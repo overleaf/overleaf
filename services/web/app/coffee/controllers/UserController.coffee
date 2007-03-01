@@ -170,6 +170,7 @@ module.exports =
 		metrics.inc "user.password-change"
 		oldPass = req.body.currentPassword
 		AuthenticationManager.authenticate _id: req.session.user._id, oldPass, (err, user)->
+			return callback(error) if error?
 			if(user)
 				logger.log user: req.session.user, "changing password"
 				newPassword1 = req.body.newPassword1
@@ -198,17 +199,20 @@ module.exports =
 	redirectUserToDropboxAuth: (req, res)->
 		user_id = req.session.user._id
 		dropboxHandler.getDropboxRegisterUrl user_id, (err, url)->
+			return callback(error) if error?
 			logger.log url:url, "redirecting user for dropbox auth"
 			res.redirect url
 
 	completeDropboxRegistration: (req, res)->
 		user_id = req.session.user._id
 		dropboxHandler.completeRegistration user_id, (err, success)->
+			return callback(error) if error?
 			res.redirect('/user/settings#dropboxSettings')
 
 	unlinkDropbox: (req, res)->
 		user_id = req.session.user._id
 		dropboxHandler.unlinkAccount user_id, (err, success)->
+			return callback(error) if error?
 			res.redirect('/user/settings#dropboxSettings')
 
 	deleteUser: (req, res)->
