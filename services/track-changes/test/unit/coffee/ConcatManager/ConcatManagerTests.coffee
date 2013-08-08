@@ -1,0 +1,214 @@
+sinon = require('sinon')
+chai = require('chai')
+should = chai.should()
+expect = chai.expect
+modulePath = "../../../../app/js/ConcatManager.js"
+SandboxedModule = require('sandboxed-module')
+
+describe "ConcatManager", ->
+	beforeEach ->
+		@ConcatManager = SandboxedModule.require modulePath
+		@user_id = "user-id-1"
+		@other_user_id = "user-id-2"
+		@ts1 = Date.now()
+		@ts2 = Date.now() + 1000
+
+	describe "concatTwoUpdates", ->
+		describe "insert - insert", ->
+			it "should append one insert to the other", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 6, i: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "foobar" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should insert one insert inside the other", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 5, i: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "fobaro" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should not append separated inserts", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, i: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "foo" ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, i: "bar" ]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+				}]
+
+		describe "delete - delete", ->
+			it "should append one delete to the other", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, d: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, d: "foobar" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+				
+			it "should insert one delete inside the other", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 1, d: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 1, d: "bafoor" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+				
+			it "should not append separated deletes", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, d: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, d: "foo" ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, d: "bar" ]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+				}]
+
+		describe "insert - delete", ->
+			it "should undo a previous insert", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 5, d: "o" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "fo" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+				
+			it "should remove part of an insert from the middle", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "fobaro" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 5, d: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "foo" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should cancel out two opposite updates", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal []
+				
+			it "should not combine separated updates", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, d: "bar" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, i: "foo" ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 9, d: "bar" ]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+				}]
+
+		describe "delete - insert", ->
+			it "should redo a previous delete at the beginning", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, i: "f" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 4, d: "oo" ]
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should redo a previous delete from halfway through", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foobar" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, i: "oo" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, d: "f" ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 5, d: "bar" ]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should not combine the ops if the insert text does not match the delete text", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foobar" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, i: "xy" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal [{
+					op: [ p: 3, d: "foobar" ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, i: "xy" ]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+				}]
+
+			it "should cancel two equal updates", ->
+				expect(@ConcatManager.concatTwoUpdates({
+					op: [ p: 3, d: "foo" ]
+					meta: ts: @ts1, user_id: @user_id
+				}, {
+					op: [ p: 3, i: "foo" ]
+					meta: ts: @ts2, user_id: @user_id
+				}))
+				.to.deep.equal []
+				
+
+				
+				
