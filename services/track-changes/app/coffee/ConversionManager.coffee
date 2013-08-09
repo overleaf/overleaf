@@ -61,7 +61,7 @@ module.exports = ConversionManager =
 
 				if !lastCompressedUpdate?
 					# No saved versions, no raw updates, nothing to do
-					callback()
+					return callback()
 
 				compressedUpdates = [lastCompressedUpdate]
 				for rawUpdate in rawUpdates
