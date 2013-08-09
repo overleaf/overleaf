@@ -40,7 +40,10 @@ module.exports = ConversionManager =
 							compressedUpdates = [lastCompressedUpdate]
 							for rawUpdate in rawUpdates
 								lastCompressedUpdate = compressedUpdates.pop()
-								compressedUpdates = compressedUpdates.concat ConcatManager.concatTwoUpdates lastCompressedUpdate, rawUpdate
+								if lastCompressedUpdate?
+									compressedUpdates = compressedUpdates.concat ConcatManager.concatTwoUpdates lastCompressedUpdate, rawUpdate
+								else
+									compressedUpdates.push rawUpdate
 							ConversionManager.removeLatestCompressedUpdate doc_id, (error) ->
 								return callback(error) if error?
 								callback null, compressedUpdates
