@@ -30,10 +30,9 @@ module.exports = ConversionManager =
 		ConversionManager.getLastRawUpdateAndVersion doc_id, (error, rawUpdate, currentVersion, tailVersion) ->
 			return callback(error) if error?
 
-			rawUpdates = ConcatManager.normalizeUpdate(rawUpdate)
-
-			if currentVersion - tailVersion > ConcatManager.OPS_TO_LEAVE
-				ConversonManager.getLatestCompressedUpdate doc_id, (error, lastCompressedUpdate) ->
+			if currentVersion - tailVersion > ConversionManager.OPS_TO_LEAVE
+				rawUpdates = ConcatManager.normalizeUpdate(rawUpdate)
+				ConversionManager.getLatestCompressedUpdate doc_id, (error, lastCompressedUpdate) ->
 					return callback(error) if error?
 
 					removeAndModifyPreviousCompressedUpdate = (callback, compressedUpdates) ->
@@ -44,7 +43,7 @@ module.exports = ConversionManager =
 								compressedUpdates = compressedUpdates.concat ConcatManager.concatTwoUpdates lastCompressedUpdate, rawUpdate
 							ConversionManager.removeLatestCompressedUpdate doc_id, (error) ->
 								return callback(error) if error?
-								callback null, compressUpdates
+								callback null, compressedUpdates
 						else
 							callback null, rawUpdates
 						
@@ -54,9 +53,18 @@ module.exports = ConversionManager =
 							return callback(error) if error?
 							ConversionManager.trimLastRawUpdate doc_id, tailVersion, (error) ->
 								return callback(error) if error?
-								console.log "Pushed op", tailVersion
+								console.log doc_id, "Pushed op", tailVersion
 								callback null, true
 
 			else
-				console.log "Up to date"
+				console.log doc_id, "Up to date"
 				callback null, false
+
+	convertAllOldRawUpdates: (doc_id, callback = (error) ->) ->
+		ConversionManager.convertOldestRawUpdate doc_id, (error, converted) ->
+			return callback(error) if error?
+			if converted
+				# Keep going
+				ConversionManager.convertAllOldRawUpdates doc_id, callback
+			else
+				callback()
