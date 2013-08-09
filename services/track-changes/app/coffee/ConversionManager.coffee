@@ -59,6 +59,10 @@ module.exports = ConversionManager =
 				if !lastCompressedUpdate?
 					lastCompressedUpdate = rawUpdates.shift()
 
+				if !lastCompressedUpdate?
+					# No saved versions, no raw updates, nothing to do
+					callback()
+
 				compressedUpdates = [lastCompressedUpdate]
 				for rawUpdate in rawUpdates
 					lastCompressedUpdate = compressedUpdates.pop()
@@ -69,5 +73,5 @@ module.exports = ConversionManager =
 				ConversionManager.insertCompressedUpdates doc_id, compressedUpdates, (error) ->
 					return callback(error) if error?
 					console.log doc_id, "Pushed doc ops", length
-					callback null, true
+					callback()
 
