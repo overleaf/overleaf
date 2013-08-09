@@ -19,13 +19,13 @@ module.exports = ConcatManager =
 		firstUpdate =
 			op: firstUpdate.op
 			meta:
-				user_id:  firstUpdate.meta.user_id
+				user_id:  firstUpdate.meta.user_id or null
 				start_ts: firstUpdate.meta.start_ts or firstUpdate.meta.ts
 				end_ts:   firstUpdate.meta.end_ts   or firstUpdate.meta.ts
 		secondUpdate =
 			op: secondUpdate.op
 			meta:
-				user_id:  secondUpdate.meta.user_id
+				user_id:  secondUpdate.meta.user_id or null
 				start_ts: secondUpdate.meta.start_ts or secondUpdate.meta.ts
 				end_ts:   secondUpdate.meta.end_ts   or secondUpdate.meta.ts
 
