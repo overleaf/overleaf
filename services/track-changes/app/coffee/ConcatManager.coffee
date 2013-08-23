@@ -19,7 +19,7 @@ module.exports = ConcatManager =
 		for update in rawUpdates
 			lastCompressedUpdate = firstPass.pop()
 			if lastCompressedUpdate?
-				firstPass = firstPass.concat ConcatManager._concatTwoUpdatesOfTheSameType lastCompressedUpdate, update
+				firstPass = firstPass.concat ConcatManager._concatTwoUpdates lastCompressedUpdate, update, false
 			else
 				firstPass.push rawUpdate
 
@@ -28,7 +28,7 @@ module.exports = ConcatManager =
 		for update in firstPass
 			lastCompressedUpdate = secondPass.pop()
 			if lastCompressedUpdate?
-				secondPass = secondPass.concat ConcatManager._cancelOppositeInsertsAndDeletes lastCompressedUpdate, update
+				secondPass = secondPass.concat ConcatManager._concatTwoUpdates lastCompressedUpdate, update, true
 			else
 				secondPass.push update
 
@@ -36,7 +36,7 @@ module.exports = ConcatManager =
 
 	MAX_TIME_BETWEEN_UPDATES: oneMinute = 60 * 1000
 
-	_concatTwoUpdatesOfTheSameType: (firstUpdate, secondUpdate) ->
+	_concatTwoUpdates: (firstUpdate, secondUpdate, mergeInsertsAndDeletes) ->
 		firstUpdate =
 			op: firstUpdate.op
 			meta:
@@ -82,34 +82,8 @@ module.exports = ConcatManager =
 					d: strInject(secondOp.d, firstOp.p - secondOp.p, firstOp.d)
 				]
 			]
-		else
-			return [firstUpdate, secondUpdate]
-
-	_cancelOppositeInsertsAndDeletes: (firstUpdate, secondUpdate) ->
-		firstUpdate =
-			op: firstUpdate.op
-			meta:
-				user_id:  firstUpdate.meta.user_id or null
-				start_ts: firstUpdate.meta.start_ts or firstUpdate.meta.ts
-				end_ts:   firstUpdate.meta.end_ts   or firstUpdate.meta.ts
-		secondUpdate =
-			op: secondUpdate.op
-			meta:
-				user_id:  secondUpdate.meta.user_id or null
-				start_ts: secondUpdate.meta.start_ts or secondUpdate.meta.ts
-				end_ts:   secondUpdate.meta.end_ts   or secondUpdate.meta.ts
-
-		if firstUpdate.meta.user_id != secondUpdate.meta.user_id
-			return [firstUpdate, secondUpdate]
-
-		if secondUpdate.meta.start_ts - firstUpdate.meta.end_ts > ConcatManager.MAX_TIME_BETWEEN_UPDATES
-			return [firstUpdate, secondUpdate]
-
-		firstOp = firstUpdate.op[0]
-		secondOp = secondUpdate.op[0]
-
 		# An insert and then a delete
-		if firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
+		if mergeInsertsAndDeletes and firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
 			offset = secondOp.p - firstOp.p
 			insertedText = firstOp.i.slice(offset, offset + secondOp.d.length)
 			if insertedText == secondOp.d
@@ -128,7 +102,7 @@ module.exports = ConcatManager =
 			else
 				# This shouldn't be possible!
 				return [firstUpdate, secondUpdate]
-		else if firstOp.d? and secondOp.i? and firstOp.p  == secondOp.p
+		else if mergeInsertsAndDeletes and firstOp.d? and secondOp.i? and firstOp.p  == secondOp.p
 			offset = firstOp.d.indexOf(secondOp.i)
 			if offset == -1
 				return [firstUpdate, secondUpdate]
