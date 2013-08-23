@@ -13,9 +13,30 @@ module.exports = ConcatManager =
 					user_id: update.meta.user_id
 		return updates
 
+	compressUpdates: (rawUpdates) ->
+		return [] if rawUpdates.length == 0
+		firstPass = [rawUpdates.shift()]
+		for update in rawUpdates
+			lastCompressedUpdate = firstPass.pop()
+			if lastCompressedUpdate?
+				firstPass = firstPass.concat ConcatManager._concatTwoUpdatesOfTheSameType lastCompressedUpdate, update
+			else
+				firstPass.push rawUpdate
+
+		return [] if firstPass.length == 0
+		secondPass = [firstPass.shift()]
+		for update in firstPass
+			lastCompressedUpdate = secondPass.pop()
+			if lastCompressedUpdate?
+				secondPass = secondPass.concat ConcatManager._cancelOppositeInsertsAndDeletes lastCompressedUpdate, update
+			else
+				secondPass.push update
+
+		return secondPass
+
 	MAX_TIME_BETWEEN_UPDATES: oneMinute = 60 * 1000
 
-	concatTwoUpdates: (firstUpdate, secondUpdate) ->
+	_concatTwoUpdatesOfTheSameType: (firstUpdate, secondUpdate) ->
 		firstUpdate =
 			op: firstUpdate.op
 			meta:
@@ -61,8 +82,34 @@ module.exports = ConcatManager =
 					d: strInject(secondOp.d, firstOp.p - secondOp.p, firstOp.d)
 				]
 			]
+		else
+			return [firstUpdate, secondUpdate]
+
+	_cancelOppositeInsertsAndDeletes: (firstUpdate, secondUpdate) ->
+		firstUpdate =
+			op: firstUpdate.op
+			meta:
+				user_id:  firstUpdate.meta.user_id or null
+				start_ts: firstUpdate.meta.start_ts or firstUpdate.meta.ts
+				end_ts:   firstUpdate.meta.end_ts   or firstUpdate.meta.ts
+		secondUpdate =
+			op: secondUpdate.op
+			meta:
+				user_id:  secondUpdate.meta.user_id or null
+				start_ts: secondUpdate.meta.start_ts or secondUpdate.meta.ts
+				end_ts:   secondUpdate.meta.end_ts   or secondUpdate.meta.ts
+
+		if firstUpdate.meta.user_id != secondUpdate.meta.user_id
+			return [firstUpdate, secondUpdate]
+
+		if secondUpdate.meta.start_ts - firstUpdate.meta.end_ts > ConcatManager.MAX_TIME_BETWEEN_UPDATES
+			return [firstUpdate, secondUpdate]
+
+		firstOp = firstUpdate.op[0]
+		secondOp = secondUpdate.op[0]
+
 		# An insert and then a delete
-		else if firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
+		if firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
 			offset = secondOp.p - firstOp.p
 			insertedText = firstOp.i.slice(offset, offset + secondOp.d.length)
 			if insertedText == secondOp.d

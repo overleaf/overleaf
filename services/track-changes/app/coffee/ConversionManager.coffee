@@ -1,8 +1,9 @@
 {db, ObjectId} = require "./mongojs"
 ConcatManager = require "./ConcatManager"
+logger = require "logger-sharelatex"
 
 module.exports = ConversionManager =
-	OPS_TO_LEAVE: 10
+	OPS_TO_LEAVE: 100
 
 	popLatestCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		db.docHistory.findAndModify
@@ -25,12 +26,19 @@ module.exports = ConversionManager =
 			tailVersion = doc.tailVersion or 0
 			if currentVersion - tailVersion > ConversionManager.OPS_TO_LEAVE
 				db.docOps.findAndModify
-					query: { doc_id: ObjectId(doc_id), version: currentVersion }
-					update: {
-						$push: { docOps: { $each: [], $slice: - ConversionManager.OPS_TO_LEAVE } }
-						$set: tailVersion: currentVersion - ConversionManager.OPS_TO_LEAVE,
-						}
-					fields: { docOps: $slice: currentVersion - tailVersion - ConversionManager.OPS_TO_LEAVE }
+					query:
+						doc_id: ObjectId(doc_id)
+						version: currentVersion
+					update:
+						$push:
+							docOps:
+								$each: []
+								$slice: - ConversionManager.OPS_TO_LEAVE
+						$set:
+							tailVersion: currentVersion - ConversionManager.OPS_TO_LEAVE
+					fields:
+						docOps:
+							$slice: currentVersion - tailVersion - ConversionManager.OPS_TO_LEAVE
 				, (error, doc) ->
 					return callback(error) if error?
 					if !doc?
@@ -63,15 +71,11 @@ module.exports = ConversionManager =
 					# No saved versions, no raw updates, nothing to do
 					return callback()
 
-				compressedUpdates = [lastCompressedUpdate]
-				for rawUpdate in rawUpdates
-					lastCompressedUpdate = compressedUpdates.pop()
-					if lastCompressedUpdate?
-						compressedUpdates = compressedUpdates.concat ConcatManager.concatTwoUpdates lastCompressedUpdate, rawUpdate
-					else
-						compressedUpdates.push rawUpdate
+				uncompressedUpdates = [lastCompressedUpdate].concat rawUpdates
+				compressedUpdates = ConcatManager.compressUpdates uncompressedUpdates
+
 				ConversionManager.insertCompressedUpdates doc_id, compressedUpdates, (error) ->
 					return callback(error) if error?
-					console.log doc_id, "Pushed doc ops", length
+					logger.log doc_id: doc_id, rawOpsLength: length, compressedOpsLength: compressedUpdates.length, "compressed doc ops"
 					callback()
 
