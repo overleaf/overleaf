@@ -2,12 +2,12 @@ sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
 expect = chai.expect
-modulePath = "../../../../app/js/ConcatManager.js"
+modulePath = "../../../../app/js/HistoryBuilder.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "ConcatManager", ->
+describe "HistoryBuilder", ->
 	beforeEach ->
-		@ConcatManager = SandboxedModule.require modulePath
+		@HistoryBuilder = SandboxedModule.require modulePath
 		@user_id = "user-id-1"
 		@other_user_id = "user-id-2"
 		@ts1 = Date.now()
@@ -16,7 +16,7 @@ describe "ConcatManager", ->
 	describe "compress", ->
 		describe "insert - insert", ->
 			it "should append one insert to the other", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -29,7 +29,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should insert one insert inside the other", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -42,7 +42,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should not append separated inserts", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -59,7 +59,7 @@ describe "ConcatManager", ->
 
 		describe "delete - delete", ->
 			it "should append one delete to the other", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -72,7 +72,7 @@ describe "ConcatManager", ->
 				}]
 				
 			it "should insert one delete inside the other", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -85,7 +85,7 @@ describe "ConcatManager", ->
 				}]
 				
 			it "should not append separated deletes", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -102,7 +102,7 @@ describe "ConcatManager", ->
 
 		describe "insert - delete", ->
 			it "should undo a previous insert", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -115,7 +115,7 @@ describe "ConcatManager", ->
 				}]
 				
 			it "should remove part of an insert from the middle", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "fobaro" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -128,7 +128,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should cancel out two opposite updates", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -138,7 +138,7 @@ describe "ConcatManager", ->
 				.to.deep.equal []
 				
 			it "should not combine separated updates", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, i: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -155,7 +155,7 @@ describe "ConcatManager", ->
 
 		describe "delete - insert", ->
 			it "should redo a previous delete at the beginning", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -168,7 +168,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should redo a previous delete from halfway through", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foobar" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -184,7 +184,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should keep words together", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "abcdefghijklmnopqrstuvwxyz hello world" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -210,7 +210,7 @@ describe "ConcatManager", ->
 				
 
 			it "should not combine the ops if the insert text does not match the delete text", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foobar" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {
@@ -226,7 +226,7 @@ describe "ConcatManager", ->
 				}]
 
 			it "should cancel two equal updates", ->
-				expect(@ConcatManager.compressUpdates [{
+				expect(@HistoryBuilder.compressUpdates [{
 					op: [ p: 3, d: "foo" ]
 					meta: ts: @ts1, user_id: @user_id
 				}, {

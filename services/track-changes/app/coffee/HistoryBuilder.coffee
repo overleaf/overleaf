@@ -1,8 +1,11 @@
 strInject = (s1, pos, s2) -> s1[...pos] + s2 + s1[pos..]
 strRemove = (s1, pos, length) -> s1[...pos] + s1[(pos + length)..]
 
-module.exports = ConcatManager =
+module.exports = HistoryBuilder =
 	normalizeUpdate: (update) ->
+		if update.meta.start_ts?
+			return [update] # already normalized
+
 		updates = []
 		for op in update.op
 			updates.push
@@ -15,11 +18,16 @@ module.exports = ConcatManager =
 
 	compressUpdates: (rawUpdates) ->
 		return [] if rawUpdates.length == 0
-		firstPass = [rawUpdates.shift()]
-		for update in rawUpdates
+		normalizedUpdates = []
+		for rawUpdate in rawUpdates
+			normalizedUpdates = normalizedUpdates.concat HistoryBuilder.normalizeUpdate(rawUpdate)
+
+		return [] if normalizedUpdates.length == 0
+		firstPass = [normalizedUpdates.shift()]
+		for update in normalizedUpdates
 			lastCompressedUpdate = firstPass.pop()
 			if lastCompressedUpdate?
-				firstPass = firstPass.concat ConcatManager._concatTwoUpdates lastCompressedUpdate, update, false
+				firstPass = firstPass.concat HistoryBuilder._concatTwoUpdates lastCompressedUpdate, update, false
 			else
 				firstPass.push rawUpdate
 
@@ -28,7 +36,7 @@ module.exports = ConcatManager =
 		for update in firstPass
 			lastCompressedUpdate = secondPass.pop()
 			if lastCompressedUpdate?
-				secondPass = secondPass.concat ConcatManager._concatTwoUpdates lastCompressedUpdate, update, true
+				secondPass = secondPass.concat HistoryBuilder._concatTwoUpdates lastCompressedUpdate, update, true
 			else
 				secondPass.push update
 
@@ -53,7 +61,7 @@ module.exports = ConcatManager =
 		if firstUpdate.meta.user_id != secondUpdate.meta.user_id
 			return [firstUpdate, secondUpdate]
 
-		if secondUpdate.meta.start_ts - firstUpdate.meta.end_ts > ConcatManager.MAX_TIME_BETWEEN_UPDATES
+		if secondUpdate.meta.start_ts - firstUpdate.meta.end_ts > HistoryBuilder.MAX_TIME_BETWEEN_UPDATES
 			return [firstUpdate, secondUpdate]
 
 		firstOp = firstUpdate.op[0]
