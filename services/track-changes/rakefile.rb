@@ -38,6 +38,12 @@ namespace 'compile' do
 			end
 			puts 'finished app compile'
 		end
+		sh %{coffee -c app.coffee} do |ok, res|
+			if ! ok
+				raise "error compiling root app file: #{res}"
+			end
+			puts 'finished root app file compile'
+		end
 	end
 
 	desc "compiles unit tests"
