@@ -14,7 +14,7 @@ module.exports = HistoryManager =
 				return callback null, compressedUpdates[0] or null
 
 	deleteCompressedUpdate: (id, callback = (error) ->) ->
-		db.docHistory.delete({ _id: ObjectId(id.toString()) }, callback)
+		db.docHistory.remove({ _id: ObjectId(id.toString()) }, callback)
 
 	popLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		HistoryManager.getLastCompressedUpdate doc_id, (error, update) ->
