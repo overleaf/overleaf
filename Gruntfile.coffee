@@ -22,18 +22,17 @@ module.exports = (grunt) ->
 				options:
 		            filter: 'exclude',
 		            tasks: [
-		            	'coffee'
+		            	'concurrent'
 		            	'execute'
 		            	'bunyan'
 		            	'availabletasks'
 		           	]
 		            groups:
-		            	"Compile tasks": [
-		            		"compile:server"
-		            		"compile"
-		            	]
 		            	"Run tasks": [
 		            		"run"
+		            		"run:all"
+		            		"run:web"
+		            		"run:document-updater"
 		            		"default"
 		            	]
 		            	"Misc": [
@@ -46,6 +45,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'run:document-updater', "Run document-updater-sharelatex, the real-time document server", ["bunyan", "execute:document-updater"]
 
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
+	grunt.registerTask 'run:all', 'run'
 
 	grunt.registerTask 'default', 'run'
 
