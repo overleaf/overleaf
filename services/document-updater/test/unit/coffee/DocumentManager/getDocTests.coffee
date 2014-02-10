@@ -40,18 +40,12 @@ describe "DocumentUpdater - getDoc", ->
 	describe "when the doc does not exist in Redis", ->
 		beforeEach ->
 			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, null, null)
-			@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines)
-			@DocOpsManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, @version)
+			@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version)
 			@RedisManager.putDocInMemory = sinon.stub().callsArg(4)
 			@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 		it "should try to get the doc from Redis", ->
 			@RedisManager.getDoc
-				.calledWith(@doc_id)
-				.should.equal true
-
-		it "should get the doc version from Mongo", ->
-			@DocOpsManager.getDocVersionInMongo
 				.calledWith(@doc_id)
 				.should.equal true
 

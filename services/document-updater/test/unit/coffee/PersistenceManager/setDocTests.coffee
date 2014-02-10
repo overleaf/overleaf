@@ -16,6 +16,7 @@ describe "PersistenceManager.setDoc", ->
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@lines = ["one", "two", "three"]
+		@version = 42
 		@callback = sinon.stub()
 		@Settings.apis =
 			web:
@@ -25,8 +26,8 @@ describe "PersistenceManager.setDoc", ->
 
 	describe "with a successful response from the web api", ->
 		beforeEach ->
-			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines))
-			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @callback)
+			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines, version: @version))
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
 
 		it "should call the web api", ->
 			@request
@@ -34,6 +35,7 @@ describe "PersistenceManager.setDoc", ->
 					url: "#{@url}/project/#{@project_id}/doc/#{@doc_id}"
 					body: JSON.stringify
 						lines: @lines
+						version: @version
 					method: "POST"
 					headers:
 						"content-type": "application/json"
@@ -54,7 +56,7 @@ describe "PersistenceManager.setDoc", ->
 	describe "when request returns an error", ->
 		beforeEach ->
 			@request.callsArgWith(1, @error = new Error("oops"), null, null)
-			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @callback)
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
 
 		it "should return the error", ->
 			@callback.calledWith(@error).should.equal true
@@ -65,7 +67,7 @@ describe "PersistenceManager.setDoc", ->
 	describe "when the request returns 404", ->
 		beforeEach ->
 			@request.callsArgWith(1, null, {statusCode: 404}, "")
-			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @callback)
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
 			
 		it "should return a NotFoundError", ->
 			@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
@@ -76,7 +78,7 @@ describe "PersistenceManager.setDoc", ->
 	describe "when the request returns an error status code", ->
 		beforeEach ->
 			@request.callsArgWith(1, null, {statusCode: 500}, "")
-			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @callback)
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
 			
 		it "should return an error", ->
 			@callback.calledWith(new Error("web api error")).should.equal true

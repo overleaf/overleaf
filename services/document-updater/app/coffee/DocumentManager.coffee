@@ -16,14 +16,12 @@ module.exports = DocumentManager =
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc not in redis so getting from persistence API"
-				PersistenceManager.getDoc project_id, doc_id, (error, lines) ->
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version) ->
 					return callback(error) if error?
-					DocOpsManager.getDocVersionInMongo doc_id, (error, version) ->
+					logger.log project_id: project_id, doc_id: doc_id, lines: lines, version: version, "got doc from persistence API"
+					RedisManager.putDocInMemory project_id, doc_id, lines, version, (error) ->
 						return callback(error) if error?
-						logger.log project_id: project_id, doc_id: doc_id, lines: lines, version: version, "got doc from persistence API"
-						RedisManager.putDocInMemory project_id, doc_id, lines, version, (error) ->
-							return callback(error) if error?
-							callback null, lines, version
+						callback null, lines, version
 			else
 				callback null, lines, version
 
@@ -87,12 +85,10 @@ module.exports = DocumentManager =
 				logger.log project_id: project_id, doc_id: doc_id, "doc is not loaded so not flushing"
 				callback null
 			else
-				logger.log project_id: project_id, doc_id: doc_id, "flushing doc"
-				PersistenceManager.setDoc project_id, doc_id, lines, (error) ->
+				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
+				PersistenceManager.setDoc project_id, doc_id, lines, version, (error) ->
 					return callback(error) if error?
-					DocOpsManager.flushDocOpsToMongo project_id, doc_id, (error) ->
-						return callback(error) if error?
-						callback null
+					callback null
 
 	flushAndDeleteDoc: (project_id, doc_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.flushAndDeleteDoc")

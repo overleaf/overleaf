@@ -28,13 +28,13 @@ module.exports = PersistenceManager =
 					body = JSON.parse body
 				catch e
 					return callback(e)
-				return callback null, body.lines
+				return callback null, body.lines, body.version
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDoc: (project_id, doc_id, lines, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -46,6 +46,7 @@ module.exports = PersistenceManager =
 			method: "POST"
 			body: JSON.stringify
 				lines: lines
+				version: parseInt(version, 10)
 			headers:
 				"content-type": "application/json"
 			auth:

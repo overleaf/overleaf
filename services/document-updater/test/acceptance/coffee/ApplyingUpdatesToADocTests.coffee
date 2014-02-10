@@ -2,9 +2,6 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 async = require "async"
-mongojs = require "../../../app/js/mongojs"
-db = mongojs.db
-ObjectId = mongojs.ObjectId
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -12,13 +9,14 @@ DocUpdaterClient = require "./helpers/DocUpdaterClient"
 describe "Applying updates to a doc", ->
 	before ->
 		@lines = ["one", "two", "three"]
+		@version = 42
 		@update =
 			doc: @doc_id
 			op: [{
 				i: "one and a half\n"
 				p: 4
 			}]
-			v: 0
+			v: @version
 		@result = ["one", "one and a half", "two", "three"]
 
 	describe "when the document is not loaded", ->
@@ -26,6 +24,7 @@ describe "Applying updates to a doc", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			sinon.spy MockWebApi, "getDocument"
 			DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
@@ -50,6 +49,7 @@ describe "Applying updates to a doc", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 				throw error if error?
@@ -76,6 +76,7 @@ describe "Applying updates to a doc", ->
 				@lines = ["", "", ""]
 				MockWebApi.insertDoc @project_id, @doc_id, {
 					lines: @lines
+					version: 0
 				}
 
 				@updates = [
@@ -92,9 +93,6 @@ describe "Applying updates to a doc", ->
 					{ doc_id: @doc_id, v: 10, op: [i: "d", p: 10] }
 				]
 				@result = ["hello world", "", ""]
-				MockWebApi.insertDoc @project_id, @doc_id, {
-					lines: @lines
-				}
 
 			it "should be able to continue applying updates when the project has been deleted", (done) ->
 				actions = []
@@ -118,6 +116,7 @@ describe "Applying updates to a doc", ->
 				@lines = ["", "", ""]
 				MockWebApi.insertDoc @project_id, @doc_id, {
 					lines: @lines
+					version: 0
 				}
 
 				@updates = [
@@ -129,9 +128,6 @@ describe "Applying updates to a doc", ->
 					{ doc_id: @doc_id, v: 0, op: [i: "world", p: 1 ] }
 				]
 				@result = ["hello", "world", ""]
-				MockWebApi.insertDoc @project_id, @doc_id, {
-					lines: @lines
-				}
 
 			it "should be able to continue applying updates when the project has been deleted", (done) ->
 				actions = []
@@ -148,61 +144,13 @@ describe "Applying updates to a doc", ->
 					DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 						doc.lines.should.deep.equal @result
 						done()
-		
-	describe "when the mongo array has been trimmed", ->
-		before ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			@lines = ["", "", ""]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-
-			@updates = [
-				{ doc_id: @doc_id, v: 0, op: [i: "h", p: 0 ] }
-				{ doc_id: @doc_id, v: 1, op: [i: "e", p: 1 ] }
-				{ doc_id: @doc_id, v: 2, op: [i: "l", p: 2 ] }
-				{ doc_id: @doc_id, v: 3, op: [i: "l", p: 3 ] }
-				{ doc_id: @doc_id, v: 4, op: [i: "o", p: 4 ] }
-				{ doc_id: @doc_id, v: 3, op: [i: "world", p: 4 ] }
-			]
-			@result = ["hello", "world", ""]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-
-		it "should be able to reload the required ops from the trimmed mongo array", (done) ->
-			actions = []
-			# Apply first set of ops
-			for update in @updates.slice(0,5)
-				do (update) =>
-					actions.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc_id, update, callback
-			# Delete doc from redis and trim ops back to version 3
-			actions.push (callback) => DocUpdaterClient.deleteDoc @project_id, @doc_id, callback
-			actions.push (callback) =>
-				db.docOps.update({doc_id: ObjectId(@doc_id)}, {$push: docOps: { $each: [], $slice: -2 }}, callback)
-			# Apply older update back from version 3
-			for update in @updates.slice(5)
-				do (update) =>
-					actions.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc_id, update, callback
-			# Flush ops to mongo
-			actions.push (callback) => DocUpdaterClient.flushDoc @project_id, @doc_id, callback
-
-			async.series actions, (error) =>
-				throw error if error?
-				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
-					db.docOps.find {doc_id: ObjectId(@doc_id)}, (error, docOps) =>
-						# Check mongo array has been trimmed
-						docOps = docOps[0]
-						docOps.docOps.length.should.equal 3
-						# Check ops have all be applied properly
-						doc.lines.should.deep.equal @result
-						done()
 
 	describe "with a broken update", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			DocUpdaterClient.sendUpdate @project_id, @doc_id, @undefined, (error) ->
 				throw error if error?

@@ -8,13 +8,14 @@ DocUpdaterClient = require "./helpers/DocUpdaterClient"
 describe "Deleting a document", ->
 	before ->
 		@lines = ["one", "two", "three"]
+		@version = 42
 		@update =
 			doc: @doc_id
 			op: [{
 				i: "one and a half\n"
 				p: 4
 			}]
-			v: 0
+			v: @version
 		@result = ["one", "one and a half", "two", "three"]
 
 	describe "when the updated doc exists in the doc updater", ->
@@ -22,6 +23,7 @@ describe "Deleting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
 			sinon.spy MockWebApi, "getDocument"
@@ -60,6 +62,7 @@ describe "Deleting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
 			sinon.spy MockWebApi, "getDocument"

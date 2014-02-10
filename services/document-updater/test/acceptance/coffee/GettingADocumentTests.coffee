@@ -11,6 +11,7 @@ describe "Getting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines = ["one", "two", "three"]
+				version: @version = 42
 			}
 			sinon.spy MockWebApi, "getDocument"
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) => done()
@@ -26,8 +27,8 @@ describe "Getting a document", ->
 		it "should return the document lines", ->
 			@returnedDoc.lines.should.deep.equal @lines
 
-		it "should return the document at version 0", ->
-			@returnedDoc.version.should.equal 0
+		it "should return the document at its current version", ->
+			@returnedDoc.version.should.equal @version
 
 	describe "when the document is already loaded", ->
 		before (done) ->
@@ -55,6 +56,7 @@ describe "Getting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines = ["one", "two", "three"]
+				version: 0
 			}
 
 			@updates = for v in [0..99]

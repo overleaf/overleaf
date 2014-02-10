@@ -35,6 +35,7 @@ describe "Deleting a project", ->
 		for doc in @docs
 			MockWebApi.insertDoc @project_id, doc.id, {
 				lines: doc.lines
+				version: doc.update.v
 			}
 
 	describe "with documents which have been updated", ->

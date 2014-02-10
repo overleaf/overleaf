@@ -45,7 +45,7 @@ module.exports = (grunt) ->
 
 		clean:
 			app: ["app/js"]
-			acceptance_tests: ["test/unit/js"]
+			acceptance_tests: ["test/acceptance/js"]
 
 		mochaTest:
 			unit:
@@ -103,7 +103,7 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'install', "Compile everything when installing as an npm module", ['compile']
 
-	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> for individual tests)', ['compile:unit_tests', 'mochaTest:unit']
+	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> for individual tests)', ['compile:server', 'compile:unit_tests', 'mochaTest:unit']
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
 
 	grunt.registerTask 'run', "Compile and run the document-updater-sharelatex server", ['compile', 'bunyan', 'execute']

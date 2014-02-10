@@ -4,7 +4,9 @@ async = require "async"
 
 module.exports = DocUpdaterClient =
 	randomId: () ->
-		return require("../../../../app/js/mongojs").ObjectId().toString()
+		chars = for i in [1..24]
+			Math.random().toString(16)[2]
+		return chars.join("")
 
 	sendUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		rclient.rpush "PendingUpdates:#{doc_id}", JSON.stringify(update), (error)->

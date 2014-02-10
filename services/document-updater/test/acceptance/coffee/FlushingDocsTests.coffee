@@ -5,23 +5,22 @@ async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
-mongojs = require "../../../app/js/mongojs"
-db = mongojs.db
-ObjectId = mongojs.ObjectId
 
 describe "Flushing a doc to Mongo", ->
 	before ->
 		@lines = ["one", "two", "three"]
+		@version = 42
 		@update =
 			doc: @doc_id
 			op: [{
 				i: "one and a half\n"
 				p: 4
 			}]
-			v: 0
+			v: @version
 		@result = ["one", "one and a half", "two", "three"]
 		MockWebApi.insertDoc @project_id, @doc_id, {
 			lines: @lines
+			version: @version
 		}
 
 	describe "when the updated doc exists in the doc updater", ->
@@ -29,8 +28,10 @@ describe "Flushing a doc to Mongo", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockWebApi, "setDocumentVersion"
 
 			DocUpdaterClient.sendUpdates @project_id, @doc_id, [@update], (error) =>
 				throw error if error?
@@ -40,58 +41,36 @@ describe "Flushing a doc to Mongo", ->
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
+			MockWebApi.setDocumentVersion.restore()
 
-		it "should flush the updated document to the web api", ->
+		it "should flush the updated doc lines to the web api", ->
 			MockWebApi.setDocumentLines
 				.calledWith(@project_id, @doc_id, @result)
 				.should.equal true
 
-		it "should flush the doc ops to Mongo", (done) ->
-			db.docOps.find doc_id: ObjectId(@doc_id), (error, docs) =>
-				doc = docs[0]
-				doc.docOps[0].op.should.deep.equal @update.op
-				done()
-
-	describe "when the doc has a large number of ops to be flushed", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-			@updates = []
-			for v in [0..999]
-				@updates.push
-					doc_id: @doc_id,
-					op: [i: v.toString(), p: 0]
-					v: v
-
-			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
-				throw error if error?
-				setTimeout () =>
-					DocUpdaterClient.flushDoc @project_id, @doc_id, done
-				, 200
-
-		it "should flush the doc ops to Mongo in order", (done) ->
-			db.docOps.find doc_id: ObjectId(@doc_id), (error, docs) =>
-				doc = docs[0]
-				updates = @updates.slice(-100)
-				for update, i in doc.docOps
-					update.op.should.deep.equal updates[i].op
-				done()
+		it "should flush the updated doc version to the web api", ->
+			MockWebApi.setDocumentVersion
+				.calledWith(@project_id, @doc_id, @version + 1)
+				.should.equal true
 
 	describe "when the doc does not exist in the doc updater", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
+				version: @version
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockWebApi, "setDocumentVersion"
 			DocUpdaterClient.flushDoc @project_id, @doc_id, done
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
+			MockWebApi.setDocumentVersion.restore()
 
 		it "should not flush the doc to the web api", ->
 			MockWebApi.setDocumentLines.called.should.equal false
+			MockWebApi.setDocumentVersion.called.should.equal false
+
 			
 

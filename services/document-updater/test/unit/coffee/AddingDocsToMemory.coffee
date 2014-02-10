@@ -20,9 +20,6 @@ describe 'putting a doc into memory', ()->
 	potentialSAdds[keys.allDocs] = doc_id
 	potentialSAdds[keys.docsInProject(project_id:project_id)] = doc_id
 
-	potentialDels = {}
-	potentialDels[keys.docOps(doc_id:doc_id)] = true
-
 	mocks =
 		"logger-sharelatex": log:->
 		redis:
@@ -53,6 +50,5 @@ describe 'putting a doc into memory', ()->
 		redisManager.putDocInMemory project_id, doc_id, lines, version, ()->
 			assert.deepEqual potentialSets, {}
 			assert.deepEqual potentialSAdds, {}
-			assert.deepEqual potentialDels, {}
 			done()
 
