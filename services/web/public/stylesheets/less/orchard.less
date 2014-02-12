@@ -1,0 +1,236 @@
+.editor-font {
+	font-size: 11pt;
+	line-height: 1.4em;
+	font-family: "Computer Modern", serif;
+	font-weight: normal;
+}
+@font-face {
+	font-family: "Computer Modern";
+	src: url('../font/cmunrm.otf');
+}
+@font-face {
+	font-family: "Computer Modern";
+	src: url('../font/cmunrb.otf');
+	font-weight: bold;
+}
+@font-face {
+	font-family: "Computer Modern Monospace";
+	src: url('../font/cmuntt.otf');
+	font-weight: bold;
+}
+
+
+.CodeMirror {
+	.CodeMirror-placeholder {
+		color: #999;
+	}
+	height: auto;
+	background: none;
+	.editor-font;
+
+	.cm-command, .cm-bracket {
+		color: green;
+	}
+	.cm-math {
+		color: purple;
+		font-family: "Computer Modern Monospace", monospace;
+	}
+
+	.CodeMirror-lines {
+		padding: 10px;
+	}
+	.oe-chapter {
+		font-weight: bold;
+		font-size: 1.8em !important;
+		line-height: 2em !important;
+	}
+	.oe-section {
+		font-weight: bold;
+		font-size: 1.5em !important;
+		line-height: 2em !important;
+	}
+	.oe-subsection {
+		font-weight: bold;
+		font-size: 1.3em !important;
+		line-height: 2em !important;
+	}
+	.oe-widget-line {
+		display: none;
+	}
+	.oe-figure {
+		margin: 0 5px;
+		padding: 12px 0 4px 0;
+		text-align: center;
+		position: relative;
+		.ui-wrapper {
+			position: relative;
+			display: inline-block;
+		}
+		.oe-figure-image-wrapper {
+			display: inline-block;
+		}
+		.oe-figure-image-placeholder {
+			background-color: rgb(200,200,200);
+		}
+		.oe-figure-image-placeholder.droppable-hover {
+			background-color: rgb(200,200,255);
+		}
+		.oe-figure-toolbar {
+			display: none;
+			text-align: right;
+			padding: 4px;
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+		}
+	}
+
+	.oe-title {
+		.CodeMirror-lines {
+			padding: 0;
+		}
+		.oe-title-title {
+			text-align: center;
+			margin-top: 40px;
+			margin-bottom: 20px;
+			.CodeMirror {
+				font-size: 1.6em;
+				line-height: 1.3em;
+			}
+		}
+
+		.oe-title-author {
+			text-align: center;
+			margin-bottom: 10px;
+			.CodeMirror {
+				font-size: 1.2em;
+				line-height: 1.3em;
+			}
+		}
+
+		.oe-title-abstract {
+			margin-top: 40px;
+			margin-bottom: 30px;
+			.oe-title-abstract-label {
+				text-align: center;
+				font-weight: bold;
+				margin-bottom: 6px;
+				font-size: 0.9em;
+				line-height: 1.3em;
+			}
+
+			.oe-title-abstract-content {
+				width: 80%;
+				margin: auto;
+				.CodeMirror {
+					font-size: 0.9em;
+					line-height: 1.3em;
+					
+				}
+			}
+		}
+	}
+
+	
+	.oe-widget {
+		border: 1px solid transparent;
+		margin: 6px 0;
+	}
+	.oe-widget-selected {
+		border: 1px dashed #bbb;
+		.oe-figure-toolbar {
+			display: block;
+		}
+		.ui-wrapper {
+			border: 1px dashed gray;
+		}
+	}
+
+	.oe-block-math {
+		.MathJax_Display {
+			margin: 12px 0;
+		}
+
+		.oe-block-math-toolbar {
+			text-align: right;
+			padding: 4px;
+			z-index: 100;
+			.bootstrap-select.btn-group {
+				margin: 0;
+			}
+		}
+		.CodeMirror {
+			font-family: "Computer Modern Monospace", monospace;
+			text-align: center;
+		}
+	}
+	.oe-non-editable {
+		color: gray;
+		cursor: default;
+	}
+
+	.oe-bibliography {
+		padding: 4px;
+		cursor: pointer;
+	}
+}
+
+
+// These are needed by the citation drop down too, so
+// don't wrap them in .oe-bibliography
+.oe-bibliography-entry {
+	display: inline-block;
+}
+
+.oe-bibliography-year {
+	font-weight: bold;
+}
+.oe-bibliography-author {
+	font-weight: bold;
+}
+.oe-bibliography-title {
+	display: block;
+	margin-left: 10px;
+}
+
+.oe-bibliography {
+	.oe-bibliography-header {
+		font-weight: bold;
+		font-size: 1.8em !important;
+		line-height: 2em !important;
+	}
+
+	.oe-bibliography-entry-wrapper {
+		margin-top: 6px;
+	}
+
+	.CodeMirror {
+		font-family: "Computer Modern Monospace", monospace;
+		color: green;
+		height: 400px;
+	}
+
+	.oe-bibliography-no-entries {
+		font-style: italic;
+	}
+
+	.oe-bibliography-error {
+		color: red;
+	}
+}
+
+
+.bootstrap-select.oe-inline-select {
+	margin: 0;
+	vertical-align: bottom;
+	> .btn {
+		border: none;
+		background: none;
+		box-shadow: none;
+		padding: 0;
+		margin: 0;
+		.editor-font;
+		color: rgb(2, 151, 172);
+	}
+}

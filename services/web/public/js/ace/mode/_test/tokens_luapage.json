@@ -1,0 +1,633 @@
+[[
+   "doctype",
+  ["text","﻿"],
+  ["punctuation.doctype.begin","<!"],
+  ["meta.tag.doctype","DOCTYPE"],
+  ["text"," "],
+  ["xml-pe","html"],
+  ["text"," "],
+  ["xml-pe","PUBLIC"],
+  ["text"," "],
+  ["string","\"-//W3C//DTD XHTML 1.0 Strict//EN\""]
+],[
+   "start",
+  ["text","   "],
+  ["string","\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\""],
+  ["punctuation.doctype.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","html"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   ["lua-bracketedComment",2,"lua-start"],
+  ["keyword","<%"],
+  ["text"," "],
+  ["comment","--[[--"]
+],[
+   ["lua-bracketedComment",2,"lua-start"],
+  ["comment","    index.lp from the Kepler Project's LuaDoc HTML doclet."]
+],[
+   ["lua-bracketedComment",2,"lua-start"],
+  ["comment","    http://keplerproject.github.com/luadoc/"]
+],[
+   "start",
+  ["comment","--]]"],
+  ["text"," "],
+  ["keyword","%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","head"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","title"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Reference"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","title"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","link"],
+  ["text"," "],
+  ["entity.other.attribute-name","rel"],
+  ["keyword.operator.separator","="],
+  ["string","\"stylesheet\""],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","\""],
+  ["keyword","<%="],
+  ["identifier","luadoc"],
+  ["text","."],
+  ["identifier","doclet"],
+  ["text","."],
+  ["identifier","html"],
+  ["text","."],
+  ["identifier","link"],
+  ["paren.lparen","("],
+  ["string","\"luadoc.css\""],
+  ["paren.rparen",")"],
+  ["keyword","%>"],
+  ["string","\""],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"text/css\""],
+  ["text"," "],
+  ["meta.tag.punctuation.end","/>"]
+],[
+   "start",
+  ["text","\t"],
+  ["comment","<!--meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/-->"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","head"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","body"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"container\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"product\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"product_logo\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"product_name\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","big"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","b"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","b"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","big"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"product_description\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"product\" -->"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"main\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"navigation\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["keyword","<%="],
+  ["identifier","luadoc"],
+  ["text","."],
+  ["identifier","doclet"],
+  ["text","."],
+  ["identifier","html"],
+  ["text","."],
+  ["identifier","include"],
+  ["paren.lparen","("],
+  ["string","\"menu.lp\""],
+  ["text",", "],
+  ["paren.lparen","{"],
+  ["text"," "],
+  ["identifier","doc"],
+  ["keyword.operator","="],
+  ["identifier","doc"],
+  ["text"," "],
+  ["paren.rparen","})"],
+  ["keyword","%>"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"navigation\" -->"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"content\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start"
+],[
+   "start",
+  ["keyword","<%if"],
+  ["text"," "],
+  ["keyword","not"],
+  ["text"," "],
+  ["identifier","options"],
+  ["text","."],
+  ["identifier","nomodules"],
+  ["text"," "],
+  ["keyword","and"],
+  ["text"," "],
+  ["keyword.operator","#"],
+  ["identifier","doc"],
+  ["text","."],
+  ["identifier","modules"],
+  ["text"," "],
+  ["keyword.operator",">"],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["text"," "],
+  ["keyword","then%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Modules"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","table"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"module_list\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["comment","<!--<tr><td colspan=\"2\">Modules</td></tr>-->"]
+],[
+   "start",
+  ["keyword","<%for"],
+  ["text"," "],
+  ["identifier","_"],
+  ["text",", "],
+  ["identifier","modulename"],
+  ["text"," "],
+  ["keyword","in"],
+  ["text"," "],
+  ["support.function","ipairs"],
+  ["paren.lparen","("],
+  ["identifier","doc"],
+  ["text","."],
+  ["identifier","modules"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword","do%>"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","tr"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","td"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"name\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.anchor","a"],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","\""],
+  ["keyword","<%="],
+  ["identifier","luadoc"],
+  ["text","."],
+  ["identifier","doclet"],
+  ["text","."],
+  ["identifier","html"],
+  ["text","."],
+  ["identifier","module_link"],
+  ["paren.lparen","("],
+  ["identifier","modulename"],
+  ["text",", "],
+  ["identifier","doc"],
+  ["paren.rparen",")"],
+  ["keyword","%>"],
+  ["string","\""],
+  ["meta.tag.punctuation.end",">"],
+  ["keyword","<%="],
+  ["identifier","modulename"],
+  ["keyword","%>"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.anchor","a"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","td"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","td"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"summary\""],
+  ["meta.tag.punctuation.end",">"],
+  ["keyword","<%="],
+  ["identifier","doc"],
+  ["text","."],
+  ["identifier","modules"],
+  ["paren.lparen","["],
+  ["identifier","modulename"],
+  ["paren.rparen","]"],
+  ["text","."],
+  ["identifier","summary"],
+  ["keyword","%>"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","td"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","tr"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["keyword","<%end%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","table"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["keyword","<%end%>"]
+],[
+   "start"
+],[
+   "start"
+],[
+   "start"
+],[
+   "start",
+  ["keyword","<%if"],
+  ["text"," "],
+  ["keyword","not"],
+  ["text"," "],
+  ["identifier","options"],
+  ["text","."],
+  ["identifier","nofiles"],
+  ["text"," "],
+  ["keyword","and"],
+  ["text"," "],
+  ["keyword.operator","#"],
+  ["identifier","doc"],
+  ["text","."],
+  ["identifier","files"],
+  ["text"," "],
+  ["keyword.operator",">"],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["text"," "],
+  ["keyword","then%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Files"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","table"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"file_list\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["comment","<!--<tr><td colspan=\"2\">Files</td></tr>-->"]
+],[
+   "start",
+  ["keyword","<%for"],
+  ["text"," "],
+  ["identifier","_"],
+  ["text",", "],
+  ["identifier","filepath"],
+  ["text"," "],
+  ["keyword","in"],
+  ["text"," "],
+  ["support.function","ipairs"],
+  ["paren.lparen","("],
+  ["identifier","doc"],
+  ["text","."],
+  ["identifier","files"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword","do%>"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","tr"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","td"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"name\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.anchor","a"],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","\""],
+  ["keyword","<%="],
+  ["identifier","luadoc"],
+  ["text","."],
+  ["identifier","doclet"],
+  ["text","."],
+  ["identifier","html"],
+  ["text","."],
+  ["identifier","file_link"],
+  ["paren.lparen","("],
+  ["identifier","filepath"],
+  ["paren.rparen",")"],
+  ["keyword","%>"],
+  ["string","\""],
+  ["meta.tag.punctuation.end",">"],
+  ["keyword","<%="],
+  ["identifier","filepath"],
+  ["keyword","%>"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.anchor","a"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","td"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.table","td"],
+  ["text"," "],
+  ["entity.other.attribute-name","class"],
+  ["keyword.operator.separator","="],
+  ["string","\"summary\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","td"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","tr"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["keyword","<%end%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.table","table"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["keyword","<%end%>"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"content\" -->"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"main\" -->"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","div"],
+  ["text"," "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"about\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","\t"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","p"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.anchor","a"],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","\"http://validator.w3.org/check?uri=referer\""],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.image","img"],
+  ["text"," "],
+  ["entity.other.attribute-name","src"],
+  ["keyword.operator.separator","="],
+  ["string","\"http://www.w3.org/Icons/valid-xhtml10\""],
+  ["text"," "],
+  ["entity.other.attribute-name","alt"],
+  ["keyword.operator.separator","="],
+  ["string","\"Valid XHTML 1.0!\""],
+  ["text"," "],
+  ["entity.other.attribute-name","height"],
+  ["keyword.operator.separator","="],
+  ["string","\"31\""],
+  ["text"," "],
+  ["entity.other.attribute-name","width"],
+  ["keyword.operator.separator","="],
+  ["string","\"88\""],
+  ["text"," "],
+  ["meta.tag.punctuation.end","/>"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.anchor","a"],
+  ["meta.tag.punctuation.end",">"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","p"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"about\" -->"]
+],[
+   "start"
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","div"],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," "],
+  ["comment","<!-- id=\"container\" -->"],
+  ["text","\t"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","body"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","html"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+]]

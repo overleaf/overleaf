@@ -1,0 +1,96 @@
+#deleteEntityModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Delete Project
+		.modal-body
+			span.message Are you sure you want to delete 
+				strong.name Project
+				| ?
+		.modal-footer
+			button.btn.btn-danger.confirm Delete Forever
+			button.btn.cancel No
+
+#leaveProjectModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Leave Project
+		.modal-body
+			span.message Are you sure you want to leave 
+				strong.name Project
+				| ?
+		.modal-footer
+			button.btn.btn-danger.confirm Leave
+			button.btn.cancel No
+
+#deleteUserAccountModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Delete Account
+		.modal-body
+			span.message Type 
+				strong Delete 
+				| below to confirm you want to delete your account forever
+			div &nbsp;
+			input.inputmodal(placeholder='')
+		.modal-footer
+			button.btn.btn-danger#confirmDeleteUser Delete Forever
+			button.btn.cancel Cancel
+
+#cloneProjectModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Clone Project
+		.modal-body
+			form.form-horizontal(onkeydown="if (event.keyCode == 13){event.preventDefault(); document.getElementById('confirmCloneProject').click()}")
+				input.inputmodal#newProjectName(placeholder='New Name')
+		.modal-footer
+			button.btn.btn-primary#confirmCloneProject Create
+			button.btn.cancel Cancel
+
+#newProjectModal(style='display: none')
+	.modal
+		.modal-header
+			h3 New Project
+		.modal-body
+			form.form-horizontal(onkeydown="if (event.keyCode == 13){event.preventDefault(); document.getElementById('confirmNewProject').click()}")
+				input.inputmodal#newProjectName(placeholder='name')
+		.modal-footer
+			button.btn.btn-primary#confirmNewProject Create
+			button.btn.cancel Cancel
+
+#newEntityModal(style='display: none')
+	.modal
+		.modal-header
+			h3 
+		.modal-body
+			form.form-horizontal(onkeydown="if (event.keyCode == 13){event.preventDefault(); $('.in button#genericSave').click()}")
+				input.inputmodal.span3(placeholder='name')
+		.modal-footer
+			button.btn.btn-primary#genericSave.confirm Save
+			button.btn.cancel Cancel
+
+
+#errorModal(style='display: none')
+	.modal
+		.modal-header
+			h3
+		.modal-body
+			span.message
+
+#genericServerErrorModal(style='display: none')
+	.modal
+		.modal-header
+			h3 There was a problem talking to the server
+		.modal-body
+			span.message Sorry, we couldn't complete your request right now. Please wait a few moments and try again. If the problem persists, please let us know.
+		.modal-footer
+			button.btn.btn-primary.cancel Ok
+
+#projectUploadModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Upload Zipped Project
+		.modal-body#projectFileUpload
+			span Upload a zipped project
+		.modal-footer
+			button.btn.cancel Cancel

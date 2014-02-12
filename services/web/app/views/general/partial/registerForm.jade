@@ -1,0 +1,13 @@
+form#registerFormShort(style="display: none;", method="post")
+	input(name='_csrf', type='hidden', value=csrfToken)
+	.fieldset
+		.clearfix
+			.input
+				input.large#email.span4.email.required(type='email', placeholder='Email Address', name='email')
+		.clearfix
+			.input
+				input.large#password.span4.required(type='password', placeholder='Password', name='password')
+		.actions    
+			button.btn.btn-success.btn-huge#registerButton(type='submit') Register  
+
+

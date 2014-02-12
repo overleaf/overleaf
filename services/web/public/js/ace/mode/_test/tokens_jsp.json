@@ -1,0 +1,435 @@
+[[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","html"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","body"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "js-start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.script","script"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "js-start",
+  ["text","        "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","x"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["string","\"abc\""],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","        "],
+  ["storage.type","function"],
+  ["text"," "],
+  ["identifier","y"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["paren.rparen","}"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.script","script"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "css-start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.style","style"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   ["css-ruleset","css-start"],
+  ["text","        "],
+  ["variable",".class"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   ["css-ruleset","css-start"],
+  ["text","            "],
+  ["support.type","background"],
+  ["text",": "],
+  ["constant.numeric","#124356"],
+  ["text",";"]
+],[
+   "css-start",
+  ["text","        "],
+  ["paren.rparen","}"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.style","style"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","p"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        Today's date: "],
+  ["meta.tag","<%"],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["lparen","("],
+  ["keyword","new"],
+  ["text"," "],
+  ["identifier","java"],
+  ["text","."],
+  ["identifier","util"],
+  ["text","."],
+  ["identifier","Date"],
+  ["lparen","("],
+  ["rparen","))"],
+  ["text","."],
+  ["identifier","toLocaleString"],
+  ["lparen","("],
+  ["rparen",")"],
+  ["meta.tag","%>"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","p"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag","<%"],
+  ["keyword.operator","!"],
+  ["text"," "],
+  ["keyword","int"],
+  ["text"," "],
+  ["identifier","i"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["text","; "],
+  ["meta.tag","%>"]
+],[
+   "jsp-start",
+  ["text","    "],
+  ["meta.tag","<jsp:declaration>"]
+],[
+   "jsp-start",
+  ["text","       "],
+  ["keyword","int"],
+  ["text"," "],
+  ["identifier","j"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","10"],
+  ["text",";"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag","</jsp:declaration>"]
+],[
+   "start"
+],[
+   "start",
+  ["text","    "],
+  ["comment","<%-- This is JSP comment --%>"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag","<%@"],
+  ["text"," "],
+  ["identifier","directive"],
+  ["text"," "],
+  ["identifier","attribute"],
+  ["keyword.operator","="],
+  ["string","\"value\""],
+  ["text"," "],
+  ["meta.tag","%>"]
+],[
+   "start"
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Select Languages:"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","h2"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","form"],
+  ["text"," "],
+  ["entity.other.attribute-name","ACTION"],
+  ["keyword.operator.separator","="],
+  ["string","\"jspCheckBox.jsp\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"checkbox\""],
+  ["text"," "],
+  ["entity.other.attribute-name","name"],
+  ["keyword.operator.separator","="],
+  ["string","\"id\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\"Java\""],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," Java"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","BR"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"checkbox\""],
+  ["text"," "],
+  ["entity.other.attribute-name","name"],
+  ["keyword.operator.separator","="],
+  ["string","\"id\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\".NET\""],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," .NET"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","BR"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"checkbox\""],
+  ["text"," "],
+  ["entity.other.attribute-name","name"],
+  ["keyword.operator.separator","="],
+  ["string","\"id\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\"PHP\""],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," PHP"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","BR"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"checkbox\""],
+  ["text"," "],
+  ["entity.other.attribute-name","name"],
+  ["keyword.operator.separator","="],
+  ["string","\"id\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\"C/C++\""],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," C/C++"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","BR"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"checkbox\""],
+  ["text"," "],
+  ["entity.other.attribute-name","name"],
+  ["keyword.operator.separator","="],
+  ["string","\"id\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\"PERL\""],
+  ["meta.tag.punctuation.end",">"],
+  ["text"," PERL "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","BR"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.form","input"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"submit\""],
+  ["text"," "],
+  ["entity.other.attribute-name","value"],
+  ["keyword.operator.separator","="],
+  ["string","\"Submit\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.form","form"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "jsp-start",
+  ["text","    "],
+  ["meta.tag","<%"]
+],[
+   "jsp-start",
+  ["text","    "],
+  ["support.function","String"],
+  ["text"," "],
+  ["identifier","select"],
+  ["lparen","["],
+  ["rparen","]"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["variable.language","request"],
+  ["text","."],
+  ["identifier","getParameterValues"],
+  ["lparen","("],
+  ["string","\"id\""],
+  ["rparen",")"],
+  ["text","; "]
+],[
+   "jsp-start",
+  ["text","    "],
+  ["keyword","if"],
+  ["text"," "],
+  ["lparen","("],
+  ["identifier","select"],
+  ["text"," "],
+  ["keyword.operator","!="],
+  ["text"," "],
+  ["constant.language","null"],
+  ["text"," "],
+  ["keyword.operator","&&"],
+  ["text"," "],
+  ["identifier","select"],
+  ["text","."],
+  ["identifier","length"],
+  ["text"," "],
+  ["keyword.operator","!="],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["rparen",")"],
+  ["text"," "],
+  ["lparen","{"]
+],[
+   "jsp-start",
+  ["text","        "],
+  ["variable.language","out"],
+  ["text","."],
+  ["identifier","println"],
+  ["lparen","("],
+  ["string","\"You have selected: \""],
+  ["rparen",")"],
+  ["text",";"]
+],[
+   "jsp-start",
+  ["text","        "],
+  ["keyword","for"],
+  ["text"," "],
+  ["lparen","("],
+  ["keyword","int"],
+  ["text"," "],
+  ["identifier","i"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["text","; "],
+  ["identifier","i"],
+  ["text"," "],
+  ["keyword.operator","<"],
+  ["text"," "],
+  ["identifier","select"],
+  ["text","."],
+  ["identifier","length"],
+  ["text","; "],
+  ["identifier","i"],
+  ["keyword.operator","++"],
+  ["rparen",")"],
+  ["text"," "],
+  ["lparen","{"]
+],[
+   "jsp-start",
+  ["text","           "],
+  ["variable.language","out"],
+  ["text","."],
+  ["identifier","println"],
+  ["lparen","("],
+  ["identifier","select"],
+  ["lparen","["],
+  ["identifier","i"],
+  ["rparen","])"],
+  ["text","; "]
+],[
+   "jsp-start",
+  ["text","        "],
+  ["rparen","}"]
+],[
+   "jsp-start",
+  ["text","    "],
+  ["rparen","}"]
+],[
+   "start",
+  ["text","    "],
+  ["meta.tag","%>"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","body"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","html"],
+  ["meta.tag.punctuation.end",">"]
+]]

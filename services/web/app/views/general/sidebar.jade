@@ -1,0 +1,24 @@
+.sidebar-navigation(style="width: 180px; top: 40px")
+	ul
+		li(class = typeof projectTabActive != "undefined" ? "active" : "")
+			a(href="/project").tab-link.project-list-tab
+				.content Projects
+		li(class = typeof accountSettingsTabActive != "undefined" ? "active" : "")
+			a(href="/user/settings").tab-link.account-settings-tab
+				.content Account Settings
+		- if (settings.enableSubscriptions)
+			li(class = typeof subscriptionTabActive != "undefined" ? "active" : "")
+				a(href="/user/subscription").tab-link.subscription-tab
+					.content Subscription
+
+	- if (settings.enableSubscriptions)
+		.bonus-advert.ab-bonus-sidebar
+			.speech-bubble
+				h3
+					a(href="/user/bonus").plain-link Get free stuff!
+				p
+					a(href="/user/bonus").plain-link Recommend ShareLaTeX to your friends and we'll upgrade your account for free.
+				p
+					a(href="/user/bonus").btn.btn-success Get free stuff
+			img(src="/img/logo/lion-64.png").lion
+

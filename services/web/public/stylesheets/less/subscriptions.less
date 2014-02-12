@@ -1,0 +1,80 @@
+#subscribeForm, #billingDetailsForm {
+	width: 500px;
+	margin: auto;
+	margin-top: 20px;
+
+	.due_now {
+		display: none;
+	}
+}
+
+#subscribeForm {
+	.due_now {
+		display: none;
+	}
+}
+
+.multi-border-radius(@a, @b, @c, @d) {
+  -webkit-border-radius: @a @b @c @d;
+     -moz-border-radius: @a @b @c @d;
+          border-radius: @a @b @c @d;
+}
+
+@plan-box-border-color: darken(@primaryButtonBackground, 20%);
+.plan-box {
+	margin: 20px 6px;
+	.name {
+		background-color: @primaryButtonBackground;
+		border: 1px solid @plan-box-border-color;
+		color: white;
+		.multi-border-radius(7px, 7px,0,0);
+		padding: 7px;
+		font-size: 18px;
+		text-align: center;
+	}
+
+	.feature {
+		padding: 7px;
+		text-align: center;
+		border: 1px solid @plan-box-border-color;
+		border-top: none;
+		border-bottom: none;
+	}
+
+	.signup {
+		border: 1px solid @plan-box-border-color;
+		.multi-border-radius(0,0, 7px, 7px);
+		padding: 7px;
+		text-align: center;
+		background-color: @primaryButtonBackground;
+	}
+}
+
+.plan-box.big {
+	margin: 15px 0px;
+	.name {
+		padding: 9px; 
+	}
+	.feature {
+		padding: 9px;
+	}
+	.signup {
+		padding: 9px;
+	}
+}
+
+.letter-from-founders {
+	margin: 20px 0;
+	p {
+		font-size: 16px;
+		line-height: 22px;
+		color: #666;
+	}
+}
+
+.portraits {
+	img {
+		border: 3px solid rgb(88, 14, 0)
+	}
+}
+

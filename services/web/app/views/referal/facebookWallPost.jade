@@ -1,0 +1,25 @@
+a(onclick='postToFeed(); return false;').facebook Post on Facebook
+
+script(src='http://connect.facebook.net/en_US/all.js')
+script(type='text/javascript')
+      FB.init({appId: "148710621956179", status: true, cookie: true});
+
+      function postToFeed() {
+
+        // calling the API ...
+        var obj = {
+          method: 'feed',
+          redirect_uri: 'https://www.sharelatex.com',
+          link: '#{buildReferalUrl()}',
+          picture: 'https://www.sharelatex.com/img/logo/logosmall.png',
+          name: 'ShareLaTeX - Online LaTeX Editor',
+          caption: 'Free Unlimited Projects and Compiles',
+          description: 'ShareLaTeX is a free Online LaTeX Editor. Real time collaboration like Google Docs, with Dropbox, history and Auto Complete'
+        };
+
+        //function callback(response) {
+        //  document.getElementById('msg').innerHTML = "Post ID: " + response['post_id'];
+        //}
+
+        FB.ui(obj, callback);
+      }

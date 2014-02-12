@@ -1,0 +1,48 @@
+.navbar.navbar-fixed-top.navbar-inverse
+	.navbar-inner
+		.container-fluid
+				a(href='/').brand ShareLaTeX
+				ul.nav
+					-if(session && session.user)
+						li
+							a(href='/project') Projects
+					-if(typeof(tenderUrl) != "undefined")
+						li
+							a.js-tender-widget(href='#') Support &amp; Feedback
+						li.nav-collapse
+							a(href='/help') Help
+					li.nav-collapse
+						a(href='/blog') Blog
+					li.nav-collapse
+						a(href='/templates') LaTeX Templates
+					- if (settings.enableSubscriptions)
+						li.nav-collapse
+							a(href='/user/subscription/plans')#plansLink Plans &amp; Pricing
+					li.dropdown.nav-collapse
+						a.dropdown-toggle(href='#',data-toggle="dropdown") Info
+							b.caret
+						ul.dropdown-menu
+							li.nav-collapse
+								a(href="/learn") LaTeX help guide
+							li.nav-collapse
+								a(href='/resources') LaTeX Resources
+							li.nav-collapse
+								a(href='/about') About Us
+				ul.nav.pull-right
+					-if(session && session.user)
+						li.dropdown
+							a.dropdown-toggle(href="#",data-toggle="dropdown") Account
+								b.caret
+							ul.dropdown-menu
+								li
+									a(href='/user/settings') User Settings
+								li
+									a(href='/user/subscription') Subscription
+								li
+									a(href='/logout') Logout
+					-else
+						li
+							a(href='/register') Register
+						li 
+							a#loginLink(href='/login'+getRedirAsQueryString()) Login
+

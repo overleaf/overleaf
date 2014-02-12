@@ -1,0 +1,49 @@
+logger  = require "logger-sharelatex"
+metrics = require "../../infrastructure/Metrics"
+fs      = require "fs"
+Path    = require "path"
+FileSystemImportManager = require "./FileSystemImportManager"
+ProjectUploadManager    = require "./ProjectUploadManager"
+
+module.exports = ProjectUploadController =
+	uploadProject: (req, res, next) ->
+		timer = new metrics.Timer("project-upload")
+		user_id = req.session.user._id
+		{name, path} = req.files.qqfile
+		name = Path.basename(name, ".zip")
+		ProjectUploadManager.createProjectFromZipArchive user_id, name, path, (error, project) ->
+			fs.unlink path, ->
+			timer.done()
+			if error?
+				logger.error
+					err: error, file_path: path, file_name: name,
+					"error uploading project"
+				res.send success: false
+			else
+				logger.log
+					project: project._id, file_path: path, file_name: name,
+					"uploaded project"
+				res.send success: true, project_id: project._id
+	
+	uploadFile: (req, res, next) ->
+		timer = new metrics.Timer("file-upload")
+		{name, path} = req.files.qqfile
+		project_id   = req.params.Project_id
+		folder_id    = req.query.folder_id
+		FileSystemImportManager.addEntity project_id, folder_id, name, path, true, (error, entity) ->
+			fs.unlink path, ->
+			timer.done()
+			if error?
+				logger.error
+					err: error, project_id: project_id, file_path: path,
+					file_name: name, folder_id: folder_id,
+					"error uploading file"
+				res.send success: false
+			else
+				logger.log
+					project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
+					"uploaded file"
+				res.send success: true, entity_id: entity?._id
+
+
+

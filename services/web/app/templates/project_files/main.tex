@@ -1,0 +1,31 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{<%= project_name %>}
+\author{<%= user.first_name %> <%= user.last_name %>}
+\date{<%= month %> <%= year %>}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+There is a theory which states that if ever anyone discovers exactly what the Universe is for and why it is here, it will instantly disappear and be replaced by something even more bizarre and inexplicable.
+There is another theory which states that this has already happened.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1.7]{universe.jpg}
+\caption{The Universe}
+\label{fig:univerise}
+\end{figure}
+
+\section{Conclusion}
+``I always thought something was fundamentally wrong with the universe'' \citep{adams1995hitchhiker}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}

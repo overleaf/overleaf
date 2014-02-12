@@ -1,0 +1,14 @@
+!!!html5
+head
+	title Mocha Tests
+	link(rel="stylesheet",href="stylesheets/mocha.css")
+	script require = { baseUrl : "/js", "urlArgs" : "fingerprint=#{date}", "paths": { "underscore" : "libs/underscore" } }
+body
+	#mocha
+	#test-area()
+	include templates
+	script(type="text/javascript")
+		window.userSettings = {
+			project_id: "test-project"
+		}
+	script(src="/js/libs/require.js",data-main="tests/unit/run.js")

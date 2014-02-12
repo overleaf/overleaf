@@ -1,0 +1,152 @@
+extends ../layout
+
+block content
+	mixin formatAccessLevel(accessLevel)
+		-if (accessLevel == "owner")
+			span Owner
+		-else if (accessLevel == "readWrite")
+			span Read and Write
+		-else if (accessLevel == "readOnly")
+			span Read Only
+		-else
+			span Unknown?
+
+	mixin tag(project_id, tagName, showDeleteIcon)
+		span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
+			span.text #{tagName} 
+			- if (showDeleteIcon)
+				i.icon-remove.icon-white.delete-tag(data-project-id=project_id, data-tag=tagName)
+
+	mixin projectList(projects)
+		-each project in projects
+			- project_id = project._id.toString()
+			.project_entry(id=project_id)
+				.btn-group.project-actions
+					a.btn.dropdown-toggle(data-toggle="dropdown", href="#") Actions 
+						span.caret
+					ul.dropdown-menu.pull-right(role="menu")
+						li
+							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone Project
+						-if (project.accessLevel == "owner")
+							li
+								a(href='/project/'+project_id, data-name=project.name, data-id=project._id, data-csrf=csrfToken).deleteProject Delete Project
+						-else
+							li
+								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project._id, data-csrf=csrfToken).leaveProject Leave Project
+						li
+							a(href='/project/'+project._id+'/download/zip').downloadZip Download Zip
+				a.projectName(href="/project/#{project._id}") #{project.name}
+				.projectDetails
+					span Last modified on 
+					span.isoDate #{project.lastUpdated.toISOString()} 
+					span &nbsp; - &nbsp;
+					span #{formatPrivlageLevel(project.publicAccesLevel)}
+					span &nbsp; - &nbsp;
+					mixin formatAccessLevel(project.accessLevel)
+				.project-tags(data-project-id=project_id)
+					- each tag in project.tags
+						mixin tag(project_id, tag.name, true)
+					span.new-tags
+						span.newTagLocation
+						span.label.addTagButton(data-project-id=project_id) Add Tag 
+							i.icon-plus.icon-white
+						
+						div
+							input(placeholder='Tag Name', name='tags', style="display: none;", data-project-id=project_id).tags-input
+
+	include ../general/sidebar
+
+	.content-with-navigation-sidebar
+		.box#projectListArea
+						
+			.row-fluid
+				.span12
+					.page-header
+						.btn-group.pull-right#newProject
+							a.btn.btn-success.dropdown-toggle(data-toggle="dropdown", href="#") New Project 
+								span.caret
+							ul.dropdown-menu.pull-right(role="menu")
+								li
+									a.normalText#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+								li
+									a.normalText#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+								li 
+									a.normalText#uploadNewProject(href="#", data-csrf=csrfToken) Upload Zipped Project
+								li.divider
+								li
+									.normalText.menu-header From Template
+								li
+									a.normalText.menu-indent(href="/templates/cv") CV or Resume
+								li
+									a.normalText.menu-indent(href="/templates/cover-letters") Cover Letter
+								li
+									a.normalText.menu-indent(href="/templates/journals") Journal Article
+								li
+									a.normalText.menu-indent(href="/templates/presentations") Presentation
+								li
+									a.normalText.menu-indent(href="/templates/thesis") Thesis
+								li
+									a.normalText.menu-indent(href="/templates/bibliographies") Bibliographies
+						h1 Projects
+			- if (projects.length > 0)
+				.row-fluid			
+					.span9
+						form.search
+							input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span6.projectSearch.search-query
+							i.icon-search
+							i.icon-remove
+						ul#projectList
+							mixin projectList(projects)
+
+					.span3
+						.tag-list
+							h2 Tags
+							#allProjectTagsArea
+								ul
+									- each tag in tags
+										-if (tag.project_ids.length > 0)
+											li 
+												mixin tag("", tag.name, false)
+												span.number x #{tag.project_ids.length}
+
+			- else
+				.row-fluid
+					.span12
+						.sharelatex-intro
+							.create-project-arrow Create your first project 
+							.welcome
+								h2 Welcome to ShareLaTeX!
+								p New to LaTeX? Then have a look at our 
+									a(href="/templates") templates 
+									| or 
+									a(href="/learn") help guides
+									| .
+
+
+
+			if freeTrial && freeTrial.expired == false
+				.row-fluid
+					.span12
+						.alert.alert-info.alert-free-trial
+							p You are currently using a free trial which expires on #{freeTrial.expiresAt}. 
+							p
+								a(href="/user/subscription").btn.btn-primary Upgrade now 
+			if freeTrial && freeTrial.expired == true
+				.row-fluid
+					.span12
+						.alert.alert-danger.alert-free-trial
+							p Your free trial has expired! Upgrade now to continue using ShareLaTeX uninterrupted.
+							p 
+								a(href="/user/subscription").btn.btn-danger Upgrade now 
+
+		include ../general/small-footer
+	script(type="text/template")#tagTemplate
+		mixin tag('{{ project_id }}', '{{ tagName }}', true)
+
+	- locals.supressDefaultJs = true
+	script(
+		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'), 
+		baseurl=jsPath,
+		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+	)
+

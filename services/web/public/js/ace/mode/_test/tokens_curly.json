@@ -1,0 +1,56 @@
+[[
+   "start",
+  ["text","tokenize Curly template"],
+  ["variable","{{"],
+  ["text","test"],
+  ["variable","}}"]
+],[
+   "start",
+  ["text","tokenize embedded script"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.script","script"],
+  ["text"," "],
+  ["entity.other.attribute-name","a"],
+  ["keyword.operator.separator","="],
+  ["string","'a'"],
+  ["meta.tag.punctuation.end",">"],
+  ["storage.type","var"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.script","script"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","'123'"]
+],[
+   "start",
+  ["text","tokenize multiline attribute value with double quotes"]
+],[
+   ["qqstring_inner","start_tag_stuff"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.anchor","a"],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","\"abc{{xyz}}"]
+],[
+   "start",
+  ["string","def\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","tokenize multiline attribute value with single quotes"]
+],[
+   ["qstring_inner","start_tag_stuff"],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.anchor","a"],
+  ["text"," "],
+  ["entity.other.attribute-name","href"],
+  ["keyword.operator.separator","="],
+  ["string","'abc"]
+],[
+   "start",
+  ["string","def\\\"'"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+]]

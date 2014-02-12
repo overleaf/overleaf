@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+	- locals.supressDefaultJs = true
+	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
+	script(src=jsPath+'libs/recurly.min.js')
+	link(rel='stylesheet', href='/recurly/recurly.css')
+
+	#billingDetailsForm.box Loading billing details form...
+
+	script(type="text/javascript")
+		Recurly.config(!{recurlyConfig})
+		Recurly.buildBillingInfoUpdateForm({
+			target      : "#billingDetailsForm",
+			successURL  : "#{successURL}?_csrf=#{csrfToken}",
+			signature   : "!{signature}",
+			accountCode : "#{user.id}"
+		});
+
+	include ../general/small-footer
+
+

@@ -1,0 +1,69 @@
+extends ../layout
+
+block content
+	.container
+		.row
+			.span8.offset2.span-box
+				.page-header	
+					h1 Become a ShareLaTeX Advisor
+				.long-form-features
+
+					div Want to help us change collaboration in academia? We are currently recruiting members to join our advisor program. If you love LaTeX like we do and want to help represent us at your Institution then please get in touch.
+
+					hr
+
+					div
+						h2 Selected Advisors will:
+						ul
+							li Teach LaTeX sessions in your Institution
+							li Help us refine our the learning resources for the sessions
+							li Invite your colleges to work on ShareLaTeX
+							li Give us feedback and new ideas
+							li Let us know what the needs of your Institution are
+					hr 
+					div 
+						h2 You will get:
+						ul
+							li A premium ShareLaTeX account for free
+							li Be the first to try out new Beta features
+							li Get coffee and cake paid by us for your sessions
+							li Get to connect with other ShareLaTeX Advisors around the world
+					hr
+					div
+						h2 Apply
+						div To apply to be a ShareLaTeX advisor please fill in this form telling us about yourself. Let us know about what you have done using ShareLaTeX and LaTeX in the past, any opinions you have on LaTeX or collaboration in academia.
+						div &nbsp;
+
+						form(name='form2', autocomplete='off', enctype='multipart/form-data', method='post', novalidate='novalidate', action='https://sharelatex.wufoo.com/forms/m7x3z9/#public')
+							.clearfix
+								label#title1.desc(for='Field1') Email address
+								.input
+									input.span4#Field1.field.text.medium(name='Field1', type='email', value='', maxlength='255', tabindex='1', onkeyup='', required='required')
+
+							.clearfix
+								label#title2.desc(for='Field2') Full name
+								.input
+									input.span4#Field2.field.text.medium(name='Field2', type='text', value='', maxlength='255', tabindex='2', onkeyup='')
+							.clearfix
+								label#title3.desc(for='Field3') Institution
+								.input
+								div
+									input.span4#Field3.field.text.medium(name='Field3', type='text', value='', maxlength='255', tabindex='3', onkeyup='')
+							.clearfix
+								label#title4.desc(for='Field4') Position
+								div
+								.input
+									input.span4#Field4.field.text.medium(name='Field4', type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+							.clearfix
+								label#title5.desc(for='Field5') About you
+								.input
+									textarea.span4#Field5.field.textarea.medium(name='Field5', spellcheck='true', rows='10', cols='50', tabindex='5', onkeyup='')
+							div
+								input#saveForm.btn.btn-success.submit(name='saveForm', type='submit', value='Submit')
+							.hide
+								label(for='comment') Do Not Fill This Out
+								textarea#comment(name='comment', rows='1', cols='1')
+								input#idstamp(type='hidden', name='idstamp', value='UtmlhAnuOejSWtH/UuhT7YWdvNi99jxEEveIrxKyVtc=')
+
+
+	include ../general/small-footer

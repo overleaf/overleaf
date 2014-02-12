@@ -1,0 +1,138 @@
+extends layout
+
+block content
+	.container
+		.row
+			.span12.span-box
+				.page-header
+					h1 Change Log 
+						small Some of the things that have changed on the site
+				#changeLogContent
+					h5 April
+					ul
+						li Added Templates
+					h5 March
+					ul
+						li Improved search and replace
+						li Improved Zip uploads
+						li Improved Zip downloads
+						li Added user bonus page
+						li Added new help pages and knowledge base
+						li Started Dropbox beta
+						li Added 'About Us' page
+					h5 February
+					ul
+						li Built in spell checker
+						li Auto completion of commands
+						li Saved message in bottom left doesn't flicker anymore
+						li Files and folders are order alphabetically in the left hand pane
+						li The root document can now be nested inside a folder
+						li Duplicate project can now be done from inside the project settings
+					h5 January
+					ul
+						li Split view and adjustable size panels added.
+					h5 December
+					ul
+						li Site can now compile with LaTeX, XeLaTeX and pdfLaTeX
+						li Made history/version control functionality
+						li When returning to document the editor scrolls to where you previously where
+						li Added recompile button
+					h5 November
+					ul
+						li Added premium accounts
+						li Updated backend collaberation system to allow multiple instances of the website to be run at the same time for more robustness
+					h5 May - October
+					ul
+						li Lots of work on increasing stability so we can serve our	growing user base (thank you!)
+						li Background work to make it possible to record a complete history of changes to your documents
+					h5 18th May
+					ul
+						li changed compiler to be more robust
+						li updated ace editor code with new vim binding
+						li added things to the resources page
+					h5 13th May
+					ul
+						li Added site to chrome web store
+						li cleaned up home page
+						li added mailchimp sign up
+						li added comments page
+						li added link to public projects
+					h5 11th May
+					ul
+						li Added flat view of public projects
+					h5 9th May
+					ul
+						li Fixed bug with deleting projects
+					h5 5th May
+					ul
+						li Lost of changes behind the scenes to improve robustness
+					h5 21st April
+					ul
+						li Increased logging length to 48 hours
+						li Trying to access a project while not logged in redirects to login page rather than restricted
+					h5 20th April
+					ul
+						li Stability update to the compiling
+					h5 16th April
+					ul
+						li When a compile fails user is shown the logs by default
+					h5 11th April
+					ul
+						li Fixed lost connection bug
+						li Fixed bug so large projects will compile (25,000+ words)
+					h5 31st March
+					ul
+						li Added public and read only projects
+						li Added blog post of LNUG talk
+						li Added project upload
+						li Improved safety of site removing edge case of when site crashes data could be potentially lost
+						li Added blank project option when creating new project
+					h5 26th March
+					ul
+						li Update to faq
+						li All js files are now minified including editor
+					h5 21st March
+					ul
+						li Fixed bug with double encoding of PDFs in headers
+						li improved reliability of site
+					h5 17th March
+					ul
+						li Minified JavaScript everywhere but editor
+					h4 16th March
+					ul
+						li Added themes preview
+						li Added Detexify to resources page
+					h4 14th March
+					ul
+						li Added Resources list
+						li Improved application monitoring
+					h4 13th March 2012
+					ul
+						li Improved resilience reducing number of restarts required.
+						li added UTF-8 to default project template
+						li Fixed projects not always deleting 
+					h4 11th March 2012
+					ul
+						li Fixed deeply nested documents not being fount
+					h4 8th March 2012
+					ul
+						li improved error handling on projects that don't compile
+						li added more FAQ answers.
+					h4 5th March 2012
+					ul
+						li fixed bug where error logs were not shown, infinite spinning compile
+						li allow users to see raw logs
+						li add change log
+						li added quantcast
+					h4 4th March 2012
+					ul
+						li fixed google plus button
+					h4 3th March 2012
+					ul
+						li fixed dropping connections
+						li fixed problem with missing data in zipped projects
+					h4 2nd March 2012
+					ul 
+						li updated 404 page with correct css
+
+

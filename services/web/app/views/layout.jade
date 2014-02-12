@@ -1,0 +1,106 @@
+!!!
+html(itemscope, itemtype='http://schema.org/Product')
+	head
+		- if (typeof(priority_title) !== "undefined" && priority_title)
+			title= title + ' - Online LaTeX Editor ShareLaTeX'
+		- else
+			title= 'Online LaTeX Editor ShareLaTeX - ' +title
+		link(rel='stylesheet', href='/stylesheets/mainStyle.css?fingerprint='+fingerprint('/stylesheets/mainStyle.css'))
+
+		meta(itemprop="name" ,content="ShareLaTeX - Real Time Online LaTeX Collaborative Editor in Your Browser")
+		meta(itemprop="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")
+		meta(itemprop="image", content="https://www.sharelatex.com/favicon.ico")
+		meta(name="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")
+
+		block scripts
+
+		- if (typeof(gaToken) != "undefined")
+			script(type='text/javascript')
+				var _gaq = _gaq || [];
+				_gaq.push(['_setAccount', '#{gaToken}']);
+				_gaq.push(['_trackPageview']);
+		
+				(function() {
+					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+		- if (typeof(mixpanelToken) != "undefined")
+			script(type="text/javascript")
+				(function(c,a){window.mixpanel=a;var b,d,h,e;b=c.createElement("script");
+				b.type="text/javascript";b.async=!0;b.src=("https:"===c.location.protocol?"https:":"http:")+
+				'//cdn.mxpnl.com/libs/mixpanel-2.2.min.js';d=c.getElementsByTagName("script")[0];
+				d.parentNode.insertBefore(b,d);a._i=[];a.init=function(b,c,f){function d(a,b){
+				var c=b.split(".");2==c.length&&(a=a[c[0]],b=c[1]);a[b]=function(){a.push([b].concat(
+				Array.prototype.slice.call(arguments,0)))}}var g=a;"undefined"!==typeof f?g=a[f]=[]:
+				f="mixpanel";g.people=g.people||[];h=['disable','track','track_pageview','track_links',
+				'track_forms','register','register_once','unregister','identify','alias','name_tag',
+				'set_config','people.set','people.increment','people.track_charge','people.append'];
+				for(e=0;e<h.length;e++)d(g,h[e]);a._i.push([b,c,f])};a.__SV=1.2;})(document,window.mixpanel||[]);
+				mixpanel.init("#{mixpanelToken}");
+
+			- if (typeof(justRegistered) != "undefined" && justRegistered)
+				script(type="text/javascript")
+					mixpanel.alias("#{mixpanelId}");
+					mixpanel.track("registered");
+					mixpanel.name_tag("#{user.email}");
+					mixpanel.people.set({
+						$email: "#{user.email}",
+						$first_name: "#{user.first_name}",
+						$last_name: "#{user.last_name}",
+						$created: new Date(#{Date.now()})
+					});
+
+			- if (typeof(mixpanelId) != "undefined")
+				script(type="text/javascript")
+					mixpanel.identify("#{mixpanelId}");
+
+			- if (typeof(justLoggedIn) != "undefined" && justLoggedIn)
+				script(type="text/javascript")
+					mixpanel.track("Logged in");
+				
+		script
+			window.csrfToken = "#{csrfToken}";
+
+		script(src=jsPath+'libs/jquery.js')
+		
+	- if (typeof(bodyClasses) == "undefined")
+		bodyClasses = []
+	body(class=bodyClasses)
+		include menubar
+		block content
+		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
+			.modal.hide#scribtexModal
+				.modal-header
+					h3 Looking for ScribTeX?
+				.modal-body
+					p ScribTeX has moved to <strong>https://scribtex.sharelatex.com</strong>. Please update your bookmarks.
+					p(style="text-align: center") You can find the page you were looking for here:
+					p(style="text-align: center")
+						a(href="https://scribtex.sharelatex.com#{scribtexPath}", style="font-size: 16px") https://scribtex.sharelatex.com#{scribtexPath}
+				.modal-footer
+					button(data-dismiss="modal").btn OK
+
+include modals
+
+if !locals.supressDefaultJs
+	script(type='text/javascript')
+		require = {
+			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'main.js')}"
+		}
+	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js?fingerprint=' + fingerprint(jsPath + 'libs/require.js'), baseurl=jsPath)
+
+- if (typeof(tenderUrl) != "undefined")
+	script(src="https://#{tenderUrl}/tender_widget.js" )
+	script(type="text/javascript")
+		Tender = {
+			hideToggle: true,
+			widgetToggles: $(".js-tender-widget"),
+			category: "questions"
+		};
+
+- if (typeof(heapToken) != "undefined" && session && session.user)
+	script(type="text/javascript")
+		var heap=heap||[];heap.load=function(a){window._heapid=a;var b=document.createElement("script");b.type="text/javascript",b.async=!0,b.src=("https:"===document.location.protocol?"https:":"http:")+"//cdn.heapanalytics.com/js/heap.js";var c=document.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c);var d=function(a){return function(){heap.push([a].concat(Array.prototype.slice.call(arguments,0)))}},e=["identify","track"];for(var f=0;f<e.length;f++)heap[e[f]]=d(e[f])};
+		heap.load("#{heapToken}");

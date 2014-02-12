@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+	.container
+		.box
+			.page-header
+				h1 Feedback
+			form(method='post')
+				.clearfix
+					label(for='xlInput') If you are having trouble with a project please include the url e.g. www.sharelatex.com/project/50c49b73ef78e1ad0c000006
+					.input
+						textarea.span11(type='text', name='message').feedback
+				.actions
+					button.btn.btn-large.btn-primary(type='submit') Send

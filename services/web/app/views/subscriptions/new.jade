@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+	- locals.supressDefaultJs = true
+	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
+	script(src=jsPath+'libs/recurly.min.js')
+	link(rel='stylesheet', href='/recurly/recurly.css')
+
+	#subscribeForm.box Loading subscription form...
+
+	script(type="text/javascript")
+		mixpanel.track("Page Viewed", { name: "payment_form", plan: "#{plan_code}" })
+
+	script(type="text/javascript")
+		Recurly.config(!{recurlyConfig})
+		Recurly.buildSubscriptionForm(!{subscriptionFormOptions});
+
+	include ../general/small-footer
+

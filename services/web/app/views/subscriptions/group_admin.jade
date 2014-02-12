@@ -1,0 +1,45 @@
+extends ../layout
+
+block content
+	.container.box
+		.row
+			.span12
+				.page-header
+					h2 Group Admin
+
+		div You are allowed up to 
+			strong #{subscription.membersLimit} 
+			| members in this group
+
+		table.table-striped.table.table-striped
+			thead 
+				tr
+					th email
+					th Name
+					th Registered
+
+			tbody#userList
+				-each user in users
+					tr
+						td #{user.email}
+						td #{user.first_name} #{user.last_name}
+						td #{!user.holdingAccount}
+						td
+							button.btn.btn-danger(id=user._id) Remove
+
+
+		form.well.form-inline#addUserToGroup
+			div
+				input(name="_csrf", type="hidden", value=csrfToken)
+				input(name="email", type="email", placeholder="someone@email.com")#newEmail.email.input-large &nbsp;
+				button.btn.btn-primary.addUser Add
+			div &nbsp;
+			div Add multiple emails seperated with commas or space.
+
+	- locals.supressDefaultJs = true
+	script(data-main='/js/SubscriptionGroupsManager.js', src='/js/libs/require.js')
+
+
+		
+
+

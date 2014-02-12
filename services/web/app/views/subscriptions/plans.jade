@@ -1,0 +1,157 @@
+extends ../layout
+
+mixin liSection(feature)
+	| #{feature.text} 
+	-if(feature.comingSoon)
+		span.label.label-info coming soon
+	-if(feature.beta)
+		span.label.label-warning beta
+
+
+mixin plan(plan, cssClass, monthly)
+	.pricing-table
+		ul(class=cssClass)
+
+			li.pricing-header-row-1
+				.package-title
+					h2.no-bold #{plan.name}
+
+			li.pricing-header-row-2
+				.package-price
+					if plan.price == 0
+						h1.free Free forever
+					else
+						h1.no-bold
+							| $#{plan.price/100}
+							if monthly
+								span.cents  /month
+							else 
+								span.cents  /year
+
+			- var odd = true
+			-each feature in plan.featureDescription
+				- odd = !odd
+				- if(odd)
+					li.pricing-content-row-odd
+						mixin liSection(feature)
+				- else
+					li.pricing-content-row-even
+						mixin liSection(feature)
+				
+			li.pricing-footer
+				- var href = '/user/subscription/new?planCode='+plan.planCode
+
+				- planIsPersonal = plan.planCode.indexOf("personal") != -1
+				- userNotLoggedIn = session && !session.user
+				-if(planIsPersonal)
+					- href = "/register"
+				-else if(userNotLoggedIn)
+					- href = "/register?redir="+href
+				a.btn.btn-success(href='#{href}').sign_up_now	
+					| Sign Up Now!
+
+
+block content
+	.container
+		.row
+			.span12.span-box
+				.page-header
+					h1 Choose your plan
+					blockquote.quote.pull-right
+						p 
+							| This is one of the most useful resources I have ever found on the Internet.
+							br
+							| Fantastic execution and thoughtful attention to detail make this product shine!
+						small Benjamin Shepherd, Waterloo University
+
+				.row
+					.span12
+						.offset3
+							ul.nav.nav-pills.pricing-pills
+								li.active
+									a(href="#", data-target=".monthly-pricing", data-toggle="tab") Monthly
+								li
+									a(href="#", data-target=".annual-pricing", data-toggle="tab") Annual
+								li
+									a(href="#", data-target=".student-pricing", data-toggle="tab") Half price student plans
+
+				.row
+					.span12
+						.page-header
+							h2 Individual Plans	
+
+				.pricing-steelblue.pricing-row
+					.tab-content
+						.tab-pane.active.monthly-pricing
+							.row
+								.span12.tagline 
+									p An online LaTeX editor for collaborating on the <strong>same LaTeX project and editing together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
+							.row
+								.span4
+									mixin plan(plans.personalAccount, "", true)
+								.span4
+									mixin plan(plans.individualMonthlyPlans[0], "big", true)
+								.span4
+									mixin plan(plans.individualMonthlyPlans[1], "", true)
+
+						.tab-pane.annual-pricing
+							.row
+								.span12.tagline
+									p Collaborate on the <strong>same LaTeX project and edit together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
+								.span4
+									mixin plan(plans.personalAccount, "", true)
+								.span4
+									mixin plan(plans.individualAnnualPlans[0], "big", false)
+								.span4
+									mixin plan(plans.individualAnnualPlans[1], "", false)
+
+						.tab-pane.student-pricing
+							.row
+								.span8.offset2.tagline 
+									p Getting started and working with <strong>LaTeX has never been so easy.</strong> Start creating beautiful work now.
+								.span4
+									mixin plan(plans.personalAccount, "", true)
+								.span4
+									mixin plan(plans.studentAccounts[0], "big", true)
+								.span4
+									mixin plan(plans.studentAccounts[1], "", false)
+
+				.row
+					.span12.ab-guarantee-shown(style="text-align: center;")
+						h2 30 day money back guarantee, cancel anytime.
+
+				.pricing-steelblue.pricing-row
+					.tab-content
+						.tab-pane.active.monthly-pricing
+							.page-header
+								h2 Group Plans	
+							.row
+								.span12.tagline 
+									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
+							.row
+								.span4
+									mixin plan(plans.groupMonthlyPlans[0], "", true)
+								.span4
+									mixin plan(plans.groupMonthlyPlans[1], "big", true)
+								.span4
+									mixin plan(plans.groupMonthlyPlans[2], "", true)
+						.tab-pane.annual-pricing
+							.page-header
+								h2 Group Plans	
+							.row
+								.span12.tagline 
+									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
+							.row
+								.span4
+									mixin plan(plans.groupAnnualPlans[0], "", false)
+								.span4
+									mixin plan(plans.groupAnnualPlans[1], "big", false)
+								.span4
+									mixin plan(plans.groupAnnualPlans[2], "", false)
+						.tab-pane.student-pricing
+
+			include ../general/small-footer
+			link(rel='stylesheet', href='/stylesheets/plans.css?fingerprint='+fingerprint('/stylesheets/mainStyle.css'))	
+
+			script
+				mixpanel.track("Page Viewed", { name: "plans" })

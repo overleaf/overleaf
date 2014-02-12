@@ -1,0 +1,138 @@
+extends ../layout
+
+block content
+	.container.bonus.box
+		.row
+			.span8.offset2
+				.page-header
+					h1 Recommend ShareLaTeX. Get free stuff.
+
+
+		.row
+			.span6.offset3
+				h2 Help us spread the word about ShareLaTeX.
+
+		.row
+			.span4.offset4.bonus-banner
+				.bonus-top
+
+		.row
+			.span4.offset4.bonus-banner
+				.title
+					a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
+				
+		.row
+			.span4.offset4.bonus-banner
+				.title
+					a(href='#', onclick='postToFeed(); return false;').facebook Post on Facebook
+
+		.row
+			.span4.offset4.bonus-banner
+				.title
+					a(href="https://plus.google.com/share?url=#{encodeURIComponent(buildReferalUrl("gp"))}", onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus Share us on Google+
+				
+		.row
+			.span4.offset4.bonus-banner
+				.title
+					a(href='mailto:?subject=Online LaTeX editor you may like, &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email Email us to your friends
+
+		.row
+			.span4.offset4.bonus-banner
+				.title
+					a(href='#link-modal', data-toggle="modal").link Link to us from your website
+
+		.row.ab-bonus
+			.span6.offset3
+				p.thanks When someone starts using ShareLaTeX after your recommendation we'll give you some <strong>free stuff</strong> to say thanks! Check your progress below.
+		.row.ab-bonus
+			.span6.offset3(style="position: relative; height: 30px; margin-top: 20px;")
+				- for (var i = 0; i <= 10; i++) {
+					- if (refered_user_count == i)
+						.number(style="left: #{i}0%").active #{i}
+					- else
+						.number(style="left: #{i}0%") #{i}
+				- }
+
+		.row.ab-bonus
+			.span6.offset3
+				.progress(style="height: 25px")
+					- if (refered_user_count == 0)
+						div(style="text-align: center; padding: 4px;") Spread the word and fill this bar up
+					.bar(style="width: #{refered_user_count}0%")
+
+		.row.ab-bonus
+			.span6.offset3(style="position: relative; height: 70px;")
+				.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") One free collaborator
+				.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") Three free collaborators
+				.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") Free Dropbox and History
+				.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") Free Professional account
+
+		.row.ab-bonus
+			.span6.offset3
+				- if (refered_user_count == 0)
+					p.thanks You've not introduced anyone to ShareLaTeX yet. Get sharing!
+				- else if (refered_user_count == 1)
+					p.thanks You've introduced <strong>#{refered_user_count}</strong> person to ShareLaTeX. Good job, but can you get some more?
+				- else
+					p.thanks You've introduced <strong>#{refered_user_count}</strong> people to ShareLaTeX. Good job!
+	
+	#link-modal.modal.hide
+		.modal-header
+			h3 Link to ShareLaTeX
+		.modal-body
+			p You can link to ShareLaTeX with the following HTML:
+			p
+				textarea(readonly=true)
+					<a href="#{buildReferalUrl("d")}">Online LaTeX Editor ShareLaTeX</a>
+			p Thanks!
+		.modal-footer
+			button.btn(data-dismiss="modal") Close
+
+	include ../general/social-footer
+	include ../general/small-footer
+
+	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
+	script(src='https://connect.facebook.net/en_US/all.js')
+	script(type='text/javascript')
+		FB.init({appId: "148710621956179", status: true, cookie: true});
+
+		function postToFeed() {
+
+			// calling the API ...
+			var obj = {
+				method: 'feed',
+				redirect_uri: 'https://www.sharelatex.com',
+				link: '!{buildReferalUrl("fb")}',
+				picture: 'https://www.sharelatex.com/img/logo/logosmall.png',
+				name: 'ShareLaTeX - Online LaTeX Editor',
+				caption: 'Free Unlimited Projects and Compiles',
+				description: 'ShareLaTeX is a free online LaTeX Editor. Real time collaboration like Google Docs, with Dropbox, history and auto-complete'
+			};
+
+			function callback(response) {
+				// document.getElementById('msg').innerHTML = "Post ID: " + response['post_id'];
+			}
+
+			FB.ui(obj, callback);
+		}
+
+	script(type="text/javascript")
+		$(function() {
+			mixpanel.track("Viewed referral page");
+			$(".twitter").click(function() {
+				mixpanel.track("Clicked Bonus Referral Button", { medium: "twitter" });
+			});
+			$(".email").click(function() {
+				mixpanel.track("Clicked Bonus Referral Button", { medium: "email" });
+			});
+			$(".facebook").click(function() {
+				mixpanel.track("Clicked Bonus Referral Button", { medium: "facebook" });
+			});
+			$(".google-plus").click(function() {
+				mixpanel.track("Clicked Bonus Referral Button", { medium: "google_plus" });
+			});
+			$(".link").click(function() {
+				mixpanel.track("Clicked Bonus Referral Button", { medium: "direct" });
+			});
+		});
+

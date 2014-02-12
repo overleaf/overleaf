@@ -1,0 +1,684 @@
+[[
+   "meta.tag.punctuation.begin0",
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","svg"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","  "],
+  ["entity.other.attribute-name","width"],
+  ["keyword.operator.separator","="],
+  ["string","\"800\""],
+  ["text"," "],
+  ["entity.other.attribute-name","height"],
+  ["keyword.operator.separator","="],
+  ["string","\"600\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","  "],
+  ["entity.other.attribute-name","xmlns"],
+  ["keyword.operator.separator","="],
+  ["string","\"http://www.w3.org/2000/svg\""]
+],[
+   "start",
+  ["text","  "],
+  ["entity.other.attribute-name","onload"],
+  ["keyword.operator.separator","="],
+  ["string","\"StartAnimation(evt)\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "start",
+  ["text","  "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","title"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Test Tube Progress Bar"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","title"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","  "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","desc"],
+  ["meta.tag.punctuation.end",">"],
+  ["text","Created for the Web Directions SVG competition"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","desc"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "js-no_regex",
+  ["text","  "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name.script","script"],
+  ["text"," "],
+  ["entity.other.attribute-name","type"],
+  ["keyword.operator.separator","="],
+  ["string","\"text/ecmascript\""],
+  ["meta.tag.punctuation.end",">"],
+  ["string.begin","<![CDATA["]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","0"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","timer_increment"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","1"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","max_time"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["constant.numeric","100"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","hickory"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","dickory"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","dock"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","var"],
+  ["text"," "],
+  ["identifier","i"],
+  ["punctuation.operator",";"]
+],[
+   "js-start"
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","function"],
+  ["text"," "],
+  ["entity.name.function","StartAnimation"],
+  ["paren.lparen","("],
+  ["variable.parameter","evt"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","hickory"],
+  ["text","  "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["identifier","evt"],
+  ["punctuation.operator","."],
+  ["identifier","target"],
+  ["punctuation.operator","."],
+  ["identifier","ownerDocument"],
+  ["punctuation.operator","."],
+  ["support.function.dom","getElementById"],
+  ["paren.lparen","("],
+  ["string","\"hickory\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","dickory"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["identifier","evt"],
+  ["punctuation.operator","."],
+  ["identifier","target"],
+  ["punctuation.operator","."],
+  ["identifier","ownerDocument"],
+  ["punctuation.operator","."],
+  ["support.function.dom","getElementById"],
+  ["paren.lparen","("],
+  ["string","\"dickory\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","dock"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["identifier","evt"],
+  ["punctuation.operator","."],
+  ["identifier","target"],
+  ["punctuation.operator","."],
+  ["identifier","ownerDocument"],
+  ["punctuation.operator","."],
+  ["support.function.dom","getElementById"],
+  ["paren.lparen","("],
+  ["string","\"dock\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start"
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","ShowAndGrowElement"],
+  ["paren.lparen","("],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-no_regex",
+  ["text","    "],
+  ["paren.rparen","}"]
+],[
+   "js-start",
+  ["text","    "],
+  ["storage.type","function"],
+  ["text"," "],
+  ["entity.name.function","ShowAndGrowElement"],
+  ["paren.lparen","("],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["identifier","timer_increment"],
+  ["punctuation.operator",";"]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["keyword","if"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator",">"],
+  ["text"," "],
+  ["identifier","max_time"],
+  ["paren.rparen",")"]
+],[
+   "js-start",
+  ["text","            "],
+  ["keyword","return"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","        "],
+  ["comment","// Scale the text string gradually until it is 20 times larger"]
+],[
+   "js-start",
+  ["text","        "],
+  ["identifier","scalefactor"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","*"],
+  ["text"," "],
+  ["constant.numeric","650"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword.operator","/"],
+  ["text"," "],
+  ["identifier","max_time"],
+  ["punctuation.operator",";"]
+],[
+   "js-start"
+],[
+   "js-start",
+  ["text","        "],
+  ["keyword","if"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","<"],
+  ["text"," "],
+  ["constant.numeric","30"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","hickory"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"display\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","hickory"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"transform\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"translate(\""],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["constant.numeric","600"],
+  ["keyword.operator","+"],
+  ["identifier","scalefactor"],
+  ["keyword.operator","*"],
+  ["constant.numeric","3"],
+  ["keyword.operator","*"],
+  ["constant.numeric","-1"],
+  ["text"," "],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["string","\", -144 )\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["paren.rparen","}"]
+],[
+   "js-no_regex"
+],[
+   "js-start",
+  ["text","        "],
+  ["keyword","if"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator",">"],
+  ["text"," "],
+  ["constant.numeric","30"],
+  ["text"," "],
+  ["keyword.operator","&&"],
+  ["text"," "],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator","<"],
+  ["text"," "],
+  ["constant.numeric","66"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","dickory"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"display\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","dickory"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"transform\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"translate(\""],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["constant.numeric","-795"],
+  ["keyword.operator","+"],
+  ["identifier","scalefactor"],
+  ["keyword.operator","*"],
+  ["constant.numeric","2"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["string","\", 0 )\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["paren.rparen","}"]
+],[
+   "js-start",
+  ["text","        "],
+  ["keyword","if"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["identifier","timevalue"],
+  ["text"," "],
+  ["keyword.operator",">"],
+  ["text"," "],
+  ["constant.numeric","66"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["paren.lparen","{"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","dock"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"display\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-start",
+  ["text","            "],
+  ["identifier","dock"],
+  ["punctuation.operator","."],
+  ["support.function.dom","setAttribute"],
+  ["paren.lparen","("],
+  ["string","\"transform\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["string","\"translate(\""],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["paren.lparen","("],
+  ["constant.numeric","1450"],
+  ["keyword.operator","+"],
+  ["identifier","scalefactor"],
+  ["keyword.operator","*"],
+  ["constant.numeric","2"],
+  ["keyword.operator","*"],
+  ["constant.numeric","-1"],
+  ["paren.rparen",")"],
+  ["text"," "],
+  ["keyword.operator","+"],
+  ["text"," "],
+  ["string","\", 144 )\""],
+  ["paren.rparen",")"],
+  ["punctuation.operator",";"]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["paren.rparen","}"]
+],[
+   "js-no_regex"
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["comment","// Call ShowAndGrowElement again <timer_increment> milliseconds later."]
+],[
+   "js-no_regex",
+  ["text","        "],
+  ["identifier","setTimeout"],
+  ["paren.lparen","("],
+  ["string","\"ShowAndGrowElement()\""],
+  ["punctuation.operator",","],
+  ["text"," "],
+  ["identifier","timer_increment"],
+  ["paren.rparen",")"]
+],[
+   "js-no_regex",
+  ["text","    "],
+  ["paren.rparen","}"]
+],[
+   "js-no_regex",
+  ["text","    "],
+  ["variable.language","window"],
+  ["punctuation.operator","."],
+  ["identifier","ShowAndGrowElement"],
+  ["text"," "],
+  ["keyword.operator","="],
+  ["text"," "],
+  ["identifier","ShowAndGrowElement"]
+],[
+   "start",
+  ["text","  "],
+  ["string.end","]]>"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name.script","script"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start"
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","  "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","rect"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","fill"],
+  ["keyword.operator.separator","="],
+  ["string","\"#2e3436\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","fill-rule"],
+  ["keyword.operator.separator","="],
+  ["string","\"nonzero\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","stroke-width"],
+  ["keyword.operator.separator","="],
+  ["string","\"3\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","y"],
+  ["keyword.operator.separator","="],
+  ["string","\"0\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","x"],
+  ["keyword.operator.separator","="],
+  ["string","\"0\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","height"],
+  ["keyword.operator.separator","="],
+  ["string","\"600\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["entity.other.attribute-name","width"],
+  ["keyword.operator.separator","="],
+  ["string","\"800\""]
+],[
+   "start",
+  ["text","    "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"rect3590\""],
+  ["meta.tag.punctuation.end","/>"]
+],[
+   "start"
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","text"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","style"],
+  ["keyword.operator.separator","="],
+  ["string","\"font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","x"],
+  ["keyword.operator.separator","="],
+  ["string","\"50\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","y"],
+  ["keyword.operator.separator","="],
+  ["string","\"350\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"hickory\""]
+],[
+   "start",
+  ["text","       "],
+  ["entity.other.attribute-name","display"],
+  ["keyword.operator.separator","="],
+  ["string","\"none\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        Hickory,"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","text"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","text"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","style"],
+  ["keyword.operator.separator","="],
+  ["string","\"font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","x"],
+  ["keyword.operator.separator","="],
+  ["string","\"50\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","y"],
+  ["keyword.operator.separator","="],
+  ["string","\"350\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"dickory\""]
+],[
+   "start",
+  ["text","       "],
+  ["entity.other.attribute-name","display"],
+  ["keyword.operator.separator","="],
+  ["string","\"none\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        dickory,"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","text"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","    "],
+  ["meta.tag.punctuation.begin","<"],
+  ["meta.tag.name","text"]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","style"],
+  ["keyword.operator.separator","="],
+  ["string","\"font-size:144px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","x"],
+  ["keyword.operator.separator","="],
+  ["string","\"50\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","y"],
+  ["keyword.operator.separator","="],
+  ["string","\"350\""]
+],[
+   "meta.tag.punctuation.begin0",
+  ["text","       "],
+  ["entity.other.attribute-name","id"],
+  ["keyword.operator.separator","="],
+  ["string","\"dock\""]
+],[
+   "start",
+  ["text","       "],
+  ["entity.other.attribute-name","display"],
+  ["keyword.operator.separator","="],
+  ["string","\"none\""],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["text","        dock!"],
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","text"],
+  ["meta.tag.punctuation.end",">"]
+],[
+   "start",
+  ["meta.tag.punctuation.begin","</"],
+  ["meta.tag.name","svg"],
+  ["meta.tag.punctuation.end",">"]
+]]

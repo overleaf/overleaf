@@ -1,0 +1,91 @@
+extends ../layout
+
+block content
+	#loadingScreen
+		h3 Loading...
+		p#loadingMessage Loading editor
+
+	#errorMessages
+		#connectionLostMessage(style="display: none;")
+			| Lost connection. 
+			span#trying-reconnect
+				| Reconnecting in 
+				span#reconnection-countdown ? 
+				|  seconds. 
+				a(href='#')#try-reconnect-now Try now.
+			span#reconnecting
+				| Reconnecting...
+
+		#savingProblems(style="display: none")
+			| Saving...
+	
+	div#toolbar.sidebar-navigation
+		ul#tabs
+		#toolbar-footer
+
+	#tab-content.tab-content
+
+	include ../templates
+	include ../templates/dropbox
+
+	script(src='/socket.io/socket.io.js')
+
+	script(type='text/javascript')
+		window.sharelatex = !{sharelatexObject};
+		window.userSettings = !{userSettingsObject};
+		window.user = !{userObject};
+		window.csrfToken = "!{csrfToken}";
+		window.requirejs = {
+			"paths" : {
+				"underscore": "libs/underscore",
+				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
+			},
+			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
+			"waitSeconds": 0,
+			"shim": {
+				"libs/backbone": {
+					deps: ["libs/underscore"]
+				},
+				"libs/pdfListView/PdfListView": {
+					deps: ["libs/pdf"]
+				},
+				"libs/pdf": {
+					deps: ["libs/compatibility"]
+				}
+			}
+		};
+
+	script(type='text/javascript')
+		if (typeof(mixpanel) != "undefined") {
+			mixpanel.track('Opened Editor', { project_id: window.userSettings.project_id });
+		}
+
+	- locals.supressDefaultJs = true
+	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
+	- var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
+	script
+		window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
+
+	script(
+		data-main=jsPath+'ide.js',
+		baseurl=jsPath,
+		data-ace-base=jsPath+'ace',
+		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+	)
+
+	- if (!anonymous)
+		script(type="text/javascript")
+			var chatReq = require.config({
+				context: "chat",
+				baseUrl: "#{chatUrl}/chat"
+			});
+			chatReq(["require", "chat"], function(require, Chat) {
+				new Chat({
+					room: {
+						project_id: window.userSettings.project_id
+					},
+					url: "#{chatUrl}"
+				})
+			});
+	
+

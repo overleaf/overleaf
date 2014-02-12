@@ -1,0 +1,176 @@
+extends ../layout
+
+block content
+	include ../general/sidebar
+
+	.content-with-navigation-sidebar
+		.box
+			.row-fluid
+				.span12
+					.page-header
+						h1 Settings
+					.messageArea
+					.tabbable
+						ul.nav.nav-tabs
+							li.active
+								a(href='#personalSettings', data-toggle="tab") Personal
+							li
+								a(href='#editorSettings', data-toggle="tab") Editor
+							li
+								a(href='#passwordReset', data-toggle="tab") Password
+							li
+								a(href='#newsletter', data-toggle="tab") Newsletter
+							- if(userCanSeeDropbox)
+								li
+									a(href='#dropboxSettings', data-toggle="tab") Dropbox 
+										span.label.label-warning beta
+							li
+								a(href='#deleteAccount', data-toggle="tab") Delete Account
+								
+						form#userSettings.tab-content.form-horizontal
+							input(type="hidden", name="_csrf", value=csrfToken)
+							.tab-pane#personalSettings.active
+								.control-group
+									label(for='firstName').control-label First Name
+									.controls
+										input#firstName(type='text', name='first_name', value=user.first_name)
+								.control-group
+									label(for='lastName').control-label Last Name 
+									.controls
+										input#lastName(type='text', name='last_name', value=user.last_name)
+								.form-actions
+									button.btn.btn-primary.large(type='submit') Update
+
+							.tab-pane#dropboxSettings
+								.alert.alert-info 
+									a(href='/help/kb/dropbox-2') Read how dropbox works
+								- if(!userHasDropboxFeature)
+									.alert.alert-info Dropbox sync is a premium feature &nbsp; &nbsp;
+										a.btn.btn-info(href='/user/subscription/plans') Upgrade
+								- else if(userIsRegisteredWithDropbox)
+									.alert.alert-success Account is linked!
+									row
+										a(href='/dropbox/unlink').btn Unlink Dropbox
+								- else
+									a.btn.btn-info(href='/dropbox/beginAuth') Link to dropbox
+
+
+							.tab-pane#editorSettings
+								.control-group
+									label(for='theme').control-label Theme &nbsp;
+										a(href='/themes') (preview)
+									.controls
+										select(name='theme')#theme
+											each theme in themes
+												if(theme.name == user.ace.theme)
+													option(value=theme.name, selected='selected')= theme.name
+												else
+													option(value=theme.name)= theme.name
+								.control-group
+									label(for='mode').control-label Key Binding 
+									.controls
+										select(name='mode')#mode
+											each mode in editors
+												if(mode == user.ace.mode)
+													option(value=mode, selected='selected')= mode
+												else
+													option(value=mode)= mode
+								.control-group
+									label(for='fontSize').control-label Font Size 
+									.controls
+										select(name='fontSize')#fontSize
+											each fontSize in fontSizes
+												if(fontSize == user.ace.fontSize)
+													option(value=fontSize, selected='selected')= fontSize
+												else
+													option(value=fontSize)= fontSize
+
+								.control-group
+									label(for='autoComplete').control-label
+										| Auto complete
+									.controls
+										if (user.ace.autoComplete)
+											label.radio.inline
+												input(type='radio', name='autoComplete', value='true', checked)
+												| On
+											label.radio.inline
+												input(type='radio', name='autoComplete', value='false')
+												| Off
+										else
+											label.radio.inline
+												input(type='radio', name='autoComplete', value='true')
+												| On
+											label.radio.inline
+												input(type='radio', name='autoComplete', value='false', checked)
+												| Off
+
+								.control-group
+									label(for='spellCheck').control-label
+										| Default Spell check language
+									.controls
+										select(name="spellCheckLanguage")
+											option(value="",selected=(user.ace.spellCheckLanguage == "")) Off
+											optgroup(label="Language")
+												for language in languages
+													option(
+														value=language.code,
+														selected=(language.code == user.ace.spellCheckLanguage)
+													)= language.name
+
+								.control-group
+									label(for="pdfViewer").control-label
+										| PDF Viewer
+									.controls
+										if (user.ace.pdfViewer == "native")
+											label.radio.inline
+												input(type='radio', name='pdfViewer', value='native', checked)
+												| Native (Best image quality)
+											br
+											label.radio.inline
+												input(type='radio', name='pdfViewer', value='pdfjs')
+												| Built in (Pdf page stays the same after recompile)
+										else
+											label.radio.inline
+												input(type='radio', name='pdfViewer', value='native')
+												| Native (Best image quality)
+											br
+											label.radio.inline
+												input(type='radio', name='pdfViewer', value='pdfjs', checked)
+												| Built in (Pdf page stays the same after recompile)
+										
+
+								.form-actions
+									button.btn.btn-primary.large(type='submit') Update
+
+							.tab-pane#passwordReset 
+								a#changePassword.btn Change Password
+
+							.tab-pane#deleteAccount 
+								a#deleteUserAccount.btn.btn-danger(data-csrf=csrfToken) Delete your account
+
+							.tab-pane#newsletter
+								p Every few months we send a news letter out summarizing the new features available, if you would prefer to not receive this email then you are free to unsubscribe below at any time							
+								a#unsubscribeFromNewsletter.btn.btn-danger(data-csrf=csrfToken) Unsubscribe
+
+	#changePasswordModal(style='display: none')
+		.modal
+			form#changePasswordForm(method="post", action="/user/password/update")
+				.modal-header
+					h3 Change Password
+				.modal-body
+					input(type="hidden", name="_csrf", value=csrfToken)
+					.clearfix
+						label(for='xlinput.inputmodal') Current Password
+						.input.inputmodal
+							input.inputmodal.span5#currentPassword(type='password', name='currentPassword', placeholder='*********')
+					.clearfix
+						label(for='xlinput.inputmodal') New Password
+						.input.inputmodal
+							input.inputmodal.span5#newPassword1(type='password', name='newPassword1', placeholder='************')
+					.clearfix
+						label(for='xlinput.inputmodal') New Password
+						.input.inputmodal
+							input.inputmodal.span5#newPassword2(type='password', name='newPassword2', placeholder='************')
+				.modal-footer
+					button(type="submit").btn.btn-primary#confirmPasswordChange Change
+					button.btn.cancel Cancel

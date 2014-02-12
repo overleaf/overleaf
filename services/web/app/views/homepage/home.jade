@@ -1,0 +1,70 @@
+link(rel='canonical', href='https://www.sharelatex.com')
+
+extends ../layout
+
+block content
+	.masthead
+		.container
+			.row
+				.title.span8
+					h1 Online LaTeX Editor
+					h2 Quickly start using LaTeX and work together in real-time
+					div
+						img(src="/img/screenshot.png")
+				.register.span4
+					h2 Register now
+					.messageArea
+					include ../general/partial/registerForm
+	
+	.universities
+		.container
+			.row
+				p Used by students and academics at:
+				#slides
+					.clearfix
+						.span3
+							img(src="/img/crests/harvard.gif", alt="harvard university logo")
+						.span3
+							img(src="/img/crests/mit.gif", alt="mit university logo")
+						.span3
+							img(src="/img/crests/oxford.gif", alt="oxford university logo")
+						.span3
+							img(src="/img/crests/tokyo.png", alt="tokyo university logo")
+					.clearfix
+						.span3
+							img(src="/img/crests/cambridge.png", alt="cambridge university logo")
+						.span3
+							img(src="/img/crests/liverpool.jpg", alt="liverpool university logo")
+						.span3
+							img(src="/img/crests/icl.png", alt="icl university logo")
+						.span3
+							img(src="/img/crests/yale.png", alt="yale university logo")
+					.clearfix
+						.span3
+							img(src="/img/crests/durham.png", alt="durham university logo")
+						.span3
+							img(src="/img/crests/nasa.png", alt="nasa university logo")
+						.span3
+							img(src="/img/crests/toronto.gif", alt="toronto university logo")
+						.span3
+							img(src="/img/crests/stanford.png", alt="stanford university logo")
+
+
+	.container
+		include ../general/long-form-features
+
+		.row
+			.span12.lower-signup-button
+				a(href="/user/subscription/plans").btn.btn-success.btn-huge Sign up now!
+
+	include ../general/social-footer
+	include ../general/small-footer
+
+	.container
+		.row
+			.span12(style="text-align:right; margin-bottom:20px")
+				a(href="https://mixpanel.com/f/partner")
+					img(src="//cdn.mxpnl.com/site_media/images/partner/badge_light.png",alt="Mobile Analytics")
+			
+
+

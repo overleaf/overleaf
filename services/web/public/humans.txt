@@ -1,0 +1,12 @@
+/* HUMANS */
+Name: Henry Oswald
+Twitter: @henryoswald
+Location: London UK
+www.henryoswald.me
+
+Name: James Allen
+Location: UK
+
+/* SITE */
+technologies
+node.js coffeescirpt, express, mongodb, websockets, jquery, requirejs, ace editor, mongoosejs
