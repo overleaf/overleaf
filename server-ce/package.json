@@ -4,7 +4,8 @@
   "dependencies": {
     "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
     "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
-    "coffee-script": "~1.7.1"
+    "coffee-script": "~1.7.1",
+    "rimraf": "~2.2.6"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
