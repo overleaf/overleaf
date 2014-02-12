@@ -1,0 +1,36 @@
+{
+  "name": "node-clsi",
+  "description": "A Node.js implementation of the CLSI LaTeX web-API",
+  "version": "0.0.1-dev",
+  "author": "James Allen <james@sharelatex.com>",
+  "dependencies": {
+    "async": "0.2.9",
+    "express": "3.3.1",
+    "lynx": "0.0.11",
+    "mkdirp": "0.3.5",
+    "mysql": "2.0.0-alpha7",
+    "request": "~2.21.0",
+    "rimraf": "2.1.4",
+    "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
+    "sequelize": "~2.0.0-beta.2",
+    "wrench": "~1.5.4",
+    "smoke-test-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/smoke-test-sharelatex.git#master"
+  },
+  "devDependencies": {
+    "mocha": "1.10.0",
+    "coffee-script": "1.6.0",
+    "chai": "~1.8.1",
+    "sinon": "~1.7.3",
+    "grunt": "~0.4.2",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-concurrent": "~0.4.2",
+    "grunt-nodemon": "~0.1.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-shell": "~0.6.1",
+    "grunt-mocha-test": "~0.8.1",
+    "sandboxed-module": "~0.3.0",
+    "timekeeper": "0.0.4"
+  }
+}

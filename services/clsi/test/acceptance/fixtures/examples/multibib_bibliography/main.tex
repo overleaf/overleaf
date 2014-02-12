@@ -1,0 +1,23 @@
+\documentclass{report}
+
+\usepackage{multibib}
+\newcites{one}{First references}
+
+\begin{document}
+
+\chapter{First chapter}
+
+The answer to life the universe and everything is 42 \citeone{DouglasAdams}
+
+\bibliographystyleone{plain}
+\bibliographyone{bibliography}
+
+\chapter{Second chapter}
+
+All that glitters is not gold \cite{Tolkien}
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}
+

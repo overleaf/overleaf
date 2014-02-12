@@ -1,0 +1,12 @@
+**.swp
+node_modules
+app/js
+test/unit/js
+test/acceptance/js
+test/acceptance/fixtures/tmp
+compiles
+app.js
+.DS_Store
+*~
+cache
+.vagrant
