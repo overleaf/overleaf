@@ -20,7 +20,7 @@ module.exports =
 	# ------------
 	#
 	# ShareLaTeX stores binary files like images in S3.
-	# Fill in your Amazon S3 credential below.
+	# Fill in your Amazon S3 credentials below.
 	s3:
 		key: ""
 		secret: ""
@@ -29,7 +29,7 @@ module.exports =
 	# Databases
 	# ---------
 	mongo:
-		url : 'mongodb://127.0.0.1/sharelatexTesting'
+		url : 'mongodb://127.0.0.1/sharelatex'
 
 	redis:
 		web:
@@ -175,20 +175,30 @@ module.exports =
 	# cookie with a secure flag (recommended).
 	secureCookie: false
 
-
 	# Internal configs
 	# ----------------
 	path:
-		commonFolder: Path.resolve "common"
+		# If we ever need to write something to disk (e.g. incoming requests
+		# that need processing but may be too big for memory, then write
+		# them to disk here).
 		dumpFolder: Path.resolve "data/dumpFolder"
-		zippedProjects: Path.resolve "data/zippedProjects"
-		unzippedProjects: Path.resolve "data/unzippedProjects"
 	
+	# Automatic Snapshots
+	# -------------------
 	automaticSnapshots:
-		maxTimeBetweenSnapshots: 30 * minutes
+		# How long should we wait after the user last edited to 
+		# take a snapshot?
 		waitTimeAfterLastEdit: 5 * minutes
+		# Even if edits are still taking place, this is maximum
+		# time to wait before taking another snapshot.
+		maxTimeBetweenSnapshots: 30 * minutes
 
-	smokeTest:
-		user: "team+smoketest@sharelatex.com"
-		password: "smoketest"
-		projectId: "52b18a70249683c0a9000007"
+	# Smoke test
+	# ----------
+	# Provide log in credentials and a project to be able to run
+	# some basic smoke tests to check the core functionality.
+	#
+	# smokeTest:
+	# 	user: ""
+	# 	password: ""
+	# 	projectId: ""
