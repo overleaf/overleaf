@@ -62,18 +62,16 @@ module.exports = (grunt) ->
 			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
 				done = @async()
 				Helpers.updateService(service.name, done)
+			grunt.registerTask 'run:#{service.name}', "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:web"]
 
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services", ("install:#{service.name}" for service in SERVICES)
+	grunt.registerTask 'install', 'install:all'
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services", ("update:#{service.name}" for service in SERVICES)
-
-	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
-
-	grunt.registerTask 'run:web', "Run web-sharelatex, the ShareLaTeX web server", ["bunyan", "execute:web"]
-	grunt.registerTask 'run:document-updater', "Run document-updater-sharelatex, the real-time document server", ["bunyan", "execute:document-updater"]
-
+	grunt.registerTask 'update', 'update:all'
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
 	grunt.registerTask 'run:all', 'run'
 
+	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 	grunt.registerTask 'default', 'run'
 
 Helpers =
