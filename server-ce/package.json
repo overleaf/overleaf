@@ -4,8 +4,6 @@
   "dependencies": {
     "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
     "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
-    "web-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/web-sharelatex.git#master",
-    "document-updater-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/documentupdater-sharelatex.git#master",
     "coffee-script": "~1.7.1"
   },
   "devDependencies": {
