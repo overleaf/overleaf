@@ -1,0 +1,30 @@
+{
+  "name": "document-updater-sharelatex",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.3.4",
+    "underscore": "1.2.2",
+    "redis": "0.7.2",
+    "chai": "",
+    "request": "2.25.0",
+    "sandboxed-module": "~0.2.0",
+    "chai-spies": "",
+    "async": "",
+    "lynx": "0.0.11",
+    "coffee-script": "1.4.0",
+    "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
+    "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "sinon": "~1.5.2",
+    "mongojs": "0.9.11"
+  },
+  "devDependencies": {
+    "grunt-execute": "~0.1.5",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-mocha-test": "~0.9.0",
+    "grunt": "~0.4.2",
+    "grunt-available-tasks": "~0.4.1",
+    "grunt-contrib-coffee": "~0.10.0",
+    "bunyan": "~0.22.1",
+    "grunt-bunyan": "~0.5.0"
+  }
+}
