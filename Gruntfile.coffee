@@ -1,6 +1,7 @@
 fs = require "fs"
 spawn = require("child_process").spawn
 rimraf = require "rimraf"
+Path = require "path"
 
 SERVICES = [{
 	name: "web"
@@ -63,7 +64,7 @@ module.exports = (grunt) ->
 			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
 				done = @async()
 				Helpers.updateService(service.name, done)
-			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:web"]
+			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:#{service.name}"]
 
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services", ("install:#{service.name}" for service in SERVICES)
 	grunt.registerTask 'install', 'install:all'
@@ -132,5 +133,5 @@ Helpers =
 				return callback(error) if error?
 				for file in fs.readdirSync("config-local")
 					unless file == ".git"
-						fs.symlinkSync("config-local/#{file}", "config/#{file}")
+						fs.symlinkSync(Path.resolve("config-local/#{file}"), "config/#{file}")
 				callback()
