@@ -1,4 +1,7 @@
+config
+config-local
 node_modules
 
 web
 document-updater
+

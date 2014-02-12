@@ -1,6 +1,6 @@
 fs = require "fs"
-exec = require("child_process").exec
 spawn = require("child_process").spawn
+rimraf = require "rimraf"
 
 SERVICES = [{
 	name: "web"
@@ -51,8 +51,9 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
-						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat("install:all")
-						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat("update:all")
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install"])
+						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
+						"Config tasks": ["install:config"]
 
 	for service in SERVICES
 		do (service) ->
@@ -62,7 +63,7 @@ module.exports = (grunt) ->
 			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
 				done = @async()
 				Helpers.updateService(service.name, done)
-			grunt.registerTask 'run:#{service.name}', "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:web"]
+			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:web"]
 
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services", ("install:#{service.name}" for service in SERVICES)
 	grunt.registerTask 'install', 'install:all'
@@ -70,6 +71,9 @@ module.exports = (grunt) ->
 	grunt.registerTask 'update', 'update:all'
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
 	grunt.registerTask 'run:all', 'run'
+
+	grunt.registerTask 'install:config', "Install a custom config from a git repository (set SHARELATEX_CONFIG_REPO to the repository location)", () ->
+		Helpers.installCustomConfig @async()
 
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 	grunt.registerTask 'default', 'run'
@@ -118,3 +122,15 @@ Helpers =
 		proc = spawn "grunt", ["install"], stdio: "inherit", cwd: dir
 		proc.on "close", () ->
 			callback()
+
+	installCustomConfig: (callback = (error) ->) ->
+		if !process.env.SHARELATEX_CONFIG_REPO?
+			return callback(new Error("Please set the SHARELATEX_CONFIG_REPO enviroment variable to point to a git repository."))
+
+		rimraf "config-local", (error) ->
+			Helpers.cloneGitRepo process.env.SHARELATEX_CONFIG_REPO, "config-local", (error) ->
+				return callback(error) if error?
+				for file in fs.readdirSync("config-local")
+					unless file == ".git"
+						fs.symlinkSync("config-local/#{file}", "config/#{file}")
+				callback()
