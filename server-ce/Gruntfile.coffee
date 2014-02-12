@@ -2,8 +2,13 @@ fs = require "fs"
 exec = require("child_process").exec
 spawn = require("child_process").spawn
 
-WEB_REPO = "git@bitbucket.org:sharelatex/web-sharelatex.git"
-DOC_UPDATER_REPO = "git@bitbucket.org:sharelatex/documentupdater-sharelatex.git"
+SERVICES = [{
+	name: "web"
+	repo: "git@github.com:sharelatex/web-sharelatex.git"
+}, {
+	name: "document-updater"
+	repo: "git@github.com:sharelatex/document-updater-sharelatex.git"
+}]
 
 
 module.exports = (grunt) ->
@@ -46,21 +51,21 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat("install:all")
+						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat("update:all")
 
-	grunt.registerTask 'install:web', "Download and set up the web-sharelatex service", () ->
-		done = @async()
-		Helpers.installService(WEB_REPO, "web", done)
-	grunt.registerTask 'install:document-updater', "Download and set up the document-updater-sharelatex service", () ->
-		done = @async()
-		Helpers.installService(DOC_UPDATER_REPO, "document-updater", done)
+	for service in SERVICES
+		do (service) ->
+			grunt.registerTask "install:#{service.name}", "Download and set up the #{service.name} service", () ->
+				done = @async()
+				Helpers.installService(service.repo, service.name, done)
+			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
+				done = @async()
+				Helpers.updateService(service.name, done)
 
-	grunt.registerTask 'update:web', "Checkout and update the web-sharelatex service", () ->
-		done = @async()
-		Helpers.updateService("web", done)
-	grunt.registerTask 'update:document-updater', "Checkout and update the document-updater-sharelatex service", () ->
-		done = @async()
-		Helpers.updateService("document-updater", done)
-		
+	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services", ("install:#{service.name}" for service in SERVICES)
+	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services", ("update:#{service.name}" for service in SERVICES)
+
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 
 	grunt.registerTask 'run:web', "Run web-sharelatex, the ShareLaTeX web server", ["bunyan", "execute:web"]
