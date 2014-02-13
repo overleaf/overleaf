@@ -42,6 +42,12 @@ module.exports =
 			port: "6379"
 			password: ""
 
+	mysql:
+		clsi:
+			database: "clsi"
+			username: "clsi"
+			password: ""
+
 	# Service locations
 	# -----------------
 
@@ -51,8 +57,13 @@ module.exports =
 	internal:
 		web:
 			port: webPort = 3000
+			host: "localhost"
 		documentupdater:
 			port: docUpdaterPort = 3003
+			host: "localhost"
+		clsi:
+			port: clsiPort = 3013
+			host: "localhost"
 
 	# Tell each service where to find the other services. If everything
 	# is running locally then this is easy, but they exist as separate config
@@ -64,6 +75,8 @@ module.exports =
 			pass: httpAuthPass
 		documentupdater:
 			url : "http://localhost:#{docUpdaterPort}"
+		clsi:
+			url: "http://localhost:#{clsiPort}"
 		thirdPartyDataStore:
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
@@ -88,8 +101,6 @@ module.exports =
 			port: 3008
 		filestore:
 			url: "http://localhost:3009"
-		clsi:
-			url: "http://localhost:3013"
 		templates_api:
 			url: "http://localhost:3014"
 
@@ -182,6 +193,10 @@ module.exports =
 		# that need processing but may be too big for memory, then write
 		# them to disk here).
 		dumpFolder: Path.resolve "data/dumpFolder"
+		# Where to write the project to disk before running LaTeX on it
+		compilesDir:  Path.resolve(__dirname + "/../compiles")
+		# Where to cache downloaded URLs for the CLSI
+		clsiCacheDir: Path.resolve(__dirname + "/../cache")
 	
 	# Automatic Snapshots
 	# -------------------
