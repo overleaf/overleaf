@@ -66,7 +66,7 @@ describe "CompileManager", ->
 			@CompileManager.clearProject @project_id, @callback
 
 		it "should remove the project directory", ->
-			@rimraf.calledWith("#{@Settings.compileDir}/#{@project_id}")
+			@rimraf.calledWith("#{@Settings.path.compilesDir}/#{@project_id}")
 				.should.equal true
 
 		it "should call the callback", ->
