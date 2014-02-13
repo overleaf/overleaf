@@ -10,7 +10,6 @@ define [
 
 	class ProjectMembersManager
 		templates:
-			usersLink: $("#usersSideBarLinkTemplate").html()
 			userPanel: $("#userPanelTemplate").html()
 
 		constructor: (@ide, options) ->
