@@ -15,13 +15,15 @@ License and Credits
 
 All code is currently proprietary but will soon be licensed under a copyleft license.
 
+### Artwork
+
 #### Silk icon set 1.3
 
 We gratefully acknowledge [Mark James](http://www.famfamfam.com/lab/icons/silk/) for
 releasing his Silk icon set under the Creative Commons Attribution 2.5 license. Some
 of these icons are used within ShareLaTeX inside the `public/img/silk` directory
 
-### IconShock icons
+#### IconShock icons
 
 We gratefully acknowledge [IconShock](http://www.iconshock.com) for use of the icons
 in the `public/img/iconshock` directory found via
