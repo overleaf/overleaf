@@ -35,5 +35,5 @@ module.exports = CompileManager =
 					callback null, outputFiles
 	
 	clearProject: (project_id, callback = (error) ->) ->
-		compileDir = Path.join(Settings.compileDir, project_id)
+		compileDir = Path.join(Settings.path.compilesDir, project_id)
 		rimraf compileDir, callback
