@@ -8,7 +8,7 @@ Keys = require "./RedisKeyBuilder"
 util = require "util"
 
 redis = require('redis')
-redisConf = Settings.redis?.web or Settings.redis or {host: "localhost", port: 6379}
+redisConf = Settings.redis.web
 rclient = redis.createClient(redisConf.port, redisConf.host)
 rclient.auth(redisConf.password)
 

@@ -7,11 +7,13 @@ RedisManager = require('./app/js/RedisManager.js')
 UpdateManager = require('./app/js/UpdateManager.js')
 Keys = require('./app/js/RedisKeyBuilder')
 redis = require('redis')
-rclient = redis.createClient(Settings.redis.port, Settings.redis.host)
-rclient.auth(Settings.redis.password)
 metrics = require('./app/js/Metrics')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
+
+redisConf = Settings.redis.web
+rclient = redis.createClient(redisConf.port, redisConf.host)
+rclient.auth(redisConf.password)
 
 app = express()
 app.configure ->

@@ -1,7 +1,7 @@
 metrics = require('./Metrics')
 Settings = require('settings-sharelatex')
 redis = require('redis')
-redisConf = Settings.redis?.web or Settings.redis or {host: "localhost", port: 6379}
+redisConf = Settings.redis.web
 rclient = redis.createClient(redisConf.port, redisConf.host)
 rclient.auth(redisConf.password)
 keys = require('./RedisKeyBuilder')
