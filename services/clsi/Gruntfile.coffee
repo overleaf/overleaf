@@ -80,7 +80,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-mocha-test'
 	grunt.loadNpmTasks 'grunt-shell'
 
-	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src']
+	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests']
 	grunt.registerTask 'run',         ['compile:app', 'concurrent']
 
 	grunt.registerTask 'compile:unit_tests', ['clean:unit_tests', 'coffee:unit_tests']

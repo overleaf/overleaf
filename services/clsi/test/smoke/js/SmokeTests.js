@@ -9,10 +9,10 @@
 
   request = require("request");
 
-  Settings = require("../../../app/js/Settings");
+  Settings = require("settings-sharelatex");
 
   buildUrl = function(path) {
-    return "http://localhost:" + Settings.listen.port + "/" + path;
+    return "http://" + Settings.internal.clsi.host + ":" + Settings.internal.clsi.port + "/" + path;
   };
 
   describe("Running a compile", function() {
@@ -34,6 +34,9 @@
         _this.error = error;
         _this.response = response;
         _this.body = body;
+        if (_this.error != null) {
+          throw _this.error;
+        }
         return done();
       });
     });

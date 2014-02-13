@@ -2,9 +2,9 @@ chai = require("chai")
 chai.should()
 expect = chai.expect
 request = require "request"
-Settings = require "../../../app/js/Settings"
+Settings = require "settings-sharelatex"
 
-buildUrl = (path) -> "http://localhost:#{Settings.listen.port}/#{path}"
+buildUrl = (path) -> "http://#{Settings.internal.clsi.host}:#{Settings.internal.clsi.port}/#{path}"
 
 describe "Running a compile", ->
 	before (done) ->
