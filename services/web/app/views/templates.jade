@@ -40,11 +40,11 @@
 				ul.dropdown-menu
 					li
 						a.js-new-file(href="#")
-							img(src="/img/doc.png")
+							img(src="/img/nide/doc.png")
 							| New File
 					li
 						a.js-new-folder(href="#")
-							img(src="/img/folder.png")
+							img(src="/img/nide/folder.png")
 							| New Folder
 					li
 						a.js-upload-file(href="#")
@@ -70,8 +70,8 @@
 	script(type="text/template")#folderTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
 			.toggle.js-toggle
-				img(src="/img/right-arrow.png").js-closed
-				img(src="/img/down-arrow.png").js-open
+				img(src="/img/nide/right-arrow.png").js-closed
+				img(src="/img/nide/down-arrow.png").js-open
 			.clickable.js-clickable
 				i(class="sprite-{{ type }}")
 				span.name {{ name }}
