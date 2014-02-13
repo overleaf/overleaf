@@ -4,7 +4,7 @@ logger = require 'logger-sharelatex'
 Settings = require 'settings-sharelatex'
 
 module.exports =
-	subscribe: (user, callback)->
+	subscribe: (user, callback = () ->)->
 		if !Settings.markdownmail?
 			logger.warn "No newsletter provider configured so not subscribing user"
 			return callback()
@@ -12,10 +12,9 @@ module.exports =
 		options = buildOptions(user, true)
 		Request.post options, (err, response, body)->
 			logger.log body:body, user:user, "finished attempting to subscribe the user to the news letter"
-			if callback?
-				callback err
+			callback(err)
 
-	unsubscribe: (user, callback)->
+	unsubscribe: (user, callback = () ->)->
 		if !Settings.markdownmail?
 			logger.warn "No newsletter provider configured so not unsubscribing user"
 			return callback()
@@ -23,7 +22,7 @@ module.exports =
 		options = buildOptions(user, false)
 		Request.post options, (err, response, body)->
 			logger.log err:err, body:body, email:user.email, "compled newsletter unsubscribe attempt"
-			callback()
+			callback(err)
 
 buildOptions = (user, is_subscribed)->
 	options =
