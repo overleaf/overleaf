@@ -9,6 +9,9 @@ SERVICES = [{
 }, {
 	name: "document-updater"
 	repo: "git@github.com:sharelatex/document-updater-sharelatex.git"
+}, {
+	name: "clsi"
+	repo: "git@github.com:sharelatex/clsi-sharelatex.git"
 }]
 
 
@@ -18,17 +21,19 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-concurrent'
 
+	execute = {}
+	for service in SERVICES
+		execute[service.name] =
+			src: "#{service.name}/app.js"
+
 	grunt.initConfig
-		execute:
-			web:
-				src: "web/app.js"
-			'document-updater':
-				src: "document-updater/app.js"
+		execute: execute
 
 		concurrent:
 			all:
-				tasks: ['run:web', 'run:document-updater']
+				tasks: ("run:#{service.name}" for service in SERVICES)
 				options:
+					limit: SERVICES.length
 					logConcurrentOutput: true
 
 		availabletasks:
@@ -45,10 +50,8 @@ module.exports = (grunt) ->
 						"Run tasks": [
 							"run"
 							"run:all"
-							"run:web"
-							"run:document-updater"
 							"default"
-						]
+						].concat ("run:#{service.name}" for service in SERVICES)
 						"Misc": [
 							"help"
 						]
