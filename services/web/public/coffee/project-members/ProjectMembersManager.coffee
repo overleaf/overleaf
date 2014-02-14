@@ -219,7 +219,7 @@ define [
 
 					url = "https://www.facebook.com/dialog/feed?link=#{encodeURIComponent(@url("fb"))}&" +
 						  "app_id=148710621956179&" +
-						  "picture=https://www.sharelatex.com/img/logo/lion-128.png&" +
+						  "picture=https://www.sharelatex.com/brand/logo/logo-128.png&" +
 						  "name=#{@ide.project.get("name")}&" +
 						  "caption=My LaTeX project (#{@ide.project.get("name")}) is available online on ShareLaTeX&" +
 						  "redirect_uri=http://www.sharelatex.com&" +
