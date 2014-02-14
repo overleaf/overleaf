@@ -24,7 +24,9 @@ module.exports =
 	s3:
 		key: ""
 		secret: ""
-		bucketName : ""
+		buckets:
+			# The S3 bucket name to store binary files in
+			user_files: ""
 
 	# Databases
 	# ---------
@@ -64,6 +66,9 @@ module.exports =
 		clsi:
 			port: clsiPort = 3013
 			host: "localhost"
+		filestore:
+			port: filestorePort = 3009
+			host: "localhost"
 
 	# Tell each service where to find the other services. If everything
 	# is running locally then this is easy, but they exist as separate config
@@ -77,6 +82,8 @@ module.exports =
 			url : "http://localhost:#{docUpdaterPort}"
 		clsi:
 			url: "http://localhost:#{clsiPort}"
+		filestore:
+			url: "http://localhost:#{filestorePort}"
 		thirdPartyDataStore:
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
@@ -99,8 +106,6 @@ module.exports =
 			port: 3007
 		blog:
 			port: 3008
-		filestore:
-			url: "http://localhost:3009"
 		templates_api:
 			url: "http://localhost:3014"
 
@@ -217,3 +222,10 @@ module.exports =
 	# 	user: ""
 	# 	password: ""
 	# 	projectId: ""
+
+	# Filestore health check
+	# ----------------------
+	# Project and file details to check in filestore when calling /health_check
+	# health_check:
+	# 	project_id: ""
+	# 	file_id: ""
