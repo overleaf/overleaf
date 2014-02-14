@@ -57,7 +57,7 @@ public/js/gui.js
 public/js/admin.js
 public/js/history/*
 public/stylesheets/mainStyle.css
-public/stylesheets/plans.css
+public/brand/plans.css
 public/minjs/
 
 public/js/main.js

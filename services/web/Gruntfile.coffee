@@ -74,7 +74,7 @@ module.exports = (grunt) ->
 					"public/stylesheets/mainStyle.css": "public/stylesheets/mainStyle.less"
 			plans:
 				files:
-					"public/stylesheets/plans.css": "public/stylesheets/less/plans.less"
+					"public/brand/plans.css": "public/brand/plans.less"
 
 		requirejs:
 			compile:

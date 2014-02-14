@@ -22,6 +22,7 @@ for path in [
     "#{jsPath}libs/pdf.js",
     "#{jsPath}libs/pdf.worker.js",
     "/stylesheets/mainStyle.css"
+    "/brand/plans.css"
 ]
 	filePath = Path.join __dirname, "../../../", "public#{path}"
 	content = fs.readFileSync filePath
