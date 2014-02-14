@@ -45,10 +45,12 @@ module.exports = (grunt) ->
 					logConcurrentOutput: true
 
 		mochaTest:
-			test:
+			unit:
+				src: ["test/unit/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
-					reporter: process.env.MOCHA_RUNNER || "spec"
-				src: ['test/*.js', 'test/**/*.js']
+					reporter: grunt.option('reporter') or 'spec'
+					grep: grunt.option("grep")
+				
 
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
@@ -57,8 +59,10 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks 'grunt-mocha-test'
 
-	grunt.registerTask "ci", ["coffee", "mochaTest"]
+	grunt.registerTask "test:unit", ["coffee", "mochaTest:unit"]
+	grunt.registerTask "ci", "test:unit"
 	grunt.registerTask 'default', ['coffee', 'concurrent']
 
-	grunt.registerTask "install", "coffee"
+	grunt.registerTask "compile", "coffee"
+	grunt.registerTask "install", "compile"
 
