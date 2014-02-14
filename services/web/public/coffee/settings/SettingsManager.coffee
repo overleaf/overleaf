@@ -4,7 +4,6 @@ define [
 ], (Modal, DropboxSettingsManager) ->
 	class SettingsManager
 		templates:
-			settingsLink: $("#settingsSideBarLinkTemplate").html()
 			settingsPanel: $("#settingsPanelTemplate").html()
 
 		constructor: (@ide, options) ->

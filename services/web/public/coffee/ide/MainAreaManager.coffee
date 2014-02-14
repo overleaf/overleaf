@@ -1,10 +1,8 @@
 define () ->
 	class MainAreaManager
 		constructor: (@ide, @el) ->
-			@$folderArea = $('#folderArea')
 			@$iframe = $('#imageArea')
 			@$loading = $('#loading')
-			@$disconnect = $('#disconnect')
 			@$currentArea = $('#loading')
 			@areas = {}
 
@@ -29,9 +27,6 @@ define () ->
 			$('#imageArea iframe').attr 'src', src
 
 		change : (type, complete)->
-			if(@$currentArea == @$disconnect)
-				return
-
 			if @areas[type]?
 				@$currentArea.hide() if @$currentArea?
 				@areas[type].show 0, =>
@@ -42,12 +37,6 @@ define () ->
 			else
 				# Deprecated system
 				switch type
-					when 'folder'
-						if(@$folderArea.attr('id')!=@$currentArea.attr('id'))
-							@$currentArea.hide()
-							@$folderArea.show()
-							@$currentArea = @$folderArea
-						break
 					when 'iframe'
 						if(@$iframe.attr('id')!=@$currentArea.attr('id'))
 							@$iframe.show()
@@ -59,11 +48,5 @@ define () ->
 							@$currentArea.hide()
 							@$loading.show()
 							@$currentArea = @$loading
-						break
-					when 'disconnect'
-						if(@$disconnect.attr('id')!=@$currentArea.attr('id'))
-							@$currentArea.hide()
-							@$disconnect.show()
-							@$currentArea = @$disconnect
 						break
 

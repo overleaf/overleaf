@@ -40,11 +40,11 @@
 				ul.dropdown-menu
 					li
 						a.js-new-file(href="#")
-							img(src="/img/doc.png")
+							img(src="/img/nide/doc.png")
 							| New File
 					li
 						a.js-new-folder(href="#")
-							img(src="/img/folder.png")
+							img(src="/img/nide/folder.png")
 							| New Folder
 					li
 						a.js-upload-file(href="#")
@@ -70,8 +70,8 @@
 	script(type="text/template")#folderTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
 			.toggle.js-toggle
-				img(src="/img/right-arrow.png").js-closed
-				img(src="/img/down-arrow.png").js-open
+				img(src="/img/nide/right-arrow.png").js-closed
+				img(src="/img/nide/down-arrow.png").js-open
 			.clickable.js-clickable
 				i(class="sprite-{{ type }}")
 				span.name {{ name }}
@@ -156,18 +156,6 @@
 	script(type="text/template")#loadingIndicatorTemplate
 		.loading
 
-	script(type="text/template")#settingsSideBarLinkTemplate
-		ul
-			li.root.project#settings(title='Show Project Settings')
-				img(src='/img/settings.png') 
-				span Settings
-
-	script(type="text/template")#usersSideBarLinkTemplate
-		ul
-			li.root.project#projectCollaberators(title='Show Project Collaborators')
-				img(src='/img/user.png') 
-				span Collaborators
-
 	script(type="text/template")#pdfSideBarLinkTemplate
 		ul
 			li.root.project#pdf(title='Show PDF', alt='pdf')
@@ -220,13 +208,13 @@
 			.pdfjs-list-view
 			.btn-group
 				button.btn.btn-info.js-fit-height
-					img(src="/img/fit-to-height.png")
+					img(src="/img/iconshock/fit-to-height.png")
 				button.btn.btn-info.js-fit-width
-					img(src="/img/fit-to-width.png")
+					img(src="/img/iconshock/fit-to-width.png")
 				button.btn.btn-info.js-zoom-out
-					img(src="/img/zoom-out.png")
+					img(src="/img/iconshock/zoom-out.png")
 				button.btn.btn-info.js-zoom-in
-					img(src="/img/zoom-in.png")
+					img(src="/img/iconshock/zoom-in.png")
 			.progress.progress-info
 				.bar
 				span Loading
@@ -328,12 +316,6 @@
 
 	script(type="text/template")#historyPanelTemplate
 		#revisionHistoryArea.fullEditorArea
-
-	script(type="text/template")#historySideBarLinkTemplate
-		ul
-			li.root.project#showHistory(title='Show project history', alt='history')
-				img(src='/img/clock.png') 
-				span History
 
 	script(type='text/template')#revisionAreaTemplate
 		#historyAreaWrapper

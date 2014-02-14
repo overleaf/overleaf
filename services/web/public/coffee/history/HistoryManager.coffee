@@ -7,7 +7,6 @@ define [
 ], (VersionListView, VersionList, HistoryView, AccountManager) ->
 	HistoryManager = class
 		templates:
-			historyLink: $("#historySideBarLinkTemplate").html()
 			historyPanel: $("#historyPanelTemplate").html()
 		
 		constructor: (ide, options) ->
