@@ -4,4 +4,9 @@ node_modules
 
 web
 document-updater
+clsi
+filestore
+
+compiles
+cache
 

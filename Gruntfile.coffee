@@ -12,6 +12,9 @@ SERVICES = [{
 }, {
 	name: "clsi"
 	repo: "git@github.com:sharelatex/clsi-sharelatex.git"
+}, {
+	name: "filestore"
+	repo: "git@github.com:sharelatex/filestore-sharelatex.git"
 }]
 
 
