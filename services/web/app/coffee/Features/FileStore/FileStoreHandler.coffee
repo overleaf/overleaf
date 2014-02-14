@@ -13,7 +13,7 @@ module.exports =
 			uri: @_buildUrl(project_id, file_id)
 		writeStream = request(opts)
 		readStream.pipe writeStream
-		readStream.on "end", callback
+		writeStream.on "end", callback
 		readStream.on "error", (err)->
 			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
 			callback err

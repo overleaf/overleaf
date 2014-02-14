@@ -10,7 +10,11 @@ describe "FileStoreHandler", ->
 	beforeEach ->
 		@fs =
 			createReadStream : sinon.stub()
-		@writeStream = {my:"writeStream", on:->}
+		@writeStream =
+			my:"writeStream"
+			on: (type, cb)-> 
+				if type == "end"
+					cb()
 		@readStream = {my:"readStream"}
 		@request = sinon.stub()
 		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
