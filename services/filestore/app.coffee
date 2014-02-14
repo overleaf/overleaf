@@ -1,0 +1,102 @@
+express = require('express')
+logger = require('logger-sharelatex')
+logger.initialize("filestore")
+metrics = require("./app/js/metrics")
+settings = require("settings-sharelatex")
+request = require("request")
+fileController = require("./app/js/FileController")
+keyBuilder = require("./app/js/KeyBuilder")
+domain = require("domain")
+appIsOk = true
+app = express()
+streamBuffers = require("stream-buffers")
+
+
+app.configure ->
+	app.use express.bodyParser()
+	
+app.configure 'development', ->
+	console.log "Development Enviroment"
+	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
+
+app.configure 'production', ->
+	console.log "Production Enviroment"
+	app.use express.logger()
+	app.use express.errorHandler()
+
+metrics.inc "startup"
+
+app.use (req, res, next)->
+	metrics.inc "http-request"
+	next()
+
+app.use (req, res, next) ->
+	requestDomain = domain.create()
+	requestDomain.add req
+	requestDomain.add res
+	requestDomain.on "error", (err)->
+		res.send 500
+		logger = require('logger-sharelatex')
+		req =
+			body:req.body
+			headers:req.headers
+			url:req.url
+			key: req.key
+			statusCode: req.statusCode
+		err.domainEmitter.res = "to big to log"
+		logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
+		appIsOk = false
+		exit = ->
+			console.log "exit"
+			process.exit(1)
+		setTimeout exit, 20000
+	requestDomain.run next
+
+app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
+app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
+
+app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.copyFile
+app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
+
+app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
+app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
+
+app.post "/shutdown", (req, res)->
+	appIsOk = false
+	res.send()
+
+app.get '/status', (req, res)->
+	if appIsOk
+		res.send('filestore sharelatex up')
+	else
+		logger.log "app is not ok - shutting down"
+		res.send("server is being shut down", 500)
+
+app.get "/health_check", (req, res)->
+	req.params.project_id = settings.health_check.project_id
+	req.params.file_id = settings.health_check.file_id
+	myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer(initialSize: 100)
+	keyBuilder.userFileKey req, res, ->
+		fileController.getFile req, myWritableStreamBuffer
+		myWritableStreamBuffer.on "close", ->
+			if myWritableStreamBuffer.size() > 0
+				res.send(200)
+			else
+				res.send(503)
+
+
+
+app.get '*', (req, res)->
+	res.send 404
+
+serverDomain = domain.create()
+serverDomain.run ->
+	server = require('http').createServer(app)
+	port = settings.internal.filestore.port or 3009
+	host = settings.internal.filestore.host or "localhost"
+	server.listen port, host, ->
+		logger.log("filestore store listening on #{host}:#{port}")
+
+serverDomain.on "error", (err)->
+	logger.log err:err, "top level uncaught exception"
+

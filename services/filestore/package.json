@@ -1,0 +1,32 @@
+{
+  "name": "filestore-sharelatex",
+  "version": "0.0.1",
+  "dependencies": {
+    "settings": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
+    "logger": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "request": "2.14.0",
+    "lynx": "0.0.11",
+    "grunt-mocha-test": "~0.8.2",
+    "knox": "~0.8.8",
+    "node-uuid": "~1.4.1",
+    "underscore": "~1.5.2",
+    "easyimage": "~0.1.6",
+    "express": "~3.4.8",
+    "longjohn": "~0.2.2",
+    "async": "~0.2.10",
+    "pngcrush": "0.0.3",
+    "stream-buffers": "~0.2.5"
+  },
+  "devDependencies": {
+    "sinon": "",
+    "chai": "",
+    "sandboxed-module": "",
+    "grunt": "0.4.1",
+    "grunt-contrib-requirejs": "0.4.1",
+    "grunt-contrib-coffee": "0.7.0",
+    "grunt-contrib-watch": "0.5.3",
+    "grunt-nodemon": "0.1.2",
+    "grunt-contrib-clean": "0.5.0",
+    "grunt-concurrent": "0.4.2"
+  }
+}
