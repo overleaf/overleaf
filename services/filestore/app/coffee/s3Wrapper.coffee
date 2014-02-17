@@ -32,6 +32,9 @@ module.exports =
 			if err?
 				logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath,"something went wrong uploading file to s3"
 				return callback(err)
+			if !res?
+				logger.err err:err, res:res, bucketName:bucketName, key:key, fsPath:fsPath, "no response from s3 put file"
+				callback("no response from put file")
 			if res.statusCode != 200
 				logger.err bucketName:bucketName, key:key, fsPath:fsPath, "non 200 response from s3 putting file"
 				return callback("non 200 response from s3 on put file")
@@ -58,7 +61,7 @@ module.exports =
 		options = buildDefaultOptions(bucketName, "get", key)
 		readStream = request(options)
 		readStream.on "error", (err)->
-			logger.err bucketName:bucketName, key:key, "error getting file stream from s3"
+			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
 		callback null, readStream
 
 	copyFile: (bucketName, sourceKey, destKey, callback)->
@@ -69,7 +72,7 @@ module.exports =
 			bucket: bucketName
 		s3Client.copyFile sourceKey, destKey, (err)->
 			if err?
-				logger.err bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
+				logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
 			callback(err)
 
 	deleteFile: (bucketName, key, callback)->
@@ -77,7 +80,7 @@ module.exports =
 		options = buildDefaultOptions(bucketName, "delete", key)
 		request options, (err, res)->
 			if err?
-				logger.err res:res, bucketName:bucketName, key:key, "something went wrong deleting file in aws"
+				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong deleting file in aws"
 			callback(err)
 
 	deleteDirectory: (bucketName, key, callback)->
@@ -95,7 +98,7 @@ module.exports =
 		options = buildDefaultOptions(bucketName, "head", key)
 		request options, (err, res)->
 			if err?
-				logger.err res:res, bucketName:bucketName, key:key, "something went wrong copying file in aws"
+				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong copying file in aws"
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)

@@ -8,7 +8,6 @@ metrics = require("./metrics")
 module.exports = 
 
 	writeStream: (stream, key, callback)->
-
 		timer = new metrics.Timer("writingFile")
 		callback = _.once callback
 		fsPath = @_getPath(key)
