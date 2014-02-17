@@ -45,11 +45,6 @@ app.use (req, res, next) ->
 			statusCode: req.statusCode
 		err.domainEmitter.res = "to big to log"
 		logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
-		appIsOk = false
-		exit = ->
-			console.log "exit"
-			process.exit(1)
-		setTimeout exit, 20000
 	requestDomain.run next
 
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
