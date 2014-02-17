@@ -12,8 +12,8 @@
     "async": "",
     "lynx": "0.0.11",
     "coffee-script": "1.4.0",
-    "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
-    "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "settings-sharelatex": "git+ssh://git@github.com:sharelatex/settings-sharelatex.git#master",
+    "logger-sharelatex": "git+ssh://git@github.com:sharelatex/logger-sharelatex.git#master",
     "sinon": "~1.5.2",
     "mongojs": "0.9.11"
   },
