@@ -11,7 +11,7 @@
     "mysql": "2.0.0-alpha7",
     "request": "~2.21.0",
     "rimraf": "2.1.4",
-    "logger-sharelatex": "git+ssh://git@github.com:sharelatex/logger-sharelatex.git#bunyan",
+    "logger-sharelatex": "git+ssh://git@github.com:sharelatex/logger-sharelatex.git#master",
     "settings-sharelatex": "git+ssh://git@github.com:sharelatex/settings-sharelatex.git#master",
     "sequelize": "~2.0.0-beta.2",
     "wrench": "~1.5.4",
