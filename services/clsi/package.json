@@ -11,11 +11,11 @@
     "mysql": "2.0.0-alpha7",
     "request": "~2.21.0",
     "rimraf": "2.1.4",
-    "logger-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
-    "settings-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
+    "logger-sharelatex": "git+ssh://git@github.com:sharelatex/logger-sharelatex.git#bunyan",
+    "settings-sharelatex": "git+ssh://git@github.com:sharelatex/settings-sharelatex.git#master",
     "sequelize": "~2.0.0-beta.2",
     "wrench": "~1.5.4",
-    "smoke-test-sharelatex": "git+ssh://git@bitbucket.org:sharelatex/smoke-test-sharelatex.git#master"
+    "smoke-test-sharelatex": "git+ssh://git@github.com:sharelatex/smoke-test-sharelatex.git#master"
   },
   "devDependencies": {
     "mocha": "1.10.0",
