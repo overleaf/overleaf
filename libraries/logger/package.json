@@ -1,0 +1,9 @@
+{
+  "name": "logger-sharelatex",
+  "homepage": "www.sharelatex.com",
+  "version": "0.0.1",
+  "dependencies": {
+    "coffee-script": "1.4.0",
+    "bunyan": "0.16.x"
+  }
+}
