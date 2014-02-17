@@ -43,7 +43,12 @@ app.use (req, res, next) ->
 			url:req.url
 			key: req.key
 			statusCode: req.statusCode
-		err.domainEmitter.res = "to big to log"
+		err =
+			message: err.message
+			stack: err.stack
+			name: err.name
+			type: err.type
+			arguments: err.arguments
 		logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
 	requestDomain.run next
 
