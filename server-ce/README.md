@@ -77,3 +77,8 @@ Contributing
 
 Please see the [CONTRIBUTING](https://github.com/sharelatex/sharelatex/blob/master/CONTRIBUTING.md) file for information on contributing to the development of ShareLaTeX.
 
+Authors
+---
+
+- [Henry Oswald](twitter.com/henryoswald)
+- James Allen
