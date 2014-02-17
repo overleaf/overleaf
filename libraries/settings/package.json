@@ -1,0 +1,8 @@
+{
+  "name": "settings-sharelatex",
+  "homepage": "www.sharelatex.com",
+  "version": "0.0.1",
+  "dependencies": {
+  	"coffee-script":"1.6.0"
+  }
+}
