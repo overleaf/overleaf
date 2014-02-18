@@ -10,3 +10,4 @@ filestore
 compiles
 cache
 
+db.sqlite
