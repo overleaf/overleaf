@@ -8,6 +8,8 @@ module.exports =
 			database: "clsi"
 			username: "clsi"
 			password: null
+			dialect: "sqlite"
+			storage: Path.resolve(__dirname + "/../db.sqlite")
 
 
 	path:

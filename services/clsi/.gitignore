@@ -11,3 +11,4 @@ app.js
 *~
 cache
 .vagrant
+db.sqlite
