@@ -2,7 +2,8 @@ web-sharelatex
 ==============
 
 web-sharelatex is the front-end web service of the open-source web-based collaborative LaTeX editor,
-ShareLaTeX. It serves all the HTML pages, CSS and javascript to the client. web-sharelatex also contains 
+[ShareLaTeX](https://www.sharelatex.com).
+It serves all the HTML pages, CSS and javascript to the client. web-sharelatex also contains 
 a lot of logic around creating and editing projects, and account management.
 
 The rest of the ShareLaTeX stack, along with information about contributing can be found in the 
@@ -13,7 +14,15 @@ License and Credits
 
 ### Code
 
-All code is currently proprietary but will soon be licensed under a copyleft license.
+All coffeescript files (files ended in *.coffee) are licensed under the
+[AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html).
+
+### Stylesheets
+
+ShareLaTeX is based on [Bootstrap](http://getbootstrap.com/), which is licensed under the
+[MIT license](http://opensource.org/licenses/MIT).
+All modifications (`*.less` files in `public/stylesheets`) are also licensed
+under the MIT license.
 
 ### Artwork
 
@@ -21,7 +30,8 @@ All code is currently proprietary but will soon be licensed under a copyleft lic
 
 We gratefully acknowledge [Mark James](http://www.famfamfam.com/lab/icons/silk/) for
 releasing his Silk icon set under the Creative Commons Attribution 2.5 license. Some
-of these icons are used within ShareLaTeX inside the `public/img/silk` directory
+of these icons are used within ShareLaTeX inside the `public/img/silk` and
+`public/brand/icons` directories.
 
 #### IconShock icons
 
