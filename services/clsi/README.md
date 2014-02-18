@@ -36,17 +36,51 @@ The CLSI is based on a JSON API.
 
 #### Example Request
 
+(Note that valid JSON should not contain any comments like the example below).
+
+    POST /project/<project-id>
+
 ```javascript
-    {
-      "options": {
-          "compiler": "lualatex" # Can be latex, pdflatex, xelatex or lualatex
-          "timeout": 40 # How many seconds to wait before killing the process. Default is 60.
-      },
-      "rootResourcePath": "main.tex", # The main file to run LaTeX on
-      # An array of files to include in the compilation
-      "resources": [{
-        "path": "main.tex",
-        "content": "\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}"
-      }]
+{
+    compile: {
+        "options": {
+            // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
+            "compiler": "lualatex"
+            // How many seconds to wait before killing the process. Default is 60.
+            "timeout": 40 
+        },
+        // The main file to run LaTeX on
+        "rootResourcePath": "main.tex", 
+        // An array of files to include in the compilation. May have either the content
+        // passed directly, or a URL where it can be downlaoded.
+        "resources": [{
+            "path": "main.tex",
+            "content": "\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}"
+        }, {
+            "path": "image.png",
+            "url": "www.example.com/image.png",
+            "modified": 123456789 // Unix time since epoch
+        }]
     }
+}
+```
+
+You can specify any project-id in the URL, and the files and LaTeX environment will be persisted between requests.
+URLs will be downloaded and cached until provided with a more recent modified date.
+
+#### Example Response
+
+```javascript
+{
+    "compile": {
+        "status": "success",
+        "outputFiles": [{
+            "type": "pdf",
+            "url": "http://localhost:3013/project/<project-id>/output/output.pdf"
+        }, {
+            "type": "log",
+            "url": "http://localhost:3013/project/<project-id>/output/output.log"
+        }]
+    }
+}
 ```
