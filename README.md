@@ -54,23 +54,28 @@ and source code repository. These are all downloaded and set upwhen you run
 
 The different services are:
 
-### [web](http://github.com/sharelatex/web-sharelatex)
+### [web](https://github.com/sharelatex/web-sharelatex)
 
 The front facing web server that serves all the HTML pages, CSS and javascript
 to the client. Also contains a lot of logic around creating and editing
 projects, and account management.
 
-### [document-updater](http://github.com/sharelatex/document-updater-sharelatex)
+### [document-updater](https://github.com/sharelatex/document-updater-sharelatex)
 
-Process updates that come in from the editor when users modify documents. Ensures that
+Processes updates that come in from the editor when users modify documents. Ensures that
 the updates are applied in the right order, and that only one operation is modifying
 the document at a time. Also caches the documents in redis for very fast but persistent
 modifications.
 
-### [CLSI](http://github.com/sharelatex/clsi-sharelatex)
+### [CLSI](https://github.com/sharelatex/clsi-sharelatex)
 
 The Common LaTeX Service Interface (CLSI) which provides an API for compiling LaTeX 
 documents.
+
+### [filestore](https://github.com/sharelatex/filestore-sharelatex)
+
+An API for perform CRUD (Create, Read, Update and Delete) operations on binary files
+(like images) stored in ShareLaTeX.
 
 Contributing
 ------------
@@ -80,5 +85,5 @@ Please see the [CONTRIBUTING](https://github.com/sharelatex/sharelatex/blob/mast
 Authors
 ---
 
-- [Henry Oswald](twitter.com/henryoswald)
-- James Allen
+- [Henry Oswald](http://twitter.com/henryoswald)
+- [James Allen](http://twitter.com/thejpallen)
