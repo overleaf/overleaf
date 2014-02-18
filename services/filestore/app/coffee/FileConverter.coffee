@@ -2,7 +2,7 @@ easyimage = require("easyimage")
 _ = require("underscore")
 metrics = require("./metrics")
 logger = require("logger-sharelatex")
-
+exec = require('child_process').exec
 approvedFormats = ["png"]
 
 module.exports =
@@ -15,10 +15,8 @@ module.exports =
 		if !_.include approvedFormats, requestedFormat
 			err = new Error("invalid format requested")
 			return callback err
-		args = 
-			src: sourcePath
-			dst: destPath
-		easyimage.convert args, (err)->
+		args = "nice convert -flatten -density 300 #{sourcePath} #{destPath}"
+		exec args, (err, stdout, stderr)->
 			timer.done()
 			callback(err, destPath)
 
@@ -31,8 +29,8 @@ module.exports =
 			dst: destPath
 			width: 424
 			height: 300
-		args = "convert -flatten -background white -resize 300x -density 300 #{sourcePath} #{destPath}"
-		easyimage.exec args, (err)->
+		args = "nice convert -flatten -background white -resize 300x -density 300 #{sourcePath} #{destPath}"
+		exec args, (err, stdout, stderr)->
 			callback(err, destPath)	
 
 	preview: (sourcePath, callback)->
@@ -44,6 +42,6 @@ module.exports =
 			dst: destPath
 			width: 600
 			height: 849
-		args = "convert -flatten -background white -resize 600x -density 300 #{sourcePath} #{destPath}"
-		easyimage.exec args, (err)->
+		args = "nice convert -flatten -background white -resize 600x -density 300 #{sourcePath} #{destPath}"
+		exec args, (err, stdout, stderr)->
 			callback(err, destPath)

@@ -13,7 +13,6 @@ module.exports =
 			user_files: ""
 			template_files: ""
 
-
 	# Filestore health check
 	# ----------------------
 	# Project and file details to check in filestore when calling /health_check

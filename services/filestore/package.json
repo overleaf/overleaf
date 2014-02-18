@@ -10,12 +10,12 @@
     "knox": "~0.8.8",
     "node-uuid": "~1.4.1",
     "underscore": "~1.5.2",
-    "easyimage": "~0.1.6",
     "express": "~3.4.8",
     "longjohn": "~0.2.2",
     "async": "~0.2.10",
     "pngcrush": "0.0.3",
-    "stream-buffers": "~0.2.5"
+    "stream-buffers": "~0.2.5",
+    "node-transloadit": "0.0.4"
   },
   "devDependencies": {
     "sinon": "",
