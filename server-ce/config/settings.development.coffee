@@ -49,6 +49,8 @@ module.exports =
 			database: "clsi"
 			username: "clsi"
 			password: ""
+			dialect: "sqlite"
+			storage: Path.resolve(__dirname + "/../db.sqlite")
 
 	# Service locations
 	# -----------------
