@@ -1,5 +1,7 @@
 http = require('http')
 http.globalAgent.maxSockets = 300
+https = require('https')
+https.globalAgent.maxSockets = 300
 settings = require("settings-sharelatex")
 request = require("request")
 logger = require("logger-sharelatex")
@@ -10,6 +12,14 @@ LocalFileWriter = require("./LocalFileWriter")
 _ = require("underscore")
 
 thirtySeconds = 30 * 1000
+
+
+printSockets = ->
+	console.log require('https').globalAgent.sockets
+	console.log require('http').globalAgent.sockets
+	setTimeout printSockets, thirtySeconds
+
+printSockets()
 
 buildDefaultOptions = (bucketName, method, key)->
 	return {
