@@ -1,4 +1,3 @@
-easyimage = require("easyimage")
 _ = require("underscore")
 metrics = require("./metrics")
 logger = require("logger-sharelatex")
@@ -29,7 +28,7 @@ module.exports =
 			dst: destPath
 			width: 424
 			height: 300
-		args = "nice convert -flatten -background white -resize 300x -density 300 #{sourcePath} #{destPath}"
+		args = "nice convert -flatten -background white -resize 260x -density 300 #{sourcePath} #{destPath}"
 		exec args, (err, stdout, stderr)->
 			callback(err, destPath)	
 
@@ -42,6 +41,6 @@ module.exports =
 			dst: destPath
 			width: 600
 			height: 849
-		args = "nice convert -flatten -background white -resize 600x -density 300 #{sourcePath} #{destPath}"
+		args = "nice convert -flatten -background white -resize 548x -density 300 #{sourcePath} #{destPath}"
 		exec args, (err, stdout, stderr)->
 			callback(err, destPath)
