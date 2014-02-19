@@ -9,52 +9,31 @@ SandboxedModule = require('sandboxed-module')
 describe "ImageOptimiser", ->
 
 	beforeEach ->
-
-		@fs = 
-			createReadStream:sinon.stub()
-			createWriteStream:sinon.stub()
-			rename:sinon.stub()
-		@pngcrush = class PngCrush
-			pipe:->
-			on: ->
+		@child_process =
+			exec : sinon.stub()
 
 		@optimiser = SandboxedModule.require modulePath, requires:
-			"fs":@fs
-			"pngcrush":@pngcrush
+			'child_process': @child_process
 			"logger-sharelatex":
 				log:->
 				err:->
 
 		@sourcePath = "/this/path/here.eps"
-		@writeStream = 
-			pipe:->
-			on: (type, cb)->
-				if type == "finish"
-					cb()
-		@sourceStream =
-			pipe:->
-				return pipe:->
-			on:->
 		@error = "Error"
 
 	describe "compressPng", ->
 		
-		beforeEach ->
-			@fs.createReadStream.returns(@sourceStream)
-			@fs.createWriteStream.returns(@writeStream)
-			@fs.rename.callsArgWith(2)
 
-		it "should get the file stream", (done)->
+		it "convert the file", (done)->
+			@child_process.exec.callsArgWith(2)
 			@optimiser.compressPng @sourcePath, (err)=>
-				@fs.createReadStream.calledWith(@sourcePath).should.equal true
+				args = @child_process.exec.args[0][0]
+				args.should.equal "optipng #{@sourcePath}"
 				done()
 
-		it "should create a compressed file stream", (done)->
-			@optimiser.compressPng @sourcePath, (err)=>
-				@fs.createWriteStream.calledWith("#{@sourcePath}-optimised")
-				done()
 
-		it "should rename the file after completion", (done)->
+		it "should return the errro the file", (done)->
+			@child_process.exec.callsArgWith(2, @error)
 			@optimiser.compressPng @sourcePath, (err)=>
-				@fs.rename.calledWith("#{@sourcePath}-optimised", @sourcePath).should.equal true
+				err.should.equal @error
 				done()

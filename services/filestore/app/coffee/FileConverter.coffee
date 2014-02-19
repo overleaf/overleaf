@@ -4,6 +4,8 @@ logger = require("logger-sharelatex")
 exec = require('child_process').exec
 approvedFormats = ["png"]
 
+twoMinsInMs = 2 * (60 * 1000)
+
 module.exports =
 
 	convert: (sourcePath, requestedFormat, callback)->
@@ -15,7 +17,9 @@ module.exports =
 			err = new Error("invalid format requested")
 			return callback err
 		args = "nice convert -flatten -density 300 #{sourcePath} #{destPath}"
-		exec args, (err, stdout, stderr)->
+		opts =
+			timeout: twoMinsInMs
+		exec args, opts, (err, stdout, stderr)->
 			timer.done()
 			callback(err, destPath)
 
@@ -29,7 +33,9 @@ module.exports =
 			width: 424
 			height: 300
 		args = "nice convert -flatten -background white -resize 260x -density 300 #{sourcePath} #{destPath}"
-		exec args, (err, stdout, stderr)->
+		opts =
+			timeout: twoMinsInMs
+		exec args, opts,(err, stdout, stderr)->
 			callback(err, destPath)	
 
 	preview: (sourcePath, callback)->
@@ -42,5 +48,7 @@ module.exports =
 			width: 600
 			height: 849
 		args = "nice convert -flatten -background white -resize 548x -density 300 #{sourcePath} #{destPath}"
-		exec args, (err, stdout, stderr)->
+		opts =
+			timeout: twoMinsInMs
+		exec args, opts,(err, stdout, stderr)->
 			callback(err, destPath)
