@@ -10,6 +10,11 @@ module.exports =
 		args = "optipng #{localPath}"
 		opts =
 			timeout: 60 * 1000
-		exec args, opts, callback
+		exec args, opts,(err, stdout, stderr)->
+			if err?
+				logger.err err:err, stderr:stderr, localPath:localPath, "something went wrong converting compressPng"
+			else
+				logger.log  localPath:localPath, "finished compressPng file"
+			callback(err)	
 			
 
