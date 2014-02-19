@@ -101,6 +101,8 @@ module.exports =
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong copying file in aws"
 			if !res?
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "no response object returned when checking if file exists"
+				err = new Error("no response from s3 #{bucketName} #{key}")
+				return callback(err)
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
