@@ -8,7 +8,6 @@ knox = require("knox")
 path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
 _ = require("underscore")
-	
 
 thirtySeconds = 30 * 1000
 
@@ -58,13 +57,19 @@ module.exports =
 				return callback(err)
 			@sendFileToS3 bucketName, key, fsPath, callback
 			
-	getFileStream: (bucketName, key, callback)->
+	getFileStream: (bucketName, key, callback = (err, res)->)->
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
-		options = buildDefaultOptions(bucketName, "get", key)
-		readStream = request(options)
-		readStream.on "error", (err)->
+		s3Client = knox.createClient
+			key: settings.s3.key
+			secret: settings.s3.secret
+			bucket: bucketName
+		s3Stream = s3Client.get(key)
+		s3Stream.end()
+		s3Stream.on 'response', (res) ->
+			callback null, res
+		s3Stream.on 'error', (err) ->
 			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
-		callback null, readStream
+			callback err
 
 	copyFile: (bucketName, sourceKey, destKey, callback)->
 		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "copying file in s3"

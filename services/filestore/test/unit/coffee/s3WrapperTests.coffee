@@ -20,6 +20,7 @@ describe "s3WrapperTests", ->
 			copyFile:sinon.stub()
 			list: sinon.stub()
 			deleteMultiple: sinon.stub()
+			get: sinon.stub()
 		@knox = 
 			createClient: sinon.stub().returns(@stubbedKnoxClient)
 		@LocalFileWriter = 
@@ -36,19 +37,19 @@ describe "s3WrapperTests", ->
 		@bucketName = "my-bucket"
 		@error = "my errror"
 
-	describe "Pipe to dest", ->
-
-		it "should use correct options", (done)->
-
-			stubbedReadStream = {on:->}
-			dest = {my:"object"}
-			@request = (opts)=>
-				return stubbedReadStream
-			@requires["request"] = @request
+	describe "getFileStream", ->
+		beforeEach ->
 			@s3Wrapper = SandboxedModule.require modulePath, requires: @requires
-			@s3Wrapper.getFileStream @bucketName, @key, (err, readStream)->
-				readStream.should.equal stubbedReadStream
-				done()
+
+
+		it "should use correct key", (done)->
+			@stubbedKnoxClient.get.returns(
+				on:->
+				end:->
+			)
+			@s3Wrapper.getFileStream @bucketName, @key, @fsPath, (err)=>
+			@stubbedKnoxClient.get.calledWith(@key).should.equal true 
+			done()
 
 	describe "sendFileToS3", ->
 
