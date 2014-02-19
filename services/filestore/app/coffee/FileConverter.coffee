@@ -4,7 +4,7 @@ logger = require("logger-sharelatex")
 exec = require('child_process').exec
 approvedFormats = ["png"]
 
-twoMinsInMs = 2 * (60 * 1000)
+fourMinsInMs = 4 * (60 * 1000)
 
 module.exports =
 
@@ -18,7 +18,7 @@ module.exports =
 			return callback err
 		args = "nice convert -flatten -density 300 #{sourcePath} #{destPath}"
 		opts =
-			timeout: twoMinsInMs
+			timeout: fourMinsInMs
 		exec args, opts, (err, stdout, stderr)->
 			timer.done()
 			if err?
@@ -38,7 +38,7 @@ module.exports =
 			height: 300
 		args = "nice convert -flatten -background white -resize 260x -density 300 #{sourcePath} #{destPath}"
 		opts =
-			timeout: twoMinsInMs
+			timeout: fourMinsInMs
 		exec args, opts,(err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
@@ -57,7 +57,7 @@ module.exports =
 			height: 849
 		args = "nice convert -flatten -background white -resize 548x -density 300 #{sourcePath} #{destPath}"
 		opts =
-			timeout: twoMinsInMs
+			timeout: fourMinsInMs
 		exec args, opts,(err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
