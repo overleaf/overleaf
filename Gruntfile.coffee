@@ -79,9 +79,6 @@ module.exports = (grunt) ->
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
 	grunt.registerTask 'run:all', 'run'
 
-	grunt.registerTask 'install:config', "Install a custom config from a git repository (set SHARELATEX_CONFIG_REPO to the repository location)", () ->
-		Helpers.installCustomConfig @async()
-
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 	grunt.registerTask 'default', 'run'
 
@@ -130,14 +127,3 @@ Helpers =
 		proc.on "close", () ->
 			callback()
 
-	installCustomConfig: (callback = (error) ->) ->
-		if !process.env.SHARELATEX_CONFIG_REPO?
-			return callback(new Error("Please set the SHARELATEX_CONFIG_REPO enviroment variable to point to a git repository."))
-
-		rimraf "config-local", (error) ->
-			Helpers.cloneGitRepo process.env.SHARELATEX_CONFIG_REPO, "config-local", (error) ->
-				return callback(error) if error?
-				for file in fs.readdirSync("config-local")
-					unless file == ".git"
-						fs.symlinkSync(Path.resolve("config-local/#{file}"), "config/#{file}")
-				callback()
