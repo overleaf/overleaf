@@ -2,10 +2,13 @@ fs = require "fs"
 path = require "path"
 env = (process.env.NODE_ENV or "development").toLowerCase()
 
-possibleConfigFiles = [
-	process.cwd() + "/config/settings.#{env}.coffee"
-	path.normalize(__dirname + "/../../config/settings.#{env}.coffee")
-]
+if process.env.SHARELATEX_CONFIG?
+	possibleConfigFiles = [process.env.SHARELATEX_CONFIG]
+else
+	possibleConfigFiles = [
+		process.cwd() + "/config/settings.#{env}.coffee"
+		path.normalize(__dirname + "/../../config/settings.#{env}.coffee")
+	]
 
 for file in possibleConfigFiles
 	if fs.existsSync(file)
