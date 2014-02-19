@@ -99,6 +99,7 @@ module.exports =
 		request options, (err, res)->
 			if err?
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong checking file in aws"
+				return callback(err)
 			if !res?
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "no response object returned when checking if file exists"
 				err = new Error("no response from s3 #{bucketName} #{key}")
