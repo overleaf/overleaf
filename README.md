@@ -32,11 +32,11 @@ ShareLaTeX should now be running at http://localhost:3000.
 Dependencies
 ------------
 
-You need:
+ShareLaTeX should run on OS X and Linux. You need:
 
-* Node.js 0.10 or greater
-* The grunt command line tools (Run `npm install -g grunt-cli` to install them)
-* A local instance of Redis and Mongodb running on their standard ports.
+* [Node.js](http://nodejs.org/) 0.10 or greater
+* The [grunt](http://gruntjs.com/) command line tools (Run `npm install -g grunt-cli` to install them)
+* A local instance of [Redis](http://redis.io/) and [MongoDB](http://www.mongodb.org/) running on their standard ports.
 
 Config
 ------
