@@ -21,6 +21,10 @@ module.exports =
 			timeout: twoMinsInMs
 		exec args, opts, (err, stdout, stderr)->
 			timer.done()
+			if err?
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, "something went wrong converting file"
+			else
+				logger.log  sourcePath:sourcePath, requestedFormat:requestedFormat, "finished converting file"
 			callback(err, destPath)
 
 	thumbnail: (sourcePath, callback)->
@@ -36,6 +40,10 @@ module.exports =
 		opts =
 			timeout: twoMinsInMs
 		exec args, opts,(err, stdout, stderr)->
+			if err?
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
+			else
+				logger.log  sourcePath:sourcePath, "finished thumbnailing file"
 			callback(err, destPath)	
 
 	preview: (sourcePath, callback)->
@@ -51,4 +59,8 @@ module.exports =
 		opts =
 			timeout: twoMinsInMs
 		exec args, opts,(err, stdout, stderr)->
+			if err?
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
+			else
+				logger.log  sourcePath:sourcePath, "finished converting file to preview"
 			callback(err, destPath)
