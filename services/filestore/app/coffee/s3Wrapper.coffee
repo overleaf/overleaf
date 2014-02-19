@@ -1,3 +1,5 @@
+http = require('http')
+http.globalAgent.maxSockets = 300
 settings = require("settings-sharelatex")
 request = require("request")
 logger = require("logger-sharelatex")
