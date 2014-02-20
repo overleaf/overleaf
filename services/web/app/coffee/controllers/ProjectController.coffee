@@ -10,7 +10,6 @@ SecurityManager = require '../managers/SecurityManager'
 GuidManager = require '../managers/GuidManager'
 Settings = require('settings-sharelatex')
 projectCreationHandler = require '../Features/Project/ProjectCreationHandler'
-projectLocator = require '../Features/Project/ProjectLocator'
 projectDuplicator = require('../Features/Project/ProjectDuplicator')
 ProjectZipStreamManager = require '../Features/Downloads/ProjectZipStreamManager'
 metrics = require('../infrastructure/Metrics')
@@ -183,15 +182,6 @@ module.exports = class ProjectController
 			@removeListener "end", endCallback
 			@emit "end" if @endEmitted
 		next()
-
-	downloadImageFile : (req, res)->
-		project_id = req.params.Project_id
-		file_id = req.params.File_id
-		queryString = req.query
-		logger.log project_id: project_id, file_id: file_id, queryString:queryString, "file download"
-		res.setHeader("Content-Disposition", "attachment")
-		FileStoreHandler.getFileStream project_id, file_id, queryString, (err, stream)->
-			stream.pipe res
 
 	cloneProject: (req, res)->
 		metrics.inc "cloned-project"

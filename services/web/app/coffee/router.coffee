@@ -31,6 +31,7 @@ CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
+FileStoreController = require("./Features/FileStore/FileStoreController")
 logger = require("logger-sharelatex")
 
 httpAuth = require('express').basicAuth (user, pass)->
@@ -97,7 +98,7 @@ module.exports = class Router
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
 		app.get  '/Project/:Project_id', SecutiryManager.requestCanAccessProject, Project.loadEditor
-		app.get  '/Project/:Project_id/file/:File_id', SecutiryManager.requestCanAccessProject, Project.downloadImageFile
+		app.get  '/Project/:Project_id/file/:File_id', SecutiryManager.requestCanAccessProject, FileStoreController.getFile
 
 		# This is left for legacy reasons and can be removed once all editors have had a chance to refresh:
 		app.get  '/Project/:Project_id/download/pdf', SecutiryManager.requestCanAccessProject, CompileController.downloadPdf
