@@ -9,7 +9,7 @@ module.exports =
 		logger.log localPath:localPath, "optimising png path"
 		args = "optipng #{localPath}"
 		opts =
-			timeout: 60 * 1000
+			timeout: 20 * 1000
 		exec args, opts,(err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, localPath:localPath, "something went wrong converting compressPng"
