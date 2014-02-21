@@ -52,7 +52,7 @@ The CLSI is based on a JSON API.
         // The main file to run LaTeX on
         "rootResourcePath": "main.tex", 
         // An array of files to include in the compilation. May have either the content
-        // passed directly, or a URL where it can be downlaoded.
+        // passed directly, or a URL where it can be downloaded.
         "resources": [{
             "path": "main.tex",
             "content": "\\documentclass{article}\n\\begin{document}\nHello World\n\\end{document}"
