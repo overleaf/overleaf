@@ -41,7 +41,7 @@ ShareLaTeX should run on OS X and Linux. You need:
 
 * [Node.js](http://nodejs.org/) 0.10 or greater
 * The [grunt](http://gruntjs.com/) command line tools (Run `npm install -g grunt-cli` to install them)
-* A local instance of [Redis](http://redis.io/) and [MongoDB](http://www.mongodb.org/) running on their standard ports.
+* A local instance of [Redis](http://redis.io/) (version 2.6 or later) and [MongoDB](http://www.mongodb.org/) running on their standard ports.
 * An up to date version of [TeXLive](https://www.tug.org/texlive/), with the `latexmk` program installed (should be included by default in TeXLive).
 
 Config
