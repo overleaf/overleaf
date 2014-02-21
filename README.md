@@ -42,7 +42,7 @@ ShareLaTeX should run on OS X and Linux. You need:
 * [Node.js](http://nodejs.org/) 0.10 or greater
 * The [grunt](http://gruntjs.com/) command line tools (Run `npm install -g grunt-cli` to install them)
 * A local instance of [Redis](http://redis.io/) and [MongoDB](http://www.mongodb.org/) running on their standard ports.
-* An update to date version of [TeXLive](https://www.tug.org/texlive/), with the `latexmk` program installed (should be included by default in TeXLive).
+* An up to date version of [TeXLive](https://www.tug.org/texlive/), with the `latexmk` program installed (should be included by default in TeXLive).
 
 Config
 ------
@@ -67,7 +67,7 @@ The different services are:
 
 ### [web](https://github.com/sharelatex/web-sharelatex)
 
-The front facing web server that serves all the HTML pages, CSS and javascript
+The front facing web server that serves all the HTML pages, CSS and JavaScript
 to the client. Also contains a lot of logic around creating and editing
 projects, and account management.
 
@@ -85,7 +85,7 @@ documents.
 
 ### [filestore](https://github.com/sharelatex/filestore-sharelatex)
 
-An API for perform CRUD (Create, Read, Update and Delete) operations on binary files
+An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
 (like images) stored in ShareLaTeX.
 
 Contributing
