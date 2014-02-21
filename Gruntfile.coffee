@@ -5,16 +5,16 @@ Path = require "path"
 
 SERVICES = [{
 	name: "web"
-	repo: "git@github.com:sharelatex/web-sharelatex.git"
+	repo: "https://github.com/sharelatex/web-sharelatex.git"
 }, {
 	name: "document-updater"
-	repo: "git@github.com:sharelatex/document-updater-sharelatex.git"
+	repo: "https://github.com/sharelatex/document-updater-sharelatex.git"
 }, {
 	name: "clsi"
-	repo: "git@github.com:sharelatex/clsi-sharelatex.git"
+	repo: "https://github.com/sharelatex/clsi-sharelatex.git"
 }, {
 	name: "filestore"
-	repo: "git@github.com:sharelatex/filestore-sharelatex.git"
+	repo: "https://github.com/sharelatex/filestore-sharelatex.git"
 }]
 
 
