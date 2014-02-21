@@ -23,6 +23,10 @@ If you can include a screenshot for front end issues that is very helpful.
 Pull Requests
 -------------
 
+See [our wiki](https://github.com/sharelatex/sharelatex/wiki/ShareLaTeX-Development-Environment)
+for information on how to modify the ShareLaTeX code and set up a good development
+environment.
+
 We love pull requests, so be bold with them! Don't be afraid of going ahead
 and changing something, or adding a new feature. We're very happy to work with you
 to get your changes merged into ShareLaTeX.
