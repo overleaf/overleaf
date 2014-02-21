@@ -9,7 +9,7 @@ or **[join in the discussion on Hacker News](https://news.ycombinator.com/item?i
 Installation
 ------------
 
-ShareLaTeX uses a service orientied architecture (SOA) where we have lots of small
+ShareLaTeX uses a service oriented architecture (SOA) where we have lots of small
 APIs that talk to each other over HTTP and Redis pub-sub channels. This repository
 pulls together all of the different services and allows you to set up and run
 them quickly.
