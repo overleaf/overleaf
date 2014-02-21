@@ -98,7 +98,7 @@ An API for performing CRUD (Create, Read, Update and Delete) operations on binar
 Contributing
 ------------
 
-Please see the [CONTRIBUTING](https://github.com/sharelatex/sharelatex/blob/master/CONTRIBUTING.md) file for information on contributing to the development of ShareLaTeX.
+Please see the [CONTRIBUTING](https://github.com/sharelatex/sharelatex/blob/master/CONTRIBUTING.md) file for information on contributing to the development of ShareLaTeX. See [our wiki](https://github.com/sharelatex/sharelatex/wiki/ShareLaTeX-Development-Environment) for information on setting up a development environment and how to recompile and run ShareLaTeX after modifications.
 
 Authors
 ---
