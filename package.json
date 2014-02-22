@@ -2,7 +2,8 @@
   "name": "sharelatex",
   "description": "An online collaborative LaTeX editor",
   "dependencies": {
-    "rimraf": "~2.2.6"
+    "rimraf": "~2.2.6",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -11,6 +12,7 @@
     "grunt-execute": "~0.1.5",
     "grunt-available-tasks": "~0.4.1",
     "grunt-concurrent": "~0.4.3",
-    "semver": "~2.2.1"
+    "semver": "~2.2.1",
+    "knox": "~0.8.9"
   }
 }
