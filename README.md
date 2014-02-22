@@ -13,10 +13,6 @@ APIs that talk to each other over HTTP and Redis pub-sub channels. This reposito
 pulls together all of the different services and allows you to set up and run
 them quickly.
 
-*Note: Please make sure you have your public key configured with github since
-we use ssh to pull additional repositories from github when you run the install
-script.*
-
 First, check out a local copy of this repository:
 
 	$ git clone https://github.com/sharelatex/sharelatex.git
