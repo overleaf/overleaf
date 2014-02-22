@@ -161,7 +161,7 @@ module.exports = (grunt) ->
 
 		checkLatexmk: (callback = (error) ->) ->
 			grunt.log.write "Checking latexmk is installed... "
-			exec "latexmk -version", (error, stdout, stderr) ->
+			exec "latexmk --version", (error, stdout, stderr) ->
 				if error? and error.message.match("command not found")
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
@@ -179,7 +179,7 @@ module.exports = (grunt) ->
 						grunt.log.error "Unknown latexmk version"
 					else
 						version = m[1]
-						if semver.gt(version + ".0", "4.39.0")
+						if semver.gte(version + ".0", "4.39.0")
 							grunt.log.writeln "OK."
 							grunt.log.writeln "Running latexmk version #{version}"
 						else
