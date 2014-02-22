@@ -20,7 +20,7 @@ script.*
 
 First, check out a local copy of this repository:
 
-	$ git clone git@github.com:sharelatex/sharelatex.git
+	$ git clone https://github.com/sharelatex/sharelatex.git
 	$ cd sharelatex
 
 Next install all the node modules and ShareLaTeX services:
