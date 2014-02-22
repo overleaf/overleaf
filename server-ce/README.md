@@ -26,7 +26,7 @@ Next install all the node modules and ShareLaTeX services:
 Now check that your system is set up correctly to run ShareLaTeX (checks that you have
 the required dependencies installed.) Watch out for any failures.
 
-	$ grunt check
+	$ grunt check --force
 
 When that has finished, run ShareLaTeX with
 

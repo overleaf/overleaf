@@ -4,6 +4,8 @@ exec = require("child_process").exec
 rimraf = require "rimraf"
 Path = require "path"
 semver = require "semver"
+settings = require "settings-sharelatex"
+knox = require "knox"
 
 SERVICES = [{
 	name: "web"
@@ -89,7 +91,9 @@ module.exports = (grunt) ->
 		Helpers.checkRedis @async()
 	grunt.registerTask "check:latexmk", "Check that latexmk is installed", () ->
 		Helpers.checkLatexmk @async()
-	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk"]
+	grunt.registerTask "check:s3", "Check that Amazon S3 credentials are configured", () ->
+		Helpers.checkS3 @async()
+	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3"]
 
 	Helpers =
 		installService: (repo_src, dir, callback = (error) ->) ->
@@ -141,7 +145,7 @@ module.exports = (grunt) ->
 			exec "redis-cli info", (error, stdout, stderr) ->
 				if error? and error.message.match("Could not connect")
 					grunt.log.error "FAIL. Redis is not running"
-					return
+					return callback(error)
 				else if error?
 					return callback(error)
 				else
@@ -149,6 +153,7 @@ module.exports = (grunt) ->
 					if !m?
 						grunt.log.error "FAIL."
 						grunt.log.error "Unknown redis version"
+						error = new Error("Unknown redis version")
 					else
 						version = m[1]
 						if semver.gt(version, "2.6.0")
@@ -157,7 +162,8 @@ module.exports = (grunt) ->
 						else
 							grunt.log.error "FAIL."
 							grunt.log.error "Redis version is too old (#{version}). Must be 2.6.0 or greater."
-				callback()
+							error = new Error("Redis version is too old (#{version}). Must be 2.6.0 or greater.")
+				callback(error)
 
 		checkLatexmk: (callback = (error) ->) ->
 			grunt.log.write "Checking latexmk is installed... "
@@ -170,6 +176,7 @@ module.exports = (grunt) ->
 					latexmk comes with TexLive 2013, and must be a version from 2013 or later.
 					This is a not a fatal error, but compiling will not work without latexmk
 					"""
+					return callback(error)
 				else if error?
 					return callback(error)
 				else
@@ -177,6 +184,7 @@ module.exports = (grunt) ->
 					if !m?
 						grunt.log.error "FAIL."
 						grunt.log.error "Unknown latexmk version"
+						error = new Error("Unknown latexmk version")
 					else
 						version = m[1]
 						if semver.gte(version + ".0", "4.39.0")
@@ -188,6 +196,39 @@ module.exports = (grunt) ->
 							latexmk version is too old (#{version}). Must be 4.39 or greater.
 							This is a not a fatal error, but compiling will not work without latexmk
 							"""
+							error = new Error("latexmk is too old")
+				callback(error)
+
+		checkS3: (callback = (error) ->) ->
+			grunt.log.write "Checking S3 credentials... "
+			try
+				client = knox.createClient({
+					key: settings.s3.key
+					secret: settings.s3.secret
+					bucket: settings.s3.buckets.user_files
+				})
+			catch e
+				grunt.log.error "FAIL."
+				grunt.log.errorlns """
+				Please configure you Amazon S3 credentials in config/settings.development.coffee
+
+				Amazon S3 (Simple Storage Service) is a cloud storage service provided by
+				Amazon. ShareLaTeX uses S3 for storing binary files like images. You can 
+				sign up for an account and find out more at:
+
+				    http://aws.amazon.com/s3/
+                  
+				"""
+				return callback()
+
+			client.getFile "does-not-exist", (error, response) ->
+				unless response? and response.statusCode == 404
+					grunt.log.error "FAIL."
+					grunt.log.errorlns """
+					Could not connect to Amazon S3. Please check your credentials.
+					"""
+				else
+					grunt.log.write "OK."
 				callback()
 
 
