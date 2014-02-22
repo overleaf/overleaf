@@ -10,6 +10,7 @@
     "grunt-bunyan": "~0.5.0",
     "grunt-execute": "~0.1.5",
     "grunt-available-tasks": "~0.4.1",
-    "grunt-concurrent": "~0.4.3"
+    "grunt-concurrent": "~0.4.3",
+    "semver": "~2.2.1"
   }
 }

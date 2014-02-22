@@ -1,7 +1,9 @@
 fs = require "fs"
 spawn = require("child_process").spawn
+exec = require("child_process").exec
 rimraf = require "rimraf"
 Path = require "path"
+semver = require "semver"
 
 SERVICES = [{
 	name: "web"
@@ -61,6 +63,7 @@ module.exports = (grunt) ->
 						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
 						"Config tasks": ["install:config"]
+						"Checks": ["check", "check:redis", "check:latexmk"]
 
 	for service in SERVICES
 		do (service) ->
@@ -82,48 +85,109 @@ module.exports = (grunt) ->
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 	grunt.registerTask 'default', 'run'
 
-Helpers =
-	installService: (repo_src, dir, callback = (error) ->) ->
-		Helpers.cloneGitRepo repo_src, dir, (error) ->
-			return callback(error) if error?
-			Helpers.installNpmModules dir, (error) ->
+	grunt.registerTask "check:redis", "Check that redis is installed and running", () ->
+		Helpers.checkRedis @async()
+	grunt.registerTask "check:latexmk", "Check that latexmk is installed", () ->
+		Helpers.checkLatexmk @async()
+	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk"]
+
+	Helpers =
+		installService: (repo_src, dir, callback = (error) ->) ->
+			Helpers.cloneGitRepo repo_src, dir, (error) ->
 				return callback(error) if error?
-				Helpers.runGruntInstall dir, (error) ->
+				Helpers.installNpmModules dir, (error) ->
 					return callback(error) if error?
+					Helpers.runGruntInstall dir, (error) ->
+						return callback(error) if error?
+						callback()
+
+		updateService: (dir, callback = (error) ->) ->
+			Helpers.updateGitRepo dir, (error) ->
+				return callback(error) if error?
+				Helpers.installNpmModules dir, (error) ->
+					return callback(error) if error?
+					Helpers.runGruntInstall dir, (error) ->
+						return callback(error) if error?
+						callback()
+
+		cloneGitRepo: (repo_src, dir, callback = (error) ->) ->
+			if !fs.existsSync(dir)
+				proc = spawn "git", ["clone", repo_src, dir], stdio: "inherit"
+				proc.on "close", () ->
+					callback()
+			else
+				console.log "#{dir} already installed, skipping."
+				callback()
+
+		updateGitRepo: (dir, callback = (error) ->) ->
+			proc = spawn "git", ["checkout", "master"], cwd: dir, stdio: "inherit"
+			proc.on "close", () ->
+				proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
+				proc.on "close", () ->
 					callback()
 
-	updateService: (dir, callback = (error) ->) ->
-		Helpers.updateGitRepo dir, (error) ->
-			return callback(error) if error?
-			Helpers.installNpmModules dir, (error) ->
-				return callback(error) if error?
-				Helpers.runGruntInstall dir, (error) ->
-					return callback(error) if error?
-					callback()
-
-	cloneGitRepo: (repo_src, dir, callback = (error) ->) ->
-		if !fs.existsSync(dir)
-			proc = spawn "git", ["clone", repo_src, dir], stdio: "inherit"
-			proc.on "close", () ->
-				callback()
-		else
-			console.log "#{dir} already installed, skipping."
-			callback()
-
-	updateGitRepo: (dir, callback = (error) ->) ->
-		proc = spawn "git", ["checkout", "master"], cwd: dir, stdio: "inherit"
-		proc.on "close", () ->
-			proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
+		installNpmModules: (dir, callback = (error) ->) ->
+			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
 
-	installNpmModules: (dir, callback = (error) ->) ->
-		proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
-		proc.on "close", () ->
-			callback()
+		runGruntInstall: (dir, callback = (error) ->) ->
+			proc = spawn "grunt", ["install"], stdio: "inherit", cwd: dir
+			proc.on "close", () ->
+				callback()
 
-	runGruntInstall: (dir, callback = (error) ->) ->
-		proc = spawn "grunt", ["install"], stdio: "inherit", cwd: dir
-		proc.on "close", () ->
-			callback()
+		checkRedis: (callback = (error) ->) ->
+			grunt.log.write "Checking Redis is running... "
+			exec "redis-cli info", (error, stdout, stderr) ->
+				if error? and error.message.match("Could not connect")
+					grunt.log.error "FAIL. Redis is not running"
+					return
+				else if error?
+					return callback(error)
+				else
+					m = stdout.match(/redis_version:(.*)/)
+					if !m?
+						grunt.log.error "FAIL."
+						grunt.log.error "Unknown redis version"
+					else
+						version = m[1]
+						if semver.gt(version, "2.6.0")
+							grunt.log.writeln "OK."
+							grunt.log.writeln "Running Redis version #{version}"
+						else
+							grunt.log.error "FAIL."
+							grunt.log.error "Redis version is too old (#{version}). Must be 2.6.0 or greater."
+				callback()
+
+		checkLatexmk: (callback = (error) ->) ->
+			grunt.log.write "Checking latexmk is installed... "
+			exec "latexmk -version", (error, stdout, stderr) ->
+				if error? and error.message.match("command not found")
+					grunt.log.error "FAIL."
+					grunt.log.errorlns """
+					Either latexmk is not installed or is not in your PATH.
+
+					latexmk comes with TexLive 2013, and must be a version from 2013 or later.
+					This is a not a fatal error, but compiling will not work without latexmk
+					"""
+				else if error?
+					return callback(error)
+				else
+					m = stdout.match(/Version (.*)/)
+					if !m?
+						grunt.log.error "FAIL."
+						grunt.log.error "Unknown latexmk version"
+					else
+						version = m[1]
+						if semver.gt(version + ".0", "4.39.0")
+							grunt.log.writeln "OK."
+							grunt.log.writeln "Running latexmk version #{version}"
+						else
+							grunt.log.error "FAIL."
+							grunt.log.errorlns """
+							latexmk version is too old (#{version}). Must be 4.39 or greater.
+							This is a not a fatal error, but compiling will not work without latexmk
+							"""
+				callback()
+
 

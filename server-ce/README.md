@@ -28,6 +28,11 @@ Next install all the node modules and ShareLaTeX services:
 	$ npm install
 	$ grunt install
 
+Now check that your system is set up correctly to run ShareLaTeX (checks that you have
+the required dependencies installed.) Watch out for any failures.
+
+	$ grunt check
+
 When that has finished, run ShareLaTeX with
 
 	$ grunt run
