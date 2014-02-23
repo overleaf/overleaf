@@ -23,6 +23,9 @@ Next install all the node modules and ShareLaTeX services:
 	$ npm install
 	$ grunt install
 
+This will create a config file in `config/settings.development.coffee`. You should open
+this now and configure your AWS S3 credentials, and other custom settings.
+
 Now check that your system is set up correctly to run ShareLaTeX (checks that you have
 the required dependencies installed.) Watch out for any failures.
 
