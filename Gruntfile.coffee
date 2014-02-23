@@ -77,9 +77,13 @@ module.exports = (grunt) ->
 				Helpers.updateService(service.name, done)
 			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:#{service.name}"]
 
-	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services", ("install:#{service.name}" for service in SERVICES)
+	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
+		Helpers.installConfig @async()
+	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
+		("install:#{service.name}" for service in SERVICES).concat(["install:config"])
 	grunt.registerTask 'install', 'install:all'
-	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services", ("update:#{service.name}" for service in SERVICES)
+	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
+		("update:#{service.name}" for service in SERVICES)
 	grunt.registerTask 'update', 'update:all'
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
 	grunt.registerTask 'run:all', 'run'
@@ -133,6 +137,15 @@ module.exports = (grunt) ->
 		installNpmModules: (dir, callback = (error) ->) ->
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
+				callback()
+
+		installConfig: (callback = (error) ->) ->
+			if !fs.existsSync("config/settings.development.coffee")
+				grunt.log.writeln "Copying example config into config/settings.development.coffee"
+				exec "cp config/settings.development.coffee.example config/settings.development.coffee", (error, stdout, stderr) ->
+					callback(error)
+			else
+				grunt.log.writeln "Config file already exists. Skipping."
 				callback()
 
 		runGruntInstall: (dir, callback = (error) ->) ->
