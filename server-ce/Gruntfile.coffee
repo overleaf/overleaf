@@ -62,10 +62,10 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
-						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install"])
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:config"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
 						"Config tasks": ["install:config"]
-						"Checks": ["check", "check:redis", "check:latexmk"]
+						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
 
 	for service in SERVICES
 		do (service) ->
@@ -80,10 +80,14 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
 		Helpers.installConfig @async()
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
-		("install:#{service.name}" for service in SERVICES).concat(["install:config"])
+		["check:make"].concat(
+			("install:#{service.name}" for service in SERVICES)
+		).concat(["install:config"])
 	grunt.registerTask 'install', 'install:all'
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
-		("update:#{service.name}" for service in SERVICES)
+		["check:make"].concat(
+			("update:#{service.name}" for service in SERVICES)
+		)
 	grunt.registerTask 'update', 'update:all'
 	grunt.registerTask 'run', "Run all of the sharelatex processes", ['concurrent:all']
 	grunt.registerTask 'run:all', 'run'
@@ -97,6 +101,8 @@ module.exports = (grunt) ->
 		Helpers.checkLatexmk @async()
 	grunt.registerTask "check:s3", "Check that Amazon S3 credentials are configured", () ->
 		Helpers.checkS3 @async()
+	grunt.registerTask "check:make", "Check that make is installed", () ->
+		Helpers.checkMake @async()
 	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3"]
 
 	Helpers =
@@ -243,5 +249,27 @@ module.exports = (grunt) ->
 				else
 					grunt.log.write "OK."
 				callback()
+
+		checkMake: (callback = (error) ->) ->
+			grunt.log.write "Checking make is installed... "
+			exec "make --version", (error, stdout, stderr) ->
+				if error? and error.message.match("command not found")
+					grunt.log.error "FAIL."
+					grunt.log.errorlns """
+					Either make is not installed or is not in your path.
+
+					On Ubuntu you can install make with:
+
+					    sudo apt-get install build-essential
+
+					"""
+					return callback(error)
+				else if error?
+					return callback(error)
+				else
+					grunt.log.write "OK."
+					return callback()
+
+
 
 
