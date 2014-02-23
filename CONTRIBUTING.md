@@ -50,5 +50,5 @@ Please do not publish security vulnerabilities publicly until we've had a chance
 to address them. All security related issues/patches should be sent directly to
 security@sharelatex.com where we will attempt to address them quickly. If you're
 unsure whether something is a security issue or not, then please be cautious and
-contact us at security@sharelatex.com first.
+contact us at team@sharelatex.com first.
 
