@@ -136,8 +136,8 @@ module.exports =
 		price: 0
 		features: 
 			collaborators: -1
-			dropbox: true
-			versioning: true
+			dropbox: false
+			versioning: false
 	}]
 
 	# Spelling languages
