@@ -1,0 +1,12 @@
+language: node_js
+
+install:
+    - npm install
+    - grunt install
+
+script: grunt test:unit
+
+services:
+    - redis-server
+    - mongodb
+    
