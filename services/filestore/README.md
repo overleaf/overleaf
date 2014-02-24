@@ -3,6 +3,8 @@ filestore-sharelatex
 
 An API for CRUD operations on binary files stored in S3
 
+[![Build Status](https://travis-ci.org/sharelatex/filestore-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/filestore-sharelatex)
+
 License
 -------
 
