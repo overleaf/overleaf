@@ -12,7 +12,7 @@ Reporting bugs and opening issues
 
 If you'd like a report a bug or open an issue then please:
 
-1. **Find the correct repository.** ShareLaTeX is split across multiple different repositories, each containing a different service (you can find a list of [all repositories here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories), and [all issues here](https://github.com/organizations/sharelatex/dashboard/issues)). If you know the bug only applies to one service, then please open an issue in that repository. For general bugs and issues that span more than one service, please open an issue in the [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
+1. **Find the correct repository.** ShareLaTeX is split across multiple different repositories, each containing a different service (you can find a list of [all repositories here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories)). If you know the bug only applies to one service, then please open an issue in that repository. For general bugs and issues that span more than one service, please open an issue in the [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
 2. **Check if there is an existing issue.** If there is then please add
    any more information that you have, or give it a "+1" in the comments.
 
@@ -33,6 +33,8 @@ to get your changes merged into ShareLaTeX.
 If you've got an idea for a change then please discuss it in the open first, 
 either by opening an issue, or by joining us in our
 [development chat room](http://www.hipchat.com/g1nJMcj7b).
+
+If you're looking for something to work on, then take a look at our [development roadmap](https://github.com/sharelatex/sharelatex/wiki/Development-Roadmap), or have a look at the open issues in any of the repositories listed [here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories).
 
 Developer Chat Room
 -------------------
