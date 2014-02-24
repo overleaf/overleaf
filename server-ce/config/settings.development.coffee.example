@@ -26,7 +26,6 @@ module.exports =
 		secret: ""
 		buckets:
 			# The S3 bucket name to store binary files in
-			# Must contain full url like: <bucketname>.s3.amazonaws.com
 			user_files: ""
 
 	# Databases
