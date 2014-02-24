@@ -4,7 +4,6 @@ exec = require("child_process").exec
 rimraf = require "rimraf"
 Path = require "path"
 semver = require "semver"
-settings = require "settings-sharelatex"
 knox = require "knox"
 
 SERVICES = [{
@@ -220,11 +219,12 @@ module.exports = (grunt) ->
 
 		checkS3: (callback = (error) ->) ->
 			grunt.log.write "Checking S3 credentials... "
+			Settings = require "settings-sharelatex"
 			try
 				client = knox.createClient({
-					key: settings.s3.key
-					secret: settings.s3.secret
-					bucket: settings.s3.buckets.user_files
+					key: Settings.s3.key
+					secret: Settings.s3.secret
+					bucket: Settings.s3.buckets.user_files
 				})
 			catch e
 				grunt.log.error "FAIL."
