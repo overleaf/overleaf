@@ -44,8 +44,9 @@ module.exports = DocOpsManager =
 				callback null, ops
 
 	pushDocOp: (project_id, doc_id, op, callback = (error) ->) ->
-		console.log "PUSHING OP", op
-		RedisManager.pushDocOp doc_id, op, callback
+		RedisManager.pushDocOp doc_id, op, (error) ->
+			return callback(error) if error?
+			RedisManager.pushUncompressedHistoryOp doc_id, op, callback
 
 	_ensureOpsAreLoaded: (project_id, doc_id, backToVersion, callback = (error) ->) ->
 		RedisManager.getDocVersion doc_id, (error, redisVersion) ->

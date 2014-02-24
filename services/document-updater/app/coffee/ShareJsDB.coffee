@@ -23,7 +23,7 @@ module.exports = ShareJsDB =
 	
 	writeOp: (doc_key, opData, callback) ->
 		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-		DocOpsManager.pushDocOp project_id, doc_id, {op:opData.op, meta:opData.meta}, (error, version) ->
+		DocOpsManager.pushDocOp project_id, doc_id, opData, (error, version) ->
 			return callback error if error?
 
 			if version == opData.v + 1

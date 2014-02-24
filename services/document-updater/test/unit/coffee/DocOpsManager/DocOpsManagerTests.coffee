@@ -306,4 +306,24 @@ describe "DocOpsManager", ->
 		it "should return the ops", ->
 			@callback.calledWith(null, @doc.docOps).should.equal true
 
+	describe "pushDocOp", ->
+		beforeEach ->
+			@op = "mock-op"
+			@RedisManager.pushDocOp = sinon.stub().callsArg(2)
+			@RedisManager.pushUncompressedHistoryOp = sinon.stub().callsArg(2)
+			@DocOpsManager.pushDocOp @project_id, @doc_id, @op, @callback
+
+		it "should push the op in to the docOps list", ->
+			@RedisManager.pushDocOp
+				.calledWith(@doc_id, @op)
+				.should.equal true
+
+		it "should push the op into the pushUncompressedHistoryOp", ->
+			@RedisManager.pushUncompressedHistoryOp
+				.calledWith(@doc_id, @op)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
 	
