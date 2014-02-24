@@ -3,6 +3,8 @@ clsi-sharelatex
 
 A web api for compiling LaTeX documents in the cloud
 
+[![Build Status](https://travis-ci.org/sharelatex/clsi-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/clsi-sharelatex)
+
 Installation
 ------------
 
