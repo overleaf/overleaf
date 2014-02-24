@@ -75,25 +75,25 @@ and source code repository. These are all downloaded and set upwhen you run
 
 The different services are:
 
-### [web](https://github.com/sharelatex/web-sharelatex)
+### [web](https://github.com/sharelatex/web-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/web-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/web-sharelatex)
 
 The front facing web server that serves all the HTML pages, CSS and JavaScript
 to the client. Also contains a lot of logic around creating and editing
 projects, and account management.
 
-### [document-updater](https://github.com/sharelatex/document-updater-sharelatex)
+### [document-updater](https://github.com/sharelatex/document-updater-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/document-updater-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/document-updater-sharelatex)
 
 Processes updates that come in from the editor when users modify documents. Ensures that
 the updates are applied in the right order, and that only one operation is modifying
 the document at a time. Also caches the documents in redis for very fast but persistent
 modifications.
 
-### [CLSI](https://github.com/sharelatex/clsi-sharelatex)
+### [CLSI](https://github.com/sharelatex/clsi-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/clsi-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/clsi-sharelatex)
 
 The Common LaTeX Service Interface (CLSI) which provides an API for compiling LaTeX 
 documents.
 
-### [filestore](https://github.com/sharelatex/filestore-sharelatex)
+### [filestore](https://github.com/sharelatex/filestore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/filestore-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/filestore-sharelatex)
 
 An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
 (like images) stored in ShareLaTeX.
