@@ -155,6 +155,10 @@ module.exports =
 		jsonOps = ops.map (op) -> JSON.stringify op
 		rclient.lpush keys.docOps(doc_id: doc_id), jsonOps.reverse(), callback
 
+	pushUncompressedHistoryOp: (doc_id, op, callback = (error) ->) ->
+		jsonOp = JSON.stringify op
+		rclient.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp, callback
+
 	getDocOpsLength: (doc_id, callback = (error, length) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), callback
 

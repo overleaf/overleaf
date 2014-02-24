@@ -8,12 +8,14 @@ DOCLINES = "doclines"
 DOCOPS = "DocOps"
 DOCVERSION = "DocVersion"
 DOCIDSWITHPENDINGUPDATES = "DocsWithPendingUpdates"
+UNCOMPRESSED_HISTORY_OPS = "UncompressedHistoryOps"
 
 module.exports =
 
 	allDocs : ALLDOCSKEY
 	docLines : (op)-> DOCLINES+":"+op.doc_id
 	docOps : (op)-> DOCOPS+":"+op.doc_id
+	uncompressedHistoryOp: (op) -> UNCOMPRESSED_HISTORY_OPS + ":" + op.doc_id
 	docVersion : (op)-> DOCVERSION+":"+op.doc_id
 	projectKey : (op)-> PROJECTKEY+":"+op.doc_id
 	blockingKey : (op)-> BLOCKINGKEY+":"+op.doc_id
