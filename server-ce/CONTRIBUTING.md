@@ -51,3 +51,11 @@ team@sharelatex.com where we will attempt to address them quickly. If you're
 unsure whether something is a security issue or not, then please be cautious and
 contact us at team@sharelatex.com first.
 
+Contributor License Agreement
+-----------------------------
+
+Before we can accept and contributions of code, we need you to agree to our 
+[Contributor License Agreement](https://sharelatex.wufoo.com/forms/sharelatex-contributor-license-agreement/).
+This is to ensure that you own the copyright of your contribution, and that you
+agree to give us a license to use it in both the open source version, and the version
+of ShareLaTeX running at www.sharelatex.com, which may have additional changes.
