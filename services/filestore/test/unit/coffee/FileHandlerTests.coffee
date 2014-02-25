@@ -1,4 +1,3 @@
-
 assert = require("chai").assert
 sinon = require('sinon')
 chai = require('chai')
@@ -11,23 +10,27 @@ describe "FileHandler", ->
 
 	beforeEach ->
 		@settings =
-			filestreamWrapper:"test"
 			s3:
 				buckets:
 					user_files:"user_files"
+		@FsWrapper =
+			getFileStream: sinon.stub()
+			checkIfFileExists: sinon.stub()
+			deleteFile: sinon.stub()
+			deleteDirectory: sinon.stub()
+			sendStreamToS3: sinon.stub()
+			insertFile: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
 		@FileConverter =
 			convert: sinon.stub()
 			thumbnail: sinon.stub()
 			preview: sinon.stub()
-		@keyBuilder = 
+		@keyBuilder =
 			addCachingToKey: sinon.stub()
 			getConvertedFolderKey: sinon.stub()
 		@ImageOptimiser =
 			compressPng: sinon.stub()
-		@FsWrapper = require("../../../app/js/fsWrapper.js")
-		@FsWrapper.selectBackend("test")
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"./fsWrapper":@FsWrapper

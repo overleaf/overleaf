@@ -9,8 +9,12 @@ SandboxedModule = require('sandboxed-module')
 describe "FileController", ->
 
 	beforeEach ->
+		@FsWrapper =
+			sendStreamToS3: sinon.stub()
+			copyFile: sinon.stub()
+			deleteFile:sinon.stub()
+
 		@settings =
-			filestreamWrapper:"test"
 			s3:
 				buckets:
 					user_files:"user_files"
@@ -27,17 +31,15 @@ describe "FileController", ->
 			"logger-sharelatex":
 				log:->
 				err:->
-		@FsWrapper = require("../../../app/js/fsWrapper.js")
-		@FsWrapper.selectBackend("test")
 		@project_id = "project_id"
 		@file_id = "file_id"
 		@bucket = "user_files"
 		@key = "#{@project_id}/#{@file_id}"
-		@req = 
+		@req =
 			key:@key
 			bucket:@bucket
 			query:{}
-			params: 
+			params:
 				project_id:@project_id
 				file_id:@file_id
 		@res =
