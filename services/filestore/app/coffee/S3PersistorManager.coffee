@@ -34,7 +34,7 @@ buildDefaultOptions = (bucketName, method, key)->
 
 module.exports =
 
-	sendFileToS3: (bucketName, key, fsPath, callback)->
+	sendFile: (bucketName, key, fsPath, callback)->
 		s3Client = knox.createClient
 			key: settings.s3.key
 			secret: settings.s3.secret
@@ -57,7 +57,7 @@ module.exports =
 			callback err
 
 
-	sendStreamToS3: (bucketName, key, readStream, callback)->
+	sendStream: (bucketName, key, readStream, callback)->
 		logger.log bucketName:bucketName, key:key, "sending file to s3"
 		readStream.on "error", (err)->
 			logger.err bucketName:bucketName, key:key, "error on stream to send to s3"
@@ -65,7 +65,7 @@ module.exports =
 			if err?
 				logger.err  bucketName:bucketName, key:key, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
 				return callback(err)
-			@sendFileToS3 bucketName, key, fsPath, callback
+			@sendFile bucketName, key, fsPath, callback
 			
 	getFileStream: (bucketName, key, callback = (err, res)->)->
 		logger.log bucketName:bucketName, key:key, "getting file from s3"

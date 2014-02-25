@@ -13,12 +13,12 @@ describe "FileHandler", ->
 			s3:
 				buckets:
 					user_files:"user_files"
-		@FsWrapper =
+		@PersistorManager =
 			getFileStream: sinon.stub()
 			checkIfFileExists: sinon.stub()
 			deleteFile: sinon.stub()
 			deleteDirectory: sinon.stub()
-			sendStreamToS3: sinon.stub()
+			sendStream: sinon.stub()
 			insertFile: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
@@ -33,7 +33,7 @@ describe "FileHandler", ->
 			compressPng: sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
-			"./PersistorManager":@FsWrapper
+			"./PersistorManager":@PersistorManager
 			"./LocalFileWriter":@LocalFileWriter
 			"./FileConverter":@FileConverter
 			"./KeyBuilder": @keyBuilder
@@ -50,33 +50,33 @@ describe "FileHandler", ->
 	describe "insertFile", ->
 		beforeEach ->
 			@stream = {}
-			@FsWrapper.deleteDirectory.callsArgWith(2)
-			@FsWrapper.sendStreamToS3.callsArgWith(3)
+			@PersistorManager.deleteDirectory.callsArgWith(2)
+			@PersistorManager.sendStream.callsArgWith(3)
 
-		it "should send file to s3", (done)->
+		it "should send file to the filestore", (done)->
 			@handler.insertFile @bucket, @key, @stream, =>
-				@FsWrapper.sendStreamToS3.calledWith(@bucket, @key, @stream).should.equal true
+				@PersistorManager.sendStream.calledWith(@bucket, @key, @stream).should.equal true
 				done()
 
 		it "should delete the convetedKey folder", (done)->
 			@keyBuilder.getConvertedFolderKey.returns(@stubbedConvetedKey)
 			@handler.insertFile @bucket, @key, @stream, =>
-				@FsWrapper.deleteDirectory.calledWith(@bucket, @stubbedConvetedKey).should.equal true
+				@PersistorManager.deleteDirectory.calledWith(@bucket, @stubbedConvetedKey).should.equal true
 				done()
 
 	describe "deleteFile", ->
 		beforeEach ->
 			@keyBuilder.getConvertedFolderKey.returns(@stubbedConvetedKey)
-			@FsWrapper.deleteFile.callsArgWith(2)
+			@PersistorManager.deleteFile.callsArgWith(2)
 
-		it "should tell the s3 wrapper to delete the file", (done)->
+		it "should tell the filestore manager to delete the file", (done)->
 			@handler.deleteFile @bucket, @key, =>
-				@FsWrapper.deleteFile.calledWith(@bucket, @key).should.equal true
+				@PersistorManager.deleteFile.calledWith(@bucket, @key).should.equal true
 				done()
 
-		it "should tell the s3 wrapper to delete the cached foler", (done)->
+		it "should tell the filestore manager to delete the cached foler", (done)->
 			@handler.deleteFile @bucket, @key, =>
-				@FsWrapper.deleteFile.calledWith(@bucket, @stubbedConvetedKey).should.equal true
+				@PersistorManager.deleteFile.calledWith(@bucket, @stubbedConvetedKey).should.equal true
 				done()
 
 	describe "getFile", ->
@@ -102,11 +102,11 @@ describe "FileHandler", ->
 
 		beforeEach ->
 			@fileStream = {on:->}
-			@FsWrapper.getFileStream.callsArgWith(2, "err", @fileStream)
+			@PersistorManager.getFileStream.callsArgWith(2, "err", @fileStream)
 
-		it "should get the stream from s3 ", (done)->
+		it "should get the stream", (done)->
 			@handler.getFile @bucket, @key, null, =>
-				@FsWrapper.getFileStream.calledWith(@bucket, @key).should.equal true
+				@PersistorManager.getFileStream.calledWith(@bucket, @key).should.equal true
 				done()
 
 		it "should return the stream and error", (done)->
@@ -118,14 +118,14 @@ describe "FileHandler", ->
 	describe "_getConvertedFile", ->
 
 		it "should getFileStream if it does exists", (done)->
-			@FsWrapper.checkIfFileExists.callsArgWith(2, null, true)
-			@FsWrapper.getFileStream.callsArgWith(2)
+			@PersistorManager.checkIfFileExists.callsArgWith(2, null, true)
+			@PersistorManager.getFileStream.callsArgWith(2)
 			@handler._getConvertedFile @bucket, @key, {}, =>
-				@FsWrapper.getFileStream.calledWith(@bucket).should.equal true
+				@PersistorManager.getFileStream.calledWith(@bucket).should.equal true
 				done()
 
 		it "should call _getConvertedFileAndCache if it does exists", (done)->
-			@FsWrapper.checkIfFileExists.callsArgWith(2, null, false)
+			@PersistorManager.checkIfFileExists.callsArgWith(2, null, false)
 			@handler._getConvertedFileAndCache = sinon.stub().callsArgWith(4)
 			@handler._getConvertedFile @bucket, @key, {}, =>
 				@handler._getConvertedFileAndCache.calledWith(@bucket, @key).should.equal true
@@ -134,15 +134,15 @@ describe "FileHandler", ->
 	describe "_getConvertedFileAndCache", ->
 
 		it "should _convertFile ", (done)->
-			@FsWrapper.sendFileToS3 = sinon.stub().callsArgWith(3)
-			@FsWrapper.getFileStream = sinon.stub().callsArgWith(2)
+			@PersistorManager.sendFile = sinon.stub().callsArgWith(3)
+			@PersistorManager.getFileStream = sinon.stub().callsArgWith(2)
 			@convetedKey = @key+"converted"
 			@handler._convertFile = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@ImageOptimiser.compressPng = sinon.stub().callsArgWith(1)
 			@handler._getConvertedFileAndCache @bucket, @key, @convetedKey, {}, =>
 				@handler._convertFile.called.should.equal true
-				@FsWrapper.sendFileToS3.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
-				@FsWrapper.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
+				@PersistorManager.sendFile.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
+				@PersistorManager.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
 				@ImageOptimiser.compressPng.calledWith(@stubbedPath).should.equal true
 				done()
 
