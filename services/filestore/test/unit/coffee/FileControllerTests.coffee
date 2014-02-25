@@ -9,9 +9,8 @@ SandboxedModule = require('sandboxed-module')
 describe "FileController", ->
 
 	beforeEach ->
-		@s3Wrapper = 
+		@FsWrapper =
 			sendStreamToS3: sinon.stub()
-			getAndPipe: sinon.stub()
 			copyFile: sinon.stub()
 			deleteFile:sinon.stub()
 
@@ -27,7 +26,7 @@ describe "FileController", ->
 		@controller = SandboxedModule.require modulePath, requires:
 			"./LocalFileWriter":@LocalFileWriter
 			"./FileHandler": @FileHandler
-			"./s3Wrapper":@s3Wrapper
+			"./fsWrapper":@FsWrapper
 			"settings-sharelatex": @settings
 			"logger-sharelatex":
 				log:->
@@ -36,14 +35,14 @@ describe "FileController", ->
 		@file_id = "file_id"
 		@bucket = "user_files"
 		@key = "#{@project_id}/#{@file_id}"
-		@req = 
+		@req =
 			key:@key
 			bucket:@bucket
 			query:{}
-			params: 
+			params:
 				project_id:@project_id
 				file_id:@file_id
-		@res = 
+		@res =
 			setHeader: ->
 		@fileStream = {}
 
@@ -74,7 +73,7 @@ describe "FileController", ->
 
 	describe "insertFile", ->
 
-		it "should send bucket name key and res to s3Wrapper", (done)->
+		it "should send bucket name key and res to FsWrapper", (done)->
 			@FileHandler.insertFile.callsArgWith(3)
 			@res.send = =>
 				@FileHandler.insertFile.calledWith(@bucket, @key, @req).should.equal true
@@ -91,17 +90,17 @@ describe "FileController", ->
 					project_id: @oldProject_id
 					file_id: @oldFile_id
 
-		it "should send bucket name and both keys to s3Wrapper", (done)->
-			@s3Wrapper.copyFile.callsArgWith(3)
+		it "should send bucket name and both keys to FsWrapper", (done)->
+			@FsWrapper.copyFile.callsArgWith(3)
 			@res.send = (code)=>
 				code.should.equal 200
-				@s3Wrapper.copyFile.calledWith(@bucket, "#{@oldProject_id}/#{@oldFile_id}", @key).should.equal true
+				@FsWrapper.copyFile.calledWith(@bucket, "#{@oldProject_id}/#{@oldFile_id}", @key).should.equal true
 				done()
 			@controller.copyFile @req, @res
 
 
 		it "should send a 500 if there was an error", (done)->
-			@s3Wrapper.copyFile.callsArgWith(3, "error")
+			@FsWrapper.copyFile.callsArgWith(3, "error")
 			@res.send = (code)=>
 				code.should.equal 500
 				done()
