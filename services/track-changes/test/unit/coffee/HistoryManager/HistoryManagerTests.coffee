@@ -29,8 +29,8 @@ describe "HistoryManager", ->
 
 	describe "when there is no compressed history to begin with", ->
 		beforeEach ->
-			@rawUpdates = ["mock-raw-op-1", "mock-raw-op-2"]
-			@compressedUpdates = ["mock-compressed-op"]
+			@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+			@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 			@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
 			@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
@@ -57,31 +57,55 @@ describe "HistoryManager", ->
 
 	describe "when the raw ops need appending to existing history", ->
 		beforeEach ->
-			@rawUpdates = ["mock-raw-op-1", "mock-raw-op-2"]
-			@lastCompressedUpdate = "mock-last-compressed-op-0"
-			@compressedUpdates = ["mock-compressed-op-1"]
+			@lastCompressedUpdate = { v: 11, op: "compressed-op-11" }
+			@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 			@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
 			@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
 			@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-			@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
-		it "should try to pop the last compressed op", ->
-			@MongoManager.popLastCompressedUpdate
-				.calledWith(@doc_id)
-				.should.equal true
-		
-		it "should compress the last compressed op and the raw ops", ->
-			@UpdateCompressor.compressRawUpdates
-				.calledWith(@lastCompressedUpdate, @rawUpdates)
-				.should.equal true
-		
-		it "should save the compressed ops", ->
-			@MongoManager.insertCompressedUpdates
-				.calledWith(@doc_id, @compressedUpdates)
-				.should.equal true
+		describe "when the raw ops start where the existing history ends", ->
+			beforeEach ->
+				@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
-		
+			it "should try to pop the last compressed op", ->
+				@MongoManager.popLastCompressedUpdate
+					.calledWith(@doc_id)
+					.should.equal true
+			
+			it "should compress the last compressed op and the raw ops", ->
+				@UpdateCompressor.compressRawUpdates
+					.calledWith(@lastCompressedUpdate, @rawUpdates)
+					.should.equal true
+			
+			it "should save the compressed ops", ->
+				@MongoManager.insertCompressedUpdates
+					.calledWith(@doc_id, @compressedUpdates)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when some raw ops are passed that have already been compressed", ->
+			beforeEach ->
+				@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+
+				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+
+			it "should only compress the more recent raw ops", ->
+				@UpdateCompressor.compressRawUpdates
+					.calledWith(@lastCompressedUpdate, @rawUpdates.slice(-2))
+					.should.equal true
+
+		describe "when the raw ops do not follow from the last compressed op version", ->
+			beforeEach ->
+				@rawUpdates = [{ v: 13, op: "mock-op-13" }]
+				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+
+			it "should call the callback with an error", ->
+				@callback
+					.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
+					.should.equal true
+
 
