@@ -15,13 +15,17 @@ them quickly.
 
 First, check out a local copy of this repository:
 
-	$ git clone https://github.com/sharelatex/sharelatex.git
-	$ cd sharelatex
+```bash
+git clone https://github.com/sharelatex/sharelatex.git
+cd sharelatex
+```
 
 Next install all the node modules and ShareLaTeX services:
 
-	$ npm install
-	$ grunt install
+```bash
+npm install
+grunt install
+```
 
 This will create a config file in `config/settings.development.coffee`. You should open
 this now and configure your AWS S3 credentials, and other custom settings.
@@ -29,11 +33,15 @@ this now and configure your AWS S3 credentials, and other custom settings.
 Now check that your system is set up correctly to run ShareLaTeX (checks that you have
 the required dependencies installed.) Watch out for any failures.
 
-	$ grunt check --force
+```bash
+grunt check --force
+```
 
 When that has finished, run ShareLaTeX with
 
-	$ grunt run
+```bash
+grunt run
+```
 
 ShareLaTeX should now be running at http://localhost:3000.
 
@@ -47,12 +55,12 @@ ShareLaTeX should run on OS X and Linux. You need:
 * A local instance of [Redis](http://redis.io/) (version 2.6 or later) and [MongoDB](http://www.mongodb.org/) running on their standard ports.
 * An up to date version of [TeXLive](https://www.tug.org/texlive/), with the `latexmk` program installed. You need latexmk from TeXLive 2013 (or the later). If you're on an older version, or aren't sure, then the following commands will install the latest version locally:
 
-  ```bash
-  $ mkdir ~/bin 
-  $ curl http://mirror.physik-pool.tu-berlin.de/tex-archive/support/latexmk/latexmk.pl > ~/bin/latexmk
-  $ chmod a+x ~/bin/latexmk
-  $ export PATH=~/bin:$PATH
-  ```
+```bash
+mkdir ~/bin 
+curl http://mirror.physik-pool.tu-berlin.de/tex-archive/support/latexmk/latexmk.pl > ~/bin/latexmk
+chmod a+x ~/bin/latexmk
+export PATH=~/bin:$PATH
+```
 
 Config
 ------
@@ -64,7 +72,9 @@ which can be done by editing the file at `config/settings.development.coffee`
 A local settings file can be specified by setting the `SHARELATEX_CONFIG` environment variable
 to point to your own settings file. E.g.
 
-	$ export SHARELATEX_CONFIG=/home/james/config/settings.development.coffee
+```bash
+export SHARELATEX_CONFIG=/home/james/config/settings.development.coffee
+```
 
 Other repositories
 ------------------
