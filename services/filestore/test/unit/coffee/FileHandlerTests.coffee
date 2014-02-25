@@ -11,16 +11,10 @@ describe "FileHandler", ->
 
 	beforeEach ->
 		@settings =
+			filestreamWrapper:"test"
 			s3:
 				buckets:
 					user_files:"user_files"
-		@s3Wrapper = 
-			getFileStream: sinon.stub()
-			checkIfFileExists: sinon.stub()
-			deleteFile: sinon.stub()
-			deleteDirectory: sinon.stub()
-			sendStreamToS3: sinon.stub()
-			insertFile: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
 		@FileConverter =
@@ -32,9 +26,11 @@ describe "FileHandler", ->
 			getConvertedFolderKey: sinon.stub()
 		@ImageOptimiser =
 			compressPng: sinon.stub()
+		@FsWrapper = require("../../../app/js/fsWrapper.js")
+		@FsWrapper.selectBackend("test")
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
-			"./fsWrapper":@s3Wrapper
+			"./fsWrapper":@FsWrapper
 			"./LocalFileWriter":@LocalFileWriter
 			"./FileConverter":@FileConverter
 			"./KeyBuilder": @keyBuilder
@@ -51,33 +47,33 @@ describe "FileHandler", ->
 	describe "insertFile", ->
 		beforeEach ->
 			@stream = {}
-			@s3Wrapper.deleteDirectory.callsArgWith(2)
-			@s3Wrapper.sendStreamToS3.callsArgWith(3)
+			@FsWrapper.deleteDirectory.callsArgWith(2)
+			@FsWrapper.sendStreamToS3.callsArgWith(3)
 
 		it "should send file to s3", (done)->
 			@handler.insertFile @bucket, @key, @stream, =>
-				@s3Wrapper.sendStreamToS3.calledWith(@bucket, @key, @stream).should.equal true
+				@FsWrapper.sendStreamToS3.calledWith(@bucket, @key, @stream).should.equal true
 				done()
 
 		it "should delete the convetedKey folder", (done)->
 			@keyBuilder.getConvertedFolderKey.returns(@stubbedConvetedKey)
 			@handler.insertFile @bucket, @key, @stream, =>
-				@s3Wrapper.deleteDirectory.calledWith(@bucket, @stubbedConvetedKey).should.equal true
+				@FsWrapper.deleteDirectory.calledWith(@bucket, @stubbedConvetedKey).should.equal true
 				done()
 
 	describe "deleteFile", ->
 		beforeEach ->
 			@keyBuilder.getConvertedFolderKey.returns(@stubbedConvetedKey)
-			@s3Wrapper.deleteFile.callsArgWith(2)
+			@FsWrapper.deleteFile.callsArgWith(2)
 
 		it "should tell the s3 wrapper to delete the file", (done)->
 			@handler.deleteFile @bucket, @key, =>
-				@s3Wrapper.deleteFile.calledWith(@bucket, @key).should.equal true
+				@FsWrapper.deleteFile.calledWith(@bucket, @key).should.equal true
 				done()
 
 		it "should tell the s3 wrapper to delete the cached foler", (done)->
 			@handler.deleteFile @bucket, @key, =>
-				@s3Wrapper.deleteFile.calledWith(@bucket, @stubbedConvetedKey).should.equal true
+				@FsWrapper.deleteFile.calledWith(@bucket, @stubbedConvetedKey).should.equal true
 				done()
 
 	describe "getFile", ->
@@ -103,11 +99,11 @@ describe "FileHandler", ->
 
 		beforeEach ->
 			@fileStream = {on:->}
-			@s3Wrapper.getFileStream.callsArgWith(2, "err", @fileStream)
+			@FsWrapper.getFileStream.callsArgWith(2, "err", @fileStream)
 
 		it "should get the stream from s3 ", (done)->
 			@handler.getFile @bucket, @key, null, =>
-				@s3Wrapper.getFileStream.calledWith(@bucket, @key).should.equal true
+				@FsWrapper.getFileStream.calledWith(@bucket, @key).should.equal true
 				done()
 
 		it "should return the stream and error", (done)->
@@ -119,14 +115,14 @@ describe "FileHandler", ->
 	describe "_getConvertedFile", ->
 
 		it "should getFileStream if it does exists", (done)->
-			@s3Wrapper.checkIfFileExists.callsArgWith(2, null, true)
-			@s3Wrapper.getFileStream.callsArgWith(2)
+			@FsWrapper.checkIfFileExists.callsArgWith(2, null, true)
+			@FsWrapper.getFileStream.callsArgWith(2)
 			@handler._getConvertedFile @bucket, @key, {}, =>
-				@s3Wrapper.getFileStream.calledWith(@bucket).should.equal true
+				@FsWrapper.getFileStream.calledWith(@bucket).should.equal true
 				done()
 
 		it "should call _getConvertedFileAndCache if it does exists", (done)->
-			@s3Wrapper.checkIfFileExists.callsArgWith(2, null, false)
+			@FsWrapper.checkIfFileExists.callsArgWith(2, null, false)
 			@handler._getConvertedFileAndCache = sinon.stub().callsArgWith(4)
 			@handler._getConvertedFile @bucket, @key, {}, =>
 				@handler._getConvertedFileAndCache.calledWith(@bucket, @key).should.equal true
@@ -135,15 +131,15 @@ describe "FileHandler", ->
 	describe "_getConvertedFileAndCache", ->
 
 		it "should _convertFile ", (done)->
-			@s3Wrapper.sendFileToS3 = sinon.stub().callsArgWith(3)
-			@s3Wrapper.getFileStream = sinon.stub().callsArgWith(2)
+			@FsWrapper.sendFileToS3 = sinon.stub().callsArgWith(3)
+			@FsWrapper.getFileStream = sinon.stub().callsArgWith(2)
 			@convetedKey = @key+"converted"
 			@handler._convertFile = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@ImageOptimiser.compressPng = sinon.stub().callsArgWith(1)
 			@handler._getConvertedFileAndCache @bucket, @key, @convetedKey, {}, =>
 				@handler._convertFile.called.should.equal true
-				@s3Wrapper.sendFileToS3.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
-				@s3Wrapper.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
+				@FsWrapper.sendFileToS3.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
+				@FsWrapper.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
 				@ImageOptimiser.compressPng.calledWith(@stubbedPath).should.equal true
 				done()
 

@@ -1,9 +1,19 @@
 settings = require("settings-sharelatex")
-wrappedFs = switch settings.filestoreWrapper
-	when "s3" then require("./s3Wrapper")
-	else null
+logger = require("logger-sharelatex")
+s3Wrapper = require("./s3Wrapper")
+testWrapper = require("./testWrapper")
 
-if !wrappedFs
-	throw new Error( "Unknown filestore wrapper #{settings.filestoreWrapper}" )
+module.exports =
+	selectBackend: (backend) ->
+		wrappedFs = switch backend
+			when "s3" then s3Wrapper
+			when "test" then testWrapper
+			else null
 
-module.exports[name] = method for name,method of wrappedFs
+		if !wrappedFs
+			throw new Error( "Unknown filestore wrapper #{backend}" )
+
+		module.exports[name] = method for name,method of wrappedFs
+
+if settings.fileStoreWrapper?
+	module.exports.selectBackend(settings.fileStoreWrapper)
