@@ -2,6 +2,9 @@
   "name": "sharelatex",
   "version": "0.0.1",
   "description": "An online collaborative LaTeX editor",
+  "scripts": {
+    "preinstall": "npm install -g grunt-cli"
+  }
   "dependencies": {
     "rimraf": "~2.2.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git"
