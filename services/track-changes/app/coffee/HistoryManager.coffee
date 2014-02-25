@@ -1,4 +1,5 @@
 MongoManager = require "./MongoManager"
+RedisManager = require "./RedisManager"
 UpdateCompressor = require "./UpdateCompressor"
 logger = require "logger-sharelatex"
 
@@ -26,9 +27,15 @@ module.exports = HistoryManager =
 				logger.log doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
 				callback()
 
+	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (doc_id, callback = (error) ->) ->
-		# Get lock - here or elsewhere?
-		# Get batch from Redis left hand side (oldest)
-		# pass batch to compressAndSaveRawUpdates
-		# Delete batch from redis
-		# release lock
+		RedisManager.getOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
+			return callback(error) if error?
+			HistoryManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
+				return callback(error) if error?
+				RedisManager.deleteOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error) ->
+					return callback(error) if error?
+					callback()
+
+	processUncompressUpdatesWithLock: (doc_id, callback = (error) ->) ->
+

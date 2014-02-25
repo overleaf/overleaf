@@ -10,63 +10,33 @@ describe "HistoryManager", ->
 		@HistoryManager = SandboxedModule.require modulePath, requires:
 			"./UpdateCompressor": @UpdateCompressor = {}
 			"./MongoManager" : @MongoManager = {}
+			"./RedisManager" : @RedisManager = {}
 			"logger-sharelatex": { log: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@callback = sinon.stub()
 
-	describe "when there are no raw ops", ->
-		beforeEach ->
-			@MongoManager.popLastCompressedUpdate = sinon.stub()
-			@MongoManager.insertCompressedUpdates = sinon.stub()
-			@HistoryManager.compressAndSaveRawUpdates @doc_id, [], @callback
+	describe "compressAndSaveRawUpdates", ->
+		describe "when there are no raw ops", ->
+			beforeEach ->
+				@MongoManager.popLastCompressedUpdate = sinon.stub()
+				@MongoManager.insertCompressedUpdates = sinon.stub()
+				@HistoryManager.compressAndSaveRawUpdates @doc_id, [], @callback
 
-		it "should not need to access the database", ->
-			@MongoManager.popLastCompressedUpdate.called.should.equal false
-			@MongoManager.insertCompressedUpdates.called.should.equal false
+			it "should not need to access the database", ->
+				@MongoManager.popLastCompressedUpdate.called.should.equal false
+				@MongoManager.insertCompressedUpdates.called.should.equal false
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
-	describe "when there is no compressed history to begin with", ->
-		beforeEach ->
-			@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
-			@compressedUpdates = { v: 13, op: "compressed-op-12" }
-
-			@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
-			@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
-			@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-			@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
-
-		it "should try to pop the last compressed op", ->
-			@MongoManager.popLastCompressedUpdate
-				.calledWith(@doc_id)
-				.should.equal true
-		
-		it "should compress the raw ops", ->
-			@UpdateCompressor.compressRawUpdates
-				.calledWith(null, @rawUpdates)
-				.should.equal true
-		
-		it "should save the compressed ops", ->
-			@MongoManager.insertCompressedUpdates
-				.calledWith(@doc_id, @compressedUpdates)
-				.should.equal true
-
-		it "should call the callback", ->
-			@callback.called.should.equal true
-
-	describe "when the raw ops need appending to existing history", ->
-		beforeEach ->
-			@lastCompressedUpdate = { v: 11, op: "compressed-op-11" }
-			@compressedUpdates = { v: 13, op: "compressed-op-12" }
-
-			@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
-			@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
-			@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-
-		describe "when the raw ops start where the existing history ends", ->
+		describe "when there is no compressed history to begin with", ->
 			beforeEach ->
 				@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+				@compressedUpdates = { v: 13, op: "compressed-op-12" }
+
+				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
+				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
 			it "should try to pop the last compressed op", ->
@@ -74,9 +44,9 @@ describe "HistoryManager", ->
 					.calledWith(@doc_id)
 					.should.equal true
 			
-			it "should compress the last compressed op and the raw ops", ->
+			it "should compress the raw ops", ->
 				@UpdateCompressor.compressRawUpdates
-					.calledWith(@lastCompressedUpdate, @rawUpdates)
+					.calledWith(null, @rawUpdates)
 					.should.equal true
 			
 			it "should save the compressed ops", ->
@@ -87,25 +57,83 @@ describe "HistoryManager", ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-		describe "when some raw ops are passed that have already been compressed", ->
+		describe "when the raw ops need appending to existing history", ->
 			beforeEach ->
-				@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+				@lastCompressedUpdate = { v: 11, op: "compressed-op-11" }
+				@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
-				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
+				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
-			it "should only compress the more recent raw ops", ->
-				@UpdateCompressor.compressRawUpdates
-					.calledWith(@lastCompressedUpdate, @rawUpdates.slice(-2))
-					.should.equal true
+			describe "when the raw ops start where the existing history ends", ->
+				beforeEach ->
+					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
-		describe "when the raw ops do not follow from the last compressed op version", ->
-			beforeEach ->
-				@rawUpdates = [{ v: 13, op: "mock-op-13" }]
-				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+				it "should try to pop the last compressed op", ->
+					@MongoManager.popLastCompressedUpdate
+						.calledWith(@doc_id)
+						.should.equal true
+				
+				it "should compress the last compressed op and the raw ops", ->
+					@UpdateCompressor.compressRawUpdates
+						.calledWith(@lastCompressedUpdate, @rawUpdates)
+						.should.equal true
+				
+				it "should save the compressed ops", ->
+					@MongoManager.insertCompressedUpdates
+						.calledWith(@doc_id, @compressedUpdates)
+						.should.equal true
 
-			it "should call the callback with an error", ->
-				@callback
-					.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
-					.should.equal true
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+			describe "when some raw ops are passed that have already been compressed", ->
+				beforeEach ->
+					@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+
+					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+
+				it "should only compress the more recent raw ops", ->
+					@UpdateCompressor.compressRawUpdates
+						.calledWith(@lastCompressedUpdate, @rawUpdates.slice(-2))
+						.should.equal true
+
+			describe "when the raw ops do not follow from the last compressed op version", ->
+				beforeEach ->
+					@rawUpdates = [{ v: 13, op: "mock-op-13" }]
+					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+
+				it "should call the callback with an error", ->
+					@callback
+						.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
+						.should.equal true
+
+	describe "processUncompressedUpdates", ->
+		beforeEach ->
+			@updates = ["mock-update"]
+			@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+			@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
+			@HistoryManager.processUncompressedUpdates @doc_id, @callback
+
+		it "should get the oldest updates", ->
+			@RedisManager.getOldestRawUpdates
+				.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+				.should.equal true
+
+		it "should compress and save the updates", ->
+			@HistoryManager.compressAndSaveRawUpdates
+				.calledWith(@doc_id, @updates)
+				.should.equal true
+
+		it "should delete the batch of uncompressed updates that was just processed", ->
+			@RedisManager.deleteOldestRawUpdates
+				.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
 
 
