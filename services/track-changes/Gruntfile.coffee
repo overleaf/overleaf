@@ -5,8 +5,14 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
 	
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
+
 		execute:
 			app:
 				src: "app.js"

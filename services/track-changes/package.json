@@ -21,6 +21,7 @@
     "grunt-available-tasks": "~0.4.2",
     "grunt-contrib-coffee": "~0.10.1",
     "bunyan": "~0.22.1",
-    "grunt-bunyan": "~0.5.0"
+    "grunt-bunyan": "~0.5.0",
+    "grunt-forever": "~0.4.2"
   }
 }
