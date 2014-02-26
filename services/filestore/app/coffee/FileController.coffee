@@ -1,4 +1,4 @@
-fsWrapper = require("./fsWrapper")
+PersistorManager = require("./PersistorManager")
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 FileHandler = require("./FileHandler")
@@ -37,7 +37,7 @@ module.exports =
 		oldProject_id = req.body.source.project_id
 		oldFile_id = req.body.source.file_id
 		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "reciving request to copy file"
-		fsWrapper.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
+		PersistorManager.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
 			if err? 
 				logger.log err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "something went wrong copying file"
 				res.send 500

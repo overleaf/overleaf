@@ -4,11 +4,11 @@ sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
 expect = chai.expect
-modulePath = "../../../app/js/fsWrapper.js"
+modulePath = "../../../app/js/PersistorManager.js"
 SandboxedModule = require('sandboxed-module')
 
 
-describe "fsWrapperTests", ->
+describe "PersistorManagerTests", ->
 
 	beforeEach ->
 		@s3Wrapper =
@@ -29,36 +29,36 @@ describe "fsWrapperTests", ->
 				"logger-sharelatex":
 					log:->
 					err:->
-			@fsWrapper = SandboxedModule.require modulePath, requires: @requires
+			@PersistorManager = SandboxedModule.require modulePath, requires: @requires
 
 		it "should load getFileStream", (done) ->
-			@fsWrapper.should.respondTo("getFileStream")
-			@fsWrapper.getFileStream()
+			@PersistorManager.should.respondTo("getFileStream")
+			@PersistorManager.getFileStream()
 			@s3Wrapper.getFileStream.calledOnce.should.equal true
 			done()
 
 		it "should load checkIfFileExists", (done) ->
-			@fsWrapper.checkIfFileExists()
+			@PersistorManager.checkIfFileExists()
 			@s3Wrapper.checkIfFileExists.calledOnce.should.equal true
 			done()
 
 		it "should load deleteFile", (done) ->
-			@fsWrapper.deleteFile()
+			@PersistorManager.deleteFile()
 			@s3Wrapper.deleteFile.calledOnce.should.equal true
 			done()
 
 		it "should load deleteDirectory", (done) ->
-			@fsWrapper.deleteDirectory()
+			@PersistorManager.deleteDirectory()
 			@s3Wrapper.deleteDirectory.calledOnce.should.equal true
 			done()
 
 		it "should load sendStreamToS3", (done) ->
-			@fsWrapper.sendStreamToS3()
+			@PersistorManager.sendStreamToS3()
 			@s3Wrapper.sendStreamToS3.calledOnce.should.equal true
 			done()
 
 		it "should load insertFile", (done) ->
-			@fsWrapper.insertFile()
+			@PersistorManager.insertFile()
 			@s3Wrapper.insertFile.calledOnce.should.equal true
 			done()
 
@@ -73,7 +73,7 @@ describe "fsWrapperTests", ->
 					log:->
 					err:->
 			try
-				@fsWrapper=SandboxedModule.require modulePath, requires: @requires
+				@PersistorManager=SandboxedModule.require modulePath, requires: @requires
 			catch error
 				assert.equal("Unknown filestore backend: null",error.message)
 			done()
@@ -88,7 +88,7 @@ describe "fsWrapperTests", ->
 					log:->
 					err:->
 			try
-				@fsWrapper=SandboxedModule.require modulePath, requires: @requires
+				@PersistorManager=SandboxedModule.require modulePath, requires: @requires
 			catch error
 				assert.equal("Unknown filestore backend: magic",error.message)
 			done()

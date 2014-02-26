@@ -33,7 +33,7 @@ describe "FileHandler", ->
 			compressPng: sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
-			"./fsWrapper":@FsWrapper
+			"./PersistorManager":@FsWrapper
 			"./LocalFileWriter":@LocalFileWriter
 			"./FileConverter":@FileConverter
 			"./KeyBuilder": @keyBuilder

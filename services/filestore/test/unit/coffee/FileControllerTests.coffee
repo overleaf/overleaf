@@ -26,7 +26,7 @@ describe "FileController", ->
 		@controller = SandboxedModule.require modulePath, requires:
 			"./LocalFileWriter":@LocalFileWriter
 			"./FileHandler": @FileHandler
-			"./fsWrapper":@FsWrapper
+			"./PersistorManager":@FsWrapper
 			"settings-sharelatex": @settings
 			"logger-sharelatex":
 				log:->
