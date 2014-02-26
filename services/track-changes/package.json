@@ -10,6 +10,7 @@
     "mongojs": "~0.9.11",
     "settings": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
     "logger": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
-    "request": "~2.33.0"
+    "request": "~2.33.0",
+    "redis": "~0.10.1"
   }
 }

@@ -176,15 +176,14 @@ describe "HistoryManager", ->
 
 	describe "processCompressedUpdatesWithLock", ->
 		beforeEach ->
-			@HistoryManager.processUncompressedUpdates = sinon.stub()
+			@HistoryManager.processUncompressedUpdates = sinon.stub().callsArg(2)
 			@LockManager.runWithLock = sinon.stub().callsArg(2)
 			@HistoryManager.processUncompressedUpdatesWithLock @doc_id, @callback
 
 		it "should run processUncompressedUpdates with the lock", ->
 			@LockManager.runWithLock
 				.calledWith(
-					"HistoryLock:#{@doc_id}",
-					@HistoryManager.processUncompressedUpdates
+					"HistoryLock:#{@doc_id}"
 				)
 				.should.equal true
 

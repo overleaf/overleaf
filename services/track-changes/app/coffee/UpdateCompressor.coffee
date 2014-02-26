@@ -26,6 +26,7 @@ module.exports = UpdateCompressor =
 						start_ts: update.meta.start_ts or update.meta.ts
 						end_ts:   update.meta.end_ts   or update.meta.ts
 						user_id:  update.meta.user_id
+					v: update.v
 		return normalizedUpdates
 
 	compressRawUpdates: (lastPreviousUpdate, rawUpdates) ->
@@ -56,12 +57,14 @@ module.exports = UpdateCompressor =
 				user_id:  firstUpdate.meta.user_id or null
 				start_ts: firstUpdate.meta.start_ts or firstUpdate.meta.ts
 				end_ts:   firstUpdate.meta.end_ts   or firstUpdate.meta.ts
+			v: firstUpdate.v
 		secondUpdate =
 			op: secondUpdate.op
 			meta:
 				user_id:  secondUpdate.meta.user_id or null
 				start_ts: secondUpdate.meta.start_ts or secondUpdate.meta.ts
 				end_ts:   secondUpdate.meta.end_ts   or secondUpdate.meta.ts
+			v: secondUpdate.v
 
 		if firstUpdate.meta.user_id != secondUpdate.meta.user_id
 			return [firstUpdate, secondUpdate]
@@ -81,6 +84,7 @@ module.exports = UpdateCompressor =
 				op:
 					p: firstOp.p
 					i: strInject(firstOp.i, secondOp.p - firstOp.p, secondOp.i)
+				v: secondUpdate.v
 			]
 		# Two deletes
 		else if firstOp.d? and secondOp.d? and secondOp.p <= firstOp.p <= (secondOp.p + secondOp.d.length)
@@ -92,6 +96,7 @@ module.exports = UpdateCompressor =
 				op:
 					p: secondOp.p
 					d: strInject(secondOp.d, firstOp.p - secondOp.p, firstOp.d)
+				v: secondUpdate.v
 			]
 		# An insert and then a delete
 		else if firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
@@ -99,7 +104,6 @@ module.exports = UpdateCompressor =
 			insertedText = firstOp.i.slice(offset, offset + secondOp.d.length)
 			if insertedText == secondOp.d
 				insert = strRemove(firstOp.i, offset, secondOp.d.length)
-				return [] if insert == ""
 				return [
 					meta:
 						start_ts: firstUpdate.meta.start_ts
@@ -108,6 +112,7 @@ module.exports = UpdateCompressor =
 					op:
 						p: firstOp.p
 						i: insert
+					v: secondUpdate.v
 				]
 			else
 				# This shouldn't be possible!

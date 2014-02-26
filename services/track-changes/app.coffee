@@ -6,11 +6,13 @@ HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()
 
+app.use express.logger()
+
 app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
-	req.send 500
+	res.send 500
 
 port = Settings.internal?.history?.port or 3014
 host = Settings.internal?.history?.host or "localhost"

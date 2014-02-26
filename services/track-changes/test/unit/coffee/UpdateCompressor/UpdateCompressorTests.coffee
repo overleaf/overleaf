@@ -18,19 +18,24 @@ describe "UpdateCompressor", ->
 			expect(@UpdateCompressor.convertRawUpdatesToCompressedFormat [{
 				op:   [ @op1 = { p: 0, i: "Foo" }, @op2 = { p: 6, i: "bar"} ]
 				meta: { ts: @ts1, user_id: @user_id }
+				v: 42
 			}, {
 				op:   [ @op3 = { p: 10, i: "baz" } ]
 				meta: { ts: @ts2, user_id: @other_user_id }
+				v: 43
 			}])
 			.to.deep.equal [{
 				op: @op1,
-				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
 			}, {
 				op: @op2,
-				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
 			}, {
 				op: @op3,
-				meta: { start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id }
+				meta: { start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id },
+				v: 43
 			}]
 
 	describe "compress", ->
@@ -39,42 +44,52 @@ describe "UpdateCompressor", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 6, i: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "foobar" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 			it "should insert one insert inside the other", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 5, i: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "fobaro" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 			it "should not append separated inserts", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, i: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "foo" }
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, i: "bar" }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 		describe "delete - delete", ->
@@ -82,42 +97,52 @@ describe "UpdateCompressor", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, d: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 3, d: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, d: "foobar" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 				
 			it "should insert one delete inside the other", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, d: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 1, d: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 1, d: "bafoor" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 				
 			it "should not append separated deletes", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, d: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, d: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, d: "foo" }
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, d: "bar" }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 		describe "insert - delete", ->
@@ -125,52 +150,68 @@ describe "UpdateCompressor", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 5, d: "o" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "fo" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 				
 			it "should remove part of an insert from the middle", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "fobaro" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 5, d: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "foo" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 			it "should cancel out two opposite updates", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 3, d: "foo" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
-				.to.deep.equal []
+				.to.deep.equal [
+					op: { p: 3, i: "" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				]
 				
 			it "should not combine separated updates", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, i: "foo" }
 					meta: ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, d: "bar" }
 					meta: ts: @ts2, user_id: @user_id
+					v: 43
 				}])
 				.to.deep.equal [{
 					op: { p: 3, i: "foo" }
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
 				}, {
 					op: { p: 9, d: "bar" }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
 				}]
 
 				
