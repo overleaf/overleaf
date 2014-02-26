@@ -132,3 +132,30 @@ describe "Appending doc ops to the history", ->
 				expect(@updates[1].op).to.deep.equal {
 					p: 6, i: "bar"
 				}
+
+	describe "when the updates need processing in batches", ->
+		before (done) ->
+			@doc_id = ObjectId().toString()
+			@user_id = ObjectId().toString()
+			updates = []
+			@expectedOp = { p:0, i: "" }
+			for i in [0..250]
+				updates.push {
+					op: [{i: "a", p: 0}]
+					meta: { ts: Date.now(), user_id: @user_id }
+					v: i
+				}
+				@expectedOp.i = "a" + @expectedOp.i
+
+			pushRawUpdates @doc_id, updates, (error) =>
+				throw error if error?
+				flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+					throw error if error?
+					done()
+
+		it "should concat the compressed op into mongo", ->
+			expect(@updates[0].op).to.deep.equal @expectedOp
+
+		it "should insert the correct version number into mongo", ->
+			expect(@updates[0].v).to.equal 250
+
