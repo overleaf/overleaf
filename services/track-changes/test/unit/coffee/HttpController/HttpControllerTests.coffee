@@ -14,22 +14,19 @@ describe "HttpController", ->
 		@version = 42
 		@next = sinon.stub()
 
-	describe "appendUpdates", ->
+	describe "flushUpdatesWithLock", ->
 		beforeEach ->
 			@req =
 				params:
 					doc_id: @doc_id
-				body:
-					docOps: @docOps = ["mock-ops"]
-					version: @version
 			@res =
 				send: sinon.stub()
-			@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArg(2)
-			@HttpController.appendUpdates @req, @res, @next
+			@HistoryManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
+			@HttpController.flushUpdatesWithLock @req, @res, @next
 
-		it "should append the updates", ->
-			@HistoryManager.compressAndSaveRawUpdates
-				.calledWith(@doc_id, @docOps)
+		it "should process the updates", ->
+			@HistoryManager.processUncompressedUpdatesWithLock
+				.calledWith(@doc_id)
 				.should.equal true
 
 		it "should return a success code", ->

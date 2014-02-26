@@ -6,14 +6,17 @@ HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()
 
-app.post "/doc/:doc_id/history", express.bodyParser(), HttpController.appendUpdates
+app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
 	req.send 500
 
-app.listen (Settings.port ||= 3014), (error) ->
+port = Settings.internal?.history?.port or 3014
+host = Settings.internal?.history?.host or "localhost"
+app.listen port, host, (error) ->
 	if error?
 		logger.error err: error, "could not start history server"
-	logger.log "history api listening on port 3014"
+	else
+		logger.log "history api listening on http://#{host}:#{port}"
 
