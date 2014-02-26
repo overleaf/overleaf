@@ -11,7 +11,7 @@ install:
     - grunt install
 
 before_script:
-	- grunt run
+    - grunt run
 
 script:
     - grunt test:unit
