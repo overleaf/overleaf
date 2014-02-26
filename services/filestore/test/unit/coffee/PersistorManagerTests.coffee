@@ -11,12 +11,12 @@ SandboxedModule = require('sandboxed-module')
 describe "PersistorManagerTests", ->
 
 	beforeEach ->
-		@s3Wrapper =
+		@S3PersistorManager =
 			getFileStream: sinon.stub()
 			checkIfFileExists: sinon.stub()
 			deleteFile: sinon.stub()
 			deleteDirectory: sinon.stub()
-			sendStreamToS3: sinon.stub()
+			sendStream: sinon.stub()
 			insertFile: sinon.stub()
 
 	describe "test s3 mixin", ->
@@ -24,7 +24,7 @@ describe "PersistorManagerTests", ->
 			@settings =
 				filestoreBackend: "s3"
 			@requires =
-				"./s3Wrapper": @s3Wrapper
+				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings
 				"logger-sharelatex":
 					log:->
@@ -34,63 +34,66 @@ describe "PersistorManagerTests", ->
 		it "should load getFileStream", (done) ->
 			@PersistorManager.should.respondTo("getFileStream")
 			@PersistorManager.getFileStream()
-			@s3Wrapper.getFileStream.calledOnce.should.equal true
+			@S3PersistorManager.getFileStream.calledOnce.should.equal true
 			done()
 
 		it "should load checkIfFileExists", (done) ->
 			@PersistorManager.checkIfFileExists()
-			@s3Wrapper.checkIfFileExists.calledOnce.should.equal true
+			@S3PersistorManager.checkIfFileExists.calledOnce.should.equal true
 			done()
 
 		it "should load deleteFile", (done) ->
 			@PersistorManager.deleteFile()
-			@s3Wrapper.deleteFile.calledOnce.should.equal true
+			@S3PersistorManager.deleteFile.calledOnce.should.equal true
 			done()
 
 		it "should load deleteDirectory", (done) ->
 			@PersistorManager.deleteDirectory()
-			@s3Wrapper.deleteDirectory.calledOnce.should.equal true
+			@S3PersistorManager.deleteDirectory.calledOnce.should.equal true
 			done()
 
-		it "should load sendStreamToS3", (done) ->
-			@PersistorManager.sendStreamToS3()
-			@s3Wrapper.sendStreamToS3.calledOnce.should.equal true
+		it "should load sendStream", (done) ->
+			@PersistorManager.sendStream()
+			@S3PersistorManager.sendStream.calledOnce.should.equal true
 			done()
 
 		it "should load insertFile", (done) ->
 			@PersistorManager.insertFile()
-			@s3Wrapper.insertFile.calledOnce.should.equal true
+			@S3PersistorManager.insertFile.calledOnce.should.equal true
 			done()
 
-	describe "test invalid mixins", ->
+	describe "test unspecified mixins", ->
 
-		it "should not load a null wrapper", (done) ->
+		it "should load s3 when no wrapper specified", (done) ->
 			@settings =
 			@requires =
-				"./s3Wrapper": @s3Wrapper
+				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings
 				"logger-sharelatex":
 					log:->
 					err:->
-			try
-				@PersistorManager=SandboxedModule.require modulePath, requires: @requires
-			catch error
-				assert.equal("Unknown filestore backend: null",error.message)
+			@PersistorManager=SandboxedModule.require modulePath, requires: @requires
+			@PersistorManager.should.respondTo("getFileStream")
+			@PersistorManager.getFileStream()
+			@S3PersistorManager.getFileStream.calledOnce.should.equal true
 			done()
 
+	describe "test invalid mixins", ->
 		it "should not load an invalid wrapper", (done) ->
 			@settings =
 				filestoreBackend:"magic"
 			@requires =
-				"./s3Wrapper": @s3Wrapper
+				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings
 				"logger-sharelatex":
 					log:->
 					err:->
+			@fsWrapper=null
 			try
 				@PersistorManager=SandboxedModule.require modulePath, requires: @requires
 			catch error
 				assert.equal("Unknown filestore backend: magic",error.message)
+			assert.isNull(@fsWrapper)
 			done()
 
 

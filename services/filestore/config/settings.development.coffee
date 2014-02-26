@@ -4,9 +4,10 @@ module.exports =
 			port: 3009
 			host: "localhost"
 			
-	# which backend to use
+	# which persistor to use for file storage
 	# current options are:
 	# "s3" - Amazon S3
+	# if no persistor is chosen, s3 will be used by default
 	filestoreBackend: "s3"
 
 	# ShareLaTeX stores binary files like images in S3.
@@ -20,7 +21,7 @@ module.exports =
 
 	# Filestore health check
 	# ----------------------
-	# Project and file details to check in filestore when calling /health_check
+	# Project and file details to check in persistor when calling /health_check
 	# health_check:
 	# 	project_id: ""
 	# 	file_id: ""

@@ -13,7 +13,7 @@ module.exports =
 	insertFile: (bucket, key, stream, callback)->
 		convetedKey = KeyBuilder.getConvertedFolderKey(key)
 		PersistorManager.deleteDirectory bucket, convetedKey, ->
-			PersistorManager.sendStreamToS3 bucket, key, stream, ->
+			PersistorManager.sendStream bucket, key, stream, ->
 				callback()
 
 	deleteFile: (bucket, key, callback)->
@@ -53,7 +53,7 @@ module.exports =
 				if err?
 					logger.err err:err, fsPath:fsPath, bucket:bucket, key:key, opts:opts, "something went wrong optimising png file"
 					return callback(err)
-				PersistorManager.sendFileToS3 bucket, convetedKey, fsPath, (err)->
+				PersistorManager.sendFile bucket, convetedKey, fsPath, (err)->
 					if err?
 						logger.err err:err, bucket:bucket, key:key, convetedKey:convetedKey, opts:opts, "something went wrong sending the file"
 						return callback(err)
@@ -67,7 +67,7 @@ module.exports =
 				FileConverter.thumbnail origonalFsPath, callback
 			else if opts.style == "preview"
 				FileConverter.preview origonalFsPath, callback
-			else 
+			else
 				throw new Error("should have specified opts to convert file with #{JSON.stringify(opts)}")
 
 
