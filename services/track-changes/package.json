@@ -2,15 +2,25 @@
   "name": "history-sharelatex",
   "version": "0.0.1",
   "dependencies": {
-    "async": "",
-    "chai": "",
+    "async": "~0.2.10",
     "express": "3.3.5",
-    "sandboxed-module": "",
-    "sinon": "",
     "mongojs": "~0.9.11",
-    "settings": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
-    "logger": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "request": "~2.33.0",
     "redis": "~0.10.1"
+  },
+  "devDependencies": {
+    "chai": "~1.9.0",
+    "sinon": "~1.8.2",
+    "sandboxed-module": "~0.3.0",
+    "grunt-execute": "~0.1.5",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-mocha-test": "~0.9.3",
+    "grunt": "~0.4.2",
+    "grunt-available-tasks": "~0.4.2",
+    "grunt-contrib-coffee": "~0.10.1",
+    "bunyan": "~0.22.1",
+    "grunt-bunyan": "~0.5.0"
   }
 }

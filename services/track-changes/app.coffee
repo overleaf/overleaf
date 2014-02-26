@@ -1,6 +1,6 @@
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
-logger.initialize("history")
+logger.initialize("track-changes")
 
 HttpController = require "./app/js/HttpController"
 express = require "express"
@@ -14,11 +14,11 @@ app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
 	res.send 500
 
-port = Settings.internal?.history?.port or 3014
-host = Settings.internal?.history?.host or "localhost"
+port = Settings.internal?.trackchanges?.port or 3014
+host = Settings.internal?.trackchanges?.host or "localhost"
 app.listen port, host, (error) ->
 	if error?
-		logger.error err: error, "could not start history server"
+		logger.error err: error, "could not start track-changes server"
 	else
-		logger.log "history api listening on http://#{host}:#{port}"
+		logger.log "track changes api listening on http://#{host}:#{port}"
 
