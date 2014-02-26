@@ -7,6 +7,7 @@ module.exports =
 	# which persistor to use for file storage
 	# current options are:
 	# "s3" - Amazon S3
+	# "fs" - local filesystem
 	# if no persistor is chosen, s3 will be used by default
 	filestoreBackend: "s3"
 
