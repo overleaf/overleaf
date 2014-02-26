@@ -40,14 +40,14 @@ The CLSI is based on a JSON API.
 
 (Note that valid JSON should not contain any comments like the example below).
 
-    POST /project/<project-id>
+    POST /project/<project-id>/compile
 
 ```javascript
 {
-    compile: {
+    "compile": {
         "options": {
             // Which compiler to use. Can be latex, pdflatex, xelatex or lualatex
-            "compiler": "lualatex"
+            "compiler": "lualatex",
             // How many seconds to wait before killing the process. Default is 60.
             "timeout": 40 
         },
