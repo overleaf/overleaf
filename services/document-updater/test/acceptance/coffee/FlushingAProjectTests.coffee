@@ -4,6 +4,7 @@ chai.should()
 async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Flushing a project", ->
@@ -40,6 +41,8 @@ describe "Flushing a project", ->
 	describe "with documents which have been updated", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockTrackChangesApi, "flushDoc"
+
 			async.series @docs.map((doc) =>
 				(callback) =>
 					DocUpdaterClient.preloadDoc @project_id, doc.id, (error) =>
@@ -56,6 +59,7 @@ describe "Flushing a project", ->
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
+			MockTrackChangesApi.flushDoc.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -73,4 +77,14 @@ describe "Flushing a project", ->
 						returnedDoc.lines.should.deep.equal doc.updatedLines
 						callback()
 			), done
+
+		it "should flush the docs in the track changes api", (done) ->
+			# This is done in the background, so wait a little while to ensure it has happened
+			setTimeout () =>
+				async.series @docs.map((doc) =>
+					(callback) =>
+						MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal true
+				), done
+				done()
+			, 100
 

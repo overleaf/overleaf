@@ -5,6 +5,7 @@ async = require "async"
 mongojs = require "../../../app/js/mongojs"
 db = mongojs.db
 ObjectId = mongojs.ObjectId
+rclient = require("redis").createClient()
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -45,6 +46,11 @@ describe "Applying updates to a doc", ->
 				doc.lines.should.deep.equal @result
 				done()
 
+		it "should push the applied updates to the track changes api", (done) ->
+			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
+
 	describe "when the document is loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
@@ -67,6 +73,11 @@ describe "Applying updates to a doc", ->
 		it "should update the doc", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @result
+				done()
+
+		it "should push the applied updates to the track changes api", (done) ->
+			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
 				done()
 
 	describe "when the document has been deleted", ->
@@ -111,6 +122,13 @@ describe "Applying updates to a doc", ->
 					DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 						doc.lines.should.deep.equal @result
 						done()
+
+			it "should push the applied updates to the track changes api", (done) ->
+				rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+					updates = (JSON.parse(u) for u in updates)
+					for appliedUpdate, i in @updates
+						appliedUpdate.op.should.deep.equal updates[i].op
+					done()
 
 		describe "when older ops come in after the delete", ->
 			before ->

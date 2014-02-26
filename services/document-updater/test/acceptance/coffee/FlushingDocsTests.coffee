@@ -4,6 +4,7 @@ chai.should()
 async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 mongojs = require "../../../app/js/mongojs"
 db = mongojs.db
@@ -31,6 +32,7 @@ describe "Flushing a doc to Mongo", ->
 				lines: @lines
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockTrackChangesApi, "flushDoc"
 
 			DocUpdaterClient.sendUpdates @project_id, @doc_id, [@update], (error) =>
 				throw error if error?
@@ -40,6 +42,7 @@ describe "Flushing a doc to Mongo", ->
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
+			MockTrackChangesApi.flushDoc.restore()
 
 		it "should flush the updated document to the web api", ->
 			MockWebApi.setDocumentLines
@@ -51,6 +54,13 @@ describe "Flushing a doc to Mongo", ->
 				doc = docs[0]
 				doc.docOps[0].op.should.deep.equal @update.op
 				done()
+
+		it "should flush the doc in the track changes api", (done) ->
+			# This is done in the background, so wait a little while to ensure it has happened
+			setTimeout () =>
+				MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+				done()
+			, 100
 
 	describe "when the doc has a large number of ops to be flushed", ->
 		before (done) ->
@@ -93,5 +103,5 @@ describe "Flushing a doc to Mongo", ->
 
 		it "should not flush the doc to the web api", ->
 			MockWebApi.setDocumentLines.called.should.equal false
-			
+
 

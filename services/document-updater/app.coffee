@@ -21,15 +21,6 @@ app.configure ->
 	app.use express.bodyParser()
 	app.use app.router
 
-app.configure 'development', ()->
-	console.log "Development Enviroment"
-	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
-
-app.configure 'production', ()->
-	console.log "Production Enviroment"
-	app.use express.logger()
-	app.use express.errorHandler()
-
 rclient.subscribe("pending-updates")
 rclient.on "message", (channel, doc_key)->
 	[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)

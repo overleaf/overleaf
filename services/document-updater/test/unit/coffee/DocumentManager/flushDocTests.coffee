@@ -10,6 +10,7 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 			"./RedisManager": @RedisManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
 			"./DocOpsManager": @DocOpsManager = {}
+			"./TrackChangesManager": @TrackChangesManager = {}
 			"logger-sharelatex": @logger = {log: sinon.stub()}
 			"./Metrics": @Metrics =
 				Timer: class Timer
@@ -25,6 +26,7 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, @lines, @version)
 			@PersistenceManager.setDoc = sinon.stub().callsArgWith(3)
 			@DocOpsManager.flushDocOpsToMongo = sinon.stub().callsArgWith(2)
+			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(1)
 			@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
 		it "should get the doc from redis", ->
@@ -48,11 +50,17 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
 
+		it "should flush the doc in the track changes api", ->
+			@TrackChangesManager.flushDocChanges
+				.calledWith(@doc_id)
+				.should.equal true
+
 	describe "when the document is not in Redis", ->
 		beforeEach ->
 			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, null, null)
 			@PersistenceManager.setDoc = sinon.stub().callsArgWith(3)
 			@DocOpsManager.flushDocOpsToMongo = sinon.stub().callsArgWith(2)
+			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(1)
 			@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
 		it "should get the doc from redis", ->

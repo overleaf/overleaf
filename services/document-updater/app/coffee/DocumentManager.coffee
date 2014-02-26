@@ -2,6 +2,7 @@ RedisManager = require "./RedisManager"
 PersistenceManager = require "./PersistenceManager"
 DocOpsManager = require "./DocOpsManager"
 DiffCodec = require "./DiffCodec"
+TrackChangesManager = require "./TrackChangesManager"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 
@@ -80,6 +81,10 @@ module.exports = DocumentManager =
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
+
+		TrackChangesManager.flushDocChanges doc_id, (error) ->
+			if error?
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc to track changes api"
 
 		RedisManager.getDoc doc_id, (error, lines, version) ->
 			return callback(error) if error?
