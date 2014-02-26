@@ -26,11 +26,8 @@ describe "ShareJsDB.writeOps", ->
 			@ShareJsDB.writeOp @doc_key, @opData, @callback
 
 		it "should write the op to redis", ->
-			op =
-				op: @opData.op
-				meta: @opData.meta
 			@DocOpsManager.pushDocOp
-				.calledWith(@project_id, @doc_id, op)
+				.calledWith(@project_id, @doc_id, @opData)
 				.should.equal true
 
 		it "should call the callback without an error", ->
@@ -46,7 +43,7 @@ describe "ShareJsDB.writeOps", ->
 			@ShareJsDB.writeOp @doc_key, @opData, @callback
 
 		it "should call the callback with an error", ->
-			@callback.calledWith(sinon.match.string).should.equal true
+			@callback.calledWith(new Error()).should.equal true
 
 
 	
