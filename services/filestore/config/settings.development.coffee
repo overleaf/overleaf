@@ -8,7 +8,7 @@ module.exports =
 	# current options are:
 	# "s3" - Amazon S3
 	# if no persistor is chosen, s3 will be used by default
-	persistorManager: "s3"
+	filestoreBackend: "s3"
 
 	# ShareLaTeX stores binary files like images in S3.
 	# Fill in your Amazon S3 credentials below.
