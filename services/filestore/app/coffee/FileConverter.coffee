@@ -22,9 +22,9 @@ module.exports =
 		exec args, opts, (err, stdout, stderr)->
 			timer.done()
 			if err?
-				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, "something went wrong converting file"
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, destPath:destPath,  "something went wrong converting file"
 			else
-				logger.log  sourcePath:sourcePath, requestedFormat:requestedFormat, "finished converting file"
+				logger.log  sourcePath:sourcePath, requestedFormat:requestedFormat, destPath:destPath,  "finished converting file"
 			callback(err, destPath)
 
 	thumbnail: (sourcePath, callback)->
@@ -43,7 +43,7 @@ module.exports =
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
 			else
-				logger.log  sourcePath:sourcePath, "finished thumbnailing file"
+				logger.log  sourcePath:sourcePath, destPath:destPath, "finished thumbnailing file"
 			callback(err, destPath)	
 
 	preview: (sourcePath, callback)->
@@ -60,7 +60,7 @@ module.exports =
 			timeout: twentySeconds
 		exec args, opts,(err, stdout, stderr)->
 			if err?
-				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, destPath:destPath, "something went wrong converting file to preview"
 			else
-				logger.log  sourcePath:sourcePath, "finished converting file to preview"
+				logger.log  sourcePath:sourcePath, destPath:destPath, "finished converting file to preview"
 			callback(err, destPath)

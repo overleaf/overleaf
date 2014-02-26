@@ -56,7 +56,7 @@ describe "FileController", ->
 			@controller.getFile @req, @res
 
 		it "should send a 200 if the cacheWarm param is true", (done)->
-			@req.params.cacheWarm = true
+			@req.query.cacheWarm = true
 			@FileHandler.getFile.callsArgWith(3, null, @fileStream)
 			@res.send = (statusCode)=>
 				statusCode.should.equal 200
