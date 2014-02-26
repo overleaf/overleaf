@@ -32,11 +32,18 @@ module.exports = HistoryManager =
 	processUncompressedUpdates: (doc_id, callback = (error) ->) ->
 		RedisManager.getOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 			return callback(error) if error?
+			length = rawUpdates.length
 			HistoryManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
 				RedisManager.deleteOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error) ->
 					return callback(error) if error?
-					callback()
+					if length == HistoryManager.REDIS_READ_BATCH_SIZE
+						# There might be more updates
+						setTimeout () ->
+							HistoryManager.processUncompressedUpdates doc_id, callback
+						, 0
+					else
+						callback()
 
 	processUncompressedUpdatesWithLock: (doc_id, callback = (error) ->) ->
 		LockManager.runWithLock(

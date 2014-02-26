@@ -112,30 +112,67 @@ describe "HistoryManager", ->
 						.should.equal true
 
 	describe "processUncompressedUpdates", ->
-		beforeEach ->
-			@updates = ["mock-update"]
-			@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
-			@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
-			@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
-			@HistoryManager.processUncompressedUpdates @doc_id, @callback
+		describe "when there is fewer than one batch to send", ->
+			beforeEach ->
+				@updates = ["mock-update"]
+				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
+				@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
+				@HistoryManager.processUncompressedUpdates @doc_id, @callback
 
-		it "should get the oldest updates", ->
-			@RedisManager.getOldestRawUpdates
-				.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
-				.should.equal true
+			it "should get the oldest updates", ->
+				@RedisManager.getOldestRawUpdates
+					.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+					.should.equal true
 
-		it "should compress and save the updates", ->
-			@HistoryManager.compressAndSaveRawUpdates
-				.calledWith(@doc_id, @updates)
-				.should.equal true
+			it "should compress and save the updates", ->
+				@HistoryManager.compressAndSaveRawUpdates
+					.calledWith(@doc_id, @updates)
+					.should.equal true
 
-		it "should delete the batch of uncompressed updates that was just processed", ->
-			@RedisManager.deleteOldestRawUpdates
-				.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
-				.should.equal true
+			it "should delete the batch of uncompressed updates that was just processed", ->
+				@RedisManager.deleteOldestRawUpdates
+					.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+					.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when there are multiple batches to send", ->
+			beforeEach (done) ->
+				@HistoryManager.REDIS_READ_BATCH_SIZE = 2
+				@updates = ["mock-update-0", "mock-update-1", "mock-update-2", "mock-update-3", "mock-update-4"]
+				@redisArray = @updates.slice()
+				@RedisManager.getOldestRawUpdates = (doc_id, batchSize, callback = (error, updates) ->) =>
+					updates = @redisArray.slice(0, batchSize)
+					@redisArray = @redisArray.slice(batchSize)
+					callback null, updates
+				sinon.spy @RedisManager, "getOldestRawUpdates"
+				@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
+				@HistoryManager.processUncompressedUpdates @doc_id, (args...) =>
+					@callback(args...)
+					done()
+
+			it "should get the oldest updates in three batches ", ->
+				@RedisManager.getOldestRawUpdates.callCount.should.equal 3
+
+			it "should compress and save the updates in batches", ->
+				@HistoryManager.compressAndSaveRawUpdates
+					.calledWith(@doc_id, @updates.slice(0,2))
+					.should.equal true
+				@HistoryManager.compressAndSaveRawUpdates
+					.calledWith(@doc_id, @updates.slice(2,4))
+					.should.equal true
+				@HistoryManager.compressAndSaveRawUpdates
+					.calledWith(@doc_id, @updates.slice(4,5))
+					.should.equal true
+
+			it "should delete the batches of uncompressed updates", ->
+				@RedisManager.deleteOldestRawUpdates.callCount.should.equal 3
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
 	describe "processCompressedUpdatesWithLock", ->
 		beforeEach ->
