@@ -11,6 +11,7 @@ describe "HistoryManager", ->
 			"./UpdateCompressor": @UpdateCompressor = {}
 			"./MongoManager" : @MongoManager = {}
 			"./RedisManager" : @RedisManager = {}
+			"./LockManager"  : @LockManager = {}
 			"logger-sharelatex": { log: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@callback = sinon.stub()
@@ -136,4 +137,19 @@ describe "HistoryManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
+	describe "processCompressedUpdatesWithLock", ->
+		beforeEach ->
+			@HistoryManager.processUncompressedUpdates = sinon.stub()
+			@LockManager.runWithLock = sinon.stub().callsArg(2)
+			@HistoryManager.processUncompressedUpdatesWithLock @doc_id, @callback
 
+		it "should run processUncompressedUpdates with the lock", ->
+			@LockManager.runWithLock
+				.calledWith(
+					"HistoryLock:#{@doc_id}",
+					@HistoryManager.processUncompressedUpdates
+				)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

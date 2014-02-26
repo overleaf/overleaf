@@ -1,6 +1,7 @@
 MongoManager = require "./MongoManager"
 RedisManager = require "./RedisManager"
 UpdateCompressor = require "./UpdateCompressor"
+LockManager = require "./LockManager"
 logger = require "logger-sharelatex"
 
 module.exports = HistoryManager =
@@ -37,5 +38,10 @@ module.exports = HistoryManager =
 					return callback(error) if error?
 					callback()
 
-	processUncompressUpdatesWithLock: (doc_id, callback = (error) ->) ->
+	processUncompressedUpdatesWithLock: (doc_id, callback = (error) ->) ->
+		LockManager.runWithLock(
+			"HistoryLock:#{doc_id}",
+			HistoryManager.processUncompressedUpdates,
+			callback
+		)
 
