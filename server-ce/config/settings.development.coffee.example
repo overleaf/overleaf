@@ -27,6 +27,9 @@ module.exports =
 		buckets:
 			# The S3 bucket name to store binary files in
 			user_files: ""
+	
+	# Tell the filestore api to use s3 to persist files, in future more backends can be added
+	filestoreBackend: "s3"
 
 	# Databases
 	# ---------
