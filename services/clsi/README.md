@@ -18,7 +18,7 @@ Then install the require npm modules:
     
 Then compile the coffee script source files:
 
-    $ grunt compile
+    $ grunt install
     
 Finally, (after configuring your local database - see the Config section), run the CLSI service:
 
