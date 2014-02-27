@@ -167,7 +167,7 @@ define [
 			@options.manager.removeMember(@model)
 
 	PublishProjectView = Backbone.View.extend
-		template: $("#publishProject").html()
+		template: $("#publishProjectTemplate").html()
 
 		events:
 			"click #publishProjectAsTemplate": "publishProjectAsTemplate"
@@ -181,18 +181,63 @@ define [
 			this.model.bind('change', this.render)
 
 		render: ->
-			viewModel = description:@model.get("description")
+			viewModel = 
+				description: @model.get("description")
+				canonicalUrl: @model.get("template.canonicalUrl")
+				isPublished: @model.get("template.isPublished")
+
 			$(@el).html $(Mustache.to_html(@template, viewModel))
+			@publishedArea = $('#publishedAsTemplateArea')
+			@unpublishedArea = $('#unpublishedAsTemplateArea')
+			@refreshPublishStatus()
+
+
+		refreshPublishStatus: ->
+			@ide.socket.emit "getPublishedDetails", @ide.user.get("id"), (err, details)=>
+				if err?
+					return @showError()
+
+				@model.set("template.isPublished", details.exists)
+				if details.exists
+					@model.set("template.canonicalUrl", details.canonicalUrl)
+					@publishedArea.show()
+					@unpublishedArea.hide()
+				else
+					@publishedArea.hide()
+					@unpublishedArea.show()
+
+		showError: ->
+			$('#problemWithPublishingArea').show()
+
+		showWorking: ->
+			$('#publishWorkingArea').show()
+
+		hideWorking: ->
+			$('#publishWorkingArea').hide()
+
+		publishProjectAsTemplate: ->
+			@showWorking()
+			@unpublishedArea.hide()
+			@ide.socket.emit "publishProjectAsTemplate", @ide.user.get("id"), (err)=>
+				@hideWorking()
+				if err?
+					@showError()
+				else 
+					@refreshPublishStatus()
+
+		unPublishProjectAsTemplate: ->
+			@showWorking()
+			@publishedArea.hide()
+			@ide.socket.emit "unPublishProjectAsTemplate", @ide.user.get("id"), (err)=>
+				@hideWorking()
+				if err?
+					@showError()
+				else 
+					@refreshPublishStatus()
 
 		updateDescription: ->
 			newDescription = $('#projectDescription').val()
-			this.model.set("description", newDescription)
-
-		publishProjectAsTemplate: ->
-			@ide.socket.emit "publishProjectAsTemplate", @ide.user.get("id"), ->
-
-		unPublishProjectAsTemplate: ->
-			@ide.socket.emit "unPublishProjectAsTemplate", @ide.user.get("id"), ->
+			@model.set("description", newDescription)
 
 	SocialSharingView = Backbone.View.extend
 		template: $("#socialSharingTemplate").html()

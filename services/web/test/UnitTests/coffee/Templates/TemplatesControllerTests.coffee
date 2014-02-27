@@ -24,6 +24,7 @@ describe 'Templates Controller', ->
 		@TemplatesPublisher = 
 			publish: sinon.stub()
 			unpublish:sinon.stub()
+			getTemplateDetails: sinon.stub()
 		@controller = SandboxedModule.require modulePath, requires:
 			'../Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../Project/ProjectOptionsHandler':@ProjectOptionsHandler
@@ -132,4 +133,18 @@ describe 'Templates Controller', ->
 			@controller.createProjectFromZipTemplate @req, res
 
 
-	describe '', ->
+	describe 'getTemplateDetails', ->
+
+		it "should return an error the templatePublisher", (done)->
+			error = "error"
+			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, error)
+			@controller.getTemplateDetails @user_id, @project_id, (passedError)=>
+				passedError.should.equal error
+				done()
+
+		it "should return the details", (done)->
+			details = {exists:true}
+			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, null, details)
+			@controller.getTemplateDetails @user_id, @project_id, (err, passedDetails)=>
+				details.should.equal passedDetails
+				done()

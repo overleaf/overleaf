@@ -37,6 +37,10 @@ module.exports =
 		logger.log user_id:user_id, project_id:project_id, "reciving request to unpublish project as template"
 		TemplatesPublisher.unpublish user_id, project_id, callback
 
+	getTemplateDetails: (user_id, project_id, callback)->
+		TemplatesPublisher.getTemplateDetails user_id, project_id, callback
+
+
 setCompiler = (project_id, compiler, callback)->
 	if compiler?
 		ProjectOptionsHandler.setCompiler project_id, compiler, callback

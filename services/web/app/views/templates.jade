@@ -289,17 +289,24 @@
 					| &nbsp; Share URL
 
 
-	script(type="text/template")#publishProject
+	script(type="text/template")#publishProjectTemplate
 		-if(session && session.user && session.user.isAdmin)
 			.box
 				.page-header
 					h2 Publish Project
 
+				#publishedAsTemplateArea(style="display:none;")
+					a#templateLink(href='{{canonicalUrl}}') View Template
+					.btn.btn-warning#unPublishProjectAsTemplate unpublish project as template
+				#problemWithPublishingArea(style="display:none;")
+					p There is a problem with our publishing service, please try again in a few minutes.
+				#publishWorkingArea(style="display:none;")
+					p Working.....
+				#unpublishedAsTemplateArea(style="display:none;")
+					.btn.btn-success#publishProjectAsTemplate Publish project as template
 				div
-					.btn#publishProjectAsTemplate Publish project as template
-					.btn#unPublishProjectAsTemplate unpublish project as template
-				.row
 					textarea.span6#projectDescription {{description}}
+
 
 	script(type="text/template")#settingsPanelTemplate
 		.fullEditorArea.projectSettings

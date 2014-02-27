@@ -17,5 +17,15 @@ module.exports =
 			callback()
 
 
+	getTemplateDetails: (user_id, project_id, callback)->
+		url = buildUrl(user_id, project_id)+"/details"
+		request.get url, (err, res, body)->
+			try
+				json = JSON.parse body
+			catch err
+				return callback err
+			callback(err, json)
+
+
 buildUrl = (user_id, project_id)->
 	url = "#{settings.apis.templates_api.url}/templates-api/user/#{user_id}/project/#{project_id}"
