@@ -152,6 +152,8 @@ block content
 								p Every few months we send a news letter out summarizing the new features available, if you would prefer to not receive this email then you are free to unsubscribe below at any time							
 								a#unsubscribeFromNewsletter.btn.btn-danger(data-csrf=csrfToken) Unsubscribe
 
+		include ../general/small-footer
+
 	#changePasswordModal(style='display: none')
 		.modal
 			form#changePasswordForm(method="post", action="/user/password/update")

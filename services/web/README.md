@@ -9,6 +9,11 @@ a lot of logic around creating and editing projects, and account management.
 The rest of the ShareLaTeX stack, along with information about contributing can be found in the 
 [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
 
+Unit test status
+----------------
+
+[![Unit test status](https://travis-ci.org/sharelatex/web-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/web-sharelatex)
+
 License and Credits
 -------------------
 

@@ -112,14 +112,16 @@ module.exports =
 	#
 	# You can select the features that are enabled by default for new
 	# new users.
+	defaultFeatures: defaultFeatures =
+		collaborators: -1
+		dropbox: true
+		versioning: true
+
 	plans: plans = [{
 		planCode: "personal"
 		name: "Personal"
 		price: 0
-		features: 
-			collaborators: -1
-			dropbox: true
-			versioning: true
+		features: defaultFeatures
 	}]
 
 	# Spelling languages

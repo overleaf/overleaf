@@ -252,7 +252,7 @@ define [
 			@ide = @options.ide
 
 		url: (medium) ->
-			"https://www.sharelatex.com/project/#{@ide.project.get("id")}" +
+			"#{window.sharelatex.siteUrl}/project/#{@ide.project.get("id")}" +
 			"?r=#{@ide.user.get("referal_id")}&rs=ps&rm=#{medium}" # Referal source = public share				
 
 		render: ->
@@ -264,10 +264,10 @@ define [
 
 					url = "https://www.facebook.com/dialog/feed?link=#{encodeURIComponent(@url("fb"))}&" +
 						  "app_id=148710621956179&" +
-						  "picture=https://www.sharelatex.com/brand/logo/logo-128.png&" +
+						  "picture=#{window.sharelatex.siteUrl}/brand/logo/logo-128.png&" +
 						  "name=#{@ide.project.get("name")}&" +
 						  "caption=My LaTeX project (#{@ide.project.get("name")}) is available online on ShareLaTeX&" +
-						  "redirect_uri=http://www.sharelatex.com&" +
+						  "redirect_uri=#{window.sharelatex.siteUrl}&" +
 						  "display=popup"
 					mixpanel?.track("Project Shared", { method: "facebook" })
 					window.open(

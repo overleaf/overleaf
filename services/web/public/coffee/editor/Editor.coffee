@@ -141,6 +141,7 @@ define [
 				readOnly: true
 			aceEditor.commands.removeCommand "transposeletters"
 			aceEditor.commands.removeCommand "showSettingsMenu"
+			aceEditor.commands.removeCommand "foldall"
 
 			aceEditor.showCommandLine = (args...) =>
 				@trigger "showCommandLine", aceEditor, args...
