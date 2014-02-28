@@ -44,30 +44,53 @@ describe "TrackChangesManager", ->
 			@op = "mock-op"
 			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(1)
 
-		describe "pushing the op", ->
+		describe "when the doc is under the load manager threshold", ->
 			beforeEach ->
+				@RedisManager.getHistoryLoadManagerThreshold = sinon.stub().callsArgWith(0, null, 40)
+				@TrackChangesManager.getLoadManagerBucket = sinon.stub().returns(30)
+
+			describe "pushing the op", ->
+				beforeEach ->
+					@RedisManager.pushUncompressedHistoryOp = sinon.stub().callsArgWith(2, null, 1)
+					@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+
+				it "should push the op into redis", ->
+					@RedisManager.pushUncompressedHistoryOp
+						.calledWith(@doc_id, @op)
+						.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+				it "should not try to flush the op", ->
+					@TrackChangesManager.flushDocChanges.called.should.equal false
+
+			describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
+				beforeEach ->
+					@RedisManager.pushUncompressedHistoryOp =
+						sinon.stub().callsArgWith(2, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
+					@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+
+				it "should tell the track changes api to flush", ->
+					@TrackChangesManager.flushDocChanges
+						.calledWith(@doc_id)
+						.should.equal true
+
+
+		describe "when the doc is over the load manager threshold", ->
+			beforeEach ->
+				@RedisManager.getHistoryLoadManagerThreshold = sinon.stub().callsArgWith(0, null, 40)
+				@TrackChangesManager.getLoadManagerBucket = sinon.stub().returns(50)
 				@RedisManager.pushUncompressedHistoryOp = sinon.stub().callsArgWith(2, null, 1)
 				@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
 
-			it "should push the op into redis", ->
-				@RedisManager.pushUncompressedHistoryOp
-					.calledWith(@doc_id, @op)
-					.should.equal true
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
+			it "should not push the op", ->
+				@RedisManager.pushUncompressedHistoryOp.called.should.equal false
 
 			it "should not try to flush the op", ->
 				@TrackChangesManager.flushDocChanges.called.should.equal false
 
-		describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
-			beforeEach ->
-				@RedisManager.pushUncompressedHistoryOp =
-					sinon.stub().callsArgWith(2, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
-				@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
-			it "should tell the track changes api to flush", ->
-				@TrackChangesManager.flushDocChanges
-					.calledWith(@doc_id)
-					.should.equal true
 

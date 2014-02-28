@@ -25,6 +25,7 @@ module.exports =
 	docsWithPendingUpdates : DOCIDSWITHPENDINGUPDATES
 	combineProjectIdAndDocId: (project_id, doc_id) -> "#{project_id}:#{doc_id}"
 	splitProjectIdAndDocId: (project_and_doc_id) -> project_and_doc_id.split(":")
+	historyLoadManagerThreshold: "HistoryLoadManagerThreshold"
 	now : (key)->
 		d = new Date()
 		d.getDate()+":"+(d.getMonth()+1)+":"+d.getFullYear()+":"+key

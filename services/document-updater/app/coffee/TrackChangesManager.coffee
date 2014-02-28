@@ -2,6 +2,7 @@ settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
 RedisManager = require "./RedisManager"
+crypto = require("crypto")
 
 module.exports = TrackChangesManager =
 	flushDocChanges: (doc_id, callback = (error) ->) ->
@@ -22,12 +23,22 @@ module.exports = TrackChangesManager =
 
 	FLUSH_EVERY_N_OPS: 50
 	pushUncompressedHistoryOp: (doc_id, op, callback = (error) ->) ->
-		RedisManager.pushUncompressedHistoryOp doc_id, op, (error, length) ->
-			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
-				# Do this in the background since it uses HTTP and so may be too
-				# slow to wait for when processing a doc update.
-				logger.log length: length, doc_id: doc_id, "flushing track changes api"
-				TrackChangesManager.flushDocChanges doc_id,  (error) ->
-					if error?
-						logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc to track changes api"
-			callback()
+		RedisManager.getHistoryLoadManagerThreshold (error, threshold) ->
+			return callback(error) if error?
+			if TrackChangesManager.getLoadManagerBucket(doc_id) < threshold
+				RedisManager.pushUncompressedHistoryOp doc_id, op, (error, length) ->
+					return callback(error) if error?
+					if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
+						# Do this in the background since it uses HTTP and so may be too
+						# slow to wait for when processing a doc update.
+						logger.log length: length, doc_id: doc_id, "flushing track changes api"
+						TrackChangesManager.flushDocChanges doc_id,  (error) ->
+							if error?
+								logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc to track changes api"
+					callback()
+			else
+				callback()
+
+	getLoadManagerBucket: (doc_id) ->
+		hash = crypto.createHash("md5").update(doc_id).digest("hex")
+		return parseInt(hash.slice(0,4), 16) % 100

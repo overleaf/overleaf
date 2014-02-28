@@ -164,6 +164,12 @@ module.exports =
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
+
+	getHistoryLoadManagerThreshold: (callback = (error, threshold) ->) ->
+		rclient.get keys.historyLoadManagerThreshold, (error, value) ->
+			return callback(error) if error?
+			return callback null, 0 if !value?
+			callback null, parseInt(value, 10)
 		
 
 getDocumentsProjectId = (doc_id, callback)->

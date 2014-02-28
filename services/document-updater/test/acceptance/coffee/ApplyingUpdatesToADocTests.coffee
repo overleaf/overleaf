@@ -12,7 +12,7 @@ MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Applying updates to a doc", ->
-	before ->
+	before (done) ->
 		@lines = ["one", "two", "three"]
 		@update =
 			doc: @doc_id
@@ -22,6 +22,8 @@ describe "Applying updates to a doc", ->
 			}]
 			v: 0
 		@result = ["one", "one and a half", "two", "three"]
+		rclient.set "HistoryLoadManagerThreshold", 100, (error) =>
+			done()
 
 	describe "when the document is not loaded", ->
 		before (done) ->
@@ -233,7 +235,7 @@ describe "Applying updates to a doc", ->
 				done()
 
 	describe "with enough updates to flush to the track changes api", ->
-		before (done) ->
+		beforeEach ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
@@ -247,13 +249,27 @@ describe "Applying updates to a doc", ->
 
 			sinon.spy MockTrackChangesApi, "flushDoc"
 
-			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
-				throw error if error?
-				setTimeout done, 200
-
-		after ->
+		afterEach ->
 			MockTrackChangesApi.flushDoc.restore()
 
-		it "should flush the doc twice", ->
-			console.log MockTrackChangesApi.flushDoc.args
-			MockTrackChangesApi.flushDoc.calledTwice.should.equal true	
+		describe "when under the load manager threshold", ->
+			beforeEach (done) ->
+				rclient.set "HistoryLoadManagerThreshold", 100, (error) =>
+					throw error if error?
+					DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
+						throw error if error?
+						setTimeout done, 200
+
+			it "should flush the doc twice", ->
+				MockTrackChangesApi.flushDoc.calledTwice.should.equal true
+
+		describe "when over the load manager threshold", ->
+			beforeEach (done) ->
+				rclient.set "HistoryLoadManagerThreshold", 0, (error) =>
+					throw error if error?
+					DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
+						throw error if error?
+						setTimeout done, 200
+
+			it "should not flush the doc", ->
+				MockTrackChangesApi.flushDoc.called.should.equal false	
