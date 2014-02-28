@@ -8,8 +8,7 @@ ProjectRootDocManager = require "../Project/ProjectRootDocManager"
 ClsiManager = require "./ClsiManager"
 Metrics = require('../../infrastructure/Metrics')
 logger = require("logger-sharelatex")
-RateLimiter = require("ratelimiter")
-
+rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
 	compile: (project_id, user_id, opt = {}, _callback = (error) ->) ->
@@ -56,17 +55,15 @@ module.exports = CompileManager =
 	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, callback = (err, canCompile)->)->
 		if !isAutoCompile
 			return callback(null, true)
-		key = "auto_compile_rate_limit"
-		ten_seconds = (10 * 1000)
-		limit = new RateLimiter(db:rclient, id:key, max:7, duration:ten_seconds)
-		limit.get (err, limit)->
-			Metrics.inc("compile.autocompile.rateLimitCheck")
-			if limit.remaining > 0 and !err?
-				canCompile = true
-			else
+		opts = 
+			endpointName:"auto_compile"
+			timeInterval:10
+			subjectName:"everyone"
+			throttle: 5
+		rateLimiter.addCount opts, (err, canCompile)->
+			if err?
 				canCompile = false
-				Metrics.inc("compile.autocompile.rateLimitHit")
-			logger.log canCompile:canCompile, limit:limit, "checking if auto compile limit has been hit"
+			logger.log canCompile:canCompile, opts:opts, "checking if auto compile limit has been hit"
 			callback err, canCompile
 
 	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
