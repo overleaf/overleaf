@@ -7,6 +7,7 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 rclient = require("redis").createClient()
 
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
@@ -230,4 +231,29 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @lines
 				done()
-	
+
+	describe "with enough updates to flush to the track changes api", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, {
+				lines: @lines
+			}
+			@updates = []
+			for v in [0..99] # Should flush after 50 ops
+				@updates.push
+					doc_id: @doc_id,
+					op: [i: v.toString(), p: 0]
+					v: v
+
+			sinon.spy MockTrackChangesApi, "flushDoc"
+
+			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
+				throw error if error?
+				setTimeout done, 200
+
+		after ->
+			MockTrackChangesApi.flushDoc.restore()
+
+		it "should flush the doc twice", ->
+			console.log MockTrackChangesApi.flushDoc.args
+			MockTrackChangesApi.flushDoc.calledTwice.should.equal true	

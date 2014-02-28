@@ -1,8 +1,9 @@
 settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
+RedisManager = require "./RedisManager"
 
-module.exports =
+module.exports = TrackChangesManager =
 	flushDocChanges: (doc_id, callback = (error) ->) ->
 		if !settings.apis?.trackchanges?
 			logger.warn doc_id: doc_id, "track changes API is not configured, so not flushing"
@@ -18,3 +19,15 @@ module.exports =
 			else
 				error = new Error("track changes api returned a failure status code: #{res.statusCode}")
 				return callback(error)
+
+	FLUSH_EVERY_N_OPS: 50
+	pushUncompressedHistoryOp: (doc_id, op, callback = (error) ->) ->
+		RedisManager.pushUncompressedHistoryOp doc_id, op, (error, length) ->
+			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
+				# Do this in the background since it uses HTTP and so may be too
+				# slow to wait for when processing a doc update.
+				logger.log length: length, doc_id: doc_id, "flushing track changes api"
+				TrackChangesManager.flushDocChanges doc_id,  (error) ->
+					if error?
+						logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc to track changes api"
+			callback()

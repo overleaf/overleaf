@@ -5,6 +5,7 @@ ObjectId = mongojs.ObjectId
 logger = require "logger-sharelatex"
 async = require "async"
 Metrics = require("./Metrics")
+TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = DocOpsManager =
 	flushDocOpsToMongo: (project_id, doc_id, _callback = (error) ->) ->
@@ -46,7 +47,7 @@ module.exports = DocOpsManager =
 	pushDocOp: (project_id, doc_id, op, callback = (error) ->) ->
 		RedisManager.pushDocOp doc_id, op, (error, version) ->
 			return callback(error) if error?
-			RedisManager.pushUncompressedHistoryOp doc_id, op, (error) ->
+			TrackChangesManager.pushUncompressedHistoryOp doc_id, op, (error) ->
 				return callback(error) if error?
 				callback null, version
 

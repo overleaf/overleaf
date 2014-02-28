@@ -8,6 +8,8 @@ describe "TrackChangesManager", ->
 		@TrackChangesManager = SandboxedModule.require modulePath, requires:
 			"request": @request = {}
 			"settings-sharelatex": @Settings = {}
+			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"./RedisManager": @RedisManager = {}
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
 
@@ -36,3 +38,36 @@ describe "TrackChangesManager", ->
 
 			it "should return the callback with an error", ->
 				@callback.calledWith(new Error("track changes api return non-success code: 500")).should.equal true
+
+	describe "pushUncompressedHistoryOp", ->
+		beforeEach ->
+			@op = "mock-op"
+			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(1)
+
+		describe "pushing the op", ->
+			beforeEach ->
+				@RedisManager.pushUncompressedHistoryOp = sinon.stub().callsArgWith(2, null, 1)
+				@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+
+			it "should push the op into redis", ->
+				@RedisManager.pushUncompressedHistoryOp
+					.calledWith(@doc_id, @op)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+			it "should not try to flush the op", ->
+				@TrackChangesManager.flushDocChanges.called.should.equal false
+
+		describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
+			beforeEach ->
+				@RedisManager.pushUncompressedHistoryOp =
+					sinon.stub().callsArgWith(2, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
+				@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+
+			it "should tell the track changes api to flush", ->
+				@TrackChangesManager.flushDocChanges
+					.calledWith(@doc_id)
+					.should.equal true
+

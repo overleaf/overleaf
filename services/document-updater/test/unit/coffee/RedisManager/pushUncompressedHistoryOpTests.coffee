@@ -19,7 +19,7 @@ describe "RedisManager.pushUncompressedHistoryOp", ->
 	describe "successfully", ->
 		beforeEach ->
 			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.rpush = sinon.stub().callsArg(2)
+			@rclient.rpush = sinon.stub().callsArgWith(2, null, @length = 42)
 			@RedisManager.pushUncompressedHistoryOp @doc_id, @op, @callback
 		
 		it "should push the doc op into the doc ops list", ->
@@ -27,8 +27,8 @@ describe "RedisManager.pushUncompressedHistoryOp", ->
 				.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@op))
 				.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		it "should call the callback with the length", ->
+			@callback.calledWith(null, @length).should.equal true
 
 
 

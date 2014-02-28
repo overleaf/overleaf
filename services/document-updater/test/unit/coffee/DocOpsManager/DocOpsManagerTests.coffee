@@ -19,6 +19,7 @@ describe "DocOpsManager", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+			"./TrackChangesManager": @TrackChangesManager = {}
 
 	describe "flushDocOpsToMongo", ->
 		describe "when versions are consistent", ->
@@ -310,7 +311,7 @@ describe "DocOpsManager", ->
 		beforeEach ->
 			@op = "mock-op"
 			@RedisManager.pushDocOp = sinon.stub().callsArgWith(2, null, @version = 42)
-			@RedisManager.pushUncompressedHistoryOp = sinon.stub().callsArg(2)
+			@TrackChangesManager.pushUncompressedHistoryOp = sinon.stub().callsArg(2)
 			@DocOpsManager.pushDocOp @project_id, @doc_id, @op, @callback
 
 		it "should push the op in to the docOps list", ->
@@ -319,7 +320,7 @@ describe "DocOpsManager", ->
 				.should.equal true
 
 		it "should push the op into the pushUncompressedHistoryOp", ->
-			@RedisManager.pushUncompressedHistoryOp
+			@TrackChangesManager.pushUncompressedHistoryOp
 				.calledWith(@doc_id, @op)
 				.should.equal true
 
