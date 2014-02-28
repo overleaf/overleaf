@@ -13,6 +13,8 @@ APIs that talk to each other over HTTP and Redis pub-sub channels. This reposito
 pulls together all of the different services and allows you to set up and run
 them quickly.
 
+### Manually
+
 First, check out a local copy of this repository:
 
 ```bash
@@ -44,6 +46,10 @@ grunt run
 ```
 
 ShareLaTeX should now be running at http://localhost:3000.
+
+### With Vagrant
+
+There is a Vagrant and Ansible backed VM installatoin script for ShareLaTeX, maintained by [@palkan](https://github/palkan), available here: https://github.com/palkan/sharelatex-vagrant-ansible
 
 Dependencies
 ------------
