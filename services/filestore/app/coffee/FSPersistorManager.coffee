@@ -3,7 +3,7 @@ fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
 
 filterName = (key) ->
-	return key.replace /\//, "_"
+  return key.replace /\//, "_"
   
 
 module.exports =
@@ -11,8 +11,8 @@ module.exports =
     filteredTarget = filterName target
     logger.log location:location, target:filteredTarget, source:source, "sending file"
     fs.rename source, "#{location}/#{filteredTarget}", (err) ->
-			if err!=null
-				logger.err err:err, location:location, target:filteredTarget, source:source, "Error on put of file"
+      if err!=null
+        logger.err err:err, location:location, target:filteredTarget, source:source, "Error on put of file"
       callback err
 
   sendStream: ( location, target, sourceStream, callback = (err)->) ->
