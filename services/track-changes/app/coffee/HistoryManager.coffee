@@ -39,7 +39,7 @@ module.exports = HistoryManager =
 			HistoryManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
 				logger.log doc_id: doc_id, "compressed and saved doc updates"
-				RedisManager.deleteOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error) ->
+				RedisManager.deleteOldestRawUpdates doc_id, length, (error) ->
 					return callback(error) if error?
 					if length == HistoryManager.REDIS_READ_BATCH_SIZE
 						# There might be more updates

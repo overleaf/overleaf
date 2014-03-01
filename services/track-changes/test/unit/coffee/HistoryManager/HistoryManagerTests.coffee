@@ -132,7 +132,7 @@ describe "HistoryManager", ->
 
 			it "should delete the batch of uncompressed updates that was just processed", ->
 				@RedisManager.deleteOldestRawUpdates
-					.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+					.calledWith(@doc_id, @updates.length)
 					.should.equal true
 
 			it "should call the callback", ->
