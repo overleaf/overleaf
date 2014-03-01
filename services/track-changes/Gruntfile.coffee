@@ -55,12 +55,12 @@ module.exports = (grunt) ->
 
 		mochaTest:
 			unit:
-				src: ['test/unit/js/**/*.js']
+				src: ["test/unit/js/#{grunt.option("feature") or "**"}/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
 			acceptance:
-				src: ['test/acceptance/js/**/*.js']
+				src: ["test/acceptance/js/**/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
