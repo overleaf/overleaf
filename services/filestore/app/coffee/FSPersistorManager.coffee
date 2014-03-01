@@ -2,12 +2,17 @@ logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
 
-module.exports =
+filterName = (key) ->
+	return key.replace /\//, "_"
+  
 
+module.exports =
   sendFile: ( location, target, source, callback = (err)->) ->
-    logger.log location:location, target:target, source:source, "sending file"
-    fs.rename source, "#{location}/#{target}", (err) ->
-      logger.err err:err, location:location, target:target, source:source, "Error on put of file"
+    filteredTarget = filterName target
+    logger.log location:location, target:filteredTarget, source:source, "sending file"
+    fs.rename source, "#{location}/#{filteredTarget}", (err) ->
+			if err!=null
+				logger.err err:err, location:location, target:filteredTarget, source:source, "Error on put of file"
       callback err
 
   sendStream: ( location, target, sourceStream, callback = (err)->) ->
@@ -21,8 +26,9 @@ module.exports =
       @sendFile location, target, fsPath, callback
 
   getFileStream: (location, name, callback = (err, res)->)->
-    logger.log location:location, name:name, "getting file"
-    sourceStream = fs.createReadStream "#{location}/#{name}"
+    filteredName = filterName name
+    logger.log location:location, name:filteredName, "getting file"
+    sourceStream = fs.createReadStream "#{location}/#{filteredName}"
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
       callback err
@@ -30,30 +36,35 @@ module.exports =
 
 
   copyFile: (location, fromName, toName, callback = (err)->)->
-    logger.log location:location, fromName:fromName, toName:toName, "copying file"
-    sourceStream = fs.createReadStream "#{location}/#{fromName}"
+    filteredFromName=filterName fromName
+    filteredToName=filterName toName
+    logger.log location:location, fromName:filteredFromName, toName:filteredToName, "copying file"
+    sourceStream = fs.createReadStream "#{location}/#{filteredFromName}"
     sourceStream.on 'error', (err) ->
-      logger.err err:err, location:location, key:fromName, "Error reading from file"
+      logger.err err:err, location:location, key:filteredFromName, "Error reading from file"
       callback err
-    targetStream = fs.createWriteStream "#{location}/#{toName}"
+    targetStream = fs.createWriteStream "#{location}/#{filteredToName}"
     targetStream.on 'error', (err) ->
-      logger.err err:err, location:location, key:targetKey, "Error writing to file"
+      logger.err err:err, location:location, key:filteredToName, "Error writing to file"
       callback err
     sourceStream.pipe targetStream
 
   deleteFile: (location, name, callback)->
-    logger.log location:location, name:name, "delete file"
-    fs.unlink "#{location}/#{name}", (err) ->
-      logger.err err:err, location:location, name:name, "Error on delete."
+    filteredName = filterName name
+    logger.log location:location, name:filteredName, "delete file"
+    fs.unlink "#{location}/#{filteredName}", (err) ->
+      logger.err err:err, location:location, name:filteredName, "Error on delete."
       callback err
 
   deleteDirectory: (location, name, callback = (err)->)->
-    fs.rmdir "#{location}/#{name}", (err) ->
-      logger.err err:err, location:location, name:name, "Error on rmdir."
+    filteredName = filterName name
+    fs.rmdir "#{location}/#{filteredName}", (err) ->
+      logger.err err:err, location:location, name:filteredName, "Error on rmdir."
       callback err
 
   checkIfFileExists:(location, name, callback = (err,exists)->)->
-    logger.log location:location, name:name, "checking if file exists"
-    fs.exists "#{location}/#{name}", (exists) ->
-      logger.log location:location, name:name, exists:exists, "checked if file exists"
+    filteredName = filterName name
+    logger.log location:location, name:filteredName, "checking if file exists"
+    fs.exists "#{location}/#{filteredName}", (exists) ->
+      logger.log location:location, name:filteredName, exists:exists, "checked if file exists"
       callback null, exists

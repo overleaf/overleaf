@@ -26,7 +26,8 @@ describe "FSPersistorManagerTests", ->
         log:->
         err:->
     @location = "/tmp"
-    @name1 = "first_file"
+    @name1 = "530f2407e7ef165704000007/530f838b46d9a9e859000008"
+    @name1Filtered ="530f2407e7ef165704000007_530f838b46d9a9e859000008"
     @name2 = "second_file"
     @error = "error_message"
     @FSPersistorManager = SandboxedModule.require modulePath, requires: @requires
@@ -35,7 +36,7 @@ describe "FSPersistorManagerTests", ->
     it "should put the file", (done) ->
       @Fs.rename.callsArgWith(2,@error)
       @FSPersistorManager.sendFile @location, @name1, @name2, (err)=>
-        @Fs.rename.calledWith( @name2, "#{@location}/#{@name1}" ).should.equal true
+        @Fs.rename.calledWith( @name2, "#{@location}/#{@name1Filtered}" ).should.equal true
         err.should.equal @error
         done()
 
@@ -69,7 +70,7 @@ describe "FSPersistorManagerTests", ->
         on:->
       )
       @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
-        @Fs.createReadStream.calledWith("#{@location}/#{@name1}").should.equal.true
+        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
         done()
 
   describe "copyFile", ->
