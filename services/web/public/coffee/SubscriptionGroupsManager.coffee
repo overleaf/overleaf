@@ -39,7 +39,7 @@ require [
 					type: 'POST'
 					data:
 						email: email
-						_csrf: $("input[name=_csrf]").val()
+						_csrf: csrfToken
 					success: (data)->
 						if data.limitReached
 							alert("You have reached your maximum number of members")
@@ -68,8 +68,6 @@ require [
 						_csrf: csrfToken
 					success: ->
 						$(userRow).parents("tr").fadeOut(250)
-
-
 
 		$form.on 'keypress', (e)->
 			if(e.keyCode == 13)
