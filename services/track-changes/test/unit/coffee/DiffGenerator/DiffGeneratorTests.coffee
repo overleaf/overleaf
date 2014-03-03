@@ -50,6 +50,34 @@ describe "DiffGenerator", ->
 			rewoundContent = @DiffGenerator.rewindUpdates content, updates
 			rewoundContent.should.equal "aaa"
 
+	describe "buildDiff", ->
+		beforeEach ->
+			@diff = [ u: "mock-diff" ]
+			@content = "Hello world"
+			@updates = [
+				{ i: "mock-update-1" }
+				{ i: "mock-update-2" }
+				{ i: "mock-update-3" }
+			]
+			@DiffGenerator.applyUpdateToDiff = sinon.stub().returns(@diff)
+			@result = @DiffGenerator.buildDiff(@content, @updates)
+
+		it "should return the diff", ->
+			@result.should.deep.equal @diff
+
+		it "should build the content into an initial diff", ->
+			@DiffGenerator.applyUpdateToDiff
+				.calledWith([{
+					u: @content
+				}], @updates[0])
+				.should.equal true
+
+		it "should apply each update", ->
+			for update in @updates
+				@DiffGenerator.applyUpdateToDiff
+					.calledWith(sinon.match.any, update)
+					.should.equal true
+
 	describe "applyUpdateToDiff", ->
 		describe "an insert", ->
 			it "should insert into the middle of (u)nchanged text", ->

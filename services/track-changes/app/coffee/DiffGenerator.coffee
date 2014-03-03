@@ -28,6 +28,10 @@ module.exports = DiffGenerator =
 		return content
 
 	buildDiff: (initialContent, updates) ->
+		diff = [ u: initialContent ]
+		for update in updates
+			diff = DiffGenerator.applyUpdateToDiff diff, update
+		return diff
 
 	applyUpdateToDiff: (diff, update) ->
 		position = 0
