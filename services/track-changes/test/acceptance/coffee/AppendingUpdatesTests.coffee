@@ -11,7 +11,7 @@ rclient = require("redis").createClient() # Only works locally for now
 
 flushAndGetCompressedUpdates = (doc_id, callback = (error, updates) ->) ->
 	request.post {
-		url: "http://localhost:3014/doc/#{doc_id}/flush"
+		url: "http://localhost:3015/doc/#{doc_id}/flush"
 	}, (error, response, body) =>
 		response.statusCode.should.equal 204
 		db.docHistory
