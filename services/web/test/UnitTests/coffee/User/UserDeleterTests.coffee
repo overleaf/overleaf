@@ -21,9 +21,12 @@ describe "UserDeleter", ->
 		@ProjectDeleter =
 			deleteUsersProjects: sinon.stub().callsArgWith(1)
 
+		@SubscriptionHandler = 
+			cancelSubscription: sinon.stub().callsArgWith(1)
 		@UserDeleter = SandboxedModule.require modulePath, requires:
 			"../../models/User": User: @User
 			"../../managers/NewsletterManager":  @NewsletterManager
+			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
 
 	describe "deleteUser", ->
@@ -44,4 +47,7 @@ describe "UserDeleter", ->
 				@ProjectDeleter.deleteUsersProjects.calledWith(@user._id).should.equal true
 				done()
 
-
+		it "should unsubscribe the user", (done)->
+			@UserDeleter.deleteUser @user._id, (err)=>
+				@SubscriptionHandler.cancelSubscription.calledWith(@user._id).should.equal true
+				done()
