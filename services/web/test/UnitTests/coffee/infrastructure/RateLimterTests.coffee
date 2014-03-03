@@ -9,17 +9,26 @@ SandboxedModule = require('sandboxed-module')
 describe "FileStoreHandler", ->
 
 	beforeEach ->
-		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
+		@settings = 
+			redis:
+				web:
+					port:"1234"
+					host:"somewhere"
+					password: "password"
 		@redbackInstance = 
 			addCount: sinon.stub()
 
 		@redback = 
 			createRateLimit: sinon.stub().returns(@redbackInstance)
+		@redis = 
+			createClient: ->
+				return auth:->
 
 		@limiter = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
-			"redback": createClient: => @redback
+			"redis": @redis
+			"redback": use: => @redback
 
 		@endpointName = "compiles"
 		@subject = "some project id"

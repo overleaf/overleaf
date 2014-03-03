@@ -1,4 +1,8 @@
-redback = require("redback").createClient()
+settings = require("settings-sharelatex")
+redis = require('redis')
+rclient = redis.createClient(settings.redis.web.port, settings.redis.web.host)
+rclient.auth(settings.redis.web.password)
+redback = require("redback").use(rclient)
 
 module.exports =
 
