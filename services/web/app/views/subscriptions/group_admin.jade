@@ -14,6 +14,7 @@ block content
 		table.table-striped.table.table-striped
 			thead 
 				tr
+					th
 					th email
 					th Name
 					th Registered
@@ -21,20 +22,27 @@ block content
 			tbody#userList
 				-each user in users
 					tr
+						td 
+							input(type="checkbox")
 						td #{user.email}
 						td #{user.first_name} #{user.last_name}
 						td #{!user.holdingAccount}
 						td
-							button.btn.btn-danger(id=user._id) Remove
+							input(type="hidden", name="user_id", value=user._id).user_id {{user._id}}
 
 
-		form.well.form-inline#addUserToGroup
-			div
-				input(name="_csrf", type="hidden", value=csrfToken)
-				input(name="email", type="email", placeholder="someone@email.com")#newEmail.email.input-large &nbsp;
-				button.btn.btn-primary.addUser Add
-			div &nbsp;
-			div Add multiple emails seperated with commas or space.
+		div
+			button.btn.btn-danger#deleteUsers Delete Selected
+		div &nbsp;
+		div
+			form.well.form-inline#addUserToGroup
+				div
+					input(name="_csrf", type="hidden", value=csrfToken)
+					input(name="email", type="email", placeholder="someone@email.com")#newEmail.email.input-large &nbsp;
+					button.btn.btn-primary.addUser Add
+				div &nbsp;
+				div Add multiple emails seperated with commas or space.
+
 
 	- locals.supressDefaultJs = true
 	script(data-main='/js/SubscriptionGroupsManager.js', src='/js/libs/require.js')

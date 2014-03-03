@@ -7,10 +7,13 @@ require [
 
 		tableRowTemplate = '''
 			<tr>
+				<td> <input type="checkbox"></td>
 				<td> {{ email }} </td>
 				<td> {{ first_name }} {{ last_name }} </td>
 				<td> {{ !holdingAccount }} </td>
-				<td><button id="{{_id}}"" class="btn btn-danger">Remove</button></td>
+				<td>
+					<input type="hidden" name="user_id" value="{{user_id}}" class="user_id">
+				</td>
 			</tr>
 		'''
 
@@ -54,16 +57,19 @@ require [
 				sendNewUserToServer(email)
 			$form.find("input").val('')
 
-		removeUser = (e)->
-			button = $(e.target)
-			user_id = button.attr("id")
-			$.ajax
-				url: "/subscription/group/user/#{user_id}"
-				type: 'DELETE'
-				data:
-					_csrf: csrfToken
-				success: ->
-					button.parents("tr").fadeOut(250)
+		removeUsers = (e)->
+			selectedUserRows = $('td input:checked').closest('tr').find(".user_id")
+			selectedUserRows.each (index, userRow)->
+				user_id = $(userRow).val()
+				$.ajax
+					url: "/subscription/group/user/#{user_id}"
+					type: 'DELETE'
+					data:
+						_csrf: csrfToken
+					success: ->
+						$(userRow).parents("tr").fadeOut(250)
+
+
 
 		$form.on 'keypress', (e)->
 			if(e.keyCode == 13)
@@ -71,4 +77,4 @@ require [
 
 		$form.find(".addUser").on 'click', addUser
 
-		$('table').on 'click', '.btn-danger', removeUser
+		$('#deleteUsers').on 'click', removeUsers
