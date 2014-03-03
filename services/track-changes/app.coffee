@@ -10,6 +10,9 @@ app.use express.logger()
 
 app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
+app.get "/status", (req, res, next) ->
+	res.send "track-changes is alive"
+
 app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
 	res.send 500
