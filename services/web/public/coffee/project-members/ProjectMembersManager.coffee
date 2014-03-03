@@ -186,6 +186,7 @@ define [
 				description: @model.get("description")
 				canonicalUrl: @model.get("template.canonicalUrl")
 				isPublished: @model.get("template.isPublished")
+				publishedDate: @model.get("template.publishedDate")
 
 			$(@el).html $(Mustache.to_html(@template, viewModel))
 			@publishedArea = $('#publishedAsTemplateArea')
@@ -201,6 +202,7 @@ define [
 				@model.set("template.isPublished", details.exists)
 				if details.exists
 					@model.set("template.canonicalUrl", details.canonicalUrl)
+					@model.set("template.publishedDate", details.publishedDate)
 					@publishedArea.show()
 					@unpublishedArea.hide()
 				else
