@@ -171,6 +171,7 @@ define [
 
 		events:
 			"click #publishProjectAsTemplate": "publishProjectAsTemplate"
+			"click #republishProjectAsTemplate": "publishProjectAsTemplate"
 			"click #unPublishProjectAsTemplate": "unPublishProjectAsTemplate"
 			"blur #projectDescription"	: "updateDescription"
 
@@ -218,6 +219,7 @@ define [
 		publishProjectAsTemplate: ->
 			@showWorking()
 			@unpublishedArea.hide()
+			@publishedArea.hide()
 			@ide.socket.emit "publishProjectAsTemplate", @ide.user.get("id"), (err)=>
 				@hideWorking()
 				if err?
