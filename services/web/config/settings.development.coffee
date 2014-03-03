@@ -91,7 +91,7 @@ module.exports =
 		clsi:
 			url: "http://localhost:3013"
 		templates_api:
-			url: "http://localhost:3014"
+			url: "http://localhost:3007"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
