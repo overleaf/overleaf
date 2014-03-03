@@ -3,5 +3,5 @@ module.exports =
 		url: 'mongodb://127.0.0.1/sharelatex'
 	internal:
 		trackchanges:
-			port: 3014
+			port: 3015
 			host: "localhost"

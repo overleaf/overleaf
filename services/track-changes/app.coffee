@@ -17,7 +17,7 @@ app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
 	res.send 500
 
-port = Settings.internal?.trackchanges?.port or 3014
+port = Settings.internal?.trackchanges?.port or 3015
 host = Settings.internal?.trackchanges?.host or "localhost"
 app.listen port, host, (error) ->
 	if error?
