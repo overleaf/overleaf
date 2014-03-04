@@ -22,7 +22,8 @@ describe "PersistorManagerTests", ->
 	describe "test s3 mixin", ->
 		beforeEach ->
 			@settings =
-				filestoreBackend: "s3"
+				filestore:
+					backend: "s3"
 			@requires =
 				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings
@@ -81,7 +82,8 @@ describe "PersistorManagerTests", ->
 	describe "test invalid mixins", ->
 		it "should not load an invalid wrapper", (done) ->
 			@settings =
-				filestoreBackend:"magic"
+				filestore:
+					backend:"magic"
 			@requires =
 				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings

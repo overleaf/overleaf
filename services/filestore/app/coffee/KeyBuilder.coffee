@@ -20,13 +20,13 @@ module.exports =
 	userFileKey: (req, res, next)->
 		{project_id, file_id} = req.params
 		req.key = "#{project_id}/#{file_id}"
-		req.bucket = settings.s3.buckets.user_files
+		req.bucket = settings.filestore.stores.user_files
 		next()
 		
 	templateFileKey: (req, res, next)->
 		{template_id, format, version} = req.params
 		req.key = "#{template_id}/#{version}/#{format}"
-		req.bucket = settings.s3.buckets.template_files
+		req.bucket = settings.filestore.stores.template_files
 		req.version = version
 		opts = req.query
 		next()

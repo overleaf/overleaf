@@ -24,8 +24,8 @@ printSockets()
 buildDefaultOptions = (bucketName, method, key)->
 	return {
 			aws:
-				key: settings.s3.key
-				secret: settings.s3.secret
+				key: settings.filestore.s3.key
+				secret: settings.filestore.s3.secret
 				bucket: bucketName
 			method: method
 			timeout: thirtySeconds
@@ -36,8 +36,8 @@ module.exports =
 
 	sendFile: (bucketName, key, fsPath, callback)->
 		s3Client = knox.createClient
-			key: settings.s3.key
-			secret: settings.s3.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		putEventEmiter = s3Client.putFile fsPath, key, (err, res)->
 			if err?
@@ -70,8 +70,8 @@ module.exports =
 	getFileStream: (bucketName, key, callback = (err, res)->)->
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
-			key: settings.s3.key
-			secret: settings.s3.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Stream = s3Client.get(key)
 		s3Stream.end()
@@ -84,8 +84,8 @@ module.exports =
 	copyFile: (bucketName, sourceKey, destKey, callback)->
 		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "copying file in s3"
 		s3Client = knox.createClient
-			key: settings.s3.key
-			secret: settings.s3.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.copyFile sourceKey, destKey, (err)->
 			if err?
@@ -102,8 +102,8 @@ module.exports =
 
 	deleteDirectory: (bucketName, key, callback)->
 		s3Client = knox.createClient
-			key: settings.s3.key
-			secret: settings.s3.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.list prefix:key, (err, data)->
 			keys = _.map data.Contents, (entry)->
