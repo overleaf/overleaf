@@ -88,7 +88,6 @@ define [
 				completions.push {
 					caption: caption
 					snippet: snippet
-					meta: "snippet"
 				}
 
 			callback null, completions

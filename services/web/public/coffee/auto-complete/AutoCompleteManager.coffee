@@ -31,9 +31,7 @@ define [
 				enableBasicAutocompletion: true,
 				enableSnippets: true
 			})
-			snippetManager = @aceEditor.completers[0]
-			console.log snippetManager
-			@aceEditor.completers = [snippetManager, @suggestionManager]
+			@aceEditor.completers = [@suggestionManager]
 
 			@bindToEditorEvents()
 
@@ -55,4 +53,7 @@ define [
 					if commandFragment?
 					 	setTimeout () =>
 					 		@aceEditor.execCommand("startAutocomplete")
+					 		$(@aceEditor.completer.popup.container)
+					 			.find(".ace_content")
+					 			.css("font-size": window.userSettings.fontSize + "px")
 					 	, 0
