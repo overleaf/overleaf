@@ -131,3 +131,33 @@ describe "MongoManager", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+	describe "getUpdatesBetweenDates", ->
+		beforeEach ->
+			@updates = ["mock-update"]
+			@db.docHistory = {}
+			@db.docHistory.find = sinon.stub().returns @db.docHistory
+			@db.docHistory.sort = sinon.stub().returns @db.docHistory
+			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
+
+			@from = new Date(Date.now())
+			@to = new Date(Date.now() + 100000)
+
+			@MongoManager.getUpdatesBetweenDates @doc_id, @from, @to, @callback
+
+		it "should find the updates for the doc", ->
+			@db.docHistory.find
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+					"meta.start_ts": { $gte: @from }
+					"meta.end_ts": { $lte: @to }
+				})
+				.should.equal true
+
+		it "should sort in descending timestamp order", ->
+			@db.docHistory.sort
+				.calledWith("meta.end_ts": -1)
+				.should.equal true
+
+		it "should call the call back with the updates", ->
+			@callback.calledWith(null, @updates).should.equal true

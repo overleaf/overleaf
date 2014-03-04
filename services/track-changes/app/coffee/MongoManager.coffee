@@ -38,3 +38,17 @@ module.exports = MongoManager =
 			meta:   update.meta
 			v:      update.v
 		}, callback
+
+	getUpdatesBetweenDates:(doc_id, fromDate, toDate, callback = (error, updates) ->) ->
+		db.docHistory
+			.find({
+				doc_id: ObjectId(doc_id.toString())
+				"meta.start_ts" : { $gte: fromDate }
+				"meta.end_ts"   : { $lte: toDate }
+			})
+			.sort( "meta.end_ts": -1 )
+			.toArray callback
+
+	ensureIndices: (callback = (error) ->) ->
+		db.docHistory.ensureIndex { doc_id: 1, "meta.start_ts": 1, "meta.end_ts": 1 }, callback
+

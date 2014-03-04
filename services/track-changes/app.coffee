@@ -2,6 +2,8 @@ Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 logger.initialize("track-changes")
 
+require("./app/js/MongoManager").ensureIndices()
+
 HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()
