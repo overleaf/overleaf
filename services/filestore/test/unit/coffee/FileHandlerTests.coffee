@@ -22,6 +22,7 @@ describe "FileHandler", ->
 			insertFile: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
+			deleteFile: sinon.stub()
 		@FileConverter =
 			convert: sinon.stub()
 			thumbnail: sinon.stub()
@@ -134,16 +135,18 @@ describe "FileHandler", ->
 	describe "_getConvertedFileAndCache", ->
 
 		it "should _convertFile ", (done)->
+			@stubbedStream = {"something":"here"}
 			@PersistorManager.sendFile = sinon.stub().callsArgWith(3)
-			@PersistorManager.getFileStream = sinon.stub().callsArgWith(2)
+			@PersistorManager.getFileStream = sinon.stub().callsArgWith(2, null, @stubbedStream)
 			@convetedKey = @key+"converted"
 			@handler._convertFile = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@ImageOptimiser.compressPng = sinon.stub().callsArgWith(1)
-			@handler._getConvertedFileAndCache @bucket, @key, @convetedKey, {}, =>
+			@handler._getConvertedFileAndCache @bucket, @key, @convetedKey, {}, (err, fsStream)=>
 				@handler._convertFile.called.should.equal true
 				@PersistorManager.sendFile.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
 				@PersistorManager.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
 				@ImageOptimiser.compressPng.calledWith(@stubbedPath).should.equal true
+				fsStream.should.equal @stubbedStream
 				done()
 
 	describe "_convertFile", ->
@@ -152,23 +155,27 @@ describe "FileHandler", ->
 			@FileConverter.thumbnail.callsArgWith(1, null, @formattedStubbedPath)
 			@FileConverter.preview.callsArgWith(1, null, @formattedStubbedPath)
 			@handler._writeS3FileToDisk = sinon.stub().callsArgWith(2, null, @stubbedPath)
+			@LocalFileWriter.deleteFile.callsArgWith(1)
 
 		it "should call thumbnail on the writer path if style was thumbnail was specified", (done)->
 			@handler._convertFile @bucket, @key, style:"thumbnail", (err, path)=>
 				path.should.equal @formattedStubbedPath
 				@FileConverter.thumbnail.calledWith(@stubbedPath).should.equal true
+				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
 
 		it "should call preview on the writer path if style was preview was specified", (done)->
 			@handler._convertFile @bucket, @key, style:"preview", (err, path)=>
 				path.should.equal @formattedStubbedPath
 				@FileConverter.preview.calledWith(@stubbedPath).should.equal true
+				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
 
 		it "should call convert on the writer path if a format was specified", (done)->
 			@handler._convertFile @bucket, @key, format:@format, (err, path)=>
 				path.should.equal @formattedStubbedPath
 				@FileConverter.convert.calledWith(@stubbedPath, @format).should.equal true
+				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
 
 

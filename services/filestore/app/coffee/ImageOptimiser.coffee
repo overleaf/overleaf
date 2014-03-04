@@ -1,7 +1,6 @@
 exec = require('child_process').exec
 logger = require("logger-sharelatex")
 
-
 module.exports = 
 
 	compressPng: (localPath, callback)->

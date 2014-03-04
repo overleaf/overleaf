@@ -45,7 +45,7 @@ module.exports =
 				return callback(err)
 			if !res?
 				logger.err err:err, res:res, bucketName:bucketName, key:key, fsPath:fsPath, "no response from s3 put file"
-				callback("no response from put file")
+				return callback("no response from put file")
 			if res.statusCode != 200
 				logger.err bucketName:bucketName, key:key, fsPath:fsPath, "non 200 response from s3 putting file"
 				return callback("non 200 response from s3 on put file")

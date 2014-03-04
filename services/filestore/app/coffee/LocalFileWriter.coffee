@@ -26,6 +26,7 @@ module.exports =
 			callback err
 
 	deleteFile: (fsPath, callback)->
+		logger.log fsPath:fsPath, "removing local temp file"
 		fs.unlink fsPath, callback
 
 	_getPath : (key)->
