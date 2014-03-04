@@ -104,9 +104,11 @@ module.exports = (grunt) ->
 		Helpers.checkLatexmk @async()
 	grunt.registerTask "check:s3", "Check that Amazon S3 credentials are configured", () ->
 		Helpers.checkS3 @async()
+	grunt.registerTask "check:fs", "Check that local filesystem options are configured", () ->
+		Helpers.checkFS @async()
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
-	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3"]
+	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs"]
 
 	Helpers =
 		installService: (repo_src, dir, callback = (error) ->) ->
@@ -222,37 +224,62 @@ module.exports = (grunt) ->
 				callback(error)
 
 		checkS3: (callback = (error) ->) ->
-			grunt.log.write "Checking S3 credentials... "
 			Settings = require "settings-sharelatex"
-			try
-				client = knox.createClient({
-					key: Settings.s3.key
-					secret: Settings.s3.secret
-					bucket: Settings.s3.buckets.user_files
-				})
-			catch e
-				grunt.log.error "FAIL."
-				grunt.log.errorlns """
-				Please configure you Amazon S3 credentials in config/settings.development.coffee
-
-				Amazon S3 (Simple Storage Service) is a cloud storage service provided by
-				Amazon. ShareLaTeX uses S3 for storing binary files like images. You can 
-				sign up for an account and find out more at:
-
-				    http://aws.amazon.com/s3/
-                  
-				"""
-				return callback()
-
-			client.getFile "does-not-exist", (error, response) ->
-				unless response? and response.statusCode == 404
+			if Settings.filestore.backend==""
+				grunt.log.writeln "No backend specified. Assuming Amazon S3"
+				Settings.filestore.backend = "s3"
+			if Settings.filestore.backend=="s3"
+				grunt.log.write "Checking S3 credentials... "
+				try
+					client = knox.createClient({
+						key: Settings.filestore.s3.key
+						secret: Settings.filestore.s3.secret
+						bucket: Settings.filestore.stores.user_files
+					})
+				catch e
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
-					Could not connect to Amazon S3. Please check your credentials.
+					Please configure you Amazon S3 credentials in config/settings.development.coffee
+
+					Amazon S3 (Simple Storage Service) is a cloud storage service provided by
+					Amazon. ShareLaTeX uses S3 for storing binary files like images. You can 
+					sign up for an account and find out more at:
+
+							http://aws.amazon.com/s3/
+										
 					"""
-				else
-					grunt.log.write "OK."
+					return callback()
+				client.getFile "does-not-exist", (error, response) ->
+					unless response? and response.statusCode == 404
+						grunt.log.error "FAIL."
+						grunt.log.errorlns """
+						Could not connect to Amazon S3. Please check your credentials.
+						"""
+					else
+						grunt.log.write "OK."
+					callback()
+			else
+				grunt.log.writeln "Filestore other than S3 configured. Not checking S3."
 				callback()
+
+		checkFS: (callback = (error) ->) ->
+			Settings = require "settings-sharelatex"
+			if Settings.filestore.backend=="fs"
+				grunt.log.write "Checking FS configuration..."
+				fs = require("fs")
+				fs.exists Settings.filestore.stores.user_files, (exists) ->
+					if exists
+						grunt.log.write "OK."
+					else
+						grunt.log.error "FAIL."
+						grunt.log.errorlns """
+						Could not find directory "#{Settings.filestore.stores.user_files}". 
+						Please check your configuration.
+						"""
+			else
+				grunt.log.writeln "Filestore other than FS configured. Not checking FS."
+			callback()
+
 
 		checkMake: (callback = (error) ->) ->
 			grunt.log.write "Checking make is installed... "
