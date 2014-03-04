@@ -5,3 +5,6 @@ module.exports =
 		trackchanges:
 			port: 3015
 			host: "localhost"
+	apis:
+		documentupdater:
+			url: "http://localhost:3003"

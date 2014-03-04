@@ -12,6 +12,8 @@ app.use express.logger()
 
 app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
+app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
+
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 

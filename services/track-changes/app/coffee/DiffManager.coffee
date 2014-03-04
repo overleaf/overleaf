@@ -2,6 +2,7 @@ HistoryManager = require "./HistoryManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 MongoManager = require "./MongoManager"
 DiffGenerator = require "./DiffGenerator"
+logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromDate, toDate, callback = (error, lines, version, updates) ->) ->
@@ -14,20 +15,26 @@ module.exports = DiffManager =
 					callback(null, lines, version, updates)
 	
 	getDiff: (project_id, doc_id, fromDate, toDate, callback = (error, diff) ->) ->
+		logger.log project_id: project_id, doc_id: doc_id, from: fromDate, to: toDate, "getting diff"
 		DiffManager.getLatestDocAndUpdates project_id, doc_id, fromDate, null, (error, lines, version, updates) ->
 			return callback(error) if error?
-			lastUpdate = updates[updates.length - 1]
+
+			logger.log lines: lines, version: version, updates: updates, "got doc and updates"
+
+			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version
 				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
-			
 
 			updatesToApply = []
-			for update in updates
-				if update.meta.end_ts <= toDate
+			for update in updates.reverse()
+				if update.meta.start_ts <= toDate
 					updatesToApply.push update
+
+			logger.log project_id: project_id, doc_id: doc_id, updatesToApply: updatesToApply, "got updates to apply"
 
 			try
 				startingContent = DiffGenerator.rewindUpdates lines.join("\n"), updates
+				logger.log project_id: project_id, doc_id: doc_id, startingContent: startingContent, "rewound doc"
 				diff = DiffGenerator.buildDiff startingContent, updatesToApply
 			catch e
 				return callback(e)

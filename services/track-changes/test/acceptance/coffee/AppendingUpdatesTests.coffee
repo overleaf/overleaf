@@ -3,31 +3,19 @@ chai = require("chai")
 chai.should()
 expect = chai.expect
 mongojs = require "../../../app/js/mongojs"
-db = mongojs.db
 ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 request = require "request"
 rclient = require("redis").createClient() # Only works locally for now
 
-flushAndGetCompressedUpdates = (doc_id, callback = (error, updates) ->) ->
-	request.post {
-		url: "http://localhost:3015/doc/#{doc_id}/flush"
-	}, (error, response, body) =>
-		response.statusCode.should.equal 204
-		db.docHistory
-			.find(doc_id: ObjectId(doc_id))
-			.sort("meta.end_ts": 1)
-			.toArray callback
-
-pushRawUpdates = (doc_id, updates, callback = (error) ->) ->
-	rclient.rpush "UncompressedHistoryOps:#{doc_id}", (JSON.stringify(u) for u in updates)..., callback
+TrackChangesClient = require "./helpers/TrackChangesClient"
 
 describe "Appending doc ops to the history", ->
 	describe "when the history does not exist yet", ->
 		before (done) ->
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
-			pushRawUpdates @doc_id, [{
+			TrackChangesClient.pushRawUpdates @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
 				v: 3
@@ -41,7 +29,7 @@ describe "Appending doc ops to the history", ->
 				v: 5
 			}], (error) =>
 				throw error if error?
-				flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
 
@@ -57,7 +45,7 @@ describe "Appending doc ops to the history", ->
 		beforeEach (done) ->
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
-			pushRawUpdates @doc_id, [{
+			TrackChangesClient.pushRawUpdates @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
 				v: 3
@@ -71,13 +59,13 @@ describe "Appending doc ops to the history", ->
 				v: 5
 			}], (error) =>
 				throw error if error?
-				flushAndGetCompressedUpdates @doc_id, (error, updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, updates) =>
 					throw error if error?
 					done()
 
 		describe "when the updates are recent and from the same user", ->
 			beforeEach (done) ->
-				pushRawUpdates @doc_id, [{
+				TrackChangesClient.pushRawUpdates @doc_id, [{
 					op: [{ i: "b", p: 6 }]
 					meta: { ts: Date.now(), user_id: @user_id }
 					v: 6
@@ -91,7 +79,7 @@ describe "Appending doc ops to the history", ->
 					v: 8
 				}], (error) =>
 					throw error if error?
-					flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+					TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
 
@@ -107,7 +95,7 @@ describe "Appending doc ops to the history", ->
 		describe "when the updates are far apart", ->
 			beforeEach (done) ->
 				oneDay = 24 * 60 * 60 * 1000
-				pushRawUpdates @doc_id, [{
+				TrackChangesClient.pushRawUpdates @doc_id, [{
 					op: [{ i: "b", p: 6 }]
 					meta: { ts: Date.now() + oneDay, user_id: @user_id }
 					v: 6
@@ -121,7 +109,7 @@ describe "Appending doc ops to the history", ->
 					v: 8
 				}], (error) =>
 					throw error if error?
-					flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+					TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
 
@@ -147,9 +135,9 @@ describe "Appending doc ops to the history", ->
 				}
 				@expectedOp.i = "a" + @expectedOp.i
 
-			pushRawUpdates @doc_id, updates, (error) =>
+			TrackChangesClient.pushRawUpdates @doc_id, updates, (error) =>
 				throw error if error?
-				flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
 

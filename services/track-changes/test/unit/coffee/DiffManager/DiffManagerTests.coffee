@@ -53,10 +53,12 @@ describe "DiffManager", ->
 			@lines = [ "hello", "world" ]
 			@version = 42
 			@updates = [
-				{ op: "mock-1", v: 41, meta: { end_ts: new Date(@to.getTime() - 10)} }
-				{ op: "mock-2", v: 42, meta: { end_ts: new Date(@to.getTime() + 10)} }
+				{ op: "mock-4", v: 42, meta: { start_ts: new Date(@to.getTime() + 20)} }
+				{ op: "mock-3", v: 41, meta: { start_ts: new Date(@to.getTime() + 10)} }
+				{ op: "mock-2", v: 40, meta: { start_ts: new Date(@to.getTime() - 10)} }
+				{ op: "mock-1", v: 39, meta: { start_ts: new Date(@to.getTime() - 20)} }
 			]
-			@diffed_updates = @updates.slice(0,1)
+			@diffed_updates = @updates.slice(2)
 			@rewound_content = "rewound-content"
 			@diff = [ u: "mock-diff" ]
 			
@@ -79,7 +81,7 @@ describe "DiffManager", ->
 
 			it "should generate the diff", ->
 				@DiffGenerator.buildDiff
-					.calledWith(@rewound_content, @diffed_updates)
+					.calledWith(@rewound_content, @diffed_updates.reverse())
 					.should.equal true
 
 			it "should call the callback with the diff", ->
@@ -88,7 +90,7 @@ describe "DiffManager", ->
 		describe "with mismatching versions", ->
 			beforeEach ->
 				@version = 42
-				@updates = [ { op: "mock-1", v: 39 }, { op: "mock-1", v: 40 } ]
+				@updates = [ { op: "mock-1", v: 40 }, { op: "mock-1", v: 39 } ]
 				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @lines, @version, @updates)
 				@DiffManager.getDiff @project_id, @doc_id, @from, @to, @callback
 
