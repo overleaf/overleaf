@@ -8,7 +8,7 @@ describe "TrackChangesManager", ->
 		@TrackChangesManager = SandboxedModule.require modulePath, requires:
 			"request": @request = {}
 			"settings-sharelatex": @Settings = {}
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./RedisManager": @RedisManager = {}
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -76,6 +76,21 @@ describe "TrackChangesManager", ->
 						.calledWith(@doc_id)
 						.should.equal true
 
+			describe "when TrackChangesManager errors", ->
+				beforeEach ->
+					@RedisManager.pushUncompressedHistoryOp =
+						sinon.stub().callsArgWith(2, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
+					@TrackChangesManager.flushDocChanges = sinon.stub().callsArgWith(1, @error = new Error("oops"))
+					@TrackChangesManager.pushUncompressedHistoryOp @doc_id, @op, @callback
+
+				it "should log out the error", ->
+					@logger.error
+						.calledWith(
+							err: @error
+							doc_id: @doc_id
+							"error flushing doc to track changes api"
+						)
+						.should.equal true
 
 		describe "when the doc is over the load manager threshold", ->
 			beforeEach ->
