@@ -16,9 +16,9 @@ module.exports =
       callback err
 
   sendStream: ( location, target, sourceStream, callback = (err)->) ->
-    logger.log location:location, target:target, source:sourceStream, "sending file stream"
+    logger.log location:location, target:target, "sending file stream"
     sourceStream.on "error", (err)->
-      logger.err location:location, target:target, source:sourceStream, err:err "error on stream to send"
+      logger.err location:location, target:target, err:err "error on stream to send"
     LocalFileWriter.writeStream sourceStream, null, (err, fsPath)=>
       if err?
         logger.err  location:location, target:target, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
