@@ -6,6 +6,10 @@ approvedFormats = ["png"]
 
 twentySeconds = 20 * 1000
 
+childProcessOpts =
+	killSignal: "SIGKILL"
+	timeout: twentySeconds
+
 module.exports =
 
 	convert: (sourcePath, requestedFormat, callback)->
@@ -17,9 +21,7 @@ module.exports =
 			err = new Error("invalid format requested")
 			return callback err
 		args = "nice convert -flatten -density 300 #{sourcePath} #{destPath}"
-		opts =
-			timeout: twentySeconds
-		exec args, opts, (err, stdout, stderr)->
+		exec args, childProcessOpts, (err, stdout, stderr)->
 			timer.done()
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, destPath:destPath,  "something went wrong converting file"
@@ -37,9 +39,7 @@ module.exports =
 			width: 424
 			height: 300
 		args = "nice convert -flatten -background white -resize 260x -density 300 #{sourcePath} #{destPath}"
-		opts =
-			timeout: twentySeconds
-		exec args, opts,(err, stdout, stderr)->
+		exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
 			else
@@ -56,9 +56,7 @@ module.exports =
 			width: 600
 			height: 849
 		args = "nice convert -flatten -background white -resize 548x -density 300 #{sourcePath} #{destPath}"
-		opts =
-			timeout: twentySeconds
-		exec args, opts,(err, stdout, stderr)->
+		exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, destPath:destPath, "something went wrong converting file to preview"
 			else
