@@ -208,9 +208,9 @@ describe "CompileManager", ->
 			@ratelimiter.addCount.callsArgWith(1, null, true)
 			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
 				args = @ratelimiter.addCount.args[0][0]
-				args.throttle.should.equal 5
+				args.throttle.should.equal 10
 				args.subjectName.should.equal "everyone"
-				args.timeInterval.should.equal 10
+				args.timeInterval.should.equal 15
 				args.endpointName.should.equal "auto_compile"
 				canCompile.should.equal true
 				done()
