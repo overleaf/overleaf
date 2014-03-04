@@ -1,0 +1,53 @@
+should = require('chai').should()
+SandboxedModule = require('sandboxed-module')
+assert = require('assert')
+path = require('path')
+sinon = require('sinon')
+modulePath = path.join __dirname, "../../../../app/js/Features/Email/EmailTemplator"
+expect = require("chai").expect
+_ = require('underscore')
+_.templateSettings =
+  interpolate: /\{\{(.+?)\}\}/g
+
+describe "Email Templator ", ->
+
+	beforeEach ->
+
+		@settings = {}
+		@EmailTemplator = SandboxedModule.require modulePath, requires:
+			"settings-sharelatex":@settings
+			"logger-sharelatex": log:->
+
+	describe "welcomeEmail", ->
+
+		beforeEach ->
+			@opts =
+				to:"bob@bob.com"
+				first_name:"bob"
+			@email = @EmailTemplator.buildEmail("welcome", @opts)
+
+		it "should insert the first_name into the template", ->
+			@email.html.indexOf(@opts.first_name).should.not.equal -1
+
+		it "should not have undefined in it", ->
+			@email.html.indexOf("undefined").should.equal -1
+
+	describe "projectSharedWithYou", ->
+		beforeEach ->
+			@opts =
+				to:"bob@bob.com"
+				first_name:"bob"
+				owner:
+					email:"sally@hally.com"
+				project:
+					url:"http://www.project.com"
+					name:"standard project"
+			@email = @EmailTemplator.buildEmail("projectSharedWithYou", @opts)
+
+		it "should insert the owner email into the template", ->
+			@email.html.indexOf(@opts.owner.email).should.not.equal -1
+			@email.subject.indexOf(@opts.owner.email).should.not.equal -1
+
+		it "should not have undefined in it", ->
+			@email.html.indexOf("undefined").should.equal -1
+			@email.subject.indexOf("undefined").should.equal -1
