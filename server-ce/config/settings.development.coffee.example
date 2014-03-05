@@ -21,29 +21,27 @@ module.exports =
 	#
 	# ShareLaTeX needs somewhere to store binary files like images.
 	# There are currently two options:
-	# Amazon S3 (the default)
-	# local filesystem
-	
+	#     Your local filesystem (the default)
+	#     Amazon S3
 	filestore:
 		# which backend persistor to use.
 		# choices are 
 		# s3 - Amazon S3
 		# fs - local filesystem
-		backend: "s3"	
+		backend: "fs"	
 		stores:
-		  # where to store user and template binary files
+			# where to store user and template binary files
 			#
-			# For Amazon S3 this is the bucket name to store binary files in
-			# Must contain full url like: <bucketname>.s3.amazonaws.com
+			# For Amazon S3 this is the bucket name to store binary files
 			#
 			# For local filesystem this is the directory to store the files in.
-			# Must contain full path, e.g. "/var/lib/sharelatex/data"
 			# This path must exist, not be tmpfs and be writable to by the user sharelatex is run as.
-			user_files: ""
-		s3:
-			# if you are using S3, then fill in your S3 details below
-			key: ""
-			secret: ""
+			user_files: Path.resolve(__dirname + "/../user_files")
+		# Uncomment if you need to configure your S3 credentials
+		# s3:
+		# 	# if you are using S3, then fill in your S3 details below
+		# 	key: ""
+		# 	secret: ""
 
 	# Databases
 	# ---------
