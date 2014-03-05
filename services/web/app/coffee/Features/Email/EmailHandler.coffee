@@ -1,14 +1,14 @@
-EmailTemplator = require "./EmailTemplator"
+settings = require("settings-sharelatex")
+EmailBuilder = require "./EmailBuilder"
 EmailSender = require "./EmailSender"
 
 module.exports =
 
 	sendEmail : (emailType, opts, callback)->
-		email = EmailTemplator.buildEmail emailType, opts
+		email = EmailBuilder.buildEmail emailType, opts
+		if email.type == "lifecycle" and !settings.email.lifecycle
+			return callback()
 		opts.html = email.html
 		opts.subject = email.subject
 		EmailSender.sendEmail opts, (err)->
 			callback(err)
-
-# module.exports.sendEmail "welcome", {first_name:"henry", to:"henry.oswald@gmail.com"}, ->
-

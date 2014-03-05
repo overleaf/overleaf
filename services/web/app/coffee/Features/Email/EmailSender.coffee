@@ -4,8 +4,8 @@ Settings = require('settings-sharelatex')
 metrics = require("../../infrastructure/Metrics")
 ses = require('node-ses')
 
-if Settings.ses?.key? and Settings.ses?.key != "" and Settings.ses?.secret? and Settings.ses?.secret != ""
-	client = ses.createClient({ key: Settings.ses.key, secret: Settings.ses.secret });
+if Settings.email?.ses? and Settings.email.ses?.key? and Settings.email.ses?.key != "" and Settings.email.ses?.secret? and Settings.email.ses?.secret != ""
+	client = ses.createClient({ key: Settings.email.ses.key, secret: Settings.email.ses.secret });
 else
 	logger.warn "AWS SES credentials are not configured. No emails will be sent."
 	client =

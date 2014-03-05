@@ -26,6 +26,7 @@ module.exports =
 		secret: ""
 		bucketName : ""
 
+
 	# Databases
 	# ---------
 	mongo:
@@ -155,11 +156,16 @@ module.exports =
 	# ShareLaTeX's help desk is provided by tenderapp.com
 	# tenderUrl: ""
 	#
-	# ShareLaTeX uses Amazon's SES api to send transactional emails.
-	# Uncomment these lines and provide your credentials to be able to send emails.
-	# ses:
-	# 	"key":""
-	# 	"secret":""
+
+	# email:
+	#	fromAddress: ""
+	# 	replyTo: ""
+	#	lifecycle: false
+	#	ShareLaTeX uses Amazon's SES api to send transactional emails.
+	#	Uncomment these lines and provide your credentials to be able to send emails.
+	#	ses:
+	#		"key":""
+	#		"secret":""
 
 	# Production Settings
 	# -------------------
