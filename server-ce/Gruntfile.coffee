@@ -239,7 +239,7 @@ module.exports = (grunt) ->
 				catch e
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
-					Please configure you Amazon S3 credentials in config/settings.development.coffee
+					Please configure your Amazon S3 credentials in config/settings.development.coffee
 
 					Amazon S3 (Simple Storage Service) is a cloud storage service provided by
 					Amazon. ShareLaTeX uses S3 for storing binary files like images. You can 
