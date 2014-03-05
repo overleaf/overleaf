@@ -1,4 +1,4 @@
-HistoryManager = require "./HistoryManager"
+UpdatesManager = require "./UpdatesManager"
 DiffManager = require "./DiffManager"
 logger = require "logger-sharelatex"
 
@@ -6,7 +6,7 @@ module.exports = HttpController =
 	flushUpdatesWithLock: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		logger.log doc_id: doc_id, "compressing doc history"
-		HistoryManager.processUncompressedUpdatesWithLock doc_id, (error) ->
+		UpdatesManager.processUncompressedUpdatesWithLock doc_id, (error) ->
 			return next(error) if error?
 			res.send 204
 
@@ -31,5 +31,18 @@ module.exports = HttpController =
 	getUpdates: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		
+
+		if req.query.to?
+			to = parseInt(req.query.to, 10)
+		if req.query.limit?
+			limit = parseInt(req.query.limit, 10)
+
+		UpdatesManager.getUpdates doc_id, to: to, limit: limit, (error, updates) ->
+			return next(error) if error?
+			formattedUpdates = for update in updates
+				{
+					meta: update.meta
+				}
+			res.send JSON.stringify updates: formattedUpdates
+
 

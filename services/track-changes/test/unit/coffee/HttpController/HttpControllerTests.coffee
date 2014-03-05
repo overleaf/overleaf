@@ -9,7 +9,7 @@ describe "HttpController", ->
 	beforeEach ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": { log: sinon.stub() }
-			"./HistoryManager": @HistoryManager = {}
+			"./UpdatesManager": @UpdatesManager = {}
 			"./DiffManager": @DiffManager = {}
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
@@ -23,11 +23,11 @@ describe "HttpController", ->
 					doc_id: @doc_id
 			@res =
 				send: sinon.stub()
-			@HistoryManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
 			@HttpController.flushUpdatesWithLock @req, @res, @next
 
 		it "should process the updates", ->
-			@HistoryManager.processUncompressedUpdatesWithLock
+			@UpdatesManager.processUncompressedUpdatesWithLock
 				.calledWith(@doc_id)
 				.should.equal true
 
@@ -58,3 +58,37 @@ describe "HttpController", ->
 
 		it "should return the diff", ->
 			@res.send.calledWith(JSON.stringify(diff: @diff)).should.equal true
+
+	describe "getUpdates", ->
+		beforeEach ->
+			@to = Date.now()
+			@limit = 10
+			@req =
+				params:
+					doc_id: @doc_id
+					project_id: @project_id
+				query:
+					to:    @to.toString()
+					limit: @limit.toString()
+			@res =
+				send: sinon.stub()
+			@rawUpdates = [{
+				v:      @v    = 42
+				op:     @op   = "mock-op"
+				meta:   @meta = "mock-meta"
+				doc_id: @doc_id
+			}]
+			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(2, null, @rawUpdates)
+			@HttpController.getUpdates @req, @res, @next
+
+		it "should get the updates", ->
+			@UpdatesManager.getUpdates
+				.calledWith(@doc_id, to: @to, limit: @limit)
+				.should.equal true
+
+		it "should return the updates", ->
+			updates = for update in @rawUpdates
+				{
+					meta: @meta
+				}
+			@res.send.calledWith(JSON.stringify(updates: updates)).should.equal true

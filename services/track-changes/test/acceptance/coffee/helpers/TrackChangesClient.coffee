@@ -22,3 +22,10 @@ module.exports = TrackChangesClient =
 		}, (error, response, body) =>
 			response.statusCode.should.equal 200
 			callback null, JSON.parse(body)
+
+	getUpdates: (project_id, doc_id, options, callback = (error, body) ->) ->
+		request.get {
+			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/updates?to=#{options.to}&limit=#{options.limit}"
+		}, (error, response, body) =>
+			response.statusCode.should.equal 200
+			callback null, JSON.parse(body)

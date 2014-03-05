@@ -2,12 +2,12 @@ sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
 expect = chai.expect
-modulePath = "../../../../app/js/HistoryManager.js"
+modulePath = "../../../../app/js/UpdatesManager.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "HistoryManager", ->
+describe "UpdatesManager", ->
 	beforeEach ->
-		@HistoryManager = SandboxedModule.require modulePath, requires:
+		@UpdatesManager = SandboxedModule.require modulePath, requires:
 			"./UpdateCompressor": @UpdateCompressor = {}
 			"./MongoManager" : @MongoManager = {}
 			"./RedisManager" : @RedisManager = {}
@@ -21,7 +21,7 @@ describe "HistoryManager", ->
 			beforeEach ->
 				@MongoManager.popLastCompressedUpdate = sinon.stub()
 				@MongoManager.insertCompressedUpdates = sinon.stub()
-				@HistoryManager.compressAndSaveRawUpdates @doc_id, [], @callback
+				@UpdatesManager.compressAndSaveRawUpdates @doc_id, [], @callback
 
 			it "should not need to access the database", ->
 				@MongoManager.popLastCompressedUpdate.called.should.equal false
@@ -38,7 +38,7 @@ describe "HistoryManager", ->
 				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-				@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+				@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
 			it "should try to pop the last compressed op", ->
 				@MongoManager.popLastCompressedUpdate
@@ -70,7 +70,7 @@ describe "HistoryManager", ->
 			describe "when the raw ops start where the existing history ends", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
-					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
 				it "should try to pop the last compressed op", ->
 					@MongoManager.popLastCompressedUpdate
@@ -94,7 +94,7 @@ describe "HistoryManager", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 
-					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
 				it "should only compress the more recent raw ops", ->
 					@UpdateCompressor.compressRawUpdates
@@ -104,7 +104,7 @@ describe "HistoryManager", ->
 			describe "when the raw ops do not follow from the last compressed op version", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 13, op: "mock-op-13" }]
-					@HistoryManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
 
 				it "should call the callback with an error", ->
 					@callback
@@ -122,17 +122,17 @@ describe "HistoryManager", ->
 			beforeEach ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
-				@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
 				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
-				@HistoryManager.processUncompressedUpdates @doc_id, @callback
+				@UpdatesManager.processUncompressedUpdates @doc_id, @callback
 
 			it "should get the oldest updates", ->
 				@RedisManager.getOldestRawUpdates
-					.calledWith(@doc_id, @HistoryManager.REDIS_READ_BATCH_SIZE)
+					.calledWith(@doc_id, @UpdatesManager.REDIS_READ_BATCH_SIZE)
 					.should.equal true
 
 			it "should compress and save the updates", ->
-				@HistoryManager.compressAndSaveRawUpdates
+				@UpdatesManager.compressAndSaveRawUpdates
 					.calledWith(@doc_id, @updates)
 					.should.equal true
 
@@ -146,7 +146,7 @@ describe "HistoryManager", ->
 
 		describe "when there are multiple batches to send", ->
 			beforeEach (done) ->
-				@HistoryManager.REDIS_READ_BATCH_SIZE = 2
+				@UpdatesManager.REDIS_READ_BATCH_SIZE = 2
 				@updates = ["mock-update-0", "mock-update-1", "mock-update-2", "mock-update-3", "mock-update-4"]
 				@redisArray = @updates.slice()
 				@RedisManager.getOldestRawUpdates = (doc_id, batchSize, callback = (error, updates) ->) =>
@@ -154,9 +154,9 @@ describe "HistoryManager", ->
 					@redisArray = @redisArray.slice(batchSize)
 					callback null, updates
 				sinon.spy @RedisManager, "getOldestRawUpdates"
-				@HistoryManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
 				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
-				@HistoryManager.processUncompressedUpdates @doc_id, (args...) =>
+				@UpdatesManager.processUncompressedUpdates @doc_id, (args...) =>
 					@callback(args...)
 					done()
 
@@ -164,13 +164,13 @@ describe "HistoryManager", ->
 				@RedisManager.getOldestRawUpdates.callCount.should.equal 3
 
 			it "should compress and save the updates in batches", ->
-				@HistoryManager.compressAndSaveRawUpdates
+				@UpdatesManager.compressAndSaveRawUpdates
 					.calledWith(@doc_id, @updates.slice(0,2))
 					.should.equal true
-				@HistoryManager.compressAndSaveRawUpdates
+				@UpdatesManager.compressAndSaveRawUpdates
 					.calledWith(@doc_id, @updates.slice(2,4))
 					.should.equal true
-				@HistoryManager.compressAndSaveRawUpdates
+				@UpdatesManager.compressAndSaveRawUpdates
 					.calledWith(@doc_id, @updates.slice(4,5))
 					.should.equal true
 
@@ -182,9 +182,9 @@ describe "HistoryManager", ->
 
 	describe "processCompressedUpdatesWithLock", ->
 		beforeEach ->
-			@HistoryManager.processUncompressedUpdates = sinon.stub().callsArg(2)
+			@UpdatesManager.processUncompressedUpdates = sinon.stub().callsArg(2)
 			@LockManager.runWithLock = sinon.stub().callsArg(2)
-			@HistoryManager.processUncompressedUpdatesWithLock @doc_id, @callback
+			@UpdatesManager.processUncompressedUpdatesWithLock @doc_id, @callback
 
 		it "should run processUncompressedUpdates with the lock", ->
 			@LockManager.runWithLock
@@ -195,3 +195,27 @@ describe "HistoryManager", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+	describe "getUpdates", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { to: "mock-to", limit: "mock-limit" }
+			@MongoManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
+			@UpdatesManager.getUpdates @doc_id, @options, @callback
+
+		it "should process outstanding updates", ->
+			@UpdatesManager.processUncompressedUpdatesWithLock
+				.calledWith(@doc_id)
+				.should.equal true
+
+		it "should get the updates from the database", ->
+			@MongoManager.getUpdates
+				.calledWith(@doc_id, @options)
+				.should.equal true
+
+		it "should return the updates", ->
+			@callback
+				.calledWith(null, @updates)
+				.should.equal true
+

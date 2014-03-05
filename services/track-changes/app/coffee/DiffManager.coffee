@@ -1,18 +1,15 @@
-HistoryManager = require "./HistoryManager"
+UpdatesManager = require "./UpdatesManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
-MongoManager = require "./MongoManager"
 DiffGenerator = require "./DiffGenerator"
 logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromDate, toDate, callback = (error, lines, version, updates) ->) ->
-		HistoryManager.processUncompressedUpdatesWithLock doc_id, (error) ->
+		UpdatesManager.getUpdates doc_id, from: fromDate, to: toDate, (error, updates) ->
 			return callback(error) if error?
 			DocumentUpdaterManager.getDocument project_id, doc_id, (error, lines, version) ->
 				return callback(error) if error?
-				MongoManager.getUpdatesBetweenDates doc_id, from: fromDate, to: toDate, (error, updates) ->
-					return callback(error) if error?
-					callback(null, lines, version, updates)
+				callback(null, lines, version, updates)
 	
 	getDiff: (project_id, doc_id, fromDate, toDate, callback = (error, diff) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, from: fromDate, to: toDate, "getting diff"

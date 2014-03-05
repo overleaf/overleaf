@@ -9,9 +9,8 @@ describe "DiffManager", ->
 	beforeEach ->
 		@DiffManager = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./HistoryManager": @HistoryManager = {}
+			"./UpdatesManager": @UpdatesManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
-			"./MongoManager": @MongoManager = {}
 			"./DiffGenerator": @DiffGenerator = {}
 		@callback = sinon.stub()
 		@from = new Date()
@@ -25,23 +24,17 @@ describe "DiffManager", ->
 			@version = 42
 			@updates = [ "mock-update-1", "mock-update-2" ]
 
-			@HistoryManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(2, null, @lines, @version)
-			@MongoManager.getUpdatesBetweenDates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
 			@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, @from, @to, @callback
-
-		it "should ensure the latest updates have been compressed", ->
-			@HistoryManager.processUncompressedUpdatesWithLock
-				.calledWith(@doc_id)
-				.should.equal true
 
 		it "should get the latest version of the doc", ->
 			@DocumentUpdaterManager.getDocument
 				.calledWith(@project_id, @doc_id)
 				.should.equal true
 
-		it "should get the requested updates from Mongo", ->
-			@MongoManager.getUpdatesBetweenDates
+		it "should get the latest updates", ->
+			@UpdatesManager.getUpdates
 				.calledWith(@doc_id, from: @from, to: @to)
 				.should.equal true
 

@@ -132,12 +132,13 @@ describe "MongoManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "getUpdatesBetweenDates", ->
+	describe "getUpdates", ->
 		beforeEach ->
 			@updates = ["mock-update"]
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
 			@db.docHistory.sort = sinon.stub().returns @db.docHistory
+			@db.docHistory.limit = sinon.stub().returns @db.docHistory
 			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
 
 			@from = new Date(Date.now())
@@ -145,7 +146,7 @@ describe "MongoManager", ->
 
 		describe "with a toDate", ->
 			beforeEach ->
-				@MongoManager.getUpdatesBetweenDates @doc_id, from: @from, to: @to, @callback
+				@MongoManager.getUpdates @doc_id, from: @from, to: @to, @callback
 
 			it "should find the all updates between the to and from date", ->
 				@db.docHistory.find
@@ -161,12 +162,16 @@ describe "MongoManager", ->
 					.calledWith("meta.end_ts": -1)
 					.should.equal true
 
+			it "should not limit the results", ->
+				@db.docHistory.limit
+					.called.should.equal false
+
 			it "should call the call back with the updates", ->
 				@callback.calledWith(null, @updates).should.equal true
 
 		describe "without a todo date", ->
 			beforeEach ->
-				@MongoManager.getUpdatesBetweenDates @doc_id, from: @from, @callback
+				@MongoManager.getUpdates @doc_id, from: @from, @callback
 
 			it "should find the all updates after the from date", ->
 				@db.docHistory.find
@@ -178,4 +183,14 @@ describe "MongoManager", ->
 
 			it "should call the call back with the updates", ->
 				@callback.calledWith(null, @updates).should.equal true
+
+		describe "with a limit", ->
+			beforeEach ->
+				@MongoManager.getUpdates @doc_id, from: @from, limit: @limit = 10, @callback
+
+			it "should limit the results", ->
+				@db.docHistory.limit
+					.calledWith(@limit)
+					.should.equal true
+
 

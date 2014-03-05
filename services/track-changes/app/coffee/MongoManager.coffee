@@ -39,17 +39,22 @@ module.exports = MongoManager =
 			v:      update.v
 		}, callback
 
-	getUpdatesBetweenDates:(doc_id, options = {}, callback = (error, updates) ->) ->
+	getUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
 			doc_id: ObjectId(doc_id.toString())
 		if options.from?
 			query["meta.end_ts"] = { $gte: options.from }
 		if options.to?
 			query["meta.start_ts"] = { $lte: options.to }
-		db.docHistory
+			
+		cursor = db.docHistory
 			.find( query )
 			.sort( "meta.end_ts": -1 )
-			.toArray callback
+
+		if options.limit?
+			cursor.limit(options.limit)
+
+		cursor.toArray callback
 
 	ensureIndices: (callback = (error) ->) ->
 		db.docHistory.ensureIndex { doc_id: 1, "meta.start_ts": 1, "meta.end_ts": 1 }, callback

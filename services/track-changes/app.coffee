@@ -14,6 +14,8 @@ app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
 app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
 
+app.get "/project/:project_id/doc/:doc_id/updates", HttpController.getUpdates
+
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 

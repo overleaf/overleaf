@@ -4,7 +4,7 @@ UpdateCompressor = require "./UpdateCompressor"
 LockManager = require "./LockManager"
 logger = require "logger-sharelatex"
 
-module.exports = HistoryManager =
+module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (doc_id, rawUpdates, callback = (error) ->) ->
 		length = rawUpdates.length
 		if length == 0
@@ -38,20 +38,20 @@ module.exports = HistoryManager =
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (doc_id, callback = (error) ->) ->
 		logger.log "processUncompressedUpdates"
-		RedisManager.getOldestRawUpdates doc_id, HistoryManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
+		RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 			return callback(error) if error?
 			length = rawUpdates.length
 			logger.log doc_id: doc_id, length: length, "got raw updates from redis"
-			HistoryManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
+			UpdatesManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
 				logger.log doc_id: doc_id, "compressed and saved doc updates"
 				RedisManager.deleteOldestRawUpdates doc_id, length, (error) ->
 					return callback(error) if error?
-					if length == HistoryManager.REDIS_READ_BATCH_SIZE
+					if length == UpdatesManager.REDIS_READ_BATCH_SIZE
 						# There might be more updates
 						logger.log doc_id: doc_id, "continuing processing updates"
 						setTimeout () ->
-							HistoryManager.processUncompressedUpdates doc_id, callback
+							UpdatesManager.processUncompressedUpdates doc_id, callback
 						, 0
 					else
 						logger.log doc_id: doc_id, "all raw updates processed"
@@ -61,7 +61,12 @@ module.exports = HistoryManager =
 		LockManager.runWithLock(
 			"HistoryLock:#{doc_id}",
 			(releaseLock) ->
-				HistoryManager.processUncompressedUpdates doc_id, releaseLock
+				UpdatesManager.processUncompressedUpdates doc_id, releaseLock
 			callback
 		)
+
+	getUpdates: (doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.processUncompressedUpdatesWithLock doc_id, (error) ->
+			return callback(error) if error?
+			MongoManager.getUpdates doc_id, options, callback
 
