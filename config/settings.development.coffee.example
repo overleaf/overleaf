@@ -86,6 +86,9 @@ module.exports =
 		filestore:
 			port: filestorePort = 3009
 			host: "localhost"
+		trackchanges:
+			port: trackchangesPort = 3015
+			host: "localhost"
 
 	# Tell each service where to find the other services. If everything
 	# is running locally then this is easy, but they exist as separate config
@@ -101,6 +104,8 @@ module.exports =
 			url: "http://localhost:#{clsiPort}"
 		filestore:
 			url: "http://localhost:#{filestorePort}"
+		trackchanges:
+			url: "http://localhost:#{trackchangesPort}"
 		thirdPartyDataStore:
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
