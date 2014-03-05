@@ -70,7 +70,6 @@ describe "FileController", ->
 				done()
 			@controller.getFile @req, @res
 
-
 	describe "insertFile", ->
 
 		it "should send bucket name key and res to PersistorManager", (done)->
@@ -79,7 +78,6 @@ describe "FileController", ->
 				@FileHandler.insertFile.calledWith(@bucket, @key, @req).should.equal true
 				done()
 			@controller.insertFile @req, @res
-			
 
 	describe "copyFile", ->
 		beforeEach ->
@@ -98,14 +96,12 @@ describe "FileController", ->
 				done()
 			@controller.copyFile @req, @res
 
-
 		it "should send a 500 if there was an error", (done)->
 			@PersistorManager.copyFile.callsArgWith(3, "error")
 			@res.send = (code)=>
 				code.should.equal 500
 				done()
 			@controller.copyFile @req, @res	
-
 
 	describe "delete file", ->
 
