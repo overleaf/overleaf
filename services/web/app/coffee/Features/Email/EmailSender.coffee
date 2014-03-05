@@ -5,9 +5,9 @@ metrics = require("../../infrastructure/Metrics")
 ses = require('node-ses')
 
 if Settings.email? and Settings.email.fromAddress?
-	defaultFromAddress = ""
-else 
 	defaultFromAddress = Settings.email.fromAddress
+else 
+	defaultFromAddress = ""
 
 if Settings.email?.ses? and Settings.email.ses?.key? and Settings.email.ses?.key != "" and Settings.email.ses?.secret? and Settings.email.ses?.secret != ""
 	client = ses.createClient({ key: Settings.email.ses.key, secret: Settings.email.ses.secret });
