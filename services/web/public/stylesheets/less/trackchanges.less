@@ -1,0 +1,30 @@
+@changesListWidth:   200px;
+@versionsListPadding: 10px;
+
+#trackChangesPanel {
+	.track-changes-diff {
+		position: absolute;
+		right: @versionsListWidth + 1px;
+		right: 0;
+		padding: 0px 12px;
+		overflow: scroll;
+		height: 100%;
+	}
+
+	.track-changes-side-bar {
+		border-left: 1px solid #999;
+		height: 100%;
+		width: @versionsListWidth;
+		position: absolute;
+		right: 0;
+	}
+
+	.change-list-area {
+		overflow: scroll;
+		position: absolute;
+		left: 0px;
+		right: 0px;
+		top: 0px;
+		bottom: 0px;
+	}
+}

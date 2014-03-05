@@ -352,3 +352,9 @@ define [
 		getCurrentDocId: () ->
 			@current_doc_id
 
+		show: () ->
+			$("#editor").show()
+
+		hide: () ->
+			$("#editor").hide()
+

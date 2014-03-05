@@ -404,11 +404,6 @@
 			div(class='version-message') {{message}}
 			div(class='version-date') {{date}} 
 
-	script(type='text/template')#autoCompleteSuggestionTemplate
-		li
-			strong {{base}}
-			| {{completion}}
-
 	script(type='text/template')#versionListTemplate
 		ul#version-list.nav.nav-pills.nav-stacked
 			li.loading Loading...
@@ -427,6 +422,23 @@
 	script(type='text/template')#hotKeysLinkTemplate
 		div
 			a(href="#", title='Show Hot Keys List') Hot keys
+
+	script(type='text/template')#trackChangesPanelTemplate
+		#trackChangesPanel
+			.track-changes-side-bar
+				.change-list-area
+			.track-changes-diff
+
+	script(type='text/template')#changeListItemTemplate
+		a(href="#")
+			div(class='change-message') {{user_id}}
+			div(class='change-date') {{end_ts}} 
+			div(class='change-date') {{start_ts}} 
+
+	script(type='text/template')#changeListTemplate
+		ul.change-list.nav.nav-pills.nav-stacked
+			li.loading-changes Loading...
+			li.empty-message You haven't made any changes yet!
 
 	script(type='text/template')#hotKeysListTemplate
 		.hotkeys
