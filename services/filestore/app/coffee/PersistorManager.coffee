@@ -1,14 +1,15 @@
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
-S3PersistorManager = require("./S3PersistorManager")
 
 # assume s3 if none specified
-settings.filestoreBackend ||= "s3"
+settings.filestore.backend ||= "s3"
 
 
-logger.log backend:settings.filestoreBackend, "Loading backend"
-module.exports = switch settings.filestoreBackend
+logger.log backend:settings.filestore.backend, "Loading backend"
+module.exports = switch settings.filestore.backend
 	when "s3"
-		S3PersistorManager
+		require("./S3PersistorManager")
+	when "fs"
+		require("./FSPersistorManager")
 	else
-		throw new Error( "Unknown filestore backend: #{settings.filestoreBackend}" )
+		throw new Error( "Unknown filestore backend: #{settings.filestore.backend}" )

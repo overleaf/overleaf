@@ -9,24 +9,26 @@ SandboxedModule = require('sandboxed-module')
 describe "S3PersistorManagerTests", ->
 
 	beforeEach ->
-		@settings = 
-			s3:
-				secret: "secret"
-				key: "this_key"
-			buckets:
-				user_files:"sl_user_files"
-		@stubbedKnoxClient = 
+		@settings =
+			filestore:
+				backend: "s3"
+				s3:
+					secret: "secret"
+					key: "this_key"
+				stores:
+					user_files:"sl_user_files"
+		@stubbedKnoxClient =
 			putFile:sinon.stub()
 			copyFile:sinon.stub()
 			list: sinon.stub()
 			deleteMultiple: sinon.stub()
 			get: sinon.stub()
-		@knox = 
+		@knox =
 			createClient: sinon.stub().returns(@stubbedKnoxClient)
-		@LocalFileWriter = 
+		@LocalFileWriter =
 			writeStream: sinon.stub()
 			deleteFile: sinon.stub()
-		@requires = 
+		@requires =
 			"knox": @knox
 			"settings-sharelatex": @settings
 			"./LocalFileWriter":@LocalFileWriter
@@ -48,7 +50,7 @@ describe "S3PersistorManagerTests", ->
 				end:->
 			)
 			@S3PersistorManager.getFileStream @bucketName, @key, @fsPath, (err)=>
-			@stubbedKnoxClient.get.calledWith(@key).should.equal true 
+			@stubbedKnoxClient.get.calledWith(@key).should.equal true
 			done()
 
 	describe "sendFile", ->
@@ -121,7 +123,7 @@ describe "S3PersistorManagerTests", ->
 			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
 
 		it "should list the contents passing them onto multi delete", (done)->
-			data = 
+			data =
 				Contents: [{Key:"1234"}, {Key: "456"}]
 			@stubbedKnoxClient.list.callsArgWith(1, null, data)
 			@stubbedKnoxClient.deleteMultiple.callsArgWith(1)
@@ -138,7 +140,7 @@ describe "S3PersistorManagerTests", ->
 
 			@S3PersistorManager.deleteFile @bucketName, @key, (err)=>
 				opts = @request.args[0][0]
-				assert.deepEqual(opts.aws, {key:@settings.s3.key, secret:@settings.s3.secret, bucket:@bucketName})
+				assert.deepEqual(opts.aws, {key:@settings.filestore.s3.key, secret:@settings.filestore.s3.secret, bucket:@bucketName})
 				opts.method.should.equal "delete"
 				opts.timeout.should.equal (30*1000)
 				opts.uri.should.equal "https://#{@bucketName}.s3.amazonaws.com/#{@key}"
@@ -162,7 +164,7 @@ describe "S3PersistorManagerTests", ->
 
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err)=>
 				opts = @request.args[0][0]
-				assert.deepEqual(opts.aws, {key:@settings.s3.key, secret:@settings.s3.secret, bucket:@bucketName})
+				assert.deepEqual(opts.aws, {key:@settings.filestore.s3.key, secret:@settings.filestore.s3.secret, bucket:@bucketName})
 				opts.method.should.equal "head"
 				opts.timeout.should.equal (30*1000)
 				opts.uri.should.equal "https://#{@bucketName}.s3.amazonaws.com/#{@key}"
