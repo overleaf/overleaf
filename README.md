@@ -64,16 +64,8 @@ ShareLaTeX should run on OS X and Linux. You need:
 Config
 ------
 
-ShareLaTeX should mostly run out of the box, although it uses Amazon S3 for storing binary
-files like images. You will need to configure ShareLaTeX to use your own S3 access key
-which can be done by editing the file at `config/settings.development.coffee`
-
-A local settings file can be specified by setting the `SHARELATEX_CONFIG` environment variable
-to point to your own settings file. E.g.
-
-```bash
-export SHARELATEX_CONFIG=/home/james/config/settings.development.coffee
-```
+ShareLaTeX should run out of the box, but if you want to adjust any settings you can do so by
+editing the `config/settings.development.coffee` file. Available options are explained inline.
 
 Other repositories
 ------------------
