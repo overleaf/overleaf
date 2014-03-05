@@ -57,14 +57,17 @@ describe "Subscription Handler sanboxed", ->
 			userHasSubscription: sinon.stub()
 			userHasSubscriptionOrFreeTrial: sinon.stub()
 
+		@EmailHandler =
+			sendEmail:sinon.stub()
 		@SubscriptionHandler = SandboxedModule.require modulePath, requires:
 			"./RecurlyWrapper": @RecurlyWrapper
 			"settings-sharelatex": @Settings
 			'../../models/User': User:@User
 			'./SubscriptionUpdater': @SubscriptionUpdater
-			'../../Features/Analytics/AnalyticsManager': @AnalyticsManager
+			'../Analytics/AnalyticsManager': @AnalyticsManager
 			"logger-sharelatex":{log:->}
 			'./LimitationsManager':@LimitationsManager
+			"../Email/EmailHandler":@EmailHandler
 
 		@SubscriptionHandler.syncSubscriptionToUser = sinon.stub().callsArgWith(2)
 
@@ -149,6 +152,9 @@ describe "Subscription Handler sanboxed", ->
 				@AnalyticsManager.trackSubscriptionCancelled
 					.calledWith(@user)
 					.should.equal true
+
+			it "should send a cancellation email", ->
+				@EmailHandler.sendEmail.calledWith("canceledSubscription", {to:@user.email, first_name:@user.first_name}).should.equal true
 
 	describe "reactiveRecurlySubscription", ->
 		describe "with a user without a subscription", ->

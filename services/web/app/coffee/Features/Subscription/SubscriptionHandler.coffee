@@ -2,9 +2,10 @@ RecurlyWrapper = require("./RecurlyWrapper")
 Settings = require "settings-sharelatex"
 User = require('../../models/User').User
 logger = require('logger-sharelatex')
-AnalyticsManager  = require '../../Features/Analytics/AnalyticsManager'
+AnalyticsManager  = require '../Analytics/AnalyticsManager'
 SubscriptionUpdater = require("./SubscriptionUpdater")
 LimitationsManager = require('./LimitationsManager')
+EmailHandler = require("../Email/EmailHandler")
 
 module.exports =
 
@@ -33,6 +34,10 @@ module.exports =
 				RecurlyWrapper.cancelSubscription subscription.recurlySubscription_id, (error) ->
 					return callback(error) if error?
 					AnalyticsManager.trackSubscriptionCancelled user
+					emailOpts =
+						to: user.email
+						first_name: user.first_name
+					EmailHandler.sendEmail "canceledSubscription", emailOpts
 					callback()
 			else
 				callback()
@@ -52,7 +57,6 @@ module.exports =
 			User.findById recurlySubscription.account.account_code, (error, user) ->
 				return callback(error) if error?
 				SubscriptionUpdater.syncSubscription recurlySubscription, user._id, callback
-
 
 
 

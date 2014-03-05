@@ -86,6 +86,10 @@ module.exports =
 					#things that can be fired and forgot.
 					newsLetterManager.subscribe user
 					ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
+					emailOpts =
+						first_name:user.first_name
+						to: user.email
+					EmailHandler.sendEmail "welcome", emailOpts
 
 	requestPasswordReset : (req, res)->
 		res.render 'user/passwordReset',

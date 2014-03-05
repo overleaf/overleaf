@@ -4,7 +4,7 @@ EmailSender = require "./EmailSender"
 
 module.exports =
 
-	sendEmail : (emailType, opts, callback)->
+	sendEmail : (emailType, opts, callback = (err)->)->
 		email = EmailBuilder.buildEmail emailType, opts
 		if email.type == "lifecycle" and !settings.email.lifecycle
 			return callback()
