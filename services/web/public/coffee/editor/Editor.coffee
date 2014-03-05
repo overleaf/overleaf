@@ -125,12 +125,10 @@ define [
 
 			mode = window.userSettings.mode
 			theme = window.userSettings.theme
-			fontSize = window.userSettings.fontSize
 
 			chosenKeyBindings = keybindings[mode]
 			aceEditor.setKeyboardHandler(chosenKeyBindings)
 			aceEditor.setTheme("ace/theme/#{window.userSettings.theme}")
-			document.getElementById('editor').style.fontSize = fontSize+'px'
 			aceEditor.setShowPrintMargin(false)
 
 			# Prevert Ctrl|Cmd-S from triggering save dialog

@@ -1,9 +1,10 @@
 define [
 	"auto-complete/SuggestionManager"
+	"auto-complete/Snippets"
 	"ace/autocomplete/util"
 	"ace/range"
 	"ace/ext/language_tools"
-], (SuggestionManager, Util) ->
+], (SuggestionManager, Snippets, Util) ->
 	Range = require("ace/range").Range
 
 	Util.retrievePrecedingIdentifier = (text, pos, regex) ->
@@ -24,14 +25,18 @@ define [
 
 	class AutoCompleteManager
 		constructor: (@ide) ->
-			@suggestionManager = new SuggestionManager()
-
 			@aceEditor = @ide.editor.aceEditor
 			@aceEditor.setOptions({
 				enableBasicAutocompletion: true,
 				enableSnippets: true
 			})
-			@aceEditor.completers = [@suggestionManager]
+
+			SnippetCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) ->
+					callback null, Snippets
+			@suggestionManager = new SuggestionManager()
+
+			@aceEditor.completers = [@suggestionManager, SnippetCompleter]
 
 			@bindToEditorEvents()
 
@@ -50,10 +55,7 @@ define [
 					lineUpToCursor = @aceSession.getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 
-					if commandFragment?
+					if commandFragment? and commandFragment.length > 2
 					 	setTimeout () =>
 					 		@aceEditor.execCommand("startAutocomplete")
-					 		$(@aceEditor.completer.popup.container)
-					 			.find(".ace_content")
-					 			.css("font-size": window.userSettings.fontSize + "px")
 					 	, 0
