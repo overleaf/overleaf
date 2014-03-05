@@ -44,7 +44,9 @@ describe "DiffManager", ->
 	describe "getDiff", ->
 		beforeEach ->
 			@lines = [ "hello", "world" ]
-			@version = 42
+			# Op versions are the version they were applied to, so doc is always one version
+			# ahead.s
+			@version = 43
 			@updates = [
 				{ op: "mock-4", v: 42, meta: { start_ts: new Date(@to.getTime() + 20)} }
 				{ op: "mock-3", v: 41, meta: { start_ts: new Date(@to.getTime() + 10)} }
@@ -82,7 +84,7 @@ describe "DiffManager", ->
 
 		describe "with mismatching versions", ->
 			beforeEach ->
-				@version = 42
+				@version = 50
 				@updates = [ { op: "mock-1", v: 40 }, { op: "mock-1", v: 39 } ]
 				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @lines, @version, @updates)
 				@DiffManager.getDiff @project_id, @doc_id, @from, @to, @callback

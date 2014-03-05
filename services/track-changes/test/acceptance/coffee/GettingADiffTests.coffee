@@ -49,7 +49,7 @@ describe "Getting a diff", ->
 
 		MockDocUpdaterApi.docs[@doc_id] =
 			lines: @lines
-			version: 6
+			version: 7
 
 		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
 			throw error if error?

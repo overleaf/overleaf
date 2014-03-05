@@ -19,7 +19,7 @@ module.exports = DiffManager =
 			logger.log lines: lines, version: version, updates: updates, "got doc and updates"
 
 			lastUpdate = updates[0]
-			if lastUpdate? and lastUpdate.v != version
+			if lastUpdate? and lastUpdate.v != version - 1
 				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
 
 			updatesToApply = []
