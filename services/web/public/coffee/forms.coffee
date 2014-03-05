@@ -31,7 +31,9 @@ require [
 				success: (data)->
 					if data.message?
 						new Message data.message
+						ga('send', 'event', 'register', 'failure')
 					else
+						ga('send', 'event', 'register', 'success')
 						window.location = data.redir || "/project"
 				
 
@@ -79,9 +81,12 @@ require [
 			success: (data)->
 				if data.message
 					new Message data.message
+					ga('send', 'event', 'login', 'failure')
 				else if data.redir
 					window.location.href = data.redir
+					ga('send', 'event', 'login', 'success')
 				else
+					ga('send', 'event', 'login', 'success')
 					window.location.href = '/project'
 
 	$('form#passwordReset').submit (event)->

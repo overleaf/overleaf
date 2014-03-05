@@ -47,7 +47,7 @@ templates.passwordReset =
 <h1 class="h1">Password Reset</h1>
 <p>
 Your password has been reset, the new password is <p> {{newPassword}}
-<p> 
+<p>
 please <a href="https://www.sharelatex.com/login">login here</a> and then change your password <a href=#{Settings.siteUrl}/user/settings> in your user settings</a>
 
 </p>
