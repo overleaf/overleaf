@@ -99,6 +99,11 @@ documents.
 An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
 (like images) stored in ShareLaTeX.
 
+### [track-changes](https://github.com/sharelatex/track-changes-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/track-changes-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/track-changes-sharelatex)
+
+An API for compressing and storing the updates applied to a document, and then rendering a diff of the changes
+between any two time points. *Still in development and not hooked into the UI yet*.
+
 Contributing
 ------------
 

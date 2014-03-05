@@ -18,12 +18,10 @@ SERVICES = [{
 }, {
 	name: "filestore"
 	repo: "https://github.com/sharelatex/filestore-sharelatex.git"
-}]
-
-TRACK_CHANGES =
+}, {
 	name: "track-changes"
 	repo: "https://github.com/sharelatex/track-changes-sharelatex.git"
-
+}]
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-bunyan'
@@ -32,7 +30,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 
 	execute = {}
-	for service in SERVICES.concat([TRACK_CHANGES])
+	for service in SERVICES
 		execute[service.name] =
 			src: "#{service.name}/app.js"
 
@@ -70,7 +68,7 @@ module.exports = (grunt) ->
 						"Config tasks": ["install:config"]
 						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
 
-	for service in SERVICES.concat([TRACK_CHANGES])
+	for service in SERVICES
 		do (service) ->
 			grunt.registerTask "install:#{service.name}", "Download and set up the #{service.name} service", () ->
 				done = @async()
