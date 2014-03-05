@@ -10,6 +10,7 @@ templates = {}
 templates.welcome =	
 	subject:  _.template "Welcome to ShareLaTeX"
 	layout: PersonalEmailLayout
+	type:"lifecycle"
 	compiledTemplate: _.template '''
 Hi {{first_name}}, thanks for signing up to ShareLaTeX. If you ever get lost, you can log in again <a href="https://www.sharelatex.com/login">here</a>.
 <p>
@@ -25,6 +26,7 @@ ShareLaTeX Co-founder
 templates.canceledSubscription = 
 	subject:  _.template "ShareLaTeX thoughts"
 	layout: PersonalEmailLayout
+	type:"lifecycle"
 	compiledTemplate: _.template '''
 Hi {{first_name}},
 
@@ -40,6 +42,7 @@ ShareLaTeX Co-founder
 templates.passwordReset =	
 	subject:  _.template "Password Reset - ShareLatex.com"
 	layout: NotificationEmailLayout
+	type:"notification"
 	compiledTemplate: _.template '''
 <h1 class="h1">Password Reset</h1>
 <p>
@@ -55,6 +58,7 @@ please <a href="https://www.sharelatex.com/login">login here</a> and then change
 templates.projectSharedWithYou = 
 	subject: _.template "{{owner.email}} wants to share {{project.name}} with you"
 	layout: NotificationEmailLayout
+	type:"notification"
 	compiledTemplate: _.template '''
 <h1 class="h1">{{owner.email}} wants to share <a href="{{project.url}}">'{{project.name}}'</a> with you</h1>
 <p>&nbsp;</p>
@@ -81,5 +85,6 @@ module.exports =
 		return {
 			subject : template.subject(opts)
 			html: template.layout(opts)
+			type:template.type
 		}
 

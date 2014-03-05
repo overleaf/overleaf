@@ -3,7 +3,7 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
 sinon = require('sinon')
-modulePath = path.join __dirname, "../../../../app/js/Features/Email/EmailTemplator"
+modulePath = path.join __dirname, "../../../../app/js/Features/Email/EmailBuilder"
 expect = require("chai").expect
 _ = require('underscore')
 _.templateSettings =
@@ -14,7 +14,7 @@ describe "Email Templator ", ->
 	beforeEach ->
 
 		@settings = {}
-		@EmailTemplator = SandboxedModule.require modulePath, requires:
+		@EmailBuilder = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 
@@ -24,7 +24,7 @@ describe "Email Templator ", ->
 			@opts =
 				to:"bob@bob.com"
 				first_name:"bob"
-			@email = @EmailTemplator.buildEmail("welcome", @opts)
+			@email = @EmailBuilder.buildEmail("welcome", @opts)
 
 		it "should insert the first_name into the template", ->
 			@email.html.indexOf(@opts.first_name).should.not.equal -1
@@ -42,7 +42,7 @@ describe "Email Templator ", ->
 				project:
 					url:"http://www.project.com"
 					name:"standard project"
-			@email = @EmailTemplator.buildEmail("projectSharedWithYou", @opts)
+			@email = @EmailBuilder.buildEmail("projectSharedWithYou", @opts)
 
 		it "should insert the owner email into the template", ->
 			@email.html.indexOf(@opts.owner.email).should.not.equal -1
