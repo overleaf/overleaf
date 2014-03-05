@@ -145,14 +145,14 @@ describe "MongoManager", ->
 
 		describe "with a toDate", ->
 			beforeEach ->
-				@MongoManager.getUpdatesBetweenDates @doc_id, @from, @to, @callback
+				@MongoManager.getUpdatesBetweenDates @doc_id, from: @from, to: @to, @callback
 
 			it "should find the all updates between the to and from date", ->
 				@db.docHistory.find
 					.calledWith({
 						doc_id: ObjectId(@doc_id)
-						"meta.start_ts": { $gte: @from }
-						"meta.end_ts": { $lte: @to }
+						"meta.end_ts": { $gte: @from }
+						"meta.start_ts": { $lte: @to }
 					})
 					.should.equal true
 
@@ -166,13 +166,13 @@ describe "MongoManager", ->
 
 		describe "without a todo date", ->
 			beforeEach ->
-				@MongoManager.getUpdatesBetweenDates @doc_id, @from, null, @callback
+				@MongoManager.getUpdatesBetweenDates @doc_id, from: @from, @callback
 
 			it "should find the all updates after the from date", ->
 				@db.docHistory.find
 					.calledWith({
 						doc_id: ObjectId(@doc_id)
-						"meta.start_ts": { $gte: @from }
+						"meta.end_ts": { $gte: @from }
 					})
 					.should.equal true
 

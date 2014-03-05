@@ -10,7 +10,7 @@ module.exports = DiffManager =
 			return callback(error) if error?
 			DocumentUpdaterManager.getDocument project_id, doc_id, (error, lines, version) ->
 				return callback(error) if error?
-				MongoManager.getUpdatesBetweenDates doc_id, fromDate, toDate, (error, updates) ->
+				MongoManager.getUpdatesBetweenDates doc_id, from: fromDate, to: toDate, (error, updates) ->
 					return callback(error) if error?
 					callback(null, lines, version, updates)
 	

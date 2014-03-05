@@ -39,13 +39,13 @@ module.exports = MongoManager =
 			v:      update.v
 		}, callback
 
-	getUpdatesBetweenDates:(doc_id, fromDate, toDate, callback = (error, updates) ->) ->
+	getUpdatesBetweenDates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
 			doc_id: ObjectId(doc_id.toString())
-		if fromDate?
-			query["meta.start_ts"] = { $gte: fromDate }
-		if toDate?
-			query["meta.end_ts"] = { $lte: toDate }
+		if options.from?
+			query["meta.end_ts"] = { $gte: options.from }
+		if options.to?
+			query["meta.start_ts"] = { $lte: options.to }
 		db.docHistory
 			.find( query )
 			.sort( "meta.end_ts": -1 )

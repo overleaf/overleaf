@@ -27,7 +27,7 @@ describe "DiffManager", ->
 
 			@HistoryManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(2, null, @lines, @version)
-			@MongoManager.getUpdatesBetweenDates = sinon.stub().callsArgWith(3, null, @updates)
+			@MongoManager.getUpdatesBetweenDates = sinon.stub().callsArgWith(2, null, @updates)
 			@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, @from, @to, @callback
 
 		it "should ensure the latest updates have been compressed", ->
@@ -42,7 +42,7 @@ describe "DiffManager", ->
 
 		it "should get the requested updates from Mongo", ->
 			@MongoManager.getUpdatesBetweenDates
-				.calledWith(@doc_id, @from, @to)
+				.calledWith(@doc_id, from: @from, to: @to)
 				.should.equal true
 
 		it "should call the callback with the lines, version and updates", ->

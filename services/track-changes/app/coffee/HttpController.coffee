@@ -28,3 +28,8 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send JSON.stringify(diff: diff)
 
+	getUpdates: (req, res, next = (error) ->) ->
+		doc_id = req.params.doc_id
+		project_id = req.params.project_id
+		
+
