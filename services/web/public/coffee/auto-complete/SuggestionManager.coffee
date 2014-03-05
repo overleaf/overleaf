@@ -1,6 +1,4 @@
-define [
-	"auto-complete/commands"
-], (commands) ->
+define [], () ->
 	class Parser
 		constructor: (@doc) ->
 
@@ -70,7 +68,7 @@ define [
 			doc = session.getValue()
 			parser = new Parser(doc)
 			commands = parser.parse()
-			
+
 			completions = []
 			for command in commands
 				caption = "\\#{command[0]}"
@@ -84,12 +82,12 @@ define [
 					snippet += "{${#{i}}}"
 					caption += "{}"
 					i++
-
-				completions.push {
-					caption: caption
-					snippet: snippet
-					meta: "cmd"
-				}
+				unless caption == prefix
+					completions.push {
+						caption: caption
+						snippet: snippet
+						meta: "cmd"
+					}
 
 			callback null, completions
 
