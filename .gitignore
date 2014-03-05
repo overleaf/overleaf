@@ -6,8 +6,11 @@ web
 document-updater
 clsi
 filestore
+track-changes
 
 compiles
 cache
+user_files
+template_files
 
 db.sqlite
