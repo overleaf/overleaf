@@ -24,7 +24,7 @@ module.exports =
 			from: Settings.email.fromAddress
 			subject: options.subject
 			message: options.html
-			replyTo: Settings.email.replyToAddress
+			replyTo: options.replyTo || Settings.email.replyToAddress
 		client.sendemail options, (err, data, res)->
 			if err?
 				logger.err err:err, "error sending message"

@@ -6,7 +6,7 @@ User = require('../models/User').User
 logger = require('logger-sharelatex')
 _ = require('underscore')
 Settings = require('settings-sharelatex')
-emailer = require('../managers/EmailManager')
+EmailHandler = require("../Features/Email/EmailHandler")
 tpdsUpdateSender = require '../Features/ThirdPartyDataStore/TpdsUpdateSender'
 projectCreationHandler = require '../Features/Project/ProjectCreationHandler'
 projectEntityHandler = require '../Features/Project/ProjectEntityHandler'
@@ -101,29 +101,19 @@ module.exports = class ProjectHandler
 					.populate('owner_ref')
 					.exec (err, project)->
 						emailOptions =
-							receiver : email
+							to : email
 							replyTo  : project.owner_ref.email
-							subject  : "#{project.owner_ref.first_name} #{project.owner_ref.last_name} wants to share '#{project.name}' with you"
-							heading  : "#{project.name} #{project.owner_ref.last_name} wants to share '#{project.name}' with you"
-							message  : "
-									"
-							template_name:"shared_project_email_template"
-							view_data:
-								project:
-									name: project.name
-									url: "#{Settings.siteUrl}/project/#{project._id}?" + [
-									     "project_name=#{project.name}"
-										 "user_first_name=#{project.owner_ref.first_name}"
-										 "new_email=#{email}"
-										 "r=#{project.owner_ref.referal_id}" # Referal
-										 "rs=ci" # referral source = collaborator invite
+							project:
+								name: project.name
+								url: "#{Settings.siteUrl}/project/#{project._id}?" + [
+										"project_name=#{project.name}"
+										"user_first_name=#{project.owner_ref.first_name}"
+										"new_email=#{email}"
+										"r=#{project.owner_ref.referal_id}" # Referal
+										"rs=ci" # referral source = collaborator invite
 									].join("&")
-								owner:
-									first_name: project.owner_ref.first_name
-									email: project.owner_ref.email
-								sharelatex_url: Settings.siteUrl
-
-						emailer.sendEmail emailOptions
+							owner: project.owner_ref
+						EmailHandler.sendEmail "projectSharedWithYou", emailOptions, ->
 						if privlages == 'readAndWrite'
 							level = {"collaberator_refs":user}
 							logger.log privileges: "readAndWrite", user: user, project: project, "adding user"
