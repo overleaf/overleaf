@@ -1,6 +1,4 @@
-define [
-	"auto-complete/commands"
-], (commands) ->
+define [], () ->
 	class Parser
 		constructor: (@doc) ->
 
@@ -66,8 +64,32 @@ define [
 				return false
 
 	class SuggestionManager
-		constructor: () ->
-			@commands = []
+		getCompletions: (editor, session, pos, prefix, callback) ->
+			doc = session.getValue()
+			parser = new Parser(doc)
+			commands = parser.parse()
+
+			completions = []
+			for command in commands
+				caption = "\\#{command[0]}"
+				snippet = caption
+				i = 1
+				_.times command[1], () ->
+					snippet += "[${#{i}}]"
+					caption += "[]"
+					i++
+				_.times command[2], () ->
+					snippet += "{${#{i}}}"
+					caption += "{}"
+					i++
+				unless caption == prefix
+					completions.push {
+						caption: caption
+						snippet: snippet
+						meta: "cmd"
+					}
+
+			callback null, completions
 
 		loadCommandsFromDoc: (doc) ->
 			parser = new Parser(doc)
