@@ -12,7 +12,7 @@ describe "HistoryManager", ->
 			"./MongoManager" : @MongoManager = {}
 			"./RedisManager" : @RedisManager = {}
 			"./LockManager"  : @LockManager = {}
-			"logger-sharelatex": { log: sinon.stub() }
+			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@callback = sinon.stub()
 
@@ -109,6 +109,12 @@ describe "HistoryManager", ->
 				it "should call the callback with an error", ->
 					@callback
 						.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
+						.should.equal true
+
+				it "should put the popped update back into mongo", ->
+					@MongoManager.insertCompressedUpdates.calledOnce.should.equal true
+					@MongoManager.insertCompressedUpdates
+						.calledWith(@doc_id, [@lastCompressedUpdate])
 						.should.equal true
 
 	describe "processUncompressedUpdates", ->

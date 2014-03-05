@@ -21,7 +21,13 @@ module.exports = HistoryManager =
 					rawUpdates.shift()
 
 				if rawUpdates[0]? and rawUpdates[0].v != lastCompressedUpdate.v + 1
-					return callback new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastCompressedUpdate.v}")
+					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastCompressedUpdate.v}")
+					logger.error err: error, doc_id: doc_id, "inconsistent doc versions"
+					# Push the update back into Mongo - catching errors at this
+					# point is useless, we're already bailing
+					MongoManager.insertCompressedUpdates doc_id, [lastCompressedUpdate], () ->
+						return callback error
+					return
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
 			MongoManager.insertCompressedUpdates doc_id, compressedUpdates, (error) ->
