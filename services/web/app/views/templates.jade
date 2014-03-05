@@ -147,10 +147,11 @@
 		#editorArea(style='display: none;')
 			#editorSplitter
 				#leftEditorPanel.ui-layout-center
-					#editor
-					#undoConflictWarning(style="display: none")
-						| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
-						a(href="#").js-hide Hide
+					#editorWrapper
+						#editor
+						#undoConflictWarning(style="display: none")
+							| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
+							a(href="#").js-hide Hide
 				#rightEditorPanel.ui-layout-east
 
 	script(type="text/template")#loadingIndicatorTemplate

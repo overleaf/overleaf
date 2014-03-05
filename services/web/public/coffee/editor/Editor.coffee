@@ -73,7 +73,7 @@ define [
 			if @currentViewState != @viewOptions.splitView
 				@currentViewState = @viewOptions.splitView
 				@leftPanel.prepend(
-					@editorPanel.find("#editor")
+					@editorPanel.find("#editorWrapper")
 				)
 				splitter = @editorPanel.find("#editorSplitter")
 				splitter.show()
@@ -84,7 +84,7 @@ define [
 				@_saveSplitterState()
 				@currentViewState = @viewOptions.flatView
 				@editorPanel.prepend(
-					@editorPanel.find("#editor")
+					@editorPanel.find("#editorWrapper")
 				)
 				@editorPanel.find("#editorSplitter").hide()
 				@aceEditor.resize(true)
