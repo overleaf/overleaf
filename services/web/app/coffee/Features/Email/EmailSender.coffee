@@ -20,10 +20,10 @@ module.exports =
 		metrics.inc "email"
 		options = 
 			to: options.to
-			from: "ShareLaTeX <team@sharelatex.com>"
+			from: Settings.email.fromAddress
 			subject: options.subject
 			message: options.html
-			replyTo: options.replyTo || "team@sharelatex.com"
+			replyTo: Settings.email.replyToAddress
 		client.sendemail options, (err, data, res)->
 			if err?
 				logger.err err:err, "error sending message"

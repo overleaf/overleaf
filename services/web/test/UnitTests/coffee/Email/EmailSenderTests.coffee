@@ -10,10 +10,14 @@ describe "Email", ->
 
 	beforeEach ->
 
-		@settings = 
-			ses:
-				key: "key"
-				secret: "secret"
+		@settings =
+			email:
+				ses:
+					key: "key"
+					secret: "secret"
+				fromAddress: "bob@bob.com"
+				replyToAddress: "sally@gmail.com"
+
 		@sesClient = 
 			sendemail: sinon.stub()
 		@ses = 
@@ -26,21 +30,22 @@ describe "Email", ->
 				warn:->
 				err:->
 
+		@opts =
+			to: "bob@bob.com"
+			subject: "new email"
+			html: "<hello></hello>"
+			replyTo: "sarah@bob.com"
+
 	describe "sendEmail", ->
 
 		it "should set the properties on the email to send", (done)->
 			@sesClient.sendemail.callsArgWith(1)
 
-			opts =
-				to: "bob@bob.com"
-				subject: "new email"
-				html: "<hello></hello>"
-				replyTo: "sarah@bob.com"
-			@sender.sendEmail opts, =>
+			@sender.sendEmail @opts, =>
 				args = @sesClient.sendemail.args[0][0]
-				args.message.should.equal opts.html
-				args.to.should.equal opts.to
-				args.subject.should.equal opts.subject
+				args.message.should.equal @opts.html
+				args.to.should.equal @opts.to
+				args.subject.should.equal @opts.subject
 				done()
 
 		it "should return the error", (done)->	
@@ -48,3 +53,21 @@ describe "Email", ->
 			@sender.sendEmail {}, (err)=>
 				err.should.equal "error"
 				done()
+
+
+		it "should use the from address from settings", (done)->
+			@sesClient.sendemail.callsArgWith(1)
+
+			@sender.sendEmail @opts, =>
+				args = @sesClient.sendemail.args[0][0]
+				args.from.should.equal @settings.email.fromAddress
+				done()
+
+		it "should use the reply to address from settings", (done)->
+			@sesClient.sendemail.callsArgWith(1)
+
+			@sender.sendEmail @opts, =>
+				args = @sesClient.sendemail.args[0][0]
+				args.replyTo.should.equal @settings.email.replyToAddress
+				done()
+
