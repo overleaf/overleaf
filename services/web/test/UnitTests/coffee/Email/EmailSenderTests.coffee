@@ -34,7 +34,6 @@ describe "Email", ->
 			to: "bob@bob.com"
 			subject: "new email"
 			html: "<hello></hello>"
-			replyTo: "sarah@bob.com"
 
 	describe "sendEmail", ->
 
@@ -71,3 +70,12 @@ describe "Email", ->
 				args.replyTo.should.equal @settings.email.replyToAddress
 				done()
 
+
+		it "should use the reply to address in options as an override", (done)->
+			@sesClient.sendemail.callsArgWith(1)
+
+			@opts.replyTo = "someone@else.com"
+			@sender.sendEmail @opts, =>
+				args = @sesClient.sendemail.args[0][0]
+				args.replyTo.should.equal @opts.replyTo
+				done()
