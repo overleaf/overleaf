@@ -4,6 +4,10 @@ Settings = require('settings-sharelatex')
 metrics = require("../../infrastructure/Metrics")
 ses = require('node-ses')
 
+if Settings.email? and Settings.email.fromAddress?
+	defaultFromAddress = ""
+else 
+	defaultFromAddress = Settings.email.fromAddress
 
 if Settings.email?.ses? and Settings.email.ses?.key? and Settings.email.ses?.key != "" and Settings.email.ses?.secret? and Settings.email.ses?.secret != ""
 	client = ses.createClient({ key: Settings.email.ses.key, secret: Settings.email.ses.secret });
@@ -21,7 +25,7 @@ module.exports =
 		metrics.inc "email"
 		options = 
 			to: options.to
-			from: Settings.email.fromAddress
+			from: defaultFromAddress
 			subject: options.subject
 			message: options.html
 			replyTo: options.replyTo || Settings.email.replyToAddress
