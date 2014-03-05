@@ -2,7 +2,6 @@ User = require('../models/User').User
 sanitize = require('validator').sanitize
 fs = require('fs')
 _ = require('underscore')
-emailer = require('../managers/EmailManager')
 logger = require('logger-sharelatex')
 Security = require('../managers/SecurityManager')
 Settings = require('settings-sharelatex')
@@ -16,6 +15,7 @@ AuthenticationManager = require("../Features/Authentication/AuthenticationManage
 AuthenticationController = require("../Features/Authentication/AuthenticationController")
 SubscriptionLocator = require("../Features/Subscription/SubscriptionLocator")
 UserDeleter = require("../Features/User/UserDeleter")
+EmailHandler = require("../Features/Email/EmailHandler")
 Url = require("url")
 
 module.exports =
@@ -100,19 +100,17 @@ module.exports =
 			if(user?)
 				randomPassword = generateRandomString 12
 				AuthenticationManager.setUserPassword user._id, randomPassword, (error) ->
-					return next(error) if error?
-					emailOptions =
-						receiver : user.email
-						subject  : "Password Reset - ShareLatex.com"
-						heading  :  "Password Reset"
-						message  : " Your password has been reset, the new password is <p> #{randomPassword}
-										<p> please login <a href=#{Settings.siteUrl}/user/settings>click here</a>
-									"
-					emailer.sendEmail emailOptions
-					metrics.inc "user.password-reset"
-					res.send message:
-						 text:'An email with your new password has been sent to you'
-						 type:'success'
+					emailOpts =
+						newPassword: randomPassword
+						to: user.email
+					EmailHandler.sendEmail "passwordReset", emailOpts, (err)->
+						if err?
+							logger.err err:err, emailOpts:emailOpts, "problem sending password reset email"
+							return res.send 500
+						metrics.inc "user.password-reset"
+						res.send message:
+							 text:'An email with your new password has been sent to you'
+							 type:'success'
 			else
 				res.send message:
 					 text:'This email address has not been registered with us'
