@@ -1,5 +1,4 @@
 define [
-	"history/util"
 	"libs/mustache"
 	"libs/backbone"
 ], (util)->
@@ -9,7 +8,7 @@ define [
 		events:
 			"scroll" : "loadUntilFull"
 
-		initialize: ->
+		initialize: () ->
 			@itemViews = []
 			@atEndOfCollection = false
 
@@ -34,6 +33,8 @@ define [
 			index = @collection.indexOf(model)
 			elementAtIndex = @$(".change-list").children()[index]
 			view.$el.insertBefore(elementAtIndex)
+			view.on "click", (e, v) =>
+				@trigger "change_diff", v.model.get("version")
 
 		listShorterThanContainer: ->
 			@$el.height() > @$(".change-list").height()
@@ -81,6 +82,9 @@ define [
 	
 	ChangeListItemView = Backbone.View.extend
 		tagName: "li"
+
+		events:
+			"click a": "onClick"
 	
 		template : $("#changeListItemTemplate").html()
 
@@ -96,6 +100,10 @@ define [
 			# modelView.start_ts = util.formatDate(modelView.start_ts)
 			# modelView.end_ts = util.formatDate(modelView.end_ts)
 			return modelView
+
+		onClick: (e) ->
+			e.preventDefault()
+			@trigger "click", e, @
 
 	return ChangeListView
 

@@ -5,10 +5,18 @@
 	.track-changes-diff {
 		position: absolute;
 		right: @versionsListWidth + 1px;
-		right: 0;
+		left: 0;
+		top: 0;
+		bottom: 0;
 		padding: 0px 12px;
-		overflow: scroll;
 		height: 100%;
+		.ace_editor {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
 	}
 
 	.track-changes-side-bar {
@@ -26,5 +34,20 @@
 		right: 0px;
 		top: 0px;
 		bottom: 0px;
+	}
+
+	.deleted-change-background, .deleted-change-foreground, .inserted-change, .change-name-marker {
+		position: absolute;
+		z-index: 2;
+	}
+
+	.change-name-marker {
+		.name {
+			font-size: 0.8em;
+			padding: 2px 6px;
+			.border-radius(3px 3px 3px 3px);
+			position: absolute;
+			left: 0;
+		}
 	}
 }
