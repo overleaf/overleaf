@@ -43,13 +43,15 @@ module.exports = MongoManager =
 		query = 
 			doc_id: ObjectId(doc_id.toString())
 		if options.from?
-			query["meta.end_ts"] = { $gte: options.from }
+			query["v"] ||= {}
+			query["v"]["$gte"] = options.from
 		if options.to?
-			query["meta.start_ts"] = { $lte: options.to }
+			query["v"] ||= {}
+			query["v"]["$lte"] = options.to
 			
 		cursor = db.docHistory
 			.find( query )
-			.sort( "meta.end_ts": -1 )
+			.sort( v: -1 )
 
 		if options.limit?
 			cursor.limit(options.limit)
@@ -57,5 +59,5 @@ module.exports = MongoManager =
 		cursor.toArray callback
 
 	ensureIndices: (callback = (error) ->) ->
-		db.docHistory.ensureIndex { doc_id: 1, "meta.start_ts": 1, "meta.end_ts": 1 }, callback
+		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, callback
 

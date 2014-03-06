@@ -30,7 +30,7 @@ describe "Getting updates", ->
 		}, {
 			op: [{ i: "three ", p: 8 }]
 			meta: { ts: @to, user_id: @user_id }
-			v: 5
+			v: @toVersion = 5
 		}, {
 			op: [{ i: "four", p: 14 }]
 			meta: { ts: @to + 2 * @minutes, user_id: @user_id }
@@ -39,7 +39,7 @@ describe "Getting updates", ->
 
 		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
 			throw error if error?
-			TrackChangesClient.getUpdates @project_id, @doc_id, { to: @to, limit: 2 }, (error, body) =>
+			TrackChangesClient.getUpdates @project_id, @doc_id, { to: @toVersion, limit: 2 }, (error, body) =>
 				throw error if error?
 				@updates = body.updates
 				done()

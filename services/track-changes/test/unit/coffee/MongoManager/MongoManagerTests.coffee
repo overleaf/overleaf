@@ -141,25 +141,24 @@ describe "MongoManager", ->
 			@db.docHistory.limit = sinon.stub().returns @db.docHistory
 			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
 
-			@from = new Date(Date.now())
-			@to = new Date(Date.now() + 100000)
+			@from = 42
+			@to   = 55
 
-		describe "with a toDate", ->
+		describe "with a to version", ->
 			beforeEach ->
 				@MongoManager.getUpdates @doc_id, from: @from, to: @to, @callback
 
-			it "should find the all updates between the to and from date", ->
+			it "should find the all updates between the to and from versions", ->
 				@db.docHistory.find
 					.calledWith({
 						doc_id: ObjectId(@doc_id)
-						"meta.end_ts": { $gte: @from }
-						"meta.start_ts": { $lte: @to }
+						v: { $gte: @from, $lte: @to }
 					})
 					.should.equal true
 
-			it "should sort in descending timestamp order", ->
+			it "should sort in descending version order", ->
 				@db.docHistory.sort
-					.calledWith("meta.end_ts": -1)
+					.calledWith("v": -1)
 					.should.equal true
 
 			it "should not limit the results", ->
@@ -169,15 +168,15 @@ describe "MongoManager", ->
 			it "should call the call back with the updates", ->
 				@callback.calledWith(null, @updates).should.equal true
 
-		describe "without a todo date", ->
+		describe "without a to version", ->
 			beforeEach ->
 				@MongoManager.getUpdates @doc_id, from: @from, @callback
 
-			it "should find the all updates after the from date", ->
+			it "should find the all updates after the from version", ->
 				@db.docHistory.find
 					.calledWith({
 						doc_id: ObjectId(@doc_id)
-						"meta.end_ts": { $gte: @from }
+						v: { $gte: @from }
 					})
 					.should.equal true
 

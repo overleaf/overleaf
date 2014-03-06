@@ -30,11 +30,11 @@ describe "Getting a diff", ->
 		}, {
 			op: [{ i: "two ", p: 4 }]
 			meta: { ts: @from + twoMinutes, user_id: @user_id }
-			v: 4
+			v: @fromVersion = 4
 		}, {
 			op: [{ i: "three ", p: 8 }]
 			meta: { ts: @to - twoMinutes, user_id: @user_id }
-			v: 5
+			v: @toVersion = 5
 		}, {
 			op: [{ i: "four", p: 14 }]
 			meta: { ts: @to + twoMinutes, user_id: @user_id }
@@ -53,7 +53,7 @@ describe "Getting a diff", ->
 
 		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
 			throw error if error?
-			TrackChangesClient.getDiff @project_id, @doc_id, @from, @to, (error, diff) =>
+			TrackChangesClient.getDiff @project_id, @doc_id, @fromVersion, @toVersion, (error, diff) =>
 				throw error if error?
 				@diff = diff.diff
 				done()
