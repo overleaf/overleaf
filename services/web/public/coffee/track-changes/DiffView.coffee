@@ -74,7 +74,7 @@ define [
 					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 85%);
 					"""
-					tag = "Added by #{entry.meta.user_id}"
+					tag = "Added by #{entry.meta.user.email}"
 				if entry.d?
 					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 95%);
@@ -83,7 +83,7 @@ define [
 						height: #{Math.round(lineHeight/2) - 1}px;
 						border-bottom: 2px solid hsl(#{hue}, 70%, 40%);
 					"""
-					tag = "Deleted by #{entry.meta.user_id}"
+					tag = "Deleted by #{entry.meta.user.email}"
 
 				tag += " on #{entry.meta.end_ts}"
 				@_addNameTag session, id, range, tag, """
