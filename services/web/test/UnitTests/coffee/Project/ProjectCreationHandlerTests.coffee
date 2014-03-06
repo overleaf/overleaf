@@ -6,10 +6,11 @@ modulePath = "../../../../app/js/Features/Project/ProjectCreationHandler.js"
 SandboxedModule = require('sandboxed-module')
 Settings = require('settings-sharelatex')
 Path = require "path"
+_ = require("underscore")
 
 describe 'ProjectCreationHandler', ->
 	ownerId = '4eecb1c1bffa66588e0000a1'
-	projectName = 'project name'
+	projectName = 'project name goes here'
 	project_id = "4eecaffcbffa66588e000008"
 	docId = '4eecb17ebffa66588e00003f'
 	rootFolderId = "234adfa3r2afe"
@@ -166,3 +167,33 @@ describe 'ProjectCreationHandler', ->
 			@handler._buildTemplate
 				.calledWith("references.bib", ownerId, projectName)
 				.should.equal true
+
+
+	describe "_buildTemplate", ->
+
+		beforeEach (done)->
+			@handler._buildTemplate "main.tex", @user_id, projectName, (err, templateLines)=>
+				@template = templateLines.reduce (singleLine, line)-> "#{singleLine}\n#{line}"
+				done()
+
+		it "should insert the project name into the template", (done)->
+			@template.indexOf(projectName).should.not.equal -1
+			done()
+
+		it "should insert the users name into the template", (done)->
+			@template.indexOf(@user.first_name).should.not.equal -1
+			@template.indexOf(@user.last_name).should.not.equal -1
+			done()
+
+		it "should not have undefined in the template", (done)->
+			@template.indexOf("undefined").should.equal -1
+			done()
+
+		it "should not have any underscore brackets in the output", (done)->
+			@template.indexOf("{{").should.equal -1
+			@template.indexOf("<%=").should.equal -1
+			done()
+
+		it "should put the year in", (done)->
+			@template.indexOf(new Date().getUTCFullYear()).should.not.equal -1
+			done()
