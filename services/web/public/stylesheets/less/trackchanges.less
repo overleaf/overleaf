@@ -1,10 +1,10 @@
-@changesListWidth:   200px;
-@versionsListPadding: 10px;
+@changesListWidth:   250px;
+@changesListPadding: 10px;
 
 #trackChangesPanel {
 	.track-changes-diff {
 		position: absolute;
-		right: @versionsListWidth + 1px;
+		right: @changesListWidth + 1px;
 		left: 0;
 		top: 0;
 		bottom: 0;
@@ -22,7 +22,7 @@
 	.track-changes-side-bar {
 		border-left: 1px solid #999;
 		height: 100%;
-		width: @versionsListWidth;
+		width: @changesListWidth;
 		position: absolute;
 		right: 0;
 	}
@@ -48,6 +48,34 @@
 			.border-radius(3px 3px 3px 3px);
 			position: absolute;
 			left: 0;
+		}
+	}
+
+	ul.change-list {
+		li {
+			padding: 4px;
+			position: relative;
+			.change-selectors {
+				position: absolute;
+				top: 4px;
+				left: 4px;
+				.change-selector-from {
+					position: absolute;
+					top: 0;
+					left: 0;
+				}
+				.change-selector-to {
+					position: absolute;
+					top: 0;
+					left: 20px;
+				}
+			}
+			.change-description {
+				padding-left: 40px;
+			}
+		}
+		li.selected {
+			background-color: rgb(190, 226, 244);
 		}
 	}
 }

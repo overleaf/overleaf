@@ -430,7 +430,11 @@
 			.track-changes-diff
 
 	script(type='text/template')#changeListItemTemplate
-		a(href="#")
+		div(class='change-selectors')
+			input(type="radio",name="fromVersion").change-selector-from
+			input(type="radio",name="toVersion").change-selector-to
+
+		div(class='change-description')
 			div(class='change-message') {{user_id}}
 			div(class='change-date') {{end_ts}} 
 			div(class='change-date') {{start_ts}} 

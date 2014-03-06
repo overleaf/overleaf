@@ -24,12 +24,12 @@ define [
 			@changeListView.render()
 			@changeListView.loadUntilFull()
 
-			@changeListView.on "change_diff", (version) =>
+			@changeListView.on "change_diff", (fromModel, toModel) =>
 				@diff = new Diff({
 					project_id: @project_id
 					doc_id: @doc_id
-					from: version
-					to: version
+					from: fromModel.get("version")
+					to:   toModel.get("version")
 				})
 				@diffView = new DiffView(
 					model: @diff

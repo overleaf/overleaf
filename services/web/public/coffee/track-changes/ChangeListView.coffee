@@ -18,6 +18,9 @@ define [
 			@collection.on "reset", (collection) ->
 				self.addItem model for model in collection.models
 
+			@selectedFromIndex = 0
+			@selectedToIndex = 0
+
 			@render()
 			@hideLoading()
 
@@ -28,13 +31,36 @@ define [
 			this
 
 		addItem: (model) ->
+			index = @collection.indexOf(model)
 			view = new ChangeListItemView(model : model)
 			@itemViews.push view
-			index = @collection.indexOf(model)
 			elementAtIndex = @$(".change-list").children()[index]
 			view.$el.insertBefore(elementAtIndex)
+
 			view.on "click", (e, v) =>
-				@trigger "change_diff", v.model.get("version")
+				@selectedToIndex = index
+				@selectedFromIndex = index
+				@resetAllSelectors()
+				@triggerChangeDiff()
+
+			view.on "selected:to", (e, v) =>
+				@selectedToIndex = index
+				@resetAllSelectors()
+				@triggerChangeDiff()
+
+			view.on "selected:from", (e, v) =>
+				@selectedFromIndex = index
+				@resetAllSelectors()
+				@triggerChangeDiff()
+
+			view.resetSelector(index, @selectedFromIndex, @selectedToIndex)
+
+		resetAllSelectors: () ->
+			for view, i in @itemViews
+				view.resetSelector(i, @selectedFromIndex, @selectedToIndex)
+
+		triggerChangeDiff: () ->
+			@trigger "change_diff", @collection.models[@selectedFromIndex], @collection.models[@selectedToIndex]
 
 		listShorterThanContainer: ->
 			@$el.height() > @$(".change-list").height()
@@ -84,7 +110,9 @@ define [
 		tagName: "li"
 
 		events:
-			"click a": "onClick"
+			"click .change-description"   : "onClick"
+			"click .change-selector-from" : "onFromSelectorClick"
+			"click .change-selector-to"   : "onToSelectorClick"
 	
 		template : $("#changeListItemTemplate").html()
 
@@ -104,6 +132,62 @@ define [
 		onClick: (e) ->
 			e.preventDefault()
 			@trigger "click", e, @
+
+		onToSelectorClick: (e) ->
+			@trigger "selected:to", e, @
+
+		onFromSelectorClick: (e) ->
+			@trigger "selected:from", e, @
+
+		isSelectedFrom: () ->
+			@$(".change-selector-from").is(":checked")
+
+		isSelectedTo: () ->
+			@$(".change-selector-to").is(":checked")
+
+		hideFromSelector: () ->
+			@$(".change-selector-from").hide()
+
+		showFromSelector: () ->
+			@$(".change-selector-from").show()
+
+		hideToSelector: () ->
+			@$(".change-selector-to").hide()
+
+		showToSelector: () ->
+			@$(".change-selector-to").show()
+
+		setFromChecked: (checked) ->
+			@$(".change-selector-from").prop("checked", checked)
+
+		setToChecked: (checked) ->
+			@$(".change-selector-to").prop("checked", checked)
+
+		setSelected: () ->
+			@$el.addClass("selected")
+
+		setUnselected: () ->
+			@$el.removeClass("selected")
+
+		resetSelector: (myIndex, selectedFromIndex, selectedToIndex) ->
+			if myIndex >= selectedToIndex
+				@showFromSelector()
+			else
+				@hideFromSelector()
+
+			if myIndex <= selectedFromIndex
+				@showToSelector()
+			else
+				@hideToSelector()
+
+			if selectedToIndex <= myIndex <= selectedFromIndex
+				@setSelected()
+			else
+				@setUnselected()
+
+			@setFromChecked(myIndex == selectedFromIndex)
+			@setToChecked(myIndex == selectedToIndex)
+
 
 	return ChangeListView
 
