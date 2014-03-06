@@ -50,9 +50,11 @@ describe "Getting updates", ->
 				start_ts: @to
 				end_ts: @to
 				user_id: @user_id
+			v: 5
 		}, {
 			meta:
 				start_ts: @to - 2 * @minutes
 				end_ts: @to - 2 * @minutes
 				user_id: @user_id
+			v: 4
 		}]

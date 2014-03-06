@@ -90,5 +90,6 @@ describe "HttpController", ->
 			updates = for update in @rawUpdates
 				{
 					meta: @meta
+					v:    @v
 				}
 			@res.send.calledWith(JSON.stringify(updates: updates)).should.equal true

@@ -42,6 +42,7 @@ module.exports = HttpController =
 			formattedUpdates = for update in updates
 				{
 					meta: update.meta
+					v: update.v
 				}
 			res.send JSON.stringify updates: formattedUpdates
 
