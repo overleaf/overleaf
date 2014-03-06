@@ -51,6 +51,10 @@ ShareLaTeX should now be running at http://localhost:3000.
 
 There is a Vagrant and Ansible backed VM installation script for ShareLaTeX, maintained by [@palkan](https://github/palkan), available here: https://github.com/palkan/sharelatex-vagrant-ansible
 
+### With Docker
+
+An [automatic docker-based installer](https://github.com/tiagoboldt/sharelatex-docker) is available. It depends on docker and will build a production environment for running ShareLaTeX on any supported platform.
+
 Dependencies
 ------------
 
