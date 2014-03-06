@@ -2,6 +2,11 @@ settings = require("settings-sharelatex")
 EmailBuilder = require "./EmailBuilder"
 EmailSender = require "./EmailSender"
 
+if !settings.email?
+	settings.email = 
+		lifecycleEnabled:false
+
+
 module.exports =
 
 	sendEmail : (emailType, opts, callback = (err)->)->
