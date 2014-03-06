@@ -14,7 +14,7 @@ pulls together all of the different services and allows you to set up and run
 them quickly.
 
 ### Automatically
-An [automatic installer](https://github.com/tiagoboldt/sharelatex-docker). It depends on docker and will build a complete working environment for running ShareLaTeX in any compatible environment. 
+An [automatic installer](https://github.com/tiagoboldt/sharelatex-docker) is available. It depends on docker and will build a production environment for running ShareLaTeX on any supported platform. 
 
 ### Manually
 
