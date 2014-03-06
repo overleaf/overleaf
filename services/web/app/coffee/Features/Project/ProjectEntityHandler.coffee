@@ -217,7 +217,7 @@ module.exports = ProjectEntityHandler =
 						logger.err "error putting doc #{doc_id} in project #{project_id} #{err}"
 						callback err
 					else if docComparitor.areSame docLines, doc.lines
-						logger.log sl_req_id: sl_req_id, docLines:docLines, project_id:project_id, doc_id:doc_id, rev:doc.rev, "old doc lines are same as the new doc lines, not updating them"
+						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, rev:doc.rev, "old doc lines are same as the new doc lines, not updating them"
 						callback()
 					else
 						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, docLines: docLines, oldDocLines: doc.lines, rev:doc.rev, "updating doc lines"
