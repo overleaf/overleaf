@@ -180,6 +180,8 @@ define [
 			@model = @ide.project
 			_.bindAll(this, "render");
 			this.model.bind('change', this.render)
+			@refreshPublishStatus()
+			
 
 		render: ->
 			viewModel = 
@@ -191,7 +193,6 @@ define [
 			$(@el).html $(Mustache.to_html(@template, viewModel))
 			@publishedArea = $('#publishedAsTemplateArea')
 			@unpublishedArea = $('#unpublishedAsTemplateArea')
-			@refreshPublishStatus()
 
 
 		refreshPublishStatus: ->
