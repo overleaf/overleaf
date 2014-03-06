@@ -8,6 +8,7 @@ ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 
 TrackChangesClient = require "./helpers/TrackChangesClient"
+MockWebApi = require "./helpers/MockWebApi"
 
 describe "Getting updates", ->
 	before (done) ->
@@ -18,6 +19,13 @@ describe "Getting updates", ->
 		@project_id = ObjectId().toString()
 
 		@minutes = 60 * 1000
+
+		MockWebApi.users[@user_id] = @user =
+			email: "user@sharelatex.com"
+			first_name: "Leo"
+			last_name: "Lion"
+			id: @user_id
+		sinon.spy MockWebApi, "getUser"
 
 		@updates = [{
 			op: [{ i: "one ", p: 0 }]
@@ -44,17 +52,25 @@ describe "Getting updates", ->
 				@updates = body.updates
 				done()
 
-	it "should return the diff", ->
+	after: () ->
+		MockWebApi.getUser.restore()
+
+	it "should fetch the user details from the web api", ->
+		MockWebApi.getUser
+			.calledWith(@user_id)
+			.should.equal true
+
+	it "should return the updates", ->
 		expect(@updates).to.deep.equal [{
 			meta:
 				start_ts: @to
 				end_ts: @to
-				user_id: @user_id
+				user: @user
 			v: 5
 		}, {
 			meta:
 				start_ts: @to - 2 * @minutes
 				end_ts: @to - 2 * @minutes
-				user_id: @user_id
+				user: @user
 			v: 4
 		}]

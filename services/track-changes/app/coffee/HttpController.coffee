@@ -37,7 +37,7 @@ module.exports = HttpController =
 		if req.query.limit?
 			limit = parseInt(req.query.limit, 10)
 
-		UpdatesManager.getUpdates doc_id, to: to, limit: limit, (error, updates) ->
+		UpdatesManager.getUpdatesWithUserInfo doc_id, to: to, limit: limit, (error, updates) ->
 			return next(error) if error?
 			formattedUpdates = for update in updates
 				{
@@ -45,5 +45,3 @@ module.exports = HttpController =
 					v: update.v
 				}
 			res.send JSON.stringify updates: formattedUpdates
-
-

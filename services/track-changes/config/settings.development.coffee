@@ -8,3 +8,7 @@ module.exports =
 	apis:
 		documentupdater:
 			url: "http://localhost:3003"
+		web:
+			url: "http://localhost:3000"
+			user: "sharelatex"
+			pass: "password"

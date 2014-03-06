@@ -78,15 +78,15 @@ describe "HttpController", ->
 				meta:   @meta = "mock-meta"
 				doc_id: @doc_id
 			}]
-			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(2, null, @rawUpdates)
+			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @rawUpdates)
 			@HttpController.getUpdates @req, @res, @next
 
 		it "should get the updates", ->
-			@UpdatesManager.getUpdates
+			@UpdatesManager.getUpdatesWithUserInfo
 				.calledWith(@doc_id, to: @to, limit: @limit)
 				.should.equal true
 
-		it "should return the updates", ->
+		it "should return the formatted updates", ->
 			updates = for update in @rawUpdates
 				{
 					meta: @meta

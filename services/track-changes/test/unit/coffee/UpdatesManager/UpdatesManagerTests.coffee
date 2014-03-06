@@ -12,6 +12,7 @@ describe "UpdatesManager", ->
 			"./MongoManager" : @MongoManager = {}
 			"./RedisManager" : @RedisManager = {}
 			"./LockManager"  : @LockManager = {}
+			"./WebApiManager": @WebApiManager = {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@callback = sinon.stub()
@@ -218,4 +219,88 @@ describe "UpdatesManager", ->
 			@callback
 				.calledWith(null, @updates)
 				.should.equal true
+
+	describe "getUpdatesWithUserInfo", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { to: "mock-to", limit: "mock-limit" }
+			@updatesWithUserInfo = ["updates-with-user-info"]
+			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
+			@UpdatesManager.getUpdatesWithUserInfo @doc_id, @options, @callback
+
+		it "should get the updates", ->
+			@UpdatesManager.getUpdates
+				.calledWith(@doc_id, @options)
+				.should.equal true
+
+		it "should file the updates with the user info", ->
+			@UpdatesManager.fillUserInfo
+				.calledWith(@updates)
+				.should.equal true
+
+		it "shoudl return the updates with the filled details", ->
+			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
+
+	describe "fillUserInfo", ->
+		beforeEach (done) ->
+			@user_id_1 = "user-id-1"
+			@user_id_2 = "user-id-2"
+			@updates = [{
+				meta:
+					user_id: @user_id_1
+				op: "mock-op-1"
+			}, {
+				meta:
+					user_id: @user_id_1
+				op: "mock-op-2"
+			}, {
+				meta:
+					user_id: @user_id_2
+				op: "mock-op-3"
+			}]
+			@user_info =
+				"user-id-1": {
+					email: "user1@sharelatex.com"
+				}
+				"user-id-2": {
+					email: "user2@sharelatex.com"
+				}
+			@WebApiManager.getUserInfo = (user_id, callback = (error, userInfo) ->) =>
+				callback null, @user_info[user_id]
+			sinon.spy @WebApiManager, "getUserInfo"
+
+			@UpdatesManager.fillUserInfo @updates, (error, @results) =>
+				done()
+
+		it "should only call getUserInfo once for each user_id", ->
+			@WebApiManager.getUserInfo.calledTwice.should.equal true
+			@WebApiManager.getUserInfo
+				.calledWith(@user_id_1)
+				.should.equal true
+			@WebApiManager.getUserInfo
+				.calledWith(@user_id_2)
+				.should.equal true
+
+		it "should return the updates with the user info filled", ->
+			expect(@results).to.deep.equal [{
+				meta:
+					user:
+						email: "user1@sharelatex.com"
+				op: "mock-op-1"
+			}, {
+				meta:
+					user:
+						email: "user1@sharelatex.com"
+				op: "mock-op-2"
+			}, {
+				meta:
+					user:
+						email: "user2@sharelatex.com"
+				op: "mock-op-3"
+			}]
+
+
+
+
 

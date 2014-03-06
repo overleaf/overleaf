@@ -9,6 +9,7 @@ Settings = require "settings-sharelatex"
 
 TrackChangesClient = require "./helpers/TrackChangesClient"
 MockDocUpdaterApi = require "./helpers/MockDocUpdaterApi"
+MockWebApi = require "./helpers/MockWebApi"
 
 describe "Getting a diff", ->
 	before (done) ->
@@ -20,6 +21,13 @@ describe "Getting a diff", ->
 		@user_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+
+		MockWebApi.users[@user_id] = @user =
+			email: "user@sharelatex.com"
+			first_name: "Leo"
+			last_name: "Lion"
+			id: @user_id
+		sinon.spy MockWebApi, "getUser"
 
 		twoMinutes = 2 * 60 * 1000
 
@@ -43,8 +51,8 @@ describe "Getting a diff", ->
 		@lines = ["one two three four"]
 		@expected_diff = [
 			{ u: "one " }
-			{ i: "two ", meta: { start_ts: @from + twoMinutes, end_ts: @from + twoMinutes, user_id: @user_id } }
-			{ i: "three ", meta: { start_ts: @to - twoMinutes, end_ts: @to - twoMinutes, user_id: @user_id } }
+			{ i: "two ", meta: { start_ts: @from + twoMinutes, end_ts: @from + twoMinutes, user: @user } }
+			{ i: "three ", meta: { start_ts: @to - twoMinutes, end_ts: @to - twoMinutes, user: @user } }
 		]
 
 		MockDocUpdaterApi.docs[@doc_id] =
@@ -60,6 +68,7 @@ describe "Getting a diff", ->
 
 	after () ->
 		MockDocUpdaterApi.getDoc.restore()
+		MockWebApi.getUser.restore()
 
 	it "should return the diff", ->
 		expect(@diff).to.deep.equal @expected_diff

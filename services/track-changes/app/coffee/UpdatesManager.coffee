@@ -2,7 +2,9 @@ MongoManager = require "./MongoManager"
 RedisManager = require "./RedisManager"
 UpdateCompressor = require "./UpdateCompressor"
 LockManager = require "./LockManager"
+WebApiManager = require "./WebApiManager"
 logger = require "logger-sharelatex"
+async = require "async"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (doc_id, rawUpdates, callback = (error) ->) ->
@@ -70,3 +72,31 @@ module.exports = UpdatesManager =
 			return callback(error) if error?
 			MongoManager.getUpdates doc_id, options, callback
 
+	getUpdatesWithUserInfo: (doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.getUpdates doc_id, options, (error, updates) ->
+			return callback(error) if error?
+			UpdatesManager.fillUserInfo updates, (error, updates) ->
+				return callback(error) if error?
+				callback null, updates
+
+	fillUserInfo: (updates, callback = (error, updates) ->) ->
+		users = {}
+		for update in updates
+			users[update.meta.user_id] = true
+
+		jobs = []
+		for user_id, _ of users
+			do (user_id) ->
+				jobs.push (callback) ->
+					WebApiManager.getUserInfo user_id, (error, userInfo) ->
+						return callback(error) if error?
+						users[user_id] = userInfo
+						callback()
+
+		async.series jobs, (error) ->
+			return callback(error) if error?
+			for update in updates
+				user_id = update.meta.user_id
+				delete update.meta.user_id
+				update.meta.user = users[user_id]
+			callback null, updates
