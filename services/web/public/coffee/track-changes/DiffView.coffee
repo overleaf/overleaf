@@ -69,12 +69,12 @@ define [
 			markerFrontLayer = @aceEditor.renderer.$markerFront
 			lineHeight = @aceEditor.renderer.lineHeight
 			if entry.i? or entry.d?
-				hue = 200
+				hue = entry.meta.user.hue()
 				if entry.i?
 					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 85%);
 					"""
-					tag = "Added by #{entry.meta.user.email}"
+					tag = "Added by #{entry.meta.user.name()}"
 				if entry.d?
 					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 95%);
@@ -83,7 +83,7 @@ define [
 						height: #{Math.round(lineHeight/2) - 1}px;
 						border-bottom: 2px solid hsl(#{hue}, 70%, 40%);
 					"""
-					tag = "Deleted by #{entry.meta.user.email}"
+					tag = "Deleted by #{entry.meta.user.name()}"
 
 				tag += " on #{entry.meta.end_ts}"
 				@_addNameTag session, id, range, tag, """

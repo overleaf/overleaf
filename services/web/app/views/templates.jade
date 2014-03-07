@@ -436,7 +436,9 @@
 
 		div(class='change-description')
 			div(class='change-date') {{date}} 
-			div(class='change-name') {{name}}
+			div(class='change-name')
+				div.color-square(style="background-color: hsl({{hue}}, 100%, 70%);")
+				span {{name}}
 
 	script(type='text/template')#changeListTemplate
 		ul.change-list.nav.nav-pills.nav-stacked

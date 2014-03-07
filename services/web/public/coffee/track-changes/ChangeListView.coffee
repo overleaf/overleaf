@@ -126,6 +126,7 @@ define [
 		
 		modelView: ->
 			modelView = {
+				hue:  @model.get("user").hue()
 				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
 				name: @model.get("user").get("first_name") + " " + @model.get("user").get("last_name")
 			}
