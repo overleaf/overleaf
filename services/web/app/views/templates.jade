@@ -147,10 +147,11 @@
 		#editorArea(style='display: none;')
 			#editorSplitter
 				#leftEditorPanel.ui-layout-center
-					#editor
-					#undoConflictWarning(style="display: none")
-						| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
-						a(href="#").js-hide Hide
+					#editorWrapper
+						#editor
+						#undoConflictWarning(style="display: none")
+							| <strong>Watch out!</strong> We had to undo some of your collaborators changes before we could undo yours.
+							a(href="#").js-hide Hide
 				#rightEditorPanel.ui-layout-east
 
 	script(type="text/template")#loadingIndicatorTemplate
@@ -403,11 +404,6 @@
 			div(class='version-message') {{message}}
 			div(class='version-date') {{date}} 
 
-	script(type='text/template')#autoCompleteSuggestionTemplate
-		li
-			strong {{base}}
-			| {{completion}}
-
 	script(type='text/template')#versionListTemplate
 		ul#version-list.nav.nav-pills.nav-stacked
 			li.loading Loading...
@@ -426,6 +422,32 @@
 	script(type='text/template')#hotKeysLinkTemplate
 		div
 			a(href="#", title='Show Hot Keys List') Hot keys
+
+	script(type='text/template')#trackChangesPanelTemplate
+		#trackChangesPanel
+			.track-changes-side-bar
+				.track-changes-header
+					h3 Recent changes
+					a(href="#").track-changes-close
+						i.icon-remove
+				.change-list-area
+			.track-changes-diff
+
+	script(type='text/template')#changeListItemTemplate
+		div(class='change-selectors')
+			input(type="radio",name="fromVersion").change-selector-from
+			input(type="radio",name="toVersion").change-selector-to
+
+		div(class='change-description')
+			div(class='change-date') {{date}} 
+			div(class='change-name')
+				div.color-square(style="background-color: hsl({{hue}}, 100%, 70%);")
+				span {{name}}
+
+	script(type='text/template')#changeListTemplate
+		ul.change-list.nav.nav-pills.nav-stacked
+			li.loading-changes Loading...
+			li.empty-message You haven't made any changes yet!
 
 	script(type='text/template')#hotKeysListTemplate
 		.hotkeys

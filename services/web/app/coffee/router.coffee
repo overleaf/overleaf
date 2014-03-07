@@ -32,6 +32,7 @@ CompileController = require("./Features/Compile/CompileController")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
+TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 logger = require("logger-sharelatex")
 
 httpAuth = require('express').basicAuth (user, pass)->
@@ -121,6 +122,9 @@ module.exports = class Router
 		app.get  '/Project/:Project_id/version/:Version_id', SecutiryManager.requestCanAccessProject, versioningController.getVersion
 		app.get  '/Project/:Project_id/version', SecutiryManager.requestCanAccessProject, versioningController.listVersions
 		app.get  '/Project/:Project_id/version/:Version_id', SecutiryManager.requestCanAccessProject, versioningController.getVersion
+
+		app.get  "/project/:Project_id/doc/:doc_id/updates", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		app.get  "/project/:Project_id/doc/:doc_id/diff", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 		app.get  '/project/:Project_id/collaborators', SecutiryManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
