@@ -5,7 +5,7 @@ module.exports = MongoManager =
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		db.docHistory
 			.find(doc_id: ObjectId(doc_id.toString()))
-			.sort( "meta.end_ts": -1)
+			.sort( v: -1 )
 			.limit(1)
 			.toArray (error, compressedUpdates) ->
 				return callback(error) if error?

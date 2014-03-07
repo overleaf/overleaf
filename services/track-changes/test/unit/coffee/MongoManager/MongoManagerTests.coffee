@@ -34,9 +34,9 @@ describe "MongoManager", ->
 				.calledWith(1)
 				.should.equal true
 
-		it "should sort in descending timestamp order", ->
+		it "should sort in descending version order", ->
 			@db.docHistory.sort
-				.calledWith("meta.end_ts": -1)
+				.calledWith(v: -1)
 				.should.equal true
 
 		it "should call the call back with the update", ->
