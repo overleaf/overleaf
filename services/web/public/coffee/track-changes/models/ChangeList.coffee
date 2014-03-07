@@ -4,7 +4,7 @@ define [
 ], (Change)->
 	ChangeList = Backbone.Collection.extend
 		model: Change
-		batchSize: 3
+		batchSize: 25
 
 		initialize: (models, @options) ->
 
