@@ -10,7 +10,6 @@ require [
 	$('.isoDate').each (i, d)->
 		html = $(d)
 		unparsedDate = html.text().trim()
-		console.log unparsedDate
 		formatedDate = moment(unparsedDate).format("Do MMM YYYY, h:mm:ss a")
 		html.text(formatedDate)
 
