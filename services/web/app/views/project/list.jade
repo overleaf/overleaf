@@ -144,6 +144,12 @@ block content
 		mixin tag('{{ project_id }}', '{{ tagName }}', true)
 
 	- locals.supressDefaultJs = true
+	script
+		window.requirejs = {
+			"paths" : {
+				"moment": "libs/moment"
+			}
+		};
 	script(
 		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'), 
 		baseurl=jsPath,
