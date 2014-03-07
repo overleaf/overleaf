@@ -1,7 +1,8 @@
 define [
+	"moment"
 	"libs/mustache"
 	"libs/backbone"
-], (util)->
+], (moment)->
 	ChangeListView = Backbone.View.extend
 		template: $("#changeListTemplate").html()
 
@@ -124,7 +125,10 @@ define [
 			return this
 		
 		modelView: ->
-			modelView = @model.toJSON()
+			modelView = {
+				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
+				name: @model.get("user").get("first_name") + " " + @model.get("user").get("last_name")
+			}
 			# modelView.start_ts = util.formatDate(modelView.start_ts)
 			# modelView.end_ts = util.formatDate(modelView.end_ts)
 			return modelView
