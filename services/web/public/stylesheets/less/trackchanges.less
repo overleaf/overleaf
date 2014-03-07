@@ -26,15 +26,31 @@
 		position: absolute;
 		right: 0;
 		background-color: white;
-	}
 
-	.change-list-area {
-		overflow: scroll;
-		position: absolute;
-		left: 0px;
-		right: 0px;
-		top: 0px;
-		bottom: 0px;
+		.track-changes-header {
+			background-color: black;
+			h3 {
+				color: white;
+				padding-left: 8px;
+				font-size: 1.2em;
+			}
+			a {
+				color: white;
+				position: absolute;
+				top: 6px;
+				right: 8px;
+			}
+			height: 30px;
+		}
+
+		.change-list-area {
+			overflow: scroll;
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			top: 30px;
+			bottom: 0px;
+		}
 	}
 
 	.deleted-change-background, .deleted-change-foreground, .inserted-change, .change-name-marker {

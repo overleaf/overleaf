@@ -12,6 +12,13 @@ define [
 			$("#editorWrapper").append(@$el)
 			@hideEl()
 
+			@ide.editor.on "change:doc", () =>
+				@hideEl()
+
+			@$el.find(".track-changes-close").on "click", (e) =>
+				e.preventDefault
+				@hideEl()
+
 		show: () ->
 			@project_id = window.userSettings.project_id
 			@doc_id = @ide.editor.current_doc_id
