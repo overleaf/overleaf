@@ -21,6 +21,8 @@ define [
 			return hue
 
 		name: () ->
+			if window.user.id == @get("id")
+				return "you"
 			parts = []
 			first_name = @get("first_name")
 			if first_name? and first_name.length > 0

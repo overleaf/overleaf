@@ -85,9 +85,10 @@ define [
 					"""
 					tag = "Deleted by #{entry.meta.user.name()}"
 
-				tag += " on #{entry.meta.end_ts}"
+				date = moment(parseInt(entry.meta.end_ts, 10)).format("Do MMM YYYY, h:mm:ss a")
+				tag += " on #{date}"
 				@_addNameTag session, id, range, tag, """
-					background-color : hsl(#{hue}, 70%, 85%);
+					background-color : hsl(#{hue}, 70%, 95%);
 				"""
 
 		_addMarkerWithCustomStyle: (session, markerLayer, range, klass, foreground, style) ->
@@ -105,7 +106,7 @@ define [
 				id: id
 			startRange = new Range.Range(
 				range.start.row, range.start.column
-				range.start.row, session.getScreenLastRowColumn(range.start.row)
+				range.start.row, range.start.column + 1
 			)
 			session.addMarker startRange, "change-name-marker", (html, range, left, top, config) ->
 				html.push """
@@ -121,7 +122,7 @@ define [
 						<div
 							class="name" style="
 								display: none;
-								bottom: #{config.lineHeight + 2}px;
+								bottom: #{config.lineHeight + 3}px;
 								#{style}
 							">#{content}</div>
 					</div>
