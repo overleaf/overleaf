@@ -117,13 +117,6 @@ describe "LimitationsManager", ->
 				hasSubscription.should.equal false
 				done()
 
-		it "should return false if the recurly token is set but subscription state is expired", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {state:"expired", recurlySubscription_id:"1234"})
-			@subscription = {}
-			@LimitationsManager.userHasSubscription @user, (err, hasSubscription)->
-				hasSubscription.should.equal false
-				done()
-
 		it "should return false if the subscription is undefined", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1)
 			@LimitationsManager.userHasSubscription @user, (err, hasSubscription)->

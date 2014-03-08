@@ -33,12 +33,14 @@ module.exports =
 		@userHasSubscription user, (err, hasSubscription, subscription)=>
 			@userHasFreeTrial user, (err, hasFreeTrial)=>
 				logger.log user_id:user._id, subscription:subscription, hasFreeTrial:hasFreeTrial, hasSubscription:hasSubscription, "checking if user has subscription or free trial"
-				callback null, hasFreeTrial or hasSubscription, subscription
+				callback err, hasFreeTrial or hasSubscription, subscription
 
 	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
-			hasValidSubscription = subscription? and subscription.recurlySubscription_id? and subscription?.state != "expired"
+			if err?
+				return callback(err)
+			hasValidSubscription = subscription? and subscription.recurlySubscription_id?
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
 
@@ -51,8 +53,7 @@ module.exports =
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
 			limitReached = subscription.member_ids.length >= subscription.membersLimit
 			logger.log user_id:user_id, limitReached:limitReached, currentTotal: subscription.member_ids.length, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
-
-			callback(null, limitReached)
+			callback(err, limitReached)
 
 getOwnerOfProject = (project_id, callback)->
 	Project.findById project_id, 'owner_ref', (error, project) ->
