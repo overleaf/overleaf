@@ -9,7 +9,6 @@ describe 'Referal allocator', ->
 	beforeEach ->
 		@ReferalAllocator = SandboxedModule.require modulePath, requires:
 			'../../models/User': User: @User = {}
-			"../Analytics/AnalyticsManager": @AnalyticsManager = {}
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator = {}
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex':
@@ -27,7 +26,6 @@ describe 'Referal allocator', ->
 				@referal_source = "bonus"
 				@User.update = sinon.stub().callsArgWith 3, null
 				@User.findOne = sinon.stub().callsArgWith 1, null, { _id: @user_id }
-				@AnalyticsManager.trackReferral = sinon.stub()
 				@ReferalAllocator.assignBonus = sinon.stub().callsArg 1
 				@ReferalAllocator.allocate @referal_id, @new_user_id, @referal_source, @referal_medium, @callback
 
@@ -46,11 +44,6 @@ describe 'Referal allocator', ->
 					.calledWith( referal_id: @referal_id )
 					.should.equal true
 			
-			it "should track the referral", ->
-				@AnalyticsManager.trackReferral
-					.calledWith({ _id: @user_id }, @referal_source, @referal_medium)
-					.should.equal true
-
 			it "shoudl assign the user their bonus", ->
 				@ReferalAllocator.assignBonus
 					.calledWith(@user_id)
@@ -64,7 +57,6 @@ describe 'Referal allocator', ->
 				@referal_source = "public_share"
 				@User.update = sinon.stub().callsArgWith 3, null
 				@User.findOne = sinon.stub().callsArgWith 1, null, { _id: @user_id }
-				@AnalyticsManager.trackReferral = sinon.stub()
 				@ReferalAllocator.assignBonus = sinon.stub().callsArg 1
 				@ReferalAllocator.allocate @referal_id, @new_user_id, @referal_source, @referal_medium, @callback
 
@@ -76,11 +68,6 @@ describe 'Referal allocator', ->
 					.calledWith( referal_id: @referal_id )
 					.should.equal true
 			
-			it "should track the referral", ->
-				@AnalyticsManager.trackReferral
-					.calledWith({ _id: @user_id }, @referal_source, @referal_medium)
-					.should.equal true
-
 			it "should not assign the user a bonus", ->
 				@ReferalAllocator.assignBonus.called.should.equal false
 

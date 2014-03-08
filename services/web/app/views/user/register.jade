@@ -35,8 +35,3 @@ block content
 
 	include ../general/small-footer
 
-	script
-		mixpanel.track("Page Viewed", { name: "register" })
-		$('#registerButton').click(function(){
-			mixpanel.track("registerpage.registerd")
-		})

@@ -218,7 +218,7 @@ define [
 			return if @timeOut?
 			@clearTimeout()
 			@timeOut = setTimeout((=>
-				heap?.track "savingShown"
+				ga('send', 'event', 'editor-interaction', 'notification-shown', "saving")
 				$("#savingProblems").show()
 			), 1000)
 

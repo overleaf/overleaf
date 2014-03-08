@@ -95,7 +95,6 @@ module.exports = (app)->
 
 	app.use (req, res, next)->
 		if req.session.user?
-			res.locals.mixpanelId = req.session.user._id
 			res.locals.user =
 				email: req.session.user.email
 				first_name: req.session.user.first_name
@@ -106,9 +105,7 @@ module.exports = (app)->
 			if req.session.justLoggedIn
 				res.locals.justLoggedIn = true
 				delete req.session.justLoggedIn
-		res.locals.mixpanelToken = Settings.analytics?.mixpanel?.token
 		res.locals.gaToken       = Settings.analytics?.ga?.token
-		res.locals.heapToken     = Settings.analytics?.heap?.token
 		res.locals.tenderUrl     = Settings.tenderUrl
 		next()
 

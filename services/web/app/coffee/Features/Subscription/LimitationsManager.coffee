@@ -38,8 +38,8 @@ module.exports =
 	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
-			logger.log user:user, subscription:subscription, "checking if user has subscription"
 			hasValidSubscription = subscription? and subscription.recurlySubscription_id? and subscription?.state != "expired"
+			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
 
 	userHasFreeTrial: (user, callback = (err, hasFreeTrial, subscription)->) ->

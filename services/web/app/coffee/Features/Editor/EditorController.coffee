@@ -12,7 +12,6 @@ LimitationsManager = require("../Subscription/LimitationsManager")
 AuthorizationManager = require("../Security/AuthorizationManager")
 AutomaticSnapshotManager = require("../Versioning/AutomaticSnapshotManager")
 VersioningApiHandler = require("../Versioning/VersioningApiHandler")
-AnalyticsManager = require("../Analytics/AnalyticsManager")
 EditorRealTimeController = require("./EditorRealTimeController")
 settings = require('settings-sharelatex')
 slReqIdHelper = require('soa-req-id')
@@ -47,7 +46,6 @@ module.exports = EditorController =
 							if error? or !canAccess
 								callback new Error("Not authorized")
 							else
-								AnalyticsManager.trackOpenEditor user, project
 								client.join(project_id)
 								client.set("project_id", project_id)
 								client.set("owner_id", project.owner_ref._id)

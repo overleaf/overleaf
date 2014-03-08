@@ -15,7 +15,7 @@ define [
 				@connected = false
 				@ide.trigger "disconnect"
 				setTimeout(=>
-					mixpanel?.track("disconnected")
+					ga('send', 'event', 'editor-interaction', 'disconnect')
 				, 2000)
 
 				if !@forcedDisconnect

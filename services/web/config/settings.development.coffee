@@ -146,11 +146,7 @@ module.exports =
 	# Fill in your unique token from various analytics services to enable
 	# them.
 	# analytics:
-	# 	mixpanel:
-	# 		token: ""
 	# 	ga:
-	# 		token: ""
-	# 	heap:
 	# 		token: ""
 	# 
 	# ShareLaTeX's help desk is provided by tenderapp.com

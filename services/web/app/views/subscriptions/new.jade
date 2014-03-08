@@ -9,7 +9,8 @@ block content
 	#subscribeForm.box Loading subscription form...
 
 	script(type="text/javascript")
-		mixpanel.track("Page Viewed", { name: "payment_form", plan: "#{plan_code}" })
+		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
+
 
 	script(type="text/javascript")
 		Recurly.config(!{recurlyConfig})

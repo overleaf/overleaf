@@ -9,14 +9,12 @@ describe "SubscriptionBackgroundTasks", ->
 		@Settings = defaultPlanCode:
 			collaborators: 13
 			versioning: true
-		@AnalyticsManager = {}
 		@SubscriptionUpdater = {}
 
 		@SubscriptionBackgroundTasks = SandboxedModule.require modulePath, requires:
 			"./SubscriptionLocator"         : @SubscriptionLocator
 			"./SubscriptionUpdater"			: @SubscriptionUpdater
 			"settings-sharelatex"           : @Settings
-			"../Analytics/AnalyticsManager" : @AnalyticsManager
 			"logger-sharelatex"				: log:->
 
 	describe 'downgradeExpiredFreeTrials', ->
@@ -27,7 +25,6 @@ describe "SubscriptionBackgroundTasks", ->
 			]
 			@SubscriptionUpdater.downgradeFreeTrial = sinon.stub().callsArg(1)
 			@SubscriptionLocator.expiredFreeTrials = sinon.stub().callsArgWith(0, null, @subscriptions)
-			@AnalyticsManager.trackFreeTrialExpired = sinon.stub()
 			@callback = sinon.stub()
 			@SubscriptionBackgroundTasks.downgradeExpiredFreeTrials(@callback)
 
@@ -35,11 +32,6 @@ describe "SubscriptionBackgroundTasks", ->
 			@SubscriptionUpdater.downgradeFreeTrial.callCount.should.equal @subscriptions.length
 			for subscription in @subscriptions
 				@SubscriptionUpdater.downgradeFreeTrial.calledWith(subscription).should.equal true
-
-		it "should track each downgrade", ->
-			@AnalyticsManager.trackFreeTrialExpired.callCount.should.equal @subscriptions.length
-			for subscription in @subscriptions
-				@AnalyticsManager.trackFreeTrialExpired.calledWith(subscription.admin_id).should.equal true
 
 		it "should return the subscriptions in the callback", ->
 			@callback.called.should.equal true

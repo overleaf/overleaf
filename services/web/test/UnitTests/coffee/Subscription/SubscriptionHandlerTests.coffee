@@ -44,11 +44,6 @@ describe "Subscription Handler sanboxed", ->
 			cancelSubscription: sinon.stub().callsArgWith(1)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 
-		@AnalyticsManager = 
-			trackSubscriptionCancelled: sinon.stub()
-			trackSubscriptionStarted: sinon.stub()
-			trackFreeTrialStarted: sinon.stub()
-
 		@SubscriptionUpdater = 
 			syncSubscription: sinon.stub().callsArgWith(2)
 			startFreeTrial: sinon.stub().callsArgWith(1)
@@ -64,7 +59,6 @@ describe "Subscription Handler sanboxed", ->
 			"settings-sharelatex": @Settings
 			'../../models/User': User:@User
 			'./SubscriptionUpdater': @SubscriptionUpdater
-			'../Analytics/AnalyticsManager': @AnalyticsManager
 			"logger-sharelatex":{log:->}
 			'./LimitationsManager':@LimitationsManager
 			"../Email/EmailHandler":@EmailHandler
@@ -147,11 +141,6 @@ describe "Subscription Handler sanboxed", ->
 			it "should cancel the subscription", ->
 				@RecurlyWrapper.cancelSubscription.called.should.equal true
 				@RecurlyWrapper.cancelSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
-
-			it "should track the cancellation", ->
-				@AnalyticsManager.trackSubscriptionCancelled
-					.calledWith(@user)
-					.should.equal true
 
 			it "should send a cancellation email", ->
 				@EmailHandler.sendEmail.calledWith("canceledSubscription", {to:@user.email, first_name:@user.first_name}).should.equal true

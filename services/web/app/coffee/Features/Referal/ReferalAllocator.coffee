@@ -1,6 +1,5 @@
 logger = require('logger-sharelatex')
 User = require('../../models/User').User
-AnalyticsManager = require("../Analytics/AnalyticsManager")
 SubscriptionLocator = require "../Subscription/SubscriptionLocator"
 Settings = require "settings-sharelatex"
 
@@ -15,9 +14,6 @@ module.exports = ReferalAllocator =
 			return callback(error) if error?
 			return callback(new Error("user not found")) if !user? or !user._id?
 
-			# Can be backgrounded
-			AnalyticsManager.trackReferral user, referal_source, referal_medium
-			
 			if referal_source == "bonus"
 				User.update query, {
 					$push:

@@ -56,9 +56,7 @@ block content
 		};
 
 	script(type='text/javascript')
-		if (typeof(mixpanel) != "undefined") {
-			mixpanel.track('Opened Editor', { project_id: window.userSettings.project_id });
-		}
+		ga('send', 'event', 'editor-interaction', 'editor-opened')
 
 	- locals.supressDefaultJs = true
 	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')

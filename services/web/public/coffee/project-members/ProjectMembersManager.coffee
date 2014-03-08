@@ -274,7 +274,7 @@ define [
 						  "caption=My LaTeX project (#{@ide.project.get("name")}) is available online on ShareLaTeX&" +
 						  "redirect_uri=#{window.sharelatex.siteUrl}&" +
 						  "display=popup"
-					mixpanel?.track("Project Shared", { method: "facebook" })
+					ga('send', 'event', 'editor-interaction', 'project-shared', "facebook")
 					window.open(
 						url
 						""
@@ -284,7 +284,7 @@ define [
 		postToTwitter: () ->
 			@ensurePublic (error, success) =>
 				if success
-					mixpanel?.track("Project Shared", { method: "twitter" })
+					ga('send', 'event', 'editor-interaction', 'project-shared', "twitter")
 					window.open(
 						"https://www.twitter.com/share/?text=Check out my online LaTeX Project: #{@ide.project.get("name")}&url=#{encodeURIComponent(@url("t"))}"
 						""
@@ -294,7 +294,7 @@ define [
 		postToGoogle: () ->
 			@ensurePublic (error, success) =>
 				if success
-					mixpanel?.track("Project Shared", { method: "google_plus" })
+					ga('send', 'event', 'editor-interaction', 'project-shared', "google-plus")
 					window.open(
 						"https://plus.google.com/share?url=#{encodeURIComponent(@url("gp"))}"
 						""
@@ -304,7 +304,7 @@ define [
 		shareUrl: () ->
 			@ensurePublic (error, success) =>
 				if success
-					mixpanel?.track("Project Shared", { method: "url" })
+					ga('send', 'event', 'editor-interaction', 'project-shared', "url")
 					Modal.createModal
 						el: $(
 							"<p>You can share you project with your friends and colleagues via this URL:</p>" +

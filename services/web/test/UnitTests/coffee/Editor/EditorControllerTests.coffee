@@ -42,7 +42,6 @@ describe "EditorController", ->
 		@VersioningApiHandler =
 			enableVersioning : sinon.stub().callsArg(1)
 		@client = new MockClient()
-		@AnalyticsManager = {}
 
 		@settings = 
 			apis:{thirdPartyDataStore:{emptyProjectFlushDelayMiliseconds:0.5}}
@@ -65,7 +64,6 @@ describe "EditorController", ->
 			'../../handlers/ProjectHandler' : @ProjectHandler
 			"../Versioning/AutomaticSnapshotManager" : @AutomaticSnapshotManager
 			"../Versioning/VersioningApiHandler" : @VersioningApiHandler
-			"../Analytics/AnalyticsManager" : @AnalyticsManager
 			'../../models/Project' : Project: @Project
 			"settings-sharelatex":@settings
 			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker
@@ -84,7 +82,6 @@ describe "EditorController", ->
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
-			@AnalyticsManager.trackOpenEditor = sinon.stub()
 
 		describe "when authorized", ->
 			beforeEach ->
@@ -119,9 +116,6 @@ describe "EditorController", ->
 			it "should enable versioning", ->
 				@VersioningApiHandler.enableVersioning.calledWith(@project)
 					.should.equal true
-
-			it "should track the event", ->
-				@AnalyticsManager.trackOpenEditor.calledWith(@user, @project).should.equal true
 
 		describe "when not authorized", ->
 			beforeEach ->

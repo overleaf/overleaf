@@ -118,21 +118,20 @@ block content
 
 	script(type="text/javascript")
 		$(function() {
-			mixpanel.track("Viewed referral page");
 			$(".twitter").click(function() {
-				mixpanel.track("Clicked Bonus Referral Button", { medium: "twitter" });
+				ga('send', 'event', 'referal-button', 'clicked', "twitter")
 			});
 			$(".email").click(function() {
-				mixpanel.track("Clicked Bonus Referral Button", { medium: "email" });
+				ga('send', 'event', 'referal-button', 'clicked', "email")
 			});
 			$(".facebook").click(function() {
-				mixpanel.track("Clicked Bonus Referral Button", { medium: "facebook" });
+				ga('send', 'event', 'referal-button', 'clicked', "facebook")
 			});
 			$(".google-plus").click(function() {
-				mixpanel.track("Clicked Bonus Referral Button", { medium: "google_plus" });
+				ga('send', 'event', 'referal-button', 'clicked', "google-plus")
 			});
 			$(".link").click(function() {
-				mixpanel.track("Clicked Bonus Referral Button", { medium: "direct" });
+				ga('send', 'event', 'referal-button', 'clicked', "direct-link")
 			});
 		});
 

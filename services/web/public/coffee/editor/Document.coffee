@@ -144,7 +144,7 @@ define [
 
 		_onError: (error) ->
 			console.error "ShareJS error", error
-			heap?.track "shareJsError", { error: (error.message or error), transport: ide.socket.socket.transport.name }
+			ga('send', 'event', 'error', "shareJsError", "#{error.message} - #{ide.socket.socket.transport.name}" )
 			@ide.socket.disconnect()
 			@doc?.clearInflightAndPendingOps()
 			@_cleanUp()

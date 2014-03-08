@@ -5,12 +5,12 @@ define () ->
 				@updateCount ||= 0
 				@updateCount++
 				if @updateCount == 100
-					mixpanel?.track("Updated doc multiple times in one session", project_id: @ide.project.id)
+					ga('send', 'event', 'editor-interaction', 'multi-doc-update')
 
 			@ide.pdfManager.on "compile:pdf", () =>
 				@compileCount ||= 0
 				@compileCount++
 				if @compileCount == 1
-					mixpanel?.track("Compiled project at least once in one session", project_id: @ide.project.id)
+					ga('send', 'event', 'editor-interaction', 'single-compile')
 				if @compileCount == 3
-					mixpanel?.track("Compiled project multiple times in one session", project_id: @ide.project.id)
+					ga('send', 'event', 'editor-interaction', 'multi-compile')
