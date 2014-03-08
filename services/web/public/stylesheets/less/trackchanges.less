@@ -1,0 +1,116 @@
+@changesListWidth:   250px;
+@changesListPadding: 10px;
+
+#trackChangesPanel {
+	.track-changes-diff {
+		position: absolute;
+		right: @changesListWidth + 1px;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		padding: 0px 12px;
+		height: 100%;
+		.ace_editor {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+	}
+
+	.track-changes-side-bar {
+		border-left: 1px solid #999;
+		height: 100%;
+		width: @changesListWidth;
+		position: absolute;
+		right: 0;
+		background-color: white;
+
+		.track-changes-header {
+			background-color: black;
+			h3 {
+				color: white;
+				padding-left: 8px;
+				font-size: 1.2em;
+			}
+			a {
+				color: white;
+				position: absolute;
+				top: 6px;
+				right: 8px;
+			}
+			height: 30px;
+		}
+
+		.change-list-area {
+			overflow: scroll;
+			position: absolute;
+			left: 0px;
+			right: 0px;
+			top: 30px;
+			bottom: 0px;
+		}
+	}
+
+	.deleted-change-background, .deleted-change-foreground, .inserted-change, .change-name-marker {
+		position: absolute;
+		z-index: 2;
+	}
+
+	.change-name-marker {
+		.name {
+			font-size: 0.8em;
+			padding: 2px 6px;
+			.border-radius(3px 3px 3px 3px);
+			position: absolute;
+			border: 1px solid #999;
+			left: 0;
+		}
+	}
+
+	ul.change-list {
+		li {
+			padding: 6px 4px;
+			position: relative;
+			border-bottom: 1px solid #ccc;
+			cursor: pointer;
+			.change-selectors {
+				position: absolute;
+				top: 4px;
+				left: 6px;
+				.change-selector-from {
+					position: absolute;
+					top: 0;
+					left: 0;
+				}
+				.change-selector-to {
+					position: absolute;
+					top: 0;
+					left: 20px;
+				}
+			}
+			.change-description {
+				padding-left: 42px;
+			}
+			.change-name {
+				font-size: 0.9em;
+				color: #666;
+				text-transform: capitalize;
+			}
+			.color-square {
+				display: inline-block;
+				height: 10px;
+				width: 10px;
+				margin-right: 4px;
+				margin-bottom: -1px;
+			}
+			&:hover {
+				background-color: #eaeaea;
+			}
+		}
+		li.selected {
+			background-color: #eaeaea;
+		}
+	}
+}

@@ -25,6 +25,7 @@ define [
 	"file-view/FileViewManager"
 	"tour/IdeTour"
 	"analytics/AnalyticsManager"
+	"track-changes/TrackChangesManager"
 	"ace/ace"
 	"libs/jquery.color"
 	"libs/jquery-layout"
@@ -56,7 +57,8 @@ define [
 	BackspaceHighjack,
 	FileViewManager,
 	IdeTour,
-	AnalyticsManager
+	AnalyticsManager,
+	TrackChangesManager
 ) ->
 
 
@@ -117,6 +119,7 @@ define [
 			@cursorManager = new CursorManager(@)
 			@fileViewManager = new FileViewManager(@)
 			@analyticsManager = new AnalyticsManager(@)
+			@trackChangesManager = new TrackChangesManager(@)
 
 			@setLoadingMessage("Connecting")
 			firstConnect = true

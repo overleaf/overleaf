@@ -1,16 +1,16 @@
 require [
 	"tags"
+	"moment"
 	"gui"
-	"libs/moment"
 	"libs/underscore"
 	"libs/fineuploader"
 	"libs/jquery.storage"
-], (tagsManager)->
+], (tagsManager, moment)->
 
 	$('.isoDate').each (i, d)->
 		html = $(d)
-		unparsedDate = html.text()
-		formatedDate = moment(unparsedDate).format('LLL')
+		unparsedDate = html.text().trim()
+		formatedDate = moment(unparsedDate).format("Do MMM YYYY, h:mm:ss a")
 		html.text(formatedDate)
 
 	refreshProjectFilter = ->

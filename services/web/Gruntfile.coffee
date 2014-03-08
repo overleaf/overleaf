@@ -84,6 +84,7 @@ module.exports = (grunt) ->
 					paths:
 						"underscore": "libs/underscore"
 						"jquery": "libs/jquery"
+						"moment": "libs/moment"
 					shim:
 						"libs/backbone":
 							deps: ["libs/underscore"]
