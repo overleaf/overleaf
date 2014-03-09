@@ -58,7 +58,7 @@ block content
 							p Your subscription has been canceled and will terminate on <strong>#{subscription.nextPaymentDueAt}</strong>. No further payments will be taken.
 							form(action="/user/subscription/reactivate",method="post")
 								input(type="hidden", name="_csrf", value=csrfToken)
-								input(type="submit",value="Reactivate your subscription").btn.btn-success
+								input(type="submit",value="Reactivate your subscription").btn.btn-success#cancelSubscription
 						when "expired"
 							p Your subscription has expired.	
 								a(href="/user/subscription/plans") Create New Subscription
@@ -78,6 +78,13 @@ block content
 						mixin printPlans(plans.studentAccounts)
 						mixin printPlans(plans.individualMonthlyPlans)
 						mixin printPlans(plans.individualAnnualPlans)
+
+
+script(type="text/javascript")
+	$('#cancelSubscription').on("click", function() {
+		ga('send', 'event', 'subscription-funnel', 'cancelation')
+	})
+
 
 
 

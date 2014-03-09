@@ -14,7 +14,13 @@ block content
 
 	script(type="text/javascript")
 		Recurly.config(!{recurlyConfig})
-		Recurly.buildSubscriptionForm(!{subscriptionFormOptions});
+		var recurlySubscriptionFormConfig = !{subscriptionFormOptions}
+		recurlySubscriptionFormConfig.successHandler = function(){
+			ga('send', 'event', 'subscription-funnel', 'created')
+		}
+
+		Recurly.buildSubscriptionForm();
+
 
 	include ../general/small-footer
 
