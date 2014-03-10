@@ -26,7 +26,7 @@ define () ->
 			\\begin{array}{${1:cc}}
 			$2 & $3 \\\\\\\\
 			$4 & $5
-			\\end{array}"
+			\\end{array}
 		"""
 		meta: "env"
 	}, {
