@@ -54,11 +54,41 @@ define [
 				@resetAllSelectors()
 				@triggerChangeDiff()
 
+			view.on "mouseenter:to", (e) =>
+				@hoverToIndex = index
+				@resetHoverStates()
+
+			view.on "mouseleave:to", (e) =>
+				delete @hoverToIndex
+				@resetHoverStates()
+
+			view.on "mouseenter:from", (e) =>
+				@hoverFromIndex = index
+				@resetHoverStates()
+
+			view.on "mouseleave:from", (e) =>
+				delete @hoverFromIndex
+				@resetHoverStates()
+
 			view.resetSelector(index, @selectedFromIndex, @selectedToIndex)
 
 		resetAllSelectors: () ->
 			for view, i in @itemViews
 				view.resetSelector(i, @selectedFromIndex, @selectedToIndex)
+
+		resetHoverStates: () ->
+			if @hoverToIndex?
+				@$("ul").addClass("hover-state")
+				for view, i in @itemViews
+					view.resetHoverState(i, @selectedFromIndex, @hoverToIndex)
+			else if @hoverFromIndex?
+				@$("ul").addClass("hover-state")
+				for view, i in @itemViews
+					view.resetHoverState(i, @hoverFromIndex, @selectedToIndex)
+			else
+				@$("ul").removeClass("hover-state")
+				for view, i in @itemViews
+					view.setHoverUnselected()
 
 		triggerChangeDiff: () ->
 			@trigger "change_diff", @collection.models[@selectedFromIndex], @collection.models[@selectedToIndex]
@@ -114,6 +144,15 @@ define [
 			"click .change-description"   : "onClick"
 			"click .change-selector-from" : "onFromSelectorClick"
 			"click .change-selector-to"   : "onToSelectorClick"
+			"mouseenter .change-selector-to": (args...) ->
+				@trigger "mouseenter:to", args...
+			"mouseleave .change-selector-to": (args...) ->
+				@trigger "mouseleave:to", args...
+			"mouseenter .change-selector-from": (args...) ->
+				@trigger "mouseenter:from", args...
+			"mouseleave .change-selector-from": (args...) ->
+				@trigger "mouseleave:from", args...
+
 	
 		template : $("#changeListItemTemplate").html()
 
@@ -168,11 +207,37 @@ define [
 		setToChecked: (checked) ->
 			@$(".change-selector-to").prop("checked", checked)
 
-		setSelected: () ->
+		setSelected: (first, last) ->
 			@$el.addClass("selected")
+			if first
+				@$el.addClass("selected-to")
+			else
+				@$el.removeClass("selected-to")
+			if last
+				@$el.addClass("selected-from")
+			else
+				@$el.removeClass("selected-from")
 
 		setUnselected: () ->
+			@$el.removeClass("selected-to")
+			@$el.removeClass("selected-from")
 			@$el.removeClass("selected")
+
+		setHoverSelected: (first, last) ->
+			@$el.addClass("hover-selected")
+			if first
+				@$el.addClass("hover-selected-to")
+			else
+				@$el.removeClass("hover-selected-to")
+			if last
+				@$el.addClass("hover-selected-from")
+			else
+				@$el.removeClass("hover-selected-from")
+
+		setHoverUnselected: () ->
+			@$el.removeClass("hover-selected-to")
+			@$el.removeClass("hover-selected-from")
+			@$el.removeClass("hover-selected")
 
 		resetSelector: (myIndex, selectedFromIndex, selectedToIndex) ->
 			if myIndex >= selectedToIndex
@@ -186,12 +251,18 @@ define [
 				@hideToSelector()
 
 			if selectedToIndex <= myIndex <= selectedFromIndex
-				@setSelected()
+				@setSelected(selectedToIndex == myIndex, selectedFromIndex == myIndex)
 			else
 				@setUnselected()
 
 			@setFromChecked(myIndex == selectedFromIndex)
 			@setToChecked(myIndex == selectedToIndex)
+
+		resetHoverState: (myIndex, hoverFromIndex, hoverToIndex) ->
+			if hoverToIndex <= myIndex <= hoverFromIndex
+				@setHoverSelected(hoverToIndex == myIndex, hoverFromIndex == myIndex)
+			else
+				@setHoverUnselected()
 
 
 	return ChangeListView

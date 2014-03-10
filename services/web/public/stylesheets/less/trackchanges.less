@@ -75,23 +75,30 @@
 			position: relative;
 			border-bottom: 1px solid #ccc;
 			cursor: pointer;
+			min-height: 38px;
 			.change-selectors {
-				position: absolute;
-				top: 4px;
-				left: 6px;
 				.change-selector-from {
 					position: absolute;
-					top: 0;
-					left: 0;
+					bottom: 5px;
+					left: 8px;
+					opacity: 0.8;
 				}
 				.change-selector-to {
 					position: absolute;
+					top: 5px;
+					left: 8px;
+					opacity: 0.8;
+				}
+				.range {
+					position: absolute;
+					left: 12px;
+					width: 4px;
 					top: 0;
-					left: 20px;
+					bottom: 0;
 				}
 			}
 			.change-description {
-				padding-left: 42px;
+				padding-left: 26px;
 			}
 			.change-name {
 				font-size: 0.9em;
@@ -111,6 +118,69 @@
 		}
 		li.selected {
 			background-color: #eaeaea;
+			.change-selectors {
+				.range {
+					background-color: rgb(0, 143, 255);
+				}
+			}
+		}
+		li.selected-to {
+			.change-selectors {
+				.range {
+					top: 10px;
+				}
+				.change-selector-to {
+					opacity: 1;
+				}
+			}
+		}
+		li.selected-from {
+			.change-selectors {
+				.range {
+					bottom: 10px;
+				}
+				.change-selector-from {
+					opacity: 1;
+				}
+			}
+		}
+	}
+	ul.change-list.hover-state {
+		li {
+			.change-selectors {
+				.range {
+					background-color: transparent;
+					top: 0;
+					bottom: 0;
+				}
+			}
+		}
+		li.hover-selected {
+			.change-selectors {
+				.range {
+					background-color: #999;
+				}
+			}
+		}
+		li.hover-selected-to {
+			.change-selectors {
+				.range {
+					top: 10px;
+				}
+				.change-selector-to {
+					opacity: 1;
+				}
+			}
+		}
+		li.hover-selected-from {
+			.change-selectors {
+				.range {
+					bottom: 10px;
+				}
+				.change-selector-from {
+					opacity: 1;
+				}
+			}
 		}
 	}
 }

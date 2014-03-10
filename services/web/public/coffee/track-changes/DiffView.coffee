@@ -46,6 +46,7 @@ define [
 			column = 0
 			for entry, i in @model.get("diff") or []
 				content = entry.u or entry.i or entry.d
+				content ||= ""
 				lines   = content.split("\n")
 				startRow    = row
 				startColumn = column
