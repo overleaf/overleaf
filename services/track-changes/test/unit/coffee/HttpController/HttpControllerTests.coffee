@@ -11,9 +11,9 @@ describe "HttpController", ->
 			"logger-sharelatex": { log: sinon.stub() }
 			"./UpdatesManager": @UpdatesManager = {}
 			"./DiffManager": @DiffManager = {}
+			"./RestoreManager": @RestoreManager = {}
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
-		@version = 42
 		@next = sinon.stub()
 
 	describe "flushUpdatesWithLock", ->
@@ -36,8 +36,8 @@ describe "HttpController", ->
 
 	describe "getDiff", ->
 		beforeEach ->
-			@from = Date.now() - 10000
-			@to = Date.now()
+			@from = 42
+			@to = 45
 			@req =
 				params:
 					doc_id: @doc_id
@@ -61,7 +61,7 @@ describe "HttpController", ->
 
 	describe "getUpdates", ->
 		beforeEach ->
-			@to = Date.now()
+			@to = 42
 			@limit = 10
 			@req =
 				params:
@@ -93,3 +93,25 @@ describe "HttpController", ->
 					v:    @v
 				}
 			@res.send.calledWith(JSON.stringify(updates: updates)).should.equal true
+
+	describe "RestoreManager", ->
+		beforeEach ->
+			@version = "42"
+			@req =
+				params:
+					doc_id: @doc_id
+					project_id: @project_id
+					version: @version
+			@res =
+				send: sinon.stub()
+
+			@RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(3)
+			@HttpController.restore @req, @res, @next
+
+		it "should restore the document", ->
+			@RestoreManager.restoreToBeforeVersion
+				.calledWith(@project_id, @doc_id, parseInt(@version, 10))
+				.should.equal true
+
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal true

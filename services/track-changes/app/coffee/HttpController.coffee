@@ -1,5 +1,6 @@
 UpdatesManager = require "./UpdatesManager"
 DiffManager = require "./DiffManager"
+RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 
 module.exports = HttpController =
@@ -45,3 +46,10 @@ module.exports = HttpController =
 					v: update.v
 				}
 			res.send JSON.stringify updates: formattedUpdates
+
+	restore: (req, res, next = (error) ->) ->
+		{doc_id, project_id, version} = req.params
+		version = parseInt(version, 10)
+		RestoreManager.restoreToBeforeVersion project_id, doc_id, version, (error) ->
+			return next(error) if error?
+			res.send 204

@@ -19,3 +19,20 @@ module.exports = DocumentUpdaterManager =
 				error = new Error("doc updater returned a non-success status code: #{res.statusCode}")
 				logger.error err: error, project_id:project_id, doc_id:doc_id, url: url, "error accessing doc updater"
 				callback error
+
+	setDocument: (project_id, doc_id, content, callback = (error) ->) ->
+		url = "#{Settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}"
+		logger.log project_id:project_id, doc_id: doc_id, "setting doc in document updater"
+		request.post {
+			url: url
+			json:
+				lines: content.split("\n")
+		}, (error, res, body)->
+			if error?
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				callback null
+			else
+				error = new Error("doc updater returned a non-success status code: #{res.statusCode}")
+				logger.error err: error, project_id:project_id, doc_id:doc_id, url: url, "error accessing doc updater"
+				callback error

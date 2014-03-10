@@ -16,6 +16,8 @@ app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
 
 app.get "/project/:project_id/doc/:doc_id/updates", HttpController.getUpdates
 
+app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpController.restore
+
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 

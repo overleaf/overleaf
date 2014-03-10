@@ -50,3 +50,42 @@ describe "DocumentUpdaterManager", ->
 				@callback
 					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
+
+	describe "setDocument", ->
+		beforeEach ->
+			@content = "mock content"
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200})
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+
+			it 'should set the document in the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
+				@request.post
+					.calledWith({
+						url: url
+						json:
+							lines: @content.split("\n")
+					}).should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a failure error code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+
+			it "should return the callback with an error", ->
+				@callback
+					.calledWith(new Error("doc updater returned failure status code: 500"))
+					.should.equal true
