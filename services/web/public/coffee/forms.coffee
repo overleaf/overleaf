@@ -31,7 +31,7 @@ require [
 				success: (data)->
 					if data.message?
 						new Message data.message
-						ga('send', 'event', 'register', 'failure')
+						ga('send', 'event', 'register', 'failure', data.message)
 					else
 						ga('send', 'event', 'register', 'success')
 						window.location = data.redir || "/project"
@@ -81,7 +81,7 @@ require [
 			success: (data)->
 				if data.message
 					new Message data.message
-					ga('send', 'event', 'login', 'failure')
+					ga('send', 'event', 'login', 'failure', data.message)
 				else if data.redir
 					window.location.href = data.redir
 					ga('send', 'event', 'login', 'success')
