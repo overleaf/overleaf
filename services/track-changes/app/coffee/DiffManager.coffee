@@ -4,36 +4,42 @@ DiffGenerator = require "./DiffGenerator"
 logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
-	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, lines, version, updates) ->) ->
+	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
 		UpdatesManager.getUpdatesWithUserInfo doc_id, from: fromVersion, to: toVersion, (error, updates) ->
 			return callback(error) if error?
-			DocumentUpdaterManager.getDocument project_id, doc_id, (error, lines, version) ->
+			DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 				return callback(error) if error?
-				callback(null, lines, version, updates)
+				callback(null, content, version, updates)
 	
 	getDiff: (project_id, doc_id, fromVersion, toVersion, callback = (error, diff) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, from: fromVersion, to: toVersion, "getting diff"
-		DiffManager.getLatestDocAndUpdates project_id, doc_id, fromVersion, null, (error, lines, version, updates) ->
+		DiffManager.getDocumentBeforeVersion project_id, doc_id, fromVersion, (error, startingContent, updates) ->
 			return callback(error) if error?
 
-			logger.log lines: lines, version: version, updates: updates, "got doc and updates"
-
-			lastUpdate = updates[0]
-			if lastUpdate? and lastUpdate.v != version - 1
-				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
-
 			updatesToApply = []
-			for update in updates.reverse()
+			for update in updates.slice().reverse()
 				if update.v <= toVersion
 					updatesToApply.push update
 
-			logger.log project_id: project_id, doc_id: doc_id, updatesToApply: updatesToApply, "got updates to apply"
-
 			try
-				startingContent = DiffGenerator.rewindUpdates lines.join("\n"), updates
-				logger.log project_id: project_id, doc_id: doc_id, startingContent: startingContent, "rewound doc"
 				diff = DiffGenerator.buildDiff startingContent, updatesToApply
 			catch e
 				return callback(e)
 			
 			callback(null, diff)
+
+	getDocumentBeforeVersion: (project_id, doc_id, version, callback = (error, document, rewoundUpdates) ->) ->
+		logger.log project_id: project_id, doc_id: doc_id, version: version, "getting document before version"
+		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, null, (error, content, version, updates) ->
+			return callback(error) if error?
+
+			lastUpdate = updates[0]
+			if lastUpdate? and lastUpdate.v != version - 1
+				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
+
+			try
+				startingContent = DiffGenerator.rewindUpdates content, updates.slice().reverse()
+			catch e
+				return callback(e)
+			
+			callback(null, startingContent, updates)

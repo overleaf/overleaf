@@ -30,8 +30,8 @@ describe "DocumentUpdaterManager", ->
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
 				@request.get.calledWith(url).should.equal true
 
-			it "should call the callback with the lines and version", ->
-				@callback.calledWith(null, @lines, @version, @ops).should.equal true
+			it "should call the callback with the content and version", ->
+				@callback.calledWith(null, @lines.join("\n"), @version, @ops).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->

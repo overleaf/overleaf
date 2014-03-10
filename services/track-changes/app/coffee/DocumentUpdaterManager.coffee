@@ -14,7 +14,7 @@ module.exports = DocumentUpdaterManager =
 					body = JSON.parse(body)
 				catch error
 					return callback(error)
-				callback null, body.lines, body.version
+				callback null, body.lines.join("\n"), body.version
 			else
 				error = new Error("doc updater returned a non-success status code: #{res.statusCode}")
 				logger.error err: error, project_id:project_id, doc_id:doc_id, url: url, "error accessing doc updater"

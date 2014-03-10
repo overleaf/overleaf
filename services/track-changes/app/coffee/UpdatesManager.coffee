@@ -14,7 +14,6 @@ module.exports = UpdatesManager =
 
 		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate) ->
 			return callback(error) if error?
-			logger.log doc_id: doc_id, "popped last update"
 
 			# Ensure that raw updates start where lastCompressedUpdate left off
 			if lastCompressedUpdate?
@@ -39,11 +38,9 @@ module.exports = UpdatesManager =
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (doc_id, callback = (error) ->) ->
-		logger.log "processUncompressedUpdates"
 		RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 			return callback(error) if error?
 			length = rawUpdates.length
-			logger.log doc_id: doc_id, length: length, "got raw updates from redis"
 			UpdatesManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
 				logger.log doc_id: doc_id, "compressed and saved doc updates"
