@@ -7,13 +7,13 @@ SandboxedModule = require('sandboxed-module')
 describe "TrackChangesController", ->
 	beforeEach ->
 		@TrackChangesController = SandboxedModule.require modulePath, requires:
-			"request" : @request = {}
+			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
 
 	describe "proxyToTrackChangesApi", ->
 		beforeEach ->
-			@req = { url: "/mock/url" }
+			@req = { url: "/mock/url", method: "POST" }
 			@res = "mock-res"
 			@next = sinon.stub()
 			@settings.apis =
@@ -23,13 +23,16 @@ describe "TrackChangesController", ->
 				events: {}
 				pipe: sinon.stub()
 				on: (event, handler) -> @events[event] = handler
-			@request.get = sinon.stub().returns @proxy
+			@request.returns @proxy
 			@TrackChangesController.proxyToTrackChangesApi @req, @res, @next
 
 		describe "successfully", ->
 			it "should call the track changes api", ->
-				@request.get
-					.calledWith("#{@settings.apis.trackchanges.url}#{@req.url}")
+				@request
+					.calledWith({
+						url: "#{@settings.apis.trackchanges.url}#{@req.url}"
+						method: @req.method
+					})
 					.should.equal true
 
 			it "should pipe the response to the client", ->

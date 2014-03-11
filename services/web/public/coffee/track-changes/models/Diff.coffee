@@ -8,6 +8,9 @@ define [
 
 		parse: (diff) ->
 			for entry in diff.diff
-				if entry.meta? and entry.meta.user?
-					entry.meta.user = User.findOrBuild(entry.meta.user.id, entry.meta.user)
+				if entry.meta?
+					if entry.meta.user?
+						entry.meta.user = User.findOrBuild(entry.meta.user.id, entry.meta.user)
+					else
+						entry.meta.user = User.getAnonymousUser()
 			return diff

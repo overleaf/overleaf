@@ -144,6 +144,11 @@ define [
 					# it's not the root folder so keep going
 					path = entity.get("name") + "/" + path
 			return path
+
+		getNameOfEntityId: (entity_id) ->
+			entity = @getEntity(entity_id)
+			return if !entity?
+			return entity.get("name")
 			
 		# RENAMING
 		renameSelected: () ->

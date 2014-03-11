@@ -70,6 +70,9 @@ define [
 				delete @hoverFromIndex
 				@resetHoverStates()
 
+			view.on "click:restore", (e) =>
+				@trigger "restore", view.model
+
 			view.resetSelector(index, @selectedFromIndex, @selectedToIndex)
 
 		resetAllSelectors: () ->
@@ -77,11 +80,11 @@ define [
 				view.resetSelector(i, @selectedFromIndex, @selectedToIndex)
 
 		resetHoverStates: () ->
-			if @hoverToIndex?
+			if @hoverToIndex? and @hoverToIndex != @selectedToIndex
 				@$("ul").addClass("hover-state")
 				for view, i in @itemViews
 					view.resetHoverState(i, @selectedFromIndex, @hoverToIndex)
-			else if @hoverFromIndex?
+			else if @hoverFromIndex? and @hoverFromIndex != @selectedFromIndex
 				@$("ul").addClass("hover-state")
 				for view, i in @itemViews
 					view.resetHoverState(i, @hoverFromIndex, @selectedToIndex)
@@ -152,6 +155,7 @@ define [
 				@trigger "mouseenter:from", args...
 			"mouseleave .change-selector-from": (args...) ->
 				@trigger "mouseleave:from", args...
+			"click .restore a": "onRestoreClick"
 
 	
 		template : $("#changeListItemTemplate").html()
@@ -182,6 +186,10 @@ define [
 
 		onFromSelectorClick: (e) ->
 			@trigger "selected:from", e, @
+
+		onRestoreClick: (e) ->
+			e.preventDefault()
+			@trigger "click:restore", e, @
 
 		isSelectedFrom: () ->
 			@$(".change-selector-from").is(":checked")

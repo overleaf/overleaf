@@ -3,21 +3,23 @@ define [
 	"track-changes/models/Diff"
 	"track-changes/ChangeListView"
 	"track-changes/DiffView"
-], (ChangeList, Diff, ChangeListView, DiffView) ->
+	"utils/Modal"
+	"moment"
+], (ChangeList, Diff, ChangeListView, DiffView, Modal, moment) ->
 	class TrackChangesManager
 		template: $("#trackChangesPanelTemplate").html()
 		
 		constructor: (@ide) ->
 			@$el = $(@template)
 			$("#editorWrapper").append(@$el)
-			@hideEl()
+			@hide()
 
 			@ide.editor.on "change:doc", () =>
-				@hideEl()
+				@hide()
 
 			@$el.find(".track-changes-close").on "click", (e) =>
 				e.preventDefault
-				@hideEl()
+				@hide()
 
 		show: () ->
 			@project_id = window.userSettings.project_id
@@ -44,14 +46,50 @@ define [
 				)
 				@diff.fetch()
 
+			@changeListView.on "restore", (change) =>
+				@restore(change)
+
 			@showEl()
 
 		showEl: ->
 			@ide.editor.hide()
 			@$el.show()
 
-		hideEl: () ->
+		hide: () ->
 			@ide.editor.show()
 			@$el.hide()
+
+		restore: (change) ->
+			name = @ide.fileTreeManager.getNameOfEntityId(@doc_id)
+			date = moment(change.get("start_ts")).format("Do MMM YYYY, h:mm:ss a")
+			modal = new Modal({
+				title: "Restore document"
+				message: "Are you sure you want to restore <strong>#{name}</strong> to before the changes on #{date}"
+				buttons: [{
+					text: "Cancel"
+				}, {
+					text: "Restore"
+					class: "btn-success"
+					close: false
+					callback: ($button) =>
+						$button.text("Restoring...")
+						$button.prop("disabled", true)
+						@doRestore change.get("version"), (error) =>
+							modal.remove()
+							@hide()
+				}]
+			})
+
+		doRestore: (version, callback = (error) ->) ->
+			$.ajax {
+				url: "/project/#{@project_id}/doc/#{@doc_id}/version/#{version}/restore"
+				type: "POST"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+				success: () ->
+					callback()
+				error: (error) ->
+					callback(error)
+			}
 
 	return TrackChangesManager

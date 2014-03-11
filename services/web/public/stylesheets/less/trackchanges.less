@@ -71,11 +71,9 @@
 
 	ul.change-list {
 		li {
-			padding: 6px 4px;
 			position: relative;
 			border-bottom: 1px solid #ccc;
 			cursor: pointer;
-			min-height: 38px;
 			.change-selectors {
 				.change-selector-from {
 					position: absolute;
@@ -98,7 +96,8 @@
 				}
 			}
 			.change-description {
-				padding-left: 26px;
+				padding: 6px 4px 6px 30px;
+				min-height: 38px;
 			}
 			.change-name {
 				font-size: 0.9em;
@@ -111,6 +110,15 @@
 				width: 10px;
 				margin-right: 4px;
 				margin-bottom: -1px;
+			}
+			.restore {
+				a {
+					display: block;
+					padding: 4px;
+					text-align: center;
+					border-top: 1px solid #ccc;
+				}
+				display: none;
 			}
 			&:hover {
 				background-color: #eaeaea;
@@ -137,11 +145,15 @@
 		li.selected-from {
 			.change-selectors {
 				.range {
-					bottom: 10px;
+					bottom: 37px;
 				}
 				.change-selector-from {
 					opacity: 1;
+					bottom: 32px;
 				}
+			}
+			.restore {
+				display: block;
 			}
 		}
 	}
@@ -179,6 +191,13 @@
 				}
 				.change-selector-from {
 					opacity: 1;
+				}
+			}
+		}
+		li.selected-from.hover-selected-from {
+			.change-selectors {
+				.range {
+					bottom: 37px;
 				}
 			}
 		}

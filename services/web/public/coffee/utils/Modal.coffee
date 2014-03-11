@@ -19,8 +19,9 @@ define [
 					button.on "click", (e) ->
 						e.preventDefault()
 						if buttonOptions.callback?
-							buttonOptions.callback()
-						self.remove()
+							buttonOptions.callback(button)
+						if !buttonOptions.close? or buttonOptions.close
+							self.remove()
 
 			@$el.modal
 				# make sure we control when the modal is hidden
@@ -38,7 +39,6 @@ define [
 					self.$el.find('.btn-primary').click()
 
 			@$el.find('input').focus()
-
 
 		remove: () ->
 			@$el.modal("hide")

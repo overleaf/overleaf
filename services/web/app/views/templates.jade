@@ -140,8 +140,7 @@
 				button.btn.btn-primary ok
 
 	script(type="text/template")#genericModalButtonTemplate
-		a(href="#",class="btn {{ class }}") {{ text }}
-
+		button(class="btn {{ class }}") {{ text }}
 
 	script(type="text/template")#editorPanelTemplate
 		#editorArea(style='display: none;')
@@ -444,6 +443,9 @@
 			div(class='change-name')
 				div.color-square(style="background-color: hsl({{hue}}, 100%, 70%);")
 				span {{name}}
+
+		div(class='restore')
+			a(href="#") Restore to here
 
 	script(type='text/template')#changeListTemplate
 		ul.change-list.nav.nav-pills.nav-stacked
