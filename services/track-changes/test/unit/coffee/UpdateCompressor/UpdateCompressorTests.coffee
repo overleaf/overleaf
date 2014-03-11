@@ -13,9 +13,9 @@ describe "UpdateCompressor", ->
 		@ts1 = Date.now()
 		@ts2 = Date.now() + 1000
 
-	describe "convertRawUpdatesToCompressedFormat", ->
+	describe "convertToSingleOpUpdates", ->
 		it "should split grouped updates into individual updates", ->
-			expect(@UpdateCompressor.convertRawUpdatesToCompressedFormat [{
+			expect(@UpdateCompressor.convertToSingleOpUpdates [{
 				op:   [ @op1 = { p: 0, i: "Foo" }, @op2 = { p: 6, i: "bar"} ]
 				meta: { ts: @ts1, user_id: @user_id }
 				v: 42
@@ -35,6 +35,31 @@ describe "UpdateCompressor", ->
 			}, {
 				op: @op3,
 				meta: { start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id },
+				v: 43
+			}]
+
+	describe "concatUpdatesWithSameVersion", ->
+		it "should concat updates with the same version", ->
+			expect(@UpdateCompressor.concatUpdatesWithSameVersion [{
+				op:   @op1 = { p: 0, i: "Foo" }
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				v: 42
+			}, {
+				op:   @op2 = { p: 6, i: "bar" }
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				v: 42
+			}, {
+				op:   @op3 = { p: 10, i: "baz" }
+				meta: { start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id }
+				v: 43
+			}])
+			.to.deep.equal [{
+				op:   [ @op1, @op2 ]
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				v: 42
+			}, {
+				op:   [ @op3 ]
+				meta: {  start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id }
 				v: 43
 			}]
 

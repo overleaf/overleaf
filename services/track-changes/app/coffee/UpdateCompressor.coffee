@@ -16,24 +16,38 @@ module.exports = UpdateCompressor =
 	# 	op: op2
 	# 	meta: { start_ts: ... , end_ts: ..., user_id: ... }
 	# }]
-	convertRawUpdatesToCompressedFormat: (updates) ->
-		normalizedUpdates = []
+	convertToSingleOpUpdates: (updates) ->
+		splitUpdates = []
 		for update in updates
 			for op in update.op
-				normalizedUpdates.push
+				splitUpdates.push
 					op: op
 					meta:
 						start_ts: update.meta.start_ts or update.meta.ts
 						end_ts:   update.meta.end_ts   or update.meta.ts
 						user_id:  update.meta.user_id
 					v: update.v
-		return normalizedUpdates
+		return splitUpdates
+
+	concatUpdatesWithSameVersion: (updates) ->
+		concattedUpdates = []
+		for update in updates
+			lastUpdate = concattedUpdates[concattedUpdates.length - 1]
+			if lastUpdate? and lastUpdate.v == update.v
+				lastUpdate.op.push update.op
+			else
+				concattedUpdates.push
+					op:   [ update.op ]
+					meta: update.meta
+					v:    update.v
+		return concattedUpdates
 
 	compressRawUpdates: (lastPreviousUpdate, rawUpdates) ->
-		updates = UpdateCompressor.convertRawUpdatesToCompressedFormat(rawUpdates)
 		if lastPreviousUpdate?
-			updates.unshift(lastPreviousUpdate)
-		return UpdateCompressor.compressUpdates(updates)
+			rawUpdates = [lastPreviousUpdate].concat(rawUpdates)
+		updates = UpdateCompressor.convertToSingleOpUpdates(rawUpdates)
+		updates = UpdateCompressor.compressUpdates(updates)
+		return UpdateCompressor.concatUpdatesWithSameVersion(updates)
 
 	compressUpdates: (updates) ->
 		return [] if updates.length == 0

@@ -9,7 +9,11 @@ module.exports = DiffGenerator =
 	ConsistencyError: ConsistencyError
 
 	rewindUpdate: (content, update) ->
-		op = update.op
+		for op in update.op.slice().reverse()
+			content = DiffGenerator.rewindOp content, op
+		return content
+
+	rewindOp: (content, op) ->
 		if op.i?
 			textToBeRemoved = content.slice(op.p, op.p + op.i.length)
 			if op.i != textToBeRemoved
@@ -33,9 +37,8 @@ module.exports = DiffGenerator =
 			diff = DiffGenerator.applyUpdateToDiff diff, update
 		return diff
 
-	applyUpdateToDiff: (diff, update) ->
+	applyOpToDiff: (diff, op, meta) ->
 		position = 0
-		op = update.op
 
 		remainingDiff = diff.slice()
 		{consumedDiff, remainingDiff} = DiffGenerator._consumeToOffset(remainingDiff, op.p)
@@ -44,15 +47,19 @@ module.exports = DiffGenerator =
 		if op.i?
 			newDiff.push
 				i: op.i
-				meta: update.meta
+				meta: meta
 		else if op.d?
-			{consumedDiff, remainingDiff} = DiffGenerator._consumeDiffAffectedByDeleteUpdate remainingDiff, update
+			{consumedDiff, remainingDiff} = DiffGenerator._consumeDiffAffectedByDeleteOp remainingDiff, op, meta
 			newDiff.push(consumedDiff...)
 
 		newDiff.push(remainingDiff...)
 
 		return newDiff
 
+	applyUpdateToDiff: (diff, update) ->
+		for op in update.op
+			diff = DiffGenerator.applyOpToDiff diff, op, update.meta
+		return diff
 
 	_consumeToOffset: (remainingDiff, totalOffset) ->
 		consumedDiff = []
@@ -76,25 +83,24 @@ module.exports = DiffGenerator =
 				consumedDiff.push part
 		throw new Error("Ran out of diff to consume. Offset is too small")
 
-	_consumeDiffAffectedByDeleteUpdate: (remainingDiff, deleteUpdate) ->
+	_consumeDiffAffectedByDeleteOp: (remainingDiff, deleteOp, meta) ->
 		consumedDiff = []
-		remainingUpdate = deleteUpdate
-		while remainingUpdate
-			{newPart, remainingDiff, remainingUpdate} = DiffGenerator._consumeDeletedPart remainingDiff, remainingUpdate
+		remainingOp = deleteOp
+		while remainingOp
+			{newPart, remainingDiff, remainingOp} = DiffGenerator._consumeDeletedPart remainingDiff, remainingOp, meta
 			consumedDiff.push newPart if newPart?
 		return {
 			consumedDiff: consumedDiff
 			remainingDiff: remainingDiff
 		}
 
-	_consumeDeletedPart: (remainingDiff, deleteUpdate) ->
+	_consumeDeletedPart: (remainingDiff, op, meta) ->
 		part = remainingDiff.shift()
 		partLength = DiffGenerator._getLengthOfDiffPart part
-		op = deleteUpdate.op
 
 		if part.d?
 			# Skip existing deletes
-			remainingUpdate = deleteUpdate
+			remainingOp = op
 			newPart = part
 
 		else if partLength > op.d.length
@@ -109,11 +115,11 @@ module.exports = DiffGenerator =
 			if part.u?
 				newPart =
 					d: op.d
-					meta: deleteUpdate.meta
+					meta: meta
 			else if part.i?
 				newPart = null
 
-			remainingUpdate = null
+			remainingOp = null
 
 		else if partLength == op.d.length
 			# The entire part has been deleted, but it is the last part
@@ -125,11 +131,11 @@ module.exports = DiffGenerator =
 			if part.u?
 				newPart =
 					d: op.d
-					meta: deleteUpdate.meta
+					meta: meta
 			else if part.i?
 				newPart = null
 
-			remainingUpdate = null
+			remainingOp = null
 
 		else if partLength < op.d.length
 			# The entire part has been deleted and there is more
@@ -142,18 +148,17 @@ module.exports = DiffGenerator =
 			if part.u
 				newPart =
 					d: part.u
-					meta: deleteUpdate.meta
+					meta: meta
 			else if part.i?
 				newPart = null
 
-			remainingUpdate =
-				op: { p: op.p, d: op.d.slice(DiffGenerator._getLengthOfDiffPart(part)) }
-				meta: deleteUpdate.meta
+			remainingOp =
+				p: op.p, d: op.d.slice(DiffGenerator._getLengthOfDiffPart(part))
 
 		return {
 			newPart: newPart
 			remainingDiff: remainingDiff
-			remainingUpdate: remainingUpdate
+			remainingOp: remainingOp
 		}
 
 	_slicePart: (basePart, from, to) ->

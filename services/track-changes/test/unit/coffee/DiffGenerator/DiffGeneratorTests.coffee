@@ -14,38 +14,40 @@ describe "DiffGenerator", ->
 			start_ts: @ts, end_ts: @ts, user_id: @user_id
 		}
 
-	describe "rewindUpdate", ->
+	describe "rewindOp", ->
 		describe "rewinding an insert", ->
 			it "should undo the insert", ->
 				content = "hello world"
-				update =
-					op: { p: 6, i: "wo" }
-				rewoundContent = @DiffGenerator.rewindUpdate content, update
+				rewoundContent = @DiffGenerator.rewindOp content, { p: 6, i: "wo" }
 				rewoundContent.should.equal "hello rld"
 
 		describe "rewinding a delete", ->
 			it "should undo the delete", ->
 				content = "hello rld"
-				update =
-					op: { p: 6, d: "wo" }
-				rewoundContent = @DiffGenerator.rewindUpdate content, update
+				rewoundContent = @DiffGenerator.rewindOp content, { p: 6, d: "wo" }
 				rewoundContent.should.equal "hello world"
 
 		describe "with an inconsistent update", ->
 			it "should throw an error", ->
 				content = "hello world"
-				update =
-					op: { p: 6, i: "foo" }
 				expect( () =>
-					@DiffGenerator.rewindUpdate content, update
+					@DiffGenerator.rewindOp content, { p: 6, i: "foo" }
 				).to.throw(@DiffGenerator.ConsistencyError)
+
+	describe "rewindUpdate", ->
+		it "should rewind ops in reverse", ->
+			content = "aaabbbccc"
+			update =
+				op: [{ p: 3, i: "bbb" }, { p: 6, i: "ccc" }]
+			rewoundContent = @DiffGenerator.rewindUpdate content, update
+			rewoundContent.should.equal "aaa"
 
 	describe "rewindUpdates", ->
 		it "should rewind updates in reverse", ->
 			content = "aaabbbccc"
 			updates = [
-				{ op: { p: 3, i: "bbb" } },
-				{ op: { p: 6, i: "ccc" } }
+				{ op: [{ p: 3, i: "bbb" }] },
+				{ op: [{ p: 6, i: "ccc" }] }
 			]
 			rewoundContent = @DiffGenerator.rewindUpdates content, updates
 			rewoundContent.should.equal "aaa"
@@ -83,7 +85,7 @@ describe "DiffGenerator", ->
 			it "should insert into the middle of (u)nchanged text", ->
 				diff = @DiffGenerator.applyUpdateToDiff(
 					[ { u: "foobar" } ],
-					{ op: { p: 3, i: "baz" }, meta: @meta }
+					{ op: [{ p: 3, i: "baz" }], meta: @meta }
 				)
 				expect(diff).to.deep.equal([
 					{ u: "foo" }
@@ -94,7 +96,7 @@ describe "DiffGenerator", ->
 			it "should insert into the start of (u)changed text", ->
 				diff = @DiffGenerator.applyUpdateToDiff(
 					[ { u: "foobar" } ],
-					{ op: { p: 0, i: "baz" }, meta: @meta }
+					{ op: [{ p: 0, i: "baz" }], meta: @meta }
 				)
 				expect(diff).to.deep.equal([
 					{ i: "baz", meta: @meta }
@@ -104,7 +106,7 @@ describe "DiffGenerator", ->
 			it "should insert into the end of (u)changed text", ->
 				diff = @DiffGenerator.applyUpdateToDiff(
 					[ { u: "foobar" } ],
-					{ op: { p: 6, i: "baz" }, meta: @meta }
+					{ op: [{ p: 6, i: "baz" }], meta: @meta }
 				)
 				expect(diff).to.deep.equal([
 					{ u: "foobar" }
@@ -114,7 +116,7 @@ describe "DiffGenerator", ->
 			it "should insert into the middle of (i)inserted text", ->
 				diff = @DiffGenerator.applyUpdateToDiff(
 					[ { i: "foobar", meta: @meta } ],
-					{ op: { p: 3, i: "baz" }, meta: @meta }
+					{ op: [{ p: 3, i: "baz" }], meta: @meta }
 				)
 				expect(diff).to.deep.equal([
 					{ i: "foo", meta: @meta }
@@ -128,7 +130,7 @@ describe "DiffGenerator", ->
 						{ d: "deleted", meta: @meta }
 						{ u: "foobar" }
 					],
-					{ op: { p: 3, i: "baz" }, meta: @meta }
+					{ op: [{ p: 3, i: "baz" }], meta: @meta }
 				)
 				expect(diff).to.deep.equal([
 					{ d: "deleted", meta: @meta }
@@ -142,7 +144,7 @@ describe "DiffGenerator", ->
 				it "should delete from the middle of (u)nchanged text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foobazbar" } ],
-						{ op: { p: 3, d: "baz" }, meta: @meta }
+						{ op: [{ p: 3, d: "baz" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ u: "foo" }
@@ -153,7 +155,7 @@ describe "DiffGenerator", ->
 				it "should delete from the start of (u)nchanged text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foobazbar" } ],
-						{ op: { p: 0, d: "foo" }, meta: @meta }
+						{ op: [{ p: 0, d: "foo" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ d: "foo", meta: @meta }
@@ -163,7 +165,7 @@ describe "DiffGenerator", ->
 				it "should delete from the end of (u)nchanged text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foobazbar" } ],
-						{ op: { p: 6, d: "bar" }, meta: @meta }
+						{ op: [{ p: 6, d: "bar" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ u: "foobaz" }
@@ -173,7 +175,7 @@ describe "DiffGenerator", ->
 				it "should delete across multiple (u)changed text parts", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foo" }, { u: "baz" }, { u: "bar" } ],
-						{ op: { p: 2, d: "obazb" }, meta: @meta }
+						{ op: [{ p: 2, d: "obazb" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ u: "fo" }
@@ -187,7 +189,7 @@ describe "DiffGenerator", ->
 				it "should delete from the middle of (i)nserted text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { i: "foobazbar", meta: @meta } ],
-						{ op: { p: 3, d: "baz" }, meta: @meta }
+						{ op: [{ p: 3, d: "baz" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ i: "foo", meta: @meta }
@@ -197,7 +199,7 @@ describe "DiffGenerator", ->
 				it "should delete from the start of (u)nchanged text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { i: "foobazbar", meta: @meta } ],
-						{ op: { p: 0, d: "foo" }, meta: @meta }
+						{ op: [{ p: 0, d: "foo" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ i: "bazbar", meta: @meta }
@@ -206,7 +208,7 @@ describe "DiffGenerator", ->
 				it "should delete from the end of (u)nchanged text", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { i: "foobazbar", meta: @meta } ],
-						{ op: { p: 6, d: "bar" }, meta: @meta }
+						{ op: [{ p: 6, d: "bar" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ i: "foobaz", meta: @meta }
@@ -215,7 +217,7 @@ describe "DiffGenerator", ->
 				it "should delete across multiple (u)changed and (i)nserted text parts", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foo" }, { i: "baz", meta: @meta }, { u: "bar" } ],
-						{ op: { p: 2, d: "obazb" }, meta: @meta }
+						{ op: [{ p: 2, d: "obazb" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ u: "fo" }
@@ -228,7 +230,7 @@ describe "DiffGenerator", ->
 				it "should delete across multiple (u)changed and (d)deleted text parts", ->
 					diff = @DiffGenerator.applyUpdateToDiff(
 						[ { u: "foo" }, { d: "baz", meta: @meta }, { u: "bar" } ],
-						{ op: { p: 2, d: "ob" }, meta: @meta }
+						{ op: [{ p: 2, d: "ob" }], meta: @meta }
 					)
 					expect(diff).to.deep.equal([
 						{ u: "fo" }
@@ -243,7 +245,7 @@ describe "DiffGenerator", ->
 					expect(
 						() => @DiffGenerator.applyUpdateToDiff(
 							[ { u: "foobazbar" } ],
-							{ op: { p: 3, d: "xxx" }, meta: @meta }
+							{ op: [{ p: 3, d: "xxx" }], meta: @meta }
 						)
 					).to.throw(@DiffGenerator.ConsistencyError)
 
@@ -251,7 +253,7 @@ describe "DiffGenerator", ->
 					expect(
 						() => @DiffGenerator.applyUpdateToDiff(
 							[ { u: "foobazbar" } ],
-							{ op: { p: 0, d: "xxx" }, meta: @meta }
+							{ op: [{ p: 0, d: "xxx" }], meta: @meta }
 						)
 					).to.throw(@DiffGenerator.ConsistencyError)
 
@@ -259,7 +261,7 @@ describe "DiffGenerator", ->
 					expect(
 						() => @DiffGenerator.applyUpdateToDiff(
 							[ { u: "foobazbar" } ],
-							{ op: { p: 6, d: "xxx" }, meta: @meta }
+							{ op: [{ p: 6, d: "xxx" }] , meta: @meta }
 						)
 					).to.throw(@DiffGenerator.ConsistencyError)
 
