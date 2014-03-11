@@ -64,7 +64,7 @@ define [
 			date = moment(change.get("start_ts")).format("Do MMM YYYY, h:mm:ss a")
 			modal = new Modal({
 				title: "Restore document"
-				message: "Are you sure you want to restore <strong>#{name}</strong> to before the changes on #{date}"
+				message: "Are you sure you want to restore <strong>#{name}</strong> to before the changes on #{date}?"
 				buttons: [{
 					text: "Cancel"
 				}, {
