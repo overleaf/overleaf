@@ -51,14 +51,14 @@ block content
 							p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>
 							form(action="/user/subscription/cancel",method="post")
 								input(type="hidden", name="_csrf", value=csrfToken)
-								input(type="submit",value="Cancel your subscription").btn.btn-danger
+								input(type="submit",value="Cancel your subscription").btn.btn-danger#cancelSubscription
 							p: a(href="/user/subscription/billing-details/edit").btn.btn-primary Update your billing details
 						when "canceled"
 							p You are currently subscribed to the <strong>#{subscription.name}</strong> plan.
 							p Your subscription has been canceled and will terminate on <strong>#{subscription.nextPaymentDueAt}</strong>. No further payments will be taken.
 							form(action="/user/subscription/reactivate",method="post")
 								input(type="hidden", name="_csrf", value=csrfToken)
-								input(type="submit",value="Reactivate your subscription").btn.btn-success#cancelSubscription
+								input(type="submit",value="Reactivate your subscription").btn.btn-success
 						when "expired"
 							p Your subscription has expired.	
 								a(href="/user/subscription/plans") Create New Subscription
