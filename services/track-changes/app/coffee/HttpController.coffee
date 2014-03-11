@@ -40,12 +40,40 @@ module.exports = HttpController =
 
 		UpdatesManager.getUpdatesWithUserInfo doc_id, to: to, limit: limit, (error, updates) ->
 			return next(error) if error?
-			formattedUpdates = for update in updates
-				{
-					meta: update.meta
-					v: update.v
-				}
-			res.send JSON.stringify updates: formattedUpdates
+			res.send JSON.stringify updates: HttpController._buildUpdatesView(updates)
+
+	TIME_BETWEEN_DISTINCT_UPDATES: fiveMinutes = 5 * 60 * 1000
+	_buildUpdatesView: (updates) ->
+		view = []
+		for update in updates.slice().reverse()
+			lastUpdate = view[view.length - 1]
+			if lastUpdate and update.meta.start_ts - lastUpdate.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				if update.meta.user?
+					userExists = false
+					for user in lastUpdate.meta.users
+						if user.id == update.meta.user.id
+							userExists = true
+							break
+					if !userExists
+						lastUpdate.meta.users.push update.meta.user
+				lastUpdate.meta.start_ts = Math.min(lastUpdate.meta.start_ts, update.meta.start_ts)
+				lastUpdate.meta.end_ts   = Math.max(lastUpdate.meta.end_ts, update.meta.end_ts)
+				lastUpdate.toV = update.v
+			else
+				newUpdate =
+					meta:
+						users: []
+						start_ts: update.meta.start_ts
+						end_ts: update.meta.end_ts
+					fromV: update.v
+					toV: update.v
+
+				if update.meta.user?
+					newUpdate.meta.users.push update.meta.user
+
+				view.push newUpdate
+
+		return view.reverse()
 
 	restore: (req, res, next = (error) ->) ->
 		{doc_id, project_id, version} = req.params

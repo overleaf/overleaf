@@ -16,6 +16,7 @@ describe "HttpController", ->
 		@project_id = "project-id-123"
 		@next = sinon.stub()
 		@user_id = "mock-user-123"
+		@now = Date.now()
 
 	describe "flushUpdatesWithLock", ->
 		beforeEach ->
@@ -73,12 +74,9 @@ describe "HttpController", ->
 					limit: @limit.toString()
 			@res =
 				send: sinon.stub()
-			@rawUpdates = [{
-				v:      @v    = 42
-				op:     @op   = "mock-op"
-				meta:   @meta = "mock-meta"
-				doc_id: @doc_id
-			}]
+			@rawUpdates = ["raw-updates"]
+			@updatesView = ["updates-view"]
+			@HttpController._buildUpdatesView = sinon.stub().returns(@updatesView)
 			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @rawUpdates)
 			@HttpController.getUpdates @req, @res, @next
 
@@ -87,13 +85,66 @@ describe "HttpController", ->
 				.calledWith(@doc_id, to: @to, limit: @limit)
 				.should.equal true
 
+		it "should build the updates view", ->
+			@HttpController._buildUpdatesView
+				.calledWith(@rawUpdates)
+				.should.equal true
+
 		it "should return the formatted updates", ->
-			updates = for update in @rawUpdates
-				{
-					meta: @meta
-					v:    @v
-				}
-			@res.send.calledWith(JSON.stringify(updates: updates)).should.equal true
+			@res.send.calledWith(JSON.stringify(updates: @updatesView)).should.equal true
+
+	describe "_buildUpdatesView", ->
+		it "should concat updates that are close in time", ->
+			expect(@HttpController._buildUpdatesView [{
+				meta:
+					user: @user_2 = { id: "mock-user-2" }
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				meta:
+					user: @user_1 = { id: "mock-user-1" }
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]).to.deep.equal [{
+				meta:
+					users: [@user_1, @user_2]
+					start_ts: @now
+					end_ts:   @now + 30
+				fromV: 4
+				toV:   5
+			}]
+
+		it "should leave updates that are far apart in time", ->
+			oneDay = 1000 * 60 * 60 * 24
+			expect(@HttpController._buildUpdatesView [{
+				meta:
+					user: @user_2 = { id: "mock-user-2" }
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+				v: 5
+			}, {
+				meta:
+					user: @user_1 = { id: "mock-user-2" }
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]).to.deep.equal [{
+				meta:
+					users: [@user_2]
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+				fromV: 5
+				toV: 5
+			}, {
+				meta:
+					users: [@user_1]
+					start_ts: @now
+					end_ts:   @now + 10
+				fromV: 4
+				toV: 4
+			}]
 
 	describe "RestoreManager", ->
 		beforeEach ->
