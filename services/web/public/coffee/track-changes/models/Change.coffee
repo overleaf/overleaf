@@ -7,10 +7,12 @@ define [
 			model = {
 				start_ts: change.meta.start_ts
 				end_ts: change.meta.end_ts
-				version: change.v
+				fromVersion: change.fromV
+				toVersion: change.toV
 			}
-			if change.meta.user?
-				model.user = User.findOrBuild(change.meta.user.id, change.meta.user)
-			else
-				model.user = User.getAnonymousUser()
+			model.users = []
+			for user in change.meta.users or []
+				model.users.push User.findOrBuild(user.id, user)
+			if model.users.length == 0
+				model.users.push User.getAnonymousUser()
 			return model

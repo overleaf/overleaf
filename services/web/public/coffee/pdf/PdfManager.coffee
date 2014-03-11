@@ -143,7 +143,6 @@ define [
 							@view.showLog()
 
 					if outputFiles?
-						console.log "outputFiles", outputFiles
 						@view.showOutputFileDownloadLinks(outputFiles)
 
 		fetchLogAndUpdateView: (pdfExists) ->

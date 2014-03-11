@@ -37,8 +37,8 @@ define [
 				@diff = new Diff({
 					project_id: @project_id
 					doc_id: @doc_id
-					from: fromModel.get("version")
-					to:   toModel.get("version")
+					from: fromModel.get("fromVersion")
+					to:   toModel.get("toVersion")
 				})
 				@diffView = new DiffView(
 					model: @diff

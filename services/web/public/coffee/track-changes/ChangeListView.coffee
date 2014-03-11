@@ -158,24 +158,26 @@ define [
 			"click .restore a": "onRestoreClick"
 
 	
-		template : $("#changeListItemTemplate").html()
+		templates:
+			item: $("#changeListItemTemplate").html()
+			user: $("#changeListItemUserTemplate").html()
 
 		initialize: ->
 			@render()
 
 		render: ->
-			@$el.html Mustache.to_html(@template, @modelView())
-			return this
-		
-		modelView: ->
-			modelView = {
-				hue:  @model.get("user").hue()
+			userHtml = for user in @model.get("users")
+				Mustache.to_html @templates.user, {
+					hue:  user.hue()
+					name: user.name()
+				}
+			data = {
 				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
-				name: @model.get("user").name()
+				users: userHtml.join("")
 			}
-			# modelView.start_ts = util.formatDate(modelView.start_ts)
-			# modelView.end_ts = util.formatDate(modelView.end_ts)
-			return modelView
+
+			@$el.html Mustache.to_html(@templates.item, data)
+			return this
 
 		onClick: (e) ->
 			e.preventDefault()
