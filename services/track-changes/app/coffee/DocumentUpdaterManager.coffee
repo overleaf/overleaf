@@ -20,13 +20,15 @@ module.exports = DocumentUpdaterManager =
 				logger.error err: error, project_id:project_id, doc_id:doc_id, url: url, "error accessing doc updater"
 				callback error
 
-	setDocument: (project_id, doc_id, content, callback = (error) ->) ->
+	setDocument: (project_id, doc_id, content, user_id, callback = (error) ->) ->
 		url = "#{Settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}"
 		logger.log project_id:project_id, doc_id: doc_id, "setting doc in document updater"
 		request.post {
 			url: url
 			json:
 				lines: content.split("\n")
+				source: "restore"
+				user_id: user_id
 		}, (error, res, body)->
 			if error?
 				return callback(error)

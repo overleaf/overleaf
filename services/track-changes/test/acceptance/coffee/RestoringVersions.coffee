@@ -54,7 +54,7 @@ describe "Restoring a version", ->
 
 		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
 			throw error if error?
-			TrackChangesClient.restoreDoc @project_id, @doc_id, @beforeVersion, (error) =>
+			TrackChangesClient.restoreDoc @project_id, @doc_id, @beforeVersion, @user_id, (error) =>
 				throw error if error?
 				done()
 
@@ -63,5 +63,5 @@ describe "Restoring a version", ->
 
 	it "should set the doc in the doc updater", ->
 		MockDocUpdaterApi.setDoc
-			.calledWith(@project_id, @doc_id, @restored_lines)
+			.calledWith(@project_id, @doc_id, @restored_lines, @user_id)
 			.should.equal true

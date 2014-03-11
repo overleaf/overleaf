@@ -54,11 +54,12 @@ describe "DocumentUpdaterManager", ->
 	describe "setDocument", ->
 		beforeEach ->
 			@content = "mock content"
+			@user_id = "user-id-123"
 
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200})
-				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @user_id, @callback
 
 			it 'should set the document in the document updater', ->
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
@@ -67,6 +68,8 @@ describe "DocumentUpdaterManager", ->
 						url: url
 						json:
 							lines: @content.split("\n")
+							source: "restore"
+							user_id: @user_id
 					}).should.equal true
 
 			it "should call the callback", ->
@@ -75,7 +78,7 @@ describe "DocumentUpdaterManager", ->
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
-				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @user_id, @callback
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(@error).should.equal true
@@ -83,7 +86,7 @@ describe "DocumentUpdaterManager", ->
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
-				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @callback
+				@DocumentUpdaterManager.setDocument @project_id, @doc_id, @content, @user_id, @callback
 
 			it "should return the callback with an error", ->
 				@callback

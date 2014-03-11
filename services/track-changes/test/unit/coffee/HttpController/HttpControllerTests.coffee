@@ -15,6 +15,7 @@ describe "HttpController", ->
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@next = sinon.stub()
+		@user_id = "mock-user-123"
 
 	describe "flushUpdatesWithLock", ->
 		beforeEach ->
@@ -102,15 +103,17 @@ describe "HttpController", ->
 					doc_id: @doc_id
 					project_id: @project_id
 					version: @version
+				headers:
+					"x-user-id": @user_id
 			@res =
 				send: sinon.stub()
 
-			@RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(3)
+			@RestoreManager.restoreToBeforeVersion = sinon.stub().callsArg(4)
 			@HttpController.restore @req, @res, @next
 
 		it "should restore the document", ->
 			@RestoreManager.restoreToBeforeVersion
-				.calledWith(@project_id, @doc_id, parseInt(@version, 10))
+				.calledWith(@project_id, @doc_id, parseInt(@version, 10), @user_id)
 				.should.equal true
 
 		it "should return a success code", ->

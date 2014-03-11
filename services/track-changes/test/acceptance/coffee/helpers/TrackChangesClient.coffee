@@ -30,9 +30,11 @@ module.exports = TrackChangesClient =
 			response.statusCode.should.equal 200
 			callback null, JSON.parse(body)
 
-	restoreDoc: (project_id, doc_id, version, callback = (error) ->) ->
+	restoreDoc: (project_id, doc_id, version, user_id, callback = (error) ->) ->
 		request.post {
 			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/version/#{version}/restore"
+			headers:
+				"X-User-Id": user_id
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback null

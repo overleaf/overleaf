@@ -49,7 +49,8 @@ module.exports = HttpController =
 
 	restore: (req, res, next = (error) ->) ->
 		{doc_id, project_id, version} = req.params
+		user_id = req.headers["x-user-id"]
 		version = parseInt(version, 10)
-		RestoreManager.restoreToBeforeVersion project_id, doc_id, version, (error) ->
+		RestoreManager.restoreToBeforeVersion project_id, doc_id, version, user_id, (error) ->
 			return next(error) if error?
 			res.send 204
