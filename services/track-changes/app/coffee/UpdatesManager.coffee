@@ -79,7 +79,8 @@ module.exports = UpdatesManager =
 	fillUserInfo: (updates, callback = (error, updates) ->) ->
 		users = {}
 		for update in updates
-			users[update.meta.user_id] = true
+			if UpdatesManager._validUserId(update.meta.user_id)
+				users[update.meta.user_id] = true
 
 		jobs = []
 		for user_id, _ of users
@@ -95,5 +96,12 @@ module.exports = UpdatesManager =
 			for update in updates
 				user_id = update.meta.user_id
 				delete update.meta.user_id
-				update.meta.user = users[user_id]
+				if UpdatesManager._validUserId(user_id)
+					update.meta.user = users[user_id]
 			callback null, updates
+
+	_validUserId: (user_id) ->
+		if !user_id?
+			return false
+		else
+			return !!user_id.match(/^[a-f0-9]{24}$/)

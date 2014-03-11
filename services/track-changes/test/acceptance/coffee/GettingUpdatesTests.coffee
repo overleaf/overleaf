@@ -33,7 +33,7 @@ describe "Getting updates", ->
 			v: 3
 		}, {
 			op: [{ i: "two ", p: 4 }]
-			meta: { ts: @to - 2 * @minutes, user_id: @user_id }
+			meta: { ts: @to - 2 * @minutes }
 			v: 4
 		}, {
 			op: [{ i: "three ", p: 8 }]
@@ -71,6 +71,5 @@ describe "Getting updates", ->
 			meta:
 				start_ts: @to - 2 * @minutes
 				end_ts: @to - 2 * @minutes
-				user: @user
 			v: 4
 		}]
