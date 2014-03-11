@@ -16,7 +16,7 @@ block content
 		Recurly.config(!{recurlyConfig})
 		var recurlySubscriptionFormConfig = !{subscriptionFormOptions}
 		recurlySubscriptionFormConfig.successHandler = function(){
-			ga('send', 'event', 'subscription-funnel', 'created')
+			ga('send', 'event', 'subscription-funnel', 'subscribed')
 		}
 
 		Recurly.buildSubscriptionForm(recurlySubscriptionFormConfig);
