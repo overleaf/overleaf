@@ -18,6 +18,8 @@ describe "Setting a document", ->
 			v: 0
 		@result = ["one", "one and a half", "two", "three"]
 		@newLines = ["these", "are", "the", "new", "lines"]
+		@source = "dropbox"
+		@user_id = "user-id-123"
 		MockWebApi.insertDoc @project_id, @doc_id, {
 			lines: @lines
 		}
@@ -30,7 +32,7 @@ describe "Setting a document", ->
 				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
 					throw error if error?
 					setTimeout () =>
-						DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, (error, res, body) =>
+						DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
 							@statusCode = res.statusCode
 							done()
 					, 200

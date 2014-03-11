@@ -32,9 +32,11 @@ module.exports = HttpController =
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
 		lines = req.body.lines
-		logger.log project_id: project_id, doc_id: doc_id, lines: lines, "setting doc via http"
+		source = req.body.source
+		user_id = req.body.user_id
+		logger.log project_id: project_id, doc_id: doc_id, lines: lines, source: source, user_id: user_id, "setting doc via http"
 		timer = new Metrics.Timer("http.setDoc")
-		DocumentManager.setDocWithLock project_id, doc_id, lines, (error) ->
+		DocumentManager.setDocWithLock project_id, doc_id, lines, source, user_id, (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "set doc via http"

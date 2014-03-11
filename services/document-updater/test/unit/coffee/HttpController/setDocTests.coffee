@@ -19,6 +19,8 @@ describe "HttpController - setDoc", ->
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@lines = ["one", "two", "three"]
+		@source = "dropbox"
+		@user_id = "user-id-123"
 		@res =
 			send: sinon.stub()
 		@req =
@@ -27,16 +29,18 @@ describe "HttpController - setDoc", ->
 				doc_id: @doc_id
 			body:
 				lines: @lines
+				source: @source
+				user_id: @user_id
 		@next = sinon.stub()
 
 	describe "successfully", ->
 		beforeEach ->
-			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(3)
+			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)
 			@HttpController.setDoc(@req, @res, @next)
 
 		it "should set the doc", ->
 			@DocumentManager.setDocWithLock
-				.calledWith(@project_id, @doc_id)
+				.calledWith(@project_id, @doc_id, @lines, @source, @user_id)
 				.should.equal true
 
 		it "should return a successful No Content response", ->
@@ -46,7 +50,7 @@ describe "HttpController - setDoc", ->
 
 		it "should log the request", ->
 			@logger.log
-				.calledWith(doc_id: @doc_id, project_id: @project_id, lines: @lines, "setting doc via http")
+				.calledWith(doc_id: @doc_id, project_id: @project_id, lines: @lines, source: @source, user_id: @user_id, "setting doc via http")
 				.should.equal true
 
 		it "should time the request", ->
@@ -54,7 +58,7 @@ describe "HttpController - setDoc", ->
 
 	describe "when an errors occurs", ->
 		beforeEach ->
-			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
+			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5, new Error("oops"))
 			@HttpController.setDoc(@req, @res, @next)
 
 		it "should call next with the error", ->

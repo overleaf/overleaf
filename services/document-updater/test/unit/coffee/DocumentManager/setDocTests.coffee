@@ -22,6 +22,8 @@ describe "DocumentManager - setDoc", ->
 		@version = 42
 		@ops = ["mock-ops"]
 		@callback = sinon.stub()
+		@source = "dropbox"
+		@user_id = "mock-user-id"
 
 	describe "with plain tex lines", ->
 		beforeEach ->
@@ -34,7 +36,7 @@ describe "DocumentManager - setDoc", ->
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-				@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @callback
+				@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, @callback
 
 			it "should get the current doc lines", ->
 				@DocumentManager.getDoc
@@ -48,7 +50,20 @@ describe "DocumentManager - setDoc", ->
 
 			it "should apply the diff as a ShareJS op", ->
 				@UpdateManager.applyUpdates
-					.calledWith(@project_id, @doc_id, [doc: @doc_id, v: @version, op: @ops, meta: { type: "external" }])
+					.calledWith(
+						@project_id,
+						@doc_id,
+						[
+							doc: @doc_id,
+							v: @version,
+							op: @ops,
+							meta: {
+								type: "external"
+								source: @source
+								user_id: @user_id
+							}
+						]
+					)
 					.should.equal true
 
 			it "should flush the doc to Mongo", ->
@@ -62,30 +77,6 @@ describe "DocumentManager - setDoc", ->
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
-	describe "with json lines", ->
-		beforeEach ->
-			@beforeLines = [text: "before", text: "lines"]
-			@afterLines = ["after", "lines"]
-			
-		describe "successfully", ->
-			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version)
-				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
-				@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null)
-				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-				@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @callback
-
-			it "should get the current doc lines", ->
-				@DocumentManager.getDoc
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-
-			it "should return not try to get a diff", ->
-				@DiffCodec.diffAsShareJsOp.called.should.equal false
-
-			it "should call the callback", ->
-				@callback.calledWith(null).should.equal true
-
 	describe "without new lines", ->
 		beforeEach ->
 			@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version)
@@ -96,7 +87,7 @@ describe "DocumentManager - setDoc", ->
 			
 		it "should not try to get the doc lines", ->
 			@DocumentManager.getDoc.called.should.equal false
-			
+
 		
 
 		
