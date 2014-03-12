@@ -2,8 +2,9 @@ define [
 	"ace/ace"
 	"ace/mode/latex"
 	"ace/range"
+	"moment"
 	"libs/backbone"
-], (Ace, LatexMode, Range)->
+], (Ace, LatexMode, Range, moment)->
 	DiffView = Backbone.View.extend
 		initialize: () ->
 			@model.on "change:diff", () => @render()
@@ -19,6 +20,7 @@ define [
 			session.setMode(new LatexMode.Mode())
 			session.setUseWrapMode(true)
 			@insertMarkers()
+			@insertNameTag()
 			return @
 
 		createAceEditor: () ->
@@ -44,6 +46,7 @@ define [
 		insertMarkers: () ->
 			row    = 0
 			column = 0
+			@entries = []
 			for entry, i in @model.get("diff") or []
 				content = entry.u or entry.i or entry.d
 				content ||= ""
@@ -62,9 +65,12 @@ define [
 				range = new Range.Range(
 					startRow, startColumn, endRow, endColumn
 				)
-				@addMarker(range, "change-marker-#{i}", entry)
+				entry.range = range
+				@addMarker(range, entry)
+				if entry.i? or entry.d?
+					@entries.push entry
 
-		addMarker: (range, id, entry) ->
+		addMarker: (range, entry) ->
 			session  = @aceEditor.getSession()
 			markerBackLayer = @aceEditor.renderer.$markerBack
 			markerFrontLayer = @aceEditor.renderer.$markerFront
@@ -72,10 +78,9 @@ define [
 			if entry.i? or entry.d?
 				hue = entry.meta.user.hue()
 				if entry.i?
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "inserted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 85%);
 					"""
-					tag = "Added by #{entry.meta.user.name()}"
 				if entry.d?
 					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
 						background-color : hsl(#{hue}, 70%, 95%);
@@ -84,13 +89,6 @@ define [
 						height: #{Math.round(lineHeight/2) - 1}px;
 						border-bottom: 2px solid hsl(#{hue}, 70%, 40%);
 					"""
-					tag = "Deleted by #{entry.meta.user.name()}"
-
-				date = moment(parseInt(entry.meta.end_ts, 10)).format("Do MMM YYYY, h:mm:ss a")
-				tag += " on #{date}"
-				@_addNameTag session, id, range, tag, """
-					background-color : hsl(#{hue}, 70%, 95%);
-				"""
 
 		_addMarkerWithCustomStyle: (session, markerLayer, range, klass, foreground, style) ->
 			session.addMarker range, klass, (html, range, left, top, config) ->
@@ -100,42 +98,65 @@ define [
 					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
 			, foreground
 
-		_addNameTag: (session, id, range, content, style) ->
-			@nameMarkers ||= []
-			@nameMarkers.push
-				range: range
-				id: id
-			startRange = new Range.Range(
-				range.start.row, range.start.column
-				range.start.row, range.start.column + 1
-			)
-			session.addMarker startRange, "change-name-marker", (html, range, left, top, config) ->
-				html.push """
-					<div
-						id    = '#{id}'
-						class = 'change-name-marker'
-						style = '
-							height: #{config.lineHeight}px;
-							top:    #{top}px;
-							left:   #{left}px;
-						'
-					>
-						<div
-							class="name" style="
-								display: none;
-								bottom: #{config.lineHeight + 3}px;
-								#{style}
-							">#{content}</div>
-					</div>
-				"""
-			, true
+		insertNameTag: () ->
+			@$ace = $(@aceEditor.renderer.container).find(".ace_scroller")
+			@$nameTagEl = $("<div class='change-name-marker'></div>")
+			@$nameTagEl.css({
+				position: "absolute"
+			})
+			@$nameTagEl.hide()
+			@$ace.append(@$nameTagEl)
+
+		_drawNameTag: (entry, position) ->
+			@$nameTagEl.show()
+			
+			if entry.i?
+				text = "Added by #{entry.meta.user.name()}"
+			else if entry.d?
+				text = "Deleted by #{entry.meta.user.name()}"
+			date = moment(parseInt(entry.meta.end_ts, 10)).format("Do MMM YYYY, h:mm a")
+			text += " on #{date}"
+			@$nameTagEl.text(text)
+
+			position = @aceEditor.renderer.textToScreenCoordinates(position.row, position.column)
+			offset = @$ace.offset()
+			position.pageX = position.pageX - offset.left
+			position.pageY = position.pageY - offset.top
+			height = @$ace.height()
+
+			hue = entry.meta.user.hue()
+			css = {
+				"background-color" : "hsl(#{hue}, 70%, 90%)";
+			}
+
+			if position.pageX + @$nameTagEl.width() < @$ace.width()
+				css["left"] = position.pageX
+				css["right"] = "auto"
+			else
+				css["right"] = 0
+				css["left"] = "auto"
+
+			if position.pageY > 2 * @$nameTagEl.height()
+				css["bottom"] = height - position.pageY
+				css["top"] = "auto"
+			else
+				css["top"] = position.pageY + @aceEditor.renderer.lineHeight
+				css["bottom"] = "auto"
+
+			@$nameTagEl.css css
+
+		_hideNameTag: () ->
+			@$nameTagEl.hide()
 
 		updateVisibleNames: (e) ->
-			for marker in @nameMarkers or []
-				if marker.range.contains(e.position.row, e.position.column)
-					$("##{marker.id}").find(".name").show()
-				else
-					$("##{marker.id}").find(".name").hide()
+			visibleName = false
+			for entry in @entries or []
+				if entry.range.contains(e.position.row, e.position.column)
+					@_drawNameTag(entry, e.position)
+					visibleName = true
+					break
+			if !visibleName
+				@_hideNameTag()
 
 	return DiffView
 

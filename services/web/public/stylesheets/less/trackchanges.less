@@ -16,6 +16,9 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
+			.ace_active-line, .ace_cursor-layer {
+				display: none;
+			}
 		}
 	}
 
@@ -53,20 +56,19 @@
 		}
 	}
 
-	.deleted-change-background, .deleted-change-foreground, .inserted-change, .change-name-marker {
+	.deleted-change-background, .deleted-change-foreground, .inserted-change-background, .change-name-marker {
 		position: absolute;
 		z-index: 2;
 	}
 
 	.change-name-marker {
-		.name {
-			font-size: 0.8em;
-			padding: 2px 6px;
-			.border-radius(3px 3px 3px 3px);
-			position: absolute;
-			border: 1px solid #999;
-			left: 0;
-		}
+		font-size: 0.8em;
+		padding: 2px 6px;
+		.border-radius(3px 3px 3px 3px);
+		position: absolute;
+		border: 1px solid #999;
+		left: 0;
+		white-space: pre;
 	}
 
 	ul.change-list {
