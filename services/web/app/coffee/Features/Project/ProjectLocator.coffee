@@ -17,7 +17,7 @@ module.exports =
 
 		search = (searchFolder, path)->
 			count++
-			element = _.find searchFolder[elementType], (el)-> el._id+'' == element_id+'' #need to ToString both id's for robustness
+			element = _.find searchFolder[elementType], (el)-> el?._id+'' == element_id+'' #need to ToString both id's for robustness
 			if !element? && searchFolder.folders? && searchFolder.folders.length != 0
 				_.each searchFolder.folders, (folder, index)->
 					newPath = {}
@@ -136,6 +136,6 @@ getIndexOf = (searchEntity, id)->
 	length = searchEntity.length
 	count = 0
 	while(count < length)
-		if searchEntity[count]._id+"" == id+""
+		if searchEntity[count]?._id+"" == id+""
 			return count
 		count++
