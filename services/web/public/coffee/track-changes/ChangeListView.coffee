@@ -7,7 +7,7 @@ define [
 		template: $("#changeListTemplate").html()
 
 		events:
-			"scroll" : "loadUntilFull"
+			"scroll" : () -> @loadUntilFull()
 
 		initialize: () ->
 			@itemViews = []
@@ -39,20 +39,13 @@ define [
 			view.$el.insertBefore(elementAtIndex)
 
 			view.on "click", (e, v) =>
-				@selectedToIndex = index
-				@selectedFromIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(index, index)
 
 			view.on "selected:to", (e, v) =>
-				@selectedToIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(@selectedFromIndex, index)
 
 			view.on "selected:from", (e, v) =>
-				@selectedFromIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(index, @selectedToIndex)
 
 			view.on "mouseenter:to", (e) =>
 				@hoverToIndex = index
@@ -70,18 +63,27 @@ define [
 				delete @hoverFromIndex
 				@resetHoverStates()
 
+			view.on "click:restore", (e) =>
+				@trigger "restore", view.model
+
 			view.resetSelector(index, @selectedFromIndex, @selectedToIndex)
+
+		setSelectionRange: (fromIndex, toIndex) ->
+			@selectedFromIndex = fromIndex
+			@selectedToIndex = toIndex
+			@resetAllSelectors()
+			@triggerChangeDiff()
 
 		resetAllSelectors: () ->
 			for view, i in @itemViews
 				view.resetSelector(i, @selectedFromIndex, @selectedToIndex)
 
 		resetHoverStates: () ->
-			if @hoverToIndex?
+			if @hoverToIndex? and @hoverToIndex != @selectedToIndex
 				@$("ul").addClass("hover-state")
 				for view, i in @itemViews
 					view.resetHoverState(i, @selectedFromIndex, @hoverToIndex)
-			else if @hoverFromIndex?
+			else if @hoverFromIndex? and @hoverFromIndex != @selectedFromIndex
 				@$("ul").addClass("hover-state")
 				for view, i in @itemViews
 					view.resetHoverState(i, @hoverFromIndex, @selectedToIndex)
@@ -99,23 +101,23 @@ define [
 		atEndOfListView: ->
 			@$el.scrollTop() + @$el.height() >= @$(".change-list").height() - 30
 
-		loadUntilFull: (e, callback) ->
+		loadUntilFull: (callback = (error) ->) ->
 			if (@listShorterThanContainer() or @atEndOfListView()) and not @atEndOfCollection and not @loading
 				@showLoading()
 				@hideEmptyMessage()
 				@collection.fetchNextBatch
-					error: =>
+					error: (error) =>
 						@hideLoading()
 						@showEmptyMessageIfCollectionEmpty()
-						callback() if callback?
+						callback(error)
 					success: (collection, response) =>
 						@hideLoading()
 						if response.updates.length == @collection.batchSize
-							@loadUntilFull(e, callback)
+							@loadUntilFull(callback)
 						else
 							@atEndOfCollection = true
 							@showEmptyMessageIfCollectionEmpty()
-							callback() if callback?
+							callback()
 							
 			else
 				callback() if callback?
@@ -152,26 +154,29 @@ define [
 				@trigger "mouseenter:from", args...
 			"mouseleave .change-selector-from": (args...) ->
 				@trigger "mouseleave:from", args...
+			"click .restore a": "onRestoreClick"
 
 	
-		template : $("#changeListItemTemplate").html()
+		templates:
+			item: $("#changeListItemTemplate").html()
+			user: $("#changeListItemUserTemplate").html()
 
 		initialize: ->
 			@render()
 
 		render: ->
-			@$el.html Mustache.to_html(@template, @modelView())
-			return this
-		
-		modelView: ->
-			modelView = {
-				hue:  @model.get("user").hue()
+			userHtml = for user in @model.get("users")
+				Mustache.to_html @templates.user, {
+					hue:  user.hue()
+					name: user.name()
+				}
+			data = {
 				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
-				name: @model.get("user").name()
+				users: userHtml.join("")
 			}
-			# modelView.start_ts = util.formatDate(modelView.start_ts)
-			# modelView.end_ts = util.formatDate(modelView.end_ts)
-			return modelView
+
+			@$el.html Mustache.to_html(@templates.item, data)
+			return this
 
 		onClick: (e) ->
 			e.preventDefault()
@@ -182,6 +187,10 @@ define [
 
 		onFromSelectorClick: (e) ->
 			@trigger "selected:from", e, @
+
+		onRestoreClick: (e) ->
+			e.preventDefault()
+			@trigger "click:restore", e, @
 
 		isSelectedFrom: () ->
 			@$(".change-selector-from").is(":checked")

@@ -4,9 +4,15 @@ define [
 ], (User)->
 	Change = Backbone.Model.extend
 		parse: (change) ->
-			return {
+			model = {
 				start_ts: change.meta.start_ts
 				end_ts: change.meta.end_ts
-				user: User.findOrBuild(change.meta.user.id, change.meta.user)
-				version: change.v
+				fromVersion: change.fromV
+				toVersion: change.toV
 			}
+			model.users = []
+			for user in change.meta.users or []
+				model.users.push User.findOrBuild(user.id, user)
+			if model.users.length == 0
+				model.users.push User.getAnonymousUser()
+			return model

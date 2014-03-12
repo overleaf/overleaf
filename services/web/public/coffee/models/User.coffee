@@ -49,4 +49,7 @@ define [
 		find: (id) ->
 			@loadedModel ||= {}
 			return @loadedModel[id]
+
+		getAnonymousUser: () ->
+			return User.findOrBuild("anonymous", { first_name: "Anonymous", email: "anon@sharelatex.com" })
 	}

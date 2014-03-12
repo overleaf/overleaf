@@ -140,8 +140,7 @@
 				button.btn.btn-primary ok
 
 	script(type="text/template")#genericModalButtonTemplate
-		a(href="#",class="btn {{ class }}") {{ text }}
-
+		button(class="btn {{ class }}") {{ text }}
 
 	script(type="text/template")#editorPanelTemplate
 		#editorArea(style='display: none;')
@@ -440,10 +439,16 @@
 			input(type="radio",name="toVersion").change-selector-to
 
 		div(class='change-description')
-			div(class='change-date') {{date}} 
-			div(class='change-name')
-				div.color-square(style="background-color: hsl({{hue}}, 100%, 70%);")
-				span {{name}}
+			div(class='change-date') {{date}}
+			div {{{users}}}
+
+		div(class='restore')
+			a(href="#") Restore to here
+
+	script(type='text/template')#changeListItemUserTemplate
+		div(class='change-name')
+			div.color-square(style="background-color: hsl({{hue}}, 100%, 70%);")
+			span {{name}}
 
 	script(type='text/template')#changeListTemplate
 		ul.change-list.nav.nav-pills.nav-stacked

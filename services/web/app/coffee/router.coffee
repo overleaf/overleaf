@@ -125,6 +125,7 @@ module.exports = class Router
 
 		app.get  "/project/:Project_id/doc/:doc_id/updates", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 		app.get  '/project/:Project_id/collaborators', SecutiryManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators

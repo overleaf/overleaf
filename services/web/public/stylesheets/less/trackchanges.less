@@ -16,6 +16,9 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
+			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
+				display: none;
+			}
 		}
 	}
 
@@ -28,7 +31,7 @@
 		background-color: white;
 
 		.track-changes-header {
-			background-color: black;
+			background-color: #282828;
 			h3 {
 				color: white;
 				padding-left: 8px;
@@ -53,29 +56,26 @@
 		}
 	}
 
-	.deleted-change-background, .deleted-change-foreground, .inserted-change, .change-name-marker {
+	.deleted-change-background, .deleted-change-foreground, .inserted-change-background, .change-name-marker {
 		position: absolute;
 		z-index: 2;
 	}
 
 	.change-name-marker {
-		.name {
-			font-size: 0.8em;
-			padding: 2px 6px;
-			.border-radius(3px 3px 3px 3px);
-			position: absolute;
-			border: 1px solid #999;
-			left: 0;
-		}
+		font-size: 0.8em;
+		padding: 2px 6px;
+		.border-radius(3px 3px 3px 3px);
+		position: absolute;
+		border: 1px solid #999;
+		left: 0;
+		white-space: pre;
 	}
 
 	ul.change-list {
 		li {
-			padding: 6px 4px;
 			position: relative;
 			border-bottom: 1px solid #ccc;
 			cursor: pointer;
-			min-height: 38px;
 			.change-selectors {
 				.change-selector-from {
 					position: absolute;
@@ -98,7 +98,8 @@
 				}
 			}
 			.change-description {
-				padding-left: 26px;
+				padding: 6px 4px 6px 30px;
+				min-height: 38px;
 			}
 			.change-name {
 				font-size: 0.9em;
@@ -112,9 +113,21 @@
 				margin-right: 4px;
 				margin-bottom: -1px;
 			}
+			.restore {
+				a {
+					display: block;
+					padding: 4px;
+					text-align: center;
+					border-top: 1px solid #ccc;
+				}
+				display: none;
+			}
 			&:hover {
 				background-color: #eaeaea;
 			}
+		}
+		li.loading-changes, li.empty-message {
+			padding: 6px;
 		}
 		li.selected {
 			background-color: #eaeaea;
@@ -137,11 +150,15 @@
 		li.selected-from {
 			.change-selectors {
 				.range {
-					bottom: 10px;
+					bottom: 37px;
 				}
 				.change-selector-from {
 					opacity: 1;
+					bottom: 32px;
 				}
+			}
+			.restore {
+				display: block;
 			}
 		}
 	}
@@ -179,6 +196,13 @@
 				}
 				.change-selector-from {
 					opacity: 1;
+				}
+			}
+		}
+		li.selected-from.hover-selected-from {
+			.change-selectors {
+				.range {
+					bottom: 37px;
 				}
 			}
 		}

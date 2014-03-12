@@ -224,7 +224,7 @@ define [
 			document.on "externalUpdate", () =>
 				Modal.createModal
 					title: "Document Updated Externally"
-					message: "This document was just updated externally (probably via Dropbox). Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
+					message: "This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
 					buttons:[
 						text: "Ok"
 					]
