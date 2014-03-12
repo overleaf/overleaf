@@ -31,25 +31,49 @@ define [
 				el         : @$el.find(".change-list-area")
 			)
 			@changeListView.render()
-			@changeListView.loadUntilFull()
+			@changeListView.loadUntilFull (error) =>
+				@autoSelectDiff()
 
 			@changeListView.on "change_diff", (fromModel, toModel) =>
-				@diff = new Diff({
-					project_id: @project_id
-					doc_id: @doc_id
-					from: fromModel.get("fromVersion")
-					to:   toModel.get("toVersion")
-				})
-				@diffView = new DiffView(
-					model: @diff
-					el:    @$el.find(".track-changes-diff")
-				)
-				@diff.fetch()
+				@showDiff(fromModel, toModel)
 
 			@changeListView.on "restore", (change) =>
 				@restore(change)
 
 			@showEl()
+
+		autoSelectDiff: () ->
+			if @changes.models.length == 0
+				return
+
+			# Find all change until the last one we made
+			fromIndex = null
+			for change, i in @changes.models
+				if ide.user in change.get("users")
+					if i > 0
+						fromIndex = i - 1
+					else
+						fromIndex = 0
+					break
+			fromIndex = 0 if !fromIndex
+
+			toChange = @changes.models[0]
+			fromChange = @changes.models[fromIndex]
+			@showDiff(fromChange, toChange)
+			@changeListView.setSelectionRange(fromIndex, 0)
+
+		showDiff: (fromModel, toModel) ->
+			@diff = new Diff({
+				project_id: @project_id
+				doc_id: @doc_id
+				from: fromModel.get("fromVersion")
+				to:   toModel.get("toVersion")
+			})
+			@diffView = new DiffView(
+				model: @diff
+				el:    @$el.find(".track-changes-diff")
+			)
+			@diff.fetch()
 
 		showEl: ->
 			@ide.editor.hide()

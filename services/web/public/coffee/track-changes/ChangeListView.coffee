@@ -7,7 +7,7 @@ define [
 		template: $("#changeListTemplate").html()
 
 		events:
-			"scroll" : "loadUntilFull"
+			"scroll" : () -> @loadUntilFull()
 
 		initialize: () ->
 			@itemViews = []
@@ -39,20 +39,13 @@ define [
 			view.$el.insertBefore(elementAtIndex)
 
 			view.on "click", (e, v) =>
-				@selectedToIndex = index
-				@selectedFromIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(index, index)
 
 			view.on "selected:to", (e, v) =>
-				@selectedToIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(@selectedFromIndex, index)
 
 			view.on "selected:from", (e, v) =>
-				@selectedFromIndex = index
-				@resetAllSelectors()
-				@triggerChangeDiff()
+				@setSelectionRange(index, @selectedToIndex)
 
 			view.on "mouseenter:to", (e) =>
 				@hoverToIndex = index
@@ -74,6 +67,12 @@ define [
 				@trigger "restore", view.model
 
 			view.resetSelector(index, @selectedFromIndex, @selectedToIndex)
+
+		setSelectionRange: (fromIndex, toIndex) ->
+			@selectedFromIndex = fromIndex
+			@selectedToIndex = toIndex
+			@resetAllSelectors()
+			@triggerChangeDiff()
 
 		resetAllSelectors: () ->
 			for view, i in @itemViews
@@ -102,23 +101,23 @@ define [
 		atEndOfListView: ->
 			@$el.scrollTop() + @$el.height() >= @$(".change-list").height() - 30
 
-		loadUntilFull: (e, callback) ->
+		loadUntilFull: (callback = (error) ->) ->
 			if (@listShorterThanContainer() or @atEndOfListView()) and not @atEndOfCollection and not @loading
 				@showLoading()
 				@hideEmptyMessage()
 				@collection.fetchNextBatch
-					error: =>
+					error: (error) =>
 						@hideLoading()
 						@showEmptyMessageIfCollectionEmpty()
-						callback() if callback?
+						callback(error)
 					success: (collection, response) =>
 						@hideLoading()
 						if response.updates.length == @collection.batchSize
-							@loadUntilFull(e, callback)
+							@loadUntilFull(callback)
 						else
 							@atEndOfCollection = true
 							@showEmptyMessageIfCollectionEmpty()
-							callback() if callback?
+							callback()
 							
 			else
 				callback() if callback?
