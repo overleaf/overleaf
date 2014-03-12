@@ -10,6 +10,7 @@ describe "DiffGenerator", ->
 		@DiffGenerator = SandboxedModule.require modulePath
 		@ts = Date.now()
 		@user_id = "mock-user-id"
+		@user_id_2 = "mock-user-id-2"
 		@meta = {
 			start_ts: @ts, end_ts: @ts, user_id: @user_id
 		}
@@ -62,6 +63,7 @@ describe "DiffGenerator", ->
 				{ i: "mock-update-3" }
 			]
 			@DiffGenerator.applyUpdateToDiff = sinon.stub().returns(@diff)
+			@DiffGenerator.compressDiff = sinon.stub().returns(@diff)
 			@result = @DiffGenerator.buildDiff(@content, @updates)
 
 		it "should return the diff", ->
@@ -79,6 +81,50 @@ describe "DiffGenerator", ->
 				@DiffGenerator.applyUpdateToDiff
 					.calledWith(sinon.match.any, update)
 					.should.equal true
+
+		it "should compress the diff", ->
+			@DiffGenerator.compressDiff
+				.calledWith(@diff)
+				.should.equal true
+
+	describe "compressDiff", ->
+		describe "with adjacent inserts with the same user_id", ->
+			it "should create one update with combined meta data and min/max timestamps", ->
+				diff = @DiffGenerator.compressDiff([
+					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
+					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id }}
+				])
+				expect(diff).to.deep.equal([
+					{ i: "foobar", meta: { start_ts: 5, end_ts: 20, user_id: @user_id }}
+				])
+
+		describe "with adjacent inserts with different user_ids", ->
+			it "should leave the inserts unchanged", ->
+				input = [
+					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
+					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id_2 }}
+				]
+				output = @DiffGenerator.compressDiff(input)
+				expect(output).to.deep.equal(input)
+
+		describe "with adjacent deletes with the same user_id", ->
+			it "should create one update with combined meta data and min/max timestamps", ->
+				diff = @DiffGenerator.compressDiff([
+					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
+					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id }}
+				])
+				expect(diff).to.deep.equal([
+					{ d: "foobar", meta: { start_ts: 5, end_ts: 20, user_id: @user_id }}
+				])
+
+		describe "with adjacent deletes with different user_ids", ->
+			it "should leave the deletes unchanged", ->
+				input = [
+					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
+					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id_2 }}
+				]
+				output = @DiffGenerator.compressDiff(input)
+				expect(output).to.deep.equal(input)
 
 	describe "applyUpdateToDiff", ->
 		describe "an insert", ->

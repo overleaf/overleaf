@@ -51,8 +51,7 @@ describe "Getting a diff", ->
 		@lines = ["one two three four"]
 		@expected_diff = [
 			{ u: "one " }
-			{ i: "two ", meta: { start_ts: @from + twoMinutes, end_ts: @from + twoMinutes, user: @user } }
-			{ i: "three ", meta: { start_ts: @to - twoMinutes, end_ts: @to - twoMinutes, user: @user } }
+			{ i: "two three ", meta: { start_ts: @from + twoMinutes, end_ts: @to - twoMinutes, user: @user } }
 		]
 
 		MockDocUpdaterApi.docs[@doc_id] =
