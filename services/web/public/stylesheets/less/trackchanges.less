@@ -16,7 +16,7 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
-			.ace_active-line, .ace_cursor-layer {
+			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
 				display: none;
 			}
 		}
@@ -125,6 +125,9 @@
 			&:hover {
 				background-color: #eaeaea;
 			}
+		}
+		li.loading-changes, li.empty-message {
+			padding: 6px;
 		}
 		li.selected {
 			background-color: #eaeaea;
