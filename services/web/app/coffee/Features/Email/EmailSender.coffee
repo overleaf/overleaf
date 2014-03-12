@@ -21,7 +21,7 @@ else
 module.exports =
 
 	sendEmail : (options, callback = (error) ->)->
-		logger.log receiver:options.receiver, subject:options.subject, "sending email"
+		logger.log receiver:options.to, subject:options.subject, "sending email"
 		metrics.inc "email"
 		options = 
 			to: options.to
