@@ -42,14 +42,17 @@ module.exports = DiffGenerator =
 		newDiff = []
 		for part in diff
 			lastPart = newDiff[newDiff.length - 1]
-			if lastPart? and lastPart.i? and part.i? and lastPart.meta.user_id == part.meta.user_id
-				lastPart.i += part.i
-				lastPart.meta.start_ts = Math.min(lastPart.meta.start_ts, part.meta.start_ts)
-				lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
-			else if lastPart? and lastPart.d? and part.d? and lastPart.meta.user_id == part.meta.user_id
-				lastPart.d += part.d
-				lastPart.meta.start_ts = Math.min(lastPart.meta.start_ts, part.meta.start_ts)
-				lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
+			if lastPart? and lastPart.meta?.user? and part.meta?.user?
+				if lastPart.i? and part.i? and lastPart.meta.user.id == part.meta.user.id
+					lastPart.i += part.i
+					lastPart.meta.start_ts = Math.min(lastPart.meta.start_ts, part.meta.start_ts)
+					lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
+				else if lastPart.d? and part.d? and lastPart.meta.user.id == part.meta.user.id
+					lastPart.d += part.d
+					lastPart.meta.start_ts = Math.min(lastPart.meta.start_ts, part.meta.start_ts)
+					lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
+				else
+					newDiff.push part
 			else
 				newDiff.push part
 		return newDiff

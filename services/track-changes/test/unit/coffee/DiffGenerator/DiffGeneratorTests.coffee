@@ -91,18 +91,18 @@ describe "DiffGenerator", ->
 		describe "with adjacent inserts with the same user_id", ->
 			it "should create one update with combined meta data and min/max timestamps", ->
 				diff = @DiffGenerator.compressDiff([
-					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
-					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id }}
+					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user: { id: @user_id } }}
+					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user: { id: @user_id } }}
 				])
 				expect(diff).to.deep.equal([
-					{ i: "foobar", meta: { start_ts: 5, end_ts: 20, user_id: @user_id }}
+					{ i: "foobar", meta: { start_ts: 5, end_ts: 20, user: { id: @user_id } }}
 				])
 
 		describe "with adjacent inserts with different user_ids", ->
 			it "should leave the inserts unchanged", ->
 				input = [
-					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
-					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id_2 }}
+					{ i: "foo", meta: { start_ts: 10, end_ts: 20, user: { id: @user_id } }}
+					{ i: "bar", meta: { start_ts: 5,  end_ts: 15, user: { id: @user_id_2 } }}
 				]
 				output = @DiffGenerator.compressDiff(input)
 				expect(output).to.deep.equal(input)
@@ -110,18 +110,18 @@ describe "DiffGenerator", ->
 		describe "with adjacent deletes with the same user_id", ->
 			it "should create one update with combined meta data and min/max timestamps", ->
 				diff = @DiffGenerator.compressDiff([
-					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
-					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id }}
+					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user: { id: @user_id } }}
+					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user: { id: @user_id } }}
 				])
 				expect(diff).to.deep.equal([
-					{ d: "foobar", meta: { start_ts: 5, end_ts: 20, user_id: @user_id }}
+					{ d: "foobar", meta: { start_ts: 5, end_ts: 20, user: { id: @user_id } }}
 				])
 
 		describe "with adjacent deletes with different user_ids", ->
 			it "should leave the deletes unchanged", ->
 				input = [
-					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user_id: @user_id }}
-					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user_id: @user_id_2 }}
+					{ d: "foo", meta: { start_ts: 10, end_ts: 20, user: { id: @user_id } }}
+					{ d: "bar", meta: { start_ts: 5,  end_ts: 15, user: { id: @user_id_2 } }}
 				]
 				output = @DiffGenerator.compressDiff(input)
 				expect(output).to.deep.equal(input)
