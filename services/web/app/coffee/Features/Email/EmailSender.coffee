@@ -15,21 +15,15 @@ client =
 		logger.log options:options, "Would send email if enabled."
 		callback()
 
-createSesClient = (settings) ->
-	if settings? and settings.key? and settings.key != "" and settings.secret? and settings.secret != ""
-		client = nodemailer.createTransport("SES", {AWSAccessKeyID: settings.key, AWSSecretKey: settings.secret} )
-	else
-		logger.warn "AWS SES credentials are not configured. No emails will be sent."
-
 if Settings.email?
-	switch Settings.email.transport
-		when "ses"
-			createSesClient( Settings.email.ses)
-		# TODO direct, client
-		when undefined,null,""
-			logger.warn "No Email transport defined. No emails will be sent."
+	if Settings.email.transport? and Settings.email.parameters?
+		nm_client = nodemailer.createTransport( Settings.email.transport, Settings.email.parameters )
+		if nm_client
+			client = nm_client
 		else
-			logger.warn "Uknown email transport #{Settings.email.transport}. No emails will be sent."
+			logger.warn "Failed to create email transport. Please check your settings. No email will be sent."
+	else
+		logger.warn "Email transport and/or parameters not defined. No emails will be sent."
 
 module.exports =
 	sendEmail : (options, callback = (error) ->)->
@@ -39,7 +33,7 @@ module.exports =
 			to: options.to
 			from: defaultFromAddress
 			subject: options.subject
-			message: options.html
+			html: options.html
 			replyTo: options.replyTo || Settings.email.replyToAddress
 		client.sendMail options, (err, res)->
 			if err?

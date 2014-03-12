@@ -134,6 +134,22 @@ module.exports =
 		{name: "English", code: "en"}
 	]
 
+	# Email support
+	# -------------
+	#
+	#	ShareLaTeX uses nodemailer (http://www.nodemailer.com/) to send transactional emails.
+	#	To see the range of transport and options they support, see http://www.nodemailer.com/docs/transports
+	#email:
+	#	fromAddress: ""
+	#	replyTo: ""
+	#	lifecycle: false
+	## Example transport and parameter settings for Amazon SES
+	#	transport: "SES"
+	#	parameters:
+	#		AWSAccessKeyID: ""
+	#		AWSSecretKey: ""
+
+
 	# Third party services
 	# --------------------
 	#
@@ -157,15 +173,6 @@ module.exports =
 	# tenderUrl: ""
 	#
 
-	# email:
-	#	fromAddress: ""
-	# 	replyTo: ""
-	#	lifecycle: false
-	#	ShareLaTeX uses Amazon's SES api to send transactional emails.
-	#	Uncomment these lines and provide your credentials to be able to send emails.
-	#	ses:
-	#		"key":""
-	#		"secret":""
 
 	# Production Settings
 	# -------------------
