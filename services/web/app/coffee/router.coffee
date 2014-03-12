@@ -34,6 +34,7 @@ ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsContr
 FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 logger = require("logger-sharelatex")
+_ = require("underscore")
 
 httpAuth = require('express').basicAuth (user, pass)->
 	isValid = Settings.httpAuthUsers[user] == pass
@@ -190,15 +191,13 @@ module.exports = class Router
 		app.get '/health_check', HealthCheckController.check
 
 		app.get "/status/compiler/:Project_id", SecutiryManager.requestCanAccessProject, (req, res) ->
-			success = false
+			sendRes = _.once (statusCode, message)->
+				res.writeHead statusCode
+				res.end message
 			CompileManager.compile req.params.Project_id, "test-compile", {}, () ->
-				success = true
-				res.writeHead 200
-				res.end "Compiler returned in less than 10 seconds"
+				sendRes 200, "Compiler returned in less than 10 seconds"
 			setTimeout (() ->
-				if !success
-					res.writeHead 500
-					res.end "Compiler timed out"
+				sendRes 500, "Compiler timed out"
 			), 10000
 			req.session.destroy()
 
