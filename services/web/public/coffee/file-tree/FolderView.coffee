@@ -119,3 +119,27 @@ define [
 				@hideEntries()
 			else
 				@showEntries()
+
+		getContextMenuEntries: (args...) ->
+			entries = EntityView::getContextMenuEntries.apply(this, args)
+			entries.push {
+				divider: true
+			}
+			entries.push @getFolderContextMenuEntries()...
+			return entries
+
+		getFolderContextMenuEntries: () ->
+			return [{
+				text: "New file"
+				onClick: () =>
+					@manager.showNewDocModal(@model)
+			}, {
+				text: "New folder"
+				onClick: () =>
+					@manager.showNewFolderModal(@model)
+			}, {
+				text: "Upload file"
+				onClick: () =>
+					@manager.showUploadFileModal(@model)
+			}]
+

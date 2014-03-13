@@ -13,44 +13,50 @@ define [
 			return @
 
 		onClick: (e) ->
+			e.preventDefault()
 			if @options.onClick
 				@options.onClick()
 
 	ContextMenu = Backbone.View.extend
-		template: $("#contextMenuTemplate").html()
+		templates:
+			menu: $("#contextMenuTemplate").html()
+			divider: $("#contextMenuDividerTemplate").html()
 
-		initialize: () ->
-			@entries = []
+		initialize: (position, entries) ->
+			if ContextMenu.currentMenu?
+				ContextMenu.currentMenu.destroy()
+			ContextMenu.currentMenu = @
 			@render()
-			@hide()
+			for entry in entries
+				@addEntry(entry)
+			@show(position)
 
 		render: () ->
-			@setElement($(@template))
+			@setElement($(@templates.menu))
 			$(document.body).append(@$el)
 			return @
 
-		hide: () -> @$el.hide()
+		destroy: () ->
+			@$el.remove()
+			@trigger "destroy"
 
-		show: (left, top) ->
+		show: (position) ->
 			page = $(document.body)
 			page.on "click.hideContextMenu", (e) =>
 				page.off "click.hideContextMenu"
-				@hide()
+				@destroy()
 			@$el.css
 				position: "absolute"
 				"z-index": 10000
-				top: (top || 0) + "px"
-				left: (left || 0) + "px"
-			@$el.show()
+			@$el.css position
 
 		addEntry: (options) ->
-			entry = new ContextMenuEntry(options)
-			@$el.append entry.render().el
-			@entries.push entry
+			if options.divider
+				@$el.append $(@templates.divider)
+			else
+				entry = new ContextMenuEntry(options)
+				@$el.append entry.render().el
 
-		clearEntries: () ->
-			while @entries.length > 0
-				@entries.pop().remove()
 			
 
 

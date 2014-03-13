@@ -443,7 +443,7 @@ body.editor {
 	overflow: hidden;
 	cursor: default;
 	border-right: 1px solid #aaa;
-	background: url('/img/noise.png') #eee;
+	background-color: rgb(238,238,238);
 	padding: 6px 0 0 6px;
 
 	ul {
@@ -459,9 +459,13 @@ body.editor {
 		list-style: none;
 		white-space: nowrap;
 		cursor: pointer;
+		position: relative;
 		.clickable {
 			height: 24px;
 			margin-left: 20px;
+		}
+		.dropdown-caret {
+			display: none;
 		}
 	}
 
@@ -495,9 +499,33 @@ body.editor {
 	}
 
 	li.selected, .entity-list-item.selected {
-		background-color: rgba(55,120,194,0.3);
+		background-color: rgb(185,201,227);
 		.border-radius(5px 0 0 5px);
-		color: #3d5979
+		color: #3d5979;
+		.dropdown-caret {
+			display: block;
+			padding: 4px 6px 4px 4px;
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgb(185,201,227);
+			&:before {
+				content: " ";
+				#gradient > .horizontal(rgba(185,201,227,0), rgb(185,201,227));
+				background-color: transparent;
+				width: 12px;
+				height: 100%;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				right: 20px
+			}
+			i {
+				vertical-align: top;
+				margin: 0;
+			}
+		}
 	}
 	
 	li img, .entity-list-item i {
@@ -598,6 +626,12 @@ table {
 		font-weight: normal;
 		color: black;
 	}
+}
+
+.context-menu {
+	display: block;
+	left: auto;
+	.border-radius(0);
 }
 
 .clear-modal-backdrop {

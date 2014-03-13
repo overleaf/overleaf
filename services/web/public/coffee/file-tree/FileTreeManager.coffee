@@ -218,52 +218,53 @@ define [
 				# value is "name.tex"
 				input[0].setSelectionRange(0, defaultName.indexOf("|"))
 
-		showNewDocModal: () ->
+		showNewDocModal: (parentFolder = @getCurrentFolder()) ->
+			return if !parentFolder?
 			@showNewEntityModal "Document", "name|.tex", (name) =>
-				@addDocToCurrentFolder name
+				@addDocToFolder parentFolder, name
 				
-		showNewFolderModal: () ->
+		showNewFolderModal:  (parentFolder = @getCurrentFolder()) ->
+			return if !parentFolder?
 			@showNewEntityModal "Folder", "name|", (name) =>
-				@addFolderToCurrentFolder name
+				@addFolderToFolder parentFolder, name
 
-		showUploadFileModal: () ->
-			folder = @getCurrentFolder()
-			return if !folder?
-			@ide.fileUploadManager.showUploadDialog folder.id
+		showUploadFileModal: (parentFolder = @getCurrentFolder()) ->
+			return if !parentFolder?
+			@ide.fileUploadManager.showUploadDialog parentFolder.id
 
 		addDoc: (folder_id, name) ->
 			@ide.socket.emit 'addDoc', folder_id, name
 
-		addDocToCurrentFolder: (name) ->
-			folder = @getCurrentFolder()
-			return if !folder?
-			@addDoc folder.id, name
+		addDocToFolder: (parentFolder, name) ->
+			@addDoc parentFolder.id, name
 
 		addFolder: (parent_folder_id, name) ->
 			@ide.socket.emit 'addFolder', parent_folder_id, name
 
-		addFolderToCurrentFolder: (name) ->
-			parentFolder = @getCurrentFolder()
+		addFolderToFolder: (parentFolder, name) ->
 			return if !parentFolder?
 			@addFolder parentFolder.id, name
 
 		# DELETING
-		confirmDelete: () ->
+		confirmDelete: (entity) ->
 			Modal.createModal
 				title: "Confirm Deletion"
-				message: "Are you sure you want to delete the selected files?"
+				message: "Are you sure you want to delete <strong>#{entity.get("name")}</strong>?"
 				buttons: [{
 					text: "Cancel"
 					class: "btn"
 				},{
 					text: "Delete"
 					class: "btn btn-danger"
-					callback: () => @_doDelete()
+					callback: () => @_doDelete(entity)
 				}]
 
-		_doDelete: () ->
+		confirmDeleteOfSelectedEntity: () ->
 			entity = @getSelectedEntity()
 			return if !entity?
+			@confirmDelete(entity)
+
+		_doDelete: (entity) ->
 			@ide.socket.emit 'deleteEntity', entity.id, entity.get("type")
 			@onDeleteEntity entity.id
 

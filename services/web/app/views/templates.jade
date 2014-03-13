@@ -66,6 +66,8 @@
 				i(class="sprite-{{ type }}")
 				span.name {{ name }}
 				input.rename.js-rename
+			.dropdown-caret
+				i.icon-chevron-down
 
 	script(type="text/template")#folderTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
@@ -76,6 +78,8 @@
 				i(class="sprite-{{ type }}")
 				span.name {{ name }}
 				input.rename.js-rename
+			.dropdown-caret
+				i.icon-chevron-down
 	
 	script(type="text/template")#entityListTemplate
 		.contents
@@ -110,6 +114,9 @@
 	script(type="text/template")#contextMenuEntryTemplate
 		li
 			a(href="#") {{text}}
+
+	script(type="text/template")#contextMenuDividerTemplate
+		li.divider
 	
 	script(type="text/template")#genericModalTemplate
 		.modal

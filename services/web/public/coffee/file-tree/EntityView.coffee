@@ -1,7 +1,8 @@
 define [
+	"utils/ContextMenu"
 	"libs/backbone"
 	"libs/mustache"
-], () ->
+], (ContextMenu) ->
 	EntityView = Backbone.View.extend
 		entityTemplate: $("#entityTemplate").html()
 
@@ -14,6 +15,8 @@ define [
 		events: () ->
 			events = {}
 			events["click ##{@model.id} > .js-clickable"] = "parentOnClick"
+			events["click .dropdown-caret"] = "showContextMenuFromCaret"
+			events["contextmenu"] = "showContextMenuFromRightClick"
 			return events
 
 		render: () ->
@@ -70,6 +73,47 @@ define [
 			e.stopPropagation()
 			if @ide.isAllowedToDoIt "readAndWrite"
 				@startRename()
+
+		showContextMenuFromCaret: (e) ->
+			e.stopPropagation()
+			caret = @$(".dropdown-caret")
+			offset = caret.offset()
+			position =
+				top: offset.top + caret.outerHeight()
+				right: $(document.body).width() - (offset.left + caret.outerWidth())
+			@toggleContextMenu(position)
+
+		showContextMenuFromRightClick: (e) ->
+			e.preventDefault()
+			e.stopPropagation()
+			position =
+				left: e.pageX
+				top: e.pageY
+			@showContextMenu(position)
+
+		toggleContextMenu: (position) ->
+			if @contextMenu?
+				@contextMenu.destroy()
+			else
+				@showContextMenu(position)
+
+		showContextMenu: (position) ->
+			entries = @getContextMenuEntries()
+
+			@contextMenu = new ContextMenu(position, entries)
+			@contextMenu.on "destroy", () =>
+				delete @contextMenu
+
+		getContextMenuEntries: () ->
+			return [{
+				text: "Rename"
+				onClick: () =>
+					@startRename()
+			}, {
+				text: "Delete"
+				onClick: () =>
+					@manager.confirmDelete(@model)
+			}]
 
 		_initializeDrag: () ->
 			@$entityListItemEl.draggable

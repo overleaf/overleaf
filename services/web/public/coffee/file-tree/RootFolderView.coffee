@@ -19,7 +19,7 @@ define [
 						@manager.showUploadFileModal()
 					"click .js-delete-btn"  : (e) ->
 						e.preventDefault()
-						@manager.confirmDelete()
+						@manager.confirmDeleteOfSelectedEntity()
 					"click .js-rename-btn"  : (e) ->
 						e.preventDefault()
 						@manager.renameSelected()
@@ -49,6 +49,9 @@ define [
 
 		onToggle: () ->
 			e.preventDefault()
+
+		getContextMenuEntries: () ->
+			@getFolderContextMenuEntries()
 
 		hideToggle: () ->
 			@$(".js-toggle").hide()
