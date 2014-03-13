@@ -25,10 +25,15 @@ for path in [
     "/brand/plans.css"
 ]
 	filePath = Path.join __dirname, "../../../", "public#{path}"
-	content = fs.readFileSync filePath
-	hash = crypto.createHash("md5").update(content).digest("hex")
-	logger.log "#{filePath}: #{hash}"
-	fingerprints[path] = hash
+	exists = fs.existsSync filePath
+	if exists
+		content = fs.readFileSync filePath
+		hash = crypto.createHash("md5").update(content).digest("hex")
+		logger.log "#{filePath}: #{hash}"
+		fingerprints[path] = hash
+	else
+		logger.log filePath:filePath, "file does not exist for fingerprints"
+	
 
 module.exports = (app)->
 	app.use (req, res, next)->
