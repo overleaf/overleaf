@@ -56,7 +56,12 @@
 		}
 	}
 
-	.deleted-change-background, .deleted-change-foreground, .inserted-change-background, .change-name-marker {
+	.deleted-change-background,
+	.deleted-change-foreground,
+	.inserted-change-background,
+	.change-name-marker,
+	.changes-before,
+	.changes-after {
 		position: absolute;
 		z-index: 2;
 	}
@@ -69,6 +74,21 @@
 		border: 1px solid #999;
 		left: 0;
 		white-space: pre;
+	}
+
+	.changes-before {
+		top: 6px;
+		right: 6px;
+	}
+	.changes-after {
+		bottom: 6px;
+		right: 6px;
+	}
+	.changes-before, .changes-after {
+		padding: 4px 8px;
+		background-color: #eee;
+		border: 1px solid #999;
+		.border-radius(3px);
 	}
 
 	ul.change-list {
