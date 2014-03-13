@@ -100,6 +100,8 @@ define [
 		showContextMenu: (position) ->
 			entries = @getContextMenuEntries()
 
+			@manager.trigger "contextmenu:beforeshow", @model, entries
+
 			@contextMenu = new ContextMenu(position, entries)
 			@contextMenu.on "destroy", () =>
 				delete @contextMenu

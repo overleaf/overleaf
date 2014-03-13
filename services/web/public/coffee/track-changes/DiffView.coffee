@@ -23,11 +23,14 @@ define [
 			@insertNameTag()
 			return @
 
+		destroy: () ->
+			@$editor?.remove()
+
 		createAceEditor: () ->
 			@$el.empty()
-			$editor = $("<div/>")
-			@$el.append($editor)
-			@aceEditor = Ace.edit($editor[0])
+			@$editor = $("<div/>")
+			@$el.append(@$editor)
+			@aceEditor = Ace.edit(@$editor[0])
 			@aceEditor.setTheme("ace/theme/#{window.userSettings.theme}")
 			@aceEditor.setReadOnly true
 			@aceEditor.setShowPrintMargin(false)

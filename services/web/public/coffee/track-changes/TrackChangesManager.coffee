@@ -4,26 +4,38 @@ define [
 	"track-changes/ChangeListView"
 	"track-changes/DiffView"
 	"utils/Modal"
+	"models/Doc"
 	"moment"
-], (ChangeList, Diff, ChangeListView, DiffView, Modal, moment) ->
+], (ChangeList, Diff, ChangeListView, DiffView, Modal, Doc, moment) ->
 	class TrackChangesManager
 		template: $("#trackChangesPanelTemplate").html()
 		
 		constructor: (@ide) ->
+			@project_id = window.userSettings.project_id
 			@$el = $(@template)
 			$("#editorWrapper").append(@$el)
-			@hide()
+			@hideEl()
 
 			@ide.editor.on "change:doc", () =>
-				@hide()
+				@hideEl()
 
 			@$el.find(".track-changes-close").on "click", (e) =>
 				e.preventDefault
 				@hide()
 
-		show: () ->
-			@project_id = window.userSettings.project_id
-			@doc_id = @ide.editor.current_doc_id
+			@ide.fileTreeManager.on "contextmenu:beforeshow", (entity, entries) =>
+				if entity instanceof Doc
+					entries.push {
+						divider: true
+					}, {
+						text: "History"
+						onClick: () =>
+							@show(entity.id)
+					}
+
+		show: (@doc_id) ->
+			@ide.fileTreeManager.selectEntity(@doc_id)
+
 			@changes = new ChangeList([], doc_id: @doc_id, project_id: @project_id)
 
 			@changeListView = new ChangeListView(
@@ -40,7 +52,14 @@ define [
 			@changeListView.on "restore", (change) =>
 				@restore(change)
 
+			if @diffView?
+				@diffView.destroy()
+
 			@showEl()
+
+		hide: () ->
+			@hideEl()
+			@ide.fileTreeManager.openDoc(@doc_id)
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0
@@ -69,6 +88,9 @@ define [
 				from: fromModel.get("fromVersion")
 				to:   toModel.get("toVersion")
 			})
+
+			if @diffView?
+				@diffView.destroy()
 			@diffView = new DiffView(
 				model: @diff
 				el:    @$el.find(".track-changes-diff")
@@ -79,7 +101,7 @@ define [
 			@ide.editor.hide()
 			@$el.show()
 
-		hide: () ->
+		hideEl: () ->
 			@ide.editor.show()
 			@$el.hide()
 
