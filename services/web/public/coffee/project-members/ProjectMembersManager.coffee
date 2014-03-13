@@ -26,6 +26,7 @@ define [
 					ide: @ide
 					el: $("#publishProject")
 				@publishProjectView.render()
+
 			setupArea()
 			if @ide?
 				@ide.on "afterJoinProject", (project) =>
@@ -49,8 +50,8 @@ define [
 					else
 						@view.options.showAdminControls = false
 					@view.render()
-
-					if @ide.project.get("owner")
+					
+					if @ide.project.get("owner") == @ide.user
 						setupPublish()
 
 
