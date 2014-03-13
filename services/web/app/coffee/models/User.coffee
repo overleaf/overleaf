@@ -32,7 +32,7 @@ UserSchema = new Schema
 						}
 	featureSwitches	  : {
 							dropbox: {type:Boolean, default:true},
-							longPolling: {type:Boolean, default:false}
+							trackChanges: {type:Boolean, default:false}
 						}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]

@@ -97,8 +97,6 @@ define [
 			ioOptions =
 				reconnect: false
 				"force new connection": true
-			if @userSettings.longPolling
-				ioOptions.transports = ["xhr-polling"]
 			@socket = socket = io.connect null, ioOptions
 
 			@messageManager = new MessageManager(@)
@@ -119,7 +117,8 @@ define [
 			@cursorManager = new CursorManager(@)
 			@fileViewManager = new FileViewManager(@)
 			@analyticsManager = new AnalyticsManager(@)
-			@trackChangesManager = new TrackChangesManager(@)
+			if @userSettings.trackChanges
+				@trackChangesManager = new TrackChangesManager(@)
 
 			@setLoadingMessage("Connecting")
 			firstConnect = true
