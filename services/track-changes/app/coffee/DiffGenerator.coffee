@@ -191,7 +191,7 @@ module.exports = DiffGenerator =
 		return part
 
 	_getLengthOfDiffPart: (part) ->
-		(part.u or part.d or part.i).length
+		(part.u or part.d or part.i or '').length
 
 	_getContentOfPart: (part) ->
-		part.u or part.d or part.i
+		part.u or part.d or part.i or ''
