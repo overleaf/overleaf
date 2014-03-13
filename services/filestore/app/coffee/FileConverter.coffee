@@ -20,7 +20,9 @@ module.exports =
 		if !_.include approvedFormats, requestedFormat
 			err = new Error("invalid format requested")
 			return callback err
-		args = "nice convert -flatten -density 300 #{sourcePath} #{destPath}"
+		width = "600x"
+		args = "nice convert -define pdf:fit-page=#{width} -flatten -density 300 #{sourcePath} #{destPath}"
+		console.log args
 		exec args, childProcessOpts, (err, stdout, stderr)->
 			timer.done()
 			if err?
@@ -33,12 +35,8 @@ module.exports =
 		logger.log sourcePath:sourcePath, "thumbnail convert file"
 		destPath = "#{sourcePath}.png"
 		sourcePath = "#{sourcePath}[0]"
-		args =
-			src: sourcePath
-			dst: destPath
-			width: 424
-			height: 300
-		args = "nice convert -flatten -background white -resize 260x -density 300 #{sourcePath} #{destPath}"
+		width = "260x"
+		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
 		exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
@@ -50,12 +48,8 @@ module.exports =
 		logger.log sourcePath:sourcePath, "preview convert file"
 		destPath = "#{sourcePath}.png"
 		sourcePath = "#{sourcePath}[0]"
-		args =
-			src: sourcePath
-			dst: destPath
-			width: 600
-			height: 849
-		args = "nice convert -flatten -background white -resize 548x -density 300 #{sourcePath} #{destPath}"
+		width = "548x"
+		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
 		exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, destPath:destPath, "something went wrong converting file to preview"
