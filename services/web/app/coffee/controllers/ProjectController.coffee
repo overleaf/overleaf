@@ -120,7 +120,7 @@ module.exports = class ProjectController
 									allowed: true
 							featureSwitches:
 								dropbox: false
-								longPolling: false
+								trackChanges: false
 					else
 						anonymous = false
 					SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
@@ -154,7 +154,7 @@ module.exports = class ProjectController
 										spellCheckLanguage: user.ace.spellCheckLanguage
 										pdfViewer : user.ace.pdfViewer
 										docPositions: {}
-										longPolling: user.featureSwitches.longPolling
+										trackChanges: user.featureSwitches.trackChanges
 									})
 									sharelatexObject : JSON.stringify({
 										siteUrl: Settings.siteUrl,
