@@ -3,9 +3,10 @@ define [
 	"models/ProjectMemberList"
 	"account/AccountManager"
 	"utils/Modal"
+	"moment"
 	"libs/backbone"
 	"libs/mustache"
-], (User, ProjectMemberList, AccountManager, Modal) ->
+], (User, ProjectMemberList, AccountManager, Modal, moment) ->
 	INFINITE_COLLABORATORS = -1
 
 	class ProjectMembersManager
@@ -20,6 +21,8 @@ define [
 					name: "Share"
 					content : $(@templates.userPanel)
 					lock: true
+					onShown: () =>
+						@publishProjectView.refreshPublishStatus()
 
 			setupPublish = _.once =>
 				@publishProjectView = new PublishProjectView
@@ -179,25 +182,32 @@ define [
 		initialize: () ->
 			@ide = @options.ide
 			@model = @ide.project
-			_.bindAll(this, "render");
-			this.model.bind('change', this.render)
-			@refreshPublishStatus()
-			
+			@render()
 
 		render: ->
 			viewModel = 
 				description: @model.get("description")
 				canonicalUrl: @model.get("template.canonicalUrl")
 				isPublished: @model.get("template.isPublished")
-				publishedDate: @model.get("template.publishedDate")
+				publishedDate: moment(@model.get("template.publishedDate")).format("Do MMM YYYY, h:mm a")
 
-			$(@el).html $(Mustache.to_html(@template, viewModel))
-			@publishedArea = $('#publishedAsTemplateArea')
-			@unpublishedArea = $('#unpublishedAsTemplateArea')
+			@$el.html $(Mustache.to_html(@template, viewModel))
+			@publishedArea = $('.show-when-published')
+			@unpublishedArea = $('.show-when-unpublished')
+			$('#problemWithPublishingArea').hide()
+			$('#publishWorkingArea').hide()
 
+		refreshView: () ->
+			if @model.get("template.isPublished")
+				@$("a#templateLink").attr("href", @model.get("template.canonicalUrl"))
+				@publishedArea.show()
+			else
+				@unpublishedArea.show()
 
 		refreshPublishStatus: ->
+			@showWorking()
 			@ide.socket.emit "getPublishedDetails", @ide.user.get("id"), (err, details)=>
+				@hideWorking()
 				if err?
 					return @showError()
 
@@ -205,16 +215,17 @@ define [
 				if details.exists
 					@model.set("template.canonicalUrl", details.canonicalUrl)
 					@model.set("template.publishedDate", details.publishedDate)
-					@publishedArea.show()
-					@unpublishedArea.hide()
-				else
-					@publishedArea.hide()
-					@unpublishedArea.show()
+
+				@refreshView()
 
 		showError: ->
+			@publishedArea.hide()
+			@unpublishedArea.hide()
 			$('#problemWithPublishingArea').show()
 
 		showWorking: ->
+			@publishedArea.hide()
+			@unpublishedArea.hide()
 			$('#publishWorkingArea').show()
 
 		hideWorking: ->
