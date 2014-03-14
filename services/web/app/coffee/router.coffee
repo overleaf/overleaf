@@ -218,7 +218,6 @@ module.exports = class Router
 				throw new Error("Test error")
 
 		app.post '/error/client', (req, res, next) ->
-			console.log req.body
 			logger.error err: req.body.error, meta: req.body.meta, "client side error"
 			res.send(204)
 
