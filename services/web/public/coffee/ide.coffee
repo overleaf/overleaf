@@ -158,7 +158,13 @@ define [
 			}
 
 		reportError: (error, meta = {}) ->
-			meta.client_id = @socket.socket.sessionid
+			meta.client_id = @socket?.socket?.sessionid
+			meta.transport = @socket?.socket?.transport?.name
+			meta.client_now = new Date()
+			meta.last_connected = @connectionManager.lastConnected
+			meta.second_last_connected = @connectionManager.secondLastConnected
+			meta.last_disconnected = @connectionManager.lastDisconnected
+			meta.second_last_disconnected = @connectionManager.secondLastDisconnected
 			errorObj = {}
 			for key in Object.getOwnPropertyNames(error)
 				errorObj[key] = error[key]
