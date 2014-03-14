@@ -201,5 +201,8 @@ define [
 			else
 				@$changesAfter.hide()
 
+		resize: () ->
+			@aceEditor.resize()
+
 	return DiffView
 

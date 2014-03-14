@@ -121,7 +121,7 @@ define [
 			@aceEditor = aceEditor = AceEditor.edit("editor")
 
 			@on "resize", => @aceEditor.resize()
-			@ide.layoutManager.on "resize", => @aceEditor.resize()
+			@ide.layoutManager.on "resize", => @trigger "resize"
 
 			mode = window.userSettings.mode
 			theme = window.userSettings.theme

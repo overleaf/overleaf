@@ -19,6 +19,9 @@ define [
 			@ide.editor.on "change:doc", () =>
 				@hideEl()
 
+			@ide.editor.on "resize", () =>
+				@diffView?.resize()
+
 			@$el.find(".track-changes-close").on "click", (e) =>
 				e.preventDefault
 				@hide()
