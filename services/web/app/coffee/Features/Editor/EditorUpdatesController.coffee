@@ -18,9 +18,11 @@ module.exports = EditorUpdatesController =
 			if takeSnapshot
 				AutomaticSnapshotManager.markProjectAsUpdated(project_id)
 
+		logger.log doc_id: doc_id, project_id: project_id, client_id: update.meta.source, version: update.v, "sending update to doc updater"
+
 		DocumentUpdaterHandler.queueChange project_id, doc_id, update, (error) ->
 			if error?
-				logger.error err:error, project_id: project_id, "document was not available for update"
+				logger.error err:error, project_id: project_id, doc_id: doc_id, client_id: update.meta.source, version: update.v, "document was not available for update"
 				client.disconnect()
 			callback(error)
 
@@ -50,6 +52,7 @@ module.exports = EditorUpdatesController =
 
 	_applyUpdateFromDocumentUpdater: (doc_id, update) ->
 		io = require('../../infrastructure/Server').io
+		logger.log doc_id: doc_id, version: update.v, source: update.meta.source, "distributing update"
 		for client in io.sockets.clients(doc_id)
 			if client.id == update.meta.source
 				client.emit "otUpdateApplied", v: update.v, doc: update.doc
