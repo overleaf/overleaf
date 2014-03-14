@@ -4,11 +4,12 @@ logger = require("logger-sharelatex")
 exec = require('child_process').exec
 approvedFormats = ["png"]
 
-twentySeconds = 20 * 1000
+fourtySeconds = 40 * 1000
 
 childProcessOpts =
 	killSignal: "SIGKILL"
-	timeout: twentySeconds
+	timeout: fourtySeconds
+
 
 module.exports =
 
