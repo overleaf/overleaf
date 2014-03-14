@@ -22,6 +22,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 				ga('create', '#{gaToken}', 'sharelatex.com');
 				ga('send', 'pageview');
+		- else
+			script(type='text/javascript')
+				window.ga = function() {};
 
 		script
 			window.csrfToken = "#{csrfToken}";

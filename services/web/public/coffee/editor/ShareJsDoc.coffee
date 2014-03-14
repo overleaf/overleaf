@@ -95,13 +95,13 @@ define [
 		INFLIGHT_OP_TIMEOUT: 10000
 		_startInflightOpTimeout: (update) ->
 			timer = setTimeout () =>
-				@_handleError "Doc op was not acknowledged in time"
+				@_handleError new Error("Doc op was not acknowledged in time"), v: update.v
 			, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
 				clearTimeout timer
 
-		_handleError: (error) ->
-			@trigger "error", error
+		_handleError: (error, meta = {}) ->
+			@trigger "error", error, meta
 
 		_bindToDocChanges: (doc) ->
 			submitOp = doc.submitOp
