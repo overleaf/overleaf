@@ -22,7 +22,7 @@ define [
 					content : $(@templates.userPanel)
 					lock: true
 					onShown: () =>
-						@publishProjectView.refreshPublishStatus()
+						@publishProjectView?.refreshPublishStatus()
 
 			setupPublish = _.once =>
 				@publishProjectView = new PublishProjectView
