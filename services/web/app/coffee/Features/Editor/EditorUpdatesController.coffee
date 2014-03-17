@@ -52,11 +52,12 @@ module.exports = EditorUpdatesController =
 
 	_applyUpdateFromDocumentUpdater: (doc_id, update) ->
 		io = require('../../infrastructure/Server').io
-		logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, "distributing update"
 		for client in io.sockets.clients(doc_id)
 			if client.id == update.meta.source
+				logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, "distributing update to sender"
 				client.emit "otUpdateApplied", v: update.v, doc: update.doc
 			else
+				logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, client_id: client.id, "distributing update to collaborator"
 				client.emit "otUpdateApplied", update
 
 	_processErrorFromDocumentUpdater: (doc_id, error, message) ->
