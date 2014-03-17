@@ -311,4 +311,27 @@ describe "DiffGenerator", ->
 						)
 					).to.throw(@DiffGenerator.ConsistencyError)
 
+			describe "when the last update in the existing diff is a delete", ->
+				it "should insert the new update before the delete", ->
+					diff = @DiffGenerator.applyUpdateToDiff(
+						[ { u: "foo" }, { d: "bar", meta: @meta } ],
+						{ op: [{ p: 3, i: "baz" }], meta: @meta }
+					)
+					expect(diff).to.deep.equal([
+						{ u: "foo" }
+						{ i: "baz", meta: @meta }
+						{ d: "bar", meta: @meta }
+					])
+
+			describe "when the only update in the existing diff is a delete", ->
+				it "should insert the new update after the delete", ->
+					diff = @DiffGenerator.applyUpdateToDiff(
+						[ { d: "bar", meta: @meta } ],
+						{ op: [{ p: 0, i: "baz" }], meta: @meta }
+					)
+					expect(diff).to.deep.equal([
+						{ d: "bar", meta: @meta }
+						{ i: "baz", meta: @meta }
+					])
+
 

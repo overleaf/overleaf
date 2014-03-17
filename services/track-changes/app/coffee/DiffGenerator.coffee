@@ -94,19 +94,20 @@ module.exports = DiffGenerator =
 					consumedDiff.push DiffGenerator._slicePart part, 0, partOffset
 				if partOffset < length
 					remainingDiff.unshift DiffGenerator._slicePart part, partOffset
-				return {
-					consumedDiff: consumedDiff
-					remainingDiff: remainingDiff
-				}
+				break
 			else
 				position += length
 				consumedDiff.push part
-		throw new Error("Ran out of diff to consume. Offset is too small")
+
+		return {
+			consumedDiff: consumedDiff
+			remainingDiff: remainingDiff
+		}
 
 	_consumeDiffAffectedByDeleteOp: (remainingDiff, deleteOp, meta) ->
 		consumedDiff = []
 		remainingOp = deleteOp
-		while remainingOp
+		while remainingOp and remainingDiff.length > 0
 			{newPart, remainingDiff, remainingOp} = DiffGenerator._consumeDeletedPart remainingDiff, remainingOp, meta
 			consumedDiff.push newPart if newPart?
 		return {
