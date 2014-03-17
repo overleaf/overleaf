@@ -39,7 +39,10 @@ define [
 			view.$el.insertBefore(elementAtIndex)
 
 			view.on "click", (e, v) =>
-				@setSelectionRange(index, index)
+				if e.shiftKey
+					@selectRangeTo(index)
+				else
+					@setSelectionRange(index, index)
 
 			view.on "selected:to", (e, v) =>
 				@setSelectionRange(@selectedFromIndex, index)
@@ -73,6 +76,13 @@ define [
 			@selectedToIndex = toIndex
 			@resetAllSelectors()
 			@triggerChangeDiff()
+
+		selectRangeTo: (index) ->
+			return unless @selectedFromIndex? and @selectedToIndex?
+			if index < @selectedToIndex
+				@setSelectionRange(@selectedFromIndex, index)
+			else
+				@setSelectionRange(index, @selectedToIndex)
 
 		resetAllSelectors: () ->
 			for view, i in @itemViews
