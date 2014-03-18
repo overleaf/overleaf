@@ -32,7 +32,7 @@
     "fairy": "0.0.2",
     "node-uuid": "1.4.0",
     "mongojs": "0.9.8",
-    "node-ses": "0.0.3",
+		"nodemailer": "0.6.1",
     "bcrypt": "0.7.5",
     "archiver": "0.5.1",
     "nodetime": "0.8.15",
