@@ -61,7 +61,7 @@ module.exports =
 						return AuthenticationController.login req, res
 					else if foundUser? && foundUser.holdingAccount == true #someone put them in as a collaberator
 						user = foundUser
-						user.holdingAccount == false
+						user.holdingAccount = false
 					else
 						user = new User email: data.email
 					d = new Date()
