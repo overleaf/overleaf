@@ -16,11 +16,11 @@ define [
 			@createAceEditor()
 			@aceEditor.setValue(@getPlainDiffContent())
 			@aceEditor.clearSelection()
-			session = @aceEditor.getSession()
-			session.setMode(new LatexMode.Mode())
-			session.setUseWrapMode(true)
+			@$ace = $(@aceEditor.renderer.container).find(".ace_scroller")
 			@insertMarkers()
 			@insertNameTag()
+			@insertMoreChangeLabels()
+			@scrollToFirstChange()
 			return @
 
 		destroy: () ->
@@ -34,11 +34,17 @@ define [
 			@aceEditor.setTheme("ace/theme/#{window.userSettings.theme}")
 			@aceEditor.setReadOnly true
 			@aceEditor.setShowPrintMargin(false)
+			session = @aceEditor.getSession()
+			session.setMode(new LatexMode.Mode())
+			session.setUseWrapMode(true)
 
 			@aceEditor.on "mousemove", (e) =>
 				position = @aceEditor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
 				e.position = position
 				@updateVisibleNames(e)
+
+			session.on "changeScrollTop", (e) =>
+				@updateMoreChangeLabels()
 
 		getPlainDiffContent: () ->
 			content = ""
@@ -102,13 +108,25 @@ define [
 			, foreground
 
 		insertNameTag: () ->
-			@$ace = $(@aceEditor.renderer.container).find(".ace_scroller")
 			@$nameTagEl = $("<div class='change-name-marker'></div>")
 			@$nameTagEl.css({
 				position: "absolute"
 			})
 			@$nameTagEl.hide()
 			@$ace.append(@$nameTagEl)
+
+		insertMoreChangeLabels: () ->
+			@$changesBefore = $("<div class='changes-before'><span></span> <i class='icon-arrow-up'></div>")
+			@$changesAfter = $("<div class='changes-after'><span></span> <i class='icon-arrow-down'></div>")
+			@$ace.append(@$changesBefore)
+			@$ace.append(@$changesAfter)
+			@updateMoreChangeLabels()
+
+		scrollToFirstChange: () ->
+			if @entries? and @entries[0]?
+				row = @entries[0].range.start.row
+				@aceEditor.gotoLine(0)
+				@aceEditor.gotoLine(row, 0, true)
 
 		_drawNameTag: (entry, position) ->
 			@$nameTagEl.show()
@@ -160,6 +178,31 @@ define [
 					break
 			if !visibleName
 				@_hideNameTag()
+
+		updateMoreChangeLabels: () ->
+			return if !@$changesBefore or !@$changesAfter
+			firstRow = @aceEditor.renderer.getFirstFullyVisibleRow()
+			lastRow = @aceEditor.renderer.getLastFullyVisibleRow()
+			changesBefore = 0
+			changesAfter = 0
+			for entry in @entries or []
+				if entry.range.start.row < firstRow
+					changesBefore += 1
+				if entry.range.end.row > lastRow
+					changesAfter += 1
+			if changesBefore > 0
+				@$changesBefore.find("span").text("#{changesBefore} more change#{if changesBefore > 1 then "s" else ""} above")
+				@$changesBefore.show()
+			else
+				@$changesBefore.hide()
+			if changesAfter > 0
+				@$changesAfter.find("span").text("#{changesAfter} more change#{if changesAfter > 1 then "s" else ""} below")
+				@$changesAfter.show()
+			else
+				@$changesAfter.hide()
+
+		resize: () ->
+			@aceEditor.resize()
 
 	return DiffView
 

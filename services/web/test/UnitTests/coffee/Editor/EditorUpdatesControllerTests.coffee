@@ -12,7 +12,7 @@ describe "EditorUpdatesController", ->
 		@client = new MockClient()
 		@callback = sinon.stub()
 		@EditorUpdatesController = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = { error: sinon.stub() }
+			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub() }
 			"./EditorRealTimeController" : @EditorRealTimeController = {}
 			"../DocumentUpdater/DocumentUpdaterHandler" : @DocumentUpdaterHandler = {}
 			"../Versioning/AutomaticSnapshotManager" : @AutomaticSnapshotManager = {}

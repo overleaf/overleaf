@@ -48,7 +48,7 @@ define [
 	SearchManager,
 	Project,
 	User,
-	StandaloneModal,
+	Modal,
 	FileTreeManager,
 	MessageManager,
 	HelpManager,
@@ -144,16 +144,39 @@ define [
 				setTimeout(joinProject, 100)
 	
 		showErrorModal: (title, message)->
-			modalOptions =
-				templateId:'genericModalTemplate'
-				isStatic: false
+			new Modal {
 				title: title
-				message:message
-			new Modal modalOptions
+				message: message
+				buttons: [ text: "OK" ]
+			}
 
-		showGenericServerErrorMessage: (message)->
-			new Modal
-				templateId : "genericServerErrorModal"
+		showGenericServerErrorMessage: ()->
+			new Modal {
+				title: "There was a problem talking to the server"
+				message: "Sorry, we couldn't complete your request right now. Please wait a few moments and try again. If the problem persists, please let us know."
+				buttons: [ text: "OK" ]
+			}
+
+		reportError: (error, meta = {}) ->
+			meta.client_id = @socket?.socket?.sessionid
+			meta.transport = @socket?.socket?.transport?.name
+			meta.client_now = new Date()
+			meta.last_connected = @connectionManager.lastConnected
+			meta.second_last_connected = @connectionManager.secondLastConnected
+			meta.last_disconnected = @connectionManager.lastDisconnected
+			meta.second_last_disconnected = @connectionManager.secondLastDisconnected
+			errorObj = {}
+			for key in Object.getOwnPropertyNames(error)
+				errorObj[key] = error[key]
+			$.ajax
+				url: "/error/client"
+				type: "POST"
+				data: JSON.stringify
+					error: errorObj
+					meta: meta
+				contentType: "application/json; charset=utf-8"
+				headers:
+					"X-Csrf-Token": window.csrfToken
 
 		setLoadingMessage: (message) ->
 			$("#loadingMessage").text(message)
@@ -171,45 +194,6 @@ define [
 	ide.layoutManager.resizeAllSplitters()
 	ide.tourManager = new IdeTour ide
 
-	class Modal
-		#templateId, title, message, isStatic, cancelCallback
-		constructor: (options, completeCallback = () -> {})->
-			html = $("##{options.templateId}").html()
-			modal = "<div id='modal' style='display:none'>#{html}</div>"
-			$('body').append(modal)
-			$modal = $('#modal')
-
-			if options.title?
-				$modal.find('h3').text(options.title)
-			if options.message?
-				$modal.find('.message').text(options.message)
-			if options.inputValue?
-				$modal.find('input').val(options.inputValue)
-
-			backdrop = true
-			if options.backdrop?
-				backdrop = options.backdrop
-
-			$modal.modal backdrop:backdrop, show:true, keyboard:true, isStatic:options.isStatic
-			$modal.find('input').focus()
-
-			$modal.find('button').click (e)=>
-				e.preventDefault()
-				$modal.modal('hide')
-				if e.target.className.indexOf("cancel") == -1
-					inputval = $modal.find('input').val()
-					completeCallback(inputval)
-
-			$modal.find('input').keydown (event)=>
-				code = event.keyCode || event.which
-				if code == 13
-					$modal.find('button.primary').click()
-
-			$modal.bind 'hide', ()->
-				if options.cancelCallback?
-					options.cancelCallback()
-				$('#modal').remove()
-
 	ide.savingAreaManager =
 		$savingArea : $('#saving-area')
 		timeOut: undefined
@@ -220,7 +204,7 @@ define [
 			return if @timeOut?
 			@clearTimeout()
 			@timeOut = setTimeout((=>
-				ga('send', 'event', 'editor-interaction', 'notification-shown', "saving")
+				ga?('send', 'event', 'editor-interaction', 'notification-shown', "saving")
 				$("#savingProblems").show()
 			), 1000)
 

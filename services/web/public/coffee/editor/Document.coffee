@@ -136,16 +136,18 @@ define [
 			@unBindFromSocketEvents()
 
 		_bindToShareJsDocEvents: () ->
-			@doc.on "error", (error) => @_onError error
+			@doc.on "error", (error, meta) => @_onError error, meta
 			@doc.on "externalUpdate", () => @trigger "externalUpdate"
 			@doc.on "remoteop", () => @trigger "remoteop"
 			@doc.on "op:sent", () => @trigger "op:sent"
 			@doc.on "op:acknowledged", () => @trigger "op:acknowledged"
 
-		_onError: (error) ->
-			console.error "ShareJS error", error
-			ga('send', 'event', 'error', "shareJsError", "#{error.message} - #{ide.socket.socket.transport.name}" )
+		_onError: (error, meta = {}) ->
+			console.error "ShareJS error", error, meta
+			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{ide.socket.socket.transport.name}" )
 			@ide.socket.disconnect()
+			meta.doc_id = @doc_id
+			@ide.reportError(error, meta)
 			@doc?.clearInflightAndPendingOps()
 			@_cleanUp()
 			@trigger "error", error

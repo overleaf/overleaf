@@ -80,6 +80,14 @@ define () ->
 		"""
 		meta: "env"
 	}, {
+		caption: "\\begin{itemize}..."
+		snippet: """
+			\\begin{itemize}
+			\\item $1
+			\\end{itemize}
+		"""
+		meta: "env"
+	}, {
 		caption: "\\begin{frame}..."
 		snippet: """
 			\\begin{frame}{${1:Frame Title}}

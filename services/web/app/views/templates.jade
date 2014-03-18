@@ -136,16 +136,6 @@
 				#subscribeForm
 			.modal-footer
 
-
-	script(type="text/template")#genericModalTemplateWithButton
-		.modal
-			.modal-header
-				h3 {{ title }}
-			.modal-body
-				.message {{ message }}
-			.modal-footer
-				button.btn.btn-primary ok
-
 	script(type="text/template")#genericModalButtonTemplate
 		button(class="btn {{ class }}") {{ text }}
 
@@ -300,22 +290,29 @@
 		-if(session && session.user && session.user.isAdmin)
 			.box
 				.page-header
-					h2 Publish Project
+					h2 Publish project as template
+					
+				#publishedAsTemplateArea.show-when-published.alert.alert-success
+					p
+						.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
+						i.icon-ok 
+						|  Your project is currently published. 
+						a#templateLink(href='{{canonicalUrl}}') View in template gallery.
+					p
+						| Lastest version: {{publishedDate}}. 
 
-				#publishedAsTemplateArea(style="display:none;")
-					a#templateLink(href='{{canonicalUrl}}') View Template
-					p published at {{publishedDate}}
-					.btn.btn-warning#unPublishProjectAsTemplate unpublish project as template
-					.btn.btn-success#republishProjectAsTemplate re publish project as template
-
-				#problemWithPublishingArea(style="display:none;")
+				#problemWithPublishingArea
 					p There is a problem with our publishing service, please try again in a few minutes.
-				#publishWorkingArea(style="display:none;")
-					p Working.....
-				#unpublishedAsTemplateArea(style="display:none;")
-					.btn.btn-success#publishProjectAsTemplate Publish project as template
-				div
-					textarea.span6#projectDescription {{description}}
+				#publishWorkingArea
+					p Working...
+				div.show-when-published.show-when-unpublished.project-description
+					label(for="project-description") Description
+					.row-fluid
+						textarea(placeholder="Template description", name="project-description").span12#projectDescription {{description}}
+				#unpublishedAsTemplateArea.show-when-unpublished
+					.btn.btn-success#publishProjectAsTemplate Publish
+				p.show-when-published
+					button.btn.btn-success#republishProjectAsTemplate Re-Publish
 
 
 	script(type="text/template")#settingsPanelTemplate

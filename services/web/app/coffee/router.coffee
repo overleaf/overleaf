@@ -217,6 +217,10 @@ module.exports = class Router
 			require("./models/Project").Project.findOne {}, () ->
 				throw new Error("Test error")
 
+		app.post '/error/client', (req, res, next) ->
+			logger.error err: req.body.error, meta: req.body.meta, "client side error"
+			res.send(204)
+
 		app.get '*', HomeController.notFound
 
 
