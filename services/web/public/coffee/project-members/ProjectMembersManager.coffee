@@ -50,11 +50,9 @@ define [
 					else
 						@view.options.showAdminControls = false
 					@view.render()
-					
-					if @ide.project.get("owner") == @ide.user
+
+					if @ide.project.get("owner") == @ide.user and @ide.user.get("id") != "openUser"
 						setupPublish()
-
-
 
 					if @ide.project.get("owner") == @ide.user or @ide.project.get("publicAccesLevel") != "private"
 						if !@socialView?
