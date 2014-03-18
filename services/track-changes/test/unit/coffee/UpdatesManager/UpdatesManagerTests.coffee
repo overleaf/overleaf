@@ -242,6 +242,29 @@ describe "UpdatesManager", ->
 		it "shoudl return the updates with the filled details", ->
 			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
 
+	describe "getSummarizedUpdates", ->
+		beforeEach ->
+			@to = 42
+			@limit = 10
+			@updates = ["mock-updates"]
+			@summarizedUpdates = ["summarized-updates"]
+			@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
+			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+
+		it "should get the updates", ->
+			@UpdatesManager.getUpdatesWithUserInfo
+				.calledWith(@doc_id, { to: @to, limit: @limit })
+				.should.equal true
+
+		it "should summarize the updates", ->
+			@UpdatesManager._summarizeUpdates
+				.calledWith(@updates)
+				.should.equal true
+
+		it "should call the callback with the summarized updates", ->
+			@callback.calledWith(null, @summarizedUpdates).should.equal true
+
 	describe "fillUserInfo", ->
 		describe "with valid users", ->
 			beforeEach (done) ->
@@ -330,5 +353,60 @@ describe "UpdatesManager", ->
 					op: "mock-op-2"
 				}]
 
+	describe "_buildUpdatesView", ->
+		beforeEach ->
+			@now = Date.now()
+
+		it "should concat updates that are close in time", ->
+			expect(@UpdatesManager._summarizeUpdates [{
+				meta:
+					user: @user_2 = { id: "mock-user-2" }
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				meta:
+					user: @user_1 = { id: "mock-user-1" }
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]).to.deep.equal [{
+				meta:
+					users: [@user_1, @user_2]
+					start_ts: @now
+					end_ts:   @now + 30
+				fromV: 4
+				toV:   5
+			}]
+
+		it "should leave updates that are far apart in time", ->
+			oneDay = 1000 * 60 * 60 * 24
+			expect(@UpdatesManager._summarizeUpdates [{
+				meta:
+					user: @user_2 = { id: "mock-user-2" }
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+				v: 5
+			}, {
+				meta:
+					user: @user_1 = { id: "mock-user-2" }
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]).to.deep.equal [{
+				meta:
+					users: [@user_2]
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+				fromV: 5
+				toV: 5
+			}, {
+				meta:
+					users: [@user_1]
+					start_ts: @now
+					end_ts:   @now + 10
+				fromV: 4
+				toV: 4
+			}]
 
 

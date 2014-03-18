@@ -76,6 +76,11 @@ module.exports = UpdatesManager =
 				return callback(error) if error?
 				callback null, updates
 
+	getSummarizedUpdates: (doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.getUpdatesWithUserInfo doc_id, options, (error, updates) ->
+			return callback(error) if error?
+			callback null, UpdatesManager._summarizeUpdates(updates)
+
 	fillUserInfo: (updates, callback = (error, updates) ->) ->
 		users = {}
 		for update in updates
@@ -105,3 +110,37 @@ module.exports = UpdatesManager =
 			return false
 		else
 			return !!user_id.match(/^[a-f0-9]{24}$/)
+
+
+	TIME_BETWEEN_DISTINCT_UPDATES: fiveMinutes = 5 * 60 * 1000
+	_summarizeUpdates: (updates) ->
+		view = []
+		for update in updates.slice().reverse()
+			lastUpdate = view[view.length - 1]
+			if lastUpdate and update.meta.start_ts - lastUpdate.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				if update.meta.user?
+					userExists = false
+					for user in lastUpdate.meta.users
+						if user.id == update.meta.user.id
+							userExists = true
+							break
+					if !userExists
+						lastUpdate.meta.users.push update.meta.user
+				lastUpdate.meta.start_ts = Math.min(lastUpdate.meta.start_ts, update.meta.start_ts)
+				lastUpdate.meta.end_ts   = Math.max(lastUpdate.meta.end_ts, update.meta.end_ts)
+				lastUpdate.toV = update.v
+			else
+				newUpdate =
+					meta:
+						users: []
+						start_ts: update.meta.start_ts
+						end_ts: update.meta.end_ts
+					fromV: update.v
+					toV: update.v
+
+				if update.meta.user?
+					newUpdate.meta.users.push update.meta.user
+
+				view.push newUpdate
+
+		return view.reverse()
