@@ -77,9 +77,38 @@ module.exports = UpdatesManager =
 				callback null, updates
 
 	getSummarizedUpdates: (doc_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.getUpdatesWithUserInfo doc_id, options, (error, updates) ->
+		options.limit ||= 25
+		summarizedUpdates = []
+		to = options.to
+		do fetchNextBatch = () ->
+			UpdatesManager._extendBatchOfSummarizedUpdates doc_id, summarizedUpdates, to, options.limit, (error, updates, endOfDatabase) ->
+				return callback(error) if error?
+				if endOfDatabase or updates.length >= options.limit
+					callback null, updates
+				else
+					to = updates[updates.length - 1].fromV - 1
+					summarizedUpdates = updates
+					fetchNextBatch()
+
+	_extendBatchOfSummarizedUpdates: (
+		doc_id,
+		existingSummarizedUpdates,
+		to, desiredLength,
+		callback = (error, summarizedUpdates, endOfDatabase) ->
+	) ->
+		UpdatesManager.getUpdatesWithUserInfo doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
 			return callback(error) if error?
-			callback null, UpdatesManager._summarizeUpdates(updates)
+			if !updates? or updates.length == 0
+				endOfDatabase = true
+			else
+				endOfDatabase = false
+			summarizedUpdates = UpdatesManager._summarizeUpdates(
+				updates, existingSummarizedUpdates
+			)
+			console.log "Summarized", summarizedUpdates
+			callback null,
+				summarizedUpdates.slice(0, desiredLength),
+				endOfDatabase
 
 	fillUserInfo: (updates, callback = (error, updates) ->) ->
 		users = {}
@@ -113,23 +142,26 @@ module.exports = UpdatesManager =
 
 
 	TIME_BETWEEN_DISTINCT_UPDATES: fiveMinutes = 5 * 60 * 1000
-	_summarizeUpdates: (updates) ->
-		view = []
-		for update in updates.slice().reverse()
-			lastUpdate = view[view.length - 1]
-			if lastUpdate and update.meta.start_ts - lastUpdate.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+	_summarizeUpdates: (updates, existingSummarizedUpdates = []) ->
+		summarizedUpdates = existingSummarizedUpdates.slice()
+		for update in updates
+			earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
+			console.log "Considering update", update, earliestUpdate
+			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				console.log "Concatting"
 				if update.meta.user?
 					userExists = false
-					for user in lastUpdate.meta.users
+					for user in earliestUpdate.meta.users
 						if user.id == update.meta.user.id
 							userExists = true
 							break
 					if !userExists
-						lastUpdate.meta.users.push update.meta.user
-				lastUpdate.meta.start_ts = Math.min(lastUpdate.meta.start_ts, update.meta.start_ts)
-				lastUpdate.meta.end_ts   = Math.max(lastUpdate.meta.end_ts, update.meta.end_ts)
-				lastUpdate.toV = update.v
+						earliestUpdate.meta.users.push update.meta.user
+				earliestUpdate.meta.start_ts = Math.min(earliestUpdate.meta.start_ts, update.meta.start_ts)
+				earliestUpdate.meta.end_ts   = Math.max(earliestUpdate.meta.end_ts, update.meta.end_ts)
+				earliestUpdate.fromV = update.v
 			else
+				console.log "creating new"
 				newUpdate =
 					meta:
 						users: []
@@ -141,6 +173,7 @@ module.exports = UpdatesManager =
 				if update.meta.user?
 					newUpdate.meta.users.push update.meta.user
 
-				view.push newUpdate
+				summarizedUpdates.push newUpdate
 
-		return view.reverse()
+		return summarizedUpdates
+

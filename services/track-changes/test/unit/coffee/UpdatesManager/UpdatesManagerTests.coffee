@@ -239,31 +239,107 @@ describe "UpdatesManager", ->
 				.calledWith(@updates)
 				.should.equal true
 
-		it "shoudl return the updates with the filled details", ->
+		it "should return the updates with the filled details", ->
 			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
 
-	describe "getSummarizedUpdates", ->
+	describe "_extendBatchOfSummarizedUpdates", ->
 		beforeEach ->
 			@to = 42
-			@limit = 10
-			@updates = ["mock-updates"]
-			@summarizedUpdates = ["summarized-updates"]
-			@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
-			@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+			@limit = 2
+			@existingSummarizedUpdates = ["summarized-updates-3"]
+			@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
 
-		it "should get the updates", ->
-			@UpdatesManager.getUpdatesWithUserInfo
-				.calledWith(@doc_id, { to: @to, limit: @limit })
-				.should.equal true
+		describe "when there are updates to get", ->
+			beforeEach ->
+				@updates = ["mock-updates"]
+				@existingSummarizedUpdates = ["summarized-updates-3"]
+				@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
+				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
+				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
 
-		it "should summarize the updates", ->
-			@UpdatesManager._summarizeUpdates
-				.calledWith(@updates)
-				.should.equal true
+			it "should get the updates", ->
+				@UpdatesManager.getUpdatesWithUserInfo
+					.calledWith(@doc_id, { to: @to, limit: 3 * @limit })
+					.should.equal true
 
-		it "should call the callback with the summarized updates", ->
-			@callback.calledWith(null, @summarizedUpdates).should.equal true
+			it "should summarize the updates", ->
+				@UpdatesManager._summarizeUpdates
+					.calledWith(@updates, @existingSummarizedUpdates)
+					.should.equal true
+
+			it "should call the callback with the summarized updates and false for end-of-databse", ->
+				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), false).should.equal true
+
+		describe "when there are no more updates", ->
+			beforeEach ->
+				@updates = []
+				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
+				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
+
+			it "should call the callback with the summarized updates and true for end-of-database", ->
+				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), true).should.equal true
+
+	describe "getSummarizedUpdates", ->
+		describe "when one batch of updates is enough to meet the limit", ->
+			beforeEach ->
+				@to = 42
+				@limit = 2
+				@updates = ["summarized-updates-3", "summarized-updates-2"]
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates)
+				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+
+			it "should get the batch of summarized updates", ->
+				@UpdatesManager._extendBatchOfSummarizedUpdates
+					.calledWith(@doc_id, [], @to, @limit)
+					.should.equal true
+
+			it "should call the callback with the updates", ->
+				@callback.calledWith(null, @updates).should.equal true
+
+		describe "when multiple batches are needed to meet the limit", ->
+			beforeEach ->
+				@to = 6
+				@limit = 4
+				@firstBatch =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
+				@secondBatch = [{ toV: 4, fromV: 4 }, { toV: 3, fromV: 3 }]
+				@UpdatesManager._extendBatchOfSummarizedUpdates = (doc_id, existingUpdates, to, limit, callback) =>
+					if existingUpdates.length == 0
+						callback null, @firstBatch, false
+					else
+						callback null, @firstBatch.concat(@secondBatch), false
+				sinon.spy @UpdatesManager, "_extendBatchOfSummarizedUpdates"
+				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+
+			it "should get the first batch of summarized updates", ->
+				@UpdatesManager._extendBatchOfSummarizedUpdates
+					.calledWith(@doc_id, [], @to, @limit)
+					.should.equal true
+
+			it "should get the second batch of summarized updates", ->
+				@UpdatesManager._extendBatchOfSummarizedUpdates
+					.calledWith(@doc_id, @firstBatch, 4, @limit)
+					.should.equal true
+
+			it "should call the callback with all the updates", ->
+				@callback.calledWith(null, @firstBatch.concat(@secondBatch)).should.equal true
+
+		describe "when the end of the database is hit", ->
+			beforeEach ->
+				@to = 6
+				@limit = 4
+				@updates =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates, true)
+				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+
+			it "should get the batch of summarized updates", ->
+				@UpdatesManager._extendBatchOfSummarizedUpdates
+					.calledWith(@doc_id, [], @to, @limit)
+					.should.equal true
+
+			it "should call the callback with the updates", ->
+				@callback.calledWith(null, @updates).should.equal true
 
 	describe "fillUserInfo", ->
 		describe "with valid users", ->
@@ -360,13 +436,13 @@ describe "UpdatesManager", ->
 		it "should concat updates that are close in time", ->
 			expect(@UpdatesManager._summarizeUpdates [{
 				meta:
-					user: @user_2 = { id: "mock-user-2" }
+					user: @user_1 = { id: "mock-user-1" }
 					start_ts: @now + 20
 					end_ts:   @now + 30
 				v: 5
 			}, {
 				meta:
-					user: @user_1 = { id: "mock-user-1" }
+					user: @user_2 = { id: "mock-user-2" }
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
@@ -409,4 +485,33 @@ describe "UpdatesManager", ->
 				toV: 4
 			}]
 
-
+		it "should concat onto existing summarized updates", ->
+			@user_1 = { id: "mock-user-1" }
+			@user_2 = { id: "mock-user-2" }
+			expect(@UpdatesManager._summarizeUpdates [{
+				meta:
+					user: @user_1
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				meta:
+					user: @user_2
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}], [{
+				meta:
+					users: [@user_1]
+					start_ts: @now + 40
+					end_ts:   @now + 50
+				fromV: 6
+				toV: 8
+			}]).to.deep.equal [{
+				meta:
+					users: [@user_1, @user_2]
+					start_ts: @now
+					end_ts:   @now + 50
+				fromV: 4
+				toV:   8
+			}]

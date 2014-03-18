@@ -42,7 +42,6 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send JSON.stringify updates: updates
 
-
 	restore: (req, res, next = (error) ->) ->
 		{doc_id, project_id, version} = req.params
 		user_id = req.headers["x-user-id"]
