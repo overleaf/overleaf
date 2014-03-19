@@ -5,13 +5,13 @@ RedisManager = require "./RedisManager"
 crypto = require("crypto")
 
 module.exports = TrackChangesManager =
-	flushDocChanges: (doc_id, callback = (error) ->) ->
+	flushDocChanges: (project_id, doc_id, callback = (error) ->) ->
 		if !settings.apis?.trackchanges?
 			logger.warn doc_id: doc_id, "track changes API is not configured, so not flushing"
 			return callback()
 
-		url = "#{settings.apis.trackchanges.url}/doc/#{doc_id}/flush"
-		logger.log doc_id: doc_id, url: url, "flushing doc in track changes api"
+		url = "#{settings.apis.trackchanges.url}/project/#{project_id}/doc/#{doc_id}/flush"
+		logger.log project_id: project_id, doc_id: doc_id, url: url, "flushing doc in track changes api"
 		request.post url, (error, res, body)->
 			if error?
 				return callback(error)
@@ -22,7 +22,7 @@ module.exports = TrackChangesManager =
 				return callback(error)
 
 	FLUSH_EVERY_N_OPS: 50
-	pushUncompressedHistoryOp: (doc_id, op, callback = (error) ->) ->
+	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
 		RedisManager.getHistoryLoadManagerThreshold (error, threshold) ->
 			return callback(error) if error?
 			if TrackChangesManager.getLoadManagerBucket(doc_id) < threshold
@@ -31,10 +31,10 @@ module.exports = TrackChangesManager =
 					if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
 						# Do this in the background since it uses HTTP and so may be too
 						# slow to wait for when processing a doc update.
-						logger.log length: length, doc_id: doc_id, "flushing track changes api"
-						TrackChangesManager.flushDocChanges doc_id,  (error) ->
+						logger.log length: length, doc_id: doc_id, project_id: project_id, "flushing track changes api"
+						TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
 							if error?
-								logger.error err: error, doc_id: doc_id, "error flushing doc to track changes api"
+								logger.error err: error, doc_id: doc_id, project_id: project_id, "error flushing doc to track changes api"
 					callback()
 			else
 				callback()

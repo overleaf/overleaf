@@ -6,7 +6,7 @@ module.exports = MockTrackChangesApi =
 		callback()
 
 	run: () ->
-		app.post "/doc/:doc_id/flush", (req, res, next) =>
+		app.post "/project/:project_id/doc/:doc_id/flush", (req, res, next) =>
 			@flushDoc req.params.doc_id, (error) ->
 				if error?
 					res.send 500

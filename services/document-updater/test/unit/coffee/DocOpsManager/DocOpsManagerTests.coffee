@@ -311,7 +311,7 @@ describe "DocOpsManager", ->
 		beforeEach ->
 			@op = "mock-op"
 			@RedisManager.pushDocOp = sinon.stub().callsArgWith(2, null, @version = 42)
-			@TrackChangesManager.pushUncompressedHistoryOp = sinon.stub().callsArg(2)
+			@TrackChangesManager.pushUncompressedHistoryOp = sinon.stub().callsArg(3)
 			@DocOpsManager.pushDocOp @project_id, @doc_id, @op, @callback
 
 		it "should push the op in to the docOps list", ->
@@ -321,7 +321,7 @@ describe "DocOpsManager", ->
 
 		it "should push the op into the pushUncompressedHistoryOp", ->
 			@TrackChangesManager.pushUncompressedHistoryOp
-				.calledWith(@doc_id, @op)
+				.calledWith(@project_id, @doc_id, @op)
 				.should.equal true
 
 		it "should call the callback with the version", ->

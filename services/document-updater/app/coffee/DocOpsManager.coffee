@@ -47,7 +47,7 @@ module.exports = DocOpsManager =
 	pushDocOp: (project_id, doc_id, op, callback = (error) ->) ->
 		RedisManager.pushDocOp doc_id, op, (error, version) ->
 			return callback(error) if error?
-			TrackChangesManager.pushUncompressedHistoryOp doc_id, op, (error) ->
+			TrackChangesManager.pushUncompressedHistoryOp project_id, doc_id, op, (error) ->
 				return callback(error) if error?
 				callback null, version
 
