@@ -24,16 +24,17 @@ module.exports = MongoManager =
 			else
 				callback null, null
 
-	insertCompressedUpdates: (doc_id, updates, callback = (error) ->) ->
+	insertCompressedUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
 		jobs = []
 		for update in updates
 			do (update) ->
-				jobs.push (callback) -> MongoManager.insertCompressedUpdate doc_id, update, callback
+				jobs.push (callback) -> MongoManager.insertCompressedUpdate project_id, doc_id, update, callback
 		async.series jobs, callback
 
-	insertCompressedUpdate: (doc_id, update, callback = (error) ->) ->
+	insertCompressedUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		db.docHistory.insert {
 			doc_id: ObjectId(doc_id.toString())
+			project_id: ObjectId(project_id.toString())
 			op:     update.op
 			meta:   update.meta
 			v:      update.v

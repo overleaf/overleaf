@@ -25,7 +25,7 @@ describe "DiffManager", ->
 			@updates = [ "mock-update-1", "mock-update-2" ]
 
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(2, null, @content, @version)
-			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
 			@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, @from, @to, @callback
 
 		it "should get the latest version of the doc", ->
@@ -35,7 +35,7 @@ describe "DiffManager", ->
 
 		it "should get the latest updates", ->
 			@UpdatesManager.getUpdatesWithUserInfo
-				.calledWith(@doc_id, from: @from, to: @to)
+				.calledWith(@project_id, @doc_id, from: @from, to: @to)
 				.should.equal true
 
 		it "should call the callback with the content, version and updates", ->

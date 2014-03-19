@@ -6,8 +6,9 @@ logger = require "logger-sharelatex"
 module.exports = HttpController =
 	flushUpdatesWithLock: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
+		project_id = req.params.project_id
 		logger.log doc_id: doc_id, "compressing doc history"
-		UpdatesManager.processUncompressedUpdatesWithLock doc_id, (error) ->
+		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return next(error) if error?
 			res.send 204
 
@@ -38,7 +39,7 @@ module.exports = HttpController =
 		if req.query.limit?
 			limit = parseInt(req.query.limit, 10)
 
-		UpdatesManager.getSummarizedUpdates doc_id, to: to, limit: limit, (error, updates) ->
+		UpdatesManager.getSummarizedUpdates project_id, doc_id, to: to, limit: limit, (error, updates) ->
 			return next(error) if error?
 			res.send JSON.stringify updates: updates
 

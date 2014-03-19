@@ -23,14 +23,15 @@ describe "HttpController", ->
 			@req =
 				params:
 					doc_id: @doc_id
+					project_id: @project_id
 			@res =
 				send: sinon.stub()
-			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
 			@HttpController.flushUpdatesWithLock @req, @res, @next
 
 		it "should process the updates", ->
 			@UpdatesManager.processUncompressedUpdatesWithLock
-				.calledWith(@doc_id)
+				.calledWith(@project_id, @doc_id)
 				.should.equal true
 
 		it "should return a success code", ->
@@ -75,12 +76,12 @@ describe "HttpController", ->
 			@res =
 				send: sinon.stub()
 			@updates = ["mock-summarized-updates"]
-			@UpdatesManager.getSummarizedUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getSummarizedUpdates = sinon.stub().callsArgWith(3, null, @updates)
 			@HttpController.getUpdates @req, @res, @next
 
 		it "should get the updates", ->
 			@UpdatesManager.getSummarizedUpdates
-				.calledWith(@doc_id, to: @to, limit: @limit)
+				.calledWith(@project_id, @doc_id, to: @to, limit: @limit)
 				.should.equal true
 
 		it "should return the formatted updates", ->

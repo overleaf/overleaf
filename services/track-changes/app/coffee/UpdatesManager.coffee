@@ -7,7 +7,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 
 module.exports = UpdatesManager =
-	compressAndSaveRawUpdates: (doc_id, rawUpdates, callback = (error) ->) ->
+	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, callback = (error) ->) ->
 		length = rawUpdates.length
 		if length == 0
 			return callback()
@@ -23,65 +23,65 @@ module.exports = UpdatesManager =
 
 				if rawUpdates[0]? and rawUpdates[0].v != lastCompressedUpdate.v + 1
 					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastCompressedUpdate.v}")
-					logger.error err: error, doc_id: doc_id, "inconsistent doc versions"
+					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
 					# Push the update back into Mongo - catching errors at this
 					# point is useless, we're already bailing
-					MongoManager.insertCompressedUpdates doc_id, [lastCompressedUpdate], () ->
+					MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], () ->
 						return callback error
 					return
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
-			MongoManager.insertCompressedUpdates doc_id, compressedUpdates, (error) ->
+			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, (error) ->
 				return callback(error) if error?
-				logger.log doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
+				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
 				callback()
 
 	REDIS_READ_BATCH_SIZE: 100
-	processUncompressedUpdates: (doc_id, callback = (error) ->) ->
+	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
 		RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 			return callback(error) if error?
 			length = rawUpdates.length
-			UpdatesManager.compressAndSaveRawUpdates doc_id, rawUpdates, (error) ->
+			UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
-				logger.log doc_id: doc_id, "compressed and saved doc updates"
+				logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
 				RedisManager.deleteOldestRawUpdates doc_id, length, (error) ->
 					return callback(error) if error?
 					if length == UpdatesManager.REDIS_READ_BATCH_SIZE
 						# There might be more updates
-						logger.log doc_id: doc_id, "continuing processing updates"
+						logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
 						setTimeout () ->
-							UpdatesManager.processUncompressedUpdates doc_id, callback
+							UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
 						, 0
 					else
-						logger.log doc_id: doc_id, "all raw updates processed"
+						logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
 						callback()
 
-	processUncompressedUpdatesWithLock: (doc_id, callback = (error) ->) ->
+	processUncompressedUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.runWithLock(
 			"HistoryLock:#{doc_id}",
 			(releaseLock) ->
-				UpdatesManager.processUncompressedUpdates doc_id, releaseLock
+				UpdatesManager.processUncompressedUpdates project_id, doc_id, releaseLock
 			callback
 		)
 
-	getUpdates: (doc_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.processUncompressedUpdatesWithLock doc_id, (error) ->
+	getUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?
 			MongoManager.getUpdates doc_id, options, callback
 
-	getUpdatesWithUserInfo: (doc_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.getUpdates doc_id, options, (error, updates) ->
+	getUpdatesWithUserInfo: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.getUpdates project_id, doc_id, options, (error, updates) ->
 			return callback(error) if error?
 			UpdatesManager.fillUserInfo updates, (error, updates) ->
 				return callback(error) if error?
 				callback null, updates
 
-	getSummarizedUpdates: (doc_id, options = {}, callback = (error, updates) ->) ->
+	getSummarizedUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		options.limit ||= 25
 		summarizedUpdates = []
 		to = options.to
 		do fetchNextBatch = () ->
-			UpdatesManager._extendBatchOfSummarizedUpdates doc_id, summarizedUpdates, to, options.limit, (error, updates, endOfDatabase) ->
+			UpdatesManager._extendBatchOfSummarizedUpdates project_id, doc_id, summarizedUpdates, to, options.limit, (error, updates, endOfDatabase) ->
 				return callback(error) if error?
 				if endOfDatabase or updates.length >= options.limit
 					callback null, updates
@@ -91,12 +91,13 @@ module.exports = UpdatesManager =
 					fetchNextBatch()
 
 	_extendBatchOfSummarizedUpdates: (
+		project_id, 
 		doc_id,
 		existingSummarizedUpdates,
 		to, desiredLength,
 		callback = (error, summarizedUpdates, endOfDatabase) ->
 	) ->
-		UpdatesManager.getUpdatesWithUserInfo doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
+		UpdatesManager.getUpdatesWithUserInfo project_id, doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
 			return callback(error) if error?
 			if !updates? or updates.length == 0
 				endOfDatabase = true
@@ -105,7 +106,6 @@ module.exports = UpdatesManager =
 			summarizedUpdates = UpdatesManager._summarizeUpdates(
 				updates, existingSummarizedUpdates
 			)
-			console.log "Summarized", summarizedUpdates
 			callback null,
 				summarizedUpdates.slice(0, desiredLength),
 				endOfDatabase
@@ -146,9 +146,7 @@ module.exports = UpdatesManager =
 		summarizedUpdates = existingSummarizedUpdates.slice()
 		for update in updates
 			earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
-			console.log "Considering update", update, earliestUpdate
 			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
-				console.log "Concatting"
 				if update.meta.user?
 					userExists = false
 					for user in earliestUpdate.meta.users
@@ -161,7 +159,6 @@ module.exports = UpdatesManager =
 				earliestUpdate.meta.end_ts   = Math.max(earliestUpdate.meta.end_ts, update.meta.end_ts)
 				earliestUpdate.fromV = update.v
 			else
-				console.log "creating new"
 				newUpdate =
 					meta:
 						users: []

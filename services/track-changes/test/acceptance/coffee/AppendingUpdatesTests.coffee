@@ -42,6 +42,12 @@ describe "Appending doc ops to the history", ->
 		it "should insert the correct version number into mongo", ->
 			expect(@updates[0].v).to.equal 5
 
+		it "should store the doc id", ->
+			expect(@updates[0].doc_id.toString()).to.equal @doc_id
+
+		it "should store the project id", ->
+			expect(@updates[0].project_id.toString()).to.equal @project_id
+
 	describe "when the history has already been started", ->
 		beforeEach (done) ->
 			@project_id = ObjectId().toString()

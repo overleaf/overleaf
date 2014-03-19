@@ -15,6 +15,7 @@ describe "UpdatesManager", ->
 			"./WebApiManager": @WebApiManager = {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@doc_id = "doc-id-123"
+		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
 	describe "compressAndSaveRawUpdates", ->
@@ -22,7 +23,7 @@ describe "UpdatesManager", ->
 			beforeEach ->
 				@MongoManager.popLastCompressedUpdate = sinon.stub()
 				@MongoManager.insertCompressedUpdates = sinon.stub()
-				@UpdatesManager.compressAndSaveRawUpdates @doc_id, [], @callback
+				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, [], @callback
 
 			it "should not need to access the database", ->
 				@MongoManager.popLastCompressedUpdate.called.should.equal false
@@ -37,9 +38,9 @@ describe "UpdatesManager", ->
 				@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(3)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-				@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
 
 			it "should try to pop the last compressed op", ->
 				@MongoManager.popLastCompressedUpdate
@@ -53,7 +54,7 @@ describe "UpdatesManager", ->
 			
 			it "should save the compressed ops", ->
 				@MongoManager.insertCompressedUpdates
-					.calledWith(@doc_id, @compressedUpdates)
+					.calledWith(@project_id, @doc_id, @compressedUpdates)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -65,13 +66,13 @@ describe "UpdatesManager", ->
 				@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(2)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(3)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
 			describe "when the raw ops start where the existing history ends", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
-					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
 
 				it "should try to pop the last compressed op", ->
 					@MongoManager.popLastCompressedUpdate
@@ -85,7 +86,7 @@ describe "UpdatesManager", ->
 				
 				it "should save the compressed ops", ->
 					@MongoManager.insertCompressedUpdates
-						.calledWith(@doc_id, @compressedUpdates)
+						.calledWith(@project_id, @doc_id, @compressedUpdates)
 						.should.equal true
 
 				it "should call the callback", ->
@@ -95,7 +96,7 @@ describe "UpdatesManager", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 
-					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
 
 				it "should only compress the more recent raw ops", ->
 					@UpdateCompressor.compressRawUpdates
@@ -105,7 +106,7 @@ describe "UpdatesManager", ->
 			describe "when the raw ops do not follow from the last compressed op version", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 13, op: "mock-op-13" }]
-					@UpdatesManager.compressAndSaveRawUpdates @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
 
 				it "should call the callback with an error", ->
 					@callback
@@ -115,7 +116,7 @@ describe "UpdatesManager", ->
 				it "should put the popped update back into mongo", ->
 					@MongoManager.insertCompressedUpdates.calledOnce.should.equal true
 					@MongoManager.insertCompressedUpdates
-						.calledWith(@doc_id, [@lastCompressedUpdate])
+						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate])
 						.should.equal true
 
 	describe "processUncompressedUpdates", ->
@@ -123,9 +124,9 @@ describe "UpdatesManager", ->
 			beforeEach ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
-				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
 				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
-				@UpdatesManager.processUncompressedUpdates @doc_id, @callback
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
 
 			it "should get the oldest updates", ->
 				@RedisManager.getOldestRawUpdates
@@ -134,7 +135,7 @@ describe "UpdatesManager", ->
 
 			it "should compress and save the updates", ->
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@doc_id, @updates)
+					.calledWith(@project_id, @doc_id, @updates)
 					.should.equal true
 
 			it "should delete the batch of uncompressed updates that was just processed", ->
@@ -155,9 +156,9 @@ describe "UpdatesManager", ->
 					@redisArray = @redisArray.slice(batchSize)
 					callback null, updates
 				sinon.spy @RedisManager, "getOldestRawUpdates"
-				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(2)
+				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
 				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
-				@UpdatesManager.processUncompressedUpdates @doc_id, (args...) =>
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
 					@callback(args...)
 					done()
 
@@ -166,13 +167,13 @@ describe "UpdatesManager", ->
 
 			it "should compress and save the updates in batches", ->
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@doc_id, @updates.slice(0,2))
+					.calledWith(@project_id, @doc_id, @updates.slice(0,2))
 					.should.equal true
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@doc_id, @updates.slice(2,4))
+					.calledWith(@project_id, @doc_id, @updates.slice(2,4))
 					.should.equal true
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@doc_id, @updates.slice(4,5))
+					.calledWith(@project_id, @doc_id, @updates.slice(4,5))
 					.should.equal true
 
 			it "should delete the batches of uncompressed updates", ->
@@ -185,7 +186,7 @@ describe "UpdatesManager", ->
 		beforeEach ->
 			@UpdatesManager.processUncompressedUpdates = sinon.stub().callsArg(2)
 			@LockManager.runWithLock = sinon.stub().callsArg(2)
-			@UpdatesManager.processUncompressedUpdatesWithLock @doc_id, @callback
+			@UpdatesManager.processUncompressedUpdatesWithLock @project_id, @doc_id, @callback
 
 		it "should run processUncompressedUpdates with the lock", ->
 			@LockManager.runWithLock
@@ -202,12 +203,12 @@ describe "UpdatesManager", ->
 			@updates = ["mock-updates"]
 			@options = { to: "mock-to", limit: "mock-limit" }
 			@MongoManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
-			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(1)
-			@UpdatesManager.getUpdates @doc_id, @options, @callback
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
+			@UpdatesManager.getUpdates @project_id, @doc_id, @options, @callback
 
 		it "should process outstanding updates", ->
 			@UpdatesManager.processUncompressedUpdatesWithLock
-				.calledWith(@doc_id)
+				.calledWith(@project_id, @doc_id)
 				.should.equal true
 
 		it "should get the updates from the database", ->
@@ -225,13 +226,13 @@ describe "UpdatesManager", ->
 			@updates = ["mock-updates"]
 			@options = { to: "mock-to", limit: "mock-limit" }
 			@updatesWithUserInfo = ["updates-with-user-info"]
-			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(3, null, @updates)
 			@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
-			@UpdatesManager.getUpdatesWithUserInfo @doc_id, @options, @callback
+			@UpdatesManager.getUpdatesWithUserInfo @project_id, @doc_id, @options, @callback
 
 		it "should get the updates", ->
 			@UpdatesManager.getUpdates
-				.calledWith(@doc_id, @options)
+				.calledWith(@project_id, @doc_id, @options)
 				.should.equal true
 
 		it "should file the updates with the user info", ->
@@ -255,12 +256,12 @@ describe "UpdatesManager", ->
 				@existingSummarizedUpdates = ["summarized-updates-3"]
 				@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
-				@UpdatesManager._extendBatchOfSummarizedUpdates @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
+				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
 
 			it "should get the updates", ->
 				@UpdatesManager.getUpdatesWithUserInfo
-					.calledWith(@doc_id, { to: @to, limit: 3 * @limit })
+					.calledWith(@project_id, @doc_id, { to: @to, limit: 3 * @limit })
 					.should.equal true
 
 			it "should summarize the updates", ->
@@ -275,8 +276,8 @@ describe "UpdatesManager", ->
 			beforeEach ->
 				@updates = []
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
-				@UpdatesManager._extendBatchOfSummarizedUpdates @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
+				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
 
 			it "should call the callback with the summarized updates and true for end-of-database", ->
 				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), true).should.equal true
@@ -287,12 +288,12 @@ describe "UpdatesManager", ->
 				@to = 42
 				@limit = 2
 				@updates = ["summarized-updates-3", "summarized-updates-2"]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates)
-				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates)
+				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@doc_id, [], @to, @limit)
+					.calledWith(@project_id, @doc_id, [], @to, @limit)
 					.should.equal true
 
 			it "should call the callback with the updates", ->
@@ -304,22 +305,22 @@ describe "UpdatesManager", ->
 				@limit = 4
 				@firstBatch =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
 				@secondBatch = [{ toV: 4, fromV: 4 }, { toV: 3, fromV: 3 }]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = (doc_id, existingUpdates, to, limit, callback) =>
+				@UpdatesManager._extendBatchOfSummarizedUpdates = (project_id, doc_id, existingUpdates, to, limit, callback) =>
 					if existingUpdates.length == 0
 						callback null, @firstBatch, false
 					else
 						callback null, @firstBatch.concat(@secondBatch), false
 				sinon.spy @UpdatesManager, "_extendBatchOfSummarizedUpdates"
-				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the first batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@doc_id, [], @to, @limit)
+					.calledWith(@project_id, @doc_id, [], @to, @limit)
 					.should.equal true
 
 			it "should get the second batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@doc_id, @firstBatch, 4, @limit)
+					.calledWith(@project_id, @doc_id, @firstBatch, 4, @limit)
 					.should.equal true
 
 			it "should call the callback with all the updates", ->
@@ -330,12 +331,12 @@ describe "UpdatesManager", ->
 				@to = 6
 				@limit = 4
 				@updates =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates, true)
-				@UpdatesManager.getSummarizedUpdates @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates, true)
+				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@doc_id, [], @to, @limit)
+					.calledWith(@project_id, @doc_id, [], @to, @limit)
 					.should.equal true
 
 			it "should call the callback with the updates", ->

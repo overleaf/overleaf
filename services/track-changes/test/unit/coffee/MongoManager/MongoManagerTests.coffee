@@ -12,6 +12,7 @@ describe "MongoManager", ->
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
+		@project_id = ObjectId().toString()
 
 	describe "getLastCompressedUpdate", ->
 		beforeEach ->
@@ -100,11 +101,12 @@ describe "MongoManager", ->
 			@update = { op: "op", meta: "meta", v: "v"}
 			@db.docHistory =
 				insert: sinon.stub().callsArg(1)
-			@MongoManager.insertCompressedUpdate @doc_id, @update, @callback
+			@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, @callback
 
 		it "should insert the update", ->
 			@db.docHistory.insert
 				.calledWith({
+					project_id: ObjectId(@project_id),
 					doc_id: ObjectId(@doc_id),
 					op: @update.op,
 					meta: @update.meta,
@@ -118,15 +120,15 @@ describe "MongoManager", ->
 	describe "insertCompressedUpdates", ->
 		beforeEach (done) ->
 			@updates = [ "mock-update-1", "mock-update-2" ]
-			@MongoManager.insertCompressedUpdate = sinon.stub().callsArg(2)
-			@MongoManager.insertCompressedUpdates @doc_id, @updates, (args...) =>
+			@MongoManager.insertCompressedUpdate = sinon.stub().callsArg(3)
+			@MongoManager.insertCompressedUpdates @project_id, @doc_id, @updates, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should insert each update", ->
 			for update in @updates
 				@MongoManager.insertCompressedUpdate
-					.calledWith(@doc_id, update)
+					.calledWith(@project_id, @doc_id, update)
 					.should.equal true
 
 		it "should call the callback", ->
