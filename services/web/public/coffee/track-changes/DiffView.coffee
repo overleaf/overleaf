@@ -86,20 +86,27 @@ define [
 			markerBackLayer = @aceEditor.renderer.$markerBack
 			markerFrontLayer = @aceEditor.renderer.$markerFront
 			lineHeight = @aceEditor.renderer.lineHeight
+
+			dark = @_isDarkTheme()
+
 			if entry.i? or entry.d?
 				hue = entry.meta.user.hue()
 				if entry.i?
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "inserted-change-background", false, """
-						background-color : hsl(#{hue}, 70%, 85%);
-					"""
+					if dark
+						style = "background-color : hsl(#{hue}, 100%, 28%);"
+					else
+						style = "background-color : hsl(#{hue}, 70%, 85%);"
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "inserted-change-background", false, style
 				if entry.d?
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
-						background-color : hsl(#{hue}, 70%, 95%);
-					"""
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-foreground", true, """
-						height: #{Math.round(lineHeight/2) - 1}px;
-						border-bottom: 2px solid hsl(#{hue}, 70%, 40%);
-					"""
+					if dark
+						bgStyle = "background-color: hsl(#{hue}, 100%, 20%);"
+						fgStyle = "border-bottom: 2px solid hsl(#{hue}, 100%, 60%);"
+					else
+						bgStyle = "background-color: hsl(#{hue}, 70%, 95%);"
+						fgStyle = "border-bottom: 2px solid hsl(#{hue}, 70%, 40%);"
+					fgStyle += "; height: #{Math.round(lineHeight/2) - 1}px;"
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, bgStyle
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-foreground", true, fgStyle
 
 		_addMarkerWithCustomStyle: (session, markerLayer, range, klass, foreground, style) ->
 			session.addMarker range, klass, (html, range, left, top, config) ->
@@ -108,6 +115,14 @@ define [
 				else
 					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
 			, foreground
+
+		_isDarkTheme: () ->
+			rgb = $(".ace_editor").css("background-color");
+			[m, r, g, b] = rgb.match(/rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)/)
+			r = parseInt(r, 10)
+			g = parseInt(g, 10)
+			b = parseInt(b, 10)
+			return r + g + b < 3 * 128
 
 		insertNameTag: () ->
 			@$nameTagEl = $("<div class='change-name-marker'></div>")
@@ -154,9 +169,10 @@ define [
 			height = @$ace.height()
 
 			hue = entry.meta.user.hue()
-			css = {
-				"background-color" : "hsl(#{hue}, 70%, 90%)";
-			}
+			if @_isDarkTheme()
+				css = { "background-color" : "hsl(#{hue}, 100%, 20%)"; }
+			else
+				css = { "background-color" : "hsl(#{hue}, 70%, 90%)"; }
 
 			if position.pageX + @$nameTagEl.width() < @$ace.width()
 				css["left"] = position.pageX
@@ -175,7 +191,7 @@ define [
 			@$nameTagEl.css css
 
 		_hideNameTag: () ->
-			@$nameTagEl.hide()
+			@$nameTagEl?.hide()
 
 		updateVisibleNames: (e) ->
 			visibleName = false
