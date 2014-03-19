@@ -13,6 +13,7 @@ TrackChangesClient = require "./helpers/TrackChangesClient"
 describe "Appending doc ops to the history", ->
 	describe "when the history does not exist yet", ->
 		before (done) ->
+			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
 			TrackChangesClient.pushRawUpdates @doc_id, [{
@@ -29,7 +30,7 @@ describe "Appending doc ops to the history", ->
 				v: 5
 			}], (error) =>
 				throw error if error?
-				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
 
@@ -43,6 +44,7 @@ describe "Appending doc ops to the history", ->
 
 	describe "when the history has already been started", ->
 		beforeEach (done) ->
+			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
 			TrackChangesClient.pushRawUpdates @doc_id, [{
@@ -59,7 +61,7 @@ describe "Appending doc ops to the history", ->
 				v: 5
 			}], (error) =>
 				throw error if error?
-				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, updates) =>
 					throw error if error?
 					done()
 
@@ -79,7 +81,7 @@ describe "Appending doc ops to the history", ->
 					v: 8
 				}], (error) =>
 					throw error if error?
-					TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+					TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
 
@@ -109,7 +111,7 @@ describe "Appending doc ops to the history", ->
 					v: 8
 				}], (error) =>
 					throw error if error?
-					TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+					TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 						throw error if error?
 						done()
 
@@ -123,6 +125,7 @@ describe "Appending doc ops to the history", ->
 
 	describe "when the updates need processing in batches", ->
 		before (done) ->
+			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
 			updates = []
@@ -137,7 +140,7 @@ describe "Appending doc ops to the history", ->
 
 			TrackChangesClient.pushRawUpdates @doc_id, updates, (error) =>
 				throw error if error?
-				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
 
@@ -150,6 +153,7 @@ describe "Appending doc ops to the history", ->
 
 	describe "when there are multiple ops in each update", ->
 		before (done) ->
+			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
 			oneDay = 24 * 60 * 60 * 1000
@@ -163,7 +167,7 @@ describe "Appending doc ops to the history", ->
 				v: 4
 			}], (error) =>
 				throw error if error?
-				TrackChangesClient.flushAndGetCompressedUpdates @doc_id, (error, @updates) =>
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
 					done()
 

@@ -3,9 +3,9 @@ rclient = require("redis").createClient() # Only works locally for now
 {db, ObjectId} = require "../../../../app/js/mongojs"
 
 module.exports = TrackChangesClient =
-	flushAndGetCompressedUpdates: (doc_id, callback = (error, updates) ->) ->
+	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
 		request.post {
-			url: "http://localhost:3015/doc/#{doc_id}/flush"
+			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/flush"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			db.docHistory

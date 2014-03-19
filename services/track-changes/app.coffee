@@ -10,7 +10,7 @@ app = express()
 
 app.use express.logger()
 
-app.post "/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
+app.post "/project/:project_id/doc/:doc_id/flush", HttpController.flushUpdatesWithLock
 
 app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
 
