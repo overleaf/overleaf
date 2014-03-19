@@ -20,6 +20,7 @@ define [
 			@insertMarkers()
 			@insertNameTag()
 			@insertMoreChangeLabels()
+			@bindToScrollEvents()
 			@scrollToFirstChange()
 			return @
 
@@ -43,7 +44,8 @@ define [
 				e.position = position
 				@updateVisibleNames(e)
 
-			session.on "changeScrollTop", (e) =>
+		bindToScrollEvents: () ->
+			@aceEditor.getSession().on "changeScrollTop", (e) =>
 				@updateMoreChangeLabels()
 
 		getPlainDiffContent: () ->
@@ -116,17 +118,23 @@ define [
 			@$ace.append(@$nameTagEl)
 
 		insertMoreChangeLabels: () ->
-			@$changesBefore = $("<div class='changes-before'><span></span> <i class='icon-arrow-up'></div>")
-			@$changesAfter = $("<div class='changes-after'><span></span> <i class='icon-arrow-down'></div>")
+			@$changesBefore = $("<a class='changes-before' href='#'><span></span> <i class='icon-arrow-up'></a>")
+			@$changesAfter = $("<a class='changes-after' href='#'><span></span> <i class='icon-arrow-down'></a>")
 			@$ace.append(@$changesBefore)
 			@$ace.append(@$changesAfter)
+			@$changesBefore.on "click", () =>
+				@gotoLastHiddenChangeBefore()
+			@$changesAfter.on "click", () =>
+				@gotoFirstHiddenChangeAfter()
 			@updateMoreChangeLabels()
 
 		scrollToFirstChange: () ->
-			if @entries? and @entries[0]?
-				row = @entries[0].range.start.row
-				@aceEditor.gotoLine(0)
-				@aceEditor.gotoLine(row, 0, true)
+			@aceEditor.scrollToLine(0)
+			setTimeout () =>
+				if @entries? and @entries[0]?
+					row = @entries[0].range.start.row
+					@aceEditor.scrollToLine(row, true, false)
+			, 10
 
 		_drawNameTag: (entry, position) ->
 			@$nameTagEl.show()
@@ -181,25 +189,40 @@ define [
 
 		updateMoreChangeLabels: () ->
 			return if !@$changesBefore or !@$changesAfter
-			firstRow = @aceEditor.renderer.getFirstFullyVisibleRow()
-			lastRow = @aceEditor.renderer.getLastFullyVisibleRow()
-			changesBefore = 0
-			changesAfter = 0
-			for entry in @entries or []
-				if entry.range.start.row < firstRow
-					changesBefore += 1
-				if entry.range.end.row > lastRow
-					changesAfter += 1
-			if changesBefore > 0
-				@$changesBefore.find("span").text("#{changesBefore} more change#{if changesBefore > 1 then "s" else ""} above")
-				@$changesBefore.show()
-			else
-				@$changesBefore.hide()
-			if changesAfter > 0
-				@$changesAfter.find("span").text("#{changesAfter} more change#{if changesAfter > 1 then "s" else ""} below")
-				@$changesAfter.show()
-			else
-				@$changesAfter.hide()
+			setTimeout () =>
+				firstRow = @aceEditor.getFirstVisibleRow()
+				lastRow = @aceEditor.getLastVisibleRow()
+				changesBefore = 0
+				changesAfter = 0
+				@lastHiddenChangeBefore = null
+				@firstHiddenChangeAfter = null
+				for entry in @entries or []
+					if entry.range.start.row < firstRow
+						changesBefore += 1
+						@lastHiddenChangeBefore = entry
+					if entry.range.end.row > lastRow
+						changesAfter += 1
+						@firstHiddenChangeAfter ||= entry
+
+				if changesBefore > 0
+					@$changesBefore.find("span").text("#{changesBefore} more change#{if changesBefore > 1 then "s" else ""} above")
+					@$changesBefore.show()
+				else
+					@$changesBefore.hide()
+				if changesAfter > 0
+					@$changesAfter.find("span").text("#{changesAfter} more change#{if changesAfter > 1 then "s" else ""} below")
+					@$changesAfter.show()
+				else
+					@$changesAfter.hide()
+			, 100
+
+		gotoLastHiddenChangeBefore: () ->
+			return if !@lastHiddenChangeBefore
+			@aceEditor.scrollToLine(@lastHiddenChangeBefore.range.start.row, true, false)
+
+		gotoFirstHiddenChangeAfter: () ->
+			return if !@firstHiddenChangeAfter
+			@aceEditor.scrollToLine(@firstHiddenChangeAfter.range.end.row, true, false)
 
 		resize: () ->
 			@aceEditor.resize()
