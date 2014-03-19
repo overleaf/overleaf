@@ -3,6 +3,15 @@ define [
 	"libs/mustache"
 	"libs/backbone"
 ], (moment)->
+
+	moment.lang "en", calendar:
+		lastDay : '[Yesterday at] h:mm a'
+		sameDay : '[Today at] h:mm a'
+		nextDay : '[Tomorrow at] h:mm a'
+		lastWeek : "Do MMM YYYY, h:mm a"
+		nextWeek : "Do MMM YYYY, h:mm a"
+		sameElse : 'Do MMM YYYY, h:mm a'
+
 	ChangeListView = Backbone.View.extend
 		template: $("#changeListTemplate").html()
 
