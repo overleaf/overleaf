@@ -40,7 +40,7 @@ module.exports = MongoManager =
 			v:      update.v
 		}, callback
 
-	getUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
+	getDocUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
 			doc_id: ObjectId(doc_id.toString())
 		if options.from?
@@ -59,6 +59,23 @@ module.exports = MongoManager =
 
 		cursor.toArray callback
 
+	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
+		query = 
+			project_id: ObjectId(project_id.toString())
+
+		if options.before?
+			query["meta.end_ts"] = { $lt: options.before }
+
+		cursor = db.docHistory
+			.find( query )
+			.sort( "meta.end_ts": -1 )
+
+		if options.limit?
+			cursor.limit(options.limit)
+
+		cursor.toArray callback
+
 	ensureIndices: (callback = (error) ->) ->
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, callback
+		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, callback
 

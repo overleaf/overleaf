@@ -134,7 +134,7 @@ describe "MongoManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "getUpdates", ->
+	describe "getDocUpdates", ->
 		beforeEach ->
 			@updates = ["mock-update"]
 			@db.docHistory = {}
@@ -148,7 +148,7 @@ describe "MongoManager", ->
 
 		describe "with a to version", ->
 			beforeEach ->
-				@MongoManager.getUpdates @doc_id, from: @from, to: @to, @callback
+				@MongoManager.getDocUpdates @doc_id, from: @from, to: @to, @callback
 
 			it "should find the all updates between the to and from versions", ->
 				@db.docHistory.find
@@ -172,7 +172,7 @@ describe "MongoManager", ->
 
 		describe "without a to version", ->
 			beforeEach ->
-				@MongoManager.getUpdates @doc_id, from: @from, @callback
+				@MongoManager.getDocUpdates @doc_id, from: @from, @callback
 
 			it "should find the all updates after the from version", ->
 				@db.docHistory.find
@@ -187,7 +187,7 @@ describe "MongoManager", ->
 
 		describe "with a limit", ->
 			beforeEach ->
-				@MongoManager.getUpdates @doc_id, from: @from, limit: @limit = 10, @callback
+				@MongoManager.getDocUpdates @doc_id, from: @from, limit: @limit = 10, @callback
 
 			it "should limit the results", ->
 				@db.docHistory.limit
@@ -195,3 +195,60 @@ describe "MongoManager", ->
 					.should.equal true
 
 
+	describe "getDocUpdates", ->
+		beforeEach ->
+			@updates = ["mock-update"]
+			@db.docHistory = {}
+			@db.docHistory.find = sinon.stub().returns @db.docHistory
+			@db.docHistory.sort = sinon.stub().returns @db.docHistory
+			@db.docHistory.limit = sinon.stub().returns @db.docHistory
+			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
+
+			@before = Date.now()
+
+		describe "with a before timestamp", ->
+			beforeEach ->
+				@MongoManager.getProjectUpdates @project_id, before: @before, @callback
+
+			it "should find the all updates before the timestamp", ->
+				@db.docHistory.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+						"meta.end_ts": { $lt: @before }
+					})
+					.should.equal true
+
+			it "should sort in descending version order", ->
+				@db.docHistory.sort
+					.calledWith("meta.end_ts": -1)
+					.should.equal true
+
+			it "should not limit the results", ->
+				@db.docHistory.limit
+					.called.should.equal false
+
+			it "should call the call back with the updates", ->
+				@callback.calledWith(null, @updates).should.equal true
+
+		describe "without a before timestamp", ->
+			beforeEach ->
+				@MongoManager.getProjectUpdates @project_id, {}, @callback
+
+			it "should find the all updates", ->
+				@db.docHistory.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+					})
+					.should.equal true
+
+			it "should call the call back with the updates", ->
+				@callback.calledWith(null, @updates).should.equal true
+
+		describe "with a limit", ->
+			beforeEach ->
+				@MongoManager.getProjectUpdates @project_id, before: @before, limit: @limit = 10, @callback
+
+			it "should limit the results", ->
+				@db.docHistory.limit
+					.calledWith(@limit)
+					.should.equal true

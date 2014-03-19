@@ -5,7 +5,7 @@ logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
-		UpdatesManager.getUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
+		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
 			return callback(error) if error?
 			DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 				return callback(error) if error?

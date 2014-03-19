@@ -198,13 +198,13 @@ describe "UpdatesManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "getUpdates", ->
+	describe "getDocUpdates", ->
 		beforeEach ->
 			@updates = ["mock-updates"]
 			@options = { to: "mock-to", limit: "mock-limit" }
-			@MongoManager.getUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@MongoManager.getDocUpdates = sinon.stub().callsArgWith(2, null, @updates)
 			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
-			@UpdatesManager.getUpdates @project_id, @doc_id, @options, @callback
+			@UpdatesManager.getDocUpdates @project_id, @doc_id, @options, @callback
 
 		it "should process outstanding updates", ->
 			@UpdatesManager.processUncompressedUpdatesWithLock
@@ -212,7 +212,7 @@ describe "UpdatesManager", ->
 				.should.equal true
 
 		it "should get the updates from the database", ->
-			@MongoManager.getUpdates
+			@MongoManager.getDocUpdates
 				.calledWith(@doc_id, @options)
 				.should.equal true
 
@@ -221,18 +221,57 @@ describe "UpdatesManager", ->
 				.calledWith(null, @updates)
 				.should.equal true
 
-	describe "getUpdatesWithUserInfo", ->
+	describe "getDocUpdatesWithUserInfo", ->
 		beforeEach ->
 			@updates = ["mock-updates"]
 			@options = { to: "mock-to", limit: "mock-limit" }
 			@updatesWithUserInfo = ["updates-with-user-info"]
-			@UpdatesManager.getUpdates = sinon.stub().callsArgWith(3, null, @updates)
+			@UpdatesManager.getDocUpdates = sinon.stub().callsArgWith(3, null, @updates)
 			@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
-			@UpdatesManager.getUpdatesWithUserInfo @project_id, @doc_id, @options, @callback
+			@UpdatesManager.getDocUpdatesWithUserInfo @project_id, @doc_id, @options, @callback
 
 		it "should get the updates", ->
-			@UpdatesManager.getUpdates
+			@UpdatesManager.getDocUpdates
 				.calledWith(@project_id, @doc_id, @options)
+				.should.equal true
+
+		it "should file the updates with the user info", ->
+			@UpdatesManager.fillUserInfo
+				.calledWith(@updates)
+				.should.equal true
+
+		it "should return the updates with the filled details", ->
+			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
+
+	describe "getProjectUpdates", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { before: "mock-before", limit: "mock-limit" }
+			@MongoManager.getProjectUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.getProjectUpdates @project_id, @options, @callback
+
+		it "should get the updates from the database", ->
+			@MongoManager.getProjectUpdates
+				.calledWith(@project_id, @options)
+				.should.equal true
+
+		it "should return the updates", ->
+			@callback
+				.calledWith(null, @updates)
+				.should.equal true
+
+	describe "getProjectUpdatesWithUserInfo", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { before: "mock-before", limit: "mock-limit" }
+			@updatesWithUserInfo = ["updates-with-user-info"]
+			@UpdatesManager.getProjectUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
+			@UpdatesManager.getProjectUpdatesWithUserInfo @project_id, @options, @callback
+
+		it "should get the updates", ->
+			@UpdatesManager.getProjectUpdates
+				.calledWith(@project_id, @options)
 				.should.equal true
 
 		it "should file the updates with the user info", ->
@@ -256,11 +295,11 @@ describe "UpdatesManager", ->
 				@existingSummarizedUpdates = ["summarized-updates-3"]
 				@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
+				@UpdatesManager.getDocUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
 				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
 
 			it "should get the updates", ->
-				@UpdatesManager.getUpdatesWithUserInfo
+				@UpdatesManager.getDocUpdatesWithUserInfo
 					.calledWith(@project_id, @doc_id, { to: @to, limit: 3 * @limit })
 					.should.equal true
 
@@ -276,20 +315,20 @@ describe "UpdatesManager", ->
 			beforeEach ->
 				@updates = []
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
+				@UpdatesManager.getDocUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
 				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
 
 			it "should call the callback with the summarized updates and true for end-of-database", ->
 				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), true).should.equal true
 
-	describe "getSummarizedUpdates", ->
+	describe "getSummarizedDocUpdates", ->
 		describe "when one batch of updates is enough to meet the limit", ->
 			beforeEach ->
 				@to = 42
 				@limit = 2
 				@updates = ["summarized-updates-3", "summarized-updates-2"]
 				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates)
-				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
@@ -311,7 +350,7 @@ describe "UpdatesManager", ->
 					else
 						callback null, @firstBatch.concat(@secondBatch), false
 				sinon.spy @UpdatesManager, "_extendBatchOfSummarizedUpdates"
-				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the first batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
@@ -332,7 +371,7 @@ describe "UpdatesManager", ->
 				@limit = 4
 				@updates =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
 				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates, true)
-				@UpdatesManager.getSummarizedUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates

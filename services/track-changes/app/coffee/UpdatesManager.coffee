@@ -64,19 +64,29 @@ module.exports = UpdatesManager =
 			callback
 		)
 
-	getUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
+	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?
-			MongoManager.getUpdates doc_id, options, callback
+			MongoManager.getDocUpdates doc_id, options, callback
 
-	getUpdatesWithUserInfo: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.getUpdates project_id, doc_id, options, (error, updates) ->
+	getDocUpdatesWithUserInfo: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.getDocUpdates project_id, doc_id, options, (error, updates) ->
 			return callback(error) if error?
 			UpdatesManager.fillUserInfo updates, (error, updates) ->
 				return callback(error) if error?
 				callback null, updates
 
-	getSummarizedUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
+	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
+		MongoManager.getProjectUpdates project_id, options, callback
+
+	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
+		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->
+			return callback(error) if error?
+			UpdatesManager.fillUserInfo updates, (error, updates) ->
+				return callback(error) if error?
+				callback null, updates
+
+	getSummarizedDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		options.limit ||= 25
 		summarizedUpdates = []
 		to = options.to
@@ -97,7 +107,7 @@ module.exports = UpdatesManager =
 		to, desiredLength,
 		callback = (error, summarizedUpdates, endOfDatabase) ->
 	) ->
-		UpdatesManager.getUpdatesWithUserInfo project_id, doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
+		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
 			return callback(error) if error?
 			if !updates? or updates.length == 0
 				endOfDatabase = true

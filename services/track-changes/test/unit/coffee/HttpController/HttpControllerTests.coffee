@@ -76,11 +76,11 @@ describe "HttpController", ->
 			@res =
 				send: sinon.stub()
 			@updates = ["mock-summarized-updates"]
-			@UpdatesManager.getSummarizedUpdates = sinon.stub().callsArgWith(3, null, @updates)
+			@UpdatesManager.getSummarizedDocUpdates = sinon.stub().callsArgWith(3, null, @updates)
 			@HttpController.getUpdates @req, @res, @next
 
 		it "should get the updates", ->
-			@UpdatesManager.getSummarizedUpdates
+			@UpdatesManager.getSummarizedDocUpdates
 				.calledWith(@project_id, @doc_id, to: @to, limit: @limit)
 				.should.equal true
 

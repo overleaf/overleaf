@@ -39,7 +39,7 @@ module.exports = HttpController =
 		if req.query.limit?
 			limit = parseInt(req.query.limit, 10)
 
-		UpdatesManager.getSummarizedUpdates project_id, doc_id, to: to, limit: limit, (error, updates) ->
+		UpdatesManager.getSummarizedDocUpdates project_id, doc_id, to: to, limit: limit, (error, updates) ->
 			return next(error) if error?
 			res.send JSON.stringify updates: updates
 
