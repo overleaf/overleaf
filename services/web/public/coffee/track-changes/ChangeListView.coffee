@@ -131,12 +131,12 @@ define [
 						callback(error)
 					success: (collection, response) =>
 						@hideLoading()
-						if response.updates.length == @collection.batchSize
-							@loadUntilFull(callback)
-						else
+						if @collection.isAtEnd()
 							@atEndOfCollection = true
 							@showEmptyMessageIfCollectionEmpty()
 							callback()
+						else
+							@loadUntilFull(callback)
 							
 			else
 				callback() if callback?
@@ -189,9 +189,16 @@ define [
 					hue:  user.hue()
 					name: user.name()
 				}
+			docNames = []
+			for doc in @model.get("docs")
+				if doc.entity?
+					docNames.push doc.entity.get("name")
+				else
+					docNames.push "deleted"
 			data = {
 				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
 				users: userHtml.join("")
+				docs: docNames.join(", ")
 			}
 
 			@$el.html Mustache.to_html(@templates.item, data)

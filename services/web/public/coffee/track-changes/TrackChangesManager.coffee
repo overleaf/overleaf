@@ -39,7 +39,7 @@ define [
 		show: (@doc_id) ->
 			@ide.fileTreeManager.selectEntity(@doc_id)
 
-			@changes = new ChangeList([], doc_id: @doc_id, project_id: @project_id)
+			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
 			@changeListView = new ChangeListView(
 				collection : @changes,

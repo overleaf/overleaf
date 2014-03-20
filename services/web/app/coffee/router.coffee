@@ -124,7 +124,7 @@ module.exports = class Router
 		app.get  '/Project/:Project_id/version', SecutiryManager.requestCanAccessProject, versioningController.listVersions
 		app.get  '/Project/:Project_id/version/:Version_id', SecutiryManager.requestCanAccessProject, versioningController.getVersion
 
-		app.get  "/project/:Project_id/doc/:doc_id/updates", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		app.get  "/project/:Project_id/updates", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecutiryManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 
