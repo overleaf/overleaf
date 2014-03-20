@@ -17,6 +17,14 @@ define [
 				identifier: "trackChanges"
 				element: @$el
 
+			@ide.tabManager.addTab
+				id: "history"
+				name: "History"
+				after: "code"
+				contract: true
+				onShown: () => @show()
+				onHidden: () => @hide()
+
 			@ide.editor.on "resize", () =>
 				@diffView?.resize()
 
@@ -33,17 +41,6 @@ define [
 				if @enabled
 					@doc_id = doc_id
 					@updateDiff()
-
-			@ide.fileTreeManager.on "contextmenu:beforeshow", (entity, entries) =>
-				if entity instanceof Doc
-					entries.push {
-						divider: true
-					}, {
-						text: "History"
-						onClick: () =>
-							@doc_id = entity.id
-							@show()
-					}
 
 		show: () ->
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
