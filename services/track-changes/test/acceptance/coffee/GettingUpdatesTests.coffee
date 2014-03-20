@@ -63,30 +63,30 @@ describe "Getting updates", ->
 				.should.equal true
 
 		it "should return at least the min_count number of summarized updates", ->
+			docs1 = {}
+			docs1[@doc_id] = toV: 20, fromV: 19
+			docs2 = {}
+			docs2[@doc_id] = toV: 18, fromV: 17
+			docs3 = {}
+			docs3[@doc_id] = toV: 16, fromV: 15
 			expect(@updates.slice(0,3)).to.deep.equal [{
-				doc_ids: [@doc_id]
+				docs: docs1
 				meta:
 					start_ts: @to - 2 * @minutes
 					end_ts: @to
 					users: [@user]
-				toV: 20
-				fromV: 19
 			}, {
-				doc_ids: [@doc_id]
+				docs: docs2
 				meta:
 					start_ts: @to - 1 * @days - 2 * @minutes
 					end_ts: @to - 1 * @days
 					users: [@user]
-				toV: 18
-				fromV: 17
 			}, {
-				doc_ids: [@doc_id]
+				docs: docs3
 				meta:
 					start_ts: @to - 2 * @days - 2 * @minutes
 					end_ts: @to - 2 * @days
 					users: [@user]
-				toV: 16
-				fromV: 15
 			}]
 
 
@@ -98,21 +98,21 @@ describe "Getting updates", ->
 				done()
 
 		it "should return as many updates as it can", ->
+			docs1 = {}
+			docs1[@doc_id] = toV: 4, fromV: 3
+			docs2 = {}
+			docs2[@doc_id] = toV: 2, fromV: 1
 			expect(@updates).to.deep.equal [{
-				doc_ids: [@doc_id]
+				docs: docs1
 				meta:
 					start_ts: @to - 8 * @days - 2 * @minutes
 					end_ts: @to - 8 * @days
 					users: [@user]
-				toV: 4
-				fromV: 3
 			}, {
-				doc_ids: [@doc_id]
+				docs: docs2
 				meta:
 					start_ts: @to - 9 * @days - 2 * @minutes
 					end_ts: @to - 9 * @days
 					users: [@user]
-				toV: 2
-				fromV: 1
 			}]
 

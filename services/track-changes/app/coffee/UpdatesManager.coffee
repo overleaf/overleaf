@@ -176,21 +176,29 @@ module.exports = UpdatesManager =
 					if !userExists
 						earliestUpdate.meta.users.push update.meta.user
 
-				if update.doc_id.toString() not in earliestUpdate.doc_ids
-					earliestUpdate.doc_ids.push update.doc_id.toString()
+				doc_id = update.doc_id.toString()
+				doc = earliestUpdate.docs[doc_id]
+				if doc?
+					doc.fromV = Math.min(doc.fromV, update.v)
+					doc.toV = Math.max(doc.toV, update.v)
+				else
+					earliestUpdate.docs[doc_id] =
+						fromV: update.v
+						toV: update.v
 
 				earliestUpdate.meta.start_ts = Math.min(earliestUpdate.meta.start_ts, update.meta.start_ts)
 				earliestUpdate.meta.end_ts   = Math.max(earliestUpdate.meta.end_ts, update.meta.end_ts)
-				earliestUpdate.fromV = update.v
 			else
 				newUpdate =
 					meta:
 						users: []
 						start_ts: update.meta.start_ts
 						end_ts: update.meta.end_ts
+					docs: {}
+
+				newUpdate.docs[update.doc_id.toString()] =
 					fromV: update.v
 					toV: update.v
-					doc_ids: [update.doc_id.toString()]
 
 				if update.meta.user?
 					newUpdate.meta.users.push update.meta.user

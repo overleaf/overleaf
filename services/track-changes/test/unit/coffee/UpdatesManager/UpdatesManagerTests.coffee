@@ -480,97 +480,107 @@ describe "UpdatesManager", ->
 			@now = Date.now()
 			@user_1 = { id: "mock-user-1" }
 			@user_2 = { id: "mock-user-2" }
-			@doc_id_1 = "mock-doc-id-1"
-			@doc_id_2 = "mock-doc-id-2"
 
 		it "should concat updates that are close in time", ->
-			expect(@UpdatesManager._summarizeUpdates [{
-				doc_id: @doc_id_1
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
 				meta:
 					user: @user_1
 					start_ts: @now + 20
 					end_ts:   @now + 30
 				v: 5
 			}, {
-				doc_id: @doc_id_1
+				doc_id: "doc-id-1"
 				meta:
 					user: @user_2
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
-			}]).to.deep.equal [{
-				doc_ids: [@doc_id_1]
+			}]
+
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
 				meta:
 					users: [@user_1, @user_2]
 					start_ts: @now
 					end_ts:   @now + 30
-				fromV: 4
-				toV:   5
 			}]
 
 		it "should leave updates that are far apart in time", ->
 			oneDay = 1000 * 60 * 60 * 24
-			expect(@UpdatesManager._summarizeUpdates [{
-				doc_id: @doc_id_1
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
 				meta:
 					user: @user_2
 					start_ts: @now + oneDay
 					end_ts:   @now + oneDay + 10
 				v: 5
 			}, {
-				doc_id: @doc_id_1
+				doc_id: "doc-id-1"
 				meta:
 					user: @user_1
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
-			}]).to.deep.equal [{
-				doc_ids: [@doc_id_1]
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 5
+						toV: 5
 				meta:
 					users: [@user_2]
 					start_ts: @now + oneDay
 					end_ts:   @now + oneDay + 10
-				fromV: 5
-				toV: 5
 			}, {
-				doc_ids: [@doc_id_1]
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 4
 				meta:
 					users: [@user_1]
 					start_ts: @now
 					end_ts:   @now + 10
-				fromV: 4
-				toV: 4
 			}]
 
 		it "should concat onto existing summarized updates", ->
-			expect(@UpdatesManager._summarizeUpdates [{
-				doc_id: @doc_id_2
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-2"
 				meta:
 					user: @user_1
 					start_ts: @now + 20
 					end_ts:   @now + 30
 				v: 5
 			}, {
-				doc_id: @doc_id_2
+				doc_id: "doc-id-2"
 				meta:
 					user: @user_2
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
 			}], [{
-				doc_ids: [@doc_id_1]
+				docs: 
+					"doc-id-1": 
+						fromV: 6
+						toV: 8
 				meta:
 					users: [@user_1]
 					start_ts: @now + 40
 					end_ts:   @now + 50
-				fromV: 6
-				toV: 8
-			}]).to.deep.equal [{
-				doc_ids: [@doc_id_1, @doc_id_2]
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						toV: 8
+						fromV: 6
+					"doc-id-2":
+						toV: 5
+						fromV: 4
 				meta:
 					users: [@user_1, @user_2]
 					start_ts: @now
 					end_ts:   @now + 50
-				fromV: 4
-				toV:   8
 			}]
