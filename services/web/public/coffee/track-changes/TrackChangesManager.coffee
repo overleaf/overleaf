@@ -49,8 +49,8 @@ define [
 			@changeListView.loadUntilFull (error) =>
 				@autoSelectDiff()
 
-			@changeListView.on "change_diff", (fromModel, toModel) =>
-				@showDiff(fromModel, toModel)
+			@changeListView.on "change_diff", (fromIndex, toIndex) =>
+				@showDiff(fromIndex, toIndex)
 
 			@changeListView.on "restore", (change) =>
 				@restore(change)
@@ -84,12 +84,20 @@ define [
 			@showDiff(fromChange, toChange)
 			@changeListView.setSelectionRange(fromIndex, 0)
 
-		showDiff: (fromModel, toModel) ->
+		showDiff: (fromIndex, toIndex) ->
+			doc_id = @doc_id
+
+			{from, to} = @_findDocVersionsRangeInSelection(doc_id, fromIndex, toIndex)
+
+			if !from? or !to?
+				console.log "No diff, should probably just show latest version"
+				return
+
 			@diff = new Diff({
 				project_id: @project_id
-				doc_id: @doc_id
-				from: fromModel.get("fromVersion")
-				to:   toModel.get("toVersion")
+				doc_id: doc_id
+				from: from
+				to:   to
 			})
 
 			if @diffView?
@@ -99,6 +107,26 @@ define [
 				el:    @$el.find(".track-changes-diff")
 			)
 			@diff.fetch()
+
+		_findDocVersionsRangeInSelection: (doc_id, fromIndex, toIndex) ->
+			from = null
+			to = null
+
+			for change in @changes.models.slice(toIndex, fromIndex + 1)
+				console.log "considering change"
+				for doc in change.get("docs")
+					console.log "considering doc", doc.id, doc_id
+					if doc.id == doc_id
+						if from? and to?
+							from = Math.min(from, doc.fromV)
+							to = Math.max(to, doc.toV)
+						else
+							from = doc.fromV
+							to = doc.toV
+						break
+			console.log "Done", from, to
+
+			return {from, to}
 
 		showEl: ->
 			@ide.editor.hide()

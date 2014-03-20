@@ -112,7 +112,7 @@ define [
 					view.setHoverUnselected()
 
 		triggerChangeDiff: () ->
-			@trigger "change_diff", @collection.models[@selectedFromIndex], @collection.models[@selectedToIndex]
+			@trigger "change_diff", @selectedFromIndex, @selectedToIndex
 
 		listShorterThanContainer: ->
 			@$el.height() > @$(".change-list").height()
