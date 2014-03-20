@@ -86,39 +86,49 @@ module.exports = UpdatesManager =
 				return callback(error) if error?
 				callback null, updates
 
-	getSummarizedDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
-		options.limit ||= 25
+	getSummarizedProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
+		options.min_count ||= 25
 		summarizedUpdates = []
-		to = options.to
+		before = options.before
 		do fetchNextBatch = () ->
-			UpdatesManager._extendBatchOfSummarizedUpdates project_id, doc_id, summarizedUpdates, to, options.limit, (error, updates, endOfDatabase) ->
+			UpdatesManager._extendBatchOfSummarizedUpdates project_id, summarizedUpdates, before, options.min_count, (error, updates, nextBeforeUpdate) ->
 				return callback(error) if error?
-				if endOfDatabase or updates.length >= options.limit
-					callback null, updates
+				if !nextBeforeUpdate? or updates.length >= options.min_count
+					callback null, updates, nextBeforeUpdate
 				else
-					to = updates[updates.length - 1].fromV - 1
+					before = nextBeforeUpdate
 					summarizedUpdates = updates
 					fetchNextBatch()
 
 	_extendBatchOfSummarizedUpdates: (
-		project_id, 
-		doc_id,
+		project_id,
 		existingSummarizedUpdates,
-		to, desiredLength,
+		before, desiredLength,
 		callback = (error, summarizedUpdates, endOfDatabase) ->
 	) ->
-		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, { to: to, limit: 3 * desiredLength }, (error, updates) ->
+		UpdatesManager.getProjectUpdatesWithUserInfo project_id, { before: before, limit: 3 * desiredLength }, (error, updates) ->
 			return callback(error) if error?
-			if !updates? or updates.length == 0
-				endOfDatabase = true
+
+			# Suppose in this request we have fetch the solid updates. In the next request we need
+			# to fetch the dotted updates. These are defined by having an end timestamp less than
+			# the last update's end timestamp (updates are ordered by descending end_ts). I.e.
+			#                 start_ts--v       v--end_ts
+			#   doc1: |......|  |...|   |-------|
+			#   doc2:     |------------------|
+			#                                ^----- Next time, fetch all updates with an
+			#                                       end_ts less than this
+			#          
+			if updates? and updates.length > 0
+				nextBeforeTimestamp = updates[updates.length - 1].meta.end_ts
 			else
-				endOfDatabase = false
+				nextBeforeTimestamp = null
+
 			summarizedUpdates = UpdatesManager._summarizeUpdates(
 				updates, existingSummarizedUpdates
 			)
 			callback null,
-				summarizedUpdates.slice(0, desiredLength),
-				endOfDatabase
+				summarizedUpdates,
+				nextBeforeTimestamp
 
 	fillUserInfo: (updates, callback = (error, updates) ->) ->
 		users = {}
@@ -165,6 +175,10 @@ module.exports = UpdatesManager =
 							break
 					if !userExists
 						earliestUpdate.meta.users.push update.meta.user
+
+				if update.doc_id.toString() not in earliestUpdate.doc_ids
+					earliestUpdate.doc_ids.push update.doc_id.toString()
+
 				earliestUpdate.meta.start_ts = Math.min(earliestUpdate.meta.start_ts, update.meta.start_ts)
 				earliestUpdate.meta.end_ts   = Math.max(earliestUpdate.meta.end_ts, update.meta.end_ts)
 				earliestUpdate.fromV = update.v
@@ -176,6 +190,7 @@ module.exports = UpdatesManager =
 						end_ts: update.meta.end_ts
 					fromV: update.v
 					toV: update.v
+					doc_ids: [update.doc_id.toString()]
 
 				if update.meta.user?
 					newUpdate.meta.users.push update.meta.user

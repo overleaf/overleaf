@@ -14,7 +14,7 @@ app.post "/project/:project_id/doc/:doc_id/flush", HttpController.flushUpdatesWi
 
 app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
 
-app.get "/project/:project_id/doc/:doc_id/updates", HttpController.getUpdates
+app.get "/project/:project_id/updates", HttpController.getUpdates
 
 app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpController.restore
 

@@ -64,28 +64,28 @@ describe "HttpController", ->
 
 	describe "getUpdates", ->
 		beforeEach ->
-			@to = 42
-			@limit = 10
+			@before = Date.now()
+			@nextBeforeTimestamp = @before - 100
+			@min_count = 10
 			@req =
 				params:
-					doc_id: @doc_id
 					project_id: @project_id
 				query:
-					to:    @to.toString()
-					limit: @limit.toString()
+					before:    @before.toString()
+					min_count: @min_count.toString()
 			@res =
 				send: sinon.stub()
 			@updates = ["mock-summarized-updates"]
-			@UpdatesManager.getSummarizedDocUpdates = sinon.stub().callsArgWith(3, null, @updates)
+			@UpdatesManager.getSummarizedProjectUpdates = sinon.stub().callsArgWith(2, null, @updates, @nextBeforeTimestamp)
 			@HttpController.getUpdates @req, @res, @next
 
 		it "should get the updates", ->
-			@UpdatesManager.getSummarizedDocUpdates
-				.calledWith(@project_id, @doc_id, to: @to, limit: @limit)
+			@UpdatesManager.getSummarizedProjectUpdates
+				.calledWith(@project_id, before: @before, min_count: @min_count)
 				.should.equal true
 
 		it "should return the formatted updates", ->
-			@res.send.calledWith(JSON.stringify(updates: @updates)).should.equal true
+			@res.send.calledWith(JSON.stringify(updates: @updates, nextBeforeTimestamp: @nextBeforeTimestamp)).should.equal true
 
 	describe "RestoreManager", ->
 		beforeEach ->

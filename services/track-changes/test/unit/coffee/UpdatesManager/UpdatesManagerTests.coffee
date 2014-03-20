@@ -284,23 +284,26 @@ describe "UpdatesManager", ->
 
 	describe "_extendBatchOfSummarizedUpdates", ->
 		beforeEach ->
-			@to = 42
-			@limit = 2
+			@before = Date.now()
+			@min_count = 2
 			@existingSummarizedUpdates = ["summarized-updates-3"]
 			@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
 
 		describe "when there are updates to get", ->
 			beforeEach ->
-				@updates = ["mock-updates"]
+				@updates = [
+					{op: "mock-op-1", meta: end_ts: @before - 10},
+					{op: "mock-op-1", meta: end_ts: @nextBeforeTimestamp = @before - 20}
+				]
 				@existingSummarizedUpdates = ["summarized-updates-3"]
 				@summarizedUpdates = ["summarized-updates-3", "summarized-update-2", "summarized-update-1"]
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getDocUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
-				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
+				@UpdatesManager.getProjectUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @existingSummarizedUpdates, @before, @min_count, @callback
 
 			it "should get the updates", ->
-				@UpdatesManager.getDocUpdatesWithUserInfo
-					.calledWith(@project_id, @doc_id, { to: @to, limit: 3 * @limit })
+				@UpdatesManager.getProjectUpdatesWithUserInfo
+					.calledWith(@project_id, { before: @before, limit: 3 * @min_count })
 					.should.equal true
 
 			it "should summarize the updates", ->
@@ -308,78 +311,81 @@ describe "UpdatesManager", ->
 					.calledWith(@updates, @existingSummarizedUpdates)
 					.should.equal true
 
-			it "should call the callback with the summarized updates and false for end-of-databse", ->
-				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), false).should.equal true
+			it "should call the callback with the summarized updates and the next before timestamp", ->
+				@callback.calledWith(null, @summarizedUpdates, @nextBeforeTimestamp).should.equal true
 
 		describe "when there are no more updates", ->
 			beforeEach ->
 				@updates = []
 				@UpdatesManager._summarizeUpdates = sinon.stub().returns(@summarizedUpdates)
-				@UpdatesManager.getDocUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
-				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @doc_id, @existingSummarizedUpdates, @to, @limit, @callback
+				@UpdatesManager.getProjectUpdatesWithUserInfo = sinon.stub().callsArgWith(2, null, @updates)
+				@UpdatesManager._extendBatchOfSummarizedUpdates @project_id, @existingSummarizedUpdates, @before, @min_count, @callback
 
-			it "should call the callback with the summarized updates and true for end-of-database", ->
-				@callback.calledWith(null, @summarizedUpdates.slice(0, @limit), true).should.equal true
+			it "should call the callback with the summarized updates and null for nextBeforeTimestamp", ->
+				@callback.calledWith(null, @summarizedUpdates, null).should.equal true
 
-	describe "getSummarizedDocUpdates", ->
+	describe "getSummarizedProjectUpdates", ->
 		describe "when one batch of updates is enough to meet the limit", ->
 			beforeEach ->
-				@to = 42
-				@limit = 2
+				@before = Date.now()
+				@min_count = 2
 				@updates = ["summarized-updates-3", "summarized-updates-2"]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates)
-				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@nextBeforeTimestamp = @before - 100
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates, @nextBeforeTimestamp)
+				@UpdatesManager.getSummarizedProjectUpdates @project_id, { before: @before, min_count: @min_count }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@project_id, @doc_id, [], @to, @limit)
+					.calledWith(@project_id, [], @before, @min_count)
 					.should.equal true
 
 			it "should call the callback with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+				@callback.calledWith(null, @updates, @nextBeforeTimestamp).should.equal true
 
 		describe "when multiple batches are needed to meet the limit", ->
 			beforeEach ->
-				@to = 6
-				@limit = 4
+				@before = Date.now()
+				@min_count = 4
 				@firstBatch =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
+				@nextBeforeTimestamp = @before - 100
 				@secondBatch = [{ toV: 4, fromV: 4 }, { toV: 3, fromV: 3 }]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = (project_id, doc_id, existingUpdates, to, limit, callback) =>
+				@nextNextBeforeTimestamp = @before - 200
+				@UpdatesManager._extendBatchOfSummarizedUpdates = (project_id, existingUpdates, before, desiredLength, callback) =>
 					if existingUpdates.length == 0
-						callback null, @firstBatch, false
+						callback null, @firstBatch, @nextBeforeTimestamp
 					else
-						callback null, @firstBatch.concat(@secondBatch), false
+						callback null, @firstBatch.concat(@secondBatch), @nextNextBeforeTimestamp
 				sinon.spy @UpdatesManager, "_extendBatchOfSummarizedUpdates"
-				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager.getSummarizedProjectUpdates @project_id, { before: @before, min_count: @min_count }, @callback
 
 			it "should get the first batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@project_id, @doc_id, [], @to, @limit)
+					.calledWith(@project_id, [], @before, @min_count)
 					.should.equal true
 
 			it "should get the second batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@project_id, @doc_id, @firstBatch, 4, @limit)
+					.calledWith(@project_id, @firstBatch, @nextBeforeTimestamp, @min_count)
 					.should.equal true
 
 			it "should call the callback with all the updates", ->
-				@callback.calledWith(null, @firstBatch.concat(@secondBatch)).should.equal true
+				@callback.calledWith(null, @firstBatch.concat(@secondBatch), @nextNextBeforeTimestamp).should.equal true
 
 		describe "when the end of the database is hit", ->
 			beforeEach ->
-				@to = 6
-				@limit = 4
+				@before = Date.now()
+				@min_count = 4
 				@updates =  [{ toV: 6, fromV: 6 }, { toV: 5, fromV: 5 }]
-				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(5, null, @updates, true)
-				@UpdatesManager.getSummarizedDocUpdates @project_id, @doc_id, { to: @to, limit: @limit }, @callback
+				@UpdatesManager._extendBatchOfSummarizedUpdates = sinon.stub().callsArgWith(4, null, @updates, null)
+				@UpdatesManager.getSummarizedProjectUpdates @project_id, { before: @before, min_count: @min_count }, @callback
 
 			it "should get the batch of summarized updates", ->
 				@UpdatesManager._extendBatchOfSummarizedUpdates
-					.calledWith(@project_id, @doc_id, [], @to, @limit)
+					.calledWith(@project_id, [], @before, @min_count)
 					.should.equal true
 
 			it "should call the callback with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+				@callback.calledWith(null, @updates, null).should.equal true
 
 	describe "fillUserInfo", ->
 		describe "with valid users", ->
@@ -469,24 +475,31 @@ describe "UpdatesManager", ->
 					op: "mock-op-2"
 				}]
 
-	describe "_buildUpdatesView", ->
+	describe "_summarizeUpdates", ->
 		beforeEach ->
 			@now = Date.now()
+			@user_1 = { id: "mock-user-1" }
+			@user_2 = { id: "mock-user-2" }
+			@doc_id_1 = "mock-doc-id-1"
+			@doc_id_2 = "mock-doc-id-2"
 
 		it "should concat updates that are close in time", ->
 			expect(@UpdatesManager._summarizeUpdates [{
+				doc_id: @doc_id_1
 				meta:
-					user: @user_1 = { id: "mock-user-1" }
+					user: @user_1
 					start_ts: @now + 20
 					end_ts:   @now + 30
 				v: 5
 			}, {
+				doc_id: @doc_id_1
 				meta:
-					user: @user_2 = { id: "mock-user-2" }
+					user: @user_2
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
 			}]).to.deep.equal [{
+				doc_ids: [@doc_id_1]
 				meta:
 					users: [@user_1, @user_2]
 					start_ts: @now
@@ -498,18 +511,21 @@ describe "UpdatesManager", ->
 		it "should leave updates that are far apart in time", ->
 			oneDay = 1000 * 60 * 60 * 24
 			expect(@UpdatesManager._summarizeUpdates [{
+				doc_id: @doc_id_1
 				meta:
-					user: @user_2 = { id: "mock-user-2" }
+					user: @user_2
 					start_ts: @now + oneDay
 					end_ts:   @now + oneDay + 10
 				v: 5
 			}, {
+				doc_id: @doc_id_1
 				meta:
-					user: @user_1 = { id: "mock-user-2" }
+					user: @user_1
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
 			}]).to.deep.equal [{
+				doc_ids: [@doc_id_1]
 				meta:
 					users: [@user_2]
 					start_ts: @now + oneDay
@@ -517,6 +533,7 @@ describe "UpdatesManager", ->
 				fromV: 5
 				toV: 5
 			}, {
+				doc_ids: [@doc_id_1]
 				meta:
 					users: [@user_1]
 					start_ts: @now
@@ -526,21 +543,22 @@ describe "UpdatesManager", ->
 			}]
 
 		it "should concat onto existing summarized updates", ->
-			@user_1 = { id: "mock-user-1" }
-			@user_2 = { id: "mock-user-2" }
 			expect(@UpdatesManager._summarizeUpdates [{
+				doc_id: @doc_id_2
 				meta:
 					user: @user_1
 					start_ts: @now + 20
 					end_ts:   @now + 30
 				v: 5
 			}, {
+				doc_id: @doc_id_2
 				meta:
 					user: @user_2
 					start_ts: @now
 					end_ts:   @now + 10
 				v: 4
 			}], [{
+				doc_ids: [@doc_id_1]
 				meta:
 					users: [@user_1]
 					start_ts: @now + 40
@@ -548,6 +566,7 @@ describe "UpdatesManager", ->
 				fromV: 6
 				toV: 8
 			}]).to.deep.equal [{
+				doc_ids: [@doc_id_1, @doc_id_2]
 				meta:
 					users: [@user_1, @user_2]
 					start_ts: @now

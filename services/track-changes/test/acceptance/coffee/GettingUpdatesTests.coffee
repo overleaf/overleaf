@@ -43,14 +43,16 @@ describe "Getting updates", ->
 
 		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
 			throw error if error?
-			done()
+			TrackChangesClient.flushUpdates @project_id, @doc_id, (error) =>
+				throw error if error?
+				done()
 
 	after: () ->
 		MockWebApi.getUser.restore()
 
 	describe "getting updates up to the limit", ->
 		before (done) ->
-			TrackChangesClient.getUpdates @project_id, @doc_id, { to: 20, limit: 3 }, (error, body) =>
+			TrackChangesClient.getUpdates @project_id, { before: @to + 1, min_count: 3 }, (error, body) =>
 				throw error if error?
 				@updates = body.updates
 				done()
@@ -60,8 +62,9 @@ describe "Getting updates", ->
 				.calledWith(@user_id)
 				.should.equal true
 
-		it "should return the same number of summarized updates as the limit", ->
-			expect(@updates).to.deep.equal [{
+		it "should return at least the min_count number of summarized updates", ->
+			expect(@updates.slice(0,3)).to.deep.equal [{
+				doc_ids: [@doc_id]
 				meta:
 					start_ts: @to - 2 * @minutes
 					end_ts: @to
@@ -69,6 +72,7 @@ describe "Getting updates", ->
 				toV: 20
 				fromV: 19
 			}, {
+				doc_ids: [@doc_id]
 				meta:
 					start_ts: @to - 1 * @days - 2 * @minutes
 					end_ts: @to - 1 * @days
@@ -76,6 +80,7 @@ describe "Getting updates", ->
 				toV: 18
 				fromV: 17
 			}, {
+				doc_ids: [@doc_id]
 				meta:
 					start_ts: @to - 2 * @days - 2 * @minutes
 					end_ts: @to - 2 * @days
@@ -87,13 +92,14 @@ describe "Getting updates", ->
 
 	describe "getting updates beyond the end of the database", ->
 		before (done) ->
-			TrackChangesClient.getUpdates @project_id, @doc_id, { to: 4, limit: 30 }, (error, body) =>
+			TrackChangesClient.getUpdates @project_id, { before: @to - 8 * @days + 1, min_count: 30 }, (error, body) =>
 				throw error if error?
 				@updates = body.updates
 				done()
 
 		it "should return as many updates as it can", ->
 			expect(@updates).to.deep.equal [{
+				doc_ids: [@doc_id]
 				meta:
 					start_ts: @to - 8 * @days - 2 * @minutes
 					end_ts: @to - 8 * @days
@@ -101,6 +107,7 @@ describe "Getting updates", ->
 				toV: 4
 				fromV: 3
 			}, {
+				doc_ids: [@doc_id]
 				meta:
 					start_ts: @to - 9 * @days - 2 * @minutes
 					end_ts: @to - 9 * @days

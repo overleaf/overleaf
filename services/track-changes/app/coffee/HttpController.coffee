@@ -31,17 +31,18 @@ module.exports = HttpController =
 			res.send JSON.stringify(diff: diff)
 
 	getUpdates: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
 		project_id = req.params.project_id
 
-		if req.query.to?
-			to = parseInt(req.query.to, 10)
-		if req.query.limit?
-			limit = parseInt(req.query.limit, 10)
+		if req.query.before?
+			before = parseInt(req.query.before, 10)
+		if req.query.min_count?
+			min_count = parseInt(req.query.min_count, 10)
 
-		UpdatesManager.getSummarizedDocUpdates project_id, doc_id, to: to, limit: limit, (error, updates) ->
+		UpdatesManager.getSummarizedProjectUpdates project_id, before: before, min_count: min_count, (error, updates, nextBeforeTimestamp) ->
 			return next(error) if error?
-			res.send JSON.stringify updates: updates
+			res.send JSON.stringify
+				updates: updates
+				nextBeforeTimestamp: nextBeforeTimestamp
 
 	restore: (req, res, next = (error) ->) ->
 		{doc_id, project_id, version} = req.params

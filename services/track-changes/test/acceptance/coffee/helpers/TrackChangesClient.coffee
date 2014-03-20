@@ -4,14 +4,22 @@ rclient = require("redis").createClient() # Only works locally for now
 
 module.exports = TrackChangesClient =
 	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
+		TrackChangesClient.flushUpdates project_id, doc_id, (error) ->
+			return callback(error) if error?
+			TrackChangesClient.getCompressedUpdates doc_id, callback
+
+	flushUpdates: (project_id, doc_id, callback = (error) ->) ->
 		request.post {
 			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/flush"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
-			db.docHistory
-				.find(doc_id: ObjectId(doc_id))
-				.sort("meta.end_ts": 1)
-				.toArray callback
+			callback(error)
+
+	getCompressedUpdates: (doc_id, callback = (error, updates) ->) ->
+		db.docHistory
+			.find(doc_id: ObjectId(doc_id))
+			.sort("meta.end_ts": 1)
+			.toArray callback
 
 	pushRawUpdates: (doc_id, updates, callback = (error) ->) ->
 		rclient.rpush "UncompressedHistoryOps:#{doc_id}", (JSON.stringify(u) for u in updates)..., callback
@@ -23,9 +31,9 @@ module.exports = TrackChangesClient =
 			response.statusCode.should.equal 200
 			callback null, JSON.parse(body)
 
-	getUpdates: (project_id, doc_id, options, callback = (error, body) ->) ->
+	getUpdates: (project_id, options, callback = (error, body) ->) ->
 		request.get {
-			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/updates?to=#{options.to}&limit=#{options.limit}"
+			url: "http://localhost:3015/project/#{project_id}/updates?before=#{options.before}&min_count=#{options.min_count}"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 200
 			callback null, JSON.parse(body)
