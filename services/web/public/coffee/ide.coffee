@@ -106,12 +106,12 @@ define [
 			@sideBarView = new SideBarManager(@, $("#sections"))
 			selectElement = @sideBarView.selectElement
 			mainAreaManager = @mainAreaManager = new MainAreaManager(@, $("#content"))
+			@fileTreeManager = new FileTreeManager(@)
 			@editor = new Editor(@)
 			@pdfManager = new PdfManager(@)
 			if @userSettings.autoComplete
 				@autoCompleteManager = new AutoCompleteManager(@)
 			@spellingManager = new SpellingManager(@)
-			@fileTreeManager = new FileTreeManager(@)
 			@fileUploadManager = new FileUploadManager(@)
 			@searchManager = new SearchManager(@)
 			@cursorManager = new CursorManager(@)

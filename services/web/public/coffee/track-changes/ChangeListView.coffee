@@ -243,20 +243,20 @@ define [
 			@$(".change-selector-to").prop("checked", checked)
 
 		setSelected: (first, last) ->
-			@$el.addClass("selected")
+			@$el.addClass("selected-change")
 			if first
-				@$el.addClass("selected-to")
+				@$el.addClass("selected-change-to")
 			else
-				@$el.removeClass("selected-to")
+				@$el.removeClass("selected-change-to")
 			if last
-				@$el.addClass("selected-from")
+				@$el.addClass("selected-change-from")
 			else
-				@$el.removeClass("selected-from")
+				@$el.removeClass("selected-change-from")
 
 		setUnselected: () ->
-			@$el.removeClass("selected-to")
-			@$el.removeClass("selected-from")
-			@$el.removeClass("selected")
+			@$el.removeClass("selected-change-to")
+			@$el.removeClass("selected-change-from")
+			@$el.removeClass("selected-change")
 
 		setHoverSelected: (first, last) ->
 			@$el.addClass("hover-selected")

@@ -35,12 +35,19 @@ define [
 				identifier: "editor"
 				element: @editorPanel
 			@initializeEditor()
+			@bindToFileTreeEvents()
+			@enable()
 			@loadingIndicator = $(@templates.loadingIndicator)
 			@editorPanel.find("#editor").append(@loadingIndicator)
 			@leftPanel = @editorPanel.find("#leftEditorPanel")
 			@rightPanel = @editorPanel.find("#rightEditorPanel")
 			@initSplitView()
 			@switchToFlatView()
+
+		bindToFileTreeEvents: () ->
+			@ide.fileTreeManager.on "open:doc", (doc_id, options = {}) =>
+				if @enabled
+					@openDoc doc_id, options
 
 		initSplitView: () ->
 			splitter = @editorPanel.find("#editorSplitter")
@@ -351,3 +358,9 @@ define [
 
 		getCurrentDocId: () ->
 			@current_doc_id
+
+		enable: () ->
+			@enabled = true
+
+		disable: () ->
+			@enabled = false

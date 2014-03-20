@@ -24,6 +24,16 @@ define [
 				e.preventDefault
 				@hide()
 
+			@bindToFileTreeEvents()
+
+			@disable()
+
+		bindToFileTreeEvents: () ->
+			@ide.fileTreeManager.on "open:doc", (doc_id) =>
+				if @enabled
+					@doc_id = doc_id
+					@updateDiff()
+
 			@ide.fileTreeManager.on "contextmenu:beforeshow", (entity, entries) =>
 				if entity instanceof Doc
 					entries.push {
@@ -31,12 +41,11 @@ define [
 					}, {
 						text: "History"
 						onClick: () =>
-							@show(entity.id)
+							@doc_id = entity.id
+							@show()
 					}
 
-		show: (@doc_id) ->
-			@ide.fileTreeManager.selectEntity(@doc_id)
-
+		show: () ->
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
 			@changeListView = new ChangeListView(
@@ -48,7 +57,7 @@ define [
 				@autoSelectDiff()
 
 			@changeListView.on "change_diff", (fromIndex, toIndex) =>
-				@showDiff(fromIndex, toIndex)
+				@selectDocAndUpdateDiff(fromIndex, toIndex)
 
 			@changeListView.on "restore", (change) =>
 				@restore(change)
@@ -57,9 +66,16 @@ define [
 				@diffView.destroy()
 
 			@ide.mainAreaManager.change "trackChanges"
+			@ide.editor.disable()
+			@ide.fileViewManager.disable()
+			@enable()
 
 		hide: () ->
+			@ide.editor.enable()
+			@ide.fileViewManager.enable()
+			@disable()
 			@ide.fileTreeManager.openDoc(@doc_id)
+			@ide.mainAreaManager.change "editor"
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0
@@ -78,13 +94,29 @@ define [
 
 			toChange = @changes.models[0]
 			fromChange = @changes.models[fromIndex]
-			@showDiff(fromChange, toChange)
 			@changeListView.setSelectionRange(fromIndex, 0)
+			@updateDiff()
 
-		showDiff: (fromIndex, toIndex) ->
-			doc_id = @doc_id
+		selectDocAndUpdateDiff: (fromIndex, toIndex) ->
+			doc_ids = []
+			for change in @changes.models.slice(toIndex, fromIndex + 1)
+				for doc in change.get("docs") or []
+					doc_ids.push doc.id if doc.id not in doc_ids
 
-			{from, to} = @_findDocVersionsRangeInSelection(doc_id, fromIndex, toIndex)
+			if !@doc_id? or @doc_id not in doc_ids
+				@doc_id = doc_ids[0]
+
+			@updateDiff()
+
+		updateDiff: () ->
+			fromIndex = @changeListView.selectedFromIndex
+			toIndex   = @changeListView.selectedToIndex
+
+			if !toIndex? or !fromIndex?
+				console.log "No selection - what should we do!?"
+				return
+
+			{from, to} = @_findDocVersionsRangeInSelection(@doc_id, fromIndex, toIndex)
 
 			if !from? or !to?
 				console.log "No diff, should probably just show latest version"
@@ -92,7 +124,7 @@ define [
 
 			@diff = new Diff({
 				project_id: @project_id
-				doc_id: doc_id
+				doc_id: @doc_id
 				from: from
 				to:   to
 			})
@@ -104,6 +136,9 @@ define [
 				el:    @$el.find(".track-changes-diff")
 			)
 			@diff.fetch()
+
+			@ide.fileTreeManager.selectEntity(@doc_id)
+
 
 		_findDocVersionsRangeInSelection: (doc_id, fromIndex, toIndex) ->
 			from = null
@@ -154,5 +189,11 @@ define [
 				error: (error) ->
 					callback(error)
 			}
+
+		enable: () ->
+			@enabled = true
+
+		disable: () ->
+			@enabled = false
 
 	return TrackChangesManager
