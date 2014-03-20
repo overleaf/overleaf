@@ -3,6 +3,15 @@ define [
 	"libs/mustache"
 	"libs/backbone"
 ], (moment)->
+
+	moment.lang "en", calendar:
+		lastDay : '[Yesterday at] h:mm a'
+		sameDay : '[Today at] h:mm a'
+		nextDay : '[Tomorrow at] h:mm a'
+		lastWeek : "Do MMM YYYY, h:mm a"
+		nextWeek : "Do MMM YYYY, h:mm a"
+		sameElse : 'Do MMM YYYY, h:mm a'
+
 	ChangeListView = Backbone.View.extend
 		template: $("#changeListTemplate").html()
 
@@ -39,7 +48,10 @@ define [
 			view.$el.insertBefore(elementAtIndex)
 
 			view.on "click", (e, v) =>
-				@setSelectionRange(index, index)
+				if e.shiftKey
+					@selectRangeTo(index)
+				else
+					@setSelectionRange(index, index)
 
 			view.on "selected:to", (e, v) =>
 				@setSelectionRange(@selectedFromIndex, index)
@@ -73,6 +85,13 @@ define [
 			@selectedToIndex = toIndex
 			@resetAllSelectors()
 			@triggerChangeDiff()
+
+		selectRangeTo: (index) ->
+			return unless @selectedFromIndex? and @selectedToIndex?
+			if index < @selectedToIndex
+				@setSelectionRange(@selectedFromIndex, index)
+			else
+				@setSelectionRange(index, @selectedToIndex)
 
 		resetAllSelectors: () ->
 			for view, i in @itemViews

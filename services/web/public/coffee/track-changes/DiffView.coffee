@@ -20,6 +20,7 @@ define [
 			@insertMarkers()
 			@insertNameTag()
 			@insertMoreChangeLabels()
+			@bindToScrollEvents()
 			@scrollToFirstChange()
 			return @
 
@@ -43,7 +44,8 @@ define [
 				e.position = position
 				@updateVisibleNames(e)
 
-			session.on "changeScrollTop", (e) =>
+		bindToScrollEvents: () ->
+			@aceEditor.getSession().on "changeScrollTop", (e) =>
 				@updateMoreChangeLabels()
 
 		getPlainDiffContent: () ->
@@ -84,20 +86,27 @@ define [
 			markerBackLayer = @aceEditor.renderer.$markerBack
 			markerFrontLayer = @aceEditor.renderer.$markerFront
 			lineHeight = @aceEditor.renderer.lineHeight
+
+			dark = @_isDarkTheme()
+
 			if entry.i? or entry.d?
 				hue = entry.meta.user.hue()
 				if entry.i?
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "inserted-change-background", false, """
-						background-color : hsl(#{hue}, 70%, 85%);
-					"""
+					if dark
+						style = "background-color : hsl(#{hue}, 100%, 28%);"
+					else
+						style = "background-color : hsl(#{hue}, 70%, 85%);"
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "inserted-change-background", false, style
 				if entry.d?
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, """
-						background-color : hsl(#{hue}, 70%, 95%);
-					"""
-					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-foreground", true, """
-						height: #{Math.round(lineHeight/2) - 1}px;
-						border-bottom: 2px solid hsl(#{hue}, 70%, 40%);
-					"""
+					if dark
+						bgStyle = "background-color: hsl(#{hue}, 100%, 20%);"
+						fgStyle = "border-bottom: 2px solid hsl(#{hue}, 100%, 60%);"
+					else
+						bgStyle = "background-color: hsl(#{hue}, 70%, 95%);"
+						fgStyle = "border-bottom: 2px solid hsl(#{hue}, 70%, 40%);"
+					fgStyle += "; height: #{Math.round(lineHeight/2) - 1}px;"
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-background", false, bgStyle
+					@_addMarkerWithCustomStyle session, markerBackLayer, range, "deleted-change-foreground", true, fgStyle
 
 		_addMarkerWithCustomStyle: (session, markerLayer, range, klass, foreground, style) ->
 			session.addMarker range, klass, (html, range, left, top, config) ->
@@ -106,6 +115,14 @@ define [
 				else
 					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
 			, foreground
+
+		_isDarkTheme: () ->
+			rgb = $(".ace_editor").css("background-color");
+			[m, r, g, b] = rgb.match(/rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)/)
+			r = parseInt(r, 10)
+			g = parseInt(g, 10)
+			b = parseInt(b, 10)
+			return r + g + b < 3 * 128
 
 		insertNameTag: () ->
 			@$nameTagEl = $("<div class='change-name-marker'></div>")
@@ -116,17 +133,23 @@ define [
 			@$ace.append(@$nameTagEl)
 
 		insertMoreChangeLabels: () ->
-			@$changesBefore = $("<div class='changes-before'><span></span> <i class='icon-arrow-up'></div>")
-			@$changesAfter = $("<div class='changes-after'><span></span> <i class='icon-arrow-down'></div>")
+			@$changesBefore = $("<a class='changes-before' href='#'><span></span> <i class='icon-arrow-up'></a>")
+			@$changesAfter = $("<a class='changes-after' href='#'><span></span> <i class='icon-arrow-down'></a>")
 			@$ace.append(@$changesBefore)
 			@$ace.append(@$changesAfter)
+			@$changesBefore.on "click", () =>
+				@gotoLastHiddenChangeBefore()
+			@$changesAfter.on "click", () =>
+				@gotoFirstHiddenChangeAfter()
 			@updateMoreChangeLabels()
 
 		scrollToFirstChange: () ->
-			if @entries? and @entries[0]?
-				row = @entries[0].range.start.row
-				@aceEditor.gotoLine(0)
-				@aceEditor.gotoLine(row, 0, true)
+			@aceEditor.scrollToLine(0)
+			setTimeout () =>
+				if @entries? and @entries[0]?
+					row = @entries[0].range.start.row
+					@aceEditor.scrollToLine(row, true, false)
+			, 10
 
 		_drawNameTag: (entry, position) ->
 			@$nameTagEl.show()
@@ -146,9 +169,10 @@ define [
 			height = @$ace.height()
 
 			hue = entry.meta.user.hue()
-			css = {
-				"background-color" : "hsl(#{hue}, 70%, 90%)";
-			}
+			if @_isDarkTheme()
+				css = { "background-color" : "hsl(#{hue}, 100%, 20%)"; }
+			else
+				css = { "background-color" : "hsl(#{hue}, 70%, 90%)"; }
 
 			if position.pageX + @$nameTagEl.width() < @$ace.width()
 				css["left"] = position.pageX
@@ -167,7 +191,7 @@ define [
 			@$nameTagEl.css css
 
 		_hideNameTag: () ->
-			@$nameTagEl.hide()
+			@$nameTagEl?.hide()
 
 		updateVisibleNames: (e) ->
 			visibleName = false
@@ -181,25 +205,40 @@ define [
 
 		updateMoreChangeLabels: () ->
 			return if !@$changesBefore or !@$changesAfter
-			firstRow = @aceEditor.renderer.getFirstFullyVisibleRow()
-			lastRow = @aceEditor.renderer.getLastFullyVisibleRow()
-			changesBefore = 0
-			changesAfter = 0
-			for entry in @entries or []
-				if entry.range.start.row < firstRow
-					changesBefore += 1
-				if entry.range.end.row > lastRow
-					changesAfter += 1
-			if changesBefore > 0
-				@$changesBefore.find("span").text("#{changesBefore} more change#{if changesBefore > 1 then "s" else ""} above")
-				@$changesBefore.show()
-			else
-				@$changesBefore.hide()
-			if changesAfter > 0
-				@$changesAfter.find("span").text("#{changesAfter} more change#{if changesAfter > 1 then "s" else ""} below")
-				@$changesAfter.show()
-			else
-				@$changesAfter.hide()
+			setTimeout () =>
+				firstRow = @aceEditor.getFirstVisibleRow()
+				lastRow = @aceEditor.getLastVisibleRow()
+				changesBefore = 0
+				changesAfter = 0
+				@lastHiddenChangeBefore = null
+				@firstHiddenChangeAfter = null
+				for entry in @entries or []
+					if entry.range.start.row < firstRow
+						changesBefore += 1
+						@lastHiddenChangeBefore = entry
+					if entry.range.end.row > lastRow
+						changesAfter += 1
+						@firstHiddenChangeAfter ||= entry
+
+				if changesBefore > 0
+					@$changesBefore.find("span").text("#{changesBefore} more change#{if changesBefore > 1 then "s" else ""} above")
+					@$changesBefore.show()
+				else
+					@$changesBefore.hide()
+				if changesAfter > 0
+					@$changesAfter.find("span").text("#{changesAfter} more change#{if changesAfter > 1 then "s" else ""} below")
+					@$changesAfter.show()
+				else
+					@$changesAfter.hide()
+			, 100
+
+		gotoLastHiddenChangeBefore: () ->
+			return if !@lastHiddenChangeBefore
+			@aceEditor.scrollToLine(@lastHiddenChangeBefore.range.start.row, true, false)
+
+		gotoFirstHiddenChangeAfter: () ->
+			return if !@firstHiddenChangeAfter
+			@aceEditor.scrollToLine(@firstHiddenChangeAfter.range.end.row, true, false)
 
 		resize: () ->
 			@aceEditor.resize()
