@@ -17,8 +17,11 @@ define [
 					@tab.empty()
 					if !@ide.isAllowedToDoIt "owner"
 					else if !@project.get('features').dropbox
+						ga('send', 'event', 'subscription-funnel', 'askToUpgrade', {dropbox:true})
 						accountManager.askToUpgrade @ide,
-							onUpgrade: @checkIfUserIsLinkedToDropbox
+							onUpgrade: =>
+								@checkIfUserIsLinkedToDropbox()
+								ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', {dropbox:true})
 					else
 						@checkIfUserIsLinkedToDropbox()
 

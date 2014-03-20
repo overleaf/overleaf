@@ -42,8 +42,10 @@ define [
 				@view.setHistoryAreaToDisplayEnableVersioning()
 
 		enableVersioning: ->
+			ga('send', 'event', 'subscription-funnel', 'askToUpgrade', {history:true})
 			AccountManager.askToUpgrade @ide,
 				onUpgrade: () =>
+					ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', {history:true})
 					@showHistoryArea()
 
 		takeSnapshot: (message, callback = (error) ->) ->

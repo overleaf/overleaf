@@ -81,9 +81,12 @@ define [
 					@ide.showGenericServerErrorMessage()
 					return
 				if !added
+					ga('send', 'event', 'subscription-funnel', 'askToUpgrade', {projectMemebrs:true})
 					AccountManager.askToUpgrade @ide,
 						why: "to add additional collaborators"
-						onUpgrade: () => @addMember(email, privileges)
+						onUpgrade: () => 
+							ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', {projectMemebrs:true})
+							@addMember(email, privileges)
 
 		afterMemberRemoved: (memberId) ->
 			for member in @members.models
