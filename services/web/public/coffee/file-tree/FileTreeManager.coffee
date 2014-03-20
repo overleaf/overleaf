@@ -155,6 +155,8 @@ define [
 			entity_id = @getSelectedEntityId()
 			return if !entity_id?
 			@views[entity_id]?.startRename()
+			ga('send', 'event', 'editor-interaction', 'renameEntity', {menu:"topMenu"})
+
 
 		renameEntity: (entity, name) ->
 			@ide.socket.emit 'renameEntity', entity.id, entity.get("type"), name
@@ -247,6 +249,7 @@ define [
 
 		# DELETING
 		confirmDelete: (entity) ->
+			ga('send', 'event', 'editor-interaction', 'deleteEntity', {menu:"topMenu"})
 			Modal.createModal
 				title: "Confirm Deletion"
 				message: "Are you sure you want to delete <strong>#{entity.get("name")}</strong>?"
