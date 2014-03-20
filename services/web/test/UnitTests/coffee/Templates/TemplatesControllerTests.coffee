@@ -29,7 +29,9 @@ describe 'Templates Controller', ->
 			'../Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../Project/ProjectOptionsHandler':@ProjectOptionsHandler
 			'./TemplatesPublisher':@TemplatesPublisher
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				err:->
 			"settings-sharelatex": 
 				path:
 					dumpFolder:@dumpFolder

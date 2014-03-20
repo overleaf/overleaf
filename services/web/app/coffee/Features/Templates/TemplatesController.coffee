@@ -38,7 +38,10 @@ module.exports =
 		TemplatesPublisher.unpublish user_id, project_id, callback
 
 	getTemplateDetails: (user_id, project_id, callback)->
-		TemplatesPublisher.getTemplateDetails user_id, project_id, callback
+		TemplatesPublisher.getTemplateDetails user_id, project_id, (err, details)->
+			if err?
+				logger.err err:err, user_id:user_id, project_id:project_id, "something went wrong getting template details"
+			callback(err, details)
 
 
 setCompiler = (project_id, compiler, callback)->
