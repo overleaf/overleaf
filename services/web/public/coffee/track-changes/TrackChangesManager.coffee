@@ -13,11 +13,9 @@ define [
 		constructor: (@ide) ->
 			@project_id = window.userSettings.project_id
 			@$el = $(@template)
-			$("#editorWrapper").append(@$el)
-			@hideEl()
-
-			@ide.editor.on "change:doc", () =>
-				@hideEl()
+			@ide.mainAreaManager.addArea
+				identifier: "trackChanges"
+				element: @$el
 
 			@ide.editor.on "resize", () =>
 				@diffView?.resize()
@@ -58,10 +56,9 @@ define [
 			if @diffView?
 				@diffView.destroy()
 
-			@showEl()
+			@ide.mainAreaManager.change "trackChanges"
 
 		hide: () ->
-			@hideEl()
 			@ide.fileTreeManager.openDoc(@doc_id)
 
 		autoSelectDiff: () ->
@@ -113,9 +110,7 @@ define [
 			to = null
 
 			for change in @changes.models.slice(toIndex, fromIndex + 1)
-				console.log "considering change"
 				for doc in change.get("docs")
-					console.log "considering doc", doc.id, doc_id
 					if doc.id == doc_id
 						if from? and to?
 							from = Math.min(from, doc.fromV)
@@ -124,17 +119,8 @@ define [
 							from = doc.fromV
 							to = doc.toV
 						break
-			console.log "Done", from, to
 
 			return {from, to}
-
-		showEl: ->
-			@ide.editor.hide()
-			@$el.show()
-
-		hideEl: () ->
-			@ide.editor.show()
-			@$el.hide()
 
 		restore: (change) ->
 			name = @ide.fileTreeManager.getNameOfEntityId(@doc_id)
