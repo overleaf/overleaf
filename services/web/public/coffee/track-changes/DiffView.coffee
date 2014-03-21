@@ -4,15 +4,33 @@ define [
 	"ace/range"
 	"moment"
 	"libs/backbone"
+	"libs/mustache"
 ], (Ace, LatexMode, Range, moment)->
 	DiffView = Backbone.View.extend
+		template: $("#trackChangesDiffTemplate").html()
+
+		events:
+			"click .restore": () ->
+				console.log "click"
+				@trigger "restore"
+
 		initialize: () ->
 			@model.on "change:diff", () => @render()
-			@render()
 
 		render: ->
 			diff = @model.get("diff")
 			return unless diff?
+
+			changes = @getNumberOfChanges()
+			html = Mustache.to_html @template, {
+				changes: "#{changes} change#{if changes == 1 then "" else "s"}"
+				name: @model.get("doc")?.get("name")
+			}
+			@$el.html(html)
+
+			if !@model.get("from")? or !@model.get("to")? or changes == 0
+				@$(".restore").hide()
+
 			@createAceEditor()
 			@aceEditor.setValue(@getPlainDiffContent())
 			@aceEditor.clearSelection()
@@ -24,12 +42,12 @@ define [
 			@scrollToFirstChange()
 			return @
 
-		destroy: () ->
+		remove: () ->
 			@$editor?.remove()
+			@undelegateEvents()
 
 		createAceEditor: () ->
-			@$el.empty()
-			@$editor = $("<div/>")
+			@$editor = @$(".track-changes-diff-editor")
 			@$el.append(@$editor)
 			@aceEditor = Ace.edit(@$editor[0])
 			@aceEditor.setTheme("ace/theme/#{window.userSettings.theme}")
@@ -53,6 +71,12 @@ define [
 			for entry in @model.get("diff") or []
 				content += entry.u or entry.i or entry.d or ""
 			return content
+
+		getNumberOfChanges: () ->
+			changes = 0
+			for entry in @model.get("diff") or []
+				changes += 1 if entry.i? or entry.d?
+			return changes
 
 		insertMarkers: () ->
 			row    = 0

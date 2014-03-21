@@ -20,6 +20,7 @@ define [
 			@ide.tabManager.addTab
 				id: "history"
 				name: "History"
+				show: "code"
 				after: "code"
 				contract: true
 				onShown: () => @show()
@@ -56,11 +57,8 @@ define [
 			@changeListView.on "change_diff", (fromIndex, toIndex) =>
 				@selectDocAndUpdateDiff(fromIndex, toIndex)
 
-			@changeListView.on "restore", (change) =>
-				@restore(change)
-
 			if @diffView?
-				@diffView.destroy()
+				@diffView.remove()
 
 			@ide.mainAreaManager.change "trackChanges"
 			@ide.editor.disable()
@@ -72,7 +70,7 @@ define [
 			@ide.fileViewManager.enable()
 			@disable()
 			@ide.fileTreeManager.openDoc(@doc_id)
-			@ide.mainAreaManager.change "editor"
+			@ide.tabManager.show "code"
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0
@@ -113,33 +111,41 @@ define [
 				console.log "No selection - what should we do!?"
 				return
 
-			{from, to} = @_findDocVersionsRangeInSelection(@doc_id, fromIndex, toIndex)
-
-			if !from? or !to?
-				console.log "No diff, should probably just show latest version"
-				return
+			{from, to, start_ts, end_ts} = @_findDocVersionsRangeInSelection(@doc_id, fromIndex, toIndex)
 
 			@diff = new Diff({
 				project_id: @project_id
 				doc_id: @doc_id
 				from: from
-				to:   to
+				to: to
+				start_ts: start_ts
+				end_ts: end_ts
+			}, {
+				ide: @ide
 			})
 
 			if @diffView?
-				@diffView.destroy()
+				@diffView.remove()
+
+			if !@diff.get("doc")?
+				console.log "This document has been deleted. What should we do?"
+				return
+
 			@diffView = new DiffView(
 				model: @diff
 				el:    @$el.find(".track-changes-diff")
 			)
+
+			@diffView.on "restore", () =>
+				@restoreDiff(@diff)
+
 			@diff.fetch()
 
 			@ide.fileTreeManager.selectEntity(@doc_id)
 
 
 		_findDocVersionsRangeInSelection: (doc_id, fromIndex, toIndex) ->
-			from = null
-			to = null
+			from = to = start_ts = end_ts = null
 
 			for change in @changes.models.slice(toIndex, fromIndex + 1)
 				for doc in change.get("docs")
@@ -147,16 +153,20 @@ define [
 						if from? and to?
 							from = Math.min(from, doc.fromV)
 							to = Math.max(to, doc.toV)
+							start_ts = Math.min(start_ts, change.get("start_ts"))
+							end_ts = Math.max(end_ts, change.get("end_ts"))
 						else
 							from = doc.fromV
 							to = doc.toV
+							start_ts = change.get("start_ts")
+							end_ts = change.get("end_ts")
 						break
 
-			return {from, to}
+			return {from, to, start_ts, end_ts}
 
-		restore: (change) ->
-			name = @ide.fileTreeManager.getNameOfEntityId(@doc_id)
-			date = moment(change.get("start_ts")).format("Do MMM YYYY, h:mm:ss a")
+		restoreDiff: (diff) ->
+			name = diff.get("doc")?.get("name")
+			date = moment(diff.get("start_ts")).format("Do MMM YYYY, h:mm:ss a")
 			modal = new Modal({
 				title: "Restore document"
 				message: "Are you sure you want to restore <strong>#{name}</strong> to before the changes on #{date}?"
@@ -169,23 +179,11 @@ define [
 					callback: ($button) =>
 						$button.text("Restoring...")
 						$button.prop("disabled", true)
-						@doRestore change.get("version"), (error) =>
+						diff.restore (error) =>
 							modal.remove()
 							@hide()
 				}]
 			})
-
-		doRestore: (version, callback = (error) ->) ->
-			$.ajax {
-				url: "/project/#{@project_id}/doc/#{@doc_id}/version/#{version}/restore"
-				type: "POST"
-				headers:
-					"X-CSRF-Token": window.csrfToken
-				success: () ->
-					callback()
-				error: (error) ->
-					callback(error)
-			}
 
 		enable: () ->
 			@enabled = true

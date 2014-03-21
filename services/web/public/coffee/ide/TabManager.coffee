@@ -17,8 +17,9 @@ define [
 		addTab: (options) ->
 			@tabs.push options
 
+			options.show ||= options.id
 			tabEl = $(Mustache.to_html @templates.tab, options)
-			tabEl.find("a").attr("href", "#" + options.id)
+			tabEl.find("a").attr("href", "#" + options.show)
 
 			if options.content?
 				contentEl = $(Mustache.to_html @templates.content, options)
@@ -53,6 +54,8 @@ define [
 				if options.contract
 					@contract()
 
+		show: (tab) ->
+			$("##{tab}-tab-li > a").tab("show")
 
 		lockOpen: () ->
 			@locked_open = true

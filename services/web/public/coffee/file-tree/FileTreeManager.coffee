@@ -97,7 +97,7 @@ define [
 				@views[@selected_entity_id].deselect()
 			@selected_entity_id = entity_id
 			@ide.sideBarView.deselectAll()
-			@views[entity_id].select()
+			@views[entity_id]?.select()
 
 		getEntity: (entity_id) ->
 			@views[entity_id]?.model
