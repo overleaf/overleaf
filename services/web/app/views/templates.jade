@@ -22,7 +22,7 @@
 		
 	script(type="text/template")#tabTemplate
 		li(id="{{ id }}-tab-li")
-			a(href="#", data-toggle="tab", data-target="\\#{{ id }}-tab", class="tab-link {{ id }}-tab")
+			a(href="#", data-toggle="tab", data-target="\\#{{ show }}-tab", class="tab-link {{ id }}-tab")
 				.content {{ name }}
 
 	script(type="text/template")#tabContentTemplate
@@ -436,6 +436,12 @@
 				.change-list-area
 			.track-changes-diff
 
+	script(type='text/template')#trackChangesDiffTemplate
+		.track-changes-diff-toolbar.btn-toolbar
+			.number-of-changes {{ changes }} in <strong>{{ name }}</strong>
+			a(href="#").restore.btn.btn-small.btn-danger Restore to before these changes
+		.track-changes-diff-editor
+
 	script(type='text/template')#changeListItemTemplate
 		div(class='change-selectors')
 			div.range
@@ -446,9 +452,6 @@
 			div.changed-docs {{docs}}
 			div.change-date {{date}}
 			div {{{users}}}
-
-		div(class='restore')
-			a(href="#") Restore to here
 
 	script(type='text/template')#changeListItemUserTemplate
 		div(class='change-name')

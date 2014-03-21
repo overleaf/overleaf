@@ -8,16 +8,39 @@
 		left: 0;
 		top: 0;
 		bottom: 0;
-		padding: 0px 12px;
 		height: 100%;
 		.ace_editor {
 			position: absolute;
-			top: 0;
+			top: 30px;
 			left: 0;
 			right: 0;
 			bottom: 0;
 			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
 				display: none;
+			}
+		}
+		.track-changes-diff-toolbar {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: -1px;
+			height: 20px;
+			padding: 5px 5px 5px 5px;
+			margin: 0;
+			background-color: #282828;
+			color: white;
+			border-right: 1px solid white;
+			.number-of-changes, .restore {
+				position: absolute;
+			}
+			.number-of-changes {
+				left: 10px;
+				bottom: 7px;
+			}
+			.restore {
+				right: 10px;
+				bottom: 5px;
+				padding: 3px 9px;
 			}
 		}
 	}
@@ -181,11 +204,10 @@
 		li.selected-change-from {
 			.change-selectors {
 				.range {
-					bottom: 37px;
+					bottom: 10px;
 				}
 				.change-selector-from {
 					opacity: 1;
-					bottom: 32px;
 				}
 			}
 			.restore {
@@ -227,13 +249,6 @@
 				}
 				.change-selector-from {
 					opacity: 1;
-				}
-			}
-		}
-		li.selected-change-from.hover-selected-from {
-			.change-selectors {
-				.range {
-					bottom: 37px;
 				}
 			}
 		}
