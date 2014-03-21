@@ -11,23 +11,23 @@ define [
 					"click .js-new-file"    : (e) ->
 						e.preventDefault()
 						@manager.showNewDocModal()
-						ga('send', 'event', 'editor-interaction', 'newFile', {menu:"DropdownMenu", entityDropdown:"folder"})
+						ga('send', 'event', 'editor-interaction', 'newFile', "topMenu")
 					"click .js-new-folder"  : (e) ->
 						e.preventDefault()
 						@manager.showNewFolderModal()
-						ga('send', 'event', 'editor-interaction', 'newFolder', {menu:"DropdownMenu", entityDropdown:"folder"})
+						ga('send', 'event', 'editor-interaction', 'newFolder', "topMenu")
 					"click .js-upload-file" : (e) ->
 						e.preventDefault()
 						@manager.showUploadFileModal()
-						ga('send', 'event', 'editor-interaction', 'uploadFile', {menu:"DropdownMenu", entityDropdown:"folder"})
+						ga('send', 'event', 'editor-interaction', 'uploadFile', "topMenu")
 					"click .js-delete-btn"  : (e) ->
 						e.preventDefault()
 						@manager.confirmDeleteOfSelectedEntity()
-						ga('send', 'event', 'editor-interaction', 'deleteEntity', {menu:"DropdownMenu", entityDropdown:"folder"})
+						ga('send', 'event', 'editor-interaction', 'deleteEntity', "topMenu")
 					"click .js-rename-btn"  : (e) ->
 						e.preventDefault()
 						@manager.renameSelected()
-						ga('send', 'event', 'editor-interaction', 'renameEntity', {menu:"DropdownMenu", entityDropdown:"folder"})
+						ga('send', 'event', 'editor-interaction', 'renameEntity', "topMenu")
 				)
 
 		render: () ->

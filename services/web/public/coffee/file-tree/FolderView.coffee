@@ -132,14 +132,17 @@ define [
 			return [{
 				text: "New file"
 				onClick: () =>
+					ga('send', 'event', 'editor-interaction', 'newFile', "folderView")
 					@manager.showNewDocModal(@model)
 			}, {
 				text: "New folder"
 				onClick: () =>
+					ga('send', 'event', 'editor-interaction', 'newFolder', "folderView")
 					@manager.showNewFolderModal(@model)
 			}, {
 				text: "Upload file"
 				onClick: () =>
+					ga('send', 'event', 'editor-interaction', 'uploadFile', "folderView")
 					@manager.showUploadFileModal(@model)
 			}]
 

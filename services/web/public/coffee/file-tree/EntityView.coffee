@@ -111,12 +111,12 @@ define [
 				text: "Rename"
 				onClick: () =>
 					@startRename()
-					ga('send', 'event', 'editor-interaction', 'renameEntity', {menu:"DropdownMenu", entityDropdown:"entityView"})
+					ga('send', 'event', 'editor-interaction', 'renameEntity', "entityView")
 			}, {
 				text: "Delete"
 				onClick: () =>
 					@manager.confirmDelete(@model)
-					ga('send', 'event', 'editor-interaction', 'deleteEntity', {menu:"DropdownMenu", entityDropdown:"entityView"})
+					ga('send', 'event', 'editor-interaction', 'deleteEntity', "entityView")
 			}]
 
 		_initializeDrag: () ->
