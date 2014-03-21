@@ -120,13 +120,21 @@ describe "UpdatesManager", ->
 						.should.equal true
 
 	describe "processUncompressedUpdates", ->
+		beforeEach ->
+			@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
+			@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
+			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
+
 		describe "when there is fewer than one batch to send", ->
 			beforeEach ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
-				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
-				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
+
+			it "should backport the project id", ->
+				@MongoManager.backportProjectId
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
 
 			it "should get the oldest updates", ->
 				@RedisManager.getOldestRawUpdates
@@ -156,8 +164,6 @@ describe "UpdatesManager", ->
 					@redisArray = @redisArray.slice(batchSize)
 					callback null, updates
 				sinon.spy @RedisManager, "getOldestRawUpdates"
-				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
-				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
 					@callback(args...)
 					done()

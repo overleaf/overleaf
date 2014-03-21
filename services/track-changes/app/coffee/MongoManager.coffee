@@ -75,7 +75,21 @@ module.exports = MongoManager =
 
 		cursor.toArray callback
 
+	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
+		db.docHistory.update {
+			doc_id: ObjectId(doc_id.toString())
+			project_id: { $exists: false }
+		}, {
+			$set: { project_id: ObjectId(project_id.toString()) }
+		}, {
+			multi: true
+		}, callback
+
 	ensureIndices: (callback = (error) ->) ->
+		# For finding all updates that go into a diff for a doc
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, callback
+		# For finding all updates that affect a project
 		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, callback
+		# For finding updates that don't yet have a project_id and need it inserting
+		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, callback
 

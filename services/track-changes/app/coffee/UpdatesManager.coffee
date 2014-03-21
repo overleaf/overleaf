@@ -38,23 +38,25 @@ module.exports = UpdatesManager =
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
-		RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
+		MongoManager.backportProjectId project_id, doc_id, (error) ->
 			return callback(error) if error?
-			length = rawUpdates.length
-			UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, (error) ->
+			RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 				return callback(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
-				RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
+				length = rawUpdates.length
+				UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, (error) ->
 					return callback(error) if error?
-					if length == UpdatesManager.REDIS_READ_BATCH_SIZE
-						# There might be more updates
-						logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
-						setTimeout () ->
-							UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
-						, 0
-					else
-						logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
-						callback()
+					logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
+					RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
+						return callback(error) if error?
+						if length == UpdatesManager.REDIS_READ_BATCH_SIZE
+							# There might be more updates
+							logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
+							setTimeout () ->
+								UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
+							, 0
+						else
+							logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
+							callback()
 
 	processUncompressedUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.runWithLock(

@@ -252,3 +252,25 @@ describe "MongoManager", ->
 				@db.docHistory.limit
 					.calledWith(@limit)
 					.should.equal true
+
+	describe "backportProjectId", ->
+		beforeEach ->
+			@db.docHistory =
+				update: sinon.stub().callsArg(3)
+			@MongoManager.backportProjectId @project_id, @doc_id, @callback
+
+		it "should insert the project_id into all entries for the doc_id which don't have it set", ->
+			@db.docHistory.update
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+					project_id: { $exists: false }
+				}, {
+					$set: { project_id: ObjectId(@project_id) }
+				}, {
+					multi: true
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
