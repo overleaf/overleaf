@@ -127,6 +127,10 @@ define [
 			if @diffView?
 				@diffView.remove()
 
+			if !@diff.get("doc")?
+				console.log "This document has been deleted. What should we do?"
+				return
+
 			@diffView = new DiffView(
 				model: @diff
 				el:    @$el.find(".track-changes-diff")
