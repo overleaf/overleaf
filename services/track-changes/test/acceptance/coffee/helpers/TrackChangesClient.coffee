@@ -4,13 +4,20 @@ rclient = require("redis").createClient() # Only works locally for now
 
 module.exports = TrackChangesClient =
 	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
-		TrackChangesClient.flushUpdates project_id, doc_id, (error) ->
+		TrackChangesClient.flushDoc project_id, doc_id, (error) ->
 			return callback(error) if error?
 			TrackChangesClient.getCompressedUpdates doc_id, callback
 
-	flushUpdates: (project_id, doc_id, callback = (error) ->) ->
+	flushDoc: (project_id, doc_id, callback = (error) ->) ->
 		request.post {
 			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/flush"
+		}, (error, response, body) =>
+			response.statusCode.should.equal 204
+			callback(error)
+
+	flushProject: (project_id, callback = (error) ->) ->
+		request.post {
+			url: "http://localhost:3015/project/#{project_id}/flush"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback(error)

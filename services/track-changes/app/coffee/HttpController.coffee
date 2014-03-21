@@ -4,11 +4,18 @@ RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 
 module.exports = HttpController =
-	flushUpdatesWithLock: (req, res, next = (error) ->) ->
+	flushDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		logger.log doc_id: doc_id, "compressing doc history"
+		logger.log project_id: project_id, doc_id: doc_id, "compressing doc history"
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	flushProject: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "compressing project history"
+		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return next(error) if error?
 			res.send 204
 

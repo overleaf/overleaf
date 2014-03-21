@@ -18,7 +18,7 @@ describe "HttpController", ->
 		@user_id = "mock-user-123"
 		@now = Date.now()
 
-	describe "flushUpdatesWithLock", ->
+	describe "flushDoc", ->
 		beforeEach ->
 			@req =
 				params:
@@ -27,7 +27,7 @@ describe "HttpController", ->
 			@res =
 				send: sinon.stub()
 			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
-			@HttpController.flushUpdatesWithLock @req, @res, @next
+			@HttpController.flushDoc @req, @res, @next
 
 		it "should process the updates", ->
 			@UpdatesManager.processUncompressedUpdatesWithLock
@@ -36,6 +36,25 @@ describe "HttpController", ->
 
 		it "should return a success code", ->
 			@res.send.calledWith(204).should.equal true
+
+	describe "flushProject", ->
+		beforeEach ->
+			@req =
+				params:
+					project_id: @project_id
+			@res =
+				send: sinon.stub()
+			@UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1)
+			@HttpController.flushProject @req, @res, @next
+
+		it "should process the updates", ->
+			@UpdatesManager.processUncompressedUpdatesForProject
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal true
+
 
 	describe "getDiff", ->
 		beforeEach ->
