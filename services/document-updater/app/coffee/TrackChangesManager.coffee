@@ -23,7 +23,6 @@ module.exports = TrackChangesManager =
 
 	FLUSH_EVERY_N_OPS: 50
 	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, "pushing history op"
 		RedisManager.pushUncompressedHistoryOp project_id, doc_id, op, (error, length) ->
 			return callback(error) if error?
 			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
