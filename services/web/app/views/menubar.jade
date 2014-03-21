@@ -11,10 +11,10 @@
 							a.js-tender-widget(href='#') Support &amp; Feedback
 						li.nav-collapse
 							a(href='/help') Help
-					li.nav-collapse
+					li.nav-collapse#blogLink
 						a(href='/blog') Blog
 					li.nav-collapse
-						a(href='/templates') LaTeX Templates
+						a(href='/templates')#templatesLink LaTeX Templates
 					- if (settings.enableSubscriptions)
 						li.nav-collapse
 							a(href='/user/subscription/plans')#plansLink Plans &amp; Pricing
@@ -23,11 +23,11 @@
 							b.caret
 						ul.dropdown-menu
 							li.nav-collapse
-								a(href="/learn") LaTeX help guide
+								a(href="/learn")#learnLink LaTeX help guide
 							li.nav-collapse
-								a(href='/resources') LaTeX Resources
+								a(href='/resources')#resourcesLink LaTeX Resources
 							li.nav-collapse
-								a(href='/about') About Us
+								a(href='/about')#aboutUsLink About Us
 				ul.nav.pull-right
 					-if(session && session.user)
 						li.dropdown
@@ -35,11 +35,11 @@
 								b.caret
 							ul.dropdown-menu
 								li
-									a(href='/user/settings') User Settings
+									a(href='/user/settings').userSettingsLink User Settings
 								li
-									a(href='/user/subscription') Subscription
+									a(href='/user/subscription').subscriptionLink Subscription
 								li
-									a(href='/logout') Logout
+									a(href='/logout').logoutLink Logout
 					-else
 						li
 							a(href='/register') Register

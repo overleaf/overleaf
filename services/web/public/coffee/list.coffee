@@ -1,6 +1,7 @@
 require [
 	"tags"
 	"moment"
+	"event_tracking"
 	"gui"
 	"libs/underscore"
 	"libs/fineuploader"
