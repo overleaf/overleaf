@@ -248,7 +248,13 @@ describe "UpdatesManager", ->
 			@updates = ["mock-updates"]
 			@options = { before: "mock-before", limit: "mock-limit" }
 			@MongoManager.getProjectUpdates = sinon.stub().callsArgWith(2, null, @updates)
+			@UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1)
 			@UpdatesManager.getProjectUpdates @project_id, @options, @callback
+
+		it "should process any outstanding updates", ->
+			@UpdatesManager.processUncompressedUpdatesForProject
+				.calledWith(@project_id)
+				.should.equal true
 
 		it "should get the updates from the database", ->
 			@MongoManager.getProjectUpdates
@@ -259,6 +265,29 @@ describe "UpdatesManager", ->
 			@callback
 				.calledWith(null, @updates)
 				.should.equal true
+
+	describe "processUncompressedUpdatesForProject", ->
+		beforeEach (done) ->
+			@doc_ids = ["mock-id-1", "mock-id-2"]
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
+			@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
+			@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
+				@callback()
+				done()
+
+		it "should get all the docs with history ops", ->
+			@RedisManager.getDocIdsWithHistoryOps
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should process the doc ops for the each doc_id", ->
+			for doc_id in @doc_ids
+				@UpdatesManager.processUncompressedUpdatesWithLock
+					.calledWith(@project_id, doc_id)
+					.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
 
 	describe "getProjectUpdatesWithUserInfo", ->
 		beforeEach ->

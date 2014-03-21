@@ -26,3 +26,6 @@ module.exports = RedisManager =
 		multi.exec (error, results) ->
 			return callback(error) if error?
 			callback null
+
+	getDocIdsWithHistoryOps: (project_id, callback = (error, doc_ids) ->) ->
+		rclient.smembers docsWithHistoryOpsKey(project_id), callback

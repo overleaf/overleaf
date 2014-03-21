@@ -64,6 +64,16 @@ module.exports = UpdatesManager =
 			callback
 		)
 
+	processUncompressedUpdatesForProject: (project_id, callback = (error) ->) ->
+		RedisManager.getDocIdsWithHistoryOps project_id, (error, doc_ids) ->
+			return callback(error) if error?
+			jobs = []
+			for doc_id in doc_ids
+				do (doc_id) ->
+					jobs.push (callback) ->
+						UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, callback
+			async.parallelLimit jobs, 5, callback
+
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?
@@ -77,7 +87,9 @@ module.exports = UpdatesManager =
 				callback null, updates
 
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
-		MongoManager.getProjectUpdates project_id, options, callback
+		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
+			return callback(error) if error?
+			MongoManager.getProjectUpdates project_id, options, callback
 
 	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->

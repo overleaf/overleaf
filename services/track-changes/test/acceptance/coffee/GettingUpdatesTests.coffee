@@ -43,9 +43,7 @@ describe "Getting updates", ->
 
 		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
 			throw error if error?
-			TrackChangesClient.flushUpdates @project_id, @doc_id, (error) =>
-				throw error if error?
-				done()
+			done()
 
 	after: () ->
 		MockWebApi.getUser.restore()

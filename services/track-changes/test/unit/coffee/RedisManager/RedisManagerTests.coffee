@@ -52,3 +52,17 @@ describe "RedisManager", ->
 
 		it "should call the callback ", ->
 			@callback.called.should.equal true
+
+	describe "getDocIdsWithHistoryOps", ->
+		beforeEach ->
+			@doc_ids = ["mock-id-1", "mock-id-2"]
+			@rclient.smembers = sinon.stub().callsArgWith(1, null, @doc_ids)
+			@RedisManager.getDocIdsWithHistoryOps @project_id, @callback
+
+		it "should read the doc_ids from redis", ->
+			@rclient.smembers
+				.calledWith("DocsWithHistoryOps:#{@project_id}")
+				.should.equal true
+
+		it "should call the callback with the doc_ids", ->
+			@callback.calledWith(null, @doc_ids).should.equal true
