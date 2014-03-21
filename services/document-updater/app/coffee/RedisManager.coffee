@@ -155,9 +155,15 @@ module.exports =
 		jsonOps = ops.map (op) -> JSON.stringify op
 		rclient.lpush keys.docOps(doc_id: doc_id), jsonOps.reverse(), callback
 
-	pushUncompressedHistoryOp: (doc_id, op, callback = (error) ->) ->
+	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error, length) ->) ->
 		jsonOp = JSON.stringify op
-		rclient.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp, callback
+		multi = rclient.multi()
+		multi.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp
+		multi.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id
+		multi.exec (error, results) ->
+			return callback(error) if error?
+			[length, _] = results
+			callback(error, length)
 
 	getDocOpsLength: (doc_id, callback = (error, length) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), callback
@@ -165,12 +171,6 @@ module.exports =
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 
-	getHistoryLoadManagerThreshold: (callback = (error, threshold) ->) ->
-		rclient.get keys.historyLoadManagerThreshold, (error, value) ->
-			return callback(error) if error?
-			return callback null, 0 if !value?
-			callback null, parseInt(value, 10)
-		
 
 getDocumentsProjectId = (doc_id, callback)->
 	rclient.get keys.projectKey({doc_id:doc_id}), (err, project_id)->

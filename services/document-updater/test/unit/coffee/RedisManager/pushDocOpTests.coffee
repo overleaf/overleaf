@@ -4,7 +4,7 @@ should = chai.should()
 modulePath = "../../../../app/js/RedisManager"
 SandboxedModule = require('sandboxed-module')
 
-describe "RedisManager.getPreviousDocOpsTests", ->
+describe "RedisManager.pushDocOp", ->
 	beforeEach ->
 		@callback = sinon.stub()
 		@RedisManager = SandboxedModule.require modulePath, requires:
@@ -12,6 +12,7 @@ describe "RedisManager.getPreviousDocOpsTests", ->
 				@rclient =
 					auth: ->
 					multi: => @rclient
+			"logger-sharelatex": {}
 		@doc_id = "doc-id-123"
 
 	beforeEach ->

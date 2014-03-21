@@ -23,22 +23,15 @@ module.exports = TrackChangesManager =
 
 	FLUSH_EVERY_N_OPS: 50
 	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
-		RedisManager.getHistoryLoadManagerThreshold (error, threshold) ->
+		logger.log project_id: project_id, doc_id: doc_id, "pushing history op"
+		RedisManager.pushUncompressedHistoryOp project_id, doc_id, op, (error, length) ->
 			return callback(error) if error?
-			if TrackChangesManager.getLoadManagerBucket(doc_id) < threshold
-				RedisManager.pushUncompressedHistoryOp doc_id, op, (error, length) ->
-					return callback(error) if error?
-					if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
-						# Do this in the background since it uses HTTP and so may be too
-						# slow to wait for when processing a doc update.
-						logger.log length: length, doc_id: doc_id, project_id: project_id, "flushing track changes api"
-						TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
-							if error?
-								logger.error err: error, doc_id: doc_id, project_id: project_id, "error flushing doc to track changes api"
-					callback()
-			else
-				callback()
+			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
+				# Do this in the background since it uses HTTP and so may be too
+				# slow to wait for when processing a doc update.
+				logger.log length: length, doc_id: doc_id, project_id: project_id, "flushing track changes api"
+				TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
+					if error?
+						logger.error err: error, doc_id: doc_id, project_id: project_id, "error flushing doc to track changes api"
+			callback()
 
-	getLoadManagerBucket: (doc_id) ->
-		hash = crypto.createHash("md5").update(doc_id).digest("hex")
-		return parseInt(hash.slice(0,4), 16) % 100

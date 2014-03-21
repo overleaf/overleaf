@@ -12,7 +12,7 @@ MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Applying updates to a doc", ->
-	before (done) ->
+	before ->
 		@lines = ["one", "two", "three"]
 		@update =
 			doc: @doc_id
@@ -22,8 +22,6 @@ describe "Applying updates to a doc", ->
 			}]
 			v: 0
 		@result = ["one", "one and a half", "two", "three"]
-		rclient.set "HistoryLoadManagerThreshold", 100, (error) =>
-			done()
 
 	describe "when the document is not loaded", ->
 		before (done) ->
@@ -51,8 +49,13 @@ describe "Applying updates to a doc", ->
 
 		it "should push the applied updates to the track changes api", (done) ->
 			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				throw error if error?
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
-				done()
+				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+					throw error if error?
+					result.should.equal 1
+					done()
+
 
 	describe "when the document is loaded", ->
 		before (done) ->
@@ -81,7 +84,9 @@ describe "Applying updates to a doc", ->
 		it "should push the applied updates to the track changes api", (done) ->
 			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
-				done()
+				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+					result.should.equal 1
+					done()
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->
@@ -131,7 +136,10 @@ describe "Applying updates to a doc", ->
 					updates = (JSON.parse(u) for u in updates)
 					for appliedUpdate, i in @updates
 						appliedUpdate.op.should.deep.equal updates[i].op
-					done()
+
+					rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+						result.should.equal 1
+						done()
 
 		describe "when older ops come in after the delete", ->
 			before ->
@@ -235,7 +243,7 @@ describe "Applying updates to a doc", ->
 				done()
 
 	describe "with enough updates to flush to the track changes api", ->
-		beforeEach ->
+		beforeEach (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
@@ -249,27 +257,13 @@ describe "Applying updates to a doc", ->
 
 			sinon.spy MockTrackChangesApi, "flushDoc"
 
+			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
+				throw error if error?
+				setTimeout done, 200
+
 		afterEach ->
 			MockTrackChangesApi.flushDoc.restore()
 
-		describe "when under the load manager threshold", ->
-			beforeEach (done) ->
-				rclient.set "HistoryLoadManagerThreshold", 100, (error) =>
-					throw error if error?
-					DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
-						throw error if error?
-						setTimeout done, 200
+		it "should flush the doc twice", ->
+			MockTrackChangesApi.flushDoc.calledTwice.should.equal true
 
-			it "should flush the doc twice", ->
-				MockTrackChangesApi.flushDoc.calledTwice.should.equal true
-
-		describe "when over the load manager threshold", ->
-			beforeEach (done) ->
-				rclient.set "HistoryLoadManagerThreshold", 0, (error) =>
-					throw error if error?
-					DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
-						throw error if error?
-						setTimeout done, 200
-
-			it "should not flush the doc", ->
-				MockTrackChangesApi.flushDoc.called.should.equal false	

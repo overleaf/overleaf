@@ -4,13 +4,14 @@ should = chai.should()
 modulePath = "../../../../app/js/RedisManager"
 SandboxedModule = require('sandboxed-module')
 
-describe "RedisManager.clearDocFromPendingUpdatesSet", ->
+describe "RedisManager.prependDocOps", ->
 	beforeEach ->
 		@doc_id = "document-id"
 		@callback = sinon.stub()
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"redis" : createClient: () =>
 				@rclient = auth:->
+			"logger-sharelatex": {}
 
 		@rclient.lpush = sinon.stub().callsArg(2)
 		@ops = [
