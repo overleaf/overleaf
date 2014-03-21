@@ -38,8 +38,13 @@ module.exports =
 	buildViewModel : ->
 		plans = Settings.plans
 
+		allPlans = {}
+		plans.forEach (plan)->
+			allPlans[plan.planCode] = plan
+			
 		result =
-			allPlans: plans
+			allPlans: allPlans
+
 
 		result.personalAccount = _.find plans, (plan)->
 			plan.planCode == "personal"

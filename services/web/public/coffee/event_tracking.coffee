@@ -1,15 +1,17 @@
 require [
-	"libs/bootstrap/bootstrap2full"
 ], ()->
 	#plans page
-	$('a.sign_up_now').on 'click', ->
-		ga 'send', 'event', 'button', 'click', 'premium-sign-up'
+	$('a.sign_up_now').on 'click', (e)->
+		ga_PlanType = $(@).attr("ga_PlanType")
+		ga 'send', 'event', 'subscription-funnel', 'sign_up_now_button', ga_PlanType
+
 	$('#annual-pricing').on 'click', ->
-		ga 'send', 'event', 'button', 'click', 'student-prices'
-
+		ga 'send', 'event', 'subscription-funnel', 'plans-page', 'annual-prices'
 	$('#student-pricing').on 'click', ->
-		ga('send', 'event', 'button', 'click', 'student-prices')
+		ga('send', 'event',  'subscription-funnel', 'plans-page', 'student-prices')
 
-	#plans link
 	$('#plansLink').on 'click', ->
-		ga 'send', 'event', 'button', 'click', 'plans-link-menu-bar' 
+		ga 'send', 'event', 'subscription-funnel', 'go-to-plans-page', 'from menu bar'
+
+
+

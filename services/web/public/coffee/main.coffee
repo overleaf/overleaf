@@ -3,6 +3,7 @@ require [
 	"./forms"
 	"./gui"
 	"./home"
+	"./event_tracking"
 ], ()->
 
 

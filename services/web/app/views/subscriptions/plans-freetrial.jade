@@ -28,7 +28,10 @@ mixin plan(plan, cssClass, monthly)
 							else 
 								span.cents  /year
 
-			- var odd = true
+			- var odd = false
+			- if(plan.planCode != "personal")
+				li.pricing-content-row-even
+					mixin liSection({text:"30 day free trial"})
 			-each feature in plan.featureDescription
 				- odd = !odd
 				- if(odd)
@@ -37,7 +40,11 @@ mixin plan(plan, cssClass, monthly)
 				- else
 					li.pricing-content-row-even
 						mixin liSection(feature)
-				
+			- if(plan.planCode == "personal")
+				li.pricing-content-row-even
+					mixin liSection({text:""})
+
+
 			li.pricing-footer
 				- var href = '/user/subscription/new?planCode='+plan.planCode
 
@@ -47,7 +54,7 @@ mixin plan(plan, cssClass, monthly)
 					- href = "/register"
 				-else if(userNotLoggedIn)
 					- href = "/register?redir="+href
-				a.btn.btn-success(href='#{href}', ga_PlanType=plan.planCode).sign_up_now	
+				a.btn.btn-success(href='#{href}').sign_up_now	
 					| Sign Up Now!
 
 
@@ -84,41 +91,37 @@ block content
 					.tab-content
 						.tab-pane.active.monthly-pricing
 							.row
-								.span12.tagline 
-									p An online LaTeX editor for collaborating on the <strong>same LaTeX project and editing together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
+								.span6.offset3.tagline.freeTrialBlurb
+									h1 Start your risk free <strong>30 day</strong> trial
 							.row
 								.span4
 									mixin plan(plans.personalAccount, "", true)
 								.span4
-									mixin plan(plans.allPlans['collaborator'], "big", true)
+									mixin plan(plans.allPlans['collaborator_free_trial'], "big", true)
 								.span4
-									mixin plan(plans.allPlans['professional'], "", true)
+									mixin plan(plans.allPlans['professional_free_trial'], "", true)
 
 						.tab-pane.annual-pricing
 							.row
-								.span12.tagline
-									p Collaborate on the <strong>same LaTeX project and edit together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
+								.span6.offset3.tagline.freeTrialBlurb
+									h1 Start your risk free <strong>30 day</strong> trial
 								.span4
 									mixin plan(plans.personalAccount, "", true)
 								.span4
-									mixin plan(plans.allPlans['collaborator-annual'], "big", false)
+									mixin plan(plans.allPlans['collaborator-annual_free_trial'], "big", false)
 								.span4
-									mixin plan(plans.allPlans['professional-annual'], "", false)
+									mixin plan(plans.allPlans['prof-ann_free_trial'], "", false)
 
 						.tab-pane.student-pricing
 							.row
-								.span8.offset2.tagline 
-									p Getting started and working with <strong>LaTeX has never been so easy.</strong> Start creating beautiful work now.
+								.span6.offset3.tagline.freeTrialBlurb
+									h1 Start your risk free <strong>30 day</strong> trial
 								.span4
 									mixin plan(plans.personalAccount, "", true)
 								.span4
-									mixin plan(plans.allPlans['student'], "big", true)
+									mixin plan(plans.allPlans['student_free_trial'], "big", true)
 								.span4
-									mixin plan(plans.allPlans['student-annual'], "", false)
-
-				.row
-					.span12.ab-guarantee-shown(style="text-align: center;")
-						h2 30 day money back guarantee, cancel anytime.
+									mixin plan(plans.allPlans['stud-ann_free_trial'], "", false)
 
 				.pricing-steelblue.pricing-row
 					.tab-content
@@ -162,5 +165,4 @@ block content
 								
 		include ../general/small-footer
 		link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))	
-
 
