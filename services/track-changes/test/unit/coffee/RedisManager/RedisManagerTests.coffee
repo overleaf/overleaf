@@ -11,8 +11,10 @@ describe "RedisManager", ->
 			"redis" : 
 				createClient: () => @rclient =
 					auth: sinon.stub()
+					multi: () => @rclient
 			"settings-sharelatex": {}
 		@doc_id = "doc-id-123"
+		@project_id = "project-id-123"
 		@batchSize = 100
 		@callback = sinon.stub()
 
@@ -33,13 +35,20 @@ describe "RedisManager", ->
 
 	describe "deleteOldestRawUpdates", ->
 		beforeEach ->
-			@rclient.ltrim = sinon.stub().callsArg(3)
-			@RedisManager.deleteOldestRawUpdates @doc_id, @batchSize, @callback
+			@rclient.ltrim = sinon.stub()
+			@rclient.srem = sinon.stub()
+			@rclient.exec = sinon.stub().callsArgWith(0)
+			@RedisManager.deleteOldestRawUpdates @project_id, @doc_id, @batchSize, @callback
 
 		it "should delete the updates from redis", ->
 			@rclient.ltrim
 				.calledWith("UncompressedHistoryOps:#{@doc_id}", @batchSize, -1)
 				.should.equal true
 
-		it "should call the callback", ->
+		it "should delete the doc from the set of docs with history ops", ->
+			@rclient.srem
+				.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
+				.should.equal true
+
+		it "should call the callback ", ->
 			@callback.called.should.equal true

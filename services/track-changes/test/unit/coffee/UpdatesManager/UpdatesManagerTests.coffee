@@ -125,7 +125,7 @@ describe "UpdatesManager", ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
 				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
-				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
+				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
 
 			it "should get the oldest updates", ->
@@ -140,7 +140,7 @@ describe "UpdatesManager", ->
 
 			it "should delete the batch of uncompressed updates that was just processed", ->
 				@RedisManager.deleteOldestRawUpdates
-					.calledWith(@doc_id, @updates.length)
+					.calledWith(@project_id, @doc_id, @updates.length)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -157,7 +157,7 @@ describe "UpdatesManager", ->
 					callback null, updates
 				sinon.spy @RedisManager, "getOldestRawUpdates"
 				@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
-				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(2)
+				@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
 					@callback(args...)
 					done()

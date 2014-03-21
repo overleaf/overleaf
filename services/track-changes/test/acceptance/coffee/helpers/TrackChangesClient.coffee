@@ -21,8 +21,10 @@ module.exports = TrackChangesClient =
 			.sort("meta.end_ts": 1)
 			.toArray callback
 
-	pushRawUpdates: (doc_id, updates, callback = (error) ->) ->
-		rclient.rpush "UncompressedHistoryOps:#{doc_id}", (JSON.stringify(u) for u in updates)..., callback
+	pushRawUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
+		rclient.sadd "DocsWithHistoryOps:#{project_id}", doc_id, (error) ->
+			return callback(error) if error?
+			rclient.rpush "UncompressedHistoryOps:#{doc_id}", (JSON.stringify(u) for u in updates)..., callback
 
 	getDiff: (project_id, doc_id, from, to, callback = (error, diff) ->) ->
 		request.get {

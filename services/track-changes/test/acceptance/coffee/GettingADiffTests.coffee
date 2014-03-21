@@ -58,7 +58,7 @@ describe "Getting a diff", ->
 			lines: @lines
 			version: 7
 
-		TrackChangesClient.pushRawUpdates @doc_id, @updates, (error) =>
+		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
 			throw error if error?
 			TrackChangesClient.getDiff @project_id, @doc_id, @fromVersion, @toVersion, (error, diff) =>
 				throw error if error?

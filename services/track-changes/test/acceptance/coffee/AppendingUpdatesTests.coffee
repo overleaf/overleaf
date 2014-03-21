@@ -16,7 +16,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
-			TrackChangesClient.pushRawUpdates @doc_id, [{
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
 				v: 3
@@ -48,12 +48,17 @@ describe "Appending doc ops to the history", ->
 		it "should store the project id", ->
 			expect(@updates[0].project_id.toString()).to.equal @project_id
 
+		it "should clear the doc from the DocsWithHistoryOps set", (done) ->
+			rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, member) ->
+				member.should.equal 0
+				done()
+
 	describe "when the history has already been started", ->
 		beforeEach (done) ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
-			TrackChangesClient.pushRawUpdates @doc_id, [{
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
 				v: 3
@@ -73,7 +78,7 @@ describe "Appending doc ops to the history", ->
 
 		describe "when the updates are recent and from the same user", ->
 			beforeEach (done) ->
-				TrackChangesClient.pushRawUpdates @doc_id, [{
+				TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 					op: [{ i: "b", p: 6 }]
 					meta: { ts: Date.now(), user_id: @user_id }
 					v: 6
@@ -103,7 +108,7 @@ describe "Appending doc ops to the history", ->
 		describe "when the updates are far apart", ->
 			beforeEach (done) ->
 				oneDay = 24 * 60 * 60 * 1000
-				TrackChangesClient.pushRawUpdates @doc_id, [{
+				TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 					op: [{ i: "b", p: 6 }]
 					meta: { ts: Date.now() + oneDay, user_id: @user_id }
 					v: 6
@@ -144,7 +149,7 @@ describe "Appending doc ops to the history", ->
 				}
 				@expectedOp[0].i = "a" + @expectedOp[0].i
 
-			TrackChangesClient.pushRawUpdates @doc_id, updates, (error) =>
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, updates, (error) =>
 				throw error if error?
 				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
 					throw error if error?
@@ -163,7 +168,7 @@ describe "Appending doc ops to the history", ->
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
 			oneDay = 24 * 60 * 60 * 1000
-			TrackChangesClient.pushRawUpdates @doc_id, [{
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }, { i: "o", p: 4 }, { i: "o", p: 5 }]
 				meta: { ts: Date.now(), user_id: @user_id }
 				v: 3

@@ -44,7 +44,7 @@ module.exports = UpdatesManager =
 			UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, (error) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
-				RedisManager.deleteOldestRawUpdates doc_id, length, (error) ->
+				RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
 					return callback(error) if error?
 					if length == UpdatesManager.REDIS_READ_BATCH_SIZE
 						# There might be more updates
