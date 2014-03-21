@@ -12,26 +12,39 @@ define [
 			@state = "closed"
 			$("#toolbar").on "mouseenter", () => @onMouseOver()
 			$("#toolbar").on "mouseleave", (e) => @onMouseOut(e)
+			@tabs = []
 
 		addTab: (options) ->
+			@tabs.push options
+
 			tabEl = $(Mustache.to_html @templates.tab, options)
 			tabEl.find("a").attr("href", "#" + options.id)
-			contentEl = $(Mustache.to_html @templates.content, options)
-			contentEl.append(options.content)
+
+			if options.content?
+				contentEl = $(Mustache.to_html @templates.content, options)
+				contentEl.append(options.content)
+				$("#tab-content").append(contentEl)
 
 			if options.active
 				tabEl.addClass("active")
-				contentEl.addClass("active")
+				contentEl?.addClass("active")
 
 			if options.after?
 				tabEl.insertAfter($("##{options.after}-tab-li"))
 			else
 				$("#tabs").append(tabEl)
-			$("#tab-content").append(contentEl)
+
 			$("body").scrollTop(0)
 			tabEl.on "shown", () =>
 				$("body").scrollTop(0)
+
 				options.onShown() if options.onShown?
+				for other_tab in @tabs
+					if other_tab.id != options.id and other_tab.active and other_tab.onHidden?
+						other_tab.onHidden()
+					other_tab.active = false
+				options.active = true
+
 				if options.lock
 					@lockOpen()
 				else
@@ -39,6 +52,7 @@ define [
 
 				if options.contract
 					@contract()
+
 
 		lockOpen: () ->
 			@locked_open = true

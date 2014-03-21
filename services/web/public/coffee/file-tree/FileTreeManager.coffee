@@ -76,7 +76,7 @@ define [
 
 		openDoc: (doc, line) ->
 			doc_id = doc.id or doc
-			@ide.editor.openDoc(doc_id, line: line)
+			@trigger "open:doc", doc_id, line: line
 			@selectEntity(doc_id)
 			$.localStorage "doc.open_id.#{@project_id}", doc_id
 
@@ -86,8 +86,7 @@ define [
 			@openDoc(doc_id, line)
 
 		openFile: (file) ->
-			@ide.mainAreaManager.change('file')
-			@ide.fileViewManager.showFile(file)
+			@trigger "open:file", file
 			@selectEntity(file.id)
 
 		openFolder: (folder) ->

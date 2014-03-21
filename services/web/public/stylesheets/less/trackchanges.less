@@ -126,9 +126,13 @@
 				min-height: 38px;
 			}
 			.change-name {
-				font-size: 0.9em;
+				font-size: 11px;
 				color: #666;
 				text-transform: capitalize;
+			}
+			.change-date {
+				margin-top: 2px;
+				font-size: 12px;
 			}
 			.color-square {
 				display: inline-block;
@@ -136,6 +140,9 @@
 				width: 10px;
 				margin-right: 4px;
 				margin-bottom: -1px;
+			}
+			.changed-docs {
+				font-weight: bold;
 			}
 			.restore {
 				a {
@@ -153,7 +160,7 @@
 		li.loading-changes, li.empty-message {
 			padding: 6px;
 		}
-		li.selected {
+		li.selected-change {
 			background-color: #eaeaea;
 			.change-selectors {
 				.range {
@@ -161,7 +168,7 @@
 				}
 			}
 		}
-		li.selected-to {
+		li.selected-change-to {
 			.change-selectors {
 				.range {
 					top: 10px;
@@ -171,7 +178,7 @@
 				}
 			}
 		}
-		li.selected-from {
+		li.selected-change-from {
 			.change-selectors {
 				.range {
 					bottom: 37px;
@@ -223,7 +230,7 @@
 				}
 			}
 		}
-		li.selected-from.hover-selected-from {
+		li.selected-change-from.hover-selected-from {
 			.change-selectors {
 				.range {
 					bottom: 37px;

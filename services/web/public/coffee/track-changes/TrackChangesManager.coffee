@@ -13,11 +13,17 @@ define [
 		constructor: (@ide) ->
 			@project_id = window.userSettings.project_id
 			@$el = $(@template)
-			$("#editorWrapper").append(@$el)
-			@hideEl()
+			@ide.mainAreaManager.addArea
+				identifier: "trackChanges"
+				element: @$el
 
-			@ide.editor.on "change:doc", () =>
-				@hideEl()
+			@ide.tabManager.addTab
+				id: "history"
+				name: "History"
+				after: "code"
+				contract: true
+				onShown: () => @show()
+				onHidden: () => @hide()
 
 			@ide.editor.on "resize", () =>
 				@diffView?.resize()
@@ -26,20 +32,18 @@ define [
 				e.preventDefault
 				@hide()
 
-			@ide.fileTreeManager.on "contextmenu:beforeshow", (entity, entries) =>
-				if entity instanceof Doc
-					entries.push {
-						divider: true
-					}, {
-						text: "History"
-						onClick: () =>
-							@show(entity.id)
-					}
+			@bindToFileTreeEvents()
 
-		show: (@doc_id) ->
-			@ide.fileTreeManager.selectEntity(@doc_id)
+			@disable()
 
-			@changes = new ChangeList([], doc_id: @doc_id, project_id: @project_id)
+		bindToFileTreeEvents: () ->
+			@ide.fileTreeManager.on "open:doc", (doc_id) =>
+				if @enabled
+					@doc_id = doc_id
+					@updateDiff()
+
+		show: () ->
+			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
 			@changeListView = new ChangeListView(
 				collection : @changes,
@@ -49,8 +53,8 @@ define [
 			@changeListView.loadUntilFull (error) =>
 				@autoSelectDiff()
 
-			@changeListView.on "change_diff", (fromModel, toModel) =>
-				@showDiff(fromModel, toModel)
+			@changeListView.on "change_diff", (fromIndex, toIndex) =>
+				@selectDocAndUpdateDiff(fromIndex, toIndex)
 
 			@changeListView.on "restore", (change) =>
 				@restore(change)
@@ -58,11 +62,17 @@ define [
 			if @diffView?
 				@diffView.destroy()
 
-			@showEl()
+			@ide.mainAreaManager.change "trackChanges"
+			@ide.editor.disable()
+			@ide.fileViewManager.disable()
+			@enable()
 
 		hide: () ->
-			@hideEl()
+			@ide.editor.enable()
+			@ide.fileViewManager.enable()
+			@disable()
 			@ide.fileTreeManager.openDoc(@doc_id)
+			@ide.mainAreaManager.change "editor"
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0
@@ -81,15 +91,39 @@ define [
 
 			toChange = @changes.models[0]
 			fromChange = @changes.models[fromIndex]
-			@showDiff(fromChange, toChange)
 			@changeListView.setSelectionRange(fromIndex, 0)
+			@updateDiff()
 
-		showDiff: (fromModel, toModel) ->
+		selectDocAndUpdateDiff: (fromIndex, toIndex) ->
+			doc_ids = []
+			for change in @changes.models.slice(toIndex, fromIndex + 1)
+				for doc in change.get("docs") or []
+					doc_ids.push doc.id if doc.id not in doc_ids
+
+			if !@doc_id? or @doc_id not in doc_ids
+				@doc_id = doc_ids[0]
+
+			@updateDiff()
+
+		updateDiff: () ->
+			fromIndex = @changeListView.selectedFromIndex
+			toIndex   = @changeListView.selectedToIndex
+
+			if !toIndex? or !fromIndex?
+				console.log "No selection - what should we do!?"
+				return
+
+			{from, to} = @_findDocVersionsRangeInSelection(@doc_id, fromIndex, toIndex)
+
+			if !from? or !to?
+				console.log "No diff, should probably just show latest version"
+				return
+
 			@diff = new Diff({
 				project_id: @project_id
 				doc_id: @doc_id
-				from: fromModel.get("fromVersion")
-				to:   toModel.get("toVersion")
+				from: from
+				to:   to
 			})
 
 			if @diffView?
@@ -100,13 +134,25 @@ define [
 			)
 			@diff.fetch()
 
-		showEl: ->
-			@ide.editor.hide()
-			@$el.show()
+			@ide.fileTreeManager.selectEntity(@doc_id)
 
-		hideEl: () ->
-			@ide.editor.show()
-			@$el.hide()
+
+		_findDocVersionsRangeInSelection: (doc_id, fromIndex, toIndex) ->
+			from = null
+			to = null
+
+			for change in @changes.models.slice(toIndex, fromIndex + 1)
+				for doc in change.get("docs")
+					if doc.id == doc_id
+						if from? and to?
+							from = Math.min(from, doc.fromV)
+							to = Math.max(to, doc.toV)
+						else
+							from = doc.fromV
+							to = doc.toV
+						break
+
+			return {from, to}
 
 		restore: (change) ->
 			name = @ide.fileTreeManager.getNameOfEntityId(@doc_id)
@@ -140,5 +186,11 @@ define [
 				error: (error) ->
 					callback(error)
 			}
+
+		enable: () ->
+			@enabled = true
+
+		disable: () ->
+			@enabled = false
 
 	return TrackChangesManager

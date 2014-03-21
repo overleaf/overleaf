@@ -106,12 +106,12 @@ define [
 			@sideBarView = new SideBarManager(@, $("#sections"))
 			selectElement = @sideBarView.selectElement
 			mainAreaManager = @mainAreaManager = new MainAreaManager(@, $("#content"))
+			@fileTreeManager = new FileTreeManager(@)
 			@editor = new Editor(@)
 			@pdfManager = new PdfManager(@)
 			if @userSettings.autoComplete
 				@autoCompleteManager = new AutoCompleteManager(@)
 			@spellingManager = new SpellingManager(@)
-			@fileTreeManager = new FileTreeManager(@)
 			@fileUploadManager = new FileUploadManager(@)
 			@searchManager = new SearchManager(@)
 			@cursorManager = new CursorManager(@)
@@ -119,6 +119,8 @@ define [
 			@analyticsManager = new AnalyticsManager(@)
 			if @userSettings.trackChanges
 				@trackChangesManager = new TrackChangesManager(@)
+			else
+				@historyManager = new HistoryManager(@)
 
 			@setLoadingMessage("Connecting")
 			firstConnect = true
@@ -186,7 +188,6 @@ define [
 
 	_.extend(Ide::, Backbone.Events)
 	window.ide = ide = new Ide()
-	ide.historyManager = new HistoryManager ide
 	ide.projectMembersManager = new ProjectMembersManager ide
 	ide.settingsManager = new SettingsManager ide
 	ide.helpManager = new HelpManager ide
