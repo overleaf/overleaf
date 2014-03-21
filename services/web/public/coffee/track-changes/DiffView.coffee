@@ -20,6 +20,17 @@ define [
 		render: ->
 			diff = @model.get("diff")
 			return unless diff?
+
+			changes = @getNumberOfChanges()
+			html = Mustache.to_html @template, {
+				changes: "#{changes} change#{if changes == 1 then "" else "s"}"
+				name: @model.get("doc")?.get("name")
+			}
+			@$el.html(html)
+
+			if !@model.get("from")? or !@model.get("to")? or changes == 0
+				@$(".restore").hide()
+
 			@createAceEditor()
 			@aceEditor.setValue(@getPlainDiffContent())
 			@aceEditor.clearSelection()
@@ -36,12 +47,6 @@ define [
 			@undelegateEvents()
 
 		createAceEditor: () ->
-			changes = @getNumberOfChanges()
-			html = Mustache.to_html @template, {
-				changes: "#{changes} change#{if changes > 1 then "s" else ""}"
-				name: @model.get("doc")?.get("name")
-			}
-			@$el.html(html)
 			@$editor = @$(".track-changes-diff-editor")
 			@$el.append(@$editor)
 			@aceEditor = Ace.edit(@$editor[0])

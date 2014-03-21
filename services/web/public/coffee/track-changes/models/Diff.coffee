@@ -8,7 +8,10 @@ define [
 			@set "doc", @ide.fileTreeManager.getEntity(@get("doc_id"))
 
 		url: () ->
-			"/project/#{@get("project_id")}/doc/#{@get("doc_id")}/diff?from=#{@get("from")}&to=#{@get("to")}"
+			url = "/project/#{@get("project_id")}/doc/#{@get("doc_id")}/diff"
+			if @get("from")? and @get("to")?
+				url += "?from=#{@get("from")}&to=#{@get("to")}"
+			return url
 
 		parse: (diff) ->
 			for entry in diff.diff

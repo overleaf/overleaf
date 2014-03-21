@@ -113,10 +113,6 @@ define [
 
 			{from, to, start_ts, end_ts} = @_findDocVersionsRangeInSelection(@doc_id, fromIndex, toIndex)
 
-			if !from? or !to?
-				console.log "No diff, should probably just show latest version"
-				return
-
 			@diff = new Diff({
 				project_id: @project_id
 				doc_id: @doc_id
