@@ -70,6 +70,7 @@ describe "EditorController", ->
 			'../ThirdPartyDataStore/TpdsPollingBackgroundTasks':@TpdsPollingBackgroundTasks
 			'./EditorRealTimeController':@EditorRealTimeController = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
+			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
 			'redis':createClient:-> auth:->
 			"logger-sharelatex": @logger =
 				log: sinon.stub()
@@ -219,20 +220,24 @@ describe "EditorController", ->
 				.should.equal true
 
 	describe "flushProjectIfEmpty", ->
+		beforeEach ->	
+			@DocumentUpdaterHandler.flushProjectToMongoAndDelete = sinon.stub()
+			@TrackChangesManager.flushProject = sinon.stub()
+
 		describe "when a project has no more users", ->
 			it "should do the flush after the config set timeout to ensure that a reconect didn't just happen", (done)->
 				@rooms[@project_id] = []
-				@DocumentUpdaterHandler.flushProjectToMongoAndDelete = sinon.stub()
 				@EditorController.flushProjectIfEmpty @project_id, =>
 					@DocumentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal(true)
+					@TrackChangesManager.flushProject.calledWith(@project_id).should.equal true
 					done()
 
 		describe "when a project still has connected users", ->
 			it "should not flush the project", (done)->
 				@rooms[@project_id] = ["socket-id-1", "socket-id-2"]
-				@DocumentUpdaterHandler.flushProjectToMongoAndDelete = sinon.stub()
 				@EditorController.flushProjectIfEmpty @project_id, =>
 					@DocumentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal(false)
+					@TrackChangesManager.flushProject.calledWith(@project_id).should.equal false
 					done()
 
 	describe "updateClientPosition", ->
