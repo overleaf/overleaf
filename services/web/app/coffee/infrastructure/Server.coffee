@@ -16,7 +16,7 @@ cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 i18n = require("i18next")
-i18n.init(resGetPath: 'locales/__lng__/__ns__.json')
+i18n.init(resGetPath: 'locales/__lng__.json')
 
 Monitor = require "./Monitor"
 
