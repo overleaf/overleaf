@@ -32,12 +32,13 @@
     "fairy": "0.0.2",
     "node-uuid": "1.4.0",
     "mongojs": "0.9.8",
-		"nodemailer": "0.6.1",
+    "nodemailer": "0.6.1",
     "bcrypt": "0.7.5",
     "archiver": "0.5.1",
     "nodetime": "0.8.15",
     "mocha": "1.17.1",
-    "redback": "0.3.7"
+    "redback": "0.3.7",
+    "i18next": "~1.7.1"
   },
   "devDependencies": {
     "chai": "",

@@ -15,6 +15,8 @@ sessionStore = new RedisStore(host:Settings.redis.web.host, port:Settings.redis.
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
+i18n = require("i18next")
+i18n.init(resGetPath: 'locales/__lng__/__ns__.json')
 
 Monitor = require "./Monitor"
 
@@ -40,6 +42,7 @@ app.configure ()->
 	app.set 'views', __dirname + '/../../views'
 	app.set 'view engine', 'jade'
 	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
+	app.use i18n.handle
 	app.use cookieParser
 	app.use express.session
 		proxy: true
