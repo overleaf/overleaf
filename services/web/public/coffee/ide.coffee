@@ -207,7 +207,7 @@ define [
 			@timeOut = setTimeout((=>
 				ga?('send', 'event', 'editor-interaction', 'notification-shown', "saving")
 				$("#savingProblems").show()
-			), 1000)
+			), 3000)
 
 		clearTimeout:->
 			if @timeOut?
