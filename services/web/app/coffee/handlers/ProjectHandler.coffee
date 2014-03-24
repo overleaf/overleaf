@@ -106,9 +106,9 @@ module.exports = class ProjectHandler
 							project:
 								name: project.name
 								url: "#{Settings.siteUrl}/project/#{project._id}?" + [
-										"project_name=#{project.name}"
-										"user_first_name=#{project.owner_ref.first_name}"
-										"new_email=#{email}"
+										"project_name=#{encodeURIComponent(project.name)}"
+										"user_first_name=#{encodeURIComponent(project.owner_ref.first_name)}"
+										"new_email=#{encodeURIComponent(email)}"
 										"r=#{project.owner_ref.referal_id}" # Referal
 										"rs=ci" # referral source = collaborator invite
 									].join("&")
