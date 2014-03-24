@@ -13,6 +13,7 @@ AuthorizationManager = require("../Security/AuthorizationManager")
 AutomaticSnapshotManager = require("../Versioning/AutomaticSnapshotManager")
 VersioningApiHandler = require("../Versioning/VersioningApiHandler")
 EditorRealTimeController = require("./EditorRealTimeController")
+TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 settings = require('settings-sharelatex')
 slReqIdHelper = require('soa-req-id')
 tpdsPollingBackgroundTasks = require('../ThirdPartyDataStore/TpdsPollingBackgroundTasks')
@@ -104,6 +105,7 @@ module.exports = EditorController =
 			logger.log project_id: project_id, connectedCount: peopleStillInProject, "flushing if empty"
 			if peopleStillInProject == 0
 				DocumentUpdaterHandler.flushProjectToMongoAndDelete(project_id)
+				TrackChangesManager.flushProject(project_id)
 			callback()
 			), 500
 		
