@@ -5,12 +5,12 @@ define [
 ], (moment)->
 
 	moment.lang "en", calendar:
-		lastDay : '[Yesterday at] h:mm a'
-		sameDay : '[Today at] h:mm a'
-		nextDay : '[Tomorrow at] h:mm a'
-		lastWeek : "Do MMM YYYY, h:mm a"
-		nextWeek : "Do MMM YYYY, h:mm a"
-		sameElse : 'Do MMM YYYY, h:mm a'
+		lastDay : '[Yesterday]'
+		sameDay : '[Today]'
+		nextDay : '[Tomorrow]'
+		lastWeek : "ddd, Do MMM YY"
+		nextWeek : "ddd, Do MMM YY"
+		sameElse : 'ddd, Do MMM YY'
 
 	ChangeListView = Backbone.View.extend
 		template: $("#changeListTemplate").html()
@@ -42,7 +42,8 @@ define [
 
 		addItem: (model) ->
 			index = @collection.indexOf(model)
-			view = new ChangeListItemView(model : model)
+			previousModel = @collection.models[index - 1]
+			view = new ChangeListItemView(model : model, previousModel: previousModel)
 			@itemViews.push view
 			elementAtIndex = @$(".change-list").children()[index]
 			view.$el.insertBefore(elementAtIndex)
@@ -191,12 +192,22 @@ define [
 				else
 					docNames.push "deleted"
 			data = {
-				date: moment(parseInt(@model.get("end_ts"), 10)).calendar()
+				day: moment(parseInt(@model.get("end_ts"), 10)).calendar()
+				time: moment(parseInt(@model.get("end_ts"), 10)).format("h:mm a")
 				users: userHtml.join("")
 				docs: docNames.join(", ")
 			}
 
 			@$el.html Mustache.to_html(@templates.item, data)
+
+			if @options.previousModel?
+				prevDate = @options.previousModel.get("end_ts")
+				date     = @model.get("end_ts")
+				if not moment(prevDate).isSame(date, "day")
+					@$el.addClass("first-in-day")
+			else
+				@$el.addClass("first-in-day")
+
 			return this
 
 		onClick: (e) ->
