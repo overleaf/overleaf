@@ -123,6 +123,14 @@
 			-ms-user-select: none;
 			-moz-user-select: none;
 			-webkit-user-select: none;
+			.track-changes-date-header {
+				border-bottom: 1px solid #ccc;
+				padding: 2px;
+				font-weight: bold;
+				text-align: center;
+				height: 19px;
+				display: none;
+			}
 			.change-selectors {
 				.change-selector-from {
 					position: absolute;
@@ -153,9 +161,12 @@
 				color: #666;
 				text-transform: capitalize;
 			}
-			.change-date {
-				margin-top: 2px;
+			.change-time {
+				float: right;
+				color: #666;
 				font-size: 12px;
+				display: inline-block;
+				padding-right: 6px;
 			}
 			.color-square {
 				display: inline-block;
@@ -214,6 +225,23 @@
 				display: block;
 			}
 		}
+		li.first-in-day {
+			.track-changes-date-header {
+				display: block;
+			}
+			.change-selectors {
+				.change-selector-to {
+					top: 28px;
+				}
+			}
+		}
+		li.first-in-day.selected-change-to {
+			.change-selectors {
+				.range {
+					top: 33px;
+				}
+			}
+		}
 	}
 	ul.change-list.hover-state {
 		li {
@@ -249,6 +277,13 @@
 				}
 				.change-selector-from {
 					opacity: 1;
+				}
+			}
+		}
+		li.first-in-day.hover-selected-to {
+			.change-selectors {
+				.range {
+					top: 33px;
 				}
 			}
 		}

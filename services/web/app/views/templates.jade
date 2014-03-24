@@ -267,7 +267,6 @@
 		.box
 			.page-header
 				h2 Share Publicly
-			link(href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css",rel="stylesheet")
 			div.share-button
 				a.btn.btn-twitter.btn-large(href="#")
 					i.icon-twitter
@@ -443,14 +442,16 @@
 		.track-changes-diff-editor
 
 	script(type='text/template')#changeListItemTemplate
-		div(class='change-selectors')
+		div.track-changes-date-header {{ day }}
+
+		div.change-selectors
 			div.range
 			input(type="radio",name="fromVersion").change-selector-from
 			input(type="radio",name="toVersion").change-selector-to
 
-		div(class='change-description')
+		div.change-description
+			div.change-time {{time}}
 			div.changed-docs {{docs}}
-			div.change-date {{date}}
 			div {{{users}}}
 
 	script(type='text/template')#changeListItemUserTemplate
