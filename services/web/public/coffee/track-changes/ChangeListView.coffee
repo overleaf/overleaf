@@ -211,6 +211,17 @@ define [
 			else
 				@$el.addClass("first-in-day")
 
+			@$(".change-selector-from").tooltip({
+				title: "Show back to this change",
+				placement: "left",
+				animation: false
+			})
+			@$(".change-selector-to").tooltip({
+				title: "Show up to this change",
+				placement: "left",
+				animation: false
+			})
+
 			return this
 
 		onClick: (e) ->
