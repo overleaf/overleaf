@@ -3,10 +3,11 @@ define [
 	"track-changes/models/Diff"
 	"track-changes/ChangeListView"
 	"track-changes/DiffView"
+	"account/AccountManager"
 	"utils/Modal"
 	"models/Doc"
 	"moment"
-], (ChangeList, Diff, ChangeListView, DiffView, Modal, Doc, moment) ->
+], (ChangeList, Diff, ChangeListView, DiffView, AccountManager, Modal, Doc, moment) ->
 	class TrackChangesManager
 		template: $("#trackChangesPanelTemplate").html()
 		
@@ -47,8 +48,9 @@ define [
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
 			@changeListView = new ChangeListView(
-				collection : @changes,
-				el         : @$el.find(".change-list-area")
+				el: @$el.find(".change-list-area")
+				collection: @changes
+				promptToUpgrade: !@ide.project.get("features").versioning
 			)
 			@changeListView.render()
 			@changeListView.loadUntilFull (error) =>
@@ -56,6 +58,8 @@ define [
 
 			@changeListView.on "change_diff", (fromIndex, toIndex) =>
 				@selectDocAndUpdateDiff(fromIndex, toIndex)
+
+			@changeListView.on "upgrade", () => @askToUpgrade()
 
 			if @diffView?
 				@diffView.remove()
@@ -190,5 +194,11 @@ define [
 
 		disable: () ->
 			@enabled = false
+
+		askToUpgrade: () ->
+			ga('send', 'event', 'subscription-funnel', 'askToUpgrade', "trackchanges")
+			AccountManager.askToUpgrade @ide,
+				onUpgrade: () =>
+					ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
 
 	return TrackChangesManager

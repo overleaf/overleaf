@@ -193,6 +193,10 @@
 		}
 		li.loading-changes, li.empty-message {
 			padding: 6px;
+			cursor: default;
+			&:hover {
+				background-color: inherit;
+			}
 		}
 		li.selected-change {
 			background-color: #eaeaea;
@@ -241,6 +245,11 @@
 					top: 33px;
 				}
 			}
+		}
+		li.upgrade-message {
+			padding: 15px;
+			background-color: rgb(255, 251, 210);
+			cursor: default;
 		}
 	}
 	ul.change-list.hover-state {

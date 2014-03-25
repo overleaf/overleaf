@@ -17,6 +17,7 @@ define [
 
 		events:
 			"scroll" : () -> @loadUntilFull()
+			"click button.upgrade": () -> @trigger "upgrade"
 
 		initialize: () ->
 			@itemViews = []
@@ -36,6 +37,8 @@ define [
 
 		render: ->
 			@$el.html Mustache.to_html @template
+			if !@options.promptToUpgrade
+				@$(".upgrade-message").hide()
 			@$el.css
 				overflow: "scroll"
 			this
