@@ -44,16 +44,15 @@ define [
 					@doc_id = doc_id
 					@updateDiff()
 
+		AB_BUCKETS: ["control", "one-week", "pop-up"]
 		show: () ->
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
 			if @changeListView?
 				@changeListView.remove()
-
 			@changeListView = new ChangeListView(
 				el: @$el.find(".change-list-area")
 				collection: @changes
-				promptToUpgrade: !@ide.project.get("features").versioning
 			)
 			@changeListView.render()
 			@changeListView.loadUntilFull (error) =>
@@ -62,7 +61,7 @@ define [
 			@changeListView.on "change_diff", (fromIndex, toIndex) =>
 				@selectDocAndUpdateDiff(fromIndex, toIndex)
 
-			@changeListView.on "upgrade", () => @askToUpgrade()
+			@showUpgradeView()
 
 			if @diffView?
 				@diffView.remove()
@@ -71,6 +70,21 @@ define [
 			@ide.editor.disable()
 			@ide.fileViewManager.disable()
 			@enable()
+
+		showUpgradeView: () ->
+			@upgradeType ||= @ide.analyticsManager.startABTest('track-changes-upgrade', @AB_BUCKETS)
+			@$el.find("button.upgrade").off "click.track-changes"
+			@$el.find("button.start-free-trial").off "click.track-changes"
+			@$el.find("button.upgrade").on "click.track-changes", () => @askToUpgrade()
+			@$el.find("button.start-free-trial").on "click.track-changes", () => @gotoFreeTrial()
+
+			if !@ide.project.get("features").versioning
+				if @upgradeType == "pop-up"
+					@$el.find(".track-changes-upgrade-popup").show()
+				else if @upgradeType == "control"
+					@$el.find(".track-changes-upgrade-control").show()
+				else if @upgradeType == "one-week"
+					@$el.find(".track-changes-upgrade-oneweek").show()
 
 		hide: () ->
 			@ide.editor.enable()
@@ -200,8 +214,15 @@ define [
 
 		askToUpgrade: () ->
 			ga('send', 'event', 'subscription-funnel', 'askToUpgrade', "trackchanges")
+			ga('send', 'event', 'ab_tests', 'track-changes-upgrade', "prompted-to-upgrade-#{@upgradeType}")
 			AccountManager.askToUpgrade @ide,
 				onUpgrade: () =>
+					@ide.analyticsManager.endABTest('track-changes-upgrade', @AB_BUCKETS)
 					ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
+
+		gotoFreeTrial: () ->
+			AccountManager.gotoSubscriptionsPage()
+			@ide.analyticsManager.endABTest('track-changes-upgrade', @AB_BUCKETS)
+			ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
 
 	return TrackChangesManager

@@ -76,17 +76,18 @@ define [
 			@ide.socket.emit "removeUserFromProject", member.id
 
 		addMember: (email, privileges) ->
+			console.log "Adding member", email
 			@ide.socket.emit "addUserToProject", email, privileges, (error, added) =>
 				if error?
 					@ide.showGenericServerErrorMessage()
 					return
 				if !added
+					console.log "got response", error, added
 					ga('send', 'event', 'subscription-funnel', 'askToUpgrade', "projectMemebrs")
 					AccountManager.askToUpgrade @ide,
 						why: "to add additional collaborators"
 						onUpgrade: () => 
 							ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "projectMemebrs")
-							@addMember(email, privileges)
 
 		afterMemberRemoved: (memberId) ->
 			for member in @members.models
