@@ -38,6 +38,18 @@ describe "UpdateCompressor", ->
 				v: 43
 			}]
 
+		it "should return no-op updates when the op list is empty", ->
+			expect(@UpdateCompressor.convertToSingleOpUpdates [{
+				op:   []
+				meta: { ts: @ts1, user_id: @user_id }
+				v: 42
+			}])
+			.to.deep.equal [{
+				op: @UpdateCompressor.NOOP
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
+			}]
+
 	describe "concatUpdatesWithSameVersion", ->
 		it "should concat updates with the same version", ->
 			expect(@UpdateCompressor.concatUpdatesWithSameVersion [{
@@ -61,6 +73,18 @@ describe "UpdateCompressor", ->
 				op:   [ @op3 ]
 				meta: {  start_ts: @ts2, end_ts: @ts2, user_id: @other_user_id }
 				v: 43
+			}]
+
+		it "should turn a noop into an empty op", ->
+			expect(@UpdateCompressor.concatUpdatesWithSameVersion [{
+				op:   @UpdateCompressor.NOOP
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				v: 42
+			}])
+			.to.deep.equal [{
+				op:   []
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id }
+				v: 42
 			}]
 
 	describe "compress", ->
@@ -239,4 +263,44 @@ describe "UpdateCompressor", ->
 					v: 43
 				}]
 
-				
+		describe "noop - insert", ->
+			it "should leave them untouched", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: @UpdateCompressor.NOOP
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, i: "bar" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: @UpdateCompressor.NOOP
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, i: "bar" }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 43
+				}]
+
+		describe "noop - delete", ->
+			it "should leave them untouched", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: @UpdateCompressor.NOOP
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, d: "bar" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: @UpdateCompressor.NOOP
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, d: "bar" }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 43
+				}]

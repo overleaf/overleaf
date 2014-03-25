@@ -194,3 +194,35 @@ describe "Appending doc ops to the history", ->
 			expect(@updates[0].v).to.equal 3
 			expect(@updates[1].v).to.equal 4
 
+	describe "when there is a no-op update", ->
+		before (done) ->
+			@project_id = ObjectId().toString()
+			@doc_id = ObjectId().toString()
+			@user_id = ObjectId().toString()
+			oneDay = 24 * 60 * 60 * 1000
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+				op: []
+				meta: { ts: Date.now(), user_id: @user_id }
+				v: 3
+			}, {
+				op: [{ i: "foo", p: 3 }]
+				meta: { ts: Date.now() + oneDay, user_id: @user_id }
+				v: 4
+			}], (error) =>
+				throw error if error?
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
+					throw error if error?
+					done()
+
+		it "should insert the compressed no-op into mongo", ->
+			expect(@updates[0].op).to.deep.equal []
+
+
+		it "should insert the compressed next update into mongo", ->
+			expect(@updates[1].op).to.deep.equal [{
+				p: 3, i: "foo"
+			}]
+
+		it "should insert the correct version numbers into mongo", ->
+			expect(@updates[0].v).to.equal 3
+			expect(@updates[1].v).to.equal 4

@@ -2,6 +2,8 @@ strInject = (s1, pos, s2) -> s1[...pos] + s2 + s1[pos..]
 strRemove = (s1, pos, length) -> s1[...pos] + s1[(pos + length)..]
 
 module.exports = UpdateCompressor =
+	NOOP: "noop"
+
 	# Updates come from the doc updater in format
 	# {
 	# 	op:   [ { ... op1 ... }, { ... op2 ... } ]
@@ -19,14 +21,23 @@ module.exports = UpdateCompressor =
 	convertToSingleOpUpdates: (updates) ->
 		splitUpdates = []
 		for update in updates
-			for op in update.op
+			if update.op.length == 0
 				splitUpdates.push
-					op: op
+					op: UpdateCompressor.NOOP
 					meta:
 						start_ts: update.meta.start_ts or update.meta.ts
 						end_ts:   update.meta.end_ts   or update.meta.ts
 						user_id:  update.meta.user_id
 					v: update.v
+			else
+				for op in update.op
+					splitUpdates.push
+						op: op
+						meta:
+							start_ts: update.meta.start_ts or update.meta.ts
+							end_ts:   update.meta.end_ts   or update.meta.ts
+							user_id:  update.meta.user_id
+						v: update.v
 		return splitUpdates
 
 	concatUpdatesWithSameVersion: (updates) ->
@@ -34,12 +45,14 @@ module.exports = UpdateCompressor =
 		for update in updates
 			lastUpdate = concattedUpdates[concattedUpdates.length - 1]
 			if lastUpdate? and lastUpdate.v == update.v
-				lastUpdate.op.push update.op
+				lastUpdate.op.push update.op unless update.op == UpdateCompressor.NOOP
 			else
-				concattedUpdates.push
-					op:   [ update.op ]
+				nextUpdate =
+					op:   []
 					meta: update.meta
 					v:    update.v
+				nextUpdate.op.push update.op unless update.op == UpdateCompressor.NOOP
+				concattedUpdates.push nextUpdate
 		return concattedUpdates
 
 	compressRawUpdates: (lastPreviousUpdate, rawUpdates) ->
