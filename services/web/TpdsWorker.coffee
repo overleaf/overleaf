@@ -33,12 +33,20 @@ processingFuncs =
 			else
 				callback()
 
-	pipeStreamFrom: (options, callback)->
+	pipeStreamFrom: (options, _callback)->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		if options.filePath == "/droppy/main.tex"
 			request options.streamOrigin, (err,res, body)->
 				logger.log options:options, body:body
+
 		origin = request(options.streamOrigin)
+
+		cancelled = false
 		origin.on 'response', (res) ->
+			return if cancelled
 			if 200 <= res.statusCode < 300
 				dest = request(options)
 				origin.pipe(dest)
@@ -54,8 +62,16 @@ processingFuncs =
 				callback(error)
 
 		origin.on 'error', (err)->
+			return if cancelled
 			logger.error err:err, options:options, "something went wrong in pipeStreamFrom origin"
 			callback(err)
+
+		setTimeout () ->
+			cancelled = true
+			error = new Error("timeout")
+			logger.error err: error, options: options, "timeout"
+			callback(error)
+		, 5000
 
 
 
