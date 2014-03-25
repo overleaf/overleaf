@@ -34,15 +34,12 @@
 	"blog":"Blog",
 	"latex_editor":"LaTeX Editor",
 
-
 	"get_free_stuff":"Get free stuff",
 	"recommend_sl_and_get_free_stuff":"Recommend ShareLaTeX to your friends and we'll upgrade your account for free.",
-
 
 	"chat":"Chat",
 	"no_one_else_online":"message telling people no one is on-line inside the editor",
 	"your_message":"place holder for the message sending box",
-
 
 	"loading":"loading message when entering the editor",
 	"loading_editor":"loading message when entering the editor",
@@ -136,7 +133,5 @@
 	"thanks_to_open_source_components":"thanks to open source - https://www.sharelatex.com/attribution",
 	"about_nodejs_and_npm":"https://www.sharelatex.com/attribution",
 	"about_pdfjs_list_view":"https://www.sharelatex.com/attribution",
-	"about_bootstrap":"https://www.sharelatex.com/attribution",
-
-
+	"about_bootstrap":"https://www.sharelatex.com/attribution"
 }
