@@ -33,15 +33,12 @@
 	"blog":"Blog",
 	"latex_editor":"LaTeX Editor",
 
-
 	"get_free_stuff":"Get free stuff",
 	"recommend_sl_and_get_free_stuff":"Recommend ShareLaTeX to your friends and we'll upgrade your account for free.",
-
 
 	"chat":"Chat",
 	"no_one_else_online":"No one else is online",
 	"your_message":"Your Message",
-
 
 	"loading":"Loading",
 	"loading_editor":"Loading Editor",
@@ -78,7 +75,6 @@
 
 	"saving":"Saving",
 
-
 	"cancel":"cancel",
 
 	"project_settings":"Project Settings",
@@ -97,15 +93,12 @@
 	"delete_forever":"Delete Forever",
 	"confirm_delete_project":"Are you sure you want to delete this project?",
 
-
 	"support_and_feedback":"Support and feedback",
 	"help":"Help",
 	"latex_templates":"LaTeX Templates",
 	"info":"Info",
 	"latex_help_guide":"LaTeX help guide",
 	"latex_resources":"LaTeX Resources",
-
-
 
 	"choose_your_plan":"Choose your plan",
 	"indvidual_plans":"Individual Plans",
@@ -139,9 +132,5 @@
 	"thanks_to_open_source_components":"We've only been able to create ShareLaTeX thanks to the many amazing free and open source technologies that exist. Here are some that we have been using and would like to say thank you to:",
 	"about_nodejs_and_npm":"and the massive set of modules that are available",
 	"about_pdfjs_list_view":"A wrapper for PDF.js that powers our built in PDF viewer",
-	"about_bootstrap":"for letting us survive without being designers",
-
-
-
-
+	"about_bootstrap":"for letting us survive without being designers"
 }
