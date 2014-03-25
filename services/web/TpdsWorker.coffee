@@ -45,8 +45,10 @@ processingFuncs =
 		origin = request(options.streamOrigin)
 
 		cancelled = false
+		gotResponse = false
 		origin.on 'response', (res) ->
 			return if cancelled
+			gotResponse = true
 			if 200 <= res.statusCode < 300
 				dest = request(options)
 				origin.pipe(dest)
@@ -63,10 +65,12 @@ processingFuncs =
 
 		origin.on 'error', (err)->
 			return if cancelled
+			gotResponse = true
 			logger.error err:err, options:options, "something went wrong in pipeStreamFrom origin"
 			callback(err)
 
 		setTimeout () ->
+			return if gotResponse
 			cancelled = true
 			error = new Error("timeout")
 			logger.error err: error, options: options, "timeout"
