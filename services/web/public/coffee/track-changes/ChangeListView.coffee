@@ -43,6 +43,9 @@ define [
 				overflow: "scroll"
 			this
 
+		remove: () ->
+			@undelegateEvents()
+
 		addItem: (model) ->
 			index = @collection.indexOf(model)
 			previousModel = @collection.models[index - 1]

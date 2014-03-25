@@ -47,6 +47,9 @@ define [
 		show: () ->
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
+			if @changeListView?
+				@changeListView.remove()
+
 			@changeListView = new ChangeListView(
 				el: @$el.find(".change-list-area")
 				collection: @changes
