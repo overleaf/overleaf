@@ -53,9 +53,9 @@ module.exports = (app)->
 			Settings.siteUrl.substring(Settings.siteUrl.indexOf("//")+2)
 		next()
 
-	app.use (req, res, next)-> 
-		res.locals.formatPrivlageLevel = (privlageLevel)->
-			formatedPrivlages = private:"Private", readOnly:"Read Only", readAndWrite:"Read and Write"
+	app.use (req, res, next)->
+		res.locals.formatProjectPublicAccessLevel = (privlageLevel)->
+			formatedPrivlages = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
 			return formatedPrivlages[privlageLevel] || "Private"
 		next()
 

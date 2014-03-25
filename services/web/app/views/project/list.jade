@@ -40,7 +40,7 @@ block content
 					span Last modified on 
 					span.isoDate #{project.lastUpdated.toISOString()} 
 					span &nbsp; - &nbsp;
-					span #{formatPrivlageLevel(project.publicAccesLevel)}
+					span #{formatProjectPublicAccessLevel(project.publicAccesLevel)}
 					span &nbsp; - &nbsp;
 					mixin formatAccessLevel(project.accessLevel)
 				.project-tags(data-project-id=project_id)
