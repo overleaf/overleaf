@@ -75,7 +75,7 @@ processingFuncs =
 			error = new Error("timeout")
 			logger.error err: error, options: options, "timeout"
 			callback(error)
-		, 5000
+		, 2000
 
 
 
