@@ -90,7 +90,7 @@ define [
 			logButtonHtml = "Logs"
 
 			if compileErrors?
-				for error in compileErrors.all
+				for error in compileErrors.errors.concat(compileErrors.warnings).concat(compileErrors.typesetting)
 					errorView = new LatexErrorView(@options.manager.ide, error)
 					errorView.render()
 					@errorViews.push(errorView)

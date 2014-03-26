@@ -25,8 +25,19 @@ define [
 				},{
 					text: "Enter Billing Information"
 					class: "btn-primary"
-					callback: () ->
-						window.location = "/user/subscription/new?planCode=student_free_trial"
+					callback: () =>
+						options.onUpgrade?()
+						@gotoSubscriptionsPage()
+				}]
+
+		gotoSubscriptionsPage: () ->
+			window.open("/user/subscription/new?planCode=student_free_trial")
+			Modal.createModal
+				title: "Please refresh"
+				message: "Please refresh this page after starting your free trial. This will make sure all of your features are enabled."
+				buttons: [{
+					text: "OK"
+					class: ""
 				}]
 
 		showUpgradeDialog: (ide, options = {}) ->

@@ -33,26 +33,50 @@ processingFuncs =
 			else
 				callback()
 
-	pipeStreamFrom: (options, callback)->
+	pipeStreamFrom: (options, _callback)->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		if options.filePath == "/droppy/main.tex"
 			request options.streamOrigin, (err,res, body)->
 				logger.log options:options, body:body
+
 		origin = request(options.streamOrigin)
+
+		cancelled = false
+		gotResponse = false
+		origin.on 'response', (res) ->
+			return if cancelled
+			gotResponse = true
+			if 200 <= res.statusCode < 300
+				dest = request(options)
+				origin.pipe(dest)
+
+				dest.on "error", (err)->
+					logger.error err:err, options:options, "something went wrong in pipeStreamFrom dest"
+					callback(err)
+					
+				dest.on 'end', callback
+			else
+				error = new Error("received non-success status code: #{res.statusCode}")
+				logger.error err: error, options: options, "something went wrong connecting to origin"
+				callback(error)
+
 		origin.on 'error', (err)->
+			return if cancelled
+			gotResponse = true
 			logger.error err:err, options:options, "something went wrong in pipeStreamFrom origin"
-			if err?
-				callback(err)
-			else
-				callback()
-		dest = request(options)
-		origin.pipe(dest)
-		dest.on "error", (err)->
-			logger.error err:err, options:options, "something went wrong in pipeStreamFrom dest"
-			if err?
-				callback(err)
-			else
-				callback()
-		dest.on 'end', callback
+			callback(err)
+
+		setTimeout () ->
+			return if gotResponse
+			cancelled = true
+			error = new Error("timeout")
+			logger.error err: error, options: options, "timeout"
+			callback(error)
+		, 2000
+
 
 
 workerRegistration = (groupKey, method, options, callback)->
