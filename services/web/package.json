@@ -28,6 +28,7 @@
     "mixpanel": "0.0.18",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
+    "translations-sharelatex": "git+https://henryoswald@bitbucket.org/henryoswald/translations-sharelatex.git#master",
     "soa-req-id": "git+https://github.com/sharelatex/soa-req-id.git#master",
     "fairy": "0.0.2",
     "node-uuid": "1.4.0",
@@ -37,8 +38,7 @@
     "archiver": "0.5.1",
     "nodetime": "0.8.15",
     "mocha": "1.17.1",
-    "redback": "0.3.7",
-    "i18next": "~1.7.1"
+    "redback": "0.3.7"
   },
   "devDependencies": {
     "chai": "",
