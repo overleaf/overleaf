@@ -435,9 +435,11 @@
 				.change-list-area
 			.track-changes-diff
 			.track-changes-upgrade-popup(style="display: none;")
-				.message
+				.message.show-when-owner
 					p You need to upgrade your plan to use the History feature.
 					button.btn.btn-primary.start-free-trial Start free trial
+				.message.show-when-not-owner
+					p Please ask the project owner to upgrade to use the History feature.
 			.track-changes-upgrade-control(style="display: none;")
 				.message History is not yet enabled for this project.
 				button.btn.btn-primary.btn-large.upgrade Enable History
@@ -471,9 +473,11 @@
 			li.loading-changes Loading...
 			li.empty-message You haven't made any changes yet!
 			li.track-changes-upgrade-oneweek(style="display: none;")
-				p We only store one week of changes for free accounts. Upgrade for an unlimited history.
-				p
+				p We only store one week of changes for free accounts.
+				p.show-when-owner Upgrade for an unlimited history.
+				p.show-when-owner
 					button.btn.btn-primary.start-free-trial Start free trial
+				p.show-when-not-owner Please ask the project owner to upgrade.
 
 	script(type='text/template')#hotKeysListTemplate
 		.hotkeys

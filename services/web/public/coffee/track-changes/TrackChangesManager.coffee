@@ -86,6 +86,11 @@ define [
 				else if @upgradeType == "one-week"
 					@$el.find(".track-changes-upgrade-oneweek").show()
 
+				if @ide.project.get("owner") == @ide.user
+					@$el.find(".show-when-not-owner").hide()
+				else
+					@$el.find(".show-when-owner").hide()
+
 		hide: () ->
 			@ide.editor.enable()
 			@ide.fileViewManager.enable()
