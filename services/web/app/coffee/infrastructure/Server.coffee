@@ -15,7 +15,7 @@ sessionStore = new RedisStore(host:Settings.redis.web.host, port:Settings.redis.
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
-translations = require "translations"
+translations = require "translations-sharelatex"
 
 Monitor = require "./Monitor"
 
