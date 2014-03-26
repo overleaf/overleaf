@@ -25,10 +25,11 @@ define [
 						@publishProjectView?.refreshPublishStatus()
 
 			setupPublish = _.once =>
-				@publishProjectView = new PublishProjectView
-					ide: @ide
-					el: $("#publishProject")
-				@publishProjectView.render()
+				if @ide.security? and @ide.security.permissionsLevel == "owner"
+					@publishProjectView = new PublishProjectView
+						ide: @ide
+						el: $("#publishProject")
+					@publishProjectView.render()
 
 			setupArea()
 			if @ide?
