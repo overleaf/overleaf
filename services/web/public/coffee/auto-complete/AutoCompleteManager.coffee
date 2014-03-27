@@ -2,10 +2,12 @@ define [
 	"auto-complete/SuggestionManager"
 	"auto-complete/Snippets"
 	"ace/autocomplete/util"
+	"ace/autocomplete"
 	"ace/range"
 	"ace/ext/language_tools"
-], (SuggestionManager, Snippets, Util) ->
+], (SuggestionManager, Snippets, Util, AutoComplete) ->
 	Range = require("ace/range").Range
+	Autocomplete = AutoComplete.Autocomplete
 
 	Util.retrievePrecedingIdentifier = (text, pos, regex) ->
 		currentLineOffset = 0
@@ -37,6 +39,20 @@ define [
 			@suggestionManager = new SuggestionManager()
 
 			@aceEditor.completers = [@suggestionManager, SnippetCompleter]
+
+			insertMatch = Autocomplete::insertMatch
+			editor = @aceEditor
+			Autocomplete::insertMatch = (data) ->
+				pos = editor.getCursorPosition()
+				range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
+				nextChar = editor.session.getTextRange(range)
+
+				# If we are in \begin{it|}, then we need to remove the trailing }
+				# since it will be adding in with the autocomplete of \begin{item}...
+				if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
+					editor.session.remove(range)
+				
+				insertMatch.call editor.completer, data
 
 			@bindToEditorEvents()
 
