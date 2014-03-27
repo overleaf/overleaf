@@ -51,6 +51,7 @@ define [
 			"click #splitViewButton": ->
 				$.localStorage("layout.pdf", "split")
 				@options.manager.switchToSplitView()
+			"click .delete-cached-files > a": -> @options.manager.deleteCachedFiles()
 
 		initialize: (@options) ->
 			@ide = @options.ide

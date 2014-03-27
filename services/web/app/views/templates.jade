@@ -182,7 +182,11 @@
 					button#downloadPdf.btn Download
 					button#downloadLinksButton.btn.dropdown-toggle(data-toggle="dropdown")
 						span.caret
-					ul.dropdown-menu#downloadLinks
+					ul.dropdown-menu
+						#downloadLinks
+						li.divider
+						li.delete-cached-files
+							a(href="#") Clear cached files
 				.btn-group.pull-right(data-toggle="buttons-radio")
 					button(type="button", title="Flat view")#flatViewButton.btn
 						i.icon-flatview

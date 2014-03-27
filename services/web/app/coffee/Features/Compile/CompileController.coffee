@@ -19,6 +19,9 @@ module.exports = CompileController =
 				res.header('Content-Disposition', "filename=#{project.getSafeProjectName()}.pdf")
 			CompileController.proxyToClsi("/project/#{project_id}/output/output.pdf", req, res, next)
 
+	deleteAuxFiles: (req, res, next) ->
+		project_id = req.params.Project_id
+		CompileController.proxyToClsi("/project/#{project_id}", req, res, next)
 
 	compileAndDownloadPdf: (req, res, next)->
 		project_id = req.params.project_id
@@ -29,8 +32,6 @@ module.exports = CompileController =
 			url = "/project/#{project_id}/output/output.pdf"
 			CompileController.proxyToClsi url, req, res, next
 
-
-
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi("/project/#{req.params.Project_id}/output/#{req.params.file}", req, res, next)
 
@@ -38,7 +39,7 @@ module.exports = CompileController =
 		logger.log url: url, "proxying to CLSI"
 		url = "#{Settings.apis.clsi.url}#{url}"
 		oneMinute = 60 * 1000
-		proxy = request.get(url: url, timeout: oneMinute)
+		proxy = request(url: url, method: req.method, timeout: oneMinute)
 		proxy.pipe(res)
 		proxy.on "error", (error) ->
 			logger.error err: error, url: url, "CLSI proxy error"
