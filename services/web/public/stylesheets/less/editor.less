@@ -467,6 +467,9 @@ body.editor {
 		.dropdown-caret {
 			display: none;
 		}
+		.entity-label {
+			display: none;
+		}
 	}
 
 	.entity-folder {
@@ -525,6 +528,28 @@ body.editor {
 				vertical-align: top;
 				margin: 0;
 			}
+		}
+	}
+
+	.entity-list-item.show-label {
+		.dropdown-caret {
+			display: none;
+		}
+		.entity-label {
+			display: block;
+			position: absolute;
+			top: 3px;
+			right: 3px;
+			font-size: 12px;
+			line-height: 12px;
+			padding: 3px 6px;
+			font-weight: normal;
+		}
+	}
+
+	.entity-list-item.folder-open.show-label {
+		.entity-label {
+			display: none;
 		}
 	}
 	

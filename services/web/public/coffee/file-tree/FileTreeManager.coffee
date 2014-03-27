@@ -277,6 +277,5 @@ define [
 			entity.collection?.remove(entity)
 			delete @views[entity_id]
 			
-				
-
-
+		setLabels: (labels) ->
+			@view.setLabels(labels)
