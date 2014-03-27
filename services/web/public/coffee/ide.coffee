@@ -26,6 +26,7 @@ define [
 	"tour/IdeTour"
 	"analytics/AnalyticsManager"
 	"track-changes/TrackChangesManager"
+	"debug/DebugManager"
 	"ace/ace"
 	"libs/jquery.color"
 	"libs/jquery-layout"
@@ -59,6 +60,7 @@ define [
 	IdeTour,
 	AnalyticsManager,
 	TrackChangesManager
+	DebugManager
 ) ->
 
 
@@ -194,6 +196,7 @@ define [
 	ide.hotkeysManager = new HotkeysManager ide
 	ide.layoutManager.resizeAllSplitters()
 	ide.tourManager = new IdeTour ide
+	ide.debugManager = new DebugManager(ide)
 
 	ide.savingAreaManager =
 		$savingArea : $('#saving-area')
