@@ -71,7 +71,7 @@ define [
 		_saveSplitterState: () ->
 			if $("#editorSplitter").is(":visible")
 				state = $("#editorSplitter").layout().readState()
-				eastWidth = state.east.size
+				eastWidth = state.east.size + $("#editorSplitter .ui-layout-resizer-east").width()
 				percentWidth = eastWidth / $("#editorSplitter").width() * 100 + "%"
 				state.east.size = percentWidth
 				$.localStorage("layout.editor", state)
