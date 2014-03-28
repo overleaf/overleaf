@@ -15,6 +15,7 @@ block content
 			thead 
 				tr
 					th
+						input(type="checkbox").select-all
 					th email
 					th Name
 					th Registered
@@ -23,7 +24,7 @@ block content
 				-each user in users
 					tr
 						td 
-							input(type="checkbox")
+							input(type="checkbox").select-one
 						td #{user.email}
 						td #{user.first_name} #{user.last_name}
 						td #{!user.holdingAccount}
