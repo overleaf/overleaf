@@ -9,6 +9,7 @@ request = require "request"
 rclient = require("redis").createClient() # Only works locally for now
 
 TrackChangesClient = require "./helpers/TrackChangesClient"
+MockWebApi = require "./helpers/MockWebApi"
 
 describe "Flushing updates", ->
 	describe "flushing a doc's updates", ->
@@ -16,6 +17,7 @@ describe "Flushing updates", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
@@ -34,23 +36,103 @@ describe "Flushing updates", ->
 				done()
 
 	describe "flushing a project's updates", ->
-		before (done) ->
-			@project_id = ObjectId().toString()
-			@doc_id = ObjectId().toString()
-			@user_id = ObjectId().toString()
-			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
-				op: [{ i: "f", p: 3 }]
-				meta: { ts: Date.now(), user_id: @user_id }
-				v: 3
-			}], (error) =>
-				throw error if error?
-				TrackChangesClient.flushProject @project_id, (error) ->
+		describe "with versioning enabled", ->
+			before (done) ->
+				@project_id = ObjectId().toString()
+				@doc_id = ObjectId().toString()
+				@user_id = ObjectId().toString()
+
+				@weeks = 7 * 24 * 60 * 60 * 1000
+
+				MockWebApi.projects[@project_id] =
+					features:
+						versioning: true
+
+				TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+					op: [{ i: "g", p: 2 }]
+					meta: { ts: Date.now() - 2 * @weeks, user_id: @user_id }
+					v: 2
+				}, {
+					op: [{ i: "f", p: 3 }]
+					meta: { ts: Date.now(), user_id: @user_id }
+					v: 3
+				}], (error) =>
 					throw error if error?
+					TrackChangesClient.flushProject @project_id, (error) ->
+						throw error if error?
+						done()
+
+			it "should not delete the old updates", (done) ->
+				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
+					expect(updates.length).to.equal 2
 					done()
 
-		it "should flush the op into mongo", (done) ->
-			TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
-				expect(updates[0].op).to.deep.equal [{
-					p: 3, i: "f"
-				}]
-				done()
+			it "should preserve history forever", (done) ->
+				TrackChangesClient.getProjectMetaData @project_id, (error, project) ->
+					expect(project.preserveHistory).to.equal true
+					done()
+
+		describe "without versioning enabled", ->
+			before (done) ->
+				@project_id = ObjectId().toString()
+				@doc_id = ObjectId().toString()
+				@user_id = ObjectId().toString()
+
+				@weeks = 7 * 24 * 60 * 60 * 1000
+
+				MockWebApi.projects[@project_id] =
+					features:
+						versioning: false
+
+				TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+					op: [{ i: "g", p: 2 }]
+					meta: { ts: Date.now() - 2 * @weeks, user_id: @user_id }
+					v: 2
+				}, {
+					op: [{ i: "f", p: 3 }]
+					meta: { ts: Date.now(), user_id: @user_id }
+					v: 3
+				}], (error) =>
+					throw error if error?
+					TrackChangesClient.flushProject @project_id, (error) ->
+						throw error if error?
+						done()
+
+			it "should delete the older update, but the newer update", (done) ->
+				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
+					expect(updates.length).to.equal 1
+					expect(updates[0].op).to.deep.equal [{ i: "f", p: 3 }]
+					done()
+
+		describe "without versioning enabled but with preserveHistory set to true", ->
+			before (done) ->
+				@project_id = ObjectId().toString()
+				@doc_id = ObjectId().toString()
+				@user_id = ObjectId().toString()
+
+				@weeks = 7 * 24 * 60 * 60 * 1000
+
+				MockWebApi.projects[@project_id] =
+					features:
+						versioning: false
+
+				TrackChangesClient.setPreserveHistoryForProject @project_id, (error) =>
+					throw error if error?
+					TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+						op: [{ i: "g", p: 2 }]
+						meta: { ts: Date.now() - 2 * @weeks, user_id: @user_id }
+						v: 2
+					}, {
+						op: [{ i: "f", p: 3 }]
+						meta: { ts: Date.now(), user_id: @user_id }
+						v: 3
+					}], (error) =>
+						throw error if error?
+						TrackChangesClient.flushProject @project_id, (error) ->
+							throw error if error?
+							done()
+
+			it "should not delete the old updates", (done) ->
+				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
+					expect(updates.length).to.equal 2
+					done()

@@ -274,3 +274,56 @@ describe "MongoManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
+	describe "getProjectMetaData", ->
+		beforeEach ->
+			@metadata = { "mock": "metadata" }
+			@db.projectHistoryMetaData =
+				find: sinon.stub().callsArgWith(1, null, [@metadata])
+			@MongoManager.getProjectMetaData @project_id, @callback
+
+		it "should look up the meta data in the db", ->
+			@db.projectHistoryMetaData.find
+				.calledWith({ project_id: ObjectId(@project_id) })
+				.should.equal true
+
+		it "should return the metadata", ->
+			@callback.calledWith(null, @metadata).should.equal true
+
+	describe "setProjectMetaData", ->
+		beforeEach ->
+			@metadata = { "mock": "metadata" }
+			@db.projectHistoryMetaData =
+				update: sinon.stub().callsArgWith(3, null, [@metadata])
+			@MongoManager.setProjectMetaData @project_id, @metadata, @callback
+
+		it "should upsert the metadata into the DB", ->
+			@db.projectHistoryMetaData.update
+				.calledWith({
+					project_id: ObjectId(@project_id)
+				}, {
+					$set: @metadata
+				}, {
+					upsert: true
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "deleteOldProjectUpdates", ->
+		beforeEach ->
+			@before = Date.now() - 10000
+			@db.docHistory =
+				remove: sinon.stub().callsArg(1)
+			@MongoManager.deleteOldProjectUpdates @project_id, @before, @callback
+
+		it "should delete updates before the 'before' time", ->
+			@db.docHistory.remove
+				.calledWith({
+					project_id: ObjectId(@project_id)
+					"meta.end_ts": { "$lt": @before }
+				})
+				.should.equal true
+
+		it "should return the callback", ->
+			@callback.called.should.equal true

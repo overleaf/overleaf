@@ -75,6 +75,12 @@ module.exports = MongoManager =
 
 		cursor.toArray callback
 
+	deleteOldProjectUpdates: (project_id, before, callback = (error) ->) ->
+		db.docHistory.remove {
+			project_id: ObjectId(project_id)
+			"meta.end_ts": { $lt: before }
+		}, callback
+
 	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
 		db.docHistory.update {
 			doc_id: ObjectId(doc_id.toString())
@@ -85,11 +91,28 @@ module.exports = MongoManager =
 			multi: true
 		}, callback
 
-	ensureIndices: (callback = (error) ->) ->
-		# For finding all updates that go into a diff for a doc
-		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, callback
-		# For finding all updates that affect a project
-		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, callback
-		# For finding updates that don't yet have a project_id and need it inserting
-		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, callback
+	getProjectMetaData: (project_id, callback = (error, metadata) ->) ->
+		db.projectHistoryMetaData.find {
+			project_id: ObjectId(project_id.toString())
+		}, (error, results) ->
+			return callback(error) if error?
+			callback null, results[0]
 
+	setProjectMetaData: (project_id, metadata, callback = (error) ->) ->
+		db.projectHistoryMetaData.update {
+			project_id: ObjectId(project_id)
+		}, {
+			$set: metadata
+		}, {
+			upsert: true
+		}, callback
+
+	ensureIndices: () ->
+		# For finding all updates that go into a diff for a doc
+		db.docHistory.ensureIndex { doc_id: 1, v: 1 }
+		# For finding all updates that affect a project
+		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }
+		# For finding updates that don't yet have a project_id and need it inserting
+		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }
+		# For finding project meta-data
+		db.projectHistoryMetaData.ensureIndex { project_id: 1 }

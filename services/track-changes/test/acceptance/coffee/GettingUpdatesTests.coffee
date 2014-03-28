@@ -19,7 +19,11 @@ describe "Getting updates", ->
 		@project_id = ObjectId().toString()
 
 		@minutes = 60 * 1000
-		@days = 24 * 60 * @minutes
+		@hours = 60 * @minutes
+
+		MockWebApi.projects[@project_id] =
+			features:
+				versioning: true
 
 		MockWebApi.users[@user_id] = @user =
 			email: "user@sharelatex.com"
@@ -32,12 +36,12 @@ describe "Getting updates", ->
 		for i in [0..9]
 			@updates.push {
 				op: [{ i: "a", p: 0 }]
-				meta: { ts: @now - (9 - i) * @days - 2 * @minutes, user_id: @user_id }
+				meta: { ts: @now - (9 - i) * @hours - 2 * @minutes, user_id: @user_id }
 				v: 2 * i + 1
 			}
 			@updates.push {
 				op: [{ i: "b", p: 0 }]
-				meta: { ts: @now - (9 - i) * @days, user_id: @user_id }
+				meta: { ts: @now - (9 - i) * @hours, user_id: @user_id }
 				v: 2 * i + 2
 			}
 
@@ -76,21 +80,21 @@ describe "Getting updates", ->
 			}, {
 				docs: docs2
 				meta:
-					start_ts: @to - 1 * @days - 2 * @minutes
-					end_ts: @to - 1 * @days
+					start_ts: @to - 1 * @hours - 2 * @minutes
+					end_ts: @to - 1 * @hours
 					users: [@user]
 			}, {
 				docs: docs3
 				meta:
-					start_ts: @to - 2 * @days - 2 * @minutes
-					end_ts: @to - 2 * @days
+					start_ts: @to - 2 * @hours - 2 * @minutes
+					end_ts: @to - 2 * @hours
 					users: [@user]
 			}]
 
 
 	describe "getting updates beyond the end of the database", ->
 		before (done) ->
-			TrackChangesClient.getUpdates @project_id, { before: @to - 8 * @days + 1, min_count: 30 }, (error, body) =>
+			TrackChangesClient.getUpdates @project_id, { before: @to - 8 * @hours + 1, min_count: 30 }, (error, body) =>
 				throw error if error?
 				@updates = body.updates
 				done()
@@ -103,14 +107,14 @@ describe "Getting updates", ->
 			expect(@updates).to.deep.equal [{
 				docs: docs1
 				meta:
-					start_ts: @to - 8 * @days - 2 * @minutes
-					end_ts: @to - 8 * @days
+					start_ts: @to - 8 * @hours - 2 * @minutes
+					end_ts: @to - 8 * @hours
 					users: [@user]
 			}, {
 				docs: docs2
 				meta:
-					start_ts: @to - 9 * @days - 2 * @minutes
-					end_ts: @to - 9 * @days
+					start_ts: @to - 9 * @hours - 2 * @minutes
+					end_ts: @to - 9 * @hours
 					users: [@user]
 			}]
 

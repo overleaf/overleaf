@@ -28,6 +28,23 @@ module.exports = TrackChangesClient =
 			.sort("meta.end_ts": 1)
 			.toArray callback
 
+	getProjectMetaData: (project_id, callback = (error, updates) ->) ->
+		db.projectHistoryMetaData
+			.find {
+				project_id: ObjectId(project_id)
+			},
+			(error, projects) ->
+				callback error, projects[0]
+
+	setPreserveHistoryForProject: (project_id, callback = (error) ->) ->
+		db.projectHistoryMetaData.update {
+			project_id: ObjectId(project_id)
+			}, {
+				$set: { preserveHistory: true }
+			}, {
+				upsert: true
+			}, callback
+
 	pushRawUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
 		rclient.sadd "DocsWithHistoryOps:#{project_id}", doc_id, (error) ->
 			return callback(error) if error?

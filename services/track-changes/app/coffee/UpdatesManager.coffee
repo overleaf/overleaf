@@ -3,6 +3,7 @@ RedisManager = require "./RedisManager"
 UpdateCompressor = require "./UpdateCompressor"
 LockManager = require "./LockManager"
 WebApiManager = require "./WebApiManager"
+UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
 
@@ -74,7 +75,9 @@ module.exports = UpdatesManager =
 				do (doc_id) ->
 					jobs.push (callback) ->
 						UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, callback
-			async.parallelLimit jobs, 5, callback
+			async.parallelLimit jobs, 5, (error) ->
+				return callback(error) if error?
+				UpdateTrimmer.deleteOldProjectUpdates project_id, callback
 
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->

@@ -13,6 +13,7 @@ describe "UpdatesManager", ->
 			"./RedisManager" : @RedisManager = {}
 			"./LockManager"  : @LockManager = {}
 			"./WebApiManager": @WebApiManager = {}
+			"./UpdateTrimmer": @UpdateTrimmer = {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
@@ -277,6 +278,7 @@ describe "UpdatesManager", ->
 			@doc_ids = ["mock-id-1", "mock-id-2"]
 			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
 			@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
+			@UpdateTrimmer.deleteOldProjectUpdates = sinon.stub().callsArg(1)
 			@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
 				@callback()
 				done()
@@ -291,6 +293,11 @@ describe "UpdatesManager", ->
 				@UpdatesManager.processUncompressedUpdatesWithLock
 					.calledWith(@project_id, doc_id)
 					.should.equal true
+
+		it "should delete old updates for the project", ->
+			@UpdateTrimmer.deleteOldProjectUpdates
+				.calledWith(@project_id)
+				.should.equal true
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
