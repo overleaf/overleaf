@@ -14,3 +14,5 @@ user_files
 template_files
 
 db.sqlite
+
+.vagrant
