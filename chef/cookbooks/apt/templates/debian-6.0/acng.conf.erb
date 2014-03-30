@@ -1,0 +1,173 @@
+# Letter case in directive names does not matter. Must be separated with colons.
+# Valid boolean values are a zero number for false, non-zero numbers for true.
+
+CacheDir: <%= node['apt']['cacher_dir'] %>
+
+# set empty to disable logging
+LogDir: /var/log/apt-cacher-ng
+
+# TCP (http) port
+# Set to 9999 to emulate apt-proxy
+Port:<%= node['apt']['cacher_port'] %>
+
+# Addresses or hostnames to listen on. Multiple addresses must be separated by
+# spaces. Each entry must be associated with a local interface. DNS resolution
+# is performed using getaddrinfo(3) for all available protocols (i.e. IPv4 and
+# IPv6 if available).
+#
+# Default: not set, will listen on all interfaces.
+#
+# BindAddress: localhost 192.168.7.254 publicNameOnMainInterface
+
+#Proxy: http://www-proxy.example.net:80
+#proxy: http://username:proxypassword@proxy.example.net:3128
+
+# Repository remapping. See manual for details.
+# In this example, backends file is generated during package installation.
+Remap-debrep: file:deb_mirror*.gz /debian ; file:backends_debian
+Remap-uburep: file:ubuntu_mirrors /ubuntu ; file:backends_ubuntu
+Remap-debvol: file:debvol_mirror*.gz /debian-volatile ; file:backends_debvol
+Remap-cygwin: file:cygwin_mirrors /cygwin # ; file:backends_cygwin # incomplete, please create this file
+
+# Virtual page accessible in a web browser to see statistics and status
+# information, i.e. under http://localhost:3142/acng-report.html
+ReportPage: acng-report.html
+
+# Socket file for accessing through local UNIX socket instead of TCP/IP. Can be
+# used with inetd bridge or cron client.
+# SocketPath:/var/run/apt-cacher-ng/socket
+
+# Forces log file to be written to disk after every line when set to 1. Default
+# is 0, buffer flush happens after client disconnects.
+#
+# (technically, this is an alias to the Debug option provided for convenience)
+#
+# UnbufferLogs: 0
+
+# Set to 0 to store only type, time and transfer sizes.
+# 1 -> client IP and relative local path are logged too
+# VerboseLog: 1
+
+# Don't detach from the console
+# ForeGround: 0
+
+# Store the pid of the daemon process therein
+# PidFile: /var/run/apt-cacher-ng/pid
+
+# Forbid outgoing connections, work around them or respond with 503 error
+# offlinemode:0
+
+# Forbid all downloads that don't run through preconfigured backends (.where)
+#ForceManaged: 0
+
+# Days before considering an unreferenced file expired (to be deleted).
+# Warning: if the value is set too low and particular index files are not
+# available for some days (mirror downtime) there is a risk of deletion of
+# still usefull package files.
+ExTreshold: 4
+
+# Stop expiration when a critical problem appeared. Currently only failed
+# refresh of an index file is considered as critical.
+#
+# WARNING: don't touch this option or set to a non-zero number.
+# Anything else is DANGEROUS and may cause data loss.
+#
+# ExAbortOnProblems: 1
+
+# Replace some Windows/DOS-FS incompatible chars when storing
+# StupidFs: 0
+
+# Experimental feature for apt-listbugs: pass-through SOAP requests and
+# responses to/from bugs.debian.org. If not set, default is true if
+# ForceManaged is enabled and false otherwise.
+# ForwardBtsSoap: 1
+
+# The daemon has a small cache for DNS data, to speed up resolution. The
+# expiration time of the DNS entries can be configured in seconds.
+# DnsCacheSeconds: 3600
+
+# Don't touch the following values without good consideration!
+#
+# Max. count of connection threads kept ready (for faster response in the
+# future). Should be a sane value between 0 and average number of connections,
+# and depend on the amount of spare RAM.
+# MaxStandbyConThreads: 8
+#
+# Hard limit of active thread count for incomming connections, i.e. operation
+# is refused when this value is reached (below zero = unlimited).
+# MaxConThreads: -1
+#
+#VfilePattern = (^|.*?/)(Index|Packages\.bz2|Packages\.gz|Packages|Release|Release\.gpg|Sources\.bz2|Sources\.gz|Sources|release|index\.db-.*\.gz|Contents-[^/]*\.gz|pkglist[^/]*\.bz2|rclist[^/]*\.bz2|/meta-release[^/]*|Translation[^/]*\.bz2)$
+#PfilePattern = .*(\.deb|\.rpm|\.dsc|\.tar\.gz\.gpg|\.tar\.gz|\.diff\.gz|\.diff\.bz2|\.jigdo|\.template|changelog|copyright|\.udeb|\.diff/.*\.gz|vmlinuz|initrd\.gz|(Devel)?ReleaseAnnouncement(\\?.*)?)$
+# Whitelist for expiration, file types not to be removed even when being
+# unreferenced. Default: same as VfilePattern which is a safe bed. When and
+# only when the only used mirrors are official repositories (with working
+# Release files) then it might be set to something more restrictive, like
+# (^|.*?/)(Release|Release\.gpg|release|meta-release|Translation[^/]*\.bz2)$
+#WfilePattern = (^|.*?/)(Index|Packages\.bz2|Packages\.gz|Packages|Release|Release\.gpg|Sources\.bz2|Sources\.gz|Sources|release|index\.db-.*\.gz|Contents-[^/]*\.gz|pkglist[^/]*\.bz2|rclist[^/]*\.bz2|/meta-release[^/]*|Translation[^/]*\.bz2)$
+
+# Higher modes only working with the debug version
+# Warning, writes a lot into apt-cacher.err logfile
+# Value overwrites UnbufferLogs setting (aliased)
+# Debug:3
+
+# Usually, general purpose proxies like Squid expose the IP adress of the
+# client user to the remote server using the X-Forwarded-For HTTP header. This
+# behaviour can be optionally turned on with the Expose-Origin option.
+# ExposeOrigin: 0
+
+# When logging the originating IP address, trust the information supplied by
+# the client in the X-Forwarded-For header.
+# LogSubmittedOrigin: 0
+
+# The version string reported to the peer, to be displayed as HTTP client (and
+# version) in the logs of the mirror.
+# WARNING: some archives use this header to detect/guess capabilities of the
+# client (i.e. redirection support) and change the behaviour accordingly, while
+# ACNG might not support the expected features. Expect side effects.
+#
+# UserAgent: Yet Another HTTP Client/1.2.3p4
+
+# In some cases the Import and Expiration tasks might create fresh volatile
+# data for internal use by reconstructing them using patch files. This
+# by-product might be recompressed with bzip2 and with some luck the resulting
+# file becomes identical to the *.bz2 file on the server, usable for APT
+# clients trying to fetch the full .bz2 compressed version. Injection of the
+# generated files into the cache has however a disadvantage on underpowered
+# servers: bzip2 compession can create high load on the server system and the
+# visible download of the busy .bz2 files also becomes slower.
+#
+# RecompBz2: 0
+
+# Network timeout for outgoing connections.
+# NetworkTimeout: 60
+
+# Sometimes it makes sense to not store the data in cache and just return the
+# package data to client as it comes in. DontCache parameters can enable this
+# behaviour for certain URL types. The tokens are extended regular expressions
+# that URLs are matched against.
+#
+# DontCacheRequested is applied to the URL as it comes in from the client.
+# Example: exclude packages built with kernel-package for x86
+# DontCacheRequested: linux-.*_10\...\.Custo._i386
+# Example usecase: exclude popular private IP ranges from caching
+# DontCacheRequested: 192.168.0 ^10\..* 172.30
+#
+# DontCacheResolved is applied to URLs after mapping to the target server. If
+# multiple backend servers are specified then it's only matched against the
+# download link for the FIRST possible source (due to implementation limits).
+# Example usecase: all Ubuntu stuff comes from a local mirror (specified as
+# backend), don't cache it again:
+# DontCacheResolved: ubuntumirror.local.net
+#
+# DontCache directive sets (overrides) both, DontCacheResolved and
+# DontCacheRequested.  Provided for convenience, see those directives for
+# details.
+#
+# Default permission set of freshly created files and directories, as octal
+# numbers (see chmod(1) for details).
+# Can by limited by the umask value (see umask(2) for details) if it's set in
+# the environment of the starting shell, e.g. in apt-cacher-ng init script or
+# in its configuration file.
+# DirPerms: 00755
+# FilePerms: 00664

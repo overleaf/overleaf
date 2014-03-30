@@ -1,0 +1,5 @@
+Acquire::http::Proxy "http://<%= @proxy %>:<%= @port %>";
+Acquire::https::Proxy "DIRECT";
+<% @bypass.each do |bypass, type| %>
+Acquire::<%= type %>::Proxy::<%= bypass %> "DIRECT";
+<% end %>
