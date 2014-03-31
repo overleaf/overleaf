@@ -123,7 +123,7 @@ module.exports = class ProjectController
 								trackChanges: false
 					else
 						anonymous = false
-					SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
+					SubscriptionLocator.getUsersSubscription user?._id, (err, subscription)->
 						SecurityManager.userCanAccessProject user, project, (canAccess, privlageLevel)->
 							allowedFreeTrial = true
 							if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
