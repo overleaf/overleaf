@@ -8,10 +8,9 @@ ShareLaTeX
 Installation
 ------------
 
-ShareLaTeX uses a service oriented architecture (SOA) where we have lots of small
-APIs that talk to each other over HTTP and Redis pub-sub channels. This repository
-pulls together all of the different services and allows you to set up and run
-them quickly.
+**[Please help us make ShareLaTeX as easy to install as possible by answering our quick survey about your system and needs](https://sharelatex.typeform.com/to/PLNits)**
+
+We're still figuring out the easiest way to let you install ShareLaTeX and get up and running quickly. If you fill in the above survey in we will be eternally grateful and it will help us make this install process as smooth as possible. For now, here is the best ways:
 
 ### Manually
 
