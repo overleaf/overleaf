@@ -75,6 +75,7 @@ define [
 			children.add(entity)
 
 		openDoc: (doc, line) ->
+			return if !doc?
 			doc_id = doc.id or doc
 			@trigger "open:doc", doc_id, line: line
 			@selectEntity(doc_id)
