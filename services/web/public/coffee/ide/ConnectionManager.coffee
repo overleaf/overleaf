@@ -8,15 +8,13 @@ define [
 			@socket = @ide.socket
 			@socket.on "connect", () =>
 				@connected = true
-				@secondLastConnected = @lastConnected
-				@lastConnected = new Date()
+				@ide.pushEvent("connected")
 				@hideModal()
 				@cancelReconnect()
 
 			@socket.on 'disconnect', () =>
 				@connected = false
-				@secondLastDisconnected = @lastDisconnected
-				@lastDisconnected = new Date()
+				@ide.pushEvent("disconnected")
 				@ide.trigger "disconnect"
 				setTimeout(=>
 					ga('send', 'event', 'editor-interaction', 'disconnect')

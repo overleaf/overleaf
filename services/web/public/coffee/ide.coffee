@@ -161,14 +161,18 @@ define [
 				buttons: [ text: "OK" ]
 			}
 
+		recentEvents: []
+
+		pushEvent: (type, meta = {}) ->
+			@recentEvents.push type: type, meta: meta, date: new Date()
+			if @recentEvents.length > 10
+				@recentEvents.shift()
+
 		reportError: (error, meta = {}) ->
 			meta.client_id = @socket?.socket?.sessionid
 			meta.transport = @socket?.socket?.transport?.name
 			meta.client_now = new Date()
-			meta.last_connected = @connectionManager.lastConnected
-			meta.second_last_connected = @connectionManager.secondLastConnected
-			meta.last_disconnected = @connectionManager.lastDisconnected
-			meta.second_last_disconnected = @connectionManager.secondLastDisconnected
+			meta.recent_events = @recentEvents
 			errorObj = {}
 			for key in Object.getOwnPropertyNames(error)
 				errorObj[key] = error[key]

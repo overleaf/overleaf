@@ -81,6 +81,12 @@ define [
 				delete @_joinCallbacks
 
 		_onUpdateApplied: (update) ->
+			@ide.pushEvent "received-update",
+				doc_id: @doc_id
+				remote_doc_id: update?.doc
+				wantToBeJoined: @wantToBeJoined
+				update: update
+
 			if update?.doc == @doc_id and @doc?
 				@doc.processUpdateFromServer update
 
@@ -93,6 +99,8 @@ define [
 			@doc?.updateConnectionState "disconnected"
 
 		_onReconnect: () ->
+			@ide.pushEvent "reconnected:afterJoinProject"
+
 			@connected = true
 			if @wantToBeJoined or @doc?.hasBufferedOps()
 				@_joinDoc (error) =>
@@ -137,10 +145,22 @@ define [
 
 		_bindToShareJsDocEvents: () ->
 			@doc.on "error", (error, meta) => @_onError error, meta
-			@doc.on "externalUpdate", () => @trigger "externalUpdate"
-			@doc.on "remoteop", () => @trigger "remoteop"
-			@doc.on "op:sent", () => @trigger "op:sent"
-			@doc.on "op:acknowledged", () => @trigger "op:acknowledged"
+			@doc.on "externalUpdate", () => 
+				@ide.pushEvent "externalUpdate",
+					doc_id: @doc_id
+				@trigger "externalUpdate"
+			@doc.on "remoteop", () => 
+				@ide.pushEvent "remoteop",
+					doc_id: @doc_id
+				@trigger "remoteop"
+			@doc.on "op:sent", () => 
+				@ide.pushEvent "op:sent",
+					doc_id: @doc_id
+				@trigger "op:sent"
+			@doc.on "op:acknowledged", () =>
+				@ide.pushEvent "op:acknowledged",
+					doc_id: @doc_id
+				@trigger "op:acknowledged"
 
 		_onError: (error, meta = {}) ->
 			console.error "ShareJS error", error, meta
