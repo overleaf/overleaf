@@ -40,8 +40,8 @@ define [
 
 		bindToFileTreeEvents: () ->
 			@ide.fileTreeManager.on "open:doc", (doc_id) =>
+				@doc_id = doc_id
 				if @enabled
-					@doc_id = doc_id
 					@updateDiff()
 
 		AB_BUCKETS: ["control", "one-week", "pop-up"]
