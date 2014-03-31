@@ -154,7 +154,7 @@ module.exports = class ProjectController
 										spellCheckLanguage: user.ace.spellCheckLanguage
 										pdfViewer : user.ace.pdfViewer
 										docPositions: {}
-										trackChanges: user.featureSwitches.trackChanges
+										oldHistory: !!user.featureSwitches?.oldHistory
 									})
 									sharelatexObject : JSON.stringify({
 										siteUrl: Settings.siteUrl,
