@@ -68,6 +68,11 @@ action :start do
 		notifies :restart, "service[#{r.name}]"
 	end
 
+	env = ""
+	r.environment.each do |key, value|
+		env += "#{key}=#{value} "
+	end
+
 	file "/etc/init/#{r.name}.conf" do
 		content <<-EOS
 			description "#{r.name}"
@@ -83,9 +88,11 @@ action :start do
 			script
 				echo $$ > /var/run/#{r.name}.pid
 				chdir #{deploy_to}/current
-				exec sudo -u #{r.user} env NODE_ENV=#{node_environment} SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee node app.js >> log/production.log
+				exec sudo -u #{r.user} env NODE_ENV=#{node_environment} SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee #{env} node app.js >> log/production.log 2>&1
 			end script
 		EOS
+
+		notifies :restart, "service[#{r.name}]"
 	end
 
 	directory "/etc/sharelatex"
