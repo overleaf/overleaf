@@ -5,13 +5,11 @@
     "public": "./public"
   },
   "dependencies": {
-    "heapdump": "0.1.0",
     "express": "3.3.4",
     "mongoose": "3.8.8",
     "mongojs": "0.9.8",
     "jade": "0.28.1",
     "underscore": "1.4.4",
-    "node-fs": "0.1.5",
     "rimraf": "2.1.2",
     "connect-redis": "1.4.5",
     "redis": "0.8.4",
@@ -25,7 +23,6 @@
     "socket.io": "0.9.15",
     "mimelib": "0.2.8",
     "bufferedstream": "1.4.1",
-    "mixpanel": "0.0.18",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "soa-req-id": "git+https://github.com/sharelatex/soa-req-id.git#master",
@@ -34,9 +31,7 @@
 		"nodemailer": "0.6.1",
     "bcrypt": "0.7.5",
     "archiver": "0.5.1",
-    "nodetime": "0.8.15",
     "mocha": "1.17.1",
-    "redback": "0.3.7"
     "redback": "0.3.7",
     "sanitizer": "0.1.1"
   },
