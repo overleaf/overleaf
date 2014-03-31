@@ -3,7 +3,7 @@ fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
 
 filterName = (key) ->
-  return key.replace /\//, "_"
+  return key.replace /\//g, "_"
   
 
 module.exports =
