@@ -108,20 +108,15 @@ describe 'AutomaticSnapshotManager', ->
 					callback(null, @project_ids)
 				else
 					throw new Error("unexpected key: #{key}")
-			sinon.stub(@AutomaticSnapshotManager, "takeSnapshotIfRequired")
-				.callsArgWith(1)
-			@AutomaticSnapshotManager.takeAutomaticSnapshots(@callback)
+			sinon.stub(@AutomaticSnapshotManager, "takeSnapshotIfRequired").callsArgWith(1, null)
+			@AutomaticSnapshotManager.takeAutomaticSnapshots @callback
 
 		afterEach ->
 			@AutomaticSnapshotManager.takeSnapshotIfRequired.restore()
 
-		it "should call takeSnapshotIfRequired for each project id", ->
-			for project_id in @project_ids
-				@AutomaticSnapshotManager.takeSnapshotIfRequired.calledWith(project_id)
-					.should.equal true
 
 		it "should call the callback", ->
-			@callback.calledWith(null).should.equal true
+			@callback.calledWith(undefined).should.equal true
 
 
 	describe "removing project from marked set", ->

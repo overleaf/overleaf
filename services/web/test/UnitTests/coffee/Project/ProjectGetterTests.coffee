@@ -5,6 +5,7 @@ expect = chai.expect
 modulePath = "../../../../app/js/Features/Project/ProjectGetter.js"
 SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongojs").ObjectId
+assert = require("chai").assert
 
 describe "ProjectGetter", ->
 	beforeEach ->
@@ -57,7 +58,8 @@ describe "ProjectGetter", ->
 			@db.users.find = (query, callback) =>
 				callback null, [@user_lookup[query._id.toString()]]
 			sinon.spy @db.users, "find"
-			@ProjectGetter.populateProjectWithUsers @project, @callback
+			@ProjectGetter.populateProjectWithUsers @project, (err, project)=>
+				@callback err, project
 
 		it "should look up each user", ->
 			for user in @users
@@ -73,5 +75,5 @@ describe "ProjectGetter", ->
 			expect(@project.collaberator_refs).to.deep.equal [@users[3], @users[4]]
 
 		it "should call the callback", ->
-			@callback.calledWith(null, @project).should.equal true
+			assert.deepEqual @callback.args[0][1], @project
 					
