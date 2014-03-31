@@ -119,10 +119,10 @@ define [
 			@cursorManager = new CursorManager(@)
 			@fileViewManager = new FileViewManager(@)
 			@analyticsManager = new AnalyticsManager(@)
-			if @userSettings.trackChanges
-				@trackChangesManager = new TrackChangesManager(@)
-			else
+			if @userSettings.oldHistory
 				@historyManager = new HistoryManager(@)
+			else
+				@trackChangesManager = new TrackChangesManager(@)
 
 			@setLoadingMessage("Connecting")
 			firstConnect = true
