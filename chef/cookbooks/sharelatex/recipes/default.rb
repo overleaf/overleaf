@@ -5,11 +5,11 @@
 # Copyright 2014, ShareLaTeX
 #
 
-directory "/etc/sharelatex"
-
-template "/etc/sharelatex/settings.coffee" do
-	mode 0400
-	user "www-data"
+for dir in ["compiles", "clsi-cache", "user_files"] do
+	directory "/var/lib/sharelatex/#{dir}" do
+		user "www-data"
+		recursive true
+	end
 end
 
 sharelatex_app "web-sharelatex" do
@@ -36,3 +36,4 @@ sharelatex_app "clsi-sharelatex" do
 	repository "https://github.com/sharelatex/clsi-sharelatex.git"
 	revision   "master"
 end
+

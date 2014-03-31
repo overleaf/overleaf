@@ -65,7 +65,7 @@ action :start do
 			end
 		end
 
-		#notifies :restart, "service[#{r.name}]"
+		notifies :restart, "service[#{r.name}]"
 	end
 
 	file "/etc/init/#{r.name}.conf" do
@@ -86,6 +86,13 @@ action :start do
 				exec sudo -u #{r.user} env NODE_ENV=#{node_environment} SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee node app.js >> log/production.log
 			end script
 		EOS
+	end
+
+	directory "/etc/sharelatex"
+	template "/etc/sharelatex/settings.coffee" do
+		mode 0400
+		user "www-data"
+		notifies :restart, "service[#{r.name}]"
 	end
 
 	service "#{r.name}" do
