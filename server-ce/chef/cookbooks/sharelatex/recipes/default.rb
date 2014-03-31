@@ -5,9 +5,14 @@
 # Copyright 2014, ShareLaTeX
 #
 
-for dir in ["compiles", "clsi-cache", "user_files"] do
+# For filestore conversions
+package "imagemagick"
+package "optipng"
+
+for dir in ["", "compiles", "clsi-cache", "user_files"] do
 	directory "/var/lib/sharelatex/#{dir}" do
-		user "www-data"
+		user  "www-data"
+		group "www-data"
 		recursive true
 	end
 end
@@ -35,5 +40,8 @@ end
 sharelatex_app "clsi-sharelatex" do
 	repository "https://github.com/sharelatex/clsi-sharelatex.git"
 	revision   "master"
+	environment({
+		"PATH" => "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:#{node[:texlive][:bin_dir]}"
+	})
 end
 

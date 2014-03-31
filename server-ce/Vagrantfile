@@ -21,6 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef.add_recipe 'redis-server'
     chef.add_recipe 'mongodb'
     chef.add_recipe 'nodejs'
+    chef.add_recipe 'texlive'
     chef.add_recipe 'sharelatex'
 
     # You may also specify custom JSON attributes:
