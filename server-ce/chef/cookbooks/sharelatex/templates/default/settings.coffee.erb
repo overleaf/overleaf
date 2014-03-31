@@ -36,7 +36,7 @@ module.exports =
 			#
 			# For local filesystem this is the directory to store the files in.
 			# This path must exist, not be tmpfs and be writable to by the user sharelatex is run as.
-			user_files: Path.resolve(__dirname + "/../user_files")
+			user_files: "/var/lib/sharelatex/user_files"
 		# Uncomment if you need to configure your S3 credentials
 		# s3:
 		# 	# if you are using S3, then fill in your S3 details below
@@ -65,7 +65,7 @@ module.exports =
 			username: "clsi"
 			password: ""
 			dialect: "sqlite"
-			storage: Path.resolve(__dirname + "/../db.sqlite")
+			storage: "/var/lib/sharelatex/clsi.sqlite"
 
 	# Service locations
 	# -----------------
@@ -230,15 +230,15 @@ module.exports =
 
 	# Internal configs
 	# ----------------
-	path:
+	path: 
 		# If we ever need to write something to disk (e.g. incoming requests
 		# that need processing but may be too big for memory, then write
 		# them to disk here).
 		dumpFolder: Path.resolve "data/dumpFolder"
 		# Where to write the project to disk before running LaTeX on it
-		compilesDir:  Path.resolve(__dirname + "/../compiles")
+		compilesDir:  "/var/lib/sharelatex/compiles"
 		# Where to cache downloaded URLs for the CLSI
-		clsiCacheDir: Path.resolve(__dirname + "/../cache")
+		clsiCacheDir: "/var/lib/sharelatex/clsi-cache"
 	
 	# Automatic Snapshots
 	# -------------------
