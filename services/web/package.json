@@ -9,7 +9,6 @@
     "express": "3.3.4",
     "mongoose": "3.6.19",
     "jade": "0.28.1",
-    "validator": "0.4.22",
     "underscore": "1.4.4",
     "node-fs": "0.1.5",
     "rimraf": "2.1.2",
@@ -38,6 +37,8 @@
     "nodetime": "0.8.15",
     "mocha": "1.17.1",
     "redback": "0.3.7"
+    "redback": "0.3.7",
+    "sanitizer": "0.1.1"
   },
   "devDependencies": {
     "chai": "",

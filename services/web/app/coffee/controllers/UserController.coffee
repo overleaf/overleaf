@@ -1,5 +1,5 @@
 User = require('../models/User').User
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 fs = require('fs')
 _ = require('underscore')
 logger = require('logger-sharelatex')
@@ -95,8 +95,8 @@ module.exports =
 			title: 'Password Reset',
 
 	doRequestPasswordReset : (req, res, next = (error) ->)->
-		email = sanitize(req.body.email).xss()
-		email = sanitize(email).trim()
+		email = sanitize.escape(req.body.email)
+		email = sanitize.escape(email).trim()
 		email = email.toLowerCase()
 		logger.log email: email, "password reset requested"
 		User.findOne {'email':email}, (err, user)->
@@ -156,11 +156,11 @@ module.exports =
 		metrics.inc "user.settings-update"
 		User.findById req.session.user._id, (err, user)->
 			if(user)
-				user.first_name   = sanitize(req.body.first_name).xss().trim()
-				user.last_name    = sanitize(req.body.last_name).xss().trim()
-				user.ace.mode     = sanitize(req.body.mode).xss().trim()
-				user.ace.theme    = sanitize(req.body.theme).xss().trim()
-				user.ace.fontSize = sanitize(req.body.fontSize).xss().trim()
+				user.first_name   = sanitize.escape(req.body.first_name).trim()
+				user.last_name    = sanitize.escape(req.body.last_name).trim()
+				user.ace.mode     = sanitize.escape(req.body.mode).trim()
+				user.ace.theme    = sanitize.escape(req.body.theme).trim()
+				user.ace.fontSize = sanitize.escape(req.body.fontSize).trim()
 				user.ace.autoComplete = req.body.autoComplete == "true"
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 				user.ace.pdfViewer = req.body.pdfViewer

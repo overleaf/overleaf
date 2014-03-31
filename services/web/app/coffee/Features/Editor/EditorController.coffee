@@ -1,6 +1,6 @@
 logger = require('logger-sharelatex')
 Metrics = require('../../infrastructure/Metrics')
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
@@ -163,7 +163,7 @@ module.exports = EditorController =
 
 	addDoc: (project_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		docName = sanitize(docName).xss()
+		docName = sanitize.escape(docName)
 		logger.log sl_req_id:sl_req_id, "sending new doc to project #{project_id}"
 		Metrics.inc "editor.add-doc"
 		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, sl_req_id, (err, doc, folder_id)=>
@@ -172,7 +172,7 @@ module.exports = EditorController =
 
 	addFile: (project_id, folder_id, fileName, path, sl_req_id, callback = (error, file)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		fileName = sanitize(fileName).xss()
+		fileName = sanitize.escape(fileName)
 		logger.log  sl_req_id:sl_req_id, "sending new file to project #{project_id} with folderid: #{folder_id}"
 		Metrics.inc "editor.add-file"
 		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, (err, fileRef, folder_id)=>
@@ -185,7 +185,7 @@ module.exports = EditorController =
 
 	addFolder: (project_id, folder_id, folderName, sl_req_id, callback = (error, folder)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		folderName = sanitize(folderName).xss()
+		folderName = sanitize.escape(folderName)
 		logger.log "sending new folder to project #{project_id}"
 		Metrics.inc "editor.add-folder"
 		ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, folder_id)=>

@@ -1,6 +1,6 @@
 User = require('../models/User').User
 Project = require('../models/Project').Project
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 path = require "path"
 logger = require('logger-sharelatex')
 _ = require('underscore')
@@ -72,8 +72,8 @@ module.exports = class ProjectController
 
 	apiNewProject: (req, res)->
 		user = req.session.user
-		projectName = sanitize(req.body.projectName).xss()
-		template = sanitize(req.body.template).xss()
+		projectName = sanitize.escape(req.body.projectName)
+		template = sanitize.escape(req.body.template)
 		logger.log user: user, type: template, name: projectName, "creating project"
 		if template == 'example'
 			projectCreationHandler.createExampleProject user._id, projectName, (err, project)->

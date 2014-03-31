@@ -1,7 +1,7 @@
 #this file is being slowly refactored out
 
 logger = require('logger-sharelatex')
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 projectHandler = require('../handlers/ProjectHandler')
 projectHandler = new projectHandler()
 SecurityManager = require('./SecurityManager')
@@ -21,7 +21,7 @@ module.exports = class CollaberationManager
 		projectHandler.deleteProject project_id, callback
 
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->
-		newName = sanitize(newName).xss()
+		newName = sanitize.escape(newName)
 		metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
 		projectHandler.renameEntity project_id, entity_id, entityType, newName, =>
@@ -36,9 +36,9 @@ module.exports = class CollaberationManager
 			callback?()
 
 	renameProject: (project_id, window_id, newName, callback)->
-		newName = sanitize(newName).xss()
+		newName = sanitize.escape(newName)
 		projectHandler.renameProject project_id, window_id, newName, =>
-			newName = sanitize(newName).xss()
+			newName = sanitize.escape(newName)
 			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
 			callback?()
 
@@ -48,7 +48,7 @@ module.exports = class CollaberationManager
 			callback?()
 
 	distributMessage: (project_id, client, message)->
-		message = sanitize(message).xss()
+		message = sanitize.escape(message)
 		metrics.inc "editor.instant-message"
 		client.get "first_name", (err, first_name)=>
 			EditorRealTimeController.emitToRoom project_id, 'reciveNewMessage', first_name, message
