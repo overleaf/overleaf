@@ -18,6 +18,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision :chef_solo do |chef|
     chef.cookbooks_path = "chef/cookbooks"
+    chef.add_recipe 'apt'
     chef.add_recipe 'redis-server'
     chef.add_recipe 'mongodb'
     chef.add_recipe 'nodejs'
