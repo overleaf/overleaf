@@ -153,14 +153,22 @@ define [
 				@ide.pushEvent "remoteop",
 					doc_id: @doc_id
 				@trigger "remoteop"
-			@doc.on "op:sent", () => 
+			@doc.on "op:sent", (op) =>
 				@ide.pushEvent "op:sent",
 					doc_id: @doc_id
+					op: op
 				@trigger "op:sent"
-			@doc.on "op:acknowledged", () =>
+			@doc.on "op:acknowledged", (op) =>
 				@ide.pushEvent "op:acknowledged",
 					doc_id: @doc_id
+					op: op
 				@trigger "op:acknowledged"
+			@doc.on "flush", (inflightOp, pendingOp, version) =>
+				@ide.pushEvent "flush",
+					doc_id: @doc_id,
+					inflightOp: inflightOp,
+					pendingOp: pendingOp
+					v: version
 
 		_onError: (error, meta = {}) ->
 			console.error "ShareJS error", error, meta

@@ -165,7 +165,7 @@ define [
 
 		pushEvent: (type, meta = {}) ->
 			@recentEvents.push type: type, meta: meta, date: new Date()
-			if @recentEvents.length > 10
+			if @recentEvents.length > 40
 				@recentEvents.shift()
 
 		reportError: (error, meta = {}) ->
