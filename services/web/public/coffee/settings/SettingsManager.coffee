@@ -126,7 +126,10 @@ define [
 				# http://stackoverflow.com/questions/6692031/check-if-event-is-triggered-by-a-human
 				if e.originalEvent?
 					if @ide.isAllowedToDoIt "readAndWrite"
-						@project.set("name", e.target.value)
+						newName = e.target.value?.trim()
+						$("input.projectName").val(newName)
+						@project.set("name", newName)
+
 
 		bindToCompiler: ->
 			$('select#compilers').val(@project.get("compiler"))

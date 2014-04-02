@@ -144,7 +144,7 @@ require [
 		$confirm.click (e) =>
 			$confirm.attr("disabled", true)
 			$confirm.text("Creating...")
-			projectName = $modal.find('input').val()
+			projectName = $modal.find('input').val()?.trim()
 			$.ajax
 				url: '/project/new'
 				type:'POST'

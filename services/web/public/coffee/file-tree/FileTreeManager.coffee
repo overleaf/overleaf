@@ -159,6 +159,7 @@ define [
 
 
 		renameEntity: (entity, name) ->
+			name = name?.trim()
 			@ide.socket.emit 'renameEntity', entity.id, entity.get("type"), name
 			entity.set("name", name)
 
@@ -197,7 +198,7 @@ define [
 			el = $($("#newEntityModalTemplate").html())
 			input = el.find("input")
 			create = _.once () =>
-				name = input.val()
+				name = input.val()?.trim()
 				if name != ""
 					callback(name)
 			modal = new Modal
