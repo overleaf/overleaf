@@ -6,6 +6,10 @@ ChildProcess = require "child_process"
 
 fixturePath = (path) -> __dirname + "/../fixtures/" + path
 
+try
+	fs.mkdirSync(fixturePath("tmp"))
+catch e
+
 convertToPng = (pdfPath, pngPath, callback = (error) ->) ->
 	convert = ChildProcess.exec "convert #{fixturePath(pdfPath)} #{fixturePath(pngPath)}"
 	convert.on "exit", () ->

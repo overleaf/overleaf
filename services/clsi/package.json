@@ -24,13 +24,13 @@
     "sinon": "~1.7.3",
     "grunt": "~0.4.2",
     "grunt-contrib-coffee": "~0.7.0",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-concurrent": "~0.4.2",
-    "grunt-nodemon": "~0.1.2",
     "grunt-contrib-clean": "~0.5.0",
     "grunt-shell": "~0.6.1",
     "grunt-mocha-test": "~0.8.1",
     "sandboxed-module": "~0.3.0",
-    "timekeeper": "0.0.4"
+    "timekeeper": "0.0.4",
+    "grunt-execute": "^0.1.5",
+    "bunyan": "^0.22.1",
+    "grunt-bunyan": "^0.5.0"
   }
 }

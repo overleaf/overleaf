@@ -1,11 +1,11 @@
 request = require "request"
 fs = require "fs"
-Settings = require "../../../../app/js/Settings"
+Settings = require "settings-sharelatex"
 
 host = "localhost"
 
 module.exports = Client =
-	host: Settings.externalUrl
+	host: Settings.apis.clsi.url
 
 	randomId: () ->
 		Math.random().toString(16).slice(2)
