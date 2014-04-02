@@ -87,6 +87,11 @@ define [
 				wantToBeJoined: @wantToBeJoined
 				update: update
 
+			if Math.random() < (@ide.disconnectRate or 0)
+				console.log "Simulating disconnect"
+				@ide.connectionManager.disconnect()
+				return
+
 			if update?.doc == @doc_id and @doc?
 				@doc.processUpdateFromServer update
 
@@ -163,6 +168,13 @@ define [
 					doc_id: @doc_id
 					op: op
 				@trigger "op:acknowledged"
+			@doc.on "op:timeout", (op) =>
+				@ide.pushEvent "op:timeout",
+					doc_id: @doc_id
+					op: op
+				@trigger "op:timeout"
+				ga?('send', 'event', 'error', "op timeout", "Op was now acknowledged - #{ide.socket.socket.transport.name}" )
+				@ide.connectionManager.reconnectImmediately()
 			@doc.on "flush", (inflightOp, pendingOp, version) =>
 				@ide.pushEvent "flush",
 					doc_id: @doc_id,

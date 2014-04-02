@@ -98,7 +98,7 @@ define [
 				v: update.v
 				op_sent_at: new Date()
 			timer = setTimeout () =>
-				@_handleError new Error("Doc op was not acknowledged in time"), meta
+				@trigger "op:timeout", update
 			, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
 				clearTimeout timer

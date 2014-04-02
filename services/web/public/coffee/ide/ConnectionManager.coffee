@@ -33,6 +33,13 @@ define [
 				e.preventDefault()
 				@tryReconnect()
 			@hideModal()
+
+		reconnectImmediately: () ->
+			@disconnect()
+			@tryReconnect()
+
+		disconnect: () ->
+			@socket.disconnect()
 				
 		showModalAndStartAutoReconnect: () ->
 			@hideModal()
