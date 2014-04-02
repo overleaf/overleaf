@@ -2,8 +2,8 @@
   "name": "filestore-sharelatex",
   "version": "0.0.1",
   "dependencies": {
-    "settings": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "logger": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "request": "2.14.0",
     "lynx": "0.0.11",
     "grunt-mocha-test": "~0.8.2",

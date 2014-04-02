@@ -55,6 +55,8 @@ public/minjs/
 test/unit/js/
 test/acceptence/js
 
+user_files/*
+
 **.swp
 
 /log.json
