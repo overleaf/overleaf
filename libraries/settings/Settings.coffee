@@ -12,7 +12,6 @@ merge = (settings, defaults) ->
 
 defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults.coffee")
 
-console.log "default settings", defaultSettingsPath
 if fs.existsSync(defaultSettingsPath)
 	defaults = require(defaultSettingsPath)
 	settingsExist = true
