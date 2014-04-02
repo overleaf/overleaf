@@ -10,7 +10,6 @@
     "mkdirp": "0.3.5",
     "mysql": "2.0.0-alpha7",
     "request": "~2.21.0",
-    "rimraf": "2.1.4",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "sequelize": "~2.0.0-beta.2",

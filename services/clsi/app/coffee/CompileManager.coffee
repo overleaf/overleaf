@@ -5,7 +5,7 @@ Settings = require("settings-sharelatex")
 Path = require "path"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
-rimraf = require "rimraf"
+child_process = require "child_process"
 
 module.exports = CompileManager =
 	doCompile: (request, callback = (error, outputFiles) ->) ->
@@ -34,6 +34,21 @@ module.exports = CompileManager =
 					return callback(error) if error?
 					callback null, outputFiles
 	
-	clearProject: (project_id, callback = (error) ->) ->
+	clearProject: (project_id, _callback = (error) ->) ->
+		callback = (error) ->
+			_callback(error)
+			_callback = () ->
+
 		compileDir = Path.join(Settings.path.compilesDir, project_id)
-		rimraf compileDir, callback
+		proc = child_process.spawn "rm", ["-r", compileDir]
+
+		proc.on "error", callback
+
+		stderr = ""
+		proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
+
+		proc.on "close", (code) ->
+			if code == 0
+				return callback(null)
+			else
+				return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))

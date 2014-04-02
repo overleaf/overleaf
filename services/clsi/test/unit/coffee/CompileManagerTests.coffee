@@ -3,6 +3,7 @@ sinon = require('sinon')
 require('chai').should()
 modulePath = require('path').join __dirname, '../../../app/js/CompileManager'
 tk = require("timekeeper")
+EventEmitter = require("events").EventEmitter
 
 describe "CompileManager", ->
 	beforeEach ->
@@ -12,7 +13,7 @@ describe "CompileManager", ->
 			"./OutputFileFinder": @OutputFileFinder = {}
 			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
 			"logger-sharelatex": @logger = { log: sinon.stub() }
-			"rimraf": @rimraf = sinon.stub().callsArg(1)
+			"child_process": @child_process = {}
 		@callback = sinon.stub()
 
 	describe "doCompile", ->
@@ -61,13 +62,43 @@ describe "CompileManager", ->
 			@callback.calledWith(null, @output_files).should.equal true
 
 	describe "clearProject", ->
-		beforeEach ->
-			@Settings.compileDir = "compiles"
-			@CompileManager.clearProject @project_id, @callback
+		describe "succesfully", ->
+			beforeEach ->
+				@Settings.compileDir = "compiles"
+				@proc = new EventEmitter()
+				@proc.stdout = new EventEmitter()
+				@proc.stderr = new EventEmitter()
+				@child_process.spawn = sinon.stub().returns(@proc)
+				@CompileManager.clearProject @project_id, @callback
+				@proc.emit "close", 0
 
-		it "should remove the project directory", ->
-			@rimraf.calledWith("#{@Settings.path.compilesDir}/#{@project_id}")
-				.should.equal true
+			it "should remove the project directory", ->
+				@child_process.spawn
+					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}"])
+					.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with a non-success status code", ->
+			beforeEach ->
+				@Settings.compileDir = "compiles"
+				@proc = new EventEmitter()
+				@proc.stdout = new EventEmitter()
+				@proc.stderr = new EventEmitter()
+				@child_process.spawn = sinon.stub().returns(@proc)
+				@CompileManager.clearProject @project_id, @callback
+				@proc.stderr.emit "data", @error = "oops"
+				@proc.emit "close", 1
+
+			it "should remove the project directory", ->
+				@child_process.spawn
+					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}"])
+					.should.equal true
+
+			it "should call the callback with an error from the stderr", ->
+				@callback
+					.calledWith(new Error())
+					.should.equal true
+
+				@callback.args[0][0].message.should.equal "rm -r #{@Settings.path.compilesDir}/#{@project_id} failed: #{@error}"
