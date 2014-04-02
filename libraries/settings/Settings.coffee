@@ -39,4 +39,3 @@ if !settingsExist
 
 module.exports = defaults
 
-console.log "Settings", module.exports
