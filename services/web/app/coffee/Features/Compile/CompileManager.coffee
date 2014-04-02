@@ -59,7 +59,7 @@ module.exports = CompileManager =
 			endpointName:"auto_compile"
 			timeInterval:15
 			subjectName:"everyone"
-			throttle: 3
+			throttle: 10
 		rateLimiter.addCount opts, (err, canCompile)->
 			if err?
 				canCompile = false
