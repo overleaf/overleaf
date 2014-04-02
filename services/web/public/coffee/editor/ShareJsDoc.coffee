@@ -109,10 +109,15 @@ define [
 		_bindToDocChanges: (doc) ->
 			submitOp = doc.submitOp
 			doc.submitOp = (args...) =>
-				@trigger "op:sent"
+				@trigger "op:sent", args...
 				doc.pendingCallbacks.push () =>
-					@trigger "op:acknowledged"
+					@trigger "op:acknowledged", args...
 				submitOp.apply(doc, args)
+
+			flush = doc.flush
+			doc.flush = (args...) =>
+				@trigger "flush", doc.inflightOp, doc.pendingOp, doc.version
+				flush.apply(doc, args)
 
 	_.extend(ShareJsDoc::, Backbone.Events)
 
