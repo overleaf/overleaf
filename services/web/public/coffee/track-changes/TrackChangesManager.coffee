@@ -74,19 +74,12 @@ define [
 			@enable()
 
 		showUpgradeView: () ->
-			@upgradeType ||= @ide.analyticsManager.startABTest('track-changes-upgrade', @AB_BUCKETS)
-			@$el.find("button.upgrade").off "click.track-changes"
 			@$el.find("button.start-free-trial").off "click.track-changes"
-			@$el.find("button.upgrade").on "click.track-changes", () => @askToUpgrade()
 			@$el.find("button.start-free-trial").on "click.track-changes", () => @gotoFreeTrial()
 
 			if !@ide.project.get("features").versioning
-				if @upgradeType == "pop-up"
-					@$el.find(".track-changes-upgrade-popup").show()
-				else if @upgradeType == "control"
-					@$el.find(".track-changes-upgrade-control").show()
-				else if @upgradeType == "one-week"
-					@$el.find(".track-changes-upgrade-oneweek").show()
+				ga('send', 'event', 'subscription-funnel', 'askToUgrade', "trackchanges")
+				@$el.find(".track-changes-upgrade-popup").show()
 
 				if @ide.project.get("owner") == @ide.user
 					@$el.find(".show-when-not-owner").hide()
@@ -230,17 +223,8 @@ define [
 		disable: () ->
 			@enabled = false
 
-		askToUpgrade: () ->
-			ga('send', 'event', 'subscription-funnel', 'askToUpgrade', "trackchanges")
-			ga('send', 'event', 'ab_tests', 'track-changes-upgrade', "prompted-to-upgrade-#{@upgradeType}")
-			AccountManager.askToUpgrade @ide,
-				onUpgrade: () =>
-					@ide.analyticsManager.endABTest('track-changes-upgrade', @AB_BUCKETS)
-					ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
-
 		gotoFreeTrial: () ->
 			AccountManager.gotoSubscriptionsPage()
-			@ide.analyticsManager.endABTest('track-changes-upgrade', @AB_BUCKETS)
 			ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
 
 	return TrackChangesManager

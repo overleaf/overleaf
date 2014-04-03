@@ -449,9 +449,6 @@
 					button.btn.btn-primary.start-free-trial Start free trial
 				.message.show-when-not-owner
 					p Please ask the project owner to upgrade to use the History feature.
-			.track-changes-upgrade-control(style="display: none;")
-				.message History is not yet enabled for this project.
-				button.btn.btn-primary.btn-large.upgrade Enable History
 
 	script(type='text/template')#trackChangesDiffTemplate
 		.track-changes-diff-toolbar.btn-toolbar
@@ -481,12 +478,6 @@
 		ul.change-list.nav.nav-pills.nav-stacked
 			li.loading-changes Loading...
 			li.empty-message You haven't made any changes yet!
-			li.track-changes-upgrade-oneweek(style="display: none;")
-				p We only store one week of changes for free accounts.
-				p.show-when-owner Upgrade for an unlimited history.
-				p.show-when-owner
-					button.btn.btn-primary.start-free-trial Start free trial
-				p.show-when-not-owner Please ask the project owner to upgrade.
 
 	script(type='text/template')#hotKeysListTemplate
 		.hotkeys
