@@ -4,7 +4,7 @@ env = (process.env.NODE_ENV or "development").toLowerCase()
 
 merge = (settings, defaults) ->
 	for key, value of settings
-		if typeof(value) == "object"
+		if typeof(value) == "object" and value not instanceof Array
 			defaults[key] = merge(settings[key], defaults[key] or {})
 		else
 			defaults[key] = value
