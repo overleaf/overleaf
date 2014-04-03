@@ -36,8 +36,9 @@
 							ul.dropdown-menu
 								li
 									a(href='/user/settings').userSettingsLink User Settings
-								li
-									a(href='/user/subscription').subscriptionLink Subscription
+								- if (settings.enableSubscriptions)
+									li
+										a(href='/user/subscription').subscriptionLink Subscription
 								li
 									a(href='/logout').logoutLink Logout
 					-else

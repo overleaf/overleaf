@@ -58,14 +58,14 @@ module.exports = class Router
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
-		app.get '/resources', HomeController.resources
-		app.get '/comments', HomeController.comments
-		app.get '/tos', HomeController.tos
-		app.get '/about', HomeController.about
-		app.get '/attribution', HomeController.attribution
-		app.get '/security', HomeController.security
-		app.get '/privacy_policy', HomeController.privacy
-		app.get '/planned_maintenance', HomeController.planned_maintenance
+		app.get '/resources', HomeController.externalPage("resources", "LaTeX Resources")
+		app.get '/tos', HomeController.externalPage("tos", "Terms of Service")
+		app.get '/about', HomeController.externalPage("about", "About Us")
+		app.get '/attribution', HomeController.externalPage("attribution", "Attribution")
+		app.get '/security', HomeController.externalPage("security", "Security")
+		app.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
+		app.get '/planned_maintenance', HomeController.externalPage("planned_mainteance", "Planned Maintenance")
+
 		app.get '/themes', InfoController.themes
 		app.get '/advisor', InfoController.advisor
 		app.get '/dropbox', InfoController.dropbox
