@@ -1,0 +1,117 @@
+\documentclass[12pt]{article}
+
+% Use this form to include EPS (latex) or PDF (pdflatex) files:
+\usepackage{asymptote}
+
+% Use this form with latex or pdflatex to include inline LaTeX code by default:
+%\usepackage[inline]{asymptote}
+
+% Use this form with latex or pdflatex to create PDF attachments by default:
+%\usepackage[attach]{asymptote}
+
+% Enable this line to support the attach option:
+%\usepackage[dvips]{attachfile2}
+
+\begin{document}
+
+% Optional subdirectory for asy files (no spaces):
+\def\asydir{}
+
+\begin{asydef}
+// Global Asymptote definitions can be put here.
+import three;
+usepackage("bm");
+texpreamble("\def\V#1{\bm{#1}}");
+// One can globally override the default toolbar settings here:
+// settings.toolbar=true;
+\end{asydef}
+
+Here is a venn diagram produced with Asymptote, drawn to width 4cm:
+
+\def\A{A}
+\def\B{\V{B}}
+
+%\begin{figure}
+\begin{center}
+\begin{asy}
+size(4cm,0);
+pen colour1=red;
+pen colour2=green;
+
+pair z0=(0,0);
+pair z1=(-1,0);
+pair z2=(1,0);
+real r=1.5;
+path c1=circle(z1,r);
+path c2=circle(z2,r);
+fill(c1,colour1);
+fill(c2,colour2);
+
+picture intersection=new picture;
+fill(intersection,c1,colour1+colour2);
+clip(intersection,c2);
+
+add(intersection);
+
+draw(c1);
+draw(c2);
+
+//draw("$\A$",box,z1);              // Requires [inline] package option.
+//draw(Label("$\B$","$B$"),box,z2); // Requires [inline] package option.
+draw("$A$",box,z1);            
+draw("$\V{B}$",box,z2);
+
+pair z=(0,-2);
+real m=3;
+margin BigMargin=Margin(0,m*dot(unit(z1-z),unit(z0-z)));
+
+draw(Label("$A\cap B$",0),conj(z)--z0,Arrow,BigMargin);
+draw(Label("$A\cup B$",0),z--z0,Arrow,BigMargin);
+draw(z--z1,Arrow,Margin(0,m));
+draw(z--z2,Arrow,Margin(0,m));
+
+shipout(bbox(0.25cm));
+\end{asy}
+%\caption{Venn diagram}\label{venn}
+\end{center}
+%\end{figure}
+
+Each graph is drawn in its own environment. One can specify the width
+and height to \LaTeX\ explicitly. This 3D example can be viewed
+interactively either with Adobe Reader or Asymptote's fast OpenGL-based
+renderer. To support {\tt latexmk}, 3D figures should specify
+\verb+inline=true+. It is sometimes desirable to embed 3D files as annotated
+attachments; this requires the \verb+attach=true+ option as well as the
+\verb+attachfile2+ \LaTeX\ package.
+\begin{center}
+\begin{asy}[height=4cm,inline=true,attach=false,viewportwidth=\linewidth]
+currentprojection=orthographic(5,4,2);
+draw(unitcube,blue);
+label("$V-E+F=2$",(0,1,0.5),3Y,blue+fontsize(17pt));
+\end{asy}
+\end{center}
+
+One can also scale the figure to the full line width:
+\begin{center}
+\begin{asy}[width=\the\linewidth,inline=true]
+pair z0=(0,0);
+pair z1=(2,0);
+pair z2=(5,0);
+pair zf=z1+0.75*(z2-z1);
+
+draw(z1--z2);
+dot(z1,red+0.15cm);
+dot(z2,darkgreen+0.3cm);
+label("$m$",z1,1.2N,red);
+label("$M$",z2,1.5N,darkgreen);
+label("$\hat{\ }$",zf,0.2*S,fontsize(24pt)+blue);
+
+pair s=-0.2*I;
+draw("$x$",z0+s--z1+s,N,red,Arrows,Bars,PenMargins);
+s=-0.5*I;
+draw("$\bar{x}$",z0+s--zf+s,blue,Arrows,Bars,PenMargins);
+s=-0.95*I;
+draw("$X$",z0+s--z2+s,darkgreen,Arrows,Bars,PenMargins);
+\end{asy}
+\end{center}
+\end{document}

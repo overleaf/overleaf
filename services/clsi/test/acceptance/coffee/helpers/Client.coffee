@@ -22,7 +22,7 @@ module.exports = Client =
 
 	getOutputFile: (response, type) ->
 		for file in response.compile.outputFiles
-			if file.type == type
+			if file.type == type and file.url.match("output.#{type}")
 				return file
 		return null
 

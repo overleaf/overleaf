@@ -54,6 +54,7 @@ module.exports = (grunt) ->
 				options:
 					reporter: "spec"
 					timeout: 40000
+					grep: grunt.option("grep")
 				src: ["test/acceptance/js/**/*.js"]
 			smoke:
 				options:
