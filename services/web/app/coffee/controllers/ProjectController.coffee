@@ -18,7 +18,7 @@ SubscriptionFormatters = require("../Features/Subscription/SubscriptionFormatter
 FileStoreHandler = require("../Features/FileStore/FileStoreHandler")
 
 module.exports = class ProjectController
-	constructor: (@collaberationManager)->
+	constructor: ()->
 		ProjectHandler = new ProjectHandler()
 
 	list: (req, res, next)->

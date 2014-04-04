@@ -5,7 +5,6 @@ ProjectController = require("./controllers/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
 InfoController = require('./controllers/InfoController')
 SpellingController = require('./Features/Spelling/SpellingController')
-CollaberationManager = require('./managers/CollaberationManager')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
 versioningController =  require("./Features/Versioning/VersioningApiController")
@@ -46,9 +45,7 @@ module.exports = class Router
 	constructor: (app, io, socketSessions)->
 		app.use(app.router)
 
-		collaberationManager = new CollaberationManager(io)
-
-		Project = new ProjectController(collaberationManager)
+		Project = new ProjectController()
 		projectHandler = new ProjectHandler()
 
 		app.get  '/', HomeController.index
@@ -325,10 +322,6 @@ module.exports = class Router
 			client.on 'getRawLogs', (callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.getLogLines project_id, callback
-
-			client.on 'distributMessage', (message)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					collaberationManager.distributMessage project_id, client, message
 
 			client.on 'changeUsersPrivlageLevel', (user_id, newPrivalageLevel)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
