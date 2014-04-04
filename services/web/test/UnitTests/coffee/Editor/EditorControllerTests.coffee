@@ -703,3 +703,20 @@ describe "EditorController", ->
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
 				done()
 
+	describe "setRootDoc", ->
+
+		beforeEach ->
+			@err = "errro"
+			@newRootDocID = "21312321321"
+			@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectEntityHandler", (done)->
+			@EditorController.setRootDoc @project_id, @newRootDocID, =>
+				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, @newRootDocID).should.equal true
+				done()
+
+		it "should emit the update to the room", (done)->
+			@EditorController.setRootDoc @project_id, @newRootDocID, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'rootDocUpdated', @newRootDocID).should.equal true				
+				done()

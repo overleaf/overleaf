@@ -269,6 +269,12 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
 			callback?()
 
+	setRootDoc: (project_id, newRootDocID, callback)->
+		ProjectEntityHandler.setRootDoc project_id, newRootDocID, () =>
+			EditorRealTimeController.emitToRoom project_id, 'rootDocUpdated', newRootDocID
+			callback?()
+
+			
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"

@@ -307,7 +307,7 @@ module.exports = class Router
 
 			client.on 'setRootDoc', (newRootDocID, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.setRootDoc(project_id, newRootDocID, callback)
+					EditorController.setRootDoc(project_id, newRootDocID, callback)
 
 			client.on 'deleteProject', (callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>

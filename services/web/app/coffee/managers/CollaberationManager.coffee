@@ -15,18 +15,11 @@ EditorRealTimeController = require('../Features/Editor/EditorRealTimeController'
 module.exports = class CollaberationManager
 	constructor: (@io)->
 
-
-
 	distributMessage: (project_id, client, message)->
 		message = sanitize.escape(message)
 		metrics.inc "editor.instant-message"
 		client.get "first_name", (err, first_name)=>
 			EditorRealTimeController.emitToRoom project_id, 'reciveNewMessage', first_name, message
-
-	setRootDoc: (project_id, newRootDocID, callback)->
-		projectEntityHandler.setRootDoc project_id, newRootDocID, () =>
-			EditorRealTimeController.emitToRoom project_id, 'rootDocUpdated', newRootDocID
-			callback?()
 
 	takeVersionSnapShot : (project_id, message, callback)->
 		versioningApiHandler.takeVersionSnapshot project_id, message, callback
