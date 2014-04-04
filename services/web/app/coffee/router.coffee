@@ -299,7 +299,7 @@ module.exports = class Router
 
 			client.on 'setProjectName', (window_id, newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.renameProject(project_id, window_id, newName, callback)
+					EditorController.renameProject(project_id, window_id, newName, callback)
 
 			client.on 'getProject',(callback)->
 			 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>

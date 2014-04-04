@@ -257,6 +257,14 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
 			callback?()
 
+
+	renameProject: (project_id, window_id, newName, callback)->
+		newName = sanitize.escape(newName)
+		ProjectHandler.renameProject project_id, window_id, newName, =>
+			newName = sanitize.escape(newName)
+			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
+			callback?()
+
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"

@@ -15,13 +15,6 @@ EditorRealTimeController = require('../Features/Editor/EditorRealTimeController'
 module.exports = class CollaberationManager
 	constructor: (@io)->
 
-	renameProject: (project_id, window_id, newName, callback)->
-		newName = sanitize.escape(newName)
-		projectHandler.renameProject project_id, window_id, newName, =>
-			newName = sanitize.escape(newName)
-			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
-			callback?()
-
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
 		projectHandler.setPublicAccessLevel project_id, newAccessLevel, =>
 			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
