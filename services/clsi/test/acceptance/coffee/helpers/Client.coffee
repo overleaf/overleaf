@@ -46,7 +46,7 @@ module.exports = Client =
 					return "#{entity}/#{subEntity}"
 			else if stat.isFile() and entity != "output.pdf"
 				extension = entity.split(".").pop()
-				if ["tex", "bib", "cls", "sty", "pdf_tex", "Rtex"].indexOf(extension) > -1
+				if ["tex", "bib", "cls", "sty", "pdf_tex", "Rtex", "ist", "md", "Rmd"].indexOf(extension) > -1
 					resources.push
 						path: entity
 						content: fs.readFileSync("#{baseDirectory}/#{directory}/#{entity}").toString()
