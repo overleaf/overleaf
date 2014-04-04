@@ -12,9 +12,9 @@ module.exports = LatexRunner =
 
 		logger.log directory: directory, compiler: compiler, timeout: timeout, mainFile: mainFile, "starting compile"
 
-		# We want to run latexmk on the tex file which we it will automatically
-		# generate from the Rtex file.
-		mainFile = mainFile.replace(/\.Rtex$/, ".tex")
+		# We want to run latexmk on the tex file which we will automatically
+		# generate from the Rtex/Rmd/md file.
+		mainFile = mainFile.replace(/\.(Rtex|md|Rmd)$/, ".tex")
 
 		if compiler == "pdflatex"
 			command = LatexRunner._pdflatexCommand mainFile
