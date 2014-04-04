@@ -311,7 +311,7 @@ module.exports = class Router
 
 			client.on 'deleteProject', (callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					collaberationManager.deleteProject(project_id, callback)
+					EditorController.deleteProject(project_id, callback)
 
 			client.on 'setPublicAccessLevel', (newAccessLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>

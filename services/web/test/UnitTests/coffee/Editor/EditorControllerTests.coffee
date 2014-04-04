@@ -609,3 +609,15 @@ describe "EditorController", ->
 				done()
 
 
+	describe "deleteProject", ->
+
+		beforeEach ->
+			@err = "errro"
+			@ProjectHandler::deleteProject = sinon.stub().callsArgWith(1, @err)
+
+		it "should call the project handler", (done)->
+			@EditorController.deleteProject @project_id, (err)=>
+				err.should.equal @err
+				@ProjectHandler::deleteProject.calledWith(@project_id).should.equal true
+				done()
+

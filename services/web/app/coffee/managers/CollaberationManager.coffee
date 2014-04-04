@@ -15,11 +15,6 @@ EditorRealTimeController = require('../Features/Editor/EditorRealTimeController'
 module.exports = class CollaberationManager
 	constructor: (@io)->
 
-	deleteProject: (project_id, callback)->
-		metrics.inc "editor.delete-project"
-		logger.log project_id:project_id, "recived message to delete project"
-		projectHandler.deleteProject project_id, callback
-
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->
 		newName = sanitize.escape(newName)
 		metrics.inc "editor.rename-entity"

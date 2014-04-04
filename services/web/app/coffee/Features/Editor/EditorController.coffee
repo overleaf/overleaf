@@ -237,6 +237,11 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'projectDescriptionUpdated', description)
 			callback()
 
+	deleteProject: (project_id, callback)->
+		Metrics.inc "editor.delete-project"
+		logger.log project_id:project_id, "recived message to delete project"
+		ProjectHandler.deleteProject project_id, callback
+
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"
