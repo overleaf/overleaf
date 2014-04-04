@@ -251,7 +251,11 @@ module.exports = EditorController =
 				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
 				callback?()
 
-
+	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
+		Metrics.inc "editor.move-entity"
+		ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
+			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
+			callback?()
 
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->

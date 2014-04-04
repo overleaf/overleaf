@@ -15,12 +15,6 @@ EditorRealTimeController = require('../Features/Editor/EditorRealTimeController'
 module.exports = class CollaberationManager
 	constructor: (@io)->
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
-		metrics.inc "editor.move-entity"
-		projectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
-			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
-			callback?()
-
 	renameProject: (project_id, window_id, newName, callback)->
 		newName = sanitize.escape(newName)
 		projectHandler.renameProject project_id, window_id, newName, =>

@@ -295,7 +295,7 @@ module.exports = class Router
 
 			client.on 'moveEntity', (entity_id, folder_id, entityType, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.moveEntity(project_id, entity_id, folder_id, entityType, callback)
+					EditorController.moveEntity(project_id, entity_id, folder_id, entityType, callback)
 
 			client.on 'setProjectName', (window_id, newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

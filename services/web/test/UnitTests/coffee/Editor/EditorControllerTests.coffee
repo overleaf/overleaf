@@ -643,3 +643,24 @@ describe "EditorController", ->
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName).should.equal true				
 				done()
 
+
+	describe "moveEntity", ->
+
+		beforeEach ->
+			@err = "errro"
+			@entity_id = "entity_id_here"
+			@entityType = "doc"
+			@folder_id = "313dasd21dasdsa"
+			@ProjectEntityHandler.moveEntity = sinon.stub().callsArgWith(4, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectEntityHandler", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType).should.equal true
+				done()
+
+
+		it "should emit the update to the room", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityMove', @entity_id, @folder_id).should.equal true				
+				done()
