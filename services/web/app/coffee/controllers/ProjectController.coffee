@@ -7,7 +7,6 @@ _ = require('underscore')
 fs = require('fs')
 ProjectHandler = require '../handlers/ProjectHandler'
 SecurityManager = require '../managers/SecurityManager'
-GuidManager = require '../managers/GuidManager'
 Settings = require('settings-sharelatex')
 projectCreationHandler = require '../Features/Project/ProjectCreationHandler'
 projectDuplicator = require('../Features/Project/ProjectDuplicator')
