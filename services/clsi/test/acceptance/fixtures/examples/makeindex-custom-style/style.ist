@@ -1,0 +1,7 @@
+heading_prefix "{\\bfseries\\hfil "
+heading_suffix "\\hfil}\\nopagebreak\n" 
+headings_flag 1
+delim_0 "\\dotfill"
+delim_1 "\\dotfill"
+delim_2 "\\dotfill"
+
