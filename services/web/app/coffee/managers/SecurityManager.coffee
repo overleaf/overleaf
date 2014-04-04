@@ -166,7 +166,9 @@ getRequestUserAndProject = (req, res, options, callback)->
 			callback err, user, project
 
 getProjectIdFromRef = (ref)->
-	if ref._id?
+	if !ref?
+		return null
+	else if ref._id?
 		return ref._id+''
 	else
 		return ref+''

@@ -25,7 +25,7 @@ describe "UserDeleter", ->
 			cancelSubscription: sinon.stub().callsArgWith(1)
 		@UserDeleter = SandboxedModule.require modulePath, requires:
 			"../../models/User": User: @User
-			"../../managers/NewsletterManager":  @NewsletterManager
+			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
 
