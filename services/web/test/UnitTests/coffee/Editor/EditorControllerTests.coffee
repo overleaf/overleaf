@@ -683,3 +683,23 @@ describe "EditorController", ->
 			@EditorController.renameProject @project_id, @window_id, @newName, =>
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @window_id, @newName).should.equal true				
 				done()
+
+
+	describe "setPublicAccessLevel", ->
+
+		beforeEach ->
+			@err = "errro"
+			@newAccessLevel = "public"
+			@ProjectHandler::setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectHandler", (done)->
+			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+				@ProjectHandler::setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
+				done()
+
+		it "should emit the update to the room", (done)->
+			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
+				done()
+

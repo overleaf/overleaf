@@ -15,10 +15,7 @@ EditorRealTimeController = require('../Features/Editor/EditorRealTimeController'
 module.exports = class CollaberationManager
 	constructor: (@io)->
 
-	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
-		projectHandler.setPublicAccessLevel project_id, newAccessLevel, =>
-			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
-			callback?()
+
 
 	distributMessage: (project_id, client, message)->
 		message = sanitize.escape(message)

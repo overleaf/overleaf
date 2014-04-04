@@ -315,7 +315,7 @@ module.exports = class Router
 
 			client.on 'setPublicAccessLevel', (newAccessLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					collaberationManager.setPublicAccessLevel(project_id, newAccessLevel, callback)
+					EditorController.setPublicAccessLevel(project_id, newAccessLevel, callback)
 
 			client.on 'pdfProject', (opts, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
