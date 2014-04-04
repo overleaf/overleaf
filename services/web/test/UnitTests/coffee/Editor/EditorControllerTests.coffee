@@ -621,3 +621,25 @@ describe "EditorController", ->
 				@ProjectHandler::deleteProject.calledWith(@project_id).should.equal true
 				done()
 
+
+	describe "renameEntity", ->
+
+		beforeEach ->
+			@err = "errro"
+			@entity_id = "entity_id_here"
+			@entityType = "doc"
+			@newName = "bobsfile.tex"
+			@ProjectHandler::renameEntity = sinon.stub().callsArgWith(4, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the project handler", (done)->
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@ProjectHandler::renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName).should.equal true
+				done()
+
+
+		it "should emit the update to the room", (done)->
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName).should.equal true				
+				done()
+

@@ -291,7 +291,7 @@ module.exports = class Router
 
 			client.on 'renameEntity', (entity_id, entityType, newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					collaberationManager.renameEntity(project_id, entity_id, entityType, newName, callback)
+					EditorController.renameEntity(project_id, entity_id, entityType, newName, callback)
 
 			client.on 'moveEntity', (entity_id, folder_id, entityType, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

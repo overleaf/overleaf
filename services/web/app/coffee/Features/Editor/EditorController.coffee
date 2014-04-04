@@ -242,6 +242,17 @@ module.exports = EditorController =
 		logger.log project_id:project_id, "recived message to delete project"
 		ProjectHandler.deleteProject project_id, callback
 
+	renameEntity: (project_id, entity_id, entityType, newName, callback)->
+		newName = sanitize.escape(newName)
+		Metrics.inc "editor.rename-entity"
+		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
+		ProjectHandler.renameEntity project_id, entity_id, entityType, newName, =>
+			if newName.length > 0
+				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
+				callback?()
+
+
+
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"
