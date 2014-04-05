@@ -32,7 +32,7 @@ describe 'third party data store', ->
 			@poller._sendToTpds = sinon.stub().callsArgWith(1, null)
 			@poller._markPollHappened = sinon.stub()
 			@poller.pollUsersWithDropbox (err)=>
-				@userModel.find.calledWith({"dropbox.access_token.oauth_token_secret":{"$exists":true}}, "_id").should.equal true
+				@userModel.find.calledWith({"dropbox.access_token.oauth_token_secret":{"$exists":true}, "features.dropbox":true}, "_id").should.equal true
 				@poller._sendToTpds.calledWith([users[0]._id, users[1]._id, users[2]._id,]).should.equal true
 				@poller._markPollHappened.called.should.equal true
 				done()
