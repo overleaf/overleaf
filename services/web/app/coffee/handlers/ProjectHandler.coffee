@@ -19,17 +19,6 @@ tagsHandler = require('../Features/Tags/TagsHandler')
 
 module.exports = class ProjectHandler
 
-	confirmFolder = (project_id, folder_id, callback)->
-		logger.log folder: folder_id, project_id: project_id, "confirming existence of folder"
-		if folder_id+'' == 'undefined'
-			Project.findById project_id, (err, project)->
-				callback(project.rootFolder[0]._id)
-		else if folder_id != null
-			callback folder_id
-		else
-			Project.findById project_id, (err, project)->
-				callback(project.rootFolder[0]._id)
-
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->
 		logger.log(entity_id: entity_id, project_id: project_id, ('renaming '+entityType))
 		if !entityType?
