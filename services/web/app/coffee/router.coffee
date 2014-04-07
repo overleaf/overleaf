@@ -298,10 +298,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorController.renameProject(project_id, window_id, newName, callback)
 
-			client.on 'getProject',(callback)->
-			 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-			 		projectHandler.getProject(project_id, callback)
-
 			client.on 'setRootDoc', (newRootDocID, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorController.setRootDoc(project_id, newRootDocID, callback)

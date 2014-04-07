@@ -18,10 +18,6 @@ async = require('async')
 tagsHandler = require('../Features/Tags/TagsHandler')
 
 module.exports = class ProjectHandler
-	getProject: (project_id, callback)->
-		logger.log project_id: project_id, "getting project"
-		Project.findById project_id, (err, project)->
-			callback err, ProjectEditorHandler.buildProjectModelView(project, includeUsers: false)
 
 	confirmFolder = (project_id, folder_id, callback)->
 		logger.log folder: folder_id, project_id: project_id, "confirming existence of folder"
