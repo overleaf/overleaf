@@ -174,8 +174,11 @@ define [
 			meta.client_now = new Date()
 			meta.recent_events = @recentEvents
 			errorObj = {}
-			for key in Object.getOwnPropertyNames(error)
-				errorObj[key] = error[key]
+			if typeof error == "object"
+				for key in Object.getOwnPropertyNames(error)
+					errorObj[key] = error[key]
+			else if typeof error == "string"
+				errorObj.message = error
 			$.ajax
 				url: "/error/client"
 				type: "POST"

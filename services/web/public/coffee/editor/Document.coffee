@@ -1,6 +1,7 @@
 define [
 	"editor/ShareJsDoc"
 	"libs/backbone"
+	"libs/underscore"
 ], (ShareJsDoc) ->
 	class Document
 		@getDocument: (ide, doc_id) ->
@@ -13,14 +14,25 @@ define [
 			@connected = @ide.socket.socket.connected
 			@joined = false
 			@wantToBeJoined = false
+			@_checkConsistency = _.bind(@_checkConsistency, @)
 			@_bindToEditorEvents()
 			@_bindToSocketEvents()
 
-		attachToAce: (ace) ->
-			@doc?.attachToAce(ace)
+		attachToAce: (@ace) ->
+			@doc?.attachToAce(@ace)
+			editorDoc = @ace.getSession().getDocument()
+			editorDoc.on "change", @_checkConsistency
 
 		detachFromAce: () ->
 			@doc?.detachFromAce()
+			editorDoc = @ace.getSession().getDocument()
+			editorDoc.off "change", @_checkConsistency
+
+		_checkConsistency: () ->
+			editorValue = @ace?.getValue()
+			sharejsValue = @doc?.getSnapshot()
+			if editorValue != sharejsValue
+				@_onError "error", new Error("Editor text does not match server text")
 
 		getSnapshot: () ->
 			@doc?.getSnapshot()
