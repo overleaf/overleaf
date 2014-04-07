@@ -3,7 +3,7 @@ UserGetter = require("../User/UserGetter")
 Project = require('../../models/Project').Project
 logger = require("logger-sharelatex")
 tpdsUpdateSender = require '../ThirdPartyDataStore/TpdsUpdateSender'
-
+_ = require("underscore")
 
 module.exports = 
 
@@ -42,3 +42,9 @@ module.exports =
 				if err?
 					return callback(err)
 				tpdsUpdateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newName}, callback
+
+	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
+		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
+		if project_id? && newAccessLevel? and _.include ['readOnly', 'readAndWrite', 'private'], newAccessLevel
+			Project.update {_id:project_id},{publicAccesLevel:newAccessLevel}, (err)->
+				callback()

@@ -690,12 +690,12 @@ describe "EditorController", ->
 		beforeEach ->
 			@err = "errro"
 			@newAccessLevel = "public"
-			@ProjectHandler::setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
+			@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the ProjectHandler", (done)->
 			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-				@ProjectHandler::setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
+				@ProjectDetailsHandler.setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
 				done()
 
 		it "should emit the update to the room", (done)->

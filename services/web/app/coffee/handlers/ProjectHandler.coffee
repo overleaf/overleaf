@@ -20,13 +20,7 @@ tagsHandler = require('../Features/Tags/TagsHandler')
 module.exports = class ProjectHandler
 
 
-	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
-		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
-		if project_id? && newAccessLevel?
-			if _.include ['readOnly', 'readAndWrite', 'private'], newAccessLevel
-				Project.update {_id:project_id},{publicAccesLevel:newAccessLevel},{}, (err)->
-					if callback?
-						callback()
+
 
 	addUserToProject: (project_id, email, privlages, callback)->
 		if email != ''

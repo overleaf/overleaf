@@ -81,3 +81,14 @@ describe 'Project details handler', ->
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, project_name:@project.name, newProjectName:@newName}).should.equal true
 				done()
 
+
+	describe "setPublicAccessLevel", ->
+		beforeEach ->
+			@ProjectModel.update.callsArgWith(2)
+			@accessLevel = "readOnly"
+
+		it "should update the project with the new level", (done)->
+			@handler.setPublicAccessLevel @project_id, @accessLevel, =>
+				@ProjectModel.update.calledWith({_id: @project_id}, {publicAccesLevel: @accessLevel}).should.equal true
+				done()
+

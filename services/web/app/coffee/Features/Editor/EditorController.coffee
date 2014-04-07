@@ -267,7 +267,7 @@ module.exports = EditorController =
 			callback?()
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
-		ProjectHandler.setPublicAccessLevel project_id, newAccessLevel, =>
+		ProjectDetailsHandler.setPublicAccessLevel project_id, newAccessLevel, =>
 			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
 			callback?()
 
