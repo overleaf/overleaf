@@ -682,3 +682,24 @@ describe 'project entity handler', ->
 
 			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->     
 
+
+	describe "renameEntity", ->
+		beforeEach ->
+			@entity_id = "4eecaffcbffa66588e000009"
+			@entityType = "doc"
+			@newName = "new.tex"
+			@path = mongo: "mongo.path", fileSystem: "/file/system/old.tex"
+			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
+			@ProjectModel.update = sinon.stub().callsArgWith(3)
+			@tpdsUpdateSender.moveEntity = sinon.stub()
+
+		it "should update the name in mongo", (done)->
+
+			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@ProjectModel.update.calledWith({_id : @project_id}, {"$set":{"mongo.path.name":@newName}}).should.equal true
+				done()
+
+		it "should send the update to the tpds", (done)->
+			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, startPath:@path.fileSystem, endPath:"/file/system/new.tex", project_name:@project.name, rev:4}).should.equal true
+				done()

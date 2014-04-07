@@ -246,7 +246,7 @@ module.exports = EditorController =
 		newName = sanitize.escape(newName)
 		Metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
-		ProjectHandler.renameEntity project_id, entity_id, entityType, newName, =>
+		ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, =>
 			if newName.length > 0
 				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
 				callback?()

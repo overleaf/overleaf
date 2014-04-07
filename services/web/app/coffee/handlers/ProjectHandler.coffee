@@ -19,25 +19,7 @@ tagsHandler = require('../Features/Tags/TagsHandler')
 
 module.exports = class ProjectHandler
 
-	renameEntity: (project_id, entity_id, entityType, newName, callback)->
-		logger.log(entity_id: entity_id, project_id: project_id, ('renaming '+entityType))
-		if !entityType?
-			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
-			return callback("No entityType set")
-		entityType = entityType.toLowerCase()
-		Project.findById project_id, (err, project)=>
-			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path, folder)=>
-				if err?
-					return callback err
-				conditons = {_id:project_id}
-				update = "$set":{}
-				namePath = path.mongo+".name"
-				update["$set"][namePath] = newName
-				endPath = path.fileSystem.replace(entity.name, newName)
-				tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
-				Project.update conditons, update, {}, (err)->
-					if callback?
-						callback err
+
 
 	renameProject: (project_id, window_id, newName, callback)->
 		logger.log project_id: project_id, "renaming project"

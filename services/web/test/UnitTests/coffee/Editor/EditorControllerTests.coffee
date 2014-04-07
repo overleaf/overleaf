@@ -629,12 +629,12 @@ describe "EditorController", ->
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
 			@newName = "bobsfile.tex"
-			@ProjectHandler::renameEntity = sinon.stub().callsArgWith(4, @err)
+			@ProjectEntityHandler.renameEntity = sinon.stub().callsArgWith(4, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the project handler", (done)->
 			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
-				@ProjectHandler::renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName).should.equal true
+				@ProjectEntityHandler.renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName).should.equal true
 				done()
 
 
