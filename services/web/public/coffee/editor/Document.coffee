@@ -10,6 +10,11 @@ define [
 				@openDocs[doc_id] = new Document(ide, doc_id)
 			return @openDocs[doc_id]
 
+		@hasUnsavedChanges: () ->
+			for doc_id, doc of (@openDocs or {})
+				return true if doc.hasBufferedOps()
+			return false
+
 		constructor: (@ide, @doc_id) ->
 			@connected = @ide.socket.socket.connected
 			@joined = false
@@ -25,8 +30,8 @@ define [
 
 		detachFromAce: () ->
 			@doc?.detachFromAce()
-			editorDoc = @ace.getSession().getDocument()
-			editorDoc.off "change", @_checkConsistency
+			editorDoc = @ace?.getSession().getDocument()
+			editorDoc?.off "change", @_checkConsistency
 
 		_checkConsistency: () ->
 			editorValue = @ace?.getValue()
@@ -39,6 +44,15 @@ define [
 
 		getType: () ->
 			@doc?.getType()
+
+		getInflightOp: () ->
+			@doc?.getInflightOp()
+
+		getPendingOp: () ->
+			@doc?.getPendingOp()
+
+		hasBufferedOps: () ->
+			@doc?.hasBufferedOps()
 
 		_bindToSocketEvents: () ->
 			@_onUpdateAppliedHandler = (update) => @_onUpdateApplied(update)
@@ -83,6 +97,25 @@ define [
 				callback()
 			else
 				@_leaveDoc(callback)
+
+		pollSavedStatus: () ->
+			# returns false if doc has ops waiting to be acknowledged or
+			# sent that haven't changed since the last time we checked.
+			# Otherwise returns true.
+			inflightOp = @getInflightOp()
+			pendingOp = @getPendingOp()
+			if !inflightOp? and !pendingOp?
+				# there's nothing going on
+				saved = true
+			else if inflightOp == @oldInflightOp
+				saved = false
+			else if pendingOp?
+				saved = false
+			else
+				saved = true
+
+			@oldInflightOp = inflightOp
+			return saved
 
 		_cancelLeave: () ->
 			if @_leaveCallbacks?
