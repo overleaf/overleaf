@@ -1,19 +1,19 @@
 logger = require('logger-sharelatex')
 _ = require('underscore')
-User = require('../models/User').User
-Quote = require('../models/Quote').Quote
-Project = require('../models/Project').Project
-DocumentUpdaterHandler = require('../Features/DocumentUpdater/DocumentUpdaterHandler')
+User = require('../../models/User').User
+Quote = require('../../models/Quote').Quote
+Project = require('../../models/Project').Project
+DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 Settings = require('settings-sharelatex')
 util = require('util')
 redis = require('redis')
 rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
 rclient.auth(Settings.redis.web.password)
-RecurlyWrapper = require('../Features/Subscription/RecurlyWrapper')
-SubscriptionHandler = require('../Features/Subscription/SubscriptionHandler')
-projectEntityHandler = require('../Features/Project/ProjectEntityHandler')
-TpdsPollingBackgroundTasks = require("../Features/ThirdPartyDataStore/TpdsPollingBackgroundTasks")
-EditorRealTimeController = require("../Features/Editor/EditorRealTimeController")
+RecurlyWrapper = require('../Subscription/RecurlyWrapper')
+SubscriptionHandler = require('../Subscription/SubscriptionHandler')
+projectEntityHandler = require('../Project/ProjectEntityHandler')
+TpdsPollingBackgroundTasks = require("../ThirdPartyDataStore/TpdsPollingBackgroundTasks")
+EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
 module.exports = AdminController =
 
@@ -25,7 +25,7 @@ module.exports = AdminController =
 		for url, agents of require('https').globalAgent.sockets
 			openSockets["https://#{url}"] = (agent._httpMessage.path for agent in agents)
 		memory = process.memoryUsage()
-		io = require("../infrastructure/Server").io
+		io = require("../../infrastructure/Server").io
 		allUsers = io.sockets.clients()
 		users = []
 		allUsers.forEach (user)->

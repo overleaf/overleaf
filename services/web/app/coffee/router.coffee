@@ -1,5 +1,5 @@
 UserController = require('./controllers/UserController')
-AdminController = require('./controllers/AdminController')
+AdminController = require('./Features/ServerAdmin/AdminController')
 HomeController = require('./Features/StaticPages/HomeController')
 ProjectController = require("./controllers/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
