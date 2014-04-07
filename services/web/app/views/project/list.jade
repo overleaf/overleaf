@@ -29,10 +29,10 @@ block content
 							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone Project
 						-if (project.accessLevel == "owner")
 							li
-								a(href='/project/'+project_id, data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete Project
+								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete Project
 						-else
 							li
-								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project._id, data-csrf=csrfToken).leaveProject Leave Project
+								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave Project
 						li
 							a(href='/project/'+project._id+'/download/zip').downloadZip Download Zip
 				a.projectName(href="/project/#{project._id}") #{project.name}
