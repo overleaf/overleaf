@@ -55,8 +55,8 @@ define [
 			remoteChange = false
 			@on "change:name", (project, name) =>
 				if !remoteChange
-					@get("ide").socket.emit "setProjectName", window.window_id, name
-			@get("ide").socket.on "projectNameUpdated", (senderWindowId, name) =>
+					@get("ide").socket.emit "setProjectName", name
+			@get("ide").socket.on "projectNameUpdated", (name) =>
 				remoteChange = true
 				@set("name", name)
 				remoteChange = false

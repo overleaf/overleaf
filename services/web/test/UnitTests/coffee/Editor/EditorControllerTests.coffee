@@ -670,18 +670,18 @@ describe "EditorController", ->
 			@err = "errro"
 			@window_id = "kdsjklj290jlk"
 			@newName = "new name here"
-			@ProjectHandler::renameProject = sinon.stub().callsArgWith(3, @err)
+			@ProjectDetailsHandler.renameProject = sinon.stub().callsArgWith(2, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the ProjectHandler", (done)->
-			@EditorController.renameProject @project_id, @window_id, @newName, =>
-				@ProjectHandler::renameProject.calledWith(@project_id, @window_id, @newName).should.equal true
+			@EditorController.renameProject @project_id, @newName, =>
+				@ProjectDetailsHandler.renameProject.calledWith(@project_id, @newName).should.equal true
 				done()
 
 
 		it "should emit the update to the room", (done)->
-			@EditorController.renameProject @project_id, @window_id, @newName, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @window_id, @newName).should.equal true				
+			@EditorController.renameProject @project_id, @newName, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @newName).should.equal true				
 				done()
 
 

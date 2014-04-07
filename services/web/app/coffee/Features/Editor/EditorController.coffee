@@ -259,11 +259,11 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
 			callback?()
 
-	renameProject: (project_id, window_id, newName, callback)->
+	renameProject: (project_id, newName, callback)->
 		newName = sanitize.escape(newName)
-		ProjectHandler.renameProject project_id, window_id, newName, =>
+		ProjectDetailsHandler.renameProject project_id, newName, =>
 			newName = sanitize.escape(newName)
-			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
+			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', newName
 			callback?()
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->

@@ -294,9 +294,9 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorController.moveEntity(project_id, entity_id, folder_id, entityType, callback)
 
-			client.on 'setProjectName', (window_id, newName, callback)->
+			client.on 'setProjectName', (newName, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.renameProject(project_id, window_id, newName, callback)
+					EditorController.renameProject(project_id, newName, callback)
 
 			client.on 'setRootDoc', (newRootDocID, callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

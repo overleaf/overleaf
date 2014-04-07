@@ -20,19 +20,6 @@ tagsHandler = require('../Features/Tags/TagsHandler')
 module.exports = class ProjectHandler
 
 
-
-	renameProject: (project_id, window_id, newName, callback)->
-		logger.log project_id: project_id, "renaming project"
-		conditons = {_id:project_id}
-		Project.findOne conditons, "name", (err, project)->
-			oldProjectName = project.name
-			Project.update conditons, {name: newName}, {},(err, project)=>
-				tpdsUpdateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newName}
-				if callback?
-					callback err
-
-
-
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
 		if project_id? && newAccessLevel?

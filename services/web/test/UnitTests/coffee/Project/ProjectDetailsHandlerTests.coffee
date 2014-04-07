@@ -20,14 +20,18 @@ describe 'Project details handler', ->
 			features: "mock-features"
 		@ProjectGetter = 
 			getProjectWithoutDocLines: sinon.stub().callsArgWith(1, null, @project)
+			getProject: sinon.stub().callsArgWith(2, null, @project)
 		@ProjectModel =
 			update: sinon.stub()
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith(1, null, @user)
+		@tpdsUpdateSender =
+			moveEntity:sinon.stub().callsArgWith 1
 		@handler = SandboxedModule.require modulePath, requires:
 			"./ProjectGetter":@ProjectGetter
 			'../../models/Project': Project:@ProjectModel
 			"../User/UserGetter": @UserGetter
+			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
 			'logger-sharelatex':
 				log:->
 				err:->
@@ -61,4 +65,19 @@ describe 'Project details handler', ->
 				@ProjectModel.update.calledWith({_id:@project_id}, {description:@description}).should.equal true
 				done()
 
+	describe "renameProject", ->
+		beforeEach ->
+			@ProjectModel.update.callsArgWith(2)
+			@newName = "new name here"
+
+		it "should update the project with the new name", (done)->
+			newName = "new name here"
+			@handler.renameProject @project_id, @newName, =>
+				@ProjectModel.update.calledWith({_id: @project_id}, {name: @newName}).should.equal true
+				done()
+
+		it "should tell the tpdsUpdateSender", (done)->
+			@handler.renameProject @project_id, @newName, =>
+				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, project_name:@project.name, newProjectName:@newName}).should.equal true
+				done()
 
