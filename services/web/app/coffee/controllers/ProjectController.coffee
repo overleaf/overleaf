@@ -124,7 +124,7 @@ module.exports = class ProjectController
 					else
 						anonymous = false
 					SubscriptionLocator.getUsersSubscription user?._id, (err, subscription)->
-						SecurityManager.userCanAccessProject user, project, (canAccess, privlageLevel)->
+						SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
 							allowedFreeTrial = true
 							if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 								allowedFreeTrial = !!subscription.freeTrial.allowed
@@ -160,7 +160,7 @@ module.exports = class ProjectController
 										siteUrl: Settings.siteUrl,
 										jsPath: res.locals.jsPath
 									})
-									privlageLevel: privlageLevel
+									privilegeLevel: privilegeLevel
 									userCanSeeDropbox: user.featureSwitches.dropbox and project.owner_ref._id+"" == user._id+""
 									loadPdfjs: (user.ace.pdfViewer == "pdfjs")
 									chatUrl: Settings.apis.chat.url

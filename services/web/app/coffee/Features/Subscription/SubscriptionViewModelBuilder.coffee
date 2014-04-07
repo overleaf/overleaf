@@ -38,8 +38,6 @@ module.exports =
 	buildViewModel : ->
 		plans = Settings.plans
 
-		console.log plans
-		console.log(typeof(plans))
 		allPlans = {}
 		plans.forEach (plan)->
 			allPlans[plan.planCode] = plan

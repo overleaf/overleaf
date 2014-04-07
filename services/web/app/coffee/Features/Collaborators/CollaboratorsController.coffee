@@ -1,5 +1,5 @@
 ProjectGetter = require "../Project/ProjectGetter"
-ProjectHandler = require "../../handlers/ProjectHandler"
+CollaboratorsHandler = require "./CollaboratorsHandler"
 
 
 module.exports = CollaboratorsController =
@@ -17,7 +17,7 @@ module.exports = CollaboratorsController =
 		user_id = req.session?.user?._id
 		if !user_id?
 			return next(new Error("User should be logged in"))
-		ProjectHandler::removeUserFromProject req.params.project_id, user_id, (error) ->
+		CollaboratorsHandler.removeUserFromProject req.params.project_id, user_id, (error) ->
 			return next(error) if error?
 			res.redirect "/project"
 

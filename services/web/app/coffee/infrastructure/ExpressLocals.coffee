@@ -54,9 +54,9 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
-		res.locals.formatProjectPublicAccessLevel = (privlageLevel)->
-			formatedPrivlages = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
-			return formatedPrivlages[privlageLevel] || "Private"
+		res.locals.formatProjectPublicAccessLevel = (privilegeLevel)->
+			formatedPrivileges = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
+			return formatedPrivileges[privilegeLevel] || "Private"
 		next()
 
 	app.use (req, res, next)-> 

@@ -11,9 +11,11 @@ ObjectId = require("mongojs").ObjectId
 
 describe "CollaboratorsController", ->
 	beforeEach ->
+		@CollaboratorsHandler =
+			removeUserFromProject:sinon.stub()
 		@CollaboratorsController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
-			"../../handlers/ProjectHandler": @ProjectHandler = class ProjectHandler
+			"./CollaboratorsHandler": @CollaboratorsHandler
 		@res = new MockResponse()
 		@req = new MockRequest()
 
@@ -54,12 +56,12 @@ describe "CollaboratorsController", ->
 				user: _id: @user_id = "user-id-123"
 				destroy:->
 			@req.params = project_id: @project_id
-			@ProjectHandler::removeUserFromProject = sinon.stub().callsArg(2)
+			@CollaboratorsHandler.removeUserFromProject = sinon.stub().callsArg(2)
 
 			@CollaboratorsController.removeSelfFromProject(@req, @res)
 
 		it "should remove the logged in user from the project", ->
-			@ProjectHandler::removeUserFromProject.calledWith(@project_id, @user_id)
+			@CollaboratorsHandler.removeUserFromProject.calledWith(@project_id, @user_id)
 
 		it "should redirect to the project page", ->
 			@res.redirectedTo.should.equal "/project"

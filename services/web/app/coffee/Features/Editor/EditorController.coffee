@@ -7,7 +7,7 @@ ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 ProjectDeleter = require("../Project/ProjectDeleter")
 ProjectGetter = require('../Project/ProjectGetter')
-ProjectHandler = new (require('../../handlers/ProjectHandler'))()
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 LimitationsManager = require("../Subscription/LimitationsManager")
 AuthorizationManager = require("../Security/AuthorizationManager")
@@ -124,7 +124,7 @@ module.exports = EditorController =
 						cursorData.name = "Anonymous"
 					EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
-	addUserToProject: (project_id, email, privlages, callback = (error, collaborator_added)->)->
+	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
 		email = email.toLowerCase()
 		LimitationsManager.isCollaboratorLimitReached project_id, (error, limit_reached) =>
 			if error?
@@ -134,12 +134,13 @@ module.exports = EditorController =
 			if limit_reached
 				callback null, false
 			else
-				ProjectHandler.addUserToProject project_id, email, privlages, (user)=>
-					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privlages)
+				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
+					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, "", ->
+					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
 					callback null, true
 
 	removeUserFromProject: (project_id, user_id, callback)->
-		ProjectHandler.removeUserFromProject project_id, user_id, =>
+		CollaboratorsHandler.removeUserFromProject project_id, user_id, =>
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			if callback?
 				callback()
@@ -241,7 +242,6 @@ module.exports = EditorController =
 	deleteProject: (project_id, callback)->
 		Metrics.inc "editor.delete-project"
 		logger.log project_id:project_id, "recived message to delete project"
-		console.log ProjectDeleter
 		ProjectDeleter.deleteProject project_id, callback
 
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->

@@ -198,7 +198,7 @@ module.exports = class Router
 
 		app.get '/test', (req, res) ->
 			res.render "tests",
-				privlageLevel: "owner"
+				privilegeLevel: "owner"
 				project:
 					name: "test"
 				date: Date.now()
@@ -314,9 +314,9 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.compile(project_id, user._id, opts, callback)
 
-			client.on 'changeUsersPrivlageLevel', (user_id, newPrivalageLevel)->
+			client.on 'changeUsersPrivilegeLevel', (user_id, newPrivalageLevel)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					projectHandler.changeUsersPrivlageLevel project_id, user_id, newPrivalageLevel
+					projectHandler.changeUsersPrivilegeLevel project_id, user_id, newPrivalageLevel
 
 			client.on 'enableversioningController', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

@@ -30,10 +30,10 @@ describe "EditorController", ->
 		@ProjectOptionsHandler =
 			setCompiler : sinon.spy()
 			setSpellCheckLanguage: sinon.spy()
-		@ProjectEntityHandler = {}
+		@ProjectEntityHandler = 
+			flushProjectToThirdPartyDataStore:sinon.stub()
 		@ProjectEditorHandler =
 			buildProjectModelView : sinon.stub().returns(@projectModelView)
-		@ProjectHandler = class ProjectHandler
 		@Project =
 			findPopulatedById: sinon.stub().callsArgWith(1, null, @project)
 		@LimitationsManager = {}
@@ -51,17 +51,24 @@ describe "EditorController", ->
 		@TpdsPollingBackgroundTasks = {}
 		@ProjectDetailsHandler = 
 			setProjectDescription:sinon.stub()
+		@CollaboratorsHandler = 
+			removeUserFromProject: sinon.stub().callsArgWith(2)
+			addUserToProject: sinon.stub().callsArgWith(3)
+		@ProjectDeleter =
+			deleteProject: sinon.stub()
+
 		@EditorController = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/Server" : io : @io
 			'../Project/ProjectEditorHandler' : @ProjectEditorHandler
 			'../Project/ProjectEntityHandler' : @ProjectEntityHandler
 			'../Project/ProjectOptionsHandler' : @ProjectOptionsHandler
 			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler
+			'../Project/ProjectDeleter' : @ProjectDeleter
 			'../Project/ProjectGetter' : @ProjectGetter = {}
+			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
 			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler
 			'../Subscription/LimitationsManager' : @LimitationsManager
 			'../Security/AuthorizationManager' : @AuthorizationManager
-			'../../handlers/ProjectHandler' : @ProjectHandler
 			"../Versioning/AutomaticSnapshotManager" : @AutomaticSnapshotManager
 			"../Versioning/VersioningApiHandler" : @VersioningApiHandler
 			'../../models/Project' : Project: @Project
@@ -293,25 +300,29 @@ describe "EditorController", ->
 			@email = "Jane.Doe@example.com"
 			@priveleges = "readOnly"
 			@addedUser = { _id: "added-user" }
-			@ProjectHandler::addUserToProject = sinon.stub().callsArgWith(3, @addedUser)
+			@CollaboratorsHandler.addUserToProject = sinon.stub().callsArgWith(3, null, @addedUser)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@callback = sinon.stub()
 
 		describe "when the project can accept more collaborators", ->
 			beforeEach ->
 				@LimitationsManager.isCollaboratorLimitReached = sinon.stub().callsArgWith(1, null, false)
-				@EditorController.addUserToProject(@project_id, @email, @priveleges, @callback)
 
-			it "should add the user to the project", ->
-				@ProjectHandler::addUserToProject
-					.calledWith(@project_id, @email.toLowerCase(), @priveleges)
-					.should.equal true
+			it "should add the user to the project", (done)->
+				@EditorController.addUserToProject @project_id, @email, @priveleges, =>
+					@CollaboratorsHandler.addUserToProject.calledWith(@project_id, @email.toLowerCase(), @priveleges).should.equal true
+					done()
 
-			it "should emit a userAddedToProject event", ->
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "userAddedToProject", @addedUser).should.equal true
+			it "should emit a userAddedToProject event", (done)->
+				@EditorController.addUserToProject @project_id, @email, @priveleges, =>
+					@EditorRealTimeController.emitToRoom.calledWith(@project_id, "userAddedToProject", @addedUser).should.equal true
+					done()
 
-			it "should return true to the callback", ->
-				@callback.calledWith(null, true).should.equal true
+			it "should return true to the callback", (done)->
+				@EditorController.addUserToProject @project_id, @email, @priveleges, (err, result)=>
+					result.should.equal true
+					done()
+
 
 		describe "when the project cannot accept more collaborators", ->
 			beforeEach ->
@@ -319,7 +330,7 @@ describe "EditorController", ->
 				@EditorController.addUserToProject(@project_id, @email, @priveleges, @callback)
 
 			it "should not add the user to the project", ->
-				@ProjectHandler::addUserToProject.called.should.equal false
+				@CollaboratorsHandler.addUserToProject.called.should.equal false
 
 			it "should not emit a userAddedToProject event", ->
 				@EditorRealTimeController.emitToRoom.called.should.equal false
@@ -331,13 +342,13 @@ describe "EditorController", ->
 	describe "removeUserFromProject", ->
 		beforeEach ->
 			@removed_user_id = "removed-user-id"
-			@ProjectHandler::removeUserFromProject = sinon.stub().callsArgWith(2)
+			@CollaboratorsHandler.removeUserFromProject = sinon.stub().callsArgWith(2)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 			@EditorController.removeUserFromProject(@project_id, @removed_user_id)
 
 		it "remove the user from the project", ->
-			@ProjectHandler::removeUserFromProject
+			@CollaboratorsHandler.removeUserFromProject
 				.calledWith(@project_id, @removed_user_id)
 				.should.equal true
 
@@ -613,12 +624,12 @@ describe "EditorController", ->
 
 		beforeEach ->
 			@err = "errro"
-			@ProjectHandler::deleteProject = sinon.stub().callsArgWith(1, @err)
+			@ProjectDeleter.deleteProject = sinon.stub().callsArgWith(1, @err)
 
 		it "should call the project handler", (done)->
 			@EditorController.deleteProject @project_id, (err)=>
 				err.should.equal @err
-				@ProjectHandler::deleteProject.calledWith(@project_id).should.equal true
+				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
 				done()
 
 
@@ -673,7 +684,7 @@ describe "EditorController", ->
 			@ProjectDetailsHandler.renameProject = sinon.stub().callsArgWith(2, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
-		it "should call the ProjectHandler", (done)->
+		it "should call the EditorController", (done)->
 			@EditorController.renameProject @project_id, @newName, =>
 				@ProjectDetailsHandler.renameProject.calledWith(@project_id, @newName).should.equal true
 				done()
@@ -693,7 +704,7 @@ describe "EditorController", ->
 			@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
-		it "should call the ProjectHandler", (done)->
+		it "should call the EditorController", (done)->
 			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
 				@ProjectDetailsHandler.setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
 				done()

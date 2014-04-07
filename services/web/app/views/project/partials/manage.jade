@@ -16,7 +16,7 @@
 
 		.tab-content.form-horizontal
 			.tab-pane#generalProjectSettings.form.form-horizontal.active
-				if privlageLevel == 'owner' || privlageLevel == 'readAndWrite'
+				if privilegeLevel == 'owner' || privilegeLevel == 'readAndWrite'
 					.control-group
 						label(for='xlInput').control-label Project Name 
 						.controls
@@ -54,7 +54,7 @@
 				else
 					span You do not have permission to modify these settings.
 
-				if privlageLevel == 'owner'
+				if privilegeLevel == 'owner'
 					.control-group
 						label(for='select').control-label Public Access 
 						.controls
@@ -69,7 +69,7 @@
 				a.btn(href='/project/'+project._id+'/clone').cloneProject Clone Project
 
 			.tab-pane#deleteProjectTab
-				if privlageLevel == 'owner'
+				if privilegeLevel == 'owner'
 					button#deleteProject.btn.btn-danger Delete Project
 				else
 					span You do not have permission to modify these settings.
