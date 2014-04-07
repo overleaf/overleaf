@@ -11,6 +11,7 @@ define [
 	"ide/TabManager"
 	"ide/LayoutManager"
 	"ide/FileUploadManager"
+	"ide/SavingAreaManager"
 	"spelling/SpellingManager"
 	"search/SearchManager"
 	"models/Project"
@@ -45,6 +46,7 @@ define [
 	TabManager,
 	LayoutManager,
 	FileUploadManager,
+	SavingAreaManager,
 	SpellingManager,
 	SearchManager,
 	Project,
@@ -174,8 +176,11 @@ define [
 			meta.client_now = new Date()
 			meta.recent_events = @recentEvents
 			errorObj = {}
-			for key in Object.getOwnPropertyNames(error)
-				errorObj[key] = error[key]
+			if typeof error == "object"
+				for key in Object.getOwnPropertyNames(error)
+					errorObj[key] = error[key]
+			else if typeof error == "string"
+				errorObj.message = error
 			$.ajax
 				url: "/error/client"
 				type: "POST"
@@ -202,22 +207,5 @@ define [
 	ide.tourManager = new IdeTour ide
 	ide.debugManager = new DebugManager(ide)
 
-	ide.savingAreaManager =
-		$savingArea : $('#saving-area')
-		timeOut: undefined
-		saved:->
-			@clearTimeout()
-			$("#savingProblems").hide()
-		saving:->
-			return if @timeOut?
-			@clearTimeout()
-			@timeOut = setTimeout((=>
-				ga?('send', 'event', 'editor-interaction', 'notification-shown', "saving")
-				$("#savingProblems").show()
-			), 3000)
-
-		clearTimeout:->
-			if @timeOut?
-				clearTimeout @timeOut
-			delete @timeOut
+	ide.savingAreaManager = new SavingAreaManager(ide)
 

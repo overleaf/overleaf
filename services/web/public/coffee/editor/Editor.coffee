@@ -210,11 +210,6 @@ define [
 				callback null, @document
 
 		_bindToDocumentEvents: (document) ->
-			document.on "op:sent", () =>
-				@ide.savingAreaManager.saving()
-			document.on "op:acknowledged", () =>
-				@ide.savingAreaManager.saved()
-
 			document.on "remoteop", () =>
 				@undoManager.nextUpdateIsRemote = true
 
@@ -364,3 +359,6 @@ define [
 
 		disable: () ->
 			@enabled = false
+
+		hasUnsavedChanges: () ->
+			Document.hasUnsavedChanges()

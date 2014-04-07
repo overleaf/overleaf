@@ -89,6 +89,9 @@ define [
 		hasBufferedOps: () ->
 			@_doc.inflightOp? or @_doc.pendingOp?
 
+		getInflightOp: () -> @_doc.inflightOp
+		getPendingOp: () -> @_doc.pendingOp
+
 		attachToAce: (ace) -> @_doc.attach_ace(ace)
 		detachFromAce: () -> @_doc.detach_ace?()
 	
