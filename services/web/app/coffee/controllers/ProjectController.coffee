@@ -5,7 +5,6 @@ path = require "path"
 logger = require('logger-sharelatex')
 _ = require('underscore')
 fs = require('fs')
-ProjectHandler = require '../handlers/ProjectHandler'
 SecurityManager = require '../managers/SecurityManager'
 Settings = require('settings-sharelatex')
 projectCreationHandler = require '../Features/Project/ProjectCreationHandler'
@@ -20,7 +19,6 @@ FileStoreHandler = require("../Features/FileStore/FileStoreHandler")
 
 module.exports = class ProjectController
 	constructor: ()->
-		ProjectHandler = new ProjectHandler()
 
 	list: (req, res, next)->
 		timer = new metrics.Timer("project-list")

@@ -12,7 +12,6 @@ EditorController = require("./Features/Editor/EditorController")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
-ProjectHandler = require('./handlers/ProjectHandler')
 dropboxHandler = require('./Features/Dropbox/DropboxHandler')
 SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
 UploadsRouter = require './Features/Uploads/UploadsRouter'
@@ -46,7 +45,6 @@ module.exports = class Router
 		app.use(app.router)
 
 		Project = new ProjectController()
-		projectHandler = new ProjectHandler()
 
 		app.get  '/', HomeController.index
 		
@@ -313,10 +311,6 @@ module.exports = class Router
 			client.on 'pdfProject', (opts, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.compile(project_id, user._id, opts, callback)
-
-			client.on 'changeUsersPrivilegeLevel', (user_id, newPrivalageLevel)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					projectHandler.changeUsersPrivilegeLevel project_id, user_id, newPrivalageLevel
 
 			client.on 'enableversioningController', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
