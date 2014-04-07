@@ -1,11 +1,12 @@
 logger = require('logger-sharelatex')
 _ = require('underscore')
-User = require('./UserController')
-Quotes = require('../models/Quote').Quote
+User = require('../../controllers/UserController')
+Quotes = require('../../models/Quote').Quote
 
 Path = require "path"
 fs = require "fs"
-homepageExists = fs.existsSync Path.resolve(__dirname + "/../../views/external/home.jade")
+
+homepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home.jade")
 
 module.exports = HomeController =
 	index : (req,res)->
@@ -23,7 +24,7 @@ module.exports = HomeController =
 
 	externalPage: (page, title) ->
 		return (req, res, next = (error) ->) ->
-			path = Path.resolve(__dirname + "/../../views/external/#{page}.jade")
+			path = Path.resolve(__dirname + "/../../../views/external/#{page}.jade")
 			fs.exists path, (exists) -> # No error in this callback - old method in Node.js!
 				if exists
 					res.render "external/#{page}.jade",
