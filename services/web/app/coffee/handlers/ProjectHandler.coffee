@@ -31,26 +31,7 @@ module.exports = class ProjectHandler
 				if callback?
 					callback err
 
-	deleteProject: (project_id, callback = (error) ->)->
-		logger.log project_id:project_id, "deleting project"
-		Project.findById project_id, (err, project)=>
-			if project?
-				require('../Features/DocumentUpdater/DocumentUpdaterHandler').flushProjectToMongoAndDelete project_id, (error) ->
-					return callback(error) if error?
-					Project.applyToAllFilesRecursivly project.rootFolder[0], (file)=>
-						FileStoreHandler.deleteFile project_id, file._id, ->
-					Project.remove {_id:project_id}, (err)->
-						if callback?
-							callback(err)
-					require('../Features/Versioning/AutomaticSnapshotManager').unmarkProjectAsUpdated project_id, ->
-					tagsHandler.removeProjectFromAllTags project.owner_ref, project_id,->
-					project.collaberator_refs.forEach (collaberator_ref)->
-						tagsHandler.removeProjectFromAllTags collaberator_ref, project_id, ->
-					project.readOnly_refs.forEach (readOnly_ref)->
-						tagsHandler.removeProjectFromAllTags readOnly_ref, project_id,->
-			else
-				if callback?
-					callback(err)
+
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"

@@ -5,6 +5,7 @@ ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
+ProjectDeleter = require("../Project/ProjectDeleter")
 ProjectGetter = require('../Project/ProjectGetter')
 ProjectHandler = new (require('../../handlers/ProjectHandler'))()
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
@@ -240,7 +241,8 @@ module.exports = EditorController =
 	deleteProject: (project_id, callback)->
 		Metrics.inc "editor.delete-project"
 		logger.log project_id:project_id, "recived message to delete project"
-		ProjectHandler.deleteProject project_id, callback
+		console.log ProjectDeleter
+		ProjectDeleter.deleteProject project_id, callback
 
 	renameEntity: (project_id, entity_id, entityType, newName, callback)->
 		newName = sanitize.escape(newName)
