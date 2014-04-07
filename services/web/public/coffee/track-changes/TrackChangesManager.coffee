@@ -3,10 +3,11 @@ define [
 	"track-changes/models/Diff"
 	"track-changes/ChangeListView"
 	"track-changes/DiffView"
+	"account/AccountManager"
 	"utils/Modal"
 	"models/Doc"
 	"moment"
-], (ChangeList, Diff, ChangeListView, DiffView, Modal, Doc, moment) ->
+], (ChangeList, Diff, ChangeListView, DiffView, AccountManager, Modal, Doc, moment) ->
 	class TrackChangesManager
 		template: $("#trackChangesPanelTemplate").html()
 		
@@ -39,23 +40,30 @@ define [
 
 		bindToFileTreeEvents: () ->
 			@ide.fileTreeManager.on "open:doc", (doc_id) =>
+				@doc_id = doc_id
 				if @enabled
-					@doc_id = doc_id
 					@updateDiff()
 
+		AB_BUCKETS: ["control", "one-week", "pop-up"]
 		show: () ->
 			@changes = new ChangeList([], project_id: @project_id, ide: @ide)
 
+			if @changeListView?
+				@changeListView.remove()
 			@changeListView = new ChangeListView(
-				collection : @changes,
-				el         : @$el.find(".change-list-area")
+				el: @$el.find(".change-list-area")
+				collection: @changes
 			)
 			@changeListView.render()
 			@changeListView.loadUntilFull (error) =>
 				@autoSelectDiff()
 
 			@changeListView.on "change_diff", (fromIndex, toIndex) =>
-				@selectDocAndUpdateDiff(fromIndex, toIndex)
+				@findDocsInChange(fromIndex, toIndex)
+				@updateLabels()
+				@updateDiff()
+
+			@showUpgradeView()
 
 			if @diffView?
 				@diffView.remove()
@@ -65,12 +73,26 @@ define [
 			@ide.fileViewManager.disable()
 			@enable()
 
+		showUpgradeView: () ->
+			@$el.find("button.start-free-trial").off "click.track-changes"
+			@$el.find("button.start-free-trial").on "click.track-changes", () => @gotoFreeTrial()
+
+			if !@ide.project.get("features").versioning
+				ga('send', 'event', 'subscription-funnel', 'askToUgrade', "trackchanges")
+				@$el.find(".track-changes-upgrade-popup").show()
+
+				if @ide.project.get("owner") == @ide.user
+					@$el.find(".show-when-not-owner").hide()
+				else
+					@$el.find(".show-when-owner").hide()
+
 		hide: () ->
 			@ide.editor.enable()
 			@ide.fileViewManager.enable()
 			@disable()
 			@ide.fileTreeManager.openDoc(@doc_id)
 			@ide.tabManager.show "code"
+			@resetLabels()
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0
@@ -92,16 +114,26 @@ define [
 			@changeListView.setSelectionRange(fromIndex, 0)
 			@updateDiff()
 
-		selectDocAndUpdateDiff: (fromIndex, toIndex) ->
-			doc_ids = []
+		findDocsInChange: (fromIndex, toIndex) ->
+			@changed_doc_ids = []
 			for change in @changes.models.slice(toIndex, fromIndex + 1)
 				for doc in change.get("docs") or []
-					doc_ids.push doc.id if doc.id not in doc_ids
+					@changed_doc_ids.push doc.id if doc.id not in @changed_doc_ids
 
-			if !@doc_id? or @doc_id not in doc_ids
-				@doc_id = doc_ids[0]
+			if !@doc_id? or @doc_id not in @changed_doc_ids
+				@doc_id = @changed_doc_ids[0]
 
 			@updateDiff()
+
+		updateLabels: () ->
+			labels = {}
+			for doc_id in @changed_doc_ids
+				labels[doc_id] = true
+			@ide.fileTreeManager.setLabels(labels)
+
+		resetLabels: () ->
+			@ide.fileTreeManager.setLabels({})
+
 
 		updateDiff: () ->
 			fromIndex = @changeListView.selectedFromIndex
@@ -190,5 +222,9 @@ define [
 
 		disable: () ->
 			@enabled = false
+
+		gotoFreeTrial: () ->
+			AccountManager.gotoSubscriptionsPage()
+			ga('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "trackchanges")
 
 	return TrackChangesManager

@@ -187,3 +187,26 @@ define [
 
 		downloadPdf: () ->
 			@ide.mainAreaManager.setIframeSrc "/project/#{@ide.project_id}/output/output.pdf?popupDownload=true"
+
+		deleteCachedFiles: () ->
+			modal = new Modal
+				title: "Clear cache?"
+				message: "This will clear all hidden LaTeX files like .aux, .bbl, etc, from our compile server. You generally don't need to do this unless you're having trouble with references. Your project files will not be deleted or changed."
+				buttons: [{
+					text: "Cancel"
+				}, {
+					text: "Clear from cache",
+					class: "btn-primary",
+					close: false
+					callback: ($button) =>
+						$button.text("Clearing...")
+						$button.prop("disabled", true)
+						$.ajax({
+							url: "/project/#{@ide.project_id}/output"
+							type: "DELETE"
+							headers:
+								"X-CSRF-Token": window.csrfToken
+							complete: () -> modal.remove()
+						})
+
+				}]

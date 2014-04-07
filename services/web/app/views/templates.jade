@@ -68,6 +68,7 @@
 				input.rename.js-rename
 			.dropdown-caret
 				i.icon-chevron-down
+			.entity-label.label.label-success
 
 	script(type="text/template")#folderTemplate
 		.entity-list-item(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
@@ -80,6 +81,7 @@
 				input.rename.js-rename
 			.dropdown-caret
 				i.icon-chevron-down
+			.entity-label.label.label-success
 	
 	script(type="text/template")#entityListTemplate
 		.contents
@@ -180,7 +182,11 @@
 					button#downloadPdf.btn Download
 					button#downloadLinksButton.btn.dropdown-toggle(data-toggle="dropdown")
 						span.caret
-					ul.dropdown-menu#downloadLinks
+					ul.dropdown-menu
+						#downloadLinks
+						li.divider
+						li.delete-cached-files
+							a(href="#") Clear cached files
 				.btn-group.pull-right(data-toggle="buttons-radio")
 					button(type="button", title="Flat view")#flatViewButton.btn
 						i.icon-flatview
@@ -286,32 +292,31 @@
 
 
 	script(type="text/template")#publishProjectTemplate
-		-if(session && session.user && session.user.isAdmin)
-			.box
-				.page-header
-					h2 Publish project as template
-					
-				#publishedAsTemplateArea.show-when-published.alert.alert-success
-					p
-						.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
-						i.icon-ok 
-						|  Your project is currently published. 
-						a#templateLink(href='{{canonicalUrl}}') View in template gallery.
-					p
-						| Lastest version: {{publishedDate}}. 
+		.box
+			.page-header
+				h2 Publish project as template
+				
+			#publishedAsTemplateArea.show-when-published.alert.alert-success
+				p
+					.btn.btn-warning#unPublishProjectAsTemplate.pull-right Unpublish
+					i.icon-ok 
+					|  Your project is currently published. 
+					a#templateLink(href='{{canonicalUrl}}') View in template gallery.
+				p
+					| Lastest version: {{publishedDate}}. 
 
-				#problemWithPublishingArea
-					p There is a problem with our publishing service, please try again in a few minutes.
-				#publishWorkingArea
-					p Working...
-				div.show-when-published.show-when-unpublished.project-description
-					label(for="project-description") Description
-					.row-fluid
-						textarea(placeholder="Template description", name="project-description").span12#projectDescription {{description}}
-				#unpublishedAsTemplateArea.show-when-unpublished
-					.btn.btn-success#publishProjectAsTemplate Publish
-				p.show-when-published
-					button.btn.btn-success#republishProjectAsTemplate Re-Publish
+			#problemWithPublishingArea
+				p There is a problem with our publishing service, please try again in a few minutes.
+			#publishWorkingArea
+				p Working...
+			div.show-when-published.show-when-unpublished.project-description
+				label(for="project-description") Description
+				.row-fluid
+					textarea(placeholder="Template description", name="project-description").span12#projectDescription {{description}}
+			#unpublishedAsTemplateArea.show-when-unpublished
+				.btn.btn-success#publishProjectAsTemplate Publish
+			p.show-when-published
+				button.btn.btn-success#republishProjectAsTemplate Re-Publish
 
 
 	script(type="text/template")#settingsPanelTemplate
@@ -425,6 +430,10 @@
 		div
 			a(href="#", title='Show Hot Keys List')#hotkeysLink Hot keys
 
+	script(type='text/template')#DebugLinkTemplate
+		div
+			a(href="#", title='Show Debug Information')#debugLink Debug
+
 	script(type='text/template')#trackChangesPanelTemplate
 		#trackChangesPanel
 			.track-changes-side-bar
@@ -434,6 +443,12 @@
 						i.icon-remove
 				.change-list-area
 			.track-changes-diff
+			.track-changes-upgrade-popup(style="display: none;")
+				.message.show-when-owner
+					p You need to upgrade your plan to use the History feature.
+					button.btn.btn-primary.start-free-trial Start free trial
+				.message.show-when-not-owner
+					p Please ask the project owner to upgrade to use the History feature.
 
 	script(type='text/template')#trackChangesDiffTemplate
 		.track-changes-diff-toolbar.btn-toolbar

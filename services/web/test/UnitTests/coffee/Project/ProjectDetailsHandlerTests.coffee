@@ -8,35 +8,40 @@ require('chai').should()
 describe 'Project details handler', ->
 
 	beforeEach ->
-		@ProjectGetter = 
-			getProjectWithoutDocLines: sinon.stub()
-		@ProjectModel =
-			update: sinon.stub()
-		@handler = SandboxedModule.require modulePath, requires:
-			"./ProjectGetter":@ProjectGetter
-			'../../models/Project': Project:@ProjectModel
-			'logger-sharelatex':
-				log:->
-				err:->
 		@project_id = "321l3j1kjkjl"
+		@user_id = "user-id-123"
 		@project = 
 			name: "project"
 			description: "this is a great project"
 			something:"should not exist"
 			compiler: "latexxxxxx"
-
+			owner_ref: @user_id
+		@user =
+			features: "mock-features"
+		@ProjectGetter = 
+			getProjectWithoutDocLines: sinon.stub().callsArgWith(1, null, @project)
+		@ProjectModel =
+			update: sinon.stub()
+		@UserGetter =
+			getUser: sinon.stub().callsArgWith(1, null, @user)
+		@handler = SandboxedModule.require modulePath, requires:
+			"./ProjectGetter":@ProjectGetter
+			'../../models/Project': Project:@ProjectModel
+			"../User/UserGetter": @UserGetter
+			'logger-sharelatex':
+				log:->
+				err:->
 
 	describe "getDetails", ->
 
-		it "should find the project", (done)->
-			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, null, @project)
-			@handler.getDetails @project_id, (err, details)=>
+		it "should find the project and owner", (done)->
+			@handler.getDetails @project_id, (err, details)=>				
 				details.name.should.equal @project.name
 				details.description.should.equal @project.description
 				details.compiler.should.equal @project.compiler
+				details.features.should.equal @user.features
 				assert.equal(details.something, undefined)
 				done()
-
 
 		it "should return the error", (done)->
 			error = "some error"

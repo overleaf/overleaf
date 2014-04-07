@@ -23,7 +23,7 @@ self = module.exports =
 			callback()
 
 	_getUserIdsWithDropbox: (callback)->
-		User.find {"dropbox.access_token.oauth_token_secret":{"$exists":true}}, "_id", (err, users)->
+		User.find {"dropbox.access_token.oauth_token_secret":{"$exists":true}, "features.dropbox":true}, "_id", (err, users)->
 			ids = users.map (user)->
 				return user._id+""
 			callback err, ids

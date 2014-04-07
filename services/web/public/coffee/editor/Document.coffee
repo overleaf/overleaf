@@ -81,6 +81,17 @@ define [
 				delete @_joinCallbacks
 
 		_onUpdateApplied: (update) ->
+			@ide.pushEvent "received-update",
+				doc_id: @doc_id
+				remote_doc_id: update?.doc
+				wantToBeJoined: @wantToBeJoined
+				update: update
+
+			if Math.random() < (@ide.disconnectRate or 0)
+				console.log "Simulating disconnect"
+				@ide.connectionManager.disconnect()
+				return
+
 			if update?.doc == @doc_id and @doc?
 				@doc.processUpdateFromServer update
 
@@ -93,6 +104,8 @@ define [
 			@doc?.updateConnectionState "disconnected"
 
 		_onReconnect: () ->
+			@ide.pushEvent "reconnected:afterJoinProject"
+
 			@connected = true
 			if @wantToBeJoined or @doc?.hasBufferedOps()
 				@_joinDoc (error) =>
@@ -137,10 +150,37 @@ define [
 
 		_bindToShareJsDocEvents: () ->
 			@doc.on "error", (error, meta) => @_onError error, meta
-			@doc.on "externalUpdate", () => @trigger "externalUpdate"
-			@doc.on "remoteop", () => @trigger "remoteop"
-			@doc.on "op:sent", () => @trigger "op:sent"
-			@doc.on "op:acknowledged", () => @trigger "op:acknowledged"
+			@doc.on "externalUpdate", () => 
+				@ide.pushEvent "externalUpdate",
+					doc_id: @doc_id
+				@trigger "externalUpdate"
+			@doc.on "remoteop", () => 
+				@ide.pushEvent "remoteop",
+					doc_id: @doc_id
+				@trigger "remoteop"
+			@doc.on "op:sent", (op) =>
+				@ide.pushEvent "op:sent",
+					doc_id: @doc_id
+					op: op
+				@trigger "op:sent"
+			@doc.on "op:acknowledged", (op) =>
+				@ide.pushEvent "op:acknowledged",
+					doc_id: @doc_id
+					op: op
+				@trigger "op:acknowledged"
+			@doc.on "op:timeout", (op) =>
+				@ide.pushEvent "op:timeout",
+					doc_id: @doc_id
+					op: op
+				@trigger "op:timeout"
+				ga?('send', 'event', 'error', "op timeout", "Op was now acknowledged - #{ide.socket.socket.transport.name}" )
+				@ide.connectionManager.reconnectImmediately()
+			@doc.on "flush", (inflightOp, pendingOp, version) =>
+				@ide.pushEvent "flush",
+					doc_id: @doc_id,
+					inflightOp: inflightOp,
+					pendingOp: pendingOp
+					v: version
 
 		_onError: (error, meta = {}) ->
 			console.error "ShareJS error", error, meta

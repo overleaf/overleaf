@@ -76,11 +76,13 @@ describe "Subscription Group Handler", ->
 			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
 
 		it "should locate the subscription", (done)->
+			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser_id).should.equal true
 				done()
 
 		it "should get the users by id", (done)->
+			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
 			@subscription.member_ids = ["1234", "342432", "312312"]
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				@UserLocator.findById.calledWith(@subscription.member_ids[0]).should.equal true
@@ -88,3 +90,13 @@ describe "Subscription Group Handler", ->
 				@UserLocator.findById.calledWith(@subscription.member_ids[2]).should.equal true
 				users.length.should.equal @subscription.member_ids.length
 				done()
+
+		it "should just return the id if the user can not be found as they may have deleted their account", (done)->
+			@UserLocator.findById.callsArgWith(1)
+			@subscription.member_ids = ["1234", "342432", "312312"]
+			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
+				assert.deepEqual users[0], {_id:@subscription.member_ids[0]}
+				assert.deepEqual users[1], {_id:@subscription.member_ids[1]}
+				assert.deepEqual users[2], {_id:@subscription.member_ids[2]}
+				done()
+

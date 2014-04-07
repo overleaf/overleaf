@@ -1,4 +1,4 @@
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 
 module.exports =
 	validateEmail : (email) ->
@@ -13,7 +13,7 @@ module.exports =
 		return hasZeroLength
 
 	validateRegisterRequest : (req, callback)->
-		email = sanitize(req.body.email).xss().trim().toLowerCase()
+		email = sanitize.escape(req.body.email).trim().toLowerCase()
 		password = req.body.password
 		username = email.match(/^[^@]*/)
 		if username?

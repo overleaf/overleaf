@@ -1,13 +1,12 @@
 User = require('../models/User').User
 Project = require('../models/Project').Project
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 path = require "path"
 logger = require('logger-sharelatex')
 _ = require('underscore')
 fs = require('fs')
 ProjectHandler = require '../handlers/ProjectHandler'
 SecurityManager = require '../managers/SecurityManager'
-GuidManager = require '../managers/GuidManager'
 Settings = require('settings-sharelatex')
 projectCreationHandler = require '../Features/Project/ProjectCreationHandler'
 projectDuplicator = require('../Features/Project/ProjectDuplicator')
@@ -19,7 +18,7 @@ SubscriptionFormatters = require("../Features/Subscription/SubscriptionFormatter
 FileStoreHandler = require("../Features/FileStore/FileStoreHandler")
 
 module.exports = class ProjectController
-	constructor: (@collaberationManager)->
+	constructor: ()->
 		ProjectHandler = new ProjectHandler()
 
 	list: (req, res, next)->
@@ -72,8 +71,8 @@ module.exports = class ProjectController
 
 	apiNewProject: (req, res)->
 		user = req.session.user
-		projectName = sanitize(req.body.projectName).xss()
-		template = sanitize(req.body.template).xss()
+		projectName = sanitize.escape(req.body.projectName)
+		template = sanitize.escape(req.body.template)
 		logger.log user: user, type: template, name: projectName, "creating project"
 		if template == 'example'
 			projectCreationHandler.createExampleProject user._id, projectName, (err, project)->
@@ -123,7 +122,7 @@ module.exports = class ProjectController
 								trackChanges: false
 					else
 						anonymous = false
-					SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
+					SubscriptionLocator.getUsersSubscription user?._id, (err, subscription)->
 						SecurityManager.userCanAccessProject user, project, (canAccess, privlageLevel)->
 							allowedFreeTrial = true
 							if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
@@ -154,7 +153,7 @@ module.exports = class ProjectController
 										spellCheckLanguage: user.ace.spellCheckLanguage
 										pdfViewer : user.ace.pdfViewer
 										docPositions: {}
-										trackChanges: user.featureSwitches.trackChanges
+										oldHistory: !!user.featureSwitches?.oldHistory
 									})
 									sharelatexObject : JSON.stringify({
 										siteUrl: Settings.siteUrl,

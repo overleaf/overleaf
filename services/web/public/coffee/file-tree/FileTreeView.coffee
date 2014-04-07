@@ -19,4 +19,7 @@ define [
 			@rootFolderView = new RootFolderView(model: rootFolder, manager: @manager)
 			entities.append(@rootFolderView.$el)
 			@rootFolderView.render()
+
+		setLabels: (labels) ->
+			@rootFolderView.setLabels(labels)
 			

@@ -107,11 +107,13 @@ define [
 			@$contents.hide()
 			@$toggle.find(".js-open").hide()
 			@$toggle.find(".js-closed").show()
+			@$entityListItemEl.removeClass("folder-open")
 
 		showEntries: () ->
 			@$contents.show()
 			@$toggle.find(".js-open").show()
 			@$toggle.find(".js-closed").hide()
+			@$entityListItemEl.addClass("folder-open")
 
 		onToggle: (e) ->
 			e.preventDefault()
@@ -146,3 +148,17 @@ define [
 					@manager.showUploadFileModal(@model)
 			}]
 
+		setLabels: (labels) ->
+			showLabel = false
+			for entity in @views
+				if entity.setLabels(labels)
+					showLabel = true
+
+			if showLabel
+				@$entityListItemEl.addClass("show-label")
+				@$labelEl.text("±")
+				return true
+			else
+				@$entityListItemEl.removeClass("show-label")
+				@$labelEl.text("")
+				return false

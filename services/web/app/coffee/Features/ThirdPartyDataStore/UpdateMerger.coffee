@@ -5,7 +5,7 @@ logger = require('logger-sharelatex')
 Settings = require('settings-sharelatex')
 slReqIdHelper = require('soa-req-id')
 FileTypeManager = require('../Uploads/FileTypeManager')
-GuidManager = require '../../managers/GuidManager'
+uuid = require('node-uuid')
 fs = require('fs')
 
 module.exports =
@@ -75,7 +75,7 @@ module.exports =
 
 		writeStreamToDisk: (project_id, file_id, stream, callback = (err, fsPath)->)->
 			if !file_id?
-				file_id = GuidManager.newGuid()
+				file_id = uuid.v4()
 			dumpPath = "#{Settings.path.dumpFolder}/#{project_id}_#{file_id}"
 
 			writeStream = fs.createWriteStream(dumpPath)

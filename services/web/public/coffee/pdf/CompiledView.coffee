@@ -51,6 +51,7 @@ define [
 			"click #splitViewButton": ->
 				$.localStorage("layout.pdf", "split")
 				@options.manager.switchToSplitView()
+			"click .delete-cached-files > a": -> @options.manager.deleteCachedFiles()
 
 		initialize: (@options) ->
 			@ide = @options.ide
@@ -90,7 +91,7 @@ define [
 			logButtonHtml = "Logs"
 
 			if compileErrors?
-				for error in compileErrors.all
+				for error in compileErrors.errors.concat(compileErrors.warnings).concat(compileErrors.typesetting)
 					errorView = new LatexErrorView(@options.manager.ide, error)
 					errorView.render()
 					@errorViews.push(errorView)

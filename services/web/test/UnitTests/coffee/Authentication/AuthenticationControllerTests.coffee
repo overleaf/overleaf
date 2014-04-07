@@ -122,6 +122,37 @@ describe "AuthenticationController", ->
 			it "should only redirect to the local path", ->
 				expect(@res.body).to.deep.equal redir: "/test"
 
+	describe "getLoggedInUserId", ->
+
+		beforeEach ->
+			@req = 
+				session :{}
+
+		it "should return the user id from the session", (done)->
+			@user_id = "2134"
+			@req.session.user = 
+				_id:@user_id
+			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
+				expect(user_id).to.equal @user_id
+				done()
+
+		it "should return an error if there is no user on the session", (done)->
+			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
+				expect(err).to.exist
+				done()
+
+		it "should return an error if there is no session", (done)->
+			@req = {}
+			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
+				expect(err).to.exist
+				done()
+
+		it "should return an error if there is no req", (done)->
+			@req = {}
+			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
+				expect(err).to.exist
+				done()
+
 	describe "getLoggedInUser", ->
 		beforeEach ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)

@@ -16,7 +16,7 @@ describe "CompileController", ->
 				apis:
 					clsi:
 						url: "clsi.example.com"
-			"request": @request = {}
+			"request": @request = sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"../../infrastructure/Metrics": @Metrics =  { inc: sinon.stub() }
@@ -68,15 +68,23 @@ describe "CompileController", ->
 
 	describe "proxyToClsi", ->
 		beforeEach ->
-			@request.get = sinon.stub().returns(@proxy = {
+			@request.returns(@proxy = {
 				pipe: sinon.stub()
 				on: sinon.stub()
 			})
+			@upstream =
+				statusCode: 204
+				headers: { "mock": "header" }
+			@req.method = "mock-method"
 			@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)
 
 		it "should open a request to the CLSI", ->
-			@request.get
-				.calledWith(url: "#{@settings.apis.clsi.url}#{@url}", timeout: 60 * 1000)
+			@request
+				.calledWith(
+					method: @req.method
+					url: "#{@settings.apis.clsi.url}#{@url}",
+					timeout: 60 * 1000
+				)
 				.should.equal true
 
 		it "should pass the request on to the client", ->
@@ -87,6 +95,17 @@ describe "CompileController", ->
 		it "should bind an error handle to the request proxy", ->
 			@proxy.on.calledWith("error").should.equal true
 
+	describe "deleteAuxFiles", ->
+		beforeEach ->
+			@CompileController.proxyToClsi = sinon.stub()
+			@req.params =
+				Project_id: @project_id
+			@CompileController.deleteAuxFiles @req, @res, @next
+
+		it "should proxy to the CLSI", ->
+			@CompileController.proxyToClsi
+				.calledWith("/project/#{@project_id}", @req, @res, @next)
+				.should.equal true
 
 	describe "compileAndDownloadPdf", ->
 		beforeEach ->

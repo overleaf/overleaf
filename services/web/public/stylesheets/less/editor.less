@@ -467,6 +467,9 @@ body.editor {
 		.dropdown-caret {
 			display: none;
 		}
+		.entity-label {
+			display: none;
+		}
 	}
 
 	.entity-folder {
@@ -525,6 +528,33 @@ body.editor {
 				vertical-align: top;
 				margin: 0;
 			}
+		}
+	}
+
+	.entity-list-item.show-label {
+		.dropdown-caret {
+			display: none;
+		}
+		.entity-label {
+			display: block;
+			position: absolute;
+			top: 3px;
+			right: 3px;
+			font-size: 13px;
+			line-height: 13px;
+			padding: 2px 6px 3px;
+			background-color: hsl(100, 80%, 42%);
+			font-weight: normal;
+			text-shadow: none;
+			&:hover {
+				background-color: hsl(100, 80%, 35%)
+			}
+		}
+	}
+
+	.entity-list-item.folder-open.show-label {
+		.entity-label {
+			display: none;
 		}
 	}
 	

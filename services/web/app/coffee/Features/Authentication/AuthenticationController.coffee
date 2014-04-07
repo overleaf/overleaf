@@ -44,7 +44,11 @@ module.exports = AuthenticationController =
 				res.send(auth_token)
 
 	getLoggedInUserId: (req, callback = (error, user_id) ->) ->
-		callback null, req.session.user._id.toString()
+		if req?.session?.user?._id?
+			callback null, req.session.user._id.toString()
+		else
+			e = new Error("user is not on req session")
+			callback e
 
 	getLoggedInUser: (req, options = {allow_auth_token: false}, callback = (error, user) ->) ->
 		if req.session?.user?._id?

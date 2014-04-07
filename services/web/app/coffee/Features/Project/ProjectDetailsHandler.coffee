@@ -1,4 +1,5 @@
 ProjectGetter = require("./ProjectGetter")
+UserGetter = require("../User/UserGetter")
 Project = require('../../models/Project').Project
 logger = require("logger-sharelatex")
 
@@ -9,12 +10,15 @@ module.exports =
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
-			details =
-				name : project.name
-				description: project.description
-				compiler: project.compiler
-			logger.log project_id:project_id, details:details, "getting project details"
-			callback(err, details)
+			UserGetter.getUser project.owner_ref, (err, user) ->
+				return callback(err) if err?
+				details =
+					name : project.name
+					description: project.description
+					compiler: project.compiler
+					features: user.features
+				logger.log project_id:project_id, details:details, "getting project details"
+				callback(err, details)
 
 	setProjectDescription: (project_id, description, callback)->
 		conditions = _id:project_id

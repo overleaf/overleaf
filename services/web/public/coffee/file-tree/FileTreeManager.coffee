@@ -75,6 +75,7 @@ define [
 			children.add(entity)
 
 		openDoc: (doc, line) ->
+			return if !doc?
 			doc_id = doc.id or doc
 			@trigger "open:doc", doc_id, line: line
 			@selectEntity(doc_id)
@@ -158,6 +159,7 @@ define [
 
 
 		renameEntity: (entity, name) ->
+			name = name?.trim()
 			@ide.socket.emit 'renameEntity', entity.id, entity.get("type"), name
 			entity.set("name", name)
 
@@ -196,7 +198,7 @@ define [
 			el = $($("#newEntityModalTemplate").html())
 			input = el.find("input")
 			create = _.once () =>
-				name = input.val()
+				name = input.val()?.trim()
 				if name != ""
 					callback(name)
 			modal = new Modal
@@ -277,6 +279,5 @@ define [
 			entity.collection?.remove(entity)
 			delete @views[entity_id]
 			
-				
-
-
+		setLabels: (labels) ->
+			@view.setLabels(labels)

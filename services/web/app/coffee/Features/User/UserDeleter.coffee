@@ -1,5 +1,5 @@
 User = require("../../models/User").User
-NewsletterManager = require "../../managers/NewsletterManager"
+NewsletterManager = require "../Newsletter/NewsletterManager"
 ProjectDeleter = require("../Project/ProjectDeleter")
 logger = require("logger-sharelatex")
 SubscriptionHandler = require("../Subscription/SubscriptionHandler")

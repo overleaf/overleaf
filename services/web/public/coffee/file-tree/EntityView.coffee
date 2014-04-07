@@ -15,6 +15,7 @@ define [
 		events: () ->
 			events = {}
 			events["click ##{@model.id} > .js-clickable"] = "parentOnClick"
+			events["click ##{@model.id} > .entity-label"] = "parentOnClick"
 			events["click .dropdown-caret"] = "showContextMenuFromCaret"
 			events["contextmenu"] = "showContextMenuFromRightClick"
 			return events
@@ -29,6 +30,7 @@ define [
 			@$nameEl = @$(".name")
 			@$inputEl = @$("input.js-rename")
 			@$entityListItemEl = @$el.children(".entity-list-item")
+			@$labelEl = @$entityListItemEl.children(".entity-label")
 
 		_makeEditable: () ->
 			if @ide.isAllowedToDoIt "readAndWrite"
@@ -47,6 +49,17 @@ define [
 		showRenameBox: () ->
 			@$nameEl.hide()
 			@$inputEl.show()
+
+		setLabels: (labels) ->
+			label = labels[@model.get("id")]
+			if label?
+				@$entityListItemEl.addClass("show-label")
+				@$labelEl.text("±")
+				return true
+			else
+				@$entityListItemEl.removeClass("show-label")
+				@$labelEl.text("")
+				return false
 
 		select: () ->
 			@selected = true

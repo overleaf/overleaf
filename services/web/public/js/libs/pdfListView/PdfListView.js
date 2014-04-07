@@ -445,6 +445,7 @@ var RenderingStates = {
 
 var idCounter = 0;
 
+
 /**
  * The view for a single page.
  */
@@ -477,15 +478,29 @@ PageView.prototype = {
         // Only change the width/height property of the canvas if it really
         // changed. Every assignment to the width/height property clears the
         // content of the canvas.
+
+        var outputScale = this.getOutputScale();
+
+        var scaledWidth = (Math.floor(viewport.width) * outputScale.sx) | 0;
+        var scaledHeight = (Math.floor(viewport.height) * outputScale.sy) | 0;
+
         var newWidth = Math.floor(viewport.width);
         var newHeight = Math.floor(viewport.height);
+
         if (this.canvas.width !== newWidth) {
-            this.canvas.width = newWidth;
+            this.canvas.width = scaledWidth;
+            this.canvas.style.width = newWidth + 'px';
             this.resetRenderState();
         }
         if (this.canvas.height !== newHeight) {
-            this.canvas.height = newHeight;
+            this.canvas.height = scaledHeight;
+            this.canvas.style.height = newHeight + 'px';
             this.resetRenderState();
+        }
+        
+        if(outputScale.scaled){
+            var ctx = this.getCanvasContext()
+            ctx.scale(outputScale.sx, outputScale.sy)
         }
 
         this.width = viewport.width;
@@ -523,6 +538,28 @@ PageView.prototype = {
         return this.canvas.getContext('2d');
     },
 
+    /**
+     * Returns scale factor for the canvas. It makes sense for the HiDPI displays.
+     * @return {Object} The object with horizontal (sx) and vertical (sy)
+                        scales. The scaled property is set to false if scaling is
+                        not required, true otherwise.
+     */
+
+    getOutputScale: function(){
+        var ctx = this.getCanvasContext()
+        var devicePixelRatio = window.devicePixelRatio || 1;
+        var backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
+                              ctx.mozBackingStorePixelRatio ||
+                              ctx.msBackingStorePixelRatio ||
+                              ctx.oBackingStorePixelRatio ||
+                              ctx.backingStorePixelRatio || 1;
+        var pixelRatio = devicePixelRatio / backingStoreRatio;
+        return {
+            sx: pixelRatio,
+            sy: pixelRatio,
+            scaled: pixelRatio != 1
+        };
+    },
     createNewCanvas: function() {
         if (this.canvas) {
             this.dom.removeChild(this.canvas);

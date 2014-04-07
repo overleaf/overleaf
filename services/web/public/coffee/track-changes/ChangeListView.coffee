@@ -40,6 +40,9 @@ define [
 				overflow: "scroll"
 			this
 
+		remove: () ->
+			@undelegateEvents()
+
 		addItem: (model) ->
 			index = @collection.indexOf(model)
 			previousModel = @collection.models[index - 1]
@@ -207,6 +210,17 @@ define [
 					@$el.addClass("first-in-day")
 			else
 				@$el.addClass("first-in-day")
+
+			@$(".change-selector-from").tooltip({
+				title: "Show back to this change",
+				placement: "left",
+				animation: false
+			})
+			@$(".change-selector-to").tooltip({
+				title: "Show up to this change",
+				placement: "left",
+				animation: false
+			})
 
 			return this
 

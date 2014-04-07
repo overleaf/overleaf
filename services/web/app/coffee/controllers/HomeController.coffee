@@ -3,8 +3,11 @@ _ = require('underscore')
 User = require('./UserController')
 Quotes = require('../models/Quote').Quote
 
+Path = require "path"
+fs = require "fs"
+homepageExists = fs.existsSync Path.resolve(__dirname + "/../../views/external/home.jade")
 
-module.exports =
+module.exports = HomeController =
 	index : (req,res)->
 		if req.session.user
 			if req.query.scribtex_path?
@@ -12,42 +15,23 @@ module.exports =
 			else
 				res.redirect '/project'
 		else
-			res.render 'homepage/home',
-				title: 'ShareLaTeX.com'
+			if homepageExists
+				res.render 'external/home',
+					title: 'ShareLaTeX.com'
+			else
+				res.redirect "/login"
 
-	comments : (req, res)->
-		res.render 'homepage/comments.jade',
-			title: 'User Comments'
-
-	resources : (req, res)->
-		res.render 'resources.jade',
-			title: 'LaTeX Resources'
-
-	tos : (req, res) ->
-		res.render 'about/tos',
-			title: "Terms of Service"
-
-	privacy : (req, res) ->
-		res.render 'about/privacy',
-			title: "Privacy Policy"
-
-	about : (req, res) ->
-		res.render 'about/about',
-			title: "About us"
+	externalPage: (page, title) ->
+		return (req, res, next = (error) ->) ->
+			path = Path.resolve(__dirname + "/../../views/external/#{page}.jade")
+			fs.exists path, (exists) -> # No error in this callback - old method in Node.js!
+				if exists
+					res.render "external/#{page}.jade",
+						title: title
+				else
+					HomeController.notFound(req, res, next)
 
 	notFound: (req, res)->
 		res.statusCode = 404
 		res.render 'general/404',
 			title: "Page Not Found"
-
-	security : (req, res) ->
-		res.render 'about/security',
-			title: "Security"
-
-	attribution: (req, res) ->
-		res.render 'about/attribution',
-			title: "Attribution"
-
-	planned_maintenance: (req, res) ->
-		res.render 'about/planned_maintenance',
-			title: "Planned Maintenance"

@@ -79,6 +79,39 @@
 		}
 	}
 
+	.track-changes-upgrade-control, .track-changes-upgrade-popup {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 100;
+	}
+
+	.track-changes-upgrade-popup {
+		background-color: rgba(128,128,128,0.4);
+		.message {
+			margin: auto;
+			margin-top: 200px;
+			padding: 10px 10px 14px 10px;
+			width: 400px;
+			font-weight: bold;
+			text-align: center;
+			background-color: white;
+			.border-radius(8px);
+		}
+	}
+
+	.track-changes-upgrade-control {
+		background-color: #eeeeee;
+		text-align: center;
+		.message {
+			font-size: 18px;
+			margin: 12px;
+			margin-top: 36px;
+		}
+	}
+
 	.deleted-change-background,
 	.deleted-change-foreground,
 	.inserted-change-background,
@@ -193,6 +226,10 @@
 		}
 		li.loading-changes, li.empty-message {
 			padding: 6px;
+			cursor: default;
+			&:hover {
+				background-color: inherit;
+			}
 		}
 		li.selected-change {
 			background-color: #eaeaea;
@@ -242,6 +279,11 @@
 				}
 			}
 		}
+		li.track-changes-upgrade-oneweek {
+			padding: 15px;
+			background-color: rgb(255, 251, 210);
+			cursor: default;
+		}
 	}
 	ul.change-list.hover-state {
 		li {
@@ -256,6 +298,7 @@
 		li.hover-selected {
 			.change-selectors {
 				.range {
+					top: 0;
 					background-color: #999;
 				}
 			}

@@ -28,7 +28,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				ga('send', 'pageview');
 		- else
 			script(type='text/javascript')
-				window.ga = function() {};
+				window.ga = function() { console.log("Sending to GA", arguments) };
 
 		script
 			window.csrfToken = "#{csrfToken}";

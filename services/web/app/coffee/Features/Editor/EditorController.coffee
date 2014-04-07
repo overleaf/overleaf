@@ -1,6 +1,6 @@
 logger = require('logger-sharelatex')
 Metrics = require('../../infrastructure/Metrics')
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
@@ -163,7 +163,7 @@ module.exports = EditorController =
 
 	addDoc: (project_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		docName = sanitize(docName).xss()
+		docName = sanitize.escape(docName)
 		logger.log sl_req_id:sl_req_id, "sending new doc to project #{project_id}"
 		Metrics.inc "editor.add-doc"
 		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, sl_req_id, (err, doc, folder_id)=>
@@ -172,7 +172,7 @@ module.exports = EditorController =
 
 	addFile: (project_id, folder_id, fileName, path, sl_req_id, callback = (error, file)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		fileName = sanitize(fileName).xss()
+		fileName = sanitize.escape(fileName)
 		logger.log  sl_req_id:sl_req_id, "sending new file to project #{project_id} with folderid: #{folder_id}"
 		Metrics.inc "editor.add-file"
 		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, (err, fileRef, folder_id)=>
@@ -185,7 +185,7 @@ module.exports = EditorController =
 
 	addFolder: (project_id, folder_id, folderName, sl_req_id, callback = (error, folder)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		folderName = sanitize(folderName).xss()
+		folderName = sanitize.escape(folderName)
 		logger.log "sending new folder to project #{project_id}"
 		Metrics.inc "editor.add-folder"
 		ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, folder_id)=>
@@ -237,6 +237,44 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'projectDescriptionUpdated', description)
 			callback()
 
+	deleteProject: (project_id, callback)->
+		Metrics.inc "editor.delete-project"
+		logger.log project_id:project_id, "recived message to delete project"
+		ProjectHandler.deleteProject project_id, callback
+
+	renameEntity: (project_id, entity_id, entityType, newName, callback)->
+		newName = sanitize.escape(newName)
+		Metrics.inc "editor.rename-entity"
+		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
+		ProjectHandler.renameEntity project_id, entity_id, entityType, newName, =>
+			if newName.length > 0
+				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
+				callback?()
+
+	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
+		Metrics.inc "editor.move-entity"
+		ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
+			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
+			callback?()
+
+	renameProject: (project_id, window_id, newName, callback)->
+		newName = sanitize.escape(newName)
+		ProjectHandler.renameProject project_id, window_id, newName, =>
+			newName = sanitize.escape(newName)
+			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', window_id, newName
+			callback?()
+
+	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
+		ProjectHandler.setPublicAccessLevel project_id, newAccessLevel, =>
+			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
+			callback?()
+
+	setRootDoc: (project_id, newRootDocID, callback)->
+		ProjectEntityHandler.setRootDoc project_id, newRootDocID, () =>
+			EditorRealTimeController.emitToRoom project_id, 'rootDocUpdated', newRootDocID
+			callback?()
+
+			
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"

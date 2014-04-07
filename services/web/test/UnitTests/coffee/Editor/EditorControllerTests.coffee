@@ -609,3 +609,114 @@ describe "EditorController", ->
 				done()
 
 
+	describe "deleteProject", ->
+
+		beforeEach ->
+			@err = "errro"
+			@ProjectHandler::deleteProject = sinon.stub().callsArgWith(1, @err)
+
+		it "should call the project handler", (done)->
+			@EditorController.deleteProject @project_id, (err)=>
+				err.should.equal @err
+				@ProjectHandler::deleteProject.calledWith(@project_id).should.equal true
+				done()
+
+
+	describe "renameEntity", ->
+
+		beforeEach ->
+			@err = "errro"
+			@entity_id = "entity_id_here"
+			@entityType = "doc"
+			@newName = "bobsfile.tex"
+			@ProjectHandler::renameEntity = sinon.stub().callsArgWith(4, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the project handler", (done)->
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@ProjectHandler::renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName).should.equal true
+				done()
+
+
+		it "should emit the update to the room", (done)->
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName).should.equal true				
+				done()
+
+	describe "moveEntity", ->
+
+		beforeEach ->
+			@err = "errro"
+			@entity_id = "entity_id_here"
+			@entityType = "doc"
+			@folder_id = "313dasd21dasdsa"
+			@ProjectEntityHandler.moveEntity = sinon.stub().callsArgWith(4, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectEntityHandler", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType).should.equal true
+				done()
+
+
+		it "should emit the update to the room", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityMove', @entity_id, @folder_id).should.equal true				
+				done()
+
+	describe "renameProject", ->
+
+		beforeEach ->
+			@err = "errro"
+			@window_id = "kdsjklj290jlk"
+			@newName = "new name here"
+			@ProjectHandler::renameProject = sinon.stub().callsArgWith(3, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectHandler", (done)->
+			@EditorController.renameProject @project_id, @window_id, @newName, =>
+				@ProjectHandler::renameProject.calledWith(@project_id, @window_id, @newName).should.equal true
+				done()
+
+
+		it "should emit the update to the room", (done)->
+			@EditorController.renameProject @project_id, @window_id, @newName, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @window_id, @newName).should.equal true				
+				done()
+
+
+	describe "setPublicAccessLevel", ->
+
+		beforeEach ->
+			@err = "errro"
+			@newAccessLevel = "public"
+			@ProjectHandler::setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectHandler", (done)->
+			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+				@ProjectHandler::setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
+				done()
+
+		it "should emit the update to the room", (done)->
+			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
+				done()
+
+	describe "setRootDoc", ->
+
+		beforeEach ->
+			@err = "errro"
+			@newRootDocID = "21312321321"
+			@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2, @err)
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		it "should call the ProjectEntityHandler", (done)->
+			@EditorController.setRootDoc @project_id, @newRootDocID, =>
+				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, @newRootDocID).should.equal true
+				done()
+
+		it "should emit the update to the room", (done)->
+			@EditorController.setRootDoc @project_id, @newRootDocID, =>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'rootDocUpdated', @newRootDocID).should.equal true				
+				done()

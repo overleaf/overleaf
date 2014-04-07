@@ -17,10 +17,7 @@ Unit test status
 License and Credits
 -------------------
 
-### Code
-
-All coffeescript files (files ended in *.coffee) are licensed under the
-[AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html).
+This project is licensed under the [AGPLv3 license](http://www.gnu.org/licenses/agpl-3.0.html)
 
 ### Stylesheets
 

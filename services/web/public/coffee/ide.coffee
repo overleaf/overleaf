@@ -26,6 +26,7 @@ define [
 	"tour/IdeTour"
 	"analytics/AnalyticsManager"
 	"track-changes/TrackChangesManager"
+	"debug/DebugManager"
 	"ace/ace"
 	"libs/jquery.color"
 	"libs/jquery-layout"
@@ -59,6 +60,7 @@ define [
 	IdeTour,
 	AnalyticsManager,
 	TrackChangesManager
+	DebugManager
 ) ->
 
 
@@ -117,10 +119,10 @@ define [
 			@cursorManager = new CursorManager(@)
 			@fileViewManager = new FileViewManager(@)
 			@analyticsManager = new AnalyticsManager(@)
-			if @userSettings.trackChanges
-				@trackChangesManager = new TrackChangesManager(@)
-			else
+			if @userSettings.oldHistory
 				@historyManager = new HistoryManager(@)
+			else
+				@trackChangesManager = new TrackChangesManager(@)
 
 			@setLoadingMessage("Connecting")
 			firstConnect = true
@@ -159,14 +161,18 @@ define [
 				buttons: [ text: "OK" ]
 			}
 
+		recentEvents: []
+
+		pushEvent: (type, meta = {}) ->
+			@recentEvents.push type: type, meta: meta, date: new Date()
+			if @recentEvents.length > 40
+				@recentEvents.shift()
+
 		reportError: (error, meta = {}) ->
 			meta.client_id = @socket?.socket?.sessionid
 			meta.transport = @socket?.socket?.transport?.name
 			meta.client_now = new Date()
-			meta.last_connected = @connectionManager.lastConnected
-			meta.second_last_connected = @connectionManager.secondLastConnected
-			meta.last_disconnected = @connectionManager.lastDisconnected
-			meta.second_last_disconnected = @connectionManager.secondLastDisconnected
+			meta.recent_events = @recentEvents
 			errorObj = {}
 			for key in Object.getOwnPropertyNames(error)
 				errorObj[key] = error[key]
@@ -194,6 +200,7 @@ define [
 	ide.hotkeysManager = new HotkeysManager ide
 	ide.layoutManager.resizeAllSplitters()
 	ide.tourManager = new IdeTour ide
+	ide.debugManager = new DebugManager(ide)
 
 	ide.savingAreaManager =
 		$savingArea : $('#saving-area')

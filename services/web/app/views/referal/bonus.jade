@@ -41,6 +41,11 @@ block content
 				.title
 					a(href='#link-modal', data-toggle="modal").link Link to us from your website
 
+		.row
+			.span4.offset4.bonus-banner
+				h2.direct-link Direct Link
+				.well #{buildReferalUrl("d")}
+
 		.row.ab-bonus
 			.span6.offset3
 				p.thanks When someone starts using ShareLaTeX after your recommendation we'll give you some <strong>free stuff</strong> to say thanks! Check your progress below.
@@ -103,7 +108,7 @@ block content
 				method: 'feed',
 				redirect_uri: 'https://www.sharelatex.com',
 				link: '!{buildReferalUrl("fb")}',
-				picture: 'https://www.sharelatex.com/img/logo/logosmall.png',
+				picture: 'https://www.sharelatex.com/brand/logo/logosmall.png',
 				name: 'ShareLaTeX - Online LaTeX Editor',
 				caption: 'Free Unlimited Projects and Compiles',
 				description: 'ShareLaTeX is a free online LaTeX Editor. Real time collaboration like Google Docs, with Dropbox, history and auto-complete'

@@ -1,11 +1,11 @@
 User = require('../models/User').User
-sanitize = require('validator').sanitize
+sanitize = require('sanitizer')
 fs = require('fs')
 _ = require('underscore')
 logger = require('logger-sharelatex')
 Security = require('../managers/SecurityManager')
 Settings = require('settings-sharelatex')
-newsLetterManager = require('../managers/NewsletterManager')
+newsLetterManager = require('../Features/Newsletter/NewsletterManager')
 dropboxHandler = require('../Features/Dropbox/DropboxHandler')
 userRegistrationHandler = require('../Features/User/UserRegistrationHandler')
 metrics = require('../infrastructure/Metrics')
@@ -95,8 +95,8 @@ module.exports =
 			title: 'Password Reset',
 
 	doRequestPasswordReset : (req, res, next = (error) ->)->
-		email = sanitize(req.body.email).xss()
-		email = sanitize(email).trim()
+		email = sanitize.escape(req.body.email)
+		email = sanitize.escape(email).trim()
 		email = email.toLowerCase()
 		logger.log email: email, "password reset requested"
 		User.findOne {'email':email}, (err, user)->
@@ -156,11 +156,11 @@ module.exports =
 		metrics.inc "user.settings-update"
 		User.findById req.session.user._id, (err, user)->
 			if(user)
-				user.first_name   = sanitize(req.body.first_name).xss().trim()
-				user.last_name    = sanitize(req.body.last_name).xss().trim()
-				user.ace.mode     = sanitize(req.body.mode).xss().trim()
-				user.ace.theme    = sanitize(req.body.theme).xss().trim()
-				user.ace.fontSize = sanitize(req.body.fontSize).xss().trim()
+				user.first_name   = sanitize.escape(req.body.first_name).trim()
+				user.last_name    = sanitize.escape(req.body.last_name).trim()
+				user.ace.mode     = sanitize.escape(req.body.mode).trim()
+				user.ace.theme    = sanitize.escape(req.body.theme).trim()
+				user.ace.fontSize = sanitize.escape(req.body.fontSize).trim()
 				user.ace.autoComplete = req.body.autoComplete == "true"
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 				user.ace.pdfViewer = req.body.pdfViewer
@@ -171,7 +171,7 @@ module.exports =
 		metrics.inc "user.password-change"
 		oldPass = req.body.currentPassword
 		AuthenticationManager.authenticate _id: req.session.user._id, oldPass, (err, user)->
-			return callback(err) if err?
+			return next(err) if err?
 			if(user)
 				logger.log user: req.session.user, "changing password"
 				newPassword1 = req.body.newPassword1
@@ -197,23 +197,23 @@ module.exports =
 					  type:'error'
 					  text:'Your old password is wrong'
 
-	redirectUserToDropboxAuth: (req, res)->
+	redirectUserToDropboxAuth: (req, res, next)->
 		user_id = req.session.user._id
 		dropboxHandler.getDropboxRegisterUrl user_id, (err, url)->
-			return callback(err) if err?
+			return next(err) if err?
 			logger.log url:url, "redirecting user for dropbox auth"
 			res.redirect url
 
-	completeDropboxRegistration: (req, res)->
+	completeDropboxRegistration: (req, res, next)->
 		user_id = req.session.user._id
 		dropboxHandler.completeRegistration user_id, (err, success)->
-			return callback(err) if err?
+			return next(err) if err?
 			res.redirect('/user/settings#dropboxSettings')
 
-	unlinkDropbox: (req, res)->
+	unlinkDropbox: (req, res, next)->
 		user_id = req.session.user._id
 		dropboxHandler.unlinkAccount user_id, (err, success)->
-			return callback(err) if err?
+			return next(err) if err?
 			res.redirect('/user/settings#dropboxSettings')
 
 	deleteUser: (req, res)->
