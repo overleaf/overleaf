@@ -75,9 +75,3 @@ module.exports = class ProjectHandler
 				logger.err err: err, "problem removing user from project collaberators"
 			if callback?
 				callback()
-
-	changeUsersPrivlageLevel: (project_id, user_id, newPrivalageLevel)->
-		@removeUserFromProject project_id, user_id, ()=>
-		  User.findById user_id, (err, user)=>
-			if user
-			  @addUserToProject project_id, user.email, newPrivalageLevel
