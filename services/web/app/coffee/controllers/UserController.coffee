@@ -16,6 +16,7 @@ SubscriptionLocator = require("../Features/Subscription/SubscriptionLocator")
 UserDeleter = require("../Features/User/UserDeleter")
 EmailHandler = require("../Features/Email/EmailHandler")
 Url = require("url")
+uuid = require("node-uuid")
 
 module.exports =
 
@@ -101,7 +102,7 @@ module.exports =
 		logger.log email: email, "password reset requested"
 		User.findOne {'email':email}, (err, user)->
 			if(user?)
-				randomPassword = generateRandomString 12
+				randomPassword = uuid.v4()
 				AuthenticationManager.setUserPassword user._id, randomPassword, (error) ->
 					emailOpts =
 						newPassword: randomPassword
@@ -223,15 +224,6 @@ module.exports =
 				req.session.destroy()
 			res.send(200)
 
-
-generateRandomString = (len)->
-	chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz"
-	randomString = ''
-	count = 0
-	while count++ < len
-		rnum = Math.floor(Math.random() * chars.length)
-		randomString += chars.substring(rnum,rnum+1)
-	return randomString
 
 THEME_LIST = []
 do generateThemeList = () ->
