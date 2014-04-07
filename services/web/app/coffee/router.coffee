@@ -31,6 +31,7 @@ HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
+DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
@@ -82,9 +83,9 @@ module.exports = class Router
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
-		app.get  '/dropbox/beginAuth', UserController.redirectUserToDropboxAuth
-		app.get  '/dropbox/completeRegistration', UserController.completeDropboxRegistration
-		app.get  '/dropbox/unlink', UserController.unlinkDropbox
+		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
+		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
+		app.get  '/dropbox/unlink', DropboxUserController.unlinkDropbox
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), PersonalInfoController.getLoggedInUsersPersonalInfo
