@@ -314,11 +314,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.compile(project_id, user._id, opts, callback)
 
-			# This is deprecated and can be removed once all editors have had a chance to refresh
-			client.on 'getRawLogs', (callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					CompileManager.getLogLines project_id, callback
-
 			client.on 'changeUsersPrivlageLevel', (user_id, newPrivalageLevel)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					projectHandler.changeUsersPrivlageLevel project_id, user_id, newPrivalageLevel
