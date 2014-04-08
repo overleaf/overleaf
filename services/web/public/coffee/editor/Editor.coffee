@@ -304,6 +304,12 @@ define [
 		gotoLine: (line) ->
 			@aceEditor.gotoLine(line)
 
+		getCurrentLine: () ->
+			@aceEditor.selection?.getCursor()?.row
+
+		getCurrentColumn: () ->
+			@aceEditor.selection?.getCursor()?.column
+
 		getLines: (from, to) ->
 			if from? and to?
 				@getSession().doc.getLines(from, to)

@@ -123,3 +123,11 @@ define [
 		onResize: () ->
 			@pdfListView.onResize()
 
+		setPdfPosition: (page, top, left) ->
+			@pdfListView.setPdfPosition({
+				page: page
+				offset:
+					left: left
+					top: top
+			}, true)
+

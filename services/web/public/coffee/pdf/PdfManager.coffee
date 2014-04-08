@@ -220,12 +220,32 @@ define [
 					h: e.x.toFixed(2)
 					v: e.y.toFixed(2)
 				type: "GET"
-				headers:
-					"X-CSRF-Token": window.csrfToken
 				success: (response) =>
 					data = JSON.parse(response)
 					if data.code and data.code.length > 0
 						file = data.code[0].file
 						line = data.code[0].line
 						@ide.fileTreeManager.openDocByPath(file, line)
+			}
+
+		syncToPdf: () ->
+			entity_id = @ide.editor.getCurrentDocId()
+			file = @ide.fileTreeManager.getPathOfEntityId(entity_id)
+			line = @ide.editor.getCurrentLine()
+			column = @ide.editor.getCurrentColumn()
+
+			$.ajax {
+				url: "/project/#{@ide.project_id}/sync/code"
+				data:
+					file: file
+					line: line + 1
+					column: column
+				type: "GET"
+				success: (response) =>
+					data = JSON.parse(response)
+					if data.pdf and data.pdf.length > 0
+						page = data.pdf[0].page - 1
+						h = data.pdf[0].h
+						v = data.pdf[0].v
+						@view.setPdfPosition page, v - 100, h
 			}

@@ -388,11 +388,14 @@ ListView.prototype = {
         return pdfPosition;
     },
 
-    setPdfPosition: function(pdfPosition) {
+    setPdfPosition: function(pdfPosition, fromTop) {
         if (typeof pdfPosition !== "undefined" && pdfPosition != null) {
             var offset = pdfPosition.offset;
             var page_index = pdfPosition.page;
             var pageView = this.pageViews[page_index];
+            if (fromTop) {
+                offset.top = pageView.normalHeight - offset.top;
+            }
             var position = pageView.getPdfPositionInViewer(offset.left, offset.top);
             this.dom.scrollTop = position.top;
         }
@@ -882,8 +885,8 @@ PDFListView.prototype = {
         return this.listView.getPdfPosition();
     },
 
-    setPdfPosition: function(pdfPosition) {
-        this.listView.setPdfPosition(pdfPosition)
+    setPdfPosition: function(pdfPosition, fromTop) {
+        this.listView.setPdfPosition(pdfPosition, fromTop)
     }
 };
 PDFListView.Logger = Logger;

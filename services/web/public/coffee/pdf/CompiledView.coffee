@@ -215,4 +215,7 @@ define [
 			Backbone.View::undelegateEvents.apply(this, arguments)
 			@pdfView.undelegateEvents()
 
+		setPdfPosition: (args...) ->
+			@pdfView.setPdfPosition?(args...)
+
 			
