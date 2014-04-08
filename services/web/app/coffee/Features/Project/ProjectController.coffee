@@ -75,85 +75,93 @@ module.exports =
 				timer.done()
 
 
-
 	loadEditor: (req, res)->
 		timer = new metrics.Timer("load-editor")
 		if !Settings.editorIsOpen
-			res.render("general/closed", {title:"updating site"})
-		else
-			if req.session.user?
-				user_id = req.session.user._id
+			return res.render("general/closed", {title:"updating site"})
+
+		user_id = if req.session.user? then req.session.user._id else 'openUser'
+		project_id = req.params.Project_id
+		
+		async.parallel {
+			project: (cb)->
+				Project.findPopulatedById project_id, cb
+			user: (cb)->
+				User.findById user_id, cb
+			subscription: (cb)->
+				SubscriptionLocator.getUsersSubscription user_id, cb
+		}, (err, results)->
+			if err?
+				return res.send 500
+			project = results.project
+			user = results.user
+			subscription = results.subscription
+			
+			if user_id == 'openUser'
+				anonymous = true
+				user = defaultSettingsForAnonymousUser(user_id)
 			else
-				user_id = 'openUser'
-			project_id = req.params.Project_id
-			Project.findPopulatedById project_id, (err, project)->
-				User.findById user_id, (err, user)->
-					if user_id == 'openUser'
-						anonymous = true
-						user =
-							id : user_id
-							ace:
-								mode:'none'
-								theme:'textmate'
-								fontSize: '12'
-								autoComplete: true
-								spellCheckLanguage: ""
-								pdfViewer: ""
-							subscription:
-								freeTrial:
-									allowed: true
-							featureSwitches:
-								dropbox: false
-								trackChanges: false
-					else
-						anonymous = false
-					SubscriptionLocator.getUsersSubscription user?._id, (err, subscription)->
-						SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
-							allowedFreeTrial = true
-							if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
-								allowedFreeTrial = !!subscription.freeTrial.allowed
-							if canAccess
-								timer.done()
-								res.render 'project/editor',
-									title:  project.name
-									priority_title: true
-									bodyClasses: ["editor"]
-									project : project
-									#owner : project.owner_ref
-									userObject : JSON.stringify({
-										id    : user.id
-										email : user.email
-										first_name : user.first_name
-										last_name  : user.last_name
-										referal_id : user.referal_id
-										subscription :
-											freeTrial: {allowed: allowedFreeTrial}
-									})
-									userSettingsObject: JSON.stringify({
-										mode  : user.ace.mode
-										theme : user.ace.theme
-										project_id : project._id
-										fontSize : user.ace.fontSize
-										autoComplete: user.ace.autoComplete
-										spellCheckLanguage: user.ace.spellCheckLanguage
-										pdfViewer : user.ace.pdfViewer
-										docPositions: {}
-										oldHistory: !!user.featureSwitches?.oldHistory
-									})
-									sharelatexObject : JSON.stringify({
-										siteUrl: Settings.siteUrl,
-										jsPath: res.locals.jsPath
-									})
-									privilegeLevel: privilegeLevel
-									loadPdfjs: (user.ace.pdfViewer == "pdfjs")
-									chatUrl: Settings.apis.chat.url
-									anonymous: anonymous
-									languages: Settings.languages
-							else
-								res.send 401
+				anonymous = false
+
+			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
+				if !canAccess
+					return res.send 401
+
+				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
+					allowedFreeTrial = !!subscription.freeTrial.allowed || true
+
+				res.render 'project/editor',
+					title:  project.name
+					priority_title: true
+					bodyClasses: ["editor"]
+					project : project
+					userObject : JSON.stringify({
+						id    : user.id
+						email : user.email
+						first_name : user.first_name
+						last_name  : user.last_name
+						referal_id : user.referal_id
+						subscription :
+							freeTrial: {allowed: allowedFreeTrial}
+					})
+					userSettingsObject: JSON.stringify({
+						mode  : user.ace.mode
+						theme : user.ace.theme
+						project_id : project._id
+						fontSize : user.ace.fontSize
+						autoComplete: user.ace.autoComplete
+						spellCheckLanguage: user.ace.spellCheckLanguage
+						pdfViewer : user.ace.pdfViewer
+						docPositions: {}
+						oldHistory: !!user.featureSwitches?.oldHistory
+					})
+					sharelatexObject : JSON.stringify({
+						siteUrl: Settings.siteUrl,
+						jsPath: res.locals.jsPath
+					})
+					privilegeLevel: privilegeLevel
+					loadPdfjs: (user.ace.pdfViewer == "pdfjs")
+					chatUrl: Settings.apis.chat.url
+					anonymous: anonymous
+					languages: Settings.languages
+					timer.done()
 
 
-
+defaultSettingsForAnonymousUser = ->
+	id : user_id
+	ace:
+		mode:'none'
+		theme:'textmate'
+		fontSize: '12'
+		autoComplete: true
+		spellCheckLanguage: ""
+		pdfViewer: ""
+	subscription:
+		freeTrial:
+			allowed: true
+	featureSwitches:
+		dropbox: false
+		trackChanges: false
 
 
 
