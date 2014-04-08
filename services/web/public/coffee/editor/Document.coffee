@@ -20,6 +20,7 @@ define [
 			@joined = false
 			@wantToBeJoined = false
 			@_checkConsistency = _.bind(@_checkConsistency, @)
+			@inconsistentCount = 0
 			@_bindToEditorEvents()
 			@_bindToSocketEvents()
 
@@ -34,10 +35,20 @@ define [
 			editorDoc?.off "change", @_checkConsistency
 
 		_checkConsistency: () ->
-			editorValue = @ace?.getValue()
-			sharejsValue = @doc?.getSnapshot()
-			if editorValue != sharejsValue
-				@_onError "error", new Error("Editor text does not match server text")
+			# We've been seeing a lot of errors when I think there shouldn't be
+			# any, which may be related to this check happening before the change is
+			# applied. If we use a timeout, hopefully we can reduce this.
+			setTimeout () =>
+				editorValue = @ace?.getValue()
+				sharejsValue = @doc?.getSnapshot()
+				if editorValue != sharejsValue
+					@inconsistentCount++
+				else
+					@inconsistentCount = 0
+
+				if @inconsistentCount >= 3
+					@_onError new Error("Editor text does not match server text")
+			, 0
 
 		getSnapshot: () ->
 			@doc?.getSnapshot()
