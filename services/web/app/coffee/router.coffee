@@ -93,7 +93,7 @@ module.exports = class Router
 		app.get  '/user/:user_id/personal_info', httpAuth, PersonalInfoController.getPersonalInfo
 		
 		app.get  '/project', AuthenticationController.requireLogin(), Project.list
-		app.post '/project/new', AuthenticationController.requireLogin(), Project.apiNewProject
+		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.NewProject
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, Project.loadEditor

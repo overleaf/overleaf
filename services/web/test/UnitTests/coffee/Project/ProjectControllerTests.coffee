@@ -17,11 +17,15 @@ describe "ProjectController", ->
 			deleteProject: sinon.stub().callsArgWith(1)
 		@ProjectDuplicator =
 			duplicate: sinon.stub().callsArgWith(3, null, {_id:@project_id})
+		@ProjectCreationHandler =
+			createExampleProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
+			createBasicProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 			"./ProjectDeleter": @ProjectDeleter
 			"./ProjectDuplicator": @ProjectDuplicator
+			"./ProjectCreationHandler": @ProjectCreationHandler
 
 
 		@user = 
@@ -56,3 +60,29 @@ describe "ProjectController", ->
 				json.project_id.should.equal @project_id
 				done()
 			@ProjectController.cloneProject @req, @res
+
+
+
+	describe "newProject", ->
+
+		it "should call the projectCreationHandler with createExampleProject", (done)->
+			@req.body.template = "example"
+			@res.send = (json)=>
+				@ProjectCreationHandler.createExampleProject.calledWith(@user._id, @projectName).should.equal true
+				@ProjectCreationHandler.createBasicProject.called.should.equal false
+				done()
+			@ProjectController.newProject @req, @res
+
+
+		it "should call the projectCreationHandler with createBasicProject", (done)->
+			@req.body.template = "basic"
+			@res.send = (json)=>
+				@ProjectCreationHandler.createExampleProject.called.should.equal false
+				@ProjectCreationHandler.createBasicProject.calledWith(@user._id, @projectName).should.equal true
+				done()
+			@ProjectController.newProject @req, @res
+
+
+
+
+
