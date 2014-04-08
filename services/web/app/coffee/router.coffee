@@ -1,7 +1,8 @@
 UserController = require('./controllers/UserController')
 AdminController = require('./Features/ServerAdmin/AdminController')
 HomeController = require('./Features/StaticPages/HomeController')
-ProjectController = require("./controllers/ProjectController")
+OldProjectController = require("./controllers/ProjectController")
+ProjectController = require("./Features/Project/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
 InfoController = require('./Features/StaticPages/InfoController')
 SpellingController = require('./Features/Spelling/SpellingController')
@@ -45,7 +46,7 @@ module.exports = class Router
 	constructor: (app, io, socketSessions)->
 		app.use(app.router)
 
-		Project = new ProjectController()
+		Project = new OldProjectController()
 
 		app.get  '/', HomeController.index
 		
@@ -109,7 +110,7 @@ module.exports = class Router
 			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
 		app.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
 
-		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, Project.deleteProject
+		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, Project.cloneProject
 
 		app.post '/Project/:Project_id/snapshot', SecurityManager.requestCanModifyProject, versioningController.takeSnapshot
