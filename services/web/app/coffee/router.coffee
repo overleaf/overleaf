@@ -111,7 +111,7 @@ module.exports = class Router
 		app.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
 
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
-		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, Project.cloneProject
+		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
 
 		app.post '/Project/:Project_id/snapshot', SecurityManager.requestCanModifyProject, versioningController.takeSnapshot
 		app.get  '/Project/:Project_id/version', SecurityManager.requestCanAccessProject, versioningController.listVersions
