@@ -102,7 +102,7 @@ describe "ProjectController", ->
 			@readOnly = [{lastUpdated:3, _id:3}]
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
-			@ProjectModel.findAllUsersProjects.callsArgWith(2, @projects, @collabertions, @readOnly)
+			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
 		it "should render the project/list page", (done)->
 

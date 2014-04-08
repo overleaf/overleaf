@@ -58,7 +58,7 @@ module.exports =
 			callback(err)
 
 	flushUsersProjectToDropbox: (user_id, callback)->
-		Project.findAllUsersProjects user_id, '_id', (projects = [], collabertions = [], readOnlyProjects = [])->
+		Project.findAllUsersProjects user_id, '_id', (err, projects = [], collabertions = [], readOnlyProjects = [])->
 			projectList = []
 			projectList = projectList.concat(projects)
 			projectList = projectList.concat(collabertions)

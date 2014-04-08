@@ -58,39 +58,47 @@ module.exports =
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
 		user_id = req.session.user._id
-		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
-			logger.log user_id: user_id, "project list timer - Subscription.getUsersSubscription"
-			return next(error) if error?
-			# TODO: Remove this one month after the ability to start free trials was removed
-			if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
-				freeTrial =
-					expired: !!subscription.freeTrial.downgraded
-					expiresAt: SubscriptionFormatters.formatDate(subscription.freeTrial.expiresAt)
-			TagsHandler.getAllTags user_id, (err, tags, tagsGroupedByProject)->
-				logger.log user_id: user_id, "project list timer - TagsHandler.getAllTags"
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel', (projects, collabertions, readOnlyProjects)->
-					logger.log user_id: user_id, "project list timer - Project.findAllUsersProjects"
-					for project in projects
-						project.accessLevel = "owner"
-					for project in collabertions
-						project.accessLevel = "readWrite"
-					for project in readOnlyProjects
-						project.accessLevel = "readOnly"
-					projects = projects.concat(collabertions).concat(readOnlyProjects)
-					projects = projects.map (project)->
-						project.tags = tagsGroupedByProject[project._id] || []
-						return project
-					tags = _.sortBy tags, (tag)->
-						-tag.project_ids.length
-					logger.log projects:projects, collabertions:collabertions, readOnlyProjects:readOnlyProjects, user_id:user_id, "rendering project list"
-					sortedProjects = _.sortBy projects, (project)->
-						return - project.lastUpdated
-					res.render 'project/list',
-						title:'Your Projects'
-						priority_title: true
-						projects: sortedProjects
-						freeTrial: freeTrial
-						tags:tags
-						projectTabActive: true
-					logger.log user_id: user_id, "project list timer - Finished"
-					timer.done()
+		async.parallel {
+			subscription: (cb)->
+				SubscriptionLocator.getUsersSubscription user_id, cb
+			tags: (cb)->
+				TagsHandler.getAllTags user_id, cb
+			projects: (cb)->
+				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel', cb
+			}, (err, results)->
+				logger.log results:results, user_id:user_id, "rendering project list"
+				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1], results.subscription[0]
+				res.render 'project/list', viewModel
+				timer.done()
+
+
+_buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGroupedByProject, subscription)->
+	# TODO: Remove this one month after the ability to start free trials was removed
+	if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
+		freeTrial =
+			expired: !!subscription.freeTrial.downgraded
+			expiresAt: SubscriptionFormatters.formatDate(subscription.freeTrial.expiresAt)
+
+	for project in projects
+		project.accessLevel = "owner"
+	for project in collabertions
+		project.accessLevel = "readWrite"
+	for project in readOnlyProjects
+		project.accessLevel = "readOnly"
+	projects = projects.concat(collabertions).concat(readOnlyProjects)
+	projects = projects.map (project)->
+		project.tags = tagsGroupedByProject[project._id] || []
+		return project
+	tags = _.sortBy tags, (tag)->
+		-tag.project_ids.length
+	sortedProjects = _.sortBy projects, (project)->
+		return - project.lastUpdated
+
+	return {
+		title:'Your Projects'
+		priority_title: true
+		projects: sortedProjects
+		freeTrial: freeTrial
+		tags:tags
+		projectTabActive: true
+	}

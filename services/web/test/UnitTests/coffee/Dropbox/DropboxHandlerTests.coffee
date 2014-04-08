@@ -73,7 +73,7 @@ describe 'third party data store', ->
 		user_id = "123u9oijllkj"
 		projectList = [{_id:"123lk"}, {_id:"12ji3ojio"}, {_id:"2jiojdoi"}]
 		collabProjectList = [{_id:"213ds"}]
-		@projectModel.findAllUsersProjects.callsArgWith(2, projectList, collabProjectList)
+		@projectModel.findAllUsersProjects.callsArgWith(2, null, projectList, collabProjectList)
 		@handler.flushUsersProjectToDropbox user_id, =>
 			@projectEntityHandler.flushProjectToThirdPartyDataStore.calledWith(projectList[0]._id).should.equal true
 			@projectEntityHandler.flushProjectToThirdPartyDataStore.calledWith(projectList[1]._id).should.equal true

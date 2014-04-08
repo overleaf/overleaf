@@ -114,7 +114,7 @@ module.exports =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		Project.findAllUsersProjects user_id, 'name', (projects, collabertions=[])->
+		Project.findAllUsersProjects user_id, 'name', (err, projects, collabertions=[])->
 			projects = projects.concat(collabertions)
 			projectName = projectName.toLowerCase()
 			project = _.find projects, (project)-> 

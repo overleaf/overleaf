@@ -56,7 +56,7 @@ ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)
 	this.find {owner_ref:user_id}, requiredFields, (err, projects)=>
 		this.find {collaberator_refs:user_id}, requiredFields, (err, collabertions)=>
 			this.find {readOnly_refs:user_id}, requiredFields, (err, readOnlyProjects)=>
-				callback(projects, collabertions, readOnlyProjects)
+				callback(err, projects, collabertions, readOnlyProjects)
 
 sanitizeTypeOfElement = (elementType)->
 	lastChar = elementType.slice -1
