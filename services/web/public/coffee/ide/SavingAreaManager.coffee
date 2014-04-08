@@ -13,7 +13,9 @@ define [
 				@warnAboutUnsavedChanges()
 
 		pollSavedStatus: () ->
-			saved = @ide.editor.document.pollSavedStatus()
+			doc = @ide.editor.document
+			return if !doc?
+			saved = doc.pollSavedStatus()
 			if saved
 				@unsavedSeconds = 0
 			else
