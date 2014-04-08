@@ -69,8 +69,11 @@ module.exports =
 			projects: (cb)->
 				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel', cb
 			}, (err, results)->
+				if err?
+					logger.err err:err, "error getting data for project list page"
+					return res.send 500
 				logger.log results:results, user_id:user_id, "rendering project list"
-				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1], results.subscription[0]
+				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1], results.subscription?[0]
 				res.render 'project/list', viewModel
 				timer.done()
 
@@ -96,7 +99,7 @@ module.exports =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			
+
 			if user_id == 'openUser'
 				anonymous = true
 				user = defaultSettingsForAnonymousUser(user_id)
