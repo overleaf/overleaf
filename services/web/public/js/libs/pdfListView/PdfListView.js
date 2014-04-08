@@ -399,6 +399,20 @@ ListView.prototype = {
             var position = pageView.getPdfPositionInViewer(offset.left, offset.top);
             this.dom.scrollTop = position.top;
         }
+    },
+
+    setHighlights: function(highlights, fromTop) {
+        for (i = 0; i < highlights.length; i++) {
+            var pageIndex = highlights[i].page;
+            var pageView = this.pageViews[pageIndex];
+            pageView.addHighlight(highlights[i].highlight, fromTop);
+        }
+    },
+
+    clearHighlights: function() {
+        for (var i = 0; i < this.pageViews.length; i++) {
+            var pageView = this.pageViews[i].clearHighlights();
+        }
     }
 };
 
@@ -663,6 +677,25 @@ PageView.prototype = {
         }
         var pdfOffset = this.viewport.convertToPdfPoint(0, canvasOffset);
         return pdfOffset[1];
+    },
+
+    clearHighlights: function() {
+        if (this.highlightsLayer) {
+            this.highlightsLayer.clearHighlights();
+        }
+    },
+
+    addHighlight: function(highlight, fromTop) {
+        if (this.highlightsLayer) {
+            var top = highlight.top;
+            var left = highlight.left;
+            var width = highlight.width;
+            var height = highlight.height;
+            if (fromTop) {
+                top = this.normalHeight - top;
+            }
+            this.highlightsLayer.addHighlight(left, top, width, height);
+        }
     }
 };
 
@@ -749,6 +782,14 @@ Page.prototype = {
                         annotationsLayer.setAnnotations(annotations)
                     }
                 );
+            }
+
+            var highlightsLayerBuilder = pageView.listView.options.highlightsLayerBuilder;
+            if (highlightsLayerBuilder) {
+                var highlightsLayerDiv = pageView.highlightsLayerDiv = document.createElement("div");
+                highlightsLayerDiv.className = 'plv-highlights-layer highlights-layer';
+                pageView.dom.appendChild(highlightsLayerDiv);
+                pageView.highlightsLayer = new highlightsLayerBuilder(pageView, highlightsLayerDiv);
             }
 
             renderContext = {
@@ -886,7 +927,15 @@ PDFListView.prototype = {
     },
 
     setPdfPosition: function(pdfPosition, fromTop) {
-        this.listView.setPdfPosition(pdfPosition, fromTop)
+        this.listView.setPdfPosition(pdfPosition, fromTop);
+    },
+
+    setHighlights: function(highlights, fromTop) {
+        this.listView.setHighlights(highlights, fromTop);
+    },
+
+    clearHighlights: function() {
+        this.listView.clearHighlights();
     }
 };
 PDFListView.Logger = Logger;

@@ -243,9 +243,5 @@ define [
 				type: "GET"
 				success: (response) =>
 					data = JSON.parse(response)
-					if data.pdf and data.pdf.length > 0
-						page = data.pdf[0].page - 1
-						h = data.pdf[0].h
-						v = data.pdf[0].v
-						@view.setPdfPosition page, v - 100, h
+					@view.highlightInPdf(data.pdf or [])
 			}
