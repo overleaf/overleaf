@@ -1,7 +1,6 @@
 UserController = require('./controllers/UserController')
 AdminController = require('./Features/ServerAdmin/AdminController')
 HomeController = require('./Features/StaticPages/HomeController')
-OldProjectController = require("./controllers/ProjectController")
 ProjectController = require("./Features/Project/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
 InfoController = require('./Features/StaticPages/InfoController')
@@ -45,8 +44,6 @@ httpAuth = require('express').basicAuth (user, pass)->
 module.exports = class Router
 	constructor: (app, io, socketSessions)->
 		app.use(app.router)
-
-		Project = new OldProjectController()
 
 		app.get  '/', HomeController.index
 		
