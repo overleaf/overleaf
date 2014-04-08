@@ -96,7 +96,7 @@ module.exports = class Router
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
-		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, Project.loadEditor
+		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf

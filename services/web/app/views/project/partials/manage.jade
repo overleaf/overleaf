@@ -9,10 +9,9 @@
 				a(href='#exportSettings', data-toggle="tab") Export & Copy
 			li
 				a(href='#deleteProjectTab', data-toggle="tab") Delete Project
-			- if(userCanSeeDropbox)
-				li#manageDropboxSettiingsTabLink
-					a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox 
-						span.label.label-warning beta
+			li#manageDropboxSettiingsTabLink
+				a(href='#dropboxProjectSettings', data-toggle='tab') Dropbox 
+					span.label.label-warning beta
 
 		.tab-content.form-horizontal
 			.tab-pane#generalProjectSettings.form.form-horizontal.active

@@ -6,9 +6,12 @@ projectCreationHandler = require("./ProjectCreationHandler")
 metrics = require('../../infrastructure/Metrics')
 sanitize = require('sanitizer')
 Project = require('../../models/Project').Project
+User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
 _ = require("underscore")
+Settings = require("settings-sharelatex")
+SecurityManager = require("../../managers/SecurityManager")
 
 module.exports =
 
@@ -70,6 +73,88 @@ module.exports =
 				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1], results.subscription[0]
 				res.render 'project/list', viewModel
 				timer.done()
+
+
+
+	loadEditor: (req, res)->
+		timer = new metrics.Timer("load-editor")
+		if !Settings.editorIsOpen
+			res.render("general/closed", {title:"updating site"})
+		else
+			if req.session.user?
+				user_id = req.session.user._id
+			else
+				user_id = 'openUser'
+			project_id = req.params.Project_id
+			Project.findPopulatedById project_id, (err, project)->
+				User.findById user_id, (err, user)->
+					if user_id == 'openUser'
+						anonymous = true
+						user =
+							id : user_id
+							ace:
+								mode:'none'
+								theme:'textmate'
+								fontSize: '12'
+								autoComplete: true
+								spellCheckLanguage: ""
+								pdfViewer: ""
+							subscription:
+								freeTrial:
+									allowed: true
+							featureSwitches:
+								dropbox: false
+								trackChanges: false
+					else
+						anonymous = false
+					SubscriptionLocator.getUsersSubscription user?._id, (err, subscription)->
+						SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
+							allowedFreeTrial = true
+							if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
+								allowedFreeTrial = !!subscription.freeTrial.allowed
+							if canAccess
+								timer.done()
+								res.render 'project/editor',
+									title:  project.name
+									priority_title: true
+									bodyClasses: ["editor"]
+									project : project
+									#owner : project.owner_ref
+									userObject : JSON.stringify({
+										id    : user.id
+										email : user.email
+										first_name : user.first_name
+										last_name  : user.last_name
+										referal_id : user.referal_id
+										subscription :
+											freeTrial: {allowed: allowedFreeTrial}
+									})
+									userSettingsObject: JSON.stringify({
+										mode  : user.ace.mode
+										theme : user.ace.theme
+										project_id : project._id
+										fontSize : user.ace.fontSize
+										autoComplete: user.ace.autoComplete
+										spellCheckLanguage: user.ace.spellCheckLanguage
+										pdfViewer : user.ace.pdfViewer
+										docPositions: {}
+										oldHistory: !!user.featureSwitches?.oldHistory
+									})
+									sharelatexObject : JSON.stringify({
+										siteUrl: Settings.siteUrl,
+										jsPath: res.locals.jsPath
+									})
+									privilegeLevel: privilegeLevel
+									loadPdfjs: (user.ace.pdfViewer == "pdfjs")
+									chatUrl: Settings.apis.chat.url
+									anonymous: anonymous
+									languages: Settings.languages
+							else
+								res.send 401
+
+
+
+
 
 
 _buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGroupedByProject, subscription)->

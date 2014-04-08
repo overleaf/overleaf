@@ -12,7 +12,11 @@ describe "ProjectController", ->
 
 		@project_id = "123213jlkj9kdlsaj"
 
-		@settings = {}
+		@settings = 
+			apis:
+				chat:
+					url:"chat.com"
+			siteUrl: "mysite.com"
 		@ProjectDeleter = 
 			deleteProject: sinon.stub().callsArgWith(1)
 		@ProjectDuplicator =
@@ -26,6 +30,11 @@ describe "ProjectController", ->
 			getAllTags: sinon.stub()
 		@ProjectModel =
 			findAllUsersProjects: sinon.stub()
+			findPopulatedById: sinon.stub()
+		@UserModel =
+			findById: sinon.stub()
+		@SecurityManager =
+			userCanAccessProject:sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
@@ -35,6 +44,8 @@ describe "ProjectController", ->
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator
 			"../Tags/TagsHandler":@TagsHandler
 			'../../models/Project': Project:@ProjectModel
+			"../../models/User":User:@UserModel
+			"../../managers/SecurityManager":@SecurityManager
 
 		@user = 
 			_id:"!£123213kjljkl"
@@ -47,7 +58,9 @@ describe "ProjectController", ->
 				user: @user
 			body:
 				projectName: @projectName 
-		@res = {}
+		@res = 
+			locals:
+				jsPath:"js path here"
 
 	describe "deleteProject", ->
 
@@ -69,8 +82,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.cloneProject @req, @res
 
-
-
 	describe "newProject", ->
 
 		it "should call the projectCreationHandler with createExampleProject", (done)->
@@ -90,9 +101,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.newProject @req, @res
 
-
-
-
 	describe "projectListPage", ->
 
 		beforeEach ->
@@ -105,8 +113,6 @@ describe "ProjectController", ->
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
 		it "should render the project/list page", (done)->
-
-			@req.body.template = "example"
 			@res.render = (pageName, opts)=>
 				pageName.should.equal "project/list"
 				done()
@@ -118,11 +124,75 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.projectListPage @req, @res
 
-
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
 				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
 				done()
-			@ProjectController.projectListPage @req, @res		
+			@ProjectController.projectListPage @req, @res
 
 
+	describe "loadEditor", ->
+		beforeEach ->
+			@settings.editorIsOpen = true
+			@project = 
+				name:"my proj"
+				_id:"213123kjlkj"
+			@user = 
+				_id:"123kj21k3lj"
+				ace:
+					fontSize:"massive"
+					theme:"sexy"
+				email: "bob@bob.com"
+			@ProjectModel.findPopulatedById.callsArgWith 1, null, @project
+			@UserModel.findById.callsArgWith(1, null, @user)
+			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
+			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
+
+		it "should render the project/editor page", (done)->
+			@res.render = (pageName, opts)=>
+				pageName.should.equal "project/editor"
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should add the project onto the opts", (done)->		
+			@res.render = (pageName, opts)=>
+				opts.project.should.equal @project
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should add userObject", (done)->
+			@res.render = (pageName, opts)=>
+				userObject = JSON.parse(opts.userObject)
+				userObject.email.should.equal @user.email
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should add on userSettingsObject", (done)->
+			@res.render = (pageName, opts)=>
+				userSettingsObject = JSON.parse(opts.userSettingsObject)
+				userSettingsObject.project_id.should.equal @project._id
+				userSettingsObject.fontSize.should.equal @user.ace.fontSize
+				userSettingsObject.theme.should.equal @user.ace.theme
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should add sharelatexObject", (done)->
+			@res.render = (pageName, opts)=>
+				sharelatexObject = JSON.parse(opts.sharelatexObject)
+				sharelatexObject.siteUrl.should.equal @settings.siteUrl
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should render the closed page if the editor is closed", (done)->
+			@settings.editorIsOpen = false
+			@res.render = (pageName, opts)=>
+				pageName.should.equal "general/closed"
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should not render the page if the project can not be accessed", (done)->
+			@SecurityManager.userCanAccessProject = sinon.stub().callsArgWith 2, false
+			@res.send = (resCode, opts)=>
+				resCode.should.equal 401
+				done()
+			@ProjectController.loadEditor @req, @res
