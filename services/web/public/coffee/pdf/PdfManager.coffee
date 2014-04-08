@@ -24,6 +24,7 @@ define [
 
 		createPdfPanel: () ->
 			@view = new CompiledView manager: @, ide: @ide
+			@view.on "dblclick", (e) => @syncToCode(e)
 			@view.render()
 			if $.localStorage("layout.pdf") == "flat"
 				@switchToFlatView()
@@ -210,3 +211,21 @@ define [
 						})
 
 				}]
+
+		syncToCode: (e) ->
+			$.ajax {
+				url: "/project/#{@ide.project_id}/sync/pdf"
+				data:
+					page: e.page + 1
+					h: e.x.toFixed(2)
+					v: e.y.toFixed(2)
+				type: "GET"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+				success: (response) =>
+					data = JSON.parse(response)
+					if data.code and data.code.length > 0
+						file = data.code[0].file
+						line = data.code[0].line
+						@ide.fileTreeManager.openDocByPath(file, line)
+			}

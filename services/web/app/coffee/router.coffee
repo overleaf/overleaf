@@ -108,6 +108,9 @@ module.exports = class Router
 				next()
 			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
 		app.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
+		app.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
+		app.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
+
 
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, Project.deleteProject
 		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, Project.cloneProject

@@ -33,6 +33,8 @@ define [
 			@pdfListView = new PDFListView @$(".pdfjs-list-view")[0],
 				textLayerBuilder: TextLayerBuilder
 				annotationsLayerBuilder: AnnotationsLayerBuilder
+				ondblclick: (e) =>
+					@trigger "dblclick", e
 				#logLevel: PDFListView.Logger.DEBUG
 			@pdfListView.listView.pageWidthOffset = 20
 			@pdfListView.listView.pageHeightOffset = 20

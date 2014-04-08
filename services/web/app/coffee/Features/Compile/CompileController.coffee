@@ -35,6 +35,9 @@ module.exports = CompileController =
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi("/project/#{req.params.Project_id}/output/#{req.params.file}", req, res, next)
 
+	proxySync: (req, res, next = (error) ->) ->
+		CompileController.proxyToClsi(req.url, req, res, next)
+
 	proxyToClsi: (url, req, res, next = (error) ->) ->
 		logger.log url: url, "proxying to CLSI"
 		url = "#{Settings.apis.clsi.url}#{url}"

@@ -215,6 +215,16 @@ ListView.prototype = {
         // per pageContainer.
         this.pdfDoc.pages.map(function(page) {
             var pageView = new PageView(page, this);
+
+            // TODO: Switch over to a proper event handler
+            var that = this;
+            var index = that.pageViews.length;
+            pageView.ondblclick = function(e) {
+                e.page = index;
+                if (that.ondblclick) {
+                    that.ondblclick.call(that, e);
+                }
+            }
             this.pageViews.push(pageView);
 
             var container = new PageContainerView(this);
@@ -462,6 +472,27 @@ function PageView(page, listView) {
 
     var dom = this.dom = document.createElement('div');
     dom.className = "plv-page-view page-view";
+    var that = this;
+    dom.ondblclick = function(e) {
+        var layerX = e.layerX;
+        var layerY = e.layerY;
+        var element = e.target;
+        while (element.offsetParent && element.offsetParent !== dom) {
+            layerX = layerX + element.offsetLeft;
+            layerY = layerY + element.offsetTop;
+            element = element.offsetParent;
+        }
+
+        var pdfPoint = that.viewport.convertToPdfPoint(layerX, layerY);
+        var event = {
+            x: pdfPoint[0],
+            y: that.normalHeight - pdfPoint[1]
+        };
+
+        if (that.ondblclick) {
+            that.ondblclick.call(that.listView, event)
+        }
+    }
     this.createNewCanvas();
 }
 
@@ -560,6 +591,7 @@ PageView.prototype = {
             scaled: pixelRatio != 1
         };
     },
+
     createNewCanvas: function() {
         if (this.canvas) {
             this.dom.removeChild(this.canvas);
@@ -766,13 +798,19 @@ function PDFListView(mainDiv, options) {
     }
     logger.logLevel = options.logLevel;
 
+    var self = this;
+
     this.listView = new ListView(mainDiv, options);
+    this.listView.ondblclick = function(e) {
+        if (options.ondblclick) {
+            options.ondblclick.call(self, e);
+        }
+    }
 
     this.renderController = new RenderController();
     this.renderController.addListView(this.listView);
     this.renderController.updateRenderList();
 
-    var self = this;
 
     mainDiv.addEventListener('scroll', function() {
         // This will update the list AND start rendering if needed.

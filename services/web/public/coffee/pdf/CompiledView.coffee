@@ -64,6 +64,7 @@ define [
 				PdfView = PdfjsView
 				@pdfjs = true
 			@pdfView = new PdfView(manager: @)
+			@pdfView.on "dblclick", (e) => @trigger "dblclick", e
 
 		render: () ->
 			@setElement(@templates.pdfPanel)
