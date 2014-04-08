@@ -2,16 +2,18 @@ define [
 	"libs/pdfListView/PdfListView"
 	"libs/pdfListView/TextLayerBuilder"
 	"libs/pdfListView/AnnotationsLayerBuilder"
+	"libs/pdfListView/HighlightsLayerBuilder"
 	"text!libs/pdfListView/TextLayer.css"
 	"text!libs/pdfListView/AnnotationsLayer.css"
+	"text!libs/pdfListView/HighlightsLayer.css"
 	"libs/backbone"
 	"libs/jquery.storage"
-], (PDFListView, TextLayerBuilder, AnnotationsLayerBuilder, textLayerCss, annotationsLayerCss) ->
+], (PDFListView, TextLayerBuilder, AnnotationsLayerBuilder, HighlightsLayerBuilder, textLayerCss, annotationsLayerCss, highlightsLayerCss) ->
 	if PDFJS?
 		PDFJS.workerSrc = "#{window.sharelatex.pdfJsWorkerPath}"
 
 	style = $("<style/>")
-	style.text(textLayerCss + "\n" + annotationsLayerCss)
+	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)
 	$("body").append(style)
 
 	PDFjsView = Backbone.View.extend
@@ -33,6 +35,9 @@ define [
 			@pdfListView = new PDFListView @$(".pdfjs-list-view")[0],
 				textLayerBuilder: TextLayerBuilder
 				annotationsLayerBuilder: AnnotationsLayerBuilder
+				highlightsLayerBuilder: HighlightsLayerBuilder
+				ondblclick: (e) =>
+					@trigger "dblclick", e
 				#logLevel: PDFListView.Logger.DEBUG
 			@pdfListView.listView.pageWidthOffset = 20
 			@pdfListView.listView.pageHeightOffset = 20
@@ -120,4 +125,36 @@ define [
 
 		onResize: () ->
 			@pdfListView.onResize()
+
+		highlightInPdf: (areas) ->
+			highlights = for area in (areas or [])
+				{
+					page: area.page - 1
+					highlight:
+						left: area.h
+						top: area.v
+						height: area.height
+						width: area.width
+				}
+
+			if highlights.length > 0
+				first = highlights[0]
+				@pdfListView.setPdfPosition({
+					page: first.page
+					offset:
+						left: first.highlight.left
+						top: first.highlight.top - 100
+				}, true)
+
+			@pdfListView.clearHighlights()
+			@pdfListView.setHighlights(highlights, true)
+			
+			setTimeout () =>
+				@$(".pdfjs-list-view .plv-highlights-layer > div").fadeOut "slow", () =>
+					@pdfListView.clearHighlights()
+			, 1000
+
+
+
+			
 

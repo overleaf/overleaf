@@ -24,6 +24,7 @@ define [
 
 		createPdfPanel: () ->
 			@view = new CompiledView manager: @, ide: @ide
+			@view.on "dblclick", (e) => @syncToCode(e)
 			@view.render()
 			if $.localStorage("layout.pdf") == "flat"
 				@switchToFlatView()
@@ -210,3 +211,37 @@ define [
 						})
 
 				}]
+
+		syncToCode: (e) ->
+			$.ajax {
+				url: "/project/#{@ide.project_id}/sync/pdf"
+				data:
+					page: e.page + 1
+					h: e.x.toFixed(2)
+					v: e.y.toFixed(2)
+				type: "GET"
+				success: (response) =>
+					data = JSON.parse(response)
+					if data.code and data.code.length > 0
+						file = data.code[0].file
+						line = data.code[0].line
+						@ide.fileTreeManager.openDocByPath(file, line)
+			}
+
+		syncToPdf: () ->
+			entity_id = @ide.editor.getCurrentDocId()
+			file = @ide.fileTreeManager.getPathOfEntityId(entity_id)
+			line = @ide.editor.getCurrentLine()
+			column = @ide.editor.getCurrentColumn()
+
+			$.ajax {
+				url: "/project/#{@ide.project_id}/sync/code"
+				data:
+					file: file
+					line: line + 1
+					column: column
+				type: "GET"
+				success: (response) =>
+					data = JSON.parse(response)
+					@view.highlightInPdf(data.pdf or [])
+			}

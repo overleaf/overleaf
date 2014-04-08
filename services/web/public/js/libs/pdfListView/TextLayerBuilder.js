@@ -84,6 +84,13 @@ TextLayerBuilder.prototype = {
         textDiv.style.left = geom.x + 'px';
         textDiv.style.top = (geom.y - fontHeight) + 'px';
 
+        textDiv.ondblclick = function(e) {
+            if (window.getSelection)
+                window.getSelection().removeAllRanges();
+            else if (document.selection)
+                document.selection.empty();
+        }
+
         // The content of the div is set in the `setTextContent` function.
 
         this.textDivs.push(textDiv);
