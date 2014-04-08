@@ -32,6 +32,29 @@ module.exports = Client =
 		app.use express.static(directory)
 		app.listen(port, host)
 
+	syncFromCode: (project_id, file, line, column, callback = (error, pdfPositions) ->) ->
+		request.get {
+			url: "#{@host}/project/#{project_id}/sync/code"
+			qs: {
+				file: file
+				line: line
+				column: column
+			}
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback null, JSON.parse(body)
+
+	syncFromPdf: (project_id, page, h, v, callback = (error, pdfPositions) ->) ->
+		request.get {
+			url: "#{@host}/project/#{project_id}/sync/pdf"
+			qs: {
+				page: page,
+				h: h, v: v
+			}
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback null, JSON.parse(body)
+
 	compileDirectory: (project_id, baseDirectory, directory, serverPort, callback = (error, res, body) ->) ->
 		resources = []
 		entities = fs.readdirSync("#{baseDirectory}/#{directory}")

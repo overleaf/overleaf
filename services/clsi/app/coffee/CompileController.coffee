@@ -38,3 +38,27 @@ module.exports = CompileController =
 		ProjectPersistenceManager.clearProject req.params.project_id, (error) ->
 			return next(error) if error?
 			res.send 204 # No content
+
+	syncFromCode: (req, res, next = (error) ->) ->
+		file   = req.query.file
+		line   = parseInt(req.query.line, 10)
+		column = parseInt(req.query.column, 10)
+		project_id = req.params.project_id
+
+		CompileManager.syncFromCode project_id, file, line, column, (error, pdfPositions) ->
+			return next(error) if error?
+			res.send JSON.stringify {
+				pdf: pdfPositions
+			}
+
+	syncFromPdf: (req, res, next = (error) ->) ->
+		page   = parseInt(req.query.page, 10)
+		h      = parseFloat(req.query.h)
+		v      = parseFloat(req.query.v)
+		project_id = req.params.project_id
+
+		CompileManager.syncFromPdf project_id, page, h, v, (error, codePositions) ->
+			return next(error) if error?
+			res.send JSON.stringify {
+				code: codePositions
+			}

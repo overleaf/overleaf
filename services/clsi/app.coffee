@@ -14,6 +14,9 @@ app = express()
 app.post "/project/:project_id/compile", express.bodyParser(), CompileController.compile
 app.del  "/project/:project_id", CompileController.clearCache
 
+app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
+app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
+
 staticServer = express.static(Settings.path.compilesDir)
 app.get "/project/:project_id/output/*", (req, res, next) ->
 	req.url = "/#{req.params.project_id}/#{req.params[0]}"

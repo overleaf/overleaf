@@ -52,3 +52,66 @@ module.exports = CompileManager =
 				return callback(null)
 			else
 				return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))
+
+	syncFromCode: (project_id, file_name, line, column, callback = (error, pdfPositions) ->) ->
+		# If LaTeX was run in a virtual environment, the file path that synctex expects
+		# might not match the file path on the host. The .synctex.gz file however, will be accessed
+		# wherever it is on the host.
+		base_dir = Settings.path.synctexBaseDir(project_id)
+		file_path = Path.join(base_dir, file_name)
+		synctex_path = Path.join(Settings.path.compilesDir, project_id, "output.pdf")
+		CompileManager._runSynctex ["code", synctex_path, file_path, line, column], (error, stdout) ->
+			return callback(error) if error?
+			logger.log project_id: project_id, file_name: file_name, line: line, column: column, stdout: stdout, "synctex code output"
+			callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
+
+	syncFromPdf: (project_id, page, h, v, callback = (error, filePositions) ->) ->
+		base_dir = Settings.path.synctexBaseDir(project_id)
+		synctex_path = Path.join(Settings.path.compilesDir, project_id, "output.pdf")
+		CompileManager._runSynctex ["pdf", synctex_path, page, h, v], (error, stdout) ->
+			return callback(error) if error?
+			logger.log project_id: project_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
+			callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
+
+	_runSynctex: (args, callback = (error, stdout) ->) ->
+		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
+		proc = child_process.spawn bin_path, args
+		proc.on "error", callback
+
+		stdout = ""
+		proc.stdout.on "data", (chunk) -> stdout += chunk.toString()
+		stderr = ""
+		proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
+
+		proc.on "close", (code) ->
+			if code == 0
+				return callback(null, stdout)
+			else
+				return callback(new Error("synctex failed: #{stderr}"))
+
+	_parseSynctexFromCodeOutput: (output) ->
+		results = []
+		for line in output.split("\n")
+			[node, page, h, v, width, height] = line.split("\t")
+			if node == "NODE"
+				results.push {
+					page:   parseInt(page, 10)
+					h:      parseFloat(h)
+					v:      parseFloat(v)
+					height: parseFloat(height)
+					width:  parseFloat(width)
+				}
+		return results
+
+	_parseSynctexFromPdfOutput: (output, base_dir) ->
+		results = []
+		for line in output.split("\n")
+			[node, file_path, line, column] = line.split("\t")
+			if node == "NODE"
+				file = file_path.slice(base_dir.length + 1)
+				results.push {
+					file: file
+					line: parseInt(line, 10)
+					column: parseInt(column, 10)
+				}
+		return results

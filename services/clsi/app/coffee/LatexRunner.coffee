@@ -33,25 +33,25 @@ module.exports = LatexRunner =
 
 	_pdflatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdf", "-e", "$pdflatex='pdflatex -interaction=batchmode %O %S'",
+			"-pdf", "-e", "$pdflatex='pdflatex -synctex=1 -interaction=batchmode %O %S'",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 		
 	_latexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdfdvi", "-e", "$latex='latex -interaction=batchmode %O %S'",
+			"-pdfdvi", "-e", "$latex='latex -synctex=1 -interaction=batchmode %O %S'",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
 	_xelatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-xelatex", "-e", "$pdflatex='xelatex -interaction=batchmode %O %S'",
+			"-xelatex", "-e", "$pdflatex='xelatex -synctex=1 -interaction=batchmode %O %S'",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
 	_lualatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdf", "-e", "$pdflatex='lualatex -interaction=batchmode %O %S'",
+			"-pdf", "-e", "$pdflatex='lualatex -synctex=1 -interaction=batchmode %O %S'",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 

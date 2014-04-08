@@ -1,3 +1,5 @@
+spawn = require("child_process").spawn
+
 module.exports = (grunt) ->
 	grunt.initConfig
 		coffee:
@@ -40,7 +42,6 @@ module.exports = (grunt) ->
 			acceptance_tests: ["test/acceptance/js"]
 			smoke_tests: ["test/smoke/js"]
 
-
 		execute:
 			app:
 				src: "app.js"
@@ -68,6 +69,14 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-shell'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+
+	grunt.registerTask 'compile:bin', () ->	
+		callback = @async()
+		proc = spawn "cc", [
+			"-o", "bin/synctex", "-lz", "-Isrc/synctex",
+			"src/synctex.c", "src/synctex/synctex_parser.c", "src/synctex/synctex_parser_utils.c"
+		], stdio: "inherit"
+		proc.on "close", callback
 
 	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests']
 	grunt.registerTask 'run',         ['compile:app', 'bunyan', 'execute']

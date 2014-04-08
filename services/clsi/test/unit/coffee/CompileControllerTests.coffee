@@ -18,6 +18,7 @@ describe "CompileController", ->
 		@Settings.externalUrl = "http://www.example.com"
 		@req = {}
 		@res = {}
+		@next = sinon.stub()
 
 	describe "compile", ->
 		beforeEach ->
@@ -89,4 +90,62 @@ describe "CompileController", ->
 							outputFiles: []
 					)
 					.should.equal true
+
+	describe "syncFromCode", ->
+		beforeEach ->
+			@file = "main.tex"
+			@line = 42
+			@column = 5
+			@project_id = "mock-project-id"
+			@req.params =
+				project_id: @project_id
+			@req.query =
+				file: @file
+				line: @line.toString()
+				column: @column.toString()
+			@res.send = sinon.stub()
+
+			@CompileManager.syncFromCode = sinon.stub().callsArgWith(4, null, @pdfPositions = ["mock-positions"])
+			@CompileController.syncFromCode @req, @res, @next
+
+		it "should find the corresponding location in the PDF", ->
+			@CompileManager.syncFromCode
+				.calledWith(@project_id, @file, @line, @column)
+				.should.equal true
+
+		it "should return the positions", ->
+			@res.send
+				.calledWith(JSON.stringify
+					pdf: @pdfPositions
+				)
+				.should.equal true
+
+	describe "syncFromPdf", ->
+		beforeEach ->
+			@page = 5
+			@h = 100.23
+			@v = 45.67
+			@project_id = "mock-project-id"
+			@req.params =
+				project_id: @project_id
+			@req.query =
+				page: @page.toString()
+				h: @h.toString()
+				v: @v.toString()
+			@res.send = sinon.stub()
+
+			@CompileManager.syncFromPdf = sinon.stub().callsArgWith(4, null, @codePositions = ["mock-positions"])
+			@CompileController.syncFromPdf @req, @res, @next
+
+		it "should find the corresponding location in the code", ->
+			@CompileManager.syncFromPdf
+				.calledWith(@project_id, @page, @h, @v)
+				.should.equal true
+
+		it "should return the positions", ->
+			@res.send
+				.calledWith(JSON.stringify
+					code: @codePositions
+				)
+				.should.equal true
 

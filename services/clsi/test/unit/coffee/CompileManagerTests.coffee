@@ -4,6 +4,7 @@ require('chai').should()
 modulePath = require('path').join __dirname, '../../../app/js/CompileManager'
 tk = require("timekeeper")
 EventEmitter = require("events").EventEmitter
+Path = require "path"
 
 describe "CompileManager", ->
 	beforeEach ->
@@ -102,3 +103,68 @@ describe "CompileManager", ->
 					.should.equal true
 
 				@callback.args[0][0].message.should.equal "rm -r #{@Settings.path.compilesDir}/#{@project_id} failed: #{@error}"
+
+	describe "syncing", ->
+		beforeEach ->
+			@page = 1
+			@h = 42.23
+			@v = 87.56
+			@width = 100.01
+			@height = 234.56
+			@line = 5
+			@column = 3
+			@file_name = "main.tex"
+			@proc = new EventEmitter()
+			@proc.stdout = new EventEmitter()
+			@proc.stderr = new EventEmitter()
+			@child_process.spawn = sinon.stub().returns(@proc)
+			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}"
+
+		describe "syncFromCode", ->
+			beforeEach ->
+				@stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n"
+				@CompileManager.syncFromCode @project_id, @file_name, @line, @column, @callback
+				@proc.stdout.emit "data", @stdout
+				@proc.emit "close", 0
+
+			it "should execute the synctex binary", ->
+				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
+				file_path = "#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}"
+				@child_process.spawn
+					.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column])
+					.should.equal true
+
+			it "should call the callback with the parsed output", ->
+				@callback
+					.calledWith(null, [{
+						page: @page
+						h: @h
+						v: @v
+						height: @height
+						width: @width
+					}])
+					.should.equal true
+
+		describe "syncFromPdf", ->
+			beforeEach ->
+				@stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}\t#{@line}\t#{@column}\n"
+				@CompileManager.syncFromPdf @project_id, @page, @h, @v, @callback
+				@proc.stdout.emit "data", @stdout
+				@proc.emit "close", 0
+
+			it "should execute the synctex binary", ->
+				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
+				@child_process.spawn
+					.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v])
+					.should.equal true
+
+			it "should call the callback with the parsed output", ->
+				@callback
+					.calledWith(null, [{
+						file: @file_name
+						line: @line
+						column: @column
+					}])
+					.should.equal true
