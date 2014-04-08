@@ -92,8 +92,8 @@ module.exports = class Router
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), PersonalInfoController.getLoggedInUsersPersonalInfo
 		app.get  '/user/:user_id/personal_info', httpAuth, PersonalInfoController.getPersonalInfo
 		
-		app.get  '/project', AuthenticationController.requireLogin(), Project.list
-		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.NewProject
+		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
+		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, Project.loadEditor
