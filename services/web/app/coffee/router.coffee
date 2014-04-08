@@ -142,7 +142,7 @@ module.exports = class Router
 		app.post '/project/:Project_id/doc/:doc_id', httpAuth, DocumentController.setDocument
 		app.ignoreCsrf('post', '/project/:Project_id/doc/:doc_id')
 
-		app.post '/user/:user_id/update/*', httpAuth, Project.startBufferingRequest, TpdsController.mergeUpdate
+		app.post '/user/:user_id/update/*', httpAuth, TpdsController.mergeUpdate
 		app.del  '/user/:user_id/update/*', httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')

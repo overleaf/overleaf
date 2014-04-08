@@ -94,8 +94,6 @@ module.exports =
 				logger.log project_id:project_id, file_id:file_id, dumpPath:dumpPath, "tpds update write stream finished"
 				callback null, dumpPath
 				
-			if stream.emitBufferedData?
-				stream.emitBufferedData()
 			stream.resume()
 
 
