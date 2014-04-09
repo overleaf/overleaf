@@ -218,4 +218,7 @@ define [
 		highlightInPdf: (args...) ->
 			@pdfView.highlightInPdf?(args...)
 
+		getPdfPosition: () ->
+			@pdfView.getPdfPosition?()
+
 			

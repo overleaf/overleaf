@@ -369,12 +369,15 @@ ListView.prototype = {
         this.setPdfPosition(this.pdfPosition);
     },
 
-    getPdfPosition: function() {
+    getPdfPosition: function(fromTop) {
         var pdfPosition = null;
         for (var i = 0; i < this.pageViews.length; i++) {
             var pageView = this.pageViews[i];
             var pdfOffset = pageView.getUppermostVisiblePdfOffset();
             if (pdfOffset !== null) {
+                if (fromTop) {
+                    pdfOffset = pageView.normalHeight - pdfOffset;
+                }
                 pdfPosition = {
                     page: i,
                     offset: {
@@ -922,8 +925,8 @@ PDFListView.prototype = {
         this.renderController.onResize();
     },
 
-    getPdfPosition: function() {
-        return this.listView.getPdfPosition();
+    getPdfPosition: function(fromTop) {
+        return this.listView.getPdfPosition(fromTop);
     },
 
     setPdfPosition: function(pdfPosition, fromTop) {

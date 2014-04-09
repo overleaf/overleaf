@@ -204,6 +204,25 @@ body.editor {
 			width: 100%;
 			height: 100%;
 		}
+		.sync-buttons {
+			z-index: 3;
+			position: absolute;
+			top: 0;
+			right: 0;
+			padding: 2px;
+			background-color: #eee;
+			.border-radius(3px);
+			border: 1px solid #aaa;
+			button {
+				display: block;
+				padding: 3px;
+				font-size: 12px;
+				line-height: 12px;
+			}
+			button:first-child {
+				margin-bottom: 3px;
+			}
+		}
 	}
 
 	#undoConflictWarning {
@@ -223,7 +242,7 @@ body.editor {
 	#pdfArea {
 		background-color: #eee;
 		#pdfToolBar{
-			padding: 5px 5px 3px 5px;
+			padding: 5px 10px 3px 10px;
 			margin: 0;
 			background-color: white;
 			border-bottom: 1px solid #aaa;

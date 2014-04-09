@@ -50,7 +50,7 @@ define [
 					@openDoc doc_id, options
 
 		initSplitView: () ->
-			splitter = @editorPanel.find("#editorSplitter")
+			@$splitter = splitter = @editorPanel.find("#editorSplitter")
 			options =
 				spacing_open: 8
 				spacing_closed: 16
@@ -286,6 +286,7 @@ define [
 				$.localStorage("doc.position.#{@current_doc_id}", docPosition)
 			
 		onCursorChange: (event) ->
+			@trigger "cursor:change", event
 			if !@ignoreCursorPositionChanges
 				docPosition = $.localStorage("doc.position.#{@current_doc_id}") || {}
 				docPosition.cursorPosition = @getCursorPosition()
@@ -340,6 +341,9 @@ define [
 
 		getContainerElement: () ->
 			$(@aceEditor.renderer.getContainerElement())
+
+		getCursorElement: () ->
+			@getContainerElement().find(".ace_cursor")
 
 		textToEditorCoordinates: (x, y) ->
 			editorAreaOffset = @getContainerElement().offset()

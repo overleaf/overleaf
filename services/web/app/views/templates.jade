@@ -202,6 +202,11 @@
 				#rawLogArea(style='display: none;')
 					pre
 
+	script(type="text/template")#syncButtonsTemplate
+		div.sync-buttons
+			button.btn.sync-code-to-pdf &rarr;
+			button.btn.sync-pdf-to-code &larr;
+
 	script(type="text/template")#outputFileLinkTemplate
 		li
 			a(href="/project/{{ project_id }}/output/{{ path }}", target="_blank") Download {{ name }}
