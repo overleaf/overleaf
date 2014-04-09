@@ -51,7 +51,7 @@ module.exports = class Router
 		
 		app.get  '/login', UserPagesController.loginPage
 		app.post '/login', AuthenticationController.login
-		app.get  '/logout', UserController.logout
+		app.get  '/logout', UserController_new.logout
 		app.get  '/restricted', SecurityManager.restricted
 
 		app.get '/resources', HomeController.externalPage("resources", "LaTeX Resources")

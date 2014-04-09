@@ -18,11 +18,14 @@ describe "UserController", ->
 
 		@UserDeleter = 
 			deleteUser: sinon.stub().callsArgWith(1)
+		@UserLocator = 
+			findById: sinon.stub().callsArgWith(1, null, @user)
 		@User =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@NewsLetterManager =
 			unsubscribe: sinon.stub().callsArgWith(1)
 		@UserController = SandboxedModule.require modulePath, requires:
+			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
 			"../../models/User": User:@User
 			'../Newsletter/NewsletterManager':@NewsLetterManager
@@ -53,8 +56,6 @@ describe "UserController", ->
 				done()
 			@UserController.unsubscribe @req, @res
 
-
-
 	describe "updateUserSettings", ->
 
 		it "should call save", (done)->
@@ -63,7 +64,6 @@ describe "UserController", ->
 				@user.save.called.should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
-
 
 		it "should set the first name", (done)->
 			@req.body =
@@ -80,5 +80,20 @@ describe "UserController", ->
 				@user.ace.theme.should.equal "something"
 				done()
 			@UserController.updateUserSettings @req, @res
+
+
+	describe "logout", ->
+
+		it "should destroy the session", (done)->
+
+			@req.session.destroy = (cb)-> 
+				if cb?
+					cb()
+			@res.redirect = (url)=>
+				url.should.equal "/login"
+				@req.session.destroy.called.should.equal true
+				done()
+
+			@UserController.logout @req, @res
 
 

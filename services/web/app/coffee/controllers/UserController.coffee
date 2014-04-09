@@ -95,15 +95,6 @@ module.exports =
 					 type:'failure'
 				logger.info email: email, "no user found with email"
 				
-	logout : (req, res)->
-		metrics.inc "user.logout"
-		if req.session? && req.session.user?
-			logger.log user: req.session.user, "logging out"
-		req.session.destroy (err)->
-			if err
-				logger.err err: err, 'error destorying session'
-			res.redirect '/login'
-
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"

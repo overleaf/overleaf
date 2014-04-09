@@ -1,9 +1,10 @@
 UserDeleter = require("./UserDeleter")
+UserLocator = require("./UserLocator")
 User = require("../../models/User").User
 newsLetterManager = require('../Newsletter/NewsletterManager')
 sanitize = require('sanitizer')
 logger = require("logger-sharelatex")
-
+metrics = require("../../infrastructure/Metrics")
 
 module.exports =
 
@@ -35,3 +36,13 @@ module.exports =
 			user.ace.pdfViewer = req.body.pdfViewer
 			user.save ->
 				res.send()
+
+	logout : (req, res)->
+		metrics.inc "user.logout"
+		logger.log user: req?.session?.user, "logging out"
+		req.session.destroy (err)->
+			if err
+				logger.err err: err, 'error destorying session'
+			res.redirect '/login'
+
+
