@@ -32,8 +32,10 @@ describe "UserController", ->
 			"logger-sharelatex": {log:->}
 
 
-		@req = new MockRequest()
-		@res = new MockResponse()
+		@req = 
+			session: destroy:->
+			body:{}
+		@res = {}
 		@next = sinon.stub()
 		@user_id = "323123"
 		@req.session.user =
@@ -86,9 +88,7 @@ describe "UserController", ->
 
 		it "should destroy the session", (done)->
 
-			@req.session.destroy = (cb)-> 
-				if cb?
-					cb()
+			@req.session.destroy = sinon.stub().callsArgWith(0)
 			@res.redirect = (url)=>
 				url.should.equal "/login"
 				@req.session.destroy.called.should.equal true
