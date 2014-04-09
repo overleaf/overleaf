@@ -144,6 +144,8 @@ RenderController.prototype = {
     finishedRendering: function(pageView) {
         var idx = this.renderList.indexOf(pageView);
 
+        pageView.callAfterRenderedCallbacks();
+
         // If the finished pageView is in the list of pages to render,
         // then remove it from the list and render start rendering the
         // next page.
@@ -408,7 +410,11 @@ ListView.prototype = {
         for (i = 0; i < highlights.length; i++) {
             var pageIndex = highlights[i].page;
             var pageView = this.pageViews[pageIndex];
-            pageView.addHighlight(highlights[i].highlight, fromTop);
+            (function(pageView, highlight) {
+                pageView.doWhenRendered(function() {
+                    pageView.addHighlight(highlight.highlight, fromTop);
+                });
+            })(pageView, highlights[i]);
         }
     },
 
@@ -489,6 +495,7 @@ function PageView(page, listView) {
 
     this.isRendered = false;
     this.renderState = RenderingStates.INITIAL;
+    this.afterRenderCallbacks = [];
 
     var dom = this.dom = document.createElement('div');
     dom.className = "plv-page-view page-view";
@@ -699,6 +706,22 @@ PageView.prototype = {
             }
             this.highlightsLayer.addHighlight(left, top, width, height);
         }
+    },
+
+    doWhenRendered: function(callback) {
+        if (this.isRendered) {
+            callback()
+        } else {
+            this.afterRenderCallbacks.push(callback);
+        }
+    },
+
+    callAfterRenderedCallbacks: function () {
+        var callbacks = this.afterRenderCallbacks;
+        for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i]();
+        }
+        this.afterRenderCallbacks = [];
     }
 };
 
