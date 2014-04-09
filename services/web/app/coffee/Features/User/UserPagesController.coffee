@@ -25,4 +25,5 @@ module.exports =
 
 	passwordResetPage : (req, res)->
 		res.render 'user/passwordReset',
-			title: 'Password Reset',
+			title: 'Password Reset'
+

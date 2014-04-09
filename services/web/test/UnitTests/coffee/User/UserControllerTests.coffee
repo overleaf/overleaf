@@ -11,8 +11,12 @@ ObjectId = require("mongojs").ObjectId
 
 describe "UserController", ->
 	beforeEach ->
+		@UserDeleter = 
+			deleteUser: sinon.stub().callsArgWith(1)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserGetter": @UserGetter = {}
+			"./UserDeleter": @UserDeleter
+
 		@req = new MockRequest()
 		@res = new MockResponse()
 		@next = sinon.stub()
@@ -102,4 +106,22 @@ describe "UserController", ->
 					email: @user.email
 					signUpDate: @user.signUpDate
 				}
+
+
+	describe "deleteUser", ->
+
+		it "should delete the user", (done)->
+			user_id = "323123"
+			@req.session.user =
+				_id = user_id
+			@res.send = (code)=>
+				@UserDeleter.deleteUser.calledWith(user_id)
+				code.should.equal 200
+				done()
+			@UserController.deleteUser @req, @res
+
+
+
+
+
 

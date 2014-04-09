@@ -11,6 +11,7 @@ describe "UserPagesController", ->
 	beforeEach ->
 
 		@settings = {}
+
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
@@ -86,5 +87,7 @@ describe "UserPagesController", ->
 				page.should.equal "user/passwordReset"
 				done()
 			@UserPagesController.passwordResetPage @req, @res
+
+
 
 

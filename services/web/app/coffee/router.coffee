@@ -36,6 +36,8 @@ DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
+console.log PersonalInfoController
+
 httpAuth = require('express').basicAuth (user, pass)->
 	isValid = Settings.httpAuthUsers[user] == pass
 	if !isValid
@@ -80,7 +82,7 @@ module.exports = class Router
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
+		app.del  '/user', AuthenticationController.requireLogin(), PersonalInfoController.deleteUser
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
