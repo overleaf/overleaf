@@ -24,6 +24,7 @@ AuthenticationController = require('./Features/Authentication/AuthenticationCont
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
 PersonalInfoController = require('./Features/User/UserController')
+UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
@@ -64,7 +65,7 @@ module.exports = class Router
 		app.get '/advisor', InfoController.advisor
 		app.get '/dropbox', InfoController.dropbox
 
-		app.get  '/register', UserController.registerForm
+		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.apiRegister
 
 		SubscriptionRouter.apply(app)
