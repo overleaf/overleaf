@@ -78,7 +78,7 @@ module.exports = (grunt) ->
 		], stdio: "inherit"
 		proc.on "close", callback
 
-	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests']
+	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests', 'compile:bin']
 	grunt.registerTask 'run',         ['compile:app', 'bunyan', 'execute']
 
 	grunt.registerTask 'compile:unit_tests', ['clean:unit_tests', 'coffee:unit_tests']
