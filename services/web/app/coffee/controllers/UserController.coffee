@@ -20,11 +20,6 @@ uuid = require("node-uuid")
 
 module.exports =
 
-	loginForm : (req, res)->
-		res.render 'user/login',
-			title: 'Login',
-			redir: req.query.redir
-
 	apiRegister : (req, res, next = (error) ->)->
 		logger.log email: req.body.email, "attempted register"
 		redir = Url.parse(req.body.redir or "/project").path

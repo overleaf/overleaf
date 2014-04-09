@@ -1,9 +1,8 @@
 
 
 module.exports =
-	
-	registerPage : (req, res)->
 
+	registerPage : (req, res)->
 		sharedProjectData =
 			project_name:req.query.project_name
 			user_first_name:req.query.user_first_name
@@ -18,3 +17,10 @@ module.exports =
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
+
+	loginPage : (req, res)->
+		res.render 'user/login',
+			title: 'Login',
+			redir: req.query.redir
+
+

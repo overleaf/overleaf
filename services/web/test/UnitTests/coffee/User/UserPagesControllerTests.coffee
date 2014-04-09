@@ -56,7 +56,6 @@ describe "UserPagesController", ->
 				done()
 			@UserPagesController.registerPage @req, @res
 
-
 		it "should not set the newTemplateData if there is nothing in the session", (done)->
 			@res.render = (page, opts)=>
 				assert.equal opts.newTemplateData.templateName, undefined
@@ -64,6 +63,18 @@ describe "UserPagesController", ->
 			@UserPagesController.registerPage @req, @res
 
 
+	describe "loginForm", ->
 
+		it "should render the login page", (done)->
+			@res.render = (page)=>
+				page.should.equal "user/login"
+				done()
+			@UserPagesController.loginPage @req, @res
 
-
+		it "should set the redirect", (done)->
+			redirect = "/go/here/please"
+			@req.query.redir = redirect
+			@res.render = (page, opts)=>
+				opts.redir.should.equal redirect
+				done()
+			@UserPagesController.loginPage @req, @res
