@@ -24,6 +24,7 @@ AuthenticationController = require('./Features/Authentication/AuthenticationCont
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
 UserInfoController = require('./Features/User/UserInfoController')
+UserController_new = require("./Features/User/UserController")
 UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
@@ -80,7 +81,7 @@ module.exports = class Router
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), UserInfoController.deleteUser
+		app.del  '/user', AuthenticationController.requireLogin(), UserController_new.deleteUser
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration

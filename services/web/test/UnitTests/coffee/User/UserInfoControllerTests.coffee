@@ -108,20 +108,3 @@ describe "UserInfoController", ->
 				}
 
 
-	describe "deleteUser", ->
-
-		it "should delete the user", (done)->
-			user_id = "323123"
-			@req.session.user =
-				_id = user_id
-			@res.send = (code)=>
-				@UserDeleter.deleteUser.calledWith(user_id)
-				code.should.equal 200
-				done()
-			@UserInfoController.deleteUser @req, @res
-
-
-
-
-
-

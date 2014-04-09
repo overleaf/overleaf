@@ -25,13 +25,6 @@ module.exports = UserController =
 			return next(error) if error?
 			res.send JSON.stringify(info)
 
-	deleteUser: (req, res)->
-		user_id = req.session.user._id
-		UserDeleter.deleteUser user_id, (err)->
-			if !err?
-				req.session.destroy()
-			res.send(200)
-			
 	_formatPersonalInfo: (user, callback = (error, info) ->) ->
 		callback null, {
 			id: user._id.toString()
