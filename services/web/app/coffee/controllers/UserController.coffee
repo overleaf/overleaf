@@ -105,24 +105,6 @@ module.exports =
 			res.redirect '/login'
 
 
-
-
-	apiUpdate : (req, res)->
-		logger.log user: req.session.user, "updating account settings"
-		metrics.inc "user.settings-update"
-		User.findById req.session.user._id, (err, user)->
-			if(user)
-				user.first_name   = sanitize.escape(req.body.first_name).trim()
-				user.last_name    = sanitize.escape(req.body.last_name).trim()
-				user.ace.mode     = sanitize.escape(req.body.mode).trim()
-				user.ace.theme    = sanitize.escape(req.body.theme).trim()
-				user.ace.fontSize = sanitize.escape(req.body.fontSize).trim()
-				user.ace.autoComplete = req.body.autoComplete == "true"
-				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
-				user.ace.pdfViewer = req.body.pdfViewer
-				user.save()
-				res.send {}
-
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"
 		oldPass = req.body.currentPassword

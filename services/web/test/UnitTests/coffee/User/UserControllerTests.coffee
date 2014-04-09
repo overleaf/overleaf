@@ -13,16 +13,18 @@ describe "UserController", ->
 	beforeEach ->
 		@user =
 			_id:"!@£!23123"
+			save:sinon.stub().callsArgWith(0)
+			ace:{}
 
 		@UserDeleter = 
 			deleteUser: sinon.stub().callsArgWith(1)
-		@UserLocator =
+		@User =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@NewsLetterManager =
 			unsubscribe: sinon.stub().callsArgWith(1)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserDeleter": @UserDeleter
-			"./UserLocator": @UserLocator
+			"../../models/User": User:@User
 			'../Newsletter/NewsletterManager':@NewsLetterManager
 			"logger-sharelatex": {log:->}
 
@@ -46,11 +48,37 @@ describe "UserController", ->
 	describe "unsubscribe", ->
 
 		it "should send the user to unsubscribe", (done)->
-
 			@res.send = (code)=>
 				@NewsLetterManager.unsubscribe.calledWith(@user).should.equal true
 				done()
 			@UserController.unsubscribe @req, @res
 
+
+
+	describe "updateUserSettings", ->
+
+		it "should call save", (done)->
+			@req.body = {}
+			@res.send = (code)=>
+				@user.save.called.should.equal true
+				done()
+			@UserController.updateUserSettings @req, @res
+
+
+		it "should set the first name", (done)->
+			@req.body =
+				first_name: "bobby  "
+			@res.send = (code)=>
+				@user.first_name.should.equal "bobby"
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should set some props on ace", (done)->
+			@req.body =
+				theme: "something  "
+			@res.send = (code)=>
+				@user.ace.theme.should.equal "something"
+				done()
+			@UserController.updateUserSettings @req, @res
 
 

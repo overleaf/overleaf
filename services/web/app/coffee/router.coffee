@@ -76,7 +76,7 @@ module.exports = class Router
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
 
 		app.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
-		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.apiUpdate
+		app.post '/user/settings', AuthenticationController.requireLogin(), UserController_new.updateUserSettings
 		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
