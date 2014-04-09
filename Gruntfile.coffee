@@ -178,13 +178,13 @@ module.exports = (grunt) ->
 						error = new Error("Unknown redis version")
 					else
 						version = m[1]
-						if semver.gt(version, "2.6.0")
+						if semver.gte(version, "2.6.12")
 							grunt.log.writeln "OK."
 							grunt.log.writeln "Running Redis version #{version}"
 						else
 							grunt.log.error "FAIL."
-							grunt.log.error "Redis version is too old (#{version}). Must be 2.6.0 or greater."
-							error = new Error("Redis version is too old (#{version}). Must be 2.6.0 or greater.")
+							grunt.log.error "Redis version is too old (#{version}). Must be 2.6.12 or greater."
+							error = new Error("Redis version is too old (#{version}). Must be 2.6.12 or greater.")
 				callback(error)
 
 		checkLatexmk: (callback = (error) ->) ->
