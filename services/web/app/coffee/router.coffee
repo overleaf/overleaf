@@ -23,7 +23,7 @@ TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
-PersonalInfoController = require('./Features/User/UserController')
+UserInfoController = require('./Features/User/UserInfoController')
 UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
@@ -35,8 +35,6 @@ TrackChangesController = require("./Features/TrackChanges/TrackChangesController
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 logger = require("logger-sharelatex")
 _ = require("underscore")
-
-console.log PersonalInfoController
 
 httpAuth = require('express').basicAuth (user, pass)->
 	isValid = Settings.httpAuthUsers[user] == pass
@@ -82,15 +80,15 @@ module.exports = class Router
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), PersonalInfoController.deleteUser
+		app.del  '/user', AuthenticationController.requireLogin(), UserInfoController.deleteUser
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
 		app.get  '/dropbox/unlink', DropboxUserController.unlinkDropbox
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
-		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), PersonalInfoController.getLoggedInUsersPersonalInfo
-		app.get  '/user/:user_id/personal_info', httpAuth, PersonalInfoController.getPersonalInfo
+		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
+		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
 		
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
