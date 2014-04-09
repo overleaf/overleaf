@@ -44,20 +44,24 @@ define [
 			###
 			return @
 
-		hide: () -> @$el.hide()
+		hide: () ->
+			@hidden = true
+			@$el.hide()
 
 		show: () ->
+			@hidden = false
+			@showIfNotHiddenAndOpen()
+
+		showIfNotHiddenAndOpen: () ->
 			state = @ide.editor.$splitter.layout().readState()
-			if !state.east?.initClosed
+			if !@hidden and !state.east?.initClosed
 				@$el.show()
+			else
+				@$el.hide()
 
 		repositionLeft: () ->
 			state = @ide.editor.$splitter.layout().readState()
 			if state.east?
 				@$el.css({right: state.east.size - 8})
-				if state.east.initClosed
-					@hide()
-				else
-					@show()
-
+			@showIfNotHiddenAndOpen();
 
