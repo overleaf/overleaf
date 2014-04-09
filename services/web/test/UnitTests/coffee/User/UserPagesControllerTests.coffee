@@ -78,3 +78,13 @@ describe "UserPagesController", ->
 				opts.redir.should.equal redirect
 				done()
 			@UserPagesController.loginPage @req, @res
+
+	describe "passwordResetPage", ->
+
+		it "should render the login page", (done)->
+			@res.render = (page)=>
+				page.should.equal "user/passwordReset"
+				done()
+			@UserPagesController.passwordResetPage @req, @res
+
+

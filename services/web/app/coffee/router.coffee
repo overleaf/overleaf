@@ -77,7 +77,7 @@ module.exports = class Router
 		app.get  '/user/settings', AuthenticationController.requireLogin(), UserController.settings
 		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.apiUpdate
 		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
-		app.get  '/user/passwordreset', UserController.requestPasswordReset
+		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser

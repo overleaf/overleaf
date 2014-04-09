@@ -68,9 +68,7 @@ module.exports =
 						to: user.email
 					EmailHandler.sendEmail "welcome", emailOpts
 
-	requestPasswordReset : (req, res)->
-		res.render 'user/passwordReset',
-			title: 'Password Reset',
+
 
 	doRequestPasswordReset : (req, res, next = (error) ->)->
 		email = sanitize.escape(req.body.email)

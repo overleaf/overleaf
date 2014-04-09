@@ -23,4 +23,6 @@ module.exports =
 			title: 'Login',
 			redir: req.query.redir
 
-
+	passwordResetPage : (req, res)->
+		res.render 'user/passwordReset',
+			title: 'Password Reset',
