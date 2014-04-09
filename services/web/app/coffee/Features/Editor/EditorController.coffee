@@ -41,26 +41,24 @@ module.exports = EditorController =
 			return callback(error) if error?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->
 				return callback(error) if error?
-				VersioningApiHandler.enableVersioning project, (error) ->
-					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject project, user,
-						(error, canAccess, privilegeLevel) ->
-							if error? or !canAccess
-								callback new Error("Not authorized")
-							else
-								client.join(project_id)
-								client.set("project_id", project_id)
-								client.set("owner_id", project.owner_ref._id)
-								client.set("user_id", user._id)
-								client.set("first_name", user.first_name)
-								client.set("last_name", user.last_name)
-								client.set("email", user.email)
-								client.set("connected_time", new Date())
-								client.set("signup_date", user.signUpDate)
-								client.set("login_count", user.loginCount)
-								client.set("take_snapshots", project.existsInVersioningApi)
-								AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
-								callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
+				AuthorizationManager.getPrivilegeLevelForProject project, user,
+					(error, canAccess, privilegeLevel) ->
+						if error? or !canAccess
+							callback new Error("Not authorized")
+						else
+							client.join(project_id)
+							client.set("project_id", project_id)
+							client.set("owner_id", project.owner_ref._id)
+							client.set("user_id", user._id)
+							client.set("first_name", user.first_name)
+							client.set("last_name", user.last_name)
+							client.set("email", user.email)
+							client.set("connected_time", new Date())
+							client.set("signup_date", user.signUpDate)
+							client.set("login_count", user.loginCount)
+							client.set("take_snapshots", project.existsInVersioningApi)
+							AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
+							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 
 	leaveProject: (client, user) ->
 		self = @

@@ -121,10 +121,6 @@ describe "EditorController", ->
 			it "should return the project model view, privilege level and protocol version", ->
 				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
 
-			it "should enable versioning", ->
-				@VersioningApiHandler.enableVersioning.calledWith(@project)
-					.should.equal true
-
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
