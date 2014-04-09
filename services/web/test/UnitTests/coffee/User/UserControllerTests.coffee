@@ -11,6 +11,9 @@ ObjectId = require("mongojs").ObjectId
 
 describe "UserController", ->
 	beforeEach ->
+
+		@UserDeleter = 
+			deleteUser: sinon.stub().callsArgWith(1)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserDeleter": @UserDeleter
 			"logger-sharelatex": {log:->}
