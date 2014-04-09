@@ -58,4 +58,4 @@ module.exports = ProjectGetter =
 							project.collaberator_refs.push user
 						callback null, project
 
-		async.series jobs, (error) -> callback error, project
+		async.parallelLimit jobs, 3, (error) -> callback error, project
