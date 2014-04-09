@@ -14,8 +14,7 @@ describe "UserPagesController", ->
 		@user = 
 			_id:"kwjewkl"
 			features:{}
-		@UserDeleter = 
-			deleteUser: sinon.stub().callsArgWith(1)
+
 		@UserLocator =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@dropboxStatus = {}

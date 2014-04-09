@@ -80,7 +80,7 @@ module.exports = class Router
 		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
-		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
+		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController_new.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController_new.deleteUser
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth

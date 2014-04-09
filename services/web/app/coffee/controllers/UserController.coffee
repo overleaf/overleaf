@@ -5,7 +5,6 @@ _ = require('underscore')
 logger = require('logger-sharelatex')
 Security = require('../managers/SecurityManager')
 Settings = require('settings-sharelatex')
-newsLetterManager = require('../Features/Newsletter/NewsletterManager')
 dropboxHandler = require('../Features/Dropbox/DropboxHandler')
 userRegistrationHandler = require('../Features/User/UserRegistrationHandler')
 metrics = require('../infrastructure/Metrics')
@@ -106,10 +105,7 @@ module.exports =
 			res.redirect '/login'
 
 
-	unsubscribe: (req, res)->
-		User.findById req.session.user._id, (err, user)->
-			newsLetterManager.unsubscribe user, ->
-				res.send()
+
 
 	apiUpdate : (req, res)->
 		logger.log user: req.session.user, "updating account settings"
@@ -156,15 +152,5 @@ module.exports =
 					message:
 					  type:'error'
 					  text:'Your old password is wrong'
-
-
-
-	deleteUser: (req, res)->
-		user_id = req.session.user._id
-		UserDeleter.deleteUser user_id, (err)->
-			if !err?
-				req.session.destroy()
-			res.send(200)
-
 
 

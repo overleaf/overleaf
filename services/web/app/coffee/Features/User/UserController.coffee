@@ -1,4 +1,6 @@
 UserDeleter = require("./UserDeleter")
+UserLocator = require("./UserLocator")
+newsLetterManager = require('../Newsletter/NewsletterManager')
 
 module.exports =
 
@@ -8,3 +10,8 @@ module.exports =
 			if !err?
 				req.session.destroy()
 			res.send(200)
+
+	unsubscribe: (req, res)->
+		UserLocator.findById req.session.user._id, (err, user)->
+			newsLetterManager.unsubscribe user, ->
+				res.send()
