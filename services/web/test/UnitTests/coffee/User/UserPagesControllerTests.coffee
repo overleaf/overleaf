@@ -11,14 +11,25 @@ describe "UserPagesController", ->
 	beforeEach ->
 
 		@settings = {}
-
+		@user = 
+			_id:"kwjewkl"
+			features:{}
+		@UserDeleter = 
+			deleteUser: sinon.stub().callsArgWith(1)
+		@UserLocator =
+			findById: sinon.stub().callsArgWith(1, null, @user)
+		@dropboxStatus = {}
+		@DropboxHandler =
+			getUserRegistrationStatus : sinon.stub().callsArgWith(1, null, @dropboxStatus)
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
-
+			"./UserLocator": @UserLocator
+			'../Dropbox/DropboxHandler': @DropboxHandler
 		@req = 
 			query:{}
-			session:{}
+			session:
+					user:@user
 		@res = {}
 
 
@@ -89,5 +100,16 @@ describe "UserPagesController", ->
 			@UserPagesController.passwordResetPage @req, @res
 
 
+	describe "settingsPage", ->
 
+		it "should render user/settings", (done)->
+			@res.render = (page)->
+				page.should.equal "user/settings"
+				done()
+			@UserPagesController.settingsPage @req, @res
 
+		it "should send user", (done)->
+			@res.render = (page, opts)=>
+				opts.user.should.equal @user
+				done()
+			@UserPagesController.settingsPage @req, @res

@@ -105,22 +105,6 @@ module.exports =
 				logger.err err: err, 'error destorying session'
 			res.redirect '/login'
 
-	settings : (req, res)->
-		logger.log user: req.session.user, "loading settings page"
-		User.findById req.session.user._id, (err, user)->
-			dropboxHandler.getUserRegistrationStatus user._id, (err, status)->
-				userIsRegisteredWithDropbox = !err? and status.registered
-				res.render 'user/settings',
-					title:'Your settings',
-					userCanSeeDropbox: user.featureSwitches.dropbox
-					userHasDropboxFeature: user.features.dropbox
-					userIsRegisteredWithDropbox: userIsRegisteredWithDropbox
-					user: user,
-					themes: THEME_LIST,
-					editors: ['default','vim','emacs'],
-					fontSizes: ['10','11','12','13','14','16','20','24']
-					languages: Settings.languages,
-					accountSettingsTabActive: true
 
 	unsubscribe: (req, res)->
 		User.findById req.session.user._id, (err, user)->
@@ -183,10 +167,4 @@ module.exports =
 			res.send(200)
 
 
-THEME_LIST = []
-do generateThemeList = () ->
-	files = fs.readdirSync __dirname + '/../../../public/js/ace/theme'
-	for file in files
-		if file.slice(-2) == "js"
-			cleanName = file.slice(0,-3)
-			THEME_LIST.push name: cleanName
+
