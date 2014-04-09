@@ -1,17 +1,19 @@
 define [
 	"utils/Modal"
 	"pdf/CompiledView"
+	"pdf/SyncButtonsView"
 	"libs/latex-log-parser"
 	"libs/jquery.storage"
 	"libs/underscore"
 	"libs/backbone"
-], (Modal, CompiledView, LogParser) ->
+], (Modal, CompiledView, SyncButtonsView, LogParser) ->
 	class PdfManager
 		templates:
 			pdfLink: $("#pdfSideBarLinkTemplate").html()
 
 		constructor: (@ide) ->
 			_.extend @, Backbone.Events
+			@createSyncButtons()
 			@createPdfPanel()
 			@ide.editor.aceEditor.commands.addCommand
 				name: "compile",
@@ -34,6 +36,15 @@ define [
 				@switchToFlatView()
 			else
 				@switchToSplitView()
+
+		createSyncButtons: () ->
+			unless @ide.userSettings.pdfViewer == "native"
+				@syncButtonsView = new SyncButtonsView(ide: @ide)
+				@syncButtonsView.on "click:sync-code-to-pdf", () =>
+					@syncToPdf()
+				@syncButtonsView.on "click:sync-pdf-to-code", () =>
+					@syncToCode()
+				@syncButtonsView.hide()
 
 		switchToFlatView: (options = {showPdf: false}) ->
 			@teardownSplitView()
@@ -85,6 +96,11 @@ define [
 
 			@view.undelegateEvents()
 			@view.delegateEvents()
+
+			@ide.editor.$splitter.append(
+				@syncButtonsView?.$el
+			)
+
 			setTimeout(@ide.layoutManager.resizeAllSplitters, 100)
 
 		teardownSplitView: () ->
@@ -112,7 +128,9 @@ define [
 			doneCompiling = _.once =>
 				@compiling = false
 				@view.doneCompiling()
+				@syncButtonsView?.show()
 			setTimeout doneCompiling, 1000 * 60
+
 			if !@ide.project.get("rootDoc_id")?
 				new Modal
 					title: "No root document selected"
@@ -123,6 +141,7 @@ define [
 					}]
 			else if !@compiling
 				@view.onCompiling()
+				@syncButtonsView?.hide()
 				@compiling = true
 				@ide.socket.emit "pdfProject", opts, (err, pdfExists, outputFiles) =>
 					@compiling = false
@@ -142,6 +161,7 @@ define [
 						else
 							@view.unsetPdf()
 							@view.showLog()
+							@syncButtonsView?.hide()
 
 					if outputFiles?
 						@view.showOutputFileDownloadLinks(outputFiles)
@@ -213,6 +233,13 @@ define [
 				}]
 
 		syncToCode: (e) ->
+			if !e? 
+				e = @view.getPdfPosition()
+				return if !e?
+				# It's not clear exactly where we should sync to if it was directly
+				# clicked on, but a little bit down from the very top seems best.
+				e.y = e.y + 80
+
 			$.ajax {
 				url: "/project/#{@ide.project_id}/sync/pdf"
 				data:

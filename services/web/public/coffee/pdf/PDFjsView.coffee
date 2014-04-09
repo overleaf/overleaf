@@ -143,7 +143,7 @@ define [
 					page: first.page
 					offset:
 						left: first.highlight.left
-						top: first.highlight.top - 100
+						top: first.highlight.top - 80
 				}, true)
 
 			@pdfListView.clearHighlights()
@@ -154,6 +154,14 @@ define [
 					@pdfListView.clearHighlights()
 			, 1000
 
+		getPdfPosition: () ->
+			position = @pdfListView.getPdfPosition(true)
+			return if !position?
+			return {
+				page: position.page
+				x: position.offset.left
+				y: position.offset.top
+			}
 
 
 			
