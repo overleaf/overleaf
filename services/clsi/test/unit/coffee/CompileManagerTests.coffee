@@ -114,25 +114,20 @@ describe "CompileManager", ->
 			@line = 5
 			@column = 3
 			@file_name = "main.tex"
-			@proc = new EventEmitter()
-			@proc.stdout = new EventEmitter()
-			@proc.stderr = new EventEmitter()
-			@child_process.spawn = sinon.stub().returns(@proc)
+			@child_process.execFile = sinon.stub()
 			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}"
 
 		describe "syncFromCode", ->
 			beforeEach ->
-				@stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n"
+				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n", "")
 				@CompileManager.syncFromCode @project_id, @file_name, @line, @column, @callback
-				@proc.stdout.emit "data", @stdout
-				@proc.emit "close", 0
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
 				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
 				file_path = "#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}"
-				@child_process.spawn
-					.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column])
+				@child_process.execFile
+					.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column], timeout: 10000)
 					.should.equal true
 
 			it "should call the callback with the parsed output", ->
@@ -148,16 +143,14 @@ describe "CompileManager", ->
 
 		describe "syncFromPdf", ->
 			beforeEach ->
-				@stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}\t#{@line}\t#{@column}\n"
+				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}\t#{@line}\t#{@column}\n", "")
 				@CompileManager.syncFromPdf @project_id, @page, @h, @v, @callback
-				@proc.stdout.emit "data", @stdout
-				@proc.emit "close", 0
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
 				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
-				@child_process.spawn
-					.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v])
+				@child_process.execFile
+					.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v], timeout: 10000)
 					.should.equal true
 
 			it "should call the callback with the parsed output", ->

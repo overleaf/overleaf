@@ -75,19 +75,10 @@ module.exports = CompileManager =
 
 	_runSynctex: (args, callback = (error, stdout) ->) ->
 		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
-		proc = child_process.spawn bin_path, args
-		proc.on "error", callback
-
-		stdout = ""
-		proc.stdout.on "data", (chunk) -> stdout += chunk.toString()
-		stderr = ""
-		proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
-
-		proc.on "close", (code) ->
-			if code == 0
-				return callback(null, stdout)
-			else
-				return callback(new Error("synctex failed: #{stderr}"))
+		seconds = 1000
+		child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
+			return callback(error) if error?
+			callback(null, stdout)
 
 	_parseSynctexFromCodeOutput: (output) ->
 		results = []
