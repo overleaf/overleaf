@@ -73,8 +73,8 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:bin', () ->	
 		callback = @async()
 		proc = spawn "cc", [
-			"-o", "bin/synctex", "-lz", "-Isrc/synctex",
-			"src/synctex.c", "src/synctex/synctex_parser.c", "src/synctex/synctex_parser_utils.c"
+			"-o", "bin/synctex", "-Isrc/synctex",
+			"src/synctex.c", "src/synctex/synctex_parser.c", "src/synctex/synctex_parser_utils.c", "-lz"
 		], stdio: "inherit"
 		proc.on "close", callback
 
