@@ -19,9 +19,8 @@ module.exports =
 		dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
 		writeStream = fs.createWriteStream(dumpPath)
 		zipUrl = req.session.templateData.zipUrl
-		if zipUrl.indexOf("www") == -1
-			zipUrl = "www.sharelatex.com#{zipUrl}"
-		request("http://#{zipUrl}").pipe(writeStream)
+		zipUrl = "#{settings.apis.templates_api.url}#{zipUrl}"
+		request(zipUrl).pipe(writeStream)
 		writeStream.on 'close', ->
 			ProjectUploadManager.createProjectFromZipArchive req.session.user._id, req.session.templateData.templateName, dumpPath, (err, project)->
 				setCompiler project._id, req.session.templateData.compiler, ->

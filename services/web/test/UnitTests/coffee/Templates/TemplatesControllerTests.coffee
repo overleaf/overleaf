@@ -6,7 +6,7 @@ sinon = require('sinon')
 modulePath = path.join __dirname, '../../../../app/js/Features/Templates/TemplatesController'
 
 
-describe 'Templates Controller', ->
+describe 'TemplatesController', ->
 
 	project_id = "213432"
 
@@ -36,6 +36,9 @@ describe 'Templates Controller', ->
 				path:
 					dumpFolder:@dumpFolder
 				siteUrl: "http://localhost:3000"
+				apis:
+					templates_api:
+						url: @templateApiUrl="http://templates.sharelatex.env"
 			"node-uuid":v4:=>@uuid
 			"request": @request
 			"fs":@fs
@@ -53,30 +56,8 @@ describe 'Templates Controller', ->
 		it 'should take the zip url and write it to disk', (done)->
 			redirect = =>
 				@ProjectUploadManager.createProjectFromZipArchive.calledWith(@user_id, @templateName, "#{@dumpFolder}/#{@uuid}").should.equal true
-				@request.calledWith("http://#{@zipUrl}").should.equal true
+				@request.calledWith("#{@templateApiUrl}#{@zipUrl}").should.equal true
 				@fs.unlink.calledWith("#{@dumpFolder}/#{@uuid}").should.equal true
-				done()
-			res = redirect:redirect
-			@controller.createProjectFromZipTemplate @req, res
-
-
-
-	describe 'reciving a request to create project from non specified domain', ->
-
-		it 'should default to www.sharelatex.com', (done)->
-			@zipUrl = "/templates/cv/different.zip"
-			@req.session.templateData.zipUrl = @zipUrl
-			redirect = =>
-				@request.calledWith("http://www.sharelatex.com#{@zipUrl}").should.equal true
-				done()
-			res = redirect:redirect
-			@controller.createProjectFromZipTemplate @req, res
-
-		it 'should use the different domain if specified', (done)->
-			@zipUrl = "www.latextemplates.com/templates/cv/remote.zip"
-			@req.session.templateData.zipUrl = @zipUrl
-			redirect = =>
-				@request.calledWith("http://#{@zipUrl}").should.equal true
 				done()
 			res = redirect:redirect
 			@controller.createProjectFromZipTemplate @req, res
