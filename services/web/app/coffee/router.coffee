@@ -67,7 +67,7 @@ module.exports = class Router
 		app.get '/dropbox', InfoController.dropbox
 
 		app.get  '/register', UserPagesController.registerPage
-		app.post '/register', UserController.apiRegister
+		app.post '/register', UserController_new.register
 
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)

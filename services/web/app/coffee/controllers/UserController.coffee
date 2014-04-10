@@ -19,53 +19,8 @@ uuid = require("node-uuid")
 
 module.exports =
 
-	apiRegister : (req, res, next = (error) ->)->
-		logger.log email: req.body.email, "attempted register"
-		redir = Url.parse(req.body.redir or "/project").path
-		userRegistrationHandler.validateRegisterRequest req, (err, data)->
-			if err?
-				logger.log validation_error: err, "user validation error"
-				metrics.inc "user.register.validation-error"
-				res.send message:
-					 text:err
-					 type:'error'
-			else
-				User.findOne {email:data.email}, (err, foundUser)->
-					if foundUser? && foundUser.holdingAccount == false
-						AuthenticationController.login req, res
-						logger.log email: data.email, "email already registered"
-						metrics.inc "user.register.already-registered"
-						return AuthenticationController.login req, res
-					else if foundUser? && foundUser.holdingAccount == true #someone put them in as a collaberator
-						user = foundUser
-						user.holdingAccount = false
-					else
-						user = new User email: data.email
-					d = new Date()
-					user.first_name = data.first_name
-					user.last_name = data.last_name
-					user.signUpDate = new Date()
-					metrics.inc "user.register.success"
-					user.save (err)->
-						req.session.user = user
-						req.session.justRegistered = true
-						logger.log user: user, "registered"
-						AuthenticationManager.setUserPassword user._id, data.password, (error) ->
-							return next(error) if error?
-							res.send
-								redir:redir
-								id:user._id.toString()
-								first_name: user.first_name
-								last_name: user.last_name
-								email: user.email
-								created: Date.now()
-					#things that can be fired and forgot.
-					newsLetterManager.subscribe user
-					ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
-					emailOpts =
-						first_name:user.first_name
-						to: user.email
-					EmailHandler.sendEmail "welcome", emailOpts
+	
+				
 
 
 

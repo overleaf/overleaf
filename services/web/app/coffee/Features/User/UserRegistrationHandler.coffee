@@ -1,4 +1,11 @@
 sanitize = require('sanitizer')
+User = require("../../models/User").User
+UserCreator = require("./UserCreator")
+AuthenticationManager = require("../Authentication/AuthenticationManager")
+NewsLetterManager = require("../NewsLetter/NewsLetterManager")
+async = require("async")
+EmailHandler = require("../Email/EmailHandler")
+logger = require("logger-sharelatex")
 
 module.exports =
 	validateEmail : (email) ->
@@ -12,25 +19,50 @@ module.exports =
 				hasZeroLength = true
 		return hasZeroLength
 
-	validateRegisterRequest : (req, callback)->
-		email = sanitize.escape(req.body.email).trim().toLowerCase()
-		password = req.body.password
+	_registrationRequestIsValid : (body, callback)->
+		email = sanitize.escape(body.email).trim().toLowerCase()
+		password = body.password
 		username = email.match(/^[^@]*/)
-		if username?
-			first_name = username[0]
-		else
-			first_name = ""
-		last_name = ""
-
 		if @hasZeroLengths([password, email])
-			callback('please fill in all the fields', null)
+			return false
 		else if !@validateEmail(email)
-			callback('not valid email', null)
+			return false
 		else
-			callback(null, {first_name:first_name, last_name:last_name, email:email, password:password})
+			return true
 
-
+	_createNewUserIfRequired: (user, userDetails, callback)->
+		if !user?
+			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email}, callback
+		else
+			callback null, user
 
 	registerNewUser: (userDetails, callback)->
+		self = @
+		requestIsValid = @_registrationRequestIsValid userDetails
+		if !requestIsValid
+			return callback("request is not valid")
+		userDetails.email = userDetails.email?.trim()?.toLowerCase()
+		User.findOne email:userDetails.email, (err, user)->
+			if err?
+				return callback err
+			if user?.holdingAccount == false
+				return callback("EmailAlreadyRegisterd")
+			self._createNewUserIfRequired user, userDetails, (err, user)->
+				if err?
+					return callback(err)
+				async.series [
+					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
+					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
+					(cb)-> NewsLetterManager.subscribe user, cb
+					(cb)-> 
+						emailOpts =
+							first_name:user.first_name
+							to: user.email
+						EmailHandler.sendEmail "welcome", emailOpts, cb
+				], (err)->
+					logger.log user: user, "registered"
+					callback(err, user)
 
-		callback()
+
+
+

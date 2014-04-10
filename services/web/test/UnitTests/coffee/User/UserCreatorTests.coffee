@@ -50,7 +50,7 @@ describe "UserCreator", ->
 			@UserCreator.createNewUser opts, (err, user)=>
 				assert.equal user.email, @email
 				assert.equal user.holdingAccount, true
-
+				assert.equal user.first_name, "bob.oswald"
 				done()
 
 

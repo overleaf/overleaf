@@ -8,6 +8,7 @@ events = require "events"
 MockResponse = require "../helpers/MockResponse"
 MockRequest = require "../helpers/MockRequest"
 ObjectId = require("mongojs").ObjectId
+assert = require("assert")
 
 describe "UserController", ->
 	beforeEach ->
@@ -24,11 +25,17 @@ describe "UserController", ->
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@NewsLetterManager =
 			unsubscribe: sinon.stub().callsArgWith(1)
+		@UserRegistrationHandler =
+			registerNewUser: sinon.stub()
+		@AuthenticationController = {}
+
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
 			"../../models/User": User:@User
 			'../Newsletter/NewsletterManager':@NewsLetterManager
+			"./UserRegistrationHandler":@UserRegistrationHandler
+			"../Authentication/AuthenticationController": @AuthenticationController
 			"logger-sharelatex": {log:->}
 
 
@@ -97,3 +104,44 @@ describe "UserController", ->
 			@UserController.logout @req, @res
 
 
+	describe "register", ->
+
+		it "should ask the UserRegistrationHandler to register user", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = =>
+				@UserRegistrationHandler.registerNewUser.calledWith(@req.body).should.equal true
+				done()
+			@UserController.register @req, @res
+
+		it "should try and log the user in if there is an EmailAlreadyRegisterd error", (done)->
+
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, message:"EmailAlreadyRegisterd")
+			@AuthenticationController.login = (req, res)=>
+				assert.deepEqual req, @req
+				assert.deepEqual res, @res
+				done()
+			@UserController.register @req, @res
+
+		it "should put the user on the session and mark them as justRegistered", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = =>
+				assert.deepEqual @user, @req.session.user
+				assert.equal @req.session.justRegistered, true
+				done()
+			@UserController.register @req, @res
+
+		it "should redirect to project page", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = (opts)=>
+				opts.redir.should.equal "/project"
+				done()
+			@UserController.register @req, @res			
+
+
+		it "should redirect passed redir if it exists", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@req.body.redir = "/somewhere"
+			@res.send = (opts)=>
+				opts.redir.should.equal "/somewhere"
+				done()
+			@UserController.register @req, @res		

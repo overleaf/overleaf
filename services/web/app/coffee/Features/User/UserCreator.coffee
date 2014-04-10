@@ -15,5 +15,14 @@ module.exports =
 		user = new User()
 		user.email = opts.email
 		user.holdingAccount = opts.holdingAccount
+
+		username = opts.email.match(/^[^@]*/)
+		if username?
+			user.first_name = username[0]
+		else
+			user.first_name = ""
+		user.last_name = ""
+
+
 		user.save (err)->
 			callback(err, user)

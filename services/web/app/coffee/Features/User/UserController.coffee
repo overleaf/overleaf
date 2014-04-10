@@ -3,9 +3,11 @@ UserLocator = require("./UserLocator")
 User = require("../../models/User").User
 newsLetterManager = require('../Newsletter/NewsletterManager')
 sanitize = require('sanitizer')
+UserRegistrationHandler = require("./UserRegistrationHandler")
 logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
-
+Url = require("url")
+AuthenticationController = require("../Authentication/AuthenticationController")
 module.exports =
 
 	deleteUser: (req, res)->
@@ -44,5 +46,26 @@ module.exports =
 			if err
 				logger.err err: err, 'error destorying session'
 			res.redirect '/login'
+
+	register : (req, res, next = (error) ->)->
+		logger.log email: req.body.email, "attempted register"
+		redir = Url.parse(req.body.redir or "/project").path
+		UserRegistrationHandler.registerNewUser req.body, (err, user)->
+			console.log err
+			if err == "EmailAlreadyRegisterd"
+				return AuthenticationController.login req, res
+			else if err?
+				next(err)
+			else
+				metrics.inc "user.register.success"
+				req.session.user = user
+				req.session.justRegistered = true
+				res.send
+					redir:redir
+					id:user._id.toString()
+					first_name: user.first_name
+					last_name: user.last_name
+					email: user.email
+					created: Date.now()
 
 
