@@ -94,9 +94,6 @@ module.exports =
 				logger.log project_id:project_id, file_id:file_id, dumpPath:dumpPath, "tpds update write stream finished"
 				callback null, dumpPath
 				
-			stream.resume()
-
-
 readFileIntoTextArray = (path, callback)->
 	fs.readFile path, "utf8", (error, content = "") ->
 		if error?
