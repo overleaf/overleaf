@@ -12,8 +12,10 @@ assert = require("assert")
 
 describe "UserController", ->
 	beforeEach ->
+		@user_id = "323123"
+
 		@user =
-			_id:"!@£!23123"
+			_id:@user_id
 			save:sinon.stub().callsArgWith(0)
 			ace:{}
 
@@ -28,7 +30,9 @@ describe "UserController", ->
 		@UserRegistrationHandler =
 			registerNewUser: sinon.stub()
 		@AuthenticationController = {}
-
+		@AuthenticationManager =
+			authenticate: sinon.stub()
+			setUserPassword: sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -36,17 +40,18 @@ describe "UserController", ->
 			'../Newsletter/NewsletterManager':@NewsLetterManager
 			"./UserRegistrationHandler":@UserRegistrationHandler
 			"../Authentication/AuthenticationController": @AuthenticationController
+			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"logger-sharelatex": {log:->}
 
 
 		@req = 
-			session: destroy:->
+			session: 
+				destroy:->
+				user :
+					_id : @user_id
 			body:{}
 		@res = {}
 		@next = sinon.stub()
-		@user_id = "323123"
-		@req.session.user =
-			_id = @user_id
 	describe "deleteUser", ->
 
 		it "should delete the user", (done)->
@@ -115,7 +120,7 @@ describe "UserController", ->
 
 		it "should try and log the user in if there is an EmailAlreadyRegisterd error", (done)->
 
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, message:"EmailAlreadyRegisterd")
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, "EmailAlreadyRegisterd")
 			@AuthenticationController.login = (req, res)=>
 				assert.deepEqual req, @req
 				assert.deepEqual res, @res
@@ -144,4 +149,41 @@ describe "UserController", ->
 			@res.send = (opts)=>
 				opts.redir.should.equal "/somewhere"
 				done()
-			@UserController.register @req, @res		
+			@UserController.register @req, @res
+
+
+
+	describe "changePassword", ->
+
+		it "should check the old password is the current one at the moment", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2)
+			@req.body =
+				currentPassword: "oldpasshere"
+			@res.send = =>
+				@AuthenticationManager.authenticate.calledWith(_id:@user._id, "oldpasshere").should.equal true
+				@AuthenticationManager.setUserPassword.called.should.equal false
+				done()
+			@UserController.changePassword @req, @res
+
+
+		it "it should not set the new password if they do not match", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2, null, {})
+			@req.body =
+				newPassword1: "1"
+				newPassword2: "2"
+			@res.send = =>
+				@AuthenticationManager.setUserPassword.called.should.equal false
+				done()
+			@UserController.changePassword @req, @res			
+
+		it "should set the new password if they do match", (done)->
+			@AuthenticationManager.authenticate.callsArgWith(2, null, @user)
+			@AuthenticationManager.setUserPassword.callsArgWith(2)
+			@req.body =
+				newPassword1: "newpass"
+				newPassword2: "newpass"
+			@res.send = =>
+				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
+				done()
+			@UserController.changePassword @req, @res		
+

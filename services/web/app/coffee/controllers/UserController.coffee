@@ -51,34 +51,5 @@ module.exports =
 				logger.info email: email, "no user found with email"
 				
 
-	changePassword : (req, res, next = (error) ->)->
-		metrics.inc "user.password-change"
-		oldPass = req.body.currentPassword
-		AuthenticationManager.authenticate _id: req.session.user._id, oldPass, (err, user)->
-			return next(err) if err?
-			if(user)
-				logger.log user: req.session.user, "changing password"
-				newPassword1 = req.body.newPassword1
-				newPassword2 = req.body.newPassword2
-				if newPassword1 != newPassword2
-					logger.log user: user, "passwords do not match"
-					res.send
-						message:
-						  type:'error'
-						  text:'Your passwords do not match'
-				else
-					logger.log user: user, "password changed"
-					AuthenticationManager.setUserPassword user._id, newPassword1, (error) ->
-						return next(error) if error?
-						res.send
-							message:
-							  type:'success'
-							  text:'Your password has been changed'
-			else
-				logger.log user: user, "current password wrong"
-				res.send
-					message:
-					  type:'error'
-					  text:'Your old password is wrong'
 
 

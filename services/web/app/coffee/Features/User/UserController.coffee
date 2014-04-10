@@ -8,6 +8,9 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationController = require("../Authentication/AuthenticationController")
+AuthenticationManager = require("../Authentication/AuthenticationManager")
+
+
 module.exports =
 
 	deleteUser: (req, res)->
@@ -51,7 +54,6 @@ module.exports =
 		logger.log email: req.body.email, "attempted register"
 		redir = Url.parse(req.body.redir or "/project").path
 		UserRegistrationHandler.registerNewUser req.body, (err, user)->
-			console.log err
 			if err == "EmailAlreadyRegisterd"
 				return AuthenticationController.login req, res
 			else if err?
@@ -68,4 +70,32 @@ module.exports =
 					email: user.email
 					created: Date.now()
 
-
+	changePassword : (req, res, next = (error) ->)->
+		metrics.inc "user.password-change"
+		oldPass = req.body.currentPassword
+		AuthenticationManager.authenticate {_id:req.session.user._id}, oldPass, (err, user)->
+			return next(err) if err?
+			if(user)
+				logger.log user: req.session.user, "changing password"
+				newPassword1 = req.body.newPassword1
+				newPassword2 = req.body.newPassword2
+				if newPassword1 != newPassword2
+					logger.log user: user, "passwords do not match"
+					res.send
+						message:
+						  type:'error'
+						  text:'Your passwords do not match'
+				else
+					logger.log user: user, "password changed"
+					AuthenticationManager.setUserPassword user._id, newPassword1, (error) ->
+						return next(error) if error?
+						res.send
+							message:
+							  type:'success'
+							  text:'Your password has been changed'
+			else
+				logger.log user: user, "current password wrong"
+				res.send
+					message:
+					  type:'error'
+					  text:'Your old password is wrong'
