@@ -78,33 +78,39 @@ module.exports =
 				timer.done()
 
 
-	loadEditor: (req, res)->
+	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
 		if !Settings.editorIsOpen
 			return res.render("general/closed", {title:"updating site"})
 
-		user_id = if req.session.user? then req.session.user._id else 'openUser'
-		project_id = req.params.Project_id
+		if req.session.user?
+			user_id = req.session.user._id 
+			anonymous = false
+		else
+			anonymous = true
+			user_id = 'openUser'
 		
+		project_id = req.params.Project_id
+	
 		async.parallel {
 			project: (cb)->
 				Project.findPopulatedById project_id, cb
 			user: (cb)->
-				User.findById user_id, cb
+				if user_id == 'openUser'
+					cb null, defaultSettingsForAnonymousUser(user_id)
+				else
+					User.findById user_id, cb
 			subscription: (cb)->
+				if user_id == 'openUser'
+					return cb()
 				SubscriptionLocator.getUsersSubscription user_id, cb
 		}, (err, results)->
 			if err?
-				return res.send 500
+				logger.err err:err, "error getting details for project page"
+				return next err
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-
-			if user_id == 'openUser'
-				anonymous = true
-				user = defaultSettingsForAnonymousUser(user_id)
-			else
-				anonymous = false
 
 			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
 				if !canAccess
@@ -150,7 +156,7 @@ module.exports =
 					timer.done()
 
 
-defaultSettingsForAnonymousUser = ->
+defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id
 	ace:
 		mode:'none'
