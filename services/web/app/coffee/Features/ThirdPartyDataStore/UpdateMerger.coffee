@@ -102,7 +102,7 @@ readFileIntoTextArray = (path, callback)->
 		if error?
 			logger.err path:path, "error reading file into text array"
 			return callback(err)
-		lines = content.split("\n")
+		lines = content.split(/\r\n|\n|\r/)
 		callback error, lines
 
 
