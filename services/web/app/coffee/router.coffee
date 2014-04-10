@@ -1,4 +1,3 @@
-UserController = require('./controllers/UserController')
 AdminController = require('./Features/ServerAdmin/AdminController')
 HomeController = require('./Features/StaticPages/HomeController')
 ProjectController = require("./Features/Project/ProjectController")
@@ -24,7 +23,7 @@ AuthenticationController = require('./Features/Authentication/AuthenticationCont
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
 UserInfoController = require('./Features/User/UserInfoController')
-UserController_new = require("./Features/User/UserController")
+UserController = require("./Features/User/UserController")
 UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
@@ -51,7 +50,7 @@ module.exports = class Router
 		
 		app.get  '/login', UserPagesController.loginPage
 		app.post '/login', AuthenticationController.login
-		app.get  '/logout', UserController_new.logout
+		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
 		app.get '/resources', HomeController.externalPage("resources", "LaTeX Resources")
@@ -67,7 +66,7 @@ module.exports = class Router
 		app.get '/dropbox', InfoController.dropbox
 
 		app.get  '/register', UserPagesController.registerPage
-		app.post '/register', UserController_new.register
+		app.post '/register', UserController.register
 
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
@@ -76,12 +75,12 @@ module.exports = class Router
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
 
 		app.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
-		app.post '/user/settings', AuthenticationController.requireLogin(), UserController_new.updateUserSettings
-		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController_new.changePassword
+		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
+		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
-		app.post '/user/passwordReset', UserController_new.doRequestPasswordReset
-		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController_new.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), UserController_new.deleteUser
+		app.post '/user/passwordReset', UserController.doRequestPasswordReset
+		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
+		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration

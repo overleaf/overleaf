@@ -1,6 +1,5 @@
 logger = require('logger-sharelatex')
 _ = require('underscore')
-User = require('../../controllers/UserController')
 Quotes = require('../../models/Quote').Quote
 
 Path = require "path"
