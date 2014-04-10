@@ -26,7 +26,7 @@ describe "UserRegistrationHandler", ->
 			"../../models/User": {User:@User}
 			"./UserCreator": @UserCreator
 			"../Authentication/AuthenticationManager":@AuthenticationManager
-			"../NewsLetter/NewsLetterManager":@NewsLetterManager
+			"../Newsletter/NewsletterManager":@NewsLetterManager
 			"../Email/EmailHandler": @EmailHandler
 
 		@passingRequest = {email:"something@email.com", password:"123"}
