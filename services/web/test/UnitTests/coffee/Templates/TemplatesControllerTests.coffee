@@ -39,16 +39,20 @@ describe 'TemplatesController', ->
 				apis:
 					templates_api:
 						url: @templateApiUrl="http://templates.sharelatex.env"
+					web:
+						url: @webApiUrl="http://web-api.sharelatex.env"
 			"node-uuid":v4:=>@uuid
 			"request": @request
 			"fs":@fs
-		@zipUrl = "www.sharelatex.com/templates/cv/best.zip"
+		@zipUrl = "%2Ftemplates%2F52fb86a81ae1e566597a25f6%2Fv%2F4%2Fzip&templateName=Moderncv%20Banking&compiler=pdflatex"
 		@templateName = "project name here"
 		@user_id = "1234"
 		@req =
 			session:
 				user: _id:@user_id
-				templateData: zipUrl: @zipUrl, templateName: @templateName
+				templateData: 
+					zipUrl: @zipUrl
+					templateName: @templateName
 		@redirect = {}
 
 	describe 'reciving a request to create project from templates.sharelatex.com', ->
@@ -58,6 +62,23 @@ describe 'TemplatesController', ->
 				@ProjectUploadManager.createProjectFromZipArchive.calledWith(@user_id, @templateName, "#{@dumpFolder}/#{@uuid}").should.equal true
 				@request.calledWith("#{@templateApiUrl}#{@zipUrl}").should.equal true
 				@fs.unlink.calledWith("#{@dumpFolder}/#{@uuid}").should.equal true
+				done()
+			res = redirect:redirect
+			@controller.createProjectFromZipTemplate @req, res
+
+
+		it "should go to the web api if the url does not contain templates", (done)->
+			@req.session.templateData.zipUrl = @zipUrl = "/project/52fd24abf080d80a22000fbd/download/zip&templateName=Example_Project&compiler=xelatex"
+			redirect = =>
+				@request.calledWith("#{@webApiUrl}#{@zipUrl}").should.equal true
+				done()
+			res = redirect:redirect
+			@controller.createProjectFromZipTemplate @req, res
+
+		it "should go to the web api if the url has template futher down the string", (done)->
+			@req.session.templateData.zipUrl = @zipUrl = "/project/52fd24abf080d80a22000fbd/download/zip&templateName=templates&compiler=xelatex"
+			redirect = =>
+				@request.calledWith("#{@webApiUrl}#{@zipUrl}").should.equal true
 				done()
 			res = redirect:redirect
 			@controller.createProjectFromZipTemplate @req, res

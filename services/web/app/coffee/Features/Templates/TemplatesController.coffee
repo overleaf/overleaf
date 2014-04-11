@@ -19,7 +19,10 @@ module.exports =
 		dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
 		writeStream = fs.createWriteStream(dumpPath)
 		zipUrl = req.session.templateData.zipUrl
-		zipUrl = "#{settings.apis.templates_api.url}#{zipUrl}"
+		if zipUrl.slice(0,12).indexOf("templates") == -1
+			zipUrl = "#{settings.apis.web.url}#{zipUrl}"
+		else
+			zipUrl = "#{settings.apis.templates_api.url}#{zipUrl}"
 		request(zipUrl).pipe(writeStream)
 		writeStream.on 'close', ->
 			ProjectUploadManager.createProjectFromZipArchive req.session.user._id, req.session.templateData.templateName, dumpPath, (err, project)->
