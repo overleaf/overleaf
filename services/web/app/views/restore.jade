@@ -24,8 +24,6 @@ block content
 									- project_id = project._id.toString()
 									td(width="50%") #{project.name}
 									td(width="25%")
-										a.btn(href="/project/#{project_id}/zip") Download as Zip
-									td(width="25%")
-										a.btn.btn-primary(href="/project/new/template?zipUrl=/project/#{project_id}/zip&templateName=#{project.name}_(Restored)") Restore to ShareLaTeX
+										a.btn(href="/project/#{project_id}/zip") Download latest version as Zip
 
 		include general/small-footer
