@@ -33,6 +33,7 @@ ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsContr
 FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
+RestoreController = require("./Features/Restore/RestoreController")
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
@@ -81,6 +82,9 @@ module.exports = class Router
 		app.post '/user/passwordReset', UserController.doRequestPasswordReset
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
+
+		app.get "/restore", AuthenticationController.requireLogin(), RestoreController.restore
+		app.get "/project/:Project_id/zip", SecurityManager.requestCanAccessProject, RestoreController.getZip
 
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
