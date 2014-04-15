@@ -33,6 +33,8 @@ describe "UserController", ->
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
+		@ReferalAllocator =
+			allocate:sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -41,6 +43,7 @@ describe "UserController", ->
 			"./UserRegistrationHandler":@UserRegistrationHandler
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../Authentication/AuthenticationManager": @AuthenticationManager
+			"../Referal/ReferalAllocator":@ReferalAllocator
 			"logger-sharelatex": {log:->}
 
 
@@ -151,6 +154,19 @@ describe "UserController", ->
 				done()
 			@UserController.register @req, @res
 
+		it "should allocate the referals", (done)->
+			@req.session =
+				referal_id : "23123"
+				referal_source : "email"
+				referal_medium : "bob"
+				
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@req.body.redir = "/somewhere"
+			@res.send = (opts)=>
+				@ReferalAllocator.allocate.calledWith(@req.session.referal_id, @user._id, @req.session.referal_source, @req.session.referal_medium).should.equal true
+				done()
+			@UserController.register @req, @res			
+			
 
 
 	describe "changePassword", ->
