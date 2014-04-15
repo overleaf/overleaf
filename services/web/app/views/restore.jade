@@ -1,0 +1,29 @@
+extends layout
+
+block content
+	.content
+		.row
+			.span10.offset1	
+				.box	
+					.row-fluid
+						.span12
+							.page-header
+								h1 Recover projects
+
+					.row-fluid
+						.span12
+							.well
+								p If any of your projects are missing, or are not showing the most recent updates, you
+									| can recover from our latest back ups here. If you have any problems, please get in 
+									| touch (team@sharelatex.com).
+
+					.row-fluid
+						table.table
+							-each project in projects
+								tr
+									- project_id = project._id.toString()
+									td(width="50%") #{project.name}
+									td(width="25%")
+										a.btn(href="/project/#{project_id}/zip") Download latest version as Zip
+
+		include general/small-footer
