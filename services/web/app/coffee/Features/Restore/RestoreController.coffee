@@ -1,6 +1,12 @@
 Settings = require "settings-sharelatex"
 mongojs = require "mongojs"
-db = mongojs.connect(Settings.mongo.restoreUrl, ["projects", "users"])
+logger = require("logger-sharelatex")
+if Settings.mongo.restoreUrl?
+	logger.log "restore url defined, talking to old db"
+	db = mongojs.connect(Settings.mongo.restoreUrl, ["projects", "users"])
+else
+	logger.log "restore not not defined, continuing as normal"
+	db = {}
 ObjectId = mongojs.ObjectId
 VersioningApiHandler = require "../Versioning/VersioningApiHandler"
 
