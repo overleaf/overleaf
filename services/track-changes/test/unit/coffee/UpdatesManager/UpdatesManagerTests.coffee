@@ -104,6 +104,7 @@ describe "UpdatesManager", ->
 						.calledWith(@lastCompressedUpdate, @rawUpdates.slice(-2))
 						.should.equal true
 
+			###
 			describe "when the raw ops do not follow from the last compressed op version", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 13, op: "mock-op-13" }]
@@ -119,6 +120,7 @@ describe "UpdatesManager", ->
 					@MongoManager.insertCompressedUpdates
 						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate])
 						.should.equal true
+			###
 
 	describe "processUncompressedUpdates", ->
 		beforeEach ->
