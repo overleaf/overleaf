@@ -39,7 +39,8 @@ module.exports =
 					(cb)->
 						AutomaticSnapshotManager.unmarkProjectAsUpdated project_id, cb
 					(cb)->
-						tagsHandler.removeProjectFromAllTags project.owner_ref, project_id, cb
+						tagsHandler.removeProjectFromAllTags project.owner_ref, project_id, (err)->
+						cb() #doesn't matter if this fails or the order it happens in
 					(cb)->
 						project.collaberator_refs.forEach (collaberator_ref)->
 							tagsHandler.removeProjectFromAllTags collaberator_ref, project_id, ->
@@ -50,4 +51,7 @@ module.exports =
 						cb()
 					(cb)->
 						Project.remove {_id:project_id}, cb
-				], callback
+				], (err)->
+					if err?
+						logger.err err:err, "problem deleting project"
+					callback(err)

@@ -3,6 +3,7 @@ settings = require("settings-sharelatex")
 request = require("request")
 logger = require("logger-sharelatex")
 
+oneSecond = 1000
 module.exports = 
 
 
@@ -12,6 +13,7 @@ module.exports =
 			uri:uri
 			json:
 				name:tag
+			timeout:oneSecond
 		logger.log user_id:user_id, project_id:project_id, tag:tag, "send delete tag to tags api"
 		request.del opts, callback
 
@@ -21,6 +23,7 @@ module.exports =
 			uri:uri
 			json:
 				name:tag
+			timeout:oneSecond
 		logger.log user_id:user_id, project_id:project_id, tag:tag, "send add tag to tags api"
 		request.post opts, callback
 
@@ -50,6 +53,7 @@ module.exports =
 		uri = buildUri(user_id, project_id)
 		opts =
 			uri:"#{settings.apis.tags.url}/user/#{user_id}/project/#{project_id}"
+			timeout:oneSecond
 		logger.log user_id:user_id, project_id:project_id, "removing project_id from tags"
 		request.del opts, callback
 
