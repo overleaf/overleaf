@@ -59,6 +59,11 @@ module.exports =
 			port: "6379"
 			password: ""
 
+		fairy:
+			host: "localhost"
+			port: "6379"
+			password: ""
+
 	mysql:
 		clsi:
 			database: "clsi"
