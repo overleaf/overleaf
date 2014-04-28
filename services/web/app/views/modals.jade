@@ -10,6 +10,17 @@
 			button.btn.btn-danger.confirm Delete Forever
 			button.btn.cancel No
 
+#renameProjectModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Rename Project
+		.modal-body
+			form.form-horizontal(onkeydown="if (event.keyCode == 13){event.preventDefault(); document.getElementById('confirmRename').click()}")
+				input.inputmodal#projectNewName(placeholder='name')
+		.modal-footer
+			button.btn.btn-primary#confirmRename Rename
+			button.btn.cancel Cancel
+
 #leaveProjectModal(style='display: none')
 	.modal
 		.modal-header

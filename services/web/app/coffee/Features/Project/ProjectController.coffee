@@ -3,6 +3,7 @@ logger = require("logger-sharelatex")
 projectDeleter = require("./ProjectDeleter")
 projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
+editorController = require("../Editor/EditorController")
 metrics = require('../../infrastructure/Metrics')
 sanitize = require('sanitizer')
 Project = require('../../models/Project').Project
@@ -57,6 +58,16 @@ module.exports =
 				logger.log project: project, user: user, name: projectName, type: template, "created project"
 				res.send {project_id:project._id}
 
+
+	renameProject: (req, res)->
+		project_id = req.params.Project_id
+		newName = req.body.newProjectName
+		editorController.renameProject project_id, newName, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, newName:newName, "problem renaming project"
+				res.send 500
+			else
+				res.send 200
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")

@@ -30,6 +30,8 @@ block content
 						-if (project.accessLevel == "owner")
 							li
 								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete Project
+							li
+								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename Project
 						-else
 							li
 								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave Project

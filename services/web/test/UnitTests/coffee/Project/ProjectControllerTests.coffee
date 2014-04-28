@@ -35,12 +35,17 @@ describe "ProjectController", ->
 			findById: sinon.stub()
 		@SecurityManager =
 			userCanAccessProject:sinon.stub()
+		@EditorController = 
+			renameProject:sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				err:->
 			"./ProjectDeleter": @ProjectDeleter
 			"./ProjectDuplicator": @ProjectDuplicator
 			"./ProjectCreationHandler": @ProjectCreationHandler
+			"../Editor/EditorController": @EditorController
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator
 			"../Tags/TagsHandler":@TagsHandler
 			'../../models/Project': Project:@ProjectModel
@@ -130,6 +135,26 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.projectListPage @req, @res
 
+	describe "renameProject", ->
+		beforeEach ->
+			@newProjectName = "my supper great new project"
+			@req.body.newProjectName = @newProjectName
+
+		it "should call the editor controller", (done)->
+			@EditorController.renameProject.callsArgWith(2)
+			@res.send = (code)=>
+				code.should.equal 200
+				@EditorController.renameProject.calledWith(@project_id, @newProjectName).should.equal true
+				done()
+			@ProjectController.renameProject @req, @res
+
+		it "should send a 500 if there is a problem", (done)->
+			@EditorController.renameProject.callsArgWith(2, "problem")
+			@res.send = (code)=>
+				code.should.equal 500
+				@EditorController.renameProject.calledWith(@project_id, @newProjectName).should.equal true
+				done()
+			@ProjectController.renameProject @req, @res
 
 	describe "loadEditor", ->
 		beforeEach ->
