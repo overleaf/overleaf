@@ -9,7 +9,8 @@ describe "ProjectZipStreamManager", ->
 	beforeEach ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
-		@archive = { }
+		@archive = 
+			on:->
 		@ProjectZipStreamManager = SandboxedModule.require modulePath, requires:
 			"archiver": @archiver = sinon.stub().returns @archive
 			"logger-sharelatex": @logger = {error: sinon.stub(), log: sinon.stub()}
@@ -87,7 +88,7 @@ describe "ProjectZipStreamManager", ->
 				"/chapters/chapter1.tex":
 					lines: ["chapter1", "content"]
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-			@archive.append = sinon.stub().callsArg(2)
+			@archive.append = sinon.stub()
 			@ProjectZipStreamManager.addAllDocsToArchive @project_id, @archive, (error) =>
 				@callback(error)
 				done()
@@ -114,7 +115,7 @@ describe "ProjectZipStreamManager", ->
 				"file-id-1" : "stream-mock-1"
 				"file-id-2" : "stream-mock-2"
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
-			@archive.append = sinon.stub().callsArg(2)
+			@archive.append = sinon.stub()
 			@FileStoreHandler.getFileStream = (project_id, file_id, {}, callback) =>
 				callback null, @streams[file_id]
 			sinon.spy @FileStoreHandler, "getFileStream"

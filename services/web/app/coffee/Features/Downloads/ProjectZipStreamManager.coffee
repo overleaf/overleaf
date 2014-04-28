@@ -8,6 +8,8 @@ module.exports = ProjectZipStreamManager =
 	createZipStreamForProject: (project_id, callback = (error, stream) ->) ->
 		archive = archiver("zip")
 		# return stream immediately before we start adding things to it
+		archive.on "error", (err)->
+			logger.err err:err, project_id:project_id, "something went wrong building archive of project"
 		callback(null, archive)
 		@addAllDocsToArchive project_id, archive, (error) =>
 			if error?
@@ -27,7 +29,8 @@ module.exports = ProjectZipStreamManager =
 					path = path.slice(1) if path[0] == "/"
 					jobs.push (callback) ->
 						logger.log project_id: project_id, "Adding doc"
-						archive.append doc.lines.join("\n"), name: path, callback
+						archive.append doc.lines.join("\n"), name: path
+						callback()
 			async.series jobs, callback
 
 	addAllFilesToArchive: (project_id, archive, callback = (error) ->) ->
@@ -42,5 +45,6 @@ module.exports = ProjectZipStreamManager =
 								logger.err err:error, project_id:project_id, file_id:file._id, "something went wrong adding file to zip archive"
 								return callback(err)
 							path = path.slice(1) if path[0] == "/"
-							archive.append stream, name: path, callback
+							archive.append stream, name: path
+							callback()
 			async.series jobs, callback
