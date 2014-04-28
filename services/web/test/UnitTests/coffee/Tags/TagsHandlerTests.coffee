@@ -6,7 +6,7 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Tags/T
 _ = require('underscore')
 
 
-describe 'Tags handler', ->
+describe 'TagsHandler', ->
 	user_id = "123nd3ijdks"
 	project_id = "123njdskj9jlk"
 	tagsUrl = "tags.sharelatex.testing"
@@ -26,17 +26,17 @@ describe 'Tags handler', ->
 
 	it 'Should post the request to the tags api with the user id in the url', (done)->
 		@handler.addTag user_id, project_id, tag, =>
-			@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", json:{name:tag}}).should.equal true
+			@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000, json:{name:tag}}).should.equal true
 			done()
 
 	it 'should send a delete request when a delete has been recived with the body format standardised', (done)->
 		@handler.deleteTag user_id, project_id, tag, =>
-			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", json:{name:tag}}).should.equal true
+			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000,  json:{name:tag}}).should.equal true
 			done()
 
 	it 'should tell the tags api to remove the project_id from all the users tags', (done)->
 		@handler.removeProjectFromAllTags user_id, project_id, =>
-			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}"}).should.equal true
+			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}", timeout:1000}).should.equal true
 			done()
 
 	describe "groupTagsByProject", ->

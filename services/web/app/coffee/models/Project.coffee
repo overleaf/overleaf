@@ -26,6 +26,7 @@ ProjectSchema = new Schema
 	deletedByExternalDataSource : {type: Boolean, default: false}
 	useClsi2          :   {type:Boolean, default: true}
 	description : {type:String, default:''}
+	archived          : { type: Boolean }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?
@@ -53,9 +54,9 @@ ProjectSchema.statics.findPopulatedById = (project_id, callback)->
 					callback(null, projects[0])
 
 ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)->
-	this.find {owner_ref:user_id}, requiredFields, (err, projects)=>
-		this.find {collaberator_refs:user_id}, requiredFields, (err, collabertions)=>
-			this.find {readOnly_refs:user_id}, requiredFields, (err, readOnlyProjects)=>
+	this.find {owner_ref:user_id, archived: { $exists: false }}, requiredFields, (err, projects)=>
+		this.find {collaberator_refs:user_id, archived: { $exists: false }}, requiredFields, (err, collabertions)=>
+			this.find {readOnly_refs:user_id, archived: { $exists: false }}, requiredFields, (err, readOnlyProjects)=>
 				callback(err, projects, collabertions, readOnlyProjects)
 
 sanitizeTypeOfElement = (elementType)->

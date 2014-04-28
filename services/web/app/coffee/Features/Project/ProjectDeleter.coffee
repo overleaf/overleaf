@@ -33,13 +33,8 @@ module.exports =
 					(cb)->
 						documentUpdaterHandler.flushProjectToMongoAndDelete project_id, cb
 					(cb)->
-						Project.applyToAllFilesRecursivly project.rootFolder[0], (file)=>
-							FileStoreHandler.deleteFile project_id, file._id, ->
-						cb()
-					(cb)->
-						AutomaticSnapshotManager.unmarkProjectAsUpdated project_id, cb
-					(cb)->
-						tagsHandler.removeProjectFromAllTags project.owner_ref, project_id, cb
+						tagsHandler.removeProjectFromAllTags project.owner_ref, project_id, (err)->
+						cb() #doesn't matter if this fails or the order it happens in
 					(cb)->
 						project.collaberator_refs.forEach (collaberator_ref)->
 							tagsHandler.removeProjectFromAllTags collaberator_ref, project_id, ->
@@ -49,5 +44,8 @@ module.exports =
 							tagsHandler.removeProjectFromAllTags readOnly_ref, project_id, ->
 						cb()
 					(cb)->
-						Project.remove {_id:project_id}, cb
-				], callback
+						Project.update {_id:project_id}, { $set: { archived: true }}, cb
+				], (err)->
+					if err?
+						logger.err err:err, "problem deleting project"
+					callback(err)

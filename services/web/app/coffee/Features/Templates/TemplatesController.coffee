@@ -35,11 +35,11 @@ module.exports =
 					res.redirect "/project/#{project._id}"
 
 	publishProject: (user_id, project_id, callback)->
-		logger.log user_id:user_id, project_id:project_id, "reciving request to publish project as template"
+		logger.log user_id:user_id, project_id:project_id, "receiving request to publish project as template"
 		TemplatesPublisher.publish user_id, project_id, callback
 
 	unPublishProject: (user_id, project_id, callback)->
-		logger.log user_id:user_id, project_id:project_id, "reciving request to unpublish project as template"
+		logger.log user_id:user_id, project_id:project_id, "receiving request to unpublish project as template"
 		TemplatesPublisher.unpublish user_id, project_id, callback
 
 	getTemplateDetails: (user_id, project_id, callback)->

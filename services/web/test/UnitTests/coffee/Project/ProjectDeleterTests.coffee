@@ -61,7 +61,7 @@ describe 'Project deleter', ->
 
 	describe "deleteProject", ->
 		beforeEach ->
-			@Project.remove.callsArgWith(1)
+			@Project.update.callsArgWith(2)
 
 		it "should flushProjectToMongoAndDelete in doc updater", (done)->
 			@deleter.deleteProject @project_id, =>
@@ -70,7 +70,11 @@ describe 'Project deleter', ->
 
 		it "should remove the project", (done)->
 			@deleter.deleteProject @project_id, =>
-				@Project.remove.calledWith(_id:@project_id).should.equal true
+				@Project.update.calledWith({
+					_id:@project_id
+				}, {
+					$set: { archived: true }
+				}).should.equal true
 				done()
 
 		it "should removeProjectFromAllTags", (done)->
