@@ -2,6 +2,10 @@ spawn = require("child_process").spawn
 
 module.exports = (grunt) ->
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
 		coffee:
 			app_src:
 				expand: true,
@@ -69,6 +73,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-shell'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
 
 	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests']
 	grunt.registerTask 'run',         ['compile:app', 'bunyan', 'execute']
