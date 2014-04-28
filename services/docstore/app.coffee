@@ -4,6 +4,7 @@ logger.initialize("docstore")
 
 express = require('express')
 HttpController = require "./app/js/HttpController"
+Errors = require "./app/js/Errors"
 
 app = express()
 
@@ -14,7 +15,10 @@ app.get '/status', (req, res)->
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "request errored"
-	res.send(500, "Oops, something went wrong")
+	if error instanceof Errors.NotFoundError
+		res.send 404
+	else
+		res.send(500, "Oops, something went wrong")
 
 port = Settings.internal.docstore.port
 host = Settings.internal.docstore.host

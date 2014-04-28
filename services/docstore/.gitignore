@@ -2,3 +2,4 @@ node_modules
 app/js/
 test/unit/js
 app.js
+forever

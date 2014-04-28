@@ -1,13 +1,35 @@
 MongoManager = require "./MongoManager"
+Errors = require "./Errors"
+logger = require "logger-sharelatex"
+_ = require "underscore"
 
 module.exports = DocManager =
-	getDoc: (project_id, doc_id, callback = (error, doc) ->) ->
+	getDoc: (project_id, doc_id, callback = (error, doc, mongoPath) ->) ->
 		MongoManager.findProject project_id, (error, project) ->
 			return callback(error) if error?
-			return callback null, null if !project?
-			DocManager.findDocInProject project, doc_id, (error, doc) ->
+			return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
+			DocManager.findDocInProject project, doc_id, (error, doc, mongoPath) ->
 				return callback(error) if error?
-				return callback null, doc
+				return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
+				return callback null, doc, mongoPath
+
+	updateDoc: (project_id, doc_id, lines, callback = (error) ->) ->
+		DocManager.getDoc project_id, doc_id, (error, doc, mongoPath) ->
+			return callback(error) if error?
+			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
+
+			if _.isEqual(doc.lines, lines)
+				logger.log {
+					project_id: project_id, doc_id: doc_id, rev: doc.rev
+				}, "doc lines have not changed"
+				return callback()
+			else
+				logger.log {
+					project_id: project_id, doc_id: doc_id, oldDocLines: doc.lines, newDocLines: lines, rev: doc.rev
+				}, "updating doc lines"
+				MongoManager.updateDoc project_id, mongoPath, lines, (error) ->
+					return callback(error) if error?
+					callback()
 
 	findDocInProject: (project, doc_id, callback = (error, doc, mongoPath) ->) ->
 		result = @_findDocInFolder project.rootFolder[0], doc_id, "rootFolder.0"

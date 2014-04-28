@@ -25,3 +25,28 @@ describe "MongoManager", ->
 					_id: ObjectId(@project_id)
 				}, {})
 				.should.equal true
+
+		it "should call the callback with the project", ->
+			@callback.calledWith(null, @project).should.equal true
+
+	describe "updateDoc", ->
+		beforeEach ->
+			@lines = ["mock-lines"]
+			@docPath = "rootFolder.0.folders.1.docs.0"
+			@db.projects.update = sinon.stub().callsArg(2)
+			@MongoManager.updateDoc @project_id, @docPath, @lines, @callback
+
+		it "should update the doc lines and increment the TPDS rev", ->
+			@db.projects.update
+				.calledWith({
+					_id: ObjectId(@project_id)
+				}, {
+					$set:
+						"rootFolder.0.folders.1.docs.0.lines": @lines
+					$inc:
+						"rootFolder.0.folders.1.docs.0.rev": 1
+				})
+				.should.equal true
+
+		it "should call the callback with the project", ->
+			@callback.called.should.equal true

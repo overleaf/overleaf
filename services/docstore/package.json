@@ -7,7 +7,8 @@
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "mongojs": "0.9.11",
-    "express": "~4.1.1"
+    "express": "~4.1.1",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "grunt-execute": "~0.2.1",
