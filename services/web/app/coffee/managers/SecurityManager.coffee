@@ -28,7 +28,7 @@ module.exports =
 	requestCanAccessProject : (req, res, next)->
 		doRequest = (req, res, next) ->
 			getRequestUserAndProject req, res, {allow_auth_token: options?.allow_auth_token}, (err, user, project)->
-				if !project?
+				if !project? or project.archived
 					return HomeController.notFound(req, res, next)
 				userCanAccessProject user, project, (canAccess, permissionLevel)->
 					if canAccess
@@ -156,7 +156,7 @@ module.exports =
 
 getRequestUserAndProject = (req, res, options, callback)->
 	project_id = req.params.Project_id
-	Project.findById project_id, 'name owner_ref readOnly_refs collaberator_refs publicAccesLevel', (err, project)=>
+	Project.findById project_id, 'name owner_ref readOnly_refs collaberator_refs publicAccesLevel archived', (err, project)=>
 		if err?
 			logger.err err:err, "error getting project for security check"
 			return callback err
