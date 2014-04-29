@@ -21,6 +21,9 @@ SERVICES = [{
 }, {
 	name: "track-changes"
 	repo: "https://github.com/sharelatex/track-changes-sharelatex.git"
+}, {
+	name: "docstore"
+	repo: "https://github.com/sharelatex/docstore-sharelatex.git"
 }]
 
 module.exports = (grunt) ->
