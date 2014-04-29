@@ -50,3 +50,22 @@ describe "MongoManager", ->
 
 		it "should call the callback with the project", ->
 			@callback.called.should.equal true
+
+	describe "insertDoc", ->
+		beforeEach ->
+			@doc_id = ObjectId().toString()
+			@lines = ["mock-lines"]
+			@db.projects.insert = sinon.stub().callsArg(1)
+			@MongoManager.insertDoc @project_id, @doc_id, lines: @lines, @callback
+
+		it "should insert the attributes with the given doc and project id", ->
+			@db.projects.insert
+				.calledWith({
+					_id: ObjectId(@doc_id)
+					project_id: ObjectId(@project_id)
+					lines: @lines
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

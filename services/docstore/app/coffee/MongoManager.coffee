@@ -13,3 +13,8 @@ module.exports = MongoManager =
 		update.$inc["#{docPath}.rev"] = 1
 
 		db.projects.update _id: ObjectId(project_id), update, callback
+
+	insertDoc: (project_id, doc_id, attributes, callback = (error) ->) ->
+		attributes._id = ObjectId(doc_id)
+		attributes.project_id = ObjectId(project_id)
+		db.projects.insert attributes, callback

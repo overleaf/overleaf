@@ -70,6 +70,44 @@ describe "DocManager", ->
 					.calledWith(new Errors.NotFoundError("No such doc: #{@doc_id}"))
 					.should.equal true
 
+	describe "deleteDoc", ->
+		describe "when the doc exists", ->
+			beforeEach ->
+				@lines = ["mock", "doc", "lines"]
+				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, lines: @lines)
+				@MongoManager.insertDoc = sinon.stub().callsArg(3)
+				@DocManager.deleteDoc @project_id, @doc_id, @callback
+
+			it "should get the doc", ->
+				@DocManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "insert the doc as a deleted doc", ->
+				@MongoManager.insertDoc
+					.calledWith(@project_id, @doc_id, {
+						lines: @lines
+						deleted: true
+					})
+					.should.equal true
+
+			it "should return the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc does not exist", ->
+			beforeEach -> 
+				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, null)
+				@MongoManager.insertDoc = sinon.stub().callsArg(3)
+				@DocManager.deleteDoc @project_id, @doc_id, @callback
+
+			it "should not try to insert a deleted doc", ->
+				@MongoManager.insertDoc.called.should.equal false
+
+			it "should return a NotFoundError", ->
+				@callback
+					.calledWith(new Errors.NotFoundError("No such doc: #{@doc_id}"))
+					.should.equal true
+
 	describe "updateDoc", ->
 		beforeEach ->
 			@oldDocLines = ["old", "doc", "lines"]

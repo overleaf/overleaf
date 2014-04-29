@@ -31,6 +31,14 @@ module.exports = DocManager =
 					return callback(error) if error?
 					callback null, true
 
+	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
+		DocManager.getDoc project_id, doc_id, (error, doc) ->
+			return callback(error) if error?
+			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
+			MongoManager.insertDoc project_id, doc_id, { lines: doc.lines, deleted: true }, (error) ->
+				return callback(error) if error?
+				callback()
+
 	findDocInProject: (project, doc_id, callback = (error, doc, mongoPath) ->) ->
 		result = @_findDocInFolder project.rootFolder[0], doc_id, "rootFolder.0"
 		if result?
