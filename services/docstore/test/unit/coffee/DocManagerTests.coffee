@@ -107,7 +107,7 @@ describe "DocManager", ->
 					.should.equal true
 
 			it "should return the callback", ->
-				@callback.called.should.equal true
+				@callback.calledWith(null, true).should.equal true
 
 		describe "when the doc lines have not changed", ->
 			beforeEach ->
@@ -118,7 +118,7 @@ describe "DocManager", ->
 				@MongoManager.updateDoc.called.should.equal false
 
 			it "should return the callback", ->
-				@callback.called.should.equal true
+				@callback.calledWith(null, false).should.equal true
 
 		describe "when the doc does not exist", ->
 			beforeEach ->

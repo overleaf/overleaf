@@ -1,14 +1,16 @@
-Settings = require('settings-sharelatex')
-logger = require('logger-sharelatex')
-logger.initialize("docstore")
-
-express = require('express')
+Settings   = require "settings-sharelatex"
+logger     = require "logger-sharelatex"
+express    = require "express"
+bodyParser = require "body-parser"
+Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
-Errors = require "./app/js/Errors"
+
+logger.initialize("docstore")
 
 app = express()
 
-app.get '/project/:project_id/doc/:doc_id', HttpController.getDoc
+app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
+app.post '/project/:project_id/doc/:doc_id', bodyParser.json(), HttpController.updateDoc
 
 app.get '/status', (req, res)->
 	res.send('docstore is alive')

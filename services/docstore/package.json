@@ -8,7 +8,8 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "mongojs": "0.9.11",
     "express": "~4.1.1",
-    "underscore": "~1.6.0"
+    "underscore": "~1.6.0",
+    "body-parser": "~1.0.2"
   },
   "devDependencies": {
     "grunt-execute": "~0.2.1",
@@ -22,6 +23,7 @@
     "sinon": "~1.5.2",
     "sandboxed-module": "~0.3.0",
     "chai": "~1.9.1",
-    "grunt-forever": "~0.4.4"
+    "grunt-forever": "~0.4.4",
+    "request": "~2.34.0"
   }
 }
