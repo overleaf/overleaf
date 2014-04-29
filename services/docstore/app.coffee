@@ -11,6 +11,7 @@ app = express()
 
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.post '/project/:project_id/doc/:doc_id', bodyParser.json(), HttpController.updateDoc
+app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
 
 app.get '/status', (req, res)->
 	res.send('docstore is alive')

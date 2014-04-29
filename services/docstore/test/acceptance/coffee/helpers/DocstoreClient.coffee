@@ -31,6 +31,11 @@ module.exports = DocstoreClient =
 			json:
 				lines: lines
 		}, callback
+
+	deleteDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
+		request.del {
+			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
+		}, callback
 		
 		
 		

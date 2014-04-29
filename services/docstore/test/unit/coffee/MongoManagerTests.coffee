@@ -8,7 +8,7 @@ describe "MongoManager", ->
 	beforeEach ->
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs":
-				db: @db = { projects: {} }
+				db: @db = { projects: {}, docs: {} }
 				ObjectId: ObjectId
 		@project_id = ObjectId().toString()
 		@callback = sinon.stub()
@@ -55,11 +55,11 @@ describe "MongoManager", ->
 		beforeEach ->
 			@doc_id = ObjectId().toString()
 			@lines = ["mock-lines"]
-			@db.projects.insert = sinon.stub().callsArg(1)
+			@db.docs.insert = sinon.stub().callsArg(1)
 			@MongoManager.insertDoc @project_id, @doc_id, lines: @lines, @callback
 
 		it "should insert the attributes with the given doc and project id", ->
-			@db.projects.insert
+			@db.docs.insert
 				.calledWith({
 					_id: ObjectId(@doc_id)
 					project_id: ObjectId(@project_id)

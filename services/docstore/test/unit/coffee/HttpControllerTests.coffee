@@ -86,3 +86,21 @@ describe "HttpController", ->
 				@res.send
 					.calledWith(400)
 					.should.equal true
+
+	describe "deleteDoc", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+				doc_id: @doc_id
+			@DocManager.deleteDoc = sinon.stub().callsArg(2)
+			@HttpController.deleteDoc @req, @res, @next
+
+		it "should delete the document", ->
+			@DocManager.deleteDoc
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
+
+		it "should return a 204 (No Content)", ->
+			@res.send
+				.calledWith(204)
+				.should.equal true

@@ -17,4 +17,4 @@ module.exports = MongoManager =
 	insertDoc: (project_id, doc_id, attributes, callback = (error) ->) ->
 		attributes._id = ObjectId(doc_id)
 		attributes.project_id = ObjectId(project_id)
-		db.projects.insert attributes, callback
+		db.docs.insert attributes, callback
