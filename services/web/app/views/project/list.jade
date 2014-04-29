@@ -26,17 +26,17 @@ block content
 						span.caret
 					ul.dropdown-menu.pull-right(role="menu")
 						li
-							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone Project
+							a(href='/project/'+project_id+'/clone', data-csrf=csrfToken).cloneProject Clone
 						li
 							a(href='/project/'+project._id+'/download/zip').downloadZip Download Zip
 						-if (project.accessLevel == "owner")
 							li
-								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename Project
+								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename
 							li
-								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete Project
+								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete
 						-else
 							li
-								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave Project
+								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave
 				a.projectName(href="/project/#{project._id}") #{project.name}
 				.projectDetails
 					span Last modified on 
