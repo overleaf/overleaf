@@ -114,6 +114,9 @@ module.exports =
 			if(user?)
 				randomPassword = uuid.v4()
 				AuthenticationManager.setUserPassword user._id, randomPassword, (error) ->
+					if err?
+						logger.err err:err, email:email, user_id:user._id, "problem reseting user password"
+						return res.send 500
 					emailOpts =
 						newPassword: randomPassword
 						to: user.email
