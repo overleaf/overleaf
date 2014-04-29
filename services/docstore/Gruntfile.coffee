@@ -53,17 +53,17 @@ module.exports = (grunt) ->
 		mochaTest:
 			unit:
 				options:
-					reporter: "spec"
+					reporter: grunt.option('reporter') or 'spec'
 				src: ["test/unit/js/**/*.js"]
 			acceptance:
 				options:
-					reporter: "spec"
+					reporter: grunt.option('reporter') or 'spec'
 					timeout: 40000
 					grep: grunt.option("grep")
 				src: ["test/acceptance/js/**/*.js"]
 			smoke:
 				options:
-					reported: "spec"
+					reporter: grunt.option('reporter') or 'spec'
 					timeout: 10000
 				src: ["test/smoke/js/**/*.js"]
 
@@ -75,7 +75,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-bunyan'
 	grunt.loadNpmTasks 'grunt-forever'
 
-	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src', 'coffee:smoke_tests']
+	grunt.registerTask 'compile:app', ['clean:app', 'coffee:app', 'coffee:app_src']
 	grunt.registerTask 'run',         ['compile:app', 'bunyan', 'execute']
 
 	grunt.registerTask 'compile:unit_tests', ['clean:unit_tests', 'coffee:unit_tests']
