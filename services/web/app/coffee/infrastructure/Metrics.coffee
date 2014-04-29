@@ -11,6 +11,9 @@ module.exports =
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
 
+	timing: (key, timeSpan, sampleRate)->
+		statsd.timing(key, timeSpan, sampleRate)
+
 	Timer : class
 		constructor :(key, sampleRate = 1)->
 			this.start = new Date()
