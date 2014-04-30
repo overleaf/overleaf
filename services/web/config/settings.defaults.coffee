@@ -72,6 +72,8 @@ module.exports =
 			url :"http://localhost:3012"
 		spelling:
 			url : "http://localhost:3005"
+		docstore:
+			url : "http://localhost:3016"
 		versioning:
 			snapshotwaitms:3000
 			url: "http://localhost:4000"
