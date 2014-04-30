@@ -9,7 +9,7 @@ module.exports.logger = (req, res, next) ->
 	res.end = () ->
 		end.apply(this, arguments)
 		responseTime = new Date() - startTime
-		routePath = req.route.path.replace(/\//g, '-').slice(1)
+		routePath = req.route.path.toString().replace(/\//g, '-').slice(1)
 
 		processName = if settings.internal.web.name? then "web-#{settings.internal.web.name}" else "web"
 		key = "#{os.hostname()}.#{processName}.#{routePath}".toLowerCase().trim()
