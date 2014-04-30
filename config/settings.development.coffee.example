@@ -184,15 +184,12 @@ module.exports =
 	# Email support
 	# -------------
 	#
-	#	ShareLaTeX uses nodemailer (http://www.nodemailer.com/) to send transactional emails.
-	#	To see the range of transport and options they support, see http://www.nodemailer.com/docs/transports
-	#email:
-	# Who should emails be from by default?
+	# ShareLaTeX uses nodemailer (http://www.nodemailer.com/) to send transactional emails.
+	# To see the range of transport and options they support, see http://www.nodemailer.com/docs/transports
+	# email:
 	#	fromAddress: ""
-	# The default replyTo field, if it should be set
 	#	replyTo: ""
 	#	lifecycle: false
-	## Example transport and parameter settings for Amazon SES
 	#	transport: "SES"
 	#	parameters:
 	#		AWSAccessKeyID: ""
