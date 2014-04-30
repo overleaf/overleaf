@@ -180,21 +180,13 @@ describe 'project entity handler', ->
 
 		describe "a doc", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler._cleanUpEntity @project, _id: @entity_id, 'doc', done
+				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(3)
+				@ProjectEntityHandler._cleanUpEntity @project, @entity = {_id: @entity_id}, 'doc', done
 
-			it "should not attempted to delete from FileStoreHandler", ->
-				@FileStoreHandler.deleteFile.called.should.equal false
-
-			it "should delete the doc from the document updater", ->
-				@documentUpdaterHandler.deleteDoc.calledWith(project_id, @entity_id).should.equal true
-
-		describe "when the entity is the root document", ->
-			beforeEach (done) ->
-				@project.rootDoc_id = new ObjectId(@entity_id)
-				@ProjectEntityHandler._cleanUpEntity @project, _id: @entity_id, 'doc', done
-
-			it "should unset the root doc id", ->
-				@ProjectEntityHandler.unsetRootDoc.calledWith(project_id).should.equal true
+			it "should clean up the doc", ->
+				@ProjectEntityHandler._cleanUpDoc
+					.calledWith(@project, @entity)
+					.should.equal true
 
 		describe "a folder", ->
 			beforeEach (done) ->
