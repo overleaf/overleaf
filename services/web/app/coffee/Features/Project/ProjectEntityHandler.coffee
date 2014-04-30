@@ -13,6 +13,7 @@ logger = require('logger-sharelatex')
 slReqIdHelper = require('soa-req-id')
 docComparitor = require('./DocLinesComparitor')
 projectUpdateHandler = require('./ProjectUpdateHandler')
+DocstoreManager = require "../Docstore/DocstoreManager"
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id, sl_req_id, callback) ->
@@ -328,7 +329,13 @@ module.exports = ProjectEntityHandler =
 
 		unsetRootDocIfRequired (error) ->
 			return callback(error) if error?
-			require('../../Features/DocumentUpdater/DocumentUpdaterHandler').deleteDoc project_id, doc_id, callback
+			require('../../Features/DocumentUpdater/DocumentUpdaterHandler').deleteDoc project_id, doc_id, (error) ->
+				return callback(error) if error?
+				ProjectEntityHandler._insertDeletedDocReference project._id, doc, (error) ->
+					return callback(error) if error?
+					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
+						return callback(error) if error?
+						callback()
 
 	_cleanUpFile: (project, file, sl_req_id, callback = (error) ->) ->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
@@ -365,6 +372,18 @@ module.exports = ProjectEntityHandler =
 			model.update conditons, pullUpdate, {}, (err)->
 				if callback?
 					callback(err)
+
+	_insertDeletedDocReference: (project_id, doc, callback = (error) ->) ->
+		Project.update {
+			_id: project_id
+		}, {
+			$push: {
+				deletedDocs: {
+					_id:  doc._id
+					name: doc.name
+				}
+			}
+		}, {}, callback
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"

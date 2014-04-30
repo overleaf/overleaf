@@ -61,6 +61,7 @@ describe 'project entity handler', ->
 			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
 			'./ProjectLocator':@projectLocator = {}
 			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@documentUpdaterHandler = {}
+			'../Docstore/DocstoreManager': @DocstoreManager = {}
 			'logger-sharelatex':{log:->}
 			'./ProjectUpdateHandler': @projectUpdater
 
@@ -703,3 +704,80 @@ describe 'project entity handler', ->
 			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, =>
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, startPath:@path.fileSystem, endPath:"/file/system/new.tex", project_name:@project.name, rev:4}).should.equal true
 				done()
+
+	describe "_insertDeletedDocReference", ->
+		beforeEach ->
+			@doc =
+				_id: ObjectId()
+				name: "test.tex"
+			@callback = sinon.stub()
+			@ProjectModel.update = sinon.stub().callsArgWith(3)
+			@ProjectEntityHandler._insertDeletedDocReference project_id, @doc, @callback
+
+		it "should insert the doc into deletedDocs", ->
+			@ProjectModel.update
+				.calledWith({
+					_id: project_id
+				}, {
+					$push: {
+						deletedDocs: {
+							_id: @doc._id
+							name: @doc.name
+						}
+					}
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "_cleanUpDoc", ->
+		beforeEach ->
+			@project =
+				_id: ObjectId(project_id)
+			@doc =
+				_id: ObjectId()
+				name: "test.tex"
+			@ProjectEntityHandler.unsetRootDoc = sinon.stub().callsArg(1)
+			@ProjectEntityHandler._insertDeletedDocReference = sinon.stub().callsArg(2)
+			@documentUpdaterHandler.deleteDoc = sinon.stub().callsArg(2)
+			@DocstoreManager.deleteDoc = sinon.stub().callsArg(2)
+			@callback = sinon.stub()
+
+		describe "when the doc is the root doc", ->
+			beforeEach ->
+				@project.rootDoc_id = @doc._id
+				@ProjectEntityHandler._cleanUpDoc @project, @doc, @callback
+
+			it "should unset the root doc", ->
+				@ProjectEntityHandler.unsetRootDoc
+					.calledWith(project_id)
+					.should.equal true
+
+			it "should delete the doc in the doc updater", ->
+				@documentUpdaterHandler.deleteDoc
+					.calledWith(project_id, @doc._id.toString())
+
+			it "should insert the doc into the deletedDocs array", ->
+				@ProjectEntityHandler._insertDeletedDocReference
+					.calledWith(@project._id, @doc)
+					.should.equal true
+
+			it "should delete the doc in the doc store", ->
+				@DocstoreManager.deleteDoc
+					.calledWith(project_id, @doc._id.toString())
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc is not the root doc", ->
+			beforeEach ->
+				@project.rootDoc_id = ObjectId()
+				@ProjectEntityHandler._cleanUpDoc @project, @doc, @callback
+
+			it "should not unset the root doc", ->
+				@ProjectEntityHandler.unsetRootDoc.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true

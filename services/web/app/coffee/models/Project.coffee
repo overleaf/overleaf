@@ -11,6 +11,9 @@ Errors  = require "../errors"
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
+DeletedDocSchema = new Schema
+	name: String
+
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
@@ -27,6 +30,7 @@ ProjectSchema = new Schema
 	useClsi2          :   {type:Boolean, default: true}
 	description : {type:String, default:''}
 	archived          : { type: Boolean }
+	deletedDocs       : [DeletedDocSchema]
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?
