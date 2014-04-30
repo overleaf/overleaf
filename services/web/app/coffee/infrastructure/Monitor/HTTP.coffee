@@ -13,11 +13,11 @@ module.exports.logger = (req, res, next) ->
 
 		processName = if settings.internal.web.name? then "web-#{settings.internal.web.name}" else "web"
 		key = "#{os.hostname()}.#{processName}.#{routePath}".toLowerCase().trim()
-		metrics.timing(key, responseTime, 0.2)
 		logger.log
 			req:
 				url: req.originalUrl || req.url
 				method: req.method
+				key:key
 				referrer: req.headers['referer'] || req.headers['referrer']
 				"remote-addr": req.ip || req.socket?.socket?.remoteAddress || req.socket?.remoteAddress
 				"user-agent": req.headers["user-agent"]
