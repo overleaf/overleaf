@@ -9,6 +9,7 @@ logger.initialize("docstore")
 
 app = express()
 
+app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.post '/project/:project_id/doc/:doc_id', bodyParser.json(), HttpController.updateDoc
 app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc

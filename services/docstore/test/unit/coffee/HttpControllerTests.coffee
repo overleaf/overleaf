@@ -4,6 +4,7 @@ chai = require('chai')
 chai.should()
 expect = chai.expect
 modulePath = require('path').join __dirname, '../../../app/js/HttpController'
+ObjectId = require("mongojs").ObjectId
 
 describe "HttpController", ->
 	beforeEach ->
@@ -18,6 +19,8 @@ describe "HttpController", ->
 		@doc = {
 			_id: @doc_id
 			lines: ["mock", "lines"]
+			version: 42
+			rev: 5
 		}
 
 	describe "getDoc", ->
@@ -35,7 +38,50 @@ describe "HttpController", ->
 
 		it "should return the doc as JSON", ->
 			@res.json
-				.calledWith(lines: @doc.lines)
+				.calledWith({
+					_id: @doc_id
+					lines: @doc.lines
+					rev: @doc.rev
+					version: @doc.version
+				})
+				.should.equal true
+
+	describe "getAllDocs", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+			@docs = [{
+				_id: ObjectId()
+				lines: ["mock", "lines", "one"]
+				version: 1
+				rev: 2
+			}, {
+				_id: ObjectId()
+				lines: ["mock", "lines", "two"]
+				version: 3
+				rev: 4
+			}]
+			@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+			@HttpController.getAllDocs @req, @res, @next
+
+		it "should get all the docs", ->
+			@DocManager.getAllDocs
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should return the doc as JSON", ->
+			@res.json
+				.calledWith([{
+					_id:   @docs[0]._id.toString()
+					lines: @docs[0].lines
+					rev:   @docs[0].rev
+					version: @docs[0].version
+				}, {
+					_id:   @docs[1]._id.toString()
+					lines: @docs[1].lines
+					rev:   @docs[1].rev
+					version: @docs[1].version
+				}])
 				.should.equal true
 
 	describe "updateDoc", ->

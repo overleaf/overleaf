@@ -5,12 +5,16 @@ chai.should()
 
 DocstoreClient = require "./helpers/DocstoreClient"
 
-describe "Applying updates to a doc", ->
+describe "Deleting a doc", ->
 	beforeEach (done) ->
 		@project_id = ObjectId()
+		@doc_id = ObjectId()
 		@lines = ["original", "lines"]
-		DocstoreClient.createDoc @project_id, @lines, (error, @doc_id) =>
-			done()
+		DocstoreClient.createProject @project_id, (error) =>
+			throw error if error?
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
+				throw error if error?
+				done()
 
 	afterEach (done) ->
 		DocstoreClient.deleteProject @project_id, done

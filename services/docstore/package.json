@@ -9,7 +9,8 @@
     "mongojs": "0.9.11",
     "express": "~4.1.1",
     "underscore": "~1.6.0",
-    "body-parser": "~1.0.2"
+    "body-parser": "~1.0.2",
+    "async": "~0.8.0"
   },
   "devDependencies": {
     "grunt-execute": "~0.2.1",

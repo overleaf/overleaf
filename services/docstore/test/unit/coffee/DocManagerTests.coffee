@@ -41,7 +41,7 @@ describe "DocManager", ->
 
 		describe "when the project does not exist", ->
 			beforeEach -> 
-				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, @null)
+				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, null)
 				@DocManager.findDocInProject = sinon.stub()
 				@DocManager.getDoc @project_id, @doc_id, @callback
 
@@ -68,6 +68,43 @@ describe "DocManager", ->
 			it "should return a NotFoundError", ->
 				@callback
 					.calledWith(new Errors.NotFoundError("No such doc: #{@doc_id}"))
+					.should.equal true
+
+	describe "getAllDocs", ->
+		describe "when the project exists", ->
+			beforeEach -> 
+				@project = { name: "mock-project" }
+				@docs = [{ _id: @doc_id, lines: ["mock-lines"] }]
+				@mongoPath = "mock.mongo.path"
+				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, @project)
+				@DocManager.findAllDocsInProject = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllDocs @project_id, @callback
+
+			it "should get the project from the database", ->
+				@MongoManager.findProject
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should find all the docs in the project", ->
+				@DocManager.findAllDocsInProject
+					.calledWith(@project)
+					.should.equal true
+
+			it "should return the docs", ->
+				@callback.calledWith(null, @docs).should.equal true
+
+		describe "when the project does not exist", ->
+			beforeEach -> 
+				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, null)
+				@DocManager.findAllDocsInProject = sinon.stub()
+				@DocManager.getDoc @project_id, @doc_id, @callback
+
+			it "should not try to find the doc in the project", ->
+				@DocManager.findAllDocsInProject.called.should.equal false
+
+			it "should return a NotFoundError", ->
+				@callback
+					.calledWith(new Errors.NotFoundError("No such project: #{@project_id}"))
 					.should.equal true
 
 	describe "deleteDoc", ->
@@ -231,4 +268,26 @@ describe "DocManager", ->
 			}, @doc_id, (error, doc, mongoPath) =>
 				expect(doc).to.be.null
 				expect(mongoPath).to.be.null
+				done()
+
+	describe "findAllDocsInProject", ->
+		it "should return all the docs", (done) ->
+			@DocManager.findAllDocsInProject {
+				rootFolder: [{
+					docs: [
+						@doc1 = { _id: ObjectId() }
+					],
+					folders: [{
+						docs: [
+							@doc2 = { _id: ObjectId() }
+						]
+					}, {
+						docs: [
+							@doc3 = { _id: ObjectId() }
+							@doc4 =  { _id: ObjectId() }
+						]
+					}]
+				}]
+			}, (error, docs) =>
+				expect(docs).to.deep.equal [@doc1, @doc2, @doc3, @doc4]
 				done()

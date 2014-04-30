@@ -11,9 +11,14 @@ module.exports = HttpController =
 			if !doc?
 				res.send 404
 			else
-				res.json {
-					lines: doc.lines
-				}
+				res.json HttpController._buildDocView(doc)
+
+	getAllDocs: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "getting all docs"
+		DocManager.getAllDocs project_id, (error, docs = []) ->
+			return next(error) if error?
+			res.json docs.map(HttpController._buildDocView)
 
 	updateDoc: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
@@ -39,3 +44,11 @@ module.exports = HttpController =
 		DocManager.deleteDoc project_id, doc_id, (error) ->
 			return next(error) if error?
 			res.send 204
+
+	_buildDocView: (doc) -> 
+		return {
+			_id:     doc._id.toString()
+			lines:   doc.lines
+			rev:     doc.rev
+			version: doc.version
+		}
