@@ -22,7 +22,6 @@ module.exports = UpdatesManager =
 				while rawUpdates[0]? and rawUpdates[0].v <= lastCompressedUpdate.v
 					rawUpdates.shift()
 
-				### TODO: Restore this when errors have died down after the Sunday crash.
 				if rawUpdates[0]? and rawUpdates[0].v != lastCompressedUpdate.v + 1
 					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastCompressedUpdate.v}")
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
@@ -31,7 +30,6 @@ module.exports = UpdatesManager =
 					MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], () ->
 						return callback error
 					return
-				###
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
 			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, (error) ->
