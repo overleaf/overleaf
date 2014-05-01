@@ -3,7 +3,6 @@ projectEntityHandler = require('./ProjectEntityHandler')
 projectLocator = require('./ProjectLocator')
 projectOptionsHandler = require('./ProjectOptionsHandler')
 DocumentUpdaterHandler = require("../DocumentUpdater/DocumentUpdaterHandler")
-DocstoreManager = require "../Docstore/DocstoreManager"
 Project = require("../../models/Project").Project
 _ = require('underscore')
 async = require('async')
@@ -17,48 +16,38 @@ module.exports =
 				projectCreationHandler.createBlankProject owner._id, newProjectName, (err, newProject)->
 					return callback(err) if err?
 					projectLocator.findRootDoc {project:originalProject}, (err, originalRootDoc)->
-						return callback(err) if err?
-						DocstoreManager.getAllDocs originalProjectId, (err, docContentsArray) ->
-							return callback(err) if err?
+						projectOptionsHandler.setCompiler newProject._id, originalProject.compiler
 
-							docContents = {}
-							for docContent in docContentsArray
-								docContents[docContent._id] = docContent
+						setRootDoc = _.once (doc_id)->
+							projectEntityHandler.setRootDoc newProject, doc_id
 
-							projectOptionsHandler.setCompiler newProject._id, originalProject.compiler
+						copyDocs = (originalFolder, newParentFolder, callback)->
+							jobs = originalFolder.docs.map (doc)->
+								return (callback)->
+									projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, doc.lines, (err, newDoc)->
+										if originalRootDoc? and newDoc.name == originalRootDoc.name
+											setRootDoc newDoc._id
+										callback()
+							async.series jobs, callback
 
-							setRootDoc = _.once (doc_id)->
-								projectEntityHandler.setRootDoc newProject, doc_id
+						copyFiles = (originalFolder, newParentFolder, callback)->
+							jobs = originalFolder.fileRefs.map (file)->
+								return (callback)->
+									projectEntityHandler.copyFileFromExistingProject newProject, newParentFolder._id, originalProject._id, file, callback
+							async.parallelLimit jobs, 5, callback
 
-							copyDocs = (originalFolder, newParentFolder, callback)->
-								jobs = originalFolder.docs.map (doc)->
-									return (callback)->
-										content = docContents[doc._id.toString()]
-										return callback(new Error("doc_id not found: #{doc._id}")) if !content?
-										projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
-											if originalRootDoc? and newDoc.name == originalRootDoc.name
-												setRootDoc newDoc._id
-											callback()
-								async.series jobs, callback
+						copyFolder = (folder, desFolder, callback)->
+							jobs = folder.folders.map (childFolder)->
+								return (callback)->
+									projectEntityHandler.addFolder newProject, desFolder._id, childFolder.name, (err, newFolder)->
+										copyFolder childFolder, newFolder, callback
+							jobs.push (cb)->
+								copyDocs folder, desFolder, cb
+							jobs.push (cb)->
+								copyFiles folder, desFolder, cb
 
-							copyFiles = (originalFolder, newParentFolder, callback)->
-								jobs = originalFolder.fileRefs.map (file)->
-									return (callback)->
-										projectEntityHandler.copyFileFromExistingProject newProject, newParentFolder._id, originalProject._id, file, callback
-								async.parallelLimit jobs, 5, callback
+							async.series jobs, callback
 
-							copyFolder = (folder, desFolder, callback)->
-								jobs = folder.folders.map (childFolder)->
-									return (callback)->
-										projectEntityHandler.addFolder newProject, desFolder._id, childFolder.name, (err, newFolder)->
-											copyFolder childFolder, newFolder, callback
-								jobs.push (cb)->
-									copyDocs folder, desFolder, cb
-								jobs.push (cb)->
-									copyFiles folder, desFolder, cb
-
-								async.series jobs, callback
-
-							copyFolder originalProject.rootFolder[0], newProject.rootFolder[0], ->
-								callback(err, newProject)
+						copyFolder originalProject.rootFolder[0], newProject.rootFolder[0], ->
+							callback(err, newProject)
 
