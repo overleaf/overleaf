@@ -7,7 +7,7 @@ SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongoose").Types.ObjectId
 tk = require 'timekeeper'
 
-describe 'ProjectEntityHandler', ->
+describe 'project entity handler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'
 	folder_id = "4eecaffcbffa66588e000008"
 	rootFolderId = "4eecaffcbffa66588e000007"
@@ -481,162 +481,137 @@ describe 'ProjectEntityHandler', ->
 				@projectUpdater.markAsUpdated.calledWith(project_id).should.equal true
 			@ProjectEntityHandler.updateDocLines project_id, docId, docLines, done
 
-	describe "getting folders, docs and files", ->
+	describe "flushing folders, docs and files", ->
 		beforeEach ->
 			@project.rootFolder = [
-				docs: [@doc1 = {
-					name  : "doc1"
-					_id   : "doc1_id"
-				}]
-				fileRefs: [@file1 = {
-					rev  : 1
-					_id  : "file1_id"
-					name : "file1"
-				}]
-				folders: [@folder1 = {
+				folders: [{
 					name    : "folder1"
-					docs    : [@doc2 = {
-						name  : "doc2"
-						_id   : "doc2_id"
+					folders : [{
+						name    : "folder2"
+						folders : [{
+							name:"folder4",
+							docs:[{name:"doc3", rev:3,lines:["doc3"]}],
+							fileRefs:[{_id:"file3_id", rev:3,name:"file3"}],
+							folders:[]
+							}]
+						docs    : [{
+							rev:2
+							name: "doc2"
+							lines: ["doc2", "lines"]
+						}]
+						fileRefs   : []
 					}]
-					fileRefs   : [@file2 = {
-						rev  : 2
+					docs    : []
+					fileRefs   : [{
+						rev:2
 						name : "file2"
 						_id  : "file2_id"
 					}]
+				}, {
+					name    : "folder3"
 					folders : []
+					docs    : []
+					fileRefs   : []
+				}]
+				docs: [{
+					rev:1
+					name: "doc1"
+					lines: ["doc1", "lines"]
+				}]
+				fileRefs: [{
+					rev:1
+					_id  : "file1_id"
+					name : "file1"
 				}]
 			]
 
-		describe "getAllFolders", ->
-			beforeEach ->
-				@callback = sinon.stub()
-				@ProjectEntityHandler.getAllFolders project_id, @callback
+		it "should work for a very small project", (done)->
+			@project.rootFolder[0].folders = []
+			@ProjectEntityHandler.getAllDocs project_id, (err, docs) =>
+				docs["/doc1"].name.should.equal "doc1"
+				@ProjectEntityHandler.getAllFiles project_id, (err, files) =>
+					files["/file1"].name.should.equal "file1"
+					done()
 
-			it "should call the callback with the folders", ->
-				@callback
-					.calledWith(null, {
-						"/": @project.rootFolder[0]
-						"/folder1": @folder1
-					})
-					.should.equal true
+		it "should be able to get all folders", (done) ->
+			@ProjectEntityHandler.getAllFolders project_id, (err, folders) ->
+				should.exist folders["/"]
+				should.exist folders["/folder1"]
+				should.exist folders["/folder1/folder2"]
+				should.exist folders["/folder1/folder2/folder4"]
+				folders["/folder1/folder2/folder4"].name.should.equal "folder4"
+				should.exist folders["/folder3"]
+				done()
 
-		describe "getAllFiles", ->
-			beforeEach ->
-				@callback = sinon.stub()
-				@ProjectEntityHandler.getAllFiles project_id, @callback
+		it "should be able to get all docs", (done) ->
+			@ProjectEntityHandler.getAllDocs project_id, (err, docs) ->
+				docs["/doc1"].name.should.equal "doc1"
+				docs["/folder1/folder2/doc2"].name.should.equal "doc2"
+				docs["/folder1/folder2/folder4/doc3"].lines.should.deep.equal ["doc3"]
+				done()
 
-			it "should call the callback with the files", ->
-				@callback
-					.calledWith(null, {
-						"/file1": @file1
-						"/folder1/file2": @file2
-					})
-					.should.equal true
+		it "should be able to get all files", (done) ->
+			@ProjectEntityHandler.getAllFiles project_id, (err, files) ->
+				files["/file1"].name.should.equal "file1"
+				files["/folder1/file2"].name.should.equal "file2"
+				files["/folder1/folder2/folder4/file3"].name.should.equal "file3"
+				done()
 
-		describe "getAllDocs", ->
-			beforeEach ->
-				@docs = [{
-					_id:   @doc1._id
-					lines: @lines1 = ["one"]
-					rev:   @rev1 = 1
-				}, {
-					_id:   @doc2._id
-					lines: @lines2 = ["two"]
-					rev:   @rev2 = 2
-				}]
-				@DocstoreManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@ProjectEntityHandler.getAllDocs project_id, @callback
+		describe "flushProjectToThirdPartyDataStore", ->
+			beforeEach (done) ->
+				@addedDocs = {}
+				@addedFiles = {}
+				@tpdsUpdateSender.addDoc = (options, _, callback) =>
+					callback()
+				sinon.spy @tpdsUpdateSender, "addDoc"
+				@tpdsUpdateSender.addFile = (options, _, callback) =>
+					callback()
+				sinon.spy @tpdsUpdateSender, "addFile"
+				@documentUpdaterHandler.flushProjectToMongo = (project_id, sl_req_id, callback) ->
+					callback()
+				sinon.spy @documentUpdaterHandler, "flushProjectToMongo"
 
-			it "should get the doc lines and rev from the docstore", ->
-				@DocstoreManager.getAllDocs
-					.calledWith(project_id)
-					.should.equal true
+				@ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, (err) -> done()
 
-			it "should call the callback with the docs with the lines and rev included", ->
-				@callback
-					.calledWith(null, {
-						"/doc1": {
-							_id:   @doc1._id
-							lines: @lines1
-							name:  @doc1.name
-							rev:   @rev1
-						}
-						"/folder1/doc2":  {
-							_id:   @doc2._id
-							lines: @lines2
-							name:  @doc2.name
-							rev:   @rev2
-						}
-					})
-					.should.equal true
+			it "should flush the documents from the document updater", ->
+				@documentUpdaterHandler.flushProjectToMongo
+					.calledWith(@project._id).should.equal true
+				@documentUpdaterHandler.flushProjectToMongo
+					.calledBefore(@tpdsUpdateSender.addDoc).should.equal true
+				@documentUpdaterHandler.flushProjectToMongo
+					.calledBefore(@tpdsUpdateSender.addFile).should.equal true
 
-	describe "flushProjectToThirdPartyDataStore", ->
-		beforeEach (done) ->
-			@project = {
-				_id: project_id
-				name: "Mock project name"
-			}
-			@ProjectModel.findById = sinon.stub().callsArgWith(1, null, @project)
-			@documentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArg(2)
-			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
-			@tpdsUpdateSender.addFile = sinon.stub().callsArg(2)
-			@docs = {
-				"/doc/one": @doc1 = { _id: "mock-doc-1", lines: ["one"], rev: 5 }
-				"/doc/two": @doc2 = { _id: "mock-doc-2", lines: ["two"], rev: 6 }
-			}
-			@files = {
-				"/file/one": @file1 = { _id: "mock-file-1", rev: 7 }
-				"/file/two": @file2 = { _id: "mock-file-2", rev: 8 }
-			}
-			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
+			it "should call addDoc for each doc", ->
+				@tpdsUpdateSender.addDoc.calledWith(
+					project_id : @project._id
+					path : "/doc1"
+					docLines: ["doc1", "lines"]
+					project_name: @project.name
+					rev:1
+				).should.equal true
+				@tpdsUpdateSender.addDoc.calledWith(
+					project_id : @project._id
+					path : "/folder1/folder2/doc2"
+					docLines: ["doc2", "lines"]
+					project_name: @project.name
+					rev:2
+				).should.equal true
 
-			@ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, () -> done()
-
-		it "should flush the project from the doc updater", ->
-			@documentUpdaterHandler.flushProjectToMongo
-				.calledWith(project_id)
-				.should.equal true
-
-		it "should look up the project in mongo", ->
-			@ProjectModel.findById
-				.calledWith(project_id)
-				.should.equal true
-
-		it "should get all the docs in the project", ->
-			@ProjectEntityHandler.getAllDocs
-				.calledWith(project_id)
-				.should.equal true
-
-		it "should get all the files in the project", ->
-			@ProjectEntityHandler.getAllFiles
-				.calledWith(project_id)
-				.should.equal true
-
-		it "should flush each doc to the TPDS", ->
-			for path, doc of @docs
-				@tpdsUpdateSender.addDoc
-					.calledWith({
-						project_id: project_id,
-						docLines: doc.lines
-						project_name: @project.name
-						rev: doc.rev
-						path: path
-					})
-					.should.equal true
-
-		it "should flush each file to the TPDS", ->
-			for path, file of @files
-				@tpdsUpdateSender.addFile
-					.calledWith({
-						project_id: project_id,
-						file_id: file._id
-						project_name: @project.name
-						rev: file.rev
-						path: path
-					})
-					.should.equal true
+			it "should call addFile for each file", ->
+				@tpdsUpdateSender.addFile.calledWith(
+					project_id : @project._id
+					file_id    : "file1_id"
+					path       : "/file1"
+					project_name: @project.name
+					rev:1
+				).should.equal true
+				@tpdsUpdateSender.addFile.calledWith(
+					project_id : @project._id
+					file_id    : "file2_id"
+					path       : "/folder1/file2"
+					project_name: @project.name
+					rev:2
+				).should.equal true
 	
 	describe "setRootDoc", ->
 		it "should call Project.update", ->
