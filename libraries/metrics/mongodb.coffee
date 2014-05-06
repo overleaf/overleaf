@@ -15,8 +15,9 @@ module.exports =
 					options = {}
 					callback = () ->
 
-				if db_command.query? and (db_command.query["ping"] or db_command.query["ismaster"])
-					# Ignore noisy methods
+				collection = db_command.collectionName
+				if collection.match(/\$cmd$/)
+					# Ignore noisy command methods like authenticating, ismaster and ping
 					return _method.call this, db_command, options, callback
 
 				key = "mongo-requests.#{type}"
@@ -32,7 +33,7 @@ module.exports =
 					logger.log
 						query: db_command.query
 						type: type
-						collection: db_command.collectionName
+						collection: collection
 						"response-time": new Date() - start
 						"mongo request"
 					callback.apply this, arguments
