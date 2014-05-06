@@ -24,7 +24,6 @@ module.exports =
 					query = Object.keys(db_command.query).sort().join("_")
 					key += "." + query
 
-				Metrics.inc key
 				timer = new Metrics.Timer(key)
 				start = new Date()
 				_method.call this, db_command, options, () ->
