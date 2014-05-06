@@ -64,6 +64,7 @@ describe 'ProjectEntityHandler', ->
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
 			'logger-sharelatex':{log:->}
 			'./ProjectUpdateHandler': @projectUpdater
+			"./ProjectGetter": @ProjectGetter = {}
 
 
 	describe 'mkdirp', ->
@@ -507,11 +508,17 @@ describe 'ProjectEntityHandler', ->
 					folders : []
 				}]
 			]
+			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 
 		describe "getAllFolders", ->
 			beforeEach ->
 				@callback = sinon.stub()
 				@ProjectEntityHandler.getAllFolders project_id, @callback
+
+			it "should get the project without the docs lines", ->
+				@ProjectGetter.getProjectWithoutDocLines
+					.calledWith(project_id)
+					.should.equal true
 
 			it "should call the callback with the folders", ->
 				@callback

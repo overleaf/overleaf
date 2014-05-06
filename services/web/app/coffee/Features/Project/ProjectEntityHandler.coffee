@@ -14,6 +14,7 @@ slReqIdHelper = require('soa-req-id')
 docComparitor = require('./DocLinesComparitor')
 projectUpdateHandler = require('./ProjectUpdateHandler')
 DocstoreManager = require "../Docstore/DocstoreManager"
+ProjectGetter = require "./ProjectGetter"
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id, sl_req_id, callback) ->
@@ -24,7 +25,7 @@ module.exports = ProjectEntityHandler =
 			folders[basePath] = folder
 			processFolder path.join(basePath, childFolder.name), childFolder for childFolder in folder.folders
 
-		Project.findById project_id, (err, project) ->
+		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
 			return callback(err) if err?
 			return callback("no project") if !project?
 			processFolder "/", project.rootFolder[0]
