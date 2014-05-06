@@ -4,8 +4,12 @@ express    = require "express"
 bodyParser = require "body-parser"
 Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
+Metrics    = require "metrics-sharelatex"
+Path       = require "path"
 
+Metrics.initialize("docstore")
 logger.initialize("docstore")
+Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 
 app = express()
 
