@@ -3,25 +3,25 @@ chai = require('chai').should()
 modulePath = "../../../../app/js/Features/Project/ProjectDuplicator.js"
 SandboxedModule = require('sandboxed-module')
 
-describe 'duplicating a project', ->
+describe 'ProjectDuplicator', ->
 
 	beforeEach ->
 		@level2folder =
 			name: "level2folderName"
 			_id:"level2folderId"
-			docs:[{name:"level2folderDocName",docLines:"level2Doc"}]
+			docs:[@doc2 = {_id: "doc2_id", name:"level2folderDocName"}]
 			folders:[]
 			fileRefs:[{name:"file2", _id:"file2"}]
 		@level1folder =
 			name:"level1folder"
 			_id:"level1folderId"
-			docs:[{name:"level1folderDocName",docLines:"level1Doc"}]
+			docs:[@doc1 = {_id: "doc1_id", name:"level1folderDocName"}]
 			folders:[@level2folder]
 			fileRefs:[{name:"file1", _id:"file1"}]
 		@rootFolder = 
 			name:"rootFolder"
 			_id:"rootFolderId"
-			docs:[{name:"rootDocHere", docLines:["level0Doc"]}]
+			docs:[@doc0 = {_id: "doc0_id", name:"rootDocHere"}]
 			folders:[@level1folder]
 			fileRefs:[{name:"file0", _id:"file0"}]
 		@project = 
@@ -29,6 +29,19 @@ describe 'duplicating a project', ->
 			rootDoc_id: "rootDoc_id"
 			rootFolder:[@rootFolder]
 			compiler: "this_is_a_Compiler"
+
+		@docContents = [{
+			_id: @doc0._id
+			lines: @doc0_lines = ["zero"]
+		}, {
+			_id: @doc1._id
+			lines: @doc1_lines = ["one"]
+		}, {
+			_id: @doc2._id
+			lines: @doc2_lines = ["two"]
+		}]
+		@DocstoreManager = 
+			getAllDocs: sinon.stub().callsArgWith(1, null, @docContents)
 
 		@owner = {_id:"this_is_the_owner"}
 		@stubbedNewProject = 
@@ -69,6 +82,7 @@ describe 'duplicating a project', ->
 			'./ProjectEntityHandler': @entityHandler
 			'./ProjectLocator': @locator
 			'./ProjectOptionsHandler': @projectOptionsHandler
+			"../Docstore/DocstoreManager": @DocstoreManager
 			'logger-sharelatex':{log:->}
 
 	it "should look up the original project", (done) ->
@@ -101,7 +115,7 @@ describe 'duplicating a project', ->
 		@duplicator.duplicate @owner, @project_id, "", (err, newProject)=>
 			@entityHandler.setRootDoc.calledWith(@stubbedNewProject, @rootFolder.docs[0]._id).should.equal true
 			done()
-	
+
 	it 'should not copy the collaberators or read only refs', (done)->
 		@duplicator.duplicate @owner, @project_id, "", (err, newProject)=>
 			newProject.collaberator_refs.length.should.equal 0
@@ -117,9 +131,10 @@ describe 'duplicating a project', ->
 
 	it 'should copy all the docs', (done)->
 		@duplicator.duplicate @owner, @project_id, "", (err, newProject)=>
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @rootFolder.docs[0].name, @rootFolder.docs[0].lines).should.equal true
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @level1folder.docs[0].name, @level1folder.docs[0].lines).should.equal true
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @level2folder.docs[0].name, @level2folder.docs[0].lines).should.equal true
+			@DocstoreManager.getAllDocs.calledWith(@project_id).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @doc1.name, @doc1_lines).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @doc2.name, @doc2_lines).should.equal true
 			done()
 
 	it 'should copy all the files', (done)->
