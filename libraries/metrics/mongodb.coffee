@@ -15,6 +15,10 @@ module.exports =
 					options = {}
 					callback = () ->
 
+				if db_command.query? and (db_command.query["ping"] or db_command.query["ismaster"])
+					# Ignore noisy methods
+					return _method.call this, db_command, options, callback
+
 				key = "mongo-requests.#{type}"
 				if db_command.query?
 					query = Object.keys(db_command.query).sort().join("_")

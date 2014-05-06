@@ -6,8 +6,8 @@ name = "unknown"
 buildKey = (key)-> "#{name}.#{process.env.NODE_ENV or "development"}.#{key}"
 
 module.exports =
-	initialize: (options = {}) ->
-		name = options.name
+	initialize: (name) ->
+		name = name
 
 	set : (key, value, sampleRate = 1)->
 		statsd.set buildKey(key), value, sampleRate
