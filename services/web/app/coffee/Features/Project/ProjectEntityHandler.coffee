@@ -117,10 +117,20 @@ module.exports = ProjectEntityHandler =
 			logger.log sl_req_id: sl_req_id, project: project._id, folder_id: folder_id, doc_name: docName, "adding doc"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
-				doc = new Doc name: docName, lines: docLines
+				doc = new Doc name: docName
 				Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
-					tpdsUpdateSender.addDoc {project_id:project._id, docLines:docLines, path:result.path.fileSystem, project_name:project.name, rev:doc.rev}, sl_req_id, ->
-						callback(err, doc, folder_id)
+					return callback(err) if err?
+					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, 0, (err, rev) ->
+						return callback(err) if err? 
+						tpdsUpdateSender.addDoc {
+							project_id:   project._id,
+							docLines:     docLines,
+							path:         result.path.fileSystem,
+							project_name: project.name,
+							rev:          0
+						}, sl_req_id, (err) ->
+							return callback(err) if err?
+							callback(null, doc, folder_id)
 
 	addFile: (project_or_id, folder_id, fileName, path, sl_req_id, callback = (error, fileRef, folder_id) ->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)

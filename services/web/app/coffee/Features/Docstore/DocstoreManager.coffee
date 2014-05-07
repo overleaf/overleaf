@@ -29,3 +29,20 @@ module.exports = DocstoreManager =
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, "error getting all docs in docstore"
 				callback(error)
+
+	updateDoc: (project_id, doc_id, lines, version, callback = (error, rev) ->) ->
+		logger.log project_id: project_id, doc_id: doc_id, version: version, "updating doc in docstore api"
+		url = "#{settings.apis.docstore.url}/project/#{project_id}/doc/#{doc_id}"
+		request.post {
+			url: url
+			json:
+				lines: lines
+				version: version
+		}, (error, res, body) ->
+			return callback(error) if error?
+			if 200 <= res.statusCode < 300
+				callback(null)
+			else
+				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "error updating doc in docstore"
+				callback(error)

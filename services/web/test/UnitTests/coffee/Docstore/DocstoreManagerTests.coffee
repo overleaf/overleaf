@@ -52,6 +52,45 @@ describe "DocstoreManager", ->
 					}, "error deleting doc in docstore")
 					.should.equal true
 
+	describe "updateDoc", ->
+		beforeEach ->
+			@lines = ["mock", "doc", "lines"]
+			@version = 42
+
+		describe "with a successful response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204, "")
+				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @callback
+
+			it "should update the doc in the docstore api", ->
+				@request.post
+					.calledWith({
+						url: "#{@settings.apis.docstore.url}/project/#{@project_id}/doc/#{@doc_id}"
+						json:
+							lines: @lines
+							version: @version
+					})
+					.should.equal true
+
+			it "should call the callback without an error", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "with a failed response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 500, "")
+				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("docstore api responded with non-success code: 500")).should.equal true
+
+			it "should log the error", ->
+				@logger.error
+					.calledWith({
+						err: new Error("docstore api responded with a non-success code: 500")
+						project_id: @project_id
+						doc_id: @doc_id
+					}, "error updating doc in docstore")
+					.should.equal true
 
 	describe "getAllDocs", ->
 		describe "with a successful response code", ->

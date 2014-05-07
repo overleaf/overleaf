@@ -1,6 +1,7 @@
 chai = require('chai')
 assert = require('chai').assert
 should = chai.should()
+expect = chai.expect
 sinon = require 'sinon'
 modulePath = "../../../../app/js/Features/Project/ProjectEntityHandler"
 SandboxedModule = require('sandboxed-module')
@@ -34,7 +35,8 @@ describe 'ProjectEntityHandler', ->
 			rootFolder:[@rootFolder]
 		@DocModel = class Doc
 			constructor:(options)->
-				{@name, @lines} = options		
+				{@name, @lines} = options
+				@_id = "mock-id"	
 				@rev = 0
 		@FileModel =  class File
 			constructor:(options)->
@@ -277,42 +279,47 @@ describe 'ProjectEntityHandler', ->
 						done()
 			@ProjectEntityHandler._removeElementFromMongoArray model, id, mongoPath, ->
 
-	describe 'adding doc', ->
-		docName = "some new doc"
-		docLines = ['1234','abc']
+	describe 'addDoc', ->
+		beforeEach ->
+			@name = "some new doc"
+			@lines = ['1234','abc']
+			@path = "/path/to/doc"
 
-		it 'should call put element', (done)->
-			@ProjectModel.putElement = (passedProject_id, passedFolder_id, passedDoc, passedType, callback)-> 
-				passedProject_id.should.equal project_id
-				passedFolder_id.should.equal folder_id
-				passedDoc.name.should.equal docName
-				passedDoc.lines[0].should.equal docLines[0]
-				passedDoc.lines[1].should.equal docLines[1]
-				passedType.should.equal 'doc'
-				done()
-			@ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, "", (err, doc, parentFolder)->
+			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
+			@callback = sinon.stub()
+			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
+			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, 0)
 
-		it 'should return doc and parent folder', (done)->
-			@ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, "", (err, doc, parentFolder)->
-				parentFolder.should.equal folder_id
-				doc.name.should.equal docName
-				done()
+			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
 
-		it 'should call third party data store', (done)->
-			fileSystemPath = "/somehwere/#{docName}"
-			@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:fileSystemPath}})
+			# Created doc
+			@doc = @ProjectModel.putElement.args[0][2]
+			@doc.name.should.equal @name
+			expect(@doc.lines).to.be.undefined
 
-			@tpdsUpdateSender.addDoc = (options)=>
-				options.project_id.should.equal project_id
-				options.docLines.should.equal docLines
-				options.path.should.equal fileSystemPath
-				options.project_name.should.equal @project.name
-				options.rev.should.equal 0
-				done()
+		it 'should call put element', ->
+			@ProjectModel.putElement
+				.calledWith(project_id, folder_id, @doc)
+				.should.equal true
 
-			@ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, "",->
+		it 'should return doc and parent folder', ->
+			@callback.calledWith(null, @doc, folder_id).should.equal true
 
-		
+		it 'should call third party data store', ->
+			@tpdsUpdateSender.addDoc
+				.calledWith({
+					project_id: project_id
+					docLines: @lines
+					path: @path
+					project_name: @project.name
+					rev: 0
+				})
+				.should.equal true
+
+		it "should send the doc lines to the doc store", ->
+			@DocstoreManager.updateDoc
+				.calledWith(project_id, @doc._id.toString(), @lines, 0)
+				.should.equal true
 
 	describe 'adding file', ->
 		fileName = "something.jpg"
