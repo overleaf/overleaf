@@ -9,7 +9,7 @@ module.exports.monitor = (logger) ->
 			end.apply(this, arguments)
 			responseTime = new Date() - startTime
 			routePath = req.route.path.toString().replace(/\//g, '_').replace(/\:/g, '').slice(1)
-			key = "#{routePath}.#{req.method}.#{res.statusCode}"
+			key = "http-requests.#{routePath}.#{req.method}.#{res.statusCode}"
 
 			Metrics.timing(key, responseTime)
 			logger.log
