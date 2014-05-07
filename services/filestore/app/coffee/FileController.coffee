@@ -15,7 +15,8 @@ module.exports =
 		FileHandler.getFile bucket, key, {format:format,style:style}, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
-				res?.send? 500
+				if !res.finished and res?.send? 
+					res.send 500
 			else if req.query.cacheWarm
 				logger.log key:key, bucket:bucket, format:format, style:style, "request is only for cache warm so not sending stream"
 				res.send 200

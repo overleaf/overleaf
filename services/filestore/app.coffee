@@ -35,8 +35,10 @@ app.use (req, res, next) ->
 	requestDomain.add req
 	requestDomain.add res
 	requestDomain.on "error", (err)->
-		if !res.finished
-			res.send(500)
+		setTimeout(->
+			if !res.finished
+				res.send(500)
+		, 3000)
 		logger = require('logger-sharelatex')
 		req =
 			body:req.body
