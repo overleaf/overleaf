@@ -47,42 +47,87 @@ describe "HttpController", ->
 				.should.equal true
 
 	describe "getAllDocs", ->
-		beforeEach ->
-			@req.params =
-				project_id: @project_id
-			@docs = [{
-				_id: ObjectId()
-				lines: ["mock", "lines", "one"]
-				version: 1
-				rev: 2
-			}, {
-				_id: ObjectId()
-				lines: ["mock", "lines", "two"]
-				version: 3
-				rev: 4
-			}]
-			@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-			@HttpController.getAllDocs @req, @res, @next
-
-		it "should get all the docs", ->
-			@DocManager.getAllDocs
-				.calledWith(@project_id)
-				.should.equal true
-
-		it "should return the doc as JSON", ->
-			@res.json
-				.calledWith([{
-					_id:   @docs[0]._id.toString()
-					lines: @docs[0].lines
-					rev:   @docs[0].rev
-					version: @docs[0].version
+		describe "normally", ->
+			beforeEach ->
+				@req.params =
+					project_id: @project_id
+				@docs = [{
+					_id: ObjectId()
+					lines: ["mock", "lines", "one"]
+					version: 1
+					rev: 2
 				}, {
-					_id:   @docs[1]._id.toString()
-					lines: @docs[1].lines
-					rev:   @docs[1].rev
-					version: @docs[1].version
-				}])
-				.should.equal true
+					_id: ObjectId()
+					lines: ["mock", "lines", "two"]
+					version: 3
+					rev: 4
+				}]
+				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@HttpController.getAllDocs @req, @res, @next
+
+			it "should get all the docs", ->
+				@DocManager.getAllDocs
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should return the doc as JSON", ->
+				@res.json
+					.calledWith([{
+						_id:   @docs[0]._id.toString()
+						lines: @docs[0].lines
+						rev:   @docs[0].rev
+						version: @docs[0].version
+					}, {
+						_id:   @docs[1]._id.toString()
+						lines: @docs[1].lines
+						rev:   @docs[1].rev
+						version: @docs[1].version
+					}])
+					.should.equal true
+
+		describe "with a null doc", ->
+			beforeEach ->
+				@req.params =
+					project_id: @project_id
+				@docs = [{
+					_id: ObjectId()
+					lines: ["mock", "lines", "one"]
+					version: 1
+					rev: 2
+				},
+				null,
+				{
+					_id: ObjectId()
+					lines: ["mock", "lines", "two"]
+					version: 3
+					rev: 4
+				}]
+				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@HttpController.getAllDocs @req, @res, @next
+
+			it "should return the non null docs as JSON", ->
+				@res.json
+					.calledWith([{
+						_id:   @docs[0]._id.toString()
+						lines: @docs[0].lines
+						rev:   @docs[0].rev
+						version: @docs[0].version
+					}, {
+						_id:   @docs[2]._id.toString()
+						lines: @docs[2].lines
+						rev:   @docs[2].rev
+						version: @docs[2].version
+					}])
+					.should.equal true
+
+			it "should log out an error", ->
+				@logger.error
+					.calledWith(
+						err: new Error("null doc")
+						project_id: @project_id
+						"encountered null doc"
+					)
+					.should.equal true
 
 	describe "updateDoc", ->
 		beforeEach ->

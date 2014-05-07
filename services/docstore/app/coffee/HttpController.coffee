@@ -22,6 +22,8 @@ module.exports = HttpController =
 			for doc in docs
 				if doc? # There can end up being null docs for some reason :( (probably a race condition)
 					docViews.push HttpController._buildDocView(doc)
+				else
+					logger.error err: new Error("null doc"), project_id: project_id, "encountered null doc"
 			res.json docViews
 
 	updateDoc: (req, res, next = (error) ->) ->
