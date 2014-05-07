@@ -17,12 +17,12 @@ module.exports =
 		statsd.increment buildKey(key), sampleRate
 
 	timing: (key, timeSpan, sampleRate)->
-		statsd.timing(key, timeSpan, sampleRate)
+		statsd.timing(buildKey(key), timeSpan, sampleRate)
 
 	Timer : class
 		constructor :(key, sampleRate = 1)->
 			this.start = new Date()
-			this.key = buildKey(key)
+			this.key = key
 			this.sampleRate = sampleRate
 		done:->
 			timeSpan = new Date - this.start
