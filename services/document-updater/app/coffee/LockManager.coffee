@@ -10,10 +10,10 @@ logger = require "logger-sharelatex"
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
+	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
 
 	tryLock : (doc_id, callback = (err, isFree)->)->
-		tenSeconds = 10
-		rclient.set keys.blockingKey(doc_id: doc_id), "locked", "EX", 10, "NX", (err, gotLock)->
+		rclient.set keys.blockingKey(doc_id: doc_id), "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
 				metrics.inc "doc-not-blocking"
