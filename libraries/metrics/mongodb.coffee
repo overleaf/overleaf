@@ -20,7 +20,7 @@ module.exports =
 					# Ignore noisy command methods like authenticating, ismaster and ping
 					return _method.call this, db_command, options, callback
 
-				key = "mongo-requests.#{type}"
+				key = "mongo-requests.#{collection}.#{type}"
 				if db_command.query?
 					query = Object.keys(db_command.query).sort().join("_")
 					key += "." + query
