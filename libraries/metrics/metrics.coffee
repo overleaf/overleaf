@@ -2,8 +2,9 @@ StatsD = require('lynx')
 statsd = new StatsD('localhost', 8125, {on_error:->})
 
 name = "unknown"
+hostname = require('os').hostname()
 
-buildKey = (key)-> "#{name}.#{process.env.NODE_ENV or "development"}.#{key}"
+buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 
 module.exports =
 	initialize: (_name) ->
@@ -31,4 +32,5 @@ module.exports =
 		statsd.gauge key, value, sampleRate
 
 	mongodb: require "./mongodb"
+	http: require "./http"
 
