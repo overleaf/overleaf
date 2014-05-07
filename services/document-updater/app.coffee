@@ -22,10 +22,13 @@ app.configure ->
 	app.use app.router
 
 rclient.subscribe("pending-updates")
-rclient.on "message", (channel, doc_key)->
+rclient.on "message", (channel, doc_key) ->
 	[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-	UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-		logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+	if !Settings.shuttingDown
+		UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
+			logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+	else
+		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update" 
 
 UpdateManager.resumeProcessing()
 
@@ -47,7 +50,10 @@ app.get '/total', (req, res)->
 		res.send {total:count}
 	
 app.get '/status', (req, res)->
-	res.send('document updater is alive')
+	if Settings.shuttingDown
+		res.send 503 # Service unavailable
+	else
+		res.send('document updater is alive')
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "request errored"
@@ -56,6 +62,19 @@ app.use (error, req, res, next) ->
 	else
 		res.send(500, "Oops, something went wrong")
 
+shutdownCleanly = (signal) ->
+	return () ->
+		logger.log signal: signal, "received interrupt, cleaning up"
+		Settings.shuttingDown = true
+		setTimeout () ->
+			logger.log signal: signal, "shutting down"
+			process.exit()
+		, 10000
+
+
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
 app.listen port, "localhost", ->
 	logger.log("documentupdater-sharelatex server listening on port #{port}")
+
+for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
+	process.on signal, shutdownCleanly(signal)
