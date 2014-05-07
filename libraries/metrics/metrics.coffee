@@ -26,7 +26,7 @@ module.exports =
 			this.sampleRate = sampleRate
 		done:->
 			timeSpan = new Date - this.start
-			statsd.timing(this.key, timeSpan, this.sampleRate)
+			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge key, value, sampleRate
