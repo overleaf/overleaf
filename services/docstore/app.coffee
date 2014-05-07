@@ -13,6 +13,8 @@ Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_mod
 
 app = express()
 
+app.use Metrics.http.monitor(logger)
+
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.post '/project/:project_id/doc/:doc_id', bodyParser.json(), HttpController.updateDoc
