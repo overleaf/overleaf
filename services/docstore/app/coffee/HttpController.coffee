@@ -18,7 +18,11 @@ module.exports = HttpController =
 		logger.log project_id: project_id, "getting all docs"
 		DocManager.getAllDocs project_id, (error, docs = []) ->
 			return next(error) if error?
-			res.json docs.map(HttpController._buildDocView)
+			docViews = []
+			for doc in docs
+				if doc? # There can end up being null docs for some reason :( (probably a race condition)
+					docViews.push HttpController._buildDocView(doc)
+			res.json docViews
 
 	updateDoc: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
