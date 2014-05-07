@@ -3,6 +3,8 @@ logger = require 'logger-sharelatex'
 logger.initialize("web-sharelatex")
 logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializers").user
 logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSerializers").project
+metrics = require("metrics-sharelatex")
+metrics.initialize("web")
 Server = require("./app/js/infrastructure/Server")
 BackgroundTasks = require("./app/js/infrastructure/BackgroundTasks")
 Errors = require "./app/js/errors"

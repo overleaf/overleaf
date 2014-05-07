@@ -1,3 +1,4 @@
+Path = require "path"
 express = require('express')
 Settings = require('settings-sharelatex')
 logger = require 'logger-sharelatex'
@@ -16,7 +17,8 @@ cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 
-Monitor = require "./Monitor"
+metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
+metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
 
 Settings.editorIsOpen ||= true
 
@@ -69,7 +71,7 @@ app.configure 'production', ->
 	logger.info "Production Enviroment"
 	app.enable('view cache')
 
-app.use Monitor.logger
+app.use metrics.http.monitor(logger)
 
 app.use (req, res, next)->
 	metrics.inc "http-request"
