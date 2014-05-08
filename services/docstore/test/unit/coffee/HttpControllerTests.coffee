@@ -139,29 +139,30 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, true)
+					version: @version = 42
+				@DocManager.updateDoc = sinon.stub().callsArgWith(4, null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines)
+					.calledWith(@project_id, @doc_id, @lines, @version)
 					.should.equal true
 
 			it "should return a modified status", ->
 				@res.json
-					.calledWith(modified: true)
+					.calledWith(modified: true, rev: @rev)
 					.should.equal true
 
 		describe "when the doc lines exist and were not updated", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, false)
+				@DocManager.updateDoc = sinon.stub().callsArgWith(4, null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should return a modified status", ->
 				@res.json
-					.calledWith(modified: false)
+					.calledWith(modified: false, rev: @rev)
 					.should.equal true
 
 		describe "when the doc lines are not provided", ->

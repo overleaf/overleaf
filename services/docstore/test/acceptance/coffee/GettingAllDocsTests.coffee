@@ -29,7 +29,7 @@ describe "Getting all docs", ->
 			throw error if error?
 			jobs = for doc in @docs
 				do (doc) =>
-					(callback) => DocstoreClient.createDoc @project_id, doc._id, doc.lines, callback
+					(callback) => DocstoreClient.createDoc @project_id, doc._id, doc.lines, doc.version, callback
 			async.series jobs, done 
 
 	afterEach (done) ->

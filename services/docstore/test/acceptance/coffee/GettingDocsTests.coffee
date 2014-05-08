@@ -10,9 +10,10 @@ describe "Getting a doc", ->
 		@project_id = ObjectId()
 		@doc_id = ObjectId()
 		@lines = ["original", "lines"]
+		@version = 42
 		DocstoreClient.createProject @project_id, (error) =>
 			throw error if error?
-			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, (error) =>
 				throw error if error?
 				done()
 
@@ -20,9 +21,10 @@ describe "Getting a doc", ->
 		DocstoreClient.deleteProject @project_id, done
 
 	describe "when the doc exists", ->
-		it "should get the doc lines", (done) ->
+		it "should get the doc lines and version", (done) ->
 			DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @lines
+				doc.version.should.equal @version
 				done()
 
 	describe "when the doc does not exist", ->

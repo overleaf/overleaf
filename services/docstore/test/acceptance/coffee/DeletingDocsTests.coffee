@@ -10,9 +10,10 @@ describe "Deleting a doc", ->
 		@project_id = ObjectId()
 		@doc_id = ObjectId()
 		@lines = ["original", "lines"]
+		@version = 42
 		DocstoreClient.createProject @project_id, (error) =>
 			throw error if error?
-			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, (error) =>
 				throw error if error?
 				done()
 

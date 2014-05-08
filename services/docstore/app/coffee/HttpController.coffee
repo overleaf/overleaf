@@ -30,17 +30,19 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
 		lines      = req.body?.lines
+		version    = req.body?.version
 
 		if !lines? or lines not instanceof Array
 			logger.error project_id: project_id, doc_id: doc_id, "no doc lines provided"
 			res.send 400 # Bad Request
 			return
 
-		logger.log project_id: project_id, doc_id: doc_id, "updating doc"
-		DocManager.updateDoc project_id, doc_id, lines, (error, modified) ->
+		logger.log project_id: project_id, doc_id: doc_id, version: version, "updating doc"
+		DocManager.updateDoc project_id, doc_id, lines, version, (error, modified, rev) ->
 			return next(error) if error?
 			res.json {
 				modified: modified
+				rev: rev
 			}
 
 	deleteDoc: (req, res, next = (error) ->) ->

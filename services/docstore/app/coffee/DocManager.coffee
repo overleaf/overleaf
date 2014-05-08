@@ -21,23 +21,29 @@ module.exports = DocManager =
 				return callback(error) if error?
 				return callback null, docs
 
-	updateDoc: (project_id, doc_id, lines, callback = (error, modified) ->) ->
+	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc, mongoPath) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
 
-			if _.isEqual(doc.lines, lines)
+			if _.isEqual(doc.lines, lines) and doc.version == version
 				logger.log {
-					project_id: project_id, doc_id: doc_id, rev: doc.rev
-				}, "doc lines have not changed"
-				return callback null, false
+					project_id: project_id, doc_id: doc_id, rev: doc.rev, version: doc.version
+				}, "doc lines and version have not changed"
+				return callback null, false, doc.rev
 			else
 				logger.log {
-					project_id: project_id, doc_id: doc_id, oldDocLines: doc.lines, newDocLines: lines, rev: doc.rev
+					project_id: project_id
+					doc_id: doc_id,
+					oldDocLines: doc.lines
+					newDocLines: lines
+					rev: doc.rev
+					oldVersion: doc.version
+					newVersion: version
 				}, "updating doc lines"
-				MongoManager.updateDoc project_id, mongoPath, lines, (error) ->
+				MongoManager.updateDoc project_id, mongoPath, lines, version, (error) ->
 					return callback(error) if error?
-					callback null, true
+					callback null, true, doc.rev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
