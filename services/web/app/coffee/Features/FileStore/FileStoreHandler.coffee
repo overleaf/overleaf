@@ -3,6 +3,9 @@ fs = require("fs")
 request = require("request")
 settings = require("settings-sharelatex")
 
+oneMinInMs = 60 * 1000
+fiveMinsInMs = oneMinInMs * 5
+
 module.exports =
 
 	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
@@ -11,6 +14,7 @@ module.exports =
 		opts =
 			method: "post"
 			uri: @_buildUrl(project_id, file_id)
+			timeout:fiveMinsInMs
 		writeStream = request(opts)
 		readStream.pipe writeStream
 		writeStream.on "end", callback
@@ -29,6 +33,7 @@ module.exports =
 		opts =
 			method : "get"
 			uri: "#{@_buildUrl(project_id, file_id)}#{queryString}"
+			timeout:fiveMinsInMs
 		readStream = request(opts)
 		callback(null, readStream)
 
@@ -37,6 +42,7 @@ module.exports =
 		opts =
 			method : "delete"
 			uri: @_buildUrl(project_id, file_id)
+			timeout:fiveMinsInMs
 		request opts, (err, response)->
 			if err?
 				logger.err err:err, project_id:project_id, file_id:file_id, "something went wrong deleting file from filestore"
@@ -51,7 +57,7 @@ module.exports =
 					project_id:oldProject_id
 					file_id:oldFile_id
 			uri: @_buildUrl(newProject_id, newFile_id)
-
+			timeout:fiveMinsInMs
 		request opts, (err)->
 			if err?
 				logger.err err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, newProject_id:newProject_id, newFile_id:newFile_id, "something went wrong telling filestore api to copy file"
