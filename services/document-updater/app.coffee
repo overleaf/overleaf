@@ -7,7 +7,6 @@ RedisManager = require('./app/js/RedisManager.js')
 UpdateManager = require('./app/js/UpdateManager.js')
 Keys = require('./app/js/RedisKeyBuilder')
 redis = require('redis')
-metrics = require('./app/js/Metrics')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
@@ -15,9 +14,14 @@ redisConf = Settings.redis.web
 rclient = redis.createClient(redisConf.port, redisConf.host)
 rclient.auth(redisConf.password)
 
+Path = require "path"
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("doc-updater")
+Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
+
 app = express()
 app.configure ->
-	app.use(express.logger(':remote-addr - [:date] - :user-agent ":method :url" :status - :response-time ms'));
+	app.use(Metrics.http.monitor(logger));
 	app.use express.bodyParser()
 	app.use app.router
 
@@ -32,10 +36,6 @@ rclient.on "message", (channel, doc_key) ->
 
 UpdateManager.resumeProcessing()
 
-app.use (req, res, next)->
-	metrics.inc "http-request"
-	next()
-
 app.get    '/project/:project_id/doc/:doc_id',       HttpController.getDoc
 app.post   '/project/:project_id/doc/:doc_id',       HttpController.setDoc
 app.post   '/project/:project_id/doc/:doc_id/flush', HttpController.flushDocIfLoaded
@@ -44,7 +44,7 @@ app.delete '/project/:project_id',                   HttpController.deleteProjec
 app.post   '/project/:project_id/flush',             HttpController.flushProject
 
 app.get '/total', (req, res)->
-	timer = new metrics.Timer("http.allDocList")	
+	timer = new Metrics.Timer("http.allDocList")	
 	RedisManager.getCountOfDocsInMemory (err, count)->
 		timer.done()
 		res.send {total:count}
@@ -70,7 +70,6 @@ shutdownCleanly = (signal) ->
 			logger.log signal: signal, "shutting down"
 			process.exit()
 		, 10000
-
 
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
 app.listen port, "localhost", ->
