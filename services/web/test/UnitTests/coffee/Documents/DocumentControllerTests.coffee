@@ -11,8 +11,7 @@ Errors = require "../../../../app/js/errors"
 
 describe "DocumentController", ->
 	beforeEach ->
-		@DocumentController = SandboxedModule.require modulePath, requires:
-			"../Project/ProjectLocator": @ProjectLocator = {}
+		@DocumentController = SandboxedModule.require modulePath, requires:  
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 		@res = new MockResponse()
 		@req = new MockRequest()
@@ -20,32 +19,34 @@ describe "DocumentController", ->
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@doc_lines = ["one", "two", "three"]
+		@version = 42
+		@rev = 5
 
 	describe "getDocument", ->
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
 				doc_id: @doc_id
-				
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, lines: @doc_lines)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @doc_lines, @version, @rev)
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should get the document from Mongo", ->
-				@ProjectLocator.findElement
-					.calledWith(project_id: @project_id, element_id: @doc_id, type: "doc")
+				@ProjectEntityHandler.getDoc
+					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
 			it "should return the document data to the client as JSON", ->
 				@res.type.should.equal "json"
 				@res.body.should.equal JSON.stringify
 					lines: @doc_lines
+					version: @version
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, new Errors.NotFoundError("not found"), null)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, new Errors.NotFoundError("not found"), null)
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should call next with the NotFoundError", ->

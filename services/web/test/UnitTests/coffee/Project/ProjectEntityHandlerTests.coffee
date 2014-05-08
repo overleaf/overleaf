@@ -10,6 +10,7 @@ tk = require 'timekeeper'
 
 describe 'ProjectEntityHandler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'
+	doc_id = '4eecb1c1bffa66588e0000a2'
 	folder_id = "4eecaffcbffa66588e000008"
 	rootFolderId = "4eecaffcbffa66588e000007"
 	
@@ -278,6 +279,22 @@ describe 'ProjectEntityHandler', ->
 						assert.deepEqual update, { '$pull': { 'folders[0]': null } }
 						done()
 			@ProjectEntityHandler._removeElementFromMongoArray model, id, mongoPath, ->
+
+	describe 'getDoc', ->
+		beforeEach ->
+			@lines = ["mock", "doc", "lines"]
+			@version = 42
+			@rev = 5
+			@DocstoreManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @rev)
+			@ProjectEntityHandler.getDoc project_id, doc_id, @callback
+
+		it "should call the docstore", ->
+			@DocstoreManager.getDoc
+				.calledWith(project_id, doc_id)
+				.should.equal true
+
+		it "should call the callback with the lines, version and rev", ->
+			@callback.calledWith(null, @lines, @version, @rev).should.equal true
 
 	describe 'addDoc', ->
 		beforeEach ->

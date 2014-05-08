@@ -111,6 +111,9 @@ module.exports = ProjectEntityHandler =
 		logger.log sl_req_id: sl_req_id, project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
+	getDoc: (project_id, doc_id, callback = (error, lines, version, rev) ->) ->
+		DocstoreManager.getDoc project_id, doc_id, callback
+
 	addDoc: (project_or_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc, folder_id) ->)=>
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
 		Project.getProject project_or_id, "", (err, project) ->
