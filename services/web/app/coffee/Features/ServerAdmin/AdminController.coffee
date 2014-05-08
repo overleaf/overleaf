@@ -1,3 +1,4 @@
+metrics = require("metrics-sharelatex")
 logger = require('logger-sharelatex')
 _ = require('underscore')
 User = require('../../models/User').User
@@ -14,6 +15,18 @@ SubscriptionHandler = require('../Subscription/SubscriptionHandler')
 projectEntityHandler = require('../Project/ProjectEntityHandler')
 TpdsPollingBackgroundTasks = require("../ThirdPartyDataStore/TpdsPollingBackgroundTasks")
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
+
+oneMinInMs = 60 * 1000
+
+updateOpenConnetionsMetrics = ()->
+	metrics.gauge "open_connections.socketio", require("../../infrastructure/Server").io?.sockets?.clients()?.length
+	metrics.gauge "open_connections.http", _.size(require('http').globalAgent?.sockets)
+	metrics.gauge "open_connections.https", _.size(require('https').globalAgent?.sockets)
+	setTimeout updateOpenConnetionsMetrics, oneMinInMs
+
+setTimeout updateOpenConnetionsMetrics, oneMinInMs
+
+
 
 module.exports = AdminController =
 
