@@ -56,10 +56,12 @@ describe "DocstoreManager", ->
 		beforeEach ->
 			@lines = ["mock", "doc", "lines"]
 			@version = 42
+			@rev = 5
+			@modified = true
 
 		describe "with a successful response code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204, "")
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204, { modified: @modified, rev: @rev })
 				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @callback
 
 			it "should update the doc in the docstore api", ->
@@ -72,8 +74,8 @@ describe "DocstoreManager", ->
 					})
 					.should.equal true
 
-			it "should call the callback without an error", ->
-				@callback.calledWith(null).should.equal true
+			it "should call the callback with the modified status and revision", ->
+				@callback.calledWith(null, @modified, @rev).should.equal true
 
 		describe "with a failed response code", ->
 			beforeEach ->

@@ -61,14 +61,15 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArg(3)
+				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArg(4)
 				@req.body =
 					lines: @doc_lines
+					version: @version
 				@DocumentController.setDocument(@req, @res, @next)
 
 			it "should update the document in Mongo", ->
 				@ProjectEntityHandler.updateDocLines
-					.calledWith(@project_id, @doc_id, @doc_lines)
+					.calledWith(@project_id, @doc_id, @doc_lines, @version)
 					.should.equal true
 
 			it "should return a successful response", ->
@@ -76,9 +77,10 @@ describe "DocumentController", ->
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArgWith(3, new Errors.NotFoundError("document does not exist"))
+				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArgWith(4, new Errors.NotFoundError("document does not exist"))
 				@req.body =
 					lines: @doc_lines
+					version: @version
 				@DocumentController.setDocument(@req, @res, @next)
 
 			it "should call next with the NotFoundError", ->

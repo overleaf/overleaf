@@ -372,7 +372,7 @@ describe "EditorController", ->
 	describe 'set document', ->
 		beforeEach ->
 			@docLines = ["foo", "bar"]
-			@ProjectEntityHandler.updateDocLines = sinon.stub().callsArg(4)
+			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArg(2)
 			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(3)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
@@ -394,12 +394,9 @@ describe "EditorController", ->
 				mock.verify()
 				done()
 
-		it 'should update the document lines', (done)->
-			@ProjectEntityHandler.updateDocLines = ->
-			mock = sinon.mock(@ProjectEntityHandler).expects("updateDocLines").withArgs(@project_id, @doc_id, @docLines).once().callsArg(4)
-
-			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)->
-				mock.verify()
+		it 'should flush the doc to mongo', (done)->
+			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)=>
+				@DocumentUpdaterHandler.flushDocToMongo.calledWith(@project_id, @doc_id).should.equal true
 				done()
 
 

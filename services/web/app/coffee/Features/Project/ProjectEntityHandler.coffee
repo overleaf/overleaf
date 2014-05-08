@@ -123,7 +123,7 @@ module.exports = ProjectEntityHandler =
 				doc = new Doc name: docName
 				Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
 					return callback(err) if err?
-					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, 0, (err, rev) ->
+					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, 0, (err, modified, rev) ->
 						return callback(err) if err? 
 						tpdsUpdateSender.addDoc {
 							project_id:   project._id,
@@ -234,45 +234,31 @@ module.exports = ProjectEntityHandler =
 					if callback?
 						callback(err, folder, parentFolder_id)
 
-	updateDocLines : (project_or_id, doc_id, docLines, sl_req_id, callback = (error) ->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		Project.getProject project_or_id, "", (err, project)->
+	updateDocLines : (project_id, doc_id, lines, version, callback = (error) ->)->
+		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) if !project?
-			project_id = project._id
-			if err?
-				logger.err err:err,project_id:project_id, "error finding project"
-				callback err
-			else if !project?
-				logger.err project_id:project_id, doc_id:doc_id, err: new Error("project #{project_id} could not be found for doc #{doc_id}")
-				callback "could not find project #{project_id}"
-			else
-				projectLocator.findElement {project:project, element_id:doc_id, type:"docs"}, (err, doc, path)->
+			logger.log project_id: project_id, doc_id: doc_id, version: version, "updating doc lines"
+			projectLocator.findElement {project:project, element_id:doc_id, type:"docs"}, (err, doc, path)->
+				if err?
+					logger.error err: err, doc_id: doc_id, project_id: project_id, version: version, lines: lines, "error finding doc while updating doc lines"
+					return callback err
+				if !doc?
+					error = new Errors.NotFoundError("doc not found")
+					logger.error err: error, doc_id: doc_id, project_id: project_id, version: version, lines: lines, "doc not found while updating doc lines"
+					return callback(error)
+
+				DocstoreManager.updateDoc project_id, doc_id, lines, version, (err, modified, rev) ->
 					if err?
-						logger.err "error putting doc #{doc_id} in project #{project_id} #{err}"
-						callback err
-					else if docComparitor.areSame docLines, doc.lines
-						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, rev:doc.rev, "old doc lines are same as the new doc lines, not updating them"
-						callback()
+						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, version: version, "error sending doc to docstore"
+						return callback(err)
+
+					if modified
+						# Don't need to block for marking as updated
+						projectUpdateHandler.markAsUpdated project_id
+						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, docLines:lines, project_name:project.name, rev:rev}, callback
 					else
-						logger.log sl_req_id: sl_req_id, project_id:project_id, doc_id:doc_id, docLines: docLines, oldDocLines: doc.lines, rev:doc.rev, "updating doc lines"
-						conditons = _id:project_id
-						update = {$set:{}, $inc:{}}
-						changeLines = {}
-						changeLines["#{path.mongo}.lines"] = docLines
-						inc = {}
-						inc["#{path.mongo}.rev"] = 1
-						update["$set"] = changeLines
-						update["$inc"] = inc
-						Project.update conditons, update, {}, (err, second)->
-							if(err)
-								logger.err(sl_req_id:sl_req_id, doc_id:doc_id, project_id:project_id, err:err, "error saving doc to mongo")
-								callback(err)
-							else
-								logger.log sl_req_id:sl_req_id, doc_id:doc_id, project_id:project_id, newDocLines:docLines, oldDocLines:doc.lines,	 "doc saved to mongo"
-								rev = doc.rev+1
-								projectUpdateHandler.markAsUpdated project_id
-							tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, docLines:docLines, project_name:project.name, rev:rev}, sl_req_id, callback
+						callback()
 
 	moveEntity: (project_id, entity_id, folder_id, entityType, sl_req_id, callback = (error) ->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)

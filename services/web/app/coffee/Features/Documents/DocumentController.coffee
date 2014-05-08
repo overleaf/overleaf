@@ -22,8 +22,9 @@ module.exports =
 		project_id = req.params.Project_id
 		doc_id = req.params.doc_id
 		lines = req.body.lines
+		version = req.body.version
 		logger.log doc_id:doc_id, project_id:project_id, "receiving set document request from api (docupdater)"
-		ProjectEntityHandler.updateDocLines project_id, doc_id, lines, (error) ->
+		ProjectEntityHandler.updateDocLines project_id, doc_id, lines, version, (error) ->
 			if error?
 				logger.err err:error, doc_id:doc_id, project_id:project_id, "error finding element for getDocument"
 				return next(error)

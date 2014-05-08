@@ -7,6 +7,7 @@ modulePath = "../../../../app/js/Features/Project/ProjectEntityHandler"
 SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongoose").Types.ObjectId
 tk = require 'timekeeper'
+Errors = require "../../../../app/js/errors"
 
 describe 'ProjectEntityHandler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'
@@ -65,7 +66,7 @@ describe 'ProjectEntityHandler', ->
 			'./ProjectLocator':@projectLocator = {}
 			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@documentUpdaterHandler = {}
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
-			'logger-sharelatex':{log:->}
+			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub()}
 			'./ProjectUpdateHandler': @projectUpdater
 			"./ProjectGetter": @ProjectGetter = {}
 
@@ -305,7 +306,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
-			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, 0)
+			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, true, 0)
 
 			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
 
@@ -457,54 +458,105 @@ describe 'ProjectEntityHandler', ->
 				done()
 
 
-	describe 'updating document lines', ->
-		docId = "123456"
-		docLines = ['1234','abc', '543543']
-		mongoPath = "folders[0].folders[5]"
-		fileSystemPath = "/somehwere/something.tex"
+	describe 'updateDocLines', ->
+		beforeEach ->
+			@lines = ['mock', 'doc', 'lines']
+			@path = "/somewhere/something.tex"
+			@doc = {
+				_id: doc_id
+			}
+			@version = 42
+			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
+			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @doc, {fileSystem: @path})
+			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
+			@projectUpdater.markAsUpdated = sinon.stub()
+			@callback = sinon.stub()
 
-		it 'should find project via getProject', (done)->
-			@ProjectModel.getProject = (passedProject_id, callback)->
-				passedProject_id.should.equal project_id
-				done()
+		describe "when the doc has been modified", ->
+			beforeEach ->
+				@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, true, @rev = 5)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @callback
 
-			@ProjectEntityHandler.updateDocLines project_id, "", [], ->
+			it "should get the project without doc lines", ->
+				@ProjectGetter.getProjectWithoutDocLines
+					.calledWith(project_id)
+					.should.equal true
 
-		it 'should find the doc', (done)->
-			
-			@projectLocator.findElement = (options, callback)->
-				options.element_id.should.equal docId
-				options.type.should.equal 'docs'
-				done()
+			it "should find the doc", ->
+				@projectLocator.findElement
+					.calledWith({
+						project: @project
+						type: "docs"
+						element_id: doc_id
+					})
+					.should.equal true
 
-			@ProjectEntityHandler.updateDocLines project_id, docId, "", ->
+			it "should update the doc in the docstore", ->
+				@DocstoreManager.updateDoc
+					.calledWith(project_id, doc_id, @lines, @version)
+					.should.equal true
 
-		it 'should build mongo update statment', (done)->
-			@projectLocator.findElement = (opts, callback)->
-				callback(null, {lines:[], rev:0}, {mongo:mongoPath})
+			it "should mark the project as updated", ->
+				@projectUpdater.markAsUpdated
+					.calledWith(project_id)
+					.should.equal true
 
-			@ProjectModel.update = (conditions, update, options, callback)->
-				conditions._id.should.equal project_id
-				update.$set["#{mongoPath}.lines"].should.equal docLines
-				update.$inc["#{mongoPath}.rev"].should.equal 1
-				done()
+			it "should send the doc the to the TPDS", ->
+				@tpdsUpdateSender.addDoc
+					.calledWith({
+						project_id: project_id
+						project_name: @project.name
+						docLines: @lines
+						rev: @rev
+						path: @path
+					})
+					.should.equal true
 
-			@ProjectEntityHandler.updateDocLines project_id, docId, docLines, ->
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
-		it 'should call third party data store ', (done)->
-			rev = 3
-			@projectLocator.findElement = (opts, callback)->
-				callback(null, {lines:[],rev:rev}, {fileSystem:fileSystemPath})
-			@ProjectModel.update = (conditions, update, options, callback)-> callback()
-			@tpdsUpdateSender.addDoc = (options, _, callback)=>
-				options.project_id.should.equal project_id
-				options.docLines.should.equal docLines
-				options.path.should.equal fileSystemPath
-				options.project_name.should.equal @project.name
-				options.rev.should.equal (rev+1)
-				callback()
-				@projectUpdater.markAsUpdated.calledWith(project_id).should.equal true
-			@ProjectEntityHandler.updateDocLines project_id, docId, docLines, done
+		describe "when the doc has not been modified", ->
+			beforeEach ->
+				@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, false, @rev = 5)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @callback
+
+			it "should not mark the project as updated", ->
+				@projectUpdater.markAsUpdated.called.should.equal false
+
+			it "should not send the doc the to the TPDS", ->
+				@tpdsUpdateSender.addDoc.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the project is not found", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, null)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @callback
+
+			it "should return a not found error", ->
+				@callback.calledWith(new Errors.NotFoundError()).should.equal true
+
+		describe "when the doc is not found", ->
+			beforeEach ->
+				@projectLocator.findElement = sinon.stub().callsArgWith(1, null, null, null)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @callback
+
+			it "should log out the error", ->
+				@logger.error
+					.calledWith(
+						project_id: project_id
+						doc_id: doc_id
+						version: @version
+						lines: @lines
+						err: new Errors.NotFoundError("doc not found")
+						"doc not found while updating doc lines"
+					)
+					.should.equal true
+
+			it "should return a not found error", ->
+				@callback.calledWith(new Errors.NotFoundError()).should.equal true
+
 
 	describe "getting folders, docs and files", ->
 		beforeEach ->
