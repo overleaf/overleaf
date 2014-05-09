@@ -1,7 +1,6 @@
 express = require('express')
 logger = require('logger-sharelatex')
 logger.initialize("filestore")
-metrics = require("./app/js/metrics")
 settings = require("settings-sharelatex")
 request = require("request")
 fileController = require("./app/js/FileController")
@@ -11,9 +10,13 @@ appIsOk = true
 app = express()
 streamBuffers = require("stream-buffers")
 
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("filestore")
+Metrics.open_sockets.monitor(logger)
 
 app.configure ->
 	app.use express.bodyParser()
+	app.use Metrics.http.monitor(logger)
 	
 app.configure 'development', ->
 	console.log "Development Enviroment"
@@ -21,13 +24,12 @@ app.configure 'development', ->
 
 app.configure 'production', ->
 	console.log "Production Enviroment"
-	app.use express.logger()
 	app.use express.errorHandler()
 
-metrics.inc "startup"
+Metrics.inc "startup"
 
 app.use (req, res, next)->
-	metrics.inc "http-request"
+	Metrics.inc "http-request"
 	next()
 
 app.use (req, res, next) ->
