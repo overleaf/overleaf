@@ -29,7 +29,7 @@ module.exports =
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
 
 	gauge : (key, value, sampleRate = 1)->
-		statsd.gauge key, value, sampleRate
+		statsd.gauge buildKey(key), value, sampleRate
 
 	mongodb: require "./mongodb"
 	http: require "./http"
