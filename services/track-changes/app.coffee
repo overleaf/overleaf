@@ -2,13 +2,18 @@ Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 logger.initialize("track-changes")
 
+Path = require "path"
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("track-changes")
+Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
+
 require("./app/js/MongoManager").ensureIndices()
 
 HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()
 
-app.use express.logger()
+app.use Metrics.http.monitor(logger)
 
 app.post "/project/:project_id/doc/:doc_id/flush", HttpController.flushDoc
 
