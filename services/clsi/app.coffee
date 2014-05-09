@@ -4,12 +4,18 @@ logger = require "logger-sharelatex"
 logger.initialize("clsi")
 smokeTest = require "smoke-test-sharelatex"
 
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("clsi")
+Metrics.open_sockets.monitor(logger)
+
 ProjectPersistenceManager = require "./app/js/ProjectPersistenceManager"
 
 require("./app/js/db").sync()
 
 express = require "express"
 app = express()
+
+app.use Metrics.http.monitor(logger)
 
 app.post "/project/:project_id/compile", express.bodyParser(), CompileController.compile
 app.del  "/project/:project_id", CompileController.clearCache
