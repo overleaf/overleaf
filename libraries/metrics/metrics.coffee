@@ -33,4 +33,5 @@ module.exports =
 
 	mongodb: require "./mongodb"
 	http: require "./http"
+	open_sockets: require "./open_sockets"
 
