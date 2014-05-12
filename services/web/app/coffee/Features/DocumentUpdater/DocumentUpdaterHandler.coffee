@@ -58,6 +58,22 @@ module.exports =
 				error = new Error("document updater returned a failure status code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
+
+	flushDocToMongo: (project_id, doc_id, callback = (error) ->) ->
+		logger.log project_id:project_id, doc_id: doc_id, "flushing doc from document updater"
+		timer = new metrics.Timer("flushing.mongo.doc")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/flush"
+		request.post url, (error, res, body)->
+			if error?
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc from document updater"
+				return callback(error)
+			else if res.statusCode >= 200 and res.statusCode < 300
+				logger.log project_id: project_id, doc_id: doc_id, "flushed doc from document updater"
+				return callback(null)
+			else
+				error = new Error("document updater returned a failure status code: #{res.statusCode}")
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "document updater returned failure status code: #{res.statusCode}"
+				return callback(error)
 	
 	deleteDoc : (project_id, doc_id, sl_req_id, callback = ()->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
