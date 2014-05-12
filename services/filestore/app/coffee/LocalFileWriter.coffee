@@ -3,7 +3,7 @@ uuid = require('node-uuid')
 path = require("path")
 _ = require("underscore")
 logger = require("logger-sharelatex")
-metrics = require("./metrics")
+metrics = require("metrics-sharelatex")
 
 module.exports = 
 

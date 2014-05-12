@@ -37,8 +37,9 @@ app.use (req, res, next) ->
 	requestDomain.add req
 	requestDomain.add res
 	requestDomain.on "error", (err)->
+		metrics.inc "err.uncaught"
 		setTimeout(->
-			if !res.finished
+			if !res.headerSent
 				res.send(500)
 		, 3000)
 		logger = require('logger-sharelatex')

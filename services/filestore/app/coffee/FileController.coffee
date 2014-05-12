@@ -2,7 +2,7 @@ PersistorManager = require("./PersistorManager")
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 FileHandler = require("./FileHandler")
-metrics = require("./metrics")
+metrics = require("metrics-sharelatex")
 oneDayInSeconds = 60 * 60 * 24
 
 module.exports =

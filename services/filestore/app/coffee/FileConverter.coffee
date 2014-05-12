@@ -1,5 +1,5 @@
 _ = require("underscore")
-metrics = require("./metrics")
+metrics = require("metrics-sharelatex")
 logger = require("logger-sharelatex")
 exec = require('child_process').exec
 approvedFormats = ["png"]
