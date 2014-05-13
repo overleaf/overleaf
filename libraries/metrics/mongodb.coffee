@@ -32,7 +32,7 @@ module.exports =
 					time = new Date() - start
 					logger.log
 						query: db_command.query
-						type: type
+						query_type: type
 						collection: collection
 						"response-time": new Date() - start
 						"mongo request"
