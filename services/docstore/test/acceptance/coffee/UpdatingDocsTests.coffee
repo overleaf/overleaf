@@ -95,3 +95,19 @@ describe "Applying updates to a doc", ->
 					doc.lines.should.deep.equal @originalLines
 					done()
 
+	describe "when the content is large", ->
+		beforeEach (done) ->
+			line = new Array(1025).join("x") # 1kb
+			@largeLines = Array.apply(null, Array(1024)).map(() -> line) # 1mb
+			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, @newVersion, (error, res, @body) =>
+				done()
+
+		it "should return modified = true", ->
+			@body.modified.should.equal true
+
+		it "should update the doc in the API", (done) ->
+			DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				doc.lines.should.deep.equal @largeLines
+				doc.version.should.deep.equal @newVersion
+				done()
+
