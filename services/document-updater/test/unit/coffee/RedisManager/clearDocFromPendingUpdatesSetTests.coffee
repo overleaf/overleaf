@@ -12,6 +12,7 @@ describe "RedisManager.clearDocFromPendingUpdatesSet", ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"redis" : createClient: () =>
 				@rclient = auth:->
+			"logger-sharelatex": {}
 
 		@rclient.srem = sinon.stub().callsArg(2)
 		@RedisManager.clearDocFromPendingUpdatesSet(@project_id, @doc_id, @callback)

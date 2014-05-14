@@ -2,7 +2,9 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 async = require "async"
+rclient = require("redis").createClient()
 
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
@@ -44,6 +46,16 @@ describe "Applying updates to a doc", ->
 				doc.lines.should.deep.equal @result
 				done()
 
+		it "should push the applied updates to the track changes api", (done) ->
+			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				throw error if error?
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+					throw error if error?
+					result.should.equal 1
+					done()
+
+
 	describe "when the document is loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
@@ -68,6 +80,13 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @result
 				done()
+
+		it "should push the applied updates to the track changes api", (done) ->
+			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+					result.should.equal 1
+					done()
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->
@@ -108,6 +127,16 @@ describe "Applying updates to a doc", ->
 					throw error if error?
 					DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 						doc.lines.should.deep.equal @result
+						done()
+
+			it "should push the applied updates to the track changes api", (done) ->
+				rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+					updates = (JSON.parse(u) for u in updates)
+					for appliedUpdate, i in @updates
+						appliedUpdate.op.should.deep.equal updates[i].op
+
+					rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+						result.should.equal 1
 						done()
 
 		describe "when older ops come in after the delete", ->
@@ -160,4 +189,30 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @lines
 				done()
-	
+
+	describe "with enough updates to flush to the track changes api", ->
+		beforeEach (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, {
+				lines: @lines
+				version: 0
+			}
+			@updates = []
+			for v in [0..99] # Should flush after 50 ops
+				@updates.push
+					doc_id: @doc_id,
+					op: [i: v.toString(), p: 0]
+					v: v
+
+			sinon.spy MockTrackChangesApi, "flushDoc"
+
+			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
+				throw error if error?
+				setTimeout done, 200
+
+		afterEach ->
+			MockTrackChangesApi.flushDoc.restore()
+
+		it "should flush the doc twice", ->
+			MockTrackChangesApi.flushDoc.calledTwice.should.equal true
+

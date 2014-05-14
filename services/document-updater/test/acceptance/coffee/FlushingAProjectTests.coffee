@@ -41,6 +41,7 @@ describe "Flushing a project", ->
 	describe "with documents which have been updated", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocumentLines"
+
 			async.series @docs.map((doc) =>
 				(callback) =>
 					DocUpdaterClient.preloadDoc @project_id, doc.id, (error) =>

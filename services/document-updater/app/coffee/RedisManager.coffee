@@ -156,12 +156,22 @@ module.exports = RedisManager =
 			version = parseInt(version, 10)
 			callback null, version
 
+	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error, length) ->) ->
+		jsonOp = JSON.stringify op
+		multi = rclient.multi()
+		multi.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp
+		multi.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id
+		multi.exec (error, results) ->
+			return callback(error) if error?
+			[length, _] = results
+			callback(error, length)
+
 	getDocOpsLength: (doc_id, callback = (error, length) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), callback
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
-		
+
 
 getDocumentsProjectId = (doc_id, callback)->
 	rclient.get keys.projectKey({doc_id:doc_id}), (err, project_id)->

@@ -5,8 +5,14 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
 	
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
+
 		execute:
 			app:
 				src: "app.js"
@@ -49,12 +55,12 @@ module.exports = (grunt) ->
 
 		mochaTest:
 			unit:
-				src: ['test/unit/js/**/*.js']
+				src: ["test/unit/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
 			acceptance:
-				src: ['test/acceptance/js/**/*.js']
+				src: ["test/acceptance/js/#{grunt.option('feature') or '*'}.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")

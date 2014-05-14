@@ -72,5 +72,4 @@ describe "Flushing a doc to Mongo", ->
 			MockWebApi.setDocumentLines.called.should.equal false
 			MockWebApi.setDocumentVersion.called.should.equal false
 
-			
 

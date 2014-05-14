@@ -7,7 +7,6 @@ RedisManager = require('./app/js/RedisManager.js')
 UpdateManager = require('./app/js/UpdateManager.js')
 Keys = require('./app/js/RedisKeyBuilder')
 redis = require('redis')
-metrics = require('./app/js/Metrics')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
@@ -15,32 +14,27 @@ redisConf = Settings.redis.web
 rclient = redis.createClient(redisConf.port, redisConf.host)
 rclient.auth(redisConf.password)
 
+Path = require "path"
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("doc-updater")
+Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
+
 app = express()
 app.configure ->
-	app.use(express.logger(':remote-addr - [:date] - :user-agent ":method :url" :status - :response-time ms'));
+	app.use(Metrics.http.monitor(logger));
 	app.use express.bodyParser()
 	app.use app.router
 
-app.configure 'development', ()->
-	console.log "Development Enviroment"
-	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
-
-app.configure 'production', ()->
-	console.log "Production Enviroment"
-	app.use express.logger()
-	app.use express.errorHandler()
-
 rclient.subscribe("pending-updates")
-rclient.on "message", (channel, doc_key)->
+rclient.on "message", (channel, doc_key) ->
 	[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-	UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-		logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+	if !Settings.shuttingDown
+		UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
+			logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+	else
+		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update" 
 
 UpdateManager.resumeProcessing()
-
-app.use (req, res, next)->
-	metrics.inc "http-request"
-	next()
 
 app.get    '/project/:project_id/doc/:doc_id',       HttpController.getDoc
 app.post   '/project/:project_id/doc/:doc_id',       HttpController.setDoc
@@ -50,13 +44,16 @@ app.delete '/project/:project_id',                   HttpController.deleteProjec
 app.post   '/project/:project_id/flush',             HttpController.flushProject
 
 app.get '/total', (req, res)->
-	timer = new metrics.Timer("http.allDocList")	
+	timer = new Metrics.Timer("http.allDocList")	
 	RedisManager.getCountOfDocsInMemory (err, count)->
 		timer.done()
 		res.send {total:count}
 	
 app.get '/status', (req, res)->
-	res.send('document updater is alive')
+	if Settings.shuttingDown
+		res.send 503 # Service unavailable
+	else
+		res.send('document updater is alive')
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "request errored"
@@ -65,6 +62,18 @@ app.use (error, req, res, next) ->
 	else
 		res.send(500, "Oops, something went wrong")
 
+shutdownCleanly = (signal) ->
+	return () ->
+		logger.log signal: signal, "received interrupt, cleaning up"
+		Settings.shuttingDown = true
+		setTimeout () ->
+			logger.log signal: signal, "shutting down"
+			process.exit()
+		, 10000
+
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
 app.listen port, "localhost", ->
 	logger.log("documentupdater-sharelatex server listening on port #{port}")
+
+for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
+	process.on signal, shutdownCleanly(signal)

@@ -4,6 +4,7 @@ DocumentManager = require "./DocumentManager"
 RedisManager = require "./RedisManager"
 DocOpsManager = require "./DocOpsManager"
 Errors = require "./Errors"
+logger = require "logger-sharelatex"
 
 module.exports = ShareJsDB =
 	getOps: (doc_key, start, end, callback) ->
@@ -23,15 +24,15 @@ module.exports = ShareJsDB =
 	
 	writeOp: (doc_key, opData, callback) ->
 		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-		DocOpsManager.pushDocOp project_id, doc_id, {op:opData.op, meta:opData.meta}, (error, version) ->
+		DocOpsManager.pushDocOp project_id, doc_id, opData, (error, version) ->
 			return callback error if error?
 
 			if version == opData.v + 1
 				callback()
 			else
-				# The document has been corrupted by the change. For now, throw an exception.
-				# Later, rebuild the snapshot.
-				callback "Version mismatch in db.append. '#{doc_id}' is corrupted."
+				error = new Error("Version mismatch. '#{doc_id}' is corrupted.")
+				logger.error err: error, doc_id: doc_id, project_id: project_id, opVersion: opData.v, expectedVersion: version, "doc is corrupt"
+				callback error
 
 	getSnapshot: (doc_key, callback) ->
 		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)

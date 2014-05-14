@@ -40,7 +40,7 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback null, lines, version, ops
 
-	setDoc: (project_id, doc_id, newLines, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, newLines, source, user_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -66,6 +66,8 @@ module.exports = DocumentManager =
 					v: version
 					meta:
 						type: "external"
+						source: source
+						user_id: user_id
 				UpdateManager.applyUpdates project_id, doc_id, [update], (error) ->
 					return callback(error) if error?
 					DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
@@ -110,9 +112,9 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
 		
-	setDocWithLock: (project_id, doc_id, lines, callback = (error) ->) ->
+	setDocWithLock: (project_id, doc_id, lines, source, user_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
-		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, callback
+		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, source, user_id, callback
 		
 	flushDocIfLoadedWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"

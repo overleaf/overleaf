@@ -40,7 +40,8 @@ module.exports = MockWebApi =
 					else
 						res.send 204
 
-		app.listen(3000)
+		app.listen 3000, (error) ->
+			throw error if error?
 
 MockWebApi.run()
 

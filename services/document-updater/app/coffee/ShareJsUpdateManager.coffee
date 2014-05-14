@@ -44,10 +44,7 @@ module.exports = ShareJsUpdateManager =
 				if error?
 					@_sendError(project_id, doc_id, error)
 					return callback(error)
-				if typeof data.snapshot == "string"
-					docLines = data.snapshot.split("\n")
-				else
-					docLines = data.snapshot.lines
+				docLines = data.snapshot.split(/\r\n|\n|\r/)
 				callback(null, docLines, data.v)
 
 	_listenForOps: (model) ->

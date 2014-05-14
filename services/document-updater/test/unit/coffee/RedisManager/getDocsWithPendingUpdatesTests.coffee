@@ -10,6 +10,7 @@ describe "RedisManager.getDocsWithPendingUpdates", ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"redis" : createClient: () =>
 				@rclient = auth:->
+			"logger-sharelatex": {}
 
 		@docs = [{
 			doc_id: "doc-id-1"
