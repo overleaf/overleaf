@@ -13,6 +13,7 @@ describe "PersistenceManager.getDoc", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+			"logger-sharelatex": @logger = {warn: sinon.stub()}
 			"./mongojs":
 				db: @db = { docOps: {} }
 				ObjectId: ObjectId
@@ -50,6 +51,11 @@ describe "PersistenceManager.getDoc", ->
 		it "should look up the version in Mongo", ->
 			@PersistenceManager.getDocVersionInMongo
 				.calledWith(@doc_id)
+				.should.equal true
+
+		it "shoud log a warning", ->
+			@logger.warn
+				.calledWith(project_id: @project_id, doc_id: @doc_id, "loading doc version from mongo - deprecated")
 				.should.equal true
 
 		it "should call the callback with the lines and version", ->

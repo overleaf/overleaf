@@ -6,7 +6,7 @@ modulePath = path.join __dirname, '../../../../app/js/LockManager.js'
 keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 project_id = 1234
 doc_id     = 5678
-loadModule = require('../module-loader').loadModule
+SandboxedModule = require('sandboxed-module')
 
 describe 'LockManager - releasing the lock', ()->
 
@@ -19,7 +19,7 @@ describe 'LockManager - releasing the lock', ()->
 				auth:->
 				del:deleteStub
 	
-	LockManager = loadModule(modulePath, mocks).module.exports
+	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should put a all data into memory', (done)->
 		LockManager.releaseLock doc_id, ->

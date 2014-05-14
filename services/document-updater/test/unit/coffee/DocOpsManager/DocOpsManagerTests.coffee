@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/DocOpsManager.js"
 SandboxedModule = require('sandboxed-module')
+{ObjectId} = require "mongojs"
 
 describe "DocOpsManager", ->
 	beforeEach ->

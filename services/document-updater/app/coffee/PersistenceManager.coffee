@@ -3,6 +3,7 @@ Settings = require "settings-sharelatex"
 Errors = require "./Errors"
 Metrics = require "./Metrics"
 {db, ObjectId} = require("./mongojs")
+logger = require "logger-sharelatex"
 
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
@@ -11,6 +12,7 @@ module.exports = PersistenceManager =
 			if version?
 				callback null, lines, version
 			else
+				logger.warn project_id: project_id, doc_id: doc_id, "loading doc version from mongo - deprecated"
 				PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
 					return callback(error) if error?
 					if version?

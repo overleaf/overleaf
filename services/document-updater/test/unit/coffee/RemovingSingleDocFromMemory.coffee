@@ -5,7 +5,7 @@ sinon = require('sinon')
 path = require('path')
 modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
 keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
-loadModule = require('./module-loader').loadModule
+SandboxedModule = require('sandboxed-module')
 
 describe 'removing single doc from memory', ()->
 
@@ -43,7 +43,7 @@ describe 'removing single doc from memory', ()->
 						exec:(callback)->
 							callback(null, [])
 		
-		redisManager = loadModule(modulePath, mocks).module.exports
+		redisManager = SandboxedModule.require(modulePath, requires: mocks)
 		redisManager.putDocInMemory project_id, doc_id1, 0, ["line"], ->
 			redisManager.putDocInMemory project_id, doc_id2, 0, ["ledf"], ->
 				redisManager.putDocInMemory project_id, doc_id3, 0, ["ledf"], ->

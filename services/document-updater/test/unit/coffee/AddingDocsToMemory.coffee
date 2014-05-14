@@ -5,7 +5,7 @@ modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
 keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
 project_id = 1234
 doc_id     = 5678
-loadModule = require('./module-loader').loadModule
+SandboxedModule = require('sandboxed-module')
 
 describe 'putting a doc into memory', ()->
 	lines = ["this is one line", "and another line"]
@@ -44,7 +44,7 @@ describe 'putting a doc into memory', ()->
 					exec:(callback)->
 						callback()
 	
-	redisManager = loadModule(modulePath, mocks).module.exports
+	redisManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should put a all data into memory', (done)->
 		redisManager.putDocInMemory project_id, doc_id, lines, version, ()->

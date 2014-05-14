@@ -7,7 +7,7 @@ keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 project_id = 1234
 doc_id     = 5678
 blockingKey = "Blocking:#{doc_id}"
-loadModule = require('../module-loader').loadModule
+SandboxedModule = require('sandboxed-module')
 
 describe 'Lock Manager - checking the lock', ()->
 
@@ -27,7 +27,7 @@ describe 'Lock Manager - checking the lock', ()->
 					expire: exireStub
 					set: setStub
 					exec: execStub
-	LockManager = loadModule(modulePath, mocks).module.exports
+	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should check if lock exists but not set or expire', (done)->
 		execStub.callsArgWith(0, null, ["1"])

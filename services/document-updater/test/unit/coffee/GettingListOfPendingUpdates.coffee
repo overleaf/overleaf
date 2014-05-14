@@ -3,7 +3,7 @@ should = require('chai').should()
 path = require('path')
 modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
 _ = require('underscore')
-loadModule = require('./module-loader').loadModule
+SandboxedModule = require('sandboxed-module')
 keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
 
 describe 'getting entire list of pending updates', ()->
@@ -33,7 +33,7 @@ describe 'getting entire list of pending updates', ()->
 					exec: (callback)->
 						callback(null, redisReturn)
 	
-	redisManager = loadModule(modulePath, mocks).module.exports
+	redisManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should have 3 elements in array', (done)->
 		redisManager.getPendingUpdatesForDoc doc_id, (err, listOfUpdates)->
