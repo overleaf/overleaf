@@ -7,30 +7,29 @@ logger = require "logger-sharelatex"
 
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
-		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines, version) ->
+		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines, webVersion) ->
 			return callback(error) if error?
-			if version?
+			PersistenceManager.getDocVersionInMongo doc_id, (error, mongoVersion) ->
+				return callback(error) if error?
+				if !webVersion? and !mongoVersion?
+					version = 0
+				else if !webVersion?
+					logger.warn project_id: project_id, doc_id: doc_id, "loading doc version from mongo - deprecated"
+					version = mongoVersion
+				else if !mongoVersion?
+					version = webVersion
+				else if webVersion > mongoVersion
+					version = webVersion
+				else
+					version = mongoVersion
 				callback null, lines, version
-			else
-				logger.warn project_id: project_id, doc_id: doc_id, "loading doc version from mongo - deprecated"
-				PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
-					return callback(error) if error?
-					if version?
-						callback null, lines, version
-					else
-						callback null, lines, 0
-		
-	getDocVersionInMongo: (doc_id, callback = (error, version) ->) ->
-		db.docOps.find {
-			doc_id: ObjectId(doc_id)
-		}, {
-			version: 1
-		}, (error, docs) ->
+
+	setDoc: (project_id, doc_id, lines, version, callback = (error) ->) ->
+		PersistenceManager.setDocInWeb project_id, doc_id, lines, version, (error) ->
 			return callback(error) if error?
-			if docs.length < 1 or !docs[0].version?
-				return callback null, null
-			else
-				return callback null, docs[0].version
+			PersistenceManager.setDocVersionInMongo doc_id, version, (error) ->
+				return callback(error) if error?
+				callback()
 
 	getDocFromWeb: (project_id, doc_id, _callback = (error, lines, version) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
@@ -62,7 +61,7 @@ module.exports = PersistenceManager =
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDoc: (project_id, doc_id, lines, version, _callback = (error) ->) ->
+	setDocInWeb: (project_id, doc_id, lines, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -90,5 +89,27 @@ module.exports = PersistenceManager =
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
+		
+	getDocVersionInMongo: (doc_id, callback = (error, version) ->) ->
+		db.docOps.find {
+			doc_id: ObjectId(doc_id)
+		}, {
+			version: 1
+		}, (error, docs) ->
+			return callback(error) if error?
+			if docs.length < 1 or !docs[0].version?
+				return callback null, null
+			else
+				return callback null, docs[0].version
+
+	setDocVersionInMongo: (doc_id, version, callback = (error) ->) ->
+		db.docOps.update {
+			doc_id: ObjectId(doc_id)
+		}, {
+			$set: version: version
+		}, {
+			upsert: true
+		}, callback
+
 
 			

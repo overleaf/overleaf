@@ -2,6 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 async = require "async"
+{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -52,6 +53,17 @@ describe "Flushing a doc to Mongo", ->
 			MockWebApi.setDocumentVersion
 				.calledWith(@project_id, @doc_id, @version + 1)
 				.should.equal true
+
+		it "should store the updated doc version into mongo", (done) ->
+			db.docOps.find {
+				doc_id: ObjectId(@doc_id)
+			}, {
+				version: 1
+			}, (error, docs) =>
+				doc = docs[0]
+				doc.version.should.equal @version + 1
+				done()
+
 
 	describe "when the doc does not exist in the doc updater", ->
 		before (done) ->

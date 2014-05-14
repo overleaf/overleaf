@@ -260,6 +260,28 @@ describe "Applying updates to a doc", ->
 				doc.lines.should.deep.equal @result
 				done()
 
+	describe "when the document version in Mongo is ahead of the web api", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, {
+				lines: @lines
+				version: @version - 20
+			}
+
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
+				throw error if error?
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+					throw error if error?
+					setTimeout done, 200
+
+		it "should update the doc (using the web version)", (done) ->
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				doc.lines.should.deep.equal @result
+				done()
+
 	describe "when there is no version yet", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
