@@ -52,6 +52,7 @@ module.exports = (grunt) ->
 		clean:
 			app: ["app/js"]
 			acceptance_tests: ["test/acceptance/js"]
+			unit_tests: ["test/unit/js"]
 
 		mochaTest:
 			unit:
@@ -102,7 +103,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir']
-	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['coffee:unit_tests']
+	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:acceptance_tests', 'compile:unit_tests']
 	grunt.registerTask 'compile', 'Compiles everything need to run document-updater-sharelatex', ['compile:server']

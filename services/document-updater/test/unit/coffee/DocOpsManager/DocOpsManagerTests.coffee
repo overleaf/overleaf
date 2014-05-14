@@ -6,15 +6,11 @@ SandboxedModule = require('sandboxed-module')
 
 describe "DocOpsManager", ->
 	beforeEach ->
-		@doc_id = "doc-id"
-		@project_id = "project-id"
+		@doc_id = ObjectId().toString()
+		@project_id = ObjectId().toString()
 		@callback = sinon.stub()
 		@DocOpsManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./Metrics": @Metrics =
-				Timer: class Timer
-					done: sinon.stub()
 			"./TrackChangesManager": @TrackChangesManager = {}
 
 	describe "getPreviousDocOps", ->

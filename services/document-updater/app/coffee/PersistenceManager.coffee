@@ -2,9 +2,35 @@ request = require "request"
 Settings = require "settings-sharelatex"
 Errors = require "./Errors"
 Metrics = require "./Metrics"
+{db, ObjectId} = require("./mongojs")
 
 module.exports = PersistenceManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines) ->) ->
+	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
+		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines, version) ->
+			return callback(error) if error?
+			if version?
+				callback null, lines, version
+			else
+				PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
+					return callback(error) if error?
+					if version?
+						callback null, lines, version
+					else
+						callback null, lines, 0
+		
+	getDocVersionInMongo: (doc_id, callback = (error, version) ->) ->
+		db.docOps.find {
+			doc_id: ObjectId(doc_id)
+		}, {
+			version: 1
+		}, (error, docs) ->
+			return callback(error) if error?
+			if docs.length < 1 or !docs[0].version?
+				return callback null, null
+			else
+				return callback null, docs[0].version
+
+	getDocFromWeb: (project_id, doc_id, _callback = (error, lines, version) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -62,6 +88,5 @@ module.exports = PersistenceManager =
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
-		
 
 			
