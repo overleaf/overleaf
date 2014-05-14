@@ -154,7 +154,7 @@ define [
 				name = @model.get("name")
 				@$inputEl.val(name).focus()
 				if @$inputEl[0].setSelectionRange?
-					selectionEnd = name.indexOf(".")
+					selectionEnd = name.lastIndexOf(".")
 					if selectionEnd == -1
 						selectionEnd = name.length
 					@$inputEl[0].setSelectionRange(0, selectionEnd)
