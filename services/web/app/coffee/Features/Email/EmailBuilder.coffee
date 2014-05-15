@@ -93,7 +93,6 @@ module.exports =
 
 	buildEmail: (templateName, opts)->
 		template = templates[templateName]
-		console.log opts
 		opts.body = template.compiledTemplate(opts)
 		return {
 			subject : template.subject(opts)

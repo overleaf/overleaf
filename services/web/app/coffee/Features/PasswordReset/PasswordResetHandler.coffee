@@ -25,6 +25,6 @@ module.exports =
 		TokenGenerator.getUserIdFromToken token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
-				logger.err email:email, "token for password reset did not find user_id"
+				logger.err user_id:user_id, "token for password reset did not find user_id"
 				return callback("no user found")
 			AuthenticationManager.setUserPassword user_id, password, callback

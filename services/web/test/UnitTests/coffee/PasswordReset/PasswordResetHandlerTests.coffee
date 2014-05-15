@@ -27,7 +27,9 @@ describe "PasswordResetHandler", ->
 			"../Email/EmailHandler":@EmailHandler
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"settings-sharelatex": @settings
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				err:->
 		@token = "12312321i"
 		@user_id = "user_id_here"
 		@user = 
