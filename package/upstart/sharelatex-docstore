@@ -1,0 +1,19 @@
+description "sharelatex-docstore"
+author      "ShareLaTeX <team@sharelatex.com>"
+
+start on started mountall
+stop on shutdown
+
+respawn
+
+limit nofile 8192 8192
+
+pre-start script
+	mkdir -p /var/log/sharelatex
+end script
+
+script
+	echo $$ > /var/run/sharelatex-docstore.pid
+	chdir /var/www/sharelatex/docstore
+	exec sudo -u sharelatex -g sharelatex env SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee NODE_ENV=production node app.js >> /var/log/sharelatex/docstore.log 2>&1
+end script
