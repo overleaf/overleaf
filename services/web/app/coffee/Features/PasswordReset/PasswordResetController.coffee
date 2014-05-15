@@ -14,17 +14,16 @@ module.exports =
 			else
 				res.send 200
 
-
 	renderSetPasswordForm: (req, res)->
 		res.render "user/setPassword", 
 			title:"Set Password"
-
+			passwordResetToken:req.query.passwordResetToken
 
 	setNewUserPassword: (req, res)->
-		{token, password} = req.body
-		if !password? or password.length < 4 or !token? or token.length == 0
+		{passwordResetToken, password} = req.body
+		if !password? or password.length < 4 or !passwordResetToken? or passwordResetToken.length == 0
 			return res.send 500
-		PasswordResetHandler.setNewUserPassword token?.trim(), password?.trim(), (err)->
+		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err)->
 			if err?
 				res.send 500
 			else

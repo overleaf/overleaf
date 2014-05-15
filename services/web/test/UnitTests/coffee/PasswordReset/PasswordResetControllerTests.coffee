@@ -25,7 +25,7 @@ describe "PasswordResetController", ->
 		@req =
 			body:
 				email:@email
-				token:@token
+				passwordResetToken:@token
 				password:@password
 
 		@res ={}
@@ -78,7 +78,7 @@ describe "PasswordResetController", ->
 
 
 		it "should error if there is no password", (done)->
-			@req.body.token = ""
+			@req.body.passwordResetToken = ""
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
 			@res.send = (code)=>
 				code.should.equal 500
