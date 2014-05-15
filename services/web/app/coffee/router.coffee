@@ -34,6 +34,8 @@ FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 RestoreController = require("./Features/Restore/RestoreController")
+PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
+
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
@@ -71,6 +73,7 @@ module.exports = class Router
 
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
+		PasswordResetRouter.apply(app)
 
 		if Settings.enableSubscriptions
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
@@ -78,8 +81,7 @@ module.exports = class Router
 		app.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
-		app.get  '/user/passwordreset', UserPagesController.passwordResetPage
-		app.post '/user/passwordReset', UserController.doRequestPasswordReset
+
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
