@@ -123,7 +123,7 @@ module.exports = ProjectEntityHandler =
 				doc = new Doc name: docName
 				Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
 					return callback(err) if err?
-					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, 0, (err, modified, rev) ->
+					DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
 						return callback(err) if err? 
 						tpdsUpdateSender.addDoc {
 							project_id:   project._id,
