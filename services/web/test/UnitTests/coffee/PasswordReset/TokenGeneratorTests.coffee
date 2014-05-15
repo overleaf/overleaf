@@ -39,8 +39,8 @@ describe "TokenGenerator", ->
 		it "should set a new token into redis with a ttl", (done)->
 			@redisMulti.exec.callsArgWith(0) 
 			@TokenGenerator.getNewToken @user_id, (err, token)=>
-				@redisMulti.set @stubbedToken, @user_id
-				@redisMulti.expire @stubbedToken, (60*1000)*60
+				@redisMulti.set "password_token:#{@stubbedToken}", @user_id
+				@redisMulti.expire "password_token:#{@stubbedToken}", 60 * 60
 				done()
 
 		it "should return if there was an error", (done)->
@@ -56,8 +56,8 @@ describe "TokenGenerator", ->
 			@redisMulti.exec.callsArgWith(0, null, [@user_id]) 
 			@TokenGenerator.getUserIdFromToken @stubbedToken, (err, user_id)=>
 				user_id.should.equal @user_id
-				@redisMulti.get.calledWith(@stubbedToken).should.equal true
-				@redisMulti.del.calledWith(@stubbedToken).should.equal true
+				@redisMulti.get.calledWith("password_token:#{@stubbedToken}").should.equal true
+				@redisMulti.del.calledWith("password_token:#{@stubbedToken}").should.equal true
 				done()
 
 

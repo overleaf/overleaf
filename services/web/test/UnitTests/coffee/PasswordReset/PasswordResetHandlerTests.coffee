@@ -54,7 +54,7 @@ describe "PasswordResetHandler", ->
 				@EmailHandler.sendEmail.called.should.equal true
 				args = @EmailHandler.sendEmail.args[0]
 				args[0].should.equal "passwordResetRequested"
-				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?resetToken=#{@token}"
+				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
 				done()
 
 

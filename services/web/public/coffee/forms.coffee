@@ -93,16 +93,26 @@ require [
 		event.preventDefault()
 		formData = $(this).serialize()
 		$.ajax
-			url: "/user/passwordReset"
+			url: "/user/password/reset"
 			type:'POST'
 			data: formData
 			success: (data)->
-				if data.message
-					new Message data.message
-				else if data.redir
-					window.location.href = data.redir
-				else
-					window.location.href = '/'
+				new Message text:"You have been sent an email to complete your password reset."
+			error:(data)->
+				new Message type:"error", text:"something went wrong processing your request."
+				
+	$('form#setPasswordReset').submit (event)->
+		event.preventDefault()
+		formData = $(this).serialize()
+		$.ajax
+			url: "/user/password/set"
+			type:'POST'
+			data: formData
+			success: (data)->
+				new Message text:"Your password has been reset"
+			error:(data)->
+				new Message type:"error", text:"something went wrong processing your request."
+
 
 
 	$('a#deleteUserAccount').click (e)->

@@ -37,16 +37,30 @@ Henry <br>
 ShareLaTeX Co-founder
 '''
 
-templates.passwordReset =	
+templates.passwordResetRequested =	
 	subject:  _.template "Password Reset - ShareLatex.com"
 	layout: NotificationEmailLayout
 	type:"notification"
 	compiledTemplate: _.template '''
 <h1 class="h1">Password Reset</h1>
 <p>
-Your password has been reset, the new password is <p> <%= newPassword %>
+We got a request to reset your ShareLaTeX password.
 <p>
-please <a href="https://www.sharelatex.com/login">login here</a> and then change your password <a href=#{Settings.siteUrl}/user/settings> in your user settings</a>
+<center>
+	<div style="width:200px;background-color:#0069CC;border:1px solid #02A9D6;border-radius:4px;padding:15px; margin:10px 5px">
+		<div style="padding-right:10px;padding-left:10px">
+			<a href="<%= setNewPasswordUrl %>" style="text-decoration:none" target="_blank">
+				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
+		  			Reset password
+				</span>
+			</a>
+		</div>
+	</div>
+</center>
+
+If you ignore this message, your password won't be changed.
+<p>
+If you didn't request a password reset, let us know.
 
 </p>
 <p>Thank you</p>
@@ -79,6 +93,7 @@ module.exports =
 
 	buildEmail: (templateName, opts)->
 		template = templates[templateName]
+		console.log opts
 		opts.body = template.compiledTemplate(opts)
 		return {
 			subject : template.subject(opts)
