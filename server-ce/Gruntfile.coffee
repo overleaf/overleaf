@@ -111,6 +111,9 @@ module.exports = (grunt) ->
 		Helpers.checkMake @async()
 	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs"]
 
+	grunt.registerTask "build_deb", "Build an installable .deb file from the current directory", () ->
+		Helpers.buildDeb @async()
+
 	Helpers =
 		installService: (repo_src, dir, callback = (error) ->) ->
 			Helpers.cloneGitRepo repo_src, dir, (error) ->
@@ -301,6 +304,69 @@ module.exports = (grunt) ->
 				else
 					grunt.log.write "OK."
 					return callback()
+
+		buildDeb: (callback = (error) ->) ->
+			# TODO: filestore uses local 'uploads' directory, not configurable in settings
+			command = ["fpm", "-s", "dir", "-t", "deb", "-n", "sharelatex", "-v", "0.0.1", "--verbose"]
+			command.push(
+				"--maintainer", "'ShareLaTeX <team@sharelatex.com>'"
+				"--config-files", "/etc/sharelatex/settings.coffee",
+				"--directories",  "/var/data/sharelatex"
+				"--directories",  "/var/log/sharelatex"
+			)
+
+			command.push(
+				"--depends", "'redis-server > 2.6.12'"
+				"--depends", "'mongodb-10gen > 2.4.0'"
+				"--depends", "'nodejs > 0.10.0'"
+			)
+
+			template = fs.readFileSync("package/upstart/sharelatex-template").toString()
+			for service in SERVICES
+				fs.writeFileSync "package/upstart/sharelatex-#{service.name}", template.replace(/SERVICE/g, service.name)
+				command.push(
+					"--deb-upstart", "package/upstart/sharelatex-#{service.name}"
+				)
+
+			after_install_script = """
+				#!/bin/sh
+				sudo adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex
+
+				mkdir -p /var/log/sharelatex
+				chown sharelatex:sharelatex /var/log/sharelatex
+
+			"""
+
+			for dir in ["user_files", "uploads", "compiles", "cache", "dump"]
+				after_install_script += """
+					mkdir -p /var/data/sharelatex/#{dir}
+					chown sharelatex:sharelatex /var/data/sharelatex/#{dir}
+					
+				"""
+
+			for service in SERVICES
+				after_install_script += "service sharelatex-#{service.name} restart\n"
+			fs.writeFileSync "package/scripts/after_install.sh", after_install_script
+			command.push("--after-install", "package/scripts/after_install.sh")
+
+			command.push("--exclude", "'**/.git'")
+			for path in ["filestore/user_files", "filestore/uploads", "clsi/cache", "clsi/compiles"]
+				command.push "--exclude", path
+
+			for service in SERVICES
+				command.push "#{service.name}=/var/www/sharelatex/"
+
+			command.push(
+				"package/config/settings.coffee=/etc/sharelatex/settings.coffee"
+			)
+			console.log command.join(" ")
+			exec command.join(" "), (error, stdout, stderr) ->
+				return callback(error) if error?
+				console.log stdout
+				console.error stderr if stderr?
+				callback()
+
+			
 
 
 
