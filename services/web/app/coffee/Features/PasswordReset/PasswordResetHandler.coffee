@@ -4,6 +4,7 @@ UserGetter = require("../User/UserGetter")
 TokenGenerator = require("./TokenGenerator")
 EmailHandler = require("../Email/EmailHandler")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+logger = require("logger-sharelatex")
 
 module.exports =
 
@@ -11,6 +12,7 @@ module.exports =
 		UserGetter.getUser email:email, (err, user)->
 			if err then return callback(err)
 			if !user?
+				logger.err email:email, "user could not be found for password reset"
 				return callback("no user found")
 			TokenGenerator.getNewToken user._id, (err, token)->
 				if err then return callback(err)
@@ -23,5 +25,6 @@ module.exports =
 		TokenGenerator.getUserIdFromToken token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
+				logger.err email:email, "token for password reset did not find user_id"
 				return callback("no user found")
 			AuthenticationManager.setUserPassword user_id, password, callback
