@@ -7,31 +7,20 @@ logger = require "logger-sharelatex"
 
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
-		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines, webVersion) ->
+		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines) ->
 			return callback(error) if error?
-			PersistenceManager.getDocVersionInMongo doc_id, (error, mongoVersion) ->
+			PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
 				return callback(error) if error?
-				if !webVersion? and !mongoVersion?
-					version = 0
-				else if !webVersion?
-					logger.warn project_id: project_id, doc_id: doc_id, "loading doc version from mongo - deprecated"
-					version = mongoVersion
-				else if !mongoVersion?
-					version = webVersion
-				else if webVersion > mongoVersion
-					version = webVersion
-				else
-					version = mongoVersion
 				callback null, lines, version
 
 	setDoc: (project_id, doc_id, lines, version, callback = (error) ->) ->
-		PersistenceManager.setDocInWeb project_id, doc_id, lines, version, (error) ->
+		PersistenceManager.setDocInWeb project_id, doc_id, lines, (error) ->
 			return callback(error) if error?
 			PersistenceManager.setDocVersionInMongo doc_id, version, (error) ->
 				return callback(error) if error?
 				callback()
 
-	getDocFromWeb: (project_id, doc_id, _callback = (error, lines, version) ->) ->
+	getDocFromWeb: (project_id, doc_id, _callback = (error, lines) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -55,13 +44,13 @@ module.exports = PersistenceManager =
 					body = JSON.parse body
 				catch e
 					return callback(e)
-				return callback null, body.lines, body.version
+				return callback null, body.lines
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDocInWeb: (project_id, doc_id, lines, version, _callback = (error) ->) ->
+	setDocInWeb: (project_id, doc_id, lines, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -73,7 +62,6 @@ module.exports = PersistenceManager =
 			method: "POST"
 			body: JSON.stringify
 				lines: lines
-				version: parseInt(version, 10)
 			headers:
 				"content-type": "application/json"
 			auth:
@@ -98,7 +86,7 @@ module.exports = PersistenceManager =
 		}, (error, docs) ->
 			return callback(error) if error?
 			if docs.length < 1 or !docs[0].version?
-				return callback null, null
+				return callback null, 0
 			else
 				return callback null, docs[0].version
 

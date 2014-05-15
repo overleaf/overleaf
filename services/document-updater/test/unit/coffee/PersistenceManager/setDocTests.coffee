@@ -18,16 +18,15 @@ describe "PersistenceManager.setDoc", ->
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
 		@lines = ["mock", "doc", "lines"]
-		@version = 42
 
-		@PersistenceManager.setDocInWeb = sinon.stub().callsArg(4)
+		@PersistenceManager.setDocInWeb = sinon.stub().callsArg(3)
 		@PersistenceManager.setDocVersionInMongo = sinon.stub().callsArg(2)
 
 		@PersistenceManager.setDoc @project_id, @doc_id, @lines, @version, @callback
 
 	it "should set the doc in the web api", ->
 		@PersistenceManager.setDocInWeb
-			.calledWith(@project_id, @doc_id, @lines, @version)
+			.calledWith(@project_id, @doc_id, @lines)
 			.should.equal true
 
 	it "should set the doc version in mongo", ->

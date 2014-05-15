@@ -1,12 +1,13 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Setting a document", ->
-	before ->
+	before (done) ->
 		[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 		@lines = ["one", "two", "three"]
 		@version = 42
@@ -21,15 +22,19 @@ describe "Setting a document", ->
 		@newLines = ["these", "are", "the", "new", "lines"]
 		@source = "dropbox"
 		@user_id = "user-id-123"
-		MockWebApi.insertDoc @project_id, @doc_id, {
-			lines: @lines
+		
+		MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+		db.docOps.insert {
+			doc_id: ObjectId(@doc_id)
 			version: @version
-		}
+		}, (error) =>
+			throw error if error?
+			done()
+				
 
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
 			sinon.spy MockWebApi, "setDocumentLines"
-			sinon.spy MockWebApi, "setDocumentVersion"
 			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 				throw error if error?
 				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
@@ -42,7 +47,6 @@ describe "Setting a document", ->
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
-			MockWebApi.setDocumentVersion.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -50,11 +54,6 @@ describe "Setting a document", ->
 		it "should send the updated doc lines to the web api", ->
 			MockWebApi.setDocumentLines
 				.calledWith(@project_id, @doc_id, @newLines)
-				.should.equal true
-
-		it "should send the updated doc version to the web api", ->
-			MockWebApi.setDocumentVersion
-				.calledWith(@project_id, @doc_id, @version + 2)
 				.should.equal true
 
 		it "should update the lines in the doc updater", (done) ->

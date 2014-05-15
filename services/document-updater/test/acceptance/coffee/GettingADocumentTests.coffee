@@ -1,20 +1,28 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Getting a document", ->
+	beforeEach ->
+		@lines = ["one", "two", "three"]
+		@version = 42
+
 	describe "when the document is not loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines = ["one", "two", "three"]
-				version: @version = 42
-			}
 			sinon.spy MockWebApi, "getDocument"
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) => done()
+
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
+				throw error if error?
+				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) => done()
 
 		after ->
 			MockWebApi.getDocument.restore()
@@ -33,14 +41,17 @@ describe "Getting a document", ->
 	describe "when the document is already loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines = ["one", "two", "three"]
-			}
-
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+			
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
 				throw error if error?
-				sinon.spy MockWebApi, "getDocument"
-				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) =>	done()
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+					throw error if error?
+					sinon.spy MockWebApi, "getDocument"
+					DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) =>	done()
 
 		after ->
 			MockWebApi.getDocument.restore()
@@ -56,7 +67,6 @@ describe "Getting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines = ["one", "two", "three"]
-				version: 0
 			}
 
 			@updates = for v in [0..99]

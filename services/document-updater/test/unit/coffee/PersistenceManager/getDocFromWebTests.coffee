@@ -16,7 +16,6 @@ describe "PersistenceManager.getDocFromWeb", ->
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@lines = ["one", "two", "three"]
-		@version = 42
 		@callback = sinon.stub()
 		@Settings.apis =
 			web:
@@ -26,7 +25,7 @@ describe "PersistenceManager.getDocFromWeb", ->
 
 	describe "with a successful response from the web api", ->
 		beforeEach ->
-			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines, version: @version))
+			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines))
 			@PersistenceManager.getDocFromWeb(@project_id, @doc_id, @callback)
 
 		it "should call the web api", ->
@@ -44,8 +43,8 @@ describe "PersistenceManager.getDocFromWeb", ->
 				})
 				.should.equal true
 
-		it "should call the callback with the doc lines and version", ->
-			@callback.calledWith(null, @lines, @version).should.equal true
+		it "should call the callback with the doc lines", ->
+			@callback.calledWith(null, @lines).should.equal true
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true

@@ -24,10 +24,10 @@ describe "PersistenceManager.getDoc", ->
 		@lines = ["mock", "doc", "lines"]
 		@version = 42
 
-	describe "when the version is set in the web api but not Mongo", ->
+	describe "successfully", ->
 		beforeEach ->
-			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines, @version)
-			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, null)
+			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines)
+			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, @version)
 			@PersistenceManager.getDoc @project_id, @doc_id, @callback
 
 		it "should look up the doc in the web api", ->
@@ -43,44 +43,4 @@ describe "PersistenceManager.getDoc", ->
 		it "should call the callback with the lines and version", ->
 			@callback.calledWith(null, @lines, @version).should.equal true
 
-	describe "when the version is not set in the web api, but is in Mongo", ->
-		beforeEach ->
-			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines, null)
-			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, @version)
-			@PersistenceManager.getDoc @project_id, @doc_id, @callback
-
-		it "shoud log a warning", ->
-			@logger.warn
-				.calledWith(project_id: @project_id, doc_id: @doc_id, "loading doc version from mongo - deprecated")
-				.should.equal true
-
-		it "should call the callback with the lines and version", ->
-			@callback.calledWith(null, @lines, @version).should.equal true
-
-	describe "when the version in the web api is ahead of Mongo", ->
-		beforeEach ->
-			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines, @version)
-			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, @version - 20)
-			@PersistenceManager.getDoc @project_id, @doc_id, @callback
-
-		it "should call the callback with the web version", ->
-			@callback.calledWith(null, @lines, @version).should.equal true
-
-	describe "when the version in the web api is behind Mongo", ->
-		beforeEach ->
-			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines, @version - 20)
-			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, @version)
-			@PersistenceManager.getDoc @project_id, @doc_id, @callback
-
-		it "should call the callback with the Mongo version", ->
-			@callback.calledWith(null, @lines, @version).should.equal true
-
-	describe "when the version is not set", ->
-		beforeEach ->
-			@PersistenceManager.getDocFromWeb = sinon.stub().callsArgWith(2, null, @lines, null)
-			@PersistenceManager.getDocVersionInMongo = sinon.stub().callsArgWith(1, null, null)
-			@PersistenceManager.getDoc @project_id, @doc_id, @callback
-
-		it "should call the callback with the lines and version = 0", ->
-			@callback.calledWith(null, @lines, 0).should.equal true
 

@@ -14,11 +14,6 @@ module.exports = MockWebApi =
 		@docs["#{project_id}:#{doc_id}"].lines = lines
 		callback null
 
-	setDocumentVersion: (project_id, doc_id, version, callback = (error) ->) ->
-		@docs["#{project_id}:#{doc_id}"] ||= {}
-		@docs["#{project_id}:#{doc_id}"].version = version
-		callback null
-
 	getDocument: (project_id, doc_id, callback = (error, doc) ->) ->
 		callback null, @docs["#{project_id}:#{doc_id}"]
 
@@ -34,11 +29,10 @@ module.exports = MockWebApi =
 
 		app.post "/project/:project_id/doc/:doc_id", express.bodyParser(), (req, res, next) =>
 			MockWebApi.setDocumentLines req.params.project_id, req.params.doc_id, req.body.lines, (error) ->
-				MockWebApi.setDocumentVersion req.params.project_id, req.params.doc_id, req.body.version, (error) ->
-					if error1? or error2?
-						res.send 500
-					else
-						res.send 204
+				if error?
+					res.send 500
+				else
+					res.send 204
 
 		app.listen 3000, (error) ->
 			throw error if error?

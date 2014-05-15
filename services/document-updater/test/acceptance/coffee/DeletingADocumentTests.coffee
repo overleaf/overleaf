@@ -1,6 +1,7 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -21,21 +22,24 @@ describe "Deleting a document", ->
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
 			sinon.spy MockWebApi, "setDocumentLines"
 			sinon.spy MockWebApi, "getDocument"
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
 				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
-							@statusCode = res.statusCode
-							done()
-					, 200
+					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+						throw error if error?
+						setTimeout () =>
+							DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
+								@statusCode = res.statusCode
+								done()
+						, 200
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
@@ -48,6 +52,16 @@ describe "Deleting a document", ->
 			MockWebApi.setDocumentLines
 				.calledWith(@project_id, @doc_id, @result)
 				.should.equal true
+
+		it "should write the version to mongo", (done) ->
+			db.docOps.find {
+				doc_id: ObjectId(@doc_id)
+			}, {
+				version: 1
+			}, (error, docs) =>
+				doc = docs[0]
+				doc.version.should.equal @version + 1
+				done()
 
 		it "should need to reload the doc if read again", (done) ->
 			MockWebApi.getDocument.called.should.equal.false
@@ -62,7 +76,6 @@ describe "Deleting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
-				version: @version
 			}
 			sinon.spy MockWebApi, "setDocumentLines"
 			sinon.spy MockWebApi, "getDocument"

@@ -42,5 +42,5 @@ describe "PersistenceManager.getDocVersionInMongo", ->
 				@db.docOps.find = sinon.stub().callsArgWith(2, null, [])
 				@PersistenceManager.getDocVersionInMongo @doc_id, @callback
 
-			it "should call the callback with null", ->
-				@callback.calledWith(null, null).should.equal true
+			it "should call the callback with 0", ->
+				@callback.calledWith(null, 0).should.equal true

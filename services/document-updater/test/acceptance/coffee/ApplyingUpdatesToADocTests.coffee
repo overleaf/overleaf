@@ -25,14 +25,17 @@ describe "Applying updates to a doc", ->
 	describe "when the document is not loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
 			sinon.spy MockWebApi, "getDocument"
-			DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
 				throw error if error?
-				setTimeout done, 200
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+					throw error if error?
+					setTimeout done, 200
 
 		after ->
 			MockWebApi.getDocument.restore()
@@ -60,16 +63,16 @@ describe "Applying updates to a doc", ->
 	describe "when the document is loaded", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert doc_id: ObjectId(@doc_id), version: @version, (error) =>
 				throw error if error?
-				sinon.spy MockWebApi, "getDocument"
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 					throw error if error?
-					setTimeout done, 200
+					sinon.spy MockWebApi, "getDocument"
+					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
+						throw error if error?
+						setTimeout done, 200
 
 		after ->
 			MockWebApi.getDocument.restore()
@@ -91,28 +94,27 @@ describe "Applying updates to a doc", ->
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->
-			before ->
+			before (done) ->
 				[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 				lines = ["", "", ""]
-				MockWebApi.insertDoc @project_id, @doc_id, {
-					lines: lines
-					version: 0
-				}
-
-				@updates = [
-					{ doc_id: @doc_id, v: 0,  op: [i: "h", p: 0 ] }
-					{ doc_id: @doc_id, v: 1,  op: [i: "e", p: 1 ] }
-					{ doc_id: @doc_id, v: 2,  op: [i: "l", p: 2 ] }
-					{ doc_id: @doc_id, v: 3,  op: [i: "l", p: 3 ] }
-					{ doc_id: @doc_id, v: 4,  op: [i: "o", p: 4 ] }
-					{ doc_id: @doc_id, v: 5,  op: [i: " ", p: 5 ] }
-					{ doc_id: @doc_id, v: 6,  op: [i: "w", p: 6 ] }
-					{ doc_id: @doc_id, v: 7,  op: [i: "o", p: 7 ] }
-					{ doc_id: @doc_id, v: 8,  op: [i: "r", p: 8 ] }
-					{ doc_id: @doc_id, v: 9,  op: [i: "l", p: 9 ] }
-					{ doc_id: @doc_id, v: 10, op: [i: "d", p: 10] }
-				]
-				@my_result = ["hello world", "", ""]
+				MockWebApi.insertDoc @project_id, @doc_id, lines: lines
+				db.docOps.insert doc_id: ObjectId(@doc_id), version: 0, (error) =>
+					throw error if error?
+					@updates = [
+						{ doc_id: @doc_id, v: 0,  op: [i: "h", p: 0 ] }
+						{ doc_id: @doc_id, v: 1,  op: [i: "e", p: 1 ] }
+						{ doc_id: @doc_id, v: 2,  op: [i: "l", p: 2 ] }
+						{ doc_id: @doc_id, v: 3,  op: [i: "l", p: 3 ] }
+						{ doc_id: @doc_id, v: 4,  op: [i: "o", p: 4 ] }
+						{ doc_id: @doc_id, v: 5,  op: [i: " ", p: 5 ] }
+						{ doc_id: @doc_id, v: 6,  op: [i: "w", p: 6 ] }
+						{ doc_id: @doc_id, v: 7,  op: [i: "o", p: 7 ] }
+						{ doc_id: @doc_id, v: 8,  op: [i: "r", p: 8 ] }
+						{ doc_id: @doc_id, v: 9,  op: [i: "l", p: 9 ] }
+						{ doc_id: @doc_id, v: 10, op: [i: "d", p: 10] }
+					]
+					@my_result = ["hello world", "", ""]
+					done()
 
 			it "should be able to continue applying updates when the project has been deleted", (done) ->
 				actions = []
@@ -141,23 +143,24 @@ describe "Applying updates to a doc", ->
 						done()
 
 		describe "when older ops come in after the delete", ->
-			before ->
+			before (done) ->
 				[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 				lines = ["", "", ""]
-				MockWebApi.insertDoc @project_id, @doc_id, {
-					lines: lines
-					version: 0
-				}
+				MockWebApi.insertDoc @project_id, @doc_id, lines: lines
+				db.docOps.insert doc_id: ObjectId(@doc_id), version: 0, (error) =>
+					throw error if error?
 
-				@updates = [
-					{ doc_id: @doc_id, v: 0, op: [i: "h", p: 0 ] }
-					{ doc_id: @doc_id, v: 1, op: [i: "e", p: 1 ] }
-					{ doc_id: @doc_id, v: 2, op: [i: "l", p: 2 ] }
-					{ doc_id: @doc_id, v: 3, op: [i: "l", p: 3 ] }
-					{ doc_id: @doc_id, v: 4, op: [i: "o", p: 4 ] }
-					{ doc_id: @doc_id, v: 0, op: [i: "world", p: 1 ] }
-				]
-				@my_result = ["hello", "world", ""]
+					@updates = [
+						{ doc_id: @doc_id, v: 0, op: [i: "h", p: 0 ] }
+						{ doc_id: @doc_id, v: 1, op: [i: "e", p: 1 ] }
+						{ doc_id: @doc_id, v: 2, op: [i: "l", p: 2 ] }
+						{ doc_id: @doc_id, v: 3, op: [i: "l", p: 3 ] }
+						{ doc_id: @doc_id, v: 4, op: [i: "o", p: 4 ] }
+						{ doc_id: @doc_id, v: 0, op: [i: "world", p: 1 ] }
+					]
+					@my_result = ["hello", "world", ""]
+
+					done()
 
 			it "should be able to continue applying updates when the project has been deleted", (done) ->
 				actions = []
@@ -178,13 +181,12 @@ describe "Applying updates to a doc", ->
 	describe "with a broken update", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
-			DocUpdaterClient.sendUpdate @project_id, @doc_id, @undefined, (error) ->
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert doc_id: ObjectId(@doc_id), version: @version, (error) =>
 				throw error if error?
-				setTimeout done, 200
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, @undefined, (error) ->
+					throw error if error?
+					setTimeout done, 200
 
 		it "should not update the doc", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
@@ -194,10 +196,6 @@ describe "Applying updates to a doc", ->
 	describe "with enough updates to flush to the track changes api", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: 0
-			}
 			updates = []
 			for v in [0..99] # Should flush after 50 ops
 				updates.push
@@ -207,9 +205,12 @@ describe "Applying updates to a doc", ->
 
 			sinon.spy MockTrackChangesApi, "flushDoc"
 
-			DocUpdaterClient.sendUpdates @project_id, @doc_id, updates, (error) =>
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert doc_id: ObjectId(@doc_id), version: 0, (error) =>
 				throw error if error?
-				setTimeout done, 200
+				DocUpdaterClient.sendUpdates @project_id, @doc_id, updates, (error) =>
+					throw error if error?
+					setTimeout done, 200
 
 		after ->
 			MockTrackChangesApi.flushDoc.restore()
@@ -217,72 +218,7 @@ describe "Applying updates to a doc", ->
 		it "should flush the doc twice", ->
 			MockTrackChangesApi.flushDoc.calledTwice.should.equal true
 
-	describe "when the document does not have a version in the web api but does in Mongo", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-			}
-
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version
-			}, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
-					throw error if error?
-					setTimeout done, 200
-
-		it "should update the doc (using the mongo version)", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
-				doc.lines.should.deep.equal @result
-				done()
-
-	describe "when the document version in the web api is ahead of Mongo", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version
-			}
-
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version - 20
-			}, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
-					throw error if error?
-					setTimeout done, 200
-
-		it "should update the doc (using the web version)", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
-				doc.lines.should.deep.equal @result
-				done()
-
-	describe "when the document version in Mongo is ahead of the web api", ->
-		before (done) ->
-			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			MockWebApi.insertDoc @project_id, @doc_id, {
-				lines: @lines
-				version: @version - 20
-			}
-
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version
-			}, (error) =>
-				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
-					throw error if error?
-					setTimeout done, 200
-
-		it "should update the doc (using the web version)", (done) ->
-			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
-				doc.lines.should.deep.equal @result
-				done()
-
-	describe "when there is no version yet", ->
+	describe "when there is no version in Mongo", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {
