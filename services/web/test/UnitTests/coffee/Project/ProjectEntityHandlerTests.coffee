@@ -305,7 +305,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
-			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(4, null, true, 0)
+			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, true, 0)
 
 			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
 
@@ -335,7 +335,7 @@ describe 'ProjectEntityHandler', ->
 
 		it "should send the doc lines to the doc store", ->
 			@DocstoreManager.updateDoc
-				.calledWith(project_id, @doc._id.toString(), @lines, 0)
+				.calledWith(project_id, @doc._id.toString(), @lines)
 				.should.equal true
 
 	describe 'adding file', ->

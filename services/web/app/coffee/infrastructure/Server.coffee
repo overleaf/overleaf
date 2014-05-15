@@ -41,7 +41,7 @@ app.configure ()->
 	app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 	app.set 'views', __dirname + '/../../views'
 	app.set 'view engine', 'jade'
-	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
+	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
 	app.use cookieParser
 	app.use express.session
 		proxy: true
