@@ -18,3 +18,9 @@ module.exports =
 			callback(err, token)
 
 	getUserIdFromToken: (token, callback)->
+		multi = rclient.multi()
+		multi.get token
+		multi.del token
+		multi.exec (err, results)->
+			callback err, results[0]
+

@@ -17,6 +17,8 @@ describe "TokenGenerator", ->
 				web:{}
 		@redisMulti =
 			set:sinon.stub()
+			get:sinon.stub()
+			del:sinon.stub()
 			expire:sinon.stub()
 			exec:sinon.stub()
 		@uuid = v4 : -> return @stubbedToken
@@ -46,3 +48,17 @@ describe "TokenGenerator", ->
 			@TokenGenerator.getNewToken @user_id, (err, token)=>
 				err.should.exist
 				done()
+
+
+	describe "getUserIdFromToken", ->
+
+		it "should get and delete the token", (done)->
+			@redisMulti.exec.callsArgWith(0, null, [@user_id]) 
+			@TokenGenerator.getUserIdFromToken @stubbedToken, (err, user_id)=>
+				user_id.should.equal @user_id
+				@redisMulti.get.calledWith(@stubbedToken).should.equal true
+				@redisMulti.del.calledWith(@stubbedToken).should.equal true
+				done()
+
+
+
