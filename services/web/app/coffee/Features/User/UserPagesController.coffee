@@ -27,12 +27,6 @@ module.exports =
 			title: 'Login',
 			redir: req.query.redir
 
-	passwordResetPage : (req, res)->
-		res.render 'user/passwordReset',
-			title: 'Password Reset'
-
-
-
 	settingsPage : (req, res)->
 		logger.log user: req.session.user, "loading settings page"
 		UserLocator.findById req.session.user._id, (err, user)->
