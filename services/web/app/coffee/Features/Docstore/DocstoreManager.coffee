@@ -30,7 +30,7 @@ module.exports = DocstoreManager =
 				logger.error err: error, project_id: project_id, "error getting all docs from docstore"
 				callback(error)
 
-	getDoc: (project_id, doc_id, callback = (error, lines, version, rev) ->) ->
+	getDoc: (project_id, doc_id, callback = (error, lines, rev) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc in docstore api"
 		url = "#{settings.apis.docstore.url}/project/#{project_id}/doc/#{doc_id}"
 		request.get {
@@ -40,20 +40,19 @@ module.exports = DocstoreManager =
 			return callback(error) if error?
 			if 200 <= res.statusCode < 300
 				logger.log doc_id: doc_id, project_id: project_id, version: doc.version, rev: doc.rev, "got doc from docstore api"
-				callback(null, doc.lines, doc.version, doc.rev)
+				callback(null, doc.lines, doc.rev)
 			else
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting doc from docstore"
 				callback(error)
 
-	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, version: version, "updating doc in docstore api"
+	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
+		logger.log project_id: project_id, doc_id: doc_id, "updating doc in docstore api"
 		url = "#{settings.apis.docstore.url}/project/#{project_id}/doc/#{doc_id}"
 		request.post {
 			url: url
 			json:
 				lines: lines
-				version: version
 		}, (error, res, result) ->
 			return callback(error) if error?
 			if 200 <= res.statusCode < 300

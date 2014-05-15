@@ -111,7 +111,7 @@ module.exports = ProjectEntityHandler =
 		logger.log sl_req_id: sl_req_id, project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
-	getDoc: (project_id, doc_id, callback = (error, lines, version, rev) ->) ->
+	getDoc: (project_id, doc_id, callback = (error, lines, rev) ->) ->
 		DocstoreManager.getDoc project_id, doc_id, callback
 
 	addDoc: (project_or_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc, folder_id) ->)=>
@@ -234,23 +234,23 @@ module.exports = ProjectEntityHandler =
 					if callback?
 						callback(err, folder, parentFolder_id)
 
-	updateDocLines : (project_id, doc_id, lines, version, callback = (error) ->)->
+	updateDocLines : (project_id, doc_id, lines, callback = (error) ->)->
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) if !project?
-			logger.log project_id: project_id, doc_id: doc_id, version: version, "updating doc lines"
+			logger.log project_id: project_id, doc_id: doc_id, "updating doc lines"
 			projectLocator.findElement {project:project, element_id:doc_id, type:"docs"}, (err, doc, path)->
 				if err?
-					logger.error err: err, doc_id: doc_id, project_id: project_id, version: version, lines: lines, "error finding doc while updating doc lines"
+					logger.error err: err, doc_id: doc_id, project_id: project_id, lines: lines, "error finding doc while updating doc lines"
 					return callback err
 				if !doc?
 					error = new Errors.NotFoundError("doc not found")
-					logger.error err: error, doc_id: doc_id, project_id: project_id, version: version, lines: lines, "doc not found while updating doc lines"
+					logger.error err: error, doc_id: doc_id, project_id: project_id, lines: lines, "doc not found while updating doc lines"
 					return callback(error)
 
-				DocstoreManager.updateDoc project_id, doc_id, lines, version, (err, modified, rev) ->
+				DocstoreManager.updateDoc project_id, doc_id, lines, (err, modified, rev) ->
 					if err?
-						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, version: version, "error sending doc to docstore"
+						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, "error sending doc to docstore"
 						return callback(err)
 
 					if modified
