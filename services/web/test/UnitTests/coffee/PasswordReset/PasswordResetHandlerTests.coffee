@@ -40,7 +40,7 @@ describe "PasswordResetHandler", ->
 		it "should check the user exists", (done)->
 			@UserGetter.getUser.callsArgWith(1)
 			@TokenGenerator.getNewToken.callsArgWith(1)
-			@PasswordResetHandler.generateAndEmailResetToken @user_id, (err)->
+			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err)=>
 				err.should.exists
 				done()
 
@@ -50,7 +50,7 @@ describe "PasswordResetHandler", ->
 			@UserGetter.getUser.callsArgWith(1, null, @user)
 			@TokenGenerator.getNewToken.callsArgWith(1, null, @token)
 			@EmailHandler.sendEmail.callsArgWith(2)
-			@PasswordResetHandler.generateAndEmailResetToken @user_id, (err)=>
+			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err)=>
 				@EmailHandler.sendEmail.called.should.equal true
 				args = @EmailHandler.sendEmail.args[0]
 				args[0].should.equal "passwordResetRequested"
@@ -58,11 +58,11 @@ describe "PasswordResetHandler", ->
 				done()
 
 
-	describe "setNewUserPassowrd", ->
+	describe "setNewUserPassword", ->
 
 		it "should return err if no user id can be found", (done)->
 			@TokenGenerator.getUserIdFromToken.callsArgWith(1)
-			@PasswordResetHandler.setNewUserPassowrd @token, @password, (err)=>
+			@PasswordResetHandler.setNewUserPassword @token, @password, (err)=>
 				err.should.exists
 				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()		
@@ -70,7 +70,7 @@ describe "PasswordResetHandler", ->
 		it "should set the user password", (done)->
 			@TokenGenerator.getUserIdFromToken.callsArgWith(1, null, @user_id)
 			@AuthenticationManager.setUserPassword.callsArgWith(2)
-			@PasswordResetHandler.setNewUserPassowrd @token, @password, (err)=>
+			@PasswordResetHandler.setNewUserPassword @token, @password, (err)=>
 				@AuthenticationManager.setUserPassword.calledWith(@user_id, @password).should.equal true
 				done()			
 
