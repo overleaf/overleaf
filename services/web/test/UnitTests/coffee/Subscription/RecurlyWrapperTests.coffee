@@ -4,6 +4,7 @@ crypto = require 'crypto'
 querystring = require 'querystring'
 RecurlyWrapper = require "../../../../app/js/Features/Subscription/RecurlyWrapper"
 Settings = require "settings-sharelatex"
+tk = require("timekeeper")
 
 fixtures =
 	"subscriptions/44f83d7cba354d5b84812419f923ea96":
@@ -107,7 +108,11 @@ describe "RecurlyWrapper", ->
 		Settings.defaultPlanCode =
 			collaborators: 0
 			versioning: false
-
+		tk.freeze(Date.now())
+	
+	afterEach -> 
+		tk.reset()
+	
 	describe "sign", ->
 		before (done) ->
 			RecurlyWrapper.sign({
