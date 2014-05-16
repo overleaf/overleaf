@@ -20,7 +20,7 @@ module.exports =
 		multi.exec (err)->
 			callback(err, token)
 
-	getUserIdFromToken: (token, callback)->
+	getUserIdFromTokenAndExpire: (token, callback)->
 		logger.log token:token, "getting user id from password token"
 		multi = rclient.multi()
 		multi.get buildKey(token)

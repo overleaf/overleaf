@@ -3,10 +3,10 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
 sinon = require('sinon')
-modulePath = path.join __dirname, "../../../../app/js/Features/PasswordReset/TokenGenerator"
+modulePath = path.join __dirname, "../../../../app/js/Features/PasswordReset/PasswordResetTokenHandler"
 expect = require("chai").expect
 
-describe "TokenGenerator", ->
+describe "PasswordResetTokenHandler", ->
 
 	beforeEach ->
 		@user_id = "user id here"
@@ -23,7 +23,7 @@ describe "TokenGenerator", ->
 			exec:sinon.stub()
 		@uuid = v4 : -> return @stubbedToken
 		self = @
-		@TokenGenerator = SandboxedModule.require modulePath, requires:
+		@PasswordResetTokenHandler = SandboxedModule.require modulePath, requires:
 			"redis" :
 				createClient: =>
 					auth:->
@@ -38,23 +38,23 @@ describe "TokenGenerator", ->
 
 		it "should set a new token into redis with a ttl", (done)->
 			@redisMulti.exec.callsArgWith(0) 
-			@TokenGenerator.getNewToken @user_id, (err, token)=>
+			@PasswordResetTokenHandler.getNewToken @user_id, (err, token)=>
 				@redisMulti.set "password_token:#{@stubbedToken}", @user_id
 				@redisMulti.expire "password_token:#{@stubbedToken}", 60 * 60
 				done()
 
 		it "should return if there was an error", (done)->
 			@redisMulti.exec.callsArgWith(0, "error")
-			@TokenGenerator.getNewToken @user_id, (err, token)=>
+			@PasswordResetTokenHandler.getNewToken @user_id, (err, token)=>
 				err.should.exist
 				done()
 
 
-	describe "getUserIdFromToken", ->
+	describe "getUserIdFromTokenAndExpire", ->
 
 		it "should get and delete the token", (done)->
 			@redisMulti.exec.callsArgWith(0, null, [@user_id]) 
-			@TokenGenerator.getUserIdFromToken @stubbedToken, (err, user_id)=>
+			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire @stubbedToken, (err, user_id)=>
 				user_id.should.equal @user_id
 				@redisMulti.get.calledWith("password_token:#{@stubbedToken}").should.equal true
 				@redisMulti.del.calledWith("password_token:#{@stubbedToken}").should.equal true
