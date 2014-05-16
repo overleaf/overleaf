@@ -21,7 +21,6 @@ describe "PasswordResetTokenHandler", ->
 			del:sinon.stub()
 			expire:sinon.stub()
 			exec:sinon.stub()
-		@uuid = v4 : -> return @stubbedToken
 		self = @
 		@PasswordResetTokenHandler = SandboxedModule.require modulePath, requires:
 			"redis" :
@@ -31,16 +30,16 @@ describe "PasswordResetTokenHandler", ->
 
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
-			"node-uuid":@uuid
+			"crypto": randomBytes: () => @stubbedToken
 
 
 	describe "getNewToken", ->
 
 		it "should set a new token into redis with a ttl", (done)->
 			@redisMulti.exec.callsArgWith(0) 
-			@PasswordResetTokenHandler.getNewToken @user_id, (err, token)=>
-				@redisMulti.set "password_token:#{@stubbedToken}", @user_id
-				@redisMulti.expire "password_token:#{@stubbedToken}", 60 * 60
+			@PasswordResetTokenHandler.getNewToken @user_id, (err, token) =>
+				@redisMulti.set.calledWith("password_token:#{@stubbedToken.toString("hex")}", @user_id).should.equal true
+				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", 60 * 60).should.equal true
 				done()
 
 		it "should return if there was an error", (done)->
