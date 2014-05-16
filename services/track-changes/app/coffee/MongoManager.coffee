@@ -116,12 +116,12 @@ module.exports = MongoManager =
 
 	ensureIndices: () ->
 		# For finding all updates that go into a diff for a doc
-		db.docHistory.ensureIndex { doc_id: 1, v: 1 }
+		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, { background: true }
 		# For finding all updates that affect a project
-		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }
+		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, { background: true }
 		# For finding updates that don't yet have a project_id and need it inserting
-		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }
+		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, { background: true }
 		# For finding project meta-data
-		db.projectHistoryMetaData.ensureIndex { project_id: 1 }
+		db.projectHistoryMetaData.ensureIndex { project_id: 1 }, { background: true }
 		# TTL index for auto deleting week old temporary ops
-		db.docHistory.ensureIndex { expiresAt: 1 }, { expireAfterSeconds: 0 }
+		db.docHistory.ensureIndex { expiresAt: 1 }, { expireAfterSeconds: 0, background: true }
