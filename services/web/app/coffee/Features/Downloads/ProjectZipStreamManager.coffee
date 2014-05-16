@@ -48,4 +48,4 @@ module.exports = ProjectZipStreamManager =
 							archive.append stream, name: path
 							stream.on "end", () ->
 								callback()
-			async.series jobs, callback
+			async.parallelLimit jobs, 5, callback
