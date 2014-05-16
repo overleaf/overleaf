@@ -124,4 +124,4 @@ module.exports = MongoManager =
 		# For finding project meta-data
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }
 		# TTL index for auto deleting week old temporary ops
-		db.docHistory.ensureIndex { tempCreatedAt: 1 }, { expireAfterSeconds: 0 }
+		db.docHistory.ensureIndex { expiresAt: 1 }, { expireAfterSeconds: 0 }
