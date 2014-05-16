@@ -10,7 +10,7 @@ describe "PasswordResetTokenHandler", ->
 
 	beforeEach ->
 		@user_id = "user id here"
-		@stubbedToken = "dsajdiojlklksda"
+		@stubbedToken = require("crypto").randomBytes(32)
 
 		@settings = 
 			redis:

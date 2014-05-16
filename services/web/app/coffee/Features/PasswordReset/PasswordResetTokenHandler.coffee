@@ -2,7 +2,7 @@ Settings = require('settings-sharelatex')
 redis = require('redis')
 rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
 rclient.auth(Settings.redis.web.password)
-uuid = require("node-uuid")
+crypto = require("crypto")
 logger = require("logger-sharelatex")
 
 ONE_HOUR_IN_S = 60 * 60
@@ -13,7 +13,7 @@ module.exports =
 
 	getNewToken: (user_id, callback)->
 		logger.log user_id:user_id, "generating token for password reset"
-		token = uuid.v4()
+		token = crypto.randomBytes(32).toString("hex")
 		multi = rclient.multi()
 		multi.set buildKey(token), user_id
 		multi.expire buildKey(token), ONE_HOUR_IN_S
