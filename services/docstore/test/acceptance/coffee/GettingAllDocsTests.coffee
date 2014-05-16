@@ -12,24 +12,21 @@ describe "Getting all docs", ->
 		@docs = [{
 			_id: ObjectId()
 			lines: ["one"]
-			version: 1
 			rev: 2
 		}, {
 			_id: ObjectId()
 			lines: ["two"]
-			version: 3
 			rev: 4
 		}, {
 			_id: ObjectId()
 			lines: ["three"]
-			version: 5
 			rev: 6
 		}]
 		DocstoreClient.createProject @project_id, (error) =>
 			throw error if error?
 			jobs = for doc in @docs
 				do (doc) =>
-					(callback) => DocstoreClient.createDoc @project_id, doc._id, doc.lines, doc.version, callback
+					(callback) => DocstoreClient.createDoc @project_id, doc._id, doc.lines, callback
 			async.series jobs, done 
 
 	afterEach (done) ->

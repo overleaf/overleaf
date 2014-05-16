@@ -13,7 +13,7 @@ describe "Deleting a doc", ->
 		@version = 42
 		DocstoreClient.createProject @project_id, (error) =>
 			throw error if error?
-			DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, (error) =>
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
 				throw error if error?
 				done()
 

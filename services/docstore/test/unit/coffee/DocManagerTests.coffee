@@ -149,15 +149,15 @@ describe "DocManager", ->
 		beforeEach ->
 			@oldDocLines = ["old", "doc", "lines"]
 			@newDocLines = ["new", "doc", "lines"]
-			@doc = { _id: @doc_id, lines: @oldDocLines, rev: @rev = 5, version: @version = 42 }
+			@doc = { _id: @doc_id, lines: @oldDocLines, rev: @rev = 5 }
 			@mongoPath = "mock.mongo.path"
 
-			@MongoManager.updateDoc = sinon.stub().callsArg(4)
+			@MongoManager.updateDoc = sinon.stub().callsArg(3)
 
 		describe "when the doc lines have changed", ->
 			beforeEach ->
 				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc, @mongoPath)
-				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, @callback
+				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 
 			it "should get the existing doc", ->
 				@DocManager.getDoc
@@ -166,7 +166,7 @@ describe "DocManager", ->
 
 			it "should update the doc with the new doc lines", ->
 				@MongoManager.updateDoc
-					.calledWith(@project_id, @mongoPath, @newDocLines, @version)
+					.calledWith(@project_id, @mongoPath, @newDocLines)
 					.should.equal true
 
 			it "should log out the old and new doc lines", ->
@@ -177,41 +177,6 @@ describe "DocManager", ->
 						oldDocLines: @oldDocLines
 						newDocLines: @newDocLines
 						rev: @doc.rev
-						oldVersion: @version
-						newVersion: @version
-						"updating doc lines"
-					)
-					.should.equal true
-
-			it "should return the callback with the new rev", ->
-				@callback.calledWith(null, true, @rev + 1).should.equal true
-
-		describe "when the version has changed", ->
-			beforeEach ->
-				@newVersion = 1003
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc, @mongoPath)
-				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @newVersion, @callback
-
-			it "should get the existing doc", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-
-			it "should update the doc with the new version", ->
-				@MongoManager.updateDoc
-					.calledWith(@project_id, @mongoPath, @oldDocLines, @newVersion)
-					.should.equal true
-
-			it "should log out the old and new doc lines", ->
-				@logger.log
-					.calledWith(
-						project_id: @project_id
-						doc_id: @doc_id
-						oldDocLines: @oldDocLines
-						newDocLines: @oldDocLines
-						rev: @doc.rev
-						oldVersion: @version
-						newVersion: @newVersion
 						"updating doc lines"
 					)
 					.should.equal true
@@ -222,7 +187,7 @@ describe "DocManager", ->
 		describe "when the doc lines have not changed", ->
 			beforeEach ->
 				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc, @mongoPath)
-				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines.slice(), @version, @callback
+				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines.slice(), @callback
 
 			it "should not update the doc", ->
 				@MongoManager.updateDoc.called.should.equal false
@@ -233,7 +198,7 @@ describe "DocManager", ->
 		describe "when the doc does not exist", ->
 			beforeEach ->
 				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
-				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, @callback
+				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 
 			it "should not try to update the doc", ->
 				@MongoManager.updateDoc.called.should.equal false

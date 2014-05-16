@@ -31,11 +31,10 @@ describe "MongoManager", ->
 
 	describe "updateDoc", ->
 		beforeEach ->
-			@version = 42
 			@lines = ["mock-lines"]
 			@docPath = "rootFolder.0.folders.1.docs.0"
 			@db.projects.update = sinon.stub().callsArg(2)
-			@MongoManager.updateDoc @project_id, @docPath, @lines, @version, @callback
+			@MongoManager.updateDoc @project_id, @docPath, @lines, @callback
 
 		it "should update the doc lines and increment the TPDS rev", ->
 			@db.projects.update
@@ -44,7 +43,6 @@ describe "MongoManager", ->
 				}, {
 					$set:
 						"rootFolder.0.folders.1.docs.0.lines": @lines
-						"rootFolder.0.folders.1.docs.0.version": @version
 					$inc:
 						"rootFolder.0.folders.1.docs.0.rev": 1
 				})

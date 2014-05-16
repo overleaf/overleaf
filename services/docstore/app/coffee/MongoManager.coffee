@@ -5,12 +5,11 @@ module.exports = MongoManager =
 		db.projects.find _id: ObjectId(project_id.toString()), {}, (error, projects = []) ->
 			callback error, projects[0]
 
-	updateDoc: (project_id, docPath, lines, version, callback = (error) ->) ->
+	updateDoc: (project_id, docPath, lines, callback = (error) ->) ->
 		update =
 			$set: {}
 			$inc: {}
 		update.$set["#{docPath}.lines"] = lines
-		update.$set["#{docPath}.version"] = version if version?
 		update.$inc["#{docPath}.rev"] = 1
 
 		db.projects.update _id: ObjectId(project_id), update, callback

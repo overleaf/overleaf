@@ -8,7 +8,7 @@ module.exports = DocstoreClient =
 			rootFolder: [{ docs: [] }]
 		}, callback
 
-	createDoc: (project_id, doc_id, lines, version, callback = (error) ->) ->
+	createDoc: (project_id, doc_id, lines, callback = (error) ->) ->
 		db.projects.update {
 			_id: project_id
 		}, {
@@ -16,7 +16,6 @@ module.exports = DocstoreClient =
 				"rootFolder.0.docs": {
 					_id: doc_id
 					lines: lines
-					version: version
 				}
 			}
 		}, callback
@@ -36,12 +35,11 @@ module.exports = DocstoreClient =
 			json: true
 		}, callback
 
-	updateDoc: (project_id, doc_id, lines, version, callback = (error, res, body) ->) ->
+	updateDoc: (project_id, doc_id, lines, callback = (error, res, body) ->) ->
 		request.post {
 			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
 			json:
 				lines: lines
-				version: version
 		}, callback
 
 	deleteDoc: (project_id, doc_id, callback = (error, res, body) ->) ->

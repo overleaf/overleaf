@@ -42,7 +42,6 @@ describe "HttpController", ->
 					_id: @doc_id
 					lines: @doc.lines
 					rev: @doc.rev
-					version: @doc.version
 				})
 				.should.equal true
 
@@ -54,12 +53,10 @@ describe "HttpController", ->
 				@docs = [{
 					_id: ObjectId()
 					lines: ["mock", "lines", "one"]
-					version: 1
 					rev: 2
 				}, {
 					_id: ObjectId()
 					lines: ["mock", "lines", "two"]
-					version: 3
 					rev: 4
 				}]
 				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
@@ -76,12 +73,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						version: @docs[0].version
 					}, {
 						_id:   @docs[1]._id.toString()
 						lines: @docs[1].lines
 						rev:   @docs[1].rev
-						version: @docs[1].version
 					}])
 					.should.equal true
 
@@ -92,14 +87,12 @@ describe "HttpController", ->
 				@docs = [{
 					_id: ObjectId()
 					lines: ["mock", "lines", "one"]
-					version: 1
 					rev: 2
 				},
 				null,
 				{
 					_id: ObjectId()
 					lines: ["mock", "lines", "two"]
-					version: 3
 					rev: 4
 				}]
 				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
@@ -111,12 +104,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						version: @docs[0].version
 					}, {
 						_id:   @docs[2]._id.toString()
 						lines: @docs[2].lines
 						rev:   @docs[2].rev
-						version: @docs[2].version
 					}])
 					.should.equal true
 
@@ -139,13 +130,12 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-					version: @version = 42
-				@DocManager.updateDoc = sinon.stub().callsArgWith(4, null, true, @rev = 5)
+				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, @version)
+					.calledWith(@project_id, @doc_id, @lines)
 					.should.equal true
 
 			it "should return a modified status", ->
@@ -157,7 +147,7 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-				@DocManager.updateDoc = sinon.stub().callsArgWith(4, null, false, @rev = 5)
+				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should return a modified status", ->
