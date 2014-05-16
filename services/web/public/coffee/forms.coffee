@@ -119,7 +119,7 @@ require [
 				type:'POST'
 				data: formData
 				success: (data)->
-					new Message text:"Your password has been reset"
+					new Message text:"Your password has been reset. <a href='/login'>Login here</a>."
 				error:(data)->
 					new Message type:"error", text:"Something went wrong processing your request."
 
