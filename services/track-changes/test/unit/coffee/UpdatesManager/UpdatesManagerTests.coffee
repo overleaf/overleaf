@@ -18,13 +18,14 @@ describe "UpdatesManager", ->
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
+		@temporary = "temp-mock"
 
 	describe "compressAndSaveRawUpdates", ->
 		describe "when there are no raw ops", ->
 			beforeEach ->
 				@MongoManager.popLastCompressedUpdate = sinon.stub()
 				@MongoManager.insertCompressedUpdates = sinon.stub()
-				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, [], @callback
+				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, [], @temporary, @callback
 
 			it "should not need to access the database", ->
 				@MongoManager.popLastCompressedUpdate.called.should.equal false
@@ -39,9 +40,9 @@ describe "UpdatesManager", ->
 				@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(3)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
-				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
+				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
 			it "should try to pop the last compressed op", ->
 				@MongoManager.popLastCompressedUpdate
@@ -55,7 +56,7 @@ describe "UpdatesManager", ->
 			
 			it "should save the compressed ops", ->
 				@MongoManager.insertCompressedUpdates
-					.calledWith(@project_id, @doc_id, @compressedUpdates)
+					.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -67,13 +68,13 @@ describe "UpdatesManager", ->
 				@compressedUpdates = { v: 13, op: "compressed-op-12" }
 
 				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(3)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
 			describe "when the raw ops start where the existing history ends", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
-					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
 				it "should try to pop the last compressed op", ->
 					@MongoManager.popLastCompressedUpdate
@@ -87,7 +88,7 @@ describe "UpdatesManager", ->
 				
 				it "should save the compressed ops", ->
 					@MongoManager.insertCompressedUpdates
-						.calledWith(@project_id, @doc_id, @compressedUpdates)
+						.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
 						.should.equal true
 
 				it "should call the callback", ->
@@ -97,7 +98,7 @@ describe "UpdatesManager", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 10, op: "mock-op-10" }, { v: 11, op: "mock-op-11"}, { v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 
-					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
 				it "should only compress the more recent raw ops", ->
 					@UpdateCompressor.compressRawUpdates
@@ -107,7 +108,7 @@ describe "UpdatesManager", ->
 			describe "when the raw ops do not follow from the last compressed op version", ->
 				beforeEach ->
 					@rawUpdates = [{ v: 13, op: "mock-op-13" }]
-					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @callback
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
 				it "should call the callback with an error", ->
 					@callback
@@ -117,20 +118,26 @@ describe "UpdatesManager", ->
 				it "should put the popped update back into mongo", ->
 					@MongoManager.insertCompressedUpdates.calledOnce.should.equal true
 					@MongoManager.insertCompressedUpdates
-						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate])
+						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate], @temporary)
 						.should.equal true
 
 	describe "processUncompressedUpdates", ->
 		beforeEach ->
-			@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(3)
+			@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(4)
 			@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
 			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
+			@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, @temporary = "temp mock")
 
 		describe "when there is fewer than one batch to send", ->
 			beforeEach ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
+
+			it "should check if the updates are temporary", ->
+				@UpdateTrimmer.shouldTrimUpdates
+					.calledWith(@project_id)
+					.should.equal true
 
 			it "should backport the project id", ->
 				@MongoManager.backportProjectId
@@ -144,7 +151,7 @@ describe "UpdatesManager", ->
 
 			it "should compress and save the updates", ->
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@project_id, @doc_id, @updates)
+					.calledWith(@project_id, @doc_id, @updates, @temporary)
 					.should.equal true
 
 			it "should delete the batch of uncompressed updates that was just processed", ->
@@ -174,13 +181,13 @@ describe "UpdatesManager", ->
 
 			it "should compress and save the updates in batches", ->
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@project_id, @doc_id, @updates.slice(0,2))
+					.calledWith(@project_id, @doc_id, @updates.slice(0,2), @temporary)
 					.should.equal true
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@project_id, @doc_id, @updates.slice(2,4))
+					.calledWith(@project_id, @doc_id, @updates.slice(2,4), @temporary)
 					.should.equal true
 				@UpdatesManager.compressAndSaveRawUpdates
-					.calledWith(@project_id, @doc_id, @updates.slice(4,5))
+					.calledWith(@project_id, @doc_id, @updates.slice(4,5), @temporary)
 					.should.equal true
 
 			it "should delete the batches of uncompressed updates", ->

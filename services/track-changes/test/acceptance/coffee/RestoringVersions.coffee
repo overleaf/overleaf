@@ -19,6 +19,7 @@ describe "Restoring a version", ->
 		@user_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+		MockWebApi.projects[@project_id] = features: versioning: true
 
 		minutes = 60 * 1000
 

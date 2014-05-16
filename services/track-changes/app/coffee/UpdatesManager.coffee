@@ -8,7 +8,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 
 module.exports = UpdatesManager =
-	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, callback = (error) ->) ->
+	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
 		length = rawUpdates.length
 		if length == 0
 			return callback()
@@ -27,37 +27,39 @@ module.exports = UpdatesManager =
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
 					# Push the update back into Mongo - catching errors at this
 					# point is useless, we're already bailing
-					MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], () ->
+					MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], temporary, () ->
 						return callback error
 					return
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
-			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, (error) ->
+			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
 				callback()
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
-		MongoManager.backportProjectId project_id, doc_id, (error) ->
+		UpdateTrimmer.shouldTrimUpdates project_id, (error, temporary) ->
 			return callback(error) if error?
-			RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
+			MongoManager.backportProjectId project_id, doc_id, (error) ->
 				return callback(error) if error?
-				length = rawUpdates.length
-				UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, (error) ->
+				RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
 					return callback(error) if error?
-					logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
-					RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
+					length = rawUpdates.length
+					UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 						return callback(error) if error?
-						if length == UpdatesManager.REDIS_READ_BATCH_SIZE
-							# There might be more updates
-							logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
-							setTimeout () ->
-								UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
-							, 0
-						else
-							logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
-							callback()
+						logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
+						RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
+							return callback(error) if error?
+							if length == UpdatesManager.REDIS_READ_BATCH_SIZE
+								# There might be more updates
+								logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
+								setTimeout () ->
+									UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
+								, 0
+							else
+								logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
+								callback()
 
 	processUncompressedUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.runWithLock(

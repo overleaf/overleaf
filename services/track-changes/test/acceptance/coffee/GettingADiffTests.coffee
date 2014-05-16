@@ -21,6 +21,7 @@ describe "Getting a diff", ->
 		@user_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+		MockWebApi.projects[@project_id] = features: versioning: true
 
 		MockWebApi.users[@user_id] = @user =
 			email: "user@sharelatex.com"

@@ -5,14 +5,19 @@ expect = chai.expect
 modulePath = "../../../../app/js/MongoManager.js"
 SandboxedModule = require('sandboxed-module')
 {ObjectId} = require("mongojs")
+tk = require "timekeeper"
 
 describe "MongoManager", ->
 	beforeEach ->
+		tk.freeze(new Date())
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+
+	afterEach ->
+		tk.reset()
 
 	describe "getLastCompressedUpdate", ->
 		beforeEach ->
@@ -101,34 +106,56 @@ describe "MongoManager", ->
 			@update = { op: "op", meta: "meta", v: "v"}
 			@db.docHistory =
 				insert: sinon.stub().callsArg(1)
-			@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, @callback
 
-		it "should insert the update", ->
-			@db.docHistory.insert
-				.calledWith({
-					project_id: ObjectId(@project_id),
-					doc_id: ObjectId(@doc_id),
-					op: @update.op,
-					meta: @update.meta,
-					v: @update.v
-				})
-				.should.equal true
+		describe "temporarly", ->
+			beforeEach ->
+				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, true, @callback
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should insert the update with a tempCreatedAt field", ->
+				@db.docHistory.insert
+					.calledWith({
+						project_id: ObjectId(@project_id),
+						doc_id: ObjectId(@doc_id),
+						op: @update.op,
+						meta: @update.meta,
+						v: @update.v
+						tempCreatedAt: new Date()
+					})
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "permanenty", ->
+			beforeEach ->
+				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, false, @callback
+
+			it "should insert the update with no tempCreatedAt field", ->
+				@db.docHistory.insert
+					.calledWith({
+						project_id: ObjectId(@project_id),
+						doc_id: ObjectId(@doc_id),
+						op: @update.op,
+						meta: @update.meta,
+						v: @update.v
+					})
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
 	describe "insertCompressedUpdates", ->
 		beforeEach (done) ->
 			@updates = [ "mock-update-1", "mock-update-2" ]
-			@MongoManager.insertCompressedUpdate = sinon.stub().callsArg(3)
-			@MongoManager.insertCompressedUpdates @project_id, @doc_id, @updates, (args...) =>
+			@MongoManager.insertCompressedUpdate = sinon.stub().callsArg(4)
+			@MongoManager.insertCompressedUpdates @project_id, @doc_id, @updates, @temporary = true, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should insert each update", ->
 			for update in @updates
 				@MongoManager.insertCompressedUpdate
-					.calledWith(@project_id, @doc_id, update)
+					.calledWith(@project_id, @doc_id, update, @temporary)
 					.should.equal true
 
 		it "should call the callback", ->

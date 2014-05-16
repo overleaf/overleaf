@@ -9,6 +9,7 @@ request = require "request"
 rclient = require("redis").createClient() # Only works locally for now
 
 TrackChangesClient = require "./helpers/TrackChangesClient"
+MockWebApi = require "./helpers/MockWebApi"
 
 describe "Appending doc ops to the history", ->
 	describe "when the history does not exist yet", ->
@@ -16,6 +17,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
@@ -58,6 +60,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]
 				meta: { ts: Date.now(), user_id: @user_id }
@@ -139,6 +142,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
 			updates = []
 			@expectedOp = [{ p:0, i: "" }]
 			for i in [0..250]
@@ -167,6 +171,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
 			oneDay = 24 * 60 * 60 * 1000
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }, { i: "o", p: 4 }, { i: "o", p: 5 }]
@@ -199,6 +204,7 @@ describe "Appending doc ops to the history", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
 			oneDay = 24 * 60 * 60 * 1000
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: []
@@ -226,3 +232,43 @@ describe "Appending doc ops to the history", ->
 		it "should insert the correct version numbers into mongo", ->
 			expect(@updates[0].v).to.equal 3
 			expect(@updates[1].v).to.equal 4
+
+	describe "when the project has versioning enabled", ->
+		before (done) ->
+			@project_id = ObjectId().toString()
+			@doc_id = ObjectId().toString()
+			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: true
+
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+				op: [{ i: "f", p: 3 }]
+				meta: { ts: Date.now(), user_id: @user_id }
+				v: 3
+			}], (error) =>
+				throw error if error?
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
+					throw error if error?
+					done()
+
+		it "should not add a tempCreatedAt entry in the update in mongo", ->
+			expect(@updates[0].tempCreatedAt).to.be.undefined
+
+	describe "when the project does not have versioning enabled", ->
+		before (done) ->
+			@project_id = ObjectId().toString()
+			@doc_id = ObjectId().toString()
+			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
+
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+				op: [{ i: "f", p: 3 }]
+				meta: { ts: Date.now(), user_id: @user_id }
+				v: 3
+			}], (error) =>
+				throw error if error?
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
+					throw error if error?
+					done()
+
+		it "should add a tempCreatedAt entry in the update in mongo", ->
+			expect(@updates[0].tempCreatedAt).to.exist

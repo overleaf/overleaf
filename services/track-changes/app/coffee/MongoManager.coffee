@@ -24,21 +24,24 @@ module.exports = MongoManager =
 			else
 				callback null, null
 
-	insertCompressedUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
+	insertCompressedUpdates: (project_id, doc_id, updates, permanent, callback = (error) ->) ->
 		jobs = []
 		for update in updates
 			do (update) ->
-				jobs.push (callback) -> MongoManager.insertCompressedUpdate project_id, doc_id, update, callback
+				jobs.push (callback) -> MongoManager.insertCompressedUpdate project_id, doc_id, update, permanent, callback
 		async.series jobs, callback
 
-	insertCompressedUpdate: (project_id, doc_id, update, callback = (error) ->) ->
-		db.docHistory.insert {
+	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
+		update = {
 			doc_id: ObjectId(doc_id.toString())
 			project_id: ObjectId(project_id.toString())
 			op:     update.op
 			meta:   update.meta
 			v:      update.v
-		}, callback
+		}
+		if temporary
+			update.tempCreatedAt = new Date()
+		db.docHistory.insert update, callback
 
 	getDocUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
@@ -116,3 +119,8 @@ module.exports = MongoManager =
 		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }
 		# For finding project meta-data
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }
+		# TTL index for auto deleting week old temporary ops
+		minutes = 60
+		hours = 60 * minutes
+		days = 24 * hours
+		db.docHistory.ensureIndex { tempCreatedAt: 1 }, { expireAfterSeconds: 7 * days }

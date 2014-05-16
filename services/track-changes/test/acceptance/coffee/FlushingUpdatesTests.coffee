@@ -17,6 +17,7 @@ describe "Flushing updates", ->
 			@project_id = ObjectId().toString()
 			@doc_id = ObjectId().toString()
 			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: true
 
 			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 				op: [{ i: "f", p: 3 }]

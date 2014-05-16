@@ -22,7 +22,7 @@ describe "UpdateTrimmer", ->
 	afterEach ->
 		tk.reset()
 
-	describe "_shouldTrimUpdates", ->
+	describe "shouldTrimUpdates", ->
 		beforeEach ->
 			@metadata = {}
 			@details =
@@ -34,7 +34,7 @@ describe "UpdateTrimmer", ->
 		describe "with preserveHistory set in the project meta data", ->
 			beforeEach ->
 				@metadata.preserveHistory = true
-				@UpdateTrimmer._shouldTrimUpdates @project_id, @callback
+				@UpdateTrimmer.shouldTrimUpdates @project_id, @callback
 
 			it "should look up the meta data", ->
 				@MongoManager.getProjectMetaData
@@ -56,7 +56,7 @@ describe "UpdateTrimmer", ->
 			describe "when the project has the versioning feature", ->
 				beforeEach ->
 					@details.features.versioning = true
-					@UpdateTrimmer._shouldTrimUpdates @project_id, @callback
+					@UpdateTrimmer.shouldTrimUpdates @project_id, @callback
 
 				it "should look up the meta data", ->
 					@MongoManager.getProjectMetaData
@@ -79,7 +79,7 @@ describe "UpdateTrimmer", ->
 			describe "when the project does not have the versioning feature", ->
 				beforeEach ->
 					@details.features.versioning = false
-					@UpdateTrimmer._shouldTrimUpdates @project_id, @callback
+					@UpdateTrimmer.shouldTrimUpdates @project_id, @callback
 
 				it "should return true", ->
 					@callback.calledWith(null, true).should.equal true
@@ -91,7 +91,7 @@ describe "UpdateTrimmer", ->
 			describe "when the project has the versioning feature", ->
 				beforeEach ->
 					@details.features.versioning = true
-					@UpdateTrimmer._shouldTrimUpdates @project_id, @callback
+					@UpdateTrimmer.shouldTrimUpdates @project_id, @callback
 
 				it "should insert preserveHistory into the metadata", ->
 					@MongoManager.setProjectMetaData
@@ -104,7 +104,7 @@ describe "UpdateTrimmer", ->
 			describe "when the project does not have the versioning feature", ->
 				beforeEach ->
 					@details.features.versioning = false
-					@UpdateTrimmer._shouldTrimUpdates @project_id, @callback
+					@UpdateTrimmer.shouldTrimUpdates @project_id, @callback
 
 				it "should return true", ->
 					@callback.calledWith(null, true).should.equal true
@@ -116,7 +116,7 @@ describe "UpdateTrimmer", ->
 
 		describe "when the updates should be trimmed", ->
 			beforeEach ->
-				@UpdateTrimmer._shouldTrimUpdates = sinon.stub().callsArgWith(1, null, true)
+				@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, true)
 				@UpdateTrimmer.deleteOldProjectUpdates @project_id, @callback
 
 			it "should delete week old updates in mongo", ->
@@ -130,7 +130,7 @@ describe "UpdateTrimmer", ->
 
 		describe "when the updates should not be trimmed", ->
 			beforeEach ->
-				@UpdateTrimmer._shouldTrimUpdates = sinon.stub().callsArgWith(1, null, false)
+				@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, false)
 				@UpdateTrimmer.deleteOldProjectUpdates @project_id, @callback
 
 			it "should not delete any updates in mongo", ->

@@ -3,7 +3,7 @@ WebApiManager = require "./WebApiManager"
 logger = require "logger-sharelatex"
 
 module.exports = UpdateTrimmer =
-	_shouldTrimUpdates: (project_id, callback = (error, shouldTrim) ->) ->
+	shouldTrimUpdates: (project_id, callback = (error, shouldTrim) ->) ->
 		MongoManager.getProjectMetaData project_id, (error, metadata) ->
 			return callback(error) if error?
 			if metadata?.preserveHistory
@@ -20,7 +20,7 @@ module.exports = UpdateTrimmer =
 						callback null, true
 
 	deleteOldProjectUpdates: (project_id, callback = (error) ->) ->
-		UpdateTrimmer._shouldTrimUpdates project_id, (error, shouldTrim) ->
+		UpdateTrimmer.shouldTrimUpdates project_id, (error, shouldTrim) ->
 			return callback(error) if error?
 			if shouldTrim
 				logger.log project_id: project_id, "deleting old updates"
