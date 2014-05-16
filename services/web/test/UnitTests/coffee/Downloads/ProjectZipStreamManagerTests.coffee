@@ -4,6 +4,7 @@ should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Downloads/ProjectZipStreamManager.js"
 SandboxedModule = require('sandboxed-module')
+EventEmitter = require("events").EventEmitter
 
 describe "ProjectZipStreamManager", ->
 	beforeEach ->
@@ -112,14 +113,16 @@ describe "ProjectZipStreamManager", ->
 				"/folder/picture.png":
 					_id: "file-id-2"
 			@streams =
-				"file-id-1" : "stream-mock-1"
-				"file-id-2" : "stream-mock-2"
+				"file-id-1" : new EventEmitter()
+				"file-id-2" : new EventEmitter()
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
 			@archive.append = sinon.stub()
 			@FileStoreHandler.getFileStream = (project_id, file_id, {}, callback) =>
 				callback null, @streams[file_id]
 			sinon.spy @FileStoreHandler, "getFileStream"
 			@ProjectZipStreamManager.addAllFilesToArchive @project_id, @archive, @callback
+			for path, stream of @streams
+				stream.emit "end"
 
 		it "should get the files for the project", ->
 			@ProjectEntityHandler.getAllFiles.calledWith(@project_id).should.equal true
