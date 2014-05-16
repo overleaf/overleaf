@@ -14,10 +14,13 @@ describe "PasswordResetController", ->
 		@PasswordResetHandler =
 			generateAndEmailResetToken:sinon.stub()
 			setNewUserPassword:sinon.stub()
+		@RateLimiter = 
+			addCount: sinon.stub()
 		@PasswordResetController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"./PasswordResetHandler":@PasswordResetHandler
 			"logger-sharelatex": log:->
+			"../../infrastructure/RateLimiter":@RateLimiter
 
 		@email = "bob@bob.com "
 		@token = "my security token that was emailed to me"
@@ -28,12 +31,23 @@ describe "PasswordResetController", ->
 				passwordResetToken:@token
 				password:@password
 
-		@res ={}
+		@res = {}
 
 
 	describe "requestReset", ->
 
+		it "should error if the rate limit is hit", (done)->
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1)
+			@RateLimiter.addCount.callsArgWith(1, null, false)
+			@res.send = (code)=>
+				code.should.equal 500
+				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.trim()).should.equal false
+				done()
+			@PasswordResetController.requestReset @req, @res
+
+
 		it "should tell the handler to process that email", (done)->
+			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1)
 			@res.send = (code)=>
 				code.should.equal 200
@@ -41,8 +55,8 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.requestReset @req, @res
 
-
 		it "should send a 500 if there is an error", (done)->
+			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, "error")
 			@res.send = (code)=>
 				code.should.equal 500
@@ -74,8 +88,6 @@ describe "PasswordResetController", ->
 				@PasswordResetHandler.setNewUserPassword.called.should.equal false
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
-
-
 
 		it "should error if there is no password", (done)->
 			@req.body.passwordResetToken = ""
