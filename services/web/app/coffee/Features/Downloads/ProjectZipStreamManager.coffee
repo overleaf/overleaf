@@ -46,5 +46,6 @@ module.exports = ProjectZipStreamManager =
 								return callback(err)
 							path = path.slice(1) if path[0] == "/"
 							archive.append stream, name: path
-							callback()
+							stream.on "end", () ->
+								callback()
 			async.series jobs, callback
