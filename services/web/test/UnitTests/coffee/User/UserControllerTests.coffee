@@ -35,9 +35,12 @@ describe "UserController", ->
 			setUserPassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
+		@UserUpdater =
+			changeEmailAddress:sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
+			"./UserUpdater":@UserUpdater
 			"../../models/User": User:@User
 			'../Newsletter/NewsletterManager':@NewsLetterManager
 			"./UserRegistrationHandler":@UserRegistrationHandler
@@ -201,5 +204,39 @@ describe "UserController", ->
 			@res.send = =>
 				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
 				done()
-			@UserController.changePassword @req, @res		
+			@UserController.changePassword @req, @res
 
+
+	describe "changeEmailAddress", ->
+		beforeEach ->
+			@newEmail = "new@email.com"
+
+		it "should return an error if the email address is null", (done)->
+			@req.body.email = null
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.changeEmailAddress @req, @res
+
+		it "should send an error if the email is 0 len", (done)->
+			@req.body.email = ""
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.changeEmailAddress @req, @res
+
+		it "should send an error if the email does not contain an @", (done)->
+			@req.body.email = "bob at something dot com"
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.changeEmailAddress @req, @res
+
+		it "should call the user updater with the new email and user _id", (done)->
+			@req.body.email = @newEmail
+			@UserUpdater.changeEmailAddress.callsArgWith(2)
+			@res.send = (code)=>
+				code.should.equal 200
+				@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal true
+				done()
+			@UserController.changeEmailAddress @req, @res

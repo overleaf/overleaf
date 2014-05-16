@@ -10,6 +10,7 @@ Url = require("url")
 AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
+UserUpdater = require("./UserUpdater")
 
 module.exports =
 
@@ -101,3 +102,15 @@ module.exports =
 					message:
 					  type:'error'
 					  text:'Your old password is wrong'
+
+	changeEmailAddress: (req, res)->
+		newEmail = req.body.email
+		user_id = req.session.user._id
+		if !newEmail? or newEmail.length == 0 or newEmail.indexOf("@") == -1
+			return res.send(412)
+		UserUpdater.changeEmailAddress user_id, newEmail, (err)->
+			if err?
+				return res.send 500, {message:err?.message}
+			res.send 200
+
+
