@@ -37,6 +37,7 @@ require [
 						window.location = data.redir || "/project"
 				
 
+
 	$('#registerFormShort').validate shortRegisterFormRules
 
 	$("#registerFormShort").show()
@@ -99,20 +100,28 @@ require [
 			success: (data)->
 				new Message text:"You have been sent an email to complete your password reset."
 			error:(data)->
-				new Message type:"error", text:"something went wrong processing your request."
-				
-	$('form#setPasswordReset').submit (event)->
-		event.preventDefault()
-		formData = $(this).serialize()
-		$.ajax
-			url: "/user/password/set"
-			type:'POST'
-			data: formData
-			success: (data)->
-				new Message text:"Your password has been reset"
-			error:(data)->
-				new Message type:"error", text:"something went wrong processing your request."
+				message = JSON.parse(data?.responseText)?.message
+				new Message type:"error", text: message || "Something went wrong processing your request."
+	
 
+	$('form#setPasswordReset').validate
+		rules:
+			password:
+				required: true
+		messages:
+            password: "Password is required"
+		errorElement: 'div'
+		submitHandler: (form)->
+			event.preventDefault()
+			formData = $(form).serialize()
+			$.ajax
+				url: "/user/password/set"
+				type:'POST'
+				data: formData
+				success: (data)->
+					new Message text:"Your password has been reset"
+				error:(data)->
+					new Message type:"error", text:"Something went wrong processing your request."
 
 
 	$('a#deleteUserAccount').click (e)->

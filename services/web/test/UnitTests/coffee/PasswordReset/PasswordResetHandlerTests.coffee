@@ -43,7 +43,7 @@ describe "PasswordResetHandler", ->
 			@UserGetter.getUser.callsArgWith(1)
 			@PasswordResetTokenHandler.getNewToken.callsArgWith(1)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err)=>
-				err.should.exists
+				should.exist(err)
 				done()
 
 

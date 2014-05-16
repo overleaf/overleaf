@@ -20,7 +20,7 @@ module.exports =
 				return res.send 500
 			PasswordResetHandler.generateAndEmailResetToken email, (err)->
 				if err?
-					res.send 500
+					res.send 500, {message:err?.message}
 				else
 					res.send 200
 
@@ -31,7 +31,7 @@ module.exports =
 
 	setNewUserPassword: (req, res)->
 		{passwordResetToken, password} = req.body
-		if !password? or password.length < 4 or !passwordResetToken? or passwordResetToken.length == 0
+		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0
 			return res.send 500
 		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err)->
 			if err?

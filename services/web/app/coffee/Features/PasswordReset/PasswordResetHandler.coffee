@@ -13,7 +13,7 @@ module.exports =
 			if err then return callback(err)
 			if !user?
 				logger.err email:email, "user could not be found for password reset"
-				return callback("no user found")
+				return callback(message:"Can't find that email, sorry.")
 			PasswordResetTokenHandler.getNewToken user._id, (err, token)->
 				if err then return callback(err)
 				emailOptions =
