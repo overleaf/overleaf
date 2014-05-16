@@ -111,7 +111,7 @@ describe "MongoManager", ->
 			beforeEach ->
 				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, true, @callback
 
-			it "should insert the update with a tempCreatedAt field", ->
+			it "should insert the update with a expiresAt field one week away", ->
 				@db.docHistory.insert
 					.calledWith({
 						project_id: ObjectId(@project_id),
@@ -119,7 +119,7 @@ describe "MongoManager", ->
 						op: @update.op,
 						meta: @update.meta,
 						v: @update.v
-						tempCreatedAt: new Date()
+						expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 					})
 					.should.equal true
 
@@ -130,7 +130,7 @@ describe "MongoManager", ->
 			beforeEach ->
 				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, false, @callback
 
-			it "should insert the update with no tempCreatedAt field", ->
+			it "should insert the update with no expiresAt field", ->
 				@db.docHistory.insert
 					.calledWith({
 						project_id: ObjectId(@project_id),

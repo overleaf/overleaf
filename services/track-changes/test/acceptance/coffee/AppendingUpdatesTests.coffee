@@ -250,8 +250,8 @@ describe "Appending doc ops to the history", ->
 					throw error if error?
 					done()
 
-		it "should not add a tempCreatedAt entry in the update in mongo", ->
-			expect(@updates[0].tempCreatedAt).to.be.undefined
+		it "should not add a expiresAt entry in the update in mongo", ->
+			expect(@updates[0].expiresAt).to.be.undefined
 
 	describe "when the project does not have versioning enabled", ->
 		before (done) ->
@@ -270,5 +270,5 @@ describe "Appending doc ops to the history", ->
 					throw error if error?
 					done()
 
-		it "should add a tempCreatedAt entry in the update in mongo", ->
-			expect(@updates[0].tempCreatedAt).to.exist
+		it "should add a expiresAt entry in the update in mongo", ->
+			expect(@updates[0].expiresAt).to.exist

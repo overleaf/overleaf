@@ -40,7 +40,11 @@ module.exports = MongoManager =
 			v:      update.v
 		}
 		if temporary
-			update.tempCreatedAt = new Date()
+			seconds = 1000
+			minutes = 60 * seconds
+			hours = 60 * minutes
+			days = 24 * hours
+			update.expiresAt = new Date(Date.now() + 7 * days)
 		db.docHistory.insert update, callback
 
 	getDocUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
@@ -120,7 +124,4 @@ module.exports = MongoManager =
 		# For finding project meta-data
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }
 		# TTL index for auto deleting week old temporary ops
-		minutes = 60
-		hours = 60 * minutes
-		days = 24 * hours
-		db.docHistory.ensureIndex { tempCreatedAt: 1 }, { expireAfterSeconds: 7 * days }
+		db.docHistory.ensureIndex { tempCreatedAt: 1 }, { expireAfterSeconds: 0 }
