@@ -26,6 +26,9 @@ module.exports =
 		# 	key: ""
 		# 	secret: ""
 
+	path:
+		uploadFolder: Path.resolve(__dirname + "/../uploads")
+
 	# Filestore health check
 	# ----------------------
 	# Project and file details to check in persistor when calling /health_check

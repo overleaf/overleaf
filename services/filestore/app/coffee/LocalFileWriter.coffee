@@ -4,6 +4,7 @@ path = require("path")
 _ = require("underscore")
 logger = require("logger-sharelatex")
 metrics = require("metrics-sharelatex")
+Settings = require("settings-sharelatex")
 
 module.exports = 
 
@@ -33,4 +34,4 @@ module.exports =
 		if !key?
 			key = uuid.v1()
 		key = key.replace(/\//g,"-")
-		path.join(__dirname, "../../uploads/#{key}")
+		path.join(Settings.path.uploadFolder, key)
