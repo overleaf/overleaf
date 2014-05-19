@@ -47,7 +47,7 @@ module.exports =
 					return res.send(400)
 				else if newEmail == user.email
 					return res.send 200
-				else 
+				else
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"

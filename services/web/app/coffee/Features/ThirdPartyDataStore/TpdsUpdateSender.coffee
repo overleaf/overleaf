@@ -15,10 +15,8 @@ buildPath = (user_id, project_name, filePath)->
 queue = require('fairy').connect(settings.redis.fairy).queue(keys.queue.web_to_tpds_http_requests)
 
 module.exports =
- 
-	addFile : (options, sl_req_id, callback = (err)->)->
-		metrics.inc("tpds.add-file")
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+
+	_addEntity: (options, sl_req_id, callback = (err)->)->
 		getProjectsUsersIds options.project_id, (err, user_id, allUserIds)->
 			logger.log project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, sl_req_id:sl_req_id, rev:options.rev, "sending file to third party data store"
 			postOptions =
@@ -29,29 +27,23 @@ module.exports =
 					sl_project_id:options.project_id
 					sl_all_user_ids:JSON.stringify(allUserIds)
 				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}" 
-				title:"addFile"
-				streamOrigin : settings.apis.filestore.url + path.join("/project/#{options.project_id}/file/","#{options.file_id}")
+				title: "addFile"
+				streamOrigin : options.streamOrigin
 			queue.enqueue options.project_id, "pipeStreamFrom", postOptions, ->
 				logger.log project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, sl_req_id:sl_req_id, rev:options.rev, "sending file to third party data store queued up for processing"
 				callback()
+	
+	addFile : (options, sl_req_id, callback = (err)->)->
+		metrics.inc("tpds.add-file")
+		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+		options.streamOrigin = settings.apis.filestore.url + path.join("/project/#{options.project_id}/file/","#{options.file_id}")
+		@_addEntity(options, sl_req_id, callback)
 
 	addDoc : (options, sl_req_id, callback = (err)->)->
 		metrics.inc("tpds.add-doc")
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		getProjectsUsersIds options.project_id, (err, user_id, allUserIds)->
-			return callback(err) if err?
-			logger.log project_id: options.project_id, user_id:user_id, path: options.path, rev:options.rev, uri:options.uri, project_name:options.project_name, docLines:options.docLines, sl_req_id:sl_req_id, "sending doc to third party data store"
-			postOptions =
-				method : "post"
-				headers: 
-					"sl_req_id":sl_req_id, 
-					sl_entity_rev:options.rev, 
-					sl_project_id:options.project_id
-					sl_all_user_ids:JSON.stringify(allUserIds)
-				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}"
-				title: "addDoc"
-				docLines: options.docLines
-			queue.enqueue options.project_id, "sendDoc", postOptions, callback
+		options.streamOrigin = settings.apis.docstore.url + path.join("/project/#{options.project_id}/doc/","#{options.doc_id}")
+		@_addEntity(options, sl_req_id, callback)
   
 
 	moveEntity : (options, sl_req_id, callback = (err)->)->
