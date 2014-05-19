@@ -17,17 +17,19 @@ describe 'Project api controller', ->
 		@req = 
 			params: 
 				project_id:@project_id
+			session:
+				destroy:sinon.stub()
 		@res = {}
+		@projDetails = {name:"something"}
 
 
 	describe "getProjectDetails", ->
 
 		it "should ask the project details handler for proj details", (done)->
-			projDetails = {name:"something"}
-			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, projDetails)
+			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, @projDetails)
 			@res.json = (data)=>
 				@ProjectDetailsHandler.getDetails.calledWith(@project_id).should.equal true
-				data.should.deep.equal projDetails
+				data.should.deep.equal @projDetails
 				done()
 			@controller.getProjectDetails @req, @res
 
@@ -36,5 +38,12 @@ describe 'Project api controller', ->
 			@ProjectDetailsHandler.getDetails.callsArgWith(1, "error")
 			@res.send = (resCode)=>
 				resCode.should.equal 500
+				done()
+			@controller.getProjectDetails @req, @res
+
+		it "should destroy the session", (done)->
+			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, @projDetails)
+			@res.json = (data)=>
+				@req.session.destroy.called.should.equal true
 				done()
 			@controller.getProjectDetails @req, @res

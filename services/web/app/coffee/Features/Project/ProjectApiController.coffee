@@ -10,4 +10,6 @@ module.exports =
 			if err?
 				logger.log err:err, project_id:project_id, "something went wrong getting project details"
 				return res.send 500
+			req.session.destroy()
 			res.json(projDetails)
+
