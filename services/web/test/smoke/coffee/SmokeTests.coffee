@@ -34,6 +34,17 @@ describe "Opening", ->
 				throw error if error?
 				done()
 
+	after (done)->
+		request.get {
+			url: buildUrl("logout")
+			headers:
+				"X-Forwarded-Proto": "https"
+		}, (error, response, body) =>
+			throw error if error?
+			done()
+
+
+
 	it "a project", (done) ->
 		request {
 			url: buildUrl("project/#{Settings.smokeTest.projectId}")
