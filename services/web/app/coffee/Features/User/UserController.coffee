@@ -28,9 +28,11 @@ module.exports =
 
 	updateUserSettings : (req, res)->
 		logger.log user: req.session.user, "updating account settings"
-		User.findById req.session.user._id, (err, user)->
+		newEmail = req.body.email?.trim()
+		user_id = req.session.user._id
+		User.findById user_id, (err, user)->
 			if err? or !user?
-				logger.err err:err, user_id:req.session.user._id, "problem updaing user settings"
+				logger.err err:err, user_id:user_id, "problem updaing user settings"
 				return res.send 500
 			user.first_name   = sanitize.escape(req.body.first_name).trim()
 			user.last_name    = sanitize.escape(req.body.last_name).trim()
@@ -40,8 +42,17 @@ module.exports =
 			user.ace.autoComplete = req.body.autoComplete == "true"
 			user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			user.ace.pdfViewer = req.body.pdfViewer
-			user.save ->
-				res.send()
+			user.save (err)->
+				if !newEmail? or newEmail.length == 0 or newEmail.indexOf("@") == -1
+					return res.send(412)
+				else if newEmail == user.email
+					return res.send 200
+				else 
+					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
+						if err?
+							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
+							return res.send 500, {message:err?.message}
+						res.send(200)
 
 	logout : (req, res)->
 		metrics.inc "user.logout"
@@ -104,13 +115,5 @@ module.exports =
 					  text:'Your old password is wrong'
 
 	changeEmailAddress: (req, res)->
-		newEmail = req.body.email
-		user_id = req.session.user._id
-		if !newEmail? or newEmail.length == 0 or newEmail.indexOf("@") == -1
-			return res.send(412)
-		UserUpdater.changeEmailAddress user_id, newEmail, (err)->
-			if err?
-				return res.send 500, {message:err?.message}
-			res.send 200
 
 

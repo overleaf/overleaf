@@ -172,15 +172,9 @@ require [
 
 	$('form#userSettings').validate
 		rules:
-			newPassword1:
-				minlength: 1
-			newPassword2:
-				equalTo: "#newPassword1"
-		messages:
-			newPassword1:
-				minlength: "1 character minimum"
-			newPassword2:
-				equalTo: "Passwords don't match"
+			email:
+				required: true
+				email: true
 		highlight: (element, errorClass, validClas)->
 			$(element).parents("div[class='clearfix']").addClass("error")
 							 
@@ -191,14 +185,19 @@ require [
 			formData = $(form).serialize()
 			$.ajax
 				url: '/user/settings'
-				type:'POST'
+				type: 'POST'
 				data: formData
 				success: (data)->
 					if data.message
 						displayMessage data
 					else
 						new Message {text:"Your settings have been saved"}
+				error:(data)->
+					message = JSON.parse(data?.responseText)?.message
+					new Message type:"error", text: message || "Something went wrong processing your request."
 
+
+				
 	class Message
 		constructor: (message)->
 			aClose = $('<a></a>').addClass('close').attr('href','#').text('x')

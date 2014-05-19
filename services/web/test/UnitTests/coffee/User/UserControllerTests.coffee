@@ -77,6 +77,8 @@ describe "UserController", ->
 			@UserController.unsubscribe @req, @res
 
 	describe "updateUserSettings", ->
+		beforeEach ->
+			@newEmail = "hello@world.com"
 
 		it "should call save", (done)->
 			@req.body = {}
@@ -100,6 +102,38 @@ describe "UserController", ->
 				@user.ace.theme.should.equal "something"
 				done()
 			@UserController.updateUserSettings @req, @res
+
+
+		it "should return an error if the email address is null", (done)->
+			@req.body.email = null
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should send an error if the email is 0 len", (done)->
+			@req.body.email = ""
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should send an error if the email does not contain an @", (done)->
+			@req.body.email = "bob at something dot com"
+			@res.send = (code)->
+				code.should.equal 412
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should call the user updater with the new email and user _id", (done)->
+			@req.body.email = @newEmail
+			@UserUpdater.changeEmailAddress.callsArgWith(2)
+			@res.send = (code)=>
+				code.should.equal 200
+				@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal true
+				done()
+			@UserController.updateUserSettings @req, @res
+
 
 
 	describe "logout", ->
@@ -207,36 +241,3 @@ describe "UserController", ->
 			@UserController.changePassword @req, @res
 
 
-	describe "changeEmailAddress", ->
-		beforeEach ->
-			@newEmail = "new@email.com"
-
-		it "should return an error if the email address is null", (done)->
-			@req.body.email = null
-			@res.send = (code)->
-				code.should.equal 412
-				done()
-			@UserController.changeEmailAddress @req, @res
-
-		it "should send an error if the email is 0 len", (done)->
-			@req.body.email = ""
-			@res.send = (code)->
-				code.should.equal 412
-				done()
-			@UserController.changeEmailAddress @req, @res
-
-		it "should send an error if the email does not contain an @", (done)->
-			@req.body.email = "bob at something dot com"
-			@res.send = (code)->
-				code.should.equal 412
-				done()
-			@UserController.changeEmailAddress @req, @res
-
-		it "should call the user updater with the new email and user _id", (done)->
-			@req.body.email = @newEmail
-			@UserUpdater.changeEmailAddress.callsArgWith(2)
-			@res.send = (code)=>
-				code.should.equal 200
-				@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal true
-				done()
-			@UserController.changeEmailAddress @req, @res

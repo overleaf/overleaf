@@ -15,7 +15,7 @@ describe "UserUpdater", ->
 			db:{}
 			ObjectId:(id)-> return id
 		@UserLocator =
-			findById:sinon.stub()
+			findByEmail:sinon.stub()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
@@ -33,15 +33,15 @@ describe "UserUpdater", ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2)
 
 		it "should check if the new email already has an account", (done)->
-			@UserLocator.findById.callsArgWith(1, null, @stubbedUser)
-			@UserUpdater.changeEmailAddress @user_id, @newEmail, (err)=>
+			@UserLocator.findByEmail.callsArgWith(1, null, @stubbedUser)
+			@UserUpdater.changeEmailAddress @user_id, @stubbedUser.email, (err)=>
 				@UserUpdater.updateUser.called.should.equal false
 				should.exist(err)
 				done()
 
 
 		it "should set the users password", (done)->
-			@UserLocator.findById.callsArgWith(1, null)
+			@UserLocator.findByEmail.callsArgWith(1, null)
 			@UserUpdater.changeEmailAddress @user_id, @newEmail, (err)=>
 				@UserUpdater.updateUser.calledWith(@user_id, $set: { "email": @newEmail}).should.equal true
 				done()
