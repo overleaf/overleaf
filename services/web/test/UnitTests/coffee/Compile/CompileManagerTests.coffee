@@ -21,7 +21,6 @@ describe "CompileManager", ->
 			"../Project/ProjectRootDocManager": @ProjectRootDocManager = {}
 			"../../models/Project": Project: @Project = {}
 			"./ClsiManager": @ClsiManager = {}
-			"../../managers/LatexManager": @LatexManager = {}
 			"../../infrastructure/RateLimiter": @ratelimiter
 			"../../infrastructure/Metrics": @Metrics =
 				Timer: class Timer
@@ -38,7 +37,6 @@ describe "CompileManager", ->
 			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 			@ClsiManager.sendRequest = sinon.stub().callsArgWith(1, null, @status = "mock-status")
-			@LatexManager.compile = sinon.stub().callsArgWith(1, null, @status = "mock-status")
 
 		describe "succesfully", ->
 			beforeEach ->

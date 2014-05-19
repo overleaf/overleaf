@@ -31,10 +31,10 @@ module.exports = CompileManager =
 					return callback(error) if error?
 					DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 						return callback(error) if error?
-						ClsiManager.sendRequest project_id, (error, success, outputFiles) ->
+						ClsiManager.sendRequest project_id, (error, status, outputFiles) ->
 							return callback(error) if error?
 							logger.log files: outputFiles, "output files"
-							callback(null, success, outputFiles)
+							callback(null, status, outputFiles)
 
 	getLogLines: (project_id, callback)->
 		Metrics.inc "editor.raw-logs"

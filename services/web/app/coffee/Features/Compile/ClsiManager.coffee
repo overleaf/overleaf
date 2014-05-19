@@ -17,7 +17,7 @@ module.exports = ClsiManager =
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
 				callback(
 					null
-					(response?.compile?.status == "success")
+					response?.compile?.status
 					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
 				)
 
@@ -32,7 +32,13 @@ module.exports = ClsiManager =
 			json: req
 			jar:  false
 		}, (error, response, body) ->
-			callback error, body
+			return callback(error) if error?
+			if 200 <= response.statusCode < 300
+				callback null, body
+			else
+				error = new Error("CLSI returned non-success code: #{response.statusCode}")
+				logger.error err: error, project_id: project_id, "CLSI returned failure code"
+				callback error, body
 
 	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
 		outputFiles = []

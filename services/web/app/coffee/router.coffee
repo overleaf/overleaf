@@ -322,7 +322,8 @@ module.exports = class Router
 
 			client.on 'pdfProject', (opts, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					CompileManager.compile(project_id, user._id, opts, callback)
+					CompileManager.compile project_id, user._id, opts, (error, status, outputFiles) ->
+						return callback error, status == "success", outputFiles
 
 			client.on 'enableversioningController', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

@@ -17,7 +17,8 @@ describe "ClsiManager", ->
 						url: "http://clsi.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"request": @request = {}
 		@project_id = "project-id"
 		@callback = sinon.stub()
 
@@ -29,7 +30,7 @@ describe "ClsiManager", ->
 			beforeEach ->
 				@ClsiManager._postToClsi = sinon.stub().callsArgWith(2, null, {
 					compile:
-						status: "success"
+						status: @status = "success"
 						outputFiles: [{
 							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.pdf"
 							type: "pdf"
@@ -58,18 +59,18 @@ describe "ClsiManager", ->
 					path: "output.log"
 					type: "log"
 				}]
-				@callback.calledWith(null, true, outputFiles).should.equal true
+				@callback.calledWith(null, @status, outputFiles).should.equal true
 
 		describe "with a failed compile", ->
 			beforeEach ->
 				@ClsiManager._postToClsi = sinon.stub().callsArgWith(2, null, {
 					compile:
-						status: "failure"
+						status: @status = "failure"
 				})
 				@ClsiManager.sendRequest @project_id, @callback
 			
 			it "should call the callback with a failure statue", ->
-				@callback.calledWith(null, false).should.equal true
+				@callback.calledWith(null, @status).should.equal true
 
 	describe "_buildRequest", ->
 		beforeEach ->
@@ -164,4 +165,32 @@ describe "ClsiManager", ->
 			it "should return an error", ->
 				expect(@error).to.exist
 
+
+	describe '_postToClsi', ->
+		beforeEach ->
+			@req = { mock: "req" }
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
+				@ClsiManager._postToClsi @project_id, @req, @callback
+
+			it 'should send the request to the CLSI', ->
+				url = "#{@settings.apis.clsi.url}/project/#{@project_id}/compile"
+				@request.post.calledWith({
+					url: url
+					json: @req
+					jar: false
+				}).should.equal true
+
+			it "should call the callback with the body and no error", ->
+				@callback.calledWith(null, @body).should.equal true
+
+		describe "when the CLSI returns an error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
+				@ClsiManager._postToClsi @project_id, @req, @callback
+
+			it "should call the callback with the body and the error", ->
+				@callback.calledWith(new Error("CLSI returned non-success code: 500"), @body).should.equal true
 
