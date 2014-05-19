@@ -44,7 +44,7 @@ module.exports =
 			user.ace.pdfViewer = req.body.pdfViewer
 			user.save (err)->
 				if !newEmail? or newEmail.length == 0 or newEmail.indexOf("@") == -1
-					return res.send(412)
+					return res.send(400)
 				else if newEmail == user.email
 					return res.send 200
 				else 

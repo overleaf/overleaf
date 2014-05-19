@@ -107,21 +107,21 @@ describe "UserController", ->
 		it "should return an error if the email address is null", (done)->
 			@req.body.email = null
 			@res.send = (code)->
-				code.should.equal 412
+				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
 
 		it "should send an error if the email is 0 len", (done)->
 			@req.body.email = ""
 			@res.send = (code)->
-				code.should.equal 412
+				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
 
 		it "should send an error if the email does not contain an @", (done)->
 			@req.body.email = "bob at something dot com"
 			@res.send = (code)->
-				code.should.equal 412
+				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
 
