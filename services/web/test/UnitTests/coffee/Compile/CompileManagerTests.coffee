@@ -90,13 +90,8 @@ describe "CompileManager", ->
 		describe "should check the rate limit", ->
 			it "should return", (done)->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon.stub().callsArgWith(1, null, false)
-				@CompileManager.compile @project_id, @user_id, {}, (err)->
-					done()
-
-			it "should not error if the autocompile limit has not been hit", (done)->
-				@CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon.stub().callsArgWith(1, null, true)
-				@CompileManager.compile @project_id, @user_id, {}, (err)->
-					assert.equal null, err
+				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
+					status.should.equal "autocompile-backoff"
 					done()
 
 	describe "getLogLines", ->

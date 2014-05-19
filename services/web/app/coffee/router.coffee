@@ -104,6 +104,7 @@ module.exports = class Router
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
+		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
@@ -320,6 +321,7 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					EditorController.setPublicAccessLevel(project_id, newAccessLevel, callback)
 
+			# Deprecated and can be removed after deploying.
 			client.on 'pdfProject', (opts, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.compile project_id, user._id, opts, (error, status, outputFiles) ->

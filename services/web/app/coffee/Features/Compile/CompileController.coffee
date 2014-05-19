@@ -4,8 +4,22 @@ CompileManager = require("./CompileManager")
 logger  = require "logger-sharelatex"
 request = require "request"
 Settings = require "settings-sharelatex"
+AuthenticationController = require "../Authentication/AuthenticationController"
 
 module.exports = CompileController =
+	compile: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		isAutoCompile = !!req.query?.auto_compile
+		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
+			return next(error) if error?
+			CompileManager.compile project_id, user_id, { isAutoCompile }, (error, status, outputFiles) ->
+				return next(error) if error?
+				res.contentType("application/json")
+				res.send 200, JSON.stringify {
+					status: status
+					outputFiles: outputFiles
+				}
+
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id

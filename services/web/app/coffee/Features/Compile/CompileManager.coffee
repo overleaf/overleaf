@@ -19,8 +19,7 @@ module.exports = CompileManager =
 
 		@_checkIfAutoCompileLimitHasBeenHit opt.isAutoCompile, (err, canCompile)->
 			if !canCompile
-				err = {rateLimitHit:true}
-				return callback(err)
+				return callback null, "autocompile-backoff", []
 			logger.log project_id: project_id, user_id: user_id, "compiling project"
 			CompileManager._checkIfRecentlyCompiled project_id, user_id, (error, recentlyCompiled) ->
 				return callback(error) if error?

@@ -37,6 +37,7 @@ define [
 			compileSuccess: $('#compileSuccessTemplate').html()
 			compileFailed: $('#compileFailedTemplate').html()
 			compileError: $('#compileErrorTemplate').html()
+			compileTimeout: $('#compileTimeoutTemplate').html()
 			outputFileLink: $('#outputFileLinkTemplate').html()
 		
 		events:
@@ -79,7 +80,7 @@ define [
 			@pdfView.onResize?()
 
 		updateLog: (options) ->
-			{pdfExists, logExists, compileErrors, rawLog} = options
+			{pdfExists, logExists, compileErrors, rawLog, timedOut, systemError} = options
 
 			if @errorViews?
 				for errorView in @errorViews
@@ -110,11 +111,12 @@ define [
 
 			@$("#showLog").html(logButtonHtml)
 
-			if !pdfExists
-				if !compileErrors?
-					errorLogs.prepend($(@templates.compileError))
-				else
-					errorLogs.prepend($(@templates.compileFailed))
+			if timedOut
+				errorLogs.prepend($(@templates.compileTimeout))
+			else if systemError
+				errorLogs.prepend($(@templates.compileError))
+			else if !pdfExists
+				errorLogs.prepend($(@templates.compileFailed))
 			else if pdfExists && compileErrors.all.length == 0
 				errorLogs.prepend($(@templates.compileSuccess))
 

@@ -124,7 +124,7 @@ define [
 				@ide.on "afterJoinProject", () =>
 					@_refreshPdfWhenProjectIsLoaded(opts)
 
-		_refreshPdfWhenProjectIsLoaded: (opts) ->
+		_refreshPdfWhenProjectIsLoaded: (opts = {}) ->
 			doneCompiling = _.once =>
 				@compiling = false
 				@view.doneCompiling()
@@ -143,17 +143,23 @@ define [
 				@view.onCompiling()
 				@syncButtonsView?.hide()
 				@compiling = true
-				@ide.socket.emit "pdfProject", opts, (err, pdfExists, outputFiles) =>
+				@_doCompile opts.isAutoCompile, (error, status, outputFiles) =>
 					@compiling = false
 					doneCompiling()
 
-					if err? and err.rateLimitHit
+					if error?
+						@view.updateLog(systemError: true)
+						@view.unsetPdf()
+						@view.showLog()
+					else if status == "timedout"
+						@view.updateLog(timedOut: true)
+						@view.unsetPdf()
+						@view.showLog()
+					else if status == "autocompile-backoff"
 						@view.showBeforeCompile()
 					else
-						if err?
-							@view.updateLog(pdfExists: false, logExists: false)
-						else
-							@fetchLogAndUpdateView(pdfExists)
+						pdfExists = (status == "success")
+						@fetchLogAndUpdateView(pdfExists)
 
 						if pdfExists
 							@view.setPdf("/project/#{@ide.project_id}/output/output.pdf?cache_bust=#{Date.now()}")
@@ -165,6 +171,22 @@ define [
 
 					if outputFiles?
 						@view.showOutputFileDownloadLinks(outputFiles)
+
+		_doCompile: (isAutoCompile, callback = (error, status, outputFiles) ->) ->
+			url = "/project/#{@ide.project_id}/compile"
+			if isAutoCompile
+				url += "?auto_compile=true"
+			$.ajax(
+				url: url
+				type: "POST"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+				dataType: 'json'
+				success: (body, status, response) ->
+					callback null, body.status, body.outputFiles
+				error: (error) ->
+					callback error
+			)
 
 		fetchLogAndUpdateView: (pdfExists) ->
 			$.ajax(

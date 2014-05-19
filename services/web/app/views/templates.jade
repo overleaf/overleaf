@@ -234,14 +234,19 @@
 	
 	script(type="text/template")#compileErrorTemplate
 		li.alert.alert-error
-			strong Compile Error: 
-			span Sorry, something went wrong and the project could not be compiled. This may be due to our compiler being overloaded or an incompatibility with the project. Please try again in a few moments and if the problem continues let us know via the feedback tab at the top.
+			strong Server Error. 
+			span Sorry, something went wrong and the project could not be compiled. Please try again in a few moments and if the problem continues please contact support.
 	
 	script(type="text/template")#compileFailedTemplate
 		li.alert.alert-error
-			strong Ooops, your LaTeX code couldn't compile for some reason. Please check these errors for details:
+			strong Ooops, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
 		
-
+	script(type="text/template")#compileTimeoutTemplate
+		li.alert.alert-error
+			strong Timed out. 
+			span Sorry, your compile was taking too long and timed out.
+				| This may be due to a large number of high-res images, or lots of complicated diagrams. 
+				| Please try to make your document simpler, or contact support for help.
 	script(type="text/template")#compileLogEntryTemplate
 		li.alert.clickable(class="alert-{{ type }}")
 			strong {{ title }}: 
