@@ -18,7 +18,7 @@ app = express()
 
 app.use Metrics.http.monitor(logger)
 
-app.post   "/project/:project_id/compile", bodyParser.json(limit: "2mb"), CompileController.compile
+app.post   "/project/:project_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
 app.delete "/project/:project_id", CompileController.clearCache
 
 app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
