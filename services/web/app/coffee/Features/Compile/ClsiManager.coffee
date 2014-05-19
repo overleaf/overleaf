@@ -26,6 +26,9 @@ module.exports = ClsiManager =
 			return callback(error) if error?
 			callback null, body?.split("\n") or []
 
+	deleteAuxFiles: (project_id, callback = (error) ->) ->
+		request.del "#{Settings.apis.clsi.url}/project/#{project_id}", callback
+
 	_postToClsi: (project_id, req, callback = (error, response) ->) ->
 		request.post {
 			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/compile"

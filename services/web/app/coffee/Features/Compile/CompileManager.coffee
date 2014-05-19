@@ -33,7 +33,15 @@ module.exports = CompileManager =
 						ClsiManager.sendRequest project_id, (error, status, outputFiles) ->
 							return callback(error) if error?
 							logger.log files: outputFiles, "output files"
+							
+							if status == "failure"
+								# Sometimes compiles fail because the project gets in a broken
+								# state in LaTeX. So always clear cache on a failure.
+								# Can do this in the background.
+								ClsiManager.deleteAuxFiles project_id
+
 							callback(null, status, outputFiles)
+
 
 	getLogLines: (project_id, callback)->
 		Metrics.inc "editor.raw-logs"

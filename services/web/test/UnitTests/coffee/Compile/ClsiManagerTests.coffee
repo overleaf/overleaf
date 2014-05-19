@@ -72,6 +72,19 @@ describe "ClsiManager", ->
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
 
+	describe "deleteAuxFiles", ->
+		beforeEach ->
+			@request.del = sinon.stub().callsArg(1)
+			@ClsiManager.deleteAuxFiles @project_id, @callback
+
+		it "should call the delete method in the CLSI", ->
+			@request.del
+				.calledWith("#{@settings.apis.clsi.url}/project/#{@project_id}")
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
 	describe "_buildRequest", ->
 		beforeEach ->
 			@project =

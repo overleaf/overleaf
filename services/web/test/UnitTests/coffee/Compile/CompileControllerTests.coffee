@@ -21,6 +21,7 @@ describe "CompileController", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"../../infrastructure/Metrics": @Metrics =  { inc: sinon.stub() }
 			"./CompileManager":@CompileManager
+			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
 		@next = sinon.stub()
@@ -144,14 +145,20 @@ describe "CompileController", ->
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@CompileController.proxyToClsi = sinon.stub()
+			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(1)
 			@req.params =
 				Project_id: @project_id
+			@res.send = sinon.stub()
 			@CompileController.deleteAuxFiles @req, @res, @next
 
 		it "should proxy to the CLSI", ->
-			@CompileController.proxyToClsi
-				.calledWith("/project/#{@project_id}", @req, @res, @next)
+			@ClsiManager.deleteAuxFiles
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should return a 200", ->
+			@res.send
+				.calledWith(200)
 				.should.equal true
 
 	describe "compileAndDownloadPdf", ->

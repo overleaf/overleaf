@@ -1,6 +1,7 @@
 Metrics = require "../../infrastructure/Metrics"
 Project = require("../../models/Project").Project
 CompileManager = require("./CompileManager")
+ClsiManager = require("./ClsiManager")
 logger  = require "logger-sharelatex"
 request = require "request"
 Settings = require "settings-sharelatex"
@@ -35,7 +36,9 @@ module.exports = CompileController =
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
-		CompileController.proxyToClsi("/project/#{project_id}", req, res, next)
+		ClsiManager.deleteAuxFiles project_id, (error) ->
+			return next(error) if error?
+			res.send(200)
 
 	compileAndDownloadPdf: (req, res, next)->
 		project_id = req.params.project_id
