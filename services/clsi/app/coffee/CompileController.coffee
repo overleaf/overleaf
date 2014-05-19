@@ -16,8 +16,11 @@ module.exports = CompileController =
 				CompileManager.doCompile request, (error, outputFiles = []) ->
 					if error?
 						logger.error err: error, project_id: request.project_id, "error running compile"
-						error = error.message or error
-						status = "failure"
+						if error.timedout
+							status = "timedout"
+						else
+							status = "error"
+							code = 500
 					else
 						status = "failure"
 						for file in outputFiles
@@ -25,10 +28,10 @@ module.exports = CompileController =
 								status = "success"
 
 					timer.done()
-					res.send JSON.stringify {
+					res.send (code or 200), {
 						compile:
 							status: status
-							error:  error
+							error:  error?.message or error
 							outputFiles: outputFiles.map (file) ->
 								url: "#{Settings.apis.clsi.url}/project/#{request.project_id}/output/#{file.path}"
 								type: file.type

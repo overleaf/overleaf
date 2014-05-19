@@ -66,7 +66,7 @@ describe "CompileController", ->
 
 			it "should return the JSON response", ->
 				@res.send
-					.calledWith(JSON.stringify
+					.calledWith(200,
 						compile:
 							status: "success"
 							error: null
@@ -83,10 +83,42 @@ describe "CompileController", ->
 		
 			it "should return the JSON response with the error", ->
 				@res.send
-					.calledWith(JSON.stringify
+					.calledWith(500,
 						compile:
-							status: "failure"
+							status: "error"
 							error:  @message
+							outputFiles: []
+					)
+					.should.equal true
+
+		describe "when the request times out", ->
+			beforeEach ->
+				@error = new Error(@message = "container timed out")
+				@error.timedout = true
+				@CompileManager.doCompile = sinon.stub().callsArgWith(1, @error, null)
+				@CompileController.compile @req, @res
+		
+			it "should return the JSON response with the timeout status", ->
+				@res.send
+					.calledWith(200,
+						compile:
+							status: "timedout"
+							error: @message
+							outputFiles: []
+					)
+					.should.equal true
+
+		describe "when the request returns no output files", ->
+			beforeEach ->
+				@CompileManager.doCompile = sinon.stub().callsArgWith(1, null, [])
+				@CompileController.compile @req, @res
+		
+			it "should return the JSON response with the failure status", ->
+				@res.send
+					.calledWith(200,
+						compile:
+							error: null
+							status: "failure"
 							outputFiles: []
 					)
 					.should.equal true

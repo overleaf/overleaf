@@ -22,6 +22,6 @@ describe "Timed out compile", ->
 	it "should return a timeout error", ->
 		@body.compile.error.should.equal "container timed out"
 
-	it "should return a failure status", ->
-		@body.compile.status.should.equal "failure"
+	it "should return a timedout status", ->
+		@body.compile.status.should.equal "timedout"
 
