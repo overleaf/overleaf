@@ -86,7 +86,7 @@ module.exports = ProjectEntityHandler =
 					for docPath, doc of docs
 						do (docPath, doc) ->
 							requests.push (callback) ->
-								tpdsUpdateSender.addDoc {project_id:project_id, doc_id:doc._id, path:docPath, project_name:project.name, rev:doc.rev||0},
+								tpdsUpdateSender.addDoc {project_id:project_id, docLines:doc.lines, path:docPath, project_name:project.name, rev:doc.rev||0},
 									sl_req_id,
 									callback
 					self.getAllFiles project_id, (error, files) ->
@@ -127,7 +127,7 @@ module.exports = ProjectEntityHandler =
 						return callback(err) if err? 
 						tpdsUpdateSender.addDoc {
 							project_id:   project._id,
-							doc_id:		  doc._id	
+							docLines:     docLines,
 							path:         result.path.fileSystem,
 							project_name: project.name,
 							rev:          0
@@ -256,7 +256,7 @@ module.exports = ProjectEntityHandler =
 					if modified
 						# Don't need to block for marking as updated
 						projectUpdateHandler.markAsUpdated project_id
-						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
+						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, docLines:lines, project_name:project.name, rev:rev}, callback
 					else
 						callback()
 
