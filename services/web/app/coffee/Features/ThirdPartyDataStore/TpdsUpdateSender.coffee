@@ -42,7 +42,7 @@ module.exports =
 	addDoc : (options, sl_req_id, callback = (err)->)->
 		metrics.inc("tpds.add-doc")
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		options.streamOrigin = settings.apis.docstore.url + path.join("/project/#{options.project_id}/doc/","#{options.doc_id}")
+		options.streamOrigin = settings.apis.docstore.url + path.join("/project/#{options.project_id}/doc/","#{options.doc_id}/raw")
 		@_addEntity(options, sl_req_id, callback)
   
 

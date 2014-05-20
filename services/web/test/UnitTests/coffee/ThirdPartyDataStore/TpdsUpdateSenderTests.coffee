@@ -54,7 +54,7 @@ describe 'TpdsUpdateSender', ->
 				done()
 			@updateSender.addFile {project_id:project_id, file_id:file_id, path:path, project_name:project_name}, ->
 
-		it 'post doc with path and lines', (done)->
+		it 'post doc with stream origin of docstore', (done)->
 			doc_id = "4545345"
 			path = "/some/path/here.tex"
 			lines = ["line1", "line2", "line3"]
@@ -64,7 +64,7 @@ describe 'TpdsUpdateSender', ->
 				job.method.should.equal "post"
 				expectedUrl = "#{thirdPartyDataStoreApiUrl}/user/#{user_id}/entity/#{encodeURIComponent(project_name)}#{encodeURIComponent(path)}"
 				job.uri.should.equal expectedUrl
-				job.streamOrigin.should.equal "#{@docstoreUrl}/project/#{project_id}/doc/#{doc_id}"
+				job.streamOrigin.should.equal "#{@docstoreUrl}/project/#{project_id}/doc/#{doc_id}/raw"
 				job.headers.sl_all_user_ids.should.eql(JSON.stringify([collaberator_ref_1, read_only_ref_1, user_id]))
 				done()
 			@updateSender.addDoc {project_id:project_id, doc_id:doc_id, path:path, docLines:lines,project_name:project_name}
