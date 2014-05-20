@@ -35,10 +35,11 @@ describe 'ProjectEntityHandler', ->
 				@rev = 0
 			save:(callback)->callback()
 			rootFolder:[@rootFolder]
+
 		@DocModel = class Doc
 			constructor:(options)->
 				{@name, @lines} = options
-				@_id = "mock-id"	
+				@_id = doc_id
 				@rev = 0
 		@FileModel =  class File
 			constructor:(options)->
@@ -326,7 +327,7 @@ describe 'ProjectEntityHandler', ->
 			@tpdsUpdateSender.addDoc
 				.calledWith({
 					project_id: project_id
-					docLines: @lines
+					doc_id: doc_id
 					path: @path
 					project_name: @project.name
 					rev: 0
@@ -504,7 +505,7 @@ describe 'ProjectEntityHandler', ->
 					.calledWith({
 						project_id: project_id
 						project_name: @project.name
-						docLines: @lines
+						doc_id: doc_id
 						rev: @rev
 						path: @path
 					})
@@ -699,7 +700,7 @@ describe 'ProjectEntityHandler', ->
 				@tpdsUpdateSender.addDoc
 					.calledWith({
 						project_id: project_id,
-						docLines: doc.lines
+						doc_id: doc._id
 						project_name: @project.name
 						rev: doc.rev
 						path: path
