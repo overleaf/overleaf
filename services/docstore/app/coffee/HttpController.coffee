@@ -13,6 +13,18 @@ module.exports = HttpController =
 			else
 				res.json HttpController._buildDocView(doc)
 
+	getRawDoc: (req, res, next = (error)->)->
+		project_id = req.params.project_id
+		doc_id     = req.params.doc_id
+		logger.log project_id: project_id, doc_id: doc_id, "getting raw doc"
+		DocManager.getDoc project_id, doc_id, (error, doc) ->
+			return next(error) if error?
+			if !doc?
+				res.send 404
+			else
+				res.setHeader('content-type', 'text/plain')
+				res.send HttpController._buildRawDocView(doc)
+
 	getAllDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "getting all docs"
@@ -58,3 +70,6 @@ module.exports = HttpController =
 			lines:   doc.lines
 			rev:     doc.rev
 		}
+
+	_buildRawDocView: (doc)->
+		return doc.lines.join("\n")

@@ -1,4 +1,5 @@
 SandboxedModule = require('sandboxed-module')
+assert = require("chai").assert
 sinon = require('sinon')
 chai = require('chai')
 chai.should()
@@ -11,14 +12,14 @@ describe "HttpController", ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"./DocManager": @DocManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-		@res = { send: sinon.stub(), json: sinon.stub() }
+		@res = { send: sinon.stub(), json: sinon.stub(), setHeader:sinon.stub() }
 		@req = {}
 		@next = sinon.stub()
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@doc = {
 			_id: @doc_id
-			lines: ["mock", "lines"]
+			lines: ["mock", "lines", " here", "", "", " spaces "]
 			version: 42
 			rev: 5
 		}
@@ -44,6 +45,25 @@ describe "HttpController", ->
 					rev: @doc.rev
 				})
 				.should.equal true
+
+	describe "getRawDoc", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+				doc_id: @doc_id
+			@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+			@HttpController.getRawDoc @req, @res, @next
+
+		it "should get the document", ->
+			@DocManager.getDoc
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
+
+		it "should set the content type header", ->
+			@res.setHeader.calledWith('content-type', 'text/plain').should.equal true
+
+		it "should send the raw version of the doc", ->
+			assert.deepEqual @res.send.args[0][0], "#{@doc.lines[0]}\n#{@doc.lines[1]}\n#{@doc.lines[2]}\n#{@doc.lines[3]}\n#{@doc.lines[4]}\n#{@doc.lines[5]}"
 
 	describe "getAllDocs", ->
 		describe "normally", ->
