@@ -31,13 +31,7 @@ module.exports = CompileManager =
 					DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 						return callback(error) if error?
 						ClsiManager.sendRequest project_id, (error, status, outputFiles) ->
-							if error?
-								# Sometimes compiles error because the project gets in a broken
-								# state in the CLSI. So always clear cache on an error.
-								# Can do this in the background.
-								ClsiManager.deleteAuxFiles project_id
-								return callback(error)
-
+							return callback(error) if error?
 							logger.log files: outputFiles, "output files"
 							callback(null, status, outputFiles)
 

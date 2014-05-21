@@ -234,9 +234,13 @@
 	
 	script(type="text/template")#compileErrorTemplate
 		li.alert.alert-error
-			strong Server Error. 
-			span Sorry, something went wrong and the project could not be compiled. Please try again in a few moments and if the problem continues please contact support.
-	
+			p
+				strong Server Error. 
+				span Sorry, something went wrong and the project could not be compiled. Please try again in a few moments.
+			p
+				| If the problem persists, try 
+				a(href='#').js-clear-cache clearing the cache.
+				|  If that doesn't work, please contact support.
 	script(type="text/template")#compileFailedTemplate
 		li.alert.alert-error
 			p
