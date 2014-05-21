@@ -33,7 +33,7 @@ describe 'TpdsUpdateSender', ->
 					filestore:
 						url: filestoreUrl
 					docstore:
-						url: @docstoreUrl
+						pubUrl: @docstoreUrl
 				redis:fairy:{}
 			"logger-sharelatex":{log:->}
 			'../../models/Project': Project:@Project
