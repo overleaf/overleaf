@@ -9,7 +9,7 @@ define [
 		id: "fileViewArea"
 		
 		render: () ->
-			extension = @model.get("name").split(".").pop()
+			extension = @model.get("name").split(".").pop().toLowerCase()
 			image = (["jpg", "jpeg", "png", "gif", "eps", "pdf"].indexOf(extension) != -1)
 			html = Mustache.to_html(@template, {
 				name: @model.get("name")
