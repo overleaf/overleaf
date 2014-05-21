@@ -7,7 +7,7 @@ define [
 
 
 		previewUrl: () ->
-			extension = @get("name").split(".").pop()
+			extension = @get("name").split(".").pop()?.toLowerCase()
 			needsConverting = (["eps", "pdf"].indexOf(extension) != -1)
 			queryString = if needsConverting then "?format=png" else ""
 			url = "#{@downloadUrl()}#{queryString}"
