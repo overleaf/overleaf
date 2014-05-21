@@ -27,10 +27,6 @@ module.exports = (grunt) ->
 			app: 
 				src: 'app.coffee'
 				dest: 'app.js'
-
-			TpdsWorker: 
-				src: 'TpdsWorker.coffee'
-				dest: 'TpdsWorker.js'
 				
 			BackgroundJobsWorker: 
 				src: 'BackgroundJobsWorker.coffee'
