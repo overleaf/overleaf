@@ -76,16 +76,16 @@ describe "CompileManager", ->
 					.calledWith(project_id: @project_id, user_id: @user_id, "compiling project")
 					.should.equal true
 
-		describe "when the compile fails", ->
+		describe "when the compile errors", ->
 			beforeEach ->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
 				@ClsiManager.deleteAuxFiles = sinon.stub()
-				@ClsiManager.sendRequest = sinon.stub().callsArgWith(1, null, @status = "failure")
+				@ClsiManager.sendRequest = sinon.stub().callsArgWith(1, @error = new Error("oops"), @status = "failure")
 				@CompileManager.compile @project_id, @user_id, {}, @callback
 
-			it "should call the callback", ->
+			it "should call the callback with the error", ->
 				@callback
-					.calledWith(null, @status)
+					.calledWith(@error)
 					.should.equal true
 
 			it "should clear the CLSI cache", ->

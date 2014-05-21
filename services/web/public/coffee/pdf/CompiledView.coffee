@@ -117,6 +117,8 @@ define [
 				errorLogs.prepend($(@templates.compileError))
 			else if !pdfExists
 				errorLogs.prepend($(@templates.compileFailed))
+				errorLogs.find(".js-clear-cache").on "click", () =>
+					@options.manager.deleteCachedFiles()
 			else if pdfExists && compileErrors.all.length == 0
 				errorLogs.prepend($(@templates.compileSuccess))
 

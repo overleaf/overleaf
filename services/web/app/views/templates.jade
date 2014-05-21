@@ -239,8 +239,12 @@
 	
 	script(type="text/template")#compileFailedTemplate
 		li.alert.alert-error
-			strong Ooops, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
-		
+			p
+				strong Compile Error. 
+				span Sorry, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
+			p
+				| If the problem persists, try 
+				a(href='#').js-clear-cache clearing the cache.
 	script(type="text/template")#compileTimeoutTemplate
 		li.alert.alert-error
 			strong Timed out. 
