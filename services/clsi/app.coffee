@@ -18,6 +18,15 @@ app = express()
 
 app.use Metrics.http.monitor(logger)
 
+# Compile requests can take longer than the default two
+# minutes (including file download time), so bump up the 
+# timeout a bit.
+TIMEOUT = threeMinutes = 3 * 60 * 1000
+app.use (req, res, next) ->
+	req.setTimeout TIMEOUT
+	res.setTimeout TIMEOUT
+	next()
+
 app.post   "/project/:project_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
 app.delete "/project/:project_id", CompileController.clearCache
 
