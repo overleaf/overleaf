@@ -45,13 +45,22 @@ describe "S3PersistorManagerTests", ->
 
 
 		it "should use correct key", (done)->
-			@stubbedKnoxClient.get.returns(
-				on:->
+			@response =
+				headers:
+					"content-length": @size = 42
+
+			@stubbedKnoxClient.get.returns(@stream = 
+				on: (e, callback) =>
+					if e == "response"
+						callback(@response)
 				end:->
+				
 			)
-			@S3PersistorManager.getFileStream @bucketName, @key, @fsPath, (err)=>
-			@stubbedKnoxClient.get.calledWith(@key).should.equal true
-			done()
+			@S3PersistorManager.getFileStream @bucketName, @key, (err, res, size) =>
+				res.should.equal @response
+				size.should.equal @size
+				@stubbedKnoxClient.get.calledWith(@key).should.equal true
+				done()
 
 	describe "sendFile", ->
 

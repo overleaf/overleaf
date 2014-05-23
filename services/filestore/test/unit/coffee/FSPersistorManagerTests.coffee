@@ -66,11 +66,12 @@ describe "FSPersistorManagerTests", ->
 
   describe "getFileStream", ->
     it "should use correct file location", (done) ->
-      @Fs.createReadStream.returns(
-        on:->
-      )
-      @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
+      @Fs.createReadStream.returns(@stream = on:->)
+      @Fs.stat = sinon.stub().callsArgWith(1, null, { size: @size = 42 })
+      @FSPersistorManager.getFileStream @location, @name1, (err, res, size)=>
         @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
+        res.should.equal @stream
+        size.should.equal @size
         done()
 
   describe "copyFile", ->

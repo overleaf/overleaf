@@ -43,15 +43,16 @@ describe "FileController", ->
 				project_id:@project_id
 				file_id:@file_id
 		@res =
-			setHeader: ->
+			header: sinon.stub()
 		@fileStream = {}
 
 	describe "getFile", ->
 
 		it "should pipe the stream", (done)->
-			@FileHandler.getFile.callsArgWith(3, null, @fileStream)
+			@FileHandler.getFile.callsArgWith(3, null, @fileStream, @size = 42)
 			@fileStream.pipe = (res)=>
 				res.should.equal @res
+				res.header.calledWith("Content-Length", @size).should.equal true
 				done()
 			@controller.getFile @req, @res
 
