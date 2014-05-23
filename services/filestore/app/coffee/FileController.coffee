@@ -12,7 +12,7 @@ module.exports =
 		{key, bucket} = req
 		{format, style} = req.query
 		logger.log key:key, bucket:bucket, format:format, style:style, "reciving request to get file"
-		FileHandler.getFile bucket, key, {format:format,style:style}, (err, fileStream, size)->
+		FileHandler.getFile bucket, key, {format:format,style:style}, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
 				if !res.finished and res?.send? 
@@ -22,7 +22,6 @@ module.exports =
 				res.send 200
 			else
 				logger.log key:key, bucket:bucket, format:format, style:style, "sending file to response"
-				res.header("Content-Length", size)
 				fileStream.pipe res
 
 	insertFile: (req, res)->

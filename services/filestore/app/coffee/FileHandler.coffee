@@ -22,20 +22,20 @@ module.exports =
 			(done)-> PersistorManager.deleteFile bucket, convetedKey, done
 		], callback
 
-	getFile: (bucket, key, opts = {}, callback = (err, fileStream, size) ->)->
+	getFile: (bucket, key, opts = {}, callback)->
 		logger.log bucket:bucket, key:key, opts:opts, "getting file"
 		if !opts.format? and !opts.style?
 			@_getStandardFile bucket, key, opts, callback
 		else
 			@_getConvertedFile bucket, key, opts, callback
 
-	_getStandardFile: (bucket, key, opts, callback = (err, fileStream, size) ->)->
-		PersistorManager.getFileStream bucket, key, (err, fileStream, size)->
+	_getStandardFile: (bucket, key, opts, callback)->
+		PersistorManager.getFileStream bucket, key, (err, fileStream)->
 			if err?
 				logger.err  bucket:bucket, key:key, opts:opts, "error getting fileStream"
-			callback err, fileStream, size
+			callback err, fileStream
 
-	_getConvertedFile: (bucket, key, opts, callback = (err, fileStream, size) ->)->
+	_getConvertedFile: (bucket, key, opts, callback)->
 		convetedKey = KeyBuilder.addCachingToKey(key, opts)
 		PersistorManager.checkIfFileExists bucket, convetedKey, (err, exists)=>
 			if exists

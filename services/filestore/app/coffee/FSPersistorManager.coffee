@@ -28,13 +28,12 @@ module.exports =
   getFileStream: (location, name, callback = (err, res)->)->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
-    path = "#{location}/#{filteredName}"
-    fs.stat path, (error, stat) ->
-      sourceStream = fs.createReadStream path
-      sourceStream.on 'error', (err) ->
-        logger.err err:err, location:location, name:name, "Error reading from file"
-        callback err
-      callback null, sourceStream, stat.size
+    sourceStream = fs.createReadStream "#{location}/#{filteredName}"
+    sourceStream.on 'error', (err) ->
+      logger.err err:err, location:location, name:name, "Error reading from file"
+      callback err
+    callback null,sourceStream
+
 
   copyFile: (location, fromName, toName, callback = (err)->)->
     filteredFromName=filterName fromName
