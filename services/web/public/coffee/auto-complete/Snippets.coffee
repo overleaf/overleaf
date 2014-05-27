@@ -4,7 +4,7 @@ define () ->
 		"align", "align*",
 		"equation", "equation*",
 		"gather", "gather*",
-		"mutliline", "multiline*",
+		"multline", "multline*",
 		"split",
 		"verbatim"
 	]
