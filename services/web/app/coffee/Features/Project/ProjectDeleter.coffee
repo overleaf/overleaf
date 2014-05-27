@@ -3,7 +3,6 @@ logger = require('logger-sharelatex')
 documentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 tagsHandler = require("../Tags/TagsHandler")
 async = require("async")
-AutomaticSnapshotManager = require('../Versioning/AutomaticSnapshotManager')
 FileStoreHandler = require("../FileStore/FileStoreHandler")
 
 module.exports =

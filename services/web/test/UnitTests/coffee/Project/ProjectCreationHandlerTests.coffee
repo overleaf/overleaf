@@ -16,7 +16,6 @@ describe 'ProjectCreationHandler', ->
 	rootFolderId = "234adfa3r2afe"
 
 	beforeEach ->
-		@versioningApiHandler={enableVersioning: sinon.stub().callsArg(1)}
 		@ProjectModel = class Project
 			constructor:(options = {})->
 				@._id = project_id
@@ -47,7 +46,6 @@ describe 'ProjectCreationHandler', ->
 			'../../models/User': User:@User
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
-			'../Versioning/VersioningApiHandler':@versioningApiHandler
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			'logger-sharelatex': {log:->}
 
@@ -68,11 +66,6 @@ describe 'ProjectCreationHandler', ->
 					(project.owner_ref + "").should.equal ownerId
 					done()
 
-			it 'should enable versioning', (done)->
-				@handler.createBlankProject ownerId, projectName, =>
-					@versioningApiHandler.enableVersioning.calledWith(project_id).should.equal true
-					done()
-
 			it "should set the language from the user", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)->
 					project.spellCheckLanguage.should.equal "de"
@@ -85,12 +78,6 @@ describe 'ProjectCreationHandler', ->
 			
 			it 'should return the error to the callback', ->
 				should.exist @callback.args[0][0]
-
-		it 'enables versioning', (done)->
-			@versioningApiHandler.enableVersioning = (enbleVersioningProjectId, callback)->
-				project_id.should.equal enbleVersioningProjectId
-				done()
-			@handler.createBlankProject ownerId, projectName, ->
 
 	describe 'Creating a basic project', ->
 		beforeEach ->

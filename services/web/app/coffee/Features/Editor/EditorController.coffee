@@ -11,8 +11,6 @@ CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 LimitationsManager = require("../Subscription/LimitationsManager")
 AuthorizationManager = require("../Security/AuthorizationManager")
-AutomaticSnapshotManager = require("../Versioning/AutomaticSnapshotManager")
-VersioningApiHandler = require("../Versioning/VersioningApiHandler")
 EditorRealTimeController = require("./EditorRealTimeController")
 TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 settings = require('settings-sharelatex')
@@ -56,7 +54,6 @@ module.exports = EditorController =
 							client.set("connected_time", new Date())
 							client.set("signup_date", user.signUpDate)
 							client.set("login_count", user.loginCount)
-							client.set("take_snapshots", project.existsInVersioningApi)
 							AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
 							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 

@@ -3,7 +3,6 @@ assert = require('assert')
 require('chai').should()
 sinon = require('sinon')
 modulePath = require('path').join __dirname, '../../../../app/js/Features/ThirdPartyDataStore/TpdsPollingBackgroundTasks.js'
-redisKeys = require('../../../../app/js/Features/Versioning/RedisKeys')
 describe 'third party data store', ->
 
 	beforeEach ->

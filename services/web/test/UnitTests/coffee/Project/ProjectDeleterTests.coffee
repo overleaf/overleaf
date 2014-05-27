@@ -22,8 +22,6 @@ describe 'Project deleter', ->
 			applyToAllFilesRecursivly: sinon.stub()
 		@documentUpdaterHandler = 
 			flushProjectToMongoAndDelete:sinon.stub().callsArgWith(1)
-		@AutomaticSnapshotManager = 
-			unmarkProjectAsUpdated:sinon.stub().callsArgWith(1)
 		@editorController = notifyUsersProjectHasBeenDeletedOrRenamed : sinon.stub().callsArgWith(1)
 		@TagsHandler = 
 			removeProjectFromAllTags: sinon.stub().callsArgWith(2)
@@ -31,7 +29,6 @@ describe 'Project deleter', ->
 			"../Editor/EditorController": @editorController
 			'../../models/Project':{Project:@Project}
 			'../DocumentUpdater/DocumentUpdaterHandler': @documentUpdaterHandler
-			'../Versioning/AutomaticSnapshotManager':@AutomaticSnapshotManager
 			"../Tags/TagsHandler":@TagsHandler
 			'logger-sharelatex':
 				log:->

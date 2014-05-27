@@ -6,7 +6,6 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/ThirdP
 describe 'third party data store reciver :', ->
 	beforeEach ->
 		@requestQueuer = {}
-		@versioningApiHandler = {takeSnapshot:(_, message, sl_req_id, cb)->cb()}
 		@updateMerger = 
 			deleteUpdate: (user_id, path, sl_req_id, cb)->cb()
 			mergeUpdate:(user_id, path, update, sl_req_id, cb)->cb()
@@ -19,7 +18,6 @@ describe 'third party data store reciver :', ->
 		@projectDeleter = {markAsDeletedByExternalSource:sinon.stub().callsArgWith(1)}
 		@rootDocManager = setRootDocAutomatically:sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
-			'../Versioning/VersioningApiHandler':@versioningApiHandler
 			'./UpdateMerger': @updateMerger
 			'./Editor/EditorController': @editorController
 			'../Project/ProjectLocator': @projectLocator
@@ -30,15 +28,6 @@ describe 'third party data store reciver :', ->
 		@user_id = "dsad29jlkjas"
 
 	describe 'getting an update', ->
-	
-		it 'should call versioning api to take snapshot for backup reasons', (done)->
-			update = {}
-			@versioningApiHandler.takeSnapshot = sinon.stub().callsArg(3)
-			@handler.newUpdate @user_id, @project.name, "",update, "", =>
-				@versioningApiHandler.takeSnapshot.calledWith(@project_id).should.equal true
-				@projectCreationHandler.createBlankProject.called.should.equal false
-				done()
-
 		it 'should send the update to the update merger', (done)->
 			path = "/path/here"
 			update = {}
@@ -68,16 +57,6 @@ describe 'third party data store reciver :', ->
 
 
 	describe 'getting a delete :', ->
-
-		it 'should call versioning api to take snapshot for backup reasons', (done)->
-			update = {}
-			@versioningApiHandler.takeSnapshot = sinon.stub()
-			@versioningApiHandler.takeSnapshot.callsArg(3)
-			@handler.deleteUpdate @user_id,@project.name, "", "", =>
-				@projectDeleter.markAsDeletedByExternalSource.calledWith(@project._id).should.equal false
-				@versioningApiHandler.takeSnapshot.calledWith(@project_id).should.equal true
-				done()
-
 		it 'should call deleteEntity in the collaberation manager', (done)->
 			path = "/delete/this"
 			update = {}

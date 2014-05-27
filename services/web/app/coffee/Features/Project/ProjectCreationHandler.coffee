@@ -5,7 +5,6 @@ Settings = require('settings-sharelatex')
 ObjectId = require('mongoose').Types.ObjectId	
 Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
-VersioningApiHandler = require('../Versioning/VersioningApiHandler')
 ProjectEntityHandler = require('./ProjectEntityHandler')
 User = require('../../models/User').User
 fs = require('fs')
@@ -26,8 +25,7 @@ module.exports =
 			project.spellCheckLanguage = user.ace.spellCheckLanguage
 			project.save (err)->
 				return callback(err) if err?
-				VersioningApiHandler.enableVersioning project._id, (err) ->
-					callback err, project
+				callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @

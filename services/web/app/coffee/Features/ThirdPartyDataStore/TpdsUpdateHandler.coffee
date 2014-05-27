@@ -1,4 +1,3 @@
-versioningApiHandler = require('../Versioning/VersioningApiHandler')
 updateMerger = require('./UpdateMerger')
 logger = require('logger-sharelatex')
 projectLocator = require('../Project/ProjectLocator')
@@ -23,9 +22,8 @@ module.exports =
 				else
 					cb err, project
 		getOrCreateProject (err, project)->
-			versioningApiHandler.takeSnapshot project._id, commitMessage, sl_req_id, ->
-				updateMerger.mergeUpdate project._id, path, updateRequest, sl_req_id, (err)->
-					callback(err)
+			updateMerger.mergeUpdate project._id, path, updateRequest, sl_req_id, (err)->
+				callback(err)
 
 
 	deleteUpdate: (user_id, projectName, path, sl_req_id, callback)->	
@@ -38,9 +36,8 @@ module.exports =
 				logger.log user_id:user_id, filePath:path, projectName:projectName, project_id:project._id, "project found for delete update, path is root so marking project as deleted"
 				return projectDeleter.markAsDeletedByExternalSource project._id, callback
 			else
-				versioningApiHandler.takeSnapshot project._id, commitMessage, sl_req_id, ->
-					updateMerger.deleteUpdate project._id, path, sl_req_id, (err)->
-						callback(err)
+				updateMerger.deleteUpdate project._id, path, sl_req_id, (err)->
+					callback(err)
 
 
 	_rootDocTimeoutLength : 30 * 1000

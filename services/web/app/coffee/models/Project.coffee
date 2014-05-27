@@ -25,7 +25,6 @@ ProjectSchema = new Schema
 	publicAccesLevel  :   {type: String, default: 'private'}
 	compiler		  :   {type:String, default:'pdflatex'}
 	spellCheckLanguage :   {type:String, default:'en'}
-	existsInVersioningApi :   {type: Boolean, default: false}
 	deletedByExternalDataSource : {type: Boolean, default: false}
 	useClsi2          :   {type:Boolean, default: true}
 	description : {type:String, default:''}

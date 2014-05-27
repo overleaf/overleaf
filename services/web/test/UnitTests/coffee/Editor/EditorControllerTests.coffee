@@ -38,9 +38,6 @@ describe "EditorController", ->
 			findPopulatedById: sinon.stub().callsArgWith(1, null, @project)
 		@LimitationsManager = {}
 		@AuthorizationManager = {}
-		@AutomaticSnapshotManager = {}
-		@VersioningApiHandler =
-			enableVersioning : sinon.stub().callsArg(1)
 		@client = new MockClient()
 
 		@settings = 
@@ -69,8 +66,6 @@ describe "EditorController", ->
 			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler
 			'../Subscription/LimitationsManager' : @LimitationsManager
 			'../Security/AuthorizationManager' : @AuthorizationManager
-			"../Versioning/AutomaticSnapshotManager" : @AutomaticSnapshotManager
-			"../Versioning/VersioningApiHandler" : @VersioningApiHandler
 			'../../models/Project' : Project: @Project
 			"settings-sharelatex":@settings
 			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker

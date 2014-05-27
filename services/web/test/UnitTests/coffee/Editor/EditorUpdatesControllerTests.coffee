@@ -15,7 +15,6 @@ describe "EditorUpdatesController", ->
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub() }
 			"./EditorRealTimeController" : @EditorRealTimeController = {}
 			"../DocumentUpdater/DocumentUpdaterHandler" : @DocumentUpdaterHandler = {}
-			"../Versioning/AutomaticSnapshotManager" : @AutomaticSnapshotManager = {}
 			"../../infrastructure/Metrics" : @metrics = { set: sinon.stub(), inc: sinon.stub() }
 			"../../infrastructure/Server" : io: @io = {}
 			"redis" : 
@@ -60,16 +59,6 @@ describe "EditorUpdatesController", ->
 
 			it "should log an error", ->
 				@logger.error.called.should.equal true
-
-		describe "when client.take_snapshot is true", ->
-			beforeEach ->
-				@client.set("take_snapshots", true)
-				@AutomaticSnapshotManager.markProjectAsUpdated = sinon.stub()
-				@EditorUpdatesController._applyUpdate(@client, @project_id, @doc_id, @update)
-
-			it "should call AutomaticSnapshotManager.markProjectAsUpdated", ->
-				@AutomaticSnapshotManager.markProjectAsUpdated.calledWith(@project_id)
-					.should.equal true
 
 	describe "applyOtUpdate", ->
 		beforeEach ->

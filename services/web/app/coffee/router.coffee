@@ -6,7 +6,6 @@ InfoController = require('./Features/StaticPages/InfoController')
 SpellingController = require('./Features/Spelling/SpellingController')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
-versioningController =  require("./Features/Versioning/VersioningApiController")
 EditorController = require("./Features/Editor/EditorController")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
@@ -33,7 +32,6 @@ ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsContr
 FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
-RestoreController = require("./Features/Restore/RestoreController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 
 logger = require("logger-sharelatex")
@@ -85,9 +83,6 @@ module.exports = class Router
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
-		app.get "/restore", AuthenticationController.requireLogin(), RestoreController.restore
-		app.get "/project/:Project_id/zip", SecurityManager.requestCanAccessProject, RestoreController.getZip
-
 		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
 		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
 		app.get  '/dropbox/unlink', DropboxUserController.unlinkDropbox
@@ -124,12 +119,6 @@ module.exports = class Router
 
 		app.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
 
-		app.post '/Project/:Project_id/snapshot', SecurityManager.requestCanModifyProject, versioningController.takeSnapshot
-		app.get  '/Project/:Project_id/version', SecurityManager.requestCanAccessProject, versioningController.listVersions
-		app.get  '/Project/:Project_id/version/:Version_id', SecurityManager.requestCanAccessProject, versioningController.getVersion
-		app.get  '/Project/:Project_id/version', SecurityManager.requestCanAccessProject, versioningController.listVersions
-		app.get  '/Project/:Project_id/version/:Version_id', SecurityManager.requestCanAccessProject, versioningController.getVersion
-
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
@@ -157,20 +146,6 @@ module.exports = class Router
 		app.del  '/user/:user_id/update/*', httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
-
-		app.get	 '/enableversioning/:Project_id', (req, res)->
-			versioningController.enableVersioning req.params.Project_id, -> res.send()
-
-		app.get  /^\/project\/([^\/]*)\/version\/([^\/]*)\/file\/(.*)$/,
-			((req, res, next) ->
-				params =
-					"Project_id": req.params[0]
-					"Version_id": req.params[1]
-					"File_id":    req.params[2]
-				req.params = params
-				next()
-			),
-			SecurityManager.requestCanAccessProject, versioningController.getVersionFile
 
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
@@ -326,10 +301,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					CompileManager.compile project_id, user._id, opts, (error, status, outputFiles) ->
 						return callback error, status == "success", outputFiles
-
-			client.on 'enableversioningController', (callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					versioningController.enableVersioning project_id, callback
 
 			client.on 'getRootDocumentsList', (callback)->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>

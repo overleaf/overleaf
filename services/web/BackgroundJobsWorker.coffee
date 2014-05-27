@@ -1,7 +1,6 @@
 settings = require('settings-sharelatex')
 SubscriptionBackgroundTasks = require("./app/js/Features/Subscription/SubscriptionBackgroundTasks")
 TpdsPollingBackgroundTasks = require("./app/js/Features/ThirdPartyDataStore/TpdsPollingBackgroundTasks")
-AutomaticSnapshotManager = require("./app/js/Features/Versioning/AutomaticSnapshotManager")
 
 time =
 	oneHour : 60 * 60 * 1000
@@ -24,4 +23,3 @@ runPeriodically = (funcToRun, periodLength)->
 runPeriodically ((cb) -> SubscriptionBackgroundTasks.downgradeExpiredFreeTrials(cb)), time.oneHour
 
 runPeriodically ((cb) -> TpdsPollingBackgroundTasks.pollUsersWithDropbox(cb)), time.fifteenMinutes
-runPeriodically ((cb) -> AutomaticSnapshotManager.takeAutomaticSnapshots(cb)), time.thirtySeconds

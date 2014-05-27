@@ -10,7 +10,6 @@ module.exports = ProjectEditorHandler =
 			rootDoc_id : project.rootDoc_id
 			rootFolder : [@buildFolderModelView project.rootFolder[0]]
 			publicAccesLevel  : project.publicAccesLevel
-			versioningVisible : !!project.existsInVersioningApi
 			dropboxEnabled 	  : !!project.existsInDropbox
 			compiler   : project.compiler
 			description: project.description

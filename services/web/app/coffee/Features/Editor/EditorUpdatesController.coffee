@@ -4,7 +4,6 @@ Settings = require 'settings-sharelatex'
 rclient = require("redis").createClient(Settings.redis.web.port, Settings.redis.web.host)
 rclient.auth(Settings.redis.web.password)
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-AutomaticSnapshotManager = require("../Versioning/AutomaticSnapshotManager")
 EditorRealTimeController = require("./EditorRealTimeController")
 
 module.exports = EditorUpdatesController =
@@ -13,10 +12,6 @@ module.exports = EditorUpdatesController =
 		metrics.set "editor.active-projects", project_id, 0.3
 		client.get "user_id", (error, user_id) ->
 			metrics.set "editor.active-users", user_id, 0.3
-
-		client.get "take_snapshots", (error, takeSnapshot) ->
-			if takeSnapshot
-				AutomaticSnapshotManager.markProjectAsUpdated(project_id)
 
 		logger.log doc_id: doc_id, project_id: project_id, client_id: update.meta?.source, version: update.v, "sending update to doc updater"
 
