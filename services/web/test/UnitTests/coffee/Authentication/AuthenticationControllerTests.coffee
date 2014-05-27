@@ -136,21 +136,21 @@ describe "AuthenticationController", ->
 				expect(user_id).to.equal @user_id
 				done()
 
-		it "should return an error if there is no user on the session", (done)->
+		it "should return null if there is no user on the session", (done)->
 			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(err).to.exist
+				expect(user_id).to.be.null
 				done()
 
-		it "should return an error if there is no session", (done)->
+		it "should return null if there is no session", (done)->
 			@req = {}
 			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(err).to.exist
+				expect(user_id).to.be.null
 				done()
 
-		it "should return an error if there is no req", (done)->
+		it "should return null if there is no req", (done)->
 			@req = {}
 			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(err).to.exist
+				expect(user_id).to.be.null
 				done()
 
 	describe "getLoggedInUser", ->

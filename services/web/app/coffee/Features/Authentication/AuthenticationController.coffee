@@ -47,8 +47,7 @@ module.exports = AuthenticationController =
 		if req?.session?.user?._id?
 			callback null, req.session.user._id.toString()
 		else
-			e = new Error("user is not on req session")
-			callback e
+			callback null, null
 
 	getLoggedInUser: (req, options = {allow_auth_token: false}, callback = (error, user) ->) ->
 		if req.session?.user?._id?
