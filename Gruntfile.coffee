@@ -361,7 +361,11 @@ module.exports = (grunt) ->
 			)
 			console.log "fpm " + command.join(" ")
 			proc = spawn "fpm", command, stdio: "inherit"
-			proc.on "close", callback
+			proc.on "close", (code) ->
+				if code != 0
+					callback(new Error("exit code: #{code}"))
+				else
+					callback()
 
 			
 
