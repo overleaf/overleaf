@@ -307,18 +307,18 @@ module.exports = (grunt) ->
 
 		buildDeb: (callback = (error) ->) ->
 			# TODO: filestore uses local 'uploads' directory, not configurable in settings
-			command = ["fpm", "-s", "dir", "-t", "deb", "-n", "sharelatex", "-v", "0.0.1", "--verbose"]
+			command = ["-s", "dir", "-t", "deb", "-n", "sharelatex", "-v", "0.0.1", "--verbose"]
 			command.push(
-				"--maintainer", "'ShareLaTeX <team@sharelatex.com>'"
+				"--maintainer", "ShareLaTeX <team@sharelatex.com>"
 				"--config-files", "/etc/sharelatex/settings.coffee",
 				"--directories",  "/var/data/sharelatex"
 				"--directories",  "/var/log/sharelatex"
 			)
 
 			command.push(
-				"--depends", "'redis-server > 2.6.12'"
-				"--depends", "'mongodb-10gen > 2.4.0'"
-				"--depends", "'nodejs > 0.10.0'"
+				"--depends", "redis-server > 2.6.12"
+				"--depends", "mongodb-10gen > 2.4.0"
+				"--depends", "nodejs > 0.10.0"
 			)
 
 			template = fs.readFileSync("package/upstart/sharelatex-template").toString()
@@ -359,12 +359,9 @@ module.exports = (grunt) ->
 			command.push(
 				"package/config/settings.coffee=/etc/sharelatex/settings.coffee"
 			)
-			console.log command.join(" ")
-			exec command.join(" "), (error, stdout, stderr) ->
-				return callback(error) if error?
-				console.log stdout
-				console.error stderr if stderr?
-				callback()
+			console.log "fpm " + command.join(" ")
+			proc = spawn "fpm", command, stdio: "inherit"
+			proc.on "close", callback
 
 			
 
