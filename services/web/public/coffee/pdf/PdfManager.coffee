@@ -280,6 +280,13 @@ define [
 		syncToPdf: () ->
 			entity_id = @ide.editor.getCurrentDocId()
 			file = @ide.fileTreeManager.getPathOfEntityId(entity_id)
+			
+			# If the root file is folder/main.tex, then synctex sees the
+			# path as folder/./main.tex
+			rootFolderPath = @ide.fileTreeManager.getRootFolderPath()
+			if rootFolderPath != ""
+				file = file.replace(RegExp("^#{rootFolderPath}"), "#{rootFolderPath}/.")
+
 			line = @ide.editor.getCurrentLine()
 			column = @ide.editor.getCurrentColumn()
 

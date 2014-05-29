@@ -121,6 +121,7 @@ define [
 			lastPart = parts.pop()
 
 			getChildWithName = (folder, name) ->
+				return folder if name == "."
 				foundChild = null
 				for child in folder.get("children").models
 					if child.get("name") == name
@@ -144,6 +145,10 @@ define [
 					# it's not the root folder so keep going
 					path = entity.get("name") + "/" + path
 			return path
+
+		getRootFolderPath: () ->
+			rootFilePath = @getPathOfEntityId(@project.get("rootDoc_id"))
+			return rootFilePath.split("/").slice(0, -1).join("/")
 
 		getNameOfEntityId: (entity_id) ->
 			entity = @getEntity(entity_id)
