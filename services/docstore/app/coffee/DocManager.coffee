@@ -61,7 +61,7 @@ module.exports = DocManager =
 		else
 			callback null, null, null
 
-	_findDocInFolder: (folder, doc_id, currentPath) ->
+	_findDocInFolder: (folder = {}, doc_id, currentPath) ->
 		for doc, i in folder.docs or []
 			if doc._id.toString() == doc_id.toString()
 				return {
@@ -75,7 +75,7 @@ module.exports = DocManager =
 
 		return null
 
-	_findAllDocsInFolder: (folder) ->
+	_findAllDocsInFolder: (folder = {}) ->
 		docs = folder.docs or []
 		for childFolder in folder.folders or []
 			docs = docs.concat @_findAllDocsInFolder childFolder
