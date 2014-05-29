@@ -24,7 +24,7 @@ module.exports = CompileController =
 					else
 						status = "failure"
 						for file in outputFiles
-							if file.type == "pdf"
+							if file.path?.match(/output\.pdf$/)
 								status = "success"
 
 					timer.done()
