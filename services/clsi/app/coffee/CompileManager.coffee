@@ -58,7 +58,7 @@ module.exports = CompileManager =
 		# might not match the file path on the host. The .synctex.gz file however, will be accessed
 		# wherever it is on the host.
 		base_dir = Settings.path.synctexBaseDir(project_id)
-		file_path = Path.join(base_dir, file_name)
+		file_path = base_dir + "/" + file_name
 		synctex_path = Path.join(Settings.path.compilesDir, project_id, "output.pdf")
 		CompileManager._runSynctex ["code", synctex_path, file_path, line, column], (error, stdout) ->
 			return callback(error) if error?
