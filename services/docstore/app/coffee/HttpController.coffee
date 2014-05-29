@@ -72,4 +72,4 @@ module.exports = HttpController =
 		}
 
 	_buildRawDocView: (doc)->
-		return doc.lines.join("\n")
+		return (doc?.lines or []).join("\n")
