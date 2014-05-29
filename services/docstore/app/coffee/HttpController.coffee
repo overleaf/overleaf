@@ -66,7 +66,7 @@ module.exports = HttpController =
 
 	_buildDocView: (doc) -> 
 		return {
-			_id:     doc._id.toString()
+			_id:     doc._id?.toString()
 			lines:   doc.lines
 			rev:     doc.rev
 		}
