@@ -109,34 +109,3 @@ describe "UpdateTrimmer", ->
 				it "should return true", ->
 					@callback.calledWith(null, true).should.equal true
 
-	describe "deleteOldProjectUpdates", ->
-		beforeEach ->
-			@oneWeek = 7 * 24 * 60 * 60 * 1000
-			@MongoManager.deleteOldProjectUpdates = sinon.stub().callsArg(2)
-
-		describe "when the updates should be trimmed", ->
-			beforeEach ->
-				@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, true)
-				@UpdateTrimmer.deleteOldProjectUpdates @project_id, @callback
-
-			it "should delete week old updates in mongo", ->
-				before = Date.now() - @oneWeek
-				@MongoManager.deleteOldProjectUpdates
-					.calledWith(@project_id, before)
-					.should.equal true
-
-			it 'should call the callback', ->
-				@callback.called.should.equal true
-
-		describe "when the updates should not be trimmed", ->
-			beforeEach ->
-				@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, false)
-				@UpdateTrimmer.deleteOldProjectUpdates @project_id, @callback
-
-			it "should not delete any updates in mongo", ->
-				@MongoManager.deleteOldProjectUpdates
-					.called
-					.should.equal false
-
-			it 'should call the callback', ->
-				@callback.called.should.equal true

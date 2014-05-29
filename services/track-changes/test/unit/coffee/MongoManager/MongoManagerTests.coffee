@@ -336,21 +336,3 @@ describe "MongoManager", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
-
-	describe "deleteOldProjectUpdates", ->
-		beforeEach ->
-			@before = Date.now() - 10000
-			@db.docHistory =
-				remove: sinon.stub().callsArg(1)
-			@MongoManager.deleteOldProjectUpdates @project_id, @before, @callback
-
-		it "should delete updates before the 'before' time", ->
-			@db.docHistory.remove
-				.calledWith({
-					project_id: ObjectId(@project_id)
-					"meta.end_ts": { "$lt": @before }
-				})
-				.should.equal true
-
-		it "should return the callback", ->
-			@callback.called.should.equal true

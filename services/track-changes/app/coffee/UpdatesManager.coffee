@@ -77,9 +77,7 @@ module.exports = UpdatesManager =
 				do (doc_id) ->
 					jobs.push (callback) ->
 						UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, callback
-			async.parallelLimit jobs, 5, (error) ->
-				return callback(error) if error?
-				UpdateTrimmer.deleteOldProjectUpdates project_id, callback
+			async.parallelLimit jobs, 5, callback
 
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->

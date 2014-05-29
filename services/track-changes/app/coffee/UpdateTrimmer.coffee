@@ -19,14 +19,3 @@ module.exports = UpdateTrimmer =
 					else
 						callback null, true
 
-	deleteOldProjectUpdates: (project_id, callback = (error) ->) ->
-		UpdateTrimmer.shouldTrimUpdates project_id, (error, shouldTrim) ->
-			return callback(error) if error?
-			if shouldTrim
-				logger.log project_id: project_id, "deleting old updates"
-				oneWeek = 7 * 24 * 60 * 60 * 1000
-				before = Date.now() - oneWeek
-				MongoManager.deleteOldProjectUpdates project_id, before, callback
-			else
-				logger.log project_id: project_id, "not deleting old updates"
-				callback()

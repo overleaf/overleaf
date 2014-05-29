@@ -7,8 +7,6 @@ Metrics = require "metrics-sharelatex"
 Metrics.initialize("track-changes")
 Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 
-require("./app/js/MongoManager").ensureIndices()
-
 HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()

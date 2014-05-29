@@ -82,12 +82,6 @@ module.exports = MongoManager =
 
 		cursor.toArray callback
 
-	deleteOldProjectUpdates: (project_id, before, callback = (error) ->) ->
-		db.docHistory.remove {
-			project_id: ObjectId(project_id)
-			"meta.end_ts": { $lt: before }
-		}, callback
-
 	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
 		db.docHistory.update {
 			doc_id: ObjectId(doc_id.toString())

@@ -63,9 +63,9 @@ describe "Flushing updates", ->
 						throw error if error?
 						done()
 
-			it "should not delete the old updates", (done) ->
+			it "should not mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
-					expect(updates.length).to.equal 2
+					expect(updates[0].expiresAt).to.not.exist
 					done()
 
 			it "should preserve history forever", (done) ->
@@ -99,10 +99,9 @@ describe "Flushing updates", ->
 						throw error if error?
 						done()
 
-			it "should delete the older update, but the newer update", (done) ->
+			it "should mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
-					expect(updates.length).to.equal 1
-					expect(updates[0].op).to.deep.equal [{ i: "f", p: 3 }]
+					expect(updates[0].expiresAt).to.exist
 					done()
 
 		describe "without versioning enabled but with preserveHistory set to true", ->
@@ -133,7 +132,7 @@ describe "Flushing updates", ->
 							throw error if error?
 							done()
 
-			it "should not delete the old updates", (done) ->
+			it "should not mark the updates for deletion", (done) ->
 				TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
-					expect(updates.length).to.equal 2
+					expect(updates[0].expiresAt).to.not.exist
 					done()
