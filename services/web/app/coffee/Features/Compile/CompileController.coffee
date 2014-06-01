@@ -11,7 +11,7 @@ module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
-		settingsOverride = req.body.settingsOverride ? {};
+		settingsOverride = req.body?.settingsOverride ? {};
 		logger.log "root doc overriden" if settingsOverride.rootDoc_id?
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
 			return next(error) if error?
