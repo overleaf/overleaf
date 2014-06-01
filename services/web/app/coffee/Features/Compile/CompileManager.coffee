@@ -25,12 +25,12 @@ module.exports = CompileManager =
 				return callback(error) if error?
 				if recentlyCompiled
 					return callback new Error("project was recently compiled so not continuing")
-
+				
 				CompileManager._ensureRootDocumentIsSet project_id, (error) ->
 					return callback(error) if error?
 					DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 						return callback(error) if error?
-						ClsiManager.sendRequest project_id, opt.settingsOverride ? null, (error, status, outputFiles) ->
+						ClsiManager.sendRequest project_id, opt.settingsOverride, (error, status, outputFiles) ->
 							return callback(error) if error?
 							logger.log files: outputFiles, "output files"
 							callback(null, status, outputFiles)
