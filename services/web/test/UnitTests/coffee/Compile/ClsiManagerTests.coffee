@@ -159,6 +159,28 @@ describe "ClsiManager", ->
 						}]
 				)
 
+
+		describe "when root doc override is valid", ->
+			beforeEach (done) ->
+				@ClsiManager._buildRequest @project_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
+					@request = request
+					done()
+
+			it "should change root path", ->
+				@request.compile.rootResourcePath.should.equal "chapters/chapter1.tex"
+
+
+		describe "when root doc override is invalid", ->
+			beforeEach (done) ->
+				@ClsiManager._buildRequest @project_id, {rootDoc_id:"invalid-id"}, (error, request) =>
+					@request = request
+					done()
+
+			it "should fallback to default root doc", ->
+				@request.compile.rootResourcePath.should.equal "main.tex"
+
+
+
 		describe "when the project has an invalid compiler", ->
 			beforeEach (done) ->
 				@project.compiler = "context"
