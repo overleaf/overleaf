@@ -8,8 +8,8 @@ logger = require "logger-sharelatex"
 url = require("url")
 
 module.exports = ClsiManager =
-	sendRequest: (project_id, callback = (error, success) ->) ->
-		ClsiManager._buildRequest project_id, (error, req) ->
+	sendRequest: (project_id, settingsOverride = {}, callback = (error, success) ->) ->
+		ClsiManager._buildRequest project_id, settingsOverride, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiManager._postToClsi project_id, req, (error, response) ->
@@ -52,7 +52,7 @@ module.exports = ClsiManager =
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
-	_buildRequest: (project_id, callback = (error, request) ->) ->
+	_buildRequest: (project_id, settingsOverride={}, callback = (error, request) ->) ->
 		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
@@ -67,6 +67,7 @@ module.exports = ClsiManager =
 
 					resources = []
 					rootResourcePath = null
+					rootResourcePathOverride = null
 
 					for path, doc of docs
 						path = path.replace(/^\//, "") # Remove leading /
@@ -75,6 +76,10 @@ module.exports = ClsiManager =
 							content: doc.lines.join("\n")
 						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 							rootResourcePath = path
+						if settingsOverride.rootDoc_id? and doc._id.toString() == settingsOverride.rootDoc_id.toString()
+							rootResourcePathOverride = path
+
+					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
 
 					for path, file of files
 						path = path.replace(/^\//, "") # Remove leading /
