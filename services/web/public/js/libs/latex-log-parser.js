@@ -1,5 +1,12 @@
 define(function() {
-    var logWrapLimit = 79;
+    // Define some constants
+    var LOG_WRAP_LIMIT = 79;
+    var LATEX_WARNING_REGEX = /^LaTeX Warning: (.*)$/;
+    var HBOX_WARNING_REGEX = /^(Over|Under)full \\(v|h)box/;
+    var BIBER_WARNING_REGEX = /^Package biblatex Warning: (.*)$/;
+    var NATBIB_WARNING_REGEX = /^Package natbib Warning: (.*)$/;
+    // This is used to parse the line number from common latex warnings
+    var LINES_REGEX = /lines? ([0-9]+)/;
 
     var LogText = function(text) {
         this.text = text.replace(/(\r\n)|\r/g, "\n");
@@ -12,12 +19,12 @@ define(function() {
             // append this line to it.
             // Some lines end with ... when LaTeX knows it's hit the limit
             // These shouldn't be wrapped.
-            if (wrappedLines[i-1].length == logWrapLimit && wrappedLines[i-1].slice(-3) != "...") {
+            if (wrappedLines[i-1].length == LOG_WRAP_LIMIT && wrappedLines[i-1].slice(-3) != "...") {
                 this.lines[this.lines.length - 1] += wrappedLines[i];
             } else {
                 this.lines.push(wrappedLines[i]);
             }
-        };
+        }
 
         this.row = 0;
     };
@@ -59,7 +66,7 @@ define(function() {
     var state = {
         NORMAL : 0,
         ERROR  : 1
-    }
+    };
 
     var LatexParser = function(text, options) {
         this.log = new LogText(text);
@@ -91,9 +98,13 @@ define(function() {
                             raw         : this.currentLine + "\n"
                         }
                     } else if (this.currentLineIsWarning()) {
-                        this.parseWarningLine();
-                    } else if (this.currentLineIsHboxWarning()){
+                        this.parseSingleWarningLine(LATEX_WARNING_REGEX);
+                    } else if (this.currentLineIsHboxWarning()) {
                         this.parseHboxLine();
+                    } else if (this.currentLineIsBiberWarning()) {
+                        this.parseBiberWarningLine();
+                    } else if (this.currentLineIsNatbibWarning()) {
+                        this.parseSingleWarningLine(NATBIB_WARNING_REGEX);
                     } else {
                         this.parseParensForFilenames();
                     }
@@ -126,19 +137,27 @@ define(function() {
         };
 
         this.currentLineIsWarning = function() {
-            return !!(this.currentLine.match(/^LaTeX Warning: /));
+            return !!(this.currentLine.match(LATEX_WARNING_REGEX));
+        };
+
+        this.currentLineIsBiberWarning = function () {
+            return !!(this.currentLine.match(BIBER_WARNING_REGEX));
+        };
+
+        this.currentLineIsNatbibWarning = function () {
+            return !!(this.currentLine.match(NATBIB_WARNING_REGEX));
         };
 
         this.currentLineIsHboxWarning = function() {
-            return !!(this.currentLine.match(/^(Over|Under)full \\(v|h)box/));
+            return !!(this.currentLine.match(HBOX_WARNING_REGEX));
         };
 
-        this.parseWarningLine = function() {
-            var warningMatch = this.currentLine.match(/^LaTeX Warning: (.*)$/);
+        this.parseSingleWarningLine = function(prefix_regex) {
+            var warningMatch = this.currentLine.match(prefix_regex);
             if (!warningMatch) return;
             var warning = warningMatch[1];
 
-            var lineMatch = warning.match(/line ([0-9]+)/);
+            var lineMatch = warning.match(LINES_REGEX);
             var line = lineMatch ? parseInt(lineMatch[1], 10) : null;
 
             this.data.push({
@@ -150,8 +169,31 @@ define(function() {
             });
         };
 
+        this.parseBiberWarningLine = function() {
+            // Biber warnings are multiple lines, let's parse the first line
+            var warningMatch = this.currentLine.match(BIBER_WARNING_REGEX);
+            if (!warningMatch) return;  // Something strange happened, return early
+
+            // Now loop over the other output and just grab the message part
+            // Each line is prefiex with: (biblatex)
+            var warning_lines = [warningMatch[1]];
+            while (((this.currentLine = this.log.nextLine()) !== false) &&
+                (warningMatch = this.currentLine.match(/^\(biblatex\)[\s]+(.*)$/))) {
+                warning_lines.push(warningMatch[1])
+            }
+
+            var raw_message = warning_lines.join(' ');
+            this.data.push({
+                line    : null,  // Unfortunately, biber doesn't return a line number
+                file    : this.currentFilePath,
+                level   : "warning",
+                message : raw_message,
+                raw     : raw_message
+            });
+        };
+
         this.parseHboxLine = function() {
-            var lineMatch = this.currentLine.match(/lines? ([0-9]+)/);
+            var lineMatch = this.currentLine.match(LINES_REGEX);
             var line = lineMatch ? parseInt(lineMatch[1], 10) : null;
 
             this.data.push({
@@ -168,7 +210,7 @@ define(function() {
             var pos = this.currentLine.search(/\(|\)/);
 
             if (pos != -1) {
-                var token = this.currentLine[pos]
+                var token = this.currentLine[pos];
                 this.currentLine = this.currentLine.slice(pos + 1);
 
                 if (token == "(") {
@@ -229,7 +271,7 @@ define(function() {
         };
 
         this.postProcess = function(data) {
-            var all         = []
+            var all         = [];
             var errors      = [];
             var warnings    = [];
             var typesetting = [];
@@ -269,7 +311,7 @@ define(function() {
 
     LatexParser.parse = function(text, options) {
         return (new LatexParser(text, options)).parse()
-    }
+    };
 
     return LatexParser;
-})
+});
