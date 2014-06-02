@@ -49,9 +49,9 @@ module.exports =
 			if res.statusCode != 200
 				logger.err bucketName:bucketName, key:key, fsPath:fsPath, "non 200 response from s3 putting file"
 				return callback("non 200 response from s3 on put file")
-			#LocalFileWriter.deleteFile fsPath, (err)->
-			logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
-			callback(err)
+			LocalFileWriter.deleteFile fsPath, (err)->
+				logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
+				callback(err)
 		putEventEmiter.on "error", (err)->
 			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
@@ -101,9 +101,10 @@ module.exports =
 			callback(err)
 
 	deleteDirectory: (bucketName, key, _callback)->
+		# deleteMultiple can call the callback multiple times so protect against this.
 		callback = (args...) ->
-			logger.log key: key, bucketName: bucketName, args: args, "calling delete callback"
 			_callback(args...)
+			_callback = () ->
 
 		logger.log key: key, bucketName: bucketName, "deleting directory"
 		s3Client = knox.createClient
@@ -111,7 +112,6 @@ module.exports =
 			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.list prefix:key, (err, data)->
-			logger.log data: data, key: key, bucketName: bucketName, "got file list"
 			keys = _.map data.Contents, (entry)->
 				return entry.Key
 			s3Client.deleteMultiple keys, callback
