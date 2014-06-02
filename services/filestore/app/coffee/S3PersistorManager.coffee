@@ -111,6 +111,7 @@ module.exports =
 			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.list prefix:key, (err, data)->
+			logger.log data: data, key: key, bucketName: bucketName, "got file list"
 			keys = _.map data.Contents, (entry)->
 				return entry.Key
 			s3Client.deleteMultiple keys, callback
