@@ -102,7 +102,7 @@ module.exports =
 
 	deleteDirectory: (bucketName, key, _callback)->
 		callback = (args...) ->
-			logger.log key: key, bucketName: bucketName, "calling delete callback"
+			logger.log key: key, bucketName: bucketName, args: args, "calling delete callback"
 			_callback(args...)
 
 		logger.log key: key, bucketName: bucketName, "deleting directory"

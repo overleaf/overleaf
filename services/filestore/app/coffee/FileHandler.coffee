@@ -11,9 +11,9 @@ module.exports =
 
 	insertFile: (bucket, key, stream, callback)->
 		convetedKey = KeyBuilder.getConvertedFolderKey(key)
-		PersistorManager.deleteDirectory bucket, convetedKey, ->
-			PersistorManager.sendStream bucket, key, stream, ->
-				callback()
+		PersistorManager.deleteDirectory bucket, convetedKey, (error) ->
+			return callback(error) if error?
+			PersistorManager.sendStream bucket, key, stream, callback
 
 	deleteFile: (bucket, key, callback)->
 		convetedKey = KeyBuilder.getConvertedFolderKey(bucket, key)
