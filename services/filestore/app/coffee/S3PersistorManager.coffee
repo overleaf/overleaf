@@ -49,9 +49,9 @@ module.exports =
 			if res.statusCode != 200
 				logger.err bucketName:bucketName, key:key, fsPath:fsPath, "non 200 response from s3 putting file"
 				return callback("non 200 response from s3 on put file")
-			LocalFileWriter.deleteFile fsPath, (err)->
-				logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
-				callback(err)
+			#LocalFileWriter.deleteFile fsPath, (err)->
+			logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
+			callback(err)
 		putEventEmiter.on "error", (err)->
 			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
@@ -100,7 +100,12 @@ module.exports =
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong deleting file in aws"
 			callback(err)
 
-	deleteDirectory: (bucketName, key, callback)->
+	deleteDirectory: (bucketName, key, _callback)->
+		callback = (args...) ->
+			logger.log key: key, bucketName: bucketName, "calling delete callback"
+			_callback(args...)
+
+		logger.log key: key, bucketName: bucketName, "deleting directory"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key
 			secret: settings.filestore.s3.secret
