@@ -16,10 +16,19 @@ SecurityManager = require("../../managers/SecurityManager")
 
 module.exports =
 
-	deleteProject: (req, res)->
+	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
-		logger.log project_id:project_id, "recived request to delete project"
-		projectDeleter.deleteProject project_id, (err)->
+		logger.log project_id:project_id, "received request to delete project"
+		projectDeleter.archiveProject project_id, (err)->
+			if err?
+				res.send 500
+			else
+				res.send 200
+
+	restoreProject: (req, res) ->
+		project_id = req.params.Project_id
+		logger.log project_id:project_id, "received request to restore project"
+		projectDeleter.restoreProject project_id, (err)->
 			if err?
 				res.send 500
 			else
@@ -73,8 +82,6 @@ module.exports =
 		timer = new metrics.Timer("project-list")
 		user_id = req.session.user._id
 		async.parallel {
-			subscription: (cb)->
-				SubscriptionLocator.getUsersSubscription user_id, cb
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
 			projects: (cb)->
@@ -84,10 +91,17 @@ module.exports =
 					logger.err err:err, "error getting data for project list page"
 					return res.send 500
 				logger.log results:results, user_id:user_id, "rendering project list"
-				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1], results.subscription?[0]
+				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1]
 				res.render 'project/list', viewModel
 				timer.done()
 
+	archivedProjects: (req, res, next)->
+		user_id = req.session.user._id
+		projectDeleter.findArchivedProjects user_id, 'name lastUpdated publicAccesLevel', (error, projects) ->
+			return next(error) if error?
+			logger.log projects: projects, user_id:user_id, "rendering archived project list"
+			viewModel = _buildListViewModel projects, [], [], [], {}
+			res.render 'project/archived', viewModel
 
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
@@ -166,7 +180,6 @@ module.exports =
 					languages: Settings.languages
 					timer.done()
 
-
 defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id
 	ace:
@@ -183,15 +196,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 		dropbox: false
 		trackChanges: false
 
-
-
-_buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGroupedByProject, subscription)->
-	# TODO: Remove this one month after the ability to start free trials was removed
-	if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
-		freeTrial =
-			expired: !!subscription.freeTrial.downgraded
-			expiresAt: SubscriptionFormatters.formatDate(subscription.freeTrial.expiresAt)
-
+_buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGroupedByProject)->
 	for project in projects
 		project.accessLevel = "owner"
 	for project in collabertions
@@ -211,7 +216,6 @@ _buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGrou
 		title:'Your Projects'
 		priority_title: true
 		projects: sortedProjects
-		freeTrial: freeTrial
 		tags:tags
 		projectTabActive: true
 	}

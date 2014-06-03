@@ -20,8 +20,7 @@ module.exports =
 		logger.log owner_id:owner_id, "deleting users projects"
 		Project.remove owner_ref:owner_id, callback
 
-
-	deleteProject: (project_id, callback = (error) ->)->
+	archiveProject: (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "deleting project"
 		Project.findById project_id, (err, project)=>
 			if err? or !project?
@@ -48,3 +47,12 @@ module.exports =
 					if err?
 						logger.err err:err, "problem deleting project"
 					callback(err)
+
+	restoreProject: (project_id, callback = (error) ->) ->
+		Project.update {_id:project_id}, { $unset: { archived: true }}, callback
+
+	findArchivedProjects: (owner_id, fields, callback = (error, projects) ->) ->
+		Project.find {
+			owner_ref: owner_id
+			archived: true
+		}, fields, callback

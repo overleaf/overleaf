@@ -124,23 +124,6 @@ block content
 									a(href="/learn") help guides
 									| .
 
-
-
-			if freeTrial && freeTrial.expired == false
-				.row-fluid
-					.span12
-						.alert.alert-info.alert-free-trial
-							p You are currently using a free trial which expires on #{freeTrial.expiresAt}. 
-							p
-								a(href="/user/subscription").btn.btn-primary Upgrade now 
-			if freeTrial && freeTrial.expired == true
-				.row-fluid
-					.span12
-						.alert.alert-danger.alert-free-trial
-							p Your free trial has expired! Upgrade now to continue using ShareLaTeX uninterrupted.
-							p 
-								a(href="/user/subscription").btn.btn-danger Upgrade now 
-
 		include ../general/small-footer
 	script(type="text/template")#tagTemplate
 		mixin tag('{{ project_id }}', '{{ tagName }}', true)

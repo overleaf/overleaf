@@ -169,6 +169,18 @@ require [
 		$modal.find('.cancel').click (e)->
 			$modal.modal('hide')
 
+	$('.restoreProject').click (event) ->
+		event.preventDefault()
+
+		id = $(@).data("id")
+		$.ajax
+			url: @href
+			type: 'POST'
+			data:
+				_csrf: $(@).data("csrf")
+			success: (data)->
+				$("##{id}").fadeOut(1000)
+
 	newProject = (template, fileToOpen) ->
 		$modal = $('#newProjectModal')
 		$confirm = $('#confirmNewProject')

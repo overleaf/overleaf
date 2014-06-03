@@ -56,17 +56,17 @@ describe 'Project deleter', ->
 				done()
 
 
-	describe "deleteProject", ->
+	describe "archiveProject", ->
 		beforeEach ->
 			@Project.update.callsArgWith(2)
 
 		it "should flushProjectToMongoAndDelete in doc updater", (done)->
-			@deleter.deleteProject @project_id, =>
+			@deleter.archiveProject @project_id, =>
 				@documentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal true
 				done()
 
 		it "should remove the project", (done)->
-			@deleter.deleteProject @project_id, =>
+			@deleter.archiveProject @project_id, =>
 				@Project.update.calledWith({
 					_id:@project_id
 				}, {
@@ -75,7 +75,7 @@ describe 'Project deleter', ->
 				done()
 
 		it "should removeProjectFromAllTags", (done)->
-			@deleter.deleteProject @project_id, =>
+			@deleter.archiveProject @project_id, =>
 				@TagsHandler.removeProjectFromAllTags.calledWith(@project.owner_ref, @project_id).should.equal true
 				@TagsHandler.removeProjectFromAllTags.calledWith(@project.collaberator_refs[0], @project_id).should.equal true
 				@TagsHandler.removeProjectFromAllTags.calledWith(@project.collaberator_refs[1], @project_id).should.equal true
@@ -83,4 +83,33 @@ describe 'Project deleter', ->
 				@TagsHandler.removeProjectFromAllTags.calledWith(@project.readOnly_refs[1], @project_id).should.equal true
 
 				done()
+
+	describe "restoreProject", ->
+		beforeEach ->
+			@Project.update.callsArgWith(2)
+
+		it "should unset the archive attribute", (done)->
+			@deleter.restoreProject @project_id, =>
+				@Project.update.calledWith({
+					_id: @project_id
+				}, {
+					$unset: { archived: true }
+				}).should.equal true
+				done()
+
+	describe "findArchivedProjects", ->
+		beforeEach ->
+			@projects = ["mock-project"]
+			@owner_id = "mock-owner-id"
+			@callback = sinon.stub()
+			@Project.find = sinon.stub().callsArgWith(2, null, @projects)
+			@deleter.findArchivedProjects @owner_id, @fields = "name lastModified", @callback
+
+		it "should find the archived projects for the owner", ->
+			@Project.find
+				.calledWith(owner_ref: @owner_id, archived: true, @fields)
+				.should.equal true
+
+		it "should return the projects", ->
+			@callback.calledWith(null, @projects).should.equal true
 

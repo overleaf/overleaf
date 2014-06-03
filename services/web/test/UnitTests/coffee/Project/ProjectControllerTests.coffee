@@ -18,7 +18,9 @@ describe "ProjectController", ->
 					url:"chat.com"
 			siteUrl: "mysite.com"
 		@ProjectDeleter = 
-			deleteProject: sinon.stub().callsArgWith(1)
+			archiveProject: sinon.stub().callsArgWith(1)
+			restoreProject: sinon.stub().callsArgWith(1)
+			findArchivedProjects: sinon.stub()
 		@ProjectDuplicator =
 			duplicate: sinon.stub().callsArgWith(3, null, {_id:@project_id})
 		@ProjectCreationHandler =
@@ -68,18 +70,22 @@ describe "ProjectController", ->
 				jsPath:"js path here"
 
 	describe "deleteProject", ->
-
 		it "should tell the project deleter", (done)->
-
 			@res.send = (code)=>
-				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
+				@ProjectDeleter.archiveProject.calledWith(@project_id).should.equal true
 				code.should.equal 200
 				done()
 			@ProjectController.deleteProject @req, @res
 
+	describe "restoreProject", ->
+		it "should tell the project deleter", (done)->
+			@res.send = (code)=>
+				@ProjectDeleter.restoreProject.calledWith(@project_id).should.equal true
+				code.should.equal 200
+				done()
+			@ProjectController.restoreProject @req, @res
 
 	describe "cloneProject", ->
-
 		it "should call the project duplicator", (done)->	
 			@res.send = (json)=>
 				@ProjectDuplicator.duplicate.calledWith(@user, @project_id, @projectName).should.equal true
@@ -134,6 +140,23 @@ describe "ProjectController", ->
 				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
 				done()
 			@ProjectController.projectListPage @req, @res
+
+	describe "archivedProjects", ->
+		beforeEach ->
+			@projects = [{lastUpdated:1, _id:1}, {lastUpdated:2, _id:2}]
+			@ProjectDeleter.findArchivedProjects.callsArgWith(2, null, @projects)
+
+		it "should render the project/archived page", (done)->
+			@res.render = (pageName, opts)=>
+				pageName.should.equal "project/archived"
+				done()
+			@ProjectController.archivedProjects @req, @res
+
+		it "should send the projects", (done)->
+			@res.render = (pageName, opts)=>
+				opts.projects.length.should.equal (@projects.length)
+				done()
+			@ProjectController.archivedProjects @req, @res
 
 	describe "renameProject", ->
 		beforeEach ->

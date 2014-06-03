@@ -92,6 +92,7 @@ module.exports = class Router
 		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
 		
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
+		app.get  '/project/archived', AuthenticationController.requireLogin(), ProjectController.archivedProjects
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
 		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
@@ -115,7 +116,8 @@ module.exports = class Router
 
 
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
-		app.post  '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
+		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
+		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
 
 		app.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
 
