@@ -152,10 +152,10 @@
 
 .navbar-brand {
   float: left;
-  padding: @navbar-padding-vertical @navbar-padding-horizontal;
-  font-size: @font-size-large;
+  //padding: @navbar-padding-vertical @navbar-padding-horizontal;
+  //font-size: @font-size-large;
   line-height: @line-height-computed;
-  height: @navbar-height;
+  //height: @navbar-height;
 
   &:hover,
   &:focus {
@@ -180,28 +180,16 @@
   position: relative;
   float: right;
   margin-right: @navbar-padding-horizontal;
-  padding: 9px 10px;
   .navbar-vertical-align(34px);
   background-color: transparent;
   background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
-  border: 1px solid transparent;
+  border: 2px solid @navbar-default-link-color;
   border-radius: @border-radius-base;
 
   // We remove the `outline` here, but later compensate by attaching `:hover`
   // styles to `:focus`.
   &:focus {
     outline: none;
-  }
-
-  // Bars
-  .icon-bar {
-    display: block;
-    width: 22px;
-    height: 2px;
-    border-radius: 1px;
-  }
-  .icon-bar + .icon-bar {
-    margin-top: 4px;
   }
 
   @media (min-width: @grid-float-breakpoint) {
@@ -379,7 +367,6 @@
 .navbar-default {
   background-color: @navbar-default-bg;
   border-color: @navbar-default-border;
-  height: 73px;
   padding: 1rem 2rem;
 
   .navbar-brand {
@@ -399,7 +386,7 @@
     > li > a {
       color: @navbar-default-link-color;
       border: 2px solid @navbar-default-link-color;
-      border-radius: 3px;
+      border-radius: @border-radius-base;
       font-size: @font-size-base * .8;
       font-weight: 700;
       line-height: 1;
@@ -433,12 +420,12 @@
 
   .navbar-toggle {
     border-color: @navbar-default-toggle-border-color;
+    color: @navbar-default-link-color;
     &:hover,
     &:focus {
       background-color: @navbar-default-toggle-hover-bg;
-    }
-    .icon-bar {
-      background-color: @navbar-default-toggle-icon-bar-bg;
+      border-color: @navbar-default-toggle-hover-bg;
+      color: #fff;
     }
   }
 
