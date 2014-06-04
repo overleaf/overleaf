@@ -30,7 +30,7 @@ block content
 
 	script(src='/socket.io/socket.io.js')
 
-	script(type='text/javascript')
+	script(type='text/javascript').
 		window.sharelatex = !{sharelatexObject};
 		window.userSettings = !{userSettingsObject};
 		window.user = !{userObject};
@@ -56,7 +56,7 @@ block content
 			}
 		};
 
-	script(type='text/javascript')
+	script(type='text/javascript').
 		ga('send', 'event', 'editor-interaction', 'editor-opened')
 
 	- locals.supressDefaultJs = true
@@ -73,7 +73,7 @@ block content
 	)
 
 	- if (!anonymous)
-		script(type="text/javascript")
+		script(type="text/javascript").
 			var chatReq = require.config({
 				context: "chat",
 				baseUrl: "#{chatUrl}/chat"

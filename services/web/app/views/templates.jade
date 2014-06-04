@@ -269,23 +269,23 @@
 					th Privileges
 					th
 			tbody
-		{{#showAdminControls}}
+		!= '{{#showAdminControls}}'
 		form.well.form-inline.addUserForm
 			input(type="email",placeholder="someone@email.com")#newEmail.email.input-large
 			select.privileges.input-medium
 				option(value="readAndWrite") Read and write
 				option(value="readOnly") Read Only
 			button.btn.btn-primary.addUser Add New Collaborator
-		{{/showAdminControls}}
+		!= '{{/showAdminControls}}'
 
 	script(type="text/template")#projectMemberListItemTemplate
 		tr.projectMember
-			td.email {{ email }}
-			td.privileges {{ privileges }}
+			td.email!= '{{ email }}'
+			td.privileges!= '{{ privileges }}'
 			td
-				{{#showRemove}}
+				!= '{{#showRemove}}'
 				button(href="#").btn.btn-danger.removeUser Remove
-				{{/showRemove}}
+				!= '{{/showRemove}}'
 
 	script(type="text/template")#socialSharingTemplate
 		.box
@@ -350,99 +350,15 @@
 			#socialSharing
 			#publishProject
 
-	script(type="text/template")#historyPanelTemplate
-		#revisionHistoryArea.fullEditorArea
-
-	script(type='text/template')#revisionAreaTemplate
-		#historyAreaWrapper
-			#historySideBar
-				.take-snapshot-wrapper
-					a#take-snapshot.btn.btn-primary Take Snapshot
-				#versionListArea
-			#diffViewArea
-		#enableVersioningMessage
-			.message History is not yet enabled for this project.
-			a.btn.btn-primary.btn-large#enableVersioning Enable history
-	
-
-	script(type='text/template')#snapshotCommentTemplate
-		input(type="text", placeholder="Snapshot comment")#snapshotComment
-
-	script(type='text/template')#diffTemplate
-		.diffView
-			h2 {{ message }}
-			.date {{ date }}
-
-	script(type='text/template')#fileDiffTemplate
-		.fileHeader
-			{{#diff}}
-			{{^deleted}}
-			ul.nav.nav-pills.pull-right
-				li.active
-					a(href="#diff-{{id}}", data-toggle="pill").diff Diff
-				li
-					a(href="#raw-{{id}}", data-toggle="pill").raw Raw
-			{{/deleted}}
-			{{/diff}}
-			h3(class="{{headerClass}}") {{path}}
-			{{#moved}}
-			.fileMoved Moved to {{newPath}}
-			{{/moved}}
-		{{#diff}}
-		.tab-content
-			.tab-pane.active.tab-diff(id="diff-{{id}}")
-				{{#sections}}
-				table.sectionDiff
-					{{#lines}}
-					tr(class="line {{type}}")
-						{{#added}}
-						td.old_line_number
-						td.new_line_number {{new_number}}
-						td.symbol +
-						{{/added}}
-						{{#removed}}
-						td.old_line_number {{old_number}}
-						td.new_line_number
-						td.symbol -
-						{{/removed}}
-						{{#unchanged}}
-						td.old_line_number {{old_number}}
-						td.new_line_number {{new_number}}
-						td.symbol
-						{{/unchanged}}
-						td.content {{content}}
-					{{/lines}}
-				.sectionSeparator
-				{{/sections}}
-			.tab-pane.tab-raw(id="raw-{{id}}")
-				pre.rawFileContent Loading...
-		{{/diff}}
-		{{#binary}}
-		{{^deleted}}
-		.binaryFileDiff 
-			a(href="{{url}}",target="_blank").rawFileLink View this version of the file
-		{{/deleted}}
-		{{/binary}}
-
-	script(type='text/template')#versionListItemTemplate
-		a(href="#")
-			div(class='version-message') {{message}}
-			div(class='version-date') {{date}} 
-
-	script(type='text/template')#versionListTemplate
-		ul#version-list.nav.nav-pills.nav-stacked
-			li.loading Loading...
-			li.empty-message You don't have any versions yet!
-
 	script(type='text/template')#fileViewTemplate
-		{{#image}}
+		!= '{{#image}}'
 		div
 			img(src='{{ previewUrl }}')
-		{{/image}}
-		{{^image}}
+		!= '{{/image}}'
+		!= '{{^image}}'
 		.no-preview No preview available :(
-		{{/image}}
-		a(href='{{ downloadUrl }}', target="_blank").download.btn.btn-large Download {{ name }}
+		!= '{{/image}}'
+		a(href='{{ downloadUrl }}', target="_blank").download.btn.btn-large!= 'Download {{ name }}'
 
 	script(type='text/template')#hotKeysLinkTemplate
 		div
