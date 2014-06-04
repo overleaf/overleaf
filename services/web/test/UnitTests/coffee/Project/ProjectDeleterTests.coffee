@@ -55,6 +55,22 @@ describe 'Project deleter', ->
 				@Project.remove.calledWith(owner_ref:user_id).should.equal true
 				done()
 
+	describe "deleteProject", ->
+		beforeEach (done) ->
+			@project_id = "mock-project-id-123"
+			@deleter.archiveProject = sinon.stub().callsArg(1)
+
+			@deleter.deleteProject @project_id, done
+
+		it "should archive the project to clean it up", ->
+			@deleter.archiveProject
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should remove the project from Mongo", ->
+			@Project.remove
+				.calledWith(_id: @project_id)
+				.should.equal true
 
 	describe "archiveProject", ->
 		beforeEach ->

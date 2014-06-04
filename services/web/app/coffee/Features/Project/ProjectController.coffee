@@ -18,8 +18,15 @@ module.exports =
 
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
-		logger.log project_id:project_id, "received request to delete project"
-		projectDeleter.archiveProject project_id, (err)->
+		forever    = req.query?.forever?
+		logger.log project_id: project_id, forever: forever, "received request to delete project"
+
+		if forever
+			doDelete = projectDeleter.deleteProject
+		else
+			doDelete = projectDeleter.archiveProject
+
+		doDelete project_id, (err)->
 			if err?
 				res.send 500
 			else

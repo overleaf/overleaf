@@ -18,8 +18,9 @@ describe "ProjectController", ->
 					url:"chat.com"
 			siteUrl: "mysite.com"
 		@ProjectDeleter = 
-			archiveProject: sinon.stub().callsArgWith(1)
-			restoreProject: sinon.stub().callsArgWith(1)
+			archiveProject: sinon.stub().callsArg(1)
+			deleteProject: sinon.stub().callsArg(1)
+			restoreProject: sinon.stub().callsArg(1)
 			findArchivedProjects: sinon.stub()
 		@ProjectDuplicator =
 			duplicate: sinon.stub().callsArgWith(3, null, {_id:@project_id})
@@ -70,9 +71,17 @@ describe "ProjectController", ->
 				jsPath:"js path here"
 
 	describe "deleteProject", ->
-		it "should tell the project deleter", (done)->
+		it "should tell the project deleter to archive when forever=false", (done)->
 			@res.send = (code)=>
 				@ProjectDeleter.archiveProject.calledWith(@project_id).should.equal true
+				code.should.equal 200
+				done()
+			@ProjectController.deleteProject @req, @res
+
+		it "should tell the project deleter to delete when forever=true", (done)->
+			@req.query = forever: "true"
+			@res.send = (code)=>
+				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
 				code.should.equal 200
 				done()
 			@ProjectController.deleteProject @req, @res

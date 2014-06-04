@@ -5,8 +5,10 @@ block content
 		-each project in projects
 			- project_id = project._id.toString()
 			.project_entry(id=project_id)
-				.btn-group.project-actions
+				.project-actions
 					a.btn(href='/project/'+project_id+'/restore', data-csrf=csrfToken, data-id=project_id).restoreProject Restore
+					|  
+					a.btn.btn-danger(href='/project/'+project_id+'?forever=true', data-csrf=csrfToken, data-name=project.name, data-id=project_id).deleteProject Delete Forever
 				.projectName #{project.name}
 
 	include ../general/sidebar

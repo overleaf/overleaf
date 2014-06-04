@@ -33,7 +33,7 @@ block content
 							li
 								a(href='/project/'+project_id+'/rename', data-name=project.name, data-id=project_id, data-csrf=csrfToken).renameProject Rename
 							li
-								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).deleteProject Delete
+								a(href='/project/'+project_id, 			data-name=project.name, data-id=project_id, data-csrf=csrfToken).archiveProject Delete
 						-else
 							li
 								a(href='/project/'+project_id+'/leave', data-name=project.name, data-id=project_id, data-csrf=csrfToken).leaveProject Leave

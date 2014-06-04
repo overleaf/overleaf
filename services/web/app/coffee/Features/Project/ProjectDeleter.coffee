@@ -5,7 +5,7 @@ tagsHandler = require("../Tags/TagsHandler")
 async = require("async")
 FileStoreHandler = require("../FileStore/FileStoreHandler")
 
-module.exports =
+module.exports = ProjectDeleter =
 
 	markAsDeletedByExternalSource : (project_id, callback)->
 		logger.log project_id:project_id, "marking project as deleted by external data source"
@@ -19,6 +19,12 @@ module.exports =
 	deleteUsersProjects: (owner_id, callback)->
 		logger.log owner_id:owner_id, "deleting users projects"
 		Project.remove owner_ref:owner_id, callback
+
+	deleteProject: (project_id, callback = (error) ->) ->
+		# archiveProject takes care of the clean-up
+		ProjectDeleter.archiveProject project_id, (error) ->
+			logger.log project_id: project_id, "deleting project"
+			Project.remove _id: project_id, callback
 
 	archiveProject: (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "deleting project"

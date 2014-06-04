@@ -1,4 +1,4 @@
-#deleteEntityModal(style='display: none')
+#archiveEntityModal(style='display: none')
 	.modal
 		.modal-header
 			h3 Delete Project
@@ -6,6 +6,21 @@
 			span.message Are you sure you want to delete 
 				strong.name Project
 				| ?
+		.modal-footer
+			button.btn.btn-danger.confirm Delete
+			button.btn.cancel No
+
+#deleteEntityModal(style='display: none')
+	.modal
+		.modal-header
+			h3 Delete Project
+		.modal-body
+			p Are you sure you want to delete 
+				strong.name Project
+				| ? 
+
+			p
+				strong It will not be possible to recover your project once deleted.
 		.modal-footer
 			button.btn.btn-danger.confirm Delete Forever
 			button.btn.cancel No

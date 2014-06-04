@@ -79,6 +79,35 @@ require [
 		$modal.find('.cancel').click (e)->
 			$modal.modal('hide')
 
+	$('.archiveProject').click (event)->
+		event.preventDefault()
+		$modal = $('#archiveEntityModal')
+		$confirm = $modal.find('.confirm')
+		$modal.modal({backdrop:true, show:true, keyboard:true})
+		name = $(@).data("name")
+		id = $(@).data("id")
+
+		$modal.find(".name").text(name)
+
+		href = this.href
+		self = @
+		$confirm.on 'click', (e) =>
+			$.ajax
+				url: href
+				type:'DELETE'
+				data:
+					_csrf: $(@).data("csrf")
+				success: (data)->
+					$modal.modal('hide')
+					if data.message
+						new Message data
+					else
+						$("##{id}").fadeOut(1000)
+		$modal.on 'hide', ->
+			$confirm.off 'click'
+		$modal.find('.cancel').click (e)->
+			$modal.modal('hide')
+
 	$('.renameProject').click (event)->
 		event.preventDefault()
 		$modal = $('#renameProjectModal')
