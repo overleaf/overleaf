@@ -152,13 +152,22 @@ module.exports = ProjectEntityHandler =
 
 	replaceFile: (project_or_id, file_id, fsPath, callback)->
 		Project.getProject project_or_id, "", (err, project) ->
+			return callback(err) if err?
 			findOpts = 
 				project_id:project._id
 				element_id:file_id
 				type:"file"
-			projectLocator.findElement findOpts, (err, fileRef, path)=>
-				FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, fsPath, (err)->
+			FileStoreHandler.uploadFileFromDisk project._id, file_id, fsPath, (err)->
+				return callback(err) if err?
+				# Note there is a potential race condition here (and elsewhere)
+				# If the file tree changes between findElement and the Project.update
+				# then the path to the file element will be out of date. In practice
+				# this is not a problem so long as we do not do anything longer running
+				# between them (like waiting for the file to upload.)
+				projectLocator.findElement findOpts, (err, fileRef, path)=>
+					return callback(err) if err?
 					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, "sl_req_id_here", (error) ->
+						return callback(err) if err?
 						conditons = _id:project._id
 						inc = {}
 						inc["#{path.mongo}.rev"] = 1
