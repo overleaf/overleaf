@@ -12,7 +12,7 @@
   position: relative;
   min-height: @navbar-height; // Ensure a navbar always shows (e.g., without a .navbar-brand in collapsed mode)
   margin-bottom: @navbar-margin-bottom;
-  border: 1px solid transparent;
+  border-bottom: 1px solid transparent;
 
   // Prevent floats from breaking the navbar
   &:extend(.clearfix all);
@@ -379,6 +379,8 @@
 .navbar-default {
   background-color: @navbar-default-bg;
   border-color: @navbar-default-border;
+  height: 73px;
+  padding: 1rem 2rem;
 
   .navbar-brand {
     color: @navbar-default-brand-color;
@@ -396,11 +398,19 @@
   .navbar-nav {
     > li > a {
       color: @navbar-default-link-color;
+      border: 2px solid @navbar-default-link-color;
+      border-radius: 3px;
+      font-size: @font-size-base * .8;
+      font-weight: 700;
+      line-height: 1;
+      margin-left: 1rem;
+      padding: 10px 10px 11px;
 
       &:hover,
       &:focus {
-        color: @navbar-default-link-hover-color;
+        color: #fff;
         background-color: @navbar-default-link-hover-bg;
+        border: 2px solid @navbar-default-link-hover-color;
       }
     }
     > .active > a {
@@ -489,127 +499,6 @@
     color: @navbar-default-link-color;
     &:hover {
       color: @navbar-default-link-hover-color;
-    }
-  }
-
-}
-
-// Inverse navbar
-
-.navbar-inverse {
-  background-color: @navbar-inverse-bg;
-  border-color: @navbar-inverse-border;
-
-  .navbar-brand {
-    color: @navbar-inverse-brand-color;
-    &:hover,
-    &:focus {
-      color: @navbar-inverse-brand-hover-color;
-      background-color: @navbar-inverse-brand-hover-bg;
-    }
-  }
-
-  .navbar-text {
-    color: @navbar-inverse-color;
-  }
-
-  .navbar-nav {
-    > li > a {
-      color: @navbar-inverse-link-color;
-
-      &:hover,
-      &:focus {
-        color: @navbar-inverse-link-hover-color;
-        background-color: @navbar-inverse-link-hover-bg;
-      }
-    }
-    > .active > a {
-      &,
-      &:hover,
-      &:focus {
-        color: @navbar-inverse-link-active-color;
-        background-color: @navbar-inverse-link-active-bg;
-      }
-    }
-    > .disabled > a {
-      &,
-      &:hover,
-      &:focus {
-        color: @navbar-inverse-link-disabled-color;
-        background-color: @navbar-inverse-link-disabled-bg;
-      }
-    }
-  }
-
-  // Darken the responsive nav toggle
-  .navbar-toggle {
-    border-color: @navbar-inverse-toggle-border-color;
-    &:hover,
-    &:focus {
-      background-color: @navbar-inverse-toggle-hover-bg;
-    }
-    .icon-bar {
-      background-color: @navbar-inverse-toggle-icon-bar-bg;
-    }
-  }
-
-  .navbar-collapse,
-  .navbar-form {
-    border-color: darken(@navbar-inverse-bg, 7%);
-  }
-
-  // Dropdowns
-  .navbar-nav {
-    > .open > a {
-      &,
-      &:hover,
-      &:focus {
-        background-color: @navbar-inverse-link-active-bg;
-        color: @navbar-inverse-link-active-color;
-      }
-    }
-
-    @media (max-width: @grid-float-breakpoint-max) {
-      // Dropdowns get custom display
-      .open .dropdown-menu {
-        > .dropdown-header {
-          border-color: @navbar-inverse-border;
-        }
-        .divider {
-          background-color: @navbar-inverse-border;
-        }
-        > li > a {
-          color: @navbar-inverse-link-color;
-          &:hover,
-          &:focus {
-            color: @navbar-inverse-link-hover-color;
-            background-color: @navbar-inverse-link-hover-bg;
-          }
-        }
-        > .active > a {
-          &,
-          &:hover,
-          &:focus {
-            color: @navbar-inverse-link-active-color;
-            background-color: @navbar-inverse-link-active-bg;
-          }
-        }
-        > .disabled > a {
-          &,
-          &:hover,
-          &:focus {
-            color: @navbar-inverse-link-disabled-color;
-            background-color: @navbar-inverse-link-disabled-bg;
-          }
-        }
-      }
-    }
-  }
-
-  .navbar-link {
-    color: @navbar-inverse-link-color;
-    &:hover {
-      color: @navbar-inverse-link-hover-color;
     }
   }
 

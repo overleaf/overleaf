@@ -1,5 +1,5 @@
 define [
-	"libs/bootstrap/bootstrap2full"
+	"libs/bootstrap"
 	"forms"
 ], ()->
 	$(document).ready ()->

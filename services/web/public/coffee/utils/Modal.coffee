@@ -1,7 +1,7 @@
 define [
 	"libs/backbone"
 	"libs/mustache"
-	"libs/bootstrap/bootstrap2full"
+	"libs/bootstrap"
 ], () ->
 	Modal = Backbone.View.extend {
 		templates:

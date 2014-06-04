@@ -1,39 +1,31 @@
-nav.navbar.navbar-fixed-top.navbar-default
+nav.navbar.navbar-default
 	.container-fluid
 		.navbar-header
+			button.navbar-toggle(data-toggle="collapse",data-target="#navbar-collapse")
+				i.fa.fa-bars
 			a(href='/').navbar-brand ShareLaTeX
 
-		.navbar-collapse.collapse
-			ul.nav.navbar-nav
+		.navbar-collapse.collapse#navbar-collapse
+			ul.nav.navbar-nav.navbar-right
 				-if(session && session.user)
 					li
 						a(href='/project') Projects
-				-if(typeof(tenderUrl) != "undefined")
-					li
-						a.js-tender-widget(href='#') Support &amp; Feedback
-					li
-						a(href='/help') Help
-				li
-					a(href='/blog') Blog
-				li
-					a(href='/templates')#templatesLink LaTeX Templates
-				- if (settings.enableSubscriptions)
-					li.nav-collapse
-						a(href='/user/subscription/plans')#plansLink Plans &amp; Pricing
-				li.dropdown.nav-collapse
-					a.dropdown-toggle(href='#',data-toggle="dropdown") Info
+
+				li.dropdown
+					a.dropdown-toggle(href='#',data-toggle="dropdown")
+						| Help 
 						b.caret
 					ul.dropdown-menu
-						li.nav-collapse
-							a(href="/learn")#learnLink LaTeX help guide
-						li.nav-collapse
-							a(href='/resources')#resourcesLink LaTeX Resources
-						li.nav-collapse
-							a(href='/about')#aboutUsLink About Us
-			ul.nav.navbar-nav.navbar-right
+						li
+							a(href='/learn') Documentation
+						-if(typeof(tenderUrl) != "undefined")
+							li
+								a.js-tender-widget(href='#') Contact
+
 				-if(session && session.user)
 					li.dropdown
-						a.dropdown-toggle(href="#",data-toggle="dropdown") Account
+						a.dropdown-toggle(href="#",data-toggle="dropdown")
+							| Account 
 							b.caret
 						ul.dropdown-menu
 							li

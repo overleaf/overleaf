@@ -1,7 +1,7 @@
 require [
 	"libs/jquery.validate"
 	"libs/fineuploader"
-	"libs/bootstrap/bootstrap2full"
+	"libs/bootstrap"
 ], ()->
 
 	$().ready ->
