@@ -21,7 +21,7 @@ for path in [
     "#{jsPath}list.js",
     "#{jsPath}libs/pdf.js",
     "#{jsPath}libs/pdf.worker.js",
-    "/stylesheets/mainStyle.css",
+    "/stylesheets/style.css",
     "/brand/plans.css"
 ]
 	filePath = Path.join __dirname, "../../../", "public#{path}"

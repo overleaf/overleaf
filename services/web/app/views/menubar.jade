@@ -1,49 +1,51 @@
-.navbar.navbar-fixed-top.navbar-inverse
-	.navbar-inner
-		.container-fluid
-				a(href='/').brand ShareLaTeX
-				ul.nav
-					-if(session && session.user)
-						li
-							a(href='/project') Projects
-					-if(typeof(tenderUrl) != "undefined")
-						li
-							a.js-tender-widget(href='#') Support &amp; Feedback
-						li.nav-collapse
-							a(href='/help') Help
-					li.nav-collapse#blogLink
-						a(href='/blog') Blog
+nav.navbar.navbar-fixed-top.navbar-default
+	.container-fluid
+		.navbar-header
+			a(href='/').navbar-brand ShareLaTeX
+
+		.navbar-collapse.collapse
+			ul.nav.navbar-nav
+				-if(session && session.user)
+					li
+						a(href='/project') Projects
+				-if(typeof(tenderUrl) != "undefined")
+					li
+						a.js-tender-widget(href='#') Support &amp; Feedback
+					li
+						a(href='/help') Help
+				li
+					a(href='/blog') Blog
+				li
+					a(href='/templates')#templatesLink LaTeX Templates
+				- if (settings.enableSubscriptions)
 					li.nav-collapse
-						a(href='/templates')#templatesLink LaTeX Templates
-					- if (settings.enableSubscriptions)
+						a(href='/user/subscription/plans')#plansLink Plans &amp; Pricing
+				li.dropdown.nav-collapse
+					a.dropdown-toggle(href='#',data-toggle="dropdown") Info
+						b.caret
+					ul.dropdown-menu
 						li.nav-collapse
-							a(href='/user/subscription/plans')#plansLink Plans &amp; Pricing
-					li.dropdown.nav-collapse
-						a.dropdown-toggle(href='#',data-toggle="dropdown") Info
+							a(href="/learn")#learnLink LaTeX help guide
+						li.nav-collapse
+							a(href='/resources')#resourcesLink LaTeX Resources
+						li.nav-collapse
+							a(href='/about')#aboutUsLink About Us
+			ul.nav.navbar-nav.navbar-right
+				-if(session && session.user)
+					li.dropdown
+						a.dropdown-toggle(href="#",data-toggle="dropdown") Account
 							b.caret
 						ul.dropdown-menu
-							li.nav-collapse
-								a(href="/learn")#learnLink LaTeX help guide
-							li.nav-collapse
-								a(href='/resources')#resourcesLink LaTeX Resources
-							li.nav-collapse
-								a(href='/about')#aboutUsLink About Us
-				ul.nav.pull-right
-					-if(session && session.user)
-						li.dropdown
-							a.dropdown-toggle(href="#",data-toggle="dropdown") Account
-								b.caret
-							ul.dropdown-menu
+							li
+								a(href='/user/settings').userSettingsLink User Settings
+							- if (settings.enableSubscriptions)
 								li
-									a(href='/user/settings').userSettingsLink User Settings
-								- if (settings.enableSubscriptions)
-									li
-										a(href='/user/subscription').subscriptionLink Subscription
-								li
-									a(href='/logout').logoutLink Logout
-					-else
-						li
-							a(href='/register') Register
-						li 
-							a#loginLink(href='/login'+getRedirAsQueryString()) Login
+									a(href='/user/subscription').subscriptionLink Subscription
+							li
+								a(href='/logout').logoutLink Logout
+				-else
+					li
+						a(href='/register') Register
+					li 
+						a#loginLink(href='/login'+getRedirAsQueryString()) Login
 

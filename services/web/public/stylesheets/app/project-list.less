@@ -1,0 +1,341 @@
+
+#projectList {
+	list-style-type: none;
+	margin: 0;
+
+	.project_entry {
+		&:hover {
+			background-color: #eaeaea;
+		}
+		min-height: 40px;
+
+		padding-left: 10px;
+		padding-top: 10px;
+		padding-bottom: 5px;
+		padding-right: 5px;
+
+		.project-actions{
+			float: right;
+		}
+
+		.projectDetails {
+			padding-top: 5px;
+			padding-bottom: 5px;
+			color: #999;
+			font-size: 12px;
+		}
+
+		.projectName {
+			font-family: 'Chivo',sans-serif;
+			font-weight: bold;
+			font-size: 22px;
+		}
+
+		.tag-label {
+			margin-right: 5px;
+			font-size: 12px;
+			cursor: arrow;
+			i {
+				margin-top: 1px;
+				cursor: pointer;
+			}
+			margin-bottom: 5px;
+		}
+
+		.addTagButton {
+			font-size: 12px;
+			cursor: pointer;
+			&:hover {
+				background-color: #468847;
+			}
+		}
+	}
+
+
+
+}
+
+#projectFilter {
+	margin-left: 8px;
+	width: 250px;
+	margin-top: -4px;
+	margin-bottom: 4px;
+
+}
+
+
+
+
+
+
+#projectListArea  {
+
+	.search {
+		position: relative;
+	}
+	.search .search-query {
+		padding-left: 29px;
+	}
+
+	.search {
+
+		input{
+			&:focus .icon-search {
+				background-image: url("/img/glyphicons-halflings-white.png")
+			}	
+		}
+
+		.icon-search {
+			position: absolute;
+			top: 3px;
+			left: 18px;
+
+		}
+
+		.icon-remove {			
+			position: absolute;
+			top: 3px;
+			left:280px;
+		}
+	}
+
+	.search .search-query:focus, .search .search-query.focused {
+		padding-left: 30px;
+	}
+
+}
+
+#newProject{
+	.dropdown-menu {
+		right: 0;
+		left: auto;
+	}
+}
+
+a.archived-projects {
+	padding: 6px 16px;
+	color: #aaa;
+}
+
+.project-actions {
+	float: right;
+	.dropdown-menu {
+		right:0;
+		left: auto;
+	}
+}
+
+.normalText{
+	font-size : 13px;
+}
+
+.clickable, #sections li{
+	cursor: pointer; 
+	cursor: hand;
+}
+
+
+.tag-list {
+	border-left: 1px solid #D9D9D9;
+	padding-left: 16px;
+	#allProjectTagsArea {
+		ul {
+			list-style:none;
+			margin: 0;
+			li {
+				margin: 8px 3px;
+			}
+		}
+		.number {
+			padding-left:5px;
+			font-size: 12px;
+			color: #999;
+		}
+	}
+}
+
+
+
+
+.twitter-typeahead .tt-query,
+.twitter-typeahead .tt-hint {
+  margin-bottom: 0;
+}
+
+.tt-dropdown-menu {
+  min-width: 160px;
+  margin-top: 2px;
+  padding: 5px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0,0,0,.2);
+  *border-right-width: 2px;
+  *border-bottom-width: 2px;
+  -webkit-border-radius: 6px;
+	 -moz-border-radius: 6px;
+		  border-radius: 6px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+	 -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+		  box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  -webkit-background-clip: padding-box;
+	 -moz-background-clip: padding;
+		  background-clip: padding-box;
+}
+
+.tt-suggestion {
+  display: block;
+  padding: 3px 20px;
+}
+
+.tt-suggestion.tt-is-under-cursor {
+  color: #fff;
+  background-color: #0081c2;
+  background-image: -moz-linear-gradient(top, #0088cc, #0077b3);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#0088cc), to(#0077b3));
+  background-image: -webkit-linear-gradient(top, #0088cc, #0077b3);
+  background-image: -o-linear-gradient(top, #0088cc, #0077b3);
+  background-image: linear-gradient(to bottom, #0088cc, #0077b3);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0)
+}
+
+.tt-suggestion.tt-is-under-cursor a {
+  color: #fff;
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+.sharelatex-intro {
+	position: relative;
+	padding-top: 60px;
+	.create-project-arrow {
+		color: #666;
+		position: absolute;
+		top: 0;
+		right: 0;
+		font-size: 24px;
+		padding: 50px 55px 0 0;
+		margin-right: 20px;
+		margin-top: -30px;
+		background-image: url(/img/upwards-sweeping-arrow.png);
+		background-repeat: no-repeat;
+		background-position: top right;
+	}
+
+	.welcome {
+		width: 350px;
+		margin: auto;
+		background-image: url(/brand/logo/logo-128.png);
+		background-position: top center;
+		background-repeat: no-repeat;
+		h2 {
+			font-size: 24px;
+			margin-bottom: 6px;
+		}
+		p {
+			font-size: 18px;
+			line-height: 22px;
+		}
+		padding-top: 130px;
+		text-align: center;
+		margin-bottom: 60px;
+	}
+}
+
+
+.content-with-navigation-sidebar {
+	padding-left: 200px;
+	padding-right: 20px;
+}
+
+.sidebar-navigation {
+	background: rgb(40,40,40);
+	border-right: 1px solid #999;
+	position: fixed;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 40px;
+	overflow: hidden;
+	z-index: 10;
+	ul {
+		list-style: none;
+		margin: 0;
+		li {
+			a {
+				color: #ccc;
+				width: 100%;
+				display: block;
+				.content {
+					padding: 12px 0;
+				}
+				&:hover {
+					.box-shadow(inset 0 0 15px #111);
+					text-decoration: none;
+					color: white;
+				}
+			}
+		}
+		li.active {
+			background-color: blue;
+			a {
+				color: white;
+				&:hover {
+					.box-shadow(none);
+				}
+			}
+		}
+	}
+
+	.image-button {
+		margin-top: 4px;
+		margin-right: 8px;
+		cursor: pointer;
+	}
+
+	a.tab-link {
+		background-position: 12px center;
+		background-repeat: no-repeat;
+		padding-left: 40px;
+		height: 40px;
+	}
+	a.code-tab {
+		background-image: url(/brand/icons/code.png);
+	}
+	a.history-tab {
+		background-image: url(/brand/icons/history.png);
+	}
+	a.settings-tab, a.account-settings-tab {
+		background-image: url(/brand/icons/settings.png);
+	}
+	a.collaborators-tab {
+		background-image: url(/brand/icons/collaborators.png);
+	}
+	a.project-list-tab {
+		background-image: url(/brand/icons/projects.png);
+	}
+	a.subscription-tab {
+		background-image: url(/brand/icons/subscription.png);
+	}
+
+	#toolbar-footer {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 180px;
+		padding-bottom: 16px;
+		text-align: center;
+		a {
+			font-size: 12px;
+			color: #ddd;
+			&:hover {
+				color: white;
+			}
+		}
+		> div {
+			margin-top: 3px;
+		}
+	}
+}
