@@ -10,7 +10,8 @@ module.exports = ProjectRootDocManager =
 			root_doc_id = null
 			for path, doc of docs
 				for line in doc.lines || []
-					if Path.extname(path).match(/\.R?tex$/) and line.match(/\\documentclass/)
+					match = line.match /(.*)\\documentclass/ # no lookbehind in js regexp :(
+					if Path.extname(path).match(/\.R?tex$/) and match and !match[1].match /%/
 						root_doc_id = doc._id
 			if root_doc_id?
 				ProjectEntityHandler.setRootDoc project_id, root_doc_id, sl_req_id, callback
