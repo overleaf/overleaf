@@ -45,14 +45,19 @@ resCacher =
 	contentType:(@setContentType)->
 	send:(@code, @body)->
 
+	#default the server to be down
+	code:500
+	body:{}
+	setContentType:"application/json"
+
 do runSmokeTest = ->
 	logger.log("running smoke tests")
 	smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))({}, resCacher)
 	setTimeout(runSmokeTest, 20 * 1000)
 
 app.get "/health_check", (req, res)->
-	res.contentType(resCacher.setContentType)
-	res.send resCacher.code, resCacher.body
+	res.contentType(resCacher?.setContentType)
+	res.send resCacher?.code, resCacher?.body
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
