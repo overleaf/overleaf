@@ -41,7 +41,18 @@ app.get "/project/:project_id/output/*", (req, res, next) ->
 app.get "/status", (req, res, next) ->
 	res.send "CLSI is alive\n"
 
-app.get "/health_check", smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))
+resCacher =
+	contentType:(@setContentType)->
+	send:(@code, @body)->
+
+do runSmokeTest = ->
+	logger.log("running smoke tests")
+	smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))({}, resCacher)
+	setTimeout(runSmokeTest, 20 * 1000)
+
+app.get "/health_check", (req, res)->
+	res.contentType(resCacher.setContentType)
+	res.send resCacher.code, resCacher.body
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
