@@ -21,6 +21,6 @@ define [
 					toV: data.toV
 					# TODO: We should not use a global reference here, but 
 					# it's hard to get @ide into Backbone at this point.
-					entity: ide.fileTreeManager.getEntity(doc_id)
+					entity: ide.fileTreeManager.getEntity(doc_id, include_deleted: true)
 
 			return model

@@ -3,11 +3,12 @@ define [
 	"models/File"
 	"models/Folder"
 	"file-tree/FileTreeView"
+	"file-tree/FolderView"
 	"utils/Effects"
 	"utils/Modal"
 	"libs/backbone"
 	"libs/jquery.storage"
-], (Doc, File, Folder, FileTreeView, Effects, Modal) ->
+], (Doc, File, Folder, FileTreeView, FolderView, Effects, Modal) ->
 	class FileTreeManager
 		constructor: (@ide) ->
 			_.extend(@, Backbone.Events)
@@ -37,6 +38,10 @@ define [
 
 		populateFileTree: () ->
 			@view.bindToRootFolder(@project.get("rootFolder"))
+			@deletedDocsView = new FolderView(model: @project.get("deletedDocs"), manager: @)
+			@deletedDocsView.render()
+			$("#sections").append(@deletedDocsView.$el)
+			@hideDeletedDocs()
 
 		listenForUpdates: () ->
 			@ide.socket.on 'reciveNewDoc', (folder_id, doc) =>
@@ -100,8 +105,12 @@ define [
 			@ide.sideBarView.deselectAll()
 			@views[entity_id]?.select()
 
-		getEntity: (entity_id) ->
-			@views[entity_id]?.model
+		getEntity: (entity_id, options = {include_deleted: false}) ->
+			model = @views[entity_id]?.model
+			if !model? or (model.get("deleted") and !options.include_deleted)
+				return
+			else
+				return model
 
 		getSelectedEntity: () -> @getEntity(@selected_entity_id)
 		getSelectedEntityId: () -> @getSelectedEntity()?.id
@@ -275,6 +284,8 @@ define [
 
 		_doDelete: (entity) ->
 			@ide.socket.emit 'deleteEntity', entity.id, entity.get("type")
+			if entity.get("type") == "doc"
+				@project.get("deletedDocs").get("children").add entity
 			@onDeleteEntity entity.id
 
 		onDeleteEntity: (entity_id) ->
@@ -286,3 +297,10 @@ define [
 			
 		setLabels: (labels) ->
 			@view.setLabels(labels)
+			@deletedDocsView.setLabels(labels)
+
+		showDeletedDocs: () ->
+			@deletedDocsView.$el.show()
+
+		hideDeletedDocs: () ->
+			@deletedDocsView.$el.hide()

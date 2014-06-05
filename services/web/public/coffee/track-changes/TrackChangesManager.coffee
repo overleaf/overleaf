@@ -71,6 +71,9 @@ define [
 			@ide.mainAreaManager.change "trackChanges"
 			@ide.editor.disable()
 			@ide.fileViewManager.disable()
+
+			@ide.fileTreeManager.showDeletedDocs()
+
 			@enable()
 
 		showUpgradeView: () ->
@@ -93,6 +96,7 @@ define [
 			@ide.fileTreeManager.openDoc(@doc_id)
 			@ide.tabManager.show "code"
 			@resetLabels()
+			@ide.fileTreeManager.hideDeletedDocs()
 
 		autoSelectDiff: () ->
 			if @changes.models.length == 0

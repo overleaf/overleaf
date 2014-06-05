@@ -20,11 +20,11 @@ define [
 				id: rawAttributes._id
 				name: rawAttributes.name
 			children = []
-			for childFolder in rawAttributes.folders
+			for childFolder in rawAttributes.folders or []
 				children.push new Folder(childFolder, parse: true)
-			for file in rawAttributes.fileRefs
+			for file in rawAttributes.fileRefs or []
 				children.push new File(file, parse: true)
-			for doc in rawAttributes.docs
+			for doc in rawAttributes.docs or []
 				children.push new Doc(doc, parse: true)
 			attributes.children = new FolderChildren(children)
 			return attributes
