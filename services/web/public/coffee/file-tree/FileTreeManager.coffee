@@ -38,6 +38,9 @@ define [
 
 		populateFileTree: () ->
 			@view.bindToRootFolder(@project.get("rootFolder"))
+			
+			if @deletedDocsView?
+				@deletedDocsView.$el.remove()
 			@deletedDocsView = new FolderView(model: @project.get("deletedDocs"), manager: @)
 			@deletedDocsView.render()
 			$("#sections").append(@deletedDocsView.$el)
@@ -72,6 +75,7 @@ define [
 				@onMoveEntity(entity_id, folder_id)
 
 		registerView: (entity_id, view) ->
+			console.log "inside", entity_id, view
 			@views[entity_id] = view
 
 		addEntityToFolder: (entity, folder_id) ->
@@ -284,8 +288,6 @@ define [
 
 		_doDelete: (entity) ->
 			@ide.socket.emit 'deleteEntity', entity.id, entity.get("type")
-			if entity.get("type") == "doc"
-				@project.get("deletedDocs").get("children").add entity
 			@onDeleteEntity entity.id
 
 		onDeleteEntity: (entity_id) ->
@@ -294,6 +296,11 @@ define [
 			entity.set("deleted", true)
 			entity.collection?.remove(entity)
 			delete @views[entity_id]
+
+			# Do this after the remove so that it's never in two places at once 
+			# and so that it doesn't get reset by deleting from @views
+			if entity.get("type") == "doc"
+				@project.get("deletedDocs").get("children").add entity
 			
 		setLabels: (labels) ->
 			@view.setLabels(labels)

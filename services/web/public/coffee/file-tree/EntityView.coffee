@@ -9,6 +9,7 @@ define [
 		initialize: () ->
 			@ide = @options.manager.ide
 			@manager = @options.manager
+			console.log "Registering view", @model, @model.id, @
 			@manager.registerView(@model.id, @)
 			@bindToModel()
 

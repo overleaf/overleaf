@@ -135,6 +135,13 @@ module.exports = ProjectEntityHandler =
 							return callback(err) if err?
 							callback(null, doc, folder_id)
 
+	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
+		# getDoc will return the deleted doc's lines, but we don't actually remove
+		# the deleted doc, just create a new one from its lines.
+		ProjectEntityHandler.getDoc project_id, doc_id, (error, lines) ->
+			return callback(error) if error?
+			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
+
 	addFile: (project_or_id, folder_id, fileName, path, sl_req_id, callback = (error, fileRef, folder_id) ->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
 		Project.getProject project_or_id, "", (err, project) ->

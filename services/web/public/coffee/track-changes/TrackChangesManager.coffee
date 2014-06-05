@@ -164,7 +164,7 @@ define [
 				@diffView.remove()
 
 			if !@diff.get("doc")?
-				console.log "This document has been deleted. What should we do?"
+				console.log "This document does not exist. What should we do?"
 				return
 
 			@diffView = new DiffView(
@@ -174,6 +174,15 @@ define [
 
 			@diffView.on "restore", () =>
 				@restoreDiff(@diff)
+
+			@diffView.on "restore-deleted", () =>
+				@restoreDeletedDoc @diff.get("doc"), (error, doc_id) =>
+					return if error? or !doc_id?
+					setTimeout () =>
+						# Give doc a chance to appear in file tree via socket.io
+						@hide()
+						@ide.fileTreeManager.openDoc(doc_id)
+					, 1000
 
 			@diff.fetch()
 
@@ -220,6 +229,21 @@ define [
 							@hide()
 				}]
 			})
+
+		restoreDeletedDoc: (doc, callback) ->
+			$.ajax {
+				url: "/project/#{@project_id}/doc/#{doc.get("id")}/restore"
+				type: "POST"
+				dataType: "json"
+				data:
+					name: doc.get("name")
+				headers:
+					"X-CSRF-Token": window.csrfToken
+				success: (body, status, response) ->
+					callback(null, body?.doc_id)
+				error: (error) ->
+					callback(error)
+			}
 
 		enable: () ->
 			@enabled = true

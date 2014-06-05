@@ -10,9 +10,14 @@ define [
 		template: $("#trackChangesDiffTemplate").html()
 
 		events:
-			"click .restore": () ->
-				console.log "click"
+			"click .restore": (e) ->
+				e.preventDefault()
 				@trigger "restore"
+			"click .restore-deleted": (e) ->
+				e.preventDefault()
+				@$("a.restore-deleted").attr("disabled", true)
+				@$("a.restore-deleted").text("Restoring...")
+				@trigger "restore-deleted"
 
 		initialize: () ->
 			@model.on "change:diff", () => @render()
@@ -30,6 +35,10 @@ define [
 
 			if !@model.get("from")? or !@model.get("to")? or changes == 0
 				@$(".restore").hide()
+
+			if @model.get("doc").get("deleted")
+				@$(".restore").hide()
+				@$(".deleted-info").show()
 
 			@createAceEditor()
 			@aceEditor.setValue(@getPlainDiffContent())

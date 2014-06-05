@@ -472,6 +472,9 @@
 		.track-changes-diff-toolbar.btn-toolbar
 			.number-of-changes {{ changes }} in <strong>{{ name }}</strong>
 			a(href="#").restore.btn.btn-small.btn-danger Restore to before these changes
+			.deleted-info(style="display:none;")
+				span This file has been deleted 
+				a(href="#").restore-deleted.btn.btn-small.btn-success Restore
 		.track-changes-diff-editor
 
 	script(type='text/template')#changeListItemTemplate
