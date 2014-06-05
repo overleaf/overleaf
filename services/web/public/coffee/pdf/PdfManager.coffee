@@ -143,7 +143,7 @@ define [
 				@view.onCompiling()
 				@syncButtonsView?.hide()
 				@compiling = true
-				@_doCompile opts.isAutoCompile, (error, status, outputFiles) =>
+				@_doCompile opts, (error, status, outputFiles) =>
 					@compiling = false
 					doneCompiling()
 
@@ -172,16 +172,19 @@ define [
 					if outputFiles?
 						@view.showOutputFileDownloadLinks(outputFiles)
 
-		_doCompile: (isAutoCompile, callback = (error, status, outputFiles) ->) ->
+		_doCompile: (opts, callback = (error, status, outputFiles) ->) ->
 			url = "/project/#{@ide.project_id}/compile"
-			if isAutoCompile
+			if opts.isAutoCompile
 				url += "?auto_compile=true"
 			$.ajax(
 				url: url
 				type: "POST"
 				headers:
 					"X-CSRF-Token": window.csrfToken
+				contentType: "application/json; charset=utf-8"
 				dataType: 'json'
+				data: JSON.stringify settingsOverride: 
+					rootDoc_id: opts.rootDocOverride_id ? null
 				success: (body, status, response) ->
 					callback null, body.status, body.outputFiles
 				error: (error) ->
