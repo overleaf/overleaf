@@ -60,7 +60,7 @@ module.exports =
     filteredName = filterName name
     fs.rmdir "#{location}/#{filteredName}", (err) ->
       logger.err err:err, location:location, name:filteredName, "Error on rmdir."
-      if err and err.errno != 34 
+      if err and err.code != 'ENOENT' 
         callback err
       else
         callback()
