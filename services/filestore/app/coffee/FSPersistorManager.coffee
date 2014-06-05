@@ -60,7 +60,10 @@ module.exports =
     filteredName = filterName name
     fs.rmdir "#{location}/#{filteredName}", (err) ->
       logger.err err:err, location:location, name:filteredName, "Error on rmdir."
-      callback err
+      if err and err.errno != 34 
+        callback err
+      else
+        callback()
 
   checkIfFileExists:(location, name, callback = (err,exists)->)->
     filteredName = filterName name
