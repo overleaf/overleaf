@@ -5,7 +5,7 @@ define [
 	Diff = Backbone.Model.extend
 		initialize: (attributes, options) ->
 			@ide = options.ide
-			@set "doc", @ide.fileTreeManager.getEntity(@get("doc_id"))
+			@set "doc", @ide.fileTreeManager.getEntity(@get("doc_id"), include_deleted: true)
 
 		url: () ->
 			url = "/project/#{@get("project_id")}/doc/#{@get("doc_id")}/diff"
