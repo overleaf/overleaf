@@ -63,7 +63,7 @@ module.exports = DocManager =
 
 	_findDocInFolder: (folder = {}, doc_id, currentPath) ->
 		for doc, i in folder.docs or []
-			if doc._id? and doc._id.toString() == doc_id.toString()
+			if doc?._id? and doc._id.toString() == doc_id.toString()
 				return {
 					doc: doc
 					mongoPath: "#{currentPath}.docs.#{i}"
