@@ -8,6 +8,7 @@ module.exports = HttpController =
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
 			return next(error) if error?
+			logger.log doc: doc, "got doc"
 			if !doc?
 				res.send 404
 			else
@@ -69,6 +70,7 @@ module.exports = HttpController =
 			_id:     doc._id?.toString()
 			lines:   doc.lines
 			rev:     doc.rev
+			deleted: !!doc.deleted
 		}
 
 	_buildRawDocView: (doc)->

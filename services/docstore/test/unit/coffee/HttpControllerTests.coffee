@@ -43,6 +43,7 @@ describe "HttpController", ->
 					_id: @doc_id
 					lines: @doc.lines
 					rev: @doc.rev
+					deleted: false
 				})
 				.should.equal true
 
@@ -93,10 +94,12 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
+						deleted: false
 					}, {
 						_id:   @docs[1]._id.toString()
 						lines: @docs[1].lines
 						rev:   @docs[1].rev
+						deleted: false
 					}])
 					.should.equal true
 
@@ -124,10 +127,12 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
+						deleted: false
 					}, {
 						_id:   @docs[2]._id.toString()
 						lines: @docs[2].lines
 						rev:   @docs[2].rev
+						deleted: false
 					}])
 					.should.equal true
 

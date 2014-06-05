@@ -10,8 +10,14 @@ module.exports = DocManager =
 			return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
 			DocManager.findDocInProject project, doc_id, (error, doc, mongoPath) ->
 				return callback(error) if error?
-				return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
-				return callback null, doc, mongoPath
+				if doc?
+					return callback null, doc, mongoPath
+				else
+					# Perhaps it's a deleted doc
+					MongoManager.findDoc doc_id, (error, doc) ->
+						return callback(error) if error?
+						return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
+						return callback null, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
 		MongoManager.findProject project_id, (error, project) ->
@@ -24,7 +30,7 @@ module.exports = DocManager =
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc, mongoPath) ->
 			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
+			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc? or !mongoPath?
 
 			if _.isEqual(doc.lines, lines)
 				logger.log {

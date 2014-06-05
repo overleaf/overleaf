@@ -5,6 +5,10 @@ module.exports = MongoManager =
 		db.projects.find _id: ObjectId(project_id.toString()), {}, (error, projects = []) ->
 			callback error, projects[0]
 
+	findDoc: (doc_id, callback = (error, doc) ->) ->
+		db.docs.find _id: ObjectId(doc_id.toString()), {}, (error, docs = []) ->
+			callback error, docs[0]
+
 	updateDoc: (project_id, docPath, lines, callback = (error) ->) ->
 		update =
 			$set: {}

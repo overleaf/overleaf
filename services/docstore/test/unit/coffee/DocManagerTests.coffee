@@ -53,16 +53,43 @@ describe "DocManager", ->
 					.calledWith(new Errors.NotFoundError("No such project: #{@project_id}"))
 					.should.equal true
 
-		describe "when the doc does not exist", ->
+		describe "when the doc does not exist in the project tree", ->
 			beforeEach -> 
-				@project = { name: "mock-project" }
 				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, @project)
 				@DocManager.findDocInProject = sinon.stub().callsArgWith(2, null, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
 				@DocManager.getDoc @project_id, @doc_id, @callback
 
 			it "should try to find the doc in the project", ->
 				@DocManager.findDocInProject
 					.calledWith(@project, @doc_id)
+					.should.equal true
+
+			it "should try to find the doc in the docs collection", ->
+				@MongoManager.findDoc
+					.calledWith(@doc_id)
+					.should.equal true
+
+			it "should return the doc", ->
+				@callback
+					.calledWith(null, @doc)
+					.should.equal true
+
+		describe "when the doc does not exist anywhere", ->
+			beforeEach -> 
+				@MongoManager.findProject = sinon.stub().callsArgWith(1, null, @project)
+				@DocManager.findDocInProject = sinon.stub().callsArgWith(2, null, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, null)
+				@DocManager.getDoc @project_id, @doc_id, @callback
+
+			it "should try to find the doc in the project", ->
+				@DocManager.findDocInProject
+					.calledWith(@project, @doc_id)
+					.should.equal true
+
+			it "should try to find the doc in the docs collection", ->
+				@MongoManager.findDoc
+					.calledWith(@doc_id)
 					.should.equal true
 
 			it "should return a NotFoundError", ->

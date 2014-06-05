@@ -11,6 +11,7 @@ describe "MongoManager", ->
 				db: @db = { projects: {}, docs: {} }
 				ObjectId: ObjectId
 		@project_id = ObjectId().toString()
+		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
 
 	describe "findProject", ->
@@ -19,7 +20,7 @@ describe "MongoManager", ->
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
 			@MongoManager.findProject @project_id, @callback
 
-		it "should find the project without the doc lines", ->
+		it "should find the project", ->
 			@db.projects.find
 				.calledWith({
 					_id: ObjectId(@project_id)
@@ -28,6 +29,22 @@ describe "MongoManager", ->
 
 		it "should call the callback with the project", ->
 			@callback.calledWith(null, @project).should.equal true
+
+	describe "findDoc", ->
+		beforeEach ->
+			@doc = { name: "mock-doc" }
+			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc])
+			@MongoManager.findDoc @doc_id, @callback
+
+		it "should find the doc", ->
+			@db.docs.find
+				.calledWith({
+					_id: ObjectId(@doc_id)
+				}, {})
+				.should.equal true
+
+		it "should call the callback with the doc", ->
+			@callback.calledWith(null, @doc).should.equal true
 
 	describe "updateDoc", ->
 		beforeEach ->
@@ -53,7 +70,6 @@ describe "MongoManager", ->
 
 	describe "insertDoc", ->
 		beforeEach ->
-			@doc_id = ObjectId().toString()
 			@lines = ["mock-lines"]
 			@db.docs.insert = sinon.stub().callsArg(1)
 			@MongoManager.insertDoc @project_id, @doc_id, lines: @lines, @callback
