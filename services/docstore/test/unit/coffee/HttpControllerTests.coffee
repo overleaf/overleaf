@@ -29,12 +29,12 @@ describe "HttpController", ->
 			@req.params =
 				project_id: @project_id
 				doc_id: @doc_id
-			@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+			@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 			@HttpController.getDoc @req, @res, @next
 
-		it "should get the document", ->
+		it "should get the document (including deleted)", ->
 			@DocManager.getDoc
-				.calledWith(@project_id, @doc_id)
+				.calledWith(@project_id, @doc_id, include_deleted: true)
 				.should.equal true
 
 		it "should return the doc as JSON", ->

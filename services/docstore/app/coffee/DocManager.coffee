@@ -4,7 +4,11 @@ logger = require "logger-sharelatex"
 _ = require "underscore"
 
 module.exports = DocManager =
-	getDoc: (project_id, doc_id, callback = (error, doc, mongoPath) ->) ->
+	getDoc: (project_id, doc_id, options, callback = (error, doc, mongoPath) ->) ->
+		if typeof(options) == "function"
+			callback = options
+			options.include_deleted = false
+
 		MongoManager.findProject project_id, (error, project) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
@@ -13,11 +17,13 @@ module.exports = DocManager =
 				if doc?
 					return callback null, doc, mongoPath
 				else
-					# Perhaps it's a deleted doc
-					MongoManager.findDoc doc_id, (error, doc) ->
-						return callback(error) if error?
-						return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
-						return callback null, doc
+					if options.include_deleted
+						MongoManager.findDoc doc_id, (error, doc) ->
+							return callback(error) if error?
+							return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
+							return callback null, doc
+					else
+						return callback new Errors.NotFoundError("No such doc: #{project_id}")
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
 		MongoManager.findProject project_id, (error, project) ->

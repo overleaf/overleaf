@@ -6,7 +6,7 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
-		DocManager.getDoc project_id, doc_id, (error, doc) ->
+		DocManager.getDoc project_id, doc_id, include_deleted: true, (error, doc) ->
 			return next(error) if error?
 			logger.log doc: doc, "got doc"
 			if !doc?
