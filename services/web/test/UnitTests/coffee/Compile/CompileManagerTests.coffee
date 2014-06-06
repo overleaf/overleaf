@@ -36,7 +36,7 @@ describe "CompileManager", ->
 			@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, false)
 			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
-			@ClsiManager.sendRequest = sinon.stub().callsArgWith(1, null, @status = "mock-status")
+			@ClsiManager.sendRequest = sinon.stub().callsArgWith(2, null, @status = "mock-status")
 
 		describe "succesfully", ->
 			beforeEach ->

@@ -9,3 +9,4 @@ define [
 			attributes =
 				id: rawAttributes._id
 				name: rawAttributes.name
+				deleted: !!rawAttributes.deleted

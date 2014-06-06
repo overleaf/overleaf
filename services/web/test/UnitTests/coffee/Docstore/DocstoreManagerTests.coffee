@@ -131,6 +131,22 @@ describe "DocstoreManager", ->
 					}, "error getting doc from docstore")
 					.should.equal true
 
+		describe "with include_deleted=true", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, statusCode: 204, @doc)
+				@DocstoreManager.getDoc @project_id, @doc_id, include_deleted: true, @callback
+
+			it "should get the doc from the docstore api (including deleted)", ->
+				@request.get
+					.calledWith({
+						url: "#{@settings.apis.docstore.url}/project/#{@project_id}/doc/#{@doc_id}?include_deleted=true"
+						json: true
+					})
+					.should.equal true
+
+			it "should call the callback with the lines, version and rev", ->
+				@callback.calledWith(null, @lines, @rev).should.equal true
+
 	describe "getAllDocs", ->
 		describe "with a successful response code", ->
 			beforeEach ->

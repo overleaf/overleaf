@@ -24,7 +24,7 @@ describe "ClsiManager", ->
 
 	describe "sendRequest", ->
 		beforeEach ->
-			@ClsiManager._buildRequest = sinon.stub().callsArgWith(1, null, @request = "mock-request")
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @request = "mock-request")
 
 		describe "with a successful compile", ->
 			beforeEach ->
@@ -39,7 +39,7 @@ describe "ClsiManager", ->
 							type: "log"
 						}]
 				})
-				@ClsiManager.sendRequest @project_id, @callback
+				@ClsiManager.sendRequest @project_id, {}, @callback
 
 			it "should build the request", ->
 				@ClsiManager._buildRequest
@@ -67,7 +67,7 @@ describe "ClsiManager", ->
 					compile:
 						status: @status = "failure"
 				})
-				@ClsiManager.sendRequest @project_id, @callback
+				@ClsiManager.sendRequest @project_id, {}, @callback
 			
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
@@ -121,7 +121,7 @@ describe "ClsiManager", ->
 
 		describe "with a valid project", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, (error, request) =>
+				@ClsiManager._buildRequest @project_id, null, (error, request) =>
 					@request = request
 					done()
 
@@ -159,10 +159,32 @@ describe "ClsiManager", ->
 						}]
 				)
 
+
+		describe "when root doc override is valid", ->
+			beforeEach (done) ->
+				@ClsiManager._buildRequest @project_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
+					@request = request
+					done()
+
+			it "should change root path", ->
+				@request.compile.rootResourcePath.should.equal "chapters/chapter1.tex"
+
+
+		describe "when root doc override is invalid", ->
+			beforeEach (done) ->
+				@ClsiManager._buildRequest @project_id, {rootDoc_id:"invalid-id"}, (error, request) =>
+					@request = request
+					done()
+
+			it "should fallback to default root doc", ->
+				@request.compile.rootResourcePath.should.equal "main.tex"
+
+
+
 		describe "when the project has an invalid compiler", ->
 			beforeEach (done) ->
 				@project.compiler = "context"
-				@ClsiManager._buildRequest @project, (error, request) =>
+				@ClsiManager._buildRequest @project, null, (error, request) =>
 					@request = request
 					done()
 
@@ -172,7 +194,7 @@ describe "ClsiManager", ->
 		describe "when there is no valid root document", ->
 			beforeEach (done) ->
 				@project.rootDoc_id = "not-valid"
-				@ClsiManager._buildRequest @project, (@error, @request) =>
+				@ClsiManager._buildRequest @project, null, (@error, @request) =>
 					done()
 			
 			it "should return an error", ->

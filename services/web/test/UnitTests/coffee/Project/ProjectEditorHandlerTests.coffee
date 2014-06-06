@@ -55,6 +55,10 @@ describe "ProjectEditorHandler", ->
 				last_name  : "Write"
 				email      : "read-write@sharelatex.com"
 			}]
+			deletedDocs: [{
+				_id: "deleted-doc-id"
+				name: "main.tex"
+			}]
 		@handler = SandboxedModule.require modulePath
 
 	describe "buildProjectModelView", ->
@@ -85,6 +89,10 @@ describe "ProjectEditorHandler", ->
 				@result.owner.first_name.should.equal "Owner"
 				@result.owner.last_name.should.equal "ShareLaTeX"
 				@result.owner.privileges.should.equal "owner"
+
+			it "should include the deletedDocs", ->
+				should.exist @result.deletedDocs
+				@result.deletedDocs.should.equal @project.deletedDocs
 				
 			it "should gather readOnly_refs and collaberators_refs into a list of members", ->
 				findMember = (id) =>

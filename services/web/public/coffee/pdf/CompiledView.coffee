@@ -204,7 +204,12 @@ define [
 
 		recompilePdf: () ->
 			@options.manager.trigger "compile:pdf"
-			@options.manager.refreshPdf()
+			rootDocOverride_id = null
+			for line in @ide.editor.getLines()
+				match = line.match /(.*)\\documentclass/
+				if match and !match[1].match /%/
+					rootDocOverride_id = @ide.editor.getCurrentDocId()
+			@options.manager.refreshPdf {rootDocOverride_id}
 
 		toggleFlatViewButton: () -> @$("#flatViewButton").button("toggle")
 		toggleSplitViewButton: () -> @$("#splitViewButton").button("toggle")

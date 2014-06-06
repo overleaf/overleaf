@@ -10,17 +10,23 @@ define [
 		template: $("#trackChangesDiffTemplate").html()
 
 		events:
-			"click .restore": () ->
-				console.log "click"
+			"click .restore": (e) ->
+				e.preventDefault()
 				@trigger "restore"
+			"click .restore-deleted": (e) ->
+				e.preventDefault()
+				@$("a.restore-deleted").attr("disabled", true)
+				@$("a.restore-deleted").text("Restoring...")
+				@trigger "restore-deleted"
 
 		initialize: () ->
-			@model.on "change:diff", () => @render()
+			if !@model.get("doc").get("deleted")
+				@model.on "change:diff", () => @render()
+				@model.fetch()
+			else
+				@render()
 
 		render: ->
-			diff = @model.get("diff")
-			return unless diff?
-
 			changes = @getNumberOfChanges()
 			html = Mustache.to_html @template, {
 				changes: "#{changes} change#{if changes == 1 then "" else "s"}"
@@ -28,18 +34,26 @@ define [
 			}
 			@$el.html(html)
 
-			if !@model.get("from")? or !@model.get("to")? or changes == 0
-				@$(".restore").hide()
+			if @model.get("doc").get("deleted")
+				@$(".change-info").hide()
+				@$(".deleted-info").show()
+			else
+				diff = @model.get("diff")
+				return unless diff?
 
-			@createAceEditor()
-			@aceEditor.setValue(@getPlainDiffContent())
-			@aceEditor.clearSelection()
-			@$ace = $(@aceEditor.renderer.container).find(".ace_scroller")
-			@insertMarkers()
-			@insertNameTag()
-			@insertMoreChangeLabels()
-			@bindToScrollEvents()
-			@scrollToFirstChange()
+				if !@model.get("from")? or !@model.get("to")? or changes == 0
+					@$(".restore").hide()
+
+				@createAceEditor()
+				@aceEditor.setValue(@getPlainDiffContent())
+				@aceEditor.clearSelection()
+				@$ace = $(@aceEditor.renderer.container).find(".ace_scroller")
+				@insertMarkers()
+				@insertNameTag()
+				@insertMoreChangeLabels()
+				@bindToScrollEvents()
+				@scrollToFirstChange()
+
 			return @
 
 		remove: () ->

@@ -112,6 +112,7 @@ define [
 
 		showContextMenu: (position) ->
 			entries = @getContextMenuEntries()
+			return if !entries?
 
 			@manager.trigger "contextmenu:beforeshow", @model, entries
 

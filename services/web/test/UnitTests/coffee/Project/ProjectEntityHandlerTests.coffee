@@ -286,7 +286,7 @@ describe 'ProjectEntityHandler', ->
 		beforeEach ->
 			@lines = ["mock", "doc", "lines"]
 			@rev = 5
-			@DocstoreManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @rev)
+			@DocstoreManager.getDoc = sinon.stub().callsArgWith(3, null, @lines, @rev)
 			@ProjectEntityHandler.getDoc project_id, doc_id, @callback
 
 		it "should call the docstore", ->
@@ -338,6 +338,31 @@ describe 'ProjectEntityHandler', ->
 			@DocstoreManager.updateDoc
 				.calledWith(project_id, @doc._id.toString(), @lines)
 				.should.equal true
+
+	describe "restoreDoc", ->
+		beforeEach ->
+			@name = "doc-name"
+			@lines = ['1234','abc']
+			@doc = { "mock": "doc" }
+			@folder_id = "mock-folder-id"
+			@callback = sinon.stub()
+			@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, null, @lines)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+
+			@ProjectEntityHandler.restoreDoc project_id, doc_id, @name, @callback
+
+		it 'should get the doc lines', ->
+			@ProjectEntityHandler.getDoc
+				.calledWith(project_id, doc_id, include_deleted: true)
+				.should.equal true
+
+		it "should add a new doc with these doc lines", ->
+			@ProjectEntityHandler.addDoc
+				.calledWith(project_id, null, @name, @lines)
+				.should.equal true
+
+		it "should call the callback with the new folder and doc", ->
+			@callback.calledWith(null, @doc, @folder_id).should.equal true
 
 	describe 'adding file', ->
 		fileName = "something.jpg"

@@ -2,8 +2,9 @@ define [
 	"models/User"
 	"models/ProjectMemberList"
 	"models/Folder"
+	"models/Doc"
 	"libs/backbone"
-], (User, ProjectMemberList, Folder) ->
+], (User, ProjectMemberList, Folder, Doc) ->
 	Project = Backbone.Model.extend
 		initialize: ->
 			@on "change:ide", (project, ide) =>
@@ -38,6 +39,15 @@ define [
 			for rawMember in rawAttributes.members
 				member = User.findOrBuild rawMember._id, rawMember
 				members.add member
+
+			for doc in rawAttributes.deletedDocs
+				doc.deleted = true
+
+			attributes.deletedDocs = new Folder({
+				_id: "deleted-docs-folder"
+				name: "Deleted documents"
+				docs: rawAttributes.deletedDocs
+			}, parse: true)
 
 			return attributes
 	

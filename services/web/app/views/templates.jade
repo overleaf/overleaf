@@ -82,6 +82,12 @@
 			.dropdown-caret
 				i.icon-chevron-down
 			.entity-label.label.label-success
+
+	script(type="text/template")#deletedDocsFolderTemplate
+		.entity-list-item.entity-deleted-docs-folder(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
+			.clickable.js-clickable
+				span.name {{ name }}
+			.entity-label.label.label-success
 	
 	script(type="text/template")#entityListTemplate
 		.contents
@@ -386,8 +392,14 @@
 
 	script(type='text/template')#trackChangesDiffTemplate
 		.track-changes-diff-toolbar.btn-toolbar
-			.number-of-changes {{ changes }} in <strong>{{ name }}</strong>
-			a(href="#").restore.btn.btn-small.btn-danger Restore to before these changes
+			.change-info
+				.number-of-changes {{ changes }} in <strong>{{ name }}</strong>
+				a(href="#").restore.btn.btn-small.btn-danger Restore to before these changes
+			.deleted-info(style="display:none;")
+				strong {{ name }}
+				.controls
+					span This file has been deleted 
+					a(href="#").restore-deleted.btn.btn-small.btn-success Restore
 		.track-changes-diff-editor
 
 	script(type='text/template')#changeListItemTemplate

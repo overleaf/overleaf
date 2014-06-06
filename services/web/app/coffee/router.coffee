@@ -7,6 +7,7 @@ SpellingController = require('./Features/Spelling/SpellingController')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
+EditorHttpController = require("./Features/Editor/EditorHttpController")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
@@ -124,6 +125,8 @@ module.exports = class Router
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+
+		app.post "/project/:Project_id/doc/:doc_id/restore", SecurityManager.requestCanAccessProject, EditorHttpController.restoreDoc
 
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators

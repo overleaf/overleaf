@@ -15,6 +15,7 @@ module.exports = ProjectEditorHandler =
 			description: project.description
 			spellCheckLanguage: project.spellCheckLanguage
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
+			deletedDocs: project.deletedDocs
 
 		if options.includeUsers
 			result.features =

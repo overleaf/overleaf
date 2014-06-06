@@ -30,9 +30,14 @@ module.exports = DocstoreManager =
 				logger.error err: error, project_id: project_id, "error getting all docs from docstore"
 				callback(error)
 
-	getDoc: (project_id, doc_id, callback = (error, lines, rev) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, "getting doc in docstore api"
+	getDoc: (project_id, doc_id, options = {}, callback = (error, lines, rev) ->) ->
+		if typeof(options) == "function"
+			callback = options
+			options = {}
+		logger.log project_id: project_id, doc_id: doc_id, options: options, "getting doc in docstore api"
 		url = "#{settings.apis.docstore.url}/project/#{project_id}/doc/#{doc_id}"
+		if options.include_deleted
+			url += "?include_deleted=true"
 		request.get {
 			url: url
 			json: true

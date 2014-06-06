@@ -44,7 +44,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: false })
+					.calledWith(@project_id, @user_id, { isAutoCompile: false, settingsOverride:{} })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -71,7 +71,7 @@ describe "CompileController", ->
 
 			it "should do the compile with the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: true })
+					.calledWith(@project_id, @user_id, { isAutoCompile: true, settingsOverride:{} })
 					.should.equal true
 
 	describe "downloadPdf", ->
