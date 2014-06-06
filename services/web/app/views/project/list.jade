@@ -43,74 +43,65 @@ block content
 		.container
 			.row
 				.col-md-2
-					#newProject.dropdown
-						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project 
-							span.caret
-						ul.dropdown-menu(role="menu")
-							li
-								a#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
-							li
-								a#newProjectExample(href="#", data-csrf=csrfToken) Example Project
-							li
-								a#uploadNewProject(href="#", data-csrf=csrfToken) Upload Project
-							li.divider
-							li.dropdown-submenu
-								a(tabindex="-1", href="#", data-toggle="dropdown") Templates
-								ul.dropdown-menu
-									li
-										a.menu-indent(href="/templates/cv") CV or Resume
-									li
-										a.menu-indent(href="/templates/cover-letters") Cover Letter
-									li
-										a.menu-indent(href="/templates/journals") Journal Article
-									li
-										a.menu-indent(href="/templates/presentations") Presentation
-									li
-										a.menu-indent(href="/templates/thesis") Thesis
-									li
-										a.menu-indent(href="/templates/bibliographies") Bibliographies
-									li
-										a.menu-indent(href="/templates") View All »
+					.row-spaced
+						#newProject.dropdown
+							a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+							ul.dropdown-menu(role="menu")
+								li
+									a#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+								li
+									a#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+								li
+									a#uploadNewProject(href="#", data-csrf=csrfToken) Upload Project
+								li.divider
+								li.dropdown-submenu
+									a(tabindex="-1", href="#", data-toggle="dropdown") Templates
+									ul.dropdown-menu
+										li
+											a.menu-indent(href="/templates/cv") CV or Resume
+										li
+											a.menu-indent(href="/templates/cover-letters") Cover Letter
+										li
+											a.menu-indent(href="/templates/journals") Journal Article
+										li
+											a.menu-indent(href="/templates/presentations") Presentation
+										li
+											a.menu-indent(href="/templates/thesis") Thesis
+										li
+											a.menu-indent(href="/templates/bibliographies") Bibliographies
+										li
+											a.menu-indent(href="/templates") View All »
+					.row-spaced
+							ul.list-unstyled.folders-menu.js-folders-menu
+								li
+									a.normalText.menu-indent(href="#") All projects
+								li
+									a.normalText.menu-indent(href="#") Your projects
+								li
+									a.normalText.menu-indent(href="#") Shared with you
+								li Folders
+								li
+									a.normalText.menu-indent(href="#")
+										i.icon.fa.fa-folder-o
+										|  PhD work
+									span.normalText  (5)
+								li
+									a.normalText.menu-indent(href="#")
+										i.icon.fa.fa-folder-o
+										|  Notes
+									span.normalText  (2)
+								li
+									a.normalText.menu-indent(href="#")
+										i.icon.fa.fa-folder-o
+										|  Papers
+									span.normalText  (1)
 
-					ul.list-unstyled.folders-menu.js-folders-menu
-						li
-							a.normalText.menu-indent(href="#") All projects
-						li
-							a.normalText.menu-indent(href="#") Your projects
-						li
-							a.normalText.menu-indent(href="#") Shared with you
-						li Folders
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  PhD work
-							span.normalText  (5)
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  Notes
-							span.normalText  (2)
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-folder-o
-								|  Papers
-							span.normalText  (1)
-
-					ul.list-unstyled.folders-menu
-						li
-							a.normalText.menu-indent(href="#")
-								i.icon.fa.fa-plus
-								|  New Folder
-
-					-if (tags.length > 0)
-						hr.soften
-						ul#allProjectTagsArea.unstyled.menu
-							li Tags
-							- each tag in tags
-								-if (tag.project_ids.length > 0)
-									li
-										mixin tag("", tag.name, false)
-										span.number x #{tag.project_ids.length}
+					.row-spaced
+						ul.list-unstyled.folders-menu
+							li
+								a.normalText.menu-indent(href="#")
+									i.icon.fa.fa-plus
+									|  New Folder
 
 					-if (settings.enableSubscriptions)
 						p
@@ -118,9 +109,9 @@ block content
 
 				.col-md-10
 					.container-fluid
-						.row
+						.row.row-spaced
 							.col-md-12
-								form.form-horizontal(role="form")
+								form.project-search.form-horizontal(role="form")
 									.form-group.has-feedback.col-md-7
 										input(placeholder='Search projects…', autofocus='autofocus').form-control.col-md-7
 										i.fa.fa-search.form-control-feedback
