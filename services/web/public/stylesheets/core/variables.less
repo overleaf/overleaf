@@ -15,7 +15,7 @@
 @gray-lighter:          #cfcfcf;
 @gray-lightest:         #f0f0f0;
 
-@blue:                  #263872;
+@blue:                  #405ebf;
 @blueDark:              #040D2D;
 @green:                 #46a546;
 @red:                   #a93529;
@@ -55,7 +55,7 @@
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
 
-@font-size-base:          1rem;
+@font-size-base:          16px;
 @font-size-large:         ceil((@font-size-base * 1.25)); // ~18px
 @font-size-small:         ceil((@font-size-base * 0.85)); // ~12px
 
@@ -90,8 +90,8 @@
 //
 //## Define common padding and border radius sizes and more. Values based on 14px text and 1.428 line-height (~20px to start).
 
-@padding-base-vertical:     6px;
-@padding-base-horizontal:   12px;
+@padding-base-vertical:     5px;
+@padding-base-horizontal:   16px;
 
 @padding-large-vertical:    10px;
 @padding-large-horizontal:  16px;
@@ -145,7 +145,7 @@
 //
 //## For each of Bootstrap's buttons, define text, background and border color.
 
-@btn-font-weight:                normal;
+@btn-font-weight:                700;
 
 @btn-default-color:              #333;
 @btn-default-bg:                 #fff;
@@ -153,23 +153,23 @@
 
 @btn-primary-color:              #fff;
 @btn-primary-bg:                 @brand-primary;
-@btn-primary-border:             darken(@btn-primary-bg, 5%);
+@btn-primary-border:             darken(@btn-primary-bg, 10%);
 
 @btn-success-color:              #fff;
 @btn-success-bg:                 @brand-success;
-@btn-success-border:             darken(@btn-success-bg, 5%);
+@btn-success-border:             darken(@btn-success-bg, 10%);
 
 @btn-info-color:                 #fff;
 @btn-info-bg:                    @brand-info;
-@btn-info-border:                darken(@btn-info-bg, 5%);
+@btn-info-border:                darken(@btn-info-bg, 15%);
 
 @btn-warning-color:              #fff;
 @btn-warning-bg:                 @brand-warning;
-@btn-warning-border:             darken(@btn-warning-bg, 5%);
+@btn-warning-border:             darken(@btn-warning-bg, 10%);
 
 @btn-danger-color:               #fff;
 @btn-danger-bg:                  @brand-danger;
-@btn-danger-border:              darken(@btn-danger-bg, 5%);
+@btn-danger-border:              darken(@btn-danger-bg, 10%);
 
 @btn-link-disabled-color:        @gray-light;
 
@@ -337,7 +337,7 @@
 
 // Basics of a navbar
 @navbar-height:                    60px;
-@navbar-margin-bottom:             @line-height-computed;
+@navbar-margin-bottom:             0;
 @navbar-border-radius:             0;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
@@ -809,3 +809,6 @@
 
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
+
+@content-margin-top: @line-height-computed;
+@content-margin-top: @line-height-computed;

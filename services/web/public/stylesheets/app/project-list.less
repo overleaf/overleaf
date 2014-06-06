@@ -13,6 +13,23 @@
   display: inline;
 }
 
+ul.folders-menu {
+  margin-top: @line-height-computed;
+  font-weight: 700;
+  a {
+  	font-size: 0.8rem;
+    padding: 3px;
+  }
+  .active {
+    background-color: @red;
+    color: white;
+    padding-left: 6px;
+    a {
+      color: white;
+    }
+  }
+}
+
 #projectList {
 	list-style-type: none;
 	height: 420px;
