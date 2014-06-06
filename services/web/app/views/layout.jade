@@ -38,7 +38,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 	- if (typeof(bodyClasses) == "undefined")
 		- var bodyClasses = []
 	body(class=bodyClasses)
-		include menubar
+		include layout/navbar
 		block content
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			.modal.hide#scribtexModal
