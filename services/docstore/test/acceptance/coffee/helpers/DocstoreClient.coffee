@@ -20,12 +20,23 @@ module.exports = DocstoreClient =
 			}
 		}, callback
 
+	createDeletedDoc: (project_id, doc_id, lines, callback = (error) ->) ->
+		db.docs.insert {
+			_id: doc_id
+			project_id: project_id
+			lines: lines
+			deleted: true
+		}, callback
+
 	deleteProject: (project_id, callback = (error, res, body) ->) ->
 		db.projects.remove _id: project_id, callback
 
-	getDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
+	getDoc: (project_id, doc_id, options, callback = (error, res, body) ->) ->
+		if typeof(options) == "function"
+			callback = options
+			options = { include_deleted: false }
 		request.get {
-			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
+			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}?include_deleted=#{options.include_deleted}"
 			json: true
 		}, callback
 
@@ -45,8 +56,7 @@ module.exports = DocstoreClient =
 	deleteDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
 		request.del {
 			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
-		}, callback
-		
+		}, callback	
 		
 		
 	

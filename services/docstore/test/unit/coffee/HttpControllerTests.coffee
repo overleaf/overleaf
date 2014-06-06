@@ -30,22 +30,36 @@ describe "HttpController", ->
 				project_id: @project_id
 				doc_id: @doc_id
 			@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
-			@HttpController.getDoc @req, @res, @next
 
-		it "should get the document (including deleted)", ->
-			@DocManager.getDoc
-				.calledWith(@project_id, @doc_id, include_deleted: true)
-				.should.equal true
+		describe "without deleted docs", ->
+			beforeEach ->
+				@HttpController.getDoc @req, @res, @next
 
-		it "should return the doc as JSON", ->
-			@res.json
-				.calledWith({
-					_id: @doc_id
-					lines: @doc.lines
-					rev: @doc.rev
-					deleted: false
-				})
-				.should.equal true
+			it "should get the document (including deleted)", ->
+				@DocManager.getDoc
+					.calledWith(@project_id, @doc_id, include_deleted: false)
+					.should.equal true
+
+			it "should return the doc as JSON", ->
+				@res.json
+					.calledWith({
+						_id: @doc_id
+						lines: @doc.lines
+						rev: @doc.rev
+						deleted: false
+					})
+					.should.equal true
+
+		describe "with deleted docs", ->
+			beforeEach ->
+				@req.query =
+					include_deleted: 'true'
+				@HttpController.getDoc @req, @res, @next
+
+			it "should get the document (without deleted)", ->
+				@DocManager.getDoc
+					.calledWith(@project_id, @doc_id, include_deleted: true)
+					.should.equal true
 
 	describe "getRawDoc", ->
 		beforeEach ->
