@@ -82,6 +82,12 @@
 			.dropdown-caret
 				i.icon-chevron-down
 			.entity-label.label.label-success
+
+	script(type="text/template")#deletedDocsFolderTemplate
+		.entity-list-item.entity-deleted-docs-folder(class="entity-{{ type }}", entity-type="{{ type }}", id="{{ id }}")
+			.clickable.js-clickable
+				span.name {{ name }}
+			.entity-label.label.label-success
 	
 	script(type="text/template")#entityListTemplate
 		.contents

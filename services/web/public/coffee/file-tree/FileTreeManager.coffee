@@ -4,11 +4,12 @@ define [
 	"models/Folder"
 	"file-tree/FileTreeView"
 	"file-tree/FolderView"
+	"file-tree/DeletedDocsFolderView"
 	"utils/Effects"
 	"utils/Modal"
 	"libs/backbone"
 	"libs/jquery.storage"
-], (Doc, File, Folder, FileTreeView, FolderView, Effects, Modal) ->
+], (Doc, File, Folder, FileTreeView, FolderView, DeletedDocsFolderView, Effects, Modal) ->
 	class FileTreeManager
 		constructor: (@ide) ->
 			_.extend(@, Backbone.Events)
@@ -41,7 +42,7 @@ define [
 			
 			if @deletedDocsView?
 				@deletedDocsView.$el.remove()
-			@deletedDocsView = new FolderView(model: @project.get("deletedDocs"), manager: @)
+			@deletedDocsView = new DeletedDocsFolderView(model: @project.get("deletedDocs"), manager: @)
 			@deletedDocsView.render()
 			$("#sections").append(@deletedDocsView.$el)
 			@hideDeletedDocs()
@@ -75,7 +76,6 @@ define [
 				@onMoveEntity(entity_id, folder_id)
 
 		registerView: (entity_id, view) ->
-			console.log "inside", entity_id, view
 			@views[entity_id] = view
 
 		addEntityToFolder: (entity, folder_id) ->
@@ -307,7 +307,8 @@ define [
 			@deletedDocsView.setLabels(labels)
 
 		showDeletedDocs: () ->
-			@deletedDocsView.$el.show()
+			if @project.get("deletedDocs").get("children").length > 0
+				@deletedDocsView.$el.show()
 
 		hideDeletedDocs: () ->
 			@deletedDocsView.$el.hide()
