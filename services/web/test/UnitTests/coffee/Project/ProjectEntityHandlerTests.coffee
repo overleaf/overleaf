@@ -286,7 +286,7 @@ describe 'ProjectEntityHandler', ->
 		beforeEach ->
 			@lines = ["mock", "doc", "lines"]
 			@rev = 5
-			@DocstoreManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @rev)
+			@DocstoreManager.getDoc = sinon.stub().callsArgWith(3, null, @lines, @rev)
 			@ProjectEntityHandler.getDoc project_id, doc_id, @callback
 
 		it "should call the docstore", ->
@@ -346,14 +346,14 @@ describe 'ProjectEntityHandler', ->
 			@doc = { "mock": "doc" }
 			@folder_id = "mock-folder-id"
 			@callback = sinon.stub()
-			@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @lines)
+			@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, null, @lines)
 			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
 
 			@ProjectEntityHandler.restoreDoc project_id, doc_id, @name, @callback
 
 		it 'should get the doc lines', ->
 			@ProjectEntityHandler.getDoc
-				.calledWith(project_id, doc_id)
+				.calledWith(project_id, doc_id, include_deleted: true)
 				.should.equal true
 
 		it "should add a new doc with these doc lines", ->

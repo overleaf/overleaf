@@ -184,8 +184,6 @@ define [
 						@ide.fileTreeManager.openDoc(doc_id)
 					, 1000
 
-			@diff.fetch()
-
 			@ide.fileTreeManager.selectEntity(@doc_id)
 
 

@@ -111,8 +111,11 @@ module.exports = ProjectEntityHandler =
 		logger.log sl_req_id: sl_req_id, project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
-	getDoc: (project_id, doc_id, callback = (error, lines, rev) ->) ->
-		DocstoreManager.getDoc project_id, doc_id, callback
+	getDoc: (project_id, doc_id, options = {}, callback = (error, lines, rev) ->) ->
+		if typeof(options) == "function"
+			callback = options
+			options = {}
+		DocstoreManager.getDoc project_id, doc_id, options, callback
 
 	addDoc: (project_or_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc, folder_id) ->)=>
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
@@ -138,7 +141,7 @@ module.exports = ProjectEntityHandler =
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
 		# the deleted doc, just create a new one from its lines.
-		ProjectEntityHandler.getDoc project_id, doc_id, (error, lines) ->
+		ProjectEntityHandler.getDoc project_id, doc_id, include_deleted: true, (error, lines) ->
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
