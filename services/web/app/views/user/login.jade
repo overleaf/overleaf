@@ -12,12 +12,10 @@ block content
 						form.validate#loginForm(enctype='multipart/form-data', method='post')
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
-							.clearfix
-								.input
-									input.span4#email.email.required(type='email', autofocus="autofocus", name='email', placeholder='your@email.com')
-							.clearfix
-								.input
-									input.span4#password.required(type='password', name='password', placeholder='********')
+							.form-group
+								input#email.email.required.form-control(type='email', autofocus="autofocus", name='email', placeholder='your@email.com')
+							.form-group
+								input#password.required.form-control(type='password', name='password', placeholder='********')
 							.actions
-								button.btn-primary.btn.btn-large#login(type='submit') Login
-								a#passwordReset(href='/user/passwordreset') Forgot your password?
+								button.btn-primary.btn#login(type='submit') Login
+								a#passwordReset.pull-right(href='/user/passwordreset') Forgot your password?

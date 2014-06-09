@@ -62,6 +62,7 @@ module.exports = class Router
 		app.get '/security', HomeController.externalPage("security", "Security")
 		app.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
 		app.get '/planned_maintenance', HomeController.externalPage("planned_mainteance", "Planned Maintenance")
+		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 
 		app.get '/themes', InfoController.themes
 		app.get '/advisor', InfoController.advisor
@@ -160,7 +161,6 @@ module.exports = class Router
 		app.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
 		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
 		app.post '/admin/writeAllDocsToMongo', SecurityManager.requestIsAdmin, AdminController.writeAllToMongo
-		app.post '/admin/addquote', SecurityManager.requestIsAdmin, AdminController.addQuote
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
 		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
 		app.post '/admin/pollUsersWithDropbox', SecurityManager.requestIsAdmin, AdminController.pollUsersWithDropbox

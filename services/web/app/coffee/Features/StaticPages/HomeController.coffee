@@ -1,6 +1,5 @@
 logger = require('logger-sharelatex')
 _ = require('underscore')
-Quotes = require('../../models/Quote').Quote
 
 Path = require "path"
 fs = require "fs"

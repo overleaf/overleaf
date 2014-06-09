@@ -2,7 +2,6 @@ metrics = require("metrics-sharelatex")
 logger = require('logger-sharelatex')
 _ = require('underscore')
 User = require('../../models/User').User
-Quote = require('../../models/Quote').Quote
 Project = require('../../models/Project').Project
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 Settings = require('settings-sharelatex')
@@ -107,13 +106,6 @@ module.exports = AdminController =
 		DocumentUpdaterHandler.flushAllDocsToMongo ()->
 			logger.log "all docs have been saved to mongo"
 			res.send()
-
-	addQuote : (req, res)->
-		quote = new Quote
-			author: req.body.author
-			quote: req.body.quote
-		quote.save (err)->
-			res.send 200
 
 	syncUserToSubscription: (req, res)->
 		{user_id, subscription_id} = req.body

@@ -1,0 +1,62 @@
+extends ../layout
+
+block content
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					h1 ShareLaTeX CSS Style Guide
+
+					h2 Headings
+
+					p Here are our heading styles:
+
+					h1 Heading level 1
+					p Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+
+					h2 Heading level 2
+					p Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+
+					h3 Heading level 3
+					p Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+
+					h4 Heading level 4
+					p Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum
+
+					h2 Buttons
+
+					p Our primary button is red:
+					p
+						a.btn.btn-primary(href="#") Primary Button
+					p Our secondary button is blue:
+					p
+						a.btn.btn-info(href="#") Secondary Button
+					p All button styles
+					p
+						.btn-toolbar
+							a.btn.btn-primary(href="#") Primary
+							a.btn.btn-info(href="#") Info (secondary)
+							a.btn.btn-default(href="#") Default
+							a.btn.btn-success(href="#") Success
+							a.btn.btn-warning(href="#") Warning
+							a.btn.btn-danger(href="#") Danger
+
+					h2 Hyperlinks
+
+					p Hyperlinks are highlighted 
+						a(href="#") as shown
+						|.
+
+					h2 Alerts
+
+					.alert.alert-danger An <code>.alert-danger</code> alert
+					.alert.alert-success An <code>.alert-success</code> alert
+					.alert.alert-info An <code>.alert-info</code> alert
+					.alert.alert-warning An <code>.alert-warning</code> alert
+
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card
+						p Cards look best on a <code>.content.content-alt</code> background

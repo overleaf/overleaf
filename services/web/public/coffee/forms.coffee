@@ -200,7 +200,7 @@ require [
 				
 	class Message
 		constructor: (message)->
-			aClose = $('<a></a>').addClass('close').attr('href','#').text('x')
+			aClose = $('<a></a>').addClass('close').attr('href','#').html('&times;')
 			pTitle = $('<strong></strong>').text(message.title)
 			pText = $('<span></span>').html(' '+message.text)
 			div = $('<div></div>')
@@ -209,7 +209,7 @@ require [
 				.append(pTitle)
 				.append(pText)
 			if message.type == "error"
-				div.addClass("alert-error")
+				div.addClass("alert-danger")
 			else
 				div.addClass("alert-info")
 

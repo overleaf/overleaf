@@ -1,37 +1,33 @@
 extends ../layout
 
 block content
-	.container
-		.row
-			.registration_message
-				if sharedProjectData.user_first_name !== undefined
-					h1 #{sharedProjectData.user_first_name} would like you to view '#{sharedProjectData.project_name}'
-					div Join ShareLaTeX to view this project
-				else if newTemplateData.templateName !== undefined
-					h1 Please register to edit the '#{newTemplateData.templateName}' template
-					div Already have a ShareLaTeX account? 
-						a(href="/login") Login here
+	.content.content-alt
+		.container
+			.row
+				.registration_message
+					if sharedProjectData.user_first_name !== undefined
+						h1 #{sharedProjectData.user_first_name} would like you to view '#{sharedProjectData.project_name}'
+						div Join ShareLaTeX to view this project
+					else if newTemplateData.templateName !== undefined
+						h1 Please register to edit the '#{newTemplateData.templateName}' template
+						div Already have a ShareLaTeX account? 
+							a(href="/login") Login here
 
-		.row
-			.span-box.span4.offset4
-				.page-header
-					h1 Register
-				.messageArea
-				form#registerFormShort(method="post")
-					input(name='_csrf', type='hidden', value=csrfToken)
-					input(name='redir', type='hidden', value=redir)
-					.clearfix
-						label(for='xlInput') Email 
-						.input
-							input#email.span4.email.required(type='email', name='email', value='#{new_email}')
-					.clearfix
-						label(for='xlInput') Password 
-						.input
-							input#password.span4.required(type='password', name='password')
-					.actions
-						button#registerButton.btn-primary.btn.btn-xlarge(type='submit') Register
+			.row
+				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+					.card
+						.page-header
+							h1 Register
+						.messageArea
+						form#registerFormShort(method="post")
+							input(name='_csrf', type='hidden', value=csrfToken)
+							input(name='redir', type='hidden', value=redir)
+							.form-group
+								label(for='email') Email 
+								input#email.email.required.form-control(type='email', name='email', value='#{new_email}')
+							.form-group
+								label(for='password') Password 
+								input#password.required.form-control(type='password', name='password')
+							.actions
+								button#registerButton.btn-primary.btn(type='submit') Register
 						
-					
-
-	include ../general/small-footer
-
