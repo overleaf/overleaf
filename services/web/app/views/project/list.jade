@@ -27,17 +27,20 @@ block content
 	mixin projectList(projects)
 		-each project in projects
 			- project_id = project._id.toString()
-			li.project_entry(id=project_id)
-				label.checkbox.select-item
-					input(type="checkbox")
-				span.title
-					a.projectName(href="/project/#{project._id}") #{project.name}
-					span.project-tags(data-project-id=project_id)
-						- each tag in project.tags
-							mixin tag(project_id, tag.name, true)
-				span.owner
-					mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
-				span.last-modified.isoDate #{project.lastUpdated.toISOString()}
+			li.project_entry(id=project_id).container-fluid
+				.row
+					.col-md-6
+						input(type="checkbox").select-item
+						span.title
+							a.projectName(href="/project/#{project._id}") #{project.name}
+							span.project-tags(data-project-id=project_id)
+								- each tag in project.tags
+									mixin tag(project_id, tag.name, true)
+					.col-md-2
+						span.owner
+							mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
+					.col-md-4
+						span.last-modified.isoDate #{project.lastUpdated.toISOString()}
 
 	.content.content-alt
 		.container
@@ -154,12 +157,15 @@ block content
 								.card.card-thin
 									- if (projects.length > 0)
 										ul.list-unstyled.project-list
-											li
-												label.checkbox.select-all
-													input(type="checkbox")
-												span.title TITLE
-												span.owner OWNER
-												span.last-modified LAST MODIFIED
+											li.container-fluid
+												.row
+													.col-md-6
+														input(type="checkbox").select-all
+														span.title TITLE
+													.col-md-2
+														span.owner OWNER
+													.col-md-4
+														span.last-modified LAST MODIFIED
 											mixin projectList(projects)
 									- else
 										.row
