@@ -14,10 +14,10 @@ module.exports = UrlFetcher =
 			if res.statusCode >= 200 and res.statusCode < 300
 				urlStream.pipe(fileStream)
 			else
-				callbackOnce(new Error("URL returned non-success status code: #{res.statusCode}"))
+				callbackOnce(new Error("URL returned non-success status code: #{res.statusCode} #{url}"))
 
 		urlStream.on "error", (error) ->
-			callbackOnce(error or new Error("Something went wrong downloading the URL"))
+			callbackOnce(error or new Error("Something went wrong downloading the URL #{url}"))
 
 		urlStream.on "end", () ->
 			callbackOnce()
