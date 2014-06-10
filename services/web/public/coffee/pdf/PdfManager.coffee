@@ -125,11 +125,6 @@ define [
 					@_refreshPdfWhenProjectIsLoaded(opts)
 
 		_refreshPdfWhenProjectIsLoaded: (opts = {}) ->
-			doneCompiling = _.once =>
-				@compiling = false
-				@view.doneCompiling()
-				@syncButtonsView?.show()
-			setTimeout doneCompiling, 1000 * 60
 
 			if !@ide.project.get("rootDoc_id")?
 				new Modal
@@ -145,8 +140,9 @@ define [
 				@compiling = true
 				@_doCompile opts, (error, status, outputFiles) =>
 					@compiling = false
-					doneCompiling()
-
+					@view.doneCompiling()
+					@syncButtonsView?.show()
+					
 					if error?
 						@view.updateLog(systemError: true)
 						@view.unsetPdf()
