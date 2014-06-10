@@ -1,6 +1,8 @@
 UserGetter = require "./UserGetter"
 logger = require("logger-sharelatex")
 UserDeleter = require("./UserDeleter")
+UserUpdater = require("./UserUpdater")
+sanitize = require('sanitizer')
 
 module.exports = UserController =
 	getLoggedInUsersPersonalInfo: (req, res, next = (error) ->) ->
@@ -19,6 +21,18 @@ module.exports = UserController =
 			UserController.sendFormattedPersonalInfo(user, res, next)
 			req.session.destroy()
 
+	updatePersonalInfo: (req, res, next = (error)->) ->
+		{first_name, last_name, role, university} = req.body
+		update = 
+			first_name:sanitize.escape(first_name)
+			last_name:sanitize.escape(last_name)
+			role:sanitize.escape(role)
+			university:sanitize.escape(university)
+		UserUpdater.updatePersonalInfo update, (err)->
+			if err?
+				res.send 500
+			else
+				res.send 204
 
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
 		UserController._formatPersonalInfo user, (error, info) ->

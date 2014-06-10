@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+assert = require("chai").assert
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/User/UserInfoController.js"
@@ -13,9 +14,15 @@ describe "UserInfoController", ->
 	beforeEach ->
 		@UserDeleter = 
 			deleteUser: sinon.stub().callsArgWith(1)
+		@UserUpdater = 
+			updatePersonalInfo: sinon.stub()
+		@sanitizer = escape:(v)->v
+		sinon.spy @sanitizer, "escape"
 		@UserInfoController = SandboxedModule.require modulePath, requires:
 			"./UserGetter": @UserGetter = {}
+			"./UserUpdater": @UserUpdater
 			"./UserDeleter": @UserDeleter
+			"sanitizer":@sanitizer
 
 		@req = new MockRequest()
 		@res = new MockResponse()
@@ -106,5 +113,48 @@ describe "UserInfoController", ->
 					email: @user.email
 					signUpDate: @user.signUpDate
 				}
+
+	describe "setPersonalInfo", ->
+
+		beforeEach ->
+			@req = {}
+			@req.body = 
+				first_name: "bob"
+				last_name: "smith"
+				role:"student"
+				university: "Sheffield"
+				notWanted: "something"
+
+		it "should send the data from the body to the user updater", (done)->
+
+			@UserUpdater.updatePersonalInfo.callsArgWith(1, null)
+			@res.send = (statusCode)=>
+				statusCode.should.equal 204
+				args = @UserUpdater.updatePersonalInfo.args[0][0]
+				args.first_name.should.equal @req.body.first_name
+				args.last_name.should.equal @req.body.last_name
+				args.role.should.equal @req.body.role
+				args.university.should.equal @req.body.university
+				assert.equal args.notWanted, undefined
+				done()
+
+			@UserInfoController.updatePersonalInfo @req, @res
+
+		it "should sanitize the data", (done)->
+			@UserUpdater.updatePersonalInfo.callsArgWith(1, null)
+			@res.send = (statusCode)=>
+				@sanitizer.escape.calledWith(@req.body.first_name).should.equal true
+				@sanitizer.escape.calledWith(@req.body.last_name).should.equal true
+				@sanitizer.escape.calledWith(@req.body.role).should.equal true
+				@sanitizer.escape.calledWith(@req.body.university).should.equal true
+				done()
+			@UserInfoController.updatePersonalInfo @req, @res
+
+		it "should send an error if the UpserUpdater returns on", (done)->
+			@UserUpdater.updatePersonalInfo.callsArgWith(1, "error")
+			@res.send = (statusCode)->
+				statusCode.should.equal 500
+				done()
+			@UserInfoController.updatePersonalInfo @req, @res
 
 
