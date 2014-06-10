@@ -9,7 +9,7 @@ module.exports =
 			title:"Reset Password"
 
 	requestReset: (req, res)->
-		email = req.body.email.trim()
+		email = req.body.email.trim().toLowerCase()
 		opts = 
 			endpointName:"auto_compile"
 			timeInterval:60
