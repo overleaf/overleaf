@@ -293,10 +293,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorController.setRootDoc(project_id, newRootDocID, callback)
 
-			client.on 'deleteProject', (callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.deleteProject(project_id, callback)
-
 			client.on 'setPublicAccessLevel', (newAccessLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					EditorController.setPublicAccessLevel(project_id, newAccessLevel, callback)

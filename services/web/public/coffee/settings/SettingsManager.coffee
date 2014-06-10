@@ -38,9 +38,14 @@ define [
 			$("#deleteProject").click (event)=>
 				event.preventDefault()
 				self = @
-				deleteProject = ->
-					self.ide.socket.emit 'deleteProject', ->
-						window.location = '/'
+				deleteProject = =>
+					$.ajax
+						url: "/Project/#{@ide.project_id}",
+						type: 'DELETE'
+						data:
+							_csrf: window.csrfToken
+						success: ->
+							window.location = '/'
 				modalOptions =
 					templateId:'deleteEntityModal'
 					isStatic: false
