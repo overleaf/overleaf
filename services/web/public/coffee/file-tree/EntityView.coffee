@@ -168,7 +168,6 @@ define [
 			@hideRenameBox()
 
 		makeReadOnly: () ->
-			console.log @
 			@$entityListItemEl.draggable("disable")
 			@readonly = true
 
