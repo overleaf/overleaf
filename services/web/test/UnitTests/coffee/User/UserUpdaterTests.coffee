@@ -72,3 +72,13 @@ describe "UserUpdater", ->
 				should.exist(err)
 				done()
 
+		it "should default them to empty strings", (done)->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2)
+			@UserUpdater.updatePersonalInfo @user_id, {}, (err)=>
+				args = @UserUpdater.updateUser.args[0][1]
+				args["$set"].first_name.should.equal ""
+				args["$set"].last_name.should.equal ""
+				args["$set"].role.should.equal ""
+				args["$set"].institution.should.equal ""
+				done()
+

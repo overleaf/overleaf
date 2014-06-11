@@ -23,12 +23,14 @@ module.exports = UserController =
 
 	updatePersonalInfo: (req, res, next = (error)->) ->
 		{first_name, last_name, role, institution} = req.body
+		user_id = req.session.user._id
+		logger.log data:req.body, user_id:user_id, "getting update for user personal info"
 		update = 
 			first_name:sanitize.escape(first_name)
 			last_name:sanitize.escape(last_name)
 			role:sanitize.escape(role)
 			institution:sanitize.escape(institution)
-		UserUpdater.updatePersonalInfo req.session.user._id, update, (err)->
+		UserUpdater.updatePersonalInfo user_id, update, (err)->
 			if err?
 				res.send 500
 			else

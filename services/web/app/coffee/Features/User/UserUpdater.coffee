@@ -33,9 +33,9 @@ module.exports = UserUpdater =
 		self = @
 		update = 
 			$set: 
-				"first_name": info.first_name
-				"last_name":  info.last_name
-				"role":		  info.role
-				"institution": info.institution
+				"first_name": info.first_name || ""
+				"last_name":  info.last_name || ""
+				"role":		  info.role || ""
+				"institution": info.institution || ""
 		self.updateUser user_id.toString(), update, (err)->
 			callback(err)
