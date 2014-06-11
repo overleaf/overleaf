@@ -94,7 +94,13 @@ define [
 			@ide.editor.enable()
 			@ide.fileViewManager.enable()
 			@disable()
-			@ide.fileTreeManager.openDoc(@doc_id)
+
+			doc = @ide.fileTreeManager.getEntity(@doc_id, include_deleted: true)
+			if doc? and doc.get("deleted")
+				@ide.fileTreeManager.openDoc(@ide.project.get("rootDoc_id"))
+			else
+				@ide.fileTreeManager.openDoc(@doc_id)
+
 			@ide.tabManager.show "code"
 			@resetLabels()
 			@ide.fileTreeManager.makeReadWriteIfAllowed()
