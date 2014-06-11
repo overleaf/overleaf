@@ -72,6 +72,7 @@ define [
 			@ide.editor.disable()
 			@ide.fileViewManager.disable()
 
+			@ide.fileTreeManager.makeReadOnly()
 			@ide.fileTreeManager.showDeletedDocs()
 
 			@enable()
@@ -96,6 +97,7 @@ define [
 			@ide.fileTreeManager.openDoc(@doc_id)
 			@ide.tabManager.show "code"
 			@resetLabels()
+			@ide.fileTreeManager.makeReadWriteIfAllowed()
 			@ide.fileTreeManager.hideDeletedDocs()
 
 		autoSelectDiff: () ->

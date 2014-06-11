@@ -23,7 +23,8 @@ define [
 		render: () ->
 			@$el.append(Mustache.to_html @entityTemplate, @model.attributes)
 			@_bindToDomElements()
-			@_makeEditable()
+			@_initializeRenameBox()
+			@_initializeDrag()
 			return @
 
 		_bindToDomElements: () ->
@@ -31,12 +32,6 @@ define [
 			@$inputEl = @$("input.js-rename")
 			@$entityListItemEl = @$el.children(".entity-list-item")
 			@$labelEl = @$entityListItemEl.children(".entity-label")
-
-		_makeEditable: () ->
-			if @ide.isAllowedToDoIt "readAndWrite"
-				@_initializeRenameBox()
-				@_initializeDrag()
-			@hideRenameBox()
 
 		bindToModel: () ->
 			@model.on "change:name", (model) =>
@@ -84,7 +79,7 @@ define [
 		onDoubleClick: (e) ->
 			e.preventDefault()
 			e.stopPropagation()
-			if @ide.isAllowedToDoIt "readAndWrite"
+			if !@readonly
 				@startRename()
 
 		showContextMenuFromCaret: (e) ->
@@ -121,6 +116,7 @@ define [
 				delete @contextMenu
 
 		getContextMenuEntries: () ->
+			return null if @readonly
 			return [{
 				text: "Rename"
 				onClick: () =>
@@ -170,6 +166,15 @@ define [
 			name = @$inputEl.val()
 			@manager.renameEntity(@model, name)
 			@hideRenameBox()
+
+		makeReadOnly: () ->
+			console.log @
+			@$entityListItemEl.draggable("disable")
+			@readonly = true
+
+		makeReadWrite: () ->
+			@$entityListItemEl.draggable("enable")
+			delete @readonly
 
 			
 

@@ -123,6 +123,7 @@ define [
 				@showEntries()
 
 		getContextMenuEntries: (args...) ->
+			return null if @readonly
 			entries = EntityView::getContextMenuEntries.apply(this, args)
 			entries.push {
 				divider: true

@@ -17,6 +17,7 @@ define [
 			@multiSelectedEntities = []
 			@ide.on "afterJoinProject", (@project) =>
 				@populateFileTree()
+				@makeReadWriteIfAllowed()
 				@project_id = @project.id
 				if @ide.editor?.current_doc_id?
 					@openDoc(@ide.editor.current_doc_id)
@@ -312,3 +313,17 @@ define [
 
 		hideDeletedDocs: () ->
 			@deletedDocsView.$el.hide()
+
+		makeReadOnly: () ->
+			for id, view of @views or []
+				view.makeReadOnly?()
+
+		makeReadWrite: () ->
+			for id, view of @views or []
+				view.makeReadWrite?()
+
+		makeReadWriteIfAllowed: () ->
+			if @ide.isAllowedToDoIt("readAndWrite")
+				@makeReadWrite()
+			else
+				@makeReadOnly()
