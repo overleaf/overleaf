@@ -216,13 +216,11 @@ _buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGrou
 		return project
 	tags = _.sortBy tags, (tag)->
 		-tag.project_ids.length
-	sortedProjects = _.sortBy projects, (project)->
-		return - project.lastUpdated
 
 	return {
 		title:'Your Projects'
 		priority_title: true
-		projects: sortedProjects
+		projects: JSON.stringify(projects)
 		tags:tags
 		projectTabActive: true
 	}

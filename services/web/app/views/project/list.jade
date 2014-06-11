@@ -1,197 +1,163 @@
 extends ../layout
 
+block scripts
+	script(src=jsPath+'project-list.js')
+
 block content
-	mixin formatAccessLevel(accessLevel)
-		-if (accessLevel == "owner")
-			span Owner
-		-else if (accessLevel == "readWrite")
-			span Read and Write
-		-else if (accessLevel == "readOnly")
-			span Read Only
-		-else
-			span Unknown?
+	#projectList
 
-	mixin formatOwnerText(level, publicLevel)
-		-if (level == "owner")
-			span Me
-		-else
-			span #{formatProjectPublicAccessLevel()} &nbsp;
-				mixin formatAccessLevel(project.accessLevel)
-
-	mixin tag(project_id, tagName, showDeleteIcon)
-		span.label.label-info.tag-label(data-project-id=project_id, data-tag=tagName)
-			span.text #{tagName} &nbsp;
-			- if (showDeleteIcon)
-				i.fa.fa-times.delete-tag(data-project-id=project_id, data-tag=tagName)
-
-	mixin projectList(projects)
-		-each project in projects
-			- project_id = project._id.toString()
-			li.project_entry(id=project_id).container-fluid
-				.row
-					.col-md-6
-						input(type="checkbox").select-item
-						span.title
-							a.projectName(href="/project/#{project._id}") #{project.name}
-							span.project-tags(data-project-id=project_id)
-								- each tag in project.tags
-									mixin tag(project_id, tag.name, true)
-					.col-md-2
-						span.owner
-							mixin formatOwnerText(project.accessLevel, project.publicAccesLevel)
-					.col-md-4
-						span.last-modified.isoDate #{project.lastUpdated.toISOString()}
-
-	.content.content-alt
-		.container
-			.row
-				.col-md-2
-					#newProject.dropdown
-						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
-						ul.dropdown-menu(role="menu")
-							li
-								a#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
-							li
-								a#newProjectExample(href="#", data-csrf=csrfToken) Example Project
-							li
-								a#uploadNewProject(href="#", data-csrf=csrfToken) Upload Project
-							li.divider
-							li.dropdown-header Templates
-							li
-								a.menu-indent(href="/templates/cv") CV or Resume
-							li
-								a.menu-indent(href="/templates/cover-letters") Cover Letter
-							li
-								a.menu-indent(href="/templates/journals") Journal Article
-							li
-								a.menu-indent(href="/templates/presentations") Presentation
-							li
-								a.menu-indent(href="/templates/thesis") Thesis
-							li
-								a.menu-indent(href="/templates/bibliographies") Bibliographies
-							li
-								a.menu-indent(href="/templates") View All »
-					.row-spaced
-							ul.list-unstyled.folders-menu.js-folders-menu
-								li
-									a.menu-indent(href="#") All projects
-								li
-									a.menu-indent(href="#") Your projects
-								li
-									a.menu-indent(href="#") Shared with you
-								li 
-									h2 Folders
-								li
-									a.menu-indent(href="#")
-										i.icon.fa.fa-folder-o
-										|  PhD work 
-									span.small (5)
-								li
-									a.menu-indent(href="#")
-										i.icon.fa.fa-folder-o
-										|  Notes 
-									span.small (2)
-								li
-									a.menu-indent(href="#")
-										i.icon.fa.fa-folder-o
-										|  Papers 
-									span.small (1)
-
-					.row-spaced-small
-						ul.list-unstyled.folders-menu
-							li
-								a.menu-indent(href="#")
-									i.icon.fa.fa-plus
-									|  New Folder
-
-					-if (settings.enableSubscriptions)
-						.row-spaced
-							a(href="/user/bonus").btn.btn-info Upgrade Account
-
-				.col-md-10
-					.container-fluid
-						.row
-							.col-md-12
-								form.project-search.form-horizontal(role="form")
-									.form-group.has-feedback.col-md-7
-										input(placeholder='Search projects…', autofocus='autofocus').form-control.col-md-7
-										i.fa.fa-search.form-control-feedback
-									//- i.fa.fa-remove
-
-								.project-tools.js-toggle-tools
-									.btn-toolbar
-										.btn-group
-											a.btn.btn-default(href='#', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download")
-												i.fa.fa-cloud-download
-											a.btn.btn-default(href='#', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Delete")
-												i.fa.fa-trash-o
-
-										.btn-group
-											a.btn.btn-default.dropdown-toggle(href="#", data-toggle="dropdown")
-												i.fa.fa-folder-open-o
-												|  
-												span.caret
-											ul.dropdown-menu.dropdown-menu-right(role="menu")
-												li.dropdown-header Add to folder
-												li
-													a.menu-indent(href="#") PhD
-												li
-													a.menu-indent(href="#") Personal
-												li
-													a.menu-indent(href="#") Papers
-
-										.btn-group
-											a.btn.btn-default.dropdown-toggle(data-toggle="dropdown", href="#") More 
-												span.caret
-											ul.dropdown-menu.dropdown-menu-right(role="menu")
-												li
-													a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
-												-if ("owner" == "owner")
-													li
-														a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
-												-else
-													li
-														a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
-						.row.row-spaced
-							.col-md-12
-								.card.card-thin
-									- if (projects.length > 0)
-										ul.list-unstyled.project-list
-											li.container-fluid
-												.row
-													.col-md-6
-														input(type="checkbox").select-all
-														span.title TITLE
-													.col-md-2
-														span.owner OWNER
-													.col-md-4
-														span.last-modified LAST MODIFIED
-											mixin projectList(projects)
-									- else
-										.row
-											.span12
-												.welcome
-													h1
-														i.fa.fa-arrow-left
-														| Welcome! Follow the arrow to get started
-													p New to LaTeX? Start by having a look at our
-														a(href="/templates")  templates
-														|  or
-														a(href="/learn")  help guides
-														| .
-
-	script(type="text/template")#tagTemplate
-		mixin tag('{{ project_id }}', '{{ tagName }}', true)
-
-	- locals.supressDefaultJs = true
 	script(type="text/javascript").
-		window.requirejs = {
-			"paths" : {
-				"moment": "libs/moment"
-			}
-		};
-	script(
-		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'),
-		baseurl=jsPath,
-		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
-	)
+		window.data = { projects: !{projects} };
+
+	script(type="text/x-handlebars", data-template-name="projects")
+		- if (projects.length > 0)
+			ul.list-unstyled.project-list
+				li.container-fluid
+					.row
+						.col-md-6
+							input(type="checkbox").select-all
+							span.title TITLE
+						.col-md-2
+							span.owner OWNER
+						.col-md-4
+							span.last-modified LAST MODIFIED
+				{{#each itemController="project"}}
+				li.project_entry.container-fluid
+					.row
+						.col-md-6
+							input(type="checkbox").select-item
+							span.title
+								<a class="projectName" {{ bind-attr href=url }}>{{name}}</a>
+						.col-md-2
+							span.owner {{ownerName}}
+						.col-md-4
+							span.last-modified.isoDate {{formattedLastUpdated}}
+				{{/each}}
+		- else
+			.row
+				.span12
+					.welcome
+						h1
+							i.fa.fa-arrow-left
+							| Welcome! Follow the arrow to get started
+						p New to LaTeX? Start by having a look at our
+							a(href="/templates")  templates
+							|  or
+							a(href="/learn")  help guides
+							| .
+
+	script(type="text/x-handlebars", data-template-name="application")
+		.content.content-alt
+			.container
+				.row
+					.col-md-2
+						#newProject.dropdown
+							a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+							ul.dropdown-menu(role="menu")
+								li
+									a#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+								li
+									a#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+								li
+									a#uploadNewProject(href="#", data-csrf=csrfToken) Upload Project
+								li.divider
+								li.dropdown-header Templates
+								li
+									a.menu-indent(href="/templates/cv") CV or Resume
+								li
+									a.menu-indent(href="/templates/cover-letters") Cover Letter
+								li
+									a.menu-indent(href="/templates/journals") Journal Article
+								li
+									a.menu-indent(href="/templates/presentations") Presentation
+								li
+									a.menu-indent(href="/templates/thesis") Thesis
+								li
+									a.menu-indent(href="/templates/bibliographies") Bibliographies
+								li
+									a.menu-indent(href="/templates") View All »
+						.row-spaced
+								ul.list-unstyled.folders-menu.js-folders-menu
+									li
+										a.menu-indent(href="#") All projects
+									li
+										a.menu-indent(href="#") Your projects
+									li
+										a.menu-indent(href="#") Shared with you
+									li 
+										h2 Folders
+									li
+										a.menu-indent(href="#")
+											i.icon.fa.fa-folder-o
+											|  PhD work 
+										span.small (5)
+									li
+										a.menu-indent(href="#")
+											i.icon.fa.fa-folder-o
+											|  Notes 
+										span.small (2)
+									li
+										a.menu-indent(href="#")
+											i.icon.fa.fa-folder-o
+											|  Papers 
+										span.small (1)
+
+						.row-spaced-small
+							ul.list-unstyled.folders-menu
+								li
+									a.menu-indent(href="#")
+										i.icon.fa.fa-plus
+										|  New Folder
+
+						-if (settings.enableSubscriptions)
+							.row-spaced
+								a(href="/user/bonus").btn.btn-info Upgrade Account
+
+					.col-md-10
+						.container-fluid
+							.row
+								.col-md-12
+									form.project-search.form-horizontal(role="form")
+										.form-group.has-feedback.col-md-7
+											input(placeholder='Search projects…', autofocus='autofocus').form-control.col-md-7
+											i.fa.fa-search.form-control-feedback
+										//- i.fa.fa-remove
+
+									.project-tools.js-toggle-tools
+										.btn-toolbar
+											.btn-group
+												a.btn.btn-default(href='#', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Download")
+													i.fa.fa-cloud-download
+												a.btn.btn-default(href='#', data-toggle="tooltip", data-placement="bottom", title="", data-original-title="Delete")
+													i.fa.fa-trash-o
+
+											.btn-group
+												a.btn.btn-default.dropdown-toggle(href="#", data-toggle="dropdown")
+													i.fa.fa-folder-open-o
+													|  
+													span.caret
+												ul.dropdown-menu.dropdown-menu-right(role="menu")
+													li.dropdown-header Add to folder
+													li
+														a.menu-indent(href="#") PhD
+													li
+														a.menu-indent(href="#") Personal
+													li
+														a.menu-indent(href="#") Papers
+
+											.btn-group
+												a.btn.btn-default.dropdown-toggle(data-toggle="dropdown", href="#") More 
+													span.caret
+												ul.dropdown-menu.dropdown-menu-right(role="menu")
+													li
+														a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/clone', data-csrf=csrfToken).cloneProject Make a Copy...
+													-if ("owner" == "owner")
+														li
+															a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/rename', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).renameProject Rename...
+													-else
+														li
+															a(href='/project/'+"5369c5737fc6b47f048da1f5"+'/leave', data-name="the project", data-id="5369c5737fc6b47f048da1f5", data-csrf=csrfToken).leaveProject Leave Project
+							.row.row-spaced
+								.col-md-12
+									.card.card-thin
+										{{ render "projects" }}
