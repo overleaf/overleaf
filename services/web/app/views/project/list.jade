@@ -101,6 +101,31 @@ block content
 						ul#projectList
 							mixin projectList(projects)
 
+					#userProfileInformation(ng-app="userProfileInformationApp")
+						div(ng-controller="UpdateForm")
+							div(ng-hide="hidePersonalInfoSection")
+								div(ng-show="percentComplete == 100")
+									span Thanks!
+								div(ng-hide="percentComplete == 100")
+									.span3
+										.span8
+											.progress
+												.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
+											span Account {{percentComplete}}% complete
+
+											button.btn(ng-hide="formVisable", ng-click="formVisable = true") Complete now
+
+									.span3(ng-show="formVisable")
+										form(enctype='multipart/form-data', method='post')
+											.input
+												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()")
+											.input
+												input(type='text', name='last_name', ng-model="userInfoForm.last_name", ng-blur="sendUpdate()", placeholder='Last Name')
+											.input
+												input(type='text', name='institution',  ng-model="userInfoForm.institution", placeholder='Institution', ng-blur="sendUpdate()")
+											.input
+												input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()")
+
 					.span3
 						.tag-list
 							h2 Tags
@@ -142,3 +167,6 @@ block content
 		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 	)
 
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js")
+	script(src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.17/angular.js")
+	script(src=jsPath+"/UserDetailsUpdater.js")
