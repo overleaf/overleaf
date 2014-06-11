@@ -279,7 +279,7 @@ define [
 			@aceEditor.scrollToLine(@firstHiddenChangeAfter.range.end.row, true, false)
 
 		resize: () ->
-			@aceEditor.resize()
+			@aceEditor?.resize()
 
 	return DiffView
 
