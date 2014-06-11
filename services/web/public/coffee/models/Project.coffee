@@ -36,11 +36,11 @@ define [
 			owner.set("privileges", "owner")
 			members.add owner
  
-			for rawMember in rawAttributes.members
+			for rawMember in rawAttributes.members or []
 				member = User.findOrBuild rawMember._id, rawMember
 				members.add member
 
-			for doc in rawAttributes.deletedDocs
+			for doc in rawAttributes.deletedDocs or []
 				doc.deleted = true
 
 			attributes.deletedDocs = new Folder({
