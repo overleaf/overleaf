@@ -10,6 +10,8 @@ UserSchema = new Schema
 	email             : {type : String, default : ''}
 	first_name        : {type : String, default : ''}
 	last_name         : {type : String, default : ''}
+	role  	          : {type : String, default : ''}
+	institution       : {type : String, default : ''}
 	hashedPassword    : String
 	isAdmin           : {type : Boolean, default : false}
 	confirmed         : {type : Boolean, default : false}

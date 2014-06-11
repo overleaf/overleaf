@@ -28,3 +28,14 @@ module.exports = UserUpdater =
 					return callback(err)
 				callback()
 
+
+	updatePersonalInfo: (user_id, info, callback)->
+		self = @
+		update = 
+			$set: 
+				"first_name": info.first_name
+				"last_name":  info.last_name
+				"role":		  info.role
+				"institution": info.institution
+		self.updateUser user_id.toString(), update, (err)->
+			callback(err)

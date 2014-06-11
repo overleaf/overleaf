@@ -22,13 +22,13 @@ module.exports = UserController =
 			req.session.destroy()
 
 	updatePersonalInfo: (req, res, next = (error)->) ->
-		{first_name, last_name, role, university} = req.body
+		{first_name, last_name, role, institution} = req.body
 		update = 
 			first_name:sanitize.escape(first_name)
 			last_name:sanitize.escape(last_name)
 			role:sanitize.escape(role)
-			university:sanitize.escape(university)
-		UserUpdater.updatePersonalInfo update, (err)->
+			institution:sanitize.escape(institution)
+		UserUpdater.updatePersonalInfo req.session.user._id, update, (err)->
 			if err?
 				res.send 500
 			else

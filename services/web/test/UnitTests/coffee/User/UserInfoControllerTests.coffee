@@ -117,41 +117,45 @@ describe "UserInfoController", ->
 	describe "setPersonalInfo", ->
 
 		beforeEach ->
-			@req = {}
+			@req = 
+				session:
+					user:
+						_id:"123123j321jikuj90jlk"
 			@req.body = 
 				first_name: "bob"
 				last_name: "smith"
 				role:"student"
-				university: "Sheffield"
+				institution: "Sheffield"
 				notWanted: "something"
 
 		it "should send the data from the body to the user updater", (done)->
 
-			@UserUpdater.updatePersonalInfo.callsArgWith(1, null)
+			@UserUpdater.updatePersonalInfo.callsArgWith(2, null)
 			@res.send = (statusCode)=>
 				statusCode.should.equal 204
-				args = @UserUpdater.updatePersonalInfo.args[0][0]
+				@UserUpdater.updatePersonalInfo.args[0][0].should.equal @req.session.user._id
+				args = @UserUpdater.updatePersonalInfo.args[0][1]
 				args.first_name.should.equal @req.body.first_name
 				args.last_name.should.equal @req.body.last_name
 				args.role.should.equal @req.body.role
-				args.university.should.equal @req.body.university
+				args.institution.should.equal @req.body.institution
 				assert.equal args.notWanted, undefined
 				done()
 
 			@UserInfoController.updatePersonalInfo @req, @res
 
 		it "should sanitize the data", (done)->
-			@UserUpdater.updatePersonalInfo.callsArgWith(1, null)
+			@UserUpdater.updatePersonalInfo.callsArgWith(2, null)
 			@res.send = (statusCode)=>
 				@sanitizer.escape.calledWith(@req.body.first_name).should.equal true
 				@sanitizer.escape.calledWith(@req.body.last_name).should.equal true
 				@sanitizer.escape.calledWith(@req.body.role).should.equal true
-				@sanitizer.escape.calledWith(@req.body.university).should.equal true
+				@sanitizer.escape.calledWith(@req.body.institution).should.equal true
 				done()
 			@UserInfoController.updatePersonalInfo @req, @res
 
 		it "should send an error if the UpserUpdater returns on", (done)->
-			@UserUpdater.updatePersonalInfo.callsArgWith(1, "error")
+			@UserUpdater.updatePersonalInfo.callsArgWith(2, "error")
 			@res.send = (statusCode)->
 				statusCode.should.equal 500
 				done()
