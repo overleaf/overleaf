@@ -36,8 +36,7 @@ define [
 				type: "project"
 			})
 			@_bindToDomElements()
-			if @ide.isAllowedToDoIt("readAndWrite")
-				@renderActions()
+			@renderActions()
 			@hideRenameBox()
 			@hideToggle()
 			@renderEntries()
@@ -45,8 +44,8 @@ define [
 			return @
 
 		renderActions: () ->
-			actions = $(@actionsTemplate)
-			actions.insertAfter(@$entityListItemEl)
+			@$actions = $(@actionsTemplate)
+			@$actions.insertAfter(@$entityListItemEl)
 			@$(".js-new-entity-menu > a").dropdown()
 
 		onClick: () ->
@@ -60,6 +59,12 @@ define [
 
 		hideToggle: () ->
 			@$(".js-toggle").hide()
+
+		makeReadOnly: () ->
+			@$actions.hide()
+
+		makeReadWrite: () ->
+			@$actions.show()
 
 		
 

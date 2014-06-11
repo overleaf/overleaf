@@ -63,6 +63,17 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.requestReset @req, @res
 
+		it "should lowercase the email address", (done)->
+			@email = "UPerCaseEMAIL@example.Com"
+			@req.body.email = @email
+			@RateLimiter.addCount.callsArgWith(1, null, true)
+			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1)
+			@res.send = (code)=>
+				code.should.equal 200
+				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.toLowerCase()).should.equal true
+				done()
+			@PasswordResetController.requestReset @req, @res
+
 	describe "setNewUserPassword", ->
 
 		it "should tell the user handler to reset the password", (done)->

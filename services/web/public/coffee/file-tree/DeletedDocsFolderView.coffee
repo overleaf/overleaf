@@ -24,6 +24,10 @@ define [
 		hideToggle: () ->
 			@$(".js-toggle").hide()
 
+		makeReadOnly: () ->
+
+		makeReadWrite: () ->
+
 		
 
 
