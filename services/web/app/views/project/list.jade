@@ -7,7 +7,10 @@ block content
 	#projectList
 
 	script(type="text/javascript").
-		window.data = { projects: !{projects} };
+		window.data = {
+			projects: !{projects},
+			tags: !{tags}
+		};
 
 	script(type="text/x-handlebars", data-template-name="projects")
 		- if (projects.length > 0)
@@ -46,6 +49,24 @@ block content
 							a(href="/learn")  help guides
 							| .
 
+	script(type="text/x-handlebars", data-template-name="tags")
+		ul.list-unstyled.folders-menu.js-folders-menu
+			li
+				a.menu-indent(href="#") All projects
+			li
+				a.menu-indent(href="#") Your projects
+			li
+				a.menu-indent(href="#") Shared with you
+			li 
+				h2 Folders
+			{{#each itemController="tag"}}
+			li
+				a.menu-indent(href="#")
+					i.icon.fa.fa-folder-o
+					|  {{name}}
+				span.small ({{projectCount}})
+			{{/each}}
+
 	script(type="text/x-handlebars", data-template-name="application")
 		.content.content-alt
 			.container
@@ -77,30 +98,7 @@ block content
 								li
 									a.menu-indent(href="/templates") View All »
 						.row-spaced
-								ul.list-unstyled.folders-menu.js-folders-menu
-									li
-										a.menu-indent(href="#") All projects
-									li
-										a.menu-indent(href="#") Your projects
-									li
-										a.menu-indent(href="#") Shared with you
-									li 
-										h2 Folders
-									li
-										a.menu-indent(href="#")
-											i.icon.fa.fa-folder-o
-											|  PhD work 
-										span.small (5)
-									li
-										a.menu-indent(href="#")
-											i.icon.fa.fa-folder-o
-											|  Notes 
-										span.small (2)
-									li
-										a.menu-indent(href="#")
-											i.icon.fa.fa-folder-o
-											|  Papers 
-										span.small (1)
+							{{ render "tags" }}
 
 						.row-spaced-small
 							ul.list-unstyled.folders-menu
