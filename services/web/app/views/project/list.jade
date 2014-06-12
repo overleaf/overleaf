@@ -44,19 +44,19 @@ block content
 							li
 								a.menu-indent(href="/templates") View All »
 					.row-spaced
-						ul.list-unstyled.folders-menu.js-folders-menu
-							li
-								a.menu-indent(href="#") All projects
-							li
-								a.menu-indent(href="#") Your projects
-							li
-								a.menu-indent(href="#") Shared with you
+						ul.list-unstyled.folders-menu.js-folders-menu(ng-controller="TagListController")
+							li(ng-class="{active: (view == 'all')}")
+								a.menu-indent(href="#", ng-click="selectAllProjects()") All projects
+							//- li
+							//- 	a.menu-indent(href="#") Your projects
+							//- li
+							//- 	a.menu-indent(href="#") Shared with you
 							li 
 								h2 Folders
-							li(ng-repeat="tag in tags", ng-controller="TagController")
-								a.menu-indent(href="#")
-									i.icon.fa.fa-folder-o
-									|  {{tag.name}}
+							li(ng-repeat="tag in tags", ng-controller="TagListItemController", ng-class="{active: tag.selected}")
+								a.menu-indent(href="#", ng-click="selectTag()")
+									i.icon.fa(ng-class="{'fa-folder-open-o': tag.selected, 'fa-folder-o': !tag.selected}")
+									|  {{tag.name}} 
 								span.small ({{tag.project_ids.length}})
 
 					.row-spaced-small
@@ -70,7 +70,7 @@ block content
 						.row-spaced
 							a(href="/user/bonus").btn.btn-info Upgrade Account
 
-				.col-md-10(ng-controller="ProjectListController")
+				.col-md-10
 					.container-fluid
 						.row
 							.col-md-12
@@ -95,7 +95,7 @@ block content
 												span.caret
 											ul.dropdown-menu.dropdown-menu-right(role="menu")
 												li.dropdown-header Add to folder
-												li(ng-repeat="tag in tags", ng-controller="TagDropdownController")
+												li(ng-repeat="tag in tags", ng-controller="TagDropdownItemController")
 													a.menu-indent(href="#", ng-click="addOrRemoveProjectsFromTag()")
 														i.fa.fa-check(ng-if="areSelectedProjectsInTag")
 														|  {{tag.name}}
@@ -126,7 +126,7 @@ block content
 														span.owner OWNER
 													.col-md-4
 														span.last-modified LAST MODIFIED
-											li.project_entry.container-fluid(ng-repeat="project in visibleProjects", ng-controller="ProjectController")
+											li.project_entry.container-fluid(ng-repeat="project in visibleProjects", ng-controller="ProjectListItemController")
 												.row
 													.col-md-6
 														input.select-item(type="checkbox", ng-model="project.selected", ng-change="onSelectedChange()")

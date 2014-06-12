@@ -6,11 +6,9 @@ ProjectPageApp.filter "formatDate", () ->
 
 ProjectPageApp.controller "ProjectPageController", ($scope) ->
 	$scope.projects = window.data.projects
-	$scope.tags = window.data.tags
-
-ProjectPageApp.controller "ProjectListController", ($scope) ->
-	$scope.allSelected = false
 	$scope.visibleProjects = $scope.projects
+	$scope.tags = window.data.tags
+	$scope.allSelected = false
 
 	# Any individual changes to the selection buttons invalidates
 	# our 'select all'
@@ -24,11 +22,31 @@ ProjectPageApp.controller "ProjectListController", ($scope) ->
 			project.selected = $scope.allSelected
 		$scope.$broadcast "selection:change"
 
-	$scope.clearSelections = () ->
+	$scope.$watch "searchText", (value) ->
+		$scope.updateVisibleProjects()
+
+	$scope.clearProjectSelections = () ->
 		for project in $scope.projects
 			project.selected = false
 		$scope.allSelected = false
 		$scope.$broadcast "selection:change"
+
+	$scope.updateVisibleProjects = () ->
+		$scope.visibleProjects = []
+		selectedTag = $scope.getSelectedTag()
+		for project in $scope.projects
+			visible = true
+			# Only show if it matches any search text
+			if $scope.searchText? and $scope.searchText != ""
+				if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
+					visible = false
+			# Only show if it matches the selected tag
+			if selectedTag? and project._id not in selectedTag.project_ids
+				visible = false
+			if visible
+				$scope.visibleProjects.push project
+		console.log "visible", $scope.visibleProjects
+		$scope.clearProjectSelections()
 
 	$scope.getSelectedProjects = () ->
 		$scope.projects.filter (project) -> project.selected
@@ -36,27 +54,38 @@ ProjectPageApp.controller "ProjectListController", ($scope) ->
 	$scope.getSelectedProjectIds = () ->
 		$scope.getSelectedProjects().map (project) -> project._id
 
-	$scope.$watch "searchText", (value) ->
-		$scope.updateVisibleProjects()
+	$scope.getSelectedTag = () ->
+		for tag in $scope.tags
+			return tag if tag.selected
+		return null
 
-	$scope.updateVisibleProjects = () ->
-		$scope.visibleProjects = []
-		for project in $scope.projects
-			visible = true
-			if $scope.searchText? and $scope.searchText != ""
-				if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
-					visible = false
-			if visible
-				$scope.visibleProjects.push project
-		$scope.clearSelections()
-
-ProjectPageApp.controller "ProjectController", ($scope) ->
+ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 	$scope.onSelectedChange = () ->
 		$scope.$emit "selected:on-change"
 
-ProjectPageApp.controller "TagController", ($scope) ->
+ProjectPageApp.controller "TagListController", ($scope) ->
+	$scope.view = "all"
 
-ProjectPageApp.controller "TagDropdownController", ($scope) ->
+	$scope.selectAllProjects = () ->
+		$scope._clearTags()
+		$scope.setActiveItem("all")
+		$scope.updateVisibleProjects()
+
+	$scope._clearTags = () ->
+		for tag in $scope.tags
+			tag.selected = false
+
+	$scope.setActiveItem = (view) ->
+		$scope.view = view
+
+ProjectPageApp.controller "TagListItemController", ($scope) ->
+	$scope.selectTag = () ->
+		$scope._clearTags()
+		$scope.tag.selected = true
+		$scope.setActiveItem("tag")
+		$scope.updateVisibleProjects()
+
+ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 	$scope.$on "selection:change", (e, newValue, oldValue) ->
 		console.log "selected watch listen"
 		$scope.recalculateProjectsInTag()

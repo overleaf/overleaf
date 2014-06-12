@@ -14,29 +14,31 @@
 }
 
 ul.folders-menu {
-  margin: 0;
-  font-weight: 700;
-  a {
-  	font-size: 0.8rem;
-    padding: 3px;
-  }
-  .active {
-    background-color: @red;
-    color: white;
-    padding-left: 6px;
-    a {
-      color: white;
-    }
-  }
+	margin: 0;
+	li {
+		line-height: 1;
+		padding: (@line-height-computed / 4) 0;
+		a {
+			font-size: 0.8rem;
+			color: #333;
+			padding-left: (@line-height-computed / 4);
+		}
+		.small {
+			font-size: 0.8rem;
+			color: @gray-light;
+		}
+  	}
+	li.active {
+		border-right: 4px solid @red;
+		a {
+			font-weight: 700;
+			color: @link-color;
+		}
+	}
   h2 {
-  	margin-top: @line-height-computed / 2;
-  	margin-bottom: @line-height-computed / 4;
+  	margin-top: @line-height-computed / 4;
+  	margin-bottom: 0;
   	font-size: @font-size-base;
-  	margin-left: 3px;
-  }
-  .small {
-  	font-size: 0.8rem;
-  	color: @gray-light;
   }
 }
 
