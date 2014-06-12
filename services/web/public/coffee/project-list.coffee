@@ -85,7 +85,7 @@ ProjectPageApp.controller "TagListItemController", ($scope) ->
 		$scope.setActiveItem("tag")
 		$scope.updateVisibleProjects()
 
-ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
+ProjectPageApp.controller "TagDropdownItemController", ($scope, $http) ->
 	$scope.$on "selection:change", (e, newValue, oldValue) ->
 		console.log "selected watch listen"
 		$scope.recalculateProjectsInTag()
@@ -105,14 +105,28 @@ ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 	$scope.removeSelectedProjectsFromTag = () ->
 		selected_project_ids = $scope.getSelectedProjectIds()
 		remaining_project_ids = []
+		removed_project_ids = []
 		for project_id in $scope.tag.project_ids
 			if project_id not in selected_project_ids
 				remaining_project_ids.push project_id
+			else
+				removed_project_ids.push project_id
 		$scope.tag.project_ids = remaining_project_ids
+
+		for project_id in removed_project_ids
+			$http.post "/project/#{project_id}/tag", { deletedTag: $scope.tag.name, _csrf: window.csrfToken }
+
 		$scope.areSelectedProjectsInTag = false
 
 	$scope.addSelectedProjectsToTag = () ->
+		added_project_ids = []
 		for project_id in $scope.getSelectedProjectIds()
 			unless project_id in $scope.tag.project_ids
 				$scope.tag.project_ids.push project_id
+				added_project_ids.push project_id
+
+		for project_id in added_project_ids
+			# TODO Factor this out into another provider?
+			$http.post "/project/#{project_id}/tag", {tag: $scope.tag.name, _csrf: window.csrfToken}
+
 		$scope.areSelectedProjectsInTag = true
