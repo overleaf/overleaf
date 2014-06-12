@@ -1,32 +1,36 @@
+define ["libs/angular"], (a)->
 
-app = angular.module("userProfileInformationApp", [])
+	angular.element(document).ready ->
 
-app.controller "UpdateForm", ($scope, $http)->
+		app = angular.module("userProfileInformationApp", [])
 
-	$scope.hidePersonalInfoSection = true
+		app.controller "UpdateForm", ($scope, $http)->
 
-	$http.get("/user/personal_info").success (data)->
-		$scope.userInfoForm = 
-			first_name: data.first_name
-			last_name: data.last_name
-			role: 	   data.role
-			institution: data.institution
-			_csrf : window.csrfToken
+			$scope.hidePersonalInfoSection = true
 
-		if getPercentComplete() != 100
-			$scope.percentComplete = getPercentComplete()
-			$scope.hidePersonalInfoSection = false
+			$http.get("/user/personal_info").success (data)->
+				$scope.userInfoForm = 
+					first_name: data.first_name
+					last_name: data.last_name
+					role: 	   data.role
+					institution: data.institution
+					_csrf : window.csrfToken
 
-	$scope.sendUpdate = ->
-		request = $http.post "/user/personal_info", $scope.userInfoForm
-		request.success (data, status)->
-			console.log "the post worked"
-		request.error (data, status)->
-			console.log "the request failed"
-		$scope.percentComplete = getPercentComplete()
+				if getPercentComplete() != 100
+					$scope.percentComplete = getPercentComplete()
+					$scope.hidePersonalInfoSection = false
 
-	getPercentComplete = ->
-		results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
-		results.length * 20
+			$scope.sendUpdate = ->
+				request = $http.post "/user/personal_info", $scope.userInfoForm
+				request.success (data, status)->
+					console.log "the post worked"
+				request.error (data, status)->
+					console.log "the request failed"
+				$scope.percentComplete = getPercentComplete()
 
+			getPercentComplete = ->
+				results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
+				results.length * 20
+
+		angular.bootstrap(document, ['userProfileInformationApp'])
 

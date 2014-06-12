@@ -9,6 +9,7 @@ require [
 	"UserDetailsUpdater"
 ], (tagsManager, moment)->
 
+
 	$('.isoDate').each (i, d)->
 		html = $(d)
 		unparsedDate = html.text().trim()
