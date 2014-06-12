@@ -101,21 +101,20 @@ block content
 						ul#projectList
 							mixin projectList(projects)
 
-					#userProfileInformation(ng-app="userProfileInformationApp")
+					.span3#userProfileInformation(ng-app="userProfileInformationApp")
 						div(ng-controller="UpdateForm")
 							div(ng-hide="hidePersonalInfoSection")
-								div(ng-show="percentComplete == 100")
+								div(ng-show="percentComplete >= 100")
 									span Thanks!
-								div(ng-hide="percentComplete == 100")
-									.span3
-										.span8
-											.progress
-												.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
-											span Account {{percentComplete}}% complete
+								div(ng-hide="percentComplete >= 100")
+									.span8
+										.progress
+											.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
+										span Account {{percentComplete}}% complete
 
-											button.btn(ng-hide="formVisable", ng-click="formVisable = true") Complete now
+										button.btn(ng-hide="formVisable", ng-click="formVisable = true") Complete now
 
-									.span3(ng-show="formVisable")
+									.span8(ng-show="formVisable")
 										form(enctype='multipart/form-data', method='post')
 											.input
 												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()")

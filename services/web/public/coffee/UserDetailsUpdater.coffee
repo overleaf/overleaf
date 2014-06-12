@@ -1,8 +1,6 @@
 
 app = angular.module("userProfileInformationApp", [])
 
-
-
 app.controller "UpdateForm", ($scope, $http)->
 
 	$scope.hidePersonalInfoSection = true
@@ -16,18 +14,19 @@ app.controller "UpdateForm", ($scope, $http)->
 			_csrf : window.csrfToken
 
 		if getPercentComplete() != 100
-			console.log "!!!!!!!"
 			$scope.percentComplete = getPercentComplete()
 			$scope.hidePersonalInfoSection = false
-			
-			console.log $scope.percentComplete
-
 
 	$scope.sendUpdate = ->
-		$http.post "/user/personal_info", $scope.userInfoForm
+		request = $http.post "/user/personal_info", $scope.userInfoForm
+		request.success (data, status)->
+			console.log "the post worked"
+		request.error (data, status)->
+			console.log "the request failed"
 		$scope.percentComplete = getPercentComplete()
 
 	getPercentComplete = ->
 		results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
-		console.log results.length * 20
 		results.length * 20
+
+
