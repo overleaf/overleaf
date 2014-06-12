@@ -1,88 +1,89 @@
-window.ProjectList = Ember.Application.create {
-	rootElement: "#projectList"
-}
+window.ProjectPageApp = angular.module("ProjectPageApp", [])
 
-ProjectList.ApplicationRoute = Ember.Route.extend {
-	setupController: () ->
-		# TODO: Figure out how to get the findAll method 
-		for project in window.data.projects
-			project = @store.createRecord('project', {
-				id: project._id
-				name: project.name
-				lastUpdated: project.lastUpdated
-			})
-		for tag in window.data.tags
-			tagObject = @store.createRecord('tag', {
-				id: tag._id
-				name: tag.name
-			})
-			for project_id in tag.project_ids
-				project = @store.getById('project', project_id)
-				if project?
-					tagObject.get("projects").pushObject(project)
+ProjectPageApp.filter "formatDate", () ->
+	(date, format = "Do MMM YYYY, h:mm a") ->
+		moment(date).format(format)
 
-		@controllerFor('projects').set('model', @store.all("project"))
-		@controllerFor('tags').set('model', @store.all("tag"))
-}
+ProjectPageApp.controller "ProjectPageController", ($scope) ->
+	$scope.projects = window.data.projects
+	$scope.tags = window.data.tags
 
-ProjectList.Tag = DS.Model.extend {
-	name: DS.attr("string")
-	projects: DS.hasMany("project")
-}
+ProjectPageApp.controller "ProjectListController", ($scope) ->
+	$scope.allSelected = false
+	$scope.visibleProjects = $scope.projects
 
-ProjectList.Project = DS.Model.extend {
-	name: DS.attr("string")
-	ownerName: DS.attr("string")
-	lastUpdated: DS.attr("date")
-	tags: DS.hasMany("tag")
-}
+	# Any individual changes to the selection buttons invalidates
+	# our 'select all'
+	$scope.$on "selected:on-change", (e) ->
+		$scope.allSelected = false
+		$scope.$broadcast "selection:change"
 
-ProjectList.ProjectsController = Ember.ArrayController.extend {
-	sortProperties: ["lastUpdated"]
-	sortAscending: false
-}
+	# Selecting or deselecting all should apply to all projects
+	$scope.onSelectAllChange = () ->
+		for project in $scope.visibleProjects
+			project.selected = $scope.allSelected
+		$scope.$broadcast "selection:change"
 
-ProjectList.ProjectController = Ember.ObjectController.extend {
-	url: (() ->
-		"/project/#{@get("model").get("id")}"
-	).property("id")
+	$scope.clearSelections = () ->
+		for project in $scope.projects
+			project.selected = false
+		$scope.allSelected = false
+		$scope.$broadcast "selection:change"
 
-	formattedLastUpdated: (() ->
-		date = @get("model").get("lastUpdated")
-		return moment(date).format("Do MMM YYYY, h:mm a")
-	).property("lastUpdated")
-}
+	$scope.getSelectedProjects = () ->
+		$scope.projects.filter (project) -> project.selected
 
-ProjectList.TagsController = Ember.ArrayController.extend {
-	sortProperties: ["name"]
-	sortAscending: true
-}
+	$scope.getSelectedProjectIds = () ->
+		$scope.getSelectedProjects().map (project) -> project._id
 
-ProjectList.TagController = Ember.ObjectController.extend {
-	projectCount: (() ->
-		@get("model").get("projects.length")
-	).property("projects.length")
-}
+	$scope.$watch "searchText", (value) ->
+		$scope.updateVisibleProjects()
 
+	$scope.updateVisibleProjects = () ->
+		$scope.visibleProjects = []
+		for project in $scope.projects
+			visible = true
+			if $scope.searchText? and $scope.searchText != ""
+				if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
+					visible = false
+			if visible
+				$scope.visibleProjects.push project
+		$scope.clearSelections()
 
+ProjectPageApp.controller "ProjectController", ($scope) ->
+	$scope.onSelectedChange = () ->
+		$scope.$emit "selected:on-change"
 
-ProjectList.ApplicationAdapter = DS.Adapter.extend {
-	findAll: (store, type, sinceToken) ->
-		console.log "Grabbing", type
-		if type == ProjectList.Project
-			return new Ember.RSVP.Promise (resolve, reject) ->
-				Ember.run null, resolve, window.data.projects.map (project) ->
-					id: project._id
-					name: project.name
-					lastUpdated: project.lastUpdated
-					tag_ids: ["53230518ee024fe3e88ca988"]
-		else if type == ProjectList.Tag
-			return new Ember.RSVP.Promise (resolve, reject) ->
-				Ember.run null, resolve, window.data.tags.map (tag) ->
-					{
-						id: tag._id
-						name: tag.name
-						project_ids: tag.project_ids
-					}
-}
+ProjectPageApp.controller "TagController", ($scope) ->
 
+ProjectPageApp.controller "TagDropdownController", ($scope) ->
+	$scope.$on "selection:change", (e, newValue, oldValue) ->
+		console.log "selected watch listen"
+		$scope.recalculateProjectsInTag()
+
+	$scope.recalculateProjectsInTag = () ->
+		$scope.areSelectedProjectsInTag = false
+		for project_id in $scope.getSelectedProjectIds()
+			if project_id in $scope.tag.project_ids
+				$scope.areSelectedProjectsInTag = true
+
+	$scope.addOrRemoveProjectsFromTag = () ->
+		if $scope.areSelectedProjectsInTag
+			$scope.removeSelectedProjectsFromTag()
+		else
+			$scope.addSelectedProjectsToTag()
+
+	$scope.removeSelectedProjectsFromTag = () ->
+		selected_project_ids = $scope.getSelectedProjectIds()
+		remaining_project_ids = []
+		for project_id in $scope.tag.project_ids
+			if project_id not in selected_project_ids
+				remaining_project_ids.push project_id
+		$scope.tag.project_ids = remaining_project_ids
+		$scope.areSelectedProjectsInTag = false
+
+	$scope.addSelectedProjectsToTag = () ->
+		for project_id in $scope.getSelectedProjectIds()
+			unless project_id in $scope.tag.project_ids
+				$scope.tag.project_ids.push project_id
+		$scope.areSelectedProjectsInTag = true

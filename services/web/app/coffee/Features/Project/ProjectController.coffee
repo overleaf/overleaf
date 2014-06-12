@@ -211,6 +211,11 @@ _buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGrou
 	for project in readOnlyProjects
 		project.accessLevel = "readOnly"
 	projects = projects.concat(collabertions).concat(readOnlyProjects)
+	projects = projects.map (project)->
+		project.tags = tagsGroupedByProject[project._id] || []
+		return project
+	tags = _.sortBy tags, (tag)->
+		-tag.project_ids.length
 
 	return {
 		title:'Your Projects'
