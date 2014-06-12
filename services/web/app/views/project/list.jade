@@ -92,7 +92,7 @@ block content
 						a(href="/project/archived").pull-right.archived-projects Archived Projects
 						h1 Projects
 			- if (projects.length > 0)
-				.row-fluid			
+				.row-fluid
 					.span9
 						form.search
 							input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span6.projectSearch.search-query
@@ -102,8 +102,9 @@ block content
 							mixin projectList(projects)
 
 					.span3#userProfileInformation(ng-app="userProfileInformationApp")
-						div(ng-controller="UpdateForm").userProfileInformationArea.alert.alert-info
-							div(ng-hide="hidePersonalInfoSection")
+						div(ng-controller="UpdateForm").userProfileInformationArea
+							div(ng-hide="hidePersonalInfoSection").alert.alert-info
+
 								div(ng-show="percentComplete >= 100")
 									h4 100% complete, well done!
 								div(ng-hide="percentComplete >= 100")
