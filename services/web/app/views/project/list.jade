@@ -102,19 +102,21 @@ block content
 							mixin projectList(projects)
 
 					.span3#userProfileInformation(ng-app="userProfileInformationApp")
-						div(ng-controller="UpdateForm")
+						div(ng-controller="UpdateForm").userProfileInformationArea.alert.alert-info
 							div(ng-hide="hidePersonalInfoSection")
 								div(ng-show="percentComplete >= 100")
-									span Thanks!
+									h4 100% complete, well done!
 								div(ng-hide="percentComplete >= 100")
-									.span8
-										.progress
-											.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
-										span Account {{percentComplete}}% complete
+									h4 Your account is 
+										strong {{percentComplete}}% 
+										| complete
 
-										button.btn(ng-hide="formVisable", ng-click="formVisable = true") Complete now
+									.progress
+										.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
 
-									.span8(ng-show="formVisable")
+									button#completeUserProfileInformation.btn.btn-primary(ng-hide="formVisable", ng-click="formVisable = true") Complete now
+
+									div(ng-show="formVisable")
 										form(enctype='multipart/form-data', method='post')
 											.input
 												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()")
@@ -124,7 +126,6 @@ block content
 												input(type='text', name='institution',  ng-model="userInfoForm.institution", placeholder='Institution', ng-blur="sendUpdate()")
 											.input
 												input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()")
-
 					.span3
 						.tag-list
 							h2 Tags
