@@ -1,9 +1,12 @@
-define ["libs/angular"], (a)->
+define ["libs/algolia", "libs/typeahead", "libs/angular"], (algolia)->
 
 	app = angular.module("userProfileInformationApp", [])
 
-	app.controller "UpdateForm", ($scope, $http)->
+	app.factory "Institutions", ->
+		new AlgoliaSearch("SK53GL4JLY", "75dc5e65794cd47eb7f725e6bb5075be").initIndex("institutions")
 
+	app.controller "UpdateForm", ($scope, $http, Institutions)->
+		$scope.institutions = 
 		$scope.hidePersonalInfoSection = true
 
 		$http.get("/user/personal_info").success (data)->
@@ -29,6 +32,10 @@ define ["libs/angular"], (a)->
 		getPercentComplete = ->
 			results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
 			results.length * 20
+
+		$scope.updateInstitutionsList = ->
+			Institutions.search $scope.userInfoForm.institution, (err, response)->
+				$scope.institutions = response.hits
 
 	angular.bootstrap(document.getElementById("userProfileInformation"), ['userProfileInformationApp'])
 

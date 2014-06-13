@@ -124,7 +124,13 @@ block content
 											.input
 												input(type='text', name='last_name', ng-model="userInfoForm.last_name", ng-blur="sendUpdate()", placeholder='Last Name')
 											.input
-												input(type='text', name='institution',  ng-model="userInfoForm.institution", placeholder='Institution', ng-blur="sendUpdate()")
+												input(type='text', name='institution',  ng-model="userInfoForm.institution", placeholder='Institution', ng-blur="sendUpdate()", ng-keyup="updateInstitutionsList()", list="_institutions")
+												datalist#_institutions
+													option(ng-repeat='institution in institutions') {{institution.name}}
+
+
+
+
 											.input
 												input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()")
 					.span3
