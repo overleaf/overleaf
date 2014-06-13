@@ -1,10 +1,30 @@
-window.ProjectPageApp = angular.module("ProjectPageApp", [])
+window.ProjectPageApp = angular.module("ProjectPageApp", ['ui.bootstrap'])
+
+$ () ->
+	$(".js-tags-dropdown-menu input, .js-tags-dropdown-menu a").click (e) ->
+		e.stopPropagation()
+
+ProjectPageApp.directive 'ngEnter', () ->
+	return (scope, element, attrs) ->
+		element.bind "keydown keypress", (event) ->
+			if event.which == 13
+				scope.$apply () ->
+					scope.$eval(attrs.ngEnter, event: event)
+				event.preventDefault()
+
+ProjectPageApp.directive 'ngFocusOn', ($timeout) ->
+	return {
+		restrict: 'AC'
+		link: (scope, element, attrs) ->
+			scope.$on attrs.ngFocusOn, () ->
+				element.focus()
+	}
 
 ProjectPageApp.filter "formatDate", () ->
 	(date, format = "Do MMM YYYY, h:mm a") ->
 		moment(date).format(format)
 
-ProjectPageApp.controller "ProjectPageController", ($scope) ->
+ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 	$scope.projects = window.data.projects
 	$scope.visibleProjects = $scope.projects
 	$scope.tags = window.data.tags
@@ -45,7 +65,6 @@ ProjectPageApp.controller "ProjectPageController", ($scope) ->
 				visible = false
 			if visible
 				$scope.visibleProjects.push project
-		console.log "visible", $scope.visibleProjects
 		$scope.clearProjectSelections()
 
 	$scope.getSelectedProjects = () ->
@@ -58,6 +77,58 @@ ProjectPageApp.controller "ProjectPageController", ($scope) ->
 		for tag in $scope.tags
 			return tag if tag.selected
 		return null
+
+	$scope.removeSelectedProjectsFromTag = (tag) ->
+		selected_project_ids = $scope.getSelectedProjectIds()
+		remaining_project_ids = []
+		removed_project_ids = []
+		for project_id in tag.project_ids
+			if project_id not in selected_project_ids
+				remaining_project_ids.push project_id
+			else
+				removed_project_ids.push project_id
+		tag.project_ids = remaining_project_ids
+
+		for project_id in removed_project_ids
+			$http.post "/project/#{project_id}/tag", {
+				deletedTag: tag.name
+				_csrf: window.csrfToken
+			}
+
+		# If we're filtering by this tag then we need to remove
+		# the projects from view
+		$scope.updateVisibleProjects()
+
+	$scope.addSelectedProjectsToTag = (tag) ->
+		added_project_ids = []
+		for project_id in $scope.getSelectedProjectIds()
+			unless project_id in tag.project_ids
+				tag.project_ids.push project_id
+				added_project_ids.push project_id
+
+		for project_id in added_project_ids
+			# TODO Factor this out into another provider?
+			$http.post "/project/#{project_id}/tag", {
+				tag: tag.name
+				_csrf: window.csrfToken
+			}
+
+	$scope.createTag = (name) ->
+		$scope.tags.push {
+			name: name
+			project_ids: []
+		}
+
+	$scope.openNewTagModal = () ->
+		modalInstance = $modal.open(
+			templateUrl: "newTagModalTemplate"
+			controller: "NewTagModalController"
+		)
+
+		modalInstance.result.then(
+			(newTagName) ->
+				$scope.createTag(newTagName)
+		)
 
 ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 	$scope.onSelectedChange = () ->
@@ -85,9 +156,8 @@ ProjectPageApp.controller "TagListItemController", ($scope) ->
 		$scope.setActiveItem("tag")
 		$scope.updateVisibleProjects()
 
-ProjectPageApp.controller "TagDropdownItemController", ($scope, $http) ->
+ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 	$scope.$on "selection:change", (e, newValue, oldValue) ->
-		console.log "selected watch listen"
 		$scope.recalculateProjectsInTag()
 
 	$scope.recalculateProjectsInTag = () ->
@@ -98,35 +168,24 @@ ProjectPageApp.controller "TagDropdownItemController", ($scope, $http) ->
 
 	$scope.addOrRemoveProjectsFromTag = () ->
 		if $scope.areSelectedProjectsInTag
-			$scope.removeSelectedProjectsFromTag()
+			$scope.removeSelectedProjectsFromTag($scope.tag)
+			$scope.areSelectedProjectsInTag = false
 		else
-			$scope.addSelectedProjectsToTag()
+			$scope.addSelectedProjectsToTag($scope.tag)
+			$scope.areSelectedProjectsInTag = true
 
-	$scope.removeSelectedProjectsFromTag = () ->
-		selected_project_ids = $scope.getSelectedProjectIds()
-		remaining_project_ids = []
-		removed_project_ids = []
-		for project_id in $scope.tag.project_ids
-			if project_id not in selected_project_ids
-				remaining_project_ids.push project_id
-			else
-				removed_project_ids.push project_id
-		$scope.tag.project_ids = remaining_project_ids
+ProjectPageApp.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
+	$scope.inputs = 
+		newTagName: "original"
 
-		for project_id in removed_project_ids
-			$http.post "/project/#{project_id}/tag", { deletedTag: $scope.tag.name, _csrf: window.csrfToken }
+	$modalInstance.opened.then () ->
+		$timeout () ->
+			$scope.$broadcast "open"
+		, 700
 
-		$scope.areSelectedProjectsInTag = false
+	$scope.create = () ->
+		console.log $scope.inputs.newTagName
+		$modalInstance.close($scope.inputs.newTagName)
 
-	$scope.addSelectedProjectsToTag = () ->
-		added_project_ids = []
-		for project_id in $scope.getSelectedProjectIds()
-			unless project_id in $scope.tag.project_ids
-				$scope.tag.project_ids.push project_id
-				added_project_ids.push project_id
-
-		for project_id in added_project_ids
-			# TODO Factor this out into another provider?
-			$http.post "/project/#{project_id}/tag", {tag: $scope.tag.name, _csrf: window.csrfToken}
-
-		$scope.areSelectedProjectsInTag = true
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
