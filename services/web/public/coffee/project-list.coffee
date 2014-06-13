@@ -30,6 +30,18 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 	$scope.tags = window.data.tags
 	$scope.allSelected = false
 
+	# Allow tags to be accessed on projects as well
+	projectsById = {}
+	for project in $scope.projects
+		projectsById[project._id] = project
+
+	for tag in $scope.tags
+		for project_id in tag.project_ids or []
+			project = projectsById[project_id]
+			if project?
+				project.tags ||= []
+				project.tags.push tag
+
 	# Any individual changes to the selection buttons invalidates
 	# our 'select all'
 	$scope.$on "selected:on-change", (e) ->
@@ -63,9 +75,12 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 			# Only show if it matches the selected tag
 			if selectedTag? and project._id not in selectedTag.project_ids
 				visible = false
+				
 			if visible
 				$scope.visibleProjects.push project
-		$scope.clearProjectSelections()
+			else
+				# We don't want hidden selections
+				project.selected = false
 
 	$scope.getSelectedProjects = () ->
 		$scope.projects.filter (project) -> project.selected
@@ -80,6 +95,9 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 
 	$scope.removeSelectedProjectsFromTag = (tag) ->
 		selected_project_ids = $scope.getSelectedProjectIds()
+		selected_projects = $scope.getSelectedProjects()
+
+		# Remove project_id from tag.project_ids
 		remaining_project_ids = []
 		removed_project_ids = []
 		for project_id in tag.project_ids
@@ -88,6 +106,14 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 			else
 				removed_project_ids.push project_id
 		tag.project_ids = remaining_project_ids
+
+		# Remove tag from project.tags
+		remaining_tags = []
+		for project in selected_projects
+			project.tags ||= []
+			index = project.tags.indexOf tag
+			if index > -1
+				project.tags.splice(index, 1)
 
 		for project_id in removed_project_ids
 			$http.post "/project/#{project_id}/tag", {
@@ -100,11 +126,19 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 		$scope.updateVisibleProjects()
 
 	$scope.addSelectedProjectsToTag = (tag) ->
+		selected_projects = $scope.getSelectedProjects()
+
+		# Add project_ids into tag.project_ids
 		added_project_ids = []
 		for project_id in $scope.getSelectedProjectIds()
 			unless project_id in tag.project_ids
 				tag.project_ids.push project_id
 				added_project_ids.push project_id
+
+		# Add tag into each project.tags
+		for project in selected_projects
+			project.tags ||= []
+			project.tags.push tag
 
 		for project_id in added_project_ids
 			# TODO Factor this out into another provider?

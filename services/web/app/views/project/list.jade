@@ -169,6 +169,9 @@ block content
 														input.select-item(type="checkbox", ng-model="project.selected", ng-change="onSelectedChange()")
 														span.title
 															a.projectName(href="/project/{{project.id}}") {{project.name}}
+														span
+															span.label.label-default(ng-repeat='tag in project.tags')
+																| {{tag.name}}
 													.col-md-2
 														span.owner {{project.publicAccesLevel}}
 													.col-md-4
