@@ -73,6 +73,9 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 	$scope.getSelectedProjectIds = () ->
 		$scope.selectedProjects.map (project) -> project._id
 
+	$scope.getFirstSelectedProject = () ->
+		$scope.selectedProjects[0]
+
 	$scope.$on "selection:change", () ->
 		$scope.updateSelectedProjects()
 
@@ -100,19 +103,22 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 			return tag if tag.selected
 		return null
 
-	$scope.removeSelectedProjectsFromTag = (tag) ->
-		selected_project_ids = $scope.getSelectedProjectIds()
-		selected_projects = $scope.getSelectedProjects()
-
+	$scope._removeProjectIdsFromTagArray = (tag, remove_project_ids) ->
 		# Remove project_id from tag.project_ids
 		remaining_project_ids = []
 		removed_project_ids = []
 		for project_id in tag.project_ids
-			if project_id not in selected_project_ids
+			if project_id not in remove_project_ids
 				remaining_project_ids.push project_id
 			else
 				removed_project_ids.push project_id
 		tag.project_ids = remaining_project_ids
+
+	$scope.removeSelectedProjectsFromTag = (tag) ->
+		selected_project_ids = $scope.getSelectedProjectIds()
+		selected_projects = $scope.getSelectedProjects()
+
+		$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
 
 		# Remove tag from project.tags
 		remaining_tags = []
@@ -171,6 +177,53 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 				$scope.createTag(newTagName)
 		)
 
+	$scope.renameProject = (project, newName) ->
+		project.name = newName
+		$http.post "/project/#{project._id}/rename", {
+			newProjectName: newName
+			_csrf: window.csrfToken
+		}
+
+	$scope.openRenameProjectModal = () ->
+		project = $scope.getFirstSelectedProject()
+		return if !project?
+
+		modalInstance = $modal.open(
+			templateUrl: "renameProjectModalTemplate"
+			controller: "RenameProjectModalController"
+			resolve:
+				projectName: () -> project.name
+		)
+
+		modalInstance.result.then(
+			(newName) ->
+				$scope.renameProject(project, newName)
+		)
+
+	$scope.deleteSelectedProjects = () ->
+		selected_projects = $scope.getSelectedProjects()
+		selected_project_ids = $scope.getSelectedProjectIds()
+
+		# Remove projects from array
+		for project in selected_projects
+			index = $scope.projects.indexOf(project)
+			if index > -1
+				$scope.projects.splice(index, 1)
+
+		# Remove project from any tags
+		for tag in $scope.tags
+			$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
+
+		for project_id in selected_project_ids
+			$http {
+				method: "DELETE"
+				url: "/project/#{project_id}"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			}
+
+		$scope.updateVisibleProjects()
+
 ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 	$scope.onSelectedChange = () ->
 		$scope.$emit "selected:on-change"
@@ -217,7 +270,7 @@ ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 
 ProjectPageApp.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
 	$scope.inputs = 
-		newTagName: "original"
+		newTagName: ""
 
 	$modalInstance.opened.then () ->
 		$timeout () ->
@@ -225,8 +278,22 @@ ProjectPageApp.controller 'NewTagModalController', ($scope, $modalInstance, $tim
 		, 700
 
 	$scope.create = () ->
-		console.log $scope.inputs.newTagName
 		$modalInstance.close($scope.inputs.newTagName)
+
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
+
+ProjectPageApp.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, projectName) ->
+	$scope.inputs = 
+		projectName: projectName
+
+	$modalInstance.opened.then () ->
+		$timeout () ->
+			$scope.$broadcast "open"
+		, 700
+
+	$scope.rename = () ->
+		$modalInstance.close($scope.inputs.projectName)
 
 	$scope.cancel = () ->
 		$modalInstance.dismiss('cancel')
