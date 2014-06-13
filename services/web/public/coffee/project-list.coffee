@@ -24,7 +24,7 @@ ProjectPageApp.filter "formatDate", () ->
 	(date, format = "Do MMM YYYY, h:mm a") ->
 		moment(date).format(format)
 
-ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
+ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) ->
 	$scope.projects = window.data.projects
 	$scope.visibleProjects = $scope.projects
 	$scope.tags = window.data.tags
@@ -177,6 +177,44 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 				$scope.createTag(newTagName)
 		)
 
+	$scope.createProject = (name, template = "none") ->
+		deferred = $q.defer()
+
+		$http
+			.post("/project/new", {
+				_csrf: window.csrfToken
+				projectName: name
+				template: template
+			})
+			.success((data, status, headers, config) ->
+				$scope.projects.push {
+					name: name
+					_id: data.project_id
+					accessLevel: "owner"
+					# TODO: Check access level if correct after adding it in
+					# to the rest of the app
+				}
+				$scope.updateVisibleProjects()
+				deferred.resolve(data.project_id)
+			)
+			.error((data, status, headers, config) ->
+				deferred.reject()
+			)
+
+		return deferred.promise
+
+	$scope.openCreateProjectModal = (template = "none") ->
+		modalInstance = $modal.open(
+			templateUrl: "newProjectModalTemplate"
+			controller: "NewProjectModalController"
+			resolve:
+				template: () -> template
+			scope: $scope
+		)
+
+		modalInstance.result.then (project_id) ->
+			window.location = "/project/#{project_id}"
+
 	$scope.renameProject = (project, newName) ->
 		project.name = newName
 		$http.post "/project/#{project._id}/rename", {
@@ -294,6 +332,28 @@ ProjectPageApp.controller 'RenameProjectModalController', ($scope, $modalInstanc
 
 	$scope.rename = () ->
 		$modalInstance.close($scope.inputs.projectName)
+
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
+
+ProjectPageApp.controller 'NewProjectModalController', ($scope, $modalInstance, $timeout, template) ->
+	$scope.inputs = 
+		projectName: ""
+	$scope.state =
+		inflight: false
+
+	$modalInstance.opened.then () ->
+		$timeout () ->
+			$scope.$broadcast "open"
+		, 700
+
+	$scope.create = () ->
+		$scope.state.inflight = true
+		$scope
+			.createProject($scope.inputs.projectName, template)
+			.then (project_id) ->
+				$scope.state.inflight = false
+				$modalInstance.close(project_id)
 
 	$scope.cancel = () ->
 		$modalInstance.dismiss('cancel')

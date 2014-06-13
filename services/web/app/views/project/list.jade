@@ -18,9 +18,15 @@ block content
 						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
 						ul.dropdown-menu(role="menu")
 							li
-								a#blankNewProject(href="#", data-csrf=csrfToken) Blank Project
+								a(
+									href="#",
+									ng-click="openCreateProjectModal()"
+								) Blank Project
 							li
-								a#newProjectExample(href="#", data-csrf=csrfToken) Example Project
+								a(
+									href="#",
+									ng-click="openCreateProjectModal('example')"
+								)  Example Project
 							li
 								a#uploadNewProject(href="#", data-csrf=csrfToken) Upload Project
 							li.divider
@@ -218,3 +224,26 @@ block content
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
 				button.btn.btn-primary(ng-click="rename()") Rename
+
+		script(type='text/ng-template', id='newProjectModalTemplate')
+			.modal-header
+				h3 New Project
+			.modal-body
+				input.form-control(
+					type="text",
+					placeholder="Project Name",
+					ng-model="inputs.projectName",
+					ng-enter="create()",
+					ng-focus-on="open"
+				)
+			.modal-footer
+				button.btn.btn-default(
+					ng-disabled="state.inflight"
+					ng-click="cancel()"
+				) Cancel
+				button.btn.btn-primary(
+					ng-disabled="state.inflight"
+					ng-click="create()"
+				)
+					span(ng-hide="state.inflight") Create
+					span(ng-show="state.inflight") Creating...
