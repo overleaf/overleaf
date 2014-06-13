@@ -88,7 +88,7 @@ block content
 
 								.project-tools.js-toggle-tools
 									.btn-toolbar
-										.btn-group
+										.btn-group(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default(
 												href='#',
 												data-original-title="Download",
@@ -106,7 +106,7 @@ block content
 											)
 												i.fa.fa-trash-o
 
-										.btn-group
+										.btn-group(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default.dropdown-toggle(
 												href="#",
 												data-toggle="dropdown"
@@ -134,7 +134,7 @@ block content
 												li
 													a(href="#", ng-click="openNewTagModal()") Create New Folder
 
-										.btn-group
+										.btn-group(ng-hide="selectedProjects.length != 1")
 											a.btn.btn-default.dropdown-toggle(data-toggle="dropdown", href="#") More 
 												span.caret
 											ul.dropdown-menu.dropdown-menu-right(role="menu")

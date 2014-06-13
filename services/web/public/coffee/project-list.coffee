@@ -29,6 +29,7 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 	$scope.visibleProjects = $scope.projects
 	$scope.tags = window.data.tags
 	$scope.allSelected = false
+	$scope.selectedProjects = []
 
 	# Allow tags to be accessed on projects as well
 	projectsById = {}
@@ -63,6 +64,18 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 		$scope.allSelected = false
 		$scope.$broadcast "selection:change"
 
+	$scope.updateSelectedProjects = () ->
+		$scope.selectedProjects = $scope.projects.filter (project) -> project.selected
+
+	$scope.getSelectedProjects = () ->
+		$scope.selectedProjects
+
+	$scope.getSelectedProjectIds = () ->
+		$scope.selectedProjects.map (project) -> project._id
+
+	$scope.$on "selection:change", () ->
+		$scope.updateSelectedProjects()
+
 	$scope.updateVisibleProjects = () ->
 		$scope.visibleProjects = []
 		selectedTag = $scope.getSelectedTag()
@@ -75,18 +88,12 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http) ->
 			# Only show if it matches the selected tag
 			if selectedTag? and project._id not in selectedTag.project_ids
 				visible = false
-				
+
 			if visible
 				$scope.visibleProjects.push project
 			else
 				# We don't want hidden selections
 				project.selected = false
-
-	$scope.getSelectedProjects = () ->
-		$scope.projects.filter (project) -> project.selected
-
-	$scope.getSelectedProjectIds = () ->
-		$scope.getSelectedProjects().map (project) -> project._id
 
 	$scope.getSelectedTag = () ->
 		for tag in $scope.tags
