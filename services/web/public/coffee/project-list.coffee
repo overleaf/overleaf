@@ -262,6 +262,12 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 
 		$scope.updateVisibleProjects()
 
+	$scope.openUploadProjectModal = () ->
+		modalInstance = $modal.open(
+			templateUrl: "uploadProjectModalTemplate"
+			controller: "UploadProjectModalController"
+		)
+
 ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 	$scope.onSelectedChange = () ->
 		$scope.$emit "selected:on-change"
@@ -355,5 +361,44 @@ ProjectPageApp.controller 'NewProjectModalController', ($scope, $modalInstance, 
 				$scope.state.inflight = false
 				$modalInstance.close(project_id)
 
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
+
+ProjectPageApp.directive 'ngFineUpload', ($timeout) ->
+	return (scope, element, attrs) ->
+		console.log "Creating fine uploader"
+		new qq.FineUploader
+			element: element[0]
+			multiple: false
+			disabledCancelForFormUploads: true
+			validation:
+				allowedExtensions: ["zip"]
+			request:
+				endpoint: "/project/new/upload"
+				forceMultipart: true
+				params:
+					_csrf: window.csrfToken
+			callbacks:
+				onComplete: (error, name, response)->
+					if response.project_id?
+						window.location = '/project/'+response.project_id
+			text:
+				waitingForResponse: "Creating project..."
+				failUpload: "Upload failed. Is it a valid zip file?"
+				uploadButton: "Select a .zip file"
+			template: """
+				<div class="qq-uploader">
+					<div class="qq-upload-drop-area"><span>{dragZoneText}</span></div>
+					<div class="qq-upload-button btn btn-primary btn-lg">
+						<div>{uploadButtonText}</div>
+					</div>
+					<span class="or btn-lg"> or </span>
+					<span class="drag-here btn-lg">drag a .zip file</span>
+					<span class="qq-drop-processing"><span>{dropProcessingText}</span><span class="qq-drop-processing-spinner"></span></span>
+					<ul class="qq-upload-list"></ul>
+				</div>
+			"""
+
+ProjectPageApp.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout) ->
 	$scope.cancel = () ->
 		$modalInstance.dismiss('cancel')
