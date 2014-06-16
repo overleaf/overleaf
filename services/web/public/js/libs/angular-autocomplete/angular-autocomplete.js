@@ -8,7 +8,6 @@ var app = angular.module('autocomplete', []);
 
 app.directive('autocomplete', function() {
   var index = -1;
-  console.log("helllo")
 
   return {
     restrict: 'E',
