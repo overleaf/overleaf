@@ -1,12 +1,12 @@
-define ["libs/algolia", "libs/typeahead", "libs/angular"], (algolia)->
+define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autocomplete"], (algolia)->
 
-	app = angular.module("userProfileInformationApp", [])
+	app = angular.module("userProfileInformationApp", ["autocomplete"])
 
 	app.factory "Institutions", ->
 		new AlgoliaSearch("SK53GL4JLY", "75dc5e65794cd47eb7f725e6bb5075be").initIndex("institutions")
 
 	app.controller "UpdateForm", ($scope, $http, Institutions)->
-		$scope.institutions = 
+		$scope.institutions = []
 		$scope.hidePersonalInfoSection = true
 
 		$http.get("/user/personal_info").success (data)->
@@ -33,9 +33,9 @@ define ["libs/algolia", "libs/typeahead", "libs/angular"], (algolia)->
 			results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
 			results.length * 20
 
-		$scope.updateInstitutionsList = ->
+		$scope.updateInstitutionsList = (a)->
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
-				$scope.institutions = response.hits
+				$scope.institutions = _.pluck response.hits, "name"
 
 	angular.bootstrap(document.getElementById("userProfileInformation"), ['userProfileInformationApp'])
 

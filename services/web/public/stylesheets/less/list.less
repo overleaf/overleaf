@@ -257,6 +257,57 @@ a.archived-projects {
 		color:#626264;
 		padding-bottom:5px;
 	}
-	#completeUserProfileInformation {
+	form {
+		margin:0px;
 	}
+
 }
+
+
+/* AUTOCOMPLETE */
+
+#institution_auto_complete {
+
+	ul>li{
+		list-style:none;
+	}
+
+	.autocomplete{
+	  width: 100%;
+	  position: relative;
+	}
+
+	.autocomplete ul{
+	  position: absolute;
+	  left: 0;
+	  min-width: 220px;
+	  border-left: 1px solid #888;
+	  border-right: 1px solid #888;
+	  border-bottom: 1px solid #888;
+	  z-index: 1;
+	  margin: -9px -1px 0px 0px;
+
+	}
+
+	.autocomplete li{
+	  text-align: left;
+	  list-style:none;
+	  padding:0.4em;
+	  background-color: #fff;
+	}
+
+	.autocomplete li.active{
+	  background-color: #BDE1F6;
+	}
+
+	.autocomplete .highlight {
+	  background-color: #E2E2E2;
+	}
+
+	.autocomplete li.active .highlight {
+	  background: #666;
+	  color: #fff;
+	}
+	
+}
+
