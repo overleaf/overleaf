@@ -125,9 +125,19 @@ describe "ProjectController", ->
 
 		beforeEach ->
 			@tags = [{name:1, project_ids:["1","2","3"]}, {name:2, project_ids:["a","1"]}, {name:3, project_ids:["a", "b", "c", "d"]}]
-			@projects = [{lastUpdated:1, _id:1}, {lastUpdated:2, _id:2}]
-			@collabertions = [{lastUpdated:5, _id:5}]
-			@readOnly = [{lastUpdated:3, _id:3}]
+			@projects = [{lastUpdated:1, _id:1, owner_ref: "user-1"}, {lastUpdated:2, _id:2, owner_ref: "user-2"}]
+			@collabertions = [{lastUpdated:5, _id:5, owner_ref: "user-1"}]
+			@readOnly = [{lastUpdated:3, _id:3, owner_ref: "user-1"}]
+
+			@users =
+				'user-1': 
+					first_name: 'James'
+				'user-2':
+					first_name: 'Henry'
+			@UserModel.findById = (id, fields, callback) =>
+				fields.should.equal 'first_name last_name'
+				callback null, @users[id]
+
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
@@ -140,13 +150,20 @@ describe "ProjectController", ->
 
 		it "should send the tags", (done)->
 			@res.render = (pageName, opts)=>
-				JSON.parse(opts.tags).length.should.equal @tags.length
+				opts.tags.length.should.equal @tags.length
 				done()
 			@ProjectController.projectListPage @req, @res
 
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
-				JSON.parse(opts.projects).length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it "should inject the users", (done) ->
+			@res.render = (pageName, opts)=>
+				opts.projects[0].owner.should.equal (@users[@projects[0].owner_ref])
+				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
 				done()
 			@ProjectController.projectListPage @req, @res
 

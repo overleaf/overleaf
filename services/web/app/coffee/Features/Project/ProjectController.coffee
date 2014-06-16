@@ -14,7 +14,7 @@ _ = require("underscore")
 Settings = require("settings-sharelatex")
 SecurityManager = require("../../managers/SecurityManager")
 
-module.exports =
+module.exports = ProjectController =
 
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
@@ -92,15 +92,23 @@ module.exports =
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
 			projects: (cb)->
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived', cb
+				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
-					return res.send 500
+					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
-				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1]
-				res.render 'project/list', viewModel
-				timer.done()
+				tags = results.tags[0]
+				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+				ProjectController._injectProjectOwners projects, (error, projects) ->
+					return next(error) if error?
+					res.render 'project/list', {
+						title:'Your Projects'
+						priority_title: true
+						projects: projects
+						tags: tags
+					}
+					timer.done()
 
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
@@ -179,6 +187,49 @@ module.exports =
 					languages: Settings.languages
 					timer.done()
 
+	_buildProjectList: (ownedProjects, sharedProjects, readOnlyProjects)->
+		projects = []
+		for project in ownedProjects
+			projects.push ProjectController._buildProjectViewModel(project, "owner")
+		for project in sharedProjects
+			projects.push ProjectController._buildProjectViewModel(project, "readWrite")
+		for project in readOnlyProjects
+			projects.push ProjectController._buildProjectViewModel(project, "readOnly")
+
+		return projects
+
+	_buildProjectViewModel: (project, accessLevel) ->
+		{
+			id: project._id
+			name: project.name
+			lastUpdated: project.lastUpdated
+			publicAccessLevel: project.publicAccesLevel
+			accessLevel: accessLevel
+			archived: !!project.archived
+			owner_ref: project.owner_ref
+		}
+
+	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
+		users = {}
+		for project in projects
+			if project.owner_ref?
+				users[project.owner_ref.toString()] = true
+
+		jobs = []
+		for user_id, _ of users
+			do (user_id) ->
+				jobs.push (callback) ->
+					User.findById user_id, "first_name last_name", (error, user) ->
+						return callback(error) if error?
+						users[user_id] = user
+						callback()
+
+		async.series jobs, (error) ->
+			for project in projects
+				if project.owner_ref?
+					project.owner = users[project.owner_ref.toString()]
+			callback null, projects
+
 defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id
 	ace:
@@ -195,28 +246,3 @@ defaultSettingsForAnonymousUser = (user_id)->
 		dropbox: false
 		trackChanges: false
 
-_buildListViewModel = (ownedProjects, sharedProjects, readOnlyProjects, tags, tagsGroupedByProject)->
-	projects = []
-	for project in ownedProjects
-		projects.push _buildProjectViewModel(project, "owner")
-	for project in sharedProjects
-		projects.push _buildProjectViewModel(project, "readWrite")
-	for project in readOnlyProjects
-		projects.push _buildProjectViewModel(project, "readOnly")
-
-	return {
-		title:'Your Projects'
-		priority_title: true
-		projects: JSON.stringify(projects)
-		tags: JSON.stringify(tags)
-		projectTabActive: true
-	}
-
-_buildProjectViewModel = (project, accessLevel) ->
-	{
-		id: project._id
-		name: project.name
-		lastUpdated: project.lastUpdated
-		publicAccessLevel: project.publicAccesLevel
-		accessLevel: accessLevel
-	}

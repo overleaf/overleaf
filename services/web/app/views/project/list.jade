@@ -3,8 +3,8 @@ extends ../layout
 block scripts
 	script(type="text/javascript").
 		window.data = {
-			projects: !{projects},
-			tags: !{tags}
+			projects: !{JSON.stringify(projects)},
+			tags: !{JSON.stringify(tags)}
 		};
 
 	script(src=jsPath+'libs/fineuploader.js')
