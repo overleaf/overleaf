@@ -138,6 +138,11 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 		tag.project_ids = remaining_project_ids
 		return removed_project_ids
 
+	$scope._removeProjectFromList = (project) ->
+		index = $scope.projects.indexOf(project)
+		if index > -1
+			$scope.projects.splice(index, 1)
+
 	$scope.removeSelectedProjectsFromTag = (tag) ->
 		selected_project_ids = $scope.getSelectedProjectIds()
 		selected_projects = $scope.getSelectedProjects()
@@ -300,24 +305,43 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 			scope: $scope
 		)
 
-	$scope.archiveSelectedProjects = () ->
+	$scope.openArchiveProjectsModal = () ->
+		modalInstance = $modal.open(
+			templateUrl: "deleteProjectsModalTemplate"
+			controller: "DeleteProjectsModalController"
+			resolve:
+				projects: () -> $scope.getSelectedProjects()
+		)
+
+		modalInstance.result.then () ->
+			$scope.archiveOrLeaveSelectedProjects()
+
+	$scope.archiveOrLeaveSelectedProjects = () ->
 		selected_projects = $scope.getSelectedProjects()
 		selected_project_ids = $scope.getSelectedProjectIds()
-
-		for project in selected_projects
-			project.archived = true
 
 		# Remove project from any tags
 		for tag in $scope.tags
 			$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
 
-		for project_id in selected_project_ids
-			$http {
-				method: "DELETE"
-				url: "/project/#{project_id}"
-				headers:
-					"X-CSRF-Token": window.csrfToken
-			}
+		for project in selected_projects
+			if project.accessLevel == "owner"
+				project.archived = true
+				$http {
+					method: "DELETE"
+					url: "/project/#{project.id}"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				}
+			else
+				$scope._removeProjectFromList project
+
+				$http {
+					method: "POST"
+					url: "/project/#{project.id}/leave"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				}
 
 		$scope.updateVisibleProjects()
 
@@ -327,9 +351,7 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 
 		# Remove projects from array
 		for project in selected_projects
-			index = $scope.projects.indexOf(project)
-			if index > -1
-				$scope.projects.splice(index, 1)
+			$scope._removeProjectFromList project
 
 		# Remove project from any tags
 		for tag in $scope.tags
@@ -488,6 +510,23 @@ ProjectPageApp.controller 'NewProjectModalController', ($scope, $modalInstance, 
 			.then (project_id) ->
 				$scope.state.inflight = false
 				$modalInstance.close(project_id)
+
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
+
+ProjectPageApp.controller 'DeleteProjectsModalController', ($scope, $modalInstance, $timeout, projects) ->
+	$scope.projectsToDelete = projects.filter (project) -> project.accessLevel == "owner"
+	$scope.projectsToLeave = projects.filter (project) -> project.accessLevel != "owner"
+
+	if $scope.projectsToLeave.length > 0 and $scope.projectsToDelete.length > 0
+		$scope.action = "Delete & Leave"
+	else if $scope.projectsToLeave.length == 0 and $scope.projectsToDelete.length > 0
+		$scope.action = "Delete"
+	else
+		$scope.action = "Leave"
+
+	$scope.delete = () ->
+		$modalInstance.close()
 
 	$scope.cancel = () ->
 		$modalInstance.dismiss('cancel')

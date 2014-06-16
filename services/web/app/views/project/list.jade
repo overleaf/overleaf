@@ -110,7 +110,7 @@ block content
 												data-original-title="Delete",
 												data-toggle="tooltip",
 												data-placement="bottom",
-												ng-click="archiveSelectedProjects()"
+												ng-click="openArchiveProjectsModal()"
 											)
 												i.fa.fa-trash-o
 
@@ -305,6 +305,27 @@ block content
 					span(ng-hide="state.inflight") Create
 					span(ng-show="state.inflight") Creating...
 
+		script(type='text/ng-template', id='deleteProjectsModalTemplate')
+			.modal-header
+				h3 {{action}} Projects
+			.modal-body
+				div(ng-show="projectsToDelete.length > 0")
+					p You are about to delete the following projects:
+					ul
+						li(ng-repeat="project in projectsToDelete | orderBy:'name'")
+							strong {{project.name}}
+				div(ng-show="projectsToLeave.length > 0")
+					p You are about to leave the following projects:
+					ul
+						li(ng-repeat="project in projectsToLeave | orderBy:'name'")
+							strong {{project.name}}
+			.modal-footer
+				button.btn.btn-default(
+					ng-click="cancel()"
+				) Cancel
+				button.btn.btn-danger(
+					ng-click="delete()"
+				) {{action}}
 
 		script(type="text/ng-template", id="uploadProjectModalTemplate")
 			.modal-header
@@ -312,4 +333,4 @@ block content
 			.modal-body(ng-fine-upload)
 				span Upload a zipped project
 			.modal-footer
-				button.btn.btn-default.cancel(ng-click="cancel()") Cancel
+				button.btn.btn-default(ng-click="cancel()") Cancel
