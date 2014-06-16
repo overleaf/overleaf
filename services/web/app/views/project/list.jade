@@ -120,7 +120,7 @@ block content
 									div(ng-show="formVisable")
 										form(enctype='multipart/form-data', method='post')
 											.input
-												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()", placeholder="First Name")
+												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()", placeholder="First Name", focus-input="formVisable")
 											.input
 												input(type='text', name='last_name', ng-model="userInfoForm.last_name", ng-blur="sendUpdate()", placeholder='Last Name')
 											.input#institution_auto_complete

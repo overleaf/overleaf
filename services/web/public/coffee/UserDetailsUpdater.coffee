@@ -5,6 +5,13 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 	app.factory "Institutions", ->
 		new AlgoliaSearch("SK53GL4JLY", "75dc5e65794cd47eb7f725e6bb5075be").initIndex("institutions")
 
+	app.directive "focusInput", ($timeout) ->
+		return (scope, element, attr) ->
+			scope.$watch attr.focusInput, (value) ->
+				if value
+					$timeout ->
+						element.select()
+
 	app.controller "UpdateForm", ($scope, $http, Institutions)->
 		$scope.institutions = []
 		$scope.formVisable = false
