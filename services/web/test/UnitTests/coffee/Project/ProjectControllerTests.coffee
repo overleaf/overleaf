@@ -140,32 +140,15 @@ describe "ProjectController", ->
 
 		it "should send the tags", (done)->
 			@res.render = (pageName, opts)=>
-				opts.tags.length.should.equal @tags.length
+				JSON.parse(opts.tags).length.should.equal @tags.length
 				done()
 			@ProjectController.projectListPage @req, @res
 
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
-				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				JSON.parse(opts.projects).length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
 				done()
 			@ProjectController.projectListPage @req, @res
-
-	describe "archivedProjects", ->
-		beforeEach ->
-			@projects = [{lastUpdated:1, _id:1}, {lastUpdated:2, _id:2}]
-			@ProjectDeleter.findArchivedProjects.callsArgWith(2, null, @projects)
-
-		it "should render the project/archived page", (done)->
-			@res.render = (pageName, opts)=>
-				pageName.should.equal "project/archived"
-				done()
-			@ProjectController.archivedProjects @req, @res
-
-		it "should send the projects", (done)->
-			@res.render = (pageName, opts)=>
-				opts.projects.length.should.equal (@projects.length)
-				done()
-			@ProjectController.archivedProjects @req, @res
 
 	describe "renameProject", ->
 		beforeEach ->

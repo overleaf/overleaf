@@ -92,7 +92,7 @@ module.exports =
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
 			projects: (cb)->
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel', cb
+				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived', cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -101,14 +101,6 @@ module.exports =
 				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1]
 				res.render 'project/list', viewModel
 				timer.done()
-
-	archivedProjects: (req, res, next)->
-		user_id = req.session.user._id
-		projectDeleter.findArchivedProjects user_id, 'name lastUpdated publicAccesLevel', (error, projects) ->
-			return next(error) if error?
-			logger.log projects: projects, user_id:user_id, "rendering archived project list"
-			viewModel = _buildListViewModel projects, [], [], [], {}
-			res.render 'project/archived', viewModel
 
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
@@ -203,19 +195,14 @@ defaultSettingsForAnonymousUser = (user_id)->
 		dropbox: false
 		trackChanges: false
 
-_buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGroupedByProject)->
-	for project in projects
-		project.accessLevel = "owner"
-	for project in collabertions
-		project.accessLevel = "readWrite"
+_buildListViewModel = (ownedProjects, sharedProjects, readOnlyProjects, tags, tagsGroupedByProject)->
+	projects = []
+	for project in ownedProjects
+		projects.push _buildProjectViewModel(project, "owner")
+	for project in sharedProjects
+		projects.push _buildProjectViewModel(project, "readWrite")
 	for project in readOnlyProjects
-		project.accessLevel = "readOnly"
-	projects = projects.concat(collabertions).concat(readOnlyProjects)
-	projects = projects.map (project)->
-		project.tags = tagsGroupedByProject[project._id] || []
-		return project
-	tags = _.sortBy tags, (tag)->
-		-tag.project_ids.length
+		projects.push _buildProjectViewModel(project, "readOnly")
 
 	return {
 		title:'Your Projects'
@@ -223,4 +210,13 @@ _buildListViewModel = (projects, collabertions, readOnlyProjects, tags, tagsGrou
 		projects: JSON.stringify(projects)
 		tags: JSON.stringify(tags)
 		projectTabActive: true
+	}
+
+_buildProjectViewModel = (project, accessLevel) ->
+	{
+		id: project._id
+		name: project.name
+		lastUpdated: project.lastUpdated
+		publicAccessLevel: project.publicAccesLevel
+		accessLevel: accessLevel
 	}

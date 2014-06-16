@@ -56,9 +56,3 @@ module.exports = ProjectDeleter =
 
 	restoreProject: (project_id, callback = (error) ->) ->
 		Project.update {_id:project_id}, { $unset: { archived: true }}, callback
-
-	findArchivedProjects: (owner_id, fields, callback = (error, projects) ->) ->
-		Project.find {
-			owner_ref: owner_id
-			archived: true
-		}, fields, callback

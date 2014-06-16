@@ -113,19 +113,3 @@ describe 'Project deleter', ->
 				}).should.equal true
 				done()
 
-	describe "findArchivedProjects", ->
-		beforeEach ->
-			@projects = ["mock-project"]
-			@owner_id = "mock-owner-id"
-			@callback = sinon.stub()
-			@Project.find = sinon.stub().callsArgWith(2, null, @projects)
-			@deleter.findArchivedProjects @owner_id, @fields = "name lastModified", @callback
-
-		it "should find the archived projects for the owner", ->
-			@Project.find
-				.calledWith(owner_ref: @owner_id, archived: true, @fields)
-				.should.equal true
-
-		it "should return the projects", ->
-			@callback.calledWith(null, @projects).should.equal true
-
