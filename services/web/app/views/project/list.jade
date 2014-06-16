@@ -51,12 +51,12 @@ block content
 								a.menu-indent(href="/templates") View All »
 					.row-spaced
 						ul.list-unstyled.folders-menu.js-folders-menu(ng-controller="TagListController")
-							li(ng-class="{active: (view == 'all')}")
-								a.menu-indent(href="#", ng-click="selectAllProjects()") All projects
-							//- li
-							//- 	a.menu-indent(href="#") Your projects
-							//- li
-							//- 	a.menu-indent(href="#") Shared with you
+							li(ng-class="{active: (filter == 'all')}")
+								a.menu-indent(href, ng-click="selectAllProjects()") All projects
+							li(ng-class="{active: (filter == 'owned')}")
+								a.menu-indent(href, ng-click="selectOwnedProjects()") Your projects
+							li(ng-class="{active: (filter == 'shared')}")
+								a.menu-indent(href, ng-click="selectSharedProjects()") Shared projects
 							li 
 								h2 Folders
 							li(
@@ -119,7 +119,7 @@ block content
 											)
 												i.fa.fa-trash-o
 
-										.btn-group(ng-hide="selectedProjects.length < 1")
+										.btn-group.dropdown(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default.dropdown-toggle(
 												href="#",
 												data-toggle="dropdown"
@@ -138,8 +138,9 @@ block content
 													a(href="#", ng-click="addOrRemoveProjectsFromTag()")
 														i.fa(
 															ng-class="{\
-																'fa-check-square-o': areSelectedProjectsInTag,\
-																'fa-square-o': !areSelectedProjectsInTag\
+																'fa-check-square-o': areSelectedProjectsInTag == true,\
+																'fa-square-o': areSelectedProjectsInTag == false,\
+																'fa-minus-square-o': areSelectedProjectsInTag == 'partial'\
 															}"
 														)
 														|  {{tag.name}}
@@ -167,7 +168,11 @@ block content
 											li.container-fluid
 												.row
 													.col-md-6
-														input.select-all(type="checkbox", ng-model="allSelected", ng-change="onSelectAllChange()")
+														input.select-all(
+															type="checkbox",
+															ng-model="allSelected",
+															ng-change="onSelectAllChange()"
+														)
 														span.title TITLE
 													.col-md-2
 														span.owner OWNER
@@ -186,7 +191,7 @@ block content
 															span.label.label-default(ng-repeat='tag in project.tags')
 																| {{tag.name}}
 													.col-md-2
-														span.owner {{project.publicAccesLevel}}
+														span.owner {{ownerName()}}
 													.col-md-4
 														span.last-modified.isoDate {{project.lastUpdated | formatDate}}
 									- else

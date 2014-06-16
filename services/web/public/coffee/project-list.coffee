@@ -30,11 +30,12 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 	$scope.tags = window.data.tags
 	$scope.allSelected = false
 	$scope.selectedProjects = []
+	$scope.filter = "all"
 
 	# Allow tags to be accessed on projects as well
 	projectsById = {}
 	for project in $scope.projects
-		projectsById[project._id] = project
+		projectsById[project.id] = project
 
 	for tag in $scope.tags
 		for project_id in tag.project_ids or []
@@ -58,6 +59,10 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 	$scope.$watch "searchText", (value) ->
 		$scope.updateVisibleProjects()
 
+	$scope.setFilter = (filter) ->
+		$scope.filter = filter
+		$scope.updateVisibleProjects()
+
 	$scope.clearProjectSelections = () ->
 		for project in $scope.projects
 			project.selected = false
@@ -71,7 +76,7 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 		$scope.selectedProjects
 
 	$scope.getSelectedProjectIds = () ->
-		$scope.selectedProjects.map (project) -> project._id
+		$scope.selectedProjects.map (project) -> project.id
 
 	$scope.getFirstSelectedProject = () ->
 		$scope.selectedProjects[0]
@@ -89,7 +94,15 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 				if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
 					visible = false
 			# Only show if it matches the selected tag
-			if selectedTag? and project._id not in selectedTag.project_ids
+			if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids
+				visible = false
+
+			# Hide projects we own if we only want to see shared projects
+			if $scope.filter == "shared" and project.accessLevel == "owner"
+				visible = false
+
+			# Hide projects we don't own if we only want to see owned projects
+			if $scope.filter == "owned" and project.accessLevel != "owner"
 				visible = false
 
 			if visible
@@ -113,12 +126,13 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 			else
 				removed_project_ids.push project_id
 		tag.project_ids = remaining_project_ids
+		return removed_project_ids
 
 	$scope.removeSelectedProjectsFromTag = (tag) ->
 		selected_project_ids = $scope.getSelectedProjectIds()
 		selected_projects = $scope.getSelectedProjects()
 
-		$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
+		removed_project_ids = $scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
 
 		# Remove tag from project.tags
 		remaining_tags = []
@@ -151,7 +165,8 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 		# Add tag into each project.tags
 		for project in selected_projects
 			project.tags ||= []
-			project.tags.push tag
+			unless tag in project.tags
+				project.tags.push tag
 
 		for project_id in added_project_ids
 			# TODO Factor this out into another provider?
@@ -217,7 +232,7 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 
 	$scope.renameProject = (project, newName) ->
 		project.name = newName
-		$http.post "/project/#{project._id}/rename", {
+		$http.post "/project/#{project.id}/rename", {
 			newProjectName: newName
 			_csrf: window.csrfToken
 		}
@@ -272,27 +287,36 @@ ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 	$scope.onSelectedChange = () ->
 		$scope.$emit "selected:on-change"
 
-ProjectPageApp.controller "TagListController", ($scope) ->
-	$scope.view = "all"
+	$scope.ownerName = () ->
+		if $scope.project.accessLevel == "owner"
+			return "You"
+		else if $scope.project.owner?
+			return "#{$scope.project.owner.first_name} #{$scope.project.owner.last_name}"
+		else
+			return "?"
 
+ProjectPageApp.controller "TagListController", ($scope) ->
 	$scope.selectAllProjects = () ->
 		$scope._clearTags()
-		$scope.setActiveItem("all")
-		$scope.updateVisibleProjects()
+		$scope.setFilter("all")
+
+	$scope.selectOwnedProjects = () ->
+		$scope._clearTags()
+		$scope.setFilter("owned")
+
+	$scope.selectSharedProjects = () ->
+		$scope._clearTags()
+		$scope.setFilter("shared")
 
 	$scope._clearTags = () ->
 		for tag in $scope.tags
 			tag.selected = false
 
-	$scope.setActiveItem = (view) ->
-		$scope.view = view
-
 ProjectPageApp.controller "TagListItemController", ($scope) ->
 	$scope.selectTag = () ->
 		$scope._clearTags()
 		$scope.tag.selected = true
-		$scope.setActiveItem("tag")
-		$scope.updateVisibleProjects()
+		$scope.setFilter("tag")
 
 ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 	$scope.$on "selection:change", (e, newValue, oldValue) ->
@@ -303,12 +327,17 @@ ProjectPageApp.controller "TagDropdownItemController", ($scope) ->
 		for project_id in $scope.getSelectedProjectIds()
 			if project_id in $scope.tag.project_ids
 				$scope.areSelectedProjectsInTag = true
+			else
+				partialSelection = true
+
+		if $scope.areSelectedProjectsInTag and partialSelection
+			$scope.areSelectedProjectsInTag = "partial"
 
 	$scope.addOrRemoveProjectsFromTag = () ->
-		if $scope.areSelectedProjectsInTag
+		if $scope.areSelectedProjectsInTag == true
 			$scope.removeSelectedProjectsFromTag($scope.tag)
 			$scope.areSelectedProjectsInTag = false
-		else
+		else if $scope.areSelectedProjectsInTag == false or $scope.areSelectedProjectsInTag == "partial"
 			$scope.addSelectedProjectsToTag($scope.tag)
 			$scope.areSelectedProjectsInTag = true
 
