@@ -82,6 +82,13 @@
 .modal-header .close {
   margin-top: -2px;
 }
+.modal-header {
+  h1, h2, h3, h4, h5 {
+    margin: 0;
+    font-family: @font-family-sans-serif;
+    font-weight: 700;
+  }
+}
 
 // Title text within header
 .modal-title {
@@ -98,10 +105,12 @@
 
 // Footer (for actions)
 .modal-footer {
-  margin-top: 15px;
+  //margin-top: 15px;
   padding: (@modal-inner-padding - 1) @modal-inner-padding @modal-inner-padding;
   text-align: right; // right align buttons
   border-top: 1px solid @modal-footer-border-color;
+  background-color: @modal-footer-background-color;
+  border-radius: 0 0 @border-radius-large @border-radius-large;
   &:extend(.clearfix all); // clear it in case folks use .pull-* classes on buttons
 
   // Properly space out buttons

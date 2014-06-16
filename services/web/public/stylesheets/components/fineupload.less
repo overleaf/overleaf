@@ -1,0 +1,159 @@
+/*
+ * Original version: 1.0 © 2010 Andrew Valums ( andrew(at)valums.com )
+ * Current Maintainer (2.0+): 2012, Ray Nicholus ( fineuploader(at)garstasio.com )
+ *
+ * Licensed under MIT license, GNU GPL 2 or later, GNU LGPL 2 or later, see license.txt.
+ */
+.qq-uploader {
+    position: relative;
+    width: 100%;
+}
+.qq-uploader {
+	text-align: center;
+	.drag-here {
+		border: 1px dashed #666;
+		vertical-align: middle;
+	}
+	.help {
+		margin-top: 6px;
+	}
+}
+/*.qq-upload-button {
+    display: block;
+    width: 105px;
+    padding: 7px 0;
+    text-align: center;
+    background: #880000;
+    border-bottom: 1px solid #DDD;
+    color: #FFF;
+}
+.qq-upload-button-hover {
+    background: #CC0000;
+}
+.qq-upload-button-focus {
+    outline: 1px dotted #000000;
+}*/
+.qq-upload-drop-area, .qq-upload-extra-drop-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 30px;
+    z-index: 2;
+    background: @orange;
+    text-align: center;
+}
+.qq-upload-drop-area span {
+    display: block;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    margin-top: -8px;
+    font-size: 16px;
+}
+.qq-upload-extra-drop-area {
+    position: relative;
+    margin-top: 50px;
+    font-size: 16px;
+    padding-top: 30px;
+    height: 20px;
+    min-height: 40px;
+}
+.qq-upload-drop-area-active {
+    background: darken(@orange, 15%);
+}
+.qq-upload-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.qq-upload-list li {
+    margin: 0;
+	margin-top: 10px;
+    padding: 9px;
+    line-height: 15px;
+    font-size: 16px;
+    background-color: @gray-lighter;
+}
+.qq-upload-file, .qq-upload-spinner, .qq-upload-size, .qq-upload-cancel, .qq-upload-retry, .qq-upload-failed-text, .qq-upload-finished, .qq-upload-delete {
+    margin-right: 12px;
+}
+.qq-upload-file {
+}
+.qq-upload-spinner {
+    display: inline-block;
+    background: url("loading.gif");
+    width: 15px;
+    height: 15px;
+    vertical-align: text-bottom;
+}
+.qq-drop-processing {
+    display: none;
+}
+.qq-drop-processing-spinner {
+    display: inline-block;
+    background: url("processing.gif");
+    width: 24px;
+    height: 24px;
+    vertical-align: text-bottom;
+}
+.qq-upload-finished {
+    display:none;
+    width:15px;
+    height:15px;
+    vertical-align:text-bottom;
+}
+.qq-upload-retry, .qq-upload-delete {
+    display: none;
+    color: #000000;
+}
+.qq-upload-cancel, .qq-upload-delete {
+	color: #000000;
+}
+.qq-upload-retryable .qq-upload-retry {
+    display: inline;
+}
+.qq-upload-size, .qq-upload-cancel, .qq-upload-retry, .qq-upload-delete {
+    font-size: 12px;
+    font-weight: normal;
+}
+.qq-upload-failed-text {
+    display: none;
+    font-style: italic;
+    font-weight: bold;
+}
+.qq-upload-failed-icon {
+    display:none;
+    width:15px;
+    height:15px;
+    vertical-align:text-bottom;
+}
+.qq-upload-fail .qq-upload-failed-text {
+    display: inline;
+}
+.qq-upload-retrying .qq-upload-failed-text {
+    display: inline;
+    color: #D60000;
+}
+.qq-upload-list li.qq-upload-success {
+    background-color: @green;
+    color: #FFFFFF;
+}
+.qq-upload-list li.qq-upload-fail {
+    background-color: @red;
+    color: #FFFFFF;
+}
+.qq-progress-bar {
+    background: -moz-linear-gradient(top,  rgba(30,87,153,1) 0%, rgba(41,137,216,1) 50%, rgba(32,124,202,1) 51%, rgba(125,185,232,1) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(50%,rgba(41,137,216,1)), color-stop(51%,rgba(32,124,202,1)), color-stop(100%,rgba(125,185,232,1))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* W3C */
+    width: 0%;
+    height: 15px;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    display: none;
+}

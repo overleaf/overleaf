@@ -1,4 +1,4 @@
-window.ProjectPageApp = angular.module("ProjectPageApp", ['ui.bootstrap'])
+window.ProjectPageApp = angular.module("ProjectPageApp", ['ui.bootstrap.modal'])
 
 $ () ->
 	$(".js-tags-dropdown-menu input, .js-tags-dropdown-menu a").click (e) ->
@@ -366,7 +366,6 @@ ProjectPageApp.controller 'NewProjectModalController', ($scope, $modalInstance, 
 
 ProjectPageApp.directive 'ngFineUpload', ($timeout) ->
 	return (scope, element, attrs) ->
-		console.log "Creating fine uploader"
 		new qq.FineUploader
 			element: element[0]
 			multiple: false
