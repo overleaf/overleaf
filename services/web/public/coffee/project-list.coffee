@@ -1,4 +1,4 @@
-window.ProjectPageApp = angular.module("ProjectPageApp", ['ui.bootstrap.modal'])
+window.ProjectPageApp = angular.module("ProjectPageApp", ['ui.bootstrap'])
 
 $ () ->
 	$(".js-tags-dropdown-menu input, .js-tags-dropdown-menu a").click (e) ->
