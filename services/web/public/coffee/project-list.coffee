@@ -345,6 +345,18 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 
 		$scope.updateVisibleProjects()
 
+
+	$scope.openDeleteProjectsModal = () ->
+		modalInstance = $modal.open(
+			templateUrl: "deleteProjectsModalTemplate"
+			controller: "DeleteProjectsModalController"
+			resolve:
+				projects: () -> $scope.getSelectedProjects()
+		)
+
+		modalInstance.result.then () ->
+			$scope.deleteSelectedProjects()
+
 	$scope.deleteSelectedProjects = () ->
 		selected_projects = $scope.getSelectedProjects()
 		selected_project_ids = $scope.getSelectedProjectIds()
