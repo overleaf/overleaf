@@ -263,6 +263,43 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 				$scope.renameProject(project, newName)
 		)
 
+	$scope.cloneProject = (project, cloneName) ->
+		deferred = $q.defer()
+
+		$http
+			.post("/project/#{project.id}/clone", {
+				_csrf: window.csrfToken
+				projectName: cloneName
+			})
+			.success((data, status, headers, config) ->
+				$scope.projects.push {
+					name: cloneName
+					id: data.project_id
+					accessLevel: "owner"
+					# TODO: Check access level if correct after adding it in
+					# to the rest of the app
+				}
+				$scope.updateVisibleProjects()
+				deferred.resolve(data.project_id)
+			)
+			.error((data, status, headers, config) ->
+				deferred.reject()
+			)
+
+		return deferred.promise
+
+	$scope.openCloneProjectModal = () ->
+		project = $scope.getFirstSelectedProject()
+		return if !project?
+
+		modalInstance = $modal.open(
+			templateUrl: "cloneProjectModalTemplate"
+			controller: "CloneProjectModalController"
+			resolve:
+				project: () -> project
+			scope: $scope
+		)
+
 	$scope.archiveSelectedProjects = () ->
 		selected_projects = $scope.getSelectedProjects()
 		selected_project_ids = $scope.getSelectedProjectIds()
@@ -407,6 +444,28 @@ ProjectPageApp.controller 'RenameProjectModalController', ($scope, $modalInstanc
 
 	$scope.rename = () ->
 		$modalInstance.close($scope.inputs.projectName)
+
+	$scope.cancel = () ->
+		$modalInstance.dismiss('cancel')
+
+ProjectPageApp.controller 'CloneProjectModalController', ($scope, $modalInstance, $timeout, project) ->
+	$scope.inputs = 
+		projectName: project.name + " (Copy)"
+	$scope.state =
+		inflight: false
+
+	$modalInstance.opened.then () ->
+		$timeout () ->
+			$scope.$broadcast "open"
+		, 700
+
+	$scope.clone = () ->
+		$scope.state.inflight = true
+		$scope
+			.cloneProject(project, $scope.inputs.projectName)
+			.then (project_id) ->
+				$scope.state.inflight = false
+				$modalInstance.close(project_id)
 
 	$scope.cancel = () ->
 		$modalInstance.dismiss('cancel')

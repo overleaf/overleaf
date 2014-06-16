@@ -155,6 +155,11 @@ block content
 														href='#',
 														ng-click="openRenameProjectModal()"
 													) Rename
+												li
+													a(
+														href='#',
+														ng-click="openCloneProjectModal()"
+													) Make a copy
 
 									.btn-toolbar(ng-show="filter == 'archived'")
 										.btn-group(ng-hide="selectedProjects.length < 1")
@@ -251,6 +256,31 @@ block content
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
 				button.btn.btn-primary(ng-click="rename()") Rename
+
+		script(type='text/ng-template', id='cloneProjectModalTemplate')
+			.modal-header
+				h3 Copy Project
+			.modal-body
+				.form-group
+					label New Name
+					input.form-control(
+						type="text",
+						placeholder="New Project Name",
+						ng-model="inputs.projectName",
+						ng-enter="clone()",
+						ng-focus-on="open"
+					)
+			.modal-footer
+				button.btn.btn-default(
+					ng-disabled="state.inflight"
+					ng-click="cancel()"
+				) Cancel
+				button.btn.btn-primary(
+					ng-disabled="state.inflight"
+					ng-click="clone()"
+				)
+					span(ng-hide="state.inflight") Copy
+					span(ng-show="state.inflight") Copying...
 
 		script(type='text/ng-template', id='newProjectModalTemplate')
 			.modal-header
