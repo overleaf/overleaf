@@ -46,7 +46,8 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 
 		$scope.updateInstitutionsList = (a)->
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
-				$scope.institutions = _.pluck response.hits, "name"
+				$scope.institutions = _.map response.hits, (institution)->
+					"#{institution.name} <span class='muted'>#{institution.domain}</span>"
 
 
 
