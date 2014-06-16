@@ -7,10 +7,12 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 
 	app.controller "UpdateForm", ($scope, $http, Institutions)->
 		$scope.institutions = []
+		$scope.formVisable = false
 		$scope.hidePersonalInfoSection = true
+		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Proffessor"]
 
 		$http.get("/user/personal_info").success (data)->
-			$scope.userInfoForm = 
+			$scope.userInfoForm =
 				first_name: data.first_name
 				last_name: data.last_name
 				role: 	   data.role
@@ -21,10 +23,12 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 				$scope.percentComplete = getPercentComplete()
 				$scope.hidePersonalInfoSection = false
 
+		$scope.showForm = ->
+			$scope.formVisable = true
+
 		$scope.sendUpdate = ->
 			request = $http.post "/user/personal_info", $scope.userInfoForm
 			request.success (data, status)->
-				console.log "the post worked"
 			request.error (data, status)->
 				console.log "the request failed"
 			$scope.percentComplete = getPercentComplete()
@@ -36,6 +40,8 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 		$scope.updateInstitutionsList = (a)->
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
 				$scope.institutions = _.pluck response.hits, "name"
+
+
 
 	angular.bootstrap(document.getElementById("userProfileInformation"), ['userProfileInformationApp'])
 
