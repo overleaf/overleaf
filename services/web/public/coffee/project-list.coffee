@@ -105,11 +105,21 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 			if $scope.filter == "owned" and project.accessLevel != "owner"
 				visible = false
 
+			if $scope.filter == "archived"
+				# Only show archived projects
+				if !project.archived
+					visible = false
+			else
+				# Only show non-archived projects
+				if project.archived
+					visible = false
+
 			if visible
 				$scope.visibleProjects.push project
 			else
 				# We don't want hidden selections
 				project.selected = false
+		$scope.updateSelectedProjects()
 
 	$scope.getSelectedTag = () ->
 		for tag in $scope.tags
@@ -253,6 +263,27 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 				$scope.renameProject(project, newName)
 		)
 
+	$scope.archiveSelectedProjects = () ->
+		selected_projects = $scope.getSelectedProjects()
+		selected_project_ids = $scope.getSelectedProjectIds()
+
+		for project in selected_projects
+			project.archived = true
+
+		# Remove project from any tags
+		for tag in $scope.tags
+			$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
+
+		for project_id in selected_project_ids
+			$http {
+				method: "DELETE"
+				url: "/project/#{project_id}"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			}
+
+		$scope.updateVisibleProjects()
+
 	$scope.deleteSelectedProjects = () ->
 		selected_projects = $scope.getSelectedProjects()
 		selected_project_ids = $scope.getSelectedProjectIds()
@@ -270,7 +301,24 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 		for project_id in selected_project_ids
 			$http {
 				method: "DELETE"
-				url: "/project/#{project_id}"
+				url: "/project/#{project_id}?forever=true"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			}
+
+		$scope.updateVisibleProjects()
+
+	$scope.restoreSelectedProjects = () ->
+		selected_projects = $scope.getSelectedProjects()
+		selected_project_ids = $scope.getSelectedProjectIds()
+
+		for project in selected_projects
+			project.archived = false
+
+		for project_id in selected_project_ids
+			$http {
+				method: "POST"
+				url: "/project/#{project_id}/restore"
 				headers:
 					"X-CSRF-Token": window.csrfToken
 			}
@@ -296,17 +344,9 @@ ProjectPageApp.controller "ProjectListItemController", ($scope) ->
 			return "?"
 
 ProjectPageApp.controller "TagListController", ($scope) ->
-	$scope.selectAllProjects = () ->
+	$scope.filterProjects = (filter = "all") ->
 		$scope._clearTags()
-		$scope.setFilter("all")
-
-	$scope.selectOwnedProjects = () ->
-		$scope._clearTags()
-		$scope.setFilter("owned")
-
-	$scope.selectSharedProjects = () ->
-		$scope._clearTags()
-		$scope.setFilter("shared")
+		$scope.setFilter(filter)
 
 	$scope._clearTags = () ->
 		for tag in $scope.tags

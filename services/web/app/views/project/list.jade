@@ -52,11 +52,13 @@ block content
 					.row-spaced
 						ul.list-unstyled.folders-menu.js-folders-menu(ng-controller="TagListController")
 							li(ng-class="{active: (filter == 'all')}")
-								a.menu-indent(href, ng-click="selectAllProjects()") All projects
+								a.menu-indent(href, ng-click="filterProjects('all')") All projects
 							li(ng-class="{active: (filter == 'owned')}")
-								a.menu-indent(href, ng-click="selectOwnedProjects()") Your projects
+								a.menu-indent(href, ng-click="filterProjects('owned')") Your projects
 							li(ng-class="{active: (filter == 'shared')}")
-								a.menu-indent(href, ng-click="selectSharedProjects()") Shared projects
+								a.menu-indent(href, ng-click="filterProjects('shared')") Shared projects
+							li(ng-class="{active: (filter == 'archived')}")
+								a.menu-indent(href, ng-click="filterProjects('archived')") Deleted projects
 							li 
 								h2 Folders
 							li(
@@ -73,13 +75,6 @@ block content
 									)
 									|  {{tag.name}} 
 								span.small ({{tag.project_ids.length}})
-
-					.row-spaced-small
-						ul.list-unstyled.folders-menu
-							li
-								a.menu-indent(href="#")
-									i.icon.fa.fa-plus
-									|  New Folder
 
 					-if (settings.enableSubscriptions)
 						.row-spaced
@@ -100,7 +95,7 @@ block content
 									//- i.fa.fa-remove
 
 								.project-tools.js-toggle-tools
-									.btn-toolbar
+									.btn-toolbar(ng-show="filter != 'archived'")
 										.btn-group(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default(
 												href='#',
@@ -115,7 +110,7 @@ block content
 												data-original-title="Delete",
 												data-toggle="tooltip",
 												data-placement="bottom",
-												ng-click="deleteSelectedProjects()"
+												ng-click="archiveSelectedProjects()"
 											)
 												i.fa.fa-trash-o
 
@@ -160,6 +155,26 @@ block content
 														href='#',
 														ng-click="openRenameProjectModal()"
 													) Rename
+
+									.btn-toolbar(ng-show="filter == 'archived'")
+										.btn-group(ng-hide="selectedProjects.length < 1")
+											a.btn.btn-default(
+												href='#',
+												data-original-title="Restore",
+												data-toggle="tooltip",
+												data-placement="bottom",
+												ng-click="restoreSelectedProjects()"
+											) Restore
+
+										.btn-group(ng-hide="selectedProjects.length < 1")
+											a.btn.btn-danger(
+												href='#',
+												data-original-title="Delete Forever",
+												data-toggle="tooltip",
+												data-placement="bottom",
+												ng-click="deleteSelectedProjects()"
+											) Delete Forever
+
 						.row.row-spaced
 							.col-md-12
 								.card.card-thin
