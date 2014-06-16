@@ -249,7 +249,7 @@ ProjectPageApp.controller "ProjectPageController", ($scope, $modal, $http, $q) -
 
 	$scope.openRenameProjectModal = () ->
 		project = $scope.getFirstSelectedProject()
-		return if !project?
+		return if !project? or project.accessLevel != "owner"
 
 		modalInstance = $modal.open(
 			templateUrl: "renameProjectModalTemplate"

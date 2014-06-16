@@ -143,14 +143,14 @@ block content
 												li
 													a(href="#", ng-click="openNewTagModal()") Create New Folder
 
-										.btn-group(ng-hide="selectedProjects.length != 1")
+										.btn-group(ng-hide="selectedProjects.length != 1").dropdown
 											a.btn.btn-default.dropdown-toggle(
 												href='#',
 												data-toggle="dropdown"
 											) More 
 												span.caret
 											ul.dropdown-menu.dropdown-menu-right(role="menu")
-												li
+												li(ng-show="getFirstSelectedProject().accessLevel == 'owner'")
 													a(
 														href='#',
 														ng-click="openRenameProjectModal()"
