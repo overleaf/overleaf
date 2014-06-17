@@ -80,6 +80,9 @@ module.exports = (grunt) ->
 		requirejs:
 			compile:
 				options:
+					optimize:"uglify2"
+					uglify2:
+						mangle: false
 					appDir: "public/js"
 					baseUrl: "./"
 					dir: "public/minjs"

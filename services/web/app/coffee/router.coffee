@@ -91,8 +91,9 @@ module.exports = class Router
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
+		app.post  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.updatePersonalInfo
 		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
-		
+
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
