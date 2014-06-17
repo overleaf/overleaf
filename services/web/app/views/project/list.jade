@@ -7,16 +7,16 @@ block scripts
 			tags: !{JSON.stringify(tags)}
 		};
 
-	script(src=jsPath+'libs/fineuploader.js')
-	script(src=jsPath+'project-list.js')
-
 block content
-	.content.content-alt(ng-app="ProjectPageApp", ng-controller="ProjectPageController")
+	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			.row
 				.col-md-2
 					#newProject.dropdown
-						a.btn.btn-primary.dropdown-toggle(data-toggle="dropdown", href="#") New Project
+						a.btn.btn-primary.dropdown-toggle(
+							href="#",
+							data-toggle="dropdown"
+						) New Project
 						ul.dropdown-menu(role="menu")
 							li
 								a(

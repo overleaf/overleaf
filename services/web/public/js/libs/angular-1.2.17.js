@@ -3836,6 +3836,7 @@ function createInjector(modulesToLoad) {
           /* jshint -W022 */
           e = e.message + '\n' + e.stack;
         }
+        console.log(module)
         throw $injectorMinErr('modulerr', "Failed to instantiate module {0} due to:\n{1}",
                   module, e.stack || e.message || e);
       }

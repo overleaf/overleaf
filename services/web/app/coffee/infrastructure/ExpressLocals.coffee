@@ -17,7 +17,7 @@ logger.log "Generating file fingerprints..."
 for path in [
     "#{jsPath}libs/require.js",
     "#{jsPath}ide.js",
-    "#{jsPath}main.js",
+    "#{jsPath}app/main.js",
     "#{jsPath}list.js",
     "#{jsPath}libs/pdf.js",
     "#{jsPath}libs/pdf.worker.js",

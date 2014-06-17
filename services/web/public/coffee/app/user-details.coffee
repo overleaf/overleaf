@@ -1,18 +1,18 @@
-define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autocomplete"], (algolia)->
-
-	app = angular.module("userProfileInformationApp", ["autocomplete"])
-
-	app.factory "Institutions", ->
+define [
+	"base"
+	"../libs/algolia"
+], (App, algolia)->
+	App.factory "Institutions", ->
 		new AlgoliaSearch("SK53GL4JLY", "1606ccef5b70ac44680b61e6b0285126").initIndex("institutions")
 
-	app.directive "focusInput", ($timeout) ->
+	App.directive "focusInput", ($timeout) ->
 		return (scope, element, attr) ->
 			scope.$watch attr.focusInput, (value) ->
 				if value
 					$timeout ->
 						element.select()
 
-	app.controller "UpdateForm", ($scope, $http, Institutions)->
+	App.controller "UpdateForm", ($scope, $http, Institutions)->
 		$scope.institutions = []
 		$scope.formVisable = false
 		$scope.hidePersonalInfoSection = true
@@ -54,8 +54,4 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
 				$scope.institutions = _.map response.hits, (institution)->
 					"#{institution.name} (<span class='muted'>#{institution.domain}</span>)"
-
-
-
-	angular.bootstrap(document.getElementById("userProfileInformation"), ['userProfileInformationApp'])
 
