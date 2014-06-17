@@ -102,13 +102,24 @@ module.exports = ProjectController =
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
-					res.render 'project/list', {
+
+					viewModel = {
 						title:'Your Projects'
 						priority_title: true
 						projects: projects
 						tags: tags
 					}
+
+					if Settings?.algolia?.institutions?.app_id? and Settings?.algolia?.institutions?.api_key?
+						viewModel.showUserDetailsArea = true
+						viewModel.algolia_api_key = Settings.algolia.institutions.api_key
+						viewModel.algolia_app_id = Settings.algolia.institutions.app_id
+					else
+						viewModel.showUserDetailsArea = false
+
+					res.render 'project/list', viewModel
 					timer.done()
+
 
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")

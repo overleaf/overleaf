@@ -2,8 +2,8 @@ define [
 	"base"
 	"../libs/algolia"
 ], (App, algolia)->
-	App.factory "Institutions", ->
-		new AlgoliaSearch("SK53GL4JLY", "1606ccef5b70ac44680b61e6b0285126").initIndex("institutions")
+	app.factory "Institutions", ->
+		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")
 
 	App.directive "focusInput", ($timeout) ->
 		return (scope, element, attr) ->

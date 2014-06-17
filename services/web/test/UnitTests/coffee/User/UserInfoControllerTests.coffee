@@ -18,10 +18,14 @@ describe "UserInfoController", ->
 			updatePersonalInfo: sinon.stub()
 		@sanitizer = escape:(v)->v
 		sinon.spy @sanitizer, "escape"
+		@UserGetter = {}
+
+
 		@UserInfoController = SandboxedModule.require modulePath, requires:
-			"./UserGetter": @UserGetter = {}
+			"./UserGetter": @UserGetter
 			"./UserUpdater": @UserUpdater
 			"./UserDeleter": @UserDeleter
+			"logger-sharelatex": log:->
 			"sanitizer":@sanitizer
 
 		@req = new MockRequest()
@@ -33,7 +37,9 @@ describe "UserInfoController", ->
 			@user =
 				_id: ObjectId()
 			@req.user = @user
+			@req.session.user = @user
 			@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 			@UserInfoController.getLoggedInUsersPersonalInfo(@req, @res, @next)
 
 		it "should call sendFormattedPersonalInfo", ->
@@ -105,6 +111,8 @@ describe "UserInfoController", ->
 				email: "doug@sharelatex.com"
 				password: "should-not-get-included"
 				signUpDate: new Date()
+				role:"student"
+				institution:"sheffield"
 			@UserInfoController._formatPersonalInfo @user, (error, info) =>
 				expect(info).to.deep.equal {
 					id: @user._id.toString()
@@ -112,6 +120,8 @@ describe "UserInfoController", ->
 					last_name: @user.last_name
 					email: @user.email
 					signUpDate: @user.signUpDate
+					role: @user.role
+					institution: @user.institution
 				}
 
 	describe "setPersonalInfo", ->

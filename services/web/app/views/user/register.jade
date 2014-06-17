@@ -18,16 +18,16 @@ block content
 					.card
 						.page-header
 							h1 Register
-						.messageArea
-						form#registerFormShort(method="post")
+						form(async-form="register", action="/register")
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
+							form-messages
 							.form-group
 								label(for='email') Email 
-								input#email.email.required.form-control(type='email', name='email', value='#{new_email}')
+								input.form-control(type='email', name='email', value='#{new_email}')
 							.form-group
 								label(for='password') Password 
-								input#password.required.form-control(type='password', name='password')
+								input.form-control(type='password', name='password')
 							.actions
-								button#registerButton.btn-primary.btn(type='submit') Register
+								button.btn-primary.btn(type='submit') Register
 						

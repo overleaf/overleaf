@@ -6,12 +6,18 @@ block scripts
 			projects: !{JSON.stringify(projects)},
 			tags: !{JSON.stringify(tags)}
 		};
+		window.algolia = {
+			institutions: {
+				app_id:  '#{algolia_app_id}',
+				api_key: '#{algolia_api_key}'
+			}
+		};
 
 block content
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			.row
-				.col-md-2
+				.col-md-3
 					#newProject.dropdown
 						a.btn.btn-primary.dropdown-toggle(
 							href="#",
@@ -80,7 +86,66 @@ block content
 						.row-spaced
 							a(href="/user/bonus").btn.btn-info Upgrade Account
 
-				.col-md-10
+					- if (showUserDetailsArea)
+						.row-spaced#userProfileInformation(ng-cloak)
+							div(ng-controller="UpdateForm").userProfileInformationArea
+								div(ng-hide="hidePersonalInfoSection").alert.alert-info
+									div(ng-show="percentComplete >= 100")
+										h4 100% complete, well done!
+									div(ng-hide="percentComplete >= 100")
+										h4 Your profile is 
+											strong {{percentComplete}}% 
+											| complete
+
+									.progress
+										.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
+
+									button#completeUserProfileInformation.btn.btn-primary(
+										ng-hide="formVisable",
+										ng-click="showForm()"
+									) Complete now
+
+									div(ng-show="formVisable")
+										form(enctype='multipart/form-data', method='post')
+											.form-group
+												input.form-control(
+													type='text',
+													name='first_name',
+													ng-model="userInfoForm.first_name",
+													ng-blur="sendUpdate()",
+													placeholder="First Name",
+													focus-input="formVisable"
+												)
+											.form-group
+												input.form-control(
+													type='text',
+													name='last_name',
+													ng-model="userInfoForm.last_name",
+													ng-blur="sendUpdate()",
+													placeholder='Last Name'
+												)
+											.form-group#institution_auto_complete
+												autocomplete(
+													ng-model="userInfoForm.institution",
+													data="institutions",
+													ng-blur="sendUpdate()",
+													on-type="updateInstitutionsList",
+													attr-placeholder="Institution",
+													attr-inputclass="form-control"
+												)
+											.form-group
+												input.form-control(
+													type='text',
+													name='role',
+													ng-model="userInfoForm.role",
+													placeholder='Role',
+													ng-blur="sendUpdate()",
+													list="_roles"
+												)
+												datalist#_roles
+													option(ng-repeat='role in roles') {{role}}
+
+				.col-md-9
 					.container-fluid
 						.row
 							.col-md-12

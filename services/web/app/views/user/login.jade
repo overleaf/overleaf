@@ -8,14 +8,22 @@ block content
 					.card
 						.page-header
 							h1 Login
-						.messageArea
-						form.validate#loginForm(enctype='multipart/form-data', method='post')
+						form(async-form="login", action='/login')
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
+							form-messages
 							.form-group
-								input#email.email.required.form-control(type='email', autofocus="autofocus", name='email', placeholder='email@example.com')
+								input.form-control(
+									type='email',
+									name='email',
+									placeholder='email@example.com'
+								)
 							.form-group
-								input#password.required.form-control(type='password', name='password', placeholder='********')
+								input.form-control(
+									type='password',
+									name='password',
+									placeholder='********'
+								)
 							.actions
-								button.btn-primary.btn#login(type='submit') Login
-								a#passwordReset.pull-right(href='/user/password/reset') Forgot your password?
+								button.btn-primary.btn(type='submit') Login
+								a.pull-right(href='/user/password/reset') Forgot your password?
