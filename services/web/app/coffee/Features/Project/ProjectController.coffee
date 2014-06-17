@@ -99,6 +99,7 @@ module.exports =
 					return res.send 500
 				logger.log results:results, user_id:user_id, "rendering project list"
 				viewModel = _buildListViewModel results.projects[0], results.projects[1], results.projects[2], results.tags[0], results.tags[1]
+				viewModel.showUserDetailsArea = Settings?.algolia?.institutions?.app_id? and Settings?.algolia?.institutions?.api_key?
 				res.render 'project/list', viewModel
 				timer.done()
 
