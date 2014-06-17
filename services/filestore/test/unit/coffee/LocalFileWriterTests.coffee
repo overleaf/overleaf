@@ -18,11 +18,15 @@ describe "LocalFileWriter", ->
 		@fs = 
 			createWriteStream : sinon.stub().returns(@writeStream)
 			unlink: sinon.stub()
+		@settings =
+			path:
+				uploadFolder:"somewhere"
 		@writer = SandboxedModule.require modulePath, requires:
 			"fs": @fs
 			"logger-sharelatex":
 				log:->
 				err:->
+			"settings-sharelatex":@settings
 		@stubbedFsPath = "something/uploads/eio2k1j3"
 
 	describe "writeStrem", ->
