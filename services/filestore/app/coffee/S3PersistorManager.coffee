@@ -100,7 +100,13 @@ module.exports =
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong deleting file in aws"
 			callback(err)
 
-	deleteDirectory: (bucketName, key, callback)->
+	deleteDirectory: (bucketName, key, _callback)->
+		# deleteMultiple can call the callback multiple times so protect against this.
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
+		logger.log key: key, bucketName: bucketName, "deleting directory"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key
 			secret: settings.filestore.s3.secret
