@@ -16,7 +16,7 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 		$scope.institutions = []
 		$scope.formVisable = false
 		$scope.hidePersonalInfoSection = true
-		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Proffessor"]
+		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Professor"]
 
 		$http.get("/user/personal_info").success (data)->
 			$scope.userInfoForm =
