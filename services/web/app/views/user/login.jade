@@ -8,7 +8,7 @@ block content
 					.card
 						.page-header
 							h1 Login
-						form(async-form="login", action='/login')
+						form(async-form="login", action='/login', ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages
