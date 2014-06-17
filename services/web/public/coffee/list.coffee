@@ -6,7 +6,9 @@ require [
 	"libs/underscore"
 	"libs/fineuploader"
 	"libs/jquery.storage"
+	"UserDetailsUpdater"
 ], (tagsManager, moment)->
+
 
 	$('.isoDate').each (i, d)->
 		html = $(d)

@@ -92,7 +92,7 @@ block content
 						a(href="/project/archived").pull-right.archived-projects Archived Projects
 						h1 Projects
 			- if (projects.length > 0)
-				.row-fluid			
+				.row-fluid
 					.span9
 						form.search
 							input#projectFilter(placeholder='Search Projects', autofocus='autofocus').span6.projectSearch.search-query
@@ -101,6 +101,34 @@ block content
 						ul#projectList
 							mixin projectList(projects)
 
+					.span3#userProfileInformation(ng-cloak)
+						div(ng-controller="UpdateForm").userProfileInformationArea
+							div(ng-hide="hidePersonalInfoSection").alert.alert-info
+
+									div(ng-show="percentComplete >= 100")
+										h4 100% complete, well done!
+									div(ng-hide="percentComplete >= 100")
+										h4 Your account is 
+											strong {{percentComplete}}% 
+											| complete
+
+									.progress
+										.bar.bar-success(ng-style="{'width' : (percentComplete+'%')}")
+
+									button#completeUserProfileInformation.btn.btn-primary(ng-hide="formVisable", ng-click="showForm()") Complete now
+
+									div(ng-show="formVisable")
+										form(enctype='multipart/form-data', method='post')
+											.input
+												input(type='text',  name='first_name', ng-model="userInfoForm.first_name",  ng-blur="sendUpdate()", placeholder="First Name", focus-input="formVisable")
+											.input
+												input(type='text', name='last_name', ng-model="userInfoForm.last_name", ng-blur="sendUpdate()", placeholder='Last Name')
+											.input#institution_auto_complete
+												autocomplete(ng-model="userInfoForm.institution", data="institutions", ng-blur="sendUpdate()", on-type="updateInstitutionsList", attr-placeholder="Institution")
+											.input
+												input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()", list="_roles")
+												datalist#_roles
+													option(ng-repeat='role in roles') {{role}}
 					.span3
 						.tag-list
 							h2 Tags
@@ -133,9 +161,17 @@ block content
 	script
 		window.requirejs = {
 			"paths" : {
-				"moment": "libs/moment"
-			}
+				"moment": "libs/moment",
+				"angular":"libs/angular"
+			},
+			shim: {
+				'angular' : {'exports' : 'angular'}
+			},
+			priority: [
+				"angular"
+			]
 		};
+
 	script(
 		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'), 
 		baseurl=jsPath,

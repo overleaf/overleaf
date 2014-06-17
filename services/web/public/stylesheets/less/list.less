@@ -2,6 +2,8 @@
 #projectList {
 	list-style-type: none;
 	margin: 0;
+	
+	min-height:280px;
 
 	.project_entry {
 		&:hover {
@@ -243,3 +245,72 @@ a.archived-projects {
 		margin-bottom: 60px;
 	}
 }
+
+
+#userProfileInformation {
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	.progress {
+		margin-bottom:10px;
+	}
+	h4 {
+		color:#626264;
+		padding-bottom:5px;
+	}
+	form {
+		margin:0px;
+		input {
+			width: 100%;
+		}
+	}
+
+}
+
+
+/* AUTOCOMPLETE */
+
+#institution_auto_complete {
+
+	ul>li{
+		list-style:none;
+	}
+
+	.autocomplete{
+	  width: 100%;
+	  position: relative;
+	}
+
+	.autocomplete ul{
+	  position: absolute;
+	  left: 0;
+	  min-width: 220px;
+	  border-left: 1px solid #888;
+	  border-right: 1px solid #888;
+	  border-bottom: 1px solid #888;
+	  z-index: 1;
+	  margin: -9px -1px 0px 0px;
+
+	}
+
+	.autocomplete li{
+	  text-align: left;
+	  list-style:none;
+	  padding:0.4em;
+	  background-color: #fff;
+	}
+
+	.autocomplete li.active{
+	  background-color: #b5d4fd;
+	}
+
+	.autocomplete .highlight {
+	  background-color: #E2E2E2;
+	}
+
+	.autocomplete li.active .highlight {
+	  background: #666;
+	  color: #fff;
+	}
+	
+}
+
