@@ -33,4 +33,5 @@ buildOptions = (user, is_subscribed)->
 			subscriber_list_id: Settings.markdownmail.list_id
 			is_subscribed: is_subscribed
 		url: "https://www.markdownmail.io/lists/subscribe"
+		timeout: 30 * 1000
 	return options

@@ -35,6 +35,7 @@ module.exports =
 			subject: options.subject
 			html: options.html
 			replyTo: options.replyTo || Settings.email.replyToAddress
+			socketTimeout: 30 * 1000
 		client.sendMail options, (err, res)->
 			if err?
 				logger.err err:err, "error sending message"
