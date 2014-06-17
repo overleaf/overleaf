@@ -44,7 +44,13 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 			results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
 			results.length * 20
 
-		$scope.updateInstitutionsList = (a)->
+		$scope.updateInstitutionsList = (inputVal)->
+
+			# this is a little hack to use until we change auto compelete lib with redesign and can 
+			# listen for blur events on institution field to send the post
+			if inputVal?.indexOf("(") != -1 and inputVal?.indexOf(")") != -1 
+				$scope.sendUpdate()
+				
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
 				$scope.institutions = _.map response.hits, (institution)->
 					"#{institution.name} (<span class='muted'>#{institution.domain}</span>)"
