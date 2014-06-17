@@ -16,7 +16,8 @@
     "async": "~0.2.10",
     "pngcrush": "0.0.3",
     "stream-buffers": "~0.2.5",
-    "node-transloadit": "0.0.4"
+    "node-transloadit": "0.0.4",
+    "coffee-script": "~1.7.1"
   },
   "devDependencies": {
     "sinon": "",
