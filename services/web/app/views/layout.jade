@@ -37,11 +37,14 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script(src=jsPath+'libs/underscore-1.3.3.js')
 		block scripts
 		
-	- if (typeof(bodyClasses) == "undefined")
-		- var bodyClasses = []
-	body(class=bodyClasses)
-		include layout/navbar
-		block content
+	body
+		#ng-app(style="display: none;")
+			include layout/navbar
+			block content
+			include layout/footer
+		#ng-app-loading
+			i.fa.fa-spin.fa-refresh
+
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			.modal.hide#scribtexModal
 				.modal-header
@@ -53,7 +56,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 						a(href="https://scribtex.sharelatex.com#{scribtexPath}", style="font-size: 16px") https://scribtex.sharelatex.com#{scribtexPath}
 				.modal-footer
 					button(data-dismiss="modal").btn OK
-		include layout/footer
 
 		script(type='text/javascript').
 			window.requirejs = {

@@ -3,4 +3,6 @@ define [
 	"user-details"
 	"directives/asyncForm"
 ], () ->
-	angular.bootstrap(document.body, ["SharelatexApp"])
+	angular.bootstrap(document.getElementById("ng-app"), ["SharelatexApp"])
+	$("#ng-app").show()
+	$("#ng-app-loading").hide()
