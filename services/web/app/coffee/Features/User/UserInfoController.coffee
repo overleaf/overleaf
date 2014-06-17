@@ -18,7 +18,6 @@ module.exports = UserController =
 	getPersonalInfo: (req, res, next = (error) ->) ->
 		UserGetter.getUser req.params.user_id, { _id: true, first_name: true, last_name: true, email: true}, (error, user) ->
 			logger.log user_id: req.params.user_id, "reciving request for getting users personal info"
-			console.log user
 			return next(error) if error?
 			return res.send(404) if !user?
 			UserController.sendFormattedPersonalInfo(user, res, next)
@@ -42,7 +41,6 @@ module.exports = UserController =
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
 		UserController._formatPersonalInfo user, (error, info) ->
 			return next(error) if error?
-			console.log info
 			res.send JSON.stringify(info)
 
 	_formatPersonalInfo: (user, callback = (error, info) ->) ->
