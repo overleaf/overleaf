@@ -20,10 +20,10 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 
 		$http.get("/user/personal_info").success (data)->
 			$scope.userInfoForm =
-				first_name: data.first_name
-				last_name: data.last_name
-				role: 	   data.role
-				institution: data.institution
+				first_name: data.first_name || ""
+				last_name: data.last_name || ""
+				role: 	   data.role || ""
+				institution: data.institution || ""
 				_csrf : window.csrfToken
 
 			if getPercentComplete() != 100
@@ -41,7 +41,7 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 			$scope.percentComplete = getPercentComplete()
 
 		getPercentComplete = ->
-			results = _.filter $scope.userInfoForm, (value)-> value? and value?.length != 0
+			results = _.filter $scope.userInfoForm, (value)-> !value? or value?.length != 0
 			results.length * 20
 
 		$scope.updateInstitutionsList = (inputVal)->
