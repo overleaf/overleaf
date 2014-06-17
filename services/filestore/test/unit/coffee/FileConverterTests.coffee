@@ -10,13 +10,9 @@ describe "FileConverter", ->
 
 	beforeEach ->
 
-		@easyimage = 
-			convert:sinon.stub()
-			exec: sinon.stub()
 		@child_process =
 			exec : sinon.stub()
 		@converter = SandboxedModule.require modulePath, requires:
-			"easyimage":@easyimage
 			'child_process': @child_process
 			"logger-sharelatex":
 				log:->
@@ -55,7 +51,7 @@ describe "FileConverter", ->
 				done()
 
 	describe "thumbnail", ->
-		it "should call easy image resize with args", (done)->
+		it "should call converter resize with args", (done)->
 			@child_process.exec.callsArgWith(2)
 			@converter.thumbnail @sourcePath, (err)=>
 				args = @child_process.exec.args[0][0]
@@ -63,7 +59,7 @@ describe "FileConverter", ->
 				done()
 
 	describe "preview", ->
-		it "should call easy image resize with args", (done)->
+		it "should call converter resize with args", (done)->
 			@child_process.exec.callsArgWith(2)
 			@converter.preview @sourcePath, (err)=>
 				args = @child_process.exec.args[0][0]
