@@ -12,7 +12,12 @@ module.exports = UserController =
 			req.session.destroy() 
 		logger.log user: req.user, "reciving request for getting logged in users personal info"
 		return next(new Error("User is not logged in")) if !req.user?
-		UserGetter.getUser req.session.user._id, { first_name: true, last_name: true, role:true, institution:true }, (error, user) ->
+		UserGetter.getUser req.user._id, {
+			first_name: true, last_name: true,
+			role:true, institution:true,
+			email: true, signUpDate: true
+		}, (error, user) ->
+			return next(error) if error?
 			UserController.sendFormattedPersonalInfo(user, res, next)
 
 	getPersonalInfo: (req, res, next = (error) ->) ->
