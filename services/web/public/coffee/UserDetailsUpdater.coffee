@@ -3,7 +3,7 @@ define ["libs/algolia", "libs/angular", "libs/angular-autocomplete/angular-autoc
 	app = angular.module("userProfileInformationApp", ["autocomplete"])
 
 	app.factory "Institutions", ->
-		new AlgoliaSearch("SK53GL4JLY", "1606ccef5b70ac44680b61e6b0285126").initIndex("institutions")
+		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")
 
 	app.directive "focusInput", ($timeout) ->
 		return (scope, element, attr) ->

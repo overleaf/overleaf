@@ -172,6 +172,16 @@ block content
 			]
 		};
 
+	- if (showUserDetailsArea)
+		script
+			window.algolia = {
+				institutions:{
+					app_id:'#{algolia_app_id}',
+					api_key:'#{algolia_api_key}'
+				}
+			}
+
+
 	script(
 		data-main=jsPath+'list.js?fingerprint='+fingerprint(jsPath + 'list.js'), 
 		baseurl=jsPath,
