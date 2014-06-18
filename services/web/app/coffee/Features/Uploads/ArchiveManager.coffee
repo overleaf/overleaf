@@ -9,6 +9,10 @@ module.exports = ArchiveManager =
 
 		unzip = child.spawn("unzip", [source, "-d", destination])
 
+		# don't remove this line, some zips need
+		# us to listen on this for some unknow reason
+		unzip.stdout.on "data", (d)->
+
 		error = null
 		unzip.stderr.on "data", (chunk) ->
 			error ||= ""
