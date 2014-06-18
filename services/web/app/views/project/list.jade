@@ -56,7 +56,9 @@ block content
 							li
 								a.menu-indent(href="/templates") View All »
 					.row-spaced
-						ul.list-unstyled.folders-menu.js-folders-menu(ng-controller="TagListController")
+						ul.list-unstyled.folders-menu(
+							ng-controller="TagListController"
+						)
 							li(ng-class="{active: (filter == 'all')}")
 								a.menu-indent(href, ng-click="filterProjects('all')") All projects
 							li(ng-class="{active: (filter == 'owned')}")
@@ -70,7 +72,8 @@ block content
 							li(
 								ng-repeat="tag in tags | filter:nonEmpty",
 								ng-controller="TagListItemController",
-								ng-class="{active: tag.selected}"
+								ng-class="{active: tag.selected}",
+								ng-cloak
 							)
 								a.menu-indent(href="#", ng-click="selectTag()")
 									i.icon.fa(
@@ -165,7 +168,7 @@ block content
 										)
 									//- i.fa.fa-remove
 
-								.project-tools.js-toggle-tools
+								.project-tools(ng-cloak)
 									.btn-toolbar(ng-show="filter != 'archived'")
 										.btn-group(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default(
@@ -256,7 +259,7 @@ block content
 							.col-md-12
 								.card.card-thin
 									- if (projects.length > 0)
-										ul.list-unstyled.project-list
+										ul.list-unstyled.project-list(ng-cloak)
 											li.container-fluid
 												.row
 													.col-md-6
