@@ -68,7 +68,7 @@ block content
 							li 
 								h2 Folders
 							li(
-								ng-repeat="tag in tags",
+								ng-repeat="tag in tags | filter:nonEmpty",
 								ng-controller="TagListItemController",
 								ng-class="{active: tag.selected}"
 							)
@@ -189,13 +189,14 @@ block content
 												span.caret
 											ul.dropdown-menu.dropdown-menu-right.js-tags-dropdown-menu(
 												role="menu"
+												ng-controller="TagListController"
 											)
 												li.dropdown-header Add to folder
 												li(
-													ng-repeat="tag in tags | orderBy:'name'",
+													ng-repeat="tag in tags | filter:nonEmpty | orderBy:'name'",
 													ng-controller="TagDropdownItemController"
 												)
-													a(href="#", ng-click="addOrRemoveProjectsFromTag()")
+													a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
 														i.fa(
 															ng-class="{\
 																'fa-check-square-o': areSelectedProjectsInTag == true,\
@@ -206,7 +207,7 @@ block content
 														|  {{tag.name}}
 												li.divider
 												li
-													a(href="#", ng-click="openNewTagModal()") Create New Folder
+													a(href="#", ng-click="openNewTagModal()", stop-propagation="click") Create New Folder
 
 										.btn-group(ng-hide="selectedProjects.length != 1").dropdown
 											a.btn.btn-default.dropdown-toggle(

@@ -142,6 +142,8 @@ define [
 				$scope.projects.splice(index, 1)
 
 		$scope.removeSelectedProjectsFromTag = (tag) ->
+			tag.showWhenEmpty = true
+
 			selected_project_ids = $scope.getSelectedProjectIds()
 			selected_projects = $scope.getSelectedProjects()
 
@@ -192,9 +194,10 @@ define [
 			$scope.tags.push {
 				name: name
 				project_ids: []
+				showWhenEmpty: true
 			}
 
-		$scope.openNewTagModal = () ->
+		$scope.openNewTagModal = (e) ->
 			modalInstance = $modal.open(
 				templateUrl: "newTagModalTemplate"
 				controller: "NewTagModalController"
@@ -421,6 +424,12 @@ define [
 			for tag in $scope.tags
 				tag.selected = false
 
+		$scope.nonEmpty = (tag) ->
+			# The showWhenEmpty property will be set on any tag which we have
+			# modified during this session. Otherwise, tags which are empty
+			# when loading the page are not shown.
+			tag.project_ids.length > 0 or !!tag.showWhenEmpty
+
 	App.controller "TagListItemController", ($scope) ->
 		$scope.selectTag = () ->
 			$scope._clearTags()
@@ -428,9 +437,6 @@ define [
 			$scope.setFilter("tag")
 
 	App.controller "TagDropdownItemController", ($scope) ->
-		$scope.$on "selection:change", (e, newValue, oldValue) ->
-			$scope.recalculateProjectsInTag()
-
 		$scope.recalculateProjectsInTag = () ->
 			$scope.areSelectedProjectsInTag = false
 			for project_id in $scope.getSelectedProjectIds()
@@ -442,13 +448,17 @@ define [
 			if $scope.areSelectedProjectsInTag and partialSelection
 				$scope.areSelectedProjectsInTag = "partial"
 
-		$scope.addOrRemoveProjectsFromTag = () ->
+		$scope.addOrRemoveProjectsFromTag = (e) ->
 			if $scope.areSelectedProjectsInTag == true
 				$scope.removeSelectedProjectsFromTag($scope.tag)
 				$scope.areSelectedProjectsInTag = false
 			else if $scope.areSelectedProjectsInTag == false or $scope.areSelectedProjectsInTag == "partial"
 				$scope.addSelectedProjectsToTag($scope.tag)
 				$scope.areSelectedProjectsInTag = true
+
+		$scope.$on "selection:change", (e, newValue, oldValue) ->
+			$scope.recalculateProjectsInTag()
+		$scope.recalculateProjectsInTag()
 
 	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
 		$scope.inputs = 
