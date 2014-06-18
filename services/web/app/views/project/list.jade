@@ -170,17 +170,15 @@ block content
 										.btn-group(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default(
 												href='#',
-												data-original-title="Download",
-												data-toggle="tooltip",
-												data-placement="bottom",
+												tooltip="Download",
+												tooltip-placement="bottom",
 												ng-click="downloadSelectedProjects()"
 											)
 												i.fa.fa-cloud-download
 											a.btn.btn-default(
 												href='#',
-												data-original-title="Delete",
-												data-toggle="tooltip",
-												data-placement="bottom",
+												tooltip="Delete",
+												tooltip-placement="bottom",
 												ng-click="openArchiveProjectsModal()"
 											)
 												i.fa.fa-trash-o
@@ -188,7 +186,9 @@ block content
 										.btn-group.dropdown(ng-hide="selectedProjects.length < 1")
 											a.btn.btn-default.dropdown-toggle(
 												href="#",
-												data-toggle="dropdown"
+												data-toggle="dropdown",
+												tooltip="Add to folders",
+												tooltip-placement="bottom"
 											)
 												i.fa.fa-folder-open-o
 												|  
