@@ -8,7 +8,7 @@ block content
 					.card
 						.page-header
 							h1 Login
-						form(async-form="login", action='/login', ng-cloak)
+						form(async-form="login", name="loginForm", action='/login', ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages
@@ -16,14 +16,25 @@ block content
 								input.form-control(
 									type='email',
 									name='email',
-									placeholder='email@example.com'
+									required,
+									placeholder='email@example.com',
+									ng-model="email"
 								)
+								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
+									| Must be an email address
 							.form-group
 								input.form-control(
 									type='password',
 									name='password',
-									placeholder='********'
+									required,
+									placeholder='********',
+									ng-model="password"
 								)
+								span.small.text-primary(ng-show="loginForm.password.$invalid && loginForm.password.$dirty")
+									| Required
 							.actions
-								button.btn-primary.btn(type='submit') Login
+								button.btn-primary.btn(
+									type='submit'
+									ng-disabled="loginForm.$invalid"
+								) Login
 								a.pull-right(href='/user/password/reset') Forgot your password?

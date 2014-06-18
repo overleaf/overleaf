@@ -303,52 +303,64 @@ block content
 			.modal-header
 				h3 Create New Folder
 			.modal-body
-				input.form-control(
-					type="text",
-					placeholder="New Folder Name",
-					ng-model="inputs.newTagName",
-					ng-enter="create()",
-					focus-on="open"
-				)
+				form(name="newTagForm", novalidate)
+					input.form-control(
+						type="text",
+						placeholder="New Folder Name",
+						required,
+						ng-model="inputs.newTagName",
+						ng-enter="create()",
+						focus-on="open"
+					)
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
-				button.btn.btn-primary(ng-click="create()") Create
+				button.btn.btn-primary(
+					ng-disabled="newTagForm.$invalid"
+					ng-click="create()"
+				) Create
 
 		script(type='text/ng-template', id='renameProjectModalTemplate')
 			.modal-header
 				h3 Rename Project
 			.modal-body
-				input.form-control(
-					type="text",
-					placeholder="Project Name",
-					ng-model="inputs.projectName",
-					ng-enter="rename()",
-					focus-on="open"
-				)
+				form(name="renameProjectForm", novalidate)
+					input.form-control(
+						type="text",
+						placeholder="Project Name",
+						ng-model="inputs.projectName",
+						required,
+						ng-enter="rename()",
+						focus-on="open"
+					)
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
-				button.btn.btn-primary(ng-click="rename()") Rename
+				button.btn.btn-primary(
+					ng-click="rename()",
+					ng-disabled="renameProjectForm.$invalid"
+				) Rename
 
 		script(type='text/ng-template', id='cloneProjectModalTemplate')
 			.modal-header
 				h3 Copy Project
 			.modal-body
-				.form-group
-					label New Name
-					input.form-control(
-						type="text",
-						placeholder="New Project Name",
-						ng-model="inputs.projectName",
-						ng-enter="clone()",
-						focus-on="open"
-					)
+				form(name="cloneProjectForm", novalidate)
+					.form-group
+						label New Name
+						input.form-control(
+							type="text",
+							placeholder="New Project Name",
+							required,
+							ng-model="inputs.projectName",
+							ng-enter="clone()",
+							focus-on="open"
+						)
 			.modal-footer
 				button.btn.btn-default(
 					ng-disabled="state.inflight"
 					ng-click="cancel()"
 				) Cancel
 				button.btn.btn-primary(
-					ng-disabled="state.inflight"
+					ng-disabled="cloneProjectForm.$invalid || state.inflight"
 					ng-click="clone()"
 				)
 					span(ng-hide="state.inflight") Copy
@@ -358,20 +370,22 @@ block content
 			.modal-header
 				h3 New Project
 			.modal-body
-				input.form-control(
-					type="text",
-					placeholder="Project Name",
-					ng-model="inputs.projectName",
-					ng-enter="create()",
-					focus-on="open"
-				)
+				form(novalidate, name="newProjectForm")
+					input.form-control(
+						type="text",
+						placeholder="Project Name",
+						required,
+						ng-model="inputs.projectName",
+						ng-enter="create()",
+						focus-on="open"
+					)
 			.modal-footer
 				button.btn.btn-default(
 					ng-disabled="state.inflight"
 					ng-click="cancel()"
 				) Cancel
 				button.btn.btn-primary(
-					ng-disabled="state.inflight"
+					ng-disabled="newProjectForm.$invalid || state.inflight"
 					ng-click="create()"
 				)
 					span(ng-hide="state.inflight") Create

@@ -18,16 +18,36 @@ block content
 					.card
 						.page-header
 							h1 Register
-						form(async-form="register", action="/register", ng-cloak)
+						form(async-form="register", name="registerForm", action="/register", novalidate, ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages
 							.form-group
 								label(for='email') Email 
-								input.form-control(type='email', name='email', value='#{new_email}')
+								input.form-control(
+									type='email',
+									name='email',
+									value='#{new_email}',
+									placeholder="email@example.com"
+									required,
+									ng-model="email"
+								)
+								span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
+									| Must be an email address
 							.form-group
 								label(for='password') Password 
-								input.form-control(type='password', name='password')
+								input.form-control(
+									type='password',
+									name='password',
+									placeholder="********",
+									required,
+									ng-model="password"
+								)
+								span.small.text-primary(ng-show="registerForm.password.$invalid && registerForm.password.$dirty")
+									| Required
 							.actions
-								button.btn-primary.btn(type='submit') Register
+								button.btn-primary.btn(
+									type='submit'
+									ng-disabled="register.$invalid"
+								) Register
 						
