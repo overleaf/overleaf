@@ -10,13 +10,6 @@ define [
 						scope.$eval(attrs.ngEnter, event: event)
 					event.preventDefault()
 
-	App.directive 'ngFocusOn', ($timeout) ->
-		return {
-			restrict: 'AC'
-			link: (scope, element, attrs) ->
-				scope.$on attrs.ngFocusOn, () ->
-					element.focus()
-		}
 
 	App.filter "formatDate", () ->
 		(date, format = "Do MMM YYYY, h:mm a") ->
@@ -56,6 +49,10 @@ define [
 
 		$scope.$watch "searchText", (value) ->
 			$scope.updateVisibleProjects()
+
+		$scope.clearSearchText = () ->
+			$scope.searchText = ""
+			$scope.$emit "search:clear"
 
 		$scope.setFilter = (filter) ->
 			$scope.filter = filter
@@ -448,7 +445,7 @@ define [
 			if $scope.areSelectedProjectsInTag and partialSelection
 				$scope.areSelectedProjectsInTag = "partial"
 
-		$scope.addOrRemoveProjectsFromTag = (e) ->
+		$scope.addOrRemoveProjectsFromTag = () ->
 			if $scope.areSelectedProjectsInTag == true
 				$scope.removeSelectedProjectsFromTag($scope.tag)
 				$scope.areSelectedProjectsInTag = false

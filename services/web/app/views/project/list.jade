@@ -150,13 +150,19 @@ block content
 						.row
 							.col-md-12
 								form.project-search.form-horizontal(role="form")
-									.form-group.has-feedback.col-md-7
+									.form-group.has-feedback.has-feedback-left.col-md-7
 										input.form-control.col-md-7(
 											placeholder='Search projects…',
 											autofocus='autofocus',
-											ng-model="searchText"
+											ng-model="searchText",
+											focus-on='search:clear'
 										)
-										i.fa.fa-search.form-control-feedback
+										i.fa.fa-search.form-control-feedback-left
+										i.fa.fa-times.form-control-feedback(
+											ng-click="clearSearchText()",
+											style="cursor: pointer;",
+											ng-show="searchText.length > 0"
+										)
 									//- i.fa.fa-remove
 
 								.project-tools.js-toggle-tools
@@ -302,7 +308,7 @@ block content
 					placeholder="New Folder Name",
 					ng-model="inputs.newTagName",
 					ng-enter="create()",
-					ng-focus-on="open"
+					focus-on="open"
 				)
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
@@ -317,7 +323,7 @@ block content
 					placeholder="Project Name",
 					ng-model="inputs.projectName",
 					ng-enter="rename()",
-					ng-focus-on="open"
+					focus-on="open"
 				)
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel
@@ -334,7 +340,7 @@ block content
 						placeholder="New Project Name",
 						ng-model="inputs.projectName",
 						ng-enter="clone()",
-						ng-focus-on="open"
+						focus-on="open"
 					)
 			.modal-footer
 				button.btn.btn-default(
@@ -357,7 +363,7 @@ block content
 					placeholder="Project Name",
 					ng-model="inputs.projectName",
 					ng-enter="create()",
-					ng-focus-on="open"
+					focus-on="open"
 				)
 			.modal-footer
 				button.btn.btn-default(

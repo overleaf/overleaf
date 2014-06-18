@@ -5,13 +5,6 @@ define [
 	app.factory "Institutions", ->
 		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")
 
-	App.directive "focusInput", ($timeout) ->
-		return (scope, element, attr) ->
-			scope.$watch attr.focusInput, (value) ->
-				if value
-					$timeout ->
-						element.select()
-
 	App.controller "UpdateForm", ($scope, $http, Institutions)->
 		$scope.institutions = []
 		$scope.formVisable = false

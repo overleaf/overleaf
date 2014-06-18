@@ -285,6 +285,23 @@ input[type="checkbox"],
   }
 }
 
+.has-feedback-left {
+  position: relative;
+  .form-control {
+    padding-left: @input-height-base;
+  }
+  .form-control-feedback-left {
+    position: absolute;
+    top: (@line-height-computed + 5); // Height of the `label` and its margin
+    left: 0;
+    display: block;
+    width: @input-height-base;
+    height: @input-height-base;
+    line-height: @input-height-base;
+    text-align: center;
+  }
+}
+
 // Feedback states
 .has-success {
   .form-control-validation(@state-success-text; @state-success-text; @state-success-bg);
@@ -444,5 +461,9 @@ input[type="checkbox"],
   .has-feedback .form-control-feedback {
     top: 0;
     right: (@grid-gutter-width / 2);
+  }
+  .has-feedback-left .form-control-feedback-left {
+    top: 0;
+    left: (@grid-gutter-width / 2);
   }
 }
