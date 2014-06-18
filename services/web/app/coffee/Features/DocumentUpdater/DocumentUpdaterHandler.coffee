@@ -13,7 +13,7 @@ rclient.auth(settings.redis.web.password)
 Project = require("../../models/Project").Project
 ProjectLocator = require('../../Features/Project/ProjectLocator')
 
-module.exports =
+module.exports = DocumentUpdaterHandler =
 	
 	queueChange : (project_id, doc_id, change, sl_req_id, callback = ()->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
@@ -41,6 +41,14 @@ module.exports =
 				error = new Error("document updater returned a failure status code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
+
+	flushMultipleProjectsToMongo: (project_ids, callback = (error) ->) ->
+		jobs = []
+		for project_id in project_ids
+			do (project_id) ->
+				jobs.push (callback) ->
+					DocumentUpdaterHandler.flushProjectToMongo project_id, callback
+		async.series jobs, callback
 
 	flushProjectToMongoAndDelete: (project_id, sl_req_id, callback = ()->) ->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)

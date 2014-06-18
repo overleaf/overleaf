@@ -10,13 +10,70 @@ describe "ProjectZipStreamManager", ->
 	beforeEach ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
-		@archive = 
+		@archive =
 			on:->
+			append: sinon.stub()
 		@ProjectZipStreamManager = SandboxedModule.require modulePath, requires:
 			"archiver": @archiver = sinon.stub().returns @archive
 			"logger-sharelatex": @logger = {error: sinon.stub(), log: sinon.stub()}
 			"../Project/ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
+			"../../models/Project": Project: @Project = {}
+
+
+	describe "createZipStreamForMultipleProjects", ->
+		describe "successfully", ->
+			beforeEach (done) ->
+				@project_ids = ["project-1", "project-2"]
+				@zip_streams =
+					"project-1": new EventEmitter()
+					"project-2": new EventEmitter()
+
+				@project_names =
+					"project-1": "Project One Name"
+					"project-2": "Project Two Name"
+
+				@ProjectZipStreamManager.createZipStreamForProject = (project_id, callback) =>
+					callback null, @zip_streams[project_id]
+					setTimeout () =>
+						@zip_streams[project_id].emit "end",
+					0
+				sinon.spy @ProjectZipStreamManager, "createZipStreamForProject"
+
+				@Project.findById = (project_id, fields, callback) =>
+					callback null, name: @project_names[project_id]
+				sinon.spy @Project, "findById"
+
+				@ProjectZipStreamManager.createZipStreamForMultipleProjects @project_ids, (args...) =>
+					@callback args...
+
+				@archive.finalize = () ->
+					done()
+
+			it "should create a zip archive", ->
+				@archiver.calledWith("zip").should.equal true
+
+			it "should return a stream before any processing is done", ->
+				@callback.calledWith(sinon.match.falsy, @archive).should.equal true
+				@callback.calledBefore(@ProjectZipStreamManager.createZipStreamForProject).should.equal true
+
+			it "should get a zip stream for all of the projects", ->
+				for project_id in @project_ids
+					@ProjectZipStreamManager.createZipStreamForProject
+						.calledWith(project_id)
+						.should.equal true
+
+			it "should get the names of each project", ->
+				for project_id in @project_ids
+					@Project.findById
+						.calledWith(project_id, "name")
+						.should.equal true
+
+			it "should add all of the projects to the zip", ->
+				for project_id in @project_ids
+					@archive.append
+						.calledWith(@zip_streams[project_id], name: @project_names[project_id] + ".zip")
+						.should.equal true
 
 	describe "createZipStreamForProject", ->
 		describe "successfully", ->
@@ -89,7 +146,6 @@ describe "ProjectZipStreamManager", ->
 				"/chapters/chapter1.tex":
 					lines: ["chapter1", "content"]
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-			@archive.append = sinon.stub()
 			@ProjectZipStreamManager.addAllDocsToArchive @project_id, @archive, (error) =>
 				@callback(error)
 				done()
@@ -116,7 +172,6 @@ describe "ProjectZipStreamManager", ->
 				"file-id-1" : new EventEmitter()
 				"file-id-2" : new EventEmitter()
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
-			@archive.append = sinon.stub()
 			@FileStoreHandler.getFileStream = (project_id, file_id, {}, callback) =>
 				callback null, @streams[file_id]
 			sinon.spy @FileStoreHandler, "getFileStream"

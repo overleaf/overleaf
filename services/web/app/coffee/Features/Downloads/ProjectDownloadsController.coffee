@@ -22,4 +22,19 @@ module.exports = ProjectDownloadsController =
 					res.contentType('application/zip')
 					stream.pipe(res)
 
+	downloadMultipleProjects: (req, res, next) ->
+		project_ids = req.query.project_ids.split(",")
+		Metrics.inc "zip-downloads-multiple"
+		logger.log project_ids: project_ids, "downloading multiple projects"
+		DocumentUpdaterHandler.flushMultipleProjectsToMongo project_ids, (error) ->
+			return next(error) if error?
+			ProjectZipStreamManager.createZipStreamForMultipleProjects project_ids, (error, stream) ->
+				return next(error) if error?
+				res.header(
+					"Content-Disposition",
+					"attachment; filename=ShareLaTeX Projects (#{project_ids.length} items).zip"
+				)
+				res.contentType('application/zip')
+				stream.pipe(res)
+
 

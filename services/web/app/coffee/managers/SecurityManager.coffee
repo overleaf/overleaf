@@ -9,8 +9,9 @@ AuthenticationController = require("../Features/Authentication/AuthenticationCon
 _ = require('underscore')
 metrics = require('../infrastructure/Metrics')
 querystring = require('querystring')
+async = require "async"
 
-module.exports =
+module.exports = SecurityManager =
 	restricted : (req, res, next)->
 		if req.session.user?
 			res.render 'user/restricted',
@@ -24,6 +25,21 @@ module.exports =
 			User.findById req.session.user._id, callback
 		else
 			callback null, null
+
+	requestCanAccessMultipleProjects: (req, res, next) ->
+		project_ids = req.query.project_ids?.split(",")
+		jobs = []
+		for project_id in project_ids or []
+			do (project_id) ->
+				jobs.push (callback) ->
+					# This is a bit hacky - better to have an abstracted method
+					# that we can pass project_id to, but this whole file needs
+					# a serious refactor ATM.
+					req.params.Project_id = project_id
+					SecurityManager.requestCanAccessProject req, res, (error) ->
+						delete req.params.Project_id
+						callback(error)
+		async.series jobs, next
 
 	requestCanAccessProject : (req, res, next)->
 		doRequest = (req, res, next) ->

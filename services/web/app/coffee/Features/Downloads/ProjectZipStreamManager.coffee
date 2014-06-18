@@ -3,8 +3,37 @@ async    = require "async"
 logger   = require "logger-sharelatex"
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 FileStoreHandler = require("../FileStore/FileStoreHandler")
+Project = require("../../models/Project").Project
 
 module.exports = ProjectZipStreamManager =
+	createZipStreamForMultipleProjects: (project_ids, callback = (error, stream) ->) ->
+		# We'll build up a zip file that contains multiple zip files
+
+		archive = archiver("zip")
+		archive.on "error", (err)->
+			logger.err err:err, project_ids:project_ids, "something went wrong building archive of project"
+		callback null, archive
+
+		logger.log project_ids: project_ids, "creating zip stream of multiple projects"
+
+		jobs = []
+		for project_id in project_ids or []
+			do (project_id) ->
+				jobs.push (callback) ->
+					Project.findById project_id, "name", (error, project) ->
+						return callback(error) if error?
+						logger.log project_id: project_id, name: project.name, "appending project to zip stream"
+						ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->
+							return callback(error) if error?
+							archive.append stream, name: "#{project.name}.zip"
+							stream.on "end", () ->
+								logger.log project_id: project_id, name: project.name, "zip stream ended"
+								callback()
+
+		async.series jobs, () ->
+			logger.log project_ids: project_ids, "finished creating zip stream of multiple projects"
+			archive.finalize()
+
 	createZipStreamForProject: (project_id, callback = (error, stream) ->) ->
 		archive = archiver("zip")
 		# return stream immediately before we start adding things to it
