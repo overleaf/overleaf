@@ -2,6 +2,7 @@ _ = require('underscore')
 
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
+settings = require("settings-sharelatex")
 
 templates = {}
 
@@ -10,7 +11,7 @@ templates.welcome =
 	layout: PersonalEmailLayout
 	type:"lifecycle"
 	compiledTemplate: _.template '''
-Hi <%= first_name %>, thanks for signing up to ShareLaTeX. If you ever get lost, you can log in again <a href="https://www.sharelatex.com/login">here</a>.
+Hi <%= first_name %>, thanks for signing up to ShareLaTeX. If you ever get lost, you can log in again <a href="<%= siteUrl %>/login">here</a>.
 <p>
 I’m the co-founder of ShareLaTeX and I love talking to our users about our service. Please feel free to get in touch by replying to this email and I will get back to you within a day.
 
@@ -64,7 +65,7 @@ If you didn't request a password reset, let us know.
 
 </p>
 <p>Thank you</p>
-<p> <a href="https://www.sharelatex.com"> ShareLatex.com </a></p>
+<p> <a href="<%= siteUrl %>"> ShareLatex.com </a></p>
 '''
 
 templates.projectSharedWithYou = 
@@ -86,13 +87,14 @@ templates.projectSharedWithYou =
 	</div>
 </center>
 <p> Thank you</p>
-<p> <a href="https://www.sharelatex.com"> ShareLatex.com </a></p>
+<p> <a href="<%= siteUrl %>"> ShareLatex.com </a></p>
 '''
 
 module.exports =
 
 	buildEmail: (templateName, opts)->
 		template = templates[templateName]
+		opts.siteUrl = settings.siteUrl
 		opts.body = template.compiledTemplate(opts)
 		return {
 			subject : template.subject(opts)
