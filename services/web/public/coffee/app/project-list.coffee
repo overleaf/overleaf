@@ -400,6 +400,17 @@ define [
 				controller: "UploadProjectModalController"
 			)
 
+		$scope.downloadSelectedProjects = () ->
+			selected_project_ids = $scope.getSelectedProjectIds()
+
+			if selected_project_ids.length > 1
+				path = "/project/download/zip?project_ids=#{selected_project_ids.join(',')}"
+			else
+				path = "/project/#{selected_project_ids[0]}/download/zip"
+
+			window.location = path
+
+
 	App.controller "ProjectListItemController", ($scope) ->
 		$scope.onSelectedChange = () ->
 			$scope.$emit "selected:on-change"
