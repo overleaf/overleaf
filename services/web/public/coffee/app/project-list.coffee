@@ -15,7 +15,56 @@ define [
 		(date, format = "Do MMM YYYY, h:mm a") ->
 			moment(date).format(format)
 
-	App.controller "ProjectPageController", ($scope, $modal, $http, $q) ->
+	App.factory "queuedHttp", ["$http", "$q", ($http, $q) ->
+		pendingRequests = []
+		inflight = false
+
+		processPendingRequests = () ->
+			return if inflight
+			doRequest = pendingRequests.shift()
+			if doRequest?
+				inflight = true
+				doRequest()
+					.success () ->
+						inflight = false
+						processPendingRequests()
+					.error () ->
+						inflight = false
+						processPendingRequests()
+
+		queuedHttp = (args...) ->
+			deferred = $q.defer()
+			promise = deferred.promise
+
+			# Adhere to the $http promise conventions
+			promise.success = (callback) ->
+				promise.then(callback)
+				return promise
+
+			promise.error = (callback) ->
+				promise.catch(callback)
+				return promise
+
+			doRequest = () ->
+				$http(args...)
+					.success (successArgs...) ->
+						deferred.resolve(successArgs...)
+					.error (errorArgs...) ->
+						deferred.reject(errorArgs...)
+
+			pendingRequests.push doRequest
+			processRequests()
+
+			return promise
+
+		queuedHttp.post = (url, data) ->
+			queuedHttp({method: "POST", url: url, data: data})
+
+		return queuedHttp
+
+	]
+
+	App.controller "ProjectPageController", ($scope, $modal, $q, queuedHttp) ->
 		$scope.projects = window.data.projects
 		$scope.visibleProjects = $scope.projects
 		$scope.tags = window.data.tags
@@ -155,7 +204,7 @@ define [
 					project.tags.splice(index, 1)
 
 			for project_id in removed_project_ids
-				$http.post "/project/#{project_id}/tag", {
+				queuedHttp.post "/project/#{project_id}/tag", {
 					deletedTag: tag.name
 					_csrf: window.csrfToken
 				}
@@ -181,8 +230,7 @@ define [
 					project.tags.push tag
 
 			for project_id in added_project_ids
-				# TODO Factor this out into another provider?
-				$http.post "/project/#{project_id}/tag", {
+				queuedHttp.post "/project/#{project_id}/tag", {
 					tag: tag.name
 					_csrf: window.csrfToken
 				}
@@ -208,7 +256,7 @@ define [
 		$scope.createProject = (name, template = "none") ->
 			deferred = $q.defer()
 
-			$http
+			queuedHttp
 				.post("/project/new", {
 					_csrf: window.csrfToken
 					projectName: name
@@ -245,7 +293,7 @@ define [
 
 		$scope.renameProject = (project, newName) ->
 			project.name = newName
-			$http.post "/project/#{project.id}/rename", {
+			queuedHttp.post "/project/#{project.id}/rename", {
 				newProjectName: newName
 				_csrf: window.csrfToken
 			}
@@ -269,7 +317,7 @@ define [
 		$scope.cloneProject = (project, cloneName) ->
 			deferred = $q.defer()
 
-			$http
+			queuedHttp
 				.post("/project/#{project.id}/clone", {
 					_csrf: window.csrfToken
 					projectName: cloneName
@@ -325,7 +373,7 @@ define [
 			for project in selected_projects
 				if project.accessLevel == "owner"
 					project.archived = true
-					$http {
+					queuedHttp {
 						method: "DELETE"
 						url: "/project/#{project.id}"
 						headers:
@@ -334,7 +382,7 @@ define [
 				else
 					$scope._removeProjectFromList project
 
-					$http {
+					queuedHttp {
 						method: "POST"
 						url: "/project/#{project.id}/leave"
 						headers:
@@ -368,7 +416,7 @@ define [
 				$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
 
 			for project_id in selected_project_ids
-				$http {
+				queuedHttp {
 					method: "DELETE"
 					url: "/project/#{project_id}?forever=true"
 					headers:
@@ -385,7 +433,7 @@ define [
 				project.archived = false
 
 			for project_id in selected_project_ids
-				$http {
+				queuedHttp {
 					method: "POST"
 					url: "/project/#{project_id}/restore"
 					headers:

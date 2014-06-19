@@ -67,7 +67,7 @@ block content
 								a.menu-indent(href, ng-click="filterProjects('shared')") Shared projects
 							li(ng-class="{active: (filter == 'archived')}")
 								a.menu-indent(href, ng-click="filterProjects('archived')") Deleted projects
-							li 
+							li
 								h2 Folders
 							li(
 								ng-repeat="tag in tags | filter:nonEmpty",
