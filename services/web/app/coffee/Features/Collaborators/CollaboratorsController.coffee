@@ -19,7 +19,7 @@ module.exports = CollaboratorsController =
 			return next(new Error("User should be logged in"))
 		CollaboratorsHandler.removeUserFromProject req.params.project_id, user_id, (error) ->
 			return next(error) if error?
-			res.redirect "/project"
+			res.send 204
 
 	_formatCollaborators: (project, callback = (error, collaborators) ->) ->
 		collaborators = []

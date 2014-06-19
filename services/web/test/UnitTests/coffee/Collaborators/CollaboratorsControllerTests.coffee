@@ -63,8 +63,8 @@ describe "CollaboratorsController", ->
 		it "should remove the logged in user from the project", ->
 			@CollaboratorsHandler.removeUserFromProject.calledWith(@project_id, @user_id)
 
-		it "should redirect to the project page", ->
-			@res.redirectedTo.should.equal "/project"
+		it "should return a success code", ->
+			@res.statusCode.should.equal 204
 
 	describe "_formatCollaborators", ->
 		beforeEach ->
