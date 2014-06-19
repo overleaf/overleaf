@@ -26,7 +26,7 @@ describe "Sending a file", ->
 		@filestoreUrl = "http://localhost:#{settings.internal.filestore.port}"
 
 	beforeEach (done)->
-		fs.unlink @localFileWritePath, ->
+		fs.unlink @localFileWritePath, =>
 			done()
 
 
@@ -38,18 +38,31 @@ describe "Sending a file", ->
 			body.indexOf("up").should.not.equal -1
 			done()
 
-	it "should be able get the file back", (done)->
-		@timeout(1000 * 10)
-		@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/12345"
+	describe "with a file on the server", ->
 
-		writeStream = request.post(@fileUrl)
+		beforeEach (done)->
+			@timeout(1000 * 5)
+			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{Math.random()}"
 
-		writeStream.on "end", =>
+			writeStream = request.post(@fileUrl)
+
+			writeStream.on "end", =>
+				done()
+			fs.createReadStream(@localFileReadPath).pipe writeStream
+
+		it "should be able get the file back", (done)->
+			@timeout(1000 * 10)
 			request.get @fileUrl, (err, response, body)=>
 				body.should.equal @constantFileContent
 				done()
 
-		fs.createReadStream(@localFileReadPath).pipe writeStream
+		it "should be able to delete the file", (done)->
+			request.del @fileUrl, (err, response, body)=>
+				response.statusCode.should.equal 204
+				request.get @fileUrl, (err, response, body)=>
+					body.indexOf("NoSuchKey").should.not.equal -1
+					done()
+
 
 
 
