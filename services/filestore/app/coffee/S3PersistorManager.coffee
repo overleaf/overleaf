@@ -13,14 +13,6 @@ _ = require("underscore")
 
 thirtySeconds = 30 * 1000
 
-
-printSockets = ->
-	console.log require('https').globalAgent.sockets
-	console.log require('http').globalAgent.sockets
-	setTimeout printSockets, thirtySeconds
-
-printSockets()
-
 buildDefaultOptions = (bucketName, method, key)->
 	return {
 			aws:
@@ -55,7 +47,6 @@ module.exports =
 		putEventEmiter.on "error", (err)->
 			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
-
 
 	sendStream: (bucketName, key, readStream, callback)->
 		logger.log bucketName:bucketName, key:key, "sending file to s3"

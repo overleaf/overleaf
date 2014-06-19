@@ -21,6 +21,14 @@ module.exports = (grunt) ->
 			server_tests:
 				expand: true,
 				flatten: false,
+				cwd: 'test/acceptence/coffee',
+				src: ['*.coffee', '**/*.coffee'],
+				dest: 'test/acceptence/js/',
+				ext: '.js'
+
+			server_acc_tests:
+				expand: true,
+				flatten: false,
 				cwd: 'test/unit/coffee',
 				src: ['*.coffee', '**/*.coffee'],
 				dest: 'test/unit/js/',
@@ -35,8 +43,10 @@ module.exports = (grunt) ->
 
 		nodemon:
 			dev:
+				script: 'app.js'
 				options:
-					file: 'app.js'
+					ext:"*.coffee"
+
 
 		concurrent:
 			dev:
@@ -50,7 +60,12 @@ module.exports = (grunt) ->
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
-				
+			acceptence:
+				src: ["test/acceptence/js/#{grunt.option('feature') or '**'}/*.js"]
+				options:
+					reporter: grunt.option('reporter') or 'spec'
+					grep: grunt.option("grep")
+
 
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
@@ -60,6 +75,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-mocha-test'
 
 	grunt.registerTask "test:unit", ["coffee", "mochaTest:unit"]
+	grunt.registerTask "test:acceptence", ["coffee", "mochaTest:acceptence"]
+
 	grunt.registerTask "ci", "test:unit"
 	grunt.registerTask 'default', ['coffee', 'concurrent']
 
