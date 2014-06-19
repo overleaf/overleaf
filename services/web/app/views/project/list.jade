@@ -17,7 +17,7 @@ block content
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			.row
-				.col-md-3
+				.col-md-2
 					#newProject.dropdown
 						a.btn.btn-primary.dropdown-toggle(
 							href="#",
@@ -60,13 +60,13 @@ block content
 							ng-controller="TagListController"
 						)
 							li(ng-class="{active: (filter == 'all')}")
-								a.menu-indent(href, ng-click="filterProjects('all')") All projects
+								a(href, ng-click="filterProjects('all')") All projects
 							li(ng-class="{active: (filter == 'owned')}")
-								a.menu-indent(href, ng-click="filterProjects('owned')") Your projects
+								a(href, ng-click="filterProjects('owned')") Your projects
 							li(ng-class="{active: (filter == 'shared')}")
-								a.menu-indent(href, ng-click="filterProjects('shared')") Shared projects
+								a(href, ng-click="filterProjects('shared')") Shared projects
 							li(ng-class="{active: (filter == 'archived')}")
-								a.menu-indent(href, ng-click="filterProjects('archived')") Deleted projects
+								a(href, ng-click="filterProjects('archived')") Deleted projects
 							li
 								h2 Folders
 							li(
@@ -75,7 +75,7 @@ block content
 								ng-class="{active: tag.selected}",
 								ng-cloak
 							)
-								a.menu-indent(href="#", ng-click="selectTag()")
+								a(href="#", ng-click="selectTag()")
 									i.icon.fa(
 										ng-class="{\
 											'fa-folder-open-o': tag.selected,\
@@ -83,7 +83,7 @@ block content
 										}"
 									)
 									|  {{tag.name}} 
-								span.small ({{tag.project_ids.length}})
+									span.subdued ({{tag.project_ids.length}})
 
 					-if (settings.enableSubscriptions)
 						.row-spaced
@@ -148,7 +148,7 @@ block content
 												datalist#_roles
 													option(ng-repeat='role in roles') {{role}}
 
-				.col-md-9
+				.col-md-10
 					.container-fluid
 						.row
 							.col-md-12

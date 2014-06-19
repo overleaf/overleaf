@@ -15,31 +15,36 @@
 
 ul.folders-menu {
 	margin: 0;
+	.subdued {
+		color: @gray-light;
+	}
 	li {
-		line-height: 1;
-		padding: (@line-height-computed / 4) 0;
+		line-height: 1.8;
 		a {
-			font-size: 0.8rem;
+			font-size: 0.9rem;
 			color: #333;
-			padding-left: (@line-height-computed / 4);
-		}
-		.small {
-			font-size: 0.8rem;
-			color: @gray-light;
+			padding: (@line-height-computed / 4);
 		}
   	}
 	li.active {
-		border-right: 4px solid @red;
+		//border-right: 4px solid @red;
 		a {
 			font-weight: 700;
-			color: @link-color;
+			color: white;
+			background-color: @link-color;
+			border-radius: @border-radius-small;
+			.subdued {
+				color: white;
+			}
 		}
 	}
-  h2 {
-  	margin-top: @line-height-computed / 4;
-  	margin-bottom: 0;
-  	font-size: @font-size-base;
-  }
+	h2 {
+		margin-top: @line-height-computed / 2;
+		margin-bottom: @line-height-computed / 4;
+		font-size: @font-size-base;
+		font-weight: 500;
+		font-family: @font-family-sans-serif;
+	}
 }
 
 form.project-search {
