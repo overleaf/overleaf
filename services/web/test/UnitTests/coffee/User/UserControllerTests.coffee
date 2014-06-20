@@ -97,17 +97,9 @@ describe "UserController", ->
 
 		it "should set some props on ace", (done)->
 			@req.body =
-				theme: "something  "
+				theme: "something"
 			@res.send = (code)=>
 				@user.ace.theme.should.equal "something"
-				done()
-			@UserController.updateUserSettings @req, @res
-
-
-		it "should return an error if the email address is null", (done)->
-			@req.body.email = null
-			@res.send = (code)->
-				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
 

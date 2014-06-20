@@ -2,7 +2,6 @@ UserDeleter = require("./UserDeleter")
 UserLocator = require("./UserLocator")
 User = require("../../models/User").User
 newsLetterManager = require('../Newsletter/NewsletterManager')
-sanitize = require('sanitizer')
 UserRegistrationHandler = require("./UserRegistrationHandler")
 logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
@@ -28,25 +27,34 @@ module.exports =
 
 	updateUserSettings : (req, res)->
 		logger.log user: req.session.user, "updating account settings"
-		newEmail = req.body.email?.trim()
 		user_id = req.session.user._id
 		User.findById user_id, (err, user)->
 			if err? or !user?
 				logger.err err:err, user_id:user_id, "problem updaing user settings"
 				return res.send 500
-			user.first_name   = sanitize.escape(req.body.first_name).trim()
-			user.last_name    = sanitize.escape(req.body.last_name).trim()
-			user.ace.mode     = sanitize.escape(req.body.mode).trim()
-			user.ace.theme    = sanitize.escape(req.body.theme).trim()
-			user.ace.fontSize = sanitize.escape(req.body.fontSize).trim()
-			user.ace.autoComplete = req.body.autoComplete == "true"
-			user.ace.spellCheckLanguage = req.body.spellCheckLanguage
-			user.ace.pdfViewer = req.body.pdfViewer
+
+			if req.body.first_name?
+				user.first_name = req.body.first_name.trim()
+			if req.body.last_name?
+				user.last_name = req.body.last_name.trim()
+			if req.body.mode?
+				user.ace.mode = req.body.mode
+			if req.body.theme?
+				user.ace.theme = req.body.theme
+			if req.body.fontSize?
+				user.ace.fontSize = req.body.fontSize
+			if req.body.autoComplete?
+				user.ace.autoComplete = (req.body.autoComplete == "true")
+			if req.body.spellCheckLanguage?
+				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
+			if req.body.pdfViewer?
+				user.ace.pdfViewer = req.body.pdfViewer
 			user.save (err)->
-				if !newEmail? or newEmail.length == 0 or newEmail.indexOf("@") == -1
-					return res.send(400)
-				else if newEmail == user.email
+				newEmail = req.body.email?.trim()
+				if !newEmail? or newEmail == user.email
 					return res.send 200
+				else if newEmail.indexOf("@") == -1
+					return res.send(400)
 				else
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
