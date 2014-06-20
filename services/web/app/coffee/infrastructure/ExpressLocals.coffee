@@ -95,6 +95,7 @@ module.exports = (app)->
 				logger.err "No fingerprint for file: #{path}"
 				return ""
 		next()
+
 	app.use (req, res, next)-> 
 		res.locals.formatPrice = SubscriptionFormatters.formatPrice
 		next()
@@ -121,5 +122,7 @@ module.exports = (app)->
 			res.locals.scribtexPath = req.query.scribtex_path
 		next()
 
-
+	app.use (req, res, next) ->
+		res.locals.nav = Settings.nav
+		next()
 

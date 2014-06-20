@@ -7,37 +7,57 @@ nav.navbar.navbar-default
 
 		.navbar-collapse.collapse#navbar-collapse
 			ul.nav.navbar-nav.navbar-right
-				-if(session && session.user)
-					li
-						a(href='/project') Projects
+				each item in nav.header
+					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
+						if item.dropdown
+							li.dropdown(class=item.class)
+								a.dropdown-toggle(href)
+									| !{item.text} 
+									b.caret
+								ul.dropdown-menu
+									each child in item.dropdown
+										if child.divider
+											li.divider
+										else
+											li
+												if child.url
+													a(href=child.url) !{child.text}
+												else
+													| !{child.text}
+						else
+							li(class=item.class)
+								if item.url
+									a(href=item.url) !{item.text}
+								else
+									| !{item.text}
 
-				li.dropdown
-					a.dropdown-toggle(href='#',data-toggle="dropdown")
-						| Help 
-						b.caret
-					ul.dropdown-menu
-						li
-							a(href='/learn') Documentation
-						-if(typeof(tenderUrl) != "undefined")
-							li
-								a.js-tender-widget(href='#') Contact
+				//- li.dropdown
+				//- 	a.dropdown-toggle(href='#',data-toggle="dropdown")
+				//- 		| Help 
+				//- 		b.caret
+				//- 	ul.dropdown-menu
+				//- 		li
+				//- 			a(href='/learn') Documentation
+				//- 		-if(typeof(tenderUrl) != "undefined")
+				//- 			li
+				//- 				a.js-tender-widget(href='#') Contact Support
 
-				-if(session && session.user)
-					li.dropdown
-						a.dropdown-toggle(href="#",data-toggle="dropdown")
-							| Account 
-							b.caret
-						ul.dropdown-menu
-							li
-								a(href='/user/settings').userSettingsLink User Settings
-							- if (settings.enableSubscriptions)
-								li
-									a(href='/user/subscription').subscriptionLink Subscription
-							li
-								a(href='/logout').logoutLink Logout
-				-else
-					li
-						a(href='/register') Register
-					li 
-						a#loginLink(href='/login'+getRedirAsQueryString()) Login
+				//- -if(session && session.user)
+				//- 	li.dropdown
+				//- 		a.dropdown-toggle(href="#",data-toggle="dropdown")
+				//- 			| Account 
+				//- 			b.caret
+				//- 		ul.dropdown-menu
+				//- 			li
+				//- 				a(href='/user/settings').userSettingsLink Account Settings
+				//- 			- if (settings.enableSubscriptions)
+				//- 				li
+				//- 					a(href='/user/subscription').subscriptionLink Subscription
+				//- 			li
+				//- 				a(href='/logout').logoutLink Logout
+				//- -else
+				//- 	li
+				//- 		a(href='/register') Register
+				//- 	li 
+				//- 		a#loginLink(href='/login'+getRedirAsQueryString()) Login
 

@@ -416,6 +416,17 @@
       }
     }
 
+    > li.subdued > a {
+      border: 0;
+      color: @gray;
+      padding: 12px 12px 13px;
+      &:hover,
+      &:focus {
+        color: @gray-dark;
+        background-color: @gray-lightest;
+      }
+    }
+
     @media (min-width: @grid-float-breakpoint) {
       > li > a {
         border-color: @navbar-default-link-color;
@@ -449,6 +460,15 @@
       &:focus {
         background-color: @navbar-default-link-active-bg;
         color: @navbar-default-link-active-color;
+      }
+    }
+
+    > .open.subdued > a {
+      &,
+      &:hover,
+      &:focus {
+        color: @gray-dark;
+        background-color: @gray-lightest;
       }
     }
 

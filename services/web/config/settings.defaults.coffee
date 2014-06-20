@@ -219,3 +219,39 @@ module.exports =
 	# 	user: ""
 	# 	password: ""
 	# 	projectId: ""
+
+	nav:
+		left_footer: [{
+			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2014"
+		}]
+
+		right_footer: [{
+			text: "<i class='fa fa-github-square'></i> Contribute on Github"
+			url: "https://github.com/sharelatex/sharelatex"
+		}]
+
+		header: [{
+			text: "Register"
+			url: "/register"
+			only_when_logged_out: true
+		}, {
+			text: "Log In"
+			url: "/login"
+			only_when_logged_out: true
+		}, {
+			text: "Projects"
+			url: "/project"
+			only_when_logged_in: true
+		}, {
+			text: "Account"
+			only_when_logged_in: true
+			dropdown: [{
+				text: "Account Settings"
+				url: "/user/settings"
+			}, {
+				divider: true
+			}, {
+				text: "Log out"
+				url: "/logout"
+			}]
+		}]

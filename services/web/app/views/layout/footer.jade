@@ -2,29 +2,30 @@ footer
 	.container
 		.row
 			ul.col-md-6
-				li © 2014 ShareLaTeX
-				li
-					a(href="/tos") Terms
-				li
-					a(href="/privacy_policy") Privacy
-				li
-					a(href="/security") Security
-				li
-					a.js-tender-widget(href='#') Contact
-				li
-					a(href="/about") About
-				li
-					a(href="/blog") Blog
+				each item in nav.left_footer
+					li
+						if item.url
+							a(href=item.url) !{item.text}
+						else
+							| !{item.text}
+							
 			ul.col-md-6
-				li
-					a(href="http://www.twitter.com/sharelatex")
-						i.fa.fa-twitter-square
-				li
-					a(href="http://www.facebook.com/pages/ShareLaTeX/301671376556660")
-						i.fa.fa-facebook-square
-				li
-					a(href="https://plus.google.com/115074691861228882827", rel="publisher")
-						i.fa.fa-google-plus-square
-				li
-					a(href="https://github.com/sharelatex/sharelatex")
-						i.fa.fa-github-square
+				each item in nav.right_footer
+					li
+						if item.url
+							a(href=item.url) !{item.text}
+						else
+							| !{item.text}
+
+				//- li
+				//- 	a(href="http://www.twitter.com/sharelatex")
+				//- 		i.fa.fa-twitter-square
+				//- li
+				//- 	a(href="http://www.facebook.com/pages/ShareLaTeX/301671376556660")
+				//- 		i.fa.fa-facebook-square
+				//- li
+				//- 	a(href="https://plus.google.com/115074691861228882827", rel="publisher")
+				//- 		i.fa.fa-google-plus-square
+				//- li
+				//- 	a(href="https://github.com/sharelatex/sharelatex")
+				//- 		i.fa.fa-github-square
