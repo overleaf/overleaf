@@ -4,7 +4,7 @@ Assert = require 'assert'
 Settings = require 'settings-sharelatex'
 User = require('../models/User').User
 Project = require('../models/Project').Project
-HomeController = require("../Features/StaticPages/HomeController")
+ErrorController = require("../Features/Errors/ErrorController")
 AuthenticationController = require("../Features/Authentication/AuthenticationController")
 _ = require('underscore')
 metrics = require('../infrastructure/Metrics')
@@ -45,7 +45,7 @@ module.exports = SecurityManager =
 		doRequest = (req, res, next) ->
 			getRequestUserAndProject req, res, {allow_auth_token: options?.allow_auth_token}, (err, user, project)->
 				if !project? or project.archived
-					return HomeController.notFound(req, res, next)
+					return ErrorController.notFound(req, res, next)
 				userCanAccessProject user, project, (canAccess, permissionLevel)->
 					if canAccess
 						next()

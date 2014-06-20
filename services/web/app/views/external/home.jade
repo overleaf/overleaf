@@ -1,0 +1,113 @@
+link(rel='canonical', href='https://www.sharelatex.com')
+
+extends ../layout
+
+block content
+	.masthead
+		.container
+			.row
+				.col-md-12
+					h1 LaTeX,
+						col-md-  Evolved
+					p Introducing the first real-time collaborative LaTeX editor.
+			.row
+				.col-md-12
+					img(src="img/screen.png")
+		.container-fluid
+			.row
+				a(href="/register").btn.btn-lg.btn-hero Start Free Trial
+				a(href="/user/subscription/plans").btn.btn-lg.btn-primary.btn-hero Buy Now
+
+	.universities
+		.container
+			.row.row-spaced-small
+				div.small Used by over <strong>200,000</strong> students and academics at:
+				#slides.container-fluid
+					.row.row-spaced
+						.col-md-3
+							img(src="/img/crests/harvard.gif", alt="harvard university logo")
+						.col-md-3
+							img(src="/img/crests/mit.gif", alt="mit university logo")
+						.col-md-3
+							img(src="/img/crests/oxford.gif", alt="oxford university logo")
+						.col-md-3
+							img(src="/img/crests/tokyo.png", alt="tokyo university logo")
+					.row.row-spaced
+						.col-md-3
+							img(src="/img/crests/cambridge.png", alt="cambridge university logo")
+						.col-md-3
+							img(src="/img/crests/liverpool.jpg", alt="liverpool university logo")
+						.col-md-3
+							img(src="/img/crests/icl.png", alt="icl university logo")
+						.col-md-3
+							img(src="/img/crests/yale.png", alt="yale university logo")
+					.row.row-spaced
+						.col-md-3
+							img(src="/img/crests/durham.png", alt="durham university logo")
+						.col-md-3
+							img(src="/img/crests/nasa.png", alt="nasa university logo")
+						.col-md-3
+							img(src="/img/crests/toronto.gif", alt="toronto university logo")
+						.col-md-3
+							img(src="/img/crests/stanford.png", alt="stanford university logo")
+
+	.pattern-container
+		.container
+			.long-form-features
+				.row
+					.col-md-4.col-md-offset-2
+						h2.h1 Seamless Collaboration
+						p Keep your LaTeX collaborators up to date by letting everyone access and edit the same LaTeX document.
+					.col-md-3.col-md-offset-1
+						h2.h1
+							i.fa.fa-group.fa-5x
+
+				.row
+					.col-md-2.col-md-offset-3
+						h2.h1
+							i.fa.fa-thumbs-up.fa-5x
+					.col-md-4.col-md-offset-1
+						h2.h1 Easy to Use
+						p ShareLaTeX is the easiest LaTeX editor to get started if you’ve never used LaTeX before. No installation required!
+
+				.row
+					.col-md-4.col-md-offset-2
+						h2.h1 Work Anywhere
+						p You can access our LaTeX editor and compile your LaTeX documents from any computer with an internet connection.
+					.col-md-3.col-md-offset-1
+						h2.h1
+							i.fa.fa-globe.fa-5x
+
+				.row
+					.col-md-2.col-md-offset-3
+						h2.h1
+							i.fa.fa-dropbox.fa-5x
+					.col-md-4.col-md-offset-1
+						h2.h1 Sync with Dropbox
+						p Keep all of your LaTeX projects synced to your Dropbox folder.
+			.row
+				.col-md-12
+					p.text-center
+						a(href="/user/subscription/plans").btn.btn-primary.btn-lg Sign up now!
+
+			.row-spaced
+
+	script(src=jsPath + "libs/jquery.slides.min.js")
+	script(type="text/javascript").
+		$(function() {
+			$('#slides').slidesjs({
+				width: 940,
+				height: 100,
+				play: {
+					active: false,
+					auto: true,
+					interval: 5000
+				},
+				navigation: {
+					active: false
+				},
+				pagination: {
+					active: false
+				}
+			});
+		});

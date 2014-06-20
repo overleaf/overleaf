@@ -4,6 +4,8 @@ _ = require('underscore')
 Path = require "path"
 fs = require "fs"
 
+ErrorController = require "../Errors/ErrorController"
+
 homepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home.jade")
 
 module.exports = HomeController =
@@ -28,9 +30,4 @@ module.exports = HomeController =
 					res.render "external/#{page}.jade",
 						title: title
 				else
-					HomeController.notFound(req, res, next)
-
-	notFound: (req, res)->
-		res.statusCode = 404
-		res.render 'general/404',
-			title: "Page Not Found"
+					ErrorController.notFound(req, res, next)

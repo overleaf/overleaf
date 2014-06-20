@@ -1,0 +1,43 @@
+extends ../layout
+
+block content
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.page-header
+						h1 About us
+					h2 Meet the team behind your favourite online LaTeX editor.
+					p.team-profile
+						span.img-container
+							img(src='/img/about/henry_oswald.jpg')
+						strong Henry Oswald
+						|  built an experimental LaTeX editor in 2011 which later became ShareLaTeX. He is a trained software engineer who lives in London.
+						| Henry has been responsible for building up a reliable platform for ShareLaTeX that allows instant real-time collaboration.
+						| Henry is a strong advocate of Test Driven Development and makes sure we keep the ShareLaTeX code clean and easy to maintain.
+						a(href='https://twitter.com/henryoswald')  Follow me on Twitter
+						| .
+					p.team-profile
+						span.img-container
+							img(src='/img/about/james_allen.jpg')
+						strong James Allen
+						|  started working with Henry early in 2012 and finished his PhD in theoretical physics early in 2013. James began working on
+						| one of the first online LaTeX editors, ScribTeX, in 2008 and he has played a large role in developing the technologies and
+						| concepts that made ScribTeX and now ShareLaTeX possible. James is also slightly too obsessed with typography and learning the internals of how LaTeX works.
+					p(style="clear: both")
+
+					h3 Motivation
+					p Our first priority with ShareLaTeX is to build a tool which makes life easier for all the LaTeX users out there.
+						| The "thank you"s and success stories are a strong motivator for us, and we hope to always be able to offer a fully-functional
+						| LaTeX editor which anyone can use for free.
+					p We also believe that charging money for tools like ShareLaTeX is important since it helps to guarantee the future of the site and
+						| the safety of your work, as well as allowing us to focus on it full time to develop new features. We prefer to provide a valuable
+						| service at a fair price rather than having to try run the site from adverts, or worse. As our customers, we are answerable to you and only you.
+
+					h3 Technologies
+					p
+						| We use a lot of exciting technologies to run ShareLaTeX. We have mutliple APIs behind the scenes that we've written in Node.js, but the one exception is our
+						a(href='https://github.com/scribtex/clsi')  open sourced compiler API.
+						|  This is written in Ruby on Rails. We generally write in
+						a(href='http://coffeescript.org/')  coffee-script
+						|  as we find it helps to speed up development and make our code more readable. Your data is stored in MongoDB, Redis and Amazon S3. We practice Test Driven Development (TDD) to help produce robust and clean code which is easy to refactor.

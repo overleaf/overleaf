@@ -1,8 +1,7 @@
 AdminController = require('./Features/ServerAdmin/AdminController')
-HomeController = require('./Features/StaticPages/HomeController')
+ErrorController = require('./Features/Errors/ErrorController')
 ProjectController = require("./Features/Project/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
-InfoController = require('./Features/StaticPages/InfoController')
 SpellingController = require('./Features/Spelling/SpellingController')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
@@ -34,6 +33,7 @@ FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
+StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -47,26 +47,11 @@ httpAuth = require('express').basicAuth (user, pass)->
 module.exports = class Router
 	constructor: (app, io, socketSessions)->
 		app.use(app.router)
-
-		app.get  '/', HomeController.index
 		
 		app.get  '/login', UserPagesController.loginPage
 		app.post '/login', AuthenticationController.login
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
-
-		app.get '/resources', HomeController.externalPage("resources", "LaTeX Resources")
-		app.get '/tos', HomeController.externalPage("tos", "Terms of Service")
-		app.get '/about', HomeController.externalPage("about", "About Us")
-		app.get '/attribution', HomeController.externalPage("attribution", "Attribution")
-		app.get '/security', HomeController.externalPage("security", "Security")
-		app.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
-		app.get '/planned_maintenance', HomeController.externalPage("planned_mainteance", "Planned Maintenance")
-		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
-
-		app.get '/themes', InfoController.themes
-		app.get '/advisor', InfoController.advisor
-		app.get '/dropbox', InfoController.dropbox
 
 		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.register
@@ -74,6 +59,7 @@ module.exports = class Router
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
+		StaticPagesRouter.apply(app)
 
 		if Settings.enableSubscriptions
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
@@ -206,8 +192,7 @@ module.exports = class Router
 			logger.error err: req.body.error, meta: req.body.meta, "client side error"
 			res.send(204)
 
-		app.get '*', HomeController.notFound
-
+		app.get '*', ErrorController.notFound
 
 		socketSessions.on 'connection', (err, client, session)->
 			metrics.inc('socket-io.connection')
