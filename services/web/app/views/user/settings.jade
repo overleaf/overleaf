@@ -5,43 +5,93 @@ block content
 		.container
 			.row
 				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-					.card
+					.card.account-settings
 						.page-header
 							h1 Account Settings
-						.messageArea
+						form-messages(ng-cloak, for="settingsForm")
+							.alert.alert-success(ng-show="settingsForm.response.success")
+								| Thanks, your settings have been updated.
+						form-messages(ng-cloak, for="changePasswordForm")
 						.container-fluid
-							.row
+							.row(ng-cloak)
 								.col-md-5
 									h3 Update Account Info
-									form#userSettings
+									form(async-form="settings", name="settingsForm", action="/user/settings", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
 										.form-group
 											label(for='email') Email
-											input#emailAddress.form-control(type='email', name='email', value=user.email)
+											input.form-control(
+												type='email',
+												name='email',
+												placeholder="email@example.com"
+												required,
+												ng-model="email",
+												ng-init="email = #{JSON.stringify(user.email)}"
+											)
+											span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+												| Must be an email address
 										.form-group
 											label(for='firstName').control-label First Name
-											input#firstName.form-control(type='text', name='first_name', value=user.first_name)
+											input.form-control(
+												type='text',
+												name='first_name',
+												value=user.first_name
+											)
 										.form-group
 											label(for='lastName').control-label Last Name 
-											input#lastName.form-control(type='text', name='last_name', value=user.last_name)
+											input.form-control(
+												type='text',
+												name='last_name',
+												value=user.last_name
+											)
 										.actions
-											button.btn.btn-primary(type='submit') Update
+											button.btn.btn-primary(
+												type='submit',
+												ng-disabled="settingsForm.$invalid"
+											) Update
 
 								.col-md-5.col-md-offset-1
 									h3 Change Password
-									form#changePasswordForm(method="post", action="/user/password/update")
+									form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
 										.form-group
 											label(for='currentPassword') Current Password
-											input#currentPassword.form-control(type='password', name='currentPassword', placeholder='*********')
+											input.form-control(
+												type='password',
+												name='currentPassword',
+												placeholder='*********',
+												ng-model="currentPassword",
+												required
+											)
+											span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
+												| Required
 										.form-group
 											label(for='newPassword1') New Password
-											input#newPassword1.form-control(type='password', name='newPassword1', placeholder='************')
+											input.form-control(
+												type='password',
+												name='newPassword1',
+												placeholder='*********',
+												ng-model="newPassword1",
+												required
+											)
+											span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
+												| Required
 										.form-group
 											label(for='newPassword2') Confirm New Password
-											input#newPassword2.form-control(type='password', name='newPassword2', placeholder='************')
+											input.form-control(
+												type='password',
+												name='newPassword2',
+												placeholder='*********',
+												ng-model="newPassword2",
+												equals="{{newPassword1}}"
+											)
+											span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+												| Doesn't match
 										.actions
-											button.btn.btn-primary(type='submit') Change
+											button.btn.btn-primary(
+												type='submit',
+												ng-disabled="changePasswordForm.$invalid"
+											) Change
 
 						hr.soften
 

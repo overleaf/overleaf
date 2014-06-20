@@ -95,6 +95,22 @@ describe "UserController", ->
 				done()
 			@UserController.updateUserSettings @req, @res
 
+		it "should set the role", (done)->
+			@req.body =
+				role: "student"
+			@res.send = (code)=>
+				@user.role.should.equal "student"
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should set the institution", (done)->
+			@req.body =
+				institution: "MIT"
+			@res.send = (code)=>
+				@user.institution.should.equal "MIT"
+				done()
+			@UserController.updateUserSettings @req, @res
+
 		it "should set some props on ace", (done)->
 			@req.body =
 				theme: "something"

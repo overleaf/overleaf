@@ -11,7 +11,7 @@ block content
 						form(async-form="login", name="loginForm", action='/login', ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
-							form-messages
+							form-messages(for="loginForm")
 							.form-group
 								input.form-control(
 									type='email',

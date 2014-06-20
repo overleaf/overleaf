@@ -37,6 +37,10 @@ module.exports =
 				user.first_name = req.body.first_name.trim()
 			if req.body.last_name?
 				user.last_name = req.body.last_name.trim()
+			if req.body.role?
+				user.role = req.body.role.trim()
+			if req.body.institution?
+				user.institution = req.body.institution.trim()
 			if req.body.mode?
 				user.ace.mode = req.body.mode
 			if req.body.theme?

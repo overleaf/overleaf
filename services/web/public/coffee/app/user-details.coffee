@@ -27,7 +27,7 @@ define [
 			$scope.formVisable = true
 
 		$scope.sendUpdate = ->
-			request = $http.post "/user/personal_info", $scope.userInfoForm
+			request = $http.post "/user/settings", $scope.userInfoForm
 			request.success (data, status)->
 			request.error (data, status)->
 				console.log "the request failed"
