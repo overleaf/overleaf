@@ -5,116 +5,158 @@ block content
 		.container
 			.row
 				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
-					.card.account-settings
+					.card
 						.page-header
 							h1 Account Settings
-						form-messages(ng-cloak, for="settingsForm")
-							.alert.alert-success(ng-show="settingsForm.response.success")
-								| Thanks, your settings have been updated.
-						form-messages(ng-cloak, for="changePasswordForm")
-						.container-fluid
-							.row(ng-cloak)
-								.col-md-5
-									h3 Update Account Info
-									form(async-form="settings", name="settingsForm", action="/user/settings", novalidate)
-										input(type="hidden", name="_csrf", value=csrfToken)
-										.form-group
-											label(for='email') Email
-											input.form-control(
-												type='email',
-												name='email',
-												placeholder="email@example.com"
-												required,
-												ng-model="email",
-												ng-init="email = #{JSON.stringify(user.email)}"
-											)
-											span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
-												| Must be an email address
-										.form-group
-											label(for='firstName').control-label First Name
-											input.form-control(
-												type='text',
-												name='first_name',
-												value=user.first_name
-											)
-										.form-group
-											label(for='lastName').control-label Last Name 
-											input.form-control(
-												type='text',
-												name='last_name',
-												value=user.last_name
-											)
-										.actions
-											button.btn.btn-primary(
-												type='submit',
-												ng-disabled="settingsForm.$invalid"
-											) Update
+						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
+							form-messages(for="settingsForm")
+								.alert.alert-success(ng-show="settingsForm.response.success")
+									| Thanks, your settings have been updated.
+							form-messages(for="changePasswordForm")
+							.container-fluid
+								.row
+									.col-md-5
+										h3 Update Account Info
+										form(async-form="settings", name="settingsForm", action="/user/settings", novalidate)
+											input(type="hidden", name="_csrf", value=csrfToken)
+											.form-group
+												label(for='email') Email
+												input.form-control(
+													type='email',
+													name='email',
+													placeholder="email@example.com"
+													required,
+													ng-model="email",
+													ng-init="email = #{JSON.stringify(user.email)}"
+												)
+												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+													| Must be an email address
+											.form-group
+												label(for='firstName').control-label First Name
+												input.form-control(
+													type='text',
+													name='first_name',
+													value=user.first_name
+												)
+											.form-group
+												label(for='lastName').control-label Last Name 
+												input.form-control(
+													type='text',
+													name='last_name',
+													value=user.last_name
+												)
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="settingsForm.$invalid"
+												) Update
 
-								.col-md-5.col-md-offset-1
-									h3 Change Password
-									form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", novalidate)
-										input(type="hidden", name="_csrf", value=csrfToken)
-										.form-group
-											label(for='currentPassword') Current Password
-											input.form-control(
-												type='password',
-												name='currentPassword',
-												placeholder='*********',
-												ng-model="currentPassword",
-												required
-											)
-											span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
-												| Required
-										.form-group
-											label(for='newPassword1') New Password
-											input.form-control(
-												type='password',
-												name='newPassword1',
-												placeholder='*********',
-												ng-model="newPassword1",
-												required
-											)
-											span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
-												| Required
-										.form-group
-											label(for='newPassword2') Confirm New Password
-											input.form-control(
-												type='password',
-												name='newPassword2',
-												placeholder='*********',
-												ng-model="newPassword2",
-												equals="{{newPassword1}}"
-											)
-											span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-												| Doesn't match
-										.actions
-											button.btn.btn-primary(
-												type='submit',
-												ng-disabled="changePasswordForm.$invalid"
-											) Change
+									.col-md-5.col-md-offset-1
+										h3 Change Password
+										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", novalidate)
+											input(type="hidden", name="_csrf", value=csrfToken)
+											.form-group
+												label(for='currentPassword') Current Password
+												input.form-control(
+													type='password',
+													name='currentPassword',
+													placeholder='*********',
+													ng-model="currentPassword",
+													required
+												)
+												span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
+													| Required
+											.form-group
+												label(for='newPassword1') New Password
+												input.form-control(
+													type='password',
+													name='newPassword1',
+													placeholder='*********',
+													ng-model="newPassword1",
+													required
+												)
+												span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
+													| Required
+											.form-group
+												label(for='newPassword2') Confirm New Password
+												input.form-control(
+													type='password',
+													name='newPassword2',
+													placeholder='*********',
+													ng-model="newPassword2",
+													equals="{{newPassword1}}"
+												)
+												span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+													| Doesn't match
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="changePasswordForm.$invalid"
+												) Change
 
-						hr.soften
+							hr.soften
 
-						h3 Dropbox Integration 
-							span.small
-								a(href='/help/kb/dropbox-2') (Learn more)
-						- if(!userHasDropboxFeature)
-									.alert.alert-info Dropbox sync is a premium feature &nbsp; &nbsp;
-										a.btn.btn-info(href='/user/subscription/plans') Upgrade
-								- else if(userIsRegisteredWithDropbox)
-									.alert.alert-success Account is linked!
-									row
-										a(href='/dropbox/unlink').btn Unlink Dropbox
-								- else
-									a.btn.btn-info(href='/dropbox/beginAuth') Link to dropbox
+							h3 Dropbox Integration 
+								span.small
+									a(href='/help/kb/dropbox-2') (Learn more)
+							- if(!userHasDropboxFeature)
+										.alert.alert-info Dropbox sync is a premium feature &nbsp; &nbsp;
+											a.btn.btn-info(href='/user/subscription/plans') Upgrade
+									- else if(userIsRegisteredWithDropbox)
+										.alert.alert-success Account is linked!
+										row
+											a(href='/dropbox/unlink').btn Unlink Dropbox
+									- else
+										a.btn.btn-info(href='/dropbox/beginAuth') Link to dropbox
 
-						hr.soften
+							hr.soften
 
-						p
-							small
-								| Every few months we send a news letter out summarizing the new features available.<br>
-								| If you would prefer to not receive this email then you are free to unsubscribe below at any time.&nbsp;
-								a#unsubscribeFromNewsletter(data-csrf=csrfToken) Click here to Unsubscribe
+							p.small
+								| Every few months we send a newsletter out summarizing the new features available.
+								| If you would prefer not to receive this email then you can unsubscribe at any time: 
+								a(
+									href,
+									ng-click="unsubscribe()",
+									ng-show="subscribed && !unsubscribing"
+								) Unsubscribe
+								span(
+									ng-show="unsubscribing"
+								)
+									i.fa.fa-spin.fa-refresh 
+									|  Unsubscribing
+								span.text-success(
+									ng-show="!subscribed"
+								)
+									i.fa.fa-check
+									|  Unsubscribed
 
-						p Need to leave?
-							a#deleteUserAccount(data-csrf=csrfToken)  Delete your account
+							p Need to leave?
+								a(href, ng-click="deleteAccount()")  Delete your account
+
+
+	script(type='text/ng-template', id='deleteAccountModalTemplate')
+		.modal-header
+			h3 Delete Account
+		.modal-body
+			p
+				| You are about to permanently <strong>delete all of your account data</strong>, including your projects
+				| and settings. Please type DELETE into the box below to proceed.
+			form(novalidate, name="deleteAccountForm")
+				input.form-control(
+					type="text",
+					placeholder="",
+					ng-model="deleteConfirmationText",
+					equals="DELETE",
+					focus-on="open"
+				)
+		.modal-footer
+			button.btn.btn-default(
+				ng-click="cancel()"
+			) Cancel
+			button.btn.btn-danger(
+				ng-disabled="deleteAccountForm.$invalid || state.inflight"
+				ng-click="delete()"
+			)
+				span(ng-hide="state.inflight") Delete
+				span(ng-show="state.inflight") Deleting...
+
