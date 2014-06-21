@@ -1,7 +1,7 @@
 require [
 	"libs/mustache"
 	"./main"
-	"libs/underscore"
+	"underscore"
 ], (m)->
 	$(document).ready ->
 

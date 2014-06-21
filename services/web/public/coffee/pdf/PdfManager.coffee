@@ -4,7 +4,7 @@ define [
 	"pdf/SyncButtonsView"
 	"libs/latex-log-parser"
 	"libs/jquery.storage"
-	"libs/underscore"
+	"underscore"
 	"libs/backbone"
 ], (Modal, CompiledView, SyncButtonsView, LogParser) ->
 	class PdfManager

@@ -32,7 +32,6 @@ define [
 	"libs/jquery.color"
 	"libs/jquery-layout"
 	"libs/backbone"
-	"main"
 ], (
 	ConnectionManager,
 	HistoryManager,

@@ -1,7 +1,7 @@
 define [
 	"editor/ShareJsDoc"
 	"libs/backbone"
-	"libs/underscore"
+	"underscore"
 ], (ShareJsDoc) ->
 	class Document
 		@getDocument: (ide, doc_id) ->

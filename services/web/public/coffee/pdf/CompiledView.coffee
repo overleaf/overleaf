@@ -3,7 +3,6 @@ define [
 	"pdf/NativePdfView"
 	"libs/backbone"
 	"libs/mustache"
-	"libs/bootstrap"
 	"libs/jquery.storage"
 ], (PdfjsView, NativePdfView) ->
 	LatexErrorView = Backbone.View.extend

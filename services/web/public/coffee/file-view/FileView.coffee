@@ -1,7 +1,6 @@
 define [
-	"libs/bootstrap"
-	"libs/mustache"
 	"libs/backbone"
+	"libs/mustache"
 ], () ->
 	FileViewManager = Backbone.View.extend
 		template: $("#fileViewTemplate").html()
