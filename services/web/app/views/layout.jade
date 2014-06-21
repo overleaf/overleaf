@@ -1,5 +1,7 @@
 doctype html
 html(itemscope, itemtype='http://schema.org/Product')
+	block vars
+
 	head
 		- if (typeof(gaExperimentCode) !== "undefined" && gaExperimentCode)
 			#{gaExperimentCode}
@@ -38,9 +40,13 @@ html(itemscope, itemtype='http://schema.org/Product')
 		block scripts
 		
 	body
-		include layout/navbar
+		- if(typeof(suppressNavbar) == "undefined")
+			include layout/navbar
+
 		block content
-		include layout/footer
+			
+		- if(typeof(suppressFooter) == "undefined")
+			include layout/footer
 
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			.modal.hide#scribtexModal
@@ -54,16 +60,17 @@ html(itemscope, itemtype='http://schema.org/Product')
 				.modal-footer
 					button(data-dismiss="modal").btn OK
 
-		script(type='text/javascript').
-			window.requirejs = {
-				"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'app/main.js')}"
-			};
 
-		script(
-			data-main=jsPath+'app/main.js',
-			baseurl=jsPath,
-			src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
-		)
+		- if(typeof(suppressFooter) == "undefined")
+			script(type='text/javascript').
+				window.requirejs = {
+					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'app/main.js')}"
+				};	
+			script(
+				data-main=jsPath+'app/main.js',
+				baseurl=jsPath,
+				src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+			)
 
 		- if (typeof(tenderUrl) != "undefined")
 			script(src="https://#{tenderUrl}/tender_widget.js" )

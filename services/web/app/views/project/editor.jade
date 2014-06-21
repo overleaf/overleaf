@@ -1,41 +1,136 @@
 extends ../layout
 
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressDefaultJs = true
+
 block scripts
 	//- Only use the native bootstrap on the editor page,
 	//- since we use the Angular-based bootstrap elsewhere.
 	script(src=jsPath+'libs/bootstrap-3.1.1.js')
+	script(src=jsPath+'libs/jquery-layout.js')
+	script(src=jsPath+'libs/jquery.storage.js')
 
 block content
-	#loadingScreen
-		h3 Loading...
-		p#loadingMessage Loading editor
 
-	#errorMessages
-		#connectionLostMessage(style="display: none;")
-			| Lost connection. 
-			span#trying-reconnect
-				| Reconnecting in 
-				span#reconnection-countdown ? 
-				|  seconds. 
-				a(href='#')#try-reconnect-now Try now.
-			span#reconnecting
-				| Reconnecting...
+	.editor(ng-controller="IdeController")
 
-		#savingProblems(style="display: none")
-			| Saving...
+		.loading-screen(ng-show="state.loading")
+			.container
+				h3 Loading...
+				.progress
+					.progress-bar(ng-style="{'width': state.load_progress + '%'}")
+
+		header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
+			a.btn.btn-full-height(href='#', tooltip="Menu", tooltip-placement="bottom")
+				i.fa.fa-bars
+
+			span.name {{ project.name }}
+
+			a(href='#', data-toggle="tooltip", title="Rename")
+				i.fa.fa-pencil
+
+			.toolbar-right
+				a.btn.btn-full-height(href='#', tooltip="Share", tooltip-placement="bottom")
+					i.fa.fa-group
+				a.btn.btn-full-height(href='#', tooltip="Recent Changes", tooltip-placement="bottom")
+					i.fa.fa-history
+				a.btn.btn-full-height(href='#', tooltip="Chat", tooltip-placement="bottom")
+					i.fa.fa-comment
+
+		#editor-content(ng-cloak, layout="main", ng-hide="state.loading")
+			aside#file-tree.ui-layout-west
+				.toolbar.toolbar-small
+					a(href, tooltip-html-unsafe="New<br>File", tooltip-placement="bottom")
+						i.fa.fa-file
+					a(href, tooltip="New Folder", tooltip-placement="bottom")
+						i.fa.fa-folder
+					a(href, tooltip="Upload File", tooltip-placement="bottom")
+						i.fa.fa-upload
+
+					.toolbar-right
+						a(href, tooltip="Rename", tooltip-placement="bottom")
+							i.fa.fa-pencil
+						a(href, tooltip="Delete", tooltip-placement="bottom", tooltip-append-to-body="true")
+							i.fa.fa-trash-o
+
+				ul.list-unstyled.file-tree-list
+					file-entity(
+						entity="entity",
+						ng-repeat="entity in rootFolder.children"
+					)
+			.ui-layout-center
+
+	script(type='text/ng-template', id='entityListItemTemplate')
+		li(
+			ng-class="{ 'selected': entity.selected }",
+			ng-controller="FileTreeEntityController"
+		)
+			.entity(ng-if="entity.type == 'doc'")
+				.entity-name(ng-click="select()")
+					//- Just a spacer to align with folders
+					i.fa.fa-fw.toggle
+					i.fa.fa-fw.fa-file
+					|  {{ entity.name }}
+
+			.entity(ng-if="entity.type == 'file'")
+				.entity-name(ng-click="select()")
+					i.fa.fa-fw.toggle
+					i.fa.fa-fw.fa-image
+					|  {{ entity.name }}
+
+			.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
+				.entity-name
+					i.fa.fa-fw.toggle(
+						ng-class="{'fa-chevron-right': !expanded, 'fa-chevron-down': expanded}"
+						ng-click="toggleExpanded()"
+					)
+				
+					i.fa.fa-fw(
+						ng-class="{\
+							'fa-folder': !expanded, \
+							'fa-folder-open': expanded \
+						}"
+						ng-click="select()"
+					)
+					span(ng-click="select()")  {{ entity.name }}
+
+				ul.list-unstyled(ng-show="expanded")
+					file-entity(entity="child", ng-repeat="child in entity.children")
+
+
+	//- #loadingScreen
+	//- 	h3 Loading...
+	//- 	p#loadingMessage Loading editor
+
+	//- #errorMessages
+	//- 	#connectionLostMessage(style="display: none;")
+	//- 		| Lost connection. 
+	//- 		span#trying-reconnect
+	//- 			| Reconnecting in 
+	//- 			span#reconnection-countdown ? 
+	//- 			|  seconds. 
+	//- 			a(href='#')#try-reconnect-now Try now.
+	//- 		span#reconnecting
+	//- 			| Reconnecting...
+
+	//- 	#savingProblems(style="display: none")
+	//- 		| Saving...
 	
-	div#toolbar.sidebar-navigation
-		ul#tabs
-		#toolbar-footer
+	//- div#toolbar.sidebar-navigation
+	//- 	ul#tabs
+	//- 	#toolbar-footer
 
-	#tab-content.tab-content
+	//- #tab-content.tab-content
 
-	include ../templates
-	include ../templates/dropbox
+	//- include ../templates
+	//- include ../templates/dropbox
 
 	script(src='/socket.io/socket.io.js')
 
 	script(type='text/javascript').
+		window.project_id = "!{project_id}"
 		window.sharelatex = !{sharelatexObject};
 		window.userSettings = !{userSettingsObject};
 		window.user = !{userObject};
@@ -64,14 +159,15 @@ block content
 	script(type='text/javascript').
 		ga('send', 'event', 'editor-interaction', 'editor-opened')
 
-	- locals.supressDefaultJs = true
+	- locals.suppressDefaultJs = true
+
 	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
 	- var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
 	script(type='text/javascript').
 		window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
 
 	script(
-		data-main=jsPath+'ide.js',
+		data-main=jsPath+'app/ide.js',
 		baseurl=jsPath,
 		data-ace-base=jsPath+'ace',
 		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')

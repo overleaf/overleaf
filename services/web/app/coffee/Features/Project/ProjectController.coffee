@@ -167,6 +167,7 @@ module.exports = ProjectController =
 					priority_title: true
 					bodyClasses: ["editor"]
 					project : project
+					project_id : project._id
 					userObject : JSON.stringify({
 						id    : user.id
 						email : user.email
@@ -179,7 +180,6 @@ module.exports = ProjectController =
 					userSettingsObject: JSON.stringify({
 						mode  : user.ace.mode
 						theme : user.ace.theme
-						project_id : project._id
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						spellCheckLanguage: user.ace.spellCheckLanguage

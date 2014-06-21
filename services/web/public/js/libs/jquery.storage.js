@@ -6,7 +6,6 @@
  * Licensed under the MIT license (http://www.opensource.org/licenses/mit-license.php).
  * 2013/02/10
  **/
-define([], function() {
 ;(function($, window, document) {
     'use strict';
 
@@ -81,5 +80,3 @@ define([], function() {
         $[method].options = defaults;
     });
 }(jQuery, window, document));
-
-});
