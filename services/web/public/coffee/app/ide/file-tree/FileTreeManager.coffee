@@ -97,7 +97,11 @@ define [
 
 			return folder
 
-		getCurrentFolder: (startFolder = @$scope.rootFolder) ->
+		getCurrentFolder: () ->
+			# Return the root folder if nothing is selected
+			@_getCurrentFolder(@$scope.rootFolder) or @$scope.rootFolder
+
+		_getCurrentFolder: (startFolder = @$scope.rootFolder) ->
 			for entity in startFolder.children or []
 				# The 'current' folder is either the one selected, or
 				# the one containing the selected doc/file
@@ -108,7 +112,7 @@ define [
 						return startFolder
 
 				if entity.type == "folder"
-					result = @getCurrentFolder(entity)
+					result = @_getCurrentFolder(entity)
 					return result if result?
 
 			return null

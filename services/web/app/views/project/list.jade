@@ -419,7 +419,17 @@ block content
 		script(type="text/ng-template", id="uploadProjectModalTemplate")
 			.modal-header
 				h3 Upload Zipped Project
-			.modal-body(ng-fine-upload)
+			.modal-body(
+				fine-upload
+				endpoint="/project/new/upload"
+				waiting-for-response-text="Creating project..."
+				failed-upload-text="Upload failed. Is it a valid zip file?"
+				upload-button-text="Select a .zip file"
+				drag-area-text="drag .zip file"
+				multiple="false"
+				allowed-extensions="['zip']"
+				on-complete-callback="onComplete"
+			)
 				span Upload a zipped project
 			.modal-footer
 				button.btn.btn-default(ng-click="cancel()") Cancel

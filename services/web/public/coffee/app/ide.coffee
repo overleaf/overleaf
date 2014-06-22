@@ -4,6 +4,7 @@ define [
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focusOn"
+	"directives/fineUpload"
 ], (
 	App
 	FileTreeManager
@@ -16,7 +17,7 @@ define [
 
 		window._ide = ide
 
-		ide.project_id = window.project_id
+		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
 		ide.socket = io.connect null,
 				reconnect: false

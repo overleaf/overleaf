@@ -7,5 +7,6 @@ define [
 	"directives/focusInput"
 	"directives/focusOn"
 	"directives/equals"
+	"directives/fineUpload"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])

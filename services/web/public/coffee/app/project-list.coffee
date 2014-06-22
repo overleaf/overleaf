@@ -1,6 +1,5 @@
 define [
 	"base"
-	"../libs/fineuploader"
 ], (App) ->
 	App.directive 'ngEnter', () ->
 		return (scope, element, attrs) ->
@@ -9,7 +8,6 @@ define [
 					scope.$apply () ->
 						scope.$eval(attrs.ngEnter, event: event)
 					event.preventDefault()
-
 
 	App.filter "formatDate", () ->
 		(date, format = "Do MMM YYYY, h:mm a") ->
@@ -607,40 +605,11 @@ define [
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
 
-	App.directive 'ngFineUpload', ($timeout) ->
-		return (scope, element, attrs) ->
-			new qq.FineUploader
-				element: element[0]
-				multiple: false
-				disabledCancelForFormUploads: true
-				validation:
-					allowedExtensions: ["zip"]
-				request:
-					endpoint: "/project/new/upload"
-					forceMultipart: true
-					params:
-						_csrf: window.csrfToken
-				callbacks:
-					onComplete: (error, name, response)->
-						if response.project_id?
-							window.location = '/project/'+response.project_id
-				text:
-					waitingForResponse: "Creating project..."
-					failUpload: "Upload failed. Is it a valid zip file?"
-					uploadButton: "Select a .zip file"
-				template: """
-					<div class="qq-uploader">
-						<div class="qq-upload-drop-area"><span>{dragZoneText}</span></div>
-						<div class="qq-upload-button btn btn-primary btn-lg">
-							<div>{uploadButtonText}</div>
-						</div>
-						<span class="or btn-lg"> or </span>
-						<span class="drag-here btn-lg">drag a .zip file</span>
-						<span class="qq-drop-processing"><span>{dropProcessingText}</span><span class="qq-drop-processing-spinner"></span></span>
-						<ul class="qq-upload-list"></ul>
-					</div>
-				"""
 
 	App.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout) ->
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
+
+		$scope.onComplete = (error, name, response) ->
+			if response.project_id?
+				window.location = '/project/' + response.project_id
