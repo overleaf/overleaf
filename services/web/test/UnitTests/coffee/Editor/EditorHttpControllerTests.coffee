@@ -68,3 +68,24 @@ describe "EditorHttpController", ->
 				.calledWith(@doc)
 				.should.equal true
 
+	describe "addFolder", ->
+		beforeEach ->
+			@folder = { "mock": "folder" }
+			@req.params =
+				Project_id: @project_id
+			@req.body =
+				name: @name = "folder-name"
+				parent_folder_id: @parent_folder_id
+			@EditorController.addFolder = sinon.stub().callsArgWith(3, null, @folder)
+			@EditorHttpController.addFolder @req, @res
+
+		it "should call EditorController.addFolder", ->
+			@EditorController.addFolder
+				.calledWith(@project_id, @parent_folder_id, @name)
+				.should.equal true
+
+		it "should send the folder back as JSON", ->
+			@res.json
+				.calledWith(@folder)
+				.should.equal true
+

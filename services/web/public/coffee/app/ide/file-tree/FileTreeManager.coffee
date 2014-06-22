@@ -12,14 +12,32 @@ define [
 			@_bindToSocketEvents()
 
 		_bindToSocketEvents: () ->
-			@ide.socket.on "docCreated", (parent_folder_id, doc) =>
-				console.log "Doc created", parent_folder_id, doc
+			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
 				@$scope.$apply () ->
 					parent_folder.children.push {
 						name: doc.name
 						id:   doc._id
 						type: "doc"
+					}
+
+			@ide.socket.on "reciveNewFile", (parent_folder_id, file) =>
+				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
+				@$scope.$apply () ->
+					parent_folder.children.push {
+						name: file.name
+						id:   file._id
+						type: "file"
+					}
+
+			@ide.socket.on "reciveNewFolder", (parent_folder_id, folder) =>
+				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
+				@$scope.$apply () ->
+					parent_folder.children.push {
+						name: folder.name
+						id:   folder._id
+						type: "folder"
+						children: []
 					}
 
 		findEntityById: (id) ->
@@ -96,7 +114,7 @@ define [
 			return null
 
 		createDocInCurrentFolder: (name, callback = (error, doc) ->) ->
-			# We'll wait for the socket.io 'createDoc' notification to actually
+			# We'll wait for the socket.io notification to actually
 			# add the doc for us.
 			parent_folder = @getCurrentFolder()
 			$.ajax {
@@ -110,7 +128,25 @@ define [
 				}
 				dataType: "json"
 				success: (doc) ->
-					console.log "Got doc from POST", doc
 					callback(null, doc)
+				failure: (error) -> callback(error)
+			}
+
+		createFolderInCurrentFolder: (name, callback = (error, doc) ->) ->
+			# We'll wait for the socket.io notification to actually
+			# add the folder for us.
+			parent_folder = @getCurrentFolder()
+			$.ajax {
+				url:  "/project/#{@ide.project_id}/folder"
+				type: "POST"
+				contentType: "application/json; charset=utf-8"
+				data: JSON.stringify {
+					name: name,
+					parent_folder_id: parent_folder?.id
+					_csrf: window.csrfToken
+				}
+				dataType: "json"
+				success: (folder) ->
+					callback(null, folder)
 				failure: (error) -> callback(error)
 			}
