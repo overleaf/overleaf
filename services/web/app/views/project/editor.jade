@@ -40,9 +40,14 @@ block content
 					i.fa.fa-comment
 
 		#editor-content(ng-cloak, layout="main", ng-hide="state.loading")
-			aside#file-tree.ui-layout-west
+			aside#file-tree.ui-layout-west(ng-controller="FileTreeController")
 				.toolbar.toolbar-small
-					a(href, tooltip-html-unsafe="New<br>File", tooltip-placement="bottom")
+					a(
+						href,
+						ng-click="openNewDocModal()",
+						tooltip-html-unsafe="New<br>File",
+						tooltip-placement="bottom"
+					)
 						i.fa.fa-file
 					a(href, tooltip="New Folder", tooltip-placement="bottom")
 						i.fa.fa-folder
@@ -58,7 +63,7 @@ block content
 				ul.list-unstyled.file-tree-list
 					file-entity(
 						entity="entity",
-						ng-repeat="entity in rootFolder.children"
+						ng-repeat="entity in rootFolder.children | orderBy:'name'"
 					)
 			.ui-layout-center
 
@@ -97,8 +102,32 @@ block content
 					span(ng-click="select()")  {{ entity.name }}
 
 				ul.list-unstyled(ng-show="expanded")
-					file-entity(entity="child", ng-repeat="child in entity.children")
+					file-entity(entity="child", ng-repeat="child in entity.children | orderBy:'name'")
 
+	script(type='text/ng-template', id='newDocModalTemplate')
+		.modal-header
+			h3 New File
+		.modal-body
+			form(novalidate, name="newDocForm")
+				input.form-control(
+					type="text",
+					placeholder="File Name",
+					required,
+					ng-model="inputs.name",
+					ng-enter="create()",
+					focus-on="open"
+				)
+		.modal-footer
+			button.btn.btn-default(
+				ng-disabled="state.inflight"
+				ng-click="cancel()"
+			) Cancel
+			button.btn.btn-primary(
+				ng-disabled="newDocForm.$invalid || state.inflight"
+				ng-click="create()"
+			)
+				span(ng-hide="state.inflight") Create
+				span(ng-show="state.inflight") Creating...
 
 	//- #loadingScreen
 	//- 	h3 Loading...

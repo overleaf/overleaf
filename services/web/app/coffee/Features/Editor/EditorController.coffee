@@ -163,7 +163,7 @@ module.exports = EditorController =
 		logger.log sl_req_id:sl_req_id, "sending new doc to project #{project_id}"
 		Metrics.inc "editor.add-doc"
 		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, sl_req_id, (err, doc, folder_id)=>
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc)
+			EditorRealTimeController.emitToRoom(project_id, 'docCreated', folder_id, doc)
 			callback(err, doc)
 
 	addFile: (project_id, folder_id, fileName, path, sl_req_id, callback = (error, file)->)->

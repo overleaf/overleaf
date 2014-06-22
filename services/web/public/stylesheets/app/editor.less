@@ -71,7 +71,14 @@
 
 	ul.file-tree-list {
 		font-size: 0.8rem;
-		margin-top: (@line-height-computed / 4);
+		margin: 0;
+		padding: (@line-height-computed / 4) 0;
+		position: absolute;
+		top: 32px;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		overflow-y: scroll;
 
 		ul {
 			margin-left: (@line-height-computed / 2);

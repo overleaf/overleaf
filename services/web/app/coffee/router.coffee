@@ -87,6 +87,8 @@ module.exports = class Router
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
+		app.post '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
+
 		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,

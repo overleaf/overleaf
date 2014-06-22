@@ -1,6 +1,7 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 logger = require "logger-sharelatex"
 EditorRealTimeController = require "./EditorRealTimeController"
+EditorController = require "./EditorController"
 
 module.exports = EditorHttpController =
 	restoreDoc: (req, res, next) ->
@@ -19,3 +20,10 @@ module.exports = EditorHttpController =
 				doc_id: doc._id
 			}
 
+	addDoc: (req, res, next) ->
+		project_id = req.params.Project_id
+		name = req.body.name
+		parent_folder_id = req.body.parent_folder_id
+		EditorController.addDoc project_id, parent_folder_id, name, [], (error, doc) ->
+			return next(error) if error?
+			res.json doc

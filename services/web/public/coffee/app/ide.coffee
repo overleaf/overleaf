@@ -2,35 +2,35 @@ define [
 	"base"
 	"ide/file-tree/FileTreeManager"
 	"ide/directives/layout"
+	"ide/services/ide"
+	"directives/focusOn"
 ], (
 	App
 	FileTreeManager
 ) ->
-	App.controller "IdeController", ["$scope", "$timeout", ($scope, $timeout) ->
+	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		$scope.state = {
 			loading: true
 			load_progress: 40
 		}
 
-		window.ide = ide = {
-			'$scope': $scope
-		}
+		window._ide = ide
+
+		ide.project_id = window.project_id
+		ide.$scope = $scope
+		ide.socket = io.connect null,
+				reconnect: false
+				"force new connection": true
+
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 
-		$scope.project_id = window.project_id
-
-		ioOptions =
-			reconnect: false
-			"force new connection": true
-		$scope.socket = io.connect null, ioOptions
-
-		$scope.socket.on "connect", () ->
+		ide.socket.on "connect", () ->
 			$scope.$apply () ->
 				$scope.state.load_progress = 80
 
 			joinProject = () =>
-				$scope.socket.emit 'joinProject', {
-					project_id: $scope.project_id
+				ide.socket.emit 'joinProject', {
+					project_id: ide.project_id
 				}, (err, project, permissionsLevel, protocolVersion) =>
 					if $scope.protocolVersion? and $scope.protocolVersion != protocolVersion
 						location.reload(true)
@@ -42,8 +42,6 @@ define [
 						$scope.state.loading = false
 
 						$scope.$emit "project:joined"
-
-						console.log "Project", $scope.project, $scope.rootFolder
 
 			setTimeout(joinProject, 100)	]
 

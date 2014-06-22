@@ -9,8 +9,10 @@ describe "EditorHttpController", ->
 			'../Project/ProjectEntityHandler' : @ProjectEntityHandler = {}
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./EditorController": @EditorController = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
+		@parent_folder_id = "mock-folder-id"
 		@req = {}
 		@res =
 			send: sinon.stub()
@@ -44,3 +46,25 @@ describe "EditorHttpController", ->
 			@res.json
 				.calledWith(doc_id: @new_doc_id)
 				.should.equal true
+
+	describe "addDoc", ->
+		beforeEach ->
+			@doc = { "mock": "doc" }
+			@req.params =
+				Project_id: @project_id
+			@req.body =
+				name: @name = "doc-name"
+				parent_folder_id: @parent_folder_id
+			@EditorController.addDoc = sinon.stub().callsArgWith(4, null, @doc)
+			@EditorHttpController.addDoc @req, @res
+
+		it "should call EditorController.addDoc", ->
+			@EditorController.addDoc
+				.calledWith(@project_id, @parent_folder_id, @name, [])
+				.should.equal true
+
+		it "should send the doc back as JSON", ->
+			@res.json
+				.calledWith(@doc)
+				.should.equal true
+
