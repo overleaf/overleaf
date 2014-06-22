@@ -30,7 +30,13 @@ aside#file-tree.ui-layout-west(ng-controller="FileTreeController")
 				tooltip-placement="bottom"
 			)
 				i.fa.fa-pencil
-			a(href, tooltip="Delete", tooltip-placement="bottom", tooltip-append-to-body="true")
+			a(
+				href,
+				ng-click="openDeleteModalForSelected()",
+				tooltip="Delete",
+				tooltip-placement="bottom",
+				tooltip-append-to-body="true"
+			)
 				i.fa.fa-trash-o
 
 	ul.list-unstyled.file-tree-list
@@ -155,3 +161,20 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		span Upload file(s)
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") Cancel
+
+script(type='text/ng-template', id='deleteEntityModalTemplate')
+	.modal-header
+		h3 Delete {{ entity.name }}
+	.modal-body
+		p Are you sure you want to permanently delete <strong>{{ entity.name }}</strong>?
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-danger(
+			ng-disabled="state.inflight"
+			ng-click="delete()"
+		)
+			span(ng-hide="state.inflight") Delete
+			span(ng-show="state.inflight") Deleting...

@@ -27,6 +27,9 @@ define [
 
 		$scope.startRenamingSelected = () ->
 			$scope.$broadcast "rename:selected"
+
+		$scope.openDeleteModalForSelected = () ->
+			$scope.$broadcast "delete:selected"
 	]
 
 	App.controller "NewDocModalController", [

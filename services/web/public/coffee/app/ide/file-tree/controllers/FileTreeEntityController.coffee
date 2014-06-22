@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FileTreeEntityController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "FileTreeEntityController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.select = () ->
 			ide.fileTreeManager.forEachEntity (entity) ->
 				entity.selected = false
@@ -20,9 +20,36 @@ define [
 		$scope.$on "rename:selected", () ->
 			$scope.startRenaming() if $scope.entity.selected
 
+		$scope.openDeleteModal = () ->
+			$modal.open(
+				templateUrl: "deleteEntityModalTemplate"
+				controller:  "DeleteEntityModalController"
+				scope: $scope
+			)
+
+		$scope.$on "delete:selected", () ->
+			$scope.openDeleteModal() if $scope.entity.selected
+
 		if $scope.entity.type == "folder"
 			$scope.expanded = false
 
 			$scope.toggleExpanded = () ->
 				$scope.expanded = !$scope.expanded
+	]
+
+	App.controller "DeleteEntityModalController", [
+		"$scope", "ide", "$modalInstance",
+		($scope,   ide,   $modalInstance) ->
+			$scope.state =
+				inflight: false
+
+			$scope.delete = () ->
+				$scope.state.inflight = true
+				ide.fileTreeManager.deleteEntity $scope.entity, (error) ->
+					$scope.$apply () ->
+						$scope.state.inflight = false
+						$modalInstance.close()
+
+			$scope.cancel = () ->
+				$modalInstance.dismiss('cancel')
 	]

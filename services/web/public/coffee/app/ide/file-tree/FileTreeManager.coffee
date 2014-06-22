@@ -45,6 +45,12 @@ define [
 				@$scope.$apply () ->
 					entity.name = name
 
+			@ide.socket.on "removeEntity", (entity_id) =>
+				entity = @findEntityById(entity_id)
+				return if !entity?
+				@$scope.$apply () =>
+					@_deleteEntityFromScope entity
+
 		findEntityById: (id) ->
 			@_findEntityByIdInFolder @$scope.rootFolder, id
 
@@ -58,12 +64,12 @@ define [
 
 			return null
 
-		forEachEntity: (callback) ->
+		forEachEntity: (callback = (entity, parent_folder) ->) ->
 			@_forEachEntityInFolder(@$scope.rootFolder, callback)
 
 		_forEachEntityInFolder: (folder, callback) ->
 			for entity in folder.children or []
-				callback(entity)
+				callback(entity, folder)
 				if entity.children?
 					@_forEachEntityInFolder(entity, callback)
 
@@ -176,3 +182,27 @@ define [
 				failure: (error) -> callback(error)
 			}
 
+		deleteEntity: (entity, callback = (error) ->) ->
+			# We'll wait for the socket.io notification to 
+			# delete from scope.
+			$.ajax {
+				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}"
+				type: "DELETE"
+				contentType: "application/json; charset=utf-8"
+				headers:
+					"X-Csrf-Token": window.csrfToken
+				dataType: "json"
+				success: () -> callback()
+				failure: (error) -> callback(error)
+			}
+
+		_deleteEntityFromScope: (entity) ->
+			parent_folder = null
+			@forEachEntity (possible_entity, folder) ->
+				if possible_entity == entity
+					parent_folder = folder
+
+			if parent_folder?
+				index = parent_folder.children.indexOf(entity)
+				if index > -1
+					parent_folder.children.splice(index, 1)
