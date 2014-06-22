@@ -19,4 +19,10 @@ define [
 
 		$scope.$on "rename:selected", () ->
 			$scope.startRenaming() if $scope.entity.selected
+
+		if $scope.entity.type == "folder"
+			$scope.expanded = false
+
+			$scope.toggleExpanded = () ->
+				$scope.expanded = !$scope.expanded
 	]

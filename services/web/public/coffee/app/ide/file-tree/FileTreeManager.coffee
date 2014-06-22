@@ -1,7 +1,6 @@
 define [
 	"ide/file-tree/directives/fileEntity"
 	"ide/file-tree/controllers/FileTreeController"
-	"ide/file-tree/controllers/FileTreeFolderController"
 	"ide/file-tree/controllers/FileTreeEntityController"
 ], () ->
 	class FileTreeManager
@@ -39,6 +38,12 @@ define [
 						type: "folder"
 						children: []
 					}
+
+			@ide.socket.on "reciveEntityRename", (entity_id, name) =>
+				entity = @findEntityById(entity_id)
+				return if !entity?
+				@$scope.$apply () ->
+					entity.name = name
 
 		findEntityById: (id) ->
 			@_findEntityByIdInFolder @$scope.rootFolder, id
