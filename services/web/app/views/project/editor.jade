@@ -15,7 +15,6 @@ block scripts
 block content
 
 	.editor(ng-controller="IdeController")
-
 		.loading-screen(ng-show="state.loading")
 			.container
 				h3 Loading...
@@ -41,7 +40,7 @@ block content
 
 		#editor-content(ng-cloak, layout="main", ng-hide="state.loading")
 			include ./editor/file-tree
-			
+
 			.ui-layout-center
 
 	//- #loadingScreen

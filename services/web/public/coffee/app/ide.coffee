@@ -4,7 +4,9 @@ define [
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focusOn"
+	"directives/focusInput"
 	"directives/fineUpload"
+	"directives/onEnter"
 ], (
 	App
 	FileTreeManager

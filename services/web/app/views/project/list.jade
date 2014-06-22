@@ -312,7 +312,7 @@ block content
 						placeholder="New Folder Name",
 						required,
 						ng-model="inputs.newTagName",
-						ng-enter="create()",
+						on-enter="create()",
 						focus-on="open"
 					)
 			.modal-footer
@@ -332,7 +332,7 @@ block content
 						placeholder="Project Name",
 						ng-model="inputs.projectName",
 						required,
-						ng-enter="rename()",
+						on-enter="rename()",
 						focus-on="open"
 					)
 			.modal-footer
@@ -354,7 +354,7 @@ block content
 							placeholder="New Project Name",
 							required,
 							ng-model="inputs.projectName",
-							ng-enter="clone()",
+							on-enter="clone()",
 							focus-on="open"
 						)
 			.modal-footer
@@ -379,7 +379,7 @@ block content
 						placeholder="Project Name",
 						required,
 						ng-model="inputs.projectName",
-						ng-enter="create()",
+						on-enter="create()",
 						focus-on="open"
 					)
 			.modal-footer

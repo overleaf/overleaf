@@ -90,6 +90,10 @@ module.exports = class Router
 		app.post '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
 		app.post '/project/:Project_id/folder', SecurityManager.requestCanModifyProject, EditorHttpController.addFolder
 
+		app.post '/project/:Project_id/:entity_type/:entity_id/rename', SecurityManager.requestCanModifyProject, EditorHttpController.renameEntity
+		app.post '/project/:Project_id/:entity_type/:entity_id/move', SecurityManager.requestCanModifyProject, EditorHttpController.moveEntity
+		app.post '/project/:Project_id/:entity_type/:entity_id/delete', SecurityManager.requestCanModifyProject, EditorHttpController.deleteEntity
+
 		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,

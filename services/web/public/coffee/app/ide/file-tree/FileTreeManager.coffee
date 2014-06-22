@@ -154,3 +154,20 @@ define [
 					callback(null, folder)
 				failure: (error) -> callback(error)
 			}
+
+		renameEntity: (entity, name, callback = (error) ->) ->
+			return if entity.name == name
+			entity.name = name
+			$.ajax {
+				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename"
+				type: "POST"
+				contentType: "application/json; charset=utf-8"
+				data: JSON.stringify {
+					name: name,
+					_csrf: window.csrfToken
+				}
+				dataType: "json"
+				success: () -> callback()
+				failure: (error) -> callback(error)
+			}
+

@@ -23,7 +23,12 @@ aside#file-tree.ui-layout-west(ng-controller="FileTreeController")
 			i.fa.fa-upload
 
 		.toolbar-right
-			a(href, tooltip="Rename", tooltip-placement="bottom")
+			a(
+				href,
+				ng-click="startRenamingSelected()",
+				tooltip="Rename",
+				tooltip-placement="bottom"
+			)
 				i.fa.fa-pencil
 			a(href, tooltip="Delete", tooltip-placement="bottom", tooltip-append-to-body="true")
 				i.fa.fa-trash-o
@@ -41,11 +46,23 @@ script(type='text/ng-template', id='entityListItemTemplate')
 		ng-controller="FileTreeEntityController"
 	)
 		.entity(ng-if="entity.type == 'doc'")
-			.entity-name(ng-click="select()")
+			.entity-name(
+				ng-click="select()"
+				ng-dblclick="startRenaming()"
+			)
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle
 				i.fa.fa-fw.fa-file
-				|  {{ entity.name }}
+				span(
+					ng-hide="entity.renaming"
+				)  {{ entity.name }}
+				input(
+					ng-show="entity.renaming",
+					ng-model="inputs.name",
+					ng-blur="finishRenaming()",
+					focus-input="entity.renaming",
+					on-enter="finishRenaming()"
+				)
 
 		.entity(ng-if="entity.type == 'file'")
 			.entity-name(ng-click="select()")
@@ -82,7 +99,7 @@ script(type='text/ng-template', id='newDocModalTemplate')
 				placeholder="File Name",
 				required,
 				ng-model="inputs.name",
-				ng-enter="create()",
+				on-enter="create()",
 				focus-on="open"
 			)
 	.modal-footer
@@ -107,7 +124,7 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 				placeholder="Folder Name",
 				required,
 				ng-model="inputs.name",
-				ng-enter="create()",
+				on-enter="create()",
 				focus-on="open"
 			)
 	.modal-footer

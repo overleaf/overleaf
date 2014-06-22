@@ -89,3 +89,57 @@ describe "EditorHttpController", ->
 				.calledWith(@folder)
 				.should.equal true
 
+	describe "renameEntity", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				entity_id: @entity_id = "entity-id-123"
+				entity_type: @entity_type = "entity-type"
+			@req.body =
+				name: @name = "new-name"
+			@EditorController.renameEntity = sinon.stub().callsArg(4)
+			@EditorHttpController.renameEntity @req, @res
+
+		it "should call EditorController.renameEntity", ->
+			@EditorController.renameEntity
+				.calledWith(@project_id, @entity_id, @entity_type, @name)
+				.should.equal true
+
+		it "should send back a success response", ->
+			@res.send.calledWith(204).should.equal true
+
+	describe "moveEntity", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				entity_id: @entity_id = "entity-id-123"
+				entity_type: @entity_type = "entity-type"
+			@req.body =
+				folder_id: @folder_id = "folder-id-123"
+			@EditorController.moveEntity = sinon.stub().callsArg(4)
+			@EditorHttpController.moveEntity @req, @res
+
+		it "should call EditorController.moveEntity", ->
+			@EditorController.moveEntity
+				.calledWith(@project_id, @entity_id, @folder_id, @entity_type)
+				.should.equal true
+
+		it "should send back a success response", ->
+			@res.send.calledWith(204).should.equal true
+
+	describe "deleteEntity", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				entity_id: @entity_id = "entity-id-123"
+				entity_type: @entity_type = "entity-type"
+			@EditorController.deleteEntity = sinon.stub().callsArg(3)
+			@EditorHttpController.deleteEntity @req, @res
+
+		it "should call EditorController.deleteEntity", ->
+			@EditorController.deleteEntity
+				.calledWith(@project_id, @entity_id, @entity_type)
+				.should.equal true
+
+		it "should send back a success response", ->
+			@res.send.calledWith(204).should.equal true
