@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FileTreeFolderController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "FileTreeFolderController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.expanded = false
 
 		$scope.toggleExpanded = () ->
@@ -17,4 +17,33 @@ define [
 			# that doesn't inherit from previous scopes.
 			return '0' if entity.type == "folder"
 			return '1'
+
+		$scope.openNewDocModal = () ->
+			$modal.open(
+				templateUrl: "newDocModalTemplate"
+				controller:  "NewDocModalController"
+				resolve: {
+					parent_folder: () -> $scope.entity
+				}
+			)
+
+		$scope.openNewFolderModal = () ->
+			$modal.open(
+				templateUrl: "newFolderModalTemplate"
+				controller:  "NewFolderModalController"
+				resolve: {
+					parent_folder: () -> $scope.entity
+				}
+			)
+
+		$scope.openUploadFileModal = () ->
+			$scope.project_id = ide.project_id
+			$modal.open(
+				templateUrl: "uploadFileModalTemplate"
+				controller:  "UploadFileModalController"
+				scope: $scope
+				resolve: {
+					parent_folder: () -> $scope.entity
+				}
+			)
 	]

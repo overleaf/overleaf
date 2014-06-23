@@ -37,8 +37,6 @@ define [
 				params     = scope.params or {}
 				params._csrf = window.csrfToken
 
-				console.log "PARAMS", params
-
 				new qq.FineUploader
 					element: element[0]
 					multiple: multiple

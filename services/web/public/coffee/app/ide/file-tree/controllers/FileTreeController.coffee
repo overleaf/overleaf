@@ -1,17 +1,23 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FileTreeController", ["$scope", "$modal", ($scope, $modal) ->
+	App.controller "FileTreeController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.openNewDocModal = () ->
 			$modal.open(
 				templateUrl: "newDocModalTemplate"
 				controller:  "NewDocModalController"
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
 			)
 
 		$scope.openNewFolderModal = () ->
 			$modal.open(
 				templateUrl: "newFolderModalTemplate"
 				controller:  "NewFolderModalController"
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
 			)
 
 		$scope.openUploadFileModal = () ->
@@ -19,6 +25,9 @@ define [
 				templateUrl: "uploadFileModalTemplate"
 				controller:  "UploadFileModalController"
 				scope: $scope
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
 			)
 
 		$scope.orderByFoldersFirst = (entity) ->
@@ -33,8 +42,8 @@ define [
 	]
 
 	App.controller "NewDocModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout",
-		($scope,   ide,   $modalInstance,   $timeout) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.inputs = 
 				name: "name.tex"
 			$scope.state =
@@ -48,7 +57,7 @@ define [
 			$scope.create = () ->
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createDocInCurrentFolder($scope.inputs.name)
+					.createDoc($scope.inputs.name, parent_folder)
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -58,8 +67,8 @@ define [
 	]
 
 	App.controller "NewFolderModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout",
-		($scope,   ide,   $modalInstance,   $timeout) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.inputs = 
 				name: "name"
 			$scope.state =
@@ -73,7 +82,7 @@ define [
 			$scope.create = () ->
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createFolderInCurrentFolder($scope.inputs.name)
+					.createFolder($scope.inputs.name, parent_folder)
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -83,9 +92,9 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout",
-		($scope,   ide,   $modalInstance,   $timeout) ->
-			parent_folder = ide.fileTreeManager.getCurrentFolder()
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+			console.log "PArent folder", parent_folder
 			$scope.parent_folder_id = parent_folder?.id
 
 			uploadCount = 0

@@ -137,29 +137,18 @@ define [
 
 			return null
 
-		createDocInCurrentFolder: (name, callback = (error, doc) ->) ->
+		createDoc: (name, parent_folder = @getCurrentFolder()) ->
 			# We'll wait for the socket.io notification to actually
 			# add the doc for us.
-			parent_folder = @getCurrentFolder()
-			$.ajax {
-				url:  "/project/#{@ide.project_id}/doc"
-				type: "POST"
-				contentType: "application/json; charset=utf-8"
-				data: JSON.stringify {
-					name: name,
-					parent_folder_id: parent_folder?.id
-					_csrf: window.csrfToken
-				}
-				dataType: "json"
-				success: (doc) ->
-					callback(null, doc)
-				failure: (error) -> callback(error)
+			@ide.$http.post "/project/#{@ide.project_id}/doc", {
+				name: name,
+				parent_folder_id: parent_folder?.id
+				_csrf: window.csrfToken
 			}
 
-		createFolderInCurrentFolder: (name) ->
+		createFolder: (name, parent_folder = @getCurrentFolder()) ->
 			# We'll wait for the socket.io notification to actually
 			# add the folder for us.
-			parent_folder = @getCurrentFolder()
 			return @ide.$http.post "/project/#{@ide.project_id}/folder", {
 				name: name,
 				parent_folder_id: parent_folder?.id

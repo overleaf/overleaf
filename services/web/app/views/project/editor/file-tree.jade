@@ -74,6 +74,25 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					on-enter="finishRenaming()"
 				)
 
+				span.dropdown(ng-show="entity.selected")
+					a.dropdown-toggle(href)
+						i.fa.fa-chevron-down
+
+					ul.dropdown-menu.dropdown-menu-right
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="startRenaming()"
+							) Rename
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="openDeleteModal()"
+							) Delete
+
+
 		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
 			.entity-name(
 				ng-click="select()"
@@ -107,6 +126,44 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					select-name-when="entity.renaming",
 					on-enter="finishRenaming()"
 				)
+
+				span.dropdown(ng-show="entity.selected")
+					a.dropdown-toggle(href)
+						i.fa.fa-chevron-down
+
+					ul.dropdown-menu.dropdown-menu-right
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="startRenaming()"
+							) Rename
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="openDeleteModal()"
+							) Delete
+						li.divider
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="openNewDocModal()"
+							) New File
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="openNewFolderModal()"
+							) New Folder
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								ng-click="openUploadFileModal()"
+							) Upload File
+
 
 			ul.list-unstyled(
 				ng-if="entity.type == 'folder'"
