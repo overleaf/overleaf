@@ -56,6 +56,9 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				ng-click="select()"
 				ng-dblclick="startRenaming()"
 				draggable
+				context-menu
+				data-target="context-menu-{{ entity.id }}"
+				context-menu-container="body"
 			)
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
@@ -92,6 +95,23 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								ng-click="openDeleteModal()"
 							) Delete
 
+				div.dropdown.context-menu(id="context-menu-{{ entity.id }}")
+					ul.dropdown-menu
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								stop-propagation="click"
+								ng-click="startRenaming()"
+							) Rename
+						li
+							a(
+								href="#"
+								prevent-default="click"
+								stop-propagation="click"
+								ng-click="openDeleteModal()"
+							) Delete
+
 
 		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
 			.entity-name(
@@ -101,69 +121,112 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				droppable
 				on-drop-callback="onDrop"
 			)
-				i.fa.fa-fw.toggle(
-					ng-if="entity.type == 'folder'"
-					ng-class="{'fa-chevron-right': !expanded, 'fa-chevron-down': expanded}"
-					ng-click="toggleExpanded()"
+				div(
+					context-menu
+					data-target="context-menu-{{ entity.id }}"
+					context-menu-container="body"
 				)
+					i.fa.fa-fw.toggle(
+						ng-if="entity.type == 'folder'"
+						ng-class="{'fa-chevron-right': !expanded, 'fa-chevron-down': expanded}"
+						ng-click="toggleExpanded()"
+					)
 
-				i.fa.fa-fw(
-					ng-if="entity.type == 'folder'"
-					ng-class="{\
-						'fa-folder': !expanded, \
-						'fa-folder-open': expanded \
-					}"
-					ng-click="select()"
-				)
+					i.fa.fa-fw(
+						ng-if="entity.type == 'folder'"
+						ng-class="{\
+							'fa-folder': !expanded, \
+							'fa-folder-open': expanded \
+						}"
+						ng-click="select()"
+					)
 
-				span(
-					ng-hide="entity.renaming"
-				)  {{ entity.name }}
-				input(
-					ng-show="entity.renaming",
-					ng-model="inputs.name",
-					ng-blur="finishRenaming()",
-					select-name-when="entity.renaming",
-					on-enter="finishRenaming()"
-				)
+					span(
+						ng-hide="entity.renaming"
+					)  {{ entity.name }}
+					input(
+						ng-show="entity.renaming",
+						ng-model="inputs.name",
+						ng-blur="finishRenaming()",
+						select-name-when="entity.renaming",
+						on-enter="finishRenaming()"
+					)
 
-				span.dropdown(ng-show="entity.selected")
-					a.dropdown-toggle(href)
-						i.fa.fa-chevron-down
+					span.dropdown(ng-show="entity.selected")
+						a.dropdown-toggle(href)
+							i.fa.fa-chevron-down
 
-					ul.dropdown-menu.dropdown-menu-right
-						li
-							a(
-								href="#"
-								prevent-default="click"
-								ng-click="startRenaming()"
-							) Rename
-						li
-							a(
-								href="#"
-								prevent-default="click"
-								ng-click="openDeleteModal()"
-							) Delete
-						li.divider
-						li
-							a(
-								href="#"
-								prevent-default="click"
-								ng-click="openNewDocModal()"
-							) New File
-						li
-							a(
-								href="#"
-								prevent-default="click"
-								ng-click="openNewFolderModal()"
-							) New Folder
-						li
-							a(
-								href="#"
-								prevent-default="click"
-								ng-click="openUploadFileModal()"
-							) Upload File
+						ul.dropdown-menu.dropdown-menu-right
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									ng-click="startRenaming()"
+								) Rename
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									ng-click="openDeleteModal()"
+								) Delete
+							li.divider
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									ng-click="openNewDocModal()"
+								) New File
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									ng-click="openNewFolderModal()"
+								) New Folder
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									ng-click="openUploadFileModal()"
+								) Upload File
 
+					.dropdown.context-menu(id="context-menu-{{ entity.id }}")
+						ul.dropdown-menu
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									stop-propagation="click"
+									ng-click="startRenaming()"
+								) Rename
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									stop-propagation="click"
+									ng-click="openDeleteModal()"
+								) Delete
+							li.divider
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									stop-propagation="click"
+									ng-click="openNewDocModal()"
+								) New File
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									stop-propagation="click"
+									ng-click="openNewFolderModal()"
+								) New Folder
+							li
+								a(
+									href="#"
+									prevent-default="click"
+									stop-propagation="click"
+									ng-click="openUploadFileModal()"
+								) Upload File
 
 			ul.list-unstyled(
 				ng-if="entity.type == 'folder'"
