@@ -43,7 +43,7 @@ define [
 			$modalInstance.opened.then () ->
 				$timeout () ->
 					$scope.$broadcast "open"
-				, 700
+				, 200
 
 			$scope.create = () ->
 				$scope.state.inflight = true
@@ -68,7 +68,7 @@ define [
 			$modalInstance.opened.then () ->
 				$timeout () ->
 					$scope.$broadcast "open"
-				, 700
+				, 200
 
 			$scope.create = () ->
 				$scope.state.inflight = true

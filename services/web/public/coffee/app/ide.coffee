@@ -3,8 +3,7 @@ define [
 	"ide/file-tree/FileTreeManager"
 	"ide/directives/layout"
 	"ide/services/ide"
-	"directives/focusOn"
-	"directives/focusInput"
+	"directives/focus"
 	"directives/fineUpload"
 	"directives/onEnter"
 ], (

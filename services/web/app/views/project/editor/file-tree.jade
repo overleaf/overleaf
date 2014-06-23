@@ -70,7 +70,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ng-show="entity.renaming",
 					ng-model="inputs.name",
 					ng-blur="finishRenaming()",
-					focus-input="entity.renaming",
+					select-name-when="entity.renaming",
 					on-enter="finishRenaming()"
 				)
 
@@ -104,7 +104,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ng-show="entity.renaming",
 					ng-model="inputs.name",
 					ng-blur="finishRenaming()",
-					focus-input="entity.renaming",
+					select-name-when="entity.renaming",
 					on-enter="finishRenaming()"
 				)
 
@@ -130,7 +130,7 @@ script(type='text/ng-template', id='newDocModalTemplate')
 				required,
 				ng-model="inputs.name",
 				on-enter="create()",
-				focus-on="open"
+				select-name-on="open"
 			)
 	.modal-footer
 		button.btn.btn-default(
@@ -155,7 +155,7 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 				required,
 				ng-model="inputs.name",
 				on-enter="create()",
-				focus-on="open"
+				select-name-on="open"
 			)
 	.modal-footer
 		button.btn.btn-default(
