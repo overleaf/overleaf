@@ -1,7 +1,7 @@
 define [
-	"project-list"
-	"user-details"
-	"account-settings"
+	"main/project-list"
+	"main/user-details"
+	"main/account-settings"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focusInput"
