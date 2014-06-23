@@ -22,8 +22,8 @@ define [
 			)
 
 		$scope.orderByFoldersFirst = (entity) ->
-			return 0 if entity.type == "folder"
-			return 1
+			return '0' if entity.type == "folder"
+			return '1'
 
 		$scope.startRenamingSelected = () ->
 			$scope.$broadcast "rename:selected"

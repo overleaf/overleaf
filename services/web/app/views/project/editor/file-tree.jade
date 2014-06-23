@@ -51,21 +51,43 @@ script(type='text/ng-template', id='entityListItemTemplate')
 		ng-class="{ 'selected': entity.selected }",
 		ng-controller="FileTreeEntityController"
 	)
-		.entity
+		.entity(ng-if="entity.type != 'folder'")
 			.entity-name(
 				ng-click="select()"
 				ng-dblclick="startRenaming()"
+				draggable
 			)
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
+
+				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
+				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
+
+				span(
+					ng-hide="entity.renaming"
+				)  {{ entity.name }}
+				input(
+					ng-show="entity.renaming",
+					ng-model="inputs.name",
+					ng-blur="finishRenaming()",
+					focus-input="entity.renaming",
+					on-enter="finishRenaming()"
+				)
+
+		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
+			.entity-name(
+				ng-click="select()"
+				ng-dblclick="startRenaming()"
+				draggable
+				droppable
+				on-drop-callback="onDrop"
+			)
 				i.fa.fa-fw.toggle(
 					ng-if="entity.type == 'folder'"
 					ng-class="{'fa-chevron-right': !expanded, 'fa-chevron-down': expanded}"
 					ng-click="toggleExpanded()"
 				)
 
-				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
-				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
 				i.fa.fa-fw(
 					ng-if="entity.type == 'folder'"
 					ng-class="{\
@@ -89,8 +111,13 @@ script(type='text/ng-template', id='entityListItemTemplate')
 			ul.list-unstyled(
 				ng-if="entity.type == 'folder'"
 				ng-show="expanded"
+				droppable
+				on-drop-callback="onDrop"
 			)
-				file-entity(entity="child", ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']")
+				file-entity(
+					entity="child",
+					ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']"
+				)
 			
 script(type='text/ng-template', id='newDocModalTemplate')
 	.modal-header

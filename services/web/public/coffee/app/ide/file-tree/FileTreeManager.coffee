@@ -1,7 +1,10 @@
 define [
 	"ide/file-tree/directives/fileEntity"
+	"ide/file-tree/directives/draggable"
+	"ide/file-tree/directives/droppable"
 	"ide/file-tree/controllers/FileTreeController"
 	"ide/file-tree/controllers/FileTreeEntityController"
+	"ide/file-tree/controllers/FileTreeFolderController"
 ], () ->
 	class FileTreeManager
 		constructor: (@ide, @$scope) ->
@@ -50,6 +53,12 @@ define [
 				return if !entity?
 				@$scope.$apply () =>
 					@_deleteEntityFromScope entity
+
+			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
+				entity = @findEntityById(entity_id)
+				folder = @findEntityById(folder_id)
+				@$scope.$apply () =>
+					@_moveEntityInScope(entity, folder)
 
 		findEntityById: (id) ->
 			@_findEntityByIdInFolder @$scope.rootFolder, id
@@ -196,6 +205,22 @@ define [
 				failure: (error) -> callback(error)
 			}
 
+		moveEntity: (entity, parent_folder, callback = (error) ->) ->
+			@_moveEntityInScope(entity, parent_folder)
+			$.ajax {
+				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move"
+				type: "POST"
+				contentType: "application/json; charset=utf-8"
+				headers:
+					"X-Csrf-Token": window.csrfToken
+				data: JSON.stringify {
+					folder_id: parent_folder.id
+				}
+				dataType: "json"
+				success: () -> callback()
+				failure: (error) -> callback(error)
+			}
+
 		_deleteEntityFromScope: (entity) ->
 			parent_folder = null
 			@forEachEntity (possible_entity, folder) ->
@@ -206,3 +231,8 @@ define [
 				index = parent_folder.children.indexOf(entity)
 				if index > -1
 					parent_folder.children.splice(index, 1)
+
+		_moveEntityInScope: (entity, parent_folder) ->
+			return if entity in parent_folder.children
+			@_deleteEntityFromScope(entity)
+			parent_folder.children.push(entity)

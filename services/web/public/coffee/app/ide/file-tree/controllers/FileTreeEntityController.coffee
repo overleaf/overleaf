@@ -29,12 +29,6 @@ define [
 
 		$scope.$on "delete:selected", () ->
 			$scope.openDeleteModal() if $scope.entity.selected
-
-		if $scope.entity.type == "folder"
-			$scope.expanded = false
-
-			$scope.toggleExpanded = () ->
-				$scope.expanded = !$scope.expanded
 	]
 
 	App.controller "DeleteEntityModalController", [
