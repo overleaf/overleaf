@@ -2,10 +2,11 @@ define [
 	"base"
 ], (App) ->
 	App.controller "FileTreeFolderController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
-		$scope.expanded = false
+		$scope.expanded = $.localStorage("folder.#{$scope.entity.id}.expanded") or false
 
 		$scope.toggleExpanded = () ->
 			$scope.expanded = !$scope.expanded
+			$.localStorage("folder.#{$scope.entity.id}.expanded", $scope.expanded)
 
 		$scope.onDrop = (events, ui) ->
 			source = $(ui.draggable).scope().entity
