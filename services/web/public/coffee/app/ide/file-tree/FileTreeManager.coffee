@@ -156,69 +156,39 @@ define [
 				failure: (error) -> callback(error)
 			}
 
-		createFolderInCurrentFolder: (name, callback = (error, doc) ->) ->
+		createFolderInCurrentFolder: (name) ->
 			# We'll wait for the socket.io notification to actually
 			# add the folder for us.
 			parent_folder = @getCurrentFolder()
-			$.ajax {
-				url:  "/project/#{@ide.project_id}/folder"
-				type: "POST"
-				contentType: "application/json; charset=utf-8"
-				data: JSON.stringify {
-					name: name,
-					parent_folder_id: parent_folder?.id
-					_csrf: window.csrfToken
-				}
-				dataType: "json"
-				success: (folder) ->
-					callback(null, folder)
-				failure: (error) -> callback(error)
+			return @ide.$http.post "/project/#{@ide.project_id}/folder", {
+				name: name,
+				parent_folder_id: parent_folder?.id
+				_csrf: window.csrfToken
 			}
 
 		renameEntity: (entity, name, callback = (error) ->) ->
 			return if entity.name == name
 			entity.name = name
-			$.ajax {
-				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename"
-				type: "POST"
-				contentType: "application/json; charset=utf-8"
-				data: JSON.stringify {
-					name: name,
-					_csrf: window.csrfToken
-				}
-				dataType: "json"
-				success: () -> callback()
-				failure: (error) -> callback(error)
+			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
+				name: name,
+				_csrf: window.csrfToken
 			}
 
 		deleteEntity: (entity, callback = (error) ->) ->
 			# We'll wait for the socket.io notification to 
 			# delete from scope.
-			$.ajax {
-				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}"
-				type: "DELETE"
-				contentType: "application/json; charset=utf-8"
+			return @ide.$http {
+				method: "DELETE"
+				url:    "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}"
 				headers:
 					"X-Csrf-Token": window.csrfToken
-				dataType: "json"
-				success: () -> callback()
-				failure: (error) -> callback(error)
 			}
 
 		moveEntity: (entity, parent_folder, callback = (error) ->) ->
 			@_moveEntityInScope(entity, parent_folder)
-			$.ajax {
-				url:  "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move"
-				type: "POST"
-				contentType: "application/json; charset=utf-8"
-				headers:
-					"X-Csrf-Token": window.csrfToken
-				data: JSON.stringify {
-					folder_id: parent_folder.id
-				}
-				dataType: "json"
-				success: () -> callback()
-				failure: (error) -> callback(error)
+			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
+				folder_id: parent_folder.id
+				_csrf: window.csrfToken
 			}
 
 		_deleteEntityFromScope: (entity) ->

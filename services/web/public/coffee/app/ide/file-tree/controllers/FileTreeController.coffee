@@ -47,9 +47,11 @@ define [
 
 			$scope.create = () ->
 				$scope.state.inflight = true
-				ide.fileTreeManager.createDocInCurrentFolder $scope.inputs.name, (error, doc) ->
-					$scope.state.inflight = false
-					$modalInstance.close()
+				ide.fileTreeManager
+					.createDocInCurrentFolder($scope.inputs.name)
+					.success () ->
+						$scope.state.inflight = false
+						$modalInstance.close()
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
@@ -70,9 +72,11 @@ define [
 
 			$scope.create = () ->
 				$scope.state.inflight = true
-				ide.fileTreeManager.createFolderInCurrentFolder $scope.inputs.name, (error, doc) ->
-					$scope.state.inflight = false
-					$modalInstance.close()
+				ide.fileTreeManager
+					.createFolderInCurrentFolder($scope.inputs.name)
+					.success () ->
+						$scope.state.inflight = false
+						$modalInstance.close()
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

@@ -39,8 +39,9 @@ define [
 
 			$scope.delete = () ->
 				$scope.state.inflight = true
-				ide.fileTreeManager.deleteEntity $scope.entity, (error) ->
-					$scope.$apply () ->
+				ide.fileTreeManager
+					.deleteEntity($scope.entity)
+					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
 
