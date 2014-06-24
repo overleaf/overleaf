@@ -42,11 +42,3 @@ module.exports =
 					fontSizes: ['10','11','12','13','14','16','20','24']
 					languages: Settings.languages,
 					accountSettingsTabActive: true
-
-THEME_LIST = []
-do generateThemeList = () ->
-	files = fs.readdirSync __dirname + '/../../../../public/js/ace/theme'
-	for file in files
-		if file.slice(-2) == "js"
-			cleanName = file.slice(0,-3)
-			THEME_LIST.push name: cleanName

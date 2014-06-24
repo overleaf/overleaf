@@ -33,8 +33,34 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong Reconnecting...
 
+		aside#left-menu(
+			ng-class="{ 'shown': ui.leftMenuShown }"
+			ng-cloak
+		)
+			h4 Settings
+			form
+				.form-controls
+					label(for="theme") Theme
+					select.form-control(
+						name="theme"
+						ng-model="settings.theme"
+					)
+						each theme in themes
+							option(value=theme) #{theme}
+
+		#left-menu-mask(
+			ng-show="ui.leftMenuShown",
+			ng-click="ui.leftMenuShown = false"
+			ng-cloak
+		)
+
 		header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
-			a.btn.btn-full-height(href='#', tooltip="Menu", tooltip-placement="bottom")
+			a.btn.btn-full-height(
+				href,
+				ng-click="ui.leftMenuShown = true"
+				tooltip="Menu",
+				tooltip-placement="bottom"
+			)
 				i.fa.fa-bars
 
 			span.name {{ project.name }}
@@ -60,7 +86,7 @@ block content
 				#editor(
 					ace-editor,
 					ng-show="!!editor.sharejs_doc && !editor.opening"
-					theme="'cobalt'",
+					theme="settings.theme",
 					show-print-margin="false",
 					sharejs-doc="editor.sharejs_doc",
 					last-updated="editor.last_updated"

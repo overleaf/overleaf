@@ -1,3 +1,11 @@
+.full-size {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
 .global-alerts {
 	position: absolute;
 	z-index: 20;
@@ -154,27 +162,16 @@
 }
 
 #ide-body {
-	position: absolute;
+	.full-size;
 	top: 40px;
-	bottom: 0;
-	left: 0;
-	right: 0;
 }
 
 #editor {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	.full-size;
 }
 
 .loading {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	.full-size;
 	padding-top: 10rem;
 	font-family: @font-family-serif;
 	text-align: center;
@@ -183,11 +180,7 @@
 
 // The internal components of the aceEditor directive
 .ace-editor-wrapper {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	.full-size;
 	.undo-conflict-warning {
 		position: absolute;
 		top: 0;
@@ -238,4 +231,40 @@
 }
 .ui-layout-resizer-dragging {
 	background-color: #ddd;
+}
+
+#left-menu {
+	position: absolute;
+	width: 210px;
+	padding: 10px;
+	top: 0;
+	bottom: 0;
+	background-color: #f4f4f4;
+	z-index: 100;
+	overflow: auto;
+	-webkit-transition: left ease-in-out 0.35s;
+	transition: left ease-in-out 0.35s;
+
+	left: -280px;
+	&.shown {
+		left: 0;
+	}
+
+	h4 {
+		font-family: @font-family-serif;
+		font-weight: 400;
+		font-size: 1rem;
+		margin: (@line-height-computed / 2) 0;
+		padding-bottom: (@line-height-computed / 4);
+		color: @gray-light;
+		border-bottom: 1px solid @gray-light;
+		text-transform: uppercase;
+	}
+}
+
+#left-menu-mask {
+	.full-size;
+	opacity: 0.4;
+	background-color: #999;
+	z-index: 99;
 }

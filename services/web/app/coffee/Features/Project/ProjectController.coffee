@@ -13,6 +13,7 @@ SubscriptionLocator = require("../Subscription/SubscriptionLocator")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
 SecurityManager = require("../../managers/SecurityManager")
+fs = require "fs"
 
 module.exports = ProjectController =
 
@@ -196,6 +197,7 @@ module.exports = ProjectController =
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
 					languages: Settings.languages
+					themes: THEME_LIST
 					timer.done()
 
 	_buildProjectList: (ownedProjects, sharedProjects, readOnlyProjects)->
@@ -256,4 +258,12 @@ defaultSettingsForAnonymousUser = (user_id)->
 	featureSwitches:
 		dropbox: false
 		trackChanges: false
+
+THEME_LIST = []
+do generateThemeList = () ->
+	files = fs.readdirSync __dirname + '/../../../../public/js/ace/theme'
+	for file in files
+		if file.slice(-2) == "js"
+			cleanName = file.slice(0,-3)
+			THEME_LIST.push cleanName
 
