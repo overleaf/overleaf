@@ -3,12 +3,7 @@ define [
 ], (App) ->
 	App.controller "FileTreeEntityController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.select = () ->
-			ide.fileTreeManager.forEachEntity (entity) ->
-				entity.selected = false
-			$scope.entity.selected = true
-
-			if ($scope.entity.type == "doc")
-				ide.editorManager.openDoc($scope.entity)
+			ide.fileTreeManager.selectEntity($scope.entity)
 
 		$scope.inputs =
 			name: $scope.entity.name

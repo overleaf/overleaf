@@ -54,7 +54,14 @@ block content
 			include ./editor/file-tree
 
 			.ui-layout-center
-				#editor(ace-editor, theme="'cobalt'", show-print-margin="false", sharejs-doc="editor.sharejs_doc", last-updated="editor.last_updated")
+				#editor(
+					ace-editor,
+					ng-show="!!editor.sharejs_doc"
+					theme="'cobalt'",
+					show-print-margin="false",
+					sharejs-doc="editor.sharejs_doc",
+					last-updated="editor.last_updated"
+				)
 
 	//- #loadingScreen
 	//- 	h3 Loading...

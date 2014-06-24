@@ -9,8 +9,34 @@ define [
 				last_updated: null
 			}
 
+			@$scope.$on "entity:selected", (event, entity) =>
+				if (entity.type == "doc")
+					@openDoc(entity)
+
+			initialized = false
+			@$scope.$on "file-tree:initialized", () =>
+				if !initialized
+					initialized = true
+					@autoOpenDoc()
+
+		autoOpenDoc: () ->
+			open_doc_id = 
+				$.localStorage("doc.open_id.#{@$scope.project_id}") or
+				@$scope.project.rootDoc_id
+			return if !open_doc_id?
+			doc = @ide.fileTreeManager.findEntityById(open_doc_id)
+			return if !doc?
+			@openDoc(doc)
+
 		openDoc: (doc, options = {}) ->
-			# TODO: Don't open if already open
+			console.log "Trying to open doc", doc.id
+			return if doc.id == @open_doc_id
+			@open_doc_id = doc.id
+			console.log "Actually opening doc", doc.id
+
+			$.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
+			@ide.fileTreeManager.selectEntity(doc)
+
 			@_openNewDocument doc, (error, sharejs_doc) =>
 				if error?
 					@ide.showGenericServerErrorMessage()

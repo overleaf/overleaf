@@ -61,9 +61,7 @@ define [
 					session.setMode(new LatexMode())
 
 					doc = session.getDocument()
-					console.log "Document", doc
 					doc.on "change", () ->
-						console.log "DOC CHANGE"
 						scope.$apply () ->
 							scope.lastUpdated = new Date()
 
@@ -85,8 +83,8 @@ define [
 					sharejs_doc.attachToAce(editor)
 
 				detachFromAce = (sharejs_doc) ->
-					old_sharejs_doc.detachFromAce()
-					old_sharejs_doc.off "remoteop.recordForUndo"
+					sharejs_doc.detachFromAce()
+					sharejs_doc.off "remoteop.recordForUndo"
 
 			template: """
 				<div class="ace-editor-wrapper">

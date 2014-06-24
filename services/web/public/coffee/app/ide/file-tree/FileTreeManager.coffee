@@ -10,6 +10,7 @@ define [
 		constructor: (@ide, @$scope) ->
 			@$scope.$on "project:joined", =>
 				@loadRootFolder()
+				@$scope.$emit "file-tree:initialized"
 
 			@_bindToSocketEvents()
 
@@ -59,6 +60,13 @@ define [
 				folder = @findEntityById(folder_id)
 				@$scope.$apply () =>
 					@_moveEntityInScope(entity, folder)
+
+		selectEntity: (entity) ->
+			return if entity.selected # Don't get into a recursive event loop
+			@ide.fileTreeManager.forEachEntity (entity) ->
+				entity.selected = false
+			entity.selected = true
+			@$scope.$emit "entity:selected", entity
 
 		findEntityById: (id) ->
 			@_findEntityByIdInFolder @$scope.rootFolder, id
