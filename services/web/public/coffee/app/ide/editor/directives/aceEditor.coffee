@@ -21,7 +21,7 @@ define [
 			link: (scope, element, attrs) ->
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
 				scope.undo =
-					show_remote_warning: true
+					show_remote_warning: false
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -71,7 +71,6 @@ define [
 						session.setUndoManager(undoManager)
 
 						sharejs_doc.on "remoteop.recordForUndo", () =>
-							console.log "Remote OP!"
 							undoManager.nextUpdateIsRemote = true
 
 						sharejs_doc.attachToAce(editor)

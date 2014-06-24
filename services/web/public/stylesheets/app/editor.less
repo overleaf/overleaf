@@ -1,3 +1,12 @@
+.global-alerts {
+	position: absolute;
+	z-index: 20;
+	top: (@line-height-computed / 4);
+	width: 400px;
+	left: 50%;
+	margin-left: -200px;
+}
+
 .toolbar {
 	height: 40px;
 	border-bottom: 1px solid @toolbar-border-color;
@@ -55,14 +64,6 @@
 			}
 		}
 	}
-}
-
-#editor-content {
-	position: absolute;
-	top: 40px;
-	bottom: 0;
-	left: 0;
-	right: 0;
 }
 
 #file-tree {
@@ -150,6 +151,14 @@
 	ul.droppable-hover {
 		background-color: @file-tree-droppable-background-color;
 	}
+}
+
+#ide-body {
+	position: absolute;
+	top: 40px;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 #editor {

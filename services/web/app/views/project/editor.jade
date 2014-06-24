@@ -13,13 +13,25 @@ block scripts
 	script(src=jsPath+'libs/jquery.storage.js')
 
 block content
-
 	.editor(ng-controller="IdeController")
 		.loading-screen(ng-show="state.loading")
 			.container
 				h3 Loading...
 				.progress
 					.progress-bar(ng-style="{'width': state.load_progress + '%'}")
+
+		.global-alerts(ng-cloak)
+			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
+				strong Disconnected
+				|  Please refresh the page to continue.
+
+			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
+				strong Lost Connection.
+				|  Reconnecting in {{ connection.reconnection_countdown }} secs. 
+				a.pull-right(href, ng-click="tryReconnectNow()") Try Now
+
+			.alert.alert-warning.small(ng-if="connection.reconnecting")
+				strong Reconnecting...
 
 		header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			a.btn.btn-full-height(href='#', tooltip="Menu", tooltip-placement="bottom")
@@ -38,7 +50,7 @@ block content
 				a.btn.btn-full-height(href='#', tooltip="Chat", tooltip-placement="bottom")
 					i.fa.fa-comment
 
-		#editor-content(ng-cloak, layout="main", ng-hide="state.loading")
+		#ide-body(ng-cloak, layout="main", ng-hide="state.loading")
 			include ./editor/file-tree
 
 			.ui-layout-center
