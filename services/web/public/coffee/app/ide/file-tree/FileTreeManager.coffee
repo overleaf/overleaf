@@ -62,11 +62,10 @@ define [
 					@_moveEntityInScope(entity, folder)
 
 		selectEntity: (entity) ->
-			return if entity.selected # Don't get into a recursive event loop
+			@selected_entity_id = entity.id # For reselecting after a reconnect
 			@ide.fileTreeManager.forEachEntity (entity) ->
 				entity.selected = false
 			entity.selected = true
-			@$scope.$emit "entity:selected", entity
 
 		findEntityById: (id) ->
 			@_findEntityByIdInFolder @$scope.rootFolder, id
@@ -104,6 +103,7 @@ define [
 				id:   rawFolder._id
 				type: "folder"
 				children: []
+				selected: (rawFolder._id == @selected_entity_id)
 			}
 
 			for doc in rawFolder.docs or []
@@ -111,6 +111,7 @@ define [
 					name: doc.name
 					id:   doc._id
 					type: "doc"
+					selected: (doc._id == @selected_entity_id)
 				}
 
 			for file in rawFolder.fileRefs or []
@@ -118,6 +119,7 @@ define [
 					name: file.name
 					id:   file._id
 					type: "file"
+					selected: (file._id == @selected_entity_id)
 				}
 
 			for childFolder in rawFolder.folders or []

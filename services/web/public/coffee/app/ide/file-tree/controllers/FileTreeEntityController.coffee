@@ -4,6 +4,7 @@ define [
 	App.controller "FileTreeEntityController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.select = () ->
 			ide.fileTreeManager.selectEntity($scope.entity)
+			$scope.$emit "entity:selected", $scope.entity
 
 		$scope.inputs =
 			name: $scope.entity.name
