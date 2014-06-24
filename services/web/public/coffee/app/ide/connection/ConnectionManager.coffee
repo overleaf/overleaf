@@ -69,9 +69,17 @@ define [], () ->
 			@ide.socket.disconnect()
 
 		startAutoReconnectCountdown: () ->
-			# TODO: Reconnect slowly if no recent updates
+			lastUpdated = @ide.editorManager.lastUpdated()
+
+			twoMinutes = 2 * 60 * 1000
+			if lastUpdated? and new Date() - lastUpdated > twoMinutes
+				# between 1 minute and 3 minutes
+				countdown = 60 + Math.floor(Math.random() * 120)
+			else
+				countdown = 3 + Math.floor(Math.random() * 7)
+
 			@$scope.$apply () =>
-				@$scope.connection.reconnection_countdown = 3 + Math.floor(Math.random() * 7)
+				@$scope.connection.reconnection_countdown = countdown
 
 			setTimeout(=>
 				if !@connected

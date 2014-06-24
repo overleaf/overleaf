@@ -6,6 +6,7 @@ define [
 		constructor: (@ide, @$scope) ->
 			@$scope.editor = {
 				sharejs_doc: null
+				last_updated: null
 			}
 
 		openDoc: (doc, options = {}) ->
@@ -53,3 +54,6 @@ define [
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
+
+		lastUpdated: () ->
+			@$scope.editor.last_updated

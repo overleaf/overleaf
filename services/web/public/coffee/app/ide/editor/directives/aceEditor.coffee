@@ -17,6 +17,7 @@ define [
 				showPrintMargin: "="
 				keybindings: "="
 				sharejsDoc: "="
+				lastUpdated: "="
 			}
 			link: (scope, element, attrs) ->
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
@@ -46,34 +47,46 @@ define [
 					editor.setKeyboardHandler(keybindings[value])
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
-					console.log "attaching doc to ace", sharejs_doc, old_sharejs_doc
 					if old_sharejs_doc?
-						old_sharejs_doc.detachFromAce()
-						old_sharejs_doc.off "remoteop.recordForUndo"
+						detachFromAce(old_sharejs_doc)
 
 					if sharejs_doc?
-						lines = sharejs_doc.getSnapshot().split("\n") 
-						editor.setSession(new EditSession(lines))
-						session = editor.getSession()
-						session.setUseWrapMode(true)
-						session.setMode(new LatexMode())
+						attachToAce(sharejs_doc)
 
-						undoManager = new UndoManager({
-							showUndoConflictWarning: () ->
-								scope.$apply () ->
-									scope.undo.show_remote_warning = true
+				attachToAce = (sharejs_doc) ->
+					lines = sharejs_doc.getSnapshot().split("\n") 
+					editor.setSession(new EditSession(lines))
+					session = editor.getSession()
+					session.setUseWrapMode(true)
+					session.setMode(new LatexMode())
 
-								$timeout () -> 
-									scope.undo.show_remote_warning = false
-								, 4000
+					doc = session.getDocument()
+					console.log "Document", doc
+					doc.on "change", () ->
+						console.log "DOC CHANGE"
+						scope.$apply () ->
+							scope.lastUpdated = new Date()
 
-						})
-						session.setUndoManager(undoManager)
+					undoManager = new UndoManager({
+						showUndoConflictWarning: () ->
+							scope.$apply () ->
+								scope.undo.show_remote_warning = true
 
-						sharejs_doc.on "remoteop.recordForUndo", () =>
-							undoManager.nextUpdateIsRemote = true
+							$timeout () -> 
+								scope.undo.show_remote_warning = false
+							, 4000
 
-						sharejs_doc.attachToAce(editor)
+					})
+					session.setUndoManager(undoManager)
+
+					sharejs_doc.on "remoteop.recordForUndo", () =>
+						undoManager.nextUpdateIsRemote = true
+
+					sharejs_doc.attachToAce(editor)
+
+				detachFromAce = (sharejs_doc) ->
+					old_sharejs_doc.detachFromAce()
+					old_sharejs_doc.off "remoteop.recordForUndo"
 
 			template: """
 				<div class="ace-editor-wrapper">
