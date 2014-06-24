@@ -54,9 +54,12 @@ block content
 			include ./editor/file-tree
 
 			.ui-layout-center
+				.loading(ng-show="!editor.sharejs_doc || editor.opening")
+					i.fa.fa-spin.fa-refresh
+					|  Loading...
 				#editor(
 					ace-editor,
-					ng-show="!!editor.sharejs_doc"
+					ng-show="!!editor.sharejs_doc && !editor.opening"
 					theme="'cobalt'",
 					show-print-margin="false",
 					sharejs-doc="editor.sharejs_doc",

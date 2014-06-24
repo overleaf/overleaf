@@ -91,6 +91,7 @@ define [], () ->
 					
 		decreaseCountdown: () ->
 			console.log "Decreasing countdown"
+			return if !@$scope.connection.reconnection_countdown?
 			@$scope.$apply () =>
 				@$scope.connection.reconnection_countdown--
 
@@ -106,5 +107,5 @@ define [], () ->
 			@$scope.connection.reconnecting = true
 			delete @$scope.connection.reconnection_countdown
 			@ide.socket.socket.reconnect()
-			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 1000
+			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 

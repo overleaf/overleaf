@@ -7,6 +7,8 @@ define [
 			@$scope.editor = {
 				sharejs_doc: null
 				last_updated: null
+				open_doc_id: null
+				opening: true
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -30,19 +32,22 @@ define [
 
 		openDoc: (doc, options = {}) ->
 			console.log "Trying to open doc", doc.id
-			return if doc.id == @open_doc_id
-			@open_doc_id = doc.id
+			return if doc.id == @$scope.open_doc_id and !options.forceReopen
+			@$scope.open_doc_id = doc.id
 			console.log "Actually opening doc", doc.id
 
 			$.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)
 
+			@$scope.editor.opening = true
 			@_openNewDocument doc, (error, sharejs_doc) =>
+				console.log "OPENED DOC", error, sharejs_doc
 				if error?
 					@ide.showGenericServerErrorMessage()
 					return
 
 				@$scope.$apply () =>
+					@$scope.editor.opening = false
 					@$scope.editor.sharejs_doc = sharejs_doc
 
 		_openNewDocument: (doc, callback = (error, sharejs_doc) ->) ->
@@ -55,28 +60,30 @@ define [
 
 			new_sharejs_doc.join (error) =>
 				return callback(error) if error?
-				@_bindToDocumentEvents(new_sharejs_doc)
+				@_bindToDocumentEvents(doc, new_sharejs_doc)
 				callback null, new_sharejs_doc
 
-		_bindToDocumentEvents: (document) ->
+		_bindToDocumentEvents: (doc, sharejs_doc) ->
+			sharejs_doc.on "error", (error) =>
+				console.error "DOC ERROR", error
+				@openDoc(doc, forceReopen: true)
 
-			document.on "error", (error) =>
-				@openDoc(document.doc_id, forceReopen: true)
+				#TODO!!!
+				# Modal.createModal
+				# 	title: "Out of sync"
+				# 	message: "Sorry, this file has gone out of sync and we need to do a full refresh. Please let us know if this happens frequently."
+				# 	buttons:[
+				# 		text: "Ok"
+				# 	]
 
-				Modal.createModal
-					title: "Out of sync"
-					message: "Sorry, this file has gone out of sync and we need to do a full refresh. Please let us know if this happens frequently."
-					buttons:[
-						text: "Ok"
-					]
-
-			document.on "externalUpdate", () =>
-				Modal.createModal
-					title: "Document Updated Externally"
-					message: "This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
-					buttons:[
-						text: "Ok"
-					]
+			sharejs_doc.on "externalUpdate", () =>
+				#TODO!!!
+				# Modal.createModal
+				# 	title: "Document Updated Externally"
+				# 	message: "This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
+				# 	buttons:[
+				# 		text: "Ok"
+				# 	]
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
