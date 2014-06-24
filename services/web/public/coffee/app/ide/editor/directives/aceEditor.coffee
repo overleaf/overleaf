@@ -1,12 +1,13 @@
 define [
 	"base"
-	"ide/editor/undo/UndoManager"
 	"ace/ace"
+	"ide/editor/undo/UndoManager"
+	"ide/editor/auto-complete/AutoCompleteManager"
 	"ace/keyboard/vim"
 	"ace/keyboard/emacs"
 	"ace/mode/latex"
 	"ace/edit_session"
-], (App, UndoManager, Ace) ->
+], (App, Ace, UndoManager, AutoCompleteManager) ->
 	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
@@ -17,6 +18,7 @@ define [
 				showPrintMargin: "="
 				keybindings: "="
 				fontSize: "="
+				autoComplete: "="
 				sharejsDoc: "="
 				lastUpdated: "="
 			}
@@ -24,6 +26,8 @@ define [
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
 				scope.undo =
 					show_remote_warning: false
+
+				autoCompleteManager = new AutoCompleteManager(editor)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -59,12 +63,22 @@ define [
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
 
+				scope.$watch "autoComplete", (autocomplete) ->
+					if autocomplete
+						console.log "Enabling auto complete"
+						autoCompleteManager.enable()
+					else
+						console.log "Disabling auto complete"
+						autoCompleteManager.disable()
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 
 					editor.setSession(new EditSession(lines))
 					session = editor.getSession()
 					session.setUseWrapMode(true)
 					session.setMode(new LatexMode())
+
+					autoCompleteManager.bindToSession(session)
 
 					doc = session.getDocument()
 					doc.on "change", () ->

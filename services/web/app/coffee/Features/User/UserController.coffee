@@ -48,7 +48,7 @@ module.exports =
 			if req.body.fontSize?
 				user.ace.fontSize = req.body.fontSize
 			if req.body.autoComplete?
-				user.ace.autoComplete = (req.body.autoComplete == "true")
+				user.ace.autoComplete = req.body.autoComplete
 			if req.body.spellCheckLanguage?
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			if req.body.pdfViewer?

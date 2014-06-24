@@ -38,7 +38,15 @@ block content
 			ng-cloak
 		)
 			h4 Settings
-			form
+			form			
+				.form-controls
+					label(for="autoComplete") Auto-Complete
+					input.form-control(
+						type="checkbox"
+						name="autoComplete"
+						ng-model="settings.autoComplete"
+					)
+
 				.form-controls
 					label(for="theme") Theme
 					select.form-control(
@@ -108,6 +116,7 @@ block content
 					theme="settings.theme",
 					keybindings="settings.mode",
 					font-size="settings.fontSize",
+					auto-complete="settings.autoComplete",
 					show-print-margin="false",
 					sharejs-doc="editor.sharejs_doc",
 					last-updated="editor.last_updated"

@@ -18,6 +18,11 @@ define [], () ->
 				if mode != oldMode
 					@saveSettings({mode: mode})
 
+			@$scope.$watch "settings.autoComplete", (autoComplete, oldAutoComplete) =>
+				console.log "autoComplete", autoComplete
+				if autoComplete != oldAutoComplete
+					@saveSettings({autoComplete: autoComplete})
+
 		saveSettings: (data) ->
 			data._csrf = window.csrfToken
 			@ide.$http.post "/user/settings", data
