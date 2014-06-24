@@ -2,6 +2,7 @@ define [
 	"base"
 	"ide/file-tree/FileTreeManager"
 	"ide/connection/ConnectionManager"
+	"ide/editor/EditorManager"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
@@ -11,6 +12,7 @@ define [
 	App
 	FileTreeManager
 	ConnectionManager
+	EditorManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		$scope.state = {
@@ -25,6 +27,7 @@ define [
 
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
+		ide.editorManager = new EditorManager(ide, $scope)
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

@@ -62,11 +62,13 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents) ->
           # Should probably also replace the editor text with the doc snapshot.
       , 0
 
-  if keepEditorContents
-    doc.del 0, doc.getText().length
-    doc.insert 0, editorDoc.getValue()
-  else
-    editorDoc.setValue doc.getText()
+  # MODIFIED by James: We will set the doc contents ourselves to
+  # avoid an extra entry in the undo stack.
+  # if keepEditorContents
+  #   doc.del 0, doc.getText().length
+  #   doc.insert 0, editorDoc.getValue()
+  # else
+  #   editorDoc.setValue doc.getText()
 
   check()
 

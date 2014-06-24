@@ -25,3 +25,11 @@ define [], () ->
 							@$scope.$emit "project:joined"
 
 				setTimeout(joinProject, 100)
+
+		reconnectImmediately: () ->
+			console.log "RECONNECT IMMEDIATELY STUB"
+			@disconnect()
+			#@tryReconnect()
+
+		disconnect: () ->
+			@socket.disconnect()

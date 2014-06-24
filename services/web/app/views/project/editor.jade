@@ -42,6 +42,7 @@ block content
 			include ./editor/file-tree
 
 			.ui-layout-center
+				#editor(ace-editor, theme="'cobalt'", show-print-margin="false", sharejs-doc="editor.sharejs_doc")
 
 	//- #loadingScreen
 	//- 	h3 Loading...
@@ -80,9 +81,10 @@ block content
 		window.csrfToken = "!{csrfToken}";
 		window.requirejs = {
 			"paths" : {
-				"underscore": "libs/underscore-1.3.3",
+				"underscore": "../libs/underscore-1.3.3",
 				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
-				"moment": "libs/moment-2.4.0"
+				"moment": "libs/moment-2.4.0",
+				"ace": "#{jsPath}ace"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
 			"waitSeconds": 0,

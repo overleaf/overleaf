@@ -7,6 +7,9 @@ define [
 				entity.selected = false
 			$scope.entity.selected = true
 
+			if ($scope.entity.type == "doc")
+				ide.editorManager.openDoc($scope.entity)
+
 		$scope.inputs =
 			name: $scope.entity.name
 
