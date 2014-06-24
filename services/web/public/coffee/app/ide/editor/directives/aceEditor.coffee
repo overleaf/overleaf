@@ -16,6 +16,7 @@ define [
 				theme: "="
 				showPrintMargin: "="
 				keybindings: "="
+				fontSize: "="
 				sharejsDoc: "="
 				lastUpdated: "="
 			}
@@ -43,8 +44,13 @@ define [
 				scope.$watch "keybindings", (value) ->
 					Vim = require("ace/keyboard/vim").handler
 					Emacs = require("ace/keyboard/emacs").handler
-					keybindings = ace: null, vim: Vim, emacs: Emacs
+					keybindings = vim: Vim, emacs: Emacs
 					editor.setKeyboardHandler(keybindings[value])
+
+				scope.$watch "fontSize", (value) ->
+					element.find(".ace_editor, .ace_content").css({
+						"font-size": value + "px"
+					})
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?

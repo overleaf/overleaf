@@ -47,6 +47,25 @@ block content
 					)
 						each theme in themes
 							option(value=theme) #{theme}
+							
+				.form-controls
+					label(for="mode") Keybindings
+					select.form-control(
+						name="mode"
+						ng-model="settings.mode"
+					)
+						option(value='default') None
+						option(value='vim') Vim
+						option(value='emacs') Emacs
+
+				.form-controls
+					label(for="fontSize") Font Size
+					select.form-control(
+						name="fontSize"
+						ng-model="settings.fontSize"
+					)
+						each size in ['10','11','12','13','14','16','20','24']
+							option(value=size) #{size}px
 
 		#left-menu-mask(
 			ng-show="ui.leftMenuShown",
@@ -87,6 +106,8 @@ block content
 					ace-editor,
 					ng-show="!!editor.sharejs_doc && !editor.opening"
 					theme="settings.theme",
+					keybindings="settings.mode",
+					font-size="settings.fontSize",
 					show-print-margin="false",
 					sharejs-doc="editor.sharejs_doc",
 					last-updated="editor.last_updated"

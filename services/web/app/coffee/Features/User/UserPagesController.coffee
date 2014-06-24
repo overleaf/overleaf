@@ -37,8 +37,5 @@ module.exports =
 					userHasDropboxFeature: user.features.dropbox
 					userIsRegisteredWithDropbox: userIsRegisteredWithDropbox
 					user: user,
-					themes: THEME_LIST,
-					editors: ['default','vim','emacs'],
-					fontSizes: ['10','11','12','13','14','16','20','24']
 					languages: Settings.languages,
 					accountSettingsTabActive: true
