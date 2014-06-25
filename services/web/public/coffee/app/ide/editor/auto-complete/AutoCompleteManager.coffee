@@ -26,7 +26,7 @@ define [
 			return null
 
 	class AutoCompleteManager
-		constructor: (@editor) ->
+		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
 
 			insertMatch = Autocomplete::insertMatch
@@ -42,6 +42,17 @@ define [
 					editor.session.remove(range)
 				
 				insertMatch.call editor.completer, data
+
+			@$scope.$watch "autoComplete", (autocomplete) =>
+				console.log "autocomplete change", autocomplete
+				if autocomplete
+					@enable()
+				else
+					@disable()
+
+
+			@editor.on "changeSession", (e) =>
+				@bindToSession(e.session)
 
 		enable: () ->
 			@editor.setOptions({

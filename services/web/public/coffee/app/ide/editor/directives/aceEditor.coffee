@@ -25,12 +25,11 @@ define [
 				spellCheckLanguage: "="
 			}
 			link: (scope, element, attrs) ->
-				editor = window.editor = Ace.edit(element.find(".ace-editor-body")[0])
-				scope.undo =
-					show_remote_warning: false
+				editor = Ace.edit(element.find(".ace-editor-body")[0])
 
-				autoCompleteManager = new AutoCompleteManager(editor)
+				autoCompleteManager = new AutoCompleteManager(scope, editor)
 				spellCheckManager = new SpellCheckManager(scope, editor, element)
+				undoManager = new UndoManager(scope, editor)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -66,14 +65,6 @@ define [
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
 
-				scope.$watch "autoComplete", (autocomplete) ->
-					if autocomplete
-						console.log "Enabling auto complete"
-						autoCompleteManager.enable()
-					else
-						console.log "Disabling auto complete"
-						autoCompleteManager.disable()
-
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 
 					editor.setSession(new EditSession(lines))
@@ -87,18 +78,6 @@ define [
 					doc.on "change", () ->
 						scope.$apply () ->
 							scope.lastUpdated = new Date()
-
-					undoManager = new UndoManager({
-						showUndoConflictWarning: () ->
-							scope.$apply () ->
-								scope.undo.show_remote_warning = true
-
-							$timeout () -> 
-								scope.undo.show_remote_warning = false
-							, 4000
-
-					})
-					session.setUndoManager(undoManager)
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true

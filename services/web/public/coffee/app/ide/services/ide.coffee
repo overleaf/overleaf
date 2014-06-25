@@ -8,7 +8,7 @@ define [
 		ide.$http = $http
 
 		ide.pushEvent = () ->
-			console.log "PUSHING EVENT STUB", arguments
+			#console.log "PUSHING EVENT STUB", arguments
 
 		ide.reportError = () ->
 			console.log "REPORTING ERROR STUB", arguments

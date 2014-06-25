@@ -8,9 +8,25 @@ define [
 	Doc = require("ace/document").Document
 
 	class UndoManager
-		constructor: (@manager) ->
+		constructor: (@$scope, @editor) ->
+			@$scope.undo =
+				show_remote_warning: false
+				
 			@reset()
 			@nextUpdateIsRemote = false
+
+			@editor.on "changeSession", (e) =>
+				console.log "setting undo manager", e.session
+				e.session.setUndoManager(@)
+
+		showUndoConflictWarning: () ->
+			@$scope.$apply () =>
+				@$scope.undo.show_remote_warning = true
+
+			setTimeout () => 
+				@$scope.$apply () =>
+					@$scope.undo.show_remote_warning = false
+			, 4000
 
 		reset: () ->
 			@undoStack = []
@@ -39,7 +55,7 @@ define [
 			return if !update?
 
 			if update.remote
-				@manager.showUndoConflictWarning()
+				@showUndoConflictWarning()
 
 			lines = @session.getDocument().getAllLines()
 			linesBeforeDelta = @_revertSimpleDeltaSetsOnDocLines(update.deltaSets, lines)
