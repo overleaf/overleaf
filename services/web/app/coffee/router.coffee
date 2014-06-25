@@ -198,6 +198,9 @@ module.exports = class Router
 				userCanSeeDropbox: true
 				languages: []
 
+		app.get "/ip", (req, res, next) ->
+			res.send("ShareLaTeX sees your IP as: #{req.ip}")
+
 		app.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
 		app.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
 		app.get '/oops-mongo', (req, res, next) ->

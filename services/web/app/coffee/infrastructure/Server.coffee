@@ -37,14 +37,16 @@ ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
 	ignoreCsrfRoutes.push new express.Route(method, route)
 
-app.configure ()->
+app.configure () ->
+	if Settings.behindProxy
+		app.enable('trust proxy')
 	app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 	app.set 'views', __dirname + '/../../views'
 	app.set 'view engine', 'jade'
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
 	app.use cookieParser
 	app.use express.session
-		proxy: true
+		proxy: Settings.behindProxy
 		cookie:
 			maxAge: cookieSessionLength
 			secure: Settings.secureCookie
