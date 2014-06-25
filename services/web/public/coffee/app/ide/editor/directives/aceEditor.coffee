@@ -3,11 +3,12 @@ define [
 	"ace/ace"
 	"ide/editor/undo/UndoManager"
 	"ide/editor/auto-complete/AutoCompleteManager"
+	"ide/editor/spell-check/SpellCheckManager"
 	"ace/keyboard/vim"
 	"ace/keyboard/emacs"
 	"ace/mode/latex"
 	"ace/edit_session"
-], (App, Ace, UndoManager, AutoCompleteManager) ->
+], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager) ->
 	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
@@ -21,13 +22,15 @@ define [
 				autoComplete: "="
 				sharejsDoc: "="
 				lastUpdated: "="
+				spellCheckLanguage: "="
 			}
 			link: (scope, element, attrs) ->
-				editor = Ace.edit(element.find(".ace-editor-body")[0])
+				editor = window.editor = Ace.edit(element.find(".ace-editor-body")[0])
 				scope.undo =
 					show_remote_warning: false
 
 				autoCompleteManager = new AutoCompleteManager(editor)
+				spellCheckManager = new SpellCheckManager(scope, editor, element)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -121,6 +124,23 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
+					<div 
+						id="spellCheckMenu"
+						class="dropdown context-menu"
+						ng-show="spellingMenu.open"
+						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
+						ng-class="{open: spellingMenu.open}"
+					>
+						<ul class="dropdown-menu">
+							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
+								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
+							</li>
+							<li class="divider"></li>
+							<li>
+								<a href ng-click="learnWord(spellingMenu.highlight)">Add to Dictionary</a>
+							</li>
+						</ul>
+					</div>
 				</div>
 			"""
 		}

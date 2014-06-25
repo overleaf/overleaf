@@ -17,6 +17,15 @@ define [
 	SettingsManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
+		# Don't freak out if we're already in an apply callback
+		$scope.$originalApply = $scope.$apply
+		$scope.$apply = (fn = () ->) ->
+			phase = @$root.$$phase
+			if (phase == '$apply' || phase == '$digest')
+				fn()
+			else
+				this.$originalApply(fn);
+
 		$scope.state = {
 			loading: true
 			load_progress: 40
