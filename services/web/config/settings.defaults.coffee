@@ -191,6 +191,11 @@ module.exports =
 	# cookie with a secure flag (recommended).
 	secureCookie: false
 
+	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
+	# then set this to true to allow it to correctly detect the forwarded IP
+	# address and http/https protocol information.
+	behindProxy: false
+
 	# Internal configs
 	# ----------------
 	path:
