@@ -4,11 +4,12 @@ define [
 	"ide/editor/undo/UndoManager"
 	"ide/editor/auto-complete/AutoCompleteManager"
 	"ide/editor/spell-check/SpellCheckManager"
+	"ide/editor/annotations/AnnotationsManager"
 	"ace/keyboard/vim"
 	"ace/keyboard/emacs"
 	"ace/mode/latex"
 	"ace/edit_session"
-], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager) ->
+], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, AnnotationsManager) ->
 	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
@@ -23,13 +24,25 @@ define [
 				sharejsDoc: "="
 				lastUpdated: "="
 				spellCheckLanguage: "="
+				cursorPosition: "="
+				annotations: "="
 			}
 			link: (scope, element, attrs) ->
+				# Don't freak out if we're already in an apply callback
+				scope.$originalApply = scope.$apply
+				scope.$apply = (fn = () ->) ->
+					phase = @$root.$$phase
+					if (phase == '$apply' || phase == '$digest')
+						fn()
+					else
+						@$originalApply(fn);
+
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
 
 				autoCompleteManager = new AutoCompleteManager(scope, editor)
 				spellCheckManager = new SpellCheckManager(scope, editor, element)
 				undoManager = new UndoManager(scope, editor)
+				annotationsManagaer = new AnnotationsManager(scope, editor)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -40,6 +53,11 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
+				editor.on "changeSelection", () ->
+					cursor = editor.getCursorPosition()
+					scope.$apply () ->
+						scope.cursorPosition = cursor
 
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")

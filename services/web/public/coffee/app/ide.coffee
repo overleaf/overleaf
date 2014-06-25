@@ -4,6 +4,7 @@ define [
 	"ide/connection/ConnectionManager"
 	"ide/editor/EditorManager"
 	"ide/settings/SettingsManager"
+	"ide/online-users/OnlineUsersManager"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
@@ -15,6 +16,7 @@ define [
 	ConnectionManager
 	EditorManager
 	SettingsManager
+	OnlineUsersManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		# Don't freak out if we're already in an apply callback
@@ -43,6 +45,7 @@ define [
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.settingsManager = new SettingsManager(ide, $scope)
+		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

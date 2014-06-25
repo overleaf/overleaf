@@ -9,6 +9,7 @@ define [
 				last_updated: null
 				open_doc_id: null
 				opening: true
+				cursorPosition: null
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -32,8 +33,8 @@ define [
 
 		openDoc: (doc, options = {}) ->
 			console.log "Trying to open doc", doc.id
-			return if doc.id == @$scope.open_doc_id and !options.forceReopen
-			@$scope.open_doc_id = doc.id
+			return if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
+			@$scope.editor.open_doc_id = doc.id
 			console.log "Actually opening doc", doc.id
 
 			$.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
