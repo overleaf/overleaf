@@ -140,16 +140,6 @@ module.exports = EditorController =
 			if callback?
 				callback()
 
-	setCompiler : (project_id, compiler, callback = ()->)->
-		ProjectOptionsHandler.setCompiler project_id, compiler, (err)->
-			logger.log compiler:compiler, project_id:project_id, "setting compiler"
-			callback()
-
-	setSpellCheckLanguage : (project_id, languageCode, callback = ()->)->
-		ProjectOptionsHandler.setSpellCheckLanguage project_id, languageCode, (err)->
-			logger.log languageCode:languageCode, project_id:project_id, "setting languageCode for spell check"
-			callback()
-
 	setDoc: (project_id, doc_id, docLines, sl_req_id, callback = (err)->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
 		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, (err)=>
@@ -253,21 +243,37 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
 			callback?()
 
-	renameProject: (project_id, newName, callback)->
+	renameProject: (project_id, newName, callback = (err) ->) ->
 		newName = sanitize.escape(newName)
 		ProjectDetailsHandler.renameProject project_id, newName, =>
 			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', newName
-			callback?()
+			callback()
 
-	setPublicAccessLevel : (project_id, newAccessLevel, callback)->
-		ProjectDetailsHandler.setPublicAccessLevel project_id, newAccessLevel, =>
+	setCompiler : (project_id, compiler, callback = (err) ->) ->
+		ProjectOptionsHandler.setCompiler project_id, compiler, (err) ->
+			return callback(err) if err?
+			logger.log compiler:compiler, project_id:project_id, "setting compiler"
+			EditorRealTimeController.emitToRoom project_id, 'compilerUpdated', compiler
+			callback()
+
+	setSpellCheckLanguage : (project_id, languageCode, callback = (err) ->) ->
+		ProjectOptionsHandler.setSpellCheckLanguage project_id, languageCode, (err) ->
+			return callback(err) if err?
+			logger.log languageCode:languageCode, project_id:project_id, "setting languageCode for spell check"
+			EditorRealTimeController.emitToRoom project_id, 'spellCheckLanguageUpdated', languageCode
+			callback()
+
+	setPublicAccessLevel : (project_id, newAccessLevel, callback = (err) ->) ->
+		ProjectDetailsHandler.setPublicAccessLevel project_id, newAccessLevel, (err) ->
+			return callback(err) if err?
 			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
-			callback?()
+			callback()
 
-	setRootDoc: (project_id, newRootDocID, callback)->
-		ProjectEntityHandler.setRootDoc project_id, newRootDocID, () =>
+	setRootDoc: (project_id, newRootDocID, callback = (err) ->) ->
+		ProjectEntityHandler.setRootDoc project_id, newRootDocID, (err) ->
+			return callback(err) if err?
 			EditorRealTimeController.emitToRoom project_id, 'rootDocUpdated', newRootDocID
-			callback?()
+			callback()
 
 			
 	p:

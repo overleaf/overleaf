@@ -136,7 +136,8 @@ module.exports =
 	# You must have the corresponding aspell package installed to 
 	# be able to use a language.
 	languages: [
-		{name: "English", code: "en"}
+		{name: "English", code: "en"},
+		{name: "French", code: "fr"}
 	]
 
 	# Email support

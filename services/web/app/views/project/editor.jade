@@ -38,7 +38,31 @@ block content
 			ng-cloak
 		)
 			h4 Settings
-			form			
+			form
+				.form-controls
+					label(for="compiler") Compiler
+					select.form-control(
+						name="compiler"
+						ng-model="project.compiler"
+					)
+						option(value='pdflatex') pdfLaTeX
+						option(value='latex') LaTeX
+						option(value='xelatex') XeLaTeX
+						option(value='lualatex') LuaLaTeX
+
+				.form-controls
+					label(for="spellCheckLanguage") Spell Check
+					select.form-control(
+						name="spellCheckLanguage"
+						ng-model="project.spellCheckLanguage"
+					)
+						option(value="") Off
+						optgroup(label="Language")
+							for language in languages
+								option(
+									value=language.code
+								)= language.name
+
 				.form-controls
 					label(for="autoComplete") Auto-Complete
 					input.form-control(

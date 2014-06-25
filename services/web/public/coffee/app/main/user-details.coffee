@@ -1,6 +1,6 @@
 define [
 	"base"
-	"../libs/algolia"
+	"../../libs/algolia"
 ], (App, algolia)->
 	app.factory "Institutions", ->
 		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")

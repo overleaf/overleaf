@@ -70,6 +70,67 @@ describe "ProjectController", ->
 			locals:
 				jsPath:"js path here"
 
+	describe "updateProjectSettings", ->
+		it "should update the name", (done) ->
+			@EditorController.renameProject = sinon.stub().callsArg(2)
+			@req.body =
+				name: @name = "New name"
+			@res.send = (code) =>
+				@EditorController.renameProject
+					.calledWith(@project_id, @name)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
+		it "should update the compiler", (done) ->
+			@EditorController.setCompiler = sinon.stub().callsArg(2)
+			@req.body =
+				compiler: @compiler = "pdflatex"
+			@res.send = (code) =>
+				@EditorController.setCompiler
+					.calledWith(@project_id, @compiler)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
+		it "should update the spell check language", (done) ->
+			@EditorController.setSpellCheckLanguage = sinon.stub().callsArg(2)
+			@req.body =
+				spellCheckLanguage: @languageCode = "fr"
+			@res.send = (code) =>
+				@EditorController.setSpellCheckLanguage
+					.calledWith(@project_id, @languageCode)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
+		it "should update the public access level", (done) ->
+			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
+			@req.body =
+				publicAccessLevel: @publicAccessLevel = "readonly"
+			@res.send = (code) =>
+				@EditorController.setPublicAccessLevel
+					.calledWith(@project_id, @publicAccessLevel)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
+		it "should update the root doc", (done) ->
+			@EditorController.setRootDoc = sinon.stub().callsArg(2)
+			@req.body =
+				rootDocId: @rootDocId = "root-doc-id"
+			@res.send = (code) =>
+				@EditorController.setRootDoc
+					.calledWith(@project_id, @rootDocId)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
 	describe "deleteProject", ->
 		it "should tell the project deleter to archive when forever=false", (done)->
 			@res.send = (code)=>

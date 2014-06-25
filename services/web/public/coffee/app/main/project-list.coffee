@@ -43,7 +43,7 @@ define [
 						deferred.reject(errorArgs...)
 
 			pendingRequests.push doRequest
-			processRequests()
+			processPendingRequests()
 
 			return promise
 

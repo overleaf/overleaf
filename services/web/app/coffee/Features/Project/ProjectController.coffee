@@ -17,6 +17,35 @@ fs = require "fs"
 
 module.exports = ProjectController =
 
+	updateProjectSettings: (req, res, next) ->
+		project_id = req.params.Project_id
+
+		jobs = []
+
+		if req.body.compiler?
+			jobs.push (callback) ->
+				editorController.setCompiler project_id, req.body.compiler, callback
+
+		if req.body.name?
+			jobs.push (callback) ->
+				editorController.renameProject project_id, req.body.name, callback
+
+		if req.body.spellCheckLanguage?
+			jobs.push (callback) ->
+				editorController.setSpellCheckLanguage project_id, req.body.spellCheckLanguage, callback
+
+		if req.body.rootDocId?
+			jobs.push (callback) ->
+				editorController.setRootDoc project_id, req.body.rootDocId, callback
+
+		if req.body.publicAccessLevel?
+			jobs.push (callback) ->
+				editorController.setPublicAccessLevel project_id, req.body.publicAccessLevel, callback
+
+		async.series jobs, (error) ->
+			return next(error) if error?
+			res.send(204)
+
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
 		forever    = req.query?.forever?
@@ -183,10 +212,7 @@ module.exports = ProjectController =
 						theme : user.ace.theme
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
-						spellCheckLanguage: user.ace.spellCheckLanguage
 						pdfViewer : user.ace.pdfViewer
-						docPositions: {}
-						oldHistory: !!user.featureSwitches?.oldHistory
 					})
 					sharelatexObject : JSON.stringify({
 						siteUrl: Settings.siteUrl,

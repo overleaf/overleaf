@@ -87,6 +87,8 @@ module.exports = class Router
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
+		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
+
 		app.post '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
 		app.post '/project/:Project_id/folder', SecurityManager.requestCanModifyProject, EditorHttpController.addFolder
 
@@ -247,14 +249,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					EditorController.removeUserFromProject(project_id, user_id, callback)
 
-			client.on 'setSpellCheckLanguage', (compiler, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.setSpellCheckLanguage project_id, compiler, callback
-
-			client.on 'setCompiler', (compiler, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.setCompiler project_id, compiler, callback
-
 			client.on 'leaveDoc', (doc_id, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.leaveDoc(client, project_id, doc_id, callback)
@@ -262,38 +256,6 @@ module.exports = class Router
 			client.on 'joinDoc', (args...)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.joinDoc(client, project_id, args...)
-
-			client.on 'addDoc', (folder_id, docName, callback)->
-			 	AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-				 	EditorController.addDoc(project_id, folder_id, docName, [""], callback)
-
-			client.on 'addFolder', (folder_id, folderName, callback)->
-			 	AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-				 	EditorController.addFolder(project_id, folder_id, folderName, callback)
-
-			client.on 'deleteEntity', (entity_id, entityType, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.deleteEntity(project_id, entity_id, entityType, callback)
-
-			client.on 'renameEntity', (entity_id, entityType, newName, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.renameEntity(project_id, entity_id, entityType, newName, callback)
-
-			client.on 'moveEntity', (entity_id, folder_id, entityType, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.moveEntity(project_id, entity_id, folder_id, entityType, callback)
-
-			client.on 'setProjectName', (newName, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.renameProject(project_id, newName, callback)
-
-			client.on 'setRootDoc', (newRootDocID, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.setRootDoc(project_id, newRootDocID, callback)
-
-			client.on 'setPublicAccessLevel', (newAccessLevel, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.setPublicAccessLevel(project_id, newAccessLevel, callback)
 
 			# Deprecated and can be removed after deploying.
 			client.on 'pdfProject', (opts, callback)->

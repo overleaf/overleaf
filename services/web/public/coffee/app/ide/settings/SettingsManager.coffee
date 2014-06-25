@@ -19,10 +19,37 @@ define [], () ->
 					@saveSettings({mode: mode})
 
 			@$scope.$watch "settings.autoComplete", (autoComplete, oldAutoComplete) =>
-				console.log "autoComplete", autoComplete
 				if autoComplete != oldAutoComplete
 					@saveSettings({autoComplete: autoComplete})
+
+			@$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
+				return if @ignoreUpdates
+				if oldLanguage? and language != oldLanguage
+					@saveProjectSettings({spellCheckLanguage: language})
+					# Also set it as the default for the user
+					@saveSettings({spellCheckLanguage: language})
+
+			@$scope.$watch "project.compiler", (compiler, oldCompiler) =>
+				return if @ignoreUpdates
+				if oldCompiler? and compiler != oldCompiler
+					@saveProjectSettings({compiler: compiler})
+
+			@ide.socket.on "compilerUpdated", (compiler) =>
+				@ignoreUpdates = true
+				@$scope.$apply () =>
+					@$scope.project.compiler = compiler
+				delete @ignoreUpdates
+
+			@ide.socket.on "spellCheckLanguageUpdated", (languageCode) =>
+				@ignoreUpdates = true
+				@$scope.$apply () =>
+					@$scope.project.spellCheckLanguage = languageCode
+				delete @ignoreUpdates
 
 		saveSettings: (data) ->
 			data._csrf = window.csrfToken
 			@ide.$http.post "/user/settings", data
+
+		saveProjectSettings: (data) ->
+			data._csrf = window.csrfToken
+			@ide.$http.post "/project/#{@ide.project_id}/settings", data

@@ -349,8 +349,11 @@ describe "EditorController", ->
 	describe "updating compiler used for project", ->
 		it "should send the new compiler and project id to the project options handler", (done)->
 			compiler = "latex"
-			@EditorController.setCompiler @project_id, compiler, (err)=>
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@EditorController.setCompiler @project_id, compiler, (err) =>
 				@ProjectOptionsHandler.setCompiler.calledWith(@project_id, compiler).should.equal true
+				console.log @EditorRealTimeController.emitToRoom.args
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "compilerUpdated", compiler).should.equal true
 				done()
 			@ProjectOptionsHandler.setCompiler.args[0][2]()
 
@@ -358,8 +361,11 @@ describe "EditorController", ->
 	describe "updating language code used for project", ->
 		it "should send the new languageCode and project id to the project options handler", (done)->
 			languageCode = "fr"
-			@EditorController.setSpellCheckLanguage @project_id, languageCode, (err)=>
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@EditorController.setSpellCheckLanguage @project_id, languageCode, (err) =>
 				@ProjectOptionsHandler.setSpellCheckLanguage.calledWith(@project_id, languageCode).should.equal true
+				console.log @EditorRealTimeController.emitToRoom.args
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "spellCheckLanguageUpdated", languageCode).should.equal true
 				done()
 			@ProjectOptionsHandler.setSpellCheckLanguage.args[0][2]()
 
@@ -687,9 +693,8 @@ describe "EditorController", ->
 	describe "setPublicAccessLevel", ->
 
 		beforeEach ->
-			@err = "errro"
 			@newAccessLevel = "public"
-			@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, @err)
+			@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the EditorController", (done)->
@@ -705,9 +710,8 @@ describe "EditorController", ->
 	describe "setRootDoc", ->
 
 		beforeEach ->
-			@err = "errro"
 			@newRootDocID = "21312321321"
-			@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2, @err)
+			@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2, null)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the ProjectEntityHandler", (done)->
