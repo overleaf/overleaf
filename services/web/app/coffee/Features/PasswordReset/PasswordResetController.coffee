@@ -11,13 +11,13 @@ module.exports =
 	requestReset: (req, res)->
 		email = req.body.email.trim().toLowerCase()
 		opts = 
-			endpointName:"auto_compile"
-			timeInterval:60
-			subjectName:email
-			throttle: 3
+			endpointName: "password_reset_rate_limit"
+			timeInterval: 60
+			subjectName: req.ip
+			throttle: 6
 		RateLimiter.addCount opts, (err, canCompile)->
 			if !canCompile
-				return res.send 500
+				return res.send 500, { message: "Rate limit hit. Please wait a while before retrying" }
 			PasswordResetHandler.generateAndEmailResetToken email, (err)->
 				if err?
 					res.send 500, {message:err?.message}
