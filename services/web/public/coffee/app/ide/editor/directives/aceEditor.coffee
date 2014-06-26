@@ -5,11 +5,12 @@ define [
 	"ide/editor/auto-complete/AutoCompleteManager"
 	"ide/editor/spell-check/SpellCheckManager"
 	"ide/editor/annotations/AnnotationsManager"
+	"ide/editor/cursor-position/CursorPositionManager"
 	"ace/keyboard/vim"
 	"ace/keyboard/emacs"
 	"ace/mode/latex"
 	"ace/edit_session"
-], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, AnnotationsManager) ->
+], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, AnnotationsManager, CursorPositionManager) ->
 	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
@@ -37,12 +38,13 @@ define [
 					else
 						@$originalApply(fn);
 
-				editor = Ace.edit(element.find(".ace-editor-body")[0])
+				window.editor = editor = Ace.edit(element.find(".ace-editor-body")[0])
 
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element)
-				spellCheckManager   = new SpellCheckManager(scope, editor, element)
-				undoManager         = new UndoManager(scope, editor, element)
-				annotationsManagaer = new AnnotationsManager(scope, editor, element)
+				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
+				spellCheckManager     = new SpellCheckManager(scope, editor, element)
+				undoManager           = new UndoManager(scope, editor, element)
+				annotationsManager    = new AnnotationsManager(scope, editor, element)
+				cursorPositionManager = new CursorPositionManager(scope, editor, element)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -91,7 +93,7 @@ define [
 					session.setMode(new LatexMode())
 
 					autoCompleteManager.bindToSession(session)
-					annotationsManagaer.redrawAnnotations()
+					annotationsManager.redrawAnnotations()
 
 					doc = session.getDocument()
 					doc.on "change", () ->
@@ -102,6 +104,8 @@ define [
 						undoManager.nextUpdateIsRemote = true
 
 					sharejs_doc.attachToAce(editor)
+
+					editor.focus()
 
 				detachFromAce = (sharejs_doc) ->
 					sharejs_doc.detachFromAce()

@@ -30,14 +30,12 @@ define [
 				@showAnnotationLabels(position)
 
 		redrawAnnotations: () ->
-			console.log "REDRAWING ANNOTATIONS"
 			@_clearMarkers()
 			@_clearLabels()
 
 			for annotation in @$scope.annotations or []
 				do (annotation) =>
 					colorScheme = @_getColorScheme(annotation.hue)
-					console.log "DRAWING ANNOTATION", annotation, colorScheme
 					if annotation.cursor?
 						@labels.push {
 							text: annotation.text
@@ -84,9 +82,6 @@ define [
 						bottom = "auto"
 
 					left   = coords.pageX
-
-					console.log "TOP BOTTOM", top, bottom
-
 
 					@$scope.annotationLabel = {
 						show: true
