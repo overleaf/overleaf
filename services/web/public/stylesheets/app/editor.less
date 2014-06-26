@@ -1,3 +1,8 @@
+@import "./editor/file-tree.less";
+@import "./editor/track-changes.less";
+@import "./editor/toolbar.less";
+@import "./editor/left-menu.less";
+
 .full-size {
 	position: absolute;
 	top: 0;
@@ -15,147 +20,6 @@
 	margin-left: -200px;
 }
 
-.toolbar {
-	height: 40px;
-	border-bottom: 1px solid @toolbar-border-color;
-
-	a {
-		display: inline-block;
-		color: @gray-light;
-		padding: 6px 12px 8px;
-		&:hover {
-			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
-			color: @gray-dark;
-		}
-	}
-
-	.btn-full-height {
-		border: none;
-		border-radius: 0;
-		border-right: 1px solid @toolbar-border-color;
-		color: @link-color;
-		padding: 6px 12px 8px;
-		&:hover {
-			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
-			background-color: darken(white, 10%);
-			color: @link-hover-color;
-		}
-	}
-
-	.toolbar-right {
-		float: right;
-		.btn-full-height {
-			border-right: 0;
-			border-left: 1px solid @toolbar-border-color;
-		}
-	}
-
-	&.toolbar-header {
-		box-shadow: 0 0 2px #ccc;
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		z-index: 1;
-	}
-
-	&.toolbar-small {
-		height: 32px;
-		a {
-			padding: 4px 2px 2px;
-			margin-left: 6px;
-		}
-		.toolbar-right {
-			a {
-				margin-left: 0;
-				margin-right: 6px;
-			}
-		}
-	}
-}
-
-#file-tree {
-	background-color: #fafafa;
-
-	ul.file-tree-list {
-		font-size: 0.8rem;
-		margin: 0;
-		padding: (@line-height-computed / 4) 0;
-		position: absolute;
-		top: 32px;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		overflow-y: scroll;
-
-		ul {
-			margin-left: (@line-height-computed / 2);
-		}
-
-		li {
-			line-height: 2.6;
-
-			.entity-name {
-				color: @gray-dark;
-				cursor: pointer;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				&:hover {
-					background-color: @gray-lightest;
-				}
-				input {
-					line-height: 1.6;
-				}
-				&.droppable-hover {
-					background-color: @file-tree-droppable-background-color;
-				}
-			}
-
-			i.fa-folder-open, i.fa-folder {
-				color: lighten(desaturate(@link-color, 10%), 5%);
-				font-size: 14px;
-			}
-
-			i.fa-file, i.fa-image {
-				color: @gray-light;
-				font-size: 14px;
-			}
-
-			i.toggle {
-				width: 24px;
-				padding: 6px;
-				font-size: 0.7rem;
-				color: @gray
-			}
-
-			&.selected {
-				> .entity > .entity-name {
-					color: @link-color;
-					border-right: 4px solid @link-color;
-					font-weight: bold;
-					i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image {
-						color: @link-color;
-					}
-					padding-right: 32px;
-				}
-			}
-
-			.dropdown {
-				position: absolute;
-				right: 0;
-				> a {
-					padding: 0 12px;
-				}
-			}
-		}
-	}
-
-	ul.droppable-hover {
-		background-color: @file-tree-droppable-background-color;
-	}
-}
-
 #ide-body {
 	.full-size;
 	top: 40px;
@@ -163,14 +27,14 @@
 
 #editor {
 	.full-size;
-}
 
-.loading {
-	.full-size;
-	padding-top: 10rem;
-	font-family: @font-family-serif;
-	text-align: center;
-	background-color: #fafafa;
+	.loading {
+		.full-size;
+		padding-top: 10rem;
+		font-family: @font-family-serif;
+		text-align: center;
+		background-color: #fafafa;
+	}
 }
 
 // The internal components of the aceEditor directive
@@ -258,38 +122,3 @@
 	z-index: 100;
 }
 
-#left-menu {
-	position: absolute;
-	width: 210px;
-	padding: 10px;
-	top: 0;
-	bottom: 0;
-	background-color: #f4f4f4;
-	z-index: 100;
-	overflow: auto;
-	-webkit-transition: left ease-in-out 0.35s;
-	transition: left ease-in-out 0.35s;
-
-	left: -280px;
-	&.shown {
-		left: 0;
-	}
-
-	h4 {
-		font-family: @font-family-serif;
-		font-weight: 400;
-		font-size: 1rem;
-		margin: (@line-height-computed / 2) 0;
-		padding-bottom: (@line-height-computed / 4);
-		color: @gray-light;
-		border-bottom: 1px solid @gray-light;
-		text-transform: uppercase;
-	}
-}
-
-#left-menu-mask {
-	.full-size;
-	opacity: 0.4;
-	background-color: #999;
-	z-index: 99;
-}

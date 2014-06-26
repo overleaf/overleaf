@@ -1,10 +1,6 @@
 define [
 	"base"
 ], (App) ->
-	App.filter "formatDate", () ->
-		(date, format = "Do MMM YYYY, h:mm a") ->
-			moment(date).format(format)
-
 	App.factory "queuedHttp", ["$http", "$q", ($http, $q) ->
 		pendingRequests = []
 		inflight = false

@@ -1,0 +1,27 @@
+header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
+	a.btn.btn-full-height(
+		href,
+		ng-click="ui.leftMenuShown = true"
+		tooltip="Menu",
+		tooltip-placement="bottom"
+	)
+		i.fa.fa-fw.fa-bars
+
+	span.name {{ project.name }}
+
+	a(href='#', data-toggle="tooltip", title="Rename")
+		i.fa.fa-pencil
+
+	.toolbar-right
+		a.btn.btn-full-height(href='#', tooltip="Share", tooltip-placement="bottom")
+			i.fa.fa-fw.fa-group
+		a.btn.btn-full-height(
+			href,
+			ng-click="toggleTrackChanges()",
+			ng-class="{ active: (ui.view == 'track-changes') }"
+			tooltip="Recent Changes",
+			tooltip-placement="bottom"
+		)
+			i.fa.fa-fw.fa-history
+		a.btn.btn-full-height(href='#', tooltip="Chat", tooltip-placement="bottom")
+			i.fa.fa-fw.fa-comment

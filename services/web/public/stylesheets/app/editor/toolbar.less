@@ -1,0 +1,63 @@
+.toolbar {
+	height: 40px;
+	border-bottom: 1px solid @toolbar-border-color;
+
+	a {
+		display: inline-block;
+		color: @gray-light;
+		padding: 6px 12px 8px;
+		&:hover {
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+			color: @gray-dark;
+		}
+	}
+
+	.btn-full-height {
+		border: none;
+		border-radius: 0;
+		border-right: 1px solid @toolbar-border-color;
+		color: @link-color;
+		padding: 6px 12px 8px;
+		&:hover {
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+			background-color: darken(white, 10%);
+			color: @link-hover-color;
+		}
+		&.active, &:active {
+			color: white;
+			background-color: @link-color;
+			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
+		}
+	}
+
+	.toolbar-right {
+		float: right;
+		.btn-full-height {
+			border-right: 0;
+			border-left: 1px solid @toolbar-border-color;
+		}
+	}
+
+	&.toolbar-header {
+		box-shadow: 0 0 2px #ccc;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 1;
+	}
+
+	&.toolbar-small {
+		height: 32px;
+		a {
+			padding: 4px 2px 2px;
+			margin-left: 6px;
+		}
+		.toolbar-right {
+			a {
+				margin-left: 0;
+				margin-right: 6px;
+			}
+		}
+	}
+}

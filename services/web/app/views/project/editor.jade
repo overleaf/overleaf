@@ -33,121 +33,17 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong Reconnecting...
 
-		aside#left-menu(
-			ng-class="{ 'shown': ui.leftMenuShown }"
-			ng-cloak
-		)
-			h4 Settings
-			form
-				.form-controls
-					label(for="compiler") Compiler
-					select.form-control(
-						name="compiler"
-						ng-model="project.compiler"
-					)
-						option(value='pdflatex') pdfLaTeX
-						option(value='latex') LaTeX
-						option(value='xelatex') XeLaTeX
-						option(value='lualatex') LuaLaTeX
+		include ./editor/left-menu
 
-				.form-controls
-					label(for="spellCheckLanguage") Spell Check
-					select.form-control(
-						name="spellCheckLanguage"
-						ng-model="project.spellCheckLanguage"
-					)
-						option(value="") Off
-						optgroup(label="Language")
-							for language in languages
-								option(
-									value=language.code
-								)= language.name
-
-				.form-controls
-					label(for="autoComplete") Auto-Complete
-					input.form-control(
-						type="checkbox"
-						name="autoComplete"
-						ng-model="settings.autoComplete"
-					)
-
-				.form-controls
-					label(for="theme") Theme
-					select.form-control(
-						name="theme"
-						ng-model="settings.theme"
-					)
-						each theme in themes
-							option(value=theme) #{theme}
-							
-				.form-controls
-					label(for="mode") Keybindings
-					select.form-control(
-						name="mode"
-						ng-model="settings.mode"
-					)
-						option(value='default') None
-						option(value='vim') Vim
-						option(value='emacs') Emacs
-
-				.form-controls
-					label(for="fontSize") Font Size
-					select.form-control(
-						name="fontSize"
-						ng-model="settings.fontSize"
-					)
-						each size in ['10','11','12','13','14','16','20','24']
-							option(value=size) #{size}px
-
-		#left-menu-mask(
-			ng-show="ui.leftMenuShown",
-			ng-click="ui.leftMenuShown = false"
-			ng-cloak
-		)
-
-		header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
-			a.btn.btn-full-height(
-				href,
-				ng-click="ui.leftMenuShown = true"
-				tooltip="Menu",
-				tooltip-placement="bottom"
-			)
-				i.fa.fa-bars
-
-			span.name {{ project.name }}
-
-			a(href='#', data-toggle="tooltip", title="Rename")
-				i.fa.fa-pencil
-
-			.toolbar-right
-				a.btn.btn-full-height(href='#', tooltip="Share", tooltip-placement="bottom")
-					i.fa.fa-group
-				a.btn.btn-full-height(href='#', tooltip="Recent Changes", tooltip-placement="bottom")
-					i.fa.fa-history
-				a.btn.btn-full-height(href='#', tooltip="Chat", tooltip-placement="bottom")
-					i.fa.fa-comment
+		include ./editor/header
 
 		#ide-body(ng-cloak, layout="main", ng-hide="state.loading")
-			include ./editor/file-tree
+			.ui-layout-west
+				include ./editor/file-tree
 
 			.ui-layout-center
-				.loading(ng-show="!editor.sharejs_doc || editor.opening")
-					i.fa.fa-spin.fa-refresh
-					| &nbsp;&nbsp;Loading...
-				#editor(
-					ace-editor,
-					ng-show="!!editor.sharejs_doc && !editor.opening"
-					theme="settings.theme",
-					keybindings="settings.mode",
-					font-size="settings.fontSize",
-					auto-complete="settings.autoComplete",
-					spell-check-language="project.spellCheckLanguage",
-					annotations="onlineUserCursorAnnotations[editor.open_doc_id]"
-					show-print-margin="false",
-					sharejs-doc="editor.sharejs_doc",
-					last-updated="editor.last_updated",
-					cursor-position="editor.cursorPosition"
-				)
+				include ./editor/editor
+				include ./editor/track-changes
 
 	//- #loadingScreen
 	//- 	h3 Loading...

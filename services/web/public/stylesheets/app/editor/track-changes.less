@@ -1,0 +1,318 @@
+@changesListWidth:   250px;
+@changesListPadding: @line-height-computed / 2;
+
+@selector-padding-vertical: @line-height-computed / 3;
+@selector-padding-horizontal: @line-height-computed / 2;
+@day-header-height: 24px;
+
+@range-bar-color: @link-color;
+
+#trackChanges {
+	// .track-changes-diff {
+	// 	position: absolute;
+	// 	right: @changesListWidth + 1px;
+	// 	left: 0;
+	// 	top: 0;
+	// 	bottom: 0;
+	// 	height: 100%;
+	// 	.ace_editor {
+	// 		position: absolute;
+	// 		top: 42px;
+	// 		left: 0;
+	// 		right: 0;
+	// 		bottom: 0;
+	// 		.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
+	// 			display: none;
+	// 		}
+	// 	}
+	// 	.track-changes-diff-toolbar {
+	// 		position: absolute;
+	// 		top: 0;
+	// 		left: 0;
+	// 		right: -1px;
+	// 		height: 32px;
+	// 		padding: 5px 5px 5px 5px;
+	// 		margin: 0;
+	// 		background-color: #282828;
+	// 		color: white;
+	// 		border-right: 1px solid white;
+	// 		.number-of-changes, .restore {
+	// 			position: absolute;
+	// 		}
+	// 		.number-of-changes {
+	// 			left: 10px;
+	// 			bottom: 7px;
+	// 		}
+	// 		.restore {
+	// 			right: 10px;
+	// 			bottom: 5px;
+	// 			padding: 3px 9px;
+	// 		}
+	// 	}
+	// }
+
+
+	// .track-changes-upgrade-control, .track-changes-upgrade-popup {
+	// 	position: absolute;
+	// 	top: 0;
+	// 	bottom: 0;
+	// 	left: 0;
+	// 	right: 0;
+	// 	z-index: 100;
+	// }
+
+	// .track-changes-upgrade-popup {
+	// 	background-color: rgba(128,128,128,0.4);
+	// 	.message {
+	// 		margin: auto;
+	// 		margin-top: 200px;
+	// 		padding: 10px 10px 14px 10px;
+	// 		width: 400px;
+	// 		font-weight: bold;
+	// 		text-align: center;
+	// 		background-color: white;
+	// 		.border-radius(8px);
+	// 	}
+	// }
+
+	// .track-changes-upgrade-control {
+	// 	background-color: #eeeeee;
+	// 	text-align: center;
+	// 	.message {
+	// 		font-size: 18px;
+	// 		margin: 12px;
+	// 		margin-top: 36px;
+	// 	}
+	// }
+
+	// .deleted-background,
+	// .deleted-foreground,
+	// .inserted-background,
+	// .name-marker,
+	// .changes-before,
+	// .changes-after {
+	// 	position: absolute;
+	// 	z-index: 2;
+	// }
+
+	// .name-marker {
+	// 	font-size: 0.8em;
+	// 	padding: 2px 6px;
+	// 	.border-radius(3px 3px 3px 3px);
+	// 	position: absolute;
+	// 	border: 1px solid #999;
+	// 	left: 0;
+	// 	white-space: pre;
+	// }
+
+	// .changes-before {
+	// 	top: 6px;
+	// 	right: 6px;
+	// }
+	// .changes-after {
+	// 	bottom: 6px;
+	// 	right: 6px;
+	// }
+	// .changes-before, .changes-after {
+	// 	padding: 4px 8px;
+	// 	background-color: #eee;
+	// 	border: 1px solid #999;
+	// 	.border-radius(3px);
+	// }
+
+
+	aside.change-list {
+		border-left: 1px solid @toolbar-border-color;
+		height: 100%;
+		width: @changesListWidth;
+		position: absolute;
+		right: 0;
+		background-color: white;
+
+		ul {
+			li.change {
+				position: relative;
+				cursor: pointer;
+				user-select: none;
+				-ms-user-select: none;
+				-moz-user-select: none;
+				-webkit-user-select: none;
+
+				.day {
+					background-color: #fafafa;
+					border-bottom: 1px solid @toolbar-border-color;
+					padding: 4px;
+					font-weight: bold;
+					text-align: center;
+					height: @day-header-height;
+					font-size: 14px;
+					line-height: 1;
+				}
+				.selectors {
+					input {
+						margin: 0;
+					}
+					position: absolute;
+					left: @selector-padding-horizontal;
+					top: 0;
+					bottom: 0;
+					width: 24px;
+					.selector-from {
+						position: absolute;
+						bottom: @selector-padding-vertical;
+						left: 0;
+						opacity: 0.8;
+					}
+					.selector-to {
+						position: absolute;
+						top: @selector-padding-vertical;
+						left: 0;
+						opacity: 0.8;
+					}
+					.range {
+						position: absolute;
+						left: 5px;
+						width: 4px;
+						top: 0;
+						bottom: 0;
+					}
+				}
+				.description {
+					padding: (@line-height-computed / 4);
+					padding-left: 38px;
+					min-height: 38px;
+					border-bottom: 1px solid @toolbar-border-color;
+				}
+				.user {
+					font-size: 0.8rem;
+					color: @gray;
+					text-transform: capitalize;
+				}
+				.time {
+					float: right;
+					color: @gray;
+					display: inline-block;
+					padding-right: (@line-height-computed / 2);
+					font-size: 0.8rem;
+					line-height: @line-height-computed;
+				}
+				// .color-square {
+				// 	display: inline-block;
+				// 	height: 10px;
+				// 	width: 10px;
+				// 	margin-right: 4px;
+				// 	margin-bottom: -1px;
+				// }
+				.docs {
+					font-weight: bold;
+					font-size: 0.9rem;
+				}
+				&:hover {
+					background-color: @gray-lightest;
+				}
+			}
+			li.loading-changes, li.empty-message {
+				padding: 6px;
+				cursor: default;
+				&:hover {
+					background-color: inherit;
+				}
+			}
+			li.selected {
+				border-left: 4px solid @range-bar-color;
+				.description {
+					padding-left: 34px;
+				}
+				.selectors {
+					left: @selector-padding-horizontal - 4px;
+					.range {
+						background-color: @range-bar-color;
+					}
+				}
+			}
+			li.selected-to {
+				.selectors {
+					.range {
+						top: 10px;
+					}
+					.selector-to {
+						opacity: 1;
+					}
+				}
+			}
+			li.selected-from {
+				.selectors {
+					.range {
+						bottom: 10px;
+					}
+					.selector-from {
+						opacity: 1;
+					}
+				}
+			}
+			li.first-in-day {
+				.day {
+					display: block;
+				}
+				.selectors {
+					.selector-to {
+						top: @day-header-height + @selector-padding-vertical;
+					}
+				}
+			}
+			li.first-in-day.selected-to {
+				.selectors {
+					.range {
+						top: 33px;
+					}
+				}
+			}
+		}
+		ul.list.hover-state {
+			li {
+				.selectors {
+					.range {
+						background-color: transparent;
+						top: 0;
+						bottom: 0;
+					}
+				}
+			}
+			li.hover-selected {
+				.selectors {
+					.range {
+						top: 0;
+						background-color: #999;
+					}
+				}
+			}
+			li.hover-selected-to {
+				.selectors {
+					.range {
+						top: 10px;
+					}
+					.selector-to {
+						opacity: 1;
+					}
+				}
+			}
+			li.hover-selected-from {
+				.selectors {
+					.range {
+						bottom: 10px;
+					}
+					.selector-from {
+						opacity: 1;
+					}
+				}
+			}
+			li.first-in-day.hover-selected-to {
+				.selectors {
+					.range {
+						top: 33px;
+					}
+				}
+			}
+		}
+	}
+}

@@ -5,11 +5,13 @@ define [
 	"ide/editor/EditorManager"
 	"ide/settings/SettingsManager"
 	"ide/online-users/OnlineUsersManager"
+	"ide/track-changes/TrackChangesManager"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
 	"directives/fineUpload"
 	"directives/onEnter"
+	"filters/formatDate"
 ], (
 	App
 	FileTreeManager
@@ -17,6 +19,7 @@ define [
 	EditorManager
 	SettingsManager
 	OnlineUsersManager
+	TrackChangesManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		# Don't freak out if we're already in an apply callback
@@ -34,6 +37,7 @@ define [
 		}
 		$scope.ui = {
 			leftMenuShown: false
+			view: "editor"
 		}
 
 		window._ide = ide
@@ -46,6 +50,7 @@ define [
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.settingsManager = new SettingsManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
+		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

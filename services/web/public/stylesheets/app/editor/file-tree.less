@@ -1,0 +1,82 @@
+
+#file-tree {
+	background-color: #fafafa;
+
+	ul.file-tree-list {
+		font-size: 0.8rem;
+		margin: 0;
+		padding: (@line-height-computed / 4) 0;
+		position: absolute;
+		top: 32px;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		overflow-y: auto;
+
+		ul {
+			margin-left: (@line-height-computed / 2);
+		}
+
+		li {
+			line-height: 2.6;
+
+			.entity-name {
+				color: @gray-dark;
+				cursor: pointer;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				&:hover {
+					background-color: @gray-lightest;
+				}
+				input {
+					line-height: 1.6;
+				}
+				&.droppable-hover {
+					background-color: @file-tree-droppable-background-color;
+				}
+			}
+
+			i.fa-folder-open, i.fa-folder {
+				color: lighten(desaturate(@link-color, 10%), 5%);
+				font-size: 14px;
+			}
+
+			i.fa-file, i.fa-image {
+				color: @gray-light;
+				font-size: 14px;
+			}
+
+			i.toggle {
+				width: 24px;
+				padding: 6px;
+				font-size: 0.7rem;
+				color: @gray
+			}
+
+			&.selected {
+				> .entity > .entity-name {
+					color: @link-color;
+					border-right: 4px solid @link-color;
+					font-weight: bold;
+					i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image {
+						color: @link-color;
+					}
+					padding-right: 32px;
+				}
+			}
+
+			.dropdown {
+				position: absolute;
+				right: 0;
+				> a {
+					padding: 0 12px;
+				}
+			}
+		}
+	}
+
+	ul.droppable-hover {
+		background-color: @file-tree-droppable-background-color;
+	}
+}

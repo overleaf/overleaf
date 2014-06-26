@@ -1,0 +1,71 @@
+aside#left-menu.full-size(
+	ng-class="{ 'shown': ui.leftMenuShown }"
+	ng-cloak
+)
+	h4 Settings
+	form
+		.form-controls
+			label(for="compiler") Compiler
+			select.form-control(
+				name="compiler"
+				ng-model="project.compiler"
+			)
+				option(value='pdflatex') pdfLaTeX
+				option(value='latex') LaTeX
+				option(value='xelatex') XeLaTeX
+				option(value='lualatex') LuaLaTeX
+
+		.form-controls
+			label(for="spellCheckLanguage") Spell Check
+			select.form-control(
+				name="spellCheckLanguage"
+				ng-model="project.spellCheckLanguage"
+			)
+				option(value="") Off
+				optgroup(label="Language")
+					for language in languages
+						option(
+							value=language.code
+						)= language.name
+
+		.form-controls
+			label(for="autoComplete") Auto-Complete
+			input.form-control(
+				type="checkbox"
+				name="autoComplete"
+				ng-model="settings.autoComplete"
+			)
+
+		.form-controls
+			label(for="theme") Theme
+			select.form-control(
+				name="theme"
+				ng-model="settings.theme"
+			)
+				each theme in themes
+					option(value=theme) #{theme}
+					
+		.form-controls
+			label(for="mode") Keybindings
+			select.form-control(
+				name="mode"
+				ng-model="settings.mode"
+			)
+				option(value='default') None
+				option(value='vim') Vim
+				option(value='emacs') Emacs
+
+		.form-controls
+			label(for="fontSize") Font Size
+			select.form-control(
+				name="fontSize"
+				ng-model="settings.fontSize"
+			)
+				each size in ['10','11','12','13','14','16','20','24']
+					option(value=size) #{size}px
+
+#left-menu-mask(
+	ng-show="ui.leftMenuShown",
+	ng-click="ui.leftMenuShown = false"
+	ng-cloak
+)
