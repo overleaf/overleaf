@@ -246,15 +246,16 @@ describe "EditorController", ->
 				row: @row = 42
 				column: @column = 37
 			}
-			@clientParams = {
-				project_id: @project_id
-				first_name: @first_name = "Douglas"
-				last_name: @last_name = "Adams"
-			}
-			@client.get = (param, callback) => callback null, @clientParams[param]
-
 		describe "with a logged in user", ->
 			beforeEach ->
+				@clientParams = {
+					project_id: @project_id
+					first_name: @first_name = "Douglas"
+					last_name: @last_name = "Adams"
+					email: @email = "joe@example.com"
+					user_id: @user_id = "user-id-123"
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
 				@EditorController.updateClientPosition @client, @update
 
 			it "should send the update to the project room with the user's name", ->
@@ -265,13 +266,17 @@ describe "EditorController", ->
 						name: "#{@first_name} #{@last_name}"
 						row: @row
 						column: @column
+						email: @email
+						user_id: @user_id
 					})
 					.should.equal true
 
 		describe "with an anonymous user", ->
 			beforeEach ->
-				@clientParams.first_name = null
-				@clientParams.last_name = null
+				@clientParams = {
+					project_id: @project_id
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
 				@EditorController.updateClientPosition @client, @update
 
 			it "should send the update to the project room with an anonymous name", ->

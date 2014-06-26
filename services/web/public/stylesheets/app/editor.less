@@ -193,27 +193,24 @@
 		background-repeat: repeat-x;
 		background-position: bottom left;
 	}
-	@cursor-color: rgb(14, 158, 0);
 	.remote-cursor {
 		position: absolute;
 		z-index: 2;
-		border-left: 2px solid @cursor-color;
-		.name {
-			font-size: 0.8em;
-			background-color: @cursor-color;
-			color: white;
-			padding: 2px 6px;
-			border-radius: 3px 3px 3px 0;
-			position: absolute;
-			left: -4px;
-		}
+		border-left: 2px solid transparent;
 		.nubbin {
-			height: 6px;
-			width: 6px;
-			background-color: @cursor-color;
+			height: 5px;
+			width: 5px;
 			position: absolute;
-			left: -4px;
+			left: -2px;
 		}
+	}
+	.annotation-label {
+		padding: (@line-height-computed / 4) (@line-height-computed / 2);
+		font-size: 0.8rem;
+		z-index: 100;
+		font-family: @font-family-sans-serif;
+		color: white;
+		font-weight: 700;
 	}
 }
 

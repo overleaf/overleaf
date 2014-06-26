@@ -1,4 +1,6 @@
-define [], () ->
+define [
+	"../../../libs/md5"
+], () ->
 	class OnlineUsersManager
 		constructor: (@ide, @$scope) ->
 			@$scope.onlineUsers = {}
@@ -17,6 +19,7 @@ define [], () ->
 						@updateCursorHighlights()
 
 			@ide.socket.on "clientTracking.clientDisconnected", (client_id) =>
+				console.log "CLIENT DISCONNECTED", client_id
 				@$scope.$apply () =>
 					delete @$scope.onlineUsers[client_id]
 					@updateCursorHighlights()
@@ -26,12 +29,14 @@ define [], () ->
 			@$scope.onlineUserCursorAnnotations = {}
 			for client_id, client of @$scope.onlineUsers
 				doc_id = client.doc_id
+				continue if !doc_id?
 				@$scope.onlineUserCursorAnnotations[doc_id] ||= []
 				@$scope.onlineUserCursorAnnotations[doc_id].push {
 					text: client.name
 					cursor:
 						row: client.row
 						column: client.column
+					hue: @getHueForUserId(client.user_id)
 				}
 
 		UPDATE_INTERVAL: 500
@@ -52,5 +57,20 @@ define [], () ->
 				, @UPDATE_INTERVAL
 			else
 				console.log "NOT UPDATING"
-					
+
+		OWN_HUE: 200 # We will always appear as this color to ourselves
+		ANONYMOUS_HUE: 100
+		getHueForUserId: (user_id) ->
+			if !user_id?
+				return @ANONYMOUS_HUE
+
+			if window.user.id == user_id
+				return @OWN_HUE
+
+			hash = CryptoJS.MD5(user_id)
+			hue = parseInt(hash.toString().slice(0,8), 16) % 320
+			# Avoid 20 degrees either side of the personal hue
+			if hue > @OWNER_HUE - 20
+				hue = hue + 40
+			return hue
 

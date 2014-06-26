@@ -39,10 +39,10 @@ define [
 
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
 
-				autoCompleteManager = new AutoCompleteManager(scope, editor)
-				spellCheckManager = new SpellCheckManager(scope, editor, element)
-				undoManager = new UndoManager(scope, editor)
-				annotationsManagaer = new AnnotationsManager(scope, editor)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element)
+				spellCheckManager   = new SpellCheckManager(scope, editor, element)
+				undoManager         = new UndoManager(scope, editor, element)
+				annotationsManagaer = new AnnotationsManager(scope, editor, element)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -91,6 +91,7 @@ define [
 					session.setMode(new LatexMode())
 
 					autoCompleteManager.bindToSession(session)
+					annotationsManagaer.redrawAnnotations()
 
 					doc = session.getDocument()
 					doc.on "change", () ->
@@ -137,6 +138,20 @@ define [
 								<a href ng-click="learnWord(spellingMenu.highlight)">Add to Dictionary</a>
 							</li>
 						</ul>
+					</div>
+					<div
+						class="annotation-label"
+						ng-show="annotationLabel.show"
+						ng-style="{
+							position: 'absolute',
+							left:     annotationLabel.left,
+							right:    annotationLabel.right,
+							bottom:   annotationLabel.bottom,
+							top:      annotationLabel.top,
+							'background-color': annotationLabel.backgroundColor
+						}"
+					>
+						{{ annotationLabel.text }}
 					</div>
 				</div>
 			"""

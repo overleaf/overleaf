@@ -112,12 +112,18 @@ module.exports = EditorController =
 				return callback(error) if error?
 				client.get "last_name", (error, last_name) ->
 					return callback(error) if error?
-					cursorData.id = client.id
-					if first_name? and last_name?
-						cursorData.name = first_name + " " + last_name
-					else
-						cursorData.name = "Anonymous"
-					EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
+					client.get "email", (error, email) ->
+						return callback(error) if error?
+						client.get "user_id", (error, user_id) ->
+							return callback(error) if error?
+							cursorData.id = client.id
+							cursorData.user_id = user_id if user_id?
+							cursorData.email = email if email?
+							if first_name? and last_name?
+								cursorData.name = first_name + " " + last_name
+							else
+								cursorData.name = "Anonymous"
+							EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
 	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
 		email = email.toLowerCase()
