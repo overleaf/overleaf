@@ -1,13 +1,22 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
-	aside.change-list
-		ul.list-unstyled(ng-controller="TrackChangesListController")
+	aside.change-list(
+		ng-controller="TrackChangesListController"
+	)
+		ul.list-unstyled(
+			ng-class="{\
+				'hover-state': trackChanges.hoveringOverListSelectors\
+			}"
+		)
 			li.change(
 				ng-repeat="update in trackChanges.updates"
 				ng-class="{\
 					'first-in-day': update.meta.first_in_day,\
 					'selected': update.inSelection,\
 					'selected-to': update.selectedTo,\
-					'selected-from': update.selectedFrom\
+					'selected-from': update.selectedFrom,\
+					'hover-selected': update.inHoverSelection,\
+					'hover-selected-to': update.hoverSelectedTo,\
+					'hover-selected-from': update.hoverSelectedFrom,\
 				}"
 				ng-controller="TrackChangesListItemController"
 			)
@@ -22,6 +31,9 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 							name="fromVersion"
 							ng-model="update.selectedFrom"
 							ng-value="true"
+							ng-mouseover="mouseOverSelectedFrom()"
+							ng-mouseout="mouseOutSelectedFrom()"
+							ng-show="update.afterSelection || update.inSelection"
 						)
 					form
 						input.selector-to(
@@ -29,6 +41,9 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 							name="toVersion"
 							ng-model="update.selectedTo"
 							ng-value="true"
+							ng-mouseover="mouseOverSelectedTo()"
+							ng-mouseout="mouseOutSelectedTo()"
+							ng-show="update.beforeSelection || update.inSelection"
 						)
 
 				div.description(ng-click="select()")

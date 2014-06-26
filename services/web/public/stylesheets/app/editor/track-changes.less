@@ -1,11 +1,12 @@
 @changesListWidth:   250px;
 @changesListPadding: @line-height-computed / 2;
 
-@selector-padding-vertical: @line-height-computed / 3;
+@selector-padding-vertical: 10px;
 @selector-padding-horizontal: @line-height-computed / 2;
 @day-header-height: 24px;
 
 @range-bar-color: @link-color;
+@range-bar-selected-offset: 10px;
 
 #trackChanges {
 	// .track-changes-diff {
@@ -220,6 +221,9 @@
 			}
 			li.selected {
 				border-left: 4px solid @range-bar-color;
+				.day {
+					padding-left: 0;
+				}
 				.description {
 					padding-left: 34px;
 				}
@@ -233,7 +237,7 @@
 			li.selected-to {
 				.selectors {
 					.range {
-						top: 10px;
+						top: @range-bar-selected-offset;
 					}
 					.selector-to {
 						opacity: 1;
@@ -243,7 +247,7 @@
 			li.selected-from {
 				.selectors {
 					.range {
-						bottom: 10px;
+						bottom: @range-bar-selected-offset;
 					}
 					.selector-from {
 						opacity: 1;
@@ -251,9 +255,6 @@
 				}
 			}
 			li.first-in-day {
-				.day {
-					display: block;
-				}
 				.selectors {
 					.selector-to {
 						top: @day-header-height + @selector-padding-vertical;
@@ -263,12 +264,12 @@
 			li.first-in-day.selected-to {
 				.selectors {
 					.range {
-						top: 33px;
+						top: @day-header-height + @range-bar-selected-offset;
 					}
 				}
 			}
 		}
-		ul.list.hover-state {
+		ul.hover-state {
 			li {
 				.selectors {
 					.range {
@@ -282,14 +283,14 @@
 				.selectors {
 					.range {
 						top: 0;
-						background-color: #999;
+						background-color: @gray-light;
 					}
 				}
 			}
 			li.hover-selected-to {
 				.selectors {
 					.range {
-						top: 10px;
+						top: @range-bar-selected-offset;
 					}
 					.selector-to {
 						opacity: 1;
@@ -299,7 +300,7 @@
 			li.hover-selected-from {
 				.selectors {
 					.range {
-						bottom: 10px;
+						bottom: @range-bar-selected-offset;
 					}
 					.selector-from {
 						opacity: 1;
@@ -309,7 +310,7 @@
 			li.first-in-day.hover-selected-to {
 				.selectors {
 					.range {
-						top: 33px;
+						top: @day-header-height + @range-bar-selected-offset;
 					}
 				}
 			}
