@@ -14,14 +14,12 @@ define [
 
 			@$scope.$watch "trackChanges.selection.updates", (updates) =>
 				if updates? and updates.length > 0
-					@_calculateRangeFromSelection()
 					@_selectDocFromUpdates()
 					@reloadDiff()
 
 			@$scope.$on "entity:selected", (event, entity) =>
 				if (@$scope.ui.view == "track-changes") and (entity.type == "doc")
 					@$scope.trackChanges.selection.doc = entity
-					@$scope.trackChanges.selection.range = @_calculateRangeFromSelection()
 					@reloadDiff()
 
 		onShow: () ->
@@ -76,11 +74,12 @@ define [
 						@$scope.trackChanges.atEnd = true
 
 		reloadDiff: () ->
-			console.log "Checking if diff has changed"
 
 			diff = @$scope.trackChanges.diff
 			{updates, doc} = @$scope.trackChanges.selection
-			{fromV, toV}   = @$scope.trackChanges.selection.range
+			{fromV, toV}   = @_calculateRangeFromSelection()
+
+			console.log "Checking if diff has changed", doc?.id, fromV, toV, updates
 
 			return if !doc?
 
@@ -144,18 +143,23 @@ define [
 						column: endColumn
 				}
 
-				if entry.i?
-					annotations.push {
-						label: entry.meta.user.first_name
-						highlight: range
-						hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
-					}
-				else if entry.d?
-					annotations.push {
-						label: entry.meta.user.first_name
-						strikeThrough: range
-						hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
-					}
+				if entry.i? or entry.d?
+					name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
+					if entry.meta.user.id == @$scope.user.id
+						name = "you"
+					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
+					if entry.i?
+						annotations.push {
+							label: "Added by #{name} on #{date}"
+							highlight: range
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+						}
+					else if entry.d?
+						annotations.push {
+							label: "Deleted by #{name} on #{date}"
+							strikeThrough: range
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+						}
 
 			return {text, annotations}
 
@@ -187,11 +191,8 @@ define [
 			selected_doc_id = @$scope.trackChanges.selection.doc?.id
 
 			for update in @$scope.trackChanges.selection.updates or []
-				console.log "Checking update", update
 				for doc_id, doc of update.docs
-					console.log "Checking doc", doc_id, selected_doc_id, doc.fromV, doc.toV
 					if doc_id == selected_doc_id
-						console.log "Doc matches"
 						if fromV? and toV?
 							fromV = Math.min(fromV, doc.fromV)
 							toV = Math.max(toV, doc.toV)
@@ -204,13 +205,12 @@ define [
 							end_ts = update.meta.end_ts
 						break
 
-			@$scope.trackChanges.selection.range = {fromV, toV, start_ts, end_ts}
+			return {fromV, toV, start_ts, end_ts}
 
 		# Set the track changes selected doc to one of the docs in the range
 		# of currently selected updates. If we already have a selected doc
 		# then prefer this one if present.
 		_selectDocFromUpdates: () ->
-			console.log "selecting doc"
 			affected_docs = {}
 			for update in @$scope.trackChanges.selection.updates
 				for doc_id, doc of update.docs
@@ -226,7 +226,8 @@ define [
 					selected_doc_id = doc_id
 					break
 
-			@$scope.trackChanges.selection.doc = @ide.fileTreeManager.findEntityById(selected_doc_id)
+			doc = @$scope.trackChanges.selection.doc = @ide.fileTreeManager.findEntityById(selected_doc_id)
+			@ide.fileTreeManager.selectEntity(doc)
 
 		_updateContainsUserId: (update, user_id) ->
 			for user in update.meta.users

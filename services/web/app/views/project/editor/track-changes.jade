@@ -51,8 +51,10 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					div.docs(ng-repeat="(doc_id, doc) in update.docs")
 						span.doc {{ doc.entity.name }}
 					div.users
-						span.user(ng-repeat="user in update.meta.users")
-							| {{user.first_name}} {{user.last_name}}
+						div.user(ng-repeat="update_user in update.meta.users")
+							.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 100%, 50%)'}")
+							span(ng-if="update_user.id != user.id") {{user.first_name}} {{user.last_name}}
+							span(ng-if="update_user.id == user.id") You
 
 	.diff.full-size
 		.diff-editor(

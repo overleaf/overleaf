@@ -74,40 +74,55 @@ define [
 				if label.range.contains(position.row, position.column)
 					labelToShow = label
 
-			@$scope.$apply () =>
-				if !labelToShow?
+			if !labelToShow?
+				@$scope.$apply () =>
 					@$scope.annotationLabel.show = false
+			else
+				$ace = $(@editor.renderer.container).find(".ace_scroller")
+				# Move the label into the Ace content area so that offsets and positions are easy to calculate.
+				$ace.append(@element.find(".annotation-label"))
+
+				if labelToShow.snapToStartOfRange
+					coords = @editor.renderer.textToScreenCoordinates(labelToShow.range.start.row, labelToShow.range.start.column)
 				else
-					$ace = $(@editor.renderer.container).find(".ace_scroller")
-					# Move the label into the Ace content area so that offsets and positions are easy to calculate.
-					$ace.append(@element.find(".annotation-label"))
+					coords = @editor.renderer.textToScreenCoordinates(position.row, position.column)
 
-					if labelToShow.snapToStartOfRange
-						coords = @editor.renderer.textToScreenCoordinates(labelToShow.range.start.row, labelToShow.range.start.column)
-					else
-						coords = @editor.renderer.textToScreenCoordinates(position.row, position.column)
+				offset = $ace.offset()
+				height = $ace.height()
+				coords.pageX = coords.pageX - offset.left
+				coords.pageY = coords.pageY - offset.top
 
-					offset = $ace.offset()
-					height = $ace.height()
-					coords.pageX = coords.pageX - offset.left
-					coords.pageY = coords.pageY - offset.top
+				if coords.pageY > @editor.renderer.lineHeight * 2
+					top    = "auto"
+					bottom = height - coords.pageY
+				else
+					top    = coords.pageY + @editor.renderer.lineHeight
+					bottom = "auto"
 
-					if coords.pageY > 100
-						top    = "auto"
-						bottom = height - coords.pageY
-					else
-						top    = coords.pageY + @editor.renderer.lineHeight
-						bottom = "auto"
+				# Apply this first that the label has the correct width when calculating below
+				@$scope.$apply () =>
+					@$scope.annotationLabel.text = labelToShow.text
+					@$scope.annotationLabel.show = true
 
-					left   = coords.pageX
+				$label = @element.find(".annotation-label")
+				console.log "pageX", coords.pageX, "label", $label.outerWidth(), "ace", $ace.width()
 
+				if coords.pageX + $label.outerWidth() < $ace.width()
+					left  = coords.pageX
+					right = "auto"
+				else
+					right = 0
+					left = "auto"
+
+				@$scope.$apply () =>
 					@$scope.annotationLabel = {
-						show: true
-						left: left
+						show:   true
+						left:   left
+						right:  right
 						bottom: bottom
 						top:    top
 						backgroundColor: labelToShow.colorScheme.labelBackgroundColor
-						text: labelToShow.text
+						text:   labelToShow.text
 					}
 
 		_clearMarkers: () ->

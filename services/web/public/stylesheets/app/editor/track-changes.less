@@ -6,7 +6,7 @@
 @day-header-height: 24px;
 
 @range-bar-color: @link-color;
-@range-bar-selected-offset: 10px;
+@range-bar-selected-offset: 14px;
 
 #trackChanges {
 	// .track-changes-diff {
@@ -136,7 +136,6 @@
 		ul {
 			li.change {
 				position: relative;
-				cursor: pointer;
 				user-select: none;
 				-ms-user-select: none;
 				-moz-user-select: none;
@@ -186,11 +185,27 @@
 					padding-left: 38px;
 					min-height: 38px;
 					border-bottom: 1px solid @toolbar-border-color;
+					cursor: pointer;
+					&:hover {
+						background-color: @gray-lightest;
+					}
 				}
-				.user {
-					font-size: 0.8rem;
-					color: @gray;
-					text-transform: capitalize;
+				.users {
+					.user {
+						font-size: 0.8rem;
+						color: @gray;
+						text-transform: capitalize;
+						position: relative;
+						padding-left: 16px;
+						.color-square {
+							height: 12px;
+							width: 12px;
+							border-radius: 3px;
+							position: absolute;
+							top: 3px;
+							left: 0;
+						}
+					}
 				}
 				.time {
 					float: right;
@@ -200,19 +215,9 @@
 					font-size: 0.8rem;
 					line-height: @line-height-computed;
 				}
-				// .color-square {
-				// 	display: inline-block;
-				// 	height: 10px;
-				// 	width: 10px;
-				// 	margin-right: 4px;
-				// 	margin-bottom: -1px;
-				// }
 				.docs {
 					font-weight: bold;
 					font-size: 0.9rem;
-				}
-				&:hover {
-					background-color: @gray-lightest;
 				}
 			}
 			li.loading-changes, li.empty-message {
