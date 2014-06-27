@@ -39,6 +39,7 @@ define [
 			leftMenuShown: false
 			view: "editor"
 		}
+		$scope.user = window.user
 
 		window._ide = ide
 

@@ -93,11 +93,9 @@ define [
 					coords.pageY = coords.pageY - offset.top
 
 					if coords.pageY > 100
-						console.log "middle of page", height - coords.pageY
 						top    = "auto"
 						bottom = height - coords.pageY
 					else
-						console.log "top of page", coords.pageY
 						top    = coords.pageY + @editor.renderer.lineHeight
 						bottom = "auto"
 

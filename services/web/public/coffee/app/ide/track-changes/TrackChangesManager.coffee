@@ -3,6 +3,34 @@ define [
 ], () ->
 	class TrackChangesManager
 		constructor: (@ide, @$scope) ->
+			@reset()
+
+			@$scope.toggleTrackChanges = () =>
+				if @$scope.ui.view == "track-changes"
+					@$scope.ui.view = "editor"
+				else
+					@$scope.ui.view = "track-changes"
+					@onShow()
+
+			@$scope.$watch "trackChanges.selection.updates", (updates) =>
+				if updates? and updates.length > 0
+					@_calculateRangeFromSelection()
+					@_selectDocFromUpdates()
+					@reloadDiff()
+
+			@$scope.$on "entity:selected", (event, entity) =>
+				if (@$scope.ui.view == "track-changes") and (entity.type == "doc")
+					@$scope.trackChanges.selection.doc = entity
+					@$scope.trackChanges.selection.range = @_calculateRangeFromSelection()
+					@reloadDiff()
+
+		onShow: () ->
+			@reset()
+			@fetchNextBatchOfChanges()
+				.success () =>
+					@autoSelectRecentUpdates()
+
+		reset: () ->
 			@$scope.trackChanges = {
 				updates: []
 				nextBeforeTimestamp: null
@@ -20,24 +48,19 @@ define [
 				diff: null
 			}
 
-			@$scope.toggleTrackChanges = () =>
-				if @$scope.ui.view == "track-changes"
-					@$scope.ui.view = "editor"
-				else
-					@$scope.ui.view = "track-changes"
+		autoSelectRecentUpdates: () ->
+			console.log "AUTO SELECTING UPDATES", @$scope.trackChanges.updates.length
+			return if @$scope.trackChanges.updates.length == 0
 
-			@$scope.$on "file-tree:initialized", () =>
-				@fetchNextBatchOfChanges()
+			@$scope.trackChanges.updates[0].selectedTo = true
 
-			@$scope.$watch "trackChanges.selection.updates", () =>
-				@$scope.trackChanges.selection.range = @_calculateRangeFromSelection()
-				@reloadDiff()
+			indexOfLastUpdateNotByMe = 0
+			for update, i in @$scope.trackChanges.updates
+				if @_updateContainsUserId(update, @$scope.user.id)
+					break
+				indexOfLastUpdateNotByMe = i
 
-			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view == "track-changes") and (entity.type == "doc")
-					@$scope.trackChanges.selection.doc = entity
-					@$scope.trackChanges.selection.range = @_calculateRangeFromSelection()
-					@reloadDiff()
+			@$scope.trackChanges.updates[indexOfLastUpdateNotByMe].selectedFrom = true
 
 		BATCH_SIZE: 4
 		fetchNextBatchOfChanges: () ->
@@ -181,4 +204,31 @@ define [
 							end_ts = update.meta.end_ts
 						break
 
-			return {fromV, toV, start_ts, end_ts}
+			@$scope.trackChanges.selection.range = {fromV, toV, start_ts, end_ts}
+
+		# Set the track changes selected doc to one of the docs in the range
+		# of currently selected updates. If we already have a selected doc
+		# then prefer this one if present.
+		_selectDocFromUpdates: () ->
+			console.log "selecting doc"
+			affected_docs = {}
+			for update in @$scope.trackChanges.selection.updates
+				for doc_id, doc of update.docs
+					affected_docs[doc_id] = true
+
+			selected_doc = @$scope.trackChanges.selection.doc
+			if selected_doc? and affected_docs[selected_doc.id]
+				console.log "An affected doc is already open, bravo!"
+				selected_doc_id = selected_doc.id
+			else
+				console.log "selected doc is not open, selecting first one"
+				for doc_id, doc of affected_docs
+					selected_doc_id = doc_id
+					break
+
+			@$scope.trackChanges.selection.doc = @ide.fileTreeManager.findEntityById(selected_doc_id)
+
+		_updateContainsUserId: (update, user_id) ->
+			for user in update.meta.users
+				return true if user.id == user_id
+			return false
