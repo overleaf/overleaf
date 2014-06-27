@@ -57,7 +57,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 							span(ng-if="update_user.id == user.id") You
 
 	.diff.full-size
-		.diff-editor(
+		.diff-editor.hide-ace-cursor(
 			ace-editor,
 			ng-show="!!trackChanges.diff && !trackChanges.diff.loading",
 			theme="settings.theme",

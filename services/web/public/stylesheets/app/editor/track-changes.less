@@ -123,6 +123,11 @@
 
 	.diff {
 		margin-right: @changesListWidth;
+		.hide-ace-cursor {
+			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
+				display: none;
+			}
+		}
 	}
 
 	aside.change-list {
