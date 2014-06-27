@@ -288,7 +288,6 @@ describe "ProjectController", ->
 		it "should add on userSettingsObject", (done)->
 			@res.render = (pageName, opts)=>
 				userSettingsObject = JSON.parse(opts.userSettingsObject)
-				userSettingsObject.project_id.should.equal @project._id
 				userSettingsObject.fontSize.should.equal @user.ace.fontSize
 				userSettingsObject.theme.should.equal @user.ace.theme
 				done()
