@@ -64,16 +64,25 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp;Loading...
 
-	.diff.full-size
+	.diff.full-size(ng-controller="TrackChangesDiffController")
 		.diff-editor.hide-ace-cursor(
 			ace-editor,
-			ng-show="!!trackChanges.diff && !trackChanges.diff.loading",
+			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted",
 			theme="settings.theme",
 			font-size="settings.fontSize",
 			text="trackChanges.diff.text",
 			annotations="trackChanges.diff.annotations",
 			read-only="true"
 		)
+		.diff-deleted.text-centered(
+			ng-show="trackChanges.diff.deleted"
+		)
+			p.text-serif {{ trackChanges.diff.doc.name }} has been deleted.
+			p 
+				a.btn.btn-primary.btn-lg(
+					href,
+					ng-click="restoreDeletedDoc()"
+				) Restore
 		.loading-panel(ng-show="trackChanges.diff.loading")
 			i.fa.fa-spin.fa-refresh
 			| &nbsp;&nbsp;Loading...

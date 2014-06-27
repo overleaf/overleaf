@@ -39,12 +39,30 @@ aside#file-tree(ng-controller="FileTreeController")
 			)
 				i.fa.fa-trash-o
 
-	ul.list-unstyled.file-tree-list
-		file-entity(
-			entity="entity",
-			ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
-		)
+	.file-tree-inner
+		ul.list-unstyled.file-tree-list
+			file-entity(
+				entity="entity",
+				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
+			)
 
+		div(ng-show="deletedDocs.length > 0 && ui.view == 'track-changes'")
+			h3 Deleted Files
+			ul.list-unstyled.file-tree-list.deleted-docs
+				li(
+					ng-class="{ 'selected': entity.selected }",
+					ng-repeat="entity in deletedDocs | orderBy:'name'",
+					ng-controller="FileTreeEntityController"
+				)
+					.entity
+						.entity-name(
+							ng-click="select()"
+						)
+							//- Just a spacer to align with folders
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file
+
+							span  {{ entity.name }}
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(

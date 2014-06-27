@@ -1,5 +1,6 @@
 define [
-	"ide/track-changes/TrackChangesListController"
+	"ide/track-changes/controllers/TrackChangesListController"
+	"ide/track-changes/controllers/TrackChangesDiffController"
 	"ide/track-changes/directives/infiniteScroll"
 ], () ->
 	class TrackChangesManager
@@ -96,24 +97,34 @@ define [
 				fromV:   fromV
 				toV:     toV
 				doc:     doc
-				loading: true
 				error:   false
 			}
 
-			url = "/project/#{@$scope.project_id}/doc/#{diff.doc.id}/diff"
-			if diff.fromV? and diff.toV?
-				url += "?from=#{diff.fromV}&to=#{diff.toV}"
+			if !doc.deleted
+				diff.loading = true
+				url = "/project/#{@$scope.project_id}/doc/#{diff.doc.id}/diff"
+				if diff.fromV? and diff.toV?
+					url += "?from=#{diff.fromV}&to=#{diff.toV}"
 
-			@ide.$http
-				.get(url)
-				.success (data) =>
-					diff.loading = false
-					{text, annotations} = @_parseDiff(data)
-					diff.text = text
-					diff.annotations = annotations
-				.error () ->
-					diff.loading = false
-					diff.error = true
+				@ide.$http
+					.get(url)
+					.success (data) =>
+						diff.loading = false
+						{text, annotations} = @_parseDiff(data)
+						diff.text = text
+						diff.annotations = annotations
+					.error () ->
+						diff.loading = false
+						diff.error = true
+			else
+				diff.deleted = true
+				console.log "DOC IS DELETED - NO DIFF FOR YOU!"
+
+		restoreDeletedDoc: (doc) ->
+			@ide.$http.post "/project/#{@$scope.project_id}/doc/#{doc.id}/restore", {
+				name: doc.name
+				_csrf: window.csrfToken
+			}
 
 		_parseDiff: (diff) ->
 			row    = 0
@@ -170,7 +181,7 @@ define [
 
 			for update in updates
 				for doc_id, doc of update.docs or {}
-					doc.entity = @ide.fileTreeManager.findEntityById(doc_id)
+					doc.entity = @ide.fileTreeManager.findEntityById(doc_id, includeDeleted: true)
 
 				for user in update.meta.users or []
 					user.hue = @ide.onlineUsersManager.getHueForUserId(user.id)
@@ -220,20 +231,19 @@ define [
 			affected_docs = {}
 			for update in @$scope.trackChanges.selection.updates
 				for doc_id, doc of update.docs
-					affected_docs[doc_id] = true
+					affected_docs[doc_id] = doc.entity
 
 			selected_doc = @$scope.trackChanges.selection.doc
-			if selected_doc? and affected_docs[selected_doc.id]
+			if selected_doc? and affected_docs[selected_doc.id]?
 				console.log "An affected doc is already open, bravo!"
-				selected_doc_id = selected_doc.id
 			else
 				console.log "selected doc is not open, selecting first one"
 				for doc_id, doc of affected_docs
-					selected_doc_id = doc_id
+					selected_doc = doc
 					break
 
-			doc = @$scope.trackChanges.selection.doc = @ide.fileTreeManager.findEntityById(selected_doc_id)
-			@ide.fileTreeManager.selectEntity(doc)
+			@$scope.trackChanges.selection.doc = selected_doc
+			@ide.fileTreeManager.selectEntity(selected_doc)
 
 		_updateContainsUserId: (update, user_id) ->
 			for user in update.meta.users

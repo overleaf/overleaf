@@ -32,6 +32,8 @@ define [
 			@openDoc(doc)
 
 		openDoc: (doc, options = {}) ->
+			@$scope.ui.view = "editor"
+			
 			console.log "Trying to open doc", doc.id
 			return if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 			@$scope.editor.open_doc_id = doc.id

@@ -1,17 +1,27 @@
 
-#file-tree {
+aside#file-tree {
 	background-color: #fafafa;
 
-	ul.file-tree-list {
-		font-size: 0.8rem;
-		margin: 0;
-		padding: (@line-height-computed / 4) 0;
+	.file-tree-inner {
 		position: absolute;
 		top: 32px;
 		bottom: 0;
 		left: 0;
 		right: 0;
 		overflow-y: auto;
+	}
+
+	h3 {
+		font-size: 1rem;
+		border-bottom: 1px solid @gray;
+		padding-bottom: (@line-height-computed / 4);
+		margin: (@line-height-computed / 2);
+	}
+
+	ul.file-tree-list {
+		font-size: 0.8rem;
+		margin: 0;
+		padding: (@line-height-computed / 4) 0;
 
 		ul {
 			margin-left: (@line-height-computed / 2);

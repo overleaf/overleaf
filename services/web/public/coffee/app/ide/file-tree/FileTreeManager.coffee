@@ -10,6 +10,7 @@ define [
 		constructor: (@ide, @$scope) ->
 			@$scope.$on "project:joined", =>
 				@loadRootFolder()
+				@loadDeletedDocs()
 				@$scope.$emit "file-tree:initialized"
 
 			@_bindToSocketEvents()
@@ -67,8 +68,15 @@ define [
 				entity.selected = false
 			entity.selected = true
 
-		findEntityById: (id) ->
-			@_findEntityByIdInFolder @$scope.rootFolder, id
+		findEntityById: (id, options = {}) ->
+			entity = @_findEntityByIdInFolder @$scope.rootFolder, id
+			return entity if entity?
+
+			if options.includeDeleted
+				for entity in @$scope.deletedDocs
+					return entity if entity.id == id
+
+			return null
 
 		_findEntityByIdInFolder: (folder, id) ->
 			for entity in folder.children or []
@@ -82,6 +90,9 @@ define [
 
 		forEachEntity: (callback = (entity, parent_folder) ->) ->
 			@_forEachEntityInFolder(@$scope.rootFolder, callback)
+
+			for entity in @$scope.deletedDocs or []
+				callback(entity)
 
 		_forEachEntityInFolder: (folder, callback) ->
 			for entity in folder.children or []
@@ -126,6 +137,16 @@ define [
 				folder.children.push @_parseFolder(childFolder)
 
 			return folder
+
+		loadDeletedDocs: () ->
+			@$scope.deletedDocs = []
+			for doc in @$scope.project.deletedDocs
+				@$scope.deletedDocs.push {
+					name: doc.name
+					id:   doc._id
+					type: "doc"
+					deleted: true
+				}
 
 		getCurrentFolder: () ->
 			# Return the root folder if nothing is selected
@@ -200,6 +221,10 @@ define [
 				index = parent_folder.children.indexOf(entity)
 				if index > -1
 					parent_folder.children.splice(index, 1)
+
+			if entity.type == "doc"
+				entity.deleted = true
+				@$scope.deletedDocs.push entity
 
 		_moveEntityInScope: (entity, parent_folder) ->
 			return if entity in parent_folder.children
