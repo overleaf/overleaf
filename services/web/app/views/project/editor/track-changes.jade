@@ -1,60 +1,68 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
 	aside.change-list(
 		ng-controller="TrackChangesListController"
+		infinite-scroll="loadMore()"
+		infinite-scroll-disabled="trackChanges.loading || trackChanges.atEnd"
+		infinite-scroll-initialize="ui.view == 'track-changes'"
 	)
-		ul.list-unstyled(
-			ng-class="{\
-				'hover-state': trackChanges.hoveringOverListSelectors\
-			}"
-		)
-			li.change(
-				ng-repeat="update in trackChanges.updates"
+		.infinite-scroll-inner
+			ul.list-unstyled(
 				ng-class="{\
-					'first-in-day': update.meta.first_in_day,\
-					'selected': update.inSelection,\
-					'selected-to': update.selectedTo,\
-					'selected-from': update.selectedFrom,\
-					'hover-selected': update.inHoverSelection,\
-					'hover-selected-to': update.hoverSelectedTo,\
-					'hover-selected-from': update.hoverSelectedFrom,\
+					'hover-state': trackChanges.hoveringOverListSelectors\
 				}"
-				ng-controller="TrackChangesListItemController"
 			)
+				li.change(
+					ng-repeat="update in trackChanges.updates"
+					ng-class="{\
+						'first-in-day': update.meta.first_in_day,\
+						'selected': update.inSelection,\
+						'selected-to': update.selectedTo,\
+						'selected-from': update.selectedFrom,\
+						'hover-selected': update.inHoverSelection,\
+						'hover-selected-to': update.hoverSelectedTo,\
+						'hover-selected-from': update.hoverSelectedFrom,\
+					}"
+					ng-controller="TrackChangesListItemController"
+				)
 
-				div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
+					div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
 
-				div.selectors
-					div.range
-					form
-						input.selector-from(
-							type="radio"
-							name="fromVersion"
-							ng-model="update.selectedFrom"
-							ng-value="true"
-							ng-mouseover="mouseOverSelectedFrom()"
-							ng-mouseout="mouseOutSelectedFrom()"
-							ng-show="update.afterSelection || update.inSelection"
-						)
-					form
-						input.selector-to(
-							type="radio"
-							name="toVersion"
-							ng-model="update.selectedTo"
-							ng-value="true"
-							ng-mouseover="mouseOverSelectedTo()"
-							ng-mouseout="mouseOutSelectedTo()"
-							ng-show="update.beforeSelection || update.inSelection"
-						)
+					div.selectors
+						div.range
+						form
+							input.selector-from(
+								type="radio"
+								name="fromVersion"
+								ng-model="update.selectedFrom"
+								ng-value="true"
+								ng-mouseover="mouseOverSelectedFrom()"
+								ng-mouseout="mouseOutSelectedFrom()"
+								ng-show="update.afterSelection || update.inSelection"
+							)
+						form
+							input.selector-to(
+								type="radio"
+								name="toVersion"
+								ng-model="update.selectedTo"
+								ng-value="true"
+								ng-mouseover="mouseOverSelectedTo()"
+								ng-mouseout="mouseOutSelectedTo()"
+								ng-show="update.beforeSelection || update.inSelection"
+							)
 
-				div.description(ng-click="select()")
-					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
-					div.docs(ng-repeat="(doc_id, doc) in update.docs")
-						span.doc {{ doc.entity.name }}
-					div.users
-						div.user(ng-repeat="update_user in update.meta.users")
-							.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 100%, 50%)'}")
-							span(ng-if="update_user.id != user.id") {{user.first_name}} {{user.last_name}}
-							span(ng-if="update_user.id == user.id") You
+					div.description(ng-click="select()")
+						div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
+						div.docs(ng-repeat="(doc_id, doc) in update.docs")
+							span.doc {{ doc.entity.name }}
+						div.users
+							div.user(ng-repeat="update_user in update.meta.users")
+								.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 100%, 50%)'}")
+								span(ng-if="update_user.id != user.id") {{user.first_name}} {{user.last_name}}
+								span(ng-if="update_user.id == user.id") You
+
+			.loading(ng-show="trackChanges.loading")
+				i.fa.fa-spin.fa-refresh
+				| &nbsp;&nbsp;Loading...
 
 	.diff.full-size
 		.diff-editor.hide-ace-cursor(

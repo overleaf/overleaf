@@ -1,5 +1,6 @@
 define [
 	"ide/track-changes/TrackChangesListController"
+	"ide/track-changes/directives/infiniteScroll"
 ], () ->
 	class TrackChangesManager
 		constructor: (@ide, @$scope) ->
@@ -24,9 +25,9 @@ define [
 
 		onShow: () ->
 			@reset()
-			@fetchNextBatchOfChanges()
-				.success () =>
-					@autoSelectRecentUpdates()
+			# @fetchNextBatchOfChanges()
+			# 	.success () =>
+			# 		@autoSelectRecentUpdates()
 
 		reset: () ->
 			@$scope.trackChanges = {
@@ -61,10 +62,11 @@ define [
 			@$scope.trackChanges.updates[indexOfLastUpdateNotByMe].selectedFrom = true
 
 		BATCH_SIZE: 4
-		fetchNextBatchOfChanges: () ->
+		fetchNextBatchOfUpdates: () ->
 			url = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
-			if @nextBeforeTimestamp?
+			if @$scope.trackChanges.nextBeforeTimestamp?
 				url += "&before=#{@$scope.trackChanges.nextBeforeTimestamp}"
+			@$scope.trackChanges.loading = true
 			@ide.$http
 				.get(url)
 				.success (data) =>
@@ -72,9 +74,9 @@ define [
 					@$scope.trackChanges.nextBeforeTimestamp = data.nextBeforeTimestamp
 					if !data.nextBeforeTimestamp?
 						@$scope.trackChanges.atEnd = true
+					@$scope.trackChanges.loading = false
 
 		reloadDiff: () ->
-
 			diff = @$scope.trackChanges.diff
 			{updates, doc} = @$scope.trackChanges.selection
 			{fromV, toV}   = @_calculateRangeFromSelection()
@@ -182,8 +184,12 @@ define [
 
 				previousUpdate = update
 
+			firstLoad = @$scope.trackChanges.updates.length == 0
+
 			@$scope.trackChanges.updates =
 				@$scope.trackChanges.updates.concat(updates)
+
+			@autoSelectRecentUpdates() if firstLoad
 
 		_calculateRangeFromSelection: () ->
 			fromV = toV = start_ts = end_ts = null

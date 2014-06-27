@@ -1,8 +1,11 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "TrackChangesListController", ["$scope", ($scope) ->
+	App.controller "TrackChangesListController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hoveringOverListSelectors = false
+
+		$scope.loadMore = () =>
+			ide.trackChangesManager.fetchNextBatchOfUpdates()
 
 		$scope.recalculateSelectedUpdates = () ->
 			console.log "RECALCULATING UPDATES"
@@ -61,6 +64,9 @@ define [
 				delete update.hoverSelectedFrom
 				delete update.hoverSelectedTo
 				delete update.inHoverSelection
+
+		$scope.$watch "trackChanges.updates.length", () ->
+			$scope.recalculateSelectedUpdates()
 	]
 
 	App.controller "TrackChangesListItemController", ["$scope", ($scope) ->
