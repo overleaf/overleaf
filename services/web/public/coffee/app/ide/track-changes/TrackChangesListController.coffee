@@ -7,7 +7,7 @@ define [
 		$scope.recalculateSelectedUpdates = () ->
 			beforeSelection = true
 			afterSelection = false
-			inSelection = false
+			$scope.trackChanges.selection.updates = []
 			for update in $scope.trackChanges.updates
 				if update.selectedTo
 					inSelection = true
@@ -16,6 +16,9 @@ define [
 				update.beforeSelection = beforeSelection
 				update.inSelection = inSelection
 				update.afterSelection = afterSelection
+
+				if inSelection
+					$scope.trackChanges.selection.updates.push update
 
 				if update.selectedFrom
 					inSelection = false
@@ -30,8 +33,6 @@ define [
 					hoverSelectedFrom = true
 				if update.hoverSelectedTo
 					hoverSelectedTo = true
-
-			console.log "RECALCULATING HOVER", hoverSelectedFrom, hoverSelectedTo
 
 			if hoverSelectedFrom
 				# We want to 'hover select' everything between hoverSelectedFrom and selectedTo
@@ -62,19 +63,19 @@ define [
 	]
 
 	App.controller "TrackChangesListItemController", ["$scope", ($scope) ->
-		$scope.$watch "update.selectedFrom", (selectedFrom) ->
-			if selectedFrom? 
-				if selectedFrom
-					for update in $scope.trackChanges.updates
-						update.selectedFrom = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()		
+		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
+			if selectedFrom
+				for update in $scope.trackChanges.updates
+					update.selectedFrom = false unless update == $scope.update
+				if selectedFrom != oldSelectedFrom
+					$scope.recalculateSelectedUpdates()		
 
-		$scope.$watch "update.selectedTo", (selectedTo) ->
-			if selectedTo?
-				if selectedTo
-					for update in $scope.trackChanges.updates
-						update.selectedTo = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()
+		$scope.$watch "update.selectedTo", (selectedTo, oldSelectedTo) ->
+			if selectedTo
+				for update in $scope.trackChanges.updates
+					update.selectedTo = false unless update == $scope.update
+				if selectedTo != oldSelectedTo
+					$scope.recalculateSelectedUpdates()
 
 		$scope.select = () ->
 			$scope.update.selectedTo = true

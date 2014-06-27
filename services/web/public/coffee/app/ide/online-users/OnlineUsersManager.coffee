@@ -29,7 +29,7 @@ define [
 				continue if !doc_id?
 				@$scope.onlineUserCursorAnnotations[doc_id] ||= []
 				@$scope.onlineUserCursorAnnotations[doc_id].push {
-					text: client.name
+					label: client.name
 					cursor:
 						row: client.row
 						column: client.column

@@ -47,6 +47,26 @@ define [
 							snapToStartOfRange: true
 						}
 						@_drawCursor(annotation, colorScheme)
+					else if annotation.highlight?
+						@labels.push {
+							text: annotation.label
+							range: new Range(
+								annotation.highlight.start.row, annotation.highlight.start.column,
+								annotation.highlight.end.row,   annotation.highlight.end.column
+							)
+							colorScheme: colorScheme
+						}
+						@_drawHighlight(annotation, colorScheme)
+					else if annotation.strikeThrough?
+						@labels.push {
+							text: annotation.label
+							range: new Range(
+								annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
+								annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
+							)
+							colorScheme: colorScheme
+						}
+						@_drawStrikeThrough(annotation, colorScheme)
 
 		showAnnotationLabels: (position) ->
 			labelToShow = null
@@ -104,7 +124,7 @@ define [
 			@markerIds.push @editor.getSession().addMarker new Range(
 				annotation.cursor.row, annotation.cursor.column,
 				annotation.cursor.row, annotation.cursor.column + 1
-			), "remote-cursor", (html, range, left, top, config) ->
+			), "annotation remote-cursor", (html, range, left, top, config) ->
 				div = """
 					<div
 						class='remote-cursor custom ace_start'
@@ -116,16 +136,70 @@ define [
 				html.push div
 			, true
 
+		_drawHighlight: (annotation, colorScheme) ->
+			@_addMarkerWithCustomStyle(
+				new Range(
+					annotation.highlight.start.row, annotation.highlight.start.column,
+					annotation.highlight.end.row,   annotation.highlight.end.column + 1
+				),
+				"annotation highlight",
+				false,
+				"background-color: #{colorScheme.highlightBackgroundColor}"
+			)
+
+		_drawStrikeThrough: (annotation, colorScheme) ->
+			lineHeight = @editor.renderer.lineHeight
+			@_addMarkerWithCustomStyle(
+				new Range(
+					annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
+					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column + 1
+				),
+				"annotation strike-through-background",
+				false,
+				"background-color: #{colorScheme.strikeThroughBackgroundColor}"
+			)
+			@_addMarkerWithCustomStyle(
+				new Range(
+					annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
+					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column + 1
+				), 
+				"annotation strike-through-foreground",
+				true, 
+				"""
+					height: #{Math.round(lineHeight/2) + 2}px;
+					border-bottom: 2px solid #{colorScheme.strikeThroughForegroundColor};
+				"""
+			)
+
+		_addMarkerWithCustomStyle: (range, klass, foreground, style) ->
+			if foreground?
+				markerLayer = @editor.renderer.$markerBack
+			else
+				markerLayer = @editor.renderer.$markerFront
+
+			@markerIds.push @editor.getSession().addMarker range, klass, (html, range, left, top, config) ->
+				if range.isMultiLine()
+					markerLayer.drawTextMarker(html, range, klass, config, style)
+				else
+					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
+			, foreground
+
 		_getColorScheme: (hue) ->
 			if @_isDarkTheme()
 				return {
 					cursor: "hsl(#{hue}, 100%, 50%)"
 					labelBackgroundColor: "hsl(#{hue}, 100%, 50%)"
+					highlightBackgroundColor: "hsl(#{hue}, 100%, 28%);"
+					strikeThroughBackgroundColor: "hsl(#{hue}, 100%, 20%);"
+					strikeThroughForegroundColor: "hsl(#{hue}, 100%, 60%);"
 				}
 			else
 				return {
 					cursor: "hsl(#{hue}, 100%, 50%)"
 					labelBackgroundColor: "hsl(#{hue}, 100%, 50%)"
+					highlightBackgroundColor: "hsl(#{hue}, 70%, 85%);"
+					strikeThroughBackgroundColor: "hsl(#{hue}, 70%, 95%);"
+					strikeThroughForegroundColor: "hsl(#{hue}, 70%, 40%);"
 				}
 
 		_isDarkTheme: () ->

@@ -53,3 +53,19 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					div.users
 						span.user(ng-repeat="user in update.meta.users")
 							| {{user.first_name}} {{user.last_name}}
+
+	.diff.full-size
+		.diff-editor(
+			ace-editor,
+			ng-show="!!trackChanges.diff && !trackChanges.diff.loading",
+			theme="settings.theme",
+			font-size="settings.fontSize",
+			text="trackChanges.diff.text",
+			annotations="trackChanges.diff.annotations",
+			read-only="true"
+		)
+		.loading-panel(ng-show="trackChanges.diff.loading")
+			i.fa.fa-spin.fa-refresh
+			| &nbsp;&nbsp;Loading...
+		.error-panel(ng-show="trackChanges.diff.error")
+			.alert.alert-danger Sorry, something went wrong :(

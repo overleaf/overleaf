@@ -13,7 +13,7 @@ define [
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (entity.type == "doc")
+				if (@$scope.ui.view == "editor" and entity.type == "doc")
 					@openDoc(entity)
 
 			initialized = false

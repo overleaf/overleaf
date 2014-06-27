@@ -27,6 +27,8 @@ define [
 				spellCheckLanguage: "="
 				cursorPosition: "="
 				annotations: "="
+				text: "="
+				readOnly: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -59,7 +61,8 @@ define [
 				editor.on "changeSelection", () ->
 					cursor = editor.getCursorPosition()
 					scope.$apply () ->
-						scope.cursorPosition = cursor
+						if scope.cursorPosition?
+							scope.cursorPosition = cursor
 
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
@@ -84,6 +87,13 @@ define [
 
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
+
+				scope.$watch "text", (text) ->
+					if text?
+						editor.setValue(text, -1)
+
+				scope.$watch "readOnly", (value) ->
+					editor.setReadOnly !!value
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 

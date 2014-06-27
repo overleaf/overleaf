@@ -29,12 +29,22 @@
 	.full-size;
 }
 
-.loading {
+.loading-panel {
 	.full-size;
 	padding-top: 10rem;
 	font-family: @font-family-serif;
 	text-align: center;
 	background-color: #fafafa;
+}
+
+.error-panel {
+	.full-size;
+	padding: @line-height-computed;
+	background-color: #fafafa;
+	.alert {
+		max-width: 400px;
+		margin: auto;
+	}
 }
 
 // The internal components of the aceEditor directive
@@ -58,8 +68,6 @@
 		background-position: bottom left;
 	}
 	.remote-cursor {
-		position: absolute;
-		z-index: 2;
 		border-left: 2px solid transparent;
 		.nubbin {
 			height: 5px;
@@ -75,6 +83,10 @@
 		font-family: @font-family-sans-serif;
 		color: white;
 		font-weight: 700;
+	}
+	.annotation {
+		position: absolute;
+		z-index: 2;
 	}
 }
 
