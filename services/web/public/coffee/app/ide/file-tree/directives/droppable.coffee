@@ -10,5 +10,6 @@ define [
 				element.droppable
 					greedy: true
 					hoverClass: "droppable-hover"
+					accept: attrs.accept
 					drop: scope.onDropCallback
 		}

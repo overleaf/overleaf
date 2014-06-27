@@ -10,7 +10,7 @@ define [
 					spacing_open: 24
 					spacing_closed: 24
 					onresize: () =>
-						scope.$broadcast "layout:#{name}:resize"
+						scope.$broadcast "layout:resize"
 
 				# Restore previously recorded state
 				if (state = $.localStorage("layout.main"))?

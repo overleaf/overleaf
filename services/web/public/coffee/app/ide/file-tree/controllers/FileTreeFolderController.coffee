@@ -10,6 +10,7 @@ define [
 
 		$scope.onDrop = (events, ui) ->
 			source = $(ui.draggable).scope().entity
+			return if !source?
 			ide.fileTreeManager.moveEntity(source, $scope.entity)
 
 		$scope.orderByFoldersFirst = (entity) ->

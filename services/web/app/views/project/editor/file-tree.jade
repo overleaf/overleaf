@@ -119,6 +119,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				ng-dblclick="startRenaming()"
 				draggable
 				droppable
+				accept=".entity-name"
 				on-drop-callback="onDrop"
 			)
 				div(
@@ -232,6 +233,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				ng-if="entity.type == 'folder'"
 				ng-show="expanded"
 				droppable
+				accept=".entity-name"
 				on-drop-callback="onDrop"
 			)
 				file-entity(
