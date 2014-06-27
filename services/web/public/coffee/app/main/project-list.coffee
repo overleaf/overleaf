@@ -1,6 +1,71 @@
 define [
 	"base"
 ], (App) ->
+	App.directive "selectAllList", () ->
+		return {
+			controller: ["$scope", ($scope) ->
+				# Selecting or deselecting all should apply to all projects
+				selectAll = () ->
+					$scope.$broadcast "select-all:select"
+
+				deselectAll = () ->
+					$scope.$broadcast "select-all:deselect"
+
+				clearSelectAllState = () ->
+					$scope.$broadcast "select-all:clear"
+
+				return {
+					clearSelectAllState: clearSelectAllState
+					selectAll: selectAll
+					deselectAll: deselectAll
+				}
+			]
+			link: (scope, element, attrs) ->
+
+
+		}
+
+	App.directive "selectAll", () ->
+		return {
+			require: "^selectAllList"
+			link: (scope, element, attrs, selectAllListController) ->
+				scope.$on "select-all:clear", () ->
+					element.prop("checked", false)
+
+				element.change () ->
+					if element.is(":checked")
+						selectAllListController.selectAll()
+					else
+						selectAllListController.deselectAll()
+					return true
+		}
+
+	App.directive "selectIndividual", () ->
+		return {
+			require: "^selectAllList"
+			scope: {
+				ngModel: "="
+			}
+			link: (scope, element, attrs, selectAllListController) ->
+				ignoreChanges = false
+
+				scope.$watch "ngModel", (value) ->
+					if value? and !ignoreChanges
+						selectAllListController.clearSelectAllState()
+
+				scope.$on "select-all:select", () ->
+					ignoreChanges = true
+					scope.$apply () ->
+						scope.ngModel = true
+					ignoreChanges = false
+
+				scope.$on "select-all:deselect", () ->
+					ignoreChanges = true
+					scope.$apply () ->
+						scope.ngModel = false
+					ignoreChanges = false
+		}
+
 	App.factory "queuedHttp", ["$http", "$q", ($http, $q) ->
 		pendingRequests = []
 		inflight = false
@@ -70,18 +135,6 @@ define [
 					project.tags ||= []
 					project.tags.push tag
 
-		# Any individual changes to the selection buttons invalidates
-		# our 'select all'
-		$scope.$on "selected:on-change", (e) ->
-			$scope.allSelected = false
-			$scope.$broadcast "selection:change"
-
-		# Selecting or deselecting all should apply to all projects
-		$scope.onSelectAllChange = () ->
-			for project in $scope.visibleProjects
-				project.selected = $scope.allSelected
-			$scope.$broadcast "selection:change"
-
 		$scope.$watch "searchText", (value) ->
 			$scope.updateVisibleProjects()
 
@@ -92,12 +145,6 @@ define [
 		$scope.setFilter = (filter) ->
 			$scope.filter = filter
 			$scope.updateVisibleProjects()
-
-		$scope.clearProjectSelections = () ->
-			for project in $scope.projects
-				project.selected = false
-			$scope.allSelected = false
-			$scope.$broadcast "selection:change"
 
 		$scope.updateSelectedProjects = () ->
 			$scope.selectedProjects = $scope.projects.filter (project) -> project.selected
@@ -110,9 +157,6 @@ define [
 
 		$scope.getFirstSelectedProject = () ->
 			$scope.selectedProjects[0]
-
-		$scope.$on "selection:change", () ->
-			$scope.updateSelectedProjects()
 
 		$scope.updateVisibleProjects = () ->
 			$scope.visibleProjects = []
@@ -446,9 +490,6 @@ define [
 
 
 	App.controller "ProjectListItemController", ($scope) ->
-		$scope.onSelectedChange = () ->
-			$scope.$emit "selected:on-change"
-
 		$scope.ownerName = () ->
 			if $scope.project.accessLevel == "owner"
 				return "You"
@@ -456,6 +497,10 @@ define [
 				return "#{$scope.project.owner.first_name} #{$scope.project.owner.last_name}"
 			else
 				return "?"
+
+		$scope.$watch "project.selected", (value) ->
+			if value?
+				$scope.updateSelectedProjects()
 
 	App.controller "TagListController", ($scope) ->
 		$scope.filterProjects = (filter = "all") ->
@@ -498,7 +543,7 @@ define [
 				$scope.addSelectedProjectsToTag($scope.tag)
 				$scope.areSelectedProjectsInTag = true
 
-		$scope.$on "selection:change", (e, newValue, oldValue) ->
+		$scope.$watch "selectedProjects", () ->
 			$scope.recalculateProjectsInTag()
 		$scope.recalculateProjectsInTag()
 

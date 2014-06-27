@@ -259,14 +259,13 @@ block content
 							.col-md-12
 								.card.card-thin
 									- if (projects.length > 0)
-										ul.list-unstyled.project-list(ng-cloak)
+										ul.list-unstyled.project-list(select-all-list, ng-cloak)
 											li.container-fluid
 												.row
 													.col-md-6
 														input.select-all(
-															type="checkbox",
-															ng-model="allSelected",
-															ng-change="onSelectAllChange()"
+															select-all,
+															type="checkbox"
 														)
 														span.title TITLE
 													.col-md-2
@@ -279,7 +278,11 @@ block content
 											)
 												.row
 													.col-md-6
-														input.select-item(type="checkbox", ng-model="project.selected", ng-change="onSelectedChange()")
+														input.select-item(
+															select-individual,
+															type="checkbox",
+															ng-model="project.selected"
+														)
 														span.title
 															a.projectName(href="/project/{{project.id}}") {{project.name}}
 														span
