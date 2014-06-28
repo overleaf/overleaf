@@ -6,6 +6,7 @@ define [
 	"ide/settings/SettingsManager"
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
+	"ide/pdf/PdfManager"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
@@ -20,6 +21,7 @@ define [
 	SettingsManager
 	OnlineUsersManager
 	TrackChangesManager
+	PdfManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		# Don't freak out if we're already in an apply callback
@@ -52,6 +54,7 @@ define [
 		ide.settingsManager = new SettingsManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
+		ide.pdfManager = new PdfManager(ide, $scope)
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

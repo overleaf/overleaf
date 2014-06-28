@@ -1,0 +1,30 @@
+.pdf-viewer {
+	.full-size;
+	top: 48px;
+	.pdfjs-viewer {
+		.full-size;
+		background-color: @gray-lighter;
+		overflow: scroll;
+		canvas {
+			background: white;
+			box-shadow: black 0px 0px 10px;
+		}
+		.page-container {
+			margin: 10px auto;
+			padding: 0 10px;
+			box-sizing: content-box;
+		}
+	}
+	.progress-thin {
+		position: absolute;
+		top: -2px;
+		height: 3px;
+		left: 0;
+		right: 0;
+		.progress-bar {
+			height: 100%;
+			background-color: @link-color;
+		}
+	}
+}
+				

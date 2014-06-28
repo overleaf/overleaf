@@ -1,12 +1,19 @@
-.toolbar.toolbar-tall
-	a.btn.btn-primary(
-		href
-	)
-		i.fa.fa-refresh
-		|  Recompile
-	a(
-		href
-		tooltip="Logs"
-		tooltip-placement="bottom"
-	)
-		i.fa.fa-file-text-o
+div.full-size(ng-controller="PdfController")
+	.toolbar.toolbar-tall
+		a.btn.btn-primary(
+			href
+		)
+			i.fa.fa-refresh
+			|  Recompile
+		a(
+			href
+			tooltip="Logs"
+			tooltip-placement="bottom"
+		)
+			i.fa.fa-file-text-o
+
+	.pdf-viewer
+		div(
+			pdfjs
+			pdf-src="pdf.url"
+		)
