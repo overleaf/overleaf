@@ -16,4 +16,6 @@ div.full-size(ng-controller="PdfController")
 		div(
 			pdfjs
 			pdf-src="pdf.url"
+			key="project_id"
+			resize-on="layout:main:resize,layout:pdf:resize"
 		)

@@ -26,5 +26,32 @@
 			background-color: @link-color;
 		}
 	}
+	.pdfjs-controls {
+		position: absolute;
+		padding: @line-height-computed / 2;
+		top: 0;
+		left: 0;
+		display: inline-block;
+		.btn-group {
+			transition: opacity 0.5s ease, visibility 0 linear 0.5s;
+			visibility: hidden;
+			opacity: 0;
+		}
+		&:hover, &.flash {
+			.btn-group {
+				transition: none;
+				visibility: visible;
+				opacity: 1;
+			}
+		}
+		i.fa-arrows-h {
+			border-right: 2px solid white;
+			border-left: 2px solid white;
+		}
+		i.fa-arrows-v {
+			border-top: 2px solid white;
+			border-bottom: 2px solid white;
+		}
+	}
 }
 				
