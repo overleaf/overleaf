@@ -58,13 +58,10 @@ define [
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
 
-				scope.$on "layout:resize", () ->
-					console.log "LAYOUT RESIZED"
-					editor.resize()
-
-				$(window).on "resize", () ->
-					console.log "WINDOW RESIZED"
-					editor.resize()
+				if attrs.resizeOn?
+					for event in attrs.resizeOn.split(",")
+						scope.$on event, () ->
+							editor.resize()
 
 				editor.on "changeSelection", () ->
 					cursor = editor.getCursorPosition()

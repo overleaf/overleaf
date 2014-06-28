@@ -2,7 +2,7 @@
 	height: 40px;
 	border-bottom: 1px solid @toolbar-border-color;
 
-	a {
+	a:not(.btn) {
 		display: inline-block;
 		color: @gray-light;
 		padding: 6px 12px 8px;
@@ -58,6 +58,17 @@
 				margin-left: 0;
 				margin-right: 6px;
 			}
+		}
+	}
+
+	&.toolbar-tall {
+		height: 48px;
+		a.btn {
+			margin-left: 12px;
+		}
+		a:not(.btn) {
+			padding-top: 10px;
+			margin-left: 4px;
 		}
 	}
 }
