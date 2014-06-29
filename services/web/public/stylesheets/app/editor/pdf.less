@@ -1,6 +1,9 @@
-.pdf-viewer {
+.pdf-viewer, .logs {
 	.full-size;
-	top: 48px;
+	top: 58px;
+}
+
+.pdf-viewer {
 	.pdfjs-viewer {
 		.full-size;
 		background-color: @gray-lighter;
@@ -51,6 +54,38 @@
 		i.fa-arrows-v {
 			border-top: 2px solid white;
 			border-bottom: 2px solid white;
+		}
+	}
+}
+
+.log-btn {
+	.label {
+		margin-left: .4em;
+		padding: .2em .4em .3em;
+		vertical-align: text-bottom;
+		line-height: inherit;
+	}
+}
+
+.logs {
+	padding: @line-height-computed / 2;
+	overflow: auto;
+	.alert {
+		font-size: 0.9rem;
+		margin-bottom: @line-height-computed / 2;
+		.line-no {
+			float: right;
+			color: @gray;
+			font-weight: 700;
+		}
+		.entry-message {
+			font-weight: 700;
+			//font-family: @font-family-monospace;
+		}
+		.entry-content {
+			white-space: pre-wrap;
+			font-size: 0.8rem;
+			//font-family: @font-family-monospace;
 		}
 	}
 }

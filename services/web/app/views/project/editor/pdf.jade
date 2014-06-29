@@ -1,21 +1,57 @@
 div.full-size(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		a.btn.btn-primary(
-			href
+		a.btn.btn-info(
+			href,
+			ng-disabled="pdf.compiling",
+			ng-click="recompile()"
 		)
-			i.fa.fa-refresh
-			|  Recompile
-		a(
+			i.fa.fa-refresh(
+				ng-class="{'fa-spin': pdf.compiling }"
+			)
+			| &nbsp;&nbsp;
+			span(ng-show="!pdf.compiling") Recompile
+			span(ng-show="pdf.compiling") Compiling...
+		a.log-btn(
 			href
+			ng-click="toggleLogs()"
+			ng-class="{ 'active': pdf.view == 'logs' }"
 			tooltip="Logs"
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file-text-o
+			span.label.label-danger(ng-show="pdf.logEntries.errors.length > 0")
+				| {{ pdf.logEntries.errors.length }}
+			span.label.label-warning(ng-show="pdf.logEntries.warnings.length > 0")
+				| {{ pdf.logEntries.warnings.length }}
 
-	.pdf-viewer
-		div(
+	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf'")
+		div(	
 			pdfjs
 			pdf-src="pdf.url"
 			key="project_id"
 			resize-on="layout:main:resize,layout:pdf:resize"
 		)
+
+	.logs(ng-show="pdf.view == 'logs'")
+		div(ng-repeat="entry in pdf.logEntries.all")
+			.alert(
+				ng-class="{\
+					'alert-danger':  entry.level == 'error',\
+					'alert-warning': entry.level == 'warning',\
+					'alert-info':    entry.level == 'typesetting'\
+				}"
+			)
+				span.line-no
+					span(ng-show="entry.file") {{ entry.file }}
+					span(ng-show="entry.line") , line {{ entry.line }}
+				p.entry-message(ng-show="entry.message") {{ entry.message }}
+				p.entry-content(ng-show="entry.content") {{ entry.content }}
+
+		p
+			.pull-right
+				a.btn.btn-default.btn-sm(href) Other logs &amp; files
+				| &nbsp;
+				a.btn.btn-default.btn-sm(href, tooltip="Clear cached files", tooltip-placement="top")
+					i.fa.fa-trash-o
+			a.btn.btn-info.btn-sm(href) View Raw Logs
+

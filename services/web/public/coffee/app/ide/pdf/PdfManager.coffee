@@ -4,3 +4,5 @@ define [
 ], () ->
 	class PdfManager
 		constructor: (@ide, @$scope) ->
+
+		# All the logic actually happens in the controller
