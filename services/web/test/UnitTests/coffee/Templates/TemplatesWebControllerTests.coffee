@@ -18,7 +18,8 @@ describe "TemplatesWebController", ->
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 		@stubbedApiData = 
-			templates:[{_id:"12312321"}]
+			template:{_id:"12312321", name:"bob"}
+			tag: {name:"tag name"}
 
 		@TemplatesWebController._getDataFromTemplatesApi = sinon.stub().callsArgWith(1, null, @stubbedApiData)
 
