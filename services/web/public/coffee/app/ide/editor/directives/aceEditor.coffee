@@ -65,12 +65,6 @@ define [
 						scope.$on event, () ->
 							editor.resize()
 
-				editor.on "changeSelection", () ->
-					cursor = editor.getCursorPosition()
-					scope.$apply () ->
-						if scope.cursorPosition?
-							scope.cursorPosition = cursor
-
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
 

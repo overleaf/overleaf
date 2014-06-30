@@ -37,8 +37,9 @@ define [
 				do (annotation) =>
 					colorScheme = @_getColorScheme(annotation.hue)
 					if annotation.cursor?
+						console.log "DRAWING CURSOR", annotation
 						@labels.push {
-							text: annotation.text
+							text: annotation.label
 							range: new Range(
 								annotation.cursor.row, annotation.cursor.column,
 								annotation.cursor.row, annotation.cursor.column + 1
