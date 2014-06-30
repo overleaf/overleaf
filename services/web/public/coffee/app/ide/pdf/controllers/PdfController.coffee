@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
-	App.controller "PdfController", ["$scope", "$http", "ide", ($scope, $http, ide) ->
+	App.controller "PdfController", ["$scope", "$http", "ide", "$modal", ($scope, $http, ide, $modal) ->
 		$scope.pdf =
 			url: null # Pdf Url
 			error: false # Server error
@@ -100,6 +100,14 @@ define [
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
 
+		$scope.clearCache = () ->
+			$http {
+				url: "/project/#{$scope.project_id}/output"
+				method: "DELETE"
+				headers:
+					"X-Csrf-Token": window.csrfToken
+			}
+
 		$scope.toggleLogs = () ->
 			if !$scope.pdf.view? or $scope.pdf.view == "pdf"
 				$scope.pdf.view = "logs"
@@ -114,4 +122,27 @@ define [
 
 		$scope.openOutputFile = (file) ->
 			window.open("/project/#{$scope.project_id}/output/#{file.path}")
+
+		$scope.openClearCacheModal = () ->
+			modalInstance = $modal.open(
+				templateUrl: "clearCacheModalTemplate"
+				controller: "ClearCacheModalController"
+				scope: $scope
+			)
+	]
+
+	App.controller 'ClearCacheModalController', ["$scope", "$modalInstance", ($scope, $modalInstance) ->
+		$scope.state =
+			inflight: false
+
+		$scope.clear = () ->
+			$scope.state.inflight = true
+			$scope
+				.clearCache()
+				.then () ->
+					$scope.state.inflight = false
+					$modalInstance.close()
+
+		$scope.cancel = () ->
+			$modalInstance.dismiss('cancel')
 	]

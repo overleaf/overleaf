@@ -79,7 +79,8 @@ div.full-size(ng-controller="PdfController")
 					href,
 					tooltip="Clear cached files",
 					tooltip-placement="top",
-					tooltip-append-to-body="true"
+					tooltip-append-to-body="true",
+					ng-click="openClearCacheModal()"
 				)
 					i.fa.fa-trash-o
 				| &nbsp;
@@ -102,3 +103,22 @@ div.full-size(ng-controller="PdfController")
 				span(ng-show="pdf.showRawLog") Hide Raw Logs
 
 		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
+
+script(type='text/ng-template', id='clearCacheModalTemplate')
+	.modal-header
+		h3 Clear cache?
+	.modal-body
+		p This will clear all hidden LaTeX files (.aux, .bbl, etc) from our compile server. 
+			| You generally don't need to do this unless you're having trouble with references. 
+		p Your project files will not be deleted or changed.
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+			ng-disabled="state.inflight"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="clear()"
+			ng-disabled="state.inflight"
+		) 
+			span(ng-show="!state.inflight") Clear cache
+			span(ng-show="state.inflight") Clearing...
