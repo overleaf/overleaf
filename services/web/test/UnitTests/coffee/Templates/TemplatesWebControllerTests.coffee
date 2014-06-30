@@ -16,7 +16,9 @@ describe "TemplatesWebController", ->
 					url:"templates.sharelatex.env"
 		@TemplatesWebController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				err:->
 		@stubbedApiData = 
 			template:{_id:"12312321", name:"bob"}
 			tag: {name:"tag name"}
