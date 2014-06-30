@@ -49,6 +49,8 @@ define [
 					@ide.showGenericServerErrorMessage()
 					return
 
+				@$scope.$broadcast "doc:opened"
+
 				@$scope.$apply () =>
 					@$scope.editor.opening = false
 					@$scope.editor.sharejs_doc = sharejs_doc
@@ -93,3 +95,9 @@ define [
 
 		lastUpdated: () ->
 			@$scope.editor.last_updated
+
+		getCurrentDocValue: () ->
+			@$scope.editor.sharejs_doc?.getSnapshot()
+
+		getCurrentDocId: () ->
+			@$scope.editor.open_doc_id

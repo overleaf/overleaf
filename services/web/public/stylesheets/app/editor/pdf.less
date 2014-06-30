@@ -1,6 +1,16 @@
-.pdf-viewer, .logs {
+.pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
 	.full-size;
 	top: 58px;
+}
+
+.pdf-logs, .pdf-errors, .pdf-uncompiled {
+	padding: @line-height-computed / 2;
+}
+
+.pdf-uncompiled {
+	.fa {
+		color: @blue;
+	}
 }
 
 .pdf-viewer {
@@ -59,16 +69,22 @@
 }
 
 .log-btn {
+	position: relative;
 	.label {
-		margin-left: .4em;
-		padding: .2em .4em .3em;
-		vertical-align: text-bottom;
-		line-height: inherit;
+		position: absolute;
+		top: 0;
+		right: 0;
+		padding: .15em .6em .2em;
+		font-size: 60%;
+	}
+	&.active, &:active {
+		.label {
+			display: none;
+		}
 	}
 }
 
-.logs {
-	padding: @line-height-computed / 2;
+.pdf-logs {
 	overflow: auto;
 	.alert {
 		font-size: 0.9rem;
