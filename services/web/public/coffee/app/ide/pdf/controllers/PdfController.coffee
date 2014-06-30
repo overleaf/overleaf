@@ -3,18 +3,6 @@ define [
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
 	App.controller "PdfController", ["$scope", "$http", "ide", "$modal", ($scope, $http, ide, $modal) ->
-		$scope.pdf =
-			url: null # Pdf Url
-			error: false # Server error
-			timeout: false # Server timed out
-			failure: false # PDF failed to compile
-			compiling: false
-			uncompiled: true
-			logEntries: []
-			rawLog: ""
-			view: null # 'pdf' 'logs'
-			showRawLog: false
-
 		autoCompile = true
 		$scope.$on "doc:opened", () ->
 			return if !autoCompile
@@ -68,9 +56,21 @@ define [
 					logEntries = LogParser.parse(log, ignoreDuplicates: true)
 					$scope.pdf.logEntries = logEntries
 					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
+
+					$scope.pdf.logEntryAnnotations = {}
 					for entry in logEntries.all
 						entry.file = entry.file.replace(/^(.*)\/compiles\/[0-9a-f]{24}\/(\.\/)?/, "")
 						entry.file = entry.file.replace(/^\/compile\//, "")
+
+						entity = ide.fileTreeManager.findEntityByPath(entry.file)
+						if entity?
+							$scope.pdf.logEntryAnnotations[entity.id] ||= []
+							$scope.pdf.logEntryAnnotations[entity.id].push {
+								row: entry.line - 1
+								type: if entry.level == "error" then "error" else "warning"
+								text: entry.message
+							}
+
 				.error () ->
 					$scope.pdf.logEntries = []
 					$scope.pdf.rawLog = ""
@@ -129,6 +129,16 @@ define [
 				controller: "ClearCacheModalController"
 				scope: $scope
 			)
+	]
+
+	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
+		$scope.openInEditor = (entry) ->
+			console.log "OPENING", entry.file, entry.line
+			entity = ide.fileTreeManager.findEntityByPath(entry.file)
+			return if entity.type != "doc"
+			if entry.line?
+				line = entry.line - 1
+			ide.editorManager.openDoc(entity, gotoLine: line)
 	]
 
 	App.controller 'ClearCacheModalController', ["$scope", "$modalInstance", ($scope, $modalInstance) ->

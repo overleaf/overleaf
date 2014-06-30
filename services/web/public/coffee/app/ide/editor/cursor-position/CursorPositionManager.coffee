@@ -11,6 +11,13 @@ define [], () ->
 
 				@gotoStoredPosition()
 
+			@$scope.$watch "gotoLine", (value) =>
+				console.log "Going to line", value
+				if value?
+					setTimeout () =>
+						@gotoLine(value)
+					, 0
+
 		onScrollTopChange: (event) ->
 			if !@ignoreCursorPositionChanges and doc_id = @$scope.sharejsDoc?.doc_id
 				docPosition = $.localStorage("doc.position.#{doc_id}") || {}
@@ -31,3 +38,6 @@ define [], () ->
 			@editor.moveCursorToPosition(pos.cursorPosition or {row: 0, column: 0})
 			@editor.getSession().setScrollTop(pos.scrollTop or 0)
 			delete @ignoreCursorPositionChanges
+
+		gotoLine: (line) ->
+			@editor.moveCursorToPosition({row: line, column: 0})

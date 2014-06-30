@@ -59,13 +59,14 @@ div.full-size(ng-controller="PdfController")
 			strong Compile Error. 
 			span Sorry, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
 
-		div(ng-repeat="entry in pdf.logEntries.all")
+		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
 			.alert(
 				ng-class="{\
 					'alert-danger':  entry.level == 'error',\
 					'alert-warning': entry.level == 'warning',\
 					'alert-info':    entry.level == 'typesetting'\
 				}"
+				ng-click="openInEditor(entry)"
 			)
 				span.line-no
 					span(ng-show="entry.file") {{ entry.file }}

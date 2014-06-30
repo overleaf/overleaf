@@ -4,5 +4,15 @@ define [
 ], () ->
 	class PdfManager
 		constructor: (@ide, @$scope) ->
-
-		# All the logic actually happens in the controller
+			@$scope.pdf =
+				url: null # Pdf Url
+				error: false # Server error
+				timeout: false # Server timed out
+				failure: false # PDF failed to compile
+				compiling: false
+				uncompiled: true
+				logEntries: []
+				logEntryAnnotations: {}
+				rawLog: ""
+				view: null # 'pdf' 'logs'
+				showRawLog: false
