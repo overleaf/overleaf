@@ -16,6 +16,8 @@ define [], () ->
 				if value?
 					setTimeout () =>
 						@gotoLine(value)
+						@$scope.$apply () =>
+							@$scope.gotoLine = null
 					, 0
 
 		onScrollTopChange: (event) ->
@@ -40,4 +42,5 @@ define [], () ->
 			delete @ignoreCursorPositionChanges
 
 		gotoLine: (line) ->
-			@editor.moveCursorToPosition({row: line, column: 0})
+			@editor.gotoLine(line)
+			@editor.focus()

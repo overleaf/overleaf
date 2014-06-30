@@ -137,7 +137,7 @@ define [
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if entity.type != "doc"
 			if entry.line?
-				line = entry.line - 1
+				line = entry.line
 			ide.editorManager.openDoc(entity, gotoLine: line)
 	]
 
