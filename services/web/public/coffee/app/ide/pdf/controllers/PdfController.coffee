@@ -5,17 +5,18 @@ define [
 	App.controller "PdfController", ["$scope", "$http", "ide", ($scope, $http, ide) ->
 		$scope.pdf =
 			url: null # Pdf Url
-			view: null # 'pdf' 'logs'
 			error: false # Server error
 			timeout: false # Server timed out
 			failure: false # PDF failed to compile
 			compiling: false
 			uncompiled: true
 			logEntries: []
+			rawLog: ""
+			view: null # 'pdf' 'logs'
+			showRawLog: false
 
 		autoCompile = true
 		$scope.$on "doc:opened", () ->
-			console.log "DOC OPENED"
 			return if !autoCompile
 			autoCompile = false
 			$scope.recompile(isAutoCompile: true)
@@ -49,9 +50,21 @@ define [
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
 				fetchLogs()
 
+			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
+			$scope.pdf.outputFiles = []
+			for file in response.outputFiles
+				if IGNORE_FILES.indexOf(file.path) == -1
+					# Turn 'output.blg' into 'blg file'.
+					if file.path.match(/^output\./)
+						file.name = "#{file.path.replace(/^output\./, "")} file"
+					else
+						file.name = file.path
+					$scope.pdf.outputFiles.push file
+
 		fetchLogs = () ->
 			$http.get "/project/#{$scope.project_id}/output/output.log"
 				.success (log) ->
+					$scope.pdf.rawLog = log
 					logEntries = LogParser.parse(log, ignoreDuplicates: true)
 					$scope.pdf.logEntries = logEntries
 					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
@@ -60,6 +73,7 @@ define [
 						entry.file = entry.file.replace(/^\/compile\//, "")
 				.error () ->
 					$scope.pdf.logEntries = []
+					$scope.pdf.rawLog = ""
 
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
@@ -94,4 +108,10 @@ define [
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
+
+		$scope.toggleRawLog = () ->
+			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
+
+		$scope.openOutputFile = (file) ->
+			window.open("/project/#{$scope.project_id}/output/#{file.path}")
 	]

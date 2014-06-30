@@ -75,9 +75,30 @@ div.full-size(ng-controller="PdfController")
 
 		p
 			.pull-right
-				a.btn.btn-default.btn-sm(href) Other logs &amp; files
-				| &nbsp;
-				a.btn.btn-default.btn-sm(href, tooltip="Clear cached files", tooltip-placement="top")
+				a.btn.btn-default.btn-sm(
+					href,
+					tooltip="Clear cached files",
+					tooltip-placement="top",
+					tooltip-append-to-body="true"
+				)
 					i.fa.fa-trash-o
-			a.btn.btn-info.btn-sm(href) View Raw Logs
+				| &nbsp;
+				div.dropdown(style="display: inline-block;")
+					a.btn.btn-default.btn-sm(
+						href
+						data-toggle="dropdown"
+					)
+						| Other logs &amp; files 
+						span.caret
+					ul.dropdown-menu.dropdown-menu-right
+						li(ng-repeat="file in pdf.outputFiles")
+							a(
+								href="/project/{{project_id}}/output/{{file.path}}"
+								target="_blank"
+								ng-click="openOutputFile(file)"
+							) {{ file.name }}
+			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
+				span(ng-show="!pdf.showRawLog") View Raw Logs
+				span(ng-show="pdf.showRawLog") Hide Raw Logs
 
+		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
