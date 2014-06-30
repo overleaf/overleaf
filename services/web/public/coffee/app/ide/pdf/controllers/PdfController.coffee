@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
-	App.controller "PdfController", ["$scope", "$http", "ide", "$modal", ($scope, $http, ide, $modal) ->
+	App.controller "PdfController", ["$scope", "$http", "ide", "$modal", "synctex", ($scope, $http, ide, $modal, synctex) ->
 		autoCompile = true
 		$scope.$on "doc:opened", () ->
 			return if !autoCompile
@@ -59,8 +59,7 @@ define [
 
 					$scope.pdf.logEntryAnnotations = {}
 					for entry in logEntries.all
-						entry.file = entry.file.replace(/^(.*)\/compiles\/[0-9a-f]{24}\/(\.\/)?/, "")
-						entry.file = entry.file.replace(/^\/compile\//, "")
+						entry.file = normalizeFilePath(entry.file)
 
 						entity = ide.fileTreeManager.findEntityByPath(entry.file)
 						if entity?
@@ -83,6 +82,16 @@ define [
 				if match and !match[1].match /%/
 					return ide.editorManager.getCurrentDocId()
 			return null
+
+		normalizeFilePath = (path) ->
+			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}\/(\.\/)?/, "")
+			path = path.replace(/^\/compile\//, "")
+
+			rootDocDirname = ide.fileTreeManager.getRootDocDirname()
+			if rootDocDirname?
+				path = path.replace(/^\.\//, rootDocDirname)
+
+			return path
 
 		$scope.recompile = (options = {}) ->
 			console.log "Recompiling", options
@@ -129,13 +138,115 @@ define [
 				controller: "ClearCacheModalController"
 				scope: $scope
 			)
+
+		$scope.syncToCode = (position) ->
+			console.log "SYNCING VIA DBL CLICK", position
+			synctex
+				.syncToCode(position)
+				.then (data) ->
+					{doc, line} = data
+					ide.editorManager.openDoc(doc, gotoLine: line)
+
+	]
+
+	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
+		synctex =
+			syncToPdf: (cursorPosition) ->
+				deferred = $q.defer()
+
+				doc_id = ide.editorManager.getCurrentDocId()
+				if !doc_id?
+					deferred.reject()
+					return deferred.promise()
+				doc = ide.fileTreeManager.findEntityById(doc_id)
+				if !doc?
+					deferred.reject()
+					return deferred.promise()
+				path = ide.fileTreeManager.getEntityPath(doc)
+				if !path?
+					deferred.reject()
+					return deferred.promise()
+				
+				# If the root file is folder/main.tex, then synctex sees the
+				# path as folder/./main.tex
+				rootDocDirname = ide.fileTreeManager.getRootDocDirname()
+				if rootDocDirname? and rootDocDirname != ""
+					path = path.replace(RegExp("^#{rootDocDirname}"), "#{rootDocDirname}/.")
+
+				{row, column} = cursorPosition
+
+				$http({
+						url: "/project/#{ide.project_id}/sync/code", 
+						method: "GET",
+						params: {
+							file: path
+							line: row + 1
+							column: column
+						}
+					})
+					.success (data) ->
+						console.log "SYNCTEX RESPONSE", data
+						deferred.resolve(data.pdf or [])
+					.error (error) ->
+						deferred.reject(error)
+
+				return deferred.promise
+
+			syncToCode: (position, options = {}) ->
+				deferred = $q.defer()
+				if !position?
+					deferred.reject()
+					return deferred.promise()
+
+				# It's not clear exactly where we should sync to if it wasn't directly
+				# clicked on, but a little bit down from the very top seems best.
+				if options.includeVisualOffset
+					position.offset.top = position.offset.top + 80
+
+				$http({
+						url: "/project/#{ide.project_id}/sync/pdf", 
+						method: "GET",
+						params: {
+							page: position.page + 1
+							h: position.offset.left.toFixed(2)
+							v: position.offset.top.toFixed(2)
+						}
+					})
+					.success (data) ->
+						console.log "SYNCTEX RESPONSE", data
+						if data.code? and data.code.length > 0
+							doc = ide.fileTreeManager.findEntityByPath(data.code[0].file)
+							return if !doc?
+							deferred.resolve({doc: doc, line: data.code[0].line})
+					.error (error) ->
+						deferred.reject(error)
+
+				return deferred.promise
+
+		return synctex
+	]
+
+	App.controller "PdfSynctexController", ["$scope", "synctex", "ide", ($scope, synctex, ide) ->
+		$scope.syncToPdf = () ->
+			synctex
+				.syncToPdf($scope.editor.cursorPosition)
+				.then (highlights) ->
+					$scope.pdf.highlights = highlights
+
+		$scope.syncToCode = () ->
+			synctex
+				.syncToCode($scope.pdf.position, includeVisualOffset: true)
+				.then (data) ->
+					{doc, line} = data
+					console.log "OPENING DOC", doc, line
+					ide.editorManager.openDoc(doc, gotoLine: line)
 	]
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
 		$scope.openInEditor = (entry) ->
 			console.log "OPENING", entry.file, entry.line
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
-			return if entity.type != "doc"
+			return if !entity? or entity.type != "doc"
 			if entry.line?
 				line = entry.line
 			ide.editorManager.openDoc(entity, gotoLine: line)

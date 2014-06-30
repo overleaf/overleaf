@@ -16,3 +16,5 @@ define [
 				rawLog: ""
 				view: null # 'pdf' 'logs'
 				showRawLog: false
+				highlights: []
+				position: null

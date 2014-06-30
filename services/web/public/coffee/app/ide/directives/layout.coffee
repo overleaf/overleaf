@@ -12,6 +12,7 @@ define [
 					onresize: () =>
 						console.log "Triggering", "layout:#{name}:resize", name
 						scope.$broadcast "layout:#{name}:resize"
+						repositionControls()
 					#maskIframesOnResize: true
 
 				# Restore previously recorded state
@@ -28,4 +29,13 @@ define [
 				# Save state when exiting
 				$(window).unload () ->
 					$.localStorage("layout.#{name}", element.layout().readState())
+
+				repositionControls = () ->
+					state = element.layout().readState()
+					if state.east?
+						element.find(".ui-layout-resizer-controls").css({
+							position: "absolute"
+							right: state.east.size
+							"z-index": 10
+						})
 		}

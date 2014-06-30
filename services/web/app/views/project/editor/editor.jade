@@ -28,3 +28,23 @@ div.full-size(
 
 	.ui-layout-east
 		include ./pdf
+
+	.ui-layout-resizer-controls.synctex-controls(
+		ng-show="!!pdf.url"
+		ng-controller="PdfSynctexController"
+	)
+		a.btn.btn-default.btn-xs(
+			tooltip="Go to code location in PDF"
+			tooltip-placement="right"
+			tooltip-append-to-body="true"
+			ng-click="syncToPdf()"
+		)
+			i.fa.fa-long-arrow-right
+		br
+		a.btn.btn-default.btn-xs(
+			tooltip-html-unsafe="Go to PDF location in code<br/>(or double click PDF)"
+			tooltip-placement="right"
+			tooltip-append-to-body="true"
+			ng-click="syncToCode()"
+		)
+			i.fa.fa-long-arrow-left

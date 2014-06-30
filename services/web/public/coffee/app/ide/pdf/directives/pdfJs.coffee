@@ -28,12 +28,16 @@ define [
 		return {
 			scope: {
 				"pdfSrc": "="
+				"highlights": "="
+				"position": "="
+				"dblClickCallback": "="
 			}
 			link: (scope, element, attrs) ->
 				pdfListView = new PDFListView element.find(".pdfjs-viewer")[0],
 					textLayerBuilder: TextLayerBuilder
 					annotationsLayerBuilder: AnnotationsLayerBuilder
 					highlightsLayerBuilder: HighlightsLayerBuilder
+					ondblclick: (e) -> onDoubleClick(e)
 					logLevel: PDFListView.Logger.DEBUG
 				pdfListView.listView.pageWidthOffset = 20
 				pdfListView.listView.pageHeightOffset = 20
@@ -58,6 +62,8 @@ define [
 					if (position = $.localStorage("pdf.position.#{attrs.key}"))
 						pdfListView.setPdfPosition(position)
 
+					scope.position = pdfListView.getPdfPosition(true)
+
 					$(window).unload () =>
 						$.localStorage "pdf.scale", {
 							scaleMode: pdfListView.getScaleMode()
@@ -69,7 +75,14 @@ define [
 					scope.flashControls = true
 					$timeout () ->
 						scope.flashControls = false
-					, 1000	
+					, 1000
+
+				element.find(".pdfjs-viewer").scroll () ->
+					console.log "UPDATING POSITION", pdfListView.getPdfPosition(true)
+					scope.position = pdfListView.getPdfPosition(true)
+
+				onDoubleClick = (e) ->
+					scope.dblClickCallback?(page: e.page, offset: { top: e.y, left: e.x })
 
 				scope.$watch "pdfSrc", (url) ->
 					if url
@@ -84,6 +97,35 @@ define [
 									delete scope.progress
 									initializePosition()
 									flashControls()
+
+				scope.$watch "highlights", (areas) ->
+					console.log "UPDATING HIGHLIGHTS", areas
+					return if !areas?
+					highlights = for area in areas or []
+						{
+							page: area.page - 1
+							highlight:
+								left: area.h
+								top: area.v
+								height: area.height
+								width: area.width
+						}
+
+					if highlights.length > 0
+						first = highlights[0]
+						pdfListView.setPdfPosition({
+							page: first.page
+							offset:
+								left: first.highlight.left
+								top: first.highlight.top - 80
+						}, true)
+
+					pdfListView.clearHighlights()
+					pdfListView.setHighlights(highlights, true)
+					
+					setTimeout () =>
+						pdfListView.clearHighlights()
+					, 1000
 
 				scope.fitToHeight = () ->
 					pdfListView.setToFitHeight()

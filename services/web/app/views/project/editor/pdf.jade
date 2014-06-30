@@ -33,6 +33,9 @@ div.full-size(ng-controller="PdfController")
 			pdf-src="pdf.url"
 			key="project_id"
 			resize-on="layout:main:resize,layout:pdf:resize"
+			highlights="pdf.highlights"
+			position="pdf.position"
+			dbl-click-callback="syncToCode"
 		)
 
 	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
