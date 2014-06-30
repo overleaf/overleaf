@@ -16,6 +16,7 @@ UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
+TemplatesRouter = require('./Features/Templates/TemplatesRouter')
 TemplatesController = require('./Features/Templates/TemplatesController')
 TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
@@ -60,6 +61,7 @@ module.exports = class Router
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
+		TemplatesRouter.apply(app)
 
 		if Settings.enableSubscriptions
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus

@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.page-header
+					h2 
+						a(href=tag.tagPagePath) #{tag.name}
+
+					-each template in templates
+						a(href=template.templatePagePath || template.canonicalUrl) 
+							.span3
+								.template-thumbnail.thumbnail
+									img(src=template.thumbnailUrl)
+									h3.txt-middle #{template.name}

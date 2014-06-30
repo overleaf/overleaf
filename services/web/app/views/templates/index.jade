@@ -1,0 +1,46 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				#searchArea(ng-app="templatesSearchApp").span12
+					div(ng-controller="SearchController")
+						.row-fluid
+							.span6.offset3.search-field
+								i.icon-search
+								input(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search")#searchField.span12
+						ul.unstyled
+							li(ng-repeat='hit in hits')
+								.thumbnail.searchResult
+									.row-fluid
+										a(ng-href='{{hit.url}}')
+											.span3
+												img(ng-src='{{hit.image_url}}')
+											.span9
+												h2(ng-bind-html='hit.name')
+												p(ng-bind-html='hit.description')
+
+
+				.row
+					-each tag in tags
+						-if(tag.totalNumberOfTemplates > 0)
+							.page-header.span12
+								h2 
+									a(href=tag.tagPagePath) #{tag.name}
+							.span12
+								.row-fluid
+									-each template in tag.exampleTemplates
+										.span3
+											a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl) 
+												.template-thumbnail.thumbnail
+													img(src=template.thumbnailUrl)
+													h3.txt-middle #{template.name}
+
+								-if(tag.totalNumberOfTemplates > 4)
+									.row-fluid
+										.span6.offset3.more-templates
+											a(href=tag.tagPagePath) View all #{tag.totalNumberOfTemplates} #{tag.name} templates
+
+
+
