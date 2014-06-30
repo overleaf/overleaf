@@ -89,7 +89,7 @@ define [
 
 			rootDocDirname = ide.fileTreeManager.getRootDocDirname()
 			if rootDocDirname?
-				path = path.replace(/^\.\//, rootDocDirname)
+				path = path.replace(/^\.\//, rootDocDirname + "/")
 
 			return path
 
