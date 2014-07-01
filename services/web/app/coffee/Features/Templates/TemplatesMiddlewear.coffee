@@ -19,5 +19,5 @@ module.exports =
 		checkForHexRegExp.test(tag_or_id)
 
 	insert_templates_user_id: (req, res, next)->
-		req.params.user_id = settings.templates_user_id
+		req.params.user_id = settings.apis.templates_api.user_id
 		next()

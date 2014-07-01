@@ -90,6 +90,9 @@ module.exports =
 			url: "http://localhost:3010"
 		templates:
 			port: 3007
+			user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
+			cdnDomain: "https://d340ybc4pnuh67.cloudfront.net"
+			indexName:"templates-development"
 		blog:
 			port: 3008
 		filestore:
@@ -261,3 +264,11 @@ module.exports =
 				url: "/logout"
 			}]
 		}]
+
+
+	algolia:
+		appId:"SK53GL4JLY"
+		secret:"75dc5e65794cd47eb7f725e6bb5075be"
+	
+
+
