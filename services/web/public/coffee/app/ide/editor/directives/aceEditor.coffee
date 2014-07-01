@@ -42,7 +42,9 @@ define [
 					else
 						@$originalApply(fn);
 
-				window.editor = editor = Ace.edit(element.find(".ace-editor-body")[0])
+				editor = Ace.edit(element.find(".ace-editor-body")[0])
+				window.editors ||= []
+				window.editors.push editor
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				spellCheckManager     = new SpellCheckManager(scope, editor, element)
