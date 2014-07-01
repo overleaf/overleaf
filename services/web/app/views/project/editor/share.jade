@@ -17,10 +17,10 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="openMakePublicModal()"
 					) Make Public
 			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
-				.col-md-9
+				.col-md-12.text-center
 					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") This project is public and can be edited by anyone with the URL.
 					strong(ng-if="project.publicAccesLevel == 'readOnly'") This project is public and can be viewed by anyone with the URL.
-				.col-md-3.text-right
+					| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakePrivateModal()"
