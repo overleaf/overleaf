@@ -50,7 +50,10 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							) Share
 				div.text-center(ng-hide="canAddCollaborators")
 					p You need to upgrade your account to add more collaborators.
-					a.btn.btn-info(href) Start Free Trial
+					p
+						a.btn.btn-info(href, ng-click="startFreeTrial()") Start Free Trial
+					p.small(ng-show="state.startedFreeTrial")
+						| Please refresh this page after starting your free trial.
 
 	.modal-footer
 		.modal-footer-left

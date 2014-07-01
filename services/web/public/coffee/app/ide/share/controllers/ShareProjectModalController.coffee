@@ -9,6 +9,7 @@ define [
 		$scope.state = {
 			error: null
 			inflight: false
+			startedFreeTrial: false
 		}
 
 		$modalInstance.opened.then () ->
@@ -51,6 +52,11 @@ define [
 				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
+
+		$scope.startFreeTrial = () ->
+			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', "projectMembers")
+			window.open("/user/subscription/plans")
+			$scope.state.startedFreeTrial = true
 
 		$scope.done = () ->
 			$modalInstance.close()
