@@ -296,6 +296,7 @@ describe "EditorController", ->
 			@email = "Jane.Doe@example.com"
 			@priveleges = "readOnly"
 			@addedUser = { _id: "added-user" }
+			@ProjectEditorHandler.buildUserModelView = sinon.stub().returns(@addedUser)
 			@CollaboratorsHandler.addUserToProject = sinon.stub().callsArgWith(3, null, @addedUser)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@callback = sinon.stub()
@@ -314,9 +315,9 @@ describe "EditorController", ->
 					@EditorRealTimeController.emitToRoom.calledWith(@project_id, "userAddedToProject", @addedUser).should.equal true
 					done()
 
-			it "should return true to the callback", (done)->
+			it "should return the user to the callback", (done)->
 				@EditorController.addUserToProject @project_id, @email, @priveleges, (err, result)=>
-					result.should.equal true
+					result.should.equal @addedUser
 					done()
 
 
