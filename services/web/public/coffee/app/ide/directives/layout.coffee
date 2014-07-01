@@ -10,10 +10,15 @@ define [
 					spacing_open: 24
 					spacing_closed: 24
 					onresize: () =>
-						console.log "Triggering", "layout:#{name}:resize", name
-						scope.$broadcast "layout:#{name}:resize"
-						repositionControls()
-					#maskIframesOnResize: true
+						onResize()
+					maskIframesOnResize: scope.$eval(
+						attrs.maskIframesOnResize or "false"
+					)
+
+				onResize = () ->
+					state = element.layout().readState()
+					scope.$broadcast "layout:#{name}:resize", state
+					repositionControls()
 
 				# Restore previously recorded state
 				if (state = $.localStorage("layout.#{name}"))?

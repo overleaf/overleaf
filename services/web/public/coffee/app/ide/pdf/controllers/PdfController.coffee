@@ -157,15 +157,15 @@ define [
 				doc_id = ide.editorManager.getCurrentDocId()
 				if !doc_id?
 					deferred.reject()
-					return deferred.promise()
+					return deferred.promise
 				doc = ide.fileTreeManager.findEntityById(doc_id)
 				if !doc?
 					deferred.reject()
-					return deferred.promise()
+					return deferred.promise
 				path = ide.fileTreeManager.getEntityPath(doc)
 				if !path?
 					deferred.reject()
-					return deferred.promise()
+					return deferred.promise
 				
 				# If the root file is folder/main.tex, then synctex sees the
 				# path as folder/./main.tex
@@ -185,7 +185,6 @@ define [
 						}
 					})
 					.success (data) ->
-						console.log "SYNCTEX RESPONSE", data
 						deferred.resolve(data.pdf or [])
 					.error (error) ->
 						deferred.reject(error)
@@ -196,7 +195,7 @@ define [
 				deferred = $q.defer()
 				if !position?
 					deferred.reject()
-					return deferred.promise()
+					return deferred.promise
 
 				# It's not clear exactly where we should sync to if it wasn't directly
 				# clicked on, but a little bit down from the very top seems best.
@@ -213,7 +212,6 @@ define [
 						}
 					})
 					.success (data) ->
-						console.log "SYNCTEX RESPONSE", data
 						if data.code? and data.code.length > 0
 							doc = ide.fileTreeManager.findEntityByPath(data.code[0].file)
 							return if !doc?
@@ -227,6 +225,17 @@ define [
 	]
 
 	App.controller "PdfSynctexController", ["$scope", "synctex", "ide", ($scope, synctex, ide) ->
+		$scope.showControls = true
+		$scope.$on "layout:pdf:resize", (event, data) ->
+			console.log "RESIZE DATA", data.east
+			if data.east.initClosed
+				$scope.showControls = false
+			else
+				$scope.showControls = true
+			setTimeout () ->
+				$scope.$digest()
+			, 0
+
 		$scope.syncToPdf = () ->
 			synctex
 				.syncToPdf($scope.editor.cursorPosition)

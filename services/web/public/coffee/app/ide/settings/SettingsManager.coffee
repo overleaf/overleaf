@@ -22,6 +22,10 @@ define [], () ->
 				if autoComplete != oldAutoComplete
 					@saveSettings({autoComplete: autoComplete})
 
+			@$scope.$watch "settings.pdfViewer", (pdfViewer, oldPdfViewer) =>
+				if pdfViewer != oldPdfViewer
+					@saveSettings({pdfViewer: pdfViewer})
+
 			@$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
 				return if @ignoreUpdates
 				if oldLanguage? and language != oldLanguage

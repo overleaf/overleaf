@@ -30,12 +30,17 @@ div.full-size(ng-controller="PdfController")
 	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
 		div(	
 			pdfjs
+			ng-if="settings.pdfViewer == 'pdfjs'"
 			pdf-src="pdf.url"
 			key="project_id"
 			resize-on="layout:main:resize,layout:pdf:resize"
 			highlights="pdf.highlights"
 			position="pdf.position"
 			dbl-click-callback="syncToCode"
+		)
+		iframe(
+			ng-src="{{ pdf.url }}"
+			ng-if="settings.pdfViewer == 'native'"
 		)
 
 	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
