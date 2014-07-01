@@ -3,10 +3,10 @@ define [
 	"ide/file-tree/FileTreeManager"
 	"ide/connection/ConnectionManager"
 	"ide/editor/EditorManager"
-	"ide/settings/SettingsManager"
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
 	"ide/pdf/PdfManager"
+	"ide/settings/index"
 	"ide/share/index"
 	"ide/directives/layout"
 	"ide/services/ide"
@@ -19,7 +19,6 @@ define [
 	FileTreeManager
 	ConnectionManager
 	EditorManager
-	SettingsManager
 	OnlineUsersManager
 	TrackChangesManager
 	PdfManager
@@ -43,6 +42,7 @@ define [
 			view: "editor"
 		}
 		$scope.user = window.user
+		$scope.settings = window.userSettings
 
 		window._ide = ide
 
@@ -52,7 +52,6 @@ define [
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
-		ide.settingsManager = new SettingsManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)

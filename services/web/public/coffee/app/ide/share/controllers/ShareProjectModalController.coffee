@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ["$scope", "$modalInstance", "$timeout", "projectMembers", ($scope, $modalInstance, $timeout, projectMembers) ->
+	App.controller "ShareProjectModalController", ["$scope", "$modalInstance", "$timeout", "projectMembers", "$modal", ($scope, $modalInstance, $timeout, projectMembers, $modal) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			email: ""
@@ -58,6 +58,47 @@ define [
 			window.open("/user/subscription/plans")
 			$scope.state.startedFreeTrial = true
 
+		$scope.openMakePublicModal = () ->
+			$modal.open {
+				templateUrl: "makePublicModalTemplate"
+				controller:  "MakePublicModalController"
+				scope: $scope
+			}
+
+		$scope.openMakePrivateModal = () ->
+			$modal.open {
+				templateUrl: "makePrivateModalTemplate"
+				controller:  "MakePrivateModalController"
+				scope: $scope
+			}
+
 		$scope.done = () ->
 			$modalInstance.close()
+
+		$scope.cancel = () ->
+			$modalInstance.dismiss()
+	]
+
+	App.controller "MakePublicModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
+		$scope.inputs = {
+			privileges: "readAndWrite"
+		}
+
+		$scope.makePublic = () ->
+			$scope.project.publicAccesLevel = $scope.inputs.privileges
+			settings.saveProjectSettings({publicAccessLevel: $scope.inputs.privileges})
+			$modalInstance.close()
+
+		$scope.cancel = () ->
+			$modalInstance.dismiss()
+	]
+
+	App.controller "MakePrivateModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
+		$scope.makePrivate = () ->
+			$scope.project.publicAccesLevel = "private"
+			settings.saveProjectSettings({publicAccessLevel: "private"})
+			$modalInstance.close()
+
+		$scope.cancel = () ->
+			$modalInstance.dismiss()
 	]

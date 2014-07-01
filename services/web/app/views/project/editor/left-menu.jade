@@ -3,7 +3,7 @@ aside#left-menu.full-size(
 	ng-cloak
 )
 	h4 Settings
-	form
+	form(ng-controller="SettingsController")
 		.form-controls
 			label(for="compiler") Compiler
 			select.form-control(

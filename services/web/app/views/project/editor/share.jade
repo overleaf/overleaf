@@ -1,12 +1,29 @@
 script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 Share Project
 	.modal-body.modal-body-share
 		.container-fluid
-			.row.public-access-level
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
 				.col-md-9 This project is private and can only be accessed by the people below.
 				.col-md-3.text-right
-					a(href) Make public
+					a(
+						href
+						ng-click="openMakePublicModal()"
+					) Make Public
+			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
+				.col-md-9
+					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") This project is public and can be edited by anyone with the URL.
+					strong(ng-if="project.publicAccesLevel == 'readOnly'") This project is public and can be viewed by anyone with the URL.
+				.col-md-3.text-right
+					a(
+						href
+						ng-click="openMakePrivateModal()"
+					) Make Private
 			.row.project-member
 				.col-md-8 {{ project.owner.email }}
 				.text-right(
@@ -62,3 +79,46 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		button.btn.btn-primary(
 			ng-click="done()"
 		) Done
+
+script(type="text/ng-template", id="makePublicModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Make project public?
+	.modal-body.modal-body-share
+		p If you make your project public then anyone with the URL will be able to access it.
+		p
+			select.form-control(
+				ng-model="inputs.privileges"
+				name="privileges"
+			)
+				option(value="readAndWrite") Allow public editing
+				option(value="readOnly")     Allow public read only access
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="makePublic()"
+		) Make public
+
+script(type="text/ng-template", id="makePrivateModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Make project private?
+	.modal-body.modal-body-share
+		p If you make your project public then only the people you choose to share it with will have access.
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="makePrivate()"
+		) Make private
