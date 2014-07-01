@@ -3,7 +3,7 @@ define [
 ], () ->
 	Range = require("ace/range").Range
 
-	class AnnotationsManager
+	class HighlightsManager
 		constructor: (@$scope, @editor, @element) ->
 			@markerIds = []
 			@labels = []
@@ -18,7 +18,7 @@ define [
 				text: ""
 			}
 
-			@$scope.$watch "annotations", (value) =>
+			@$scope.$watch "highlights", (value) =>
 				@redrawAnnotations()
 
 			@$scope.$watch "theme", (value) =>
@@ -33,12 +33,13 @@ define [
 			@_clearMarkers()
 			@_clearLabels()
 
-			for annotation in @$scope.annotations or []
+			for annotation in @$scope.highlights or []
 				do (annotation) =>
 					colorScheme = @_getColorScheme(annotation.hue)
 					if annotation.cursor?
+						console.log "DRAWING CURSOR", annotation
 						@labels.push {
-							text: annotation.text
+							text: annotation.label
 							range: new Range(
 								annotation.cursor.row, annotation.cursor.column,
 								annotation.cursor.row, annotation.cursor.column + 1

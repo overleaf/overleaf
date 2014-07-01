@@ -10,9 +10,15 @@ define [
 					spacing_open: 24
 					spacing_closed: 24
 					onresize: () =>
-						console.log "Triggering", "layout:#{name}:resize", name
-						scope.$broadcast "layout:#{name}:resize"
-					#maskIframesOnResize: true
+						onResize()
+					maskIframesOnResize: scope.$eval(
+						attrs.maskIframesOnResize or "false"
+					)
+
+				onResize = () ->
+					state = element.layout().readState()
+					scope.$broadcast "layout:#{name}:resize", state
+					repositionControls()
 
 				# Restore previously recorded state
 				if (state = $.localStorage("layout.#{name}"))?
@@ -28,4 +34,13 @@ define [
 				# Save state when exiting
 				$(window).unload () ->
 					$.localStorage("layout.#{name}", element.layout().readState())
+
+				repositionControls = () ->
+					state = element.layout().readState()
+					if state.east?
+						element.find(".ui-layout-resizer-controls").css({
+							position: "absolute"
+							right: state.east.size
+							"z-index": 10
+						})
 		}

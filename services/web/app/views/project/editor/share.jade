@@ -1,0 +1,125 @@
+script(type='text/ng-template', id='shareProjectModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Share Project
+	.modal-body.modal-body-share
+		.container-fluid
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
+				.col-md-12.text-center
+					| This project is private and can only be accessed by the people below.
+					| &nbsp;&nbsp;
+					a(
+						href
+						ng-click="openMakePublicModal()"
+					) Make Public
+			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
+				.col-md-12.text-center
+					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") This project is public and can be edited by anyone with the URL.
+					strong(ng-if="project.publicAccesLevel == 'readOnly'") This project is public and can be viewed by anyone with the URL.
+					| &nbsp;&nbsp;
+					a(
+						href
+						ng-click="openMakePrivateModal()"
+					) Make Private
+			.row.project-member
+				.col-md-8 {{ project.owner.email }}
+				.text-right(
+					ng-class="{'col-md-3': project.members.length > 0, 'col-md-4': project.members.length == 0}"
+				) Owner
+			.row.project-member(ng-repeat="member in project.members")
+				.col-md-8 {{ member.email }}
+				.col-md-3.text-right
+					span(ng-show="member.privileges == 'readAndWrite'") Can Edit
+					span(ng-show="member.privileges == 'readOnly'") Read Only
+				.col-md-1
+					a(
+						href
+						tooltip="Remove collaborator"
+						tooltip-placement="bottom"
+						ng-click="removeMember(member)"
+					)
+						i.fa.fa-times
+			.row.invite-controls
+				form(ng-show="canAddCollaborators")
+					.small Share with your collaborators
+					.form-group
+						input.form-control(
+							type="email"
+							placeholder="Enter email address..."
+							ng-model="inputs.email"
+							focus-on="open"
+						)
+					.form-group
+						.pull-right
+							select.privileges.form-control(
+								ng-model="inputs.privileges"
+								name="privileges"
+							)
+								option(value="readAndWrite") Can Edit
+								option(value="readOnly") Read Only
+							| &nbsp;&nbsp;
+							button.btn.btn-info(
+								type="submit"
+								ng-click="addMember()"
+							) Share
+				div.text-center(ng-hide="canAddCollaborators")
+					p You need to upgrade your account to add more collaborators.
+					p
+						a.btn.btn-info(href, ng-click="startFreeTrial()") Start Free Trial
+					p.small(ng-show="state.startedFreeTrial")
+						| Please refresh this page after starting your free trial.
+
+	.modal-footer
+		.modal-footer-left
+			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
+			span.text-danger.error(ng-show="state.error") {{ state.error }}
+		button.btn.btn-primary(
+			ng-click="done()"
+		) Done
+
+script(type="text/ng-template", id="makePublicModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Make project public?
+	.modal-body.modal-body-share
+		p If you make your project public then anyone with the URL will be able to access it.
+		p
+			select.form-control(
+				ng-model="inputs.privileges"
+				name="privileges"
+			)
+				option(value="readAndWrite") Allow public editing
+				option(value="readOnly")     Allow public read only access
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="makePublic()"
+		) Make public
+
+script(type="text/ng-template", id="makePrivateModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Make project private?
+	.modal-body.modal-body-share
+		p If you make your project public then only the people you choose to share it with will have access.
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="makePrivate()"
+		) Make private

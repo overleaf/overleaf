@@ -14,32 +14,67 @@ div.full-size(ng-controller="PdfController")
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
-			ng-class="{ 'active': pdf.view == 'logs' }"
+			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled }"
 			tooltip="Logs"
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file-text-o
-			span.label.label-danger(ng-show="pdf.logEntries.errors.length > 0")
-				| {{ pdf.logEntries.errors.length }}
-			span.label.label-warning(ng-show="pdf.logEntries.warnings.length > 0")
-				| {{ pdf.logEntries.warnings.length }}
+			span.label(
+				ng-show="pdf.logEntries.warnings.length + pdf.logEntries.errors.length > 0"
+				ng-class="{\
+					'label-warning': pdf.logEntries.errors.length == 0,\
+					'label-danger': pdf.logEntries.errors.length > 0\
+				}"
+			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 
-	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf'")
+	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
 		div(	
 			pdfjs
+			ng-if="settings.pdfViewer == 'pdfjs'"
 			pdf-src="pdf.url"
 			key="project_id"
 			resize-on="layout:main:resize,layout:pdf:resize"
+			highlights="pdf.highlights"
+			position="pdf.position"
+			dbl-click-callback="syncToCode"
+		)
+		iframe(
+			ng-src="{{ pdf.url }}"
+			ng-if="settings.pdfViewer == 'native'"
 		)
 
-	.logs(ng-show="pdf.view == 'logs'")
-		div(ng-repeat="entry in pdf.logEntries.all")
+	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
+		| &nbsp;
+		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
+		| &nbsp;&nbsp;Click here to preview your work as a PDF.
+
+	.pdf-errors(ng-show="pdf.timeout || pdf.error")
+		.alert.alert-danger(ng-show="pdf.error")
+			strong Server Error. 
+			span Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.
+
+		.alert.alert-danger(ng-show="pdf.timeout")
+			strong Timed out. 
+			span Sorry, your compile was taking too long and timed out.
+				| This may be due to a large number of high-res images, or lots of complicated diagrams. 
+				| Please try to make your document simpler, or contact support for help.
+
+	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
+		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
+			| No errors, good job!
+
+		.alert.alert-danger(ng-show="pdf.failure")
+			strong Compile Error. 
+			span Sorry, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
+
+		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
 			.alert(
 				ng-class="{\
 					'alert-danger':  entry.level == 'error',\
 					'alert-warning': entry.level == 'warning',\
 					'alert-info':    entry.level == 'typesetting'\
 				}"
+				ng-click="openInEditor(entry)"
 			)
 				span.line-no
 					span(ng-show="entry.file") {{ entry.file }}
@@ -49,9 +84,50 @@ div.full-size(ng-controller="PdfController")
 
 		p
 			.pull-right
-				a.btn.btn-default.btn-sm(href) Other logs &amp; files
-				| &nbsp;
-				a.btn.btn-default.btn-sm(href, tooltip="Clear cached files", tooltip-placement="top")
+				a.btn.btn-default.btn-sm(
+					href,
+					tooltip="Clear cached files",
+					tooltip-placement="top",
+					tooltip-append-to-body="true",
+					ng-click="openClearCacheModal()"
+				)
 					i.fa.fa-trash-o
-			a.btn.btn-info.btn-sm(href) View Raw Logs
+				| &nbsp;
+				div.dropdown(style="display: inline-block;")
+					a.btn.btn-default.btn-sm(
+						href
+						data-toggle="dropdown"
+					)
+						| Other logs &amp; files 
+						span.caret
+					ul.dropdown-menu.dropdown-menu-right
+						li(ng-repeat="file in pdf.outputFiles")
+							a(
+								href="/project/{{project_id}}/output/{{file.path}}"
+								target="_blank"
+								ng-click="openOutputFile(file)"
+							) {{ file.name }}
+			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
+				span(ng-show="!pdf.showRawLog") View Raw Logs
+				span(ng-show="pdf.showRawLog") Hide Raw Logs
 
+		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
+
+script(type='text/ng-template', id='clearCacheModalTemplate')
+	.modal-header
+		h3 Clear cache?
+	.modal-body
+		p This will clear all hidden LaTeX files (.aux, .bbl, etc) from our compile server. 
+			| You generally don't need to do this unless you're having trouble with references. 
+		p Your project files will not be deleted or changed.
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+			ng-disabled="state.inflight"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="clear()"
+			ng-disabled="state.inflight"
+		) 
+			span(ng-show="!state.inflight") Clear cache
+			span(ng-show="state.inflight") Clearing...

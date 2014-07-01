@@ -1,0 +1,50 @@
+.modal-body-share {
+	h3 {
+		border-bottom: 1px solid @gray-lighter;
+		padding-bottom: @line-height-computed / 4;
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	.project-member, .public-access-level {
+		padding: (@line-height-computed / 2) 0;
+		border-bottom: 1px solid @gray-lighter;
+		font-size: 14px;
+	}
+
+	.public-access-level {
+		color: @gray;
+		padding-top: 0;
+		font-size: 12px;
+		padding-bottom: @line-height-computed;
+	}
+
+	.project-member {
+		&:hover {
+			background-color: @gray-lightest;
+		}
+	}
+
+	.invite-controls {
+		.small {
+			padding: 2px;
+		}
+		padding: @line-height-computed / 2;
+		background-color: @gray-lightest;
+		margin-top: @line-height-computed / 2;
+		form {
+			.form-group {
+				margin-bottom: @line-height-computed / 2;
+				&:last-child {
+					margin-bottom: 0;
+				}
+			}
+			.privileges {
+				display: inline-block;
+				width: auto;
+				height: 30px;
+				font-size: 14px;
+			}
+		}
+	}
+}

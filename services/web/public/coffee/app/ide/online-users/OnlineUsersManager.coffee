@@ -4,7 +4,7 @@ define [
 	class OnlineUsersManager
 		constructor: (@ide, @$scope) ->
 			@$scope.onlineUsers = {}
-			@$scope.onlineUserCursorAnnotations = {}
+			@$scope.onlineUserCursorHighlights = {}
 
 			@$scope.$watch "editor.cursorPosition", (position) =>
 				if position?
@@ -23,12 +23,12 @@ define [
 
 		updateCursorHighlights: () ->
 			console.log "UPDATING CURSOR HIGHLIGHTS"
-			@$scope.onlineUserCursorAnnotations = {}
+			@$scope.onlineUserCursorHighlights = {}
 			for client_id, client of @$scope.onlineUsers
 				doc_id = client.doc_id
 				continue if !doc_id?
-				@$scope.onlineUserCursorAnnotations[doc_id] ||= []
-				@$scope.onlineUserCursorAnnotations[doc_id].push {
+				@$scope.onlineUserCursorHighlights[doc_id] ||= []
+				@$scope.onlineUserCursorHighlights[doc_id].push {
 					label: client.name
 					cursor:
 						row: client.row
@@ -38,6 +38,7 @@ define [
 
 		UPDATE_INTERVAL: 500
 		sendCursorPositionUpdate: () ->
+			console.log "SENDING CURSOR POSITION UPDATE", @$scope.editor.cursorPosition
 			if !@cursorUpdateTimeout?
 				@cursorUpdateTimeout = setTimeout ()=>
 					position = @$scope.editor.cursorPosition

@@ -4,7 +4,7 @@ define [
 	"ide/editor/undo/UndoManager"
 	"ide/editor/auto-complete/AutoCompleteManager"
 	"ide/editor/spell-check/SpellCheckManager"
-	"ide/editor/annotations/AnnotationsManager"
+	"ide/editor/highlights/HighlightsManager"
 	"ide/editor/cursor-position/CursorPositionManager"
 	"ace/keyboard/vim"
 	"ace/keyboard/emacs"
@@ -26,9 +26,11 @@ define [
 				lastUpdated: "="
 				spellCheckLanguage: "="
 				cursorPosition: "="
-				annotations: "="
+				highlights: "="
 				text: "="
 				readOnly: "="
+				gotoLine: "="
+				annotations: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -63,12 +65,6 @@ define [
 						scope.$on event, () ->
 							editor.resize()
 
-				editor.on "changeSelection", () ->
-					cursor = editor.getCursorPosition()
-					scope.$apply () ->
-						if scope.cursorPosition?
-							scope.cursorPosition = cursor
-
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
 
@@ -100,15 +96,26 @@ define [
 						session.setUseWrapMode(true)
 						session.setMode(new LatexMode())
 
+				scope.$watch "annotations", (annotations) ->
+					console.log "SETTING ANNOTATIONS", annotations
+					if annotations?
+						session = editor.getSession() 
+						session.setAnnotations annotations
+
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
+
+				resetSession = () ->
+					session = editor.getSession()
+					session.setUseWrapMode(true)
+					session.setMode(new LatexMode())
+					session.setAnnotations scope.annotations
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 
 					editor.setSession(new EditSession(lines))
+					resetSession()
 					session = editor.getSession()
-					session.setUseWrapMode(true)
-					session.setMode(new LatexMode())
 
 					autoCompleteManager.bindToSession(session)
 					annotationsManager.redrawAnnotations()

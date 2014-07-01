@@ -88,6 +88,25 @@ define [
 
 			return null
 
+		findEntityByPath: (path) ->
+			@_findEntityByPathInFolder @$scope.rootFolder, path
+
+		_findEntityByPathInFolder: (folder, path) ->
+			parts = path.split("/")
+			name = parts.shift()
+			rest = parts.join("/")
+			
+			if name == "."
+				return @_findEntityByPathInFolder(folder, rest)
+
+			for entity in folder.children
+				if entity.name == name
+					if rest == ""
+						return entity
+					else if entity.type == "folder"
+						return @_findEntityByPathInFolder(entity, rest)
+			return null
+
 		forEachEntity: (callback = (entity, parent_folder) ->) ->
 			@_forEachEntityInFolder(@$scope.rootFolder, callback)
 
@@ -99,6 +118,26 @@ define [
 				callback(entity, folder)
 				if entity.children?
 					@_forEachEntityInFolder(entity, callback)
+
+		getEntityPath: (entity) ->
+			@_getEntityPathInFolder @$scope.rootFolder, entity
+
+		_getEntityPathInFolder: (folder, entity) ->
+			for child in folder.children or []
+				if child == entity
+					return entity.name
+				else if child.type == "folder"
+					path = @_getEntityPathInFolder(child, entity)
+					if path?
+						return child.name + "/" + path
+			return null
+
+		getRootDocDirname: () ->
+			rootDoc = @findEntityById @$scope.project.rootDoc_id
+			return if !rootDoc?
+			path = @getEntityPath(rootDoc)
+			return if !path?
+			return path.split("/").slice(0, -1).join("/")
 
 		# forEachFolder: (callback) ->
 		# 	@forEachEntity (entity) ->

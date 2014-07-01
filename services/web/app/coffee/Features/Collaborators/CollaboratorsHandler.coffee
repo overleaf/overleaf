@@ -26,7 +26,8 @@ module.exports =
 
 	addUserToProject: (project_id, email, privilegeLevel, callback)->
 		emails = mimelib.parseAddresses(email)
-		email = emails[0].address?.toLowerCase()
+		email = emails[0]?.address?.toLowerCase()
+		return callback(new Error("no valid email provided")) if !email?
 		self = @
 		User.findOne {'email':email}, (err, user)->
 			async.waterfall [

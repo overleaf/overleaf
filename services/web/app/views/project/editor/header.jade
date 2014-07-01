@@ -13,7 +13,13 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		i.fa.fa-pencil
 
 	.toolbar-right
-		a.btn.btn-full-height(href='#', tooltip="Share", tooltip-placement="bottom")
+		a.btn.btn-full-height(
+			href,
+			tooltip="Share",
+			tooltip-placement="bottom",
+			ng-click="openShareProjectModal()",
+			ng-controller="ShareController"
+		)
 			i.fa.fa-fw.fa-group
 		a.btn.btn-full-height(
 			href,

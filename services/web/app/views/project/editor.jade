@@ -37,6 +37,8 @@ block content
 
 		include ./editor/header
 
+		include ./editor/share
+
 		#ide-body(ng-cloak, layout="main", ng-hide="state.loading")
 			.ui-layout-west
 				include ./editor/file-tree
@@ -44,34 +46,6 @@ block content
 			.ui-layout-center
 				include ./editor/editor
 				include ./editor/track-changes
-
-	//- #loadingScreen
-	//- 	h3 Loading...
-	//- 	p#loadingMessage Loading editor
-
-	//- #errorMessages
-	//- 	#connectionLostMessage(style="display: none;")
-	//- 		| Lost connection. 
-	//- 		span#trying-reconnect
-	//- 			| Reconnecting in 
-	//- 			span#reconnection-countdown ? 
-	//- 			|  seconds. 
-	//- 			a(href='#')#try-reconnect-now Try now.
-	//- 		span#reconnecting
-	//- 			| Reconnecting...
-
-	//- 	#savingProblems(style="display: none")
-	//- 		| Saving...
-	
-	//- div#toolbar.sidebar-navigation
-	//- 	ul#tabs
-	//- 	#toolbar-footer
-
-	//- #tab-content.tab-content
-
-	//- include ../templates
-	//- include ../templates/dropbox
-
 
 	script(src='/socket.io/socket.io.js')
 

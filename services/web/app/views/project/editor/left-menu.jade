@@ -3,7 +3,7 @@ aside#left-menu.full-size(
 	ng-cloak
 )
 	h4 Settings
-	form
+	form(ng-controller="SettingsController")
 		.form-controls
 			label(for="compiler") Compiler
 			select.form-control(
@@ -63,6 +63,15 @@ aside#left-menu.full-size(
 			)
 				each size in ['10','11','12','13','14','16','20','24']
 					option(value=size) #{size}px
+
+		.form-controls
+			label(for="pdfViewer") PDF Viewer
+			select.form-control(
+				name="pdfViewer"
+				ng-model="settings.pdfViewer"
+			)
+				option(value="pdfjs") Built-In
+				option(value="native") Native
 
 #left-menu-mask(
 	ng-show="ui.leftMenuShown",

@@ -10,6 +10,7 @@ define [
 				open_doc_id: null
 				opening: true
 				cursorPosition: null
+				gotoLine: null
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -33,25 +34,33 @@ define [
 
 		openDoc: (doc, options = {}) ->
 			@$scope.ui.view = "editor"
+
+			done = () =>
+				if options.gotoLine?
+					@$scope.editor.gotoLine = options.gotoLine
 			
-			console.log "Trying to open doc", doc.id
-			return if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
+			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
+				@$scope.$apply () =>
+					done()
+				return
+
 			@$scope.editor.open_doc_id = doc.id
-			console.log "Actually opening doc", doc.id
 
 			$.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)
 
 			@$scope.editor.opening = true
 			@_openNewDocument doc, (error, sharejs_doc) =>
-				console.log "OPENED DOC", error, sharejs_doc
 				if error?
 					@ide.showGenericServerErrorMessage()
 					return
 
+				@$scope.$broadcast "doc:opened"
+
 				@$scope.$apply () =>
 					@$scope.editor.opening = false
 					@$scope.editor.sharejs_doc = sharejs_doc
+					done()
 
 		_openNewDocument: (doc, callback = (error, sharejs_doc) ->) ->
 			current_sharejs_doc = @$scope.editor.sharejs_doc
@@ -93,3 +102,9 @@ define [
 
 		lastUpdated: () ->
 			@$scope.editor.last_updated
+
+		getCurrentDocValue: () ->
+			@$scope.editor.sharejs_doc?.getSnapshot()
+
+		getCurrentDocId: () ->
+			@$scope.editor.open_doc_id

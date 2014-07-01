@@ -110,9 +110,9 @@ define [
 					.get(url)
 					.success (data) =>
 						diff.loading = false
-						{text, annotations} = @_parseDiff(data)
+						{text, highlights} = @_parseDiff(data)
 						diff.text = text
-						diff.annotations = annotations
+						diff.highlights = highlights
 					.error () ->
 						diff.loading = false
 						diff.error = true
@@ -129,7 +129,7 @@ define [
 		_parseDiff: (diff) ->
 			row    = 0
 			column = 0
-			annotations = []
+			highlights = []
 			text   = ""
 			for entry, i in diff.diff or []
 				content = entry.u or entry.i or entry.d
@@ -162,19 +162,19 @@ define [
 						name = "you"
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
-						annotations.push {
+						highlights.push {
 							label: "Added by #{name} on #{date}"
 							highlight: range
 							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
 						}
 					else if entry.d?
-						annotations.push {
+						highlights.push {
 							label: "Deleted by #{name} on #{date}"
 							strikeThrough: range
 							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
 						}
 
-			return {text, annotations}
+			return {text, highlights}
 
 		_loadUpdates: (updates = []) ->
 			previousUpdate = @$scope.trackChanges.updates[@$scope.trackChanges.updates.length - 1]
