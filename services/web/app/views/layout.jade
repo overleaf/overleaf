@@ -85,10 +85,15 @@ html(itemscope, itemtype='http://schema.org/Product')
 				};
 
 		script.
-			window.sharelatex = {
-				algolia: !{JSON.stringify(settings.algolia)}
-			}
+			window.sharelatex = {}
 
+		- if (typeof(settings.algolia) != "undefined")
+			script.
+				window.sharelatex.algolia = {
+					app_id:'#{settings.algolia.app_id}',
+					api_key:'#{settings.algolia.read_only_api_key}',
+					indexes:!{JSON.stringify(settings.algolia.indexes)}
+				}
 
 		- if (typeof(settings.apis) != "undefined" && typeof(settings.apis.templates_api) != "undefined")
 			script.

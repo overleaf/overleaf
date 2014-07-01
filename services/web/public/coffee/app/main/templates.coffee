@@ -17,9 +17,9 @@ define [
 
 
 	app.factory "algolia", ->
-		if window?.sharelatex?.algolia?.appId?
-			client = new AlgoliaSearch(window.sharelatex.algolia?.templates?.appId, window.sharelatex.algolia?.templates?.secret)
-			index = client.initIndex(window.sharelatex.algolia?.templates?.indexName)
+		if window?.sharelatex?.algolia?.app_id?
+			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
+			index = client.initIndex(window.sharelatex.algolia?.indexes?.templates)
 			return index
 
 	app.controller "SearchController", ($scope, algolia, _) ->
