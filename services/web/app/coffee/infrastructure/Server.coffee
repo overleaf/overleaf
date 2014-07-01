@@ -17,6 +17,7 @@ cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
+OldAssetProxy = require("./OldAssetProxy")
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -76,6 +77,7 @@ app.configure 'production', ->
 
 app.use metrics.http.monitor(logger)
 app.use RedirectManager
+app.use OldAssetProxy
 
 app.use (req, res, next)->
 	metrics.inc "http-request"

@@ -269,3 +269,5 @@ module.exports =
 	redirects:
 		"/templates/index": "/templates/"
 
+	proxyUrls: {}
+
