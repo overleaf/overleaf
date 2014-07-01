@@ -264,11 +264,8 @@ module.exports =
 				url: "/logout"
 			}]
 		}]
-
-
-	algolia:
-		appId:"SK53GL4JLY"
-		secret:"75dc5e65794cd47eb7f725e6bb5075be"
 	
 
+	redirects:
+		"/templates/index": "/templates/"
 

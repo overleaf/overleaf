@@ -16,6 +16,7 @@ sessionStore = new RedisStore(host:Settings.redis.web.host, port:Settings.redis.
 cookieParser = express.cookieParser(Settings.security.sessionSecret)
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
+RedirectManager = require("./RedirectManager")
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -74,6 +75,7 @@ app.configure 'production', ->
 	app.enable('view cache')
 
 app.use metrics.http.monitor(logger)
+app.use RedirectManager
 
 app.use (req, res, next)->
 	metrics.inc "http-request"
