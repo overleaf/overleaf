@@ -37,10 +37,10 @@ aside#left-menu.full-size(
 				.row
 					label.col-md-6(for="autoComplete") Auto-Complete
 					.col-md-6
-						input.form-control(
-							type="checkbox"
+						select.form-control(
 							name="autoComplete"
 							ng-model="settings.autoComplete"
+							ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
 						)
 
 			.form-controls
