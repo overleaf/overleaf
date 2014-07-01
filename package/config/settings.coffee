@@ -1,6 +1,6 @@
 Path = require('path')
 http = require('http')
-http.globalAgent.maxSockets = 30
+http.globalAgent.maxSockets = 300
 
 # Make time interval config easier.
 seconds = 1000
