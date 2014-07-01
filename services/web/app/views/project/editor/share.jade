@@ -9,8 +9,9 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-body.modal-body-share
 		.container-fluid
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
-				.col-md-9 This project is private and can only be accessed by the people below.
-				.col-md-3.text-right
+				.col-md-12.text-center
+					| This project is private and can only be accessed by the people below.
+					| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakePublicModal()"
