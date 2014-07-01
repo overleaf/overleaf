@@ -7,6 +7,7 @@ define [
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
 	"ide/pdf/PdfManager"
+	"ide/share/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"

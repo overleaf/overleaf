@@ -1,0 +1,61 @@
+script(type='text/ng-template', id='shareProjectModalTemplate')
+	.modal-header
+		h3 Share Project
+	.modal-body.modal-body-share
+		.container-fluid
+			.row.public-access-level
+				.col-md-9 This project is private and can only be accessed by the people below.
+				.col-md-3.text-right
+					a(href) Make public
+			.row.project-member
+				.col-md-8 {{ project.owner.email }}
+				.text-right(
+					ng-class="{'col-md-3': project.members.length > 0, 'col-md-4': project.members.length == 0}"
+				) Owner
+			.row.project-member(ng-repeat="member in project.members")
+				.col-md-8 {{ member.email }}
+				.col-md-3.text-right
+					span(ng-show="member.privileges == 'readAndWrite'") Can Edit
+					span(ng-show="member.privileges == 'readOnly'") Read Only
+				.col-md-1
+					a(
+						href
+						tooltip="Remove collaborator"
+						tooltip-placement="bottom"
+						ng-click="removeMember(member)"
+					)
+						i.fa.fa-times
+			.row.invite-controls
+				form(ng-show="canAddCollaborators")
+					.small Share with your collaborators
+					.form-group
+						input.form-control(
+							type="email"
+							placeholder="Enter email address..."
+							ng-model="inputs.email"
+							focus-on="open"
+						)
+					.form-group
+						.pull-right
+							select.privileges.form-control(
+								ng-model="inputs.privileges"
+								name="privileges"
+							)
+								option(value="readAndWrite") Can Edit
+								option(value="readOnly") Read Only
+							| &nbsp;&nbsp;
+							button.btn.btn-info(
+								type="submit"
+								ng-click="addMember()"
+							) Share
+				div.text-center(ng-hide="canAddCollaborators")
+					p You need to upgrade your account to add more collaborators.
+					a.btn.btn-info(href) Start Free Trial
+
+	.modal-footer
+		.modal-footer-left
+			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
+			span.text-danger.error(ng-show="state.error") {{ state.error }}
+		button.btn.btn-primary(
+			ng-click="done()"
+		) Done
