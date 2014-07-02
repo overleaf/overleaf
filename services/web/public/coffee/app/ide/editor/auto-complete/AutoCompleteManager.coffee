@@ -29,19 +29,23 @@ define [
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
 
-			insertMatch = Autocomplete::insertMatch
-			editor = @editor
-			Autocomplete::insertMatch = (data) ->
-				pos = editor.getCursorPosition()
-				range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
-				nextChar = editor.session.getTextRange(range)
+			if !Autocomplete::_insertMatch?
+				# Only override this once since it's global but we may create multiple
+				# autocomplete handlers
+				Autocomplete::_insertMatch = Autocomplete::insertMatch
+				Autocomplete::insertMatch = (data) ->
+					pos = editor.getCursorPosition()
+					range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
+					nextChar = editor.session.getTextRange(range)
 
-				# If we are in \begin{it|}, then we need to remove the trailing }
-				# since it will be adding in with the autocomplete of \begin{item}...
-				if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
-					editor.session.remove(range)
-				
-				insertMatch.call editor.completer, data
+					console.log "INSERT MATCH", this
+
+					# If we are in \begin{it|}, then we need to remove the trailing }
+					# since it will be adding in with the autocomplete of \begin{item}...
+					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
+						editor.session.remove(range)
+					
+					Autocomplete::_insertMatch.call this, data
 
 			@$scope.$watch "autoComplete", (autocomplete) =>
 				console.log "autocomplete change", autocomplete

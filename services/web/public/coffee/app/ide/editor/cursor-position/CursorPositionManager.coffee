@@ -13,9 +13,9 @@ define [], () ->
 
 			@editor.on "changeSelection", () =>
 				cursor = @editor.getCursorPosition()
-				console.log "Updating cursor position", cursor
 				@$scope.$apply () =>
-					@$scope.cursorPosition = cursor
+					if @$scope.cursorPosition?
+						@$scope.cursorPosition = cursor
 
 			@$scope.$watch "gotoLine", (value) =>
 				console.log "Going to line", value

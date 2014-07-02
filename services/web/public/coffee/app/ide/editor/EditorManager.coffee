@@ -9,7 +9,7 @@ define [
 				last_updated: null
 				open_doc_id: null
 				opening: true
-				cursorPosition: null
+				cursorPosition: {}
 				gotoLine: null
 			}
 

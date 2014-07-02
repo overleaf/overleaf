@@ -2,76 +2,120 @@ aside#left-menu.full-size(
 	ng-class="{ 'shown': ui.leftMenuShown }"
 	ng-cloak
 )
+	h4 Download
+
+	ul.unformatted-list.nav.nav-downloads
+		li
+			a(
+				ng-href="/project/{{project_id}}/download/zip"
+				target="_blank"
+			)
+				i.fa.fa-file-archive-o.fa-2x
+				br
+				| Source
+		li
+			a(
+				ng-href="/project/{{project_id}}/{{pdf.url}}"
+				target="_blank"
+				ng-if="pdf.url"
+			)
+				i.fa.fa-file-pdf-o.fa-2x
+				br
+				| PDF
+			div.pdf-disabled(
+				ng-if="!pdf.url"
+				tooltip="Please compile your project before downloading the PDF"
+				tooltip-placement="bottom"
+			)
+				i.fa.fa-file-pdf-o.fa-2x
+				br
+				| PDF
+
 	h4 Settings
-	form(ng-controller="SettingsController")
-		.form-controls
-			label(for="compiler") Compiler
-			select.form-control(
-				name="compiler"
-				ng-model="project.compiler"
-			)
-				option(value='pdflatex') pdfLaTeX
-				option(value='latex') LaTeX
-				option(value='xelatex') XeLaTeX
-				option(value='lualatex') LuaLaTeX
+	form.settings(ng-controller="SettingsController")
+		.containter-fluid
+			.form-controls
+				.row
+					label.col-md-6(for="compiler") Compiler
+					.col-md-6
+						select.form-control(
+							name="compiler"
+							ng-model="project.compiler"
+						)
+							option(value='pdflatex') pdfLaTeX
+							option(value='latex') LaTeX
+							option(value='xelatex') XeLaTeX
+							option(value='lualatex') LuaLaTeX
 
-		.form-controls
-			label(for="spellCheckLanguage") Spell Check
-			select.form-control(
-				name="spellCheckLanguage"
-				ng-model="project.spellCheckLanguage"
-			)
-				option(value="") Off
-				optgroup(label="Language")
-					for language in languages
-						option(
-							value=language.code
-						)= language.name
+			.form-controls
+				.row
+					label.col-md-6(for="spellCheckLanguage") Spell Check
+					.col-md-6
+						select.form-control(
+							name="spellCheckLanguage"
+							ng-model="project.spellCheckLanguage"
+						)
+							option(value="") Off
+							optgroup(label="Language")
+								for language in languages
+									option(
+										value=language.code
+									)= language.name
 
-		.form-controls
-			label(for="autoComplete") Auto-Complete
-			input.form-control(
-				type="checkbox"
-				name="autoComplete"
-				ng-model="settings.autoComplete"
-			)
+			.form-controls
+				.row
+					label.col-md-6(for="autoComplete") Auto-Complete
+					.col-md-6
+						select.form-control(
+							name="autoComplete"
+							ng-model="settings.autoComplete"
+							ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
+						)
 
-		.form-controls
-			label(for="theme") Theme
-			select.form-control(
-				name="theme"
-				ng-model="settings.theme"
-			)
-				each theme in themes
-					option(value=theme) #{theme}
-					
-		.form-controls
-			label(for="mode") Keybindings
-			select.form-control(
-				name="mode"
-				ng-model="settings.mode"
-			)
-				option(value='default') None
-				option(value='vim') Vim
-				option(value='emacs') Emacs
+			.form-controls
+				.row
+					label.col-md-6(for="theme") Theme
+					.col-md-6
+						select.form-control(
+							name="theme"
+							ng-model="settings.theme"
+						)
+							each theme in themes
+								option(value=theme) #{theme}
 
-		.form-controls
-			label(for="fontSize") Font Size
-			select.form-control(
-				name="fontSize"
-				ng-model="settings.fontSize"
-			)
-				each size in ['10','11','12','13','14','16','20','24']
-					option(value=size) #{size}px
+			.form-controls
+				.row
+					label.col-md-6(for="mode") Keybindings
+					.col-md-6
+						select.form-control(
+							name="mode"
+							ng-model="settings.mode"
+						)
+							option(value='default') None
+							option(value='vim') Vim
+							option(value='emacs') Emacs
 
-		.form-controls
-			label(for="pdfViewer") PDF Viewer
-			select.form-control(
-				name="pdfViewer"
-				ng-model="settings.pdfViewer"
-			)
-				option(value="pdfjs") Built-In
-				option(value="native") Native
+			.form-controls
+				.row
+					label.col-md-6(for="fontSize") Font Size
+					.col-md-6
+						select.form-control(
+							name="fontSize"
+							ng-model="settings.fontSize"
+						)
+							each size in ['10','11','12','13','14','16','20','24']
+								option(value=size) #{size}px
+
+			.form-controls
+				.row
+					label.col-md-6(for="pdfViewer") PDF Viewer
+					.col-md-6
+						select.form-control(
+							name="pdfViewer"
+							ng-model="settings.pdfViewer"
+						)
+							option(value="pdfjs") Built-In
+							option(value="native") Native
 
 #left-menu-mask(
 	ng-show="ui.leftMenuShown",

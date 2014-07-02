@@ -227,7 +227,6 @@ define [
 	App.controller "PdfSynctexController", ["$scope", "synctex", "ide", ($scope, synctex, ide) ->
 		$scope.showControls = true
 		$scope.$on "layout:pdf:resize", (event, data) ->
-			console.log "RESIZE DATA", data.east
 			if data.east.initClosed
 				$scope.showControls = false
 			else
