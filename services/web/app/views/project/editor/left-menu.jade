@@ -6,12 +6,27 @@ aside#left-menu.full-size(
 
 	ul.unformatted-list.nav.nav-downloads
 		li
-			a(ng-href="/project/{{project_id}}/download/zip")
+			a(
+				ng-href="/project/{{project_id}}/download/zip"
+				target="_blank"
+			)
 				i.fa.fa-file-archive-o.fa-2x
 				br
 				| Source
 		li
-			a(ng-href="/project/{{project_id}}/output/output.pdf")
+			a(
+				ng-href="/project/{{project_id}}/{{pdf.url}}"
+				target="_blank"
+				ng-if="pdf.url"
+			)
+				i.fa.fa-file-pdf-o.fa-2x
+				br
+				| PDF
+			div.pdf-disabled(
+				ng-if="!pdf.url"
+				tooltip="Please compile your project before downloading the PDF"
+				tooltip-placement="bottom"
+			)
 				i.fa.fa-file-pdf-o.fa-2x
 				br
 				| PDF
