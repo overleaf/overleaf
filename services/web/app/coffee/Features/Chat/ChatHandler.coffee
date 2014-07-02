@@ -19,8 +19,14 @@ module.exports =
 
 
 	getMessages: (project_id, query, callback)->
+		qs = {}
+		qs.limit = query.limit if query?.limit?
+		qs.before = query.before if query?.before?
+
 		opts =
 			uri:"#{settings.apis.chat.url}/room/#{project_id}/messages"
 			method:"get"
+			qs: qs
+
 		request opts, (err, response, body)->
 			callback(err, body)

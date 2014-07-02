@@ -52,18 +52,33 @@ describe "ChatHandler", ->
 		beforeEach ->
 			@returnedMessages = [{content:"hello world"}]
 			@request.callsArgWith(1, null, null, @returnedMessages)
+			@query = {}
 
 		it "should make get request for room to chat api", (done)->
 
-			@ChatHandler.getMessages @project_id, (err)=>
+			@ChatHandler.getMessages @project_id, @query, (err)=>
 				@opts =
 					method:"get"
 					uri:"#{@settings.apis.chat.url}/room/#{@project_id}/messages"
+					qs:{}
+				@request.calledWith(@opts).should.equal true
+				done()
+
+		it "should make get request for room to chat api with query string", (done)->
+			@query = {limit:5, before:12345, ignore:"this"}
+
+			@ChatHandler.getMessages @project_id, @query, (err)=>
+				@opts =
+					method:"get"
+					uri:"#{@settings.apis.chat.url}/room/#{@project_id}/messages"
+					qs:
+						limit:5
+						before:12345
 				@request.calledWith(@opts).should.equal true
 				done()
 
 		it "should return the messages from the request", (done)->
-			@ChatHandler.getMessages @project_id, (err, returnedMessages)=>
+			@ChatHandler.getMessages @project_id, @query, (err, returnedMessages)=>
 				returnedMessages.should.equal @returnedMessages
 				done()
 
