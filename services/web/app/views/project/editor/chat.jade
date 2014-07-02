@@ -1,0 +1,38 @@
+aside.chat(
+	ng-controller="ChatController"
+	infinite-scroll="loadMore()"
+	infinite-scroll-disabled="chat.loading || chat.atEnd"
+	infinite-scroll-initialize="ui.chatOpen"
+)
+	.messages(
+		infinite-scroll="loadMore()"
+		infinite-scroll-disabled="chat.loading || chat.atEnd"
+		infinite-scroll-initialize="ui.chatOpen"
+	)
+		.infinite-scroll-inner
+			ul.list-unstyled
+				li.message(
+					ng-repeat="message in chat.messages | orderBy:'timestamp':true"
+					ng-controller="ChatMessageController"
+					ng-class="{'self': message.user.id == user.id }"
+				)
+
+					span.avatar
+						img(ng-src="{{gravatarUrl(message.user)}}")
+					div.message-wrapper
+						.name(ng-if="message.user.id != user.id") {{ message.user.first_name }}
+						.message(
+							ng-style="{\
+								'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)',\
+								'background-color': 'hsl({{ hue(message.user) }}, 60%, 97%)'\
+							}"
+						)
+							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)'}")
+							{{ message.content }}
+
+	.new-message
+		textarea(
+			placeholder="Your message..."
+		)
+
+

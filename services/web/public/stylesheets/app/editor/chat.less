@@ -1,0 +1,97 @@
+@new-message-height: 80px;
+
+.chat {
+	.messages {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: @new-message-height;
+		overflow-x: hidden;
+		li.message {
+			margin: @line-height-computed / 2;
+			.avatar {
+				margin-top: 14px;
+				float: left;
+				width: 50px;
+				height: 50px;
+				border-radius: 50%;
+				overflow: hidden;
+				img {
+					width: 100%;
+				}
+			}
+			.message-wrapper {
+				margin-left: 50px + @line-height-computed/2;
+				.name {
+					font-size: 12px;
+					color: @gray-light;
+					margin-bottom: 4px;
+				}
+				.message {
+					padding: @line-height-computed / 2;
+					border-left: 3px solid transparent;
+					position: relative;
+					font-size: 14px;
+					box-shadow: -1px 2px 3px #ddd;
+					border-raduis: @border-radius-base;
+					.arrow {
+						right: 100%;
+						top: @line-height-computed / 4;
+						border: solid;
+						content: " ";
+						height: 0;
+						width: 0;
+						position: absolute;
+						pointer-events: none;
+						border-top-color: transparent !important;
+						border-bottom-color: transparent !important;
+						border-width: 10px;
+					}
+				}
+			}
+
+			&:not(.self) {
+				.message {
+					.arrow {
+						border-left-color: transparent !important;
+					}
+				}
+			}
+
+			&.self {
+				margin-top: @line-height-computed;
+				.avatar {
+					display: none;
+				}
+				.message-wrapper .message {
+					border-left: none;
+					border-right: 3px solid transparent;
+					.arrow {
+						left: 100%;
+						right: auto;
+						border-right-color: transparent !important;
+					}
+				}
+			}
+		}
+	}
+
+	.new-message {
+		.full-size;
+		top: auto;
+		height: @new-message-height;
+		background-color: @gray-lightest;
+		padding: @line-height-computed / 4;
+		border-top: 1px solid @toolbar-border-color;
+		textarea {
+			border-radius: @border-radius-base;
+			border: 1px solid @toolbar-border-color;
+			height: 100%;
+			width: 100%;
+			color: @gray-dark;
+			font-size: 14px;
+			padding: @line-height-computed / 4;
+		}
+	}
+}

@@ -46,6 +46,8 @@ define [
 		$scope.user = window.user
 		$scope.settings = window.userSettings
 
+		$scope.chat = {}
+
 		window._ide = ide
 
 		ide.project_id = $scope.project_id = window.project_id
