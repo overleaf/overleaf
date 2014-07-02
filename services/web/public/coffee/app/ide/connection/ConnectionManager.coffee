@@ -79,6 +79,7 @@ define [], () ->
 				countdown = 3 + Math.floor(Math.random() * 7)
 
 			@$scope.$apply () =>
+				@$scope.connection.reconnecting = false
 				@$scope.connection.reconnection_countdown = countdown
 
 			setTimeout(=>
