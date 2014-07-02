@@ -28,6 +28,7 @@ define [
 
 			$(document).on "click", (e) =>
 				@closeContextMenu(e)
+				return true
 			# $(document).on "contextmenu", (e) =>
 			# 	@closeContextMenu(e)
 
