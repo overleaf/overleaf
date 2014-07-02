@@ -2,6 +2,20 @@ aside#left-menu.full-size(
 	ng-class="{ 'shown': ui.leftMenuShown }"
 	ng-cloak
 )
+	h4 Download
+
+	ul.unformatted-list.nav.nav-downloads
+		li
+			a(ng-href="/project/{{project_id}}/download/zip")
+				i.fa.fa-file-archive-o.fa-2x
+				br
+				| Source
+		li
+			a(ng-href="/project/{{project_id}}/output/output.pdf")
+				i.fa.fa-file-pdf-o.fa-2x
+				br
+				| PDF
+
 	h4 Settings
 	form.settings(ng-controller="SettingsController")
 		.containter-fluid

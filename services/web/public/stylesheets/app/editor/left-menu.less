@@ -31,6 +31,24 @@
 		margin-top: 0;
 	}
 
+	ul.nav-downloads {
+		li {
+			display: inline-block;
+			text-align: center;
+			width: 100px;
+			a {
+				color: @gray-dark;
+				&:hover, &:active {
+					background-color: @link-color;
+					color: white;
+				}
+				i {
+					margin-bottom: (@line-height-computed / 4);
+				}
+			}
+		}
+	}
+
 	form.settings {
 		label {
 			font-weight: normal;

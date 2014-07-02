@@ -10,7 +10,7 @@ define [
 	"ace/keyboard/emacs"
 	"ace/mode/latex"
 	"ace/edit_session"
-], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, AnnotationsManager, CursorPositionManager) ->
+], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
 	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
@@ -49,7 +49,7 @@ define [
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				spellCheckManager     = new SpellCheckManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
-				annotationsManager    = new AnnotationsManager(scope, editor, element)
+				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
@@ -118,9 +118,6 @@ define [
 					editor.setSession(new EditSession(lines))
 					resetSession()
 					session = editor.getSession()
-
-					autoCompleteManager.bindToSession(session)
-					annotationsManager.redrawAnnotations()
 
 					doc = session.getDocument()
 					doc.on "change", () ->

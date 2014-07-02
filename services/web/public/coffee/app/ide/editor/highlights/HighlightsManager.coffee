@@ -29,6 +29,9 @@ define [
 				e.position = position
 				@showAnnotationLabels(position)
 
+			@editor.on "changeSession", () =>
+				@redrawAnnotations()
+
 		redrawAnnotations: () ->
 			@_clearMarkers()
 			@_clearLabels()
