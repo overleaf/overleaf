@@ -35,17 +35,32 @@ block content
 
 		include ./editor/left-menu
 
-		include ./editor/header
-
-		include ./editor/share
-
-		#ide-body(ng-cloak, layout="main", ng-hide="state.loading")
-			.ui-layout-west
-				include ./editor/file-tree
-
+		#chat-wrapper(
+			layout="chat",
+			spacing-open="12",
+			spacing-closed="0",
+			initial-size-east="250",
+			init-closed-east="true",
+			open-east="ui.chatOpen",
+			ng-hide="state.loading",
+			ng-cloak
+		)
 			.ui-layout-center
-				include ./editor/editor
-				include ./editor/track-changes
+				include ./editor/header
+
+				include ./editor/share
+
+				#ide-body(ng-cloak, layout="main", ng-hide="state.loading", resize-on="layout:chat:resize")
+					.ui-layout-west
+						include ./editor/file-tree
+
+					.ui-layout-center
+						include ./editor/editor
+						include ./editor/track-changes
+
+			.ui-layout-east
+				| Chat!
+
 
 	script(src='/socket.io/socket.io.js')
 

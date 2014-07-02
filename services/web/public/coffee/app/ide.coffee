@@ -8,6 +8,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/settings/index"
 	"ide/share/index"
+	"ide/chat/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
@@ -40,6 +41,7 @@ define [
 		$scope.ui = {
 			leftMenuShown: false
 			view: "editor"
+			chatOpen: false
 		}
 		$scope.user = window.user
 		$scope.settings = window.userSettings

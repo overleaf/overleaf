@@ -2,6 +2,8 @@ div.full-size(
 	ng-show="ui.view == 'editor'"
 	layout="pdf"
 	resize-on="layout:main:resize"
+	resize-proportionally="true"
+	initial-size-east="'50%'"
 )
 	.ui-layout-center
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
