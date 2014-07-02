@@ -4,7 +4,6 @@ sinon = require 'sinon'
 querystring = require 'querystring'
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionHandler"
 SubscriptionHandler = require modulePath
-tk = require 'timekeeper'
 
 mockRecurlySubscriptions =
 	"subscription-123-active":

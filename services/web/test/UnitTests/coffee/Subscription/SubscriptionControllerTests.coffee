@@ -4,7 +4,6 @@ Settings   = require 'settings-sharelatex'
 should = require("chai").should()
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
-tk = require 'timekeeper'
 modulePath = '../../../../app/js/Features/Subscription/SubscriptionController'
 
 mockSubscriptions =
