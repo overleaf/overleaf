@@ -61,6 +61,17 @@ block content
 			.ui-layout-east
 				include ./editor/chat
 
+	script(type="text/ng-template", id="genericMessageModalTemplate")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="done()"
+			) &times;
+			h3 {{ title }}
+		.modal-body {{ message }}
+		.modal-footer
+			button.btn.btn-info(ng-click="done()") OK
 
 	script(src='/socket.io/socket.io.js')
 
