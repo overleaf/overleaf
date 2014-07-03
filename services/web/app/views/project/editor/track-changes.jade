@@ -1,4 +1,17 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
+	.upgrade-prompt(ng-show="!project.features.versioning")
+		.message(ng-show="project.owner._id == user.id")
+			p You need to upgrade your account to use the History feature.
+			p
+				a.btn.btn-info(
+					href="/user/subscription/plans"
+					target="_blank"
+					ng-click="startedFreeTrial = true"
+				) Start Free Trial
+			p.small(ng-show="startedFreeTrial") Please refresh the page after starting your free trial.
+		.message(ng-show="project.owner._id != user.id")
+			p Please ask the project owner to upgrade to use the History feature.
+
 	aside.change-list(
 		ng-controller="TrackChangesListController"
 		infinite-scroll="loadMore()"

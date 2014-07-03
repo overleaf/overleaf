@@ -9,117 +9,25 @@
 @range-bar-selected-offset: 14px;
 
 #trackChanges {
-	// .track-changes-diff {
-	// 	position: absolute;
-	// 	right: @changesListWidth + 1px;
-	// 	left: 0;
-	// 	top: 0;
-	// 	bottom: 0;
-	// 	height: 100%;
-	// 	.ace_editor {
-	// 		position: absolute;
-	// 		top: 42px;
-	// 		left: 0;
-	// 		right: 0;
-	// 		bottom: 0;
-	// 		.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
-	// 			display: none;
-	// 		}
-	// 	}
-	// 	.track-changes-diff-toolbar {
-	// 		position: absolute;
-	// 		top: 0;
-	// 		left: 0;
-	// 		right: -1px;
-	// 		height: 32px;
-	// 		padding: 5px 5px 5px 5px;
-	// 		margin: 0;
-	// 		background-color: #282828;
-	// 		color: white;
-	// 		border-right: 1px solid white;
-	// 		.number-of-changes, .restore {
-	// 			position: absolute;
-	// 		}
-	// 		.number-of-changes {
-	// 			left: 10px;
-	// 			bottom: 7px;
-	// 		}
-	// 		.restore {
-	// 			right: 10px;
-	// 			bottom: 5px;
-	// 			padding: 3px 9px;
-	// 		}
-	// 	}
-	// }
-
-
-	// .track-changes-upgrade-control, .track-changes-upgrade-popup {
-	// 	position: absolute;
-	// 	top: 0;
-	// 	bottom: 0;
-	// 	left: 0;
-	// 	right: 0;
-	// 	z-index: 100;
-	// }
-
-	// .track-changes-upgrade-popup {
-	// 	background-color: rgba(128,128,128,0.4);
-	// 	.message {
-	// 		margin: auto;
-	// 		margin-top: 200px;
-	// 		padding: 10px 10px 14px 10px;
-	// 		width: 400px;
-	// 		font-weight: bold;
-	// 		text-align: center;
-	// 		background-color: white;
-	// 		.border-radius(8px);
-	// 	}
-	// }
-
-	// .track-changes-upgrade-control {
-	// 	background-color: #eeeeee;
-	// 	text-align: center;
-	// 	.message {
-	// 		font-size: 18px;
-	// 		margin: 12px;
-	// 		margin-top: 36px;
-	// 	}
-	// }
-
-	// .deleted-background,
-	// .deleted-foreground,
-	// .inserted-background,
-	// .name-marker,
-	// .changes-before,
-	// .changes-after {
-	// 	position: absolute;
-	// 	z-index: 2;
-	// }
-
-	// .name-marker {
-	// 	font-size: 0.8em;
-	// 	padding: 2px 6px;
-	// 	.border-radius(3px 3px 3px 3px);
-	// 	position: absolute;
-	// 	border: 1px solid #999;
-	// 	left: 0;
-	// 	white-space: pre;
-	// }
-
-	// .changes-before {
-	// 	top: 6px;
-	// 	right: 6px;
-	// }
-	// .changes-after {
-	// 	bottom: 6px;
-	// 	right: 6px;
-	// }
-	// .changes-before, .changes-after {
-	// 	padding: 4px 8px;
-	// 	background-color: #eee;
-	// 	border: 1px solid #999;
-	// 	.border-radius(3px);
-	// }
+	.upgrade-prompt {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 100;
+		background-color: rgba(128,128,128,0.4);
+		.message {
+			margin: auto;
+			margin-top: 100px;
+			padding: 10px 10px 14px 10px;
+			width: 500px;
+			font-weight: bold;
+			text-align: center;
+			background-color: white;
+			border-radius: 8px;
+		}
+	}
 
 	.diff {
 		margin-right: @changesListWidth;
