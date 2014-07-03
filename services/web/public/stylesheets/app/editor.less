@@ -62,6 +62,35 @@
 	}
 }
 
+.project-name {
+	.name {
+		display: inline-block;
+		max-width: 250px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		vertical-align: top;
+		padding: 6px;
+		color: @gray;
+		font-weight: 700;
+		white-space: nowrap;
+	}
+	input {
+		height: 30px;
+		margin-top: 4px;
+		text-align: center;
+		padding: 6px;
+		font-weight: 700;
+	}
+	a.rename {
+		visibility: hidden;
+	}
+	&:hover {
+		a.rename {
+			visibility: visible;
+		}
+	}
+}
+
 // The internal components of the aceEditor directive
 .ace-editor-wrapper {
 	.full-size;
