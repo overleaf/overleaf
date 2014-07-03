@@ -1,0 +1,19 @@
+div.binary-file.full-size(
+	ng-controller="BinaryFileController"
+	ng-show="ui.view == 'file'"
+	ng-if="openFile"
+)
+	img(
+		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}"
+		ng-if="['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(openFile)) > -1"
+	)
+	img(
+		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}?format=png"
+		ng-if="['pdf', 'eps'].indexOf(extension(openFile)) > -1"
+	)
+	p.no-preview(
+		ng-if="['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
+	) Sorry, no preview is available.
+	a.btn.btn-info(
+		ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
+	) Download {{ openFile.name }}
