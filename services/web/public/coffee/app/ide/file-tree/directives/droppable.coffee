@@ -7,6 +7,7 @@ define [
 				onDropCallback: "="
 			}
 			link: (scope, element, attrs) ->
+				console.log "DROPPABLE", element, scope.onDropCallback
 				element.droppable
 					greedy: true
 					hoverClass: "droppable-hover"

@@ -39,8 +39,12 @@ aside#file-tree(ng-controller="FileTreeController")
 			)
 				i.fa.fa-trash-o
 
-	.file-tree-inner
-		ul.list-unstyled.file-tree-list
+	.file-tree-inner(ng-if="rootFolder", ng-controller="FileTreeRootFolderController")
+		ul.list-unstyled.file-tree-list(
+			droppable
+			accept=".entity-name"
+			on-drop-callback="onDrop"
+		)
 			file-entity(
 				entity="entity",
 				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
