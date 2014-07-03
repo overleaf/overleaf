@@ -7,10 +7,11 @@ define [
 				onDropCallback: "="
 			}
 			link: (scope, element, attrs) ->
-				console.log "DROPPABLE", element, scope.onDropCallback
-				element.droppable
-					greedy: true
-					hoverClass: "droppable-hover"
-					accept: attrs.accept
-					drop: scope.onDropCallback
+				scope.$watch attrs.droppable, (droppable) ->
+					if droppable
+						element.droppable
+							greedy: true
+							hoverClass: "droppable-hover"
+							accept: attrs.accept
+							drop: scope.onDropCallback
 		}

@@ -157,21 +157,24 @@ define [
 				}
 
 				if entry.i? or entry.d?
-					name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
-					if entry.meta.user.id == @$scope.user.id
+					if entry.meta.user?
+						name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
+					else
+						name = "Anonymous"
+					if entry.meta.user?.id == @$scope.user.id
 						name = "you"
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
 						highlights.push {
 							label: "Added by #{name} on #{date}"
 							highlight: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 					else if entry.d?
 						highlights.push {
 							label: "Deleted by #{name} on #{date}"
 							strikeThrough: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 
 			return {text, highlights}

@@ -57,6 +57,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.protocolVersion = protocolVersion
 					@$scope.project = project
+					@$scope.permissionsLevel = permissionsLevel
 					@$scope.state.load_progress = 100
 					@$scope.state.loading = false
 					@$scope.$emit "project:joined"

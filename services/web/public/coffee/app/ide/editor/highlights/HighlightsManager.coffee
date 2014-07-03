@@ -204,16 +204,16 @@ define [
 		_getColorScheme: (hue) ->
 			if @_isDarkTheme()
 				return {
-					cursor: "hsl(#{hue}, 100%, 50%)"
-					labelBackgroundColor: "hsl(#{hue}, 100%, 50%)"
+					cursor: "hsl(#{hue}, 70%, 50%)"
+					labelBackgroundColor: "hsl(#{hue}, 70%, 50%)"
 					highlightBackgroundColor: "hsl(#{hue}, 100%, 28%);"
 					strikeThroughBackgroundColor: "hsl(#{hue}, 100%, 20%);"
 					strikeThroughForegroundColor: "hsl(#{hue}, 100%, 60%);"
 				}
 			else
 				return {
-					cursor: "hsl(#{hue}, 100%, 50%)"
-					labelBackgroundColor: "hsl(#{hue}, 100%, 50%)"
+					cursor: "hsl(#{hue}, 70%, 50%)"
+					labelBackgroundColor: "hsl(#{hue}, 70%, 50%)"
 					highlightBackgroundColor: "hsl(#{hue}, 70%, 85%);"
 					strikeThroughBackgroundColor: "hsl(#{hue}, 70%, 95%);"
 					strikeThroughForegroundColor: "hsl(#{hue}, 70%, 40%);"

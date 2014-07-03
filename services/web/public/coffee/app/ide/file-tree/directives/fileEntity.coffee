@@ -6,10 +6,18 @@ define [
 			restrict: "E"
 			scope: {
 				entity: "="
+				permissions: "="
 			}
 			templateUrl: "entityListItemTemplate"
 			compile: (element) ->
 				RecursionHelper.compile element, (scope, element, attrs, ctrl) ->
-					# Link function here if needed
+					# Don't freak out if we're already in an apply callback
+					scope.$originalApply = scope.$apply
+					scope.$apply = (fn = () ->) ->
+						phase = @$root.$$phase
+						if (phase == '$apply' || phase == '$digest')
+							fn()
+						else
+							@$originalApply(fn);
 		}
 	]

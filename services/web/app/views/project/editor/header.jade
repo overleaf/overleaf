@@ -15,6 +15,7 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 	.toolbar-right
 		a.btn.btn-full-height(
 			href,
+			ng-if="permissions.admin",
 			tooltip="Share",
 			tooltip-placement="bottom",
 			ng-click="openShareProjectModal()",

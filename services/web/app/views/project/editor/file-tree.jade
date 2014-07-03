@@ -1,5 +1,5 @@
 aside#file-tree(ng-controller="FileTreeController")
-	.toolbar.toolbar-small
+	.toolbar.toolbar-small(ng-if="permissions.write")
 		a(
 			href,
 			ng-click="openNewDocModal()",
@@ -39,14 +39,19 @@ aside#file-tree(ng-controller="FileTreeController")
 			)
 				i.fa.fa-trash-o
 
-	.file-tree-inner(ng-if="rootFolder", ng-controller="FileTreeRootFolderController")
+	.file-tree-inner(
+		ng-if="rootFolder", 
+		ng-controller="FileTreeRootFolderController",
+		ng-class="{ 'no-toolbar': !permissions.write }"
+	)
 		ul.list-unstyled.file-tree-list(
-			droppable
+			droppable="permissions.write"
 			accept=".entity-name"
 			on-drop-callback="onDrop"
 		)
 			file-entity(
 				entity="entity",
+				permissions="permissions",
 				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
 			)
 
@@ -76,11 +81,12 @@ script(type='text/ng-template', id='entityListItemTemplate')
 		.entity(ng-if="entity.type != 'folder'")
 			.entity-name(
 				ng-click="select()"
-				ng-dblclick="startRenaming()"
-				draggable
+				ng-dblclick="permissions.write && startRenaming()"
+				draggable="permissions.write"
 				context-menu
 				data-target="context-menu-{{ entity.id }}"
 				context-menu-container="body"
+				context-menu-disabled="!permissions.write"
 			)
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
@@ -92,6 +98,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
 				input(
+					ng-if="permissions.write",
 					ng-show="entity.renaming",
 					ng-model="inputs.name",
 					ng-blur="finishRenaming()",
@@ -99,7 +106,10 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					on-enter="finishRenaming()"
 				)
 
-				span.dropdown(ng-show="entity.selected")
+				span.dropdown(
+					ng-show="entity.selected",
+					ng-if="permissions.write"
+				)
 					a.dropdown-toggle(href)
 						i.fa.fa-chevron-down
 
@@ -117,7 +127,10 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								ng-click="openDeleteModal()"
 							) Delete
 
-				div.dropdown.context-menu(id="context-menu-{{ entity.id }}")
+				div.dropdown.context-menu(
+					id="context-menu-{{ entity.id }}",
+					ng-if="permissions.write"
+				)
 					ul.dropdown-menu
 						li
 							a(
@@ -138,9 +151,9 @@ script(type='text/ng-template', id='entityListItemTemplate')
 		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
 			.entity-name(
 				ng-click="select()"
-				ng-dblclick="startRenaming()"
-				draggable
-				droppable
+				ng-dblclick="permissions.write && startRenaming()"
+				draggable="permissions.write"
+				droppable="permissions.write"
 				accept=".entity-name"
 				on-drop-callback="onDrop"
 			)
@@ -148,6 +161,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					context-menu
 					data-target="context-menu-{{ entity.id }}"
 					context-menu-container="body"
+					context-menu-disabled="!permissions.write"
 				)
 					i.fa.fa-fw.toggle(
 						ng-if="entity.type == 'folder'"
@@ -168,6 +182,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						ng-hide="entity.renaming"
 					)  {{ entity.name }}
 					input(
+						ng-if="permissions.write",
 						ng-show="entity.renaming",
 						ng-model="inputs.name",
 						ng-blur="finishRenaming()",
@@ -175,7 +190,10 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						on-enter="finishRenaming()"
 					)
 
-					span.dropdown(ng-show="entity.selected")
+					span.dropdown(
+						ng-if="permissions.write"
+						ng-show="entity.selected"
+					)
 						a.dropdown-toggle(href)
 							i.fa.fa-chevron-down
 
@@ -212,7 +230,10 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									ng-click="openUploadFileModal()"
 								) Upload File
 
-					.dropdown.context-menu(id="context-menu-{{ entity.id }}")
+					.dropdown.context-menu(
+						ng-if="permissions.write"
+						id="context-menu-{{ entity.id }}"
+					)
 						ul.dropdown-menu
 							li
 								a(
@@ -254,12 +275,13 @@ script(type='text/ng-template', id='entityListItemTemplate')
 			ul.list-unstyled(
 				ng-if="entity.type == 'folder'"
 				ng-show="expanded"
-				droppable
+				droppable="permissions.write"
 				accept=".entity-name"
 				on-drop-callback="onDrop"
 			)
 				file-entity(
 					entity="child",
+					permissions="permissions",
 					ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']"
 				)
 			
