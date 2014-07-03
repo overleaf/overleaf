@@ -73,18 +73,26 @@
 	}
 }
 
-.log-btn {
-	position: relative;
-	.label {
-		position: absolute;
-		top: 0;
-		right: 0;
-		padding: .15em .6em .2em;
-		font-size: 60%;
-	}
-	&.active, &:active {
+.toolbar {
+	.log-btn {
+		position: relative;
 		.label {
-			display: none;
+			position: absolute;
+			top: 0;
+			right: 0;
+			padding: .15em .6em .2em;
+			font-size: 60%;
+		}
+		&.active, &:active {
+			.label {
+				display: none;
+			}
+			color: white;
+			background-color: @link-color;
+			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
+			&:hover {
+				color: white;
+			}
 		}
 	}
 }
