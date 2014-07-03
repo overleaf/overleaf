@@ -9,10 +9,9 @@ define [
 
 			@$scope.toggleTrackChanges = () =>
 				if @$scope.ui.view == "track-changes"
-					@$scope.ui.view = "editor"
+					@hide()
 				else
-					@$scope.ui.view = "track-changes"
-					@onShow()
+					@show()
 
 			@$scope.$watch "trackChanges.selection.updates", (updates) =>
 				if updates? and updates.length > 0
@@ -24,11 +23,14 @@ define [
 					@$scope.trackChanges.selection.doc = entity
 					@reloadDiff()
 
-		onShow: () ->
+		show: () ->
+			@$scope.ui.view = "track-changes"
 			@reset()
-			# @fetchNextBatchOfChanges()
-			# 	.success () =>
-			# 		@autoSelectRecentUpdates()
+
+		hide: () ->
+			@$scope.ui.view = "editor"
+			# Make sure we run the 'open' logic for whatever is currently selected
+			@$scope.$emit "entity:selected", @ide.fileTreeManager.findSelectedEntity()
 
 		reset: () ->
 			@$scope.trackChanges = {

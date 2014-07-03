@@ -70,6 +70,12 @@ define [
 				entity.selected = false
 			entity.selected = true
 
+		findSelectedEntity: () ->
+			selected = null
+			@forEachEntity (entity) ->
+				selected = entity if entity.selected
+			return selected
+
 		findEntityById: (id, options = {}) ->
 			return @$scope.rootFolder if @$scope.rootFolder.id == id
 
