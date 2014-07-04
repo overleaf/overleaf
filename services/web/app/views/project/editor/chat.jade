@@ -12,11 +12,12 @@ aside.chat(
 		.infinite-scroll-inner
 			ul.list-unstyled
 				li.message(
-					ng-repeat="message in chat.messages | orderBy:'timestamp':true"
+					ng-repeat="message in chat.groupedMessages | orderBy:'timestamp':false"
 					ng-controller="ChatMessageController"
 					ng-class="{'self': message.user.id == user.id }"
 				)
-
+					div.date(ng-if="$index == 0 || (message.timestamp - chat.groupedMessages[$index - 1].timestamp) > 5 * 60 * 1000")
+						{{ message.timestamp | formatDate:'h:MMa' }} {{ message.timestamp | relativeDate }}
 					span.avatar
 						img(ng-src="{{gravatarUrl(message.user)}}")
 					div.message-wrapper
@@ -28,7 +29,7 @@ aside.chat(
 							}"
 						)
 							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)'}")
-							{{ message.content }}
+							p(ng-repeat="content in message.contents") {{ content }}
 
 	.new-message
 		textarea(
