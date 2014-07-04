@@ -15,10 +15,13 @@ describe "ChatController", ->
 			sendMessage:sinon.stub()
 			getMessages:sinon.stub()
 
+		@EditorRealTimeController =
+			emitToRoom:sinon.stub().callsArgWith(3)
 		@ChatController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 			"./ChatHandler":@ChatHandler
+			"../Editor/EditorRealTimeController":@EditorRealTimeController
 		@query = 
 			before:"some time"
 
@@ -31,6 +34,15 @@ describe "ChatController", ->
 			@ChatController.sendMessage @project_id, @user_id, @messageContent, (err)=>
 				@ChatHandler.sendMessage.calledWith(@project_id, @user_id, @messageContent).should.equal true
 				done()
+
+		it "should tell the editor real time controller about the update with the data from the chat handler", (done)->
+			@chatMessage =
+				content:"hello world"
+			@ChatHandler.sendMessage.callsArgWith(3, null, @chatMessage)
+			@ChatController.sendMessage @project_id, @user_id, @messageContent, (err)=>
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "new-chat-message", @chatMessage).should.equal true
+				done()
+
 
 	describe "getMessages", ->
 
