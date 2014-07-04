@@ -7,14 +7,35 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 	)
 		i.fa.fa-fw.fa-bars
 
-	span.name {{ project.name }}
+	.toolbar-center.project-name(ng-controller="ProjectNameController")
+		span.name(
+			ng-dblclick="startRenaming()",
+			ng-show="!state.renaming"
+		) {{ project.name }}
 
-	a(href='#', data-toggle="tooltip", title="Rename")
-		i.fa.fa-pencil
+		input.form-control(
+			type="text"
+			ng-model="inputs.name",
+			ng-show="state.renaming",
+			on-enter="finishRenaming()",
+			ng-blur="finishRenaming()",
+			select-name-when="state.renaming"
+		)
+
+		a.rename(
+			href='#',
+			tooltip-placement="bottom",
+			tooltip="Rename",
+			tooltip-append-to-body="true",
+			ng-click="startRenaming()",
+			ng-show="!state.renaming"
+		)
+			i.fa.fa-pencil
 
 	.toolbar-right
 		a.btn.btn-full-height(
 			href,
+			ng-if="permissions.admin",
 			tooltip="Share",
 			tooltip-placement="bottom",
 			ng-click="openShareProjectModal()",

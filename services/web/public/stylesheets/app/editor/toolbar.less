@@ -13,11 +13,6 @@
 			color: @gray-dark;
 			text-decoration: none;
 		}
-		&.active, &:active {
-			color: white;
-			background-color: @link-color;
-			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
-		}
 	}
 
 	.btn-full-height {
@@ -45,6 +40,17 @@
 			border-right: 0;
 			border-left: 1px solid @toolbar-border-color;
 		}
+	}
+
+	.toolbar-center {
+		width: 300px;
+		position: absolute;
+		top: 0;
+		left: 50%;
+		margin-left: -150px;
+		text-align: center;
+		text-overflow: ellipsis;
+		overflow: hidden;
 	}
 
 	&.toolbar-header {

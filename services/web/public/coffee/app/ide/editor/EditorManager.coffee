@@ -1,6 +1,7 @@
 define [
 	"ide/editor/Document"
 	"ide/editor/directives/aceEditor"
+	"ide/editor/controllers/SavingNotificationController"
 ], (Document) ->
 	class EditorManager
 		constructor: (@ide, @$scope) ->
@@ -14,7 +15,7 @@ define [
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view == "editor" and entity.type == "doc")
+				if (@$scope.ui.view != "track-changes" and entity.type == "doc")
 					@openDoc(entity)
 
 			initialized = false
@@ -77,25 +78,17 @@ define [
 
 		_bindToDocumentEvents: (doc, sharejs_doc) ->
 			sharejs_doc.on "error", (error) =>
-				console.error "DOC ERROR", error
 				@openDoc(doc, forceReopen: true)
-
-				#TODO!!!
-				# Modal.createModal
-				# 	title: "Out of sync"
-				# 	message: "Sorry, this file has gone out of sync and we need to do a full refresh. Please let us know if this happens frequently."
-				# 	buttons:[
-				# 		text: "Ok"
-				# 	]
+				@ide.showGenericMessageModal(
+					"Out of sync"
+					"Sorry, this file has gone out of sync and we need to do a full refresh. Please let us know if this happens frequently."
+				)
 
 			sharejs_doc.on "externalUpdate", () =>
-				#TODO!!!
-				# Modal.createModal
-				# 	title: "Document Updated Externally"
-				# 	message: "This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
-				# 	buttons:[
-				# 		text: "Ok"
-				# 	]
+				@ide.showGenericMessageModal(
+					"Document Updated Externally"
+					"This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
+				)
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()

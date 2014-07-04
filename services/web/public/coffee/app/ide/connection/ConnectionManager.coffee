@@ -57,6 +57,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.protocolVersion = protocolVersion
 					@$scope.project = project
+					@$scope.permissionsLevel = permissionsLevel
 					@$scope.state.load_progress = 100
 					@$scope.state.loading = false
 					@$scope.$emit "project:joined"
@@ -79,6 +80,7 @@ define [], () ->
 				countdown = 3 + Math.floor(Math.random() * 7)
 
 			@$scope.$apply () =>
+				@$scope.connection.reconnecting = false
 				@$scope.connection.reconnection_countdown = countdown
 
 			setTimeout(=>

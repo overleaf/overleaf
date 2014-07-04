@@ -9,7 +9,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-body.modal-body-share
 		.container-fluid
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
-				.col-md-12.text-center
+				.col-xs-12.text-center
 					| This project is private and can only be accessed by the people below.
 					| &nbsp;&nbsp;
 					a(
@@ -17,7 +17,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="openMakePublicModal()"
 					) Make Public
 			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
-				.col-md-12.text-center
+				.col-xs-12.text-center
 					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") This project is public and can be edited by anyone with the URL.
 					strong(ng-if="project.publicAccesLevel == 'readOnly'") This project is public and can be viewed by anyone with the URL.
 					| &nbsp;&nbsp;
@@ -26,16 +26,16 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="openMakePrivateModal()"
 					) Make Private
 			.row.project-member
-				.col-md-8 {{ project.owner.email }}
+				.col-xs-8 {{ project.owner.email }}
 				.text-right(
-					ng-class="{'col-md-3': project.members.length > 0, 'col-md-4': project.members.length == 0}"
+					ng-class="{'col-xs-3': project.members.length > 0, 'col-xs-4': project.members.length == 0}"
 				) Owner
 			.row.project-member(ng-repeat="member in project.members")
-				.col-md-8 {{ member.email }}
-				.col-md-3.text-right
+				.col-xs-8 {{ member.email }}
+				.col-xs-3.text-right
 					span(ng-show="member.privileges == 'readAndWrite'") Can Edit
 					span(ng-show="member.privileges == 'readOnly'") Read Only
-				.col-md-1
+				.col-xs-1
 					a(
 						href
 						tooltip="Remove collaborator"

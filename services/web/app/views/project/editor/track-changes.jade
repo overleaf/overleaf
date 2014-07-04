@@ -1,4 +1,17 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
+	.upgrade-prompt(ng-show="!project.features.versioning")
+		.message(ng-show="project.owner._id == user.id")
+			p You need to upgrade your account to use the History feature.
+			p
+				a.btn.btn-info(
+					href="/user/subscription/plans"
+					target="_blank"
+					ng-click="startedFreeTrial = true"
+				) Start Free Trial
+			p.small(ng-show="startedFreeTrial") Please refresh the page after starting your free trial.
+		.message(ng-show="project.owner._id != user.id")
+			p Please ask the project owner to upgrade to use the History feature.
+
 	aside.change-list(
 		ng-controller="TrackChangesListController"
 		infinite-scroll="loadMore()"
@@ -57,8 +70,11 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 100%, 50%)'}")
-								span(ng-if="update_user.id != user.id") {{user.first_name}} {{user.last_name}}
+								span(ng-if="update_user.id != user.id") {{update_user.first_name}} {{update_user.last_name}}
 								span(ng-if="update_user.id == user.id") You
+							div.user(ng-if="update.meta.users.length == 0")
+								.color-square(style="background-color: hsl(100, 100%, 50%)")
+								span Anonymous
 
 			.loading(ng-show="trackChanges.loading")
 				i.fa.fa-spin.fa-refresh

@@ -56,7 +56,7 @@ define [
 		OWN_HUE: 200 # We will always appear as this color to ourselves
 		ANONYMOUS_HUE: 100
 		getHueForUserId: (user_id) ->
-			if !user_id?
+			if !user_id? or user_id == "anonymous-user"
 				return @ANONYMOUS_HUE
 
 			if window.user.id == user_id

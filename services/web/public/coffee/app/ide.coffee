@@ -5,7 +5,9 @@ define [
 	"ide/editor/EditorManager"
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
+	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
+	"ide/binary-files/BinaryFilesManager"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -22,7 +24,9 @@ define [
 	EditorManager
 	OnlineUsersManager
 	TrackChangesManager
+	PermissionsManager
 	PdfManager
+	BinaryFilesManager
 ) ->
 	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
 		# Don't freak out if we're already in an apply callback
@@ -59,6 +63,8 @@ define [
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)
+		ide.permissionsManager = new PermissionsManager(ide, $scope)
+		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

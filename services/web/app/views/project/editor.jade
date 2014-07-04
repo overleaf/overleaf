@@ -33,6 +33,14 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong Reconnecting...
 
+			.div(ng-controller="SavingNotificationController")
+				.alert.alert-warning.small(
+					ng-repeat="(doc_id, state) in docSavingStatus"
+					ng-if="state.unsavedSeconds > 3"
+				)
+					| Saving {{ state.doc.name }}... ({{ state.unsavedSeconds }} seconds of unsaved changes)
+
+
 		include ./editor/left-menu
 
 		#chat-wrapper(
@@ -56,11 +64,23 @@ block content
 
 					.ui-layout-center
 						include ./editor/editor
+						include ./editor/binary-file
 						include ./editor/track-changes
 
 			.ui-layout-east
 				include ./editor/chat
 
+	script(type="text/ng-template", id="genericMessageModalTemplate")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="done()"
+			) &times;
+			h3 {{ title }}
+		.modal-body {{ message }}
+		.modal-footer
+			button.btn.btn-info(ng-click="done()") OK
 
 	script(src='/socket.io/socket.io.js')
 

@@ -149,6 +149,10 @@ define [
 				@ide.connectionManager.disconnect()
 				return
 
+			if Math.random() < (@ide.ignoreRate or 0)
+				console.log "Simulating lost update"
+				return
+
 			if update?.doc == @doc_id and @doc?
 				@doc.processUpdateFromServer update
 

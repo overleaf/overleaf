@@ -5,6 +5,7 @@
 @import "./editor/pdf.less";
 @import "./editor/share.less";
 @import "./editor/chat.less";
+@import "./editor/binary-file.less";
 
 .full-size {
 	position: absolute;
@@ -17,10 +18,15 @@
 .global-alerts {
 	position: absolute;
 	z-index: 20;
-	top: (@line-height-computed / 4);
+	top: 2px;
 	width: 400px;
 	left: 50%;
 	margin-left: -200px;
+	.alert {
+		padding: (@line-height-computed / 4);
+		font-size: 14px;
+		margin-bottom: (@line-height-computed / 4);
+	}
 }
 
 #chat-wrapper {
@@ -54,6 +60,35 @@
 	.alert {
 		max-width: 400px;
 		margin: auto;
+	}
+}
+
+.project-name {
+	.name {
+		display: inline-block;
+		max-width: 250px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		vertical-align: top;
+		padding: 6px;
+		color: @gray;
+		font-weight: 700;
+		white-space: nowrap;
+	}
+	input {
+		height: 30px;
+		margin-top: 4px;
+		text-align: center;
+		padding: 6px;
+		font-weight: 700;
+	}
+	a.rename {
+		visibility: hidden;
+	}
+	&:hover {
+		a.rename {
+			visibility: visible;
+		}
 	}
 }
 

@@ -5,6 +5,7 @@ define [
 	"ide/file-tree/controllers/FileTreeController"
 	"ide/file-tree/controllers/FileTreeEntityController"
 	"ide/file-tree/controllers/FileTreeFolderController"
+	"ide/file-tree/controllers/FileTreeRootFolderController"
 ], () ->
 	class FileTreeManager
 		constructor: (@ide, @$scope) ->
@@ -59,6 +60,7 @@ define [
 			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
 				entity = @findEntityById(entity_id)
 				folder = @findEntityById(folder_id)
+				console.log "Got recive ENTITY", entity_id, folder_id, entity, folder
 				@$scope.$apply () =>
 					@_moveEntityInScope(entity, folder)
 
@@ -68,7 +70,15 @@ define [
 				entity.selected = false
 			entity.selected = true
 
+		findSelectedEntity: () ->
+			selected = null
+			@forEachEntity (entity) ->
+				selected = entity if entity.selected
+			return selected
+
 		findEntityById: (id, options = {}) ->
+			return @$scope.rootFolder if @$scope.rootFolder.id == id
+
 			entity = @_findEntityByIdInFolder @$scope.rootFolder, id
 			return entity if entity?
 
@@ -250,7 +260,7 @@ define [
 				_csrf: window.csrfToken
 			}
 
-		_deleteEntityFromScope: (entity) ->
+		_deleteEntityFromScope: (entity, options = { moveToDeleted: true }) ->
 			parent_folder = null
 			@forEachEntity (possible_entity, folder) ->
 				if possible_entity == entity
@@ -261,11 +271,11 @@ define [
 				if index > -1
 					parent_folder.children.splice(index, 1)
 
-			if entity.type == "doc"
+			if entity.type == "doc" and options.moveToDeleted
 				entity.deleted = true
 				@$scope.deletedDocs.push entity
 
 		_moveEntityInScope: (entity, parent_folder) ->
 			return if entity in parent_folder.children
-			@_deleteEntityFromScope(entity)
+			@_deleteEntityFromScope(entity, moveToDeleted: false)
 			parent_folder.children.push(entity)

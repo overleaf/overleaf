@@ -9,10 +9,9 @@ define [
 
 			@$scope.toggleTrackChanges = () =>
 				if @$scope.ui.view == "track-changes"
-					@$scope.ui.view = "editor"
+					@hide()
 				else
-					@$scope.ui.view = "track-changes"
-					@onShow()
+					@show()
 
 			@$scope.$watch "trackChanges.selection.updates", (updates) =>
 				if updates? and updates.length > 0
@@ -24,11 +23,14 @@ define [
 					@$scope.trackChanges.selection.doc = entity
 					@reloadDiff()
 
-		onShow: () ->
+		show: () ->
+			@$scope.ui.view = "track-changes"
 			@reset()
-			# @fetchNextBatchOfChanges()
-			# 	.success () =>
-			# 		@autoSelectRecentUpdates()
+
+		hide: () ->
+			@$scope.ui.view = "editor"
+			# Make sure we run the 'open' logic for whatever is currently selected
+			@$scope.$emit "entity:selected", @ide.fileTreeManager.findSelectedEntity()
 
 		reset: () ->
 			@$scope.trackChanges = {
@@ -157,21 +159,24 @@ define [
 				}
 
 				if entry.i? or entry.d?
-					name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
-					if entry.meta.user.id == @$scope.user.id
+					if entry.meta.user?
+						name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
+					else
+						name = "Anonymous"
+					if entry.meta.user?.id == @$scope.user.id
 						name = "you"
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
 						highlights.push {
 							label: "Added by #{name} on #{date}"
 							highlight: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 					else if entry.d?
 						highlights.push {
 							label: "Deleted by #{name} on #{date}"
 							strikeThrough: range
-							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user.id)
+							hue: @ide.onlineUsersManager.getHueForUserId(entry.meta.user?.id)
 						}
 
 			return {text, highlights}
