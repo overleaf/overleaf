@@ -49,7 +49,8 @@ define [
 			groupedMessages = []
 			for message in messages
 				shouldGroup = previousMessage? and
-					previousMessage.user == message.user
+					previousMessage.user == message.user and
+					message.timestamp - previousMessage.timestamp < TIMESTAMP_GROUP_SIZE
 				if shouldGroup
 					previousMessage.timestamp = message.timestamp
 					previousMessage.contents.push message.content
