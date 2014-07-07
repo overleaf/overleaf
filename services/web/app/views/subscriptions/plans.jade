@@ -11,7 +11,7 @@ block content
 
 				.row
 					.col-md-12
-						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. You'll stay up to date with your collaborators, keep track of all changes to your work, and use our up to date and fast compiling environment from anywhere in the world.
+						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. You'll stay up to date with your collaborators, keep track of all changes to your work, and use our LaTeX environment from anywhere in the world.
 
 				.row(ng-cloak)
 					.col-md-12
@@ -62,7 +62,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}"
 										) Sign up now!
 							.card
 								.card-header
@@ -81,7 +81,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}"
 										) Sign up now!
 
 						.card-group.text-centered(ng-if="ui.view == 'student'")
@@ -109,7 +109,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="/user/subscription/new?planCode=student"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student"
 										) Sign up now!
 							.card
 								.card-header
@@ -125,7 +125,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="/user/subscription/new?planCode=student_annual"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student_annual"
 										) Sign up now!
 
 				.row(ng-cloak)
@@ -175,7 +175,7 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
 							.card.highlighted
 								.card-header
 									h2 Research Lab
@@ -191,7 +191,7 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
 							.card
 								.card-header
 									h2 Department
@@ -207,4 +207,4 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
