@@ -460,7 +460,7 @@ block content
 							ng-model="userInfoForm.role",
 							placeholder='Role',
 							ng-blur="sendUpdate()",
-							typeahead="role for role in roles"
+							typeahead="role for role in roles | filter:$viewValue"
 						)
 			.modal-footer
 				button.btn.btn-info(ng-click="done()") Done
