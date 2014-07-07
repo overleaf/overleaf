@@ -262,7 +262,7 @@ module.exports =
 	# Provide log in credentials and a project to be able to run
 	# some basic smoke tests to check the core functionality.
 
-	shouldSmokeTest: true
+	shouldSmokeTest: false
 	# smokeTest:
 	# 	user: ""
 	# 	password: ""
