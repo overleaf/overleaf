@@ -25,10 +25,10 @@ module.exports =
 	#     Amazon S3
 	filestore:
 		# which backend persistor to use.
-		# choices are 
+		# choices are
 		# s3 - Amazon S3
 		# fs - local filesystem
-		backend: "fs"	
+		backend: "fs"
 		stores:
 			# where to store user and template binary files
 			#
@@ -175,7 +175,7 @@ module.exports =
 	# Spelling languages
 	# ------------------
 	#
-	# You must have the corresponding aspell package installed to 
+	# You must have the corresponding aspell package installed to
 	# be able to use a language.
 	languages: [
 		{name: "English", code: "en"}
@@ -214,7 +214,7 @@ module.exports =
 	# 		token: ""
 	# 	heap:
 	# 		token: ""
-	# 
+	#
 	# ShareLaTeX's help desk is provided by tenderapp.com
 	# tenderUrl: ""
 	#
@@ -246,11 +246,11 @@ module.exports =
 		compilesDir:  Path.resolve(__dirname + "/../compiles")
 		# Where to cache downloaded URLs for the CLSI
 		clsiCacheDir: Path.resolve(__dirname + "/../cache")
-	
+
 	# Automatic Snapshots
 	# -------------------
 	automaticSnapshots:
-		# How long should we wait after the user last edited to 
+		# How long should we wait after the user last edited to
 		# take a snapshot?
 		waitTimeAfterLastEdit: 5 * minutes
 		# Even if edits are still taking place, this is maximum
@@ -261,7 +261,8 @@ module.exports =
 	# ----------
 	# Provide log in credentials and a project to be able to run
 	# some basic smoke tests to check the core functionality.
-	#
+
+	shouldSmokeTest: true
 	# smokeTest:
 	# 	user: ""
 	# 	password: ""
