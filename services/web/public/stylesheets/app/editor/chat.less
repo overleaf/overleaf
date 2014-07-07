@@ -10,6 +10,13 @@
 		overflow-x: hidden;
 		li.message {
 			margin: @line-height-computed / 2;
+			.date {
+				font-size: 12px;
+				color: @gray-light;
+				border-bottom: 1px solid @gray-lightest;
+				margin-bottom: @line-height-computed / 2;
+				text-align: center;
+			}
 			.avatar {
 				margin-top: 14px;
 				float: left;
@@ -47,6 +54,12 @@
 						border-top-color: transparent !important;
 						border-bottom-color: transparent !important;
 						border-width: 10px;
+					}
+				}
+				p {
+					margin-bottom: @line-height-computed / 4;
+					&:last-child {
+						margin-bottom: 0;
 					}
 				}
 			}
