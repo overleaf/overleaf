@@ -1,16 +1,16 @@
 .project-header {
-  .btn-group > .btn {
-    padding-left: @line-height-base / 2;
-    padding-right: @line-height-base / 2;
-  }
+	.btn-group > .btn {
+		padding-left: @line-height-base / 2;
+		padding-right: @line-height-base / 2;
+	}
 }
 
 .project-search {
-  margin: @line-height-base 0;
+	margin: @line-height-base 0;
 }
 
 .project-tools {
-  display: inline;
+	display: inline;
 }
 
 .first-project {
@@ -40,7 +40,7 @@ ul.folders-menu {
 			color: #333;
 			padding: (@line-height-computed / 4);
 		}
-  	}
+		}
 	li.active {
 		//border-right: 4px solid @red;
 		a {
@@ -122,5 +122,56 @@ ul.project-list {
 			}
 			margin-bottom: 5px;
 		}
+	}
+}
+
+#institution_auto_complete {
+
+	ul>li{
+		list-style:none;
+	}
+
+	.autocomplete {
+		width: 100%;
+		position: relative;
+	}
+
+	.autocomplete ul {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		z-index: @zindex-dropdown;
+		float: left;
+		min-width: 160px;
+		padding: 5px 0;
+		margin: 2px 0 0; // override default ul
+		list-style: none;
+		font-size: @font-size-base;
+		background-color: @dropdown-bg;
+		border: 1px solid @dropdown-fallback-border; // IE8 fallback
+		border: 1px solid @dropdown-border;
+		border-radius: @border-radius-base;
+		.box-shadow(0 6px 12px rgba(0,0,0,.175));
+		background-clip: padding-box;
+
+		// Links within the dropdown menu
+		> li {
+			display: block;
+			padding: 3px 20px;
+			clear: both;
+			font-weight: normal;
+			line-height: @line-height-base;
+			color: @dropdown-link-color;
+			white-space: nowrap; // prevent links from randomly breaking onto new lines
+		}
+
+		> li.active {
+			text-decoration: none;
+			color: @dropdown-link-hover-color;
+			background-color: @dropdown-link-hover-bg;
+		}
+	}
+	.autocomplete .highlight {
+		font-weight: 700;
 	}
 }
