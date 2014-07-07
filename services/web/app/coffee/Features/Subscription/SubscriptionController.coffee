@@ -14,17 +14,10 @@ module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
 		plans = SubscriptionViewModelBuilder.buildViewModel()
-		if !req.session.user?
-			for plan in plans
-				plan.href = "/register?redir=#{plan.href}"
 		viewName = "subscriptions/plans"
-		if req.query.variant?
-			viewName += "-#{req.query.variant}"
 		logger.log viewName:viewName, "showing plans page"
 		res.render viewName,
 			title: "Plans and Pricing"
-			plans: plans
-			gaExperimentCode: gaExperimentCode
 
 
 	#get to show the recurly.js page
