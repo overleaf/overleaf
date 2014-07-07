@@ -1,7 +1,6 @@
 .recurly {
   display: block;
   position: relative;
-  width: 500px;
 }
 .recurly .cost,
 .recurly .discount {

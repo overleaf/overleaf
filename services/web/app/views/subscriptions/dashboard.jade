@@ -8,79 +8,77 @@ mixin printPlan(plan)
 			td
 				strong #{plan.name}
 			td
-				ul
-					-for benefit in plan.featureDescription
-						li #{benefit.text} &nbsp;
-							if benefit.comingSoon
-								span.label.label-info coming soon
-			td
 				-if (plan.annual)
 					| $#{plan.price / 100} / year
 				-else
 					| $#{plan.price / 100} / month	
 			td
 				-if (subscription.state == "free-trial")
-					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-primary Subscribe to this plan
+					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success Subscribe to this plan
 				-else if (plan.planCode == subscription.planCode)
 					button.btn.disabled Your plan
 				-else
 					form(action="/user/subscription/update",method="post")
 						input(type="hidden", name="_csrf", value=csrfToken)
 						input(type="hidden",name="plan_code",value="#{plan.planCode}")
-						input(type="submit",value="Change to this plan").btn.btn-primary
+						input(type="submit",value="Change to this plan").btn.btn-success
 
 mixin printPlans(plans)
 	-each plan in plans
 		mixin printPlan(plan)
 
 block content
-	include ../general/sidebar
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card
+						.page-header
+							h1 Your Subscription
+						case subscription.state
+							when "free-trial"
+								p You are currently using a free trial which expires on <strong>#{subscription.expiresAt}</strong>.
+								p Choose a plan below to subscribe to.
+							when "active"
+								p You are currently subscribed to the <strong>#{subscription.name}</strong> plan. 
+									a(href, ng-click="changePlan = true") Change Plan.
+								p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>
+								p.pull-right
 
-	.content-with-navigation-sidebar
-		.box
-			.row-fluid
-				.span12
-					.page-header
-						h1 Your Subscription
-					p: case subscription.state
-						when "free-trial"
-							p You are currently using a free trial which expires on <strong>#{subscription.expiresAt}</strong>.
-							p Choose a plan below to subscribe to.
-						when "active"
-							p You are currently subscribed to the <strong>#{subscription.name}</strong> plan.
-							p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>
-							form(action="/user/subscription/cancel",method="post")
-								input(type="hidden", name="_csrf", value=csrfToken)
-								input(type="submit",value="Cancel your subscription").btn.btn-danger#cancelSubscription
-							p: a(href="/user/subscription/billing-details/edit").btn.btn-primary Update your billing details
-						when "canceled"
-							p You are currently subscribed to the <strong>#{subscription.name}</strong> plan.
-							p Your subscription has been canceled and will terminate on <strong>#{subscription.nextPaymentDueAt}</strong>. No further payments will be taken.
-							form(action="/user/subscription/reactivate",method="post")
-								input(type="hidden", name="_csrf", value=csrfToken)
-								input(type="submit",value="Reactivate your subscription").btn.btn-success
-						when "expired"
-							p Your subscription has expired.	
-								a(href="/user/subscription/plans") Create New Subscription
-						default
-							p There is a problem with your subscription. Please contact us for more information.
+								p: form(action="/user/subscription/cancel",method="post")
+									input(type="hidden", name="_csrf", value=csrfToken)
+									a(href="/user/subscription/billing-details/edit").btn.btn-info Update your billing details
+									| &nbsp;
+									input(type="submit", value="Cancel your subscription").btn.btn-primary#cancelSubscription
+							when "canceled"
+								p You are currently subscribed to the <strong>#{subscription.name}</strong> plan.
+								p Your subscription has been canceled and will terminate on <strong>#{subscription.nextPaymentDueAt}</strong>. No further payments will be taken.
+								p: form(action="/user/subscription/reactivate",method="post")
+									input(type="hidden", name="_csrf", value=csrfToken)
+									input(type="submit",value="Reactivate your subscription").btn.btn-success
+							when "expired"
+								p Your subscription has expired.	
+									a(href="/user/subscription/plans") Create New Subscription
+							default
+								p There is a problem with your subscription. Please contact us for more information.
 
-					-if(subscription.groupPlan)
-						a(href="/subscription/group").btn.btn-success Manage Group
-					hr
-					h2 Change plan
-					p: table.table
-						tr
-							th Name
-							th Features
-							th Price
-							th
-						mixin printPlans(plans.studentAccounts)
-						mixin printPlans(plans.individualMonthlyPlans)
-						mixin printPlans(plans.individualAnnualPlans)
+						-if(subscription.groupPlan)
+							a(href="/subscription/group").btn.btn-success Manage Group
+
+						div(ng-show="changePlan", ng-cloak)
+							hr
+							h2 Change plan
+							p: table.table
+								tr
+									th Name
+									th Price
+									th
+								mixin printPlans(plans.studentAccounts)
+								mixin printPlans(plans.individualMonthlyPlans)
+								mixin printPlans(plans.individualAnnualPlans)
 
 
-	script(type="text/javascript")
+	script(type="text/javascript").
 		$('#cancelSubscription').on("click", function() {
 			ga('send', 'event', 'subscription-funnel', 'cancelation')
 		})

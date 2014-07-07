@@ -4,11 +4,18 @@ block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
 	script(src=jsPath+'libs/recurly.min.js')
-	link(rel='stylesheet', href='/recurly/recurly.css')
 
-	#billingDetailsForm.box Loading billing details form...
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3
+					.card
+						.page-header
+							h1.text-centered Update Your Billing Details
+						#billingDetailsForm Loading billing details form...
+	
 
-	script(type="text/javascript")
+	script(type="text/javascript").
 		Recurly.config(!{recurlyConfig})
 		Recurly.buildBillingInfoUpdateForm({
 			target      : "#billingDetailsForm",
@@ -17,6 +24,5 @@ block content
 			accountCode : "#{user.id}"
 		});
 
-	include ../general/small-footer
 
 
