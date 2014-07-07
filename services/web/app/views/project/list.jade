@@ -231,7 +231,7 @@ block content
 						.row.row-spaced
 							.col-md-12
 								.card.card-thin
-									ul.list-unstyled.project-list(
+									ul.list-unstyled.project-list.structured-list(
 										select-all-list,
 										ng-if="projects.length > 0",
 										ng-cloak
@@ -243,11 +243,11 @@ block content
 														select-all,
 														type="checkbox"
 													)
-													span.title TITLE
+													| TITLE
 												.col-md-2
-													span.owner OWNER
+													| OWNER
 												.col-md-4
-													span.last-modified LAST MODIFIED
+													| LAST MODIFIED
 										li.project_entry.container-fluid(
 											ng-repeat="project in visibleProjects | orderBy:'lastUpdated':true",
 											ng-controller="ProjectListItemController"

@@ -68,16 +68,16 @@ form.project-search {
 	}
 }
 
-ul.project-list {
+ul.structured-list {
 	list-style-type: none;
 	margin: 0;
 	overflow: hidden;
-	overflow-y: scroll;
+	overflow-y: auto;
 	li {
 		border-bottom: 1px solid @gray-lightest;
 		padding: (@line-height-computed / 4) 0;
 		&:first-child {
-			.last-modified, .owner {
+			.header {
 				font-size: 1rem;
 			}
 		}
@@ -101,6 +101,11 @@ ul.project-list {
 		.select-item, .select-all {
 			margin-left: @line-height-computed / 4;
 		}
+	}
+}
+
+ul.project-list {
+	li {
 		.last-modified, .owner {
 			font-size: .8rem;
 		}
