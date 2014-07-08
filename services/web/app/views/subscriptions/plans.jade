@@ -1,166 +1,210 @@
 extends ../layout
 
-mixin liSection(feature)
-	| #{feature.text} 
-	-if(feature.comingSoon)
-		span.label.label-info coming soon
-	-if(feature.beta)
-		span.label.label-warning beta
-
-
-mixin plan(plan, cssClass, monthly)
-	.pricing-table
-		ul(class=cssClass)
-
-			li.pricing-header-row-1
-				.package-title
-					h2.no-bold #{plan.name}
-
-			li.pricing-header-row-2
-				.package-price
-					if plan.price == 0
-						h1.free Free forever
-					else
-						h1.no-bold
-							| $#{plan.price/100}
-							if monthly
-								span.cents  /month
-							else 
-								span.cents  /year
-
-			- var odd = true
-			-each feature in plan.featureDescription
-				- odd = !odd
-				- if(odd)
-					li.pricing-content-row-odd
-						mixin liSection(feature)
-				- else
-					li.pricing-content-row-even
-						mixin liSection(feature)
-				
-			li.pricing-footer
-				- var href = '/user/subscription/new?planCode='+plan.planCode
-
-				- planIsPersonal = plan.planCode.indexOf("personal") != -1
-				- userNotLoggedIn = session && !session.user
-				-if(planIsPersonal)
-					- href = "/register"
-				-else if(userNotLoggedIn)
-					- href = "/register?redir="+href
-				a.btn.btn-success(href='#{href}', ga_PlanType=plan.planCode).sign_up_now	
-					| Sign Up Now!
-
-
 block content
-	.container
-		.row
-			.span12.span-box
-				.page-header
-					h1 Choose your plan
-					blockquote.quote.pull-right
-						p 
-							| This is one of the most useful resources I have ever found on the Internet.
-							br
-							| Fantastic execution and thoughtful attention to detail make this product shine!
-						small Benjamin Shepherd, Waterloo University
+	.content-alt
+		.content.plans(ng-controller="PlansController")
+			.container
+				.row
+					.col-md-12
+						.page-header.centered.plans-header.text-centered
+							h1 Start Your 30-Day Free Trial Today
 
 				.row
-					.span12
-						.offset3
-							ul.nav.nav-pills.pricing-pills
-								li.active
-									a(href="#", data-target=".monthly-pricing", data-toggle="tab") Monthly
-								li
-									a(href="#", data-target=".annual-pricing", data-toggle="tab") Annual
-								li
-									a(href="#", data-target=".student-pricing", data-toggle="tab") Half price student plans
+					.col-md-12
+						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. You'll stay up to date with your collaborators, keep track of all changes to your work, and use our LaTeX environment from anywhere in the world.
+
+				.row(ng-cloak)
+					.col-md-12
+						ul.nav.nav-pills
+							li(ng-class="{'active': ui.view == 'monthly'}")
+								a(
+									href,
+									ng-click="ui.view = 'monthly'"
+								) Monthly
+							li(ng-class="{'active': ui.view == 'annual'}")
+								a(
+									href
+									ng-click="ui.view = 'annual'"
+								) Annual
+							li(ng-class="{'active': ui.view == 'student'}")
+								a(
+									href,
+									ng-click="ui.view = 'student'"
+								) Half Price Student Plans
+
+				.row(ng-cloak)
+					.col-md-12
+						.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+							.card
+								.card-header
+									h2 Personal
+								.circle Free
+								ul.list-unstyled
+									li Only one extra collaborator per<br/> project
+									li &nbsp;
+									li
+										br
+										a.btn.btn-primary(href="/register") Sign up now!
+							.card.highlighted
+								.card-header
+									h2 Collaborator
+								.circle
+									span(ng-if="ui.view == 'monthly'")
+										| $15 
+										span.small / mo
+									span(ng-if="ui.view == 'annual'")
+										| $180 
+										span.small / yr
+								ul.list-unstyled
+									li 10 extra collaborators per project
+									li Full document history
+									li Sync to Dropbox
+									li
+										br
+										a.btn.btn-primary(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}"
+										) Sign up now!
+							.card
+								.card-header
+									h2 Professional
+								.circle 
+									span(ng-if="ui.view == 'monthly'")
+										| $30 
+										span.small / mo
+									span(ng-if="ui.view == 'annual'")
+										| $360 
+										span.small / yr
+								ul.list-unstyled
+									li Unlimited collaborators per project
+									li Full document history
+									li Sync to Dropbox
+									li
+										br
+										a.btn.btn-primary(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}"
+										) Sign up now!
+
+						.card-group.text-centered(ng-if="ui.view == 'student'")
+							.card
+								.card-header
+									h2 Personal
+								.circle Free
+								ul.list-unstyled
+									li Only one extra collaborator per<br/> project
+									li &nbsp;
+									li
+										br
+										a.btn.btn-primary(href="/register") Sign up now!
+							.card.highlighted
+								.card-header
+									h2 Student
+								.circle
+									span
+										| $8 
+										span.small / mo
+								ul.list-unstyled
+									li 6 extra collaborators per project
+									li Full document history
+									li Sync to Dropbox
+									li
+										br
+										a.btn.btn-primary(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student"
+										) Sign up now!
+							.card
+								.card-header
+									h2 Student (Annual)
+								.circle
+									span
+										| $80 
+										span.small / yr
+								ul.list-unstyled
+									li 6 extra collaborators per project
+									li Full document history
+									li Sync to Dropbox
+									li
+										br
+										a.btn.btn-primary(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student_annual"
+										) Sign up now!
+
+				.row(ng-cloak)
+					p.text-centered Choose the plan that works for you with our 30-day money-back guarantee. Cancel at any time.
 
 				.row
-					.span12
-						.page-header
-							h2 Individual Plans	
+					.col-md-12
+						.page-header.plans-header.plans-subheader.text-centered
+							h2 Enjoy all of these great features
+					.col-md-4
+						.card.features.text-centered
+							i.fa.fa-file-text-o.fa-5x
+							h4 Unlimited projects
+							p Create as much as you like.
+					.col-md-4
+						.card.features.text-centered
+							i.fa.fa-clock-o.fa-5x
+							h4 Full document history
+							p Never lose a step, we've got your back.
+					.col-md-4
+						.card.features.text-centered
+							i.fa.fa-dropbox.fa-5x
+							h4 Sync to Dropbox
+							p Access your projects everywhere.
 
-				.pricing-steelblue.pricing-row
-					.tab-content
-						.tab-pane.active.monthly-pricing
-							.row
-								.span12.tagline 
-									p An online LaTeX editor for collaborating on the <strong>same LaTeX project and editing together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
-							.row
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['collaborator'], "big", true)
-								.span4
-									mixin plan(plans.allPlans['professional'], "", true)
+				.row(ng-if="ui.view == 'monthly' || ui.view == 'annual'", ng-cloak)
+					.col-md-12
+						.page-header.plans-header.plans-subheader.text-centered
+							h2 Group Plans
+							p Improve the workflow of your research group by using ShareLaTeX with everyone on your team
 
-						.tab-pane.annual-pricing
-							.row
-								.span12.tagline
-									p Collaborate on the <strong>same LaTeX project and edit together in real-time</strong>. You’ll never go out of sync with your collaborators again, or lose track of any changes.
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['collaborator-annual'], "big", false)
-								.span4
-									mixin plan(plans.allPlans['professional-annual'], "", false)
-
-						.tab-pane.student-pricing
-							.row
-								.span8.offset2.tagline 
-									p Getting started and working with <strong>LaTeX has never been so easy.</strong> Start creating beautiful work now.
-								.span4
-									mixin plan(plans.personalAccount, "", true)
-								.span4
-									mixin plan(plans.allPlans['student'], "big", true)
-								.span4
-									mixin plan(plans.allPlans['student-annual'], "", false)
-
-				.row
-					.span12.ab-guarantee-shown(style="text-align: center;")
-						h2 30 day money back guarantee, cancel anytime.
-
-				.pricing-steelblue.pricing-row
-					.tab-content
-						.tab-pane.active.monthly-pricing
-							.page-header
-								h2 Group Plans	
-							.row
-								.span12.tagline 
-									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
-							.row
-								.span4
-									mixin plan(plans.groupMonthlyPlans[0], "", true)
-								.span4
-									mixin plan(plans.groupMonthlyPlans[1], "big", true)
-								.span4
-									mixin plan(plans.groupMonthlyPlans[2], "", true)
-						.tab-pane.annual-pricing
-							.page-header
-								h2 Group Plans	
-							.row
-								.span12.tagline 
-									p Improve the workflow of your research group by unlocking ShareLaTeX's premium features for everyone on your team
-							.row
-								.span4
-									mixin plan(plans.groupAnnualPlans[0], "", false)
-								.span4
-									mixin plan(plans.groupAnnualPlans[1], "big", false)
-								.span4
-									mixin plan(plans.groupAnnualPlans[2], "", false)
-						.tab-pane.student-pricing
-
-
-				.row
-					.span6.offset3
-						.alert.alert-info(style="color: #333")
-							h3 Want to use ShareLaTeX for free?
-							p Tell your university or department about our 
-								a(href="/university") site licenses 
-								| and use of all our
-								| features for free as a student or member of staff.
-								
-		include ../general/small-footer
-		link(rel='stylesheet', href='/brand/plans.css?fingerprint='+fingerprint('/brand/plans.css'))	
-
-
+				.row(ng-if="ui.view == 'monthly' || ui.view == 'annual'", ng-cloak)
+					.col-md-12
+						.card-group.text-centered
+							.card
+								.card-header
+									h2 Group
+								.circle
+									span(ng-if="ui.view == 'monthly'")
+										| $50 
+										span.small / mo
+									span(ng-if="ui.view == 'annual'")
+										| $500 
+										span.small / yr
+								ul.list-unstyled
+									li 5 group members
+									li.small All the advantages of the Professional account for each team member
+									li
+										br
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+							.card.highlighted
+								.card-header
+									h2 Research Lab
+								.circle
+									span(ng-if="ui.view == 'monthly'")
+										| $90 
+										span.small / mo
+									span(ng-if="ui.view == 'annual'")
+										| $900 
+										span.small / yr
+								ul.list-unstyled
+									li 10 group members
+									li.small All the advantages of the Professional account for each team member
+									li
+										br
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+							.card
+								.card-header
+									h2 Department
+								.circle
+									span(ng-if="ui.view == 'monthly'")
+										| $170 
+										span.small / mo
+									span(ng-if="ui.view == 'annual'")
+										| $1700 
+										span.small / yr
+								ul.list-unstyled
+									li 20 group members
+									li.small All the advantages of the Professional account for each team member
+									li
+										br
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!

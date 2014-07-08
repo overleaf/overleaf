@@ -1,33 +1,36 @@
 extends ../layout
 
 block content
-	link(href='http://fonts.googleapis.com/css?family=Just+Another+Hand', rel='stylesheet', type='text/css')
-	.container
-		.row
-			div &nbsp;
-			.span8.offset2.span-box
-				.page-header
-					h2 Thanks for subscribing!
-				.alert.alert-success
-					p Your card will be charged soon.
-					p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>, if you do not want to be charged again 
-						a(href="/user/subscription") click here to cancel.
-				div
-					p
-						- if (subscription.groupPlan == true)
-							a.btn.btn-success.btn-large(href="/subscription/group") Add your first group members now
-				div.letter-from-founders
-					p Thank you for subscribing to the #{subscription.name} plan. It's support from people like yourself that allows ShareLaTeX to continue to grow and improve.
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card
+						.page-header
+							h2 Thanks for subscribing!
+						.alert.alert-success
+							p Your card will be charged soon.
+							p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>.
+							p If you do not want to be charged again 
+								a(href="/user/subscription") click here to cancel.
 
-					p If there is anything you ever need please feel free to contact us directly at 
-						a(href='mailto:support@sharelatex.com') support@sharelatex.com
-						| - it goes straight to both our inboxes.
-					p Regards,
-						br
-						| Henry and James
-					.portraits
-						img(src="/img/about/henry_oswald.jpg") 
-						&nbsp;
-						img(src="/img/about/james_allen.jpg")
-				div
-					a.btn.btn-primary(href="/project") < Back to your projects
+						p
+							- if (subscription.groupPlan == true)
+								a.btn.btn-success.btn-large(href="/subscription/group") Add your first group members now
+						p.letter-from-founders
+							p Thank you for subscribing to the #{subscription.name} plan. It's support from people like yourself that allows ShareLaTeX to continue to grow and improve.
+
+							p If there is anything you ever need please feel free to contact us directly at 
+								a(href='mailto:support@sharelatex.com') support@sharelatex.com
+								| . It goes straight to both our inboxes.
+							p Regards,
+								br
+								| Henry and James
+							.portraits
+								span.img-circle
+									img(src="/img/about/henry_oswald.jpg") 
+								&nbsp;
+								span.img-circle
+									img(src="/img/about/james_allen.jpg") 
+						p
+							a.btn.btn-primary(href="/project") &lt; Back to your projects

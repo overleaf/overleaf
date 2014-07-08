@@ -5,12 +5,8 @@ define [
 	app.factory "Institutions", ->
 		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")
 
-	App.controller "UpdateForm", ($scope, $http, Institutions)->
+	App.controller "UserProfileController", ($scope, $modal, $http)->
 		$scope.institutions = []
-		$scope.formVisable = false
-		$scope.hidePersonalInfoSection = true
-		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Professor"]
-
 		$http.get("/user/personal_info").success (data)->
 			$scope.userInfoForm =
 				first_name: data.first_name || ""
@@ -19,23 +15,33 @@ define [
 				institution: data.institution || ""
 				_csrf : window.csrfToken
 
-			if getPercentComplete() != 100
-				$scope.percentComplete = getPercentComplete()
-				$scope.hidePersonalInfoSection = false
-
 		$scope.showForm = ->
 			$scope.formVisable = true
+
+		$scope.getPercentComplete = ->
+			results = _.filter $scope.userInfoForm, (value)-> !value? or value?.length != 0
+			results.length * 20
+
+		$scope.$watch "userInfoForm", (value) ->
+			if value?
+				$scope.percentComplete = $scope.getPercentComplete()
+		, true
+
+		$scope.openUserProfileModal = () ->
+			$modal.open {
+				templateUrl: "userProfileModalTemplate"
+				controller: "UserProfileModalController"
+				scope: $scope
+			}
+
+	App.controller "UserProfileModalController", ($scope, $modalInstance, $http, Institutions) ->
+		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Professor"]
 
 		$scope.sendUpdate = ->
 			request = $http.post "/user/settings", $scope.userInfoForm
 			request.success (data, status)->
 			request.error (data, status)->
 				console.log "the request failed"
-			$scope.percentComplete = getPercentComplete()
-
-		getPercentComplete = ->
-			results = _.filter $scope.userInfoForm, (value)-> !value? or value?.length != 0
-			results.length * 20
 
 		$scope.updateInstitutionsList = (inputVal)->
 
@@ -48,3 +54,5 @@ define [
 				$scope.institutions = _.map response.hits, (institution)->
 					"#{institution.name} (#{institution.domain})"
 
+		$scope.done = () ->
+			$modalInstance.close()

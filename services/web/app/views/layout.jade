@@ -3,9 +3,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
-		- if (typeof(gaExperimentCode) !== "undefined" && gaExperimentCode)
-			#{gaExperimentCode}
-
 		- if (typeof(priority_title) !== "undefined" && priority_title)
 			title= title + ' - Online LaTeX Editor ShareLaTeX'
 		- else

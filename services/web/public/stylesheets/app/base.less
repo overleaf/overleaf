@@ -1,3 +1,15 @@
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
+
+
+.img-circle {
+	display: inline-block;
+	overflow: hidden;
+	border-radius: 50%;
+	width: @line-height-computed * 4;
+	height: @line-height-computed * 4;
+	img {
+		margin-top: -10px;
+	}
+}

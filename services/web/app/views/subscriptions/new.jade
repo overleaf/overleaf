@@ -4,15 +4,21 @@ block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
 	script(src=jsPath+'libs/recurly.min.js')
-	link(rel='stylesheet', href='/recurly/recurly.css')
 
-	#subscribeForm.box Loading subscription form...
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3
+					.card
+						.page-header
+							h1.text-centered New Subscription
+						#subscribeForm Loading subscription form...
 
 	script(type="text/javascript")
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
 
 
-	script(type="text/javascript")
+	script(type="text/javascript").
 		Recurly.config(!{recurlyConfig})
 		var recurlySubscriptionFormConfig = !{subscriptionFormOptions}
 		recurlySubscriptionFormConfig.successHandler = function(){
@@ -21,6 +27,4 @@ block content
 
 		Recurly.buildSubscriptionForm(recurlySubscriptionFormConfig);
 
-
-	include ../general/small-footer
 

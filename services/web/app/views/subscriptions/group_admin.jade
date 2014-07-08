@@ -1,52 +1,84 @@
 extends ../layout
 
 block content
-	.container.box
-		.row
-			.span12
-				.page-header
-					h2 Group Admin
+	.content.content-alt
+		.container
+			.row
+				.col-md-10.col-md-offset-1
+					.card(ng-controller="GroupMembersController")
+						.page-header
+							.pull-right(ng-cloak)
+								small(ng-show="selectedUsers.length == 0") You have added <strong>{{ users.length }}</strong> of <strong>{{ groupSize }}</strong> available members
+								a.btn.btn-danger(
+									href,
+									ng-show="selectedUsers.length > 0"
+									ng-click="removeMembers()"
+								) Remove from group
+							h1 Group Account
 
-		div You are allowed up to 
-			strong #{subscription.membersLimit} 
-			| members in this group
+						.row-spaced-small
+							ul.list-unstyled.structured-list(
+								select-all-list,
+								ng-cloak
+							)
+								li.container-fluid
+									.row
+										.col-md-5
+											input.select-all(
+												select-all,
+												type="checkbox"
+											)
+											span.email EMAIL
+										.col-md-5
+											span.name NAME
+										.col-md-2
+											span.registered REGISTERED
+								li.container-fluid(
+									ng-repeat="user in users | orderBy:'email':true",
+									ng-controller="GroupMemberListItemController"
+								)
+									.row
+										.col-md-5
+											input.select-item(
+												select-individual,
+												type="checkbox",
+												ng-model="user.selected"
+											)
+											span.email {{ user.email }}
+										.col-md-5
+											span.name {{ user.first_name }} {{ user.last_name }}
+										.col-md-2
+											span.registered
+												i.fa.fa-check.text-success(ng-show="!user.holdingAccount")
+												i.fa.fa-times(ng-show="user.holdingAccount")
+								li(
+									ng-if="users.length == 0",
+									ng-cloak
+								)
+									.row
+										.col-md-12.text-centered
+											small No members
 
-		table.table-striped.table.table-striped
-			thead 
-				tr
-					th
-						input(type="checkbox").select-all
-					th email
-					th Name
-					th Registered
+						div(ng-if="users.length < groupSize", ng-cloak)
+							hr
+							p
+								.small Add more members
+								form.form
+									.row
+										.col-xs-6
+											input.form-control(
+												name="email",
+												type="text",
+												placeholder="jane@example.com, joe@example.com",
+												ng-model="inputs.emails",
+												on-enter="addMembers()"
+											)
+										.col-xs-6
+											button.btn.btn-primary(ng-click="addMembers()") Add
 
-			tbody#userList
-				-each user in users
-					tr
-						td 
-							input(type="checkbox").select-one
-						td #{user.email}
-						td #{user.first_name} #{user.last_name}
-						td #{!user.holdingAccount}
-						td
-							input(type="hidden", name="user_id", value=user._id).user_id {{user._id}}
-
-
-		div
-			button.btn.btn-danger#deleteUsers Delete Selected
-		div &nbsp;
-		div
-			form.well.form-inline#addUserToGroup
-				div
-					input(name="_csrf", type="hidden", value=csrfToken)
-					input(name="email", type="email", placeholder="someone@email.com")#newEmail.email.input-large &nbsp;
-					button.btn.btn-primary.addUser Add
-				div &nbsp;
-				div Add multiple emails seperated with commas or space.
-
-
-	- locals.supressDefaultJs = true
-	script(data-main='/js/SubscriptionGroupsManager.js', src='/js/libs/require.js')
+	script(type="text/javascript").
+		window.users = !{JSON.stringify(users)};
+		window.groupSize = #{subscription.membersLimit};
 
 
 		

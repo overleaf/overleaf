@@ -123,6 +123,8 @@ module.exports = ProjectController =
 				TagsHandler.getAllTags user_id, cb
 			projects: (cb)->
 				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+			subscription: (cb)->
+				SubscriptionLocator.getUsersSubscription user_id, cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -138,6 +140,7 @@ module.exports = ProjectController =
 						priority_title: true
 						projects: projects
 						tags: tags
+						hasSubscription: !!results.subscription
 					}
 
 					if Settings?.algolia?.institutions?.app_id? and Settings?.algolia?.institutions?.api_key?
