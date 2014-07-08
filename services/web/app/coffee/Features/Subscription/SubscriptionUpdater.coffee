@@ -24,12 +24,6 @@ module.exports =
 				self._createNewSubscription adminUser_id, (err, subscription)->
 					self._updateSubscription recurlySubscription, subscription, callback
 
-	# TODO: Remove this one month after the ability to start free trials was removed
-	downgradeFreeTrial: (subscription, callback = (error)->) ->
-		UserFeaturesUpdater.updateFeatures subscription.admin_id, Settings.defaultPlanCode, ->
-			subscription.freeTrial.downgraded = true
-			subscription.save callback
-
 	addUserToGroup: (adminUser_id, user_id, callback)->
 		logger.log adminUser_id:adminUser_id, user_id:user_id, "adding user into mongo subscription"
 		searchOps = 
