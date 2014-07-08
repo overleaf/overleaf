@@ -37,15 +37,13 @@ module.exports = (grunt) ->
 					join: true
 				files:
 					"public/js/libs/sharejs.js": [
-						"public/coffee/editor/ShareJSHeader.coffee"
-						"public/coffee/editor/sharejs/types/helpers.coffee"
-						"public/coffee/editor/sharejs/types/text.coffee"
-						"public/coffee/editor/sharejs/types/text-api.coffee"
-						"public/coffee/editor/sharejs/types/json.coffee"
-						"public/coffee/editor/sharejs/types/json-api.coffee"
-						"public/coffee/editor/sharejs/client/microevent.coffee"
-						"public/coffee/editor/sharejs/client/doc.coffee"
-						"public/coffee/editor/sharejs/client/ace.coffee"
+						"public/coffee/ide/editor/sharejs/header.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/types/helpers.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/types/text.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/types/text-api.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/client/microevent.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/client/doc.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/client/ace.coffee"
 					]
 
 			client:
@@ -89,12 +87,8 @@ module.exports = (grunt) ->
 					inlineText: false
 					preserveLicenseComments: false
 					paths:
-						"underscore": "libs/underscore"
-						"jquery": "libs/jquery"
-						"moment": "libs/moment"
+						"moment": "libs/moment-2.7.0"
 					shim:
-						"libs/backbone":
-							deps: ["libs/underscore"]
 						"libs/pdfListView/PdfListView":
 							deps: ["libs/pdf"]
 						"libs/pdf":
@@ -104,16 +98,12 @@ module.exports = (grunt) ->
 					modules: [
 						{
 							name: "main",
-							exclude: ["jquery"]
+							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["jquery"]
+							exclude: ["libs", "libs/jquery-layout"]
 						}, {
-							name: "home",
-							exclude: ["jquery"]
-						}, {
-							name: "list",
-							exclude: ["jquery"]
+							name: "libs"
 						}
 					]
 
