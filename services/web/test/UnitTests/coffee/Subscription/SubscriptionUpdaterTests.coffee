@@ -119,20 +119,6 @@ describe "Subscription Updater", ->
 				@subscription.save.called.should.equal true
 				done()
 
-
-	describe 'downgradeFreeTrial', ->
-		it "should tell the feature updater to update the user", (done)->
-			@SubscriptionUpdater.downgradeFreeTrial @subscription, =>
-				@UserFeaturesUpdater.updateFeatures.calledWith(@subscription.admin_id, @Settings.defaultPlanCode).should.equal true
-				done()
-
-		it "should update the subscription", (done)->
-			@SubscriptionUpdater.downgradeFreeTrial @subscription, =>
-				@subscription.freeTrial.downgraded.should.equal true
-				@subscription.save.called.should.equal true
-				done()
-
-
 	describe "addUserToGroup", ->
 		it "should add the users id to the group as a set", (done)->
 			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>

@@ -1,5 +1,4 @@
 settings = require('settings-sharelatex')
-SubscriptionBackgroundTasks = require("./app/js/Features/Subscription/SubscriptionBackgroundTasks")
 TpdsPollingBackgroundTasks = require("./app/js/Features/ThirdPartyDataStore/TpdsPollingBackgroundTasks")
 
 time =
@@ -18,8 +17,5 @@ runPeriodically = (funcToRun, periodLength)->
 		funcToRun ->
 			setTimeout recursiveReference, periodLength
 	setTimeout recursiveReference, 0
-
-# TODO: Remove this one month after the ability to start free trials was removed
-runPeriodically ((cb) -> SubscriptionBackgroundTasks.downgradeExpiredFreeTrials(cb)), time.oneHour
 
 runPeriodically ((cb) -> TpdsPollingBackgroundTasks.pollUsersWithDropbox(cb)), time.fifteenMinutes
