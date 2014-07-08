@@ -1,6 +1,6 @@
 define [
-	"ide/editor/auto-complete/SuggestionManager"
-	"ide/editor/auto-complete/Snippets"
+	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
+	"ide/editor/directives/aceEditor/auto-complete/Snippets"
 	"ace/autocomplete/util"
 	"ace/autocomplete"
 	"ace/range"
