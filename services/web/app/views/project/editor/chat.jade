@@ -8,7 +8,7 @@ aside.chat(
 		infinite-scroll="loadMore()"
 		infinite-scroll-disabled="chat.loading || chat.atEnd"
 		infinite-scroll-initialize="ui.chatOpen"
-		scroll-to-bottom-on="message:new"
+		scroll-glue
 	)
 		.infinite-scroll-inner
 			ul.list-unstyled

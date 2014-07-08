@@ -6,7 +6,6 @@ define [
 
 		$scope.$on "project:joined", =>
 			@ide.socket.on "new-chat-message", (message) =>
-				$scope.$emit "message:new"
 				$scope.chat.messages.push(message)
 
 		$http.get(MESSAGES_URL).success (data, status, headers, config)->
