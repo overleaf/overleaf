@@ -1,6 +1,6 @@
 extends ../layout
 
-block scripts
+block content
 	script(type="text/javascript").
 		window.data = {
 			projects: !{JSON.stringify(projects)},
@@ -13,7 +13,6 @@ block scripts
 			}
 		};
 
-block content
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			.row

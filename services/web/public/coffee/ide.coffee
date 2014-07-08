@@ -1,210 +1,71 @@
 define [
-	"ide/ConnectionManager"
-	"history/HistoryManager"
-	"auto-complete/AutoCompleteManager"
-	"project-members/ProjectMembersManager"
-	"settings/SettingsManager"
-	"editor/Editor"
-	"pdf/PdfManager"
-	"ide/MainAreaManager"
-	"ide/SideBarManager"
-	"ide/TabManager"
-	"ide/LayoutManager"
-	"ide/FileUploadManager"
-	"ide/SavingAreaManager"
-	"spelling/SpellingManager"
-	"search/SearchManager"
-	"models/Project"
-	"models/User"
-	"utils/Modal"
-	"file-tree/FileTreeManager"
-	"messages/MessageManager"
-	"help/HelpManager"
-	"cursors/CursorManager"
-	"keys/HotkeysManager"
-	"keys/BackspaceHighjack"
-	"file-view/FileViewManager"
-	"tour/IdeTour"
-	"analytics/AnalyticsManager"
-	"track-changes/TrackChangesManager"
-	"debug/DebugManager"
-	"ace/ace"
-	"libs/jquery.color"
-	"libs/jquery-layout"
-	"libs/backbone"
+	"base"
+	"ide/file-tree/FileTreeManager"
+	"ide/connection/ConnectionManager"
+	"ide/editor/EditorManager"
+	"ide/online-users/OnlineUsersManager"
+	"ide/track-changes/TrackChangesManager"
+	"ide/permissions/PermissionsManager"
+	"ide/pdf/PdfManager"
+	"ide/binary-files/BinaryFilesManager"
+	"ide/settings/index"
+	"ide/share/index"
+	"ide/chat/index"
+	"ide/directives/layout"
+	"ide/services/ide"
+	"directives/focus"
+	"directives/fineUpload"
+	"directives/scroll"
+	"directives/onEnter"
+	"filters/formatDate"
 ], (
-	ConnectionManager,
-	HistoryManager,
-	AutoCompleteManager,
-	ProjectMembers,
-	SettingsManager,
-	Editor,
-	PdfManager,
-	MainAreaManager,
-	SideBarManager,
-	TabManager,
-	LayoutManager,
-	FileUploadManager,
-	SavingAreaManager,
-	SpellingManager,
-	SearchManager,
-	Project,
-	User,
-	Modal,
-	FileTreeManager,
-	MessageManager,
-	HelpManager,
-	CursorManager,
-	HotkeysManager,
-	BackspaceHighjack,
-	FileViewManager,
-	IdeTour,
-	AnalyticsManager,
+	App
+	FileTreeManager
+	ConnectionManager
+	EditorManager
+	OnlineUsersManager
 	TrackChangesManager
-	DebugManager
+	PermissionsManager
+	PdfManager
+	BinaryFilesManager
 ) ->
-
-
-
-	ProjectMembersManager = ProjectMembers.ProjectMembersManager
-
-	mainAreaManager = undefined
-	socket = undefined
-	currentDoc_id = undefined
-	selectElement = undefined
-	security = undefined
-	_.templateSettings =
-		interpolate : /\{\{(.+?)\}\}/g
-
-	isAllowedToDoIt = (permissionsLevel)->
-
-		if permissionsLevel == "owner" &&  _.include ["owner"], security.permissionsLevel
-			return true
-		else if permissionsLevel == "readAndWrite"  && _.include ["readAndWrite", "owner"], security.permissionsLevel
-			return true
-		else if permissionsLevel == "readOnly" && _.include ["readOnly", "readAndWrite", "owner"], security.permissionsLevel
-			return true
-		else
-			return false
-
-	Ide = class Ide
-		constructor: () ->
-			@userSettings = window.userSettings
-			@project_id = @userSettings.project_id
-
-			@user = User.findOrBuild window.user.id, window.user
-			
-			ide = this
-			@isAllowedToDoIt = isAllowedToDoIt
-
-			ioOptions =
-				reconnect: false
-				"force new connection": true
-			@socket = socket = io.connect null, ioOptions
-
-			@messageManager = new MessageManager(@)
-			@connectionManager = new ConnectionManager(@)
-			@tabManager = new TabManager(@)
-			@layoutManager = new LayoutManager(@)
-			@sideBarView = new SideBarManager(@, $("#sections"))
-			selectElement = @sideBarView.selectElement
-			mainAreaManager = @mainAreaManager = new MainAreaManager(@, $("#content"))
-			@fileTreeManager = new FileTreeManager(@)
-			@editor = new Editor(@)
-			@pdfManager = new PdfManager(@)
-			if @userSettings.autoComplete
-				@autoCompleteManager = new AutoCompleteManager(@)
-			@spellingManager = new SpellingManager(@)
-			@fileUploadManager = new FileUploadManager(@)
-			@searchManager = new SearchManager(@)
-			@cursorManager = new CursorManager(@)
-			@fileViewManager = new FileViewManager(@)
-			@analyticsManager = new AnalyticsManager(@)
-			if @userSettings.oldHistory
-				@historyManager = new HistoryManager(@)
+	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
+		# Don't freak out if we're already in an apply callback
+		$scope.$originalApply = $scope.$apply
+		$scope.$apply = (fn = () ->) ->
+			phase = @$root.$$phase
+			if (phase == '$apply' || phase == '$digest')
+				fn()
 			else
-				@trackChangesManager = new TrackChangesManager(@)
+				this.$originalApply(fn);
 
-			@setLoadingMessage("Connecting")
-			firstConnect = true
-			socket.on "connect", () =>
-				@setLoadingMessage("Joining project")
-				joinProject = () =>
-					socket.emit 'joinProject', {project_id: @project_id}, (err, project, permissionsLevel, protocolVersion) =>
-						@hideLoadingScreen()
-						if @protocolVersion? and @protocolVersion != protocolVersion
-							location.reload(true)
-						@protocolVersion = protocolVersion
-						Security = {}
-						Security.permissionsLevel = permissionsLevel
-						@security = security = Object.freeze(Security)
-						@project = new Project project, parse: true
-						@project.set("ide", ide)						
-						ide.trigger "afterJoinProject", @project
+		$scope.state = {
+			loading: true
+			load_progress: 40
+		}
+		$scope.ui = {
+			leftMenuShown: false
+			view: "editor"
+			chatOpen: false
+		}
+		$scope.user = window.user
+		$scope.settings = window.userSettings
 
-						if firstConnect
-							@pdfManager.refreshPdf(isAutoCompile:true)
-						firstConnect = false
+		$scope.chat = {}
 
-				setTimeout(joinProject, 100)
-	
-		showErrorModal: (title, message)->
-			new Modal {
-				title: title
-				message: message
-				buttons: [ text: "OK" ]
-			}
+		window._ide = ide
 
-		showGenericServerErrorMessage: ()->
-			new Modal {
-				title: "There was a problem talking to the server"
-				message: "Sorry, we couldn't complete your request right now. Please wait a few moments and try again. If the problem persists, please let us know."
-				buttons: [ text: "OK" ]
-			}
+		ide.project_id = $scope.project_id = window.project_id
+		ide.$scope = $scope
 
-		recentEvents: []
+		ide.connectionManager = new ConnectionManager(ide, $scope)
+		ide.fileTreeManager = new FileTreeManager(ide, $scope)
+		ide.editorManager = new EditorManager(ide, $scope)
+		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
+		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
+		ide.pdfManager = new PdfManager(ide, $scope)
+		ide.permissionsManager = new PermissionsManager(ide, $scope)
+		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
+	]
 
-		pushEvent: (type, meta = {}) ->
-			@recentEvents.push type: type, meta: meta, date: new Date()
-			if @recentEvents.length > 40
-				@recentEvents.shift()
-
-		reportError: (error, meta = {}) ->
-			meta.client_id = @socket?.socket?.sessionid
-			meta.transport = @socket?.socket?.transport?.name
-			meta.client_now = new Date()
-			meta.recent_events = @recentEvents
-			errorObj = {}
-			if typeof error == "object"
-				for key in Object.getOwnPropertyNames(error)
-					errorObj[key] = error[key]
-			else if typeof error == "string"
-				errorObj.message = error
-			$.ajax
-				url: "/error/client"
-				type: "POST"
-				data: JSON.stringify
-					error: errorObj
-					meta: meta
-				contentType: "application/json; charset=utf-8"
-				headers:
-					"X-Csrf-Token": window.csrfToken
-
-		setLoadingMessage: (message) ->
-			$("#loadingMessage").text(message)
-
-		hideLoadingScreen: () ->
-			$("#loadingScreen").remove()
-
-	_.extend(Ide::, Backbone.Events)
-	window.ide = ide = new Ide()
-	ide.projectMembersManager = new ProjectMembersManager ide
-	ide.settingsManager = new SettingsManager ide
-	ide.helpManager = new HelpManager ide
-	ide.hotkeysManager = new HotkeysManager ide
-	ide.layoutManager.resizeAllSplitters()
-	ide.tourManager = new IdeTour ide
-	ide.debugManager = new DebugManager(ide)
-
-	ide.savingAreaManager = new SavingAreaManager(ide)
-
+	angular.bootstrap(document.body, ["SharelatexApp"])
