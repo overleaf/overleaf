@@ -66,4 +66,4 @@ Gemfile.lock
 *.swp
 .DS_Store
 
-
+app/views/external
