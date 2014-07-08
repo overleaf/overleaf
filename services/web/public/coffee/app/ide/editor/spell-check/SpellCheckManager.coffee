@@ -39,7 +39,6 @@ define [
 				@learnWord(highlight)
 
 		runFullCheck: () ->
-			console.log "Running full check"
 			@highlightedWordManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()

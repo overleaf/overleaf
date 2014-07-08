@@ -3,6 +3,7 @@ define [
 	"../../libs/fineuploader"
 ], (App) ->
 	App.directive 'fineUpload', ($timeout) ->
+		console.log "7777777777"
 		return {
 			scope: {
 				multiple: "="

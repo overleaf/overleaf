@@ -16,6 +16,7 @@ define [
 	"directives/focus"
 	"directives/fineUpload"
 	"directives/onEnter"
+	"directives/scroll"
 	"filters/formatDate"
 ], (
 	App

@@ -35,6 +35,7 @@ TrackChangesController = require("./Features/TrackChanges/TrackChangesController
 DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
+ChatController = require("./Features/Chat/ChatController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -151,6 +152,9 @@ module.exports = class Router
 
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
+
+		app.get  "/project/:project_id/messages", ChatController.getMessages
+		app.post "/project/:project_id/messages", ChatController.sendMessage
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
@@ -295,3 +299,4 @@ module.exports = class Router
 			client.on "getPublishedDetails", (user_id, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					TemplatesController.getTemplateDetails user_id, project_id, callback
+

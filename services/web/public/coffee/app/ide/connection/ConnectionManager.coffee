@@ -60,7 +60,7 @@ define [], () ->
 					@$scope.permissionsLevel = permissionsLevel
 					@$scope.state.load_progress = 100
 					@$scope.state.loading = false
-					@$scope.$emit "project:joined"
+					@$scope.$broadcast "project:joined"
 
 		reconnectImmediately: () ->
 			@disconnect()

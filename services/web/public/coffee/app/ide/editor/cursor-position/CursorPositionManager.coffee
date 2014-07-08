@@ -18,7 +18,6 @@ define [], () ->
 						@$scope.cursorPosition = cursor
 
 			@$scope.$watch "gotoLine", (value) =>
-				console.log "Going to line", value
 				if value?
 					setTimeout () =>
 						@gotoLine(value)

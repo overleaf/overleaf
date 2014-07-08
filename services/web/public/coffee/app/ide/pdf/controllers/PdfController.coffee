@@ -94,7 +94,6 @@ define [
 			return path
 
 		$scope.recompile = (options = {}) ->
-			console.log "Recompiling", options
 			return if $scope.pdf.compiling
 			$scope.pdf.compiling = true
 
@@ -140,7 +139,6 @@ define [
 			)
 
 		$scope.syncToCode = (position) ->
-			console.log "SYNCING VIA DBL CLICK", position
 			synctex
 				.syncToCode(position)
 				.then (data) ->
@@ -246,13 +244,11 @@ define [
 				.syncToCode($scope.pdf.position, includeVisualOffset: true)
 				.then (data) ->
 					{doc, line} = data
-					console.log "OPENING DOC", doc, line
 					ide.editorManager.openDoc(doc, gotoLine: line)
 	]
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
 		$scope.openInEditor = (entry) ->
-			console.log "OPENING", entry.file, entry.line
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?

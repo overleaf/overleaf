@@ -53,3 +53,10 @@ describe "ChatController", ->
 				@ChatHandler.getMessages.calledWith(@project_id, @query).should.equal true
 				done()
 
+		it "should return the messages", (done)->
+			messages = [{content:"hello"}]
+			@ChatHandler.getMessages.callsArgWith(2, null, messages)
+			@ChatController.getMessages @project_id, @query, (err, passedMessages)=>
+				passedMessages.should.deep.equal messages
+				done()
+

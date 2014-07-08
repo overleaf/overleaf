@@ -8,6 +8,7 @@ aside.chat(
 		infinite-scroll="loadMore()"
 		infinite-scroll-disabled="chat.loading || chat.atEnd"
 		infinite-scroll-initialize="ui.chatOpen"
+		scroll-to-bottom-on="message:new"
 	)
 		.infinite-scroll-inner
 			ul.list-unstyled
@@ -19,7 +20,7 @@ aside.chat(
 					div.date(ng-if="$index == 0 || (message.timestamp - chat.groupedMessages[$index - 1].timestamp) > 5 * 60 * 1000")
 						{{ message.timestamp | formatDate:'h:MMa' }} {{ message.timestamp | relativeDate }}
 					span.avatar
-						img(ng-src="{{gravatarUrl(message.user)}}")
+						img(ng-src="{{message.user.gravatar_url}}")
 					div.message-wrapper
 						.name(ng-if="message.user.id != user.id") {{ message.user.first_name }}
 						.message(
@@ -32,8 +33,6 @@ aside.chat(
 							p(ng-repeat="content in message.contents") {{ content }}
 
 	.new-message
-		textarea(
-			placeholder="Your message..."
-		)
+		textarea(placeholder="Your message...", on-enter="sendMessage()", ng-model="newMessageContent")
 
 

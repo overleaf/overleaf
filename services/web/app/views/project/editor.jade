@@ -131,19 +131,3 @@ block content
 		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 	)
 
-	- if (!anonymous)
-		script(type="text/javascript").
-			var chatReq = require.config({
-				context: "chat",
-				baseUrl: "#{chatUrl}/chat"
-			});
-			chatReq(["require", "chat"], function(require, Chat) {
-				new Chat({
-					room: {
-						project_id: window.userSettings.project_id
-					},
-					url: "#{chatUrl}"
-				})
-			});
-	
-

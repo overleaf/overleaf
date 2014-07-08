@@ -38,7 +38,6 @@ define [
 					range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
 					nextChar = editor.session.getTextRange(range)
 
-					console.log "INSERT MATCH", this
 
 					# If we are in \begin{it|}, then we need to remove the trailing }
 					# since it will be adding in with the autocomplete of \begin{item}...
@@ -48,7 +47,6 @@ define [
 					Autocomplete::_insertMatch.call this, data
 
 			@$scope.$watch "autoComplete", (autocomplete) =>
-				console.log "autocomplete change", autocomplete
 				if autocomplete
 					@enable()
 				else

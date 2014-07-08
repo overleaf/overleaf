@@ -5,17 +5,24 @@ logger = require("logger-sharelatex")
 module.exports =
 
 
-	sendMessage: (project_id, user_id, messageContent, callback)->
+	sendMessage: (req, res)->
+		{project_id} = req.params
+		user_id = req.session.user._id
+		messageContent = req.body.content
 		ChatHandler.sendMessage project_id, user_id, messageContent, (err, builtMessge)->
 			if err?
 				logger.err err:err, project_id:project_id, user_id:user_id, messageContent:messageContent, "problem sending message to chat api"
-				return callback(err)
+				return res.send(500)
 			EditorRealTimeController.emitToRoom project_id,  "new-chat-message", builtMessge, (err)->
-				callback(err)
+			res.send()
 
-	getMessages: (project_id, query, callback)->
-		ChatHandler.getMessages project_id, query, (err)->
+	getMessages: (req, res)->
+		{project_id} = req.params
+		query = req.body
+		logger.log project_id:project_id, query:query, "getting messages"
+		ChatHandler.getMessages project_id, query, (err, messages)->
 			if err?
 				logger.err err:err, query:query, "problem getting messages from chat api"
-				return callback(err)
-			callback()
+				return res.send 500
+			logger.log messages:messages, "sending messages to client"
+			res.send messages

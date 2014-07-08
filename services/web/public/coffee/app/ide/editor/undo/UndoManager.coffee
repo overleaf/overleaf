@@ -16,7 +16,6 @@ define [
 			@nextUpdateIsRemote = false
 
 			@editor.on "changeSession", (e) =>
-				console.log "setting undo manager", e.session
 				e.session.setUndoManager(@)
 
 		showUndoConflictWarning: () ->

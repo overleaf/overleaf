@@ -47,7 +47,6 @@ define [
 				onProgress = (progress) ->
 					scope.$apply () ->
 						scope.progress = Math.floor(progress.loaded/progress.total*100)
-						console.log "PROGRESS", scope.progress, progress.loaded, progress.total
 
 				initializedPosition = false
 				initializePosition = () ->
@@ -78,7 +77,6 @@ define [
 					, 1000
 
 				element.find(".pdfjs-viewer").scroll () ->
-					console.log "UPDATING POSITION", pdfListView.getPdfPosition(true)
 					scope.position = pdfListView.getPdfPosition(true)
 
 				onDoubleClick = (e) ->
@@ -99,7 +97,6 @@ define [
 									flashControls()
 
 				scope.$watch "highlights", (areas) ->
-					console.log "UPDATING HIGHLIGHTS", areas
 					return if !areas?
 					highlights = for area in areas or []
 						{

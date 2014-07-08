@@ -47,8 +47,6 @@ define [
 				range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
 				nextChar = editor.session.getTextRange(range)
 
-				console.log "CALLING OLD"
-
 				# If we are in \begin{it|}, then we need to remove the trailing }
 				# since it will be adding in with the autocomplete of \begin{item}...
 				if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
