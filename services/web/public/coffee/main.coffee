@@ -11,6 +11,7 @@ define [
 	"directives/fineUpload"
 	"directives/onEnter"
 	"directives/selectAll"
+	"directives/maxHeight"
 	"filters/formatDate"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])
