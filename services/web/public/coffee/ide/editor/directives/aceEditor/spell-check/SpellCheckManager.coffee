@@ -1,5 +1,5 @@
 define [
-	"ide/editor/spell-check/HighlightedWordManager"
+	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
 	"ace/range"
 ], (HighlightedWordManager) ->
 	Range = require("ace/range").Range
