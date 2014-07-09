@@ -1,12 +1,12 @@
 extends ../layout
 
 block content
-	//- We need to do .replace(/\//, '\\/') do that '</script>' -> '<\/script>'
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script(type="text/javascript").
 		window.data = {
-			projects: !{JSON.stringify(projects).replace(/\//, '\\/')},
-			tags: !{JSON.stringify(tags).replace(/\//, '\\/')}
+			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
+			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')}
 		};
 		window.algolia = {
 			institutions: {
