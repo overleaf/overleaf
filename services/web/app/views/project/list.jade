@@ -245,11 +245,11 @@ block content
 														select-all,
 														type="checkbox"
 													)
-													| TITLE
+													span.header Title
 												.col-md-2
-													| OWNER
+													span.header Owner
 												.col-md-4
-													| LAST MODIFIED
+													span.header Last Modified
 										li.project_entry.container-fluid(
 											ng-repeat="project in visibleProjects | orderBy:'lastUpdated':true",
 											ng-controller="ProjectListItemController"
@@ -261,15 +261,14 @@ block content
 														type="checkbox",
 														ng-model="project.selected"
 													)
-													span.title
-														a.projectName(href="/project/{{project.id}}") {{project.name}}
 													span
-														span.label.label-default(ng-repeat='tag in project.tags')
+														a.projectName(href="/project/{{project.id}}") {{project.name}}
+														span.label.label-default.tag-label(ng-repeat='tag in project.tags')
 															| {{tag.name}}
 												.col-md-2
-													span.owner {{ownerName()}}
+													| {{ownerName()}}
 												.col-md-4
-													span.last-modified.isoDate {{project.lastUpdated | formatDate}}
+													| {{project.lastUpdated | formatDate}}
 										li(
 											ng-if="visibleProjects.length == 0",
 											ng-cloak
