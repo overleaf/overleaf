@@ -36,6 +36,7 @@ DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
+BlogController = require("./Features/Blog/BlogController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -63,6 +64,8 @@ module.exports = class Router
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
+
+		app.get '/blog/*', BlogController.getPage
 
 		if Settings.enableSubscriptions
 			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
