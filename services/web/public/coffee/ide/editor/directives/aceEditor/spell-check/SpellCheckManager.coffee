@@ -13,12 +13,14 @@ define [
 				if language != oldLanguage and oldLanguage?
 					@runFullCheck()
 
+			onChange = (e) =>
+				@runCheckOnChange(e)
+
 			@editor.on "changeSession", (e) =>
 				@runFullCheck()
 
-				doc = e.session.getDocument()
-				doc.on "change", (e) =>
-					@runCheckOnChange(e)
+				e.oldSession?.getDocument().off "change", onChange
+				e.session.getDocument().on "change", onChange
 
 			@$scope.spellingMenu = {left: '0px', top: '0px'}
 

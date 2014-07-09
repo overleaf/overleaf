@@ -82,7 +82,7 @@ define [
 
 		_unBindFromSocketEvents: () ->
 			@ide.socket.removeListener "otUpdateApplied", @_onUpdateAppliedHandler
-			@ide.socket.removeListener "otUpdateError", @_onUpdateErrorHandler
+			@ide.socket.removeListener "otUpdateError", @_onErrorHandler
 			@ide.socket.removeListener "disconnect", @_onDisconnectHandler
 
 		leaveAndCleanUp: () ->

@@ -24,8 +24,12 @@ define [
 				else
 					@disable()
 
+			onChange = (change) =>
+				@onChange(change)
+
 			@editor.on "changeSession", (e) =>
-				@bindToSession(e.session)
+				e.oldSession.off "change", onChange
+				e.session.on "change", onChange
 
 		enable: () ->
 			@editor.setOptions({
@@ -45,9 +49,6 @@ define [
 				enableSnippets: false
 			})
 
-		bindToSession: (@aceSession) ->
-			@aceSession.on "change", (change) => @onChange(change)
-
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.data.range.end
@@ -56,7 +57,7 @@ define [
 			if end.row == cursorPosition.row and end.column == cursorPosition.column + 1
 				if change.data.action == "insertText"
 					range = new Range(end.row, 0, end.row, end.column)
-					lineUpToCursor = @aceSession.getTextRange(range)
+					lineUpToCursor = @editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 
 					if commandFragment? and commandFragment.length > 2

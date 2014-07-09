@@ -107,6 +107,9 @@ define [
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
 
+				emitChange = () -> 
+					scope.$emit "#{scope.name}:change"
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 
 					editor.setSession(new EditSession(lines))
@@ -114,8 +117,7 @@ define [
 					session = editor.getSession()
 
 					doc = session.getDocument()
-					doc.on "change", () ->
-						scope.$emit "#{scope.name}:change"
+					doc.on "change", emitChange
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
@@ -127,6 +129,10 @@ define [
 				detachFromAce = (sharejs_doc) ->
 					sharejs_doc.detachFromAce()
 					sharejs_doc.off "remoteop.recordForUndo"
+
+					session = editor.getSession()
+					doc = session.getDocument()
+					doc.off "change", emitChange
 
 			template: """
 				<div class="ace-editor-wrapper">

@@ -2,6 +2,9 @@ define [], () ->
 	class CursorPositionManager
 		constructor: (@$scope, @editor, @element) ->
 
+			onChangeCursor = (e) =>
+				@emitCursorUpdateEvent(e)
+
 			@editor.on "changeSession", (e) =>
 				if e.oldSession?
 					@storeCursorPosition(e.oldSession)
@@ -9,8 +12,8 @@ define [], () ->
 
 				@doc_id = @$scope.sharejsDoc?.doc_id
 
-				e.session.selection.on 'changeCursor', (e) =>
-					@emitCursorUpdateEvent(e)
+				e.oldSession?.selection.off 'changeCursor', onChangeCursor
+				e.session.selection.on 'changeCursor', onChangeCursor
 
 				setTimeout () =>
 					@gotoStoredPosition()
