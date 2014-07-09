@@ -6,9 +6,8 @@ define [
 			@$scope.onlineUsers = {}
 			@$scope.onlineUserCursorHighlights = {}
 
-			@$scope.$watch "editor.cursorPosition", (position) =>
-				if position?
-					@sendCursorPositionUpdate()
+			@$scope.$on "cursor:editor:update", (event, position) =>
+				@sendCursorPositionUpdate(position)
 
 			@ide.socket.on "clientTracking.clientUpdated", (client) =>
 				if client.id != @ide.socket.socket.sessionid # Check it's not me!
@@ -37,11 +36,9 @@ define [
 				}
 
 		UPDATE_INTERVAL: 500
-		sendCursorPositionUpdate: () ->
-			console.log "SENDING CURSOR POSITION UPDATE", @$scope.editor.cursorPosition
+		sendCursorPositionUpdate: (position) ->
 			if !@cursorUpdateTimeout?
 				@cursorUpdateTimeout = setTimeout ()=>
-					position = @$scope.editor.cursorPosition
 					doc_id   = @$scope.editor.open_doc_id
 
 					@ide.socket.emit "clientTracking.updatePosition", {

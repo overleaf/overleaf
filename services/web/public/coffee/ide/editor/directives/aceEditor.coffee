@@ -43,11 +43,11 @@ define [
 						@$originalApply(fn);
 
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
-				window.editors ||= []
-				window.editors.push editor
 
-				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
-				spellCheckManager     = new SpellCheckManager(scope, editor, element)
+				scope.name = attrs.aceEditor
+
+				# autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
+				# spellCheckManager     = new SpellCheckManager(scope, editor, element)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element)

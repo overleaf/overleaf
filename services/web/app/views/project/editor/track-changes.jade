@@ -82,7 +82,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 
 	.diff.full-size(ng-controller="TrackChangesDiffController")
 		.diff-editor.hide-ace-cursor(
-			ace-editor,
+			ace-editor="track-changes",
 			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted",
 			theme="settings.theme",
 			font-size="settings.fontSize",

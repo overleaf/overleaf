@@ -11,12 +11,6 @@ define [], () ->
 
 				@gotoStoredPosition()
 
-			@editor.on "changeSelection", () =>
-				cursor = @editor.getCursorPosition()
-				@$scope.$apply () =>
-					if @$scope.cursorPosition?
-						@$scope.cursorPosition = cursor
-
 			@$scope.$watch "gotoLine", (value) =>
 				console.log "Going to line", value
 				if value?
@@ -33,10 +27,18 @@ define [], () ->
 				$.localStorage("doc.position.#{doc_id}", docPosition)
 			
 		onCursorChange: (event) ->
+			@storeCursorPosition()
+			@emitCursorUpdateEvent()
+
+		storeCursorPosition: () ->
 			if !@ignoreCursorPositionChanges and doc_id = @$scope.sharejsDoc?.doc_id
 				docPosition = $.localStorage("doc.position.#{doc_id}") || {}
 				docPosition.cursorPosition = @editor.getCursorPosition()
 				$.localStorage("doc.position.#{doc_id}", docPosition)
+
+		emitCursorUpdateEvent: () ->
+			cursor = @editor.getCursorPosition()
+			@$scope.$emit "cursor:#{@$scope.name}:update", cursor
 
 		gotoStoredPosition: () ->
 			doc_id = @$scope.sharejsDoc?.doc_id
