@@ -21,7 +21,6 @@ define [
 					@updateCursorHighlights()
 
 		updateCursorHighlights: () ->
-			console.log "UPDATING CURSOR HIGHLIGHTS"
 			@$scope.onlineUserCursorHighlights = {}
 			for client_id, client of @$scope.onlineUsers
 				doc_id = client.doc_id

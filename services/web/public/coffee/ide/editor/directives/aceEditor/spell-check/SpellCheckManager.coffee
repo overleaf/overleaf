@@ -56,8 +56,6 @@ define [
 			@$scope.$apply () =>
 				@$scope.spellingMenu.highlight = highlight
 
-			console.log "highlight", @$scope.highlight_under_mouse
-
 			if highlight
 				e.stopPropagation()
 				e.preventDefault()
@@ -68,8 +66,6 @@ define [
 						highlight.row, highlight.column + highlight.word.length
 					)
 				)
-
-				console.log "Height", @element.find(".context-menu").height()
 
 				@$scope.$apply () =>
 					@$scope.spellingMenu.open = true

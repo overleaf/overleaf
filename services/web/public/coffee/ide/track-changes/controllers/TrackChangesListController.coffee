@@ -8,7 +8,6 @@ define [
 			ide.trackChangesManager.fetchNextBatchOfUpdates()
 
 		$scope.recalculateSelectedUpdates = () ->
-			console.log "RECALCULATING UPDATES"
 			beforeSelection = true
 			afterSelection = false
 			$scope.trackChanges.selection.updates = []
@@ -72,14 +71,12 @@ define [
 	App.controller "TrackChangesListItemController", ["$scope", ($scope) ->
 		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
 			if selectedFrom
-				console.log "SELECTED FROM CHANGED", $scope.update, selectedFrom, oldSelectedFrom
 				for update in $scope.trackChanges.updates
 					update.selectedFrom = false unless update == $scope.update
 				$scope.recalculateSelectedUpdates()		
 
 		$scope.$watch "update.selectedTo", (selectedTo, oldSelectedTo) ->
 			if selectedTo
-				console.log "SELECTED TO CHANGED", $scope.update, selectedTo, oldSelectedTo
 				for update in $scope.trackChanges.updates
 					update.selectedTo = false unless update == $scope.update
 				$scope.recalculateSelectedUpdates()

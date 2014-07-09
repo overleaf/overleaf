@@ -21,7 +21,6 @@ define [], () ->
 				@storeScrollTopPosition(@editor.getSession())
 
 			@$scope.$on "#{@$scope.name}:gotoLine", (editor, value) =>
-				console.log "Going to line", value
 				if value?
 					setTimeout () =>
 						@gotoLine(value)

@@ -92,7 +92,6 @@ define [], () ->
 			clearTimeout @timeoutId if @timeoutId?
 					
 		decreaseCountdown: () ->
-			console.log "Decreasing countdown"
 			return if !@$scope.connection.reconnection_countdown?
 			@$scope.$apply () =>
 				@$scope.connection.reconnection_countdown--
@@ -104,7 +103,6 @@ define [], () ->
 				@timeoutId = setTimeout (=> @decreaseCountdown()), 1000
 
 		tryReconnect: () ->
-			console.log "Trying reconnect"
 			@cancelReconnect()
 			@$scope.connection.reconnecting = true
 			delete @$scope.connection.reconnection_countdown

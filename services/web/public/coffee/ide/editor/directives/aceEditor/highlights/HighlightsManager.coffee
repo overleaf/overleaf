@@ -40,7 +40,6 @@ define [
 				do (annotation) =>
 					colorScheme = @_getColorScheme(annotation.hue)
 					if annotation.cursor?
-						console.log "DRAWING CURSOR", annotation
 						@labels.push {
 							text: annotation.label
 							range: new Range(
@@ -109,7 +108,6 @@ define [
 					@$scope.annotationLabel.show = true
 
 				$label = @element.find(".annotation-label")
-				console.log "pageX", coords.pageX, "label", $label.outerWidth(), "ace", $ace.width()
 
 				if coords.pageX + $label.outerWidth() < $ace.width()
 					left  = coords.pageX

@@ -99,7 +99,6 @@ define [
 						session.setMode(new LatexMode())
 
 				scope.$watch "annotations", (annotations) ->
-					console.log "SETTING ANNOTATIONS", annotations
 					if annotations?
 						session = editor.getSession() 
 						session.setAnnotations annotations

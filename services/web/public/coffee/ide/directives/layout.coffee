@@ -49,7 +49,6 @@ define [
 					oldWidth = element.width()
 					# Something resized our parent element
 					onExternalResize = () ->
-						console.log "EXTERNAL RESIOZE", name, attrs.resizeProportionally
 						if attrs.resizeProportionally? and scope.$eval(attrs.resizeProportionally)
 							eastState = element.layout().readState().east
 							if eastState?
@@ -87,7 +86,6 @@ define [
 
 					if attrs.openEast?
 						scope.$watch attrs.openEast, (value, oldValue) ->
-							console.log "Open East", value, oldValue
 							if value? and value != oldValue
 								if value
 									element.layout().open("east")
