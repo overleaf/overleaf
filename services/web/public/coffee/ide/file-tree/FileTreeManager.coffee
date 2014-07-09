@@ -189,7 +189,7 @@ define [
 
 		loadDeletedDocs: () ->
 			@$scope.deletedDocs = []
-			for doc in @$scope.project.deletedDocs
+			for doc in @$scope.project.deletedDocs or []
 				@$scope.deletedDocs.push {
 					name: doc.name
 					id:   doc._id
