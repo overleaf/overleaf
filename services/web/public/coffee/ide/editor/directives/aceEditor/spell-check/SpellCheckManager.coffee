@@ -29,8 +29,6 @@ define [
 			$(document).on "click", (e) =>
 				@closeContextMenu(e)
 				return true
-			# $(document).on "contextmenu", (e) =>
-			# 	@closeContextMenu(e)
 
 			@$scope.replaceWord = (highlight, suggestion) =>
 				@replaceWord(highlight, suggestion)
@@ -39,13 +37,11 @@ define [
 				@learnWord(highlight)
 
 		runFullCheck: () ->
-			console.log "Running full check"
 			@highlightedWordManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()
 
 		runCheckOnChange: (e) ->
-			console.log "Checking change", e.data
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@highlightedWordManager.applyChange(e.data)
 				@markLinesAsUpdated(e.data)
