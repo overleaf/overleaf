@@ -266,9 +266,9 @@ block content
 														span.label.label-default.tag-label(ng-repeat='tag in project.tags')
 															| {{tag.name}}
 												.col-md-2
-													| {{ownerName()}}
+													span.owner {{ownerName()}}
 												.col-md-4
-													| {{project.lastUpdated | formatDate}}
+													span.last-modified {{project.lastUpdated | formatDate}}
 										li(
 											ng-if="visibleProjects.length == 0",
 											ng-cloak
