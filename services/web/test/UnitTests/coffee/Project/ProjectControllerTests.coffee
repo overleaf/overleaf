@@ -278,25 +278,22 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.loadEditor @req, @res
 
-		it "should add userObject", (done)->
+		it "should add user", (done)->
 			@res.render = (pageName, opts)=>
-				userObject = JSON.parse(opts.userObject)
-				userObject.email.should.equal @user.email
+				opts.user.email.should.equal @user.email
 				done()
 			@ProjectController.loadEditor @req, @res
 
-		it "should add on userSettingsObject", (done)->
+		it "should add on userSettings", (done)->
 			@res.render = (pageName, opts)=>
-				userSettingsObject = JSON.parse(opts.userSettingsObject)
-				userSettingsObject.fontSize.should.equal @user.ace.fontSize
-				userSettingsObject.theme.should.equal @user.ace.theme
+				opts.userSettings.fontSize.should.equal @user.ace.fontSize
+				opts.userSettings.theme.should.equal @user.ace.theme
 				done()
 			@ProjectController.loadEditor @req, @res
 
-		it "should add sharelatexObject", (done)->
+		it "should add sharelatex", (done)->
 			@res.render = (pageName, opts)=>
-				sharelatexObject = JSON.parse(opts.sharelatexObject)
-				sharelatexObject.siteUrl.should.equal @settings.siteUrl
+				opts.sharelatex.siteUrl.should.equal @settings.siteUrl
 				done()
 			@ProjectController.loadEditor @req, @res
 

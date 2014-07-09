@@ -87,8 +87,8 @@ module.exports = ProjectController =
 
 	newProject: (req, res)->
 		user = req.session.user
-		projectName = sanitize.escape(req.body.projectName)
-		template = sanitize.escape(req.body.template)
+		projectName = req.body.projectName?.trim()
+		template = req.body.template
 		logger.log user: user, type: template, name: projectName, "creating project"
 		async.waterfall [
 			(cb)->
@@ -201,7 +201,7 @@ module.exports = ProjectController =
 					bodyClasses: ["editor"]
 					project : project
 					project_id : project._id
-					userObject : JSON.stringify({
+					user : {
 						id    : user.id
 						email : user.email
 						first_name : user.first_name
@@ -209,18 +209,18 @@ module.exports = ProjectController =
 						referal_id : user.referal_id
 						subscription :
 							freeTrial: {allowed: allowedFreeTrial}
-					})
-					userSettingsObject: JSON.stringify({
+					}
+					userSettings: {
 						mode  : user.ace.mode
 						theme : user.ace.theme
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
-					})
-					sharelatexObject : JSON.stringify({
+					}
+					sharelatex : {
 						siteUrl: Settings.siteUrl,
 						jsPath: res.locals.jsPath
-					})
+					}
 					privilegeLevel: privilegeLevel
 					loadPdfjs: (user.ace.pdfViewer == "pdfjs")
 					chatUrl: Settings.apis.chat.url
