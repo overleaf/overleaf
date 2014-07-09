@@ -1,5 +1,5 @@
 define [
-	"ace/range"
+	"ace/ace"
 ], () ->
 	Range = require("ace/range").Range
 

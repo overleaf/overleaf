@@ -6,12 +6,7 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-	"ace/keyboard/vim"
-	"ace/keyboard/emacs"
-	"ace/mode/latex"
-	"ace/edit_session"
 ], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
-	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
 	App.directive "aceEditor", ["$timeout", ($timeout) ->
@@ -43,6 +38,8 @@ define [
 						@$originalApply(fn);
 
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
+				window.editors ||= []
+				window.editors.push editor
 
 				scope.name = attrs.aceEditor
 
@@ -74,10 +71,10 @@ define [
 					editor.setShowPrintMargin(value)
 
 				scope.$watch "keybindings", (value) ->
-					Vim = require("ace/keyboard/vim").handler
-					Emacs = require("ace/keyboard/emacs").handler
-					keybindings = vim: Vim, emacs: Emacs
-					editor.setKeyboardHandler(keybindings[value])
+					if value in ["vim", "emacs"]
+						editor.setKeyboardHandler("ace/keyboard/#{value}")
+					else
+						editor.setKeyboardHandler(null)
 
 				scope.$watch "fontSize", (value) ->
 					element.find(".ace_editor, .ace_content").css({
@@ -109,7 +106,7 @@ define [
 				resetSession = () ->
 					session = editor.getSession()
 					session.setUseWrapMode(true)
-					session.setMode(new LatexMode())
+					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
 
 				attachToAce = (sharejs_doc) ->

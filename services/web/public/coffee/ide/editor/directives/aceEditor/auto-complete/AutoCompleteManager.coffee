@@ -1,23 +1,10 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
 	"ide/editor/directives/aceEditor/auto-complete/Snippets"
-	"ace/autocomplete/util"
-	"ace/autocomplete"
-	"ace/range"
-	"ace/ext/language_tools"
-], (SuggestionManager, Snippets, Util, AutoComplete) ->
-	Range = require("ace/range").Range
-	Autocomplete = AutoComplete.Autocomplete
-
-	Util.retrievePrecedingIdentifier = (text, pos, regex) ->
-		currentLineOffset = 0
-		for i in [(pos-1)..0]
-			if text[i] == "\n"
-				currentLineOffset = i + 1
-				break
-		currentLine = text.slice(currentLineOffset, pos)
-		fragment = getLastCommandFragment(currentLine) or ""
-		return fragment
+	"ace/ace"
+	"ace/ext-language_tools"
+], (SuggestionManager, Snippets, Ace) ->
+	Range = Ace.require("ace/range").Range
 
 	getLastCommandFragment = (lineUpToCursor) ->
 		if m = lineUpToCursor.match(/(\\[^\\ ]+)$/)
@@ -29,21 +16,7 @@ define [
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
 
-			if !Autocomplete::_insertMatch?
-				# Only override this once since it's global but we may create multiple
-				# autocomplete handlers
-				Autocomplete::_insertMatch = Autocomplete::insertMatch
-				Autocomplete::insertMatch = (data) ->
-					pos = editor.getCursorPosition()
-					range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
-					nextChar = editor.session.getTextRange(range)
-
-					# If we are in \begin{it|}, then we need to remove the trailing }
-					# since it will be adding in with the autocomplete of \begin{item}...
-					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
-						editor.session.remove(range)
-					
-					Autocomplete::_insertMatch.call this, data
+			@monkeyPatchAutocomplete()	
 
 			@$scope.$watch "autoComplete", (autocomplete) =>
 				if autocomplete
@@ -51,14 +24,14 @@ define [
 				else
 					@disable()
 
-
 			@editor.on "changeSession", (e) =>
 				@bindToSession(e.session)
 
 		enable: () ->
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
-				enableSnippets: true
+				enableSnippets: true,
+				enableLiveAutocompletion: false
 			})
 			
 			SnippetCompleter =
@@ -87,6 +60,50 @@ define [
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 
 					if commandFragment? and commandFragment.length > 2
-					 	setTimeout () =>
-					 		@editor.execCommand("startAutocomplete")
-					 	, 0
+						setTimeout () =>
+							@editor.execCommand("startAutocomplete")
+						, 0
+
+		monkeyPatchAutocomplete: () ->
+			Autocomplete = require("ace/autocomplete").Autocomplete
+			Util = require("ace/autocomplete/util")
+			editor = @editor
+
+			if !Autocomplete::_insertMatch?
+				# Only override this once since it's global but we may create multiple
+				# autocomplete handlers
+				Autocomplete::_insertMatch = Autocomplete::insertMatch
+				Autocomplete::insertMatch = (data) ->
+					pos = editor.getCursorPosition()
+					range = new Range(pos.row, pos.column, pos.row, pos.column + 1)
+					nextChar = editor.session.getTextRange(range)
+
+					# If we are in \begin{it|}, then we need to remove the trailing }
+					# since it will be adding in with the autocomplete of \begin{item}...
+					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
+						editor.session.remove(range)
+					
+					Autocomplete::_insertMatch.call this, data
+
+				# Overwrite this to set autoInsert = false
+				Autocomplete.startCommand = {
+					name: "startAutocomplete",
+					exec: (editor) ->
+						if (!editor.completer)
+							editor.completer = new Autocomplete()
+						editor.completer.autoInsert = false
+						editor.completer.autoSelect = true
+						editor.completer.showPopup(editor)
+						editor.completer.cancelContextMenu()
+					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"
+				}
+
+			Util.retrievePrecedingIdentifier = (text, pos, regex) ->
+				currentLineOffset = 0
+				for i in [(pos-1)..0]
+					if text[i] == "\n"
+						currentLineOffset = i + 1
+						break
+				currentLine = text.slice(currentLineOffset, pos)
+				fragment = getLastCommandFragment(currentLine) or ""
+				return fragment
