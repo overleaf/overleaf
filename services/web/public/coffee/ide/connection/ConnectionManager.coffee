@@ -11,6 +11,9 @@ define [], () ->
 			@$scope.tryReconnectNow = () =>
 				@tryReconnect()
 
+			@$scope.$on "editor:change", () =>
+				@lastUpdated = new Date()
+
 			@ide.socket = io.connect null,
 				reconnect: false
 				"force new connection": true
@@ -70,10 +73,8 @@ define [], () ->
 			@ide.socket.disconnect()
 
 		startAutoReconnectCountdown: () ->
-			lastUpdated = @ide.editorManager.lastUpdated()
-
 			twoMinutes = 2 * 60 * 1000
-			if lastUpdated? and new Date() - lastUpdated > twoMinutes
+			if @lastUpdated? and new Date() - @lastUpdated > twoMinutes
 				# between 1 minute and 3 minutes
 				countdown = 60 + Math.floor(Math.random() * 120)
 			else

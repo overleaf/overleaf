@@ -7,10 +7,8 @@ define [
 		constructor: (@ide, @$scope) ->
 			@$scope.editor = {
 				sharejs_doc: null
-				last_updated: null
 				open_doc_id: null
 				opening: true
-				cursorPosition: {}
 				gotoLine: null
 			}
 
@@ -92,9 +90,6 @@ define [
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
-
-		lastUpdated: () ->
-			@$scope.editor.last_updated
 
 		getCurrentDocValue: () ->
 			@$scope.editor.sharejs_doc?.getSnapshot()

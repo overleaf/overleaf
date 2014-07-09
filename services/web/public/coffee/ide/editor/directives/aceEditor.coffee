@@ -18,9 +18,7 @@ define [
 				fontSize: "="
 				autoComplete: "="
 				sharejsDoc: "="
-				lastUpdated: "="
 				spellCheckLanguage: "="
-				cursorPosition: "="
 				highlights: "="
 				text: "="
 				readOnly: "="
@@ -117,8 +115,7 @@ define [
 
 					doc = session.getDocument()
 					doc.on "change", () ->
-						scope.$apply () ->
-							scope.lastUpdated = new Date()
+						scope.$emit "#{scope.name}:change"
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
