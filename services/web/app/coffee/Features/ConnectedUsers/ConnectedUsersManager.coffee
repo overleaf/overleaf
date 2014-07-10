@@ -8,8 +8,8 @@ rclient.auth(Settings.redis.web.password)
 
 ONE_HOUR_IN_S = 60 * 60
 
+buildProjectSetKey = (project_id)-> return "users_in_project:#{project_id}"
 buildUserKey = (project_id, user_id)-> return "connected_user:#{project_id}:#{user_id}"
-buildProjectSetKey = (project_id)-> return "connected_user:#{project_id}"
 
 
 module.exports = 
@@ -21,6 +21,15 @@ module.exports =
 			(cb)->
 				rclient.setex buildUserKey(project_id, user_id), new Date(), ONE_HOUR_IN_S * 6, cb
 		], callback
+
+	marksUserAsDisconnected: (project_id, user_id, callback)->
+		async.series [
+			(cb)->
+				rclient.srem buildProjectSetKey(project_id), user_id, cb
+			(cb)->
+				rclient.del buildUserKey(project_id, user_id), cb
+		], callback
+
 
 
 	_getConnectedUser: (project_id, user_id, callback)->

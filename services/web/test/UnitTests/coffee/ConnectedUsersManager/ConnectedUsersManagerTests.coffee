@@ -21,6 +21,8 @@ describe "ConnectedUsersManager", ->
 			setex:sinon.stub()
 			sadd:sinon.stub()
 			get: sinon.stub()
+			srem:sinon.stub()
+			del:sinon.stub()
 		tk.freeze(new Date())
 
 		@ConnectedUsersManager = SandboxedModule.require modulePath, requires:
@@ -42,13 +44,30 @@ describe "ConnectedUsersManager", ->
 
 		it "should set a key with the date and give it a ttl", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
+				console.log @rClient.setex.args[0], "connected_user:#{@project_id}:#{@user_id}"
 				@rClient.setex.calledWith("connected_user:#{@project_id}:#{@user_id}", new Date(), 60 * 60 * 6).should.equal true
 				done()
 
 		it "should push the user_id on to the project list", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
-				@rClient.sadd.calledWith("connected_user:#{@project_id}", @user_id).should.equal true
+				@rClient.sadd.calledWith("users_in_project:#{@project_id}", @user_id).should.equal true
 				done()
+
+	describe "marksUserAsDisconnected", ->
+		beforeEach ->
+			@rClient.srem.callsArgWith(2)
+			@rClient.del.callsArgWith(1)
+
+		it "should remove the user from the set", (done)->
+			@ConnectedUsersManager.marksUserAsDisconnected @project_id, @user_id, (err)=>
+				@rClient.srem.calledWith("users_in_project:#{@project_id}", @user_id).should.equal true
+				done()
+
+		it "should delete the connected_user string", (done)->
+			@ConnectedUsersManager.marksUserAsDisconnected @project_id, @user_id, (err)=>
+				@rClient.del.calledWith("connected_user:#{@project_id}:#{@user_id}").should.equal true
+				done()
+
 
 
 	describe "_getConnectedUser", ->
