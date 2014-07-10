@@ -1218,7 +1218,7 @@ exports.parForEach = function(array, fn, callback) {
     }
 };
 
-var ID_REGEX = /[\\a-zA-Z_0-9\$\-\u00A2-\uFFFF]/;
+var ID_REGEX = /[a-zA-Z_0-9\$\-\u00A2-\uFFFF]/;
 
 exports.retrievePrecedingIdentifier = function(text, pos, regex) {
     regex = regex || ID_REGEX;
@@ -1229,9 +1229,7 @@ exports.retrievePrecedingIdentifier = function(text, pos, regex) {
         else
             break;
     }
-    var frag = buf.reverse().join("");
-    console.log("NATIVE FRAGMENT", frag, buf, regex, text.slice(pos - 10, pos));
-    return frag;
+    return buf.reverse().join("");
 };
 
 exports.retrieveFollowingIdentifier = function(text, pos, regex) {
@@ -1259,7 +1257,7 @@ var lang = require("./lib/lang");
 var snippetManager = require("./snippets").snippetManager;
 
 var Autocomplete = function() {
-    this.autoInsert = false;
+    this.autoInsert = true;
     this.autoSelect = true;
     this.keyboardHandler = new HashHandler();
     this.keyboardHandler.bindKeys(this.commands);
@@ -1417,7 +1415,6 @@ var Autocomplete = function() {
     };
 
     this.gatherCompletions = function(editor, callback) {
-        console.log("gatherCompletions");
         var session = editor.getSession();
         var pos = editor.getCursorPosition();
 
@@ -1434,7 +1431,6 @@ var Autocomplete = function() {
                     matches = matches.concat(results);
                 var pos = editor.getCursorPosition();
                 var line = session.getLine(pos.row);
-                console.log("IN COMPLETER", results)
                 callback(null, {
                     prefix: util.retrievePrecedingIdentifier(line, pos.column, results[0] && results[0].identifierRegex),
                     matches: matches,
@@ -1487,11 +1483,8 @@ var Autocomplete = function() {
         this.gatherCompletions(this.editor, function(err, results) {
             var detachIfFinished = function() {
                 if (!results.finished) return;
-                console.log("DETACHING");
                 return this.detach();
             }.bind(this);
-
-            console.log("UPDATE COMPLETIONS CALLBACK", results)
 
             var prefix = results.prefix;
             var matches = results && results.matches;
@@ -1511,7 +1504,6 @@ var Autocomplete = function() {
             if (this.autoInsert && filtered.length == 1)
                 return this.insertMatch(filtered[0]);
 
-            console.log("opening pop up", prefix, keepPopupPosition);
             this.openPopup(this.editor, prefix, keepPopupPosition);
         }.bind(this));
     };
@@ -1527,7 +1519,7 @@ Autocomplete.startCommand = {
     exec: function(editor) {
         if (!editor.completer)
             editor.completer = new Autocomplete();
-        editor.completer.autoInsert = false;
+        editor.completer.autoInsert = 
         editor.completer.autoSelect = true;
         editor.completer.showPopup(editor);
         editor.completer.cancelContextMenu();
@@ -1738,7 +1730,6 @@ var loadSnippetFile = function(id) {
 };
 
 function getCompletionPrefix(editor) {
-    console.log("getCompletionPrefix");
     var pos = editor.getCursorPosition();
     var line = editor.session.getLine(pos.row);
     var prefix = util.retrievePrecedingIdentifier(line, pos.column);
