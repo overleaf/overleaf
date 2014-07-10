@@ -65,6 +65,7 @@ module.exports = class Router
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
 
+		app.get '/blog', BlogController.getIndexPage
 		app.get '/blog/*', BlogController.getPage
 
 		if Settings.enableSubscriptions
