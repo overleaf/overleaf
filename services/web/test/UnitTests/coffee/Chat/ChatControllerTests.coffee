@@ -25,33 +25,45 @@ describe "ChatController", ->
 		@query = 
 			before:"some time"
 
-
+		@req =
+			params:
+				project_id:@project_id
+			session:
+				user:
+					_id:@user_id
+			body:
+				content:@messageContent
+		@res = {}
 
 	describe "sendMessage", ->
 
 		it "should tell the chat handler about the message", (done)->
 			@ChatHandler.sendMessage.callsArgWith(3)
-			@ChatController.sendMessage @project_id, @user_id, @messageContent, (err)=>
+			@res.send = =>
 				@ChatHandler.sendMessage.calledWith(@project_id, @user_id, @messageContent).should.equal true
 				done()
+			@ChatController.sendMessage @req, @res
 
 		it "should tell the editor real time controller about the update with the data from the chat handler", (done)->
 			@chatMessage =
 				content:"hello world"
 			@ChatHandler.sendMessage.callsArgWith(3, null, @chatMessage)
-			@ChatController.sendMessage @project_id, @user_id, @messageContent, (err)=>
+			@res.send = =>
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "new-chat-message", @chatMessage).should.equal true
 				done()
-
+			@ChatController.sendMessage @req, @res
 
 	describe "getMessages", ->
+		beforeEach ->
+			@req.body = @query
 
-		it "should tell the chat handler about the request", (done)->
+		it "should ask the chat handler about the request", (done)->
 
 			@ChatHandler.getMessages.callsArgWith(2)
-			@ChatController.getMessages @project_id, @query, (err)=>
+			@res.send = =>
 				@ChatHandler.getMessages.calledWith(@project_id, @query).should.equal true
 				done()
+			@ChatController.getMessages @req, @res
 
 		it "should return the messages", (done)->
 			messages = [{content:"hello"}]
