@@ -139,7 +139,6 @@ describe "ProjectUploadController", ->
 					.should.equal true
 
 			it "should return a successful response to the FileUploader client", ->
-				console.log @res.body
 				expect(@res.body).to.deep.equal
 					success: true
 					entity_id: @entity._id

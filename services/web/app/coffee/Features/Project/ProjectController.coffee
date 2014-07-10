@@ -143,10 +143,10 @@ module.exports = ProjectController =
 						hasSubscription: !!results.subscription
 					}
 
-					if Settings?.algolia?.institutions?.app_id? and Settings?.algolia?.institutions?.api_key?
+					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
 						viewModel.showUserDetailsArea = true
-						viewModel.algolia_api_key = Settings.algolia.institutions.api_key
-						viewModel.algolia_app_id = Settings.algolia.institutions.app_id
+						viewModel.algolia_api_key = Settings.algolia.api_key
+						viewModel.algolia_app_id = Settings.algolia.app_id
 					else
 						viewModel.showUserDetailsArea = false
 
