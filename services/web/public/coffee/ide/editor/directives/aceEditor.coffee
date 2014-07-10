@@ -1,15 +1,18 @@
 define [
 	"base"
 	"ace/ace"
+	"ace/ext-searchbox"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = require('ace/edit_session').EditSession
 
-	App.directive "aceEditor", ["$timeout", ($timeout) ->
+	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
+		monkeyPatchSearch($rootScope, $compile)
+
 		return  {
 			scope: {
 				theme: "="
@@ -56,6 +59,20 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
+				# Trigger search AND replace on CMD+F
+				editor.commands.addCommand
+					name: "find",
+					bindKey: win: "Ctrl-F", mac: "Command-F"
+					exec: (editor) ->
+						Ace.require("ace/ext/searchbox").Search(editor, true)
+					readOnly: true
+				editor.commands.removeCommand "replace"
+
+				# Make '/' work for search in vim mode.
+				editor.showCommandLine = (arg) =>
+					if arg == "/"
+						Ace.require("ace/ext/searchbox").Search(editor, true)
 
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
@@ -184,3 +201,46 @@ define [
 			"""
 		}
 	]
+
+	monkeyPatchSearch = ($rootScope, $compile) ->
+		SearchBox = Ace.require("ace/ext/searchbox").SearchBox
+		searchHtml = """
+			<div class="ace_search right">
+				<a href type="button" action="hide" class="ace_searchbtn_close">
+					<i class="fa fa-fw fa-times"></i>
+				</a>
+				<div class="ace_search_form">
+					<input class="ace_search_field form-control input-sm" placeholder="Search for" spellcheck="false"></input>
+					<div class="btn-group">
+						<button type="button" action="findNext" class="ace_searchbtn next btn btn-default btn-sm">
+							<i class="fa fa-chevron-down fa-fw"></i>
+						</button>
+						<button type="button" action="findPrev" class="ace_searchbtn prev btn btn-default btn-sm">
+							<i class="fa fa-chevron-up fa-fw"></i>
+						</button>
+					</div>
+				</div>
+				<div class="ace_replace_form">
+					<input class="ace_search_field form-control input-sm" placeholder="Replace with" spellcheck="false"></input>
+					<div class="btn-group">
+						<button type="button" action="replaceAndFindNext" class="ace_replacebtn btn btn-default btn-sm">Replace</button>
+						<button type="button" action="replaceAll" class="ace_replacebtn btn btn-default btn-sm">All</button>
+					</div>
+				</div>
+				<div class="ace_search_options">
+					<div class="btn-group">
+						<span action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</span>
+						<span action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</span>
+						<span action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</span>
+					</div>
+				</div>
+			</div>
+		"""
+
+		# Remove Ace CSS
+		$("#ace_searchbox").remove()
+
+		$init = SearchBox::$init
+		SearchBox::$init = () ->
+			@element = $compile(searchHtml)($rootScope.$new())[0];
+			$init.apply(@)
