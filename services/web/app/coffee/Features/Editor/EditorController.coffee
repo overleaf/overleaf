@@ -68,7 +68,7 @@ module.exports = EditorController =
 			return if error? or !project_id?
 			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientDisconnected", client.id)
 			EditorRealTimeController.emitToRoom(project_id, "ConnectedUsers.userDissconected", user)
-			ConnectedUsersManager.marksUserAsDisconnected project_id, user._id, ->
+			ConnectedUsersManager.markUserAsDisconnected project_id, user._id, ->
 			logger.log user_id:user._id, project_id:project_id, "user leaving project"
 			self.flushProjectIfEmpty(project_id)
 

@@ -23,7 +23,7 @@ module.exports =
 				rclient.setex buildUserKey(project_id, user_id), new Date(), ONE_HOUR_IN_S * 6, cb
 		], callback
 
-	marksUserAsDisconnected: (project_id, user_id, callback)->
+	markUserAsDisconnected: (project_id, user_id, callback)->
 		logger.log project_id:project_id, user_id:user_id, "marking user as disconnected"
 		async.series [
 			(cb)->

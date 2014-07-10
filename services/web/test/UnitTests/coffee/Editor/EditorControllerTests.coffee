@@ -54,7 +54,7 @@ describe "EditorController", ->
 		@ProjectDeleter =
 			deleteProject: sinon.stub()
 		@ConnectedUsersManager =
-			marksUserAsDisconnected:sinon.stub()
+			markUserAsDisconnected:sinon.stub()
 			markUserAsConnected:sinon.stub()
 
 		@EditorController = SandboxedModule.require modulePath, requires:
@@ -156,7 +156,7 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@EditorController.flushProjectIfEmpty = sinon.stub()
 			@EditorController.leaveProject @client, @user
-			@ConnectedUsersManager.marksUserAsDisconnected.callsArgWith(2)
+			@ConnectedUsersManager.markUserAsDisconnected.callsArgWith(2)
 
 		it "should call the flush project if empty function", ->
 			@EditorController.flushProjectIfEmpty
@@ -172,7 +172,7 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom.calledWith(@project_id, "ConnectedUsers.userDissconected", @user).should.equal true
 
 		it "should mark the user as connected with the ConnectedUsersManager", ->
-			@ConnectedUsersManager.marksUserAsDisconnected.calledWith(@project_id, @user_id).should.equal true
+			@ConnectedUsersManager.markUserAsDisconnected.calledWith(@project_id, @user_id).should.equal true
 
 
 	describe "joinDoc", ->

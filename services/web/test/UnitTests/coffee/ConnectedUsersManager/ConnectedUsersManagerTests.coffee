@@ -53,18 +53,18 @@ describe "ConnectedUsersManager", ->
 				@rClient.sadd.calledWith("users_in_project:#{@project_id}", @user_id).should.equal true
 				done()
 
-	describe "marksUserAsDisconnected", ->
+	describe "markUserAsDisconnected", ->
 		beforeEach ->
 			@rClient.srem.callsArgWith(2)
 			@rClient.del.callsArgWith(1)
 
 		it "should remove the user from the set", (done)->
-			@ConnectedUsersManager.marksUserAsDisconnected @project_id, @user_id, (err)=>
+			@ConnectedUsersManager.markUserAsDisconnected @project_id, @user_id, (err)=>
 				@rClient.srem.calledWith("users_in_project:#{@project_id}", @user_id).should.equal true
 				done()
 
 		it "should delete the connected_user string", (done)->
-			@ConnectedUsersManager.marksUserAsDisconnected @project_id, @user_id, (err)=>
+			@ConnectedUsersManager.markUserAsDisconnected @project_id, @user_id, (err)=>
 				@rClient.del.calledWith("connected_user:#{@project_id}:#{@user_id}").should.equal true
 				done()
 
