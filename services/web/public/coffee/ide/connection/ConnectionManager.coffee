@@ -25,7 +25,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
 					if @$scope.state.loading
-						@$scope.state.load_progress = 80
+						@$scope.state.load_progress = 70
 
 				setTimeout(() =>
 					@joinProject()
