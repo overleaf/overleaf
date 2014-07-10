@@ -50,13 +50,18 @@ define [
 
 	]
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, queuedHttp) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp) ->
 		$scope.projects = window.data.projects
 		$scope.visibleProjects = $scope.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
 		$scope.selectedProjects = []
 		$scope.filter = "all"
+
+		$scope.windowHeight = $window.innerHeight
+		angular.element($window).bind "resize", () ->
+			$scope.windowHeight = $window.innerHeight
+			$scope.$apply()
 
 		# Allow tags to be accessed on projects as well
 		projectsById = {}

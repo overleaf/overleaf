@@ -6,12 +6,7 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-	"ace/keyboard/vim"
-	"ace/keyboard/emacs"
-	"ace/mode/latex"
-	"ace/edit_session"
 ], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
-	LatexMode = require("ace/mode/latex").Mode
 	EditSession = require('ace/edit_session').EditSession
 
 	App.directive "aceEditor", ["$timeout", ($timeout) ->
@@ -23,9 +18,7 @@ define [
 				fontSize: "="
 				autoComplete: "="
 				sharejsDoc: "="
-				lastUpdated: "="
 				spellCheckLanguage: "="
-				cursorPosition: "="
 				highlights: "="
 				text: "="
 				readOnly: "="
@@ -45,6 +38,8 @@ define [
 				editor = Ace.edit(element.find(".ace-editor-body")[0])
 				window.editors ||= []
 				window.editors.push editor
+
+				scope.name = attrs.aceEditor
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				spellCheckManager     = new SpellCheckManager(scope, editor, element)
@@ -74,10 +69,10 @@ define [
 					editor.setShowPrintMargin(value)
 
 				scope.$watch "keybindings", (value) ->
-					Vim = require("ace/keyboard/vim").handler
-					Emacs = require("ace/keyboard/emacs").handler
-					keybindings = vim: Vim, emacs: Emacs
-					editor.setKeyboardHandler(keybindings[value])
+					if value in ["vim", "emacs"]
+						editor.setKeyboardHandler("ace/keyboard/#{value}")
+					else
+						editor.setKeyboardHandler(null)
 
 				scope.$watch "fontSize", (value) ->
 					element.find(".ace_editor, .ace_content").css({
@@ -96,10 +91,9 @@ define [
 						editor.setValue(text, -1)
 						session = editor.getSession()
 						session.setUseWrapMode(true)
-						session.setMode(new LatexMode())
+						session.setMode("ace/mode/latex")
 
 				scope.$watch "annotations", (annotations) ->
-					console.log "SETTING ANNOTATIONS", annotations
 					if annotations?
 						session = editor.getSession() 
 						session.setAnnotations annotations
@@ -110,8 +104,11 @@ define [
 				resetSession = () ->
 					session = editor.getSession()
 					session.setUseWrapMode(true)
-					session.setMode(new LatexMode())
+					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
+
+				emitChange = () -> 
+					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n") 
@@ -120,9 +117,7 @@ define [
 					session = editor.getSession()
 
 					doc = session.getDocument()
-					doc.on "change", () ->
-						scope.$apply () ->
-							scope.lastUpdated = new Date()
+					doc.on "change", emitChange
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
@@ -134,6 +129,10 @@ define [
 				detachFromAce = (sharejs_doc) ->
 					sharejs_doc.detachFromAce()
 					sharejs_doc.off "remoteop.recordForUndo"
+
+					session = editor.getSession()
+					doc = session.getDocument()
+					doc.off "change", emitChange
 
 			template: """
 				<div class="ace-editor-wrapper">

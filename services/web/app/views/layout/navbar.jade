@@ -21,13 +21,13 @@ nav.navbar.navbar-default
 										else
 											li
 												if child.url
-													a(href=child.url) !{child.text}
+													a(href=child.url, class=child.class) !{child.text}
 												else
 													| !{child.text}
 						else
 							li(class=item.class)
 								if item.url
-									a(href=item.url) !{item.text}
+									a(href=item.url, class=item.class) !{item.text}
 								else
 									| !{item.text}
 

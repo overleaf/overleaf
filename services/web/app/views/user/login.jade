@@ -18,7 +18,8 @@ block content
 									name='email',
 									required,
 									placeholder='email@example.com',
-									ng-model="email"
+									ng-model="email",
+									ng-model-options="{ updateOn: 'blur' }"
 								)
 								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
 									| Must be an email address

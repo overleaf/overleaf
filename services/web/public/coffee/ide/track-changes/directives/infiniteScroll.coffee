@@ -15,9 +15,7 @@ define [
 
 				loadUntilFull = () ->
 					if (listShorterThanContainer() or atEndOfListView()) and not scope.$eval(attrs.infiniteScrollDisabled)
-						console.log "Loading more"
 						promise = scope.$eval(attrs.infiniteScroll)
-						console.log promise
 						promise.then () ->
 							loadUntilFull()
 						# @collection.fetchNextBatch
@@ -38,7 +36,6 @@ define [
 					loadUntilFull()
 
 				scope.$watch attrs.infiniteScrollInitialize, (value) ->
-					console.log "INITIALIZE", value
 					if value
 						loadUntilFull()
 

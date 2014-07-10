@@ -31,6 +31,23 @@
 		margin-top: 0;
 	}
 
+	ul.nav {
+		a {
+			&:hover, &:active {
+				background-color: @link-color;
+				color: white;
+				i {
+					color: white;
+				}
+			}
+			i {
+				color: @gray;
+			}
+			padding: (@line-height-computed / 4);
+			font-weight: 700;
+		}
+	}
+
 	ul.nav-downloads {
 		li {
 			display: inline-block;
@@ -38,28 +55,27 @@
 			width: 100px;
 			a {
 				color: @gray-dark;
-				&:hover, &:active {
-					background-color: @link-color;
-					color: white;
-				}
 			}
 			.pdf-disabled {
 				color: @gray-light;
 			}
 			i {
-				margin-bottom: (@line-height-computed / 4);
+				margin: (@line-height-computed / 4) 0;
 			}
 		}
 	}
 
 	form.settings {
 		label {
+			float: left;
 			font-weight: normal;
 			color: @gray-dark;
 			margin-bottom: 0;
-			padding-top: 8px;
+			padding-top: 7px;
 		}
 		select.form-control {
+			float: right;
+			width: 50%;
 			height: 34px;
 			background: none;
 			border: none;
@@ -70,6 +86,7 @@
 			font-weight: 700;
 		}
 		.form-controls {
+			clear: both;
 			padding: 0 (@line-height-computed / 4);
 			&:hover {
 				background-color: @link-color;
@@ -79,6 +96,11 @@
 				label {
 					color: white;
 				}
+			}
+			&:after {
+				content:"";
+				display:table;
+				clear:both;
 			}
 		}
 	}

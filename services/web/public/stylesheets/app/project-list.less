@@ -93,13 +93,19 @@ ul.structured-list {
 		a {
 			color: darken(@blue, 10%);
 		}
-		.select-item, .select-all, .title, .last-modified, .owner {
-			display: inline-block;
-			vertical-align: top;
-			margin-right: @line-height-computed;
+		.header {
+			text-transform: uppercase;
 		}
 		.select-item, .select-all {
-			margin-left: @line-height-computed / 4;
+			display: inline-block;
+		}
+		.select-item, .select-all {
+			position: absolute;
+			left: @line-height-computed;
+		}
+		.select-item + span, .select-all + span {
+			display: inline-block;
+			padding-left: @line-height-computed * 1.5;
 		}
 	}
 }
@@ -113,19 +119,12 @@ ul.project-list {
 			margin-right: 0;
 		}
 		.projectName {
-			margin-right: @line-height-computed;
+			margin-right: @line-height-computed / 4;
 		}
-	}
-	.project_entry {
 		.tag-label {
-			margin-right: 5px;
-			font-size: 12px;
-			cursor: arrow;
-			i {
-				margin-top: 1px;
-				cursor: pointer;
-			}
-			margin-bottom: 5px;
+			margin-left: @line-height-computed / 4;
+			position: relative;
+			top: -2px;
 		}
 	}
 }

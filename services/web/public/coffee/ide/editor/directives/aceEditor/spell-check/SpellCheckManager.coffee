@@ -1,6 +1,6 @@
 define [
 	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
-	"ace/range"
+	"ace/ace"
 ], (HighlightedWordManager) ->
 	Range = require("ace/range").Range
 
@@ -13,12 +13,14 @@ define [
 				if language != oldLanguage and oldLanguage?
 					@runFullCheck()
 
+			onChange = (e) =>
+				@runCheckOnChange(e)
+
 			@editor.on "changeSession", (e) =>
 				@runFullCheck()
 
-				doc = e.session.getDocument()
-				doc.on "change", (e) =>
-					@runCheckOnChange(e)
+				e.oldSession?.getDocument().off "change", onChange
+				e.session.getDocument().on "change", onChange
 
 			@$scope.spellingMenu = {left: '0px', top: '0px'}
 
@@ -29,8 +31,6 @@ define [
 			$(document).on "click", (e) =>
 				@closeContextMenu(e)
 				return true
-			# $(document).on "contextmenu", (e) =>
-			# 	@closeContextMenu(e)
 
 			@$scope.replaceWord = (highlight, suggestion) =>
 				@replaceWord(highlight, suggestion)
@@ -39,13 +39,11 @@ define [
 				@learnWord(highlight)
 
 		runFullCheck: () ->
-			console.log "Running full check"
 			@highlightedWordManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@runSpellCheck()
 
 		runCheckOnChange: (e) ->
-			console.log "Checking change", e.data
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 				@highlightedWordManager.applyChange(e.data)
 				@markLinesAsUpdated(e.data)
@@ -60,8 +58,6 @@ define [
 			@$scope.$apply () =>
 				@$scope.spellingMenu.highlight = highlight
 
-			console.log "highlight", @$scope.highlight_under_mouse
-
 			if highlight
 				e.stopPropagation()
 				e.preventDefault()
@@ -72,8 +68,6 @@ define [
 						highlight.row, highlight.column + highlight.word.length
 					)
 				)
-
-				console.log "Height", @element.find(".context-menu").height()
 
 				@$scope.$apply () =>
 					@$scope.spellingMenu.open = true

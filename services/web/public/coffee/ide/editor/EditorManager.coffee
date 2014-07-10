@@ -7,10 +7,8 @@ define [
 		constructor: (@ide, @$scope) ->
 			@$scope.editor = {
 				sharejs_doc: null
-				last_updated: null
 				open_doc_id: null
 				opening: true
-				cursorPosition: {}
 				gotoLine: null
 			}
 
@@ -38,7 +36,7 @@ define [
 
 			done = () =>
 				if options.gotoLine?
-					@$scope.editor.gotoLine = options.gotoLine
+					@$scope.$broadcast "editor:gotoLine", options.gotoLine
 			
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>
@@ -92,9 +90,6 @@ define [
 
 		_unbindFromDocumentEvents: (document) ->
 			document.off()
-
-		lastUpdated: () ->
-			@$scope.editor.last_updated
 
 		getCurrentDocValue: () ->
 			@$scope.editor.sharejs_doc?.getSnapshot()

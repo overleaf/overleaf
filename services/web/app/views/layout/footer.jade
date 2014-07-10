@@ -5,7 +5,7 @@ footer
 				each item in nav.left_footer
 					li
 						if item.url
-							a(href=item.url) !{item.text}
+							a(href=item.url, class=item.class) !{item.text}
 						else
 							| !{item.text}
 							
@@ -13,7 +13,7 @@ footer
 				each item in nav.right_footer
 					li
 						if item.url
-							a(href=item.url) !{item.text}
+							a(href=item.url, class=item.class) !{item.text}
 						else
 							| !{item.text}
 
