@@ -96,5 +96,6 @@ define [
 							, 0
 
 					resetOpenStates()
+					onInternalResize()
 		}
 	]

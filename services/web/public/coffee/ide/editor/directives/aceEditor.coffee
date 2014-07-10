@@ -91,7 +91,7 @@ define [
 						editor.setValue(text, -1)
 						session = editor.getSession()
 						session.setUseWrapMode(true)
-						session.setMode(new LatexMode())
+						session.setMode("ace/mode/latex")
 
 				scope.$watch "annotations", (annotations) ->
 					if annotations?
