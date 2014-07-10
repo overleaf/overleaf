@@ -23,7 +23,6 @@ define [
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
 		$scope.addMember = () ->
-			console.log "EMAIL", $scope.inputs.email
 			return if !$scope.inputs.email? or $scope.inputs.email == ""
 			$scope.state.error = null
 			$scope.state.inflight = true
@@ -32,7 +31,6 @@ define [
 				.then (user) ->
 					$scope.state.inflight = false
 					$scope.inputs.email = ""
-					console.log "GOT USER", user
 					$scope.project.members.push user
 				.catch () ->
 					$scope.state.inflight = false

@@ -77,11 +77,13 @@ block content
 
 	script(src='/socket.io/socket.io.js')
 
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
+	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
 		window.project_id = "!{project_id}"
-		window.sharelatex = !{sharelatexObject};
-		window.userSettings = !{userSettingsObject};
-		window.user = !{userObject};
+		window.sharelatex = !{JSON.stringify(sharelatex).replace(/\//g, '\\/')};
+		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
+		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
 		window.requirejs = {
 			"paths" : {

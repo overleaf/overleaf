@@ -27,7 +27,8 @@ block content
 													placeholder="email@example.com"
 													required,
 													ng-model="email",
-													ng-init="email = #{JSON.stringify(user.email)}"
+													ng-init="email = #{JSON.stringify(user.email)}",
+													ng-model-options="{ updateOn: 'blur' }"
 												)
 												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 													| Must be an email address

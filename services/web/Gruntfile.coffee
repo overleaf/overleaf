@@ -165,7 +165,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'wrap_sharejs', 'Wrap the compiled ShareJS code for AMD module loading', () ->
 		content = fs.readFileSync "public/js/libs/sharejs.js"
 		fs.writeFileSync "public/js/libs/sharejs.js", """
-			define(["ace/range"], function() {
+			define(["ace/ace"], function() {
 				#{content}
 				return window.sharejs;
 			});

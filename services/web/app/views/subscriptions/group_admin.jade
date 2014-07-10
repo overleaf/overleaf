@@ -28,11 +28,11 @@ block content
 												select-all,
 												type="checkbox"
 											)
-											span.email EMAIL
+											span.header Email
 										.col-md-5
-											span.name NAME
+											span.header Name
 										.col-md-2
-											span.registered REGISTERED
+											span.header Registered
 								li.container-fluid(
 									ng-repeat="user in users | orderBy:'email':true",
 									ng-controller="GroupMemberListItemController"

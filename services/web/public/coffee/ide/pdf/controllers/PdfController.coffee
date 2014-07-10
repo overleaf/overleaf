@@ -229,13 +229,18 @@ define [
 				$scope.showControls = false
 			else
 				$scope.showControls = true
+
 			setTimeout () ->
 				$scope.$digest()
 			, 0
 
-		$scope.syncToPdf = () ->
+		@cursorPosition = null
+		ide.$scope.$on "cursor:editor:update", (event, @cursorPosition) =>
+
+		$scope.syncToPdf = () =>
+			return if !@cursorPosition?
 			synctex
-				.syncToPdf($scope.editor.cursorPosition)
+				.syncToPdf(@cursorPosition)
 				.then (highlights) ->
 					$scope.pdf.highlights = highlights
 

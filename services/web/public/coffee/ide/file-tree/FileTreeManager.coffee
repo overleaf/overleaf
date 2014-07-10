@@ -60,7 +60,6 @@ define [
 			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
 				entity = @findEntityById(entity_id)
 				folder = @findEntityById(folder_id)
-				console.log "Got recive ENTITY", entity_id, folder_id, entity, folder
 				@$scope.$apply () =>
 					@_moveEntityInScope(entity, folder)
 
@@ -189,7 +188,7 @@ define [
 
 		loadDeletedDocs: () ->
 			@$scope.deletedDocs = []
-			for doc in @$scope.project.deletedDocs
+			for doc in @$scope.project.deletedDocs or []
 				@$scope.deletedDocs.push {
 					name: doc.name
 					id:   doc._id

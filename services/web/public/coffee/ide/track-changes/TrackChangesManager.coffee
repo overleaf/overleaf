@@ -51,7 +51,6 @@ define [
 			}
 
 		autoSelectRecentUpdates: () ->
-			console.log "AUTO SELECTING UPDATES", @$scope.trackChanges.updates.length
 			return if @$scope.trackChanges.updates.length == 0
 
 			@$scope.trackChanges.updates[0].selectedTo = true
@@ -84,16 +83,12 @@ define [
 			{updates, doc} = @$scope.trackChanges.selection
 			{fromV, toV}   = @_calculateRangeFromSelection()
 
-			console.log "Checking if diff has changed", doc?.id, fromV, toV, updates
-
 			return if !doc?
 
 			return if diff? and
 				diff.doc   == doc   and
 				diff.fromV == fromV and
 				diff.toV   == toV
-
-			console.log "Loading diff", fromV, toV, doc?.id
 
 			@$scope.trackChanges.diff = diff = {
 				fromV:   fromV
@@ -120,7 +115,6 @@ define [
 						diff.error = true
 			else
 				diff.deleted = true
-				console.log "DOC IS DELETED - NO DIFF FOR YOU!"
 
 		restoreDeletedDoc: (doc) ->
 			@ide.$http.post "/project/#{@$scope.project_id}/doc/#{doc.id}/restore", {
@@ -240,9 +234,8 @@ define [
 
 			selected_doc = @$scope.trackChanges.selection.doc
 			if selected_doc? and affected_docs[selected_doc.id]?
-				console.log "An affected doc is already open, bravo!"
+				# Selected doc is already open
 			else
-				console.log "selected doc is not open, selecting first one"
 				for doc_id, doc of affected_docs
 					selected_doc = doc
 					break

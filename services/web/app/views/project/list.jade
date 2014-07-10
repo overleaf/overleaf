@@ -1,10 +1,12 @@
 extends ../layout
 
 block content
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
+	//- and doesn't prematurely end the script tag.
 	script(type="text/javascript").
 		window.data = {
-			projects: !{JSON.stringify(projects)},
-			tags: !{JSON.stringify(tags)}
+			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
+			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')}
 		};
 		window.algolia = {
 			institutions: {
@@ -233,6 +235,7 @@ block content
 									ul.list-unstyled.project-list.structured-list(
 										select-all-list,
 										ng-if="projects.length > 0",
+										max-height="windowHeight - 290",
 										ng-cloak
 									)
 										li.container-fluid
@@ -242,11 +245,11 @@ block content
 														select-all,
 														type="checkbox"
 													)
-													| TITLE
+													span.header Title
 												.col-md-2
-													| OWNER
+													span.header Owner
 												.col-md-4
-													| LAST MODIFIED
+													span.header Last Modified
 										li.project_entry.container-fluid(
 											ng-repeat="project in visibleProjects | orderBy:'lastUpdated':true",
 											ng-controller="ProjectListItemController"
@@ -258,15 +261,14 @@ block content
 														type="checkbox",
 														ng-model="project.selected"
 													)
-													span.title
-														a.projectName(href="/project/{{project.id}}") {{project.name}}
 													span
-														span.label.label-default(ng-repeat='tag in project.tags')
+														a.projectName(href="/project/{{project.id}}") {{project.name}}
+														span.label.label-default.tag-label(ng-repeat='tag in project.tags')
 															| {{tag.name}}
 												.col-md-2
 													span.owner {{ownerName()}}
 												.col-md-4
-													span.last-modified.isoDate {{project.lastUpdated | formatDate}}
+													span.last-modified {{project.lastUpdated | formatDate}}
 										li(
 											ng-if="visibleProjects.length == 0",
 											ng-cloak

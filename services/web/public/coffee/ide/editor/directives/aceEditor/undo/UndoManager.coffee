@@ -1,7 +1,5 @@
 define [
-	"ace/range"
-	"ace/edit_session"
-	"ace/document"
+	"ace/ace"
 ], () ->
 	Range = require("ace/range").Range
 	EditSession = require("ace/edit_session").EditSession

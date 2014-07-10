@@ -38,7 +38,7 @@ define [
 					annotationsLayerBuilder: AnnotationsLayerBuilder
 					highlightsLayerBuilder: HighlightsLayerBuilder
 					ondblclick: (e) -> onDoubleClick(e)
-					logLevel: PDFListView.Logger.DEBUG
+					# logLevel: PDFListView.Logger.DEBUG
 				pdfListView.listView.pageWidthOffset = 20
 				pdfListView.listView.pageHeightOffset = 20
 

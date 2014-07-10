@@ -40,21 +40,3 @@ describe "Subscription Locator Tests", ->
 				subscription.should.equal @subscription
 				done()
 
-	describe "expiredFreeTrials", ->
-		beforeEach ->
-			@subscriptions = [ _id : 1, freeTrial:{} ]
-			@Subscription.find = sinon.stub().callsArgWith(1, null, @subscriptions)
-		
-		it "should look for subscriptions with an expired free trial that haven't been downgraded", (done)->
-			@SubscriptionLocator.expiredFreeTrials =>
-				@Subscription.find.called.should.equal true
-				query = @Subscription.find.args[0][0]
-				assert.isDefined(query["freeTrial.expiresAt"].$lt)
-				assert.deepEqual(query["freeTrial.downgraded"],"$ne": true)
-				done()
-		
-		it "should return the subscriptions in a callback", (done)->
-			@SubscriptionLocator.expiredFreeTrials (err, subscriptions)=>
-				subscriptions.should.deep.equal @subscriptions
-				done()
-
