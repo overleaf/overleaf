@@ -15,6 +15,7 @@ buildUserKey = (project_id, user_id)-> return "connected_user:#{project_id}:#{us
 module.exports = 
 
 	markUserAsConnected: (project_id, user_id, callback = (err)->)->
+		logger.log project_id:project_id, user_id:user_id, "marking user as connected"
 		async.series [
 			(cb)->
 				rclient.sadd buildProjectSetKey(project_id), user_id, cb
@@ -23,6 +24,7 @@ module.exports =
 		], callback
 
 	marksUserAsDisconnected: (project_id, user_id, callback)->
+		logger.log project_id:project_id, user_id:user_id, "marking user as disconnected"
 		async.series [
 			(cb)->
 				rclient.srem buildProjectSetKey(project_id), user_id, cb

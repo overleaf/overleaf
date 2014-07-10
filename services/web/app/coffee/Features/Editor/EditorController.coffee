@@ -17,6 +17,7 @@ settings = require('settings-sharelatex')
 slReqIdHelper = require('soa-req-id')
 tpdsPollingBackgroundTasks = require('../ThirdPartyDataStore/TpdsPollingBackgroundTasks')
 async = require('async')
+ConnectedUsersManager = require("../ConnectedUsers/ConnectedUsersManager")
 _ = require('underscore')
 rclientPub = require("redis").createClient(settings.redis.web.port, settings.redis.web.host)
 rclientPub.auth(settings.redis.web.password)
@@ -57,11 +58,17 @@ module.exports = EditorController =
 							AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
 							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 
+							# can be done affter the connection has happened
+							EditorRealTimeController.emitToRoom(project_id, "ConnectedUsers.userConnected", user)
+							ConnectedUsersManager.markUserAsConnected project_id, user._id, ->
+
 	leaveProject: (client, user) ->
 		self = @
 		client.get "project_id", (error, project_id) ->
 			return if error? or !project_id?
 			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientDisconnected", client.id)
+			EditorRealTimeController.emitToRoom(project_id, "ConnectedUsers.userDissconected", user)
+			ConnectedUsersManager.marksUserAsDisconnected project_id, user._id, ->
 			logger.log user_id:user._id, project_id:project_id, "user leaving project"
 			self.flushProjectIfEmpty(project_id)
 

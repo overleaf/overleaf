@@ -53,6 +53,9 @@ describe "EditorController", ->
 			addUserToProject: sinon.stub().callsArgWith(3)
 		@ProjectDeleter =
 			deleteProject: sinon.stub()
+		@ConnectedUsersManager =
+			marksUserAsDisconnected:sinon.stub()
+			markUserAsConnected:sinon.stub()
 
 		@EditorController = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/Server" : io : @io
@@ -73,6 +76,7 @@ describe "EditorController", ->
 			'./EditorRealTimeController':@EditorRealTimeController = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
+			"../ConnectedUsers/ConnectedUsersManager":@ConnectedUsersManager
 			'redis':createClient:-> auth:->
 			"logger-sharelatex": @logger =
 				log: sinon.stub()
@@ -85,6 +89,8 @@ describe "EditorController", ->
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
+			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ConnectedUsersManager.markUserAsConnected.callsArgWith(2)
 
 		describe "when authorized", ->
 			beforeEach ->
@@ -116,6 +122,13 @@ describe "EditorController", ->
 			it "should return the project model view, privilege level and protocol version", ->
 				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
 
+			it "should emit the to the room that the user has connected", ->
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "ConnectedUsers.userConnected", @user).should.equal true
+
+			it "should mark the user as connected with the ConnectedUsersManager", ->
+				@ConnectedUsersManager.markUserAsConnected.calledWith(@project_id, @user_id).should.equal true
+
+
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
@@ -143,6 +156,7 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@EditorController.flushProjectIfEmpty = sinon.stub()
 			@EditorController.leaveProject @client, @user
+			@ConnectedUsersManager.marksUserAsDisconnected.callsArgWith(2)
 
 		it "should call the flush project if empty function", ->
 			@EditorController.flushProjectIfEmpty
@@ -153,6 +167,13 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom
 				.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
 				.should.equal true
+
+		it "should emit the to the room that the user has connected", ->
+			@EditorRealTimeController.emitToRoom.calledWith(@project_id, "ConnectedUsers.userDissconected", @user).should.equal true
+
+		it "should mark the user as connected with the ConnectedUsersManager", ->
+			@ConnectedUsersManager.marksUserAsDisconnected.calledWith(@project_id, @user_id).should.equal true
+
 
 	describe "joinDoc", ->
 		beforeEach ->
