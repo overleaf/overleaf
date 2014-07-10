@@ -86,16 +86,17 @@ define [
 					
 					Autocomplete::_insertMatch.call this, data
 
-				# Overwrite this to set autoInsert = false
+				# Overwrite this to set autoInsert = false and set font size
 				Autocomplete.startCommand = {
 					name: "startAutocomplete",
-					exec: (editor) ->
+					exec: (editor) =>
 						if (!editor.completer)
 							editor.completer = new Autocomplete()
 						editor.completer.autoInsert = false
 						editor.completer.autoSelect = true
 						editor.completer.showPopup(editor)
 						editor.completer.cancelContextMenu()
+						$(editor.completer.popup.container).css({'font-size': @$scope.fontSize + 'px'})
 					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"
 				}
 
