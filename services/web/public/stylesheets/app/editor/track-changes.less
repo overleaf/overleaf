@@ -29,8 +29,25 @@
 		}
 	}
 
-	.diff {
+	.diff-panel {
+		.full-size;
 		margin-right: @changesListWidth;
+	}
+
+	.diff {
+		.full-size;
+		.toolbar {
+			padding: 3px;
+			.name {
+				float: left;
+				padding: 3px @line-height-computed / 4;
+				display: inline-block;
+			}
+		}
+		.diff-editor {
+			.full-size;
+			top: 40px;
+		}
 		.hide-ace-cursor {
 			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
 				display: none;

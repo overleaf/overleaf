@@ -80,22 +80,31 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp;Loading...
 
-	.diff.full-size(ng-controller="TrackChangesDiffController")
-		.diff-editor.hide-ace-cursor(
-			ace-editor="track-changes",
-			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted && !trackChanges.diff.error",
-			theme="settings.theme",
-			font-size="settings.fontSize",
-			text="trackChanges.diff.text",
-			highlights="trackChanges.diff.highlights",
-			read-only="true",
-			resize-on="layout:main:resize"
+	.diff-panel.full-size(ng-controller="TrackChangesDiffController")
+		.diff(
+			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted && !trackChanges.diff.error"
 		)
+			.toolbar.toolbar-alt
+				span.name Changes to <strong>{{trackChanges.diff.doc.name}}</strong>
+				.toolbar-right
+					a.btn.btn-danger.btn-sm(
+						href,
+						ng-click="openRestoreDiffModal()"
+					) Restore to before these changes
+			.diff-editor.hide-ace-cursor(
+				ace-editor="track-changes",
+				theme="settings.theme",
+				font-size="settings.fontSize",
+				text="trackChanges.diff.text",
+				highlights="trackChanges.diff.highlights",
+				read-only="true",
+				resize-on="layout:main:resize"
+			)
 		.diff-deleted.text-centered(
 			ng-show="trackChanges.diff.deleted"
 		)
 			p.text-serif {{ trackChanges.diff.doc.name }} has been deleted.
-			p 
+			p
 				a.btn.btn-primary.btn-lg(
 					href,
 					ng-click="restoreDeletedDoc()"
@@ -105,3 +114,25 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 			| &nbsp;&nbsp;Loading...
 		.error-panel(ng-show="trackChanges.diff.error")
 			.alert.alert-danger Sorry, something went wrong :(
+
+script(type="text/ng-template", id="trackChangesRestoreDiffModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Restore {{diff.doc.name}}
+	.modal-body.modal-body-share
+		p Are you sure you want to restore <strong>{{diff.doc.name}}</strong> to before the changes on {{diff.start_ts | formatDate}}?
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()",
+			ng-disabled="state.inflight"
+		) Cancel
+		button.btn.btn-danger(
+			ng-click="restore()",
+			ng-disabled="state.inflight"
+		)
+			span(ng-show="!state.inflight") Restore
+			span(ng-show="state.inflight") Restoring...

@@ -1,5 +1,5 @@
 aside#file-tree(ng-controller="FileTreeController")
-	.toolbar.toolbar-small(ng-if="permissions.write")
+	.toolbar.toolbar-small.toolbar-alt(ng-if="permissions.write")
 		a(
 			href,
 			ng-click="openNewDocModal()",
@@ -40,7 +40,7 @@ aside#file-tree(ng-controller="FileTreeController")
 				i.fa.fa-trash-o
 
 	.file-tree-inner(
-		ng-if="rootFolder", 
+		ng-if="rootFolder",
 		ng-controller="FileTreeRootFolderController",
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
@@ -284,7 +284,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					permissions="permissions",
 					ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']"
 				)
-			
+
 script(type='text/ng-template', id='newDocModalTemplate')
 	.modal-header
 		h3 New File

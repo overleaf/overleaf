@@ -81,7 +81,7 @@ define [
 		reloadDiff: () ->
 			diff = @$scope.trackChanges.diff
 			{updates, doc} = @$scope.trackChanges.selection
-			{fromV, toV}   = @_calculateRangeFromSelection()
+			{fromV, toV, start_ts, end_ts}   = @_calculateRangeFromSelection()
 
 			return if !doc?
 
@@ -91,10 +91,12 @@ define [
 				diff.toV   == toV
 
 			@$scope.trackChanges.diff = diff = {
-				fromV:   fromV
-				toV:     toV
-				doc:     doc
-				error:   false
+				fromV:    fromV
+				toV:      toV
+				start_ts: start_ts
+				end_ts:   end_ts
+				doc:      doc
+				error:    false
 			}
 
 			if !doc.deleted
@@ -117,10 +119,12 @@ define [
 				diff.deleted = true
 
 		restoreDeletedDoc: (doc) ->
-			@ide.$http.post "/project/#{@$scope.project_id}/doc/#{doc.id}/restore", {
-				name: doc.name
-				_csrf: window.csrfToken
-			}
+			url = "/project/#{@$scope.project_id}/doc/#{doc.id}/restore"
+			@ide.$http.post(url, name: doc.name, _csrf: window.csrfToken)
+
+		restoreDiff: (diff) ->
+			url = "/project/#{@$scope.project_id}/doc/#{diff.doc.id}/version/#{diff.fromV}/restore"
+			@ide.$http.post(url, _csrf: window.csrfToken)
 
 		_parseDiff: (diff) ->
 			row    = 0
