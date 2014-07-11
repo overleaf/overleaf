@@ -16,9 +16,9 @@ module.exports = AuthenticationController =
 			if !isAllowed
 				logger.log email:email, "too many login requests"
 				res.statusCode = 429
-				return res.send 
+				return res.send
 					message:
-						text: 'This account has had too many login requests, <br> please wait 2 minutes before trying to log in again',
+						text: 'This account has had too many login requests. Please wait 2 minutes before trying to log in again',
 						type: 'error'
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
@@ -100,7 +100,7 @@ module.exports = AuthenticationController =
 		callback()
 
 	_establishUserSession: (req, user, callback = (error) ->) ->
-		lightUser = 
+		lightUser =
 			_id: user._id
 			first_name: user.first_name
 			last_name: user.last_name
@@ -110,7 +110,3 @@ module.exports = AuthenticationController =
 		req.session.user = lightUser
 		req.session.justLoggedIn = true
 		req.session.save callback
-		
-		
-	
-		
