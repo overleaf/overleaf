@@ -27,6 +27,7 @@ define [
 				readOnly: "="
 				gotoLine: "="
 				annotations: "="
+				navigateHighlights: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -112,7 +113,7 @@ define [
 
 				scope.$watch "annotations", (annotations) ->
 					if annotations?
-						session = editor.getSession() 
+						session = editor.getSession()
 						session.setAnnotations annotations
 
 				scope.$watch "readOnly", (value) ->
@@ -124,11 +125,11 @@ define [
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
 
-				emitChange = () -> 
+				emitChange = () ->
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
-					lines = sharejs_doc.getSnapshot().split("\n") 
+					lines = sharejs_doc.getSnapshot().split("\n")
 					editor.setSession(new EditSession(lines))
 					resetSession()
 					session = editor.getSession()
@@ -166,7 +167,7 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
-					<div 
+					<div
 						id="spellCheckMenu"
 						class="dropdown context-menu"
 						ng-show="spellingMenu.open"
@@ -197,6 +198,27 @@ define [
 					>
 						{{ annotationLabel.text }}
 					</div>
+
+					<a
+						href
+						class="highlights-before-label btn btn-info btn-xs"
+						ng-show="updateLabels.highlightsBefore > 0"
+						ng-click="gotoHighlightAbove()"
+					>
+						<i class="fa fa-fw fa-arrow-up"></i>
+						{{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
+					</a>
+
+					<a
+						href
+						class="highlights-after-label btn btn-info btn-xs"
+						ng-show="updateLabels.highlightsAfter > 0"
+						ng-click="gotoHighlightBelow()"
+					>
+						<i class="fa fa-fw fa-arrow-down"></i>
+						{{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
+
+					</a>
 				</div>
 			"""
 		}
