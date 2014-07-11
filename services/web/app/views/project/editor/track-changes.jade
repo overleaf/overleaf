@@ -85,7 +85,16 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted && !trackChanges.diff.error"
 		)
 			.toolbar.toolbar-alt
-				span.name Changes to <strong>{{trackChanges.diff.doc.name}}</strong>
+				span.name
+					| <strong>{{trackChanges.diff.highlights.length}} </strong>
+					ng-pluralize(
+						count="trackChanges.diff.highlights.length",
+						when="{\
+							'one': 'change',\
+							'other': 'changes'\
+						}"
+					)
+					|  in <strong>{{trackChanges.diff.doc.name}}</strong>
 				.toolbar-right
 					a.btn.btn-danger.btn-sm(
 						href,
