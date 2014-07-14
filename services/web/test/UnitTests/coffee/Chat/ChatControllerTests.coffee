@@ -27,7 +27,7 @@ describe "ChatController", ->
 
 		@req =
 			params:
-				project_id:@project_id
+				Project_id:@project_id
 			session:
 				user:
 					_id:@user_id

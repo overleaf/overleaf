@@ -6,7 +6,7 @@ module.exports =
 
 
 	sendMessage: (req, res)->
-		{project_id} = req.params
+		project_id = req.params.Project_id
 		user_id = req.session.user._id
 		messageContent = req.body.content
 		ChatHandler.sendMessage project_id, user_id, messageContent, (err, builtMessge)->
@@ -17,7 +17,7 @@ module.exports =
 			res.send()
 
 	getMessages: (req, res)->
-		{project_id} = req.params
+		project_id = req.params.Project_id
 		query = req.body
 		logger.log project_id:project_id, query:query, "getting messages"
 		ChatHandler.getMessages project_id, query, (err, messages)->

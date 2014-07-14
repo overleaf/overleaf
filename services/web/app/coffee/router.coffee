@@ -160,8 +160,8 @@ module.exports = class Router
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		app.get  "/project/:project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
-		app.post "/project/:project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+		app.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
+		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
