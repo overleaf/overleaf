@@ -1,15 +1,18 @@
 define [
 	"base"
 	"ace/ace"
+	"ace/ext-searchbox"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = require('ace/edit_session').EditSession
 
-	App.directive "aceEditor", ["$timeout", ($timeout) ->
+	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
+		monkeyPatchSearch($rootScope, $compile)
+
 		return  {
 			scope: {
 				theme: "="
@@ -24,6 +27,7 @@ define [
 				readOnly: "="
 				gotoLine: "="
 				annotations: "="
+				navigateHighlights: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -56,6 +60,20 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
+				# Trigger search AND replace on CMD+F
+				editor.commands.addCommand
+					name: "find",
+					bindKey: win: "Ctrl-F", mac: "Command-F"
+					exec: (editor) ->
+						Ace.require("ace/ext/searchbox").Search(editor, true)
+					readOnly: true
+				editor.commands.removeCommand "replace"
+
+				# Make '/' work for search in vim mode.
+				editor.showCommandLine = (arg) =>
+					if arg == "/"
+						Ace.require("ace/ext/searchbox").Search(editor, true)
 
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
@@ -95,7 +113,7 @@ define [
 
 				scope.$watch "annotations", (annotations) ->
 					if annotations?
-						session = editor.getSession() 
+						session = editor.getSession()
 						session.setAnnotations annotations
 
 				scope.$watch "readOnly", (value) ->
@@ -107,11 +125,11 @@ define [
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
 
-				emitChange = () -> 
+				emitChange = () ->
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
-					lines = sharejs_doc.getSnapshot().split("\n") 
+					lines = sharejs_doc.getSnapshot().split("\n")
 					editor.setSession(new EditSession(lines))
 					resetSession()
 					session = editor.getSession()
@@ -149,7 +167,7 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
-					<div 
+					<div
 						id="spellCheckMenu"
 						class="dropdown context-menu"
 						ng-show="spellingMenu.open"
@@ -180,7 +198,71 @@ define [
 					>
 						{{ annotationLabel.text }}
 					</div>
+
+					<a
+						href
+						class="highlights-before-label btn btn-info btn-xs"
+						ng-show="updateLabels.highlightsBefore > 0"
+						ng-click="gotoHighlightAbove()"
+					>
+						<i class="fa fa-fw fa-arrow-up"></i>
+						{{ updateLabels.highlightsBefore }} more update{{ updateLabels.highlightsBefore > 1 && "" || "s" }} above
+					</a>
+
+					<a
+						href
+						class="highlights-after-label btn btn-info btn-xs"
+						ng-show="updateLabels.highlightsAfter > 0"
+						ng-click="gotoHighlightBelow()"
+					>
+						<i class="fa fa-fw fa-arrow-down"></i>
+						{{ updateLabels.highlightsAfter }} more update{{ updateLabels.highlightsAfter > 1 && "" || "s" }} below
+
+					</a>
 				</div>
 			"""
 		}
 	]
+
+	monkeyPatchSearch = ($rootScope, $compile) ->
+		SearchBox = Ace.require("ace/ext/searchbox").SearchBox
+		searchHtml = """
+			<div class="ace_search right">
+				<a href type="button" action="hide" class="ace_searchbtn_close">
+					<i class="fa fa-fw fa-times"></i>
+				</a>
+				<div class="ace_search_form">
+					<input class="ace_search_field form-control input-sm" placeholder="Search for" spellcheck="false"></input>
+					<div class="btn-group">
+						<button type="button" action="findNext" class="ace_searchbtn next btn btn-default btn-sm">
+							<i class="fa fa-chevron-down fa-fw"></i>
+						</button>
+						<button type="button" action="findPrev" class="ace_searchbtn prev btn btn-default btn-sm">
+							<i class="fa fa-chevron-up fa-fw"></i>
+						</button>
+					</div>
+				</div>
+				<div class="ace_replace_form">
+					<input class="ace_search_field form-control input-sm" placeholder="Replace with" spellcheck="false"></input>
+					<div class="btn-group">
+						<button type="button" action="replaceAndFindNext" class="ace_replacebtn btn btn-default btn-sm">Replace</button>
+						<button type="button" action="replaceAll" class="ace_replacebtn btn btn-default btn-sm">All</button>
+					</div>
+				</div>
+				<div class="ace_search_options">
+					<div class="btn-group">
+						<span action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</span>
+						<span action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</span>
+						<span action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</span>
+					</div>
+				</div>
+			</div>
+		"""
+
+		# Remove Ace CSS
+		$("#ace_searchbox").remove()
+
+		$init = SearchBox::$init
+		SearchBox::$init = () ->
+			@element = $compile(searchHtml)($rootScope.$new())[0];
+			$init.apply(@)

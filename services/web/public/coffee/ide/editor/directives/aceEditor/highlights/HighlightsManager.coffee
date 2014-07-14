@@ -18,6 +18,11 @@ define [
 				text: ""
 			}
 
+			@$scope.updateLabels = {
+				updatesAbove: 0
+				updatesBelow: 0
+			}
+
 			@$scope.$watch "highlights", (value) =>
 				@redrawAnnotations()
 
@@ -29,8 +34,29 @@ define [
 				e.position = position
 				@showAnnotationLabels(position)
 
-			@editor.on "changeSession", () =>
+			onChangeScrollTop = () =>
+				@updateShowMoreLabels()
+
+			@editor.getSession().on "changeScrollTop", onChangeScrollTop
+
+			@$scope.$watch "text", () =>
+				if @$scope.navigateHighlights
+					setTimeout () =>
+						@scrollToFirstHighlight()
+					, 0
+
+			@editor.on "changeSession", (e) =>
+				e.oldSession?.off "changeScrollTop", onChangeScrollTop
+				e.session.on "changeScrollTop", onChangeScrollTop
 				@redrawAnnotations()
+
+			@$scope.gotoHighlightBelow = () =>
+				return if !@firstHiddenHighlightAfter?
+				@editor.scrollToLine(@firstHiddenHighlightAfter.end.row, true, false)
+
+			@$scope.gotoHighlightAbove = () =>
+				return if !@lastHiddenHighlightBefore?
+				@editor.scrollToLine(@lastHiddenHighlightBefore.start.row, true, false)
 
 		redrawAnnotations: () ->
 			@_clearMarkers()
@@ -70,6 +96,8 @@ define [
 							colorScheme: colorScheme
 						}
 						@_drawStrikeThrough(annotation, colorScheme)
+
+			@updateShowMoreLabels()
 
 		showAnnotationLabels: (position) ->
 			labelToShow = null
@@ -127,6 +155,39 @@ define [
 						text:   labelToShow.text
 					}
 
+		updateShowMoreLabels: () ->
+			return if !@$scope.navigateHighlights
+			setTimeout () =>
+				firstRow = @editor.getFirstVisibleRow()
+				lastRow  = @editor.getLastVisibleRow()
+				highlightsBefore = 0
+				highlightsAfter = 0
+				@lastHiddenHighlightBefore = null
+				@firstHiddenHighlightAfter = null
+				for annotation in @$scope.highlights or []
+					range = annotation.highlight or annotation.strikeThrough
+					continue if !range?
+					if range.start.row < firstRow
+						highlightsBefore += 1
+						@lastHiddenHighlightBefore = range
+					if range.end.row > lastRow
+						highlightsAfter += 1
+						@firstHiddenHighlightAfter ||= range
+
+				@$scope.$apply =>
+					@$scope.updateLabels = {
+						highlightsBefore: highlightsBefore
+						highlightsAfter:  highlightsAfter
+					}
+			, 100
+
+		scrollToFirstHighlight: () ->
+			for annotation in @$scope.highlights or []
+				range = annotation.highlight or annotation.strikeThrough
+				continue if !range?
+				@editor.scrollToLine(range.start.row, true, false)
+				break
+
 		_clearMarkers: () ->
 			for marker_id in @markerIds
 				@editor.getSession().removeMarker(marker_id)
@@ -177,9 +238,9 @@ define [
 				new Range(
 					annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
 					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column + 1
-				), 
+				),
 				"annotation strike-through-foreground",
-				true, 
+				true,
 				"""
 					height: #{Math.round(lineHeight/2) + 2}px;
 					border-bottom: 2px solid #{colorScheme.strikeThroughForegroundColor};

@@ -7,6 +7,7 @@ define [
 				formName = attrs.asyncForm
 
 				scope[attrs.name].response = response = {}
+				scope[attrs.name].inflight = false
 
 				element.on "submit", (e) ->
 					e.preventDefault()
@@ -15,9 +16,12 @@ define [
 					for data in element.serializeArray()
 						formData[data.name] = data.value
 
+					scope[attrs.name].inflight = true
+
 					$http
 						.post(element.attr('action'), formData)
 						.success (data, status, headers, config) ->
+							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false
 
@@ -33,12 +37,13 @@ define [
 									ga('send', 'event', formName, 'failure', data.message)
 								else
 									ga('send', 'event', formName, 'success')
-									
+
 						.error (data, status, headers, config) ->
+							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
 							response.message =
-								text: data.message or "Something went wrong talking to the server :(. Please try again."
+								text: data.message?.text or "Something went wrong talking to the server :(. Please try again."
 								type: 'error'
 							ga('send', 'event', formName, 'failure', data.message)
 		}

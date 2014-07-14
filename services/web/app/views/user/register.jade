@@ -10,7 +10,7 @@ block content
 						div Join ShareLaTeX to view this project
 					else if newTemplateData.templateName !== undefined
 						h1 Please register to edit the '#{newTemplateData.templateName}' template
-						div Already have a ShareLaTeX account? 
+						div Already have a ShareLaTeX account?
 							a(href="/login") Login here
 
 			.row
@@ -18,12 +18,12 @@ block content
 					.card
 						.page-header
 							h1 Register
-						form(async-form="register", name="registerForm", action="/register", novalidate, ng-cloak)
+						form(async-form="register", name="registerForm", action="/register", ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages(for="registerForm")
 							.form-group
-								label(for='email') Email 
+								label(for='email') Email
 								input.form-control(
 									type='email',
 									name='email',
@@ -36,7 +36,7 @@ block content
 								span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
 									| Must be an email address
 							.form-group
-								label(for='password') Password 
+								label(for='password') Password
 								input.form-control(
 									type='password',
 									name='password',
@@ -49,6 +49,7 @@ block content
 							.actions
 								button.btn-primary.btn(
 									type='submit'
-									ng-disabled="register.$invalid"
-								) Register
-						
+									ng-disabled="registerForm.inflight"
+								)
+									span(ng-show="!registerForm.inflight") Register
+									span(ng-show="registerForm.inflight") Registering...

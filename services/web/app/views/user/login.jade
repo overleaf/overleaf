@@ -35,7 +35,9 @@ block content
 									| Required
 							.actions
 								button.btn-primary.btn(
-									type='submit'
-									ng-disabled="loginForm.$invalid"
-								) Login
+									type='submit',
+									ng-disabled="loginForm.inflight"
+								)
+									span(ng-show="!loginForm.inflight") Login
+									span(ng-show="loginForm.inflight") Logging in...
 								a.pull-right(href='/user/password/reset') Forgot your password?
