@@ -8,6 +8,8 @@ rclient.auth(Settings.redis.web.password)
 
 
 ONE_HOUR_IN_S = 60 * 60
+ONE_DAY_IN_S = ONE_HOUR_IN_S * 24
+FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4
 
 buildProjectSetKey = (project_id)-> return "users_in_project:#{project_id}"
 buildUserKey = (project_id, user_id)-> return "connected_user:#{project_id}:#{user_id}"
@@ -21,8 +23,9 @@ module.exports =
 			(cb)->
 				rclient.sadd buildProjectSetKey(project_id), user_id, cb
 			(cb)->
-				ttl = ONE_HOUR_IN_S * 6
-				rclient.setex buildUserKey(project_id, user_id), ttl, new Date(), cb
+				rclient.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S, cb
+			(cb)->
+				rclient.setex buildUserKey(project_id, user_id), ONE_HOUR_IN_S, new Date(), cb
 		], (err)->
 			if err?
 				logger.err err:err, project_id:project_id, user_id:user_id, "problem marking user as connected"
@@ -33,6 +36,8 @@ module.exports =
 		async.series [
 			(cb)->
 				rclient.srem buildProjectSetKey(project_id), user_id, cb
+			(cb)->
+				rclient.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S, cb
 			(cb)->
 				rclient.del buildUserKey(project_id, user_id), cb
 		], callback
