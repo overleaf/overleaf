@@ -52,6 +52,8 @@ module.exports =
 				result.user_id = user_id
 				if result.cursorData?
 					result.cursorData = JSON.parse(result.cursorData)
+					result.email = result.cursorData.email
+					result.name = result.cursorData.name
 			callback err, result
 
 	setUserCursorPosition: (project_id, user_id, cursorData, callback)->

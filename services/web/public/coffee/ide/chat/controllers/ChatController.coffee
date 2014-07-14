@@ -3,6 +3,7 @@ define [
 ], (App) ->
 	App.controller "ChatController", ["$scope", "$http", "ide", "$location", ($scope, $http, @ide, $location) ->
 		MESSAGES_URL = "/project/#{$scope.project_id}/messages"
+		CONNECTED_USER_URL = "/project/#{$scope.project_id}/connected_users"
 
 		$scope.$on "project:joined", =>
 			@ide.socket.on "new-chat-message", (message) =>
@@ -10,6 +11,9 @@ define [
 
 		$http.get(MESSAGES_URL).success (data, status, headers, config)->
 			$scope.chat.messages = data
+
+		$http.get(CONNECTED_USER_URL).success (data)->
+			console.log data
 
 		$scope.$watchCollection "chat.messages", (messages) ->
 			if messages?
