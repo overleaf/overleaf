@@ -4,7 +4,7 @@ logger = require("logger-sharelatex")
 module.exports = 
 
 	getConnectedUsers: (req, res)->
-		project_id = req.params.project_id
+		project_id = req.params.Project_id
 		ConnectedUsersManager.getConnectedUsers project_id, (err, users)->
 			if err?
 				logger.err err:err, project_id:project_id, "problem getting connected users"

@@ -50,7 +50,8 @@ module.exports =
 			else
 				result.connected = true
 				result.user_id = user_id
-
+				if result.cursorData?
+					result.cursorData = JSON.parse(result.cursorData)
 			callback err, result
 
 	setUserCursorPosition: (project_id, user_id, cursorData, callback)->

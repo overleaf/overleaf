@@ -37,6 +37,7 @@ PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
+ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -133,6 +134,8 @@ module.exports = class Router
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
 
+		app.get  '/project/:Project_id/connected_users', SecurityManager.requestCanAccessProject, ConnectedUsersController.getConnectedUsers
+
 		app.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
 		app.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
@@ -157,8 +160,8 @@ module.exports = class Router
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		app.get  "/project/:project_id/messages", ChatController.getMessages
-		app.post "/project/:project_id/messages", ChatController.sendMessage
+		app.get  "/project/:project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
+		app.post "/project/:project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
