@@ -1,6 +1,7 @@
 _ = require("underscore")
 async = require("async")
 Settings = require('settings-sharelatex')
+logger = require("logger-sharelatex")
 redis = require('redis')
 rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
 rclient.auth(Settings.redis.web.password)
@@ -12,7 +13,7 @@ buildProjectSetKey = (project_id)-> return "users_in_project:#{project_id}"
 buildUserKey = (project_id, user_id)-> return "connected_user:#{project_id}:#{user_id}"
 
 
-module.exports = 
+module.exports =
 
 	markUserAsConnected: (project_id, user_id, callback = (err)->)->
 		logger.log project_id:project_id, user_id:user_id, "marking user as connected"
@@ -20,8 +21,12 @@ module.exports =
 			(cb)->
 				rclient.sadd buildProjectSetKey(project_id), user_id, cb
 			(cb)->
-				rclient.setex buildUserKey(project_id, user_id), new Date(), ONE_HOUR_IN_S * 6, cb
-		], callback
+				ttl = ONE_HOUR_IN_S * 6
+				rclient.setex buildUserKey(project_id, user_id), ttl, new Date(), cb
+		], (err)->
+			if err?
+				logger.err err:err, project_id:project_id, user_id:user_id, "problem marking user as connected"
+			callback(err)
 
 	markUserAsDisconnected: (project_id, user_id, callback)->
 		logger.log project_id:project_id, user_id:user_id, "marking user as disconnected"
@@ -31,8 +36,6 @@ module.exports =
 			(cb)->
 				rclient.del buildUserKey(project_id, user_id), cb
 		], callback
-
-
 
 	_getConnectedUser: (project_id, user_id, callback)->
 		rclient.get buildUserKey(project_id, user_id), (err, result)->
@@ -45,8 +48,7 @@ module.exports =
 
 	getConnectedUsers: (project_id, callback)->
 		self = @
-		rclient.get "connected_users_list:#{project_id}", (err, results)->
-
+		rclient.smembers buildProjectSetKey(project_id), (err, results)->
 			jobs = results.map (user_id)->
 				(cb)->
 					self._getConnectedUser(project_id, user_id, cb)

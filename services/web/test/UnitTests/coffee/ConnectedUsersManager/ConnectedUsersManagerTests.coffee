@@ -23,6 +23,7 @@ describe "ConnectedUsersManager", ->
 			get: sinon.stub()
 			srem:sinon.stub()
 			del:sinon.stub()
+			smembers:sinon.stub()
 		tk.freeze(new Date())
 
 		@ConnectedUsersManager = SandboxedModule.require modulePath, requires:
@@ -45,7 +46,7 @@ describe "ConnectedUsersManager", ->
 		it "should set a key with the date and give it a ttl", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
 				console.log @rClient.setex.args[0], "connected_user:#{@project_id}:#{@user_id}"
-				@rClient.setex.calledWith("connected_user:#{@project_id}:#{@user_id}", new Date(), 60 * 60 * 6).should.equal true
+				@rClient.setex.calledWith("connected_user:#{@project_id}:#{@user_id}", 60 * 60 * 6, new Date()).should.equal true
 				done()
 
 		it "should push the user_id on to the project list", (done)->
@@ -92,7 +93,7 @@ describe "ConnectedUsersManager", ->
 
 		beforeEach ->
 			@users = ["1234", "5678", "9123"]
-			@rClient.get.callsArgWith(1, null, @users)
+			@rClient.smembers.callsArgWith(1, null, @users)
 			@ConnectedUsersManager._getConnectedUser = sinon.stub()
 			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[0]).callsArgWith(2, null, {connected:true, user_id:@users[0]})
 			@ConnectedUsersManager._getConnectedUser.withArgs(@project_id, @users[1]).callsArgWith(2, null, {connected:false, user_id:@users[1]})
