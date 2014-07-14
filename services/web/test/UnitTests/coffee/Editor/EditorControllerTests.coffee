@@ -56,6 +56,7 @@ describe "EditorController", ->
 		@ConnectedUsersManager =
 			markUserAsDisconnected:sinon.stub()
 			markUserAsConnected:sinon.stub()
+			setUserCursorPosition:sinon.stub()
 
 		@EditorController = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/Server" : io : @io
@@ -262,11 +263,14 @@ describe "EditorController", ->
 	describe "updateClientPosition", ->
 		beforeEach ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ConnectedUsersManager.setUserCursorPosition.callsArgWith(3)
 			@update = {
 				doc_id: @doc_id = "doc-id-123"
 				row: @row = 42
 				column: @column = 37
 			}
+
+
 		describe "with a logged in user", ->
 			beforeEach ->
 				@clientParams = {
@@ -279,18 +283,21 @@ describe "EditorController", ->
 				@client.get = (param, callback) => callback null, @clientParams[param]
 				@EditorController.updateClientPosition @client, @update
 
+				@populatedCursorData = 
+					doc_id: @doc_id,
+					id: @client.id
+					name: "#{@first_name} #{@last_name}"
+					row: @row
+					column: @column
+					email: @email
+					user_id: @user_id
+
 			it "should send the update to the project room with the user's name", ->
-				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "clientTracking.clientUpdated", {
-						doc_id: @doc_id,
-						id: @client.id
-						name: "#{@first_name} #{@last_name}"
-						row: @row
-						column: @column
-						email: @email
-						user_id: @user_id
-					})
-					.should.equal true
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
+
+			it "should send the  cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.setUserCursorPosition.calledWith(@project_id, @user_id, @populatedCursorData).should.equal true
+				done()
 
 		describe "with an anonymous user", ->
 			beforeEach ->
@@ -311,6 +318,9 @@ describe "EditorController", ->
 					})
 					.should.equal true
 				
+			it "should not send cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.setUserCursorPosition.called.should.equal false
+				done()
 
 	describe "addUserToProject", ->
 		beforeEach ->

@@ -11,6 +11,8 @@ ONE_HOUR_IN_S = 60 * 60
 ONE_DAY_IN_S = ONE_HOUR_IN_S * 24
 FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4
 
+USER_TIMEOUT_IN_S = ONE_HOUR_IN_S
+
 buildProjectSetKey = (project_id)-> return "users_in_project:#{project_id}"
 buildUserKey = (project_id, user_id)-> return "connected_user:#{project_id}:#{user_id}"
 
@@ -25,7 +27,9 @@ module.exports =
 			(cb)->
 				rclient.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S, cb
 			(cb)->
-				rclient.setex buildUserKey(project_id, user_id), ONE_HOUR_IN_S, new Date(), cb
+				rclient.hset buildUserKey(project_id, user_id), "connected_at", new Date(), cb
+			(cb)->
+				rclient.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S, cb
 		], (err)->
 			if err?
 				logger.err err:err, project_id:project_id, user_id:user_id, "problem marking user as connected"
@@ -43,13 +47,25 @@ module.exports =
 		], callback
 
 	_getConnectedUser: (project_id, user_id, callback)->
-		rclient.get buildUserKey(project_id, user_id), (err, result)->
+		rclient.hgetall buildUserKey(project_id, user_id), (err, result)->
 			if !result?
-				connected = false
+				result =
+					connected : false
+					user_id:user_id
 			else
-				connected = true
+				result.connected = true
+				result.user_id = user_id
 
-			callback err, {connected:connected, user_id:user_id}
+			callback err, result
+
+	setUserCursorPosition: (project_id, user_id, cursorData, callback)->
+		async.series [
+			(cb)->
+				rclient.hset buildUserKey(project_id, user_id), "cursorData", JSON.stringify(cursorData), cb
+			(cb)->
+				rclient.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S, cb
+		], callback
+
 
 	getConnectedUsers: (project_id, callback)->
 		self = @
@@ -60,8 +76,5 @@ module.exports =
 			async.series jobs, (err, users)->
 				users = _.filter users, (user)->
 					user.connected
-				user_ids = _.map users, (user)->
-					user.user_id
-				callback err, user_ids
-
+				callback err, users
 

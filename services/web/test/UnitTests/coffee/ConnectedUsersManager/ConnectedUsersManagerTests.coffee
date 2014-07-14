@@ -25,6 +25,8 @@ describe "ConnectedUsersManager", ->
 			del:sinon.stub()
 			smembers:sinon.stub()
 			expire:sinon.stub()
+			hset:sinon.stub()
+			hgetall:sinon.stub()
 		tk.freeze(new Date())
 
 		@ConnectedUsersManager = SandboxedModule.require modulePath, requires:
@@ -40,14 +42,14 @@ describe "ConnectedUsersManager", ->
 
 	describe "markUserAsConnected", ->
 		beforeEach ->
-			@rClient.setex.callsArgWith(3)
+			@rClient.hset.callsArgWith(3)
 			@rClient.sadd.callsArgWith(2)
 			@rClient.expire.callsArgWith(2)
 
 
 		it "should set a key with the date and give it a ttl", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
-				@rClient.setex.calledWith("connected_user:#{@project_id}:#{@user_id}", 60 * 60, new Date()).should.equal true
+				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@user_id}", "connected_at", new Date()).should.equal true
 				done()
 
 		it "should push the user_id on to the project list", (done)->
@@ -58,6 +60,11 @@ describe "ConnectedUsersManager", ->
 		it "should add a ttl to the connected user set so it stays clean", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
 				@rClient.expire.calledWith("users_in_project:#{@project_id}", 24 * 4 * 60 * 60).should.equal true
+				done()
+
+		it "should add a ttl to the connected user so it stays clean", (done)->
+			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
+				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@user_id}", 60 * 60).should.equal true
 				done()
 
 	describe "markUserAsDisconnected", ->
@@ -85,14 +92,14 @@ describe "ConnectedUsersManager", ->
 	describe "_getConnectedUser", ->
 
 		it "should get the user returning connected if there is a value", (done)->
-			@rClient.get.callsArgWith(1, null, new Date())
+			@rClient.hgetall.callsArgWith(1, null, {connected_at:new Date(), cursorData:{row:1}})
 			@ConnectedUsersManager._getConnectedUser @project_id, @user_id, (err, result)=>
 				result.connected.should.equal true
 				result.user_id.should.equal @user_id
 				done()
 
 		it "should get the user returning connected if there is a value", (done)->
-			@rClient.get.callsArgWith(1)
+			@rClient.hgetall.callsArgWith(1)
 			@ConnectedUsersManager._getConnectedUser @project_id, @user_id, (err, result)=>
 				result.connected.should.equal false
 				result.user_id.should.equal @user_id
@@ -114,11 +121,25 @@ describe "ConnectedUsersManager", ->
 		it "should only return the users in the list which are still in redis", (done)->
 			@ConnectedUsersManager.getConnectedUsers @project_id, (err, users)=>
 				users.length.should.equal 2
-				users[0].should.equal @users[0]
-				users[1].should.equal @users[2]
+				users[0].should.deep.equal {user_id:@users[0], connected:true}
+				users[1].should.deep.equal {user_id:@users[2], connected:true}
+				done()
+
+	describe "setUserCursorPosition", ->
+
+		beforeEach ->
+			@cursorData = { row: 12, column: 9, doc_id: '53c3b8c85fee64000023dc6e' }
+			@rClient.hset.callsArgWith(3)
+			@rClient.expire.callsArgWith(2)
+
+		it "should add the cursor data to the users hash", (done)->
+			@ConnectedUsersManager.setUserCursorPosition @project_id, @user_id, @cursorData, (err)=>
+				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@user_id}", "cursorData", JSON.stringify(@cursorData)).should.equal true
 				done()
 
 
-
-
+		it "should add the ttl on", (done)->
+			@ConnectedUsersManager.setUserCursorPosition @project_id, @user_id, @cursorData, (err)=>
+				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@user_id}", 60 * 60).should.equal true
+				done()
 

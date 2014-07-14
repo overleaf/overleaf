@@ -126,6 +126,7 @@ module.exports = EditorController =
 			cursorData.email = email if email?
 			if first_name? and last_name?
 				cursorData.name = first_name + " " + last_name
+				ConnectedUsersManager.setUserCursorPosition(project_id, user_id, cursorData, ->)
 			else
 				cursorData.name = "Anonymous"
 			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
