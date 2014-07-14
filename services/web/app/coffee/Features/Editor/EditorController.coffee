@@ -113,24 +113,22 @@ module.exports = EditorController =
 			), 500
 		
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
-		client.get "project_id", (error, project_id) ->
-			return callback(error) if error?
-			client.get "first_name", (error, first_name) ->
-				return callback(error) if error?
-				client.get "last_name", (error, last_name) ->
-					return callback(error) if error?
-					client.get "email", (error, email) ->
-						return callback(error) if error?
-						client.get "user_id", (error, user_id) ->
-							return callback(error) if error?
-							cursorData.id = client.id
-							cursorData.user_id = user_id if user_id?
-							cursorData.email = email if email?
-							if first_name? and last_name?
-								cursorData.name = first_name + " " + last_name
-							else
-								cursorData.name = "Anonymous"
-							EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
+		async.parallel {
+			project_id: (cb)-> client.get "project_id", cb
+			first_name: (cb)-> client.get "first_name", cb
+			last_name: (cb)-> client.get "last_name", cb
+			email: (cb)-> client.get "email", cb
+			user_id: (cb)-> client.get "user_id", cb
+		}, (err, results)->
+			{first_name, last_name, user_id, email, project_id} = results
+			cursorData.id = client.id
+			cursorData.user_id = user_id if user_id?
+			cursorData.email = email if email?
+			if first_name? and last_name?
+				cursorData.name = first_name + " " + last_name
+			else
+				cursorData.name = "Anonymous"
+			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
 	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
 		email = email.toLowerCase()
