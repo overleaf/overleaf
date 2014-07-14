@@ -27,6 +27,8 @@ describe "ConnectedUsersManager", ->
 			expire:sinon.stub()
 			hset:sinon.stub()
 			hgetall:sinon.stub()
+			exec:sinon.stub()
+			multi: => return @rClient
 		tk.freeze(new Date())
 
 		@ConnectedUsersManager = SandboxedModule.require modulePath, requires:
@@ -42,10 +44,7 @@ describe "ConnectedUsersManager", ->
 
 	describe "markUserAsConnected", ->
 		beforeEach ->
-			@rClient.hset.callsArgWith(3)
-			@rClient.sadd.callsArgWith(2)
-			@rClient.expire.callsArgWith(2)
-
+			@rClient.exec.callsArgWith(0)
 
 		it "should set a key with the date and give it a ttl", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @user_id, (err)=>
@@ -69,9 +68,7 @@ describe "ConnectedUsersManager", ->
 
 	describe "markUserAsDisconnected", ->
 		beforeEach ->
-			@rClient.srem.callsArgWith(2)
-			@rClient.del.callsArgWith(1)
-			@rClient.expire.callsArgWith(2)
+			@rClient.exec.callsArgWith(0)
 
 		it "should remove the user from the set", (done)->
 			@ConnectedUsersManager.markUserAsDisconnected @project_id, @user_id, (err)=>
@@ -88,7 +85,6 @@ describe "ConnectedUsersManager", ->
 				@rClient.expire.calledWith("users_in_project:#{@project_id}", 24 * 4 * 60 * 60).should.equal true
 				done()
 
-
 	describe "_getConnectedUser", ->
 
 		it "should get the user returning connected if there is a value", (done)->
@@ -104,8 +100,6 @@ describe "ConnectedUsersManager", ->
 				result.connected.should.equal false
 				result.user_id.should.equal @user_id
 				done()
-
-
 
 	describe "getConnectedUsers", ->
 
@@ -129,8 +123,7 @@ describe "ConnectedUsersManager", ->
 
 		beforeEach ->
 			@cursorData = { row: 12, column: 9, doc_id: '53c3b8c85fee64000023dc6e' }
-			@rClient.hset.callsArgWith(3)
-			@rClient.expire.callsArgWith(2)
+			@rClient.exec.callsArgWith(0)
 
 		it "should add the cursor data to the users hash", (done)->
 			@ConnectedUsersManager.setUserCursorPosition @project_id, @user_id, @cursorData, (err)=>

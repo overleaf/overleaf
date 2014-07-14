@@ -21,30 +21,25 @@ module.exports =
 
 	markUserAsConnected: (project_id, user_id, callback = (err)->)->
 		logger.log project_id:project_id, user_id:user_id, "marking user as connected"
-		async.series [
-			(cb)->
-				rclient.sadd buildProjectSetKey(project_id), user_id, cb
-			(cb)->
-				rclient.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S, cb
-			(cb)->
-				rclient.hset buildUserKey(project_id, user_id), "connected_at", new Date(), cb
-			(cb)->
-				rclient.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S, cb
-		], (err)->
+
+		multi = rclient.multi()
+		multi.sadd buildProjectSetKey(project_id), user_id
+		multi.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S
+		multi.hset buildUserKey(project_id, user_id), "connected_at", new Date()
+		multi.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S
+		multi.exec (err)->
 			if err?
 				logger.err err:err, project_id:project_id, user_id:user_id, "problem marking user as connected"
 			callback(err)
 
 	markUserAsDisconnected: (project_id, user_id, callback)->
 		logger.log project_id:project_id, user_id:user_id, "marking user as disconnected"
-		async.series [
-			(cb)->
-				rclient.srem buildProjectSetKey(project_id), user_id, cb
-			(cb)->
-				rclient.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S, cb
-			(cb)->
-				rclient.del buildUserKey(project_id, user_id), cb
-		], callback
+		multi = rclient.multi()
+		multi.srem buildProjectSetKey(project_id), user_id
+		multi.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S
+		multi.del buildUserKey(project_id, user_id)
+		multi.exec callback
+
 
 	_getConnectedUser: (project_id, user_id, callback)->
 		rclient.hgetall buildUserKey(project_id, user_id), (err, result)->
@@ -59,12 +54,10 @@ module.exports =
 			callback err, result
 
 	setUserCursorPosition: (project_id, user_id, cursorData, callback)->
-		async.series [
-			(cb)->
-				rclient.hset buildUserKey(project_id, user_id), "cursorData", JSON.stringify(cursorData), cb
-			(cb)->
-				rclient.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S, cb
-		], callback
+		multi = rclient.multi()
+		multi.hset buildUserKey(project_id, user_id), "cursorData", JSON.stringify(cursorData)
+		multi.expire buildUserKey(project_id, user_id), USER_TIMEOUT_IN_S
+		multi.exec callback
 
 
 	getConnectedUsers: (project_id, callback)->
