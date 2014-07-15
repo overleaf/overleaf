@@ -63,7 +63,7 @@ define [
 
 			@$scope.trackChanges.updates[indexOfLastUpdateNotByMe].selectedFrom = true
 
-		BATCH_SIZE: 4
+		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
 			url = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
 			if @$scope.trackChanges.nextBeforeTimestamp?

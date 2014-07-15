@@ -18,7 +18,7 @@ module.exports =
 
 	getMessages: (req, res)->
 		project_id = req.params.Project_id
-		query = req.body
+		query = req.query
 		logger.log project_id:project_id, query:query, "getting messages"
 		ChatHandler.getMessages project_id, query, (err, messages)->
 			if err?

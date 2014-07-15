@@ -1,24 +1,25 @@
 aside.chat(
 	ng-controller="ChatController"
-	infinite-scroll="loadMore()"
-	infinite-scroll-disabled="chat.loading || chat.atEnd"
-	infinite-scroll-initialize="ui.chatOpen"
 )
 	.messages(
-		infinite-scroll="loadMore()"
+		infinite-scroll="loadMoreMessages()"
 		infinite-scroll-disabled="chat.loading || chat.atEnd"
 		infinite-scroll-initialize="ui.chatOpen"
-		scroll-glue
+		infinite-scroll-upwards="true"
+		update-scroll-bottom-on="messages:updated"
 	)
 		.infinite-scroll-inner
+			.loading(ng-show="chat.loading")
+				i.fa.fa-fw.fa-spin.fa-refresh
+				| Loading...
 			ul.list-unstyled
 				li.message(
-					ng-repeat="message in chat.groupedMessages | orderBy:'timestamp':false"
+					ng-repeat="message in chat.messages"
 					ng-controller="ChatMessageController"
 					ng-class="{'self': message.user.id == user.id }"
 				)
-					div.date(ng-if="$index == 0 || (message.timestamp - chat.groupedMessages[$index - 1].timestamp) > 5 * 60 * 1000")
-						{{ message.timestamp | formatDate:'h:MMa' }} {{ message.timestamp | relativeDate }}
+					div.date(ng-if="$index == 0 || (message.timestamp - chat.messages[$index - 1].timestamp) > 5 * 60 * 1000")
+						{{ message.timestamp | formatDate:'h:mm a' }} {{ message.timestamp | relativeDate }}
 					span.avatar
 						img(ng-src="{{message.user.gravatar_url}}")
 					div.message-wrapper
@@ -30,7 +31,7 @@ aside.chat(
 							}"
 						)
 							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)'}")
-							p(ng-repeat="content in message.contents") {{ content }}
+							p(ng-repeat="content in message.contents track by $index") {{ content }}
 
 	.new-message
 		textarea(placeholder="Your message...", on-enter="sendMessage()", ng-model="newMessageContent")
