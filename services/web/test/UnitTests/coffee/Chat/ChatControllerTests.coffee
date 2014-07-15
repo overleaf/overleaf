@@ -55,7 +55,7 @@ describe "ChatController", ->
 
 	describe "getMessages", ->
 		beforeEach ->
-			@req.body = @query
+			@req.query = @query
 
 		it "should ask the chat handler about the request", (done)->
 
