@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	App.factory "chatMessages", ($http, ide) ->
 		MESSAGES_URL = "/project/#{ide.project_id}/messages"
-		MESSAGE_LIMIT = 3
+		MESSAGE_LIMIT = 50
 		CONNECTED_USER_URL = "/project/#{ide.project_id}/connected_users"
 
 		chat = {
