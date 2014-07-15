@@ -1,0 +1,45 @@
+script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Publish as Template
+	.modal-body.modal-body-share
+		form()
+			label(for='Description') Template Description
+			.form-group
+				textarea.form-control(
+				rows=5,
+				name='Description',
+				ng-model="template.description",
+				ng-blur="updateProjectDescription()",
+				value=""
+			)
+		div(ng-show="publishedDetails.exists").text-center.publishedDetails
+			|  Your project was last published at 
+			strong {{publishedDetails.publishedDate}}. 
+			a(ng-href="{{publishedDetails.canonicalUrl}}") View it in template gallery.
+
+
+
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()",
+			ng-disabled="state.publishInflight"
+		) Cancel
+		button.btn.btn-info(
+			ng-click="unpublishTemplate()",
+			ng-disabled="state.unpublishInflight",
+			ng-show="publishedDetails.exists"
+		) 
+			span(ng-show="!state.unpublishInflight") Unpublish
+			span(ng-show="state.unpublishInflight") Unpublishing...
+		button.btn.btn-primary(
+			ng-click="publish()",
+			ng-disabled="state.publishInflight"
+		)
+			span(ng-show="!state.publishInflight && !publishedDetails.exists") Publish
+			span(ng-show="!state.publishInflight && publishedDetails.exists") Republish
+			span(ng-show="state.publishInflight") Publishing...
