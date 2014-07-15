@@ -39,7 +39,6 @@ define [
 		TIMESTAMP_GROUP_SIZE = 5 * 60 * 1000 # 5 minutes
 		
 		prependMessage = (message) ->
-			console.log "PREPENDING MESSAGE", message
 			firstMessage = chat.state.messages[0]
 			shouldGroup = firstMessage? and
 				firstMessage.user.id == message.user.id and

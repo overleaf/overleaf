@@ -5,9 +5,10 @@ define [
 	App.controller "ChatController", ($scope, chatMessages, @ide, $location) ->
 		$scope.chat = chatMessages.state
 		
-		$scope.$watchCollection "chat.messages", (messages) ->
+		$scope.$watch "chat.messages", (messages) ->
 			if messages?
 				$scope.$emit "messages:updated"
+		, true # Deep watch
 				
 		$scope.sendMessage = ->
 			chatMessages
