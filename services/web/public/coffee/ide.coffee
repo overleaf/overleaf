@@ -11,6 +11,7 @@ define [
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
+	"ide/templates/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"

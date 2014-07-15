@@ -59,6 +59,7 @@ block content
 						include ./editor/editor
 						include ./editor/binary-file
 						include ./editor/track-changes
+						include ./editor/publish-template
 
 			.ui-layout-east
 				//- include ./editor/chat
@@ -101,6 +102,7 @@ block content
 				}
 			}
 		};
+		window.project_description = "#{project.description}"
 
 	script(type='text/javascript').
 		ga('send', 'event', 'editor-interaction', 'editor-opened')
