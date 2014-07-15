@@ -6,6 +6,12 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		tooltip-placement="bottom"
 	)
 		i.fa.fa-fw.fa-bars
+	a(
+		href="/project"
+		tooltip="Back to projects",
+		tooltip-placement="bottom"
+	)
+		i.fa.fa-fw.fa-level-up
 
 	.toolbar-center.project-name(ng-controller="ProjectNameController")
 		span.name(
