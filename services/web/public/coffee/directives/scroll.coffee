@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.directive "updateScrollBottomOn", ->
+	App.directive "updateScrollBottomOn", ($timeout) ->
 		return {
 			restrict: "A"
 			link: (scope, element, attrs, ctrls) ->
@@ -29,7 +29,7 @@ define [
 					scrollBottom = element[0].scrollHeight - element[0].scrollTop - element[0].clientHeight
 					
 				scope.$on attrs.updateScrollBottomOn, () ->
-					setTimeout () ->
+					$timeout () ->
 						element.scrollTop(element[0].scrollHeight - element[0].clientHeight - scrollBottom)
 					, 0
 		}

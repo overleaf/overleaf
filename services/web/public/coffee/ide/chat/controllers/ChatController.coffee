@@ -7,8 +7,11 @@ define [
 		
 		$scope.$watch "chat.messages", (messages) ->
 			if messages?
-				$scope.$emit "messages:updated"
+				$scope.$emit "updateScrollPosition"
 		, true # Deep watch
+		
+		$scope.$on "layout:chat:resize", () ->
+			$scope.$emit "updateScrollPosition"
 				
 		$scope.sendMessage = ->
 			chatMessages

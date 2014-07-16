@@ -6,7 +6,7 @@ aside.chat(
 		infinite-scroll-disabled="chat.loading || chat.atEnd"
 		infinite-scroll-initialize="ui.chatOpen"
 		infinite-scroll-upwards="true"
-		update-scroll-bottom-on="messages:updated"
+		update-scroll-bottom-on="updateScrollPosition"
 	)
 		.infinite-scroll-inner
 			.loading(ng-show="chat.loading")

@@ -34,7 +34,6 @@ define [
 					messages.reverse()
 					prependMessages(messages)
 					chat.state.nextBeforeTimestamp = chat.state.messages[0]?.timestamp
-					console.log messages, chat.state
 		
 		TIMESTAMP_GROUP_SIZE = 5 * 60 * 1000 # 5 minutes
 		
