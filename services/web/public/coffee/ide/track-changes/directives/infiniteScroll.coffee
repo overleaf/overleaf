@@ -8,29 +8,25 @@ define [
 				element.css 'overflow-y': 'auto'
 
 				atEndOfListView = () ->
+					if attrs.infiniteScrollUpwards?
+						atTopOfListView()
+					else
+						atBottomOfList()
+					
+				atTopOfListView = () ->
+					element.scrollTop() < 30
+					
+				atBottomOfListView = () ->
 					element.scrollTop() + element.height() >= innerElement.height() - 30
 
 				listShorterThanContainer = () ->
-					element.innerHeight() > @$(".change-list").outerHeight()
+					element.height() > innerElement.height()
 
 				loadUntilFull = () ->
 					if (listShorterThanContainer() or atEndOfListView()) and not scope.$eval(attrs.infiniteScrollDisabled)
 						promise = scope.$eval(attrs.infiniteScroll)
 						promise.then () ->
 							loadUntilFull()
-						# @collection.fetchNextBatch
-						# 	error: (error) =>
-						# 		@hideLoading()
-						# 		@showEmptyMessageIfCollectionEmpty()
-						# 		callback(error)
-						# 	success: (collection, response) =>
-						# 		@hideLoading()
-						# 		if @collection.isAtEnd()
-						# 			@atEndOfCollection = true
-						# 			@showEmptyMessageIfCollectionEmpty()
-						# 			callback()
-						# 		else
-						# 			@loadUntilFull(callback)
 
 				element.on "scroll", (event) ->
 					loadUntilFull()

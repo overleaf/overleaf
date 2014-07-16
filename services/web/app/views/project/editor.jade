@@ -62,7 +62,7 @@ block content
 						include ./editor/publish-template
 
 			.ui-layout-east
-				//- include ./editor/chat
+				include ./editor/chat
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header
@@ -120,4 +120,5 @@ block content
 		data-ace-base=jsPath+'ace',
 		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 	)
+		
 
