@@ -1,6 +1,7 @@
 path = require('path')
 ProjectUploadManager = require('../Uploads/ProjectUploadManager')
 ProjectOptionsHandler = require("../Project/ProjectOptionsHandler")
+ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 TemplatesPublisher = require("./TemplatesPublisher")
 settings = require('settings-sharelatex')
 fs = require('fs')
@@ -46,7 +47,10 @@ module.exports =
 		TemplatesPublisher.getTemplateDetails user_id, project_id, (err, details)->
 			if err?
 				logger.err err:err, user_id:user_id, project_id:project_id, "something went wrong getting template details"
-			callback(err, details)
+				return callback(err)
+			ProjectDetailsHandler.getProjectDescription project_id, (err, description)->
+				details.description = description
+				callback(err, details)
 
 
 setCompiler = (project_id, compiler, callback)->
