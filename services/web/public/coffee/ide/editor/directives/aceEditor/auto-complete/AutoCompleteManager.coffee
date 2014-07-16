@@ -96,7 +96,7 @@ define [
 						editor.completer.autoSelect = true
 						editor.completer.showPopup(editor)
 						editor.completer.cancelContextMenu()
-						$(editor.completer.popup.container).css({'font-size': @$scope.fontSize + 'px'})
+						$(editor.completer.popup?.container).css({'font-size': @$scope.fontSize + 'px'})
 					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"
 				}
 
