@@ -4,7 +4,7 @@ aside#left-menu.full-size(
 )
 	h4 Download
 
-	ul.list-unstyled.nav.nav-downloads
+	ul.list-unstyled.nav.nav-downloads.text-center
 		li
 			a(
 				ng-href="/project/{{project_id}}/download/zip"
@@ -30,6 +30,14 @@ aside#left-menu.full-size(
 				i.fa.fa-file-pdf-o.fa-2x
 				br
 				| PDF
+				
+	span(ng-controller="TemplatesController", ng-show="permissions.admin")
+		h4() Publish
+		ul.list-unstyled.nav()
+			li
+				a(ng-click="openPublishTemplateModal()")
+					i.fa.fa-external-link.fa-fw 
+					| &nbsp;&nbsp;Publish as Template
 
 	h4 Settings
 	form.settings(ng-controller="SettingsController")
@@ -102,14 +110,6 @@ aside#left-menu.full-size(
 				)
 					option(value="pdfjs") Built-In
 					option(value="native") Native
-					
-	span(ng-controller="TemplatesController", ng-show="permissions.admin")
-		h4() Publish
-		ul.list-unstyled.nav()
-			li
-				a(ng-click="openPublishTemplateModal()")
-					i.fa.fa-external-link.fa-fw 
-					| &nbsp;&nbsp;Publish as Template
 
 
 #left-menu-mask(
