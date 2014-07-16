@@ -36,7 +36,7 @@ aside#left-menu.full-size(
 		.containter-fluid
 			.form-controls
 				label(for="compiler") Compiler
-				select.form-control(
+				select(
 					name="compiler"
 					ng-model="project.compiler"
 				)
@@ -47,7 +47,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="spellCheckLanguage") Spell Check
-				select.form-control(
+				select(
 					name="spellCheckLanguage"
 					ng-model="project.spellCheckLanguage"
 				)
@@ -60,7 +60,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="autoComplete") Auto-Complete
-				select.form-control(
+				select(
 					name="autoComplete"
 					ng-model="settings.autoComplete"
 					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
@@ -68,7 +68,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="theme") Theme
-				select.form-control(
+				select(
 					name="theme"
 					ng-model="settings.theme"
 				)
@@ -77,7 +77,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="mode") Keybindings
-				select.form-control(
+				select(
 					name="mode"
 					ng-model="settings.mode"
 				)
@@ -87,7 +87,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="fontSize") Font Size
-				select.form-control(
+				select(
 					name="fontSize"
 					ng-model="settings.fontSize"
 				)
@@ -96,7 +96,7 @@ aside#left-menu.full-size(
 
 			.form-controls
 				label(for="pdfViewer") PDF Viewer
-				select.form-control(
+				select(
 					name="pdfViewer"
 					ng-model="settings.pdfViewer"
 				)
