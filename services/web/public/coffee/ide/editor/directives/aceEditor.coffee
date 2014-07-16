@@ -66,7 +66,7 @@ define [
 					name: "find",
 					bindKey: win: "Ctrl-F", mac: "Command-F"
 					exec: (editor) ->
-						Ace.require("ace/ext/searchbox").Search(editor, true)
+						ace.require("ace/ext/searchbox").Search(editor, true)
 					readOnly: true
 				editor.commands.removeCommand "replace"
 

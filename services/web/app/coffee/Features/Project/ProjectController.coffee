@@ -217,12 +217,7 @@ module.exports = ProjectController =
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
 					}
-					sharelatex : {
-						siteUrl: Settings.siteUrl,
-						jsPath: res.locals.jsPath
-					}
 					privilegeLevel: privilegeLevel
-					loadPdfjs: (user.ace.pdfViewer == "pdfjs")
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
 					languages: Settings.languages
