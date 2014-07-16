@@ -1,0 +1,179 @@
+script(type='text/ng-template', id='newTagModalTemplate')
+	.modal-header
+		h3 Create New Folder
+	.modal-body
+		form(name="newTagForm", novalidate)
+			input.form-control(
+				type="text",
+				placeholder="New Folder Name",
+				required,
+				ng-model="inputs.newTagName",
+				on-enter="create()",
+				focus-on="open"
+			)
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") Cancel
+		button.btn.btn-primary(
+			ng-disabled="newTagForm.$invalid"
+			ng-click="create()"
+		) Create
+
+script(type='text/ng-template', id='renameProjectModalTemplate')
+	.modal-header
+		h3 Rename Project
+	.modal-body
+		form(name="renameProjectForm", novalidate)
+			input.form-control(
+				type="text",
+				placeholder="Project Name",
+				ng-model="inputs.projectName",
+				required,
+				on-enter="rename()",
+				focus-on="open"
+			)
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") Cancel
+		button.btn.btn-primary(
+			ng-click="rename()",
+			ng-disabled="renameProjectForm.$invalid"
+		) Rename
+
+script(type='text/ng-template', id='cloneProjectModalTemplate')
+	.modal-header
+		h3 Copy Project
+	.modal-body
+		form(name="cloneProjectForm", novalidate)
+			.form-group
+				label New Name
+				input.form-control(
+					type="text",
+					placeholder="New Project Name",
+					required,
+					ng-model="inputs.projectName",
+					on-enter="clone()",
+					focus-on="open"
+				)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-primary(
+			ng-disabled="cloneProjectForm.$invalid || state.inflight"
+			ng-click="clone()"
+		)
+			span(ng-hide="state.inflight") Copy
+			span(ng-show="state.inflight") Copying...
+
+script(type='text/ng-template', id='newProjectModalTemplate')
+	.modal-header
+		h3 New Project
+	.modal-body
+		form(novalidate, name="newProjectForm")
+			input.form-control(
+				type="text",
+				placeholder="Project Name",
+				required,
+				ng-model="inputs.projectName",
+				on-enter="create()",
+				focus-on="open"
+			)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-primary(
+			ng-disabled="newProjectForm.$invalid || state.inflight"
+			ng-click="create()"
+		)
+			span(ng-hide="state.inflight") Create
+			span(ng-show="state.inflight") Creating...
+
+script(type='text/ng-template', id='deleteProjectsModalTemplate')
+	.modal-header
+		h3 {{action}} Projects
+	.modal-body
+		div(ng-show="projectsToDelete.length > 0")
+			p You are about to delete the following projects:
+			ul
+				li(ng-repeat="project in projectsToDelete | orderBy:'name'")
+					strong {{project.name}}
+		div(ng-show="projectsToLeave.length > 0")
+			p You are about to leave the following projects:
+			ul
+				li(ng-repeat="project in projectsToLeave | orderBy:'name'")
+					strong {{project.name}}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-danger(
+			ng-click="delete()"
+		) {{action}}
+
+script(type="text/ng-template", id="uploadProjectModalTemplate")
+	.modal-header
+		h3 Upload Zipped Project
+	.modal-body(
+		fine-upload
+		endpoint="/project/new/upload"
+		waiting-for-response-text="Creating project..."
+		failed-upload-text="Upload failed. Is it a valid zip file?"
+		upload-button-text="Select a .zip file"
+		drag-area-text="drag .zip file"
+		multiple="false"
+		allowed-extensions="['zip']"
+		on-complete-callback="onComplete"
+	)
+		span Upload a zipped project
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") Cancel
+
+script(type="text/ng-template", id="userProfileModalTemplate")
+	.modal-header
+		h3 Your Profile
+	.modal-body
+		form(enctype='multipart/form-data', method='post')
+			.form-group
+				label(for="first_name") First Name
+				input.form-control(
+					type='text',
+					name='first_name',
+					ng-model="userInfoForm.first_name",
+					ng-blur="sendUpdate()",
+					placeholder="First Name",
+					select-when="formVisable"
+				)
+			.form-group
+				label(for="last_name") Last Name
+				input.form-control(
+					type='text',
+					name='last_name',
+					ng-model="userInfoForm.last_name",
+					ng-blur="sendUpdate()",
+					placeholder='Last Name'
+				)
+			.form-group#institution_auto_complete
+				label(for="institution") Institution
+				autocomplete(
+					ng-model="userInfoForm.institution",
+					name="institution",
+					data="institutions",
+					ng-blur="sendUpdate()",
+					on-type="updateInstitutionsList",
+					attr-placeholder="Institution",
+					attr-inputclass="form-control"
+				)
+			.form-group
+				label(for="role") Role
+				input.form-control(
+					type='text',
+					name='role',
+					ng-model="userInfoForm.role",
+					placeholder='Role',
+					ng-blur="sendUpdate()",
+					typeahead="role for role in roles | filter:$viewValue"
+				)
+	.modal-footer
+		button.btn.btn-info(ng-click="done()") Done
