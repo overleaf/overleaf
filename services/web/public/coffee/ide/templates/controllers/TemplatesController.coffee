@@ -3,10 +3,7 @@ define [
 	"ide/permissions/PermissionsManager"
 ], (App, PermissionsManager) ->
 	App.controller "TemplatesController", ($scope, $modal, ide) ->
-		$scope.showPublishTemplateLinkInSideBar = ide.$scope.hasPermission("admin")
-
 		$scope.openPublishTemplateModal = () ->
-			console.log "open"
 			$modal.open {
 				templateUrl: "publishProjectAsTemplateModalTemplate"
 				controller: "PublishProjectAsTemplateModalController"

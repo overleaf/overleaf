@@ -17,6 +17,3 @@ define [], () ->
 						@$scope.permissions.read = true
 						@$scope.permissions.write = true
 						@$scope.permissions.admin = true
-
-			@$scope.hasPermission = (requestedLevel)=>
-				return @$scope.permissions[requestedLevel]

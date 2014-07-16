@@ -102,7 +102,8 @@ aside#left-menu.full-size(
 				)
 					option(value="pdfjs") Built-In
 					option(value="native") Native
-	span(ng-controller="TemplatesController", ng-show="hasPermission('admin')")
+					
+	span(ng-controller="TemplatesController", ng-show="permissions.admin")
 		h4() Publish
 		ul.list-unstyled.nav()
 			li

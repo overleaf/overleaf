@@ -17,7 +17,6 @@ define [
 	annotationsLayerCss
 	highlightsLayerCss
 ) ->
-	console.log "SETTING workerSrc", PDFJS, window.pdfJsWorkerPath
 	if PDFJS?
 		PDFJS.workerSrc = window.pdfJsWorkerPath
 
