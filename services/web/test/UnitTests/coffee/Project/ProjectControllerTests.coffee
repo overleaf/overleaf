@@ -291,12 +291,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.loadEditor @req, @res
 
-		it "should add sharelatex", (done)->
-			@res.render = (pageName, opts)=>
-				opts.sharelatex.siteUrl.should.equal @settings.siteUrl
-				done()
-			@ProjectController.loadEditor @req, @res
-
 		it "should render the closed page if the editor is closed", (done)->
 			@settings.editorIsOpen = false
 			@res.render = (pageName, opts)=>
