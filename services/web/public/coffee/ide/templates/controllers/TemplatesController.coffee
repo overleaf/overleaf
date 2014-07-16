@@ -39,7 +39,7 @@ define [
 			if description?
 				ide.socket.emit 'updateProjectDescription', description, () => 
 
-		$scope.publish = ->
+		$scope.publishTemplate = ->
 			$scope.state.publishInflight = true
 			ide.socket.emit 'publishProjectAsTemplate', user_id, (error, docLines, version) =>
 				refreshPublishedStatus()

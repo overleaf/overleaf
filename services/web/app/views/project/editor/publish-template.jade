@@ -27,18 +27,18 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()",
-			ng-disabled="state.publishInflight"
+			ng-disabled="state.publishInflight || state.unpublishInflight"
 		) Cancel
 		button.btn.btn-info(
 			ng-click="unpublishTemplate()",
-			ng-disabled="state.unpublishInflight",
+			ng-disabled="state.publishInflight || state.unpublishInflight"
 			ng-show="publishedDetails.exists"
 		) 
 			span(ng-show="!state.unpublishInflight") Unpublish
 			span(ng-show="state.unpublishInflight") Unpublishing...
 		button.btn.btn-primary(
-			ng-click="publish()",
-			ng-disabled="state.publishInflight"
+			ng-click="publishTemplate()",
+			ng-disabled="state.publishInflight || state.unpublishInflight"
 		)
 			span(ng-show="!state.publishInflight && !publishedDetails.exists") Publish
 			span(ng-show="!state.publishInflight && publishedDetails.exists") Republish
