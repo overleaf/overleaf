@@ -1,9 +1,13 @@
 extends ../layout
 
 block content
-	.container
-		.row
-			.span6.offset3.span-box
-				.page-header
-					h2 Sorry, we can't find the page you are looking for.
-				.row
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2.text-center
+					.page-header
+						h2 Sorry, we can't find the page you are looking for.
+					p
+						a(href="/")
+							i.fa.fa-arrow-circle-o-left
+							|  Take me home!

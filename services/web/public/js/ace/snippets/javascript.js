@@ -1,4 +1,4 @@
-define("ace/snippets/javascript",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/snippets/javascript",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 exports.snippetText = "# Prototype\n\
@@ -169,7 +169,7 @@ snippet forr\n\
 \n\
 #modules\n\
 snippet def\n\
-	define(function(require, exports, module) {\n\
+	ace.define(function(require, exports, module) {\n\
 	\"use strict\";\n\
 	var ${1/.*\\///} = require(\"${1}\");\n\
 	\n\

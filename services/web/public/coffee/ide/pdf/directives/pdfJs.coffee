@@ -18,7 +18,7 @@ define [
 	highlightsLayerCss
 ) ->
 	if PDFJS?
-		PDFJS.workerSrc = "#{window.sharelatex.pdfJsWorkerPath}"
+		PDFJS.workerSrc = window.pdfJsWorkerPath
 
 	style = $("<style/>")
 	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)

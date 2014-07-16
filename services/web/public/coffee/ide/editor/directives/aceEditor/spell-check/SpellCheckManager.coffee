@@ -2,7 +2,7 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
 	"ace/ace"
 ], (HighlightedWordManager) ->
-	Range = require("ace/range").Range
+	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
 		constructor: (@$scope, @editor, @element) ->

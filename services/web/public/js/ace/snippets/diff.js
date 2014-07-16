@@ -1,4 +1,4 @@
-define("ace/snippets/diff",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/snippets/diff",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 exports.snippetText = "# DEP-3 (http://dep.debian.net/deps/dep3/) style patch header\n\

@@ -1,4 +1,4 @@
-define("ace/theme/chrome",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+ace.define("ace/theme/chrome",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 
 exports.isDark = false;
 exports.cssClass = "ace-chrome";

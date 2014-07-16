@@ -80,7 +80,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 				};
 
 		script.
-			window.sharelatex = {}
+			window.sharelatex = {
+				siteUrl: '#{settings.siteUrl}',
+				jsPath:  '#{jsPath}'
+			};
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.

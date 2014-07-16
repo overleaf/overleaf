@@ -1,4 +1,4 @@
-define("ace/ext/whitespace",["require","exports","module","ace/lib/lang"], function(require, exports, module) {
+ace.define("ace/ext/whitespace",["require","exports","module","ace/lib/lang"], function(require, exports, module) {
 "use strict";
 
 var lang = require("../lib/lang");
@@ -174,6 +174,6 @@ exports.commands = [{
 });
 ;
                 (function() {
-                    window.require(["ace/ext/whitespace"], function() {});
+                    ace.require(["ace/ext/whitespace"], function() {});
                 })();
             

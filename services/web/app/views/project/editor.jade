@@ -82,7 +82,6 @@ block content
 	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
 		window.project_id = "!{project_id}"
-		window.sharelatex = !{JSON.stringify(sharelatex).replace(/\//g, '\\/')};
 		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
 		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
@@ -99,6 +98,9 @@ block content
 				},
 				"libs/pdf": {
 					deps: ["libs/compatibility"]
+				},
+				"ace/ext-searchbox": {
+					deps: ["ace/ace"]
 				}
 			}
 		};
@@ -111,7 +113,7 @@ block content
 	- var fingerprintedPath = fingerprint(jsPath+'libs/pdf.worker.js')
 	- var pdfJsWorkerPath = jsPath+'libs/pdf.worker.js?fingerprint='+fingerprintedPath
 	script(type='text/javascript').
-		window.sharelatex.pdfJsWorkerPath = "#{pdfJsWorkerPath}"
+		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
 
 	script(
 		data-main=jsPath+'ide.js',

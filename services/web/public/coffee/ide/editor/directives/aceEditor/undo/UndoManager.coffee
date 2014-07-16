@@ -1,9 +1,9 @@
 define [
 	"ace/ace"
 ], () ->
-	Range = require("ace/range").Range
-	EditSession = require("ace/edit_session").EditSession
-	Doc = require("ace/document").Document
+	Range = ace.require("ace/range").Range
+	EditSession = ace.require("ace/edit_session").EditSession
+	Doc = ace.require("ace/document").Document
 
 	class UndoManager
 		constructor: (@$scope, @editor) ->

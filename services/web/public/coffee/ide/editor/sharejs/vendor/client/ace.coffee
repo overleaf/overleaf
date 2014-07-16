@@ -1,6 +1,6 @@
 # This is some utility code to connect an ace editor to a sharejs document.
 
-Range = require("ace/range").Range
+Range = ace.require("ace/range").Range
 
 # Convert an ace delta into an op understood by share.js
 applyToShareJS = (editorDoc, delta, doc) ->

@@ -1,4 +1,4 @@
-define("ace/snippets/vala",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/snippets/vala",["require","exports","module"], function(require, exports, module) {
 "use strict";
 exports.snippets = [
     {
