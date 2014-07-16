@@ -14,14 +14,14 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 					textarea.form-control(
 					rows=5,
 					name='Description',
-					ng-model="template.description",
+					ng-model="templateDetails.description",
 					ng-blur="updateProjectDescription()",
 					value=""
 				)
-			div(ng-show="publishedDetails.exists").text-center.publishedDetails
+			div(ng-show="templateDetails.exists").text-center.templateDetails
 				|  Your project was last published at 
-				strong {{publishedDetails.publishedDate}}. 
-				a(ng-href="{{publishedDetails.canonicalUrl}}") View it in template gallery.
+				strong {{templateDetails.publishedDate}}. 
+				a(ng-href="{{templateDetails.canonicalUrl}}") View it in template gallery.
 
 		span(ng-show="problemTalkingToTemplateApi") There is a problem with our publishing service, please try again in a few minutes.
 
@@ -38,7 +38,7 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 		button.btn.btn-info(
 			ng-click="unpublishTemplate()",
 			ng-disabled="state.publishInflight || state.unpublishInflight"
-			ng-show="publishedDetails.exists"
+			ng-show="templateDetails.exists"
 		) 
 			span(ng-show="!state.unpublishInflight") Unpublish
 			span(ng-show="state.unpublishInflight") Unpublishing...
@@ -47,6 +47,6 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 			ng-click="publishTemplate()",
 			ng-disabled="state.publishInflight || state.unpublishInflight"
 		)
-			span(ng-show="!state.publishInflight && !publishedDetails.exists") Publish
-			span(ng-show="!state.publishInflight && publishedDetails.exists") Republish
+			span(ng-show="!state.publishInflight && !templateDetails.exists") Publish
+			span(ng-show="!state.publishInflight && templateDetails.exists") Republish
 			span(ng-show="state.publishInflight") Publishing...
