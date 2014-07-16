@@ -2,48 +2,59 @@ define [
 	"base"
 	"ide/permissions/PermissionsManager"
 ], (App, PermissionsManager) ->
+
 	App.controller "TemplatesController", ($scope, $modal, ide) ->
 		$scope.openPublishTemplateModal = () ->
-			$modal.open {
+			resetState = ->
+				$scope.problemTalkingToTemplateApi = false
+
+			resetState()
+
+			modal = $modal.open {
 				templateUrl: "publishProjectAsTemplateModalTemplate"
 				controller: "PublishProjectAsTemplateModalController"
-				resolve:
-					diff: () -> $scope.trackChanges.diff
+				scope:$scope
 			}
+			modal.result.then(resetState, resetState)
 
 	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, ide) ->
-		permissionsManager = new PermissionsManager(ide, $scope)
 		user_id = ide.$scope.user.id
-		$scope.template =
-			description: window.project_description
-		$scope.publishedDetails =
-			exists:false
+		$scope.templateDetails = {exists:false}
 
 		$scope.state =
 			publishInflight: false
 			unpublishInflight: false
 
+		problemTalkingToTemplateApi = ->
+			$scope.problemTalkingToTemplateApi = true
+
 		refreshPublishedStatus = ->
 			ide.socket.emit "getPublishedDetails", user_id, (err, data)->
-				$scope.publishedDetails = data
-				$scope.publishedDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
+				if !data? or err? then return problemTalkingToTemplateApi()
+				$scope.templateDetails = data
+				$scope.templateDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
+				$scope.templateDetails.description = data.description
 
 		refreshPublishedStatus()
+		$scope.$watch $scope.problemTalkingToTemplateApi, refreshPublishedStatus
 
 		$scope.updateProjectDescription = ->
 			description = $scope.template.description
 			if description?
-				ide.socket.emit 'updateProjectDescription', description, () => 
+				ide.socket.emit 'updateProjectDescription', description, (err) => 
+					if err? then return problemTalkingToTemplateApi()
 
-		$scope.publish = ->
+		$scope.publishTemplate = ->
 			$scope.state.publishInflight = true
-			ide.socket.emit 'publishProjectAsTemplate', user_id, (error, docLines, version) =>
+			ide.socket.emit 'publishProjectAsTemplate', user_id, (error) =>
+				if err? then return problemTalkingToTemplateApi()
 				refreshPublishedStatus()
 				$scope.state.publishInflight = false
 
 		$scope.unpublishTemplate = ->
 			$scope.state.unpublishInflight = true
-			ide.socket.emit 'unPublishProjectAsTemplate', user_id, (error, docLines, version) =>
+			ide.socket.emit 'unPublishProjectAsTemplate', user_id, (error) =>
+				if err? then return problemTalkingToTemplateApi()
 				refreshPublishedStatus()
 				$scope.state.unpublishInflight = false
 

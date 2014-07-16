@@ -25,9 +25,12 @@ describe 'TemplatesController', ->
 			publish: sinon.stub()
 			unpublish:sinon.stub()
 			getTemplateDetails: sinon.stub()
+		@ProjectDetailsHandler =
+			getProjectDescription:sinon.stub()
 		@controller = SandboxedModule.require modulePath, requires:
 			'../Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../Project/ProjectOptionsHandler':@ProjectOptionsHandler
+			'../Project/ProjectDetailsHandler':@ProjectDetailsHandler
 			'./TemplatesPublisher':@TemplatesPublisher
 			"logger-sharelatex": 
 				log:->
@@ -138,6 +141,9 @@ describe 'TemplatesController', ->
 
 
 	describe 'getTemplateDetails', ->
+		beforeEach ->
+			@description = "this project is nice"
+			@ProjectDetailsHandler.getProjectDescription.callsArgWith(1, null, @description)
 
 		it "should return an error the templatePublisher", (done)->
 			error = "error"
@@ -152,3 +158,10 @@ describe 'TemplatesController', ->
 			@controller.getTemplateDetails @user_id, @project_id, (err, passedDetails)=>
 				details.should.equal passedDetails
 				done()
+
+		it "should get the template description", (done)->
+			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, null, {})
+			@controller.getTemplateDetails @user_id, @project_id, (err, passedDetails)=>
+				passedDetails.description.should.equal @description
+				done()
+

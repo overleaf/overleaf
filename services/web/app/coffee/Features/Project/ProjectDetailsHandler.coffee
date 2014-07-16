@@ -22,6 +22,10 @@ module.exports =
 				logger.log project_id:project_id, details:details, "getting project details"
 				callback(err, details)
 
+	getProjectDescription: (project_id, callback)->
+		Project.findOne _id:project_id, "description", (err, project)->
+			callback(err, project?.description)
+
 	setProjectDescription: (project_id, description, callback)->
 		conditions = _id:project_id
 		update = description:description

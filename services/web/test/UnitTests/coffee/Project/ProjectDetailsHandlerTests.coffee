@@ -23,6 +23,7 @@ describe 'Project details handler', ->
 			getProject: sinon.stub().callsArgWith(2, null, @project)
 		@ProjectModel =
 			update: sinon.stub()
+			findOne: sinon.stub()
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith(1, null, @user)
 		@tpdsUpdateSender =
@@ -54,6 +55,23 @@ describe 'Project details handler', ->
 				err.should.equal error
 				done()
 
+	describe "getProjectDescription", ->
+
+		it "should make a call to mongo just for the description", (done)->
+			@ProjectModel.findOne.callsArgWith(2)
+			@handler.getProjectDescription @project_id, (err, description)=>
+				@ProjectModel.findOne.calledWith({_id:@project_id}, "description").should.equal true
+				done()
+
+		it "should return what the mongo call returns", (done)->
+			err = "error"
+			description = "cool project"
+			@ProjectModel.findOne.callsArgWith(2, err, {description:description})
+			@handler.getProjectDescription @project_id, (returnedErr, returnedDescription)=>
+				err.should.equal returnedErr
+				description.should.equal returnedDescription
+				done()	
+
 	describe "setProjectDescription", ->
 
 		beforeEach ->
@@ -64,6 +82,8 @@ describe 'Project details handler', ->
 			@handler.setProjectDescription @project_id, @description, =>
 				@ProjectModel.update.calledWith({_id:@project_id}, {description:@description}).should.equal true
 				done()
+
+
 
 	describe "renameProject", ->
 		beforeEach ->
