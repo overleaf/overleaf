@@ -32,7 +32,7 @@ div.full-size(ng-controller="PdfController")
 			pdfjs
 			ng-if="settings.pdfViewer == 'pdfjs'"
 			pdf-src="pdf.url"
-			key="project_id"
+			key="{{ project_id }}"
 			resize-on="layout:main:resize,layout:pdf:resize"
 			highlights="pdf.highlights"
 			position="pdf.position"
