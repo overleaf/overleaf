@@ -9,13 +9,20 @@ script(type='text/ng-template', id='newTagModalTemplate')
 				required,
 				ng-model="inputs.newTagName",
 				on-enter="create()",
-				focus-on="open"
+				focus-on="open",
+				stop-propagation="click"
 			)
 	.modal-footer
-		button.btn.btn-default(ng-click="cancel()") Cancel
+		//- We stop propagation to stop the clicks from closing the
+		//- 'move to folder' menu.
+		button.btn.btn-default(
+			ng-click="cancel()"
+			stop-propagation="click"
+		) Cancel
 		button.btn.btn-primary(
 			ng-disabled="newTagForm.$invalid"
 			ng-click="create()"
+			stop-propagation="click"
 		) Create
 
 script(type='text/ng-template', id='renameProjectModalTemplate')
