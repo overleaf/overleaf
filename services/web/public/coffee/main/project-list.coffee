@@ -456,11 +456,10 @@ define [
 			# modified during this session. Otherwise, tags which are empty
 			# when loading the page are not shown.
 			tag.project_ids.length > 0 or !!tag.showWhenEmpty
-
-	App.controller "TagListItemController", ($scope) ->
-		$scope.selectTag = () ->
+			
+		$scope.selectTag = (tag) ->
 			$scope._clearTags()
-			$scope.tag.selected = true
+			tag.selected = true
 			$scope.setFilter("tag")
 
 	App.controller "TagDropdownItemController", ($scope) ->

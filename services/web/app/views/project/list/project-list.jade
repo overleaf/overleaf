@@ -137,8 +137,14 @@
 							)
 							span
 								a.projectName(href="/project/{{project.id}}") {{project.name}}
-								span.label.label-default.tag-label(ng-repeat='tag in project.tags')
-									| {{tag.name}}
+								span(
+									ng-controller="TagListController"
+								)
+									a.label.label-default.tag-label(
+										href,
+										ng-repeat='tag in project.tags',
+										ng-click="selectTag(tag)"
+									) {{tag.name}}
 						.col-md-2
 							span.owner {{ownerName()}}
 						.col-md-4

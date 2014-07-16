@@ -52,19 +52,18 @@
 			h2 Folders
 		li(
 			ng-repeat="tag in tags | filter:nonEmpty",
-			ng-controller="TagListItemController",
 			ng-class="{active: tag.selected}",
 			ng-cloak
 		)
-			a(href, ng-click="selectTag()")
+			a.tag(href, ng-click="selectTag(tag)")
 				i.icon.fa.fa-fw(
 					ng-class="{\
 						'fa-folder-open-o': tag.selected,\
 						'fa-folder-o': !tag.selected\
 					}"
 				)
-				|  {{tag.name}} 
-				span.subdued ({{tag.project_ids.length}})
+				span.name {{tag.name}} 
+					span.subdued  ({{tag.project_ids.length}})
 		li(ng-cloak)
 			a(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus
