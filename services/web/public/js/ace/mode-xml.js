@@ -1,4 +1,4 @@
-define("ace/mode/xml_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
+ace.define("ace/mode/xml_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");
@@ -208,7 +208,7 @@ oop.inherits(XmlHighlightRules, TextHighlightRules);
 exports.XmlHighlightRules = XmlHighlightRules;
 });
 
-define("ace/mode/behaviour/xml",["require","exports","module","ace/lib/oop","ace/mode/behaviour","ace/token_iterator"], function(require, exports, module) {
+ace.define("ace/mode/behaviour/xml",["require","exports","module","ace/lib/oop","ace/mode/behaviour","ace/token_iterator"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../../lib/oop");
@@ -341,7 +341,7 @@ oop.inherits(XmlBehaviour, Behaviour);
 exports.XmlBehaviour = XmlBehaviour;
 });
 
-define("ace/mode/folding/xml",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/range","ace/mode/folding/fold_mode","ace/token_iterator"], function(require, exports, module) {
+ace.define("ace/mode/folding/xml",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/range","ace/mode/folding/fold_mode","ace/token_iterator"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../../lib/oop");
@@ -577,7 +577,7 @@ function is(token, type) {
 
 });
 
-define("ace/mode/xml",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/mode/text","ace/mode/xml_highlight_rules","ace/mode/behaviour/xml","ace/mode/folding/xml"], function(require, exports, module) {
+ace.define("ace/mode/xml",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/mode/text","ace/mode/xml_highlight_rules","ace/mode/behaviour/xml","ace/mode/folding/xml"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");

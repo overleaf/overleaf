@@ -1,4 +1,4 @@
-define("ace/mode/clojure_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
+ace.define("ace/mode/clojure_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");
@@ -166,7 +166,7 @@ oop.inherits(ClojureHighlightRules, TextHighlightRules);
 exports.ClojureHighlightRules = ClojureHighlightRules;
 });
 
-define("ace/mode/matching_parens_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
+ace.define("ace/mode/matching_parens_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
 "use strict";
 
 var Range = require("../range").Range;
@@ -211,7 +211,7 @@ var MatchingParensOutdent = function() {};
 exports.MatchingParensOutdent = MatchingParensOutdent;
 });
 
-define("ace/mode/clojure",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/clojure_highlight_rules","ace/mode/matching_parens_outdent"], function(require, exports, module) {
+ace.define("ace/mode/clojure",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/clojure_highlight_rules","ace/mode/matching_parens_outdent"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../lib/oop");

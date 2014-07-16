@@ -1,4 +1,4 @@
-define("ace/theme/textmate",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
+ace.define("ace/theme/textmate",["require","exports","module","ace/lib/dom"], function(require, exports, module) {
 "use strict";
 
 exports.isDark = false;
@@ -129,7 +129,7 @@ var dom = require("../lib/dom");
 dom.importCssString(exports.cssText, exports.cssClass);
 });
 
-define("ace/ace",["require","exports","module","ace/lib/fixoldbrowsers","ace/lib/dom","ace/lib/event","ace/editor","ace/edit_session","ace/undomanager","ace/virtual_renderer","ace/worker/worker_client","ace/keyboard/hash_handler","ace/placeholder","ace/multi_select","ace/mode/folding/fold_mode","ace/theme/textmate","ace/ext/error_marker","ace/config"], function(require, exports, module) {
+ace.define("ace/ace",["require","exports","module","ace/lib/fixoldbrowsers","ace/lib/dom","ace/lib/event","ace/editor","ace/edit_session","ace/undomanager","ace/virtual_renderer","ace/worker/worker_client","ace/keyboard/hash_handler","ace/placeholder","ace/multi_select","ace/mode/folding/fold_mode","ace/theme/textmate","ace/ext/error_marker","ace/config"], function(require, exports, module) {
 "use strict";
 
 require("./lib/fixoldbrowsers");
@@ -189,7 +189,7 @@ exports.EditSession = EditSession;
 exports.UndoManager = UndoManager;
 });
 
-define("ace/ext/textarea",["require","exports","module","ace/lib/event","ace/lib/useragent","ace/lib/net","ace/ace","ace/theme/textmate"], function(require, exports, module) {
+ace.define("ace/ext/textarea",["require","exports","module","ace/lib/event","ace/lib/useragent","ace/lib/net","ace/ace","ace/theme/textmate"], function(require, exports, module) {
 "use strict";
 
 var event = require("../lib/event");
@@ -616,6 +616,6 @@ exports.defaultOptions = {
 });
 ;
                 (function() {
-                    window.require(["ace/ext/textarea"], function() {});
+                    ace.require(["ace/ext/textarea"], function() {});
                 })();
             

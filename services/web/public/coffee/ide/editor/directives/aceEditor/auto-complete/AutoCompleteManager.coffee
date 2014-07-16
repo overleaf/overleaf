@@ -3,8 +3,8 @@ define [
 	"ide/editor/directives/aceEditor/auto-complete/Snippets"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, Snippets, Ace) ->
-	Range = Ace.require("ace/range").Range
+], (SuggestionManager, Snippets) ->
+	Range = ace.require("ace/range").Range
 
 	getLastCommandFragment = (lineUpToCursor) ->
 		if m = lineUpToCursor.match(/(\\[^\\ ]+)$/)
@@ -66,8 +66,8 @@ define [
 						, 0
 
 		monkeyPatchAutocomplete: () ->
-			Autocomplete = require("ace/autocomplete").Autocomplete
-			Util = require("ace/autocomplete/util")
+			Autocomplete = ace.require("ace/autocomplete").Autocomplete
+			Util = ace.require("ace/autocomplete/util")
 			editor = @editor
 
 			if !Autocomplete::_insertMatch?

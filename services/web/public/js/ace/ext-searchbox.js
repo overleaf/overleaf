@@ -1,4 +1,4 @@
-define("ace/ext/searchbox",["require","exports","module","ace/lib/dom","ace/lib/lang","ace/lib/event","ace/keyboard/hash_handler","ace/lib/keys"], function(require, exports, module) {
+ace.define("ace/ext/searchbox",["require","exports","module","ace/lib/dom","ace/lib/lang","ace/lib/event","ace/keyboard/hash_handler","ace/lib/keys"], function(require, exports, module) {
 "use strict";
 
 var dom = require("../lib/dom");
@@ -388,6 +388,6 @@ exports.Search = function(editor, isReplace) {
 });
 ;
                 (function() {
-                    window.require(["ace/ext/searchbox"], function() {});
+                    ace.require(["ace/ext/searchbox"], function() {});
                 })();
             

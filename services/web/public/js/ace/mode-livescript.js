@@ -1,4 +1,4 @@
-define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
+ace.define("ace/mode/matching_brace_outdent",["require","exports","module","ace/range"], function(require, exports, module) {
 "use strict";
 
 var Range = require("../range").Range;
@@ -38,7 +38,7 @@ var MatchingBraceOutdent = function() {};
 exports.MatchingBraceOutdent = MatchingBraceOutdent;
 });
 
-define("ace/mode/livescript",["require","exports","module","ace/tokenizer","ace/mode/matching_brace_outdent","ace/range","ace/mode/text"], function(require, exports, module){
+ace.define("ace/mode/livescript",["require","exports","module","ace/tokenizer","ace/mode/matching_brace_outdent","ace/range","ace/mode/text"], function(require, exports, module){
   var identifier, LiveScriptMode, keywordend, stringfill;
   identifier = '(?![\\d\\s])[$\\w\\xAA-\\uFFDC](?:(?!\\s)[$\\w\\xAA-\\uFFDC]|-[A-Za-z])*';
   exports.Mode = LiveScriptMode = (function(superclass){

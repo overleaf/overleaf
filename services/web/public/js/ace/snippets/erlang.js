@@ -1,4 +1,4 @@
-define("ace/snippets/erlang",["require","exports","module"], function(require, exports, module) {
+ace.define("ace/snippets/erlang",["require","exports","module"], function(require, exports, module) {
 "use strict";
 
 exports.snippetText = "# module and export all\n\
@@ -14,7 +14,7 @@ snippet mod\n\
 	    ok.\n\
 # define directive\n\
 snippet def\n\
-	-define(${1:macro}, ${2:body}).${3}\n\
+	-ace.define(${1:macro}, ${2:body}).${3}\n\
 # export directive\n\
 snippet exp\n\
 	-export([${1:function}/${2:arity}]).\n\
@@ -97,7 +97,7 @@ snippet supervisor\n\
 	%% Supervisor callbacks\n\
 	-export([init/1]).\n\
 \n\
-	-define(SERVER, ?MODULE).\n\
+	-ace.define(SERVER, ?MODULE).\n\
 \n\
 	start_link() ->\n\
 	    supervisor:start_link({local, ?SERVER}, ?MODULE, []).\n\
@@ -123,7 +123,7 @@ snippet gen_server\n\
 	-export([init/1, handle_call/3, handle_cast/2, handle_info/2,\n\
 	         terminate/2, code_change/3]).\n\
 \n\
-	-define(SERVER, ?MODULE).\n\
+	-ace.define(SERVER, ?MODULE).\n\
 \n\
 	-record(state, {}).\n\
 \n\

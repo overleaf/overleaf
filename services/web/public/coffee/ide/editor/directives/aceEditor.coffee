@@ -8,7 +8,7 @@ define [
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 ], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
-	EditSession = require('ace/edit_session').EditSession
+	EditSession = ace.require('ace/edit_session').EditSession
 
 	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
 		monkeyPatchSearch($rootScope, $compile)
@@ -39,7 +39,7 @@ define [
 					else
 						@$originalApply(fn);
 
-				editor = Ace.edit(element.find(".ace-editor-body")[0])
+				editor = ace.edit(element.find(".ace-editor-body")[0])
 				window.editors ||= []
 				window.editors.push editor
 
@@ -225,7 +225,7 @@ define [
 	]
 
 	monkeyPatchSearch = ($rootScope, $compile) ->
-		SearchBox = Ace.require("ace/ext/searchbox").SearchBox
+		SearchBox = ace.require("ace/ext/searchbox").SearchBox
 		searchHtml = """
 			<div class="ace_search right">
 				<a href type="button" action="hide" class="ace_searchbtn_close">

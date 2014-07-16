@@ -1,7 +1,7 @@
 define [
 	"ace/ace"
 ], () ->
-	Range = require("ace/range").Range
+	Range = ace.require("ace/range").Range
 
 	class HighlightsManager
 		constructor: (@$scope, @editor, @element) ->

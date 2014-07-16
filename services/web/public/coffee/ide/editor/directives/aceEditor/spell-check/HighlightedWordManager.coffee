@@ -1,7 +1,7 @@
 define [
-	"ace/range"
+	"ace/ace"
 ], () ->
-	Range = require("ace/range").Range
+	Range = ace.require("ace/range").Range
 
 	class Highlight
 		constructor: (options) ->

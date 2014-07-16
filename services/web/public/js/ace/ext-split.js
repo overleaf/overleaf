@@ -1,4 +1,4 @@
-define("ace/split",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/lib/event_emitter","ace/editor","ace/virtual_renderer","ace/edit_session"], function(require, exports, module) {
+ace.define("ace/split",["require","exports","module","ace/lib/oop","ace/lib/lang","ace/lib/event_emitter","ace/editor","ace/virtual_renderer","ace/edit_session"], function(require, exports, module) {
 "use strict";
 
 var oop = require("./lib/oop");
@@ -235,13 +235,13 @@ function UndoManagerProxy(undoManager, session) {
 exports.Split = Split;
 });
 
-define("ace/ext/split",["require","exports","module","ace/split"], function(require, exports, module) {
+ace.define("ace/ext/split",["require","exports","module","ace/split"], function(require, exports, module) {
 "use strict";
 module.exports = require("../split");
 
 });
 ;
                 (function() {
-                    window.require(["ace/ext/split"], function() {});
+                    ace.require(["ace/ext/split"], function() {});
                 })();
             
