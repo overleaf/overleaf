@@ -8,6 +8,7 @@ fs = require('fs')
 request = require('request')
 uuid = require('node-uuid')
 logger = require('logger-sharelatex')
+async = require("async")
 
 
 module.exports =
@@ -44,13 +45,18 @@ module.exports =
 		TemplatesPublisher.unpublish user_id, project_id, callback
 
 	getTemplateDetails: (user_id, project_id, callback)->
-		TemplatesPublisher.getTemplateDetails user_id, project_id, (err, details)->
+		async.parallel {
+			details: (cb)->
+				TemplatesPublisher.getTemplateDetails user_id, project_id, cb
+			description: (cb)->
+				ProjectDetailsHandler.getProjectDescription project_id, cb
+		}, (err, results)->
 			if err?
 				logger.err err:err, user_id:user_id, project_id:project_id, "something went wrong getting template details"
 				return callback(err)
-			ProjectDetailsHandler.getProjectDescription project_id, (err, description)->
-				details.description = description
-				callback(err, details)
+			details = results.details
+			details.description = results.description
+			callback(err, details)
 
 
 setCompiler = (project_id, compiler, callback)->

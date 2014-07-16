@@ -20,7 +20,10 @@ describe 'Templates publish', ->
 		@TemplatesPublisher = SandboxedModule.require modulePath, requires:
 			"request": @request
 			"settings-sharelatex":@settings
-
+			"logger-sharelatex": 
+				log:->
+				err:->
+					
 		@project_id = "12312132"
 		@user_id = "132jlkjdsaoij"
 
