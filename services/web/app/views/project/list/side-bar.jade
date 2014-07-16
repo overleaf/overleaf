@@ -1,0 +1,105 @@
+.dropdown
+	a.btn.btn-primary.dropdown-toggle(
+		href="#",
+		data-toggle="dropdown"
+	) New Project
+	ul.dropdown-menu(role="menu")
+		li
+			a(
+				href,
+				ng-click="openCreateProjectModal()"
+			) Blank Project
+		li
+			a(
+				href,
+				ng-click="openCreateProjectModal('example')"
+			) Example Project
+		li
+			a(
+				href,
+				ng-click="openUploadProjectModal()"
+			) Upload Project
+		li.divider
+		li.dropdown-header Templates
+		li
+			a.menu-indent(href="/templates/cv") CV or Resume
+		li
+			a.menu-indent(href="/templates/cover-letters") Cover Letter
+		li
+			a.menu-indent(href="/templates/journals") Journal Article
+		li
+			a.menu-indent(href="/templates/presentations") Presentation
+		li
+			a.menu-indent(href="/templates/thesis") Thesis
+		li
+			a.menu-indent(href="/templates/bibliographies") Bibliographies
+		li
+			a.menu-indent(href="/templates") View All »
+
+.row-spaced(ng-if="projects.length > 0", ng-cloak)
+	ul.list-unstyled.folders-menu(
+		ng-controller="TagListController"
+	)
+		li(ng-class="{active: (filter == 'all')}")
+			a(href, ng-click="filterProjects('all')") All projects
+		li(ng-class="{active: (filter == 'owned')}")
+			a(href, ng-click="filterProjects('owned')") Your projects
+		li(ng-class="{active: (filter == 'shared')}")
+			a(href, ng-click="filterProjects('shared')") Shared with you
+		li(ng-class="{active: (filter == 'archived')}")
+			a(href, ng-click="filterProjects('archived')") Deleted projects
+		li
+			h2 Folders
+		li(
+			ng-repeat="tag in tags | filter:nonEmpty",
+			ng-class="{active: tag.selected}",
+			ng-cloak
+		)
+			a.tag(href, ng-click="selectTag(tag)")
+				i.icon.fa.fa-fw(
+					ng-class="{\
+						'fa-folder-open-o': tag.selected,\
+						'fa-folder-o': !tag.selected\
+					}"
+				)
+				span.name {{tag.name}} 
+					span.subdued  ({{tag.project_ids.length}})
+		li(ng-cloak)
+			a(href, ng-click="openNewTagModal()")
+				i.fa.fa-fw.fa-plus
+				|  New Folder
+
+.row-spaced(ng-if="projects.length == 0", ng-cloak)
+	.first-project
+		div
+			i.fa.fa-arrow-up.fa-2x
+		div
+			strong Create your first project!
+
+- if (showUserDetailsArea)
+	.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
+		div(ng-controller="UserProfileController")
+			hr(ng-show="percentComplete < 100")
+			.text-centered.user-profile(ng-show="percentComplete < 100")
+				.progress
+					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
+
+				p.small
+					| Your profile is 
+					strong {{percentComplete}}% 
+					| complete
+
+				button#completeUserProfileInformation.btn.btn-info(
+					ng-hide="formVisable",
+					ng-click="openUserProfileModal()"
+				) Complete
+
+-if (settings.enableSubscriptions && !hasSubscription)
+	.row-spaced(ng-if="projects.length > 0", ng-cloak).text-centered
+		hr
+		p.small You are using the free version of ShareLaTeX.
+		p
+			a(href="/user/subscription/plans").btn.btn-primary Upgrade
+		p.small
+			| or unlock some free bonus features by 
+			a(href="/user/bonus") sharing ShareLaTeX.

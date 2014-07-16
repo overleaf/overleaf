@@ -40,7 +40,7 @@ ul.folders-menu {
 			color: #333;
 			padding: (@line-height-computed / 4);
 		}
-		}
+	}
 	li.active {
 		//border-right: 4px solid @red;
 		a {
@@ -53,12 +53,30 @@ ul.folders-menu {
 			}
 		}
 	}
+	li > a.small {
+		color: @gray;
+	}
 	h2 {
 		margin-top: @line-height-computed / 2;
 		margin-bottom: @line-height-computed / 4;
 		font-size: @font-size-base;
 		font-weight: 500;
 		font-family: @font-family-sans-serif;
+	}
+	a.tag {
+		padding: 2px (@line-height-computed / 4);
+		display: inline-block;
+		position: relative;
+		i {
+			position: absolute;
+			top: 7px;
+			left: 6px;
+		}
+		span.name {
+			display: inline-block;
+			padding-left: 22px;
+			line-height: 1.4;
+		}
 	}
 }
 
@@ -125,6 +143,9 @@ ul.project-list {
 			margin-left: @line-height-computed / 4;
 			position: relative;
 			top: -2px;
+			padding-top: 0.25em;
+			display: inline-block;
+			color: white;
 		}
 	}
 }
