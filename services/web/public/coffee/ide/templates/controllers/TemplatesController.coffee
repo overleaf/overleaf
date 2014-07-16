@@ -17,8 +17,7 @@ define [
 	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, ide) ->
 		permissionsManager = new PermissionsManager(ide, $scope)
 		user_id = ide.$scope.user.id
-		$scope.template =
-			description: window.project_description
+		$scope.template = {}
 		$scope.publishedDetails =
 			exists:false
 
@@ -30,6 +29,8 @@ define [
 			ide.socket.emit "getPublishedDetails", user_id, (err, data)->
 				$scope.publishedDetails = data
 				$scope.publishedDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
+				console.log data
+				$scope.template.description = data.description
 
 		refreshPublishedStatus()
 

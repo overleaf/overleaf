@@ -23,7 +23,8 @@ module.exports =
 				callback(err, details)
 
 	getProjectDescription: (project_id, callback)->
-		Project.find _id:project_id, "description", callback
+		Project.findOne _id:project_id, "description", (err, project)->
+			callback(err, project?.description)
 
 	setProjectDescription: (project_id, description, callback)->
 		conditions = _id:project_id
