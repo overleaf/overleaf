@@ -145,7 +145,7 @@ module.exports = ProjectController =
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
 						viewModel.showUserDetailsArea = true
-						viewModel.algolia_api_key = Settings.algolia.api_key
+						viewModel.algolia_api_key = Settings.algolia.read_only_api_key
 						viewModel.algolia_app_id = Settings.algolia.app_id
 					else
 						viewModel.showUserDetailsArea = false
