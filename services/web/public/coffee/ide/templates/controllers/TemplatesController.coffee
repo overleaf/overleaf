@@ -1,7 +1,9 @@
 define [
 	"base"
-], (App) ->
+	"ide/permissions/PermissionsManager"
+], (App, PermissionsManager) ->
 	App.controller "TemplatesController", ($scope, $modal, ide) ->
+		$scope.showPublishTemplateLinkInSideBar = ide.$scope.hasPermission("admin")
 
 		$scope.openPublishTemplateModal = () ->
 			console.log "open"
@@ -12,8 +14,9 @@ define [
 					diff: () -> $scope.trackChanges.diff
 			}
 
-	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, diff, ide) ->
-		user_id = window.user.id #TODO this is not correct, it needs to be the owners id
+	App.controller "PublishProjectAsTemplateModalController", ($scope, $modalInstance, ide) ->
+		permissionsManager = new PermissionsManager(ide, $scope)
+		user_id = ide.$scope.user.id
 		$scope.template =
 			description: window.project_description
 		$scope.publishedDetails =
@@ -25,7 +28,6 @@ define [
 
 		refreshPublishedStatus = ->
 			ide.socket.emit "getPublishedDetails", user_id, (err, data)->
-				console.log "got published details"
 				$scope.publishedDetails = data
 				$scope.publishedDetails.publishedDate = moment(data.publishedDate).format("Do MMM YYYY, h:mm a")
 
@@ -35,19 +37,16 @@ define [
 			description = $scope.template.description
 			if description?
 				ide.socket.emit 'updateProjectDescription', description, () => 
-					console.log "updated"
 
 		$scope.publish = ->
 			$scope.state.publishInflight = true
 			ide.socket.emit 'publishProjectAsTemplate', user_id, (error, docLines, version) =>
-				console.log "published"
 				refreshPublishedStatus()
 				$scope.state.publishInflight = false
 
 		$scope.unpublishTemplate = ->
 			$scope.state.unpublishInflight = true
 			ide.socket.emit 'unPublishProjectAsTemplate', user_id, (error, docLines, version) =>
-				console.log "unpublished"
 				refreshPublishedStatus()
 				$scope.state.unpublishInflight = false
 

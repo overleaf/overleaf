@@ -102,12 +102,13 @@ aside#left-menu.full-size(
 				)
 					option(value="pdfjs") Built-In
 					option(value="native") Native
-	h4 Publish
-	ul.list-unstyled.nav(ng-controller="TemplatesController")
-		li
-			a(ng-click="openPublishTemplateModal()")
-				i.fa.fa-list-alt.fa-fw 
-				| &nbsp;&nbsp;Publish as Template
+	span(ng-controller="TemplatesController", ng-show="hasPermission('admin')")
+		h4() Publish
+		ul.list-unstyled.nav()
+			li
+				a(ng-click="openPublishTemplateModal()")
+					i.fa.fa-list-alt.fa-fw 
+					| &nbsp;&nbsp;Publish as Template
 
 
 #left-menu-mask(

@@ -1,11 +1,12 @@
 define [], () ->
 	class PermissionsManager
 		constructor: (@ide, @$scope) ->
+			@$scope.permissions =
+				read:  false
+				write: false
+				admin: false
 			@$scope.$watch "permissionsLevel", (permissionsLevel) =>
-				@$scope.permissions =
-					read:  false
-					write: false
-					admin: false
+
 				if permissionsLevel?
 					if permissionsLevel == "readOnly"
 						@$scope.permissions.read = true
@@ -17,3 +18,5 @@ define [], () ->
 						@$scope.permissions.write = true
 						@$scope.permissions.admin = true
 
+			@$scope.hasPermission = (requestedLevel)=>
+				return @$scope.permissions[requestedLevel]
