@@ -4,6 +4,9 @@ define [
 	App.controller "SettingsController", ["$scope", "settings", "ide", ($scope, settings, ide) ->
 		if $scope.settings.mode not in ["default", "vim", "emacs"]
 			$scope.settings.mode = "default"
+			
+		if $scope.settings.pdfViewer not in ["pdfjs", "native"]
+			$scope.settings.pdfViewer = "pdfjs"
 
 		$scope.$watch "settings.theme", (theme, oldTheme) =>
 			if theme != oldTheme
