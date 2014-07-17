@@ -122,13 +122,13 @@
 								select-all,
 								type="checkbox"
 							)
-							span.header Title
+							span.header(ng-click="changePredicate('name')") Title
 						.col-md-2
-							span.header Owner
+							span.header(ng-click="changePredicate('accessLevel')") Owner
 						.col-md-4
-							span.header Last Modified
+							span.header(ng-click="changePredicate('lastUpdated')") Last Modified
 				li.project_entry.container-fluid(
-					ng-repeat="project in visibleProjects | orderBy:'lastUpdated':true",
+					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
 					ng-controller="ProjectListItemController"
 				)
 					.row
