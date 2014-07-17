@@ -64,4 +64,9 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			ng-click="toggleChat()",
 			ng-controller="ChatButtonController"
 		)
-			i.fa.fa-fw.fa-comment
+			i.fa.fa-fw.fa-comment(
+				ng-class="{ 'bounce': unreadMessages > 0 }"
+			)
+			span.label.label-info(
+				ng-show="unreadMessages > 0"
+			) {{ unreadMessages }}

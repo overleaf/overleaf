@@ -12,10 +12,13 @@ define [
 				loading: false
 				atEnd: false
 				nextBeforeTimestamp: null
+				newMessage: null
 		}
 			
 		ide.socket.on "new-chat-message", (message) =>
-			appendMessage(message)
+			ide.$scope.$apply () ->
+				chat.state.newMessage = message
+				appendMessage(message)
 			
 		chat.loadMoreMessages = () ->
 			return if chat.state.atEnd

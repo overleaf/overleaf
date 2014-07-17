@@ -12,7 +12,9 @@ aside.chat(
 			.loading(ng-show="chat.loading")
 				i.fa.fa-fw.fa-spin.fa-refresh
 				| Loading...
-			ul.list-unstyled
+			ul.list-unstyled(
+				ng-click="resetUnreadMessages()"
+			)
 				li.message(
 					ng-repeat="message in chat.messages"
 					ng-controller="ChatMessageController"
@@ -34,6 +36,11 @@ aside.chat(
 							p(ng-repeat="content in message.contents track by $index") {{ content }}
 
 	.new-message
-		textarea(placeholder="Your message...", on-enter="sendMessage()", ng-model="newMessageContent")
+		textarea(
+			placeholder="Your message...",
+			on-enter="sendMessage()",
+			ng-model="newMessageContent",
+			ng-click="resetUnreadMessages()"
+		)
 
 
