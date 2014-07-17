@@ -91,7 +91,7 @@ describe "EditorController", ->
 			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ConnectedUsersManager.markUserAsConnected.callsArgWith(2)
+			@ConnectedUsersManager.markUserAsConnected.callsArgWith(3)
 
 		describe "when authorized", ->
 			beforeEach ->
@@ -123,11 +123,8 @@ describe "EditorController", ->
 			it "should return the project model view, privilege level and protocol version", ->
 				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
 
-			it "should emit the to the room that the user has connected", ->
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "ConnectedUsers.userConnected", @user).should.equal true
-
 			it "should mark the user as connected with the ConnectedUsersManager", ->
-				@ConnectedUsersManager.markUserAsConnected.calledWith(@project_id, @user_id).should.equal true
+				@ConnectedUsersManager.markUserAsConnected.calledWith(@project_id, @client.id, @user).should.equal true
 
 
 		describe "when not authorized", ->
@@ -169,11 +166,8 @@ describe "EditorController", ->
 				.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
 				.should.equal true
 
-		it "should emit the to the room that the user has connected", ->
-			@EditorRealTimeController.emitToRoom.calledWith(@project_id, "ConnectedUsers.userDissconected", @user).should.equal true
-
 		it "should mark the user as connected with the ConnectedUsersManager", ->
-			@ConnectedUsersManager.markUserAsDisconnected.calledWith(@project_id, @user_id).should.equal true
+			@ConnectedUsersManager.markUserAsDisconnected.calledWith(@project_id, @client.id).should.equal true
 
 
 	describe "joinDoc", ->
@@ -296,7 +290,11 @@ describe "EditorController", ->
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.setUserCursorPosition.calledWith(@project_id, @user_id, @populatedCursorData).should.equal true
+				@ConnectedUsersManager.setUserCursorPosition.calledWith(@project_id, @client.id, {
+					row: @row
+					column: @column
+					doc_id: @doc_id
+				}).should.equal true
 				done()
 
 		describe "with an anonymous user", ->

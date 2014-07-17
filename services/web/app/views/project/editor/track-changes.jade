@@ -68,7 +68,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 							span.doc {{ doc.entity.name }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
-								.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 100%, 50%)'}")
+								.color-square(ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
 								.name(ng-if="update_user.id != user.id") {{update_user.first_name}} {{update_user.last_name}}
 								.name(ng-if="update_user.id == user.id") You
 							div.user(ng-if="update.meta.users.length == 0")
