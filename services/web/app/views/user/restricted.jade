@@ -1,10 +1,13 @@
 extends ../layout
 
 block content
-
-	.container#loginBox
-		.row
-			.box.span3.offset4
-				.page-header
-					h1 Restricted
-
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2.text-center
+					.page-header
+						h2 Restricted, sorry you don't have permission to load this page.
+					p
+						a(href="/")
+							i.fa.fa-arrow-circle-o-left
+							|  Take me home!

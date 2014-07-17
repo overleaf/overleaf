@@ -13,6 +13,7 @@ define [
 	"ide/chat/index"
 	"ide/clone/index"
 	"ide/templates/index"
+	"ide/dropbox/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"

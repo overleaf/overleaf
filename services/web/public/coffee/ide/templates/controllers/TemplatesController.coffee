@@ -39,7 +39,7 @@ define [
 		$scope.$watch $scope.problemTalkingToTemplateApi, refreshPublishedStatus
 
 		$scope.updateProjectDescription = ->
-			description = $scope.template.description
+			description = $scope.templateDetails.description
 			if description?
 				ide.socket.emit 'updateProjectDescription', description, (err) => 
 					if err? then return problemTalkingToTemplateApi()

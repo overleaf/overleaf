@@ -46,6 +46,15 @@ aside#left-menu.full-size(
 					i.fa.fa-external-link.fa-fw 
 					| &nbsp;&nbsp;Publish as Template
 
+
+	span(ng-controller="DropboxController")
+		h4() Sync
+		ul.list-unstyled.nav()
+			li
+				a(ng-click="openDropboxModal()")
+					i.fa.fa-dropbox.fa-fw
+					| &nbsp;&nbsp; Dropbox
+
 	h4 Settings
 	form.settings(ng-controller="SettingsController")
 		.containter-fluid
