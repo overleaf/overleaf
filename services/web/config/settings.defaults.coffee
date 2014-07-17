@@ -88,6 +88,7 @@ module.exports =
 			subdomain: ""
 		chat:
 			url: "http://localhost:3010"
+			internal_url: "http://localhost:3010"
 		templates:
 			port: 3007
 			user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"

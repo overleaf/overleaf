@@ -13,7 +13,7 @@ describe "ChatHandler", ->
 		@settings = 
 			apis:
 				chat:
-					url:"chat.sharelatex.env"
+					internal_url:"chat.sharelatex.env"
 		@request = sinon.stub()
 		@ChatHandler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
@@ -38,7 +38,7 @@ describe "ChatHandler", ->
 					json:
 						content:@messageContent
 						user_id:@user_id
-					uri:"#{@settings.apis.chat.url}/room/#{@project_id}/messages"
+					uri:"#{@settings.apis.chat.internal_url}/room/#{@project_id}/messages"
 				@request.calledWith(@opts).should.equal true
 				done()
 
@@ -59,7 +59,7 @@ describe "ChatHandler", ->
 			@ChatHandler.getMessages @project_id, @query, (err)=>
 				@opts =
 					method:"get"
-					uri:"#{@settings.apis.chat.url}/room/#{@project_id}/messages"
+					uri:"#{@settings.apis.chat.internal_url}/room/#{@project_id}/messages"
 					qs:{}
 				@request.calledWith(@opts).should.equal true
 				done()
@@ -70,7 +70,7 @@ describe "ChatHandler", ->
 			@ChatHandler.getMessages @project_id, @query, (err)=>
 				@opts =
 					method:"get"
-					uri:"#{@settings.apis.chat.url}/room/#{@project_id}/messages"
+					uri:"#{@settings.apis.chat.internal_url}/room/#{@project_id}/messages"
 					qs:
 						limit:5
 						before:12345

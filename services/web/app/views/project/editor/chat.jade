@@ -33,7 +33,10 @@ aside.chat(
 							}"
 						)
 							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)'}")
-							p(ng-repeat="content in message.contents track by $index") {{ content }}
+							p(
+								mathjax,
+								ng-repeat="content in message.contents track by $index"
+							) {{ content }}
 
 	.new-message
 		textarea(

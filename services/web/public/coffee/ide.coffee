@@ -53,6 +53,11 @@ define [
 		$scope.settings = window.userSettings
 
 		$scope.chat = {}
+		
+		$scope.startFreeTrial = (source) ->
+			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
+			window.open("/user/subscription/new?planCode=student_free_trial")
+			$scope.startedFreeTrial = true
 
 		window._ide = ide
 

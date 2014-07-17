@@ -10,7 +10,7 @@ module.exports =
 			json:
 				content:messageContent
 				user_id:user_id
-			uri:"#{settings.apis.chat.url}/room/#{project_id}/messages"
+			uri:"#{settings.apis.chat.internal_url}/room/#{project_id}/messages"
 		request opts, (err, response, body)->
 			if err?
 				logger.err err:err, "problem sending new message to chat"
@@ -24,7 +24,7 @@ module.exports =
 		qs.before = query.before if query?.before?
 
 		opts =
-			uri:"#{settings.apis.chat.url}/room/#{project_id}/messages"
+			uri:"#{settings.apis.chat.internal_url}/room/#{project_id}/messages"
 			method:"get"
 			qs: qs
 

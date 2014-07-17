@@ -14,11 +14,27 @@ define [
 				nextBeforeTimestamp: null
 				newMessage: null
 		}
-			
+		
+		justSent = false	
 		ide.socket.on "new-chat-message", (message) =>
-			ide.$scope.$apply () ->
-				chat.state.newMessage = message
-				appendMessage(message)
+			if message.user.id == ide.$scope.user.id and justSent
+				# Nothing to do
+			else
+				ide.$scope.$apply () ->
+					appendMessage(message)
+			justSent = false
+			
+		chat.sendMessage = (message) ->
+			body = 
+				content: message
+				_csrf : window.csrfToken
+			justSent = true
+			appendMessage({
+				user: ide.$scope.user
+				content: message
+				timestamp: Date.now()
+			})
+			return $http.post(MESSAGES_URL, body)
 			
 		chat.loadMoreMessages = () ->
 			return if chat.state.atEnd
@@ -60,6 +76,9 @@ define [
 				prependMessage(message)
 				
 		appendMessage = (message) ->
+			console.log "MESSAGES", message, chat.state.messages
+			chat.state.newMessage = message
+			
 			lastMessage = chat.state.messages[chat.state.messages.length - 1]
 			shouldGroup = lastMessage? and
 				lastMessage.user.id == message.user.id and
@@ -73,11 +92,5 @@ define [
 					timestamp: message.timestamp
 					contents: [message.content]
 				})
-					
-		chat.sendMessage = (message) ->
-			body = 
-				content: message
-				_csrf : window.csrfToken
-			return $http.post(MESSAGES_URL, body)
 					
 		return chat
