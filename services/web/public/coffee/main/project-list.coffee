@@ -493,7 +493,7 @@ define [
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
-			, 700
+			, 200
 
 		$scope.create = () ->
 			$modalInstance.close($scope.inputs.newTagName)
@@ -508,7 +508,7 @@ define [
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
-			, 700
+			, 200
 
 		$scope.rename = () ->
 			$modalInstance.close($scope.inputs.projectName)
@@ -525,7 +525,7 @@ define [
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
-			, 700
+			, 200
 
 		$scope.clone = () ->
 			$scope.state.inflight = true
@@ -547,7 +547,7 @@ define [
 		$modalInstance.opened.then () ->
 			$timeout () ->
 				$scope.$broadcast "open"
-			, 700
+			, 200
 
 		$scope.create = () ->
 			$scope.state.inflight = true

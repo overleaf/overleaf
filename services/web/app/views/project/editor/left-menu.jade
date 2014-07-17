@@ -31,10 +31,17 @@ aside#left-menu.full-size(
 				br
 				| PDF
 				
-	span(ng-controller="TemplatesController", ng-show="permissions.admin")
-		h4() Publish
-		ul.list-unstyled.nav()
-			li
+	span
+		h4 Actions
+		ul.list-unstyled.nav
+			li(ng-controller="CloneProjectController")
+				a(
+					href,
+					ng-click="openCloneProjectModal()"
+				)
+					i.fa.fa-fw.fa-copy
+					| &nbsp;&nbsp;Copy Project
+			li(ng-controller="TemplatesController", ng-show="permissions.admin")
 				a(ng-click="openPublishTemplateModal()")
 					i.fa.fa-external-link.fa-fw 
 					| &nbsp;&nbsp;Publish as Template
@@ -117,3 +124,30 @@ aside#left-menu.full-size(
 	ng-click="ui.leftMenuShown = false"
 	ng-cloak
 )
+
+script(type='text/ng-template', id='cloneProjectModalTemplate')
+	.modal-header
+		h3 Copy Project
+	.modal-body
+		form(name="cloneProjectForm", novalidate)
+			.form-group
+				label New Name
+				input.form-control(
+					type="text",
+					placeholder="New Project Name",
+					required,
+					ng-model="inputs.projectName",
+					on-enter="clone()",
+					focus-on="open"
+				)
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) Cancel
+		button.btn.btn-primary(
+			ng-disabled="cloneProjectForm.$invalid || state.inflight"
+			ng-click="clone()"
+		)
+			span(ng-hide="state.inflight") Copy
+			span(ng-show="state.inflight") Copying...
