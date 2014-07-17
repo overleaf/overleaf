@@ -11,7 +11,7 @@ ONE_HOUR_IN_S = 60 * 60
 ONE_DAY_IN_S = ONE_HOUR_IN_S * 24
 FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4
 
-USER_TIMEOUT_IN_S = ONE_HOUR_IN_S
+USER_TIMEOUT_IN_S = ONE_HOUR_IN_S / 4
 
 buildProjectSetKey = (project_id)-> return "clients_in_project:#{project_id}"
 buildUserKey = (project_id, client_id)-> return "connected_user:#{project_id}:#{client_id}"

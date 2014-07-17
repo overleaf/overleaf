@@ -89,7 +89,7 @@ describe "ConnectedUsersManager", ->
 
 		it "should add a ttl to the connected user so it stays clean", (done)->
 			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
-				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 60).should.equal true
+				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 15).should.equal true
 				done()
 
 	describe "markUserAsDisconnected", ->
@@ -160,6 +160,6 @@ describe "ConnectedUsersManager", ->
 
 		it "should add the ttl on", (done)->
 			@ConnectedUsersManager.setUserCursorPosition @project_id, @client_id, @cursorData, (err)=>
-				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 60).should.equal true
+				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 15).should.equal true
 				done()
 
