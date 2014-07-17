@@ -12,6 +12,7 @@ define [
 	"ide/share/index"
 	"ide/chat/index"
 	"ide/templates/index"
+	"ide/dropbox/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"
