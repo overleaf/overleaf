@@ -20,7 +20,7 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 
 
 			div(ng-show="dbState.hasDropboxFeature && dbState.userIsLinkedToDropbox")
-				progressbar.progress-striped.active(value='percentageLeftTillNextPoll', type="info")
+				progressbar.progress-striped.active(value='dbState.percentageLeftTillNextPoll', type="info")
 				span 
 					strong {{dbState.minsTillNextPoll}} minutes 
 					span until dropbox is next checked for changes.
