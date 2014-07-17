@@ -34,7 +34,7 @@ define [
 				roundedMinsSinceLastPoll = Math.round(milisecondsSinceLastPoll / ONE_MIN_MILI)
 
 				$scope.dbState.minsTillNextPoll = POLLING_INTERVAL - roundedMinsSinceLastPoll
-				$scope.dbState.percentageLeftTillNextPoll = 100 - ((roundedMinsSinceLastPoll / POLLING_INTERVAL) * 100)
+				$scope.dbState.percentageLeftTillNextPoll = ((roundedMinsSinceLastPoll / POLLING_INTERVAL) * 100)
 				console.log $scope.dbState.percentageLeftTillNextPoll
 				$timeout calculatePollTime, 60 * 1000
 
