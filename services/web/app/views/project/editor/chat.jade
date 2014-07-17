@@ -11,7 +11,7 @@ aside.chat(
 		.infinite-scroll-inner
 			.loading(ng-show="chat.loading")
 				i.fa.fa-fw.fa-spin.fa-refresh
-				| Loading...
+				| &nbsp;&nbsp;Loading...
 			ul.list-unstyled(
 				ng-click="resetUnreadMessages()"
 			)
@@ -28,11 +28,11 @@ aside.chat(
 						.name(ng-if="message.user.id != user.id") {{ message.user.first_name }}
 						.message(
 							ng-style="{\
-								'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)',\
+								'border-color': 'hsl({{ hue(message.user) }}, 70%, 70%)',\
 								'background-color': 'hsl({{ hue(message.user) }}, 60%, 97%)'\
 							}"
 						)
-							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 60%, 80%)'}")
+							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 70%, 70%)'}")
 							p(
 								mathjax,
 								ng-repeat="content in message.contents track by $index"

@@ -45,7 +45,7 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		)
 			span.online-user(
 				ng-repeat="user in onlineUsersArray",
-				ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 100%, 50%)' }",
+				ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
 				popover="{{ user.name }}"
 				popover-placement="bottom"
 				popover-append-to-body="true"
