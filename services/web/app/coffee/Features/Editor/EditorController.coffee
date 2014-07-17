@@ -59,16 +59,14 @@ module.exports = EditorController =
 							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 
 							# can be done affter the connection has happened
-							EditorRealTimeController.emitToRoom(project_id, "ConnectedUsers.userConnected", user)
-							ConnectedUsersManager.markUserAsConnected project_id, user._id, ->
+							ConnectedUsersManager.markUserAsConnected project_id, client.id, user, ->
 
 	leaveProject: (client, user) ->
 		self = @
 		client.get "project_id", (error, project_id) ->
 			return if error? or !project_id?
 			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientDisconnected", client.id)
-			EditorRealTimeController.emitToRoom(project_id, "ConnectedUsers.userDissconected", user)
-			ConnectedUsersManager.markUserAsDisconnected project_id, user._id, ->
+			ConnectedUsersManager.markUserAsDisconnected project_id, client.id, ->
 			logger.log user_id:user._id, project_id:project_id, "user leaving project"
 			self.flushProjectIfEmpty(project_id)
 
@@ -126,7 +124,11 @@ module.exports = EditorController =
 			cursorData.email = email if email?
 			if first_name? and last_name?
 				cursorData.name = first_name + " " + last_name
-				ConnectedUsersManager.setUserCursorPosition(project_id, user_id, cursorData, ->)
+				ConnectedUsersManager.setUserCursorPosition(project_id, client.id, {
+					row: cursorData.row,
+					column: cursorData.column,
+					doc_id: cursorData.doc_id
+				}, ->)
 			else
 				cursorData.name = "Anonymous"
 			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)

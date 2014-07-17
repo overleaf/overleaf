@@ -1,30 +1,63 @@
 define [
 	"libs/md5"
+	"ide/online-users/controllers/OnlineUsersController"
 ], () ->
 	class OnlineUsersManager
 		constructor: (@ide, @$scope) ->
 			@$scope.onlineUsers = {}
 			@$scope.onlineUserCursorHighlights = {}
+			@$scope.onlineUsersArray = []
 
 			@$scope.$on "cursor:editor:update", (event, position) =>
 				@sendCursorPositionUpdate(position)
+			
+			@$scope.$on "project:joined", () =>
+				ide.$http
+					.get "/project/#{@ide.$scope.project._id}/connected_users"
+					.success (connectedUsers) =>
+						@$scope.onlineUsers = {}
+						for user in connectedUsers or []
+							if user.client_id == @ide.socket.socket.sessionid
+								# Don't store myself
+								continue
+							# Store data in the same format returned by clientTracking.clientUpdated
+							@$scope.onlineUsers[user.client_id] = {
+								id:      user.client_id
+								user_id: user.user_id
+								email:   user.email
+								name:    "#{user.first_name} #{user.last_name}"
+								doc_id:  user.cursorData?.doc_id
+								row:     user.cursorData?.row
+								column:  user.cursorData?.column
+							}
+						@refreshOnlineUsers()
 
 			@ide.socket.on "clientTracking.clientUpdated", (client) =>
 				if client.id != @ide.socket.socket.sessionid # Check it's not me!
 					@$scope.$apply () =>
 						@$scope.onlineUsers[client.id] = client
-						@updateCursorHighlights()
+						@refreshOnlineUsers()
 
 			@ide.socket.on "clientTracking.clientDisconnected", (client_id) =>
 				@$scope.$apply () =>
 					delete @$scope.onlineUsers[client_id]
-					@updateCursorHighlights()
+					@refreshOnlineUsers()
+					
+			@$scope.getHueForUserId = (user_id) =>
+				@getHueForUserId(user_id)
 
-		updateCursorHighlights: () ->
+		refreshOnlineUsers: () ->
+			@$scope.onlineUsersArray = []
+			
+			for client_id, user of @$scope.onlineUsers
+				if user.doc_id?
+					user.doc = @ide.fileTreeManager.findEntityById(user.doc_id)
+				@$scope.onlineUsersArray.push user
+				
 			@$scope.onlineUserCursorHighlights = {}
 			for client_id, client of @$scope.onlineUsers
 				doc_id = client.doc_id
-				continue if !doc_id?
+				continue if !doc_id? or !client.row? or !client.column?
 				@$scope.onlineUserCursorHighlights[doc_id] ||= []
 				@$scope.onlineUserCursorHighlights[doc_id].push {
 					label: client.name
