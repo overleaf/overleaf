@@ -21,11 +21,16 @@ define [
 								# Don't store myself
 								continue
 							# Store data in the same format returned by clientTracking.clientUpdated
+							if user.first_name?.length == 0 and user.last_name.length == 0
+								name = user.email
+							else
+								name = "#{user.first_name} #{user.last_name}"
+
 							@$scope.onlineUsers[user.client_id] = {
 								id:      user.client_id
 								user_id: user.user_id
 								email:   user.email
-								name:    "#{user.first_name} #{user.last_name}"
+								name:    name
 								doc_id:  user.cursorData?.doc_id
 								row:     user.cursorData?.row
 								column:  user.cursorData?.column
