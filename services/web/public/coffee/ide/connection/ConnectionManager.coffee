@@ -105,8 +105,9 @@ define [], () ->
 
 		tryReconnect: () ->
 			@cancelReconnect()
-			@$scope.connection.reconnecting = true
 			delete @$scope.connection.reconnection_countdown
+			return if @connected
+			@$scope.connection.reconnecting = true
 			@ide.socket.socket.reconnect()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 
