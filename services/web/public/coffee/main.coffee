@@ -5,6 +5,7 @@ define [
 	"main/templates"
 	"main/plans"
 	"main/group-members"
+	"main/scribtex-popup"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
