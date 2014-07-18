@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	app.controller "openInSlController", ($scope) ->
+	App.controller "openInSlController", ($scope) ->
 
 		$scope.openInSlText = "Open in ShareLaTeX"
 		$scope.isDisabled = false
@@ -16,13 +16,13 @@ define [
 			ga('send', 'event', 'template-site', 'download-zip', $('.page-header h1').text())
 
 
-	app.factory "algolia", ->
+	App.factory "algolia", ->
 		if window?.sharelatex?.algolia?.app_id?
 			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
 			index = client.initIndex(window.sharelatex.algolia?.indexes?.templates)
 			return index
 
-	app.controller "SearchController", ($scope, algolia, _) ->
+	App.controller "SearchController", ($scope, algolia, _) ->
 		$scope.hits = []
 
 		$scope.safeApply = (fn)->

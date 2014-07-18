@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/algolia-2.5.2"
 ], (App, algolia)->
-	app.factory "Institutions", ->
+	App.factory "Institutions", ->
 		new AlgoliaSearch(window.algolia.institutions.app_id, window.algolia.institutions.api_key).initIndex("institutions")
 
 	App.controller "UserProfileController", ($scope, $modal, $http)->
