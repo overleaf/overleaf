@@ -88,6 +88,7 @@ module.exports = (grunt) ->
 					preserveLicenseComments: false
 					paths:
 						"moment": "libs/moment-2.7.0"
+						"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"
 					shim:
 						"libs/pdfListView/PdfListView":
 							deps: ["libs/pdf"]
