@@ -82,6 +82,14 @@ define [
 				$scope.reverse = !$scope.reverse
 			$scope.predicate = newPredicate
 
+		$scope.getSortIconClass = (column)->
+			if column == $scope.predicate and $scope.reverse
+				return "fa-sort-down"
+			else if column == $scope.predicate and !$scope.reverse
+				return "fa-sort-up"
+			else
+				return "fa-sort"
+
 		$scope.clearSearchText = () ->
 			$scope.searchText = ""
 			$scope.$emit "search:clear"
