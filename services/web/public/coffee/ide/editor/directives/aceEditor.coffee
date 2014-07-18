@@ -9,6 +9,14 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 ], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
+	
+	# Ace loads its script itself, so we need to hook in to be able to clear
+	# the cache.
+	if !ace.config._moduleUrl?
+		ace.config._moduleUrl = ace.config.moduleUrl
+		ace.config.moduleUrl = (args...) ->
+			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
+			return url
 
 	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
 		monkeyPatchSearch($rootScope, $compile)
@@ -73,7 +81,7 @@ define [
 				# Make '/' work for search in vim mode.
 				editor.showCommandLine = (arg) =>
 					if arg == "/"
-						Ace.require("ace/ext/searchbox").Search(editor, true)
+						ace.require("ace/ext/searchbox").Search(editor, true)
 
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")

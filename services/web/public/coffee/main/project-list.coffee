@@ -84,11 +84,11 @@ define [
 
 		$scope.getSortIconClass = (column)->
 			if column == $scope.predicate and $scope.reverse
-				return "fa-sort-down"
+				return "fa-caret-down"
 			else if column == $scope.predicate and !$scope.reverse
-				return "fa-sort-up"
+				return "fa-caret-up"
 			else
-				return "fa-sort"
+				return ""
 
 		$scope.clearSearchText = () ->
 			$scope.searchText = ""
