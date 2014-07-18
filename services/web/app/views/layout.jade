@@ -53,10 +53,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- if(typeof(suppressFooter) == "undefined")
 			script(type='text/javascript').
 				window.requirejs = {
-					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'app/main.js')}",
+					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'app/main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"paths" : {
-						"moment": "libs/moment-2.7.0",
-						"libs": "#{jsPath}/libs.js?fingerprint=#{fingerprint(jsPath + 'libs.js')}"
+						"moment": "libs/moment-2.7.0"
 					}
 				};	
 			script(

@@ -16,7 +16,6 @@ define [
 		ace.config._moduleUrl = ace.config.moduleUrl
 		ace.config.moduleUrl = (args...) ->
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
-			console.log "URL", url
 			return url
 
 	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
