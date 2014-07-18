@@ -57,7 +57,7 @@ define [
 		$scope.selectedProjects = []
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
-		$scope.reverse = false
+		$scope.reverse = true
 
 		$scope.windowHeight = $window.innerHeight
 		angular.element($window).bind "resize", () ->
