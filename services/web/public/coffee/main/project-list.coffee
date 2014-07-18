@@ -57,6 +57,8 @@ define [
 		$scope.allSelected = false
 		$scope.selectedProjects = []
 		$scope.filter = "all"
+		$scope.predicate = "lastUpdated"
+		$scope.reverse = false
 
 		$scope.windowHeight = $window.innerHeight
 		angular.element($window).bind "resize", () ->
@@ -75,8 +77,18 @@ define [
 					project.tags ||= []
 					project.tags.push tag
 
-		$scope.$watch "searchText", (value) ->
-			$scope.updateVisibleProjects()
+		$scope.changePredicate = (newPredicate)->
+			if $scope.predicate == newPredicate
+				$scope.reverse = !$scope.reverse
+			$scope.predicate = newPredicate
+
+		$scope.getSortIconClass = (column)->
+			if column == $scope.predicate and $scope.reverse
+				return "fa-sort-down"
+			else if column == $scope.predicate and !$scope.reverse
+				return "fa-sort-up"
+			else
+				return "fa-sort"
 
 		$scope.clearSearchText = () ->
 			$scope.searchText = ""

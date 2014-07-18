@@ -43,17 +43,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- if(typeof(suppressFooter) == "undefined")
 			include layout/footer
 
+
+
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
-			.modal.hide#scribtexModal
-				.modal-header
-					h3 Looking for ScribTeX?
-				.modal-body
-					p ScribTeX has moved to <strong>https://scribtex.sharelatex.com</strong>. Please update your bookmarks.
-					p(style="text-align: center") You can find the page you were looking for here:
-					p(style="text-align: center")
-						a(href="https://scribtex.sharelatex.com#{scribtexPath}", style="font-size: 16px") https://scribtex.sharelatex.com#{scribtexPath}
-				.modal-footer
-					button(data-dismiss="modal").btn OK
+			span(ng-controller="ScribtexPopupController")
+			include scribtex-modal
 
 
 		- if(typeof(suppressFooter) == "undefined")
