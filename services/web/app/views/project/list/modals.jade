@@ -142,6 +142,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 		h3 Your Profile
 	.modal-body
 		form(enctype='multipart/form-data', method='post')
+
 			.form-group
 				label(for="first_name") First Name
 				input.form-control(
@@ -152,6 +153,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 					placeholder="First Name",
 					select-when="formVisable"
 				)
+
 			.form-group
 				label(for="last_name") Last Name
 				input.form-control(
@@ -161,6 +163,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 					ng-blur="sendUpdate()",
 					placeholder='Last Name'
 				)
+
 			.form-group#institution_auto_complete
 				label(for="institution") Institution
 				autocomplete(
@@ -172,15 +175,13 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 					attr-placeholder="Institution",
 					attr-inputclass="form-control"
 				)
+
 			.form-group
 				label(for="role") Role
-				input.form-control(
-					type='text',
-					name='role',
-					ng-model="userInfoForm.role",
-					placeholder='Role',
-					ng-blur="sendUpdate()",
-					typeahead="role for role in roles | filter:$viewValue"
-				)
+				input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()", list="_roles").form-control
+				datalist#_roles
+					option(ng-repeat='role in roles') {{role}}
+
+
 	.modal-footer
 		button.btn.btn-info(ng-click="done()") Done
