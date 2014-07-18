@@ -18,6 +18,8 @@ for path in [
     "#{jsPath}libs/require.js",
     "#{jsPath}ide.js",
     "#{jsPath}main.js",
+	"#{jsPath}libs.js",
+	"#{jsPath}ace/ace.js",
     "#{jsPath}libs/pdf.js",
     "#{jsPath}libs/pdf.worker.js",
     "/stylesheets/style.css"

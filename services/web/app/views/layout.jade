@@ -55,7 +55,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 				window.requirejs = {
 					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'app/main.js')}",
 					"paths" : {
-						"moment": "libs/moment-2.7.0"
+						"moment": "libs/moment-2.7.0",
+						"libs": "#{jsPath}/libs.js?fingerprint=#{fingerprint(jsPath + 'libs.js')}"
 					}
 				};	
 			script(

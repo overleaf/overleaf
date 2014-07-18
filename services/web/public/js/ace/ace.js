@@ -3465,6 +3465,7 @@ exports.moduleUrl = function(name, component) {
     }
     if (path && path.slice(-1) != "/")
         path += "/";
+    console.log(path, component, sep, base);
     return path + component + sep + base + this.get("suffix");
 };
 

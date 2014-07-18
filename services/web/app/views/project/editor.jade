@@ -91,7 +91,7 @@ block content
 				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
 				"moment": "libs/moment-2.7.0"
 			},
-			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}",
+			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
 				"libs/pdfListView/PdfListView": {
@@ -105,6 +105,7 @@ block content
 				}
 			}
 		};
+		window.aceFingerprint = "#{fingerprint(jsPath + 'ace/ace.js')}"
 
 	script(type='text/javascript').
 		ga('send', 'event', 'editor-interaction', 'editor-opened')
@@ -117,7 +118,7 @@ block content
 		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
 
 	script(
-		data-main=jsPath+'ide.js',
+		data-main=jsPath+"ide.js",
 		baseurl=jsPath,
 		data-ace-base=jsPath+'ace',
 		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
