@@ -37,7 +37,10 @@ define [
 	App.controller "UserProfileModalController", ($scope, $modalInstance, $http, Institutions) ->
 		$scope.roles = ["Student", "Post-graduate student", "Post-doctoral researcher", "Lecturer", "Professor"]
 
-		$scope.sendUpdate = ->
+		$modalInstance.result.finally ->
+			sendUpdate()
+
+		sendUpdate = ->
 			request = $http.post "/user/settings", $scope.userInfoForm
 			request.success (data, status)->
 			request.error (data, status)->
@@ -45,14 +48,9 @@ define [
 
 		$scope.updateInstitutionsList = (inputVal)->
 
-			# this is a little hack to use until we change auto compelete lib with redesign and can 
-			# listen for blur events on institution field to send the post
-			if inputVal?.indexOf("(") != -1 and inputVal?.indexOf(")") != -1 
-				$scope.sendUpdate()
-
 			query = $scope.userInfoForm.institution
 			if query?.length <= 3
-				return #saves us algolia searches, need ~4 chars to get uni anyway
+				return #saves us algolia searches
 				
 			Institutions.search $scope.userInfoForm.institution, (err, response)->
 				$scope.institutions = _.map response.hits, (institution)->

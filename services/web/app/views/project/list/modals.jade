@@ -149,7 +149,6 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 					type='text',
 					name='first_name',
 					ng-model="userInfoForm.first_name",
-					ng-blur="sendUpdate()",
 					placeholder="First Name",
 					select-when="formVisable"
 				)
@@ -160,27 +159,29 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 					type='text',
 					name='last_name',
 					ng-model="userInfoForm.last_name",
-					ng-blur="sendUpdate()",
 					placeholder='Last Name'
 				)
 
-			.form-group#institution_auto_complete
+			.form-group.user_details_auto_complete
 				label(for="institution") Institution
 				autocomplete(
 					ng-model="userInfoForm.institution",
 					name="institution",
 					data="institutions",
-					ng-blur="sendUpdate()",
 					on-type="updateInstitutionsList",
 					attr-placeholder="Institution",
 					attr-inputclass="form-control"
 				)
 
-			.form-group
+			.form-group.user_details_auto_complete
 				label(for="role") Role
-				input(type='text', name='role',  ng-model="userInfoForm.role", placeholder='Role', ng-blur="sendUpdate()", list="_roles").form-control
-				datalist#_roles
-					option(ng-repeat='role in roles') {{role}}
+				autocomplete(
+					ng-model="userInfoForm.role",
+					name="role",
+					data="roles",
+					attr-placeholder="Role",
+					attr-inputclass="form-control"
+				)
 
 
 	.modal-footer
