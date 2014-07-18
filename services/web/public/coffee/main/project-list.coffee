@@ -52,7 +52,6 @@ define [
 
 	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp) ->
 		$scope.projects = window.data.projects
-		$scope.visibleProjects = $scope.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
 		$scope.selectedProjects = []
@@ -439,7 +438,8 @@ define [
 				path = "/project/#{selected_project_ids[0]}/download/zip"
 
 			window.location = path
-
+			
+		$scope.updateVisibleProjects()
 
 	App.controller "ProjectListItemController", ($scope) ->
 		$scope.ownerName = () ->
