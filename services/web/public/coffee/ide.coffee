@@ -53,6 +53,7 @@ define [
 		}
 		$scope.user = window.user
 		$scope.settings = window.userSettings
+		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
 		

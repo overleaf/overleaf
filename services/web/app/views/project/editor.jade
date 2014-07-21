@@ -86,6 +86,7 @@ block content
 		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
 		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
+		window.anonymous = #{anonymous};
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",

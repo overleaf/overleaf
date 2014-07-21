@@ -27,7 +27,7 @@ define [], () ->
 				if value?
 					setTimeout () =>
 						@gotoLine(value)
-					, 0
+					, 10 # Hack: Must happen after @gotoStoredPosition
 
 		storeScrollTopPosition: (session) ->
 			if @doc_id?

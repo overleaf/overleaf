@@ -3,13 +3,15 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		href,
 		ng-click="ui.leftMenuShown = true"
 		tooltip="Menu",
-		tooltip-placement="bottom"
+		tooltip-placement="bottom",
+		tooltip-append-to-body="true"
 	)
 		i.fa.fa-fw.fa-bars
 	a(
 		href="/project"
 		tooltip="Back to projects",
-		tooltip-placement="bottom"
+		tooltip-placement="bottom",
+		tooltip-append-to-body="true"
 	)
 		i.fa.fa-fw.fa-level-up
 
@@ -76,7 +78,8 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			tooltip-placement="bottom",
 			ng-class="{ active: ui.chatOpen }",
 			ng-click="toggleChat()",
-			ng-controller="ChatButtonController"
+			ng-controller="ChatButtonController",
+			ng-show="!anonymous"
 		)
 			i.fa.fa-fw.fa-comment(
 				ng-class="{ 'bounce': unreadMessages > 0 }"

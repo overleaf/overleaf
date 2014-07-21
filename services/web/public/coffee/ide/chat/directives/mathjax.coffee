@@ -11,7 +11,7 @@ define [
 			inlineMath: [ ['$','$'], ["\\(","\\)"] ],
 			displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
 			processEscapes: true
-
+		skipStartupTypeset: true
 
 	MathJax.Hub.Config(mathjaxConfig);
 	
