@@ -1,5 +1,6 @@
 aside.chat(
-	ng-controller="ChatController"
+	ng-controller="ChatController",
+	ng-if="!anonymous"
 )
 	.messages(
 		infinite-scroll="loadMoreMessages()"
@@ -12,6 +13,12 @@ aside.chat(
 			.loading(ng-show="chat.loading")
 				i.fa.fa-fw.fa-spin.fa-refresh
 				| &nbsp;&nbsp;Loading...
+			.no-messages.text-center.small(ng-show='!chat.loading && chat.messages.length == 0')
+				| No messages
+			.first-message.text-center(ng-show='!chat.loading && chat.messages.length == 0')
+				| Send your first message
+				br
+				i.fa.fa-arrow-down
 			ul.list-unstyled(
 				ng-click="resetUnreadMessages()"
 			)
