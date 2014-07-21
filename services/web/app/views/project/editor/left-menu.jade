@@ -68,6 +68,14 @@ aside#left-menu.full-size(
 					option(value='latex') LaTeX
 					option(value='xelatex') XeLaTeX
 					option(value='lualatex') LuaLaTeX
+					
+			.form-controls
+				label(for="rootDoc_id") Main document
+				select(
+					name="rootDoc_id",
+					ng-model="project.rootDoc_id",
+					ng-options="doc.doc.id as doc.path for doc in docs"
+				)
 
 			.form-controls
 				label(for="spellCheckLanguage") Spell Check
