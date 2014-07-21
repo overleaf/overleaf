@@ -33,7 +33,6 @@ define [
 				highlights: "="
 				text: "="
 				readOnly: "="
-				gotoLine: "="
 				annotations: "="
 				navigateHighlights: "="
 			}

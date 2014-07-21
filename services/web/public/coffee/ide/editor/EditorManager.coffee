@@ -9,7 +9,6 @@ define [
 				sharejs_doc: null
 				open_doc_id: null
 				opening: true
-				gotoLine: null
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
