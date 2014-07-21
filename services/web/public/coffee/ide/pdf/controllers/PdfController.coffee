@@ -107,6 +107,9 @@ define [
 				.error () ->
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
+					
+		# This needs to be public.
+		ide.$scope.recompile = $scope.recompile
 
 		$scope.clearCache = () ->
 			$http {
