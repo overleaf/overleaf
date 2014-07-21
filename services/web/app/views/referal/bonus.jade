@@ -6,7 +6,7 @@ block content
 			.row
 				.col-md-8.col-md-offset-2
 					.card
-						.container-fluid
+						.container-fluid(ng-controller="BonusLinksController")
 							.row
 								.col-md-12
 									.page-header
@@ -44,7 +44,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#link-modal', data-toggle="modal").link Link to us from your website
+										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link Link to us from your website
 
 							.row
 								.col-md-10.col-md-offset-1.bonus-banner
@@ -86,17 +86,40 @@ block content
 									- else
 										p.thanks You've introduced <strong>#{refered_user_count}</strong> people to ShareLaTeX. Good job!
 						
-						#link-modal.modal.hide
+						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
+								button.close(
+									type="button"
+									data-dismiss="modal"
+									ng-click="cancel()"
+								) &times;
 								h3 Link to ShareLaTeX
-							.modal-body
+							.modal-body.modal-body-share.link-modal
+
 								p You can link to ShareLaTeX with the following HTML:
 								p
-									textarea(readonly=true)
+									textarea.col-md-12(readonly=true)
 										<a href="#{buildReferalUrl("d")}">Online LaTeX Editor ShareLaTeX</a>
+
 								p Thanks!
-							.modal-footer
-								button.btn(data-dismiss="modal") Close
+
+
+							.modal-footer()
+								button.btn.btn-default(
+									ng-click="cancel()",
+								)
+									span Close
+
+
+
+
+
+
+
+
+
+
+
 
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
 	script(src='https://connect.facebook.net/en_US/all.js')

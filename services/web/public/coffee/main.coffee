@@ -7,6 +7,7 @@ define [
 	"main/group-members"
 	"main/scribtex-popup"
 	"main/event-tracking"
+	"main/bonus"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
