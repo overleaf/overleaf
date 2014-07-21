@@ -6,6 +6,7 @@ define [
 	"main/plans"
 	"main/group-members"
 	"main/scribtex-popup"
+	"main/event-tracking"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
@@ -15,5 +16,6 @@ define [
 	"directives/selectAll"
 	"directives/maxHeight"
 	"filters/formatDate"
+
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])

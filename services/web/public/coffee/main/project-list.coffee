@@ -50,7 +50,7 @@ define [
 
 	]
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
@@ -88,6 +88,10 @@ define [
 				return "fa-caret-up"
 			else
 				return ""
+
+		$scope.searchProjects = ->
+			event_tracking.send 'project-list-page-interaction', 'project-search', 'keydown'
+			$scope.updateVisibleProjects()
 
 		$scope.clearSearchText = () ->
 			$scope.searchText = ""
@@ -196,6 +200,7 @@ define [
 
 		$scope.addSelectedProjectsToTag = (tag) ->
 			selected_projects = $scope.getSelectedProjects()
+			event_tracking.send 'project-list-page-interaction', 'project action', 'addSelectedProjectsToTag'
 
 			# Add project_ids into tag.project_ids
 			added_project_ids = []
@@ -217,6 +222,7 @@ define [
 				}
 
 		$scope.createTag = (name) ->
+			event_tracking.send 'project-list-page-interaction', 'project action', 'createTag'
 			$scope.tags.push {
 				name: name
 				project_ids: []
@@ -261,6 +267,7 @@ define [
 			return deferred.promise
 
 		$scope.openCreateProjectModal = (template = "none") ->
+			event_tracking.send 'project-list-page-interaction', 'new-project', template
 			modalInstance = $modal.open(
 				templateUrl: "newProjectModalTemplate"
 				controller: "NewProjectModalController"
@@ -282,7 +289,7 @@ define [
 		$scope.openRenameProjectModal = () ->
 			project = $scope.getFirstSelectedProject()
 			return if !project? or project.accessLevel != "owner"
-
+			event_tracking.send 'project-list-page-interaction', 'project action', 'Rename'
 			modalInstance = $modal.open(
 				templateUrl: "renameProjectModalTemplate"
 				controller: "RenameProjectModalController"
@@ -297,7 +304,7 @@ define [
 
 		$scope.cloneProject = (project, cloneName) ->
 			deferred = $q.defer()
-
+			event_tracking.send 'project-list-page-interaction', 'project action', 'Clone'
 			queuedHttp
 				.post("/project/#{project.id}/clone", {
 					_csrf: window.csrfToken
@@ -339,7 +346,7 @@ define [
 				resolve:
 					projects: () -> $scope.getSelectedProjects()
 			)
-
+			event_tracking.send 'project-list-page-interaction', 'project action', 'Delete'
 			modalInstance.result.then () ->
 				$scope.archiveOrLeaveSelectedProjects()
 
@@ -431,7 +438,7 @@ define [
 
 		$scope.downloadSelectedProjects = () ->
 			selected_project_ids = $scope.getSelectedProjectIds()
-
+			event_tracking.send 'project-list-page-interaction', 'project action', 'Download Zip'
 			if selected_project_ids.length > 1
 				path = "/project/download/zip?project_ids=#{selected_project_ids.join(',')}"
 			else

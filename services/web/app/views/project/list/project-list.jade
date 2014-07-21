@@ -6,7 +6,8 @@
 					placeholder='Search projects…',
 					autofocus='autofocus',
 					ng-model="searchText",
-					focus-on='search:clear'
+					focus-on='search:clear',
+					ng-keyup="searchProjects()"
 				)
 				i.fa.fa-search.form-control-feedback-left
 				i.fa.fa-times.form-control-feedback(

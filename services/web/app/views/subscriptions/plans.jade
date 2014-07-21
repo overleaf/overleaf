@@ -19,17 +19,17 @@ block content
 							li(ng-class="{'active': ui.view == 'monthly'}")
 								a(
 									href,
-									ng-click="ui.view = 'monthly'"
+									ng-click="switchToMonthly()"
 								) Monthly
 							li(ng-class="{'active': ui.view == 'annual'}")
 								a(
 									href
-									ng-click="ui.view = 'annual'"
+									ng-click="switchToAnnual()"
 								) Annual
 							li(ng-class="{'active': ui.view == 'student'}")
 								a(
 									href,
-									ng-click="ui.view = 'student'"
+									ng-click="switchToStudent()"
 								) Half Price Student Plans
 
 				.row(ng-cloak)
@@ -62,7 +62,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('collaborator')"
 										) Sign up now!
 							.card
 								.card-header
@@ -81,7 +81,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('professional')"
 										) Sign up now!
 
 						.card-group.text-centered(ng-if="ui.view == 'student'")
@@ -109,7 +109,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student", ng-click="signUpNowClicked('student')"
 										) Sign up now!
 							.card
 								.card-header
@@ -125,7 +125,7 @@ block content
 									li
 										br
 										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student_annual"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student_annual", ng-click="signUpNowClicked('student')"
 										) Sign up now!
 
 				.row(ng-cloak)
@@ -175,7 +175,7 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_5_members')") Sign up now!
 							.card.highlighted
 								.card-header
 									h2 Research Lab
@@ -191,7 +191,7 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_10_members')") Sign up now!
 							.card
 								.card-header
 									h2 Department
@@ -207,4 +207,4 @@ block content
 									li.small All the advantages of the Professional account for each team member
 									li
 										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}") Sign up now!
+										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_20_members')") Sign up now!
