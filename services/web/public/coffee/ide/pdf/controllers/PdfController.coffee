@@ -223,17 +223,6 @@ define [
 	]
 
 	App.controller "PdfSynctexController", ["$scope", "synctex", "ide", ($scope, synctex, ide) ->
-		$scope.showControls = true
-		$scope.$on "layout:pdf:resize", (event, data) ->
-			if data.east.initClosed
-				$scope.showControls = false
-			else
-				$scope.showControls = true
-
-			setTimeout () ->
-				$scope.$digest()
-			, 0
-
 		@cursorPosition = null
 		ide.$scope.$on "cursor:editor:update", (event, @cursorPosition) =>
 

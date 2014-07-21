@@ -33,7 +33,7 @@ div.full-size(
 		include ./pdf
 
 	.ui-layout-resizer-controls.synctex-controls(
-		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs' && showControls"
+		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
 		ng-controller="PdfSynctexController"
 	)
 		a.btn.btn-default.btn-xs(

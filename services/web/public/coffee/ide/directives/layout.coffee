@@ -72,11 +72,16 @@ define [
 					repositionControls = () ->
 						state = element.layout().readState()
 						if state.east?
-							element.find("> .ui-layout-resizer-controls").css({
-								position: "absolute"
-								right: state.east.size
-								"z-index": 10
-							})
+							controls = element.find("> .ui-layout-resizer-controls")
+							if state.east.initClosed
+								controls.hide()
+							else
+								controls.show()
+								controls.css({
+									position: "absolute"
+									right: state.east.size
+									"z-index": 10
+								})
 
 					resetOpenStates = () ->
 						state = element.layout().readState()
