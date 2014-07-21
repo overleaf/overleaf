@@ -3,9 +3,6 @@ define [
 ], (App) ->
 	App.directive "droppable", () ->
 		return {
-			scope: {
-				onDropCallback: "="
-			}
 			link: (scope, element, attrs) ->
 				scope.$watch attrs.droppable, (droppable) ->
 					if droppable
@@ -13,5 +10,5 @@ define [
 							greedy: true
 							hoverClass: "droppable-hover"
 							accept: attrs.accept
-							drop: scope.onDropCallback
+							drop: scope.$eval(attrs.onDropCallback)
 		}
