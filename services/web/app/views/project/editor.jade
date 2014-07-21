@@ -11,7 +11,7 @@ block content
 			.container
 				h3 Loading...
 				.progress
-					.progress-bar(ng-style="{'width': state.load_progress + '%'}")
+					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
 
 		.global-alerts(ng-cloak)
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
