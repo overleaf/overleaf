@@ -95,7 +95,9 @@ define [
 
 		$scope.clearSearchText = () ->
 			$scope.searchText = ""
+			$scope.filter = "all"
 			$scope.$emit "search:clear"
+			$scope.updateVisibleProjects()
 
 		$scope.setFilter = (filter) ->
 			$scope.filter = filter
