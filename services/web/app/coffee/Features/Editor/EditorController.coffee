@@ -263,7 +263,6 @@ module.exports = EditorController =
 			callback?()
 
 	renameProject: (project_id, newName, callback = (err) ->) ->
-		newName = sanitize.escape(newName)
 		ProjectDetailsHandler.renameProject project_id, newName, =>
 			EditorRealTimeController.emitToRoom project_id, 'projectNameUpdated', newName
 			callback()
