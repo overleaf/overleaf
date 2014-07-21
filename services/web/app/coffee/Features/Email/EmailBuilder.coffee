@@ -48,7 +48,7 @@ templates.passwordResetRequested =
 We got a request to reset your ShareLaTeX password.
 <p>
 <center>
-	<div style="width:200px;background-color:#0069CC;border:1px solid #02A9D6;border-radius:4px;padding:15px; margin:10px 5px">
+	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:12.5px;">
 		<div style="padding-right:10px;padding-left:10px">
 			<a href="<%= setNewPasswordUrl %>" style="text-decoration:none" target="_blank">
 				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
@@ -73,13 +73,13 @@ templates.projectSharedWithYou =
 	layout: NotificationEmailLayout
 	type:"notification"
 	compiledTemplate: _.template '''
-<h1 class="h1"><%= owner.email %> wants to share <a href="<%= project.url %>">'<%= project.name %>'</a> with you</h1>
+<p>Hi, <%= owner.email %> wants to share <a href="<%= project.url %>">'<%= project.name %>'</a> with you</p>
 <p>&nbsp;</p>
 <center>
-	<div style="width:200px;background-color:#0069CC;border:1px solid #02A9D6;border-radius:4px;padding:15px; margin:10px 5px">
+	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:12.5px;">
 		<div style="padding-right:10px;padding-left:10px">
 			<a href="<%= project.url %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
+				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
 		  			View Project
 				</span>
 			</a>
@@ -88,6 +88,7 @@ templates.projectSharedWithYou =
 </center>
 <p> Thank you</p>
 <p> <a href="<%= siteUrl %>"> ShareLatex.com </a></p>
+
 '''
 
 module.exports =
