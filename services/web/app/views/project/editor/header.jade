@@ -78,7 +78,8 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			tooltip-placement="bottom",
 			ng-class="{ active: ui.chatOpen }",
 			ng-click="toggleChat()",
-			ng-controller="ChatButtonController"
+			ng-controller="ChatButtonController",
+			ng-show="!anonymous"
 		)
 			i.fa.fa-fw.fa-comment(
 				ng-class="{ 'bounce': unreadMessages > 0 }"

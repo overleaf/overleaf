@@ -80,7 +80,7 @@ define [
 
 					resetOpenStates = () ->
 						state = element.layout().readState()
-						if attrs.openEast?
+						if attrs.openEast? and state.east?
 							openEast = $parse(attrs.openEast)
 							openEast.assign(scope, !state.east.initClosed)
 
