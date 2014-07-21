@@ -44,52 +44,58 @@ describe "ConnectedUsersManager", ->
 			last_name: "Bloggs"
 			email: "joe@example.com"
 		}
+		@cursorData = { row: 12, column: 9, doc_id: '53c3b8c85fee64000023dc6e' }
 
 	afterEach -> 
 		tk.reset()
 
-	describe "markUserAsConnected", ->
+	describe "updateUserPosition", ->
 		beforeEach ->
 			@rClient.exec.callsArgWith(0)
 
 		it "should set a key with the date and give it a ttl", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
-				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "connected_at", Date.now()).should.equal true
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
+				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "last_updated_at", Date.now()).should.equal true
 				done()
 
 		it "should set a key with the user_id", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "user_id", @user._id).should.equal true
 				done()
 
 		it "should set a key with the first_name", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "first_name", @user.first_name).should.equal true
 				done()
 
 		it "should set a key with the last_name", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "last_name", @user.last_name).should.equal true
 				done()
 
 		it "should set a key with the email", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "email", @user.email).should.equal true
 				done()
 
 		it "should push the client_id on to the project list", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.sadd.calledWith("clients_in_project:#{@project_id}", @client_id).should.equal true
 				done()
 
-		it "should add a ttl to the connected user set so it stays clean", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+		it "should add a ttl to the project set so it stays clean", (done)->
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.expire.calledWith("clients_in_project:#{@project_id}", 24 * 4 * 60 * 60).should.equal true
 				done()
 
-		it "should add a ttl to the connected user so it stays clean", (done)->
-			@ConnectedUsersManager.markUserAsConnected @project_id, @client_id, @user, (err)=>
+		it "should add a ttl to the connected user so it stays clean", (done) ->
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, null, (err)=>
 				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 15).should.equal true
+				done()
+
+		it "should set the cursor position when provided", (done)->
+			@ConnectedUsersManager.updateUserPosition @project_id, @client_id, @user, @cursorData, (err)=>
+				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "cursorData", JSON.stringify(@cursorData)).should.equal true
 				done()
 
 	describe "markUserAsDisconnected", ->
@@ -144,22 +150,5 @@ describe "ConnectedUsersManager", ->
 				users.length.should.equal 2
 				users[0].should.deep.equal {client_id:@users[0], connected:true}
 				users[1].should.deep.equal {client_id:@users[2], connected:true}
-				done()
-
-	describe "setUserCursorPosition", ->
-
-		beforeEach ->
-			@cursorData = { row: 12, column: 9, doc_id: '53c3b8c85fee64000023dc6e' }
-			@rClient.exec.callsArgWith(0)
-
-		it "should add the cursor data to the users hash", (done)->
-			@ConnectedUsersManager.setUserCursorPosition @project_id, @client_id, @cursorData, (err)=>
-				@rClient.hset.calledWith("connected_user:#{@project_id}:#{@client_id}", "cursorData", JSON.stringify(@cursorData)).should.equal true
-				done()
-
-
-		it "should add the ttl on", (done)->
-			@ConnectedUsersManager.setUserCursorPosition @project_id, @client_id, @cursorData, (err)=>
-				@rClient.expire.calledWith("connected_user:#{@project_id}:#{@client_id}", 60 * 15).should.equal true
 				done()
 

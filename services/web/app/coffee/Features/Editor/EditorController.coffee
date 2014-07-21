@@ -59,7 +59,7 @@ module.exports = EditorController =
 							callback null, ProjectEditorHandler.buildProjectModelView(project), privilegeLevel, EditorController.protocolVersion
 
 							# can be done affter the connection has happened
-							ConnectedUsersManager.markUserAsConnected project_id, client.id, user, ->
+							ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, ->
 
 	leaveProject: (client, user) ->
 		self = @
@@ -124,7 +124,12 @@ module.exports = EditorController =
 			cursorData.email = email if email?
 			if first_name? and last_name?
 				cursorData.name = first_name + " " + last_name
-				ConnectedUsersManager.setUserCursorPosition(project_id, client.id, {
+				ConnectedUsersManager.updateUserPosition(project_id, client.id, {
+					first_name: first_name,
+					last_name:  last_name,
+					email:      email,
+					user_id:    user_id
+				}, {
 					row: cursorData.row,
 					column: cursorData.column,
 					doc_id: cursorData.doc_id

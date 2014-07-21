@@ -55,8 +55,7 @@ describe "EditorController", ->
 			deleteProject: sinon.stub()
 		@ConnectedUsersManager =
 			markUserAsDisconnected:sinon.stub()
-			markUserAsConnected:sinon.stub()
-			setUserCursorPosition:sinon.stub()
+			updateUserPosition:sinon.stub()
 
 		@EditorController = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/Server" : io : @io
@@ -91,7 +90,7 @@ describe "EditorController", ->
 			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ConnectedUsersManager.markUserAsConnected.callsArgWith(3)
+			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
 
 		describe "when authorized", ->
 			beforeEach ->
@@ -124,7 +123,7 @@ describe "EditorController", ->
 				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
 
 			it "should mark the user as connected with the ConnectedUsersManager", ->
-				@ConnectedUsersManager.markUserAsConnected.calledWith(@project_id, @client.id, @user).should.equal true
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, @user, null).should.equal true
 
 
 		describe "when not authorized", ->
@@ -257,7 +256,7 @@ describe "EditorController", ->
 	describe "updateClientPosition", ->
 		beforeEach ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ConnectedUsersManager.setUserCursorPosition.callsArgWith(3)
+			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
 			@update = {
 				doc_id: @doc_id = "doc-id-123"
 				row: @row = 42
@@ -290,7 +289,12 @@ describe "EditorController", ->
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.setUserCursorPosition.calledWith(@project_id, @client.id, {
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+					user_id: @user_id,
+					email: @email,
+					first_name: @first_name,
+					last_name: @last_name
+				}, {
 					row: @row
 					column: @column
 					doc_id: @doc_id
@@ -317,7 +321,7 @@ describe "EditorController", ->
 					.should.equal true
 				
 			it "should not send cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.setUserCursorPosition.called.should.equal false
+				@ConnectedUsersManager.updateUserPosition.called.should.equal false
 				done()
 
 	describe "addUserToProject", ->

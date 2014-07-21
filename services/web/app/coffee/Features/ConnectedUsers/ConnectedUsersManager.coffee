@@ -19,18 +19,27 @@ buildUserKey = (project_id, client_id)-> return "connected_user:#{project_id}:#{
 
 module.exports =
 
-	markUserAsConnected: (project_id, client_id, user, callback = (err)->)->
+	# Use the same method for when a user connects, and when a user sends a cursor
+	# update. This way we don't care if the connected_user key has expired when
+	# we receive a cursor update. 
+	updateUserPosition: (project_id, client_id, user, cursorData, callback = (err)->)->
 		logger.log project_id:project_id, client_id:client_id, "marking user as connected"
 
 		multi = rclient.multi()
-		multi.sadd buildProjectSetKey(project_id), client_id
+		
+		multi.sadd   buildProjectSetKey(project_id), client_id
 		multi.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S
-		multi.hset buildUserKey(project_id, client_id), "connected_at", Date.now()
+		
+		multi.hset buildUserKey(project_id, client_id), "last_updated_at", Date.now()
 		multi.hset buildUserKey(project_id, client_id), "user_id", user._id
 		multi.hset buildUserKey(project_id, client_id), "first_name", user.first_name
 		multi.hset buildUserKey(project_id, client_id), "last_name", user.last_name
 		multi.hset buildUserKey(project_id, client_id), "email", user.email
+		
+		if cursorData?
+			multi.hset buildUserKey(project_id, client_id), "cursorData", JSON.stringify(cursorData)
 		multi.expire buildUserKey(project_id, client_id), USER_TIMEOUT_IN_S
+		
 		multi.exec (err)->
 			if err?
 				logger.err err:err, project_id:project_id, client_id:client_id, "problem marking user as connected"
@@ -57,13 +66,6 @@ module.exports =
 				if result.cursorData?
 					result.cursorData = JSON.parse(result.cursorData)
 			callback err, result
-
-	setUserCursorPosition: (project_id, client_id, cursorData, callback)->
-		multi = rclient.multi()
-		multi.hset buildUserKey(project_id, client_id), "cursorData", JSON.stringify(cursorData)
-		multi.expire buildUserKey(project_id, client_id), USER_TIMEOUT_IN_S
-		multi.exec callback
-
 
 	getConnectedUsers: (project_id, callback)->
 		self = @
