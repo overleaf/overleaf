@@ -14,6 +14,7 @@ define [
 	"ide/clone/index"
 	"ide/templates/index"
 	"ide/dropbox/index"
+	"ide/hotkeys/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"directives/focus"

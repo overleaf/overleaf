@@ -1,0 +1,66 @@
+script(type="text/ng-template", id="hotkeysModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Hotkeys
+	.modal-body.modal-hotkeys
+		h3 Common
+		.row
+			.col-xs-6
+				.hotkey
+					span.combination {{ctrl}} + F
+					span.description Find (and replace)
+				.hotkey
+					span.combination {{ctrl}} + Enter
+					span.description Compile
+			.col-xs-6
+				.hotkey
+					span.combination {{ctrl}} + Z
+					span.description Undo
+				.hotkey
+					span.combination {{ctrl}} + Y
+					span.description Redo
+
+		h3 Navigation
+		.row
+			.col-xs-6
+				.hotkey
+					span.combination {{ctrl}} + Home
+					span.description  Beginning of document
+				.hotkey
+					span.combination {{ctrl}} + End
+					span.description End of document
+			.col-xs-6
+				.hotkey
+					span.combination {{ctrl}} + L
+					span.description Go To Line
+
+		h3 Editing
+		.row
+			.col-xs-6
+				.hotkey
+					span.combination {{ctrl}} + /
+					span.description Toggle Comment
+				.hotkey
+					span.combination {{ctrl}} + D
+					span.description Delete Current Line
+				.hotkey
+					span.combination {{ctrl}} + A
+					span.description Select All
+			.col-xs-6
+				.hotkey
+					span.combination Tab
+					span.description Indent Selection
+				.hotkey
+					span.combination {{ctrl}} + U
+					span.description To Uppercase
+				.hotkey
+					span.combination Ctrl + Shift + U
+					span.description To Lowercase
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) OK

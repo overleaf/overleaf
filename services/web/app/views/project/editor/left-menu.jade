@@ -135,6 +135,12 @@ aside#left-menu.full-size(
 					option(value="pdfjs") Built-In
 					option(value="native") Native
 
+	h4 Hotkeys
+	ul.list-unstyled.nav
+		li(ng-controller="HotkeysController")
+			a(ng-click="openHotkeysModal()")
+				i.fa.fa-keyboard-o.fa-fw
+				| &nbsp;&nbsp; Show Hotkeys
 
 #left-menu-mask(
 	ng-show="ui.leftMenuShown",
