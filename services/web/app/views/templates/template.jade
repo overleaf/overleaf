@@ -5,37 +5,51 @@ block content
 		.container
 			.row
 				.page-header
-					h1 #{template.name} LaTeX Template
-					-if(tag)
-						a(href=tag.tagPagePath) ← Back to more #{tag.name} LaTeX templates
+					h2
+						a(href="/templates") Templates
+						|  ›
+						a(href=tag.tagPagePath)  #{tag.name}
+						|  ›
+						|  #{template.name}
 				.container.txt-lefty
 					.row-fluid()
-						.span6
+						.col-md-6
 							.entry
 								.row-fluid
-									.span12
+									.col-md-12
 										a(href=template.pdfUrl)
-											img(src="#{template.previewUrl}")
+											//img(src="#{template.previewUrl}")
+											img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview")
 
-						.span6()
-							h3 About
-							div !{template.description}
+						.col-md-6
+							.card
+								h3 About
+								div !{template.description}
+								div(ng-controller="openInSlController")
+									a.btn.btn-primary.btn-large(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
+									| &nbsp;
 
-							h3 Actions
-							span(ng-controller="openInSlController")
-								a.btn.btn-success.btn-large.open-in-sharelatex(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
-								| &nbsp;
-								a.btn.btn-large.download-zip(href=template.zipUrl, rel='nofollow', ng-click='downloadZip()') Download Zip
+									a.btn.btn-default(
+										href=template.zipUrl, 
+										rel='nofollow', 
+										ng-click='downloadZip()', 
+										data-toggle="tooltip", 
+										data-placement="bottom", 
+										title="", 
+										data-original-title="Download .zip File"
+									)
 
+										i.fa.fa-cloud-download
 
-							.social_buttons
-								.addthis_toolbox.addthis_default_style.addthis_32x32_style
-									a.addthis_button_facebook
-									a.addthis_button_twitter
-									a.addthis_button_google_plusone_share
-									a.addthis_button_compact
-								script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
-							div
+								.social_buttons
+									.addthis_toolbox.addthis_default_style.addthis_32x32_style
+										a.addthis_button_facebook
+										a.addthis_button_twitter
+										a.addthis_button_google_plusone_share
+										a.addthis_button_compact
+									script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
+							div &nbsp;
+							.card
 								h3 Comment
 								#disqus_thread
 								script(type='text/javascript').
