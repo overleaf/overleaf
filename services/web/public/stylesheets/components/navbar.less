@@ -421,10 +421,13 @@
       color: @gray;
       padding: 12px 12px 13px;
       margin-left: 0;
-      &:hover,
-      &:focus {
+      &:hover {
         color: @gray-dark;
         background-color: @gray-lightest;
+      }
+      &:focus {
+          color: @gray;
+          background-color: transparent;
       }
     }
 
@@ -440,7 +443,7 @@
     border-color: @navbar-default-toggle-border-color;
     color: @navbar-default-link-color;
     &:hover,
-    &:focus {
+    &.active {
       background-color: @navbar-default-toggle-hover-bg;
       border-color: @navbar-default-toggle-hover-bg;
       color: #fff;
