@@ -11,61 +11,58 @@ block content
 						a(href=tag.tagPagePath)  #{tag.name}
 						|  ›
 						|  #{template.name}
-				.container.txt-lefty
-					.row-fluid()
-						.col-md-6
-							.entry
-								.row-fluid
-									.col-md-12
-										a(href=template.pdfUrl)
-											//img(src="#{template.previewUrl}")
-											img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview")
+				.row
+					.col-md-6
+						.entry
+							.row
+								.col-md-12
+									a(href=template.pdfUrl)
+										//img(src="#{template.previewUrl}")
+										img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb89a333621a613683ec95/v/1/pdf-converted-cache/style-preview")
 
-						.col-md-6
-							.card
-								h3 About
-								div !{template.description}
-								div(ng-controller="openInSlController")
-									a.btn.btn-primary.btn-large(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
-									| &nbsp;
+					.col-md-6
+						.template-details-section
+							h3 About
+							div !{template.description}
+							div(ng-controller="openInSlController")
+								a.btn.btn-primary.btn-large(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
+								| &nbsp;
 
-									a.btn.btn-default(
-										href=template.zipUrl, 
-										rel='nofollow', 
-										ng-click='downloadZip()', 
-										data-toggle="tooltip", 
-										data-placement="bottom", 
-										title="", 
-										data-original-title="Download .zip File"
-									)
+								a.btn.btn-default(
+									href=template.zipUrl, 
+									rel='nofollow', 
+									ng-click='downloadZip()', 
+									data-toggle="tooltip", 
+									data-placement="bottom", 
+									title="", 
+									data-original-title="Download .zip File"
+								)
 
-										i.fa.fa-cloud-download
+									i.fa.fa-cloud-download
+						.template-details-section.social_buttons
+							.addthis_toolbox.addthis_default_style.addthis_32x32_style
+								a.addthis_button_facebook
+								a.addthis_button_twitter
+								a.addthis_button_google_plusone_share
+								a.addthis_button_compact
+							script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
 
-								.social_buttons
-									.addthis_toolbox.addthis_default_style.addthis_32x32_style
-										a.addthis_button_facebook
-										a.addthis_button_twitter
-										a.addthis_button_google_plusone_share
-										a.addthis_button_compact
-									script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
-							div &nbsp;
-							.card
-								h3 Comment
-								#disqus_thread
-								script(type='text/javascript').
-									/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-									var disqus_shortname = 'sharelatextemplates'; // required: replace example with your forum shortname
-									/* * * DON'T EDIT BELOW THIS LINE * * */
-									(function() {
-									var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-									dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-									(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-									})();
-								noscript
-									| Please enable JavaScript to view the
-									a(href='http://disqus.com/?ref_noscript') comments powered by Disqus.
-								a.dsq-brlink(href='http://disqus.com')
-									| comments powered by
-									span.logo-disqus Disqus
+						h3 Comment
+						#disqus_thread
+						script(type='text/javascript').
+							/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+							var disqus_shortname = 'sharelatextemplates'; // required: replace example with your forum shortname
+							/* * * DON'T EDIT BELOW THIS LINE * * */
+							(function() {
+							var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+							dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+							(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+							})();
+						noscript
+							| Please enable JavaScript to view the
+							a(href='http://disqus.com/?ref_noscript') comments powered by Disqus.
+						a.dsq-brlink(href='http://disqus.com')
+							| comments powered by
+							span.logo-disqus Disqus
 
 
