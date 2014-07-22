@@ -3,12 +3,12 @@ extends ../layout
 block content
 	.content.content-alt
 		.container
-			.row.template-page-header
+			.row.template-page-header(ng-controller="SearchController")
 				
 				.col-md-2
 					h2
 						a(href="/templates") Templates
-				.col-md-8(ng-controller="SearchController")
+				.col-md-8
 					form.project-search.form-horizontal(role="form")
 						.form-group.has-feedback.has-feedback-left.col-md-12
 							input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search template library....")
@@ -18,15 +18,17 @@ block content
 								style="cursor: pointer;",
 								ng-show="searchQueryText.length > 0"
 							)
-					ul.unstyled
+				.col-md-12
+					ul.list-unstyled
 						li(ng-repeat='hit in hits')
 							.thumbnail.searchResult
 								.row
 									a(ng-href='{{hit.url}}')
 										.col-md-3
-											img(ng-src='{{hit.image_url}}')
-										.col-md-9
-											h2(ng-bind-html='hit.name')
+											img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+											//img(ng-src='{{hit.image_url}}')
+										.col-md-7
+											h1(ng-bind-html='hit.name')
 											p(ng-bind-html='hit.description')
 
 
