@@ -3,7 +3,6 @@
 	background-image: -webkit-linear-gradient(left,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
 	background-image: linear-gradient(to right,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
 	position: relative;
-	min-height: @line-height-computed * 29.5;
 	text-align: center;
 	overflow: hidden;
 	h1, p {
@@ -12,44 +11,49 @@
 	}
 	h1 {
 		font-size: 4.75rem;
-	  line-height: 6.25rem;
-	  margin-bottom: 0;
-		margin-top: @line-height-computed * 2;
+		line-height: 6.25rem;
+		margin-bottom: 0;
+		margin-top: @line-height-computed;
 		text-shadow: 0 1px 3px rgba(0,0,0,0.42);
 		span {
-			font-family: @font-family-base;
+			font-family: @font-family-sans-serif;
 			font-weight: 100;
-			letter-spacing: 10px;
+			letter-spacing: 5px;
 		}
 	}
 	p:first-of-type {
 		font-size: @line-height-computed;
 		font-weight: 200;
-		letter-spacing: 3px;
+		letter-spacing: 1px;
 		margin-top: 0;
 		text-rendering: auto;
+		margin-bottom: @line-height-computed;
 	}
-	.register {
-		margin-top: @line-height-computed * 4;
-		.input {
-			margin-bottom: @line-height-computed / 2;
-		}
-		div.error {
-			color: rgb(189, 7, 7);
-			padding: 1px;
-		}
-	}
-	.container-fluid {
+	.register-banner {
 		background-image: -webkit-linear-gradient(top,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
 		background-image: linear-gradient(to bottom,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
-		padding: 3rem 0;
-		margin-top: 4.5rem;
-		position: relative;
+		padding: @line-height-computed 0;
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		h2 {
+			color: white;
+			margin-top: 0;
+			font-family: @font-family-sans-serif;
+			font-weight: 500;
+			letter-spacing: 1px;
+		}
+		.form-group {
+			margin-left: @line-height-computed / 2;
+		}
 	}
-	img {
-		box-shadow: 0 0 50px rgba(0,0,0,.67);
-		margin-top: @line-height-computed;
-		margin-bottom: -@line-height-computed * 15;
+	.screenshot {
+		height: 450px;
+		overflow-y: hidden;
+		img {
+			box-shadow: 0 0 50px rgba(0,0,0,.67);
+			max-width: 100%;
+		}
 	}
 	.btn-hero {
 		background-color: transparent;
@@ -73,16 +77,16 @@
 }
 
 .universities {
-	overflow: hidden;
-	height: 160px;
-	border-left: none;
-	border-right: none;
+	// overflow: hidden;
+	// height: 160px;
+	// border-left: none;
+	// border-right: none;
 	padding-bottom: @line-height-computed;
 	text-align: center;
 	margin: 0 auto;
 	img {
 		max-width: 100%;
-		max-height: 80px;
+		max-height: 60px;
 	}
 }
 
@@ -92,15 +96,9 @@
 }
 
 .long-form-features {
-	.row {
-		margin-top: 4rem;
-		margin-bottom: 4rem;
-		.span7:first-child p {
-			margin-right: 12rem;
-		}
-		.span7:last-child p, .span7:last-child h3 {
-			margin-left: 12rem;
-		}
+	h2 {
+		margin-top: 0;
+		margin-bottom: @line-height-computed;
 	}
 	img {
 		border-radius: 3px;

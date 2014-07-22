@@ -34,7 +34,8 @@ define [
 				text: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "="
+				navigateHighlights: "=",
+				onCtrlEnter: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -76,6 +77,15 @@ define [
 						ace.require("ace/ext/searchbox").Search(editor, true)
 					readOnly: true
 				editor.commands.removeCommand "replace"
+				
+				scope.$watch "onCtrlEnter", (callback) ->
+					if callback?
+						editor.commands.addCommand 
+							name: "compile",
+							bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
+							exec: (editor) =>
+								callback()
+							readOnly: true
 
 				# Make '/' work for search in vim mode.
 				editor.showCommandLine = (arg) =>

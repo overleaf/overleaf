@@ -13,6 +13,10 @@ define [
 				@loadRootFolder()
 				@loadDeletedDocs()
 				@$scope.$emit "file-tree:initialized"
+				
+			@$scope.$watch "rootFolder", (rootFolder) =>
+				if rootFolder?
+					@recalculateDocList()
 
 			@_bindToSocketEvents()
 
@@ -116,17 +120,21 @@ define [
 						return @_findEntityByPathInFolder(entity, rest)
 			return null
 
-		forEachEntity: (callback = (entity, parent_folder) ->) ->
-			@_forEachEntityInFolder(@$scope.rootFolder, callback)
+		forEachEntity: (callback = (entity, parent_folder, path) ->) ->
+			@_forEachEntityInFolder(@$scope.rootFolder, null, callback)
 
 			for entity in @$scope.deletedDocs or []
 				callback(entity)
 
-		_forEachEntityInFolder: (folder, callback) ->
+		_forEachEntityInFolder: (folder, path, callback) ->
 			for entity in folder.children or []
-				callback(entity, folder)
+				if path?
+					childPath = path + "/" + entity.name
+				else
+					childPath = entity.name
+				callback(entity, folder, childPath)
 				if entity.children?
-					@_forEachEntityInFolder(entity, callback)
+					@_forEachEntityInFolder(entity, childPath, callback)
 
 		getEntityPath: (entity) ->
 			@_getEntityPathInFolder @$scope.rootFolder, entity
@@ -195,6 +203,28 @@ define [
 					type: "doc"
 					deleted: true
 				}
+				
+		recalculateDocList: () ->
+			@$scope.docs = []
+			@forEachEntity (entity, parentFolder, path) =>
+				if entity.type == "doc" and !entity.deleted
+					@$scope.docs.push {
+						doc:  entity
+						path: path
+					}
+			
+		getEntityPath: (entity) ->
+			@_getEntityPathInFolder @$scope.rootFolder, entity
+
+		_getEntityPathInFolder: (folder, entity) ->
+			for child in folder.children or []
+				if child == entity
+					return entity.name
+				else if child.type == "folder"
+					path = @_getEntityPathInFolder(child, entity)
+					if path?
+						return child.name + "/" + path
+			return null
 
 		getCurrentFolder: () ->
 			# Return the root folder if nothing is selected

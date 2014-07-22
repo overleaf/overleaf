@@ -40,6 +40,12 @@ define [
 			if oldCompiler? and compiler != oldCompiler
 				settings.saveProjectSettings({compiler: compiler})
 
+		$scope.$watch "project.rootDoc_id", (rootDoc_id, oldRootDoc_id) =>
+			return if @ignoreUpdates
+			if oldRootDoc_id? and rootDoc_id != oldRootDoc_id
+				settings.saveProjectSettings({rootDocId: rootDoc_id})
+
+
 		ide.socket.on "compilerUpdated", (compiler) =>
 			@ignoreUpdates = true
 			$scope.$apply () =>

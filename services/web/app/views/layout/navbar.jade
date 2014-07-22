@@ -1,11 +1,11 @@
 nav.navbar.navbar-default
 	.container-fluid
 		.navbar-header
-			button.navbar-toggle(data-toggle="collapse",data-target="#navbar-collapse")
+			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
 			a(href='/').navbar-brand
 
-		.navbar-collapse.collapse#navbar-collapse
+		.navbar-collapse.collapse(collapse="navCollapsed")
 			ul.nav.navbar-nav.navbar-right
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))

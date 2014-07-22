@@ -31,7 +31,7 @@ aside#left-menu.full-size(
 				br
 				| PDF
 				
-	span
+	span(ng-show="!anonymous")
 		h4 Actions
 		ul.list-unstyled.nav
 			li(ng-controller="CloneProjectController")
@@ -47,7 +47,7 @@ aside#left-menu.full-size(
 					| &nbsp;&nbsp;Publish as Template
 
 
-	span(ng-controller="DropboxController")
+	span(ng-controller="DropboxController", ng-show="!anonymous")
 		h4() Sync
 		ul.list-unstyled.nav()
 			li
@@ -55,10 +55,10 @@ aside#left-menu.full-size(
 					i.fa.fa-dropbox.fa-fw
 					| &nbsp;&nbsp; Dropbox
 
-	h4 Settings
-	form.settings(ng-controller="SettingsController")
+	h4(ng-show="!anonymous") Settings
+	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
 		.containter-fluid
-			.form-controls
+			.form-controls(ng-show="permissions.write")
 				label(for="compiler") Compiler
 				select(
 					name="compiler"
@@ -68,6 +68,14 @@ aside#left-menu.full-size(
 					option(value='latex') LaTeX
 					option(value='xelatex') XeLaTeX
 					option(value='lualatex') LuaLaTeX
+					
+			.form-controls(ng-show="permissions.write")
+				label(for="rootDoc_id") Main document
+				select(
+					name="rootDoc_id",
+					ng-model="project.rootDoc_id",
+					ng-options="doc.doc.id as doc.path for doc in docs"
+				)
 
 			.form-controls
 				label(for="spellCheckLanguage") Spell Check
@@ -99,7 +107,7 @@ aside#left-menu.full-size(
 					each theme in themes
 						option(value=theme) #{theme}
 
-			.form-controls
+			.form-controls(ng-show="!anonymous")
 				label(for="mode") Keybindings
 				select(
 					name="mode"
