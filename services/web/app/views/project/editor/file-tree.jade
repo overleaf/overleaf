@@ -72,6 +72,20 @@ aside#file-tree(ng-controller="FileTreeController")
 							i.fa.fa-fw.fa-file
 
 							span  {{ entity.name }}
+							
+		
+		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf')")
+			ul.list-unstyled.file-tree-list
+				li(
+					ng-class="{ 'selected': ui.view == 'pdf' }"
+				)
+					.entity
+						.entity-name(
+							ng-click="ui.view = 'pdf'"
+						)
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file-pdf-o
+							|  PDF
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(

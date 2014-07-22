@@ -50,6 +50,7 @@ define [
 			leftMenuShown: false
 			view: "editor"
 			chatOpen: false
+			pdfLayout: 'sideBySide'
 		}
 		$scope.user = window.user
 		$scope.settings = window.userSettings
