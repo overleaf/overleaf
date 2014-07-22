@@ -1,6 +1,7 @@
 div.full-size(
 	ng-show="ui.view == 'editor'"
 	layout="pdf"
+	layout-disabled="ui.pdfLayout != 'sideBySide'"
 	resize-on="layout:main:resize"
 	resize-proportionally="true"
 	initial-size-east="'50%'"
@@ -31,7 +32,8 @@ div.full-size(
 		)
 
 	.ui-layout-east
-		include ./pdf
+		div(ng-if="ui.pdfLayout == 'sideBySide'")
+			include ./pdf
 
 	.ui-layout-resizer-controls.synctex-controls(
 		ng-show="!!pdf.url && settings.pdfViewer == 'pdfjs'"
@@ -52,3 +54,10 @@ div.full-size(
 			ng-click="syncToCode()"
 		)
 			i.fa.fa-long-arrow-left
+			
+div.full-size(
+	ng-if="ui.pdfLayout == 'flat'"
+	ng-show="ui.view == 'pdf'"
+)
+	include ./pdf
+	

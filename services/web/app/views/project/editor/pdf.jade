@@ -1,4 +1,4 @@
-div.full-size(ng-controller="PdfController")
+div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
 		a.btn.btn-info(
 			href,
@@ -26,6 +26,27 @@ div.full-size(ng-controller="PdfController")
 					'label-danger': pdf.logEntries.errors.length > 0\
 				}"
 			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
+			
+		.toolbar-right
+			a(
+				href,
+				ng-click="switchToFlatLayout()"
+				ng-show="ui.pdfLayout == 'sideBySide'"
+				tooltip="Full screen"
+				tooltip-placement="bottom"
+				tooltip-append-to-body="true"
+			)
+				i.full-screen
+			a(
+				href,
+				ng-click="switchToSideBySideLayout()"
+				ng-show="ui.pdfLayout == 'flat'"
+				tooltip="Split screen"
+				tooltip-placement="bottom"
+				tooltip-append-to-body="true"
+			)
+				i.split-screen
+				i.split-screen
 
 	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
 		div(	

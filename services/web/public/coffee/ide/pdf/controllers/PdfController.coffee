@@ -147,7 +147,22 @@ define [
 				.then (data) ->
 					{doc, line} = data
 					ide.editorManager.openDoc(doc, gotoLine: line)
-
+					
+		$scope.switchToFlatLayout = () ->
+			$scope.ui.pdfLayout = 'flat'
+			$scope.ui.view = 'pdf'
+			$.localStorage "pdf.layout", "flat"
+			
+		$scope.switchToSideBySideLayout = () ->
+			$scope.ui.pdfLayout = 'sideBySide'
+			$scope.ui.view = 'editor'
+			$.localStorage "pdf.layout", "split"
+			
+		if pdfLayout = $.localStorage("pdf.layout")
+			$scope.switchToSideBySideLayout() if pdfLayout == "split"
+			$scope.switchToFlatLayout() if pdfLayout == "flat"
+		else
+			$scope.switchToSideBySideLayout()
 	]
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->

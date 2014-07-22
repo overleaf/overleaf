@@ -102,5 +102,12 @@ define [
 
 					resetOpenStates()
 					onInternalResize()
+					
+					scope.$watch attrs.layoutDisabled, (value) ->
+						if value
+							element.layout().hide("east")
+						else
+							element.layout().show("east")
+							
 		}
 	]
