@@ -25,6 +25,9 @@ define [
 	App.controller "SearchController", ($scope, algolia, _) ->
 		$scope.hits = []
 
+		$scope.clearSearchText = ->
+			$scope.searchQueryText = ""
+
 		$scope.safeApply = (fn)->
 			phase = $scope.$root.$$phase
 			if(phase == '$apply' || phase == '$digest')
