@@ -65,9 +65,9 @@
 				span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
 		li(ng-cloak)
-			a(href, ng-click="openNewTagModal()")
+			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus
-				|  New Folder
+				span.name New Folder
 
 .row-spaced(ng-if="projects.length == 0", ng-cloak)
 	.first-project
