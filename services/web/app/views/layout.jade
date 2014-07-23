@@ -34,6 +34,28 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script(src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
 		script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.min.js")
 		
+		script.
+			window.sharelatex = {
+				siteUrl: '#{settings.siteUrl}',
+				jsPath:  '#{jsPath}'
+			};
+
+		- if (typeof(settings.algolia) != "undefined")
+			script.
+				window.sharelatex.algolia = {
+					app_id:'#{settings.algolia.app_id}',
+					api_key:'#{settings.algolia.read_only_api_key}',
+					indexes:!{JSON.stringify(settings.algolia.indexes)}
+				}
+
+		- if (typeof(settings.apis) != "undefined" && typeof(settings.apis.templates_api) != "undefined")
+			script.
+				window.sharelatex.templates = {
+					user_id : '!{settings.apis.templates_api.user_id}',
+					cdnDomain : '!{settings.apis.templates_api.cdnDomain}',
+					indexName : '!{settings.apis.templates_api.indexName}'
+				}
+				
 	body
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
@@ -73,25 +95,5 @@ html(itemscope, itemtype='http://schema.org/Product')
 					category: "questions"
 				};
 
-		script.
-			window.sharelatex = {
-				siteUrl: '#{settings.siteUrl}',
-				jsPath:  '#{jsPath}'
-			};
-
-		- if (typeof(settings.algolia) != "undefined")
-			script.
-				window.sharelatex.algolia = {
-					app_id:'#{settings.algolia.app_id}',
-					api_key:'#{settings.algolia.read_only_api_key}',
-					indexes:!{JSON.stringify(settings.algolia.indexes)}
-				}
-
-		- if (typeof(settings.apis) != "undefined" && typeof(settings.apis.templates_api) != "undefined")
-			script.
-				window.sharelatex.templates = {
-					user_id : '!{settings.apis.templates_api.user_id}',
-					cdnDomain : '!{settings.apis.templates_api.cdnDomain}',
-					indexName : '!{settings.apis.templates_api.indexName}'
-				}
+	
 
