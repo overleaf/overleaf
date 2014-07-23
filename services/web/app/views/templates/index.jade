@@ -1,13 +1,14 @@
 extends ../layout
 
 block content
-
-	.page-header.template-page-header
+	.content.content-alt
 		.container
-			.row
+			.row.template-page-header(ng-controller="SearchController")
+				
 				.col-md-2
-					h1 Templates
-				.col-md-8(ng-controller="SearchController")
+					h2
+						a(href="/templates") Templates
+				.col-md-8
 					form.project-search.form-horizontal(role="form")
 						.form-group.has-feedback.has-feedback-left.col-md-12
 							input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search template library....")
@@ -17,41 +18,41 @@ block content
 								style="cursor: pointer;",
 								ng-show="searchQueryText.length > 0"
 							)
-					ul.unstyled
+				.col-md-12
+					ul.list-unstyled
 						li(ng-repeat='hit in hits')
 							.thumbnail.searchResult
-								.row-fluid
+								.row
 									a(ng-href='{{hit.url}}')
 										.col-md-3
-											img(ng-src='{{hit.image_url}}')
-										.col-md-9
-											h2(ng-bind-html='hit.name')
+											img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+											//img(ng-src='{{hit.image_url}}')
+										.col-md-7
+											h1(ng-bind-html='hit.name')
 											p(ng-bind-html='hit.description')
 
 
 
 
+			.row
+				-each tag in tags
+					-if(tag.totalNumberOfTemplates > 0)
+						.page-header.col-md-12
+							h2 
+								a(href=tag.tagPagePath) #{tag.name}
+						.row
+							-each template in tag.exampleTemplates
+								.col-md-3.template-thumbnail
+									a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
+										//- img(src=template.thumbnailUrl)
+										img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+										div.caption
+											h3.txt-middle #{template.name}
 
-	.container
-		-each tag in tags
-			-if(tag.totalNumberOfTemplates > 0)
-				.page-header.col-md-12
-					h2 
-						a(href=tag.tagPagePath) #{tag.name}
-				.col-md-12
-					.row-fluid
-						-each template in tag.exampleTemplates
-							.col-md-3.template-thumbnail
-								a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
-									//- img(src=template.thumbnailUrl)
-									img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c1f33621a613683ecad/v/0/pdf-converted-cache/style-thumbnail")
-									div.caption
-										h3.txt-middle #{template.name}
-
-					-if(tag.totalNumberOfTemplates > 4)
-						.row-fluid
-							.col-md-6.offset3.more-templates
-								a(href=tag.tagPagePath) View all #{tag.totalNumberOfTemplates} #{tag.name} templates
+							-if(tag.totalNumberOfTemplates > 4)
+								.row-fluid
+									.col-md-6.offset3.more-templates
+										a(href=tag.tagPagePath) View all #{tag.totalNumberOfTemplates} #{tag.name} templates »
 
 
 

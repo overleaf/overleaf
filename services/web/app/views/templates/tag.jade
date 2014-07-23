@@ -5,12 +5,16 @@ block content
 		.container
 			.row
 				.page-header
-					h2 
-						a(href=tag.tagPagePath) #{tag.name}
-
+					h2
+						a(href="/templates") Templates
+						|  ›
+						a(href=tag.tagPagePath)  #{tag.name}
+				.row
 					-each template in templates
 						a(href=template.templatePagePath || template.canonicalUrl) 
-							.span3
-								.template-thumbnail.thumbnail
-									img(src=template.thumbnailUrl)
-									h3.txt-middle #{template.name}
+							.col-md-3.template-thumbnail
+								a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
+									//- img(src=template.thumbnailUrl)
+									img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+									div.caption
+										h3 #{template.name}

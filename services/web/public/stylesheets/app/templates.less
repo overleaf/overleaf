@@ -1,11 +1,7 @@
 .template-page-header {
-	background: @gray-lightest;
-	border-top: 1px solid @gray-lightest;
-	margin: 0;
 	padding-top: unit(@line-height-base,rem);
-	h1 {
-		color: @gray-dark;
-		margin-top: 0;
+	h1, h2 {
+		margin-top: 6px;
 		margin-right: @line-height-base * 5;
 		line-height: 1;
 	}
@@ -22,12 +18,33 @@
 		padding:0px;
 		h3 {
 			color:@link-color;
+			margin: 10px 0px 10px 20px;
 		}
 	}
 
 	.caption {
-		background: @gray-lightest;
+		background: lighten(@gray-lightest, 3%);
 		border-top: 1px solid #ddd;
 	}
 
+}
+
+.social_buttons {
+	padding-top: 20px;
+}
+
+.sample-template {
+	-webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+	box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.template-details-section {
+	padding-bottom: 20px;
+}
+
+.searchResult {
+	img {
+		max-width: 100%;    
+		height: auto;
+	}
 }

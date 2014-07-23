@@ -7,7 +7,7 @@ module.exports = TemplatesWebController =
 	renderTemplatesIndexPage: (req, res)->
 		logger.log "rendering index page of templates"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{req.params.user_id}", (err, data)->
-			if err?
+			if err? or !data?
 				logger.err err:err, "something went wrong in renderTemplatesIndexPage"
 				return res.send 500
 			data.title = "LaTeX Templates"
@@ -17,10 +17,10 @@ module.exports = TemplatesWebController =
 		{user_id, tag_name, template_name} = req.params
 		logger.log user_id:user_id, tag_name:tag_name, template_name:template_name, "rendering latex template page"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{user_id}/tag/#{tag_name}/template/#{template_name}", (err, data)->
-			if err?
+			if err? or !data?
 				logger.err err:err, user_id:user_id, tag_name:tag_name, template_name:template_name, "something went wrong in renerTemplateInTag"
 				return res.send 500
-			data.title = data.template.name
+			data.title = data?.template?.name
 			res.render "templates/template", data
 
 	tagOrCanonicalPage: (req, res)->

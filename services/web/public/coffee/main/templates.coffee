@@ -17,6 +17,8 @@ define [
 
 
 	App.factory "algolia", ->
+		console.log window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key
+
 		if window?.sharelatex?.algolia?.app_id?
 			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
 			index = client.initIndex(window.sharelatex.algolia?.indexes?.templates)
@@ -27,6 +29,7 @@ define [
 
 		$scope.clearSearchText = ->
 			$scope.searchQueryText = ""
+			updateHits []
 
 		$scope.safeApply = (fn)->
 			phase = $scope.$root.$$phase
