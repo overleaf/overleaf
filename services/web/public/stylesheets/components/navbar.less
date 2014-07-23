@@ -371,11 +371,18 @@
 
   .navbar-brand {
     background-image: url('/img/logo.png');
+    background-size: 135px 16px;
     background-repeat: no-repeat;
     height: 16px;
     margin-top: 10px;
     padding: 0;
-    width: 128px;
+    width: 135px;
+  }
+  
+  @media(-webkit-min-device-pixel-ratio: 2) {
+      .navbar-brand {
+        background-image: url('/img/logo@2x.png');
+      }
   }
 
   .navbar-text {
