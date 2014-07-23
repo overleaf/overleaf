@@ -1,4 +1,3 @@
-
 should = require('chai').should()
 SandboxedModule = require('sandboxed-module')
 assert = require('assert')
@@ -17,9 +16,11 @@ describe "BlogController", ->
 					url:"http://blog.sharelatex.env"
 		@request = 
 			get: sinon.stub()
+		@ErrorController = {}
 		@BlogController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
+			"../Errors/ErrorController": @ErrorController
 			"request": @request
 
 		@req = {}
@@ -37,6 +38,17 @@ describe "BlogController", ->
 				@request.get.calledWith("#{@settings.apis.blog.url}#{@req.url}")
 				view.should.equal "blog/blog_holder"
 				assert.deepEqual body, data
+				done()
+
+			@BlogController.getPage @req, @res
+
+		it "should send to the error controller if the blog responds 404", (done)->
+			@req.url = "/blog/something.html"
+			@request.get.callsArgWith(1, null, {statusCode:404})
+			
+			@ErrorController.notFound = (req, res)=>
+				assert.deepEqual req, @req
+				assert.deepEqual res, @res
 				done()
 
 			@BlogController.getPage @req, @res

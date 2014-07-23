@@ -8,8 +8,9 @@ block content
 					h2
 						a(href="/templates") Templates
 						|  ›
-						a(href=tag.tagPagePath)  #{tag.name}
-						|  ›
+						- if(tag)
+							a(href=tag.tagPagePath)  #{tag.name}
+							|  ›
 						|  #{template.name}
 				.row
 					.col-md-6
@@ -24,7 +25,7 @@ block content
 						.template-details-section
 							h3 About
 							div !{template.description}
-							div(ng-controller="openInSlController")
+							div(ng-controller="openInSlController").download-buttons
 								a.btn.btn-primary.btn-large(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
 								| &nbsp;
 
