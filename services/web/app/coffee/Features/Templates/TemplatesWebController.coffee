@@ -70,7 +70,7 @@ module.exports = TemplatesWebController =
 			if err?
 				logger.err err:err, user_id:user_id, tag_name:tag_name, "something went wrong in _renderCanonicalPage"
 				return res.send 500
-			data.title = data.tag.name
+			data.title = data?.tag?.name
 			res.render "templates/tag", data
 
 	_getDataFromTemplatesApi: (path, callback)->
