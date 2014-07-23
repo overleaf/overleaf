@@ -2,12 +2,13 @@ request = require("request")
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 _ = require("underscore")
+ErrorController = require "../Errors/ErrorController"
 
 extensionsToProxy = [".png", ".xml", ".jpeg", ".json", ".zip", ".eps"]
 
 module.exports = BlogController = 
 
-	getPage: (req, res)->
+	getPage: (req, res, next)->
 		url = req.url?.toLowerCase()
 		blogUrl = "#{settings.apis.blog.url}#{url}"
 
@@ -19,6 +20,8 @@ module.exports = BlogController =
 
 		logger.log url:url, "proxying request to blog api"
 		request.get blogUrl, (err, r, data)->
+			if r?.statusCode == 404
+				return ErrorController.notFound(req, res, next)
 			data = data.trim()
 			try
 				data = JSON.parse(data)
