@@ -1,5 +1,10 @@
 script(type='text/ng-template', id='newTagModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 Create New Folder
 	.modal-body
 		form(name="newTagForm", novalidate)
@@ -27,6 +32,11 @@ script(type='text/ng-template', id='newTagModalTemplate')
 
 script(type='text/ng-template', id='renameProjectModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 Rename Project
 	.modal-body
 		form(name="renameProjectForm", novalidate)
@@ -47,6 +57,11 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 
 script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 Copy Project
 	.modal-body
 		form(name="cloneProjectForm", novalidate)
@@ -74,6 +89,11 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 
 script(type='text/ng-template', id='newProjectModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 New Project
 	.modal-body
 		form(novalidate, name="newProjectForm")
@@ -99,6 +119,11 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 
 script(type='text/ng-template', id='deleteProjectsModalTemplate')
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 {{action}} Projects
 	.modal-body
 		div(ng-show="projectsToDelete.length > 0")
@@ -121,6 +146,11 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 
 script(type="text/ng-template", id="uploadProjectModalTemplate")
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
 		h3 Upload Zipped Project
 	.modal-body(
 		fine-upload
@@ -139,6 +169,11 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 
 script(type="text/ng-template", id="userProfileModalTemplate")
 	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="done()"
+		) &times;
 		h3 Your Profile
 	.modal-body
 		form(enctype='multipart/form-data', method='post')
