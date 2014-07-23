@@ -1,8 +1,8 @@
 .row
-	.col-md-12
+	.col-xs-12
 		form.project-search.form-horizontal(role="form")
-			.form-group.has-feedback.has-feedback-left.col-md-7
-				input.form-control.col-md-7(
+			.form-group.has-feedback.has-feedback-left.col-xs-7
+				input.form-control.col-xs-7(
 					placeholder='Search projects…',
 					autofocus='autofocus',
 					ng-model="searchText",
@@ -108,7 +108,7 @@
 					) Delete Forever
 
 .row.row-spaced
-	.col-md-12
+	.col-xs-12
 		.card.card-thin
 			ul.list-unstyled.project-list.structured-list(
 				select-all-list,
@@ -118,17 +118,17 @@
 			)
 				li.container-fluid
 					.row
-						.col-md-6(ng-click="changePredicate('name')")
+						.col-xs-6(ng-click="changePredicate('name')")
 							input.select-all(
 								select-all,
 								type="checkbox"
 							)
 							span.header.clickable Title
 								i.tablesort.fa(ng-class="getSortIconClass('name')")
-						.col-md-2(ng-click="changePredicate('accessLevel')")
+						.col-xs-2(ng-click="changePredicate('accessLevel')")
 							span.header.clickable Owner
 								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
-						.col-md-4(ng-click="changePredicate('lastUpdated')")
+						.col-xs-4(ng-click="changePredicate('lastUpdated')")
 							span.header.clickable Last Modified
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
 				li.project_entry.container-fluid(
@@ -136,7 +136,7 @@
 					ng-controller="ProjectListItemController"
 				)
 					.row
-						.col-md-6
+						.col-xs-6
 							input.select-item(
 								select-individual,
 								type="checkbox",
@@ -152,16 +152,16 @@
 										ng-repeat='tag in project.tags',
 										ng-click="selectTag(tag)"
 									) {{tag.name}}
-						.col-md-2
+						.col-xs-2
 							span.owner {{ownerName()}}
-						.col-md-4
+						.col-xs-4
 							span.last-modified {{project.lastUpdated | formatDate}}
 				li(
 					ng-if="visibleProjects.length == 0",
 					ng-cloak
 				)
 					.row
-						.col-md-12.text-centered
+						.col-xs-12.text-centered
 							small No projects
 			div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
 				h2 Welcome to ShareLaTeX!
