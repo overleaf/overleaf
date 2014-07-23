@@ -39,11 +39,26 @@ aside#file-tree(ng-controller="FileTreeController")
 			)
 				i.fa.fa-trash-o
 
+
 	.file-tree-inner(
 		ng-if="rootFolder",
 		ng-controller="FileTreeRootFolderController",
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
+
+		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf')")
+			ul.list-unstyled.file-tree-list
+				li(
+					ng-class="{ 'selected': ui.view == 'pdf' }"
+				)
+					.entity
+						.entity-name(
+							ng-click="ui.view = 'pdf'"
+						)
+							i.fa.fa-fw.toggle
+							i.fa.fa-fw.fa-file-pdf-o
+							|  PDF
+	
 		ul.list-unstyled.file-tree-list(
 			droppable="permissions.write"
 			accept=".entity-name"
@@ -74,18 +89,7 @@ aside#file-tree(ng-controller="FileTreeController")
 							span  {{ entity.name }}
 							
 		
-		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf')")
-			ul.list-unstyled.file-tree-list
-				li(
-					ng-class="{ 'selected': ui.view == 'pdf' }"
-				)
-					.entity
-						.entity-name(
-							ng-click="ui.view = 'pdf'"
-						)
-							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file-pdf-o
-							|  PDF
+
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
