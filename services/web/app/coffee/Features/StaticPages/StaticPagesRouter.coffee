@@ -12,6 +12,4 @@ module.exports =
 		app.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
 		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 
-		app.get '/themes', InfoController.themes
-		app.get '/advisor', InfoController.advisor
 		app.get '/dropbox', InfoController.dropbox
