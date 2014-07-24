@@ -122,12 +122,3 @@ module.exports = AdminController =
 	pollUsersWithDropbox: (req, res)->
 		TpdsPollingBackgroundTasks.pollUsersWithDropbox ->
 			res.send 200
-
-	updateProjectCompiler: (req, res, next = (error) ->)->
-		Project.findOne _id: req.body.project_id, (error, project) ->
-			return next(error) if error?
-			project.useClsi2 = (req.body.new == "new")
-			logger.log project_id: req.body.project_id, useClsi2: project.useClsi2, "updating project compiler"
-			project.save (error) ->
-				return next(error) if error?
-				res.send(200)

@@ -24,6 +24,7 @@
       &:focus {
         text-decoration: none;
         background-color: @nav-link-hover-bg;
+        color: white;
       }
     }
 
@@ -87,6 +88,7 @@
       border: 1px solid transparent;
       border-radius: @border-radius-base @border-radius-base 0 0;
       &:hover {
+        cursor: pointer;
         border-color: @nav-tabs-link-hover-border-color @nav-tabs-link-hover-border-color @nav-tabs-border-color;
       }
     }
@@ -121,6 +123,8 @@
     // Links rendered as pills
     > a {
       border-radius: @nav-pills-border-radius;
+      border: 2px solid @link-color;
+      padding: 8px 13px;
     }
     + li {
       margin-left: 2px;

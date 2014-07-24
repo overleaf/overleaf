@@ -24,7 +24,6 @@
 	p:first-of-type {
 		font-size: @line-height-computed;
 		font-weight: 200;
-		letter-spacing: 1px;
 		margin-top: 0;
 		text-rendering: auto;
 		margin-bottom: @line-height-computed;
@@ -48,7 +47,10 @@
 		}
 	}
 	.screenshot {
-		height: 450px;
+		height: 550px;
+		// Make sure the 
+		padding: 50px;
+		margin: -50px;
 		overflow-y: hidden;
 		img {
 			box-shadow: 0 0 50px rgba(0,0,0,.67);

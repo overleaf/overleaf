@@ -49,8 +49,11 @@
 //
 //## Font, line-height, and color for body text, headings, and more.
 
-@font-family-sans-serif:  "Helvetica Neue", Helvetica, Arial, sans-serif;
-@font-family-serif:       "PT Serif", Georgia, Times, serif;
+@import url(//fonts.googleapis.com/css?family=PT+Serif:400);
+@import url(//fonts.googleapis.com/css?family=Open+Sans:400,300);
+
+@font-family-sans-serif:  "Open Sans", sans-serif;
+@font-family-serif:       "PT Serif", serif;
 //** Default monospace fonts for `<code>`, `<kbd>`, and `<pre>`.
 @font-family-monospace:   Menlo, Monaco, Consolas, "Courier New", monospace;
 @font-family-base:        @font-family-sans-serif;
@@ -371,7 +374,7 @@
 
 //=== Shared nav styles
 @nav-link-padding:                          10px 15px;
-@nav-link-hover-bg:                         @gray-lighter;
+@nav-link-hover-bg:                         @link-color;
 
 @nav-disabled-link-color:                   @gray-light;
 @nav-disabled-link-hover-color:             @gray-light;
@@ -381,7 +384,7 @@
 //== Tabs
 @nav-tabs-border-color:                     #ddd;
 
-@nav-tabs-link-hover-border-color:          @gray-lighter;
+@nav-tabs-link-hover-border-color:          @link-color;
 
 @nav-tabs-active-link-hover-bg:             @body-bg;
 @nav-tabs-active-link-hover-color:          @gray;

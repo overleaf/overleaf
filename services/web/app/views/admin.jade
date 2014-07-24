@@ -1,133 +1,64 @@
 extends layout
 
 block content
-	.container
-		.row.box
-			.page-header
-				h1 Admin Panel
+	.content.content-alt
+		.container
 			.row
-
-			.tabbable
-				ul.nav.nav-tabs
-					li.active
-						a(href='#userListSection', data-toggle="tab") Users
-					li
-						a(href='#closeEditorSection', data-toggle="tab") Close Editor
-					li
-						a(href='#quotesManagementSection', data-toggle="tab") Quotes Management
-					li
-						a(href='#subscriptionManagement', data-toggle="tab") Subscription Management
-					li
-						a(href='#tpdsManagementSection', data-toggle="tab") Tpds Management
-					li
-						a(href='#compilerManagementSection', data-toggle="tab") Compiler Management
-
-				.tab-content.form-horizontal
-					.tab-pane#userListSection.form.form-horizontal.active
-						.clearfix          
-							ul#stats
-								li current connected users : #{currentConnectedUsers}
-								li number of docs in memory : #{numberOfAceDocs}
-								li total registred users : #{totalUsers}
-								li total projects : #{totalProjects}
-								li yesterday: 
+				.col-xs-12
+					.card
+						.page-header
+							h1 Admin Panel
+						tabset(ng-cloak)
+							tab(heading="Open Sockets")
+								.row-spaced
 									ul
-										li docsets : #{redisstats.yesterday.docsets}
-								li today: 
-									ul
-										li docsets : #{redisstats.today.docsets}
-
-						.clearfix
-							span Open sockets
-							ul
-								-each agents, url in openSockets
-									li #{url} - total : #{agents.length}
-										ul
-											-each agent in agents
-												li #{agent}
-
-						table.table-striped.table.table-striped#connected-users
-								thead
-									tr
-										th email
-										th first name
-										th last name
-										th login count
-										th signup date
-										th user id
-										th project id
-										th connected mins
-								tbody 
-									-each user in users
-										tr
-											td #{user.email}
-											td #{user.first_name}
-											td #{user.last_name}
-											td #{user.login_count}
-											td #{user.signup_date}
-											td #{user.user_id}
-											td #{user.project_id}
-											td #{user.connected_mins}
-
-					.tab-pane#closeEditorSection.form.form-horizontal.active
-						form
-							.clearfix
-								button.btn#closeEditor(data-csrf=csrfToken) Close Editor
-							.clearfix
-								button.btn#disconnectAll(data-csrf=csrfToken) Force Discount Now Users
-
-					.tab-pane#quotesManagementSection.form.form-horizontal.active
-						form.validate(enctype='multipart/form-data', method='post',action='/admin/addquote')
-							input(name="_csrf", type="hidden", value=csrfToken)
-							.clearfix
-								label(for='xlInput') author 
-								.input
-									input.span4#email.email.required(type='text',  name='author', placeholder='author')
-							.clearfix
-								label(for='xlInput') quote 
-								.input
-									input.span4#password.required(type='text', name='quote', placeholder='quote')
-							.actions
-								button.btn-primary.btn.btn-large#login(type='submit') add
-
-					.tab-pane#subscriptionManagement
-						form.validate(enctype='multipart/form-data', method='post',action='/admin/syncUserToSubscription')
-							input(name="_csrf", type="hidden", value=csrfToken)
-							.clearfix
-								label(for='xlInput') subscription_id 
-								.input
-									input.span4#email.required(type='text',  name='subscription_id', placeholder='subscription_id')
-							.clearfix
-								label(for='xlInput') user_id 
-								.input
-									input.span4#password.required(type='text', name='user_id', placeholder='user_id')
-							.actions
-								button.btn-primary.btn.btn-large#login(type='submit') Link
-
-					.tab-pane#tpdsManagementSection
-						h3 flush project to tpds
-						form(enctype='multipart/form-data', method='post',action='/admin/flushProjectToTpds')
-							input(name="_csrf", type="hidden", value=csrfToken)
-							.clearfix
-								label(for='xlInput') project_id 
-								.input
-									input.span4#email.required(type='text',  name='project_id', placeholder='project_id')
-							.actions
-								button.btn-primary.btn.btn-large#login(type='submit') Flush
-						button#pollTpds.btn(src='/admin/pollUsersWithDropbox', data-csrf=csrfToken) Poll users with dropbox
+										-each agents, url in openSockets
+											li #{url} - total : #{agents.length}
+												ul
+													-each agent in agents
+														li #{agent}
+														
+							tab(heading="Close Editor")
+								.row-spaced
+									form(enctype='multipart/form-data', method='post',action='/admin/closeEditor')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										button.btn.btn-danger(type="submit") Close Editor
+									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
+									
+								.row-spaced
+									form(enctype='multipart/form-data', method='post',action='/admin/dissconectAllUsers')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										button.btn.btn-danger(type="submit") Disconnect all users
+									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
+									
+							tab(heading="Subscriptions")
+								h3 Link Recurly subscription to user
+								.row
+									form.form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/syncUserToSubscription')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										.form-group
+											label(for='subscription_id') subscription_id (in Recurly)
+											input.form-control(type='text', name='subscription_id', placeholder='subscription_id', required)
+										.form-group
+											label(for='user_id') user_id 
+											input.form-control(type='text', name='user_id', placeholder='user_id', required)
+										.form-group
+											button.btn-primary.btn(type='submit') Link
+											
+							tab(heading="TPDS Management")
+								h3 Flush project to TPDS
+								.row
+									form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/flushProjectToTpds')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										.form-group
+											label(for='project_id') project_id 
+											input.form-control(type='text',  name='project_id', placeholder='project_id', required)
+										.form-group
+											button.btn-primary.btn(type='submit') Flush
+								hr
+								.row-spaced
+									form(enctype='multipart/form-data', method='post',action='/admin/pollUsersWithDropbox')
+										input(name="_csrf", type="hidden", value=csrfToken)
+										button.btn.btn-primary(type="submit") Poll users with dropbox	
 
 
-					.tab-pane#compilerManagementSection
-						h3 Update project compiler
-						form(enctype='multipart/form-data', method='post',action='/admin/updateProjectCompiler')
-							input(name="_csrf", type="hidden", value=csrfToken)
-							.clearfix
-								label(for='xlInput') project_id 
-								.input
-									input.span4.required(type='text',  name='project_id', placeholder='project_id')
-							.actions
-								input(type='submit', name="new", value="new").btn Use new
-								input(type='submit', name="old", value="old").btn Use old
-
-	- locals.supressDefaultJs = true
-	script(data-main='js/admin.js', src='js/libs/require.js')
