@@ -47,9 +47,18 @@ define [], () ->
 
 			@ide.socket.on 'forceDisconnect', (message) =>
 				@$scope.$apply () =>
+					@$scope.permissions.write = false
 					@$scope.connection.forced_disconnect = true
-				@socket.disconnect()
-
+				@ide.socket.socket.disconnect()
+				@ide.showGenericMessageModal("Please Refresh", """
+					We're performing maintenance on ShareLaTeX and you need to refresh the editor.
+					Sorry for any inconvenience.
+					The editor will refresh in automatically in 10 seconds.
+				""")
+				setTimeout () ->
+					location.reload()
+				, 10 * 1000
+				
 		joinProject: () ->
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
