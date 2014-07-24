@@ -95,10 +95,6 @@
 }
 
 .universities {
-	// overflow: hidden;
-	// height: 160px;
-	// border-left: none;
-	// border-right: none;
 	padding-bottom: @line-height-computed;
 	text-align: center;
 	margin: 0 auto;
@@ -111,4 +107,53 @@
 .pattern-container {
 	background: url('/img/pattern-home.png') repeat #f1f1f1;
 	border-top: 1px solid @gray-lightest;
+}
+
+.real-time-example {
+	.cursor {
+		background-color: hsl(200, 70%, 70%);
+		display: inline-block;
+		width: 2px;
+		color: transparent;
+		line-height: 1.4;
+		position: relative;
+		&:after {
+			content: "Joe";
+			top: 22px;
+			right: 0;
+			position: absolute;
+			display: block;
+			background-color: hsl(200, 70%, 70%);
+			padding: (@line-height-computed / 4) (@line-height-computed / 2);
+			font-size: 0.8rem;
+			z-index: 100;
+			font-family: @font-family-sans-serif;
+			color: white;
+			font-weight: 700;
+		}
+	}
+}
+
+.track-changes-example {
+	.removed, .added {
+		color: #333;
+		margin: 0 -3px;
+		padding: 0 3px;
+	}
+	.added {
+		background-color: hsl(200, 70%, 70%);
+	}
+	
+	.removed {
+		background-color: hsl(200, 70%, 95%);
+		position: relative;
+		&:after {
+			content: " ";
+			position: absolute;
+			top: 12px;
+			left: 0;
+			right: 0;
+			border-top: 1px solid hsl(200, 70%, 40%);
+		}
+	}
 }
