@@ -55,6 +55,17 @@ define [
 					selectName(element)
 		}
 
+
+	App.directive "focus", ($timeout) ->
+		scope:
+			trigger: "@focus"
+
+		link: (scope, element) ->
+			scope.$watch "trigger", (value) ->
+				if value is "true"
+					$timeout ->
+						element[0].focus()
+
 	selectName = (element) ->
 		# Select up to last '.'. I.e. everything
 		# except the file extension
