@@ -52,9 +52,25 @@
 		padding: 50px;
 		margin: -50px;
 		overflow-y: hidden;
-		img {
+		.img {
 			box-shadow: 0 0 50px rgba(0,0,0,.67);
-			max-width: 100%;
+			max-width: 960px;
+			background-image: url('/img/screen.png');
+			background-size: 100%;
+			background-repeat: no-repeat;
+			margin: auto;
+			height: 672px;
+		}
+		@media
+		only screen and (-webkit-min-device-pixel-ratio: 2),
+		only screen and (   min--moz-device-pixel-ratio: 2),
+		only screen and (     -o-min-device-pixel-ratio: 2/1),
+		only screen and (        min-device-pixel-ratio: 2),
+		only screen and (                min-resolution: 192dpi),
+		only screen and (                min-resolution: 2dppx) { 
+			.img {
+				background-image: url('/img/screen@2x.png');
+			}
 		}
 	}
 	.btn-hero {
