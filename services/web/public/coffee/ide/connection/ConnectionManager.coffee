@@ -49,7 +49,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.permissions.write = false
 					@$scope.connection.forced_disconnect = true
-				@ide.socket.socket.disconnect()
+				@ide.socket.disconnect()
 				@ide.showGenericMessageModal("Please Refresh", """
 					We're performing maintenance on ShareLaTeX and you need to refresh the editor.
 					Sorry for any inconvenience.

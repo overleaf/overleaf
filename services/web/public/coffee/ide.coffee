@@ -77,6 +77,17 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
+		
+		inited = false
+		$scope.$on "project:joined", () ->
+			return if inited
+			inited = true
+			if $scope.project.deletedByExternalDataSource
+				ide.showGenericMessageModal("Project Renamed or Deleted", """
+					This project has either been renamed or deleted by an external data source such as Dropbox.
+					We don't want to delete your data on ShareLaTeX, so this project still contains your history and collaborators.
+					If the project has been renamed please look in your project list for a new project under the new name.
+				""")
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
