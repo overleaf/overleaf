@@ -59,11 +59,28 @@ define [
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
 
-		$scope.windowHeight = $window.innerHeight
+		recalculateProjectListHeight = () ->
+			topOffset = $(".project-list-card").offset().top
+			bottomOffset = $("footer").outerHeight() + 25
+			sideBarHeight = $("aside").height() - 56
+			# When footer is visible and page doesn't need to scroll we just make it
+			# span between header and footer
+			height = $window.innerHeight - topOffset - bottomOffset
+			
+			# When page is small enough that this pushes the project list smaller than
+			# the side bar, then the window going to have to scroll to take into account the
+			# footer. So we now start to track to the bottom of the window, with a 25px padding
+			# since the footer is hidden below the fold. Don't ever get bigger than the sidebar
+			# though since that's what triggered this happening in the first place.
+			if height < sideBarHeight
+				height = Math.min(sideBarHeight, $window.innerHeight - topOffset - 25)
+			$scope.projectListHeight = height
+			
+		recalculateProjectListHeight()
 		angular.element($window).bind "resize", () ->
-			$scope.windowHeight = $window.innerHeight
+			recalculateProjectListHeight()
 			$scope.$apply()
-
+			
 		# Allow tags to be accessed on projects as well
 		projectsById = {}
 		for project in $scope.projects
