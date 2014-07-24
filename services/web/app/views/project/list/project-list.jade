@@ -109,11 +109,11 @@
 
 .row.row-spaced
 	.col-xs-12
-		.card.card-thin
+		.card.card-thin.project-list-card
 			ul.list-unstyled.project-list.structured-list(
 				select-all-list,
 				ng-if="projects.length > 0",
-				max-height="windowHeight - 290",
+				max-height="projectListHeight - 25",
 				ng-cloak
 			)
 				li.container-fluid
