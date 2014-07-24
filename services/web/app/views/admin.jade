@@ -59,6 +59,21 @@ block content
 								.row-spaced
 									form(enctype='multipart/form-data', method='post',action='/admin/pollUsersWithDropbox')
 										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-primary(type="submit") Poll users with dropbox	
+										button.btn.btn-primary(type="submit") Poll users with dropbox
+										
+							tab(heading="System Messages")
+								each message in systemMessages 
+									.alert.alert-info.row-spaced !{message.content}
+								hr
+								form(enctype='multipart/form-data', method='post', action='/admin/messages')
+									input(name="_csrf", type="hidden", value=csrfToken)
+									.form-group
+										label(for="content")
+										input.form-control(name="content", type="text", placeholder="Message...", required)
+									button.btn.btn-primary(type="submit") Post Message
+								hr
+								form(enctype='multipart/form-data', method='post', action='/admin/messages/clear')
+									input(name="_csrf", type="hidden", value=csrfToken)
+									button.btn.btn-danger(type="submit") Clear all messages
 
 

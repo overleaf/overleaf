@@ -4,6 +4,7 @@ crypto = require 'crypto'
 Settings = require('settings-sharelatex')
 SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatters')
 querystring = require('querystring')
+SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 
 fingerprints = {}
 Path = require 'path'
@@ -125,4 +126,9 @@ module.exports = (app)->
 	app.use (req, res, next) ->
 		res.locals.nav = Settings.nav
 		next()
+		
+	app.use (req, res, next) ->
+		SystemMessageManager.getMessages (error, messages = []) ->
+			res.locals.systemMessages = messages
+			next()
 
