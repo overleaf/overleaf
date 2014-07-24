@@ -22,6 +22,7 @@ define [
 	"directives/scroll"
 	"directives/onEnter"
 	"filters/formatDate"
+	"main/event-tracking"
 ], (
 	App
 	FileTreeManager

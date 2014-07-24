@@ -18,7 +18,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ["$timeout", "$compile", "$rootScope", ($timeout, $compile, $rootScope) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -142,7 +142,11 @@ define [
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
 
-				emitChange = () ->
+				updateCount = 0
+				onChange = () ->
+					updateCount++
+					if updateCount == 100
+						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
 
 				attachToAce = (sharejs_doc) ->
@@ -152,7 +156,7 @@ define [
 					session = editor.getSession()
 
 					doc = session.getDocument()
-					doc.on "change", emitChange
+					doc.on "change", onChange
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
@@ -167,7 +171,7 @@ define [
 
 					session = editor.getSession()
 					doc = session.getDocument()
-					doc.off "change", emitChange
+					doc.off "change", onChange
 
 			template: """
 				<div class="ace-editor-wrapper">
@@ -239,7 +243,6 @@ define [
 				</div>
 			"""
 		}
-	]
 
 	monkeyPatchSearch = ($rootScope, $compile) ->
 		SearchBox = ace.require("ace/ext/searchbox").SearchBox

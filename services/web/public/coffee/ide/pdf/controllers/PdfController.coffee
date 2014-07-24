@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
-	App.controller "PdfController", ["$scope", "$http", "ide", "$modal", "synctex", ($scope, $http, ide, $modal, synctex) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking) ->
 		autoCompile = true
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -93,9 +93,17 @@ define [
 
 			return path
 
+		compileCount = 0
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 			$scope.pdf.compiling = true
+			
+			if !options.isAutoCompile
+				compileCount++
+				if compileCount == 1
+					event_tracking.send('editor-interaction', 'single-compile')
+				else if compileCount == 3
+					event_tracking.send('editor-interaction', 'multi-compile')
 
 			options.rootDocOverride_id = getRootDocOverride_id()
 
@@ -163,7 +171,6 @@ define [
 			$scope.switchToFlatLayout() if pdfLayout == "flat"
 		else
 			$scope.switchToSideBySideLayout()
-	]
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
 		synctex =
