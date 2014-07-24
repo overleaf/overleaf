@@ -7,14 +7,28 @@ define [
 		ide = {}
 		ide.$http = $http
 
-		ide.pushEvent = () ->
-			#console.log "PUSHING EVENT STUB", arguments
+		@recentEvents = []
+		ide.pushEvent = (type, meta = {}) =>
+			@recentEvents.push type: type, meta: meta, date: new Date()
+			if @recentEvents.length > 40
+				@recentEvents.shift()
 
-		ide.reportError = () ->
-			console.log "REPORTING ERROR STUB", arguments
-
-		ide.showGenericServerErrorMessage = () ->
-			console.error "GENERIC SERVER ERROR MESSAGE STUB"
+		ide.reportError = (error, meta = {}) =>
+			meta.client_id = @socket?.socket?.sessionid
+			meta.transport = @socket?.socket?.transport?.name
+			meta.client_now = new Date()
+			meta.recent_events = @recentEvents
+			errorObj = {}
+			if typeof error == "object"
+				for key in Object.getOwnPropertyNames(error)
+					errorObj[key] = error[key]
+			else if typeof error == "string"
+				errorObj.message = error
+			$http.post "/error/client", {
+				error: errorObj
+				meta: meta
+				_csrf: window.csrfToken
+			}
 
 		ide.showGenericMessageModal = (title, message) ->
 			$modal.open {

@@ -50,7 +50,10 @@ define [
 			@$scope.editor.opening = true
 			@_openNewDocument doc, (error, sharejs_doc) =>
 				if error?
-					@ide.showGenericServerErrorMessage()
+					@ide.showGenericMessageModal(
+						"Error opening document"
+						"Sorry, something went wrong opening this document. Please try again."
+					)
 					return
 
 				@$scope.$broadcast "doc:opened"
