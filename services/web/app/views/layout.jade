@@ -40,6 +40,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				siteUrl: '#{settings.siteUrl}',
 				jsPath:  '#{jsPath}'
 			};
+			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
@@ -58,6 +59,19 @@ html(itemscope, itemtype='http://schema.org/Product')
 				}
 				
 	body
+		- if(typeof(suppressSystemMessages) == "undefined")
+			.system-messages(
+				ng-cloak
+				ng-controller="SystemMessagesController"
+			)
+				.system-message(
+					ng-repeat="message in messages"
+					ng-controller="SystemMessageController"
+					ng-hide="hidden"
+				)
+					a(href, ng-click="hide()").pull-right &times;
+					.system-message-content(ng-bind-html="htmlContent")
+	
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
 

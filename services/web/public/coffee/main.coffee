@@ -8,6 +8,7 @@ define [
 	"main/scribtex-popup"
 	"main/event-tracking"
 	"main/bonus"
+	"main/system-messages"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"

@@ -170,6 +170,8 @@ module.exports = class Router
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
 		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
 		app.post '/admin/pollUsersWithDropbox', SecurityManager.requestIsAdmin, AdminController.pollUsersWithDropbox
+		app.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
+		app.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
 
 		app.get '/perfTest', (req,res)->
 			res.send("hello")
