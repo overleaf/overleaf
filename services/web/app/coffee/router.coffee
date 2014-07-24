@@ -167,11 +167,9 @@ module.exports = class Router
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
 		app.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
 		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
-		app.post '/admin/writeAllDocsToMongo', SecurityManager.requestIsAdmin, AdminController.writeAllToMongo
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
 		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
 		app.post '/admin/pollUsersWithDropbox', SecurityManager.requestIsAdmin, AdminController.pollUsersWithDropbox
-		app.post '/admin/updateProjectCompiler', SecurityManager.requestIsAdmin, AdminController.updateProjectCompiler
 
 		app.get '/perfTest', (req,res)->
 			res.send("hello")
