@@ -1,5 +1,4 @@
 HomeController = require('./HomeController')
-InfoController = require('./InfoController')
 
 module.exports =
 	apply: (app) ->
@@ -12,4 +11,4 @@ module.exports =
 		app.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
 		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 
-		app.get '/dropbox', InfoController.dropbox
+		app.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
