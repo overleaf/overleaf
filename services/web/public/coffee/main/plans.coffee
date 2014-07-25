@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "PlansController", ($scope, event_tracking) ->
+	App.controller "PlansController", ($scope, $modal, event_tracking) ->
 		
 		$scope.ui =
 			view: "monthly"
@@ -22,3 +22,8 @@ define [
 		$scope.switchToAnnual = ->
 			$scope.ui.view = "annual"
 			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
+			
+		$scope.openGroupPlanModal = () ->
+			$modal.open {
+				templateUrl: "groupPlanModalTemplate"
+			}
