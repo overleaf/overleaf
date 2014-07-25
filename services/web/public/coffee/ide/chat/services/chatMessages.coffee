@@ -76,7 +76,6 @@ define [
 				prependMessage(message)
 				
 		appendMessage = (message) ->
-			console.log "MESSAGES", message, chat.state.messages
 			chat.state.newMessage = message
 			
 			lastMessage = chat.state.messages[chat.state.messages.length - 1]

@@ -35,7 +35,6 @@ define [
 
 				$scope.dbState.minsTillNextPoll = POLLING_INTERVAL - roundedMinsSinceLastPoll
 				$scope.dbState.percentageLeftTillNextPoll = ((roundedMinsSinceLastPoll / POLLING_INTERVAL) * 100)
-				console.log $scope.dbState.percentageLeftTillNextPoll
 				$timeout calculatePollTime, 60 * 1000
 
 		ide.socket.emit "getUserDropboxLinkStatus", user_id, (err, status)=>

@@ -391,7 +391,6 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@EditorController.setCompiler @project_id, compiler, (err) =>
 				@ProjectOptionsHandler.setCompiler.calledWith(@project_id, compiler).should.equal true
-				console.log @EditorRealTimeController.emitToRoom.args
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "compilerUpdated", compiler).should.equal true
 				done()
 			@ProjectOptionsHandler.setCompiler.args[0][2]()
@@ -403,7 +402,6 @@ describe "EditorController", ->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@EditorController.setSpellCheckLanguage @project_id, languageCode, (err) =>
 				@ProjectOptionsHandler.setSpellCheckLanguage.calledWith(@project_id, languageCode).should.equal true
-				console.log @EditorRealTimeController.emitToRoom.args
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "spellCheckLanguageUpdated", languageCode).should.equal true
 				done()
 			@ProjectOptionsHandler.setSpellCheckLanguage.args[0][2]()

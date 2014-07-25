@@ -32,7 +32,6 @@ describe 'Templates publish', ->
 		it 'should post the project to the templates api', (done)->
 			@TemplatesPublisher.publish @user_id, @project_id, =>
 				uri = "#{@settings.apis.templates_api.url}/templates/user/#{@user_id}/project/#{@project_id}"
-				console.log @request.post.args, uri
 				@request.post.calledWith(uri).should.equal true
 				done()
 

@@ -94,7 +94,6 @@ define [
 	App.controller "UploadFileModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
-			console.log "PArent folder", parent_folder
 			$scope.parent_folder_id = parent_folder?.id
 
 			uploadCount = 0
