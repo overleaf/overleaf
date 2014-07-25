@@ -129,9 +129,8 @@ define [
 						session.setMode("ace/mode/latex")
 
 				scope.$watch "annotations", (annotations) ->
-					if annotations?
-						session = editor.getSession()
-						session.setAnnotations annotations
+					session = editor.getSession()
+					session.setAnnotations annotations
 
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
