@@ -14,6 +14,7 @@ define [
 			@nextUpdateIsRemote = false
 
 			@editor.on "changeSession", (e) =>
+				@reset()
 				e.session.setUndoManager(@)
 
 		showUndoConflictWarning: () ->
@@ -26,10 +27,16 @@ define [
 			, 4000
 
 		reset: () ->
+			@firstUpdate = true
 			@undoStack = []
 			@redoStack = []
 
 		execute: (options) ->
+			if @firstUpdate
+				# The first update we receive is Ace setting the document, which we should
+				# ignore
+				@firstUpdate = false
+				return
 			aceDeltaSets = options.args[0]
 			@session = options.args[1]
 			return if !aceDeltaSets?
