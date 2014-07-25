@@ -150,10 +150,21 @@
 		&:after {
 			content: " ";
 			position: absolute;
-			top: 12px;
+			top: 50%;
 			left: 0;
 			right: 0;
 			border-top: 1px solid hsl(200, 70%, 40%);
 		}
 	}
+}
+
+.real-time-example-code {
+	border-left: 42px solid @gray-lighter;
+	background-color: white;
+	padding: 12px;
+	font-family: @font-family-monospace;
+	.highlight {
+		color: @blue;
+	}
+	box-shadow: 0 3px 3px rgba(0,0,0,.2);
 }
