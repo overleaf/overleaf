@@ -10,8 +10,8 @@ block content
 							h1 Start Your 30-Day Free Trial Today
 
 				.row
-					.col-md-12
-						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. You'll stay up to date with your collaborators, keep track of all changes to your work, and use our LaTeX environment from anywhere in the world.
+					.col-md-8.col-md-offset-2
+						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. Stay up to date with your collaborators, keep track of all changes to your work, and use our LaTeX environment from anywhere in the world.
 
 				.row(ng-cloak)
 					.col-md-12
@@ -40,49 +40,52 @@ block content
 									h2 Personal
 								.circle Free
 								ul.list-unstyled
-									li Only one extra collaborator per<br/> project
+									li Only one collaborator
+									li &nbsp;
 									li &nbsp;
 									li
 										br
-										a.btn.btn-primary(href="/register") Sign up now!
+										a.btn.btn-info(href="/register") Sign up now
 							.card.highlighted
 								.card-header
 									h2 Collaborator
 								.circle
 									span(ng-if="ui.view == 'monthly'")
-										| $15 
-										span.small / mo
+										| $15
+										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| $180 
-										span.small / yr
+										| $180
+										span.small/yr
 								ul.list-unstyled
-									li 10 extra collaborators per project
+									li 
+										strong 10 collaborators per project
 									li Full document history
 									li Sync to Dropbox
 									li
 										br
-										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('collaborator')"
-										) Sign up now!
+										a.btn.btn-info(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || ''}}_free_trial", ng-click="signUpNowClicked('collaborator')"
+										) Start Free Trial!
 							.card
 								.card-header
 									h2 Professional
 								.circle 
 									span(ng-if="ui.view == 'monthly'")
-										| $30 
-										span.small / mo
+										| $30
+										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| $360 
-										span.small / yr
+										| $360
+										span.small /yr
 								ul.list-unstyled
-									li Unlimited collaborators per project
+									li
+										strong Unlimited collaborators
 									li Full document history
 									li Sync to Dropbox
 									li
 										br
-										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('professional')"
-										) Sign up now!
+										a.btn.btn-info(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || ''}}_free_trial", ng-click="signUpNowClicked('professional')"
+										) Start Free Trial!
 
 						.card-group.text-centered(ng-if="ui.view == 'student'")
 							.card
@@ -90,46 +93,49 @@ block content
 									h2 Personal
 								.circle Free
 								ul.list-unstyled
-									li Only one extra collaborator per<br/> project
+									li Only one collaborator
+									li &nbsp;
 									li &nbsp;
 									li
 										br
-										a.btn.btn-primary(href="/register") Sign up now!
+										a.btn.btn-info(href="/register") Sign up now
 							.card.highlighted
 								.card-header
 									h2 Student
 								.circle
 									span
-										| $8 
-										span.small / mo
+										| $8
+										span.small /mo
 								ul.list-unstyled
-									li 6 extra collaborators per project
+									li
+										strong 6 collaborators per project
 									li Full document history
 									li Sync to Dropbox
 									li
 										br
-										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student", ng-click="signUpNowClicked('student')"
-										) Sign up now!
+										a.btn.btn-info(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student_free_trial", ng-click="signUpNowClicked('student')"
+										) Start Free Trial!
 							.card
 								.card-header
 									h2 Student (Annual)
 								.circle
 									span
-										| $80 
-										span.small / yr
+										| $80
+										span.small /yr
 								ul.list-unstyled
-									li 6 extra collaborators per project
+									li
+										strong 6 collaborators per project
 									li Full document history
 									li Sync to Dropbox
 									li
 										br
-										a.btn.btn-primary(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student_annual", ng-click="signUpNowClicked('student')"
-										) Sign up now!
+										a.btn.btn-info(
+											ng-href="#{baseUrl}/user/subscription/new?planCode=stud-ann_free_trial", ng-click="signUpNowClicked('student')"
+										) Start Free Trial!
 
 				.row(ng-cloak)
-					p.text-centered Choose the plan that works for you with our 30-day money-back guarantee. Cancel at any time.
+					p.text-centered Choose the plan that works for you with our 30-day free trial. Cancel at any time.
 
 				.row
 					.col-md-12
@@ -139,7 +145,7 @@ block content
 						.card.features.text-centered
 							i.fa.fa-file-text-o.fa-5x
 							h4 Unlimited projects
-							p Create as much as you like.
+							p Create as many projects as you need.
 					.col-md-4
 						.card.features.text-centered
 							i.fa.fa-clock-o.fa-5x
@@ -150,61 +156,3 @@ block content
 							i.fa.fa-dropbox.fa-5x
 							h4 Sync to Dropbox
 							p Access your projects everywhere.
-
-				.row(ng-if="ui.view == 'monthly' || ui.view == 'annual'", ng-cloak)
-					.col-md-12
-						.page-header.plans-header.plans-subheader.text-centered
-							h2 Group Plans
-							p Improve the workflow of your research group by using ShareLaTeX with everyone on your team
-
-				.row(ng-if="ui.view == 'monthly' || ui.view == 'annual'", ng-cloak)
-					.col-md-12
-						.card-group.text-centered
-							.card
-								.card-header
-									h2 Group
-								.circle
-									span(ng-if="ui.view == 'monthly'")
-										| $50 
-										span.small / mo
-									span(ng-if="ui.view == 'annual'")
-										| $500 
-										span.small / yr
-								ul.list-unstyled
-									li 5 group members
-									li.small All the advantages of the Professional account for each team member
-									li
-										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_5_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_5_members')") Sign up now!
-							.card.highlighted
-								.card-header
-									h2 Research Lab
-								.circle
-									span(ng-if="ui.view == 'monthly'")
-										| $90 
-										span.small / mo
-									span(ng-if="ui.view == 'annual'")
-										| $900 
-										span.small / yr
-								ul.list-unstyled
-									li 10 group members
-									li.small All the advantages of the Professional account for each team member
-									li
-										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_10_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_10_members')") Sign up now!
-							.card
-								.card-header
-									h2 Department
-								.circle
-									span(ng-if="ui.view == 'monthly'")
-										| $170 
-										span.small / mo
-									span(ng-if="ui.view == 'annual'")
-										| $1700 
-										span.small / yr
-								ul.list-unstyled
-									li 20 group members
-									li.small All the advantages of the Professional account for each team member
-									li
-										br
-										a.btn.btn-primary(href="#{baseUrl}/user/subscription/new?planCode=group_20_members{{ ui.view == 'annual' && '_annual' || ''}}", ng-click="signUpNowClicked('group_20_members')") Sign up now!
