@@ -7,7 +7,7 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-							h1 Start Your 30-Day Free Trial Today
+							h1 Start Your 30-Day Free Trial Today!
 
 				.row
 					.col-md-8.col-md-offset-2
@@ -136,6 +136,42 @@ block content
 
 				.row(ng-cloak)
 					p.text-centered Choose the plan that works for you with our 30-day free trial. Cancel at any time.
+					
+				.row(ng-cloak)
+					.col-md-8.col-md-offset-2
+						.alert.alert-info.text-centered
+							| Interested in using ShareLaTeX with a group, team or department wide account?
+							br
+							a(href, ng-click="openGroupPlanModal()") Get in touch for details!
+						
+					script(type="text/ng-template", id="groupPlanModalTemplate")
+						.modal-header
+							h3 Group Plan Enquiry
+						.modal-body
+							form(name='form1', autocomplete='off', enctype='multipart/form-data', method='post', novalidate='', action='https://sharelatex.wufoo.com/forms/z7x3p3/#public', _lpchecked='1')
+								.form-group
+									label(for='Field9') Name
+									input.form-control(name='Field9', type='text', value='', maxlength='255', tabindex='1', onkeyup='')
+								
+								.form-group
+									label(for='Field11') Email
+									input.form-control(name='Field11', type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+								
+								.form-group
+									label(for='Field12') University
+									input.form-control(name='Field12', type='text', value='', maxlength='255', tabindex='3', onkeyup='')
+									
+								.form-group
+									label(for='Field13') Position
+									input.form-control(name='Field13', type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+								
+								.form-group
+									input.btn.btn-primary.btn-large(name='saveForm', type='submit', value='Send')
+								div(style='display: none;')
+									label(for='comment') Do Not Fill This Out
+									textarea#comment(name='comment', rows='1', cols='1')
+									input#idstamp(type='hidden', name='idstamp', value='xkgLkZnS/AQW71jCS1d0XrrFjq26lJryIPVk2rx0YkU=')
+
 
 				.row
 					.col-md-12
