@@ -105,7 +105,7 @@ aside#left-menu.full-size(
 					ng-model="settings.theme"
 				)
 					each theme in themes
-						option(value=theme) #{theme}
+						option(value=theme) #{theme.replace(/_/g, ' ')}
 
 			.form-controls(ng-show="!anonymous")
 				label(for="mode") Keybindings
