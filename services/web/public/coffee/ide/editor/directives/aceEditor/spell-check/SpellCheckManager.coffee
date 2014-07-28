@@ -29,7 +29,8 @@ define [
 				@openContextMenu(e.domEvent)
 
 			$(document).on "click", (e) =>
-				@closeContextMenu(e)
+				if e.which != 3 # Ignore if this was a right click
+					@closeContextMenu(e)
 				return true
 
 			@$scope.replaceWord = (highlight, suggestion) =>
