@@ -92,3 +92,35 @@ aside#file-tree {
 		background-color: @file-tree-droppable-background-color;
 	}
 }
+
+.editor-dark {
+	aside#file-tree {
+		// background-color: lighten(@editor-dark-background-color, 10%);
+		
+		ul.file-tree-list {
+			.dropdown-toggle {
+				color: @editor-dark-highlight-color;
+			}
+			
+			li {
+				.entity-name {
+					color: #aaaaaa;
+					&:hover {
+						background-color: black;
+					}
+				}
+				&.selected {
+					> .entity > .entity-name {
+						color: @editor-dark-highlight-color;
+						border-color: @editor-dark-highlight-color;
+						i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image, i.fa-file-pdf-o {
+							color: @editor-dark-highlight-color;
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	
+}

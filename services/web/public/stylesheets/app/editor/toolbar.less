@@ -104,3 +104,28 @@
 		background-color: #fafafa;
 	}
 }
+
+.editor-dark {
+	.toolbar-alt {
+		background-color: darken(@editor-dark-background-color, 0%);
+	}
+	.toolbar {
+		border-color: @editor-dark-toolbar-border-color;
+		.btn-full-height {
+			border-color: @editor-dark-toolbar-border-color;
+			&:hover {
+				background-color: black;
+				color: lighten(@link-color, 10%);
+			}
+		}
+		&.toolbar-header {
+			box-shadow: none;
+		}
+		a:not(.btn) {
+			color: @gray;
+			&:hover {
+				color: @gray-light;
+			}
+		}
+	}
+}

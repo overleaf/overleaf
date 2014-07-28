@@ -64,7 +64,6 @@
 		width: @changesListWidth;
 		position: absolute;
 		right: 0;
-		background-color: white;
 
 		.loading {
 			text-align: center;
@@ -260,6 +259,27 @@
 				.selectors {
 					.range {
 						top: @day-header-height + @range-bar-selected-offset;
+					}
+				}
+			}
+		}
+	}
+}
+
+.editor-dark {
+	#trackChanges {
+		aside.change-list {
+			border-color: @editor-dark-toolbar-border-color;
+			
+			ul li.change {
+				.day {
+					background-color: darken(@editor-dark-background-color, 10%);
+					border-bottom: 1px solid @editor-dark-toolbar-border-color;
+				}
+				.description {
+					border-bottom: 1px solid @editor-dark-toolbar-border-color;
+					&:hover {
+						background-color: black;
 					}
 				}
 			}

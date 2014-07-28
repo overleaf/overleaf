@@ -155,3 +155,24 @@
 		padding: 0 2px 0;
 	}
 }
+
+.editor-dark {
+	.pdf-logs {
+		background-color: lighten(@editor-dark-background-color, 10%);
+	}
+	.pdfjs-viewer {
+		background-color: lighten(@editor-dark-background-color, 10%);
+	}
+	.pdf .toolbar {
+		.toolbar-right a {
+			i {
+				border-color: @gray;
+			}
+			&:hover {
+				i {
+					border-color: @gray-light;
+				}
+			}
+		}
+	}
+}

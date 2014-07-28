@@ -207,3 +207,24 @@
 	position: fixed;
 	z-index: 100;
 }
+
+.editor-dark {
+	color: @gray-lighter;
+	background-color: @editor-dark-background-color;
+	
+	.ui-layout-resizer {
+		background-color: darken(@editor-dark-background-color, 10%);
+		border: none;
+	}
+	
+	.btn-default {
+		color: white;
+		background-color: @gray;
+		border-color: darken(@gray-dark, 10%);
+		&:hover {
+			background-color: darken(@gray, 5%);
+			border-color: darken(@gray-dark, 20%);
+			
+		}
+	}
+}

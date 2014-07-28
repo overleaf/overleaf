@@ -89,6 +89,21 @@ define [
 					We don't want to delete your data on ShareLaTeX, so this project still contains your history and collaborators.
 					If the project has been renamed please look in your project list for a new project under the new name.
 				""")
+				
+		DARK_THEMES = [
+			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",
+			"merbivore", "merbivore_soft", "mono_industrial", "monokai",
+			"pastel_on_dark", "solarized_dark", "terminal", "tomorrow_night",
+			"tomorrow_night_blue", "tomorrow_night_bright", "tomorrow_night_eighties",
+			"twilight", "vibrant_ink"
+		]
+		$scope.darkTheme = false
+		$scope.$watch "settings.theme", (theme) ->
+			if theme in DARK_THEMES
+				$scope.darkTheme = true
+			else
+				$scope.darkTheme = false
+			
 	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
