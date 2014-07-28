@@ -146,16 +146,16 @@ block content
 				input.form-control(
 					type="text",
 					placeholder="",
-					ng-model="deleteConfirmationText",
-					equals="DELETE",
-					focus-on="open"
+					ng-model="state.deleteText",
+					focus-on="open",
+					ng-keyup="checkValidation()"
 				)
 		.modal-footer
 			button.btn.btn-default(
 				ng-click="cancel()"
 			) Cancel
 			button.btn.btn-danger(
-				ng-disabled="deleteAccountForm.$invalid || state.inflight"
+				ng-disabled="!state.isValid || state.inflight"
 				ng-click="delete()"
 			)
 				span(ng-hide="state.inflight") Delete

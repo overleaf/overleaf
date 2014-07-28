@@ -28,13 +28,18 @@ define [
 	App.controller "DeleteAccountModalController", [
 		"$scope", "$modalInstance", "$timeout", "$http",
 		($scope,   $modalInstance,   $timeout,   $http) ->
-			$scope.state =
+			$scope.state = 
+				isValid : false
+				deleteText: ""
 				inflight: false
 
 			$modalInstance.opened.then () ->
 				$timeout () ->
 					$scope.$broadcast "open"
 				, 700
+
+			$scope.checkValidation = ->
+				$scope.state.isValid = $scope.state.deleteText == "DELETE"
 
 			$scope.delete = () ->
 				$scope.state.inflight = true

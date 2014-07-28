@@ -3,7 +3,7 @@ HomeController = require('./HomeController')
 module.exports =
 	apply: (app) ->
 		app.get  '/', HomeController.index
-		app.get  '/home', HomeController.index
+		app.get  '/home', HomeController.home
 
 		app.get '/tos', HomeController.externalPage("tos", "Terms of Service")
 		app.get '/about', HomeController.externalPage("about", "About Us")
