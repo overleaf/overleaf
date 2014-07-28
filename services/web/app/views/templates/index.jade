@@ -25,8 +25,7 @@ block content
 								.row
 									a(ng-href='{{hit.url}}')
 										.col-md-3
-											img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
-											//img(ng-src='{{hit.image_url}}')
+											img(ng-src='{{hit.image_url}}')
 										.col-md-7
 											h1(ng-bind-html='hit.name')
 											p(ng-bind-html='hit.description')
@@ -44,8 +43,7 @@ block content
 							-each template in tag.exampleTemplates
 								.col-md-3.template-thumbnail
 									a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
-										//- img(src=template.thumbnailUrl)
-										img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+										img(src=template.thumbnailUrl)
 										div.caption
 											h3.txt-middle #{template.name}
 

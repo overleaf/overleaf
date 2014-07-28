@@ -14,7 +14,6 @@ block content
 						a(href=template.templatePagePath || template.canonicalUrl) 
 							.col-md-3.template-thumbnail
 								a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
-									//- img(src=template.thumbnailUrl)
-									img(src="https://d1hk1zhcb5hn6i.cloudfront.net/52fb8c6f34a287a85245b493/v/0/pdf-converted-cache/style-thumbnail")
+									img(src=template.thumbnailUrl)
 									div.caption
 										h3 #{template.name}
