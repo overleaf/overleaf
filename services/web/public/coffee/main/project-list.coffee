@@ -50,7 +50,7 @@ define [
 
 	]
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
@@ -75,8 +75,10 @@ define [
 			if height < sideBarHeight
 				height = Math.min(sideBarHeight, $window.innerHeight - topOffset - 25)
 			$scope.projectListHeight = height
-			
-		recalculateProjectListHeight()
+		
+		$timeout () ->
+			recalculateProjectListHeight()
+		, 0
 		angular.element($window).bind "resize", () ->
 			recalculateProjectListHeight()
 			$scope.$apply()
