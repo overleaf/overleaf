@@ -22,6 +22,14 @@ module.exports = HomeController =
 			else
 				res.redirect "/login"
 
+	home: (req, res)->
+		if homepageExists
+			res.render 'external/home',
+				title: 'ShareLaTeX.com'
+		else
+			res.redirect "/login"
+
+
 	externalPage: (page, title) ->
 		return (req, res, next = (error) ->) ->
 			path = Path.resolve(__dirname + "/../../../views/external/#{page}.jade")
