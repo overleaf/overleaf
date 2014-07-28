@@ -69,12 +69,12 @@ div.full-size.pdf(ng-controller="PdfController")
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 		| &nbsp;&nbsp;Click here to preview your work as a PDF.
 
-	.pdf-errors(ng-show="pdf.timeout || pdf.error")
+	.pdf-errors(ng-show="pdf.timedout || pdf.error")
 		.alert.alert-danger(ng-show="pdf.error")
 			strong Server Error. 
 			span Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.
 
-		.alert.alert-danger(ng-show="pdf.timeout")
+		.alert.alert-danger(ng-show="pdf.timedout")
 			strong Timed out. 
 			span Sorry, your compile was taking too long and timed out.
 				| This may be due to a large number of high-res images, or lots of complicated diagrams. 
