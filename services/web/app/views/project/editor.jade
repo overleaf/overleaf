@@ -7,7 +7,7 @@ block vars
 	- var suppressSystemMessages = true
 
 block content
-	.editor(ng-controller="IdeController", ng-class="{'editor-dark': darkTheme}").full-size
+	.editor(ng-controller="IdeController").full-size
 		.loading-screen(ng-show="state.loading")
 			.container
 				h3 Loading...
