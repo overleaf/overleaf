@@ -27,6 +27,15 @@ div.full-size.pdf(ng-controller="PdfController")
 				}"
 			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 			
+		a(
+			ng-href="{{pdf.url}}"
+			target="_blank"
+			ng-if="pdf.url"
+			tooltip="Download PDF"
+			tooltip-placement="bottom"
+		)
+			i.fa.fa-download
+			
 		.toolbar-right
 			a(
 				href,
