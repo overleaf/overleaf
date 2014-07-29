@@ -2,52 +2,52 @@
 	a.btn.btn-primary.dropdown-toggle(
 		href="#",
 		data-toggle="dropdown"
-	) New Project
+	) #{translate("new_project")}
 	ul.dropdown-menu(role="menu")
 		li
 			a(
 				href,
 				ng-click="openCreateProjectModal()"
-			) Blank Project
+			) #{translate("blank_project")}
 		li
 			a(
 				href,
 				ng-click="openCreateProjectModal('example')"
-			) Example Project
+			) #{translate("example_project")}
 		li
 			a(
 				href,
 				ng-click="openUploadProjectModal()"
-			) Upload Project
+			) #{translate("upload_project")}
 		li.divider
-		li.dropdown-header Templates
+		li.dropdown-header #{translate("templates")}
 		li
-			a.menu-indent(href="/templates/cv") CV or Resume
+			a.menu-indent(href="/templates/cv") #{translate("cv_or_resume")}
 		li
-			a.menu-indent(href="/templates/cover-letters") Cover Letter
+			a.menu-indent(href="/templates/cover-letters") #{translate("cover_letter")}
 		li
-			a.menu-indent(href="/templates/journals") Journal Article
+			a.menu-indent(href="/templates/journals") #{translate("journal_article")}
 		li
-			a.menu-indent(href="/templates/presentations") Presentation
+			a.menu-indent(href="/templates/presentations") #{translate("presentation")}
 		li
-			a.menu-indent(href="/templates/thesis") Thesis
+			a.menu-indent(href="/templates/thesis") #{translate("thesis")}
 		li
-			a.menu-indent(href="/templates/bibliographies") Bibliographies
+			a.menu-indent(href="/templates/bibliographies") #{translate("bibliographies")}
 		li
-			a.menu-indent(href="/templates") View All »
+			a.menu-indent(href="/templates") #{translate("view_all")} »
 
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
 		ng-controller="TagListController"
 	)
 		li(ng-class="{active: (filter == 'all')}")
-			a(href, ng-click="filterProjects('all')") All projects
+			a(href, ng-click="filterProjects('all')") #{translate("all_projects")}
 		li(ng-class="{active: (filter == 'owned')}")
-			a(href, ng-click="filterProjects('owned')") Your projects
+			a(href, ng-click="filterProjects('owned')") #{translate("your_projects")}
 		li(ng-class="{active: (filter == 'shared')}")
-			a(href, ng-click="filterProjects('shared')") Shared with you
+			a(href, ng-click="filterProjects('shared')") #{translate("shared_with_you")}
 		li(ng-class="{active: (filter == 'archived')}")
-			a(href, ng-click="filterProjects('archived')") Deleted projects
+			a(href, ng-click="filterProjects('archived')") #{translate("deleted_projects")}
 		li
 			h2 Folders
 		li(
@@ -67,14 +67,14 @@
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus
-				span.name New Folder
+				span.name #{translate("new_folder")}
 
 .row-spaced(ng-if="projects.length == 0", ng-cloak)
 	.first-project
 		div
 			i.fa.fa-arrow-up.fa-2x
 		div
-			strong Create your first project!
+			strong #{translate("create_your_first_project")}
 
 - if (showUserDetailsArea)
 	.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
@@ -85,14 +85,12 @@
 					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
 
 				p.small
-					| Your profile is 
-					strong {{percentComplete}}% 
-					| complete
+					| #{translate("profile_complete_percentage", {percent:FIX ME})} 
 
 				button#completeUserProfileInformation.btn.btn-info(
 					ng-hide="formVisable",
 					ng-click="openUserProfileModal()"
-				) Complete
+				) #{translate("complete")}
 
 -if (settings.enableSubscriptions && !hasSubscription)
 	.row-spaced(ng-if="projects.length > 0", ng-cloak).text-centered
