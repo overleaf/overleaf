@@ -11,7 +11,7 @@ define [
 					if attrs.infiniteScrollUpwards?
 						atTopOfListView()
 					else
-						atBottomOfList()
+						atBottomOfListView()
 					
 				atTopOfListView = () ->
 					element.scrollTop() < 30

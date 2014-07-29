@@ -25,6 +25,7 @@ define [
 			@$scope.spellingMenu = {left: '0px', top: '0px'}
 
 			@editor.on "nativecontextmenu", (e) =>
+				e.domEvent.stopPropagation();
 				@closeContextMenu(e.domEvent)
 				@openContextMenu(e.domEvent)
 
@@ -74,6 +75,7 @@ define [
 					@$scope.spellingMenu.open = true
 					@$scope.spellingMenu.left = e.clientX + 'px'
 					@$scope.spellingMenu.top = e.clientY + 'px'
+				return false
 
 		closeContextMenu: (e) ->
 			@$scope.$apply () =>
