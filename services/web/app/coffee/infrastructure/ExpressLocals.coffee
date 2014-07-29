@@ -50,6 +50,10 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
+		res.locals.translate = req.i18n.translate
+		next()
+
+	app.use (req, res, next)->
 		res.locals.getSiteHost = ->
 			Settings.siteUrl.substring(Settings.siteUrl.indexOf("//")+2)
 		next()

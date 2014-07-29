@@ -25,6 +25,7 @@
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
     "soa-req-id": "git+https://github.com/sharelatex/soa-req-id.git#master",
     "fairy": "0.0.2",
     "node-uuid": "1.4.1",

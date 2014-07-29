@@ -18,6 +18,7 @@ oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
+translations = require "translations-sharelatex"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -46,6 +47,8 @@ app.configure () ->
 	app.set 'views', __dirname + '/../../views'
 	app.set 'view engine', 'jade'
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
+	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
+	app.use translations.expressMiddlewear
 	app.use cookieParser
 	app.use express.session
 		proxy: Settings.behindProxy

@@ -9,6 +9,7 @@ Server = require("./app/js/infrastructure/Server")
 BackgroundTasks = require("./app/js/infrastructure/BackgroundTasks")
 Errors = require "./app/js/errors"
 
+
 argv = require("optimist")
 	.options("user", {alias : "u", description : "Run the server with permissions of the specified user"})
 	.options("group", {alias : "g", description : "Run the server with permissions of the specified group"})
