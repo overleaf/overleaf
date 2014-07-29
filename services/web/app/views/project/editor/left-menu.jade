@@ -47,7 +47,7 @@ aside#left-menu.full-size(
 					| &nbsp;&nbsp;Publish as Template
 
 
-	span(ng-controller="DropboxController", ng-show="!anonymous")
+	span(ng-controller="DropboxController", ng-show="permissions.admin")
 		h4() Sync
 		ul.list-unstyled.nav()
 			li
