@@ -231,6 +231,7 @@ module.exports = EditorController =
 		callback()
 
 	getLastTimePollHappned: (callback)->
+		logger.log "getting last time a poll happened in dropbox"
 		tpdsPollingBackgroundTasks.getLastTimePollHappned callback
 
 	updateProjectDescription: (project_id, description, callback = ->)->

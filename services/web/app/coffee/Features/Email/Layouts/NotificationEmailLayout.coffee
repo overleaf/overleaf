@@ -314,7 +314,7 @@ module.exports = _.template '''
 											<td class="headerContent" style="padding: 25px;border-bottom:#dadf90;background-color:#F6F6F6;text-align:left;">
 
 												<!-- // Begin Module: Standard Header Image \\ -->
-												<img src="file:///Users/adamconrad/Code/Work/sharelatex/web/public/img/logo.png" style="max-width:600px;" id="headerImage campaign-icon"  />
+												<img src="https://www.sharelatex.com/img/logo.png" style="max-width:600px;" id="headerImage campaign-icon"  />
 												<!-- // End Module: Standard Header Image \\ -->
 
 											</td>

@@ -32,4 +32,7 @@ self = module.exports =
 		rclient.set LAST_TIME_POLL_HAPPEND_KEY, new Date().getTime(), callback
 
 	getLastTimePollHappned: (callback = (err, lastTimePollHappened)->)->
-		rclient.get LAST_TIME_POLL_HAPPEND_KEY, callback
+		rclient.get LAST_TIME_POLL_HAPPEND_KEY, (err, time)->
+			logger.log lastTimePollHappened:time, "got last time a poll happend to dropbox"
+			callback(err, time)
+
