@@ -85,8 +85,8 @@
 				.progress
 					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
 
-				p.small(ng-i18next="[i18next]({percent:percentComplete})profile_complete_percentage")
-
+				p.small #{translate("profile_complete_percentage")}
+				
 				button#completeUserProfileInformation.btn.btn-info(
 					ng-hide="formVisable",
 					ng-click="openUserProfileModal()"
