@@ -18,17 +18,6 @@ block content
 			}
 		};
 
-
-
-		$.i18n.init({
-			lng: 'en-gb',
-			fallbackLng: 'en',
-			resGetPath: 'locales/__lng__.json'
-		}, function() {
-			console.log($.t('new_project')); // -> i18n (from en-US resourcefile)
-		});
-
-
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			.row

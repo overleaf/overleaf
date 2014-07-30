@@ -1,6 +1,19 @@
 define [
 	"base"
 ], (App) ->
+
+
+	angular.module('jm.i18next').config ['$i18nextProvider', ($i18nextProvider)->
+		console.log("hello")
+		$i18nextProvider.options =
+			lng: 'en-GB',
+			useCookie: false,
+			useLocalStorage: false,
+			fallbackLng: 'en',
+			resGetPath: '/locales/__lng__.json'
+	]
+
+
 	App.factory "queuedHttp", ($http, $q) ->
 		pendingRequests = []
 		inflight = false
@@ -48,7 +61,8 @@ define [
 
 		return queuedHttp
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, $i18next) ->
+		console.log $i18next, $i18next("new_project"), "- NEW PROJECT"
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
