@@ -9,7 +9,7 @@ module.exports = WikiController =
 		if page == ""
 			page = "Main_Page"
 		
-		wikiUrl = "#{settings.apis.wiki.url}/api.php"
+		wikiUrl = "#{settings.apis.wiki.url}/learn-scripts/api.php"
 
 		logger.log page: page, "proxying request to wiki"
 		
