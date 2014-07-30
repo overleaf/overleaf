@@ -3,6 +3,9 @@ extends ../layout
 block content
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
+
+
+
 	script(type="text/javascript").
 		window.data = {
 			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
@@ -14,6 +17,17 @@ block content
 				api_key: '#{algolia_api_key}'
 			}
 		};
+
+
+
+		$.i18n.init({
+			lng: 'en-gb',
+			fallbackLng: 'en',
+			resGetPath: 'locales/__lng__.json'
+		}, function() {
+			console.log($.t('new_project')); // -> i18n (from en-US resourcefile)
+		});
+
 
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container

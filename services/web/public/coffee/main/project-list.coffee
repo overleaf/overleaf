@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.factory "queuedHttp", ["$http", "$q", ($http, $q) ->
+	App.factory "queuedHttp", ($http, $q) ->
 		pendingRequests = []
 		inflight = false
 
@@ -47,8 +47,6 @@ define [
 			queuedHttp({method: "POST", url: url, data: data})
 
 		return queuedHttp
-
-	]
 
 	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects

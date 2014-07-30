@@ -40,6 +40,8 @@ ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
 	ignoreCsrfRoutes.push new express.Route(method, route)
 
+
+
 app.configure () ->
 	if Settings.behindProxy
 		app.enable('trust proxy')
@@ -71,6 +73,8 @@ app.configure () ->
 
 	app.use ReferalConnect.use
 	app.use express.methodOverride()
+	app.use translations.serverStaticFiles
+
 
 expressLocals(app)
 

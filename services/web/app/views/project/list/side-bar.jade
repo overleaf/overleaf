@@ -2,7 +2,8 @@
 	a.btn.btn-primary.dropdown-toggle(
 		href="#",
 		data-toggle="dropdown"
-	) #{translate("new_project")}
+	) 
+		p(ng-i18next="new_project") 
 	ul.dropdown-menu(role="menu")
 		li
 			a(
@@ -85,7 +86,7 @@
 					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
 
 				p.small
-					| #{translate("profile_complete_percentage", {percent:FIX ME})} 
+					| #{translate("profile_complete_percentage", {percent:"FIX ME"})} 
 
 				button#completeUserProfileInformation.btn.btn-info(
 					ng-hide="formVisable",
