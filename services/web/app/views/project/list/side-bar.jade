@@ -2,8 +2,9 @@
 	a.btn.btn-primary.dropdown-toggle(
 		href="#",
 		data-toggle="dropdown"
-	) 
-		p(ng-i18next="new_project") 
+	)
+		| #{translate("new_project")}
+
 	ul.dropdown-menu(role="menu")
 		li
 			a(
@@ -95,9 +96,9 @@
 -if (settings.enableSubscriptions && !hasSubscription)
 	.row-spaced(ng-if="projects.length > 0", ng-cloak).text-centered
 		hr
-		p.small You are using the free version of ShareLaTeX.
+		p.small #{translate("on_free_sl")}
 		p
-			a(href="/user/subscription/plans").btn.btn-primary Upgrade
+			a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
 		p.small
-			| or unlock some free bonus features by 
-			a(href="/user/bonus") sharing ShareLaTeX.
+			| #{translate("or_unlock_features_bonus")} 
+			a(href="/user/bonus") #{translate("sharing_sl")} .
