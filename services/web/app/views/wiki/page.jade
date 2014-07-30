@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+	.content
+		.container.wiki
+			.row
+				.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+					.page-header
+						- if (title == "Main Page")
+							h1 ShareLaTeX Documentation
+						- else
+							h1 #{title}
+							a(href="/learn")
+								i.fa.fa-long-arrow-left
+								| &nbsp; Back to all articles
+						
+					| !{content}
