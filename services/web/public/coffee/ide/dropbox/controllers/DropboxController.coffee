@@ -38,10 +38,10 @@ define [
 				$timeout calculatePollTime, 60 * 1000
 
 		ide.socket.emit "getUserDropboxLinkStatus", user_id, (err, status)=>
+			$scope.dbState.gotLinkStatus = true
 			if status.registered 
 				calculatePollTime()
 				$scope.dbState.userIsLinkedToDropbox = true
-				$scope.dbState.gotLinkStatus = true
 				cachedState = $scope.dbState
 		
 		$scope.linkToDropbox = ->
