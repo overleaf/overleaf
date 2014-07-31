@@ -7,11 +7,11 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-							h1 Start Your 30-Day Free Trial Today!
+							h1 #{translate("start_30_day_trial")}
 
 				.row
 					.col-md-8.col-md-offset-2
-						p.text-centered ShareLaTeX is the world's easiest to use LaTeX editor. Stay up to date with your collaborators, keep track of all changes to your work, and use our LaTeX environment from anywhere in the world.
+						p.text-centered #{translate("sl_benefits_plans")}
 
 				.row(ng-cloak)
 					.col-md-12
@@ -20,55 +20,55 @@ block content
 								a(
 									href,
 									ng-click="switchToMonthly()"
-								) Monthly
+								) #{translate("monthly")}
 							li(ng-class="{'active': ui.view == 'annual'}")
 								a(
 									href
 									ng-click="switchToAnnual()"
-								) Annual
+								) #{translate("annual")}
 							li(ng-class="{'active': ui.view == 'student'}")
 								a(
 									href,
 									ng-click="switchToStudent()"
-								) Half Price Student Plans
+								) #{translate("half_price_student")} 
 
 				.row(ng-cloak)
 					.col-md-12
 						.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
 							.card
 								.card-header
-									h2 Personal
-								.circle Free
+									h2 #{translate("personal")} 
+								.circle #{translate("free")} 
 								ul.list-unstyled
-									li Only one collaborator
+									li #{translate("one_collaborator")}
 									li &nbsp;
 									li &nbsp;
 									li
 										br
-										a.btn.btn-info(href="/register") Sign up now
+										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
 							.card.highlighted
 								.card-header
-									h2 Collaborator
+									h2 #{translate("collaborator")}
 								.circle
 									span(ng-if="ui.view == 'monthly'")
 										| $15
 										span.small /mo
 									span(ng-if="ui.view == 'annual'")
 										| $180
-										span.small/yr
+										span.small /yr
 								ul.list-unstyled
 									li 
-										strong 10 collaborators per project
-									li Full document history
-									li Sync to Dropbox
+										strong #{translate("collabs_per_proj", {collabcount:10})}
+									li #{translate("full_doc_history")}
+									li #{translate("sync_to_dropbox")}
 									li
 										br
 										a.btn.btn-info(
 											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || ''}}_free_trial", ng-click="signUpNowClicked('collaborator')"
-										) Start Free Trial!
+										) #{translate("start_free_trial")}
 							.card
 								.card-header
-									h2 Professional
+									h2 #{translate("professional")}
 								.circle 
 									span(ng-if="ui.view == 'monthly'")
 										| $30
@@ -78,91 +78,91 @@ block content
 										span.small /yr
 								ul.list-unstyled
 									li
-										strong Unlimited collaborators
-									li Full document history
-									li Sync to Dropbox
+										strong #{translate("unlimited_collabs")}
+									li #{translate("full_doc_history")}
+									li #{translate("sync_to_dropbox")}
 									li
 										br
 										a.btn.btn-info(
 											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || ''}}_free_trial", ng-click="signUpNowClicked('professional')"
-										) Start Free Trial!
+										) #{translate("start_free_trial")}
 
 						.card-group.text-centered(ng-if="ui.view == 'student'")
 							.card
 								.card-header
-									h2 Personal
-								.circle Free
+									h2 #{translate("personal")}
+								.circle #{translate("free")}
 								ul.list-unstyled
-									li Only one collaborator
+									li #{translate("one_collaborator")}
 									li &nbsp;
 									li &nbsp;
 									li
 										br
-										a.btn.btn-info(href="/register") Sign up now
+										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
 							.card.highlighted
 								.card-header
-									h2 Student
+									h2 #{translate("student")}
 								.circle
 									span
 										| $8
 										span.small /mo
 								ul.list-unstyled
 									li
-										strong 6 collaborators per project
-									li Full document history
-									li Sync to Dropbox
+										strong #{translate("collabs_per_proj", {collabcount:6})}
+									li #{translate("full_doc_history")}
+									li #{translate("sync_to_dropbox")}
 									li
 										br
 										a.btn.btn-info(
 											ng-href="#{baseUrl}/user/subscription/new?planCode=student_free_trial", ng-click="signUpNowClicked('student')"
-										) Start Free Trial!
+										) #{translate("start_free_trial")}
 							.card
 								.card-header
-									h2 Student (Annual)
+									h2 #{translate("student")} (#{translate("annual")})
 								.circle
 									span
 										| $80
 										span.small /yr
 								ul.list-unstyled
 									li
-										strong 6 collaborators per project
-									li Full document history
-									li Sync to Dropbox
+										strong #{translate("collabs_per_proj", {collabcount:6})}
+									li #{translate("full_doc_history")}
+									li #{translate("sync_to_dropbox")}
 									li
 										br
 										a.btn.btn-info(
 											ng-href="#{baseUrl}/user/subscription/new?planCode=stud-ann_free_trial", ng-click="signUpNowClicked('student')"
-										) Start Free Trial!
+										) #{translate("start_free_trial")}
 
 				.row(ng-cloak)
-					p.text-centered Choose the plan that works for you with our 30-day free trial. Cancel at any time.
+					p.text-centered #{translate("start_free_trial")} #{translate("choose_plan_works_for_you")}
 					
 				.row(ng-cloak)
 					.col-md-8.col-md-offset-2
 						.alert.alert-info.text-centered
-							| Interested in using ShareLaTeX with a group, team or department wide account?
+							| #{translate("interested_in_group_licence")}
 							br
-							a(href, ng-click="openGroupPlanModal()") Get in touch for details!
+							a(href, ng-click="openGroupPlanModal()") #{translate("get_in_touch_for_details")}
 						
 					script(type="text/ng-template", id="groupPlanModalTemplate")
 						.modal-header
-							h3 Group Plan Enquiry
+							h3 #{translate("group_plan_enquiry")}
 						.modal-body
 							form(name='form1', autocomplete='off', enctype='multipart/form-data', method='post', novalidate='', action='https://sharelatex.wufoo.com/forms/z7x3p3/#public', _lpchecked='1')
 								.form-group
-									label(for='Field9') Name
+									label(for='Field9') #{translate("name")}
 									input.form-control(name='Field9', type='text', value='', maxlength='255', tabindex='1', onkeyup='')
 								
 								.form-group
-									label(for='Field11') Email
+									label(for='Field11') #{translate("email")}
 									input.form-control(name='Field11', type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
 								
 								.form-group
-									label(for='Field12') University
+									label(for='Field12') #{translate("university")}
 									input.form-control(name='Field12', type='text', value='', maxlength='255', tabindex='3', onkeyup='')
 									
 								.form-group
-									label(for='Field13') Position
+									label(for='Field13') #{translate("position")}
 									input.form-control(name='Field13', type='text', value='', maxlength='255', tabindex='4', onkeyup='')
 								
 								.form-group
@@ -176,19 +176,19 @@ block content
 				.row
 					.col-md-12
 						.page-header.plans-header.plans-subheader.text-centered
-							h2 Enjoy all of these great features
+							h2 #{translate("enjoy_these_features")}
 					.col-md-4
 						.card.features.text-centered
 							i.fa.fa-file-text-o.fa-5x
-							h4 Unlimited projects
-							p Create as many projects as you need.
+							h4 #{translate("unlimited_projects")}
+							p #{translate("create_unlimited_projects")}
 					.col-md-4
 						.card.features.text-centered
 							i.fa.fa-clock-o.fa-5x
-							h4 Full document history
-							p Never lose a step, we've got your back.
+							h4 #{translate("full_doc_history")}
+							p #{translate("never_loose_work")}
 					.col-md-4
 						.card.features.text-centered
 							i.fa.fa-dropbox.fa-5x
-							h4 Sync to Dropbox
-							p Access your projects everywhere.
+							h4 #{translate("sync_to_dropbox")}
+							p #{translate("access_projects_anywhere")}
