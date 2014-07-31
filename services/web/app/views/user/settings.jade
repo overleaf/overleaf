@@ -70,6 +70,7 @@ block content
 											.form-group
 												label(for='newPassword1') New Password
 												input.form-control(
+													id='newPassword1',
 													type='password',
 													name='newPassword1',
 													placeholder='*********',
@@ -85,7 +86,7 @@ block content
 													name='newPassword2',
 													placeholder='*********',
 													ng-model="newPassword2",
-													equals="{{newPassword1}}"
+													equals="newPassword1"
 												)
 												span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
 													| Doesn't match

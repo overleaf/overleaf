@@ -2,14 +2,14 @@ define [
 	"base"
 ], (App) ->
 
-	App.directive 'equals', () ->
+	App.directive "equals", [->
 		return {
-			require: "ngModel",
-			link: (scope, element, attrs, ngModel) ->
-				scope.$watch attrs.ngModel, () -> validate()
-				attrs.$observe 'equals', () -> validate()
-
-				validate = () ->
-					equal = (attrs.equals == ngModel.$viewValue)
-					ngModel.$setValidity('areEqual', equal)
+			require: "ngModel"
+			link: (scope, elem, attrs, ctrl) ->
+				firstField = "#" + attrs.equals
+				elem.add(firstField).on "keyup", ->
+					scope.$apply ->
+						equal = elem.val() == $(firstField).val()
+						ctrl.$setValidity "areEqual", equal
 		}
+	]
