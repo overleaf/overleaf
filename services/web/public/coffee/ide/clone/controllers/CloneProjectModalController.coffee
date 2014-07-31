@@ -22,8 +22,7 @@ define [
 			$scope.state.inflight = true
 			cloneProject($scope.inputs.projectName)
 				.then (data) ->
-					console.log "DATA", data
-					#window.location = "/project/#{data.project_id}"
+					window.location = "/project/#{data.data.project_id}"
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
