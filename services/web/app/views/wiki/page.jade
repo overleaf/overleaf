@@ -4,14 +4,13 @@ block content
 	.content
 		.container.wiki
 			.row
-				.col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+				.col-xs-3.contents
+					| !{contents.content}
+				.col-xs-8.page
 					.page-header
-						- if (title == "Main Page")
+						- if (page.title == "Main Page")
 							h1 ShareLaTeX Documentation
 						- else
-							h1 #{title}
-							a(href="/learn")
-								i.fa.fa-long-arrow-left
-								| &nbsp; Back to all articles
+							h1 #{page.title}
 						
-					| !{content}
+					| !{page.content}

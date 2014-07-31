@@ -8,27 +8,33 @@ module.exports = WikiController =
 		page = req.url.replace(/^\/learn/, "").replace(/^\//, "")
 		if page == ""
 			page = "Main_Page"
-		
-		wikiUrl = "#{settings.apis.wiki.url}/learn-scripts/api.php"
 
-		logger.log page: page, "proxying request to wiki"
+		logger.log page: page, "getting page from wiki"
 		
+		WikiController._getPageContent "Contents", (error, contents) ->
+			return next(error) if error?
+			WikiController._getPageContent page, (error, page) ->
+				return next(error) if error?
+				res.render "wiki/page", {
+					page: page
+					contents: contents
+				}
+		
+	_getPageContent: (page, callback = (error, data = { content: "", title: "" }) ->) ->
 		request {
-			url: wikiUrl
+			url: "#{settings.apis.wiki.url}/learn-scripts/api.php"
 			qs: {
 				page: decodeURI(page)
 				action: "parse"
 				format: "json"
 			}
 		}, (err, response, data)->
-			if response?.statusCode == 404
-				return ErrorController.notFound(req, res, next)
+			return callback(err) if err?
 			try
 				data = JSON.parse(data)
 			catch err
 				logger.err err:err, data:data, "error parsing data from wiki"
-			logger.log data: data, "got response from wiki"
-			res.render "wiki/page", {
-				content: data.parse.text['*']
-				title: data.parse.title
+			callback null, {
+				content: data?.parse?.text?['*']
+				title: data?.parse?.title
 			}
