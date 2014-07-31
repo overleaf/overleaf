@@ -51,7 +51,7 @@
 		li(ng-class="{active: (filter == 'archived')}")
 			a(href, ng-click="filterProjects('archived')") #{translate("deleted_projects")}
 		li
-			h2 Folders
+			h2 #{translate("folders")}
 		li(
 			ng-repeat="tag in tags | filter:nonEmpty",
 			ng-class="{active: tag.selected}",
@@ -86,7 +86,7 @@
 				.progress
 					.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
 
-				p.small #{translate("profile_complete_percentage")}
+				p.small #{translate("profile_complete_percentage_test", {percentval:"{{percentComplete}}"})}
 				
 				button#completeUserProfileInformation.btn.btn-info(
 					ng-hide="formVisable",

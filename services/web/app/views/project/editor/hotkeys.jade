@@ -5,9 +5,9 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Hotkeys
+		h3 #{translate("hotkeys")}
 	.modal-body.modal-hotkeys
-		h3 Common
+		h3 #{translate("common")}
 		.row
 			.col-xs-6
 				.hotkey
@@ -24,7 +24,7 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 					span.combination {{ctrl}} + Y
 					span.description Redo
 
-		h3 Navigation
+		h3 #{translate("navigation")}
 		.row
 			.col-xs-6
 				.hotkey
@@ -38,7 +38,7 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 					span.combination {{ctrl}} + L
 					span.description Go To Line
 
-		h3 Editing
+		h3 #{translate("editing")}
 		.row
 			.col-xs-6
 				.hotkey
@@ -63,4 +63,4 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
-		) OK
+		) #{translate("ok")}

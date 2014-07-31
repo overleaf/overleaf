@@ -9,8 +9,8 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-class="{'fa-spin': pdf.compiling }"
 			)
 			| &nbsp;&nbsp;
-			span(ng-show="!pdf.compiling") Recompile
-			span(ng-show="pdf.compiling") Compiling...
+			span(ng-show="!pdf.compiling") #{translate("recompile")}
+			span(ng-show="pdf.compiling") #{translate("compiling")}...
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
@@ -76,26 +76,24 @@ div.full-size.pdf(ng-controller="PdfController")
 	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
 		| &nbsp;
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
-		| &nbsp;&nbsp;Click here to preview your work as a PDF.
+		| &nbsp;&nbsp;#{translate("click_here_to_preview_pdf")}
 
 	.pdf-errors(ng-show="pdf.timedout || pdf.error")
 		.alert.alert-danger(ng-show="pdf.error")
-			strong Server Error. 
-			span Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.
+			strong #{translate("server_error")}
+			span #{translate("somthing_went_wrong_compiling")}
 
 		.alert.alert-danger(ng-show="pdf.timedout")
-			strong Timed out. 
-			span Sorry, your compile was taking too long and timed out.
-				| This may be due to a large number of high-res images, or lots of complicated diagrams. 
-				| Please try to make your document simpler, or contact support for help.
+			strong #{translate("timedout")}.
+			span #{translate("proj_timed_out_reason")}
 
 	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
-			| No errors, good job!
+			| #{translate("no_errors_good_job")}
 
 		.alert.alert-danger(ng-show="pdf.failure")
-			strong Compile Error. 
-			span Sorry, your LaTeX code couldn't compile for some reason. Please check the errors below for details, or view the raw log.
+			strong #{translate("compile_error")}. 
+			span #{translate("generic_failed_compile_message")}.
 
 		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
 			.alert(
@@ -128,7 +126,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						href
 						dropdown-toggle
 					)
-						| Other logs &amp; files 
+						| #{translate("other_logs_and_files")} 
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
@@ -138,26 +136,25 @@ div.full-size.pdf(ng-controller="PdfController")
 								ng-click="openOutputFile(file)"
 							) {{ file.name }}
 			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
-				span(ng-show="!pdf.showRawLog") View Raw Logs
-				span(ng-show="pdf.showRawLog") Hide Raw Logs
+				span(ng-show="!pdf.showRawLog") #{translate("view_raw_logs")}
+				span(ng-show="pdf.showRawLog") #{translate("hide_raw_logs")}
 
 		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
 
 script(type='text/ng-template', id='clearCacheModalTemplate')
 	.modal-header
-		h3 Clear cache?
+		h3 #{translate("clear_cache")}?
 	.modal-body
-		p This will clear all hidden LaTeX files (.aux, .bbl, etc) from our compile server. 
-			| You generally don't need to do this unless you're having trouble with references. 
-		p Your project files will not be deleted or changed.
+		p #{translate("clear_cache_explanation")}
+		p #{translate("clear_cache_is_safe")}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
 			ng-disabled="state.inflight"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-info(
 			ng-click="clear()"
 			ng-disabled="state.inflight"
 		) 
-			span(ng-show="!state.inflight") Clear cache
-			span(ng-show="state.inflight") Clearing...
+			span(ng-show="!state.inflight") #{translate("clear_cache")}
+			span(ng-show="state.inflight") #{translate("clearing")}...

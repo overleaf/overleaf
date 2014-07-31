@@ -12,11 +12,11 @@ aside.chat(
 		.infinite-scroll-inner
 			.loading(ng-show="chat.loading")
 				i.fa.fa-fw.fa-spin.fa-refresh
-				| &nbsp;&nbsp;Loading...
+				| &nbsp;&nbsp;#{translate("loading")}...
 			.no-messages.text-center.small(ng-show='!chat.loading && chat.messages.length == 0')
-				| No messages
+				| #{translate("no_messages")}
 			.first-message.text-center(ng-show='!chat.loading && chat.messages.length == 0')
-				| Send your first message
+				| #{translate("send_first_message")}
 				br
 				i.fa.fa-arrow-down
 			ul.list-unstyled(

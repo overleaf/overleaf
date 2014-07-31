@@ -6,24 +6,25 @@ block content
 			.row
 				.registration_message
 					if sharedProjectData.user_first_name !== undefined
-						h1 #{sharedProjectData.user_first_name} would like you to view '#{sharedProjectData.project_name}'
-						div Join ShareLaTeX to view this project
+						h1  #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:sharedProjectData.project_name})}
+						div #{translate("join_sl_to_view_project")}
 					else if newTemplateData.templateName !== undefined
-						h1 Please register to edit the '#{newTemplateData.templateName}' template
-						div Already have a ShareLaTeX account? 
-							a(href="/login") Login here
+						h1 #{translate("register_to_edit_template", {templatename:newTemplateData.templateName})}
+
+						div #{translate("already_have_sl_account")}
+							a(href="/login") #{translate("login_here")}
 
 			.row
 				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
 					.card
 						.page-header
-							h1 Register
+							h1 #{translate("register")}
 						form(async-form="register", name="registerForm", action="/register", ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
 							form-messages(for="registerForm")
 							.form-group
-								label(for='email') Email
+								label(for='email') #{translate("email")}
 								input.form-control(
 									type='email',
 									name='email',
@@ -35,9 +36,9 @@ block content
 									focus="true"
 								)
 								span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
-									| Must be an email address
+									| #{translate("must_be_email_address")}
 							.form-group
-								label(for='password') Password
+								label(for='password') #{translate("password")}
 								input.form-control(
 									type='password',
 									name='password',
@@ -46,11 +47,11 @@ block content
 									ng-model="password"
 								)
 								span.small.text-primary(ng-show="registerForm.password.$invalid && registerForm.password.$dirty")
-									| Required
+									| #{translate("required")}
 							.actions
 								button.btn-primary.btn(
 									type='submit'
 									ng-disabled="registerForm.inflight"
 								)
-									span(ng-show="!registerForm.inflight") Register
-									span(ng-show="registerForm.inflight") Registering...
+									span(ng-show="!registerForm.inflight") #{translate("register")}
+									span(ng-show="registerForm.inflight") #{translate("registering")}...

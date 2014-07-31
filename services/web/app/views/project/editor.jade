@@ -10,30 +10,28 @@ block content
 	.editor(ng-controller="IdeController").full-size
 		.loading-screen(ng-show="state.loading")
 			.container
-				h3 Loading...
+				h3 #{translate("loading")}...
 				.progress
 					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
 
 		.global-alerts(ng-cloak)
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
-				strong Disconnected
-				|  Please refresh the page to continue.
+				strong #{translate("disconnected")}
+				|  #{translate("please_refresh")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
-				strong Lost Connection.
-				|  Reconnecting in {{ connection.reconnection_countdown }} secs. 
-				a.pull-right(href, ng-click="tryReconnectNow()") Try Now
+				strong #{translate("lost_connection")}.
+				| #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
+				a.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
-				strong Reconnecting...
+				strong #{translate("reconnecting")}...
 
 			.div(ng-controller="SavingNotificationController")
 				.alert.alert-warning.small(
 					ng-repeat="(doc_id, state) in docSavingStatus"
 					ng-if="state.unsavedSeconds > 3"
-				)
-					| Saving {{ state.doc.name }}... ({{ state.unsavedSeconds }} seconds of unsaved changes)
-
+				)	#{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
 
 		include ./editor/left-menu
 
@@ -78,7 +76,7 @@ block content
 			h3 {{ title }}
 		.modal-body {{ message }}
 		.modal-footer
-			button.btn.btn-info(ng-click="done()") OK
+			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
 	script(src='/socket.io/socket.io.js')
 
