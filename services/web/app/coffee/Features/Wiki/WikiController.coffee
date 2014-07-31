@@ -16,7 +16,7 @@ module.exports = WikiController =
 		request {
 			url: wikiUrl
 			qs: {
-				page: page
+				page: decodeURI(page)
 				action: "parse"
 				format: "json"
 			}
