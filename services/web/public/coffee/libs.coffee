@@ -8,8 +8,4 @@ define [
 	"libs/jquery.storage"
 	"libs/fineuploader"
 	"libs/angular-sanitize-1.2.17"
-	"libs/i18next"
-	"libs/ng-i18next/provider"
-	"libs/ng-i18next/directive/directive"
-	"libs/ng-i18next/filter/filter"
 ], () ->

@@ -10,7 +10,6 @@ define [
 		"ng-context-menu"
 		"underscore"
 		"ngSanitize"
-		"jm.i18next"
 	])
 
 	return App

@@ -50,8 +50,7 @@ define [
 
 		return queuedHttp
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, $i18next) ->
-		console.log $i18next, $i18next("new_project"), "- NEW PROJECT"
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
