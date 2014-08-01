@@ -18,7 +18,7 @@ module.exports = AuthenticationController =
 				res.statusCode = 429
 				return res.send
 					message:
-						text: 'This account has had too many login requests. Please wait 2 minutes before trying to log in again',
+						text: req.i18n.translate("to_many_login_requests_2_mins"),
 						type: 'error'
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
@@ -33,7 +33,7 @@ module.exports = AuthenticationController =
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
 					res.send message:
-						text: 'Your email or password were incorrect. Please try again',
+						text: req.i18n.translate("email_or_password_wrong_try_again"),
 						type: 'error'
 
 	getAuthToken: (req, res, next = (error) ->) ->

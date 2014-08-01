@@ -19,7 +19,7 @@ module.exports = UserUpdater =
 		logger.log user_id:user_id, newEmail:newEmail, "updaing email address of user"
 		UserLocator.findByEmail newEmail, (error, user) ->
 			if user?
-				return callback({message:"User with that email already exists."})
+				return callback({message:"alread_exists"})
 			self.updateUser user_id.toString(), {
 				$set: { "email": newEmail},
 			}, (err) ->

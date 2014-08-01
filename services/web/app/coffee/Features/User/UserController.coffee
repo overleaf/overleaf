@@ -63,7 +63,11 @@ module.exports =
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
-							return res.send 500, {message:err?.message}
+							if err.message == "alread_exists"
+								message = req.i18n.translate("alread_exists")
+							else
+								message = req.i18n.translate("problem_changing_email_address")
+							return res.send 500, {message:message}
 						res.send(200)
 
 	logout : (req, res)->
