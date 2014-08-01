@@ -1,16 +1,17 @@
 extends ../layout
 
 block content
-	.content
+	.content.content-alt
 		.container.wiki
 			.row
 				.col-xs-3.contents
 					| !{contents.content}
-				.col-xs-8.page
-					.page-header
-						- if (page.title == "Main Page")
-							h1 ShareLaTeX Documentation
-						- else
-							h1 #{page.title}
-						
-					| !{page.content}
+				.col-xs-9.page
+					.card
+						.page-header
+							- if (page.title == "Main Page")
+								h1 ShareLaTeX Documentation
+							- else
+								h1 #{page.title}
+							
+						| !{page.content}
