@@ -8,13 +8,13 @@ block content
 					.card(ng-controller="GroupMembersController")
 						.page-header
 							.pull-right(ng-cloak)
-								small(ng-show="selectedUsers.length == 0") You have added <strong>{{ users.length }}</strong> of <strong>{{ groupSize }}</strong> available members
+								small(ng-show="selectedUsers.length == 0") #{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
 								a.btn.btn-danger(
 									href,
 									ng-show="selectedUsers.length > 0"
 									ng-click="removeMembers()"
-								) Remove from group
-							h1 Group Account
+								) #{translate("remove_from_group")}
+							h1 #{translate("group_account")}
 
 						.row-spaced-small
 							ul.list-unstyled.structured-list(
@@ -28,11 +28,11 @@ block content
 												select-all,
 												type="checkbox"
 											)
-											span.header Email
+											span.header #{translate("email")}
 										.col-md-5
-											span.header Name
+											span.header #{translate("name")}
 										.col-md-2
-											span.header Registered
+											span.header #{translate("registered")}
 								li.container-fluid(
 									ng-repeat="user in users | orderBy:'email':true",
 									ng-controller="GroupMemberListItemController"
@@ -57,12 +57,12 @@ block content
 								)
 									.row
 										.col-md-12.text-centered
-											small No members
+											small #{translate("no_members")}
 
 						div(ng-if="users.length < groupSize", ng-cloak)
 							hr
 							p
-								.small Add more members
+								.small #{translate("add_more_members")}
 								form.form
 									.row
 										.col-xs-6
@@ -74,7 +74,7 @@ block content
 												on-enter="addMembers()"
 											)
 										.col-xs-6
-											button.btn.btn-primary(ng-click="addMembers()") Add
+											button.btn.btn-primary(ng-click="addMembers()") #{translate("add")}
 
 	script(type="text/javascript").
 		window.users = !{JSON.stringify(users)};

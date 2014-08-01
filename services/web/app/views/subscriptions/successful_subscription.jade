@@ -7,23 +7,22 @@ block content
 				.col-md-8.col-md-offset-2
 					.card
 						.page-header
-							h2 Thanks for subscribing!
+							h2 #{translate("thanks_for_subscribing")}
 						.alert.alert-success
-							p Your card will be charged soon.
-							p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>.
-							p If you do not want to be charged again 
-								a(href="/user/subscription") click here to cancel.
+							p #{translate("your_card_will_be_charged_soon")}
+							p #{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>#{subscription.price}</strong>", collectionDate:"<strong>#{subscription.nextPaymentDueAt}</strong>"})}
+							p #{translate("if_you_dont_want_to_be_charged")}
+								a(href="/user/subscription") #{translate("click_here_to_cancel")}.
 
 						p
 							- if (subscription.groupPlan == true)
-								a.btn.btn-success.btn-large(href="/subscription/group") Add your first group members now
+								a.btn.btn-success.btn-large(href="/subscription/group") #{translate("add_your_first_group_member_now")}
 						p.letter-from-founders
-							p Thank you for subscribing to the #{subscription.name} plan. It's support from people like yourself that allows ShareLaTeX to continue to grow and improve.
-
-							p If there is anything you ever need please feel free to contact us directly at 
+							p #{translate("thanks_for_subscribing_you_help_sl", {planName:subscription.name})}
+							p #{translate("need_anything_contact_us_at")} 
 								a(href='mailto:support@sharelatex.com') support@sharelatex.com
-								| . It goes straight to both our inboxes.
-							p Regards,
+								| . #{translate("goes_straight_to_our_inboxes")}.
+							p #{translate("regards")},
 								br
 								| Henry and James
 							.portraits
@@ -33,4 +32,4 @@ block content
 								span.img-circle
 									img(src="/img/about/james_allen.jpg") 
 						p
-							a.btn.btn-primary(href="/project") &lt; Back to your projects
+							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}

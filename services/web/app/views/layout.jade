@@ -4,11 +4,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 	head
 	
-
 		- if (typeof(priority_title) !== "undefined" && priority_title)
-			title= title + ' - Online LaTeX Editor ShareLaTeX'
+			title= title + ' - '+ translate("online_latex_editor")
 		- else
-			title= 'Online LaTeX Editor ShareLaTeX - ' +title
+			title=  translate("online_latex_editor") +' ShareLaTeX - ' +title
+			
 		link(rel="icon", href="/favicon.ico")
 		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css",rel="stylesheet")
