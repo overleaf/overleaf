@@ -6,6 +6,17 @@ nav.navbar.navbar-default
 			a(href='/').navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
+
+			.dropdown
+				button.btn.btn-default.dropdown-toggle Lang
+					span.caret
+				ul.dropdown-menu
+					li
+						a(href="/?setLng=en-GB") british
+						a(href="/?setLng=en-US") USA
+						a(href="/?setLng=fr-FR") french
+
+
 			ul.nav.navbar-nav.navbar-right
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
