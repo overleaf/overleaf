@@ -157,7 +157,7 @@ module.exports = ProjectController =
 	loadEditor: (req, res, next)->
 		timer = new metrics.Timer("load-editor")
 		if !Settings.editorIsOpen
-			return res.render("general/closed", {title:"updating site"})
+			return res.render("general/closed", {title:"updating_site"})
 
 		if req.session.user?
 			user_id = req.session.user._id 

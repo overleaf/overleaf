@@ -94,7 +94,7 @@ app.use (req, res, next)->
 app.use (req, res, next) ->
 	if !Settings.editorIsOpen
 		res.status(503)
-		res.render("general/closed", {title:"Maintenance"})
+		res.render("general/closed", {title:"maintenance"})
 	else
 		next()
 

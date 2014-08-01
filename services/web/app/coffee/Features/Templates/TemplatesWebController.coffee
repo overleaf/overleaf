@@ -10,7 +10,7 @@ module.exports = TemplatesWebController =
 			if err? or !data?
 				logger.err err:err, "something went wrong in renderTemplatesIndexPage"
 				return res.send 500
-			data.title = "LaTeX Templates"
+			data.title = "latex_templates"
 			res.render "templates/index", data
 
 	renerTemplateInTag: (req, res)->
@@ -60,7 +60,7 @@ module.exports = TemplatesWebController =
 			if err?
 				logger.err err:err, user_id:user_id, "something went wrong in _renderCanonicalPage"
 				return res.send 500
-			data.title = "All Templates"
+			data.title = "all_templates"
 			res.render "templates/tag", data
 
 	_renderTagPage:  (req, res)->

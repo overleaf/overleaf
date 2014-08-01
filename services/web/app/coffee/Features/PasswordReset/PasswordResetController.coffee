@@ -6,7 +6,7 @@ module.exports =
 
 	renderRequestResetForm: (req, res)->
 		res.render "user/passwordReset", 
-			title:"Reset Password"
+			title:"reset_password"
 
 	requestReset: (req, res)->
 		email = req.body.email.trim().toLowerCase()
@@ -26,7 +26,7 @@ module.exports =
 
 	renderSetPasswordForm: (req, res)->
 		res.render "user/setPassword", 
-			title:"Set Password"
+			title:"set_password"
 			passwordResetToken:req.query.passwordResetToken
 
 	setNewUserPassword: (req, res)->
