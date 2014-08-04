@@ -23,7 +23,6 @@ module.exports =
 			new_email:req.query.new_email || ""
 
 	loginPage : (req, res)->
-		console.info req
 		res.render 'user/login',
 			title: 'login',
 			redir: req.query.redir

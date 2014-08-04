@@ -50,9 +50,6 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
-		console.log req.i18n
-		console.log req.i18n.t("profile_complete_percentage", {percent:88})
-		console.log req.i18n.translate("profile_complete_percentage", {percent:87})
 		res.locals.translate = req.i18n.translate
 		next()
 
