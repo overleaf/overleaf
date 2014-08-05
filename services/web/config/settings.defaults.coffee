@@ -139,6 +139,13 @@ module.exports =
 		features: defaultFeatures
 	}]
 
+
+	# i18n
+	# ------
+	# 
+	i18n:
+		defaultLng:"en-US"
+
 	# Spelling languages
 	# ------------------
 	#

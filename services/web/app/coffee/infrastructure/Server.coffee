@@ -18,7 +18,7 @@ oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
-translations = require("translations-sharelatex").setup(Settings.subdomainLang)
+translations = require("translations-sharelatex").setup(Settings.i18n)
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -75,7 +75,6 @@ app.configure () ->
 
 	app.use ReferalConnect.use
 	app.use express.methodOverride()
-
 
 expressLocals(app)
 
