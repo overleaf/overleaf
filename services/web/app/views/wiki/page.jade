@@ -9,9 +9,6 @@ block content
 				.col-xs-9.page
 					.card
 						.page-header
-							- if (page.title == "Main Page")
-								h1 ShareLaTeX Documentation
-							- else
-								h1 #{page.title}
+							h1 #{title}
 							
 						| !{page.content}

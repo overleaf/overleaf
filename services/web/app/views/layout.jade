@@ -3,10 +3,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
-		- if (typeof(priority_title) !== "undefined" && priority_title)
-			title= title + ' - Online LaTeX Editor ShareLaTeX'
-		- else
-			title= 'Online LaTeX Editor ShareLaTeX - ' +title
+		-if (typeof(title) == "undefined")
+			title ShareLaTeX, the Online LaTeX Editor
+		-else
+			title= title + ' - ShareLaTeX, the Online LaTeX Editor'
 		link(rel="icon", href="/favicon.ico")
 		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css",rel="stylesheet")

@@ -15,9 +15,15 @@ module.exports = WikiController =
 			return next(error) if error?
 			WikiController._getPageContent page, (error, page) ->
 				return next(error) if error?
+				if page.title == "Main Page"
+					title = "Documentation"
+				else
+					title = page.title
+					
 				res.render "wiki/page", {
 					page: page
 					contents: contents
+					title: title
 				}
 		
 	_getPageContent: (page, callback = (error, data = { content: "", title: "" }) ->) ->
