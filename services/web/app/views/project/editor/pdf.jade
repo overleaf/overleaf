@@ -83,11 +83,14 @@ div.full-size.pdf(ng-controller="PdfController")
 			strong Server Error. 
 			span Sorry, something went wrong and your project could not be compiled. Please try again in a few moments.
 
-		.alert.alert-danger(ng-show="pdf.timedout")
-			strong Timed out. 
-			span Sorry, your compile was taking too long and timed out.
-				| This may be due to a large number of high-res images, or lots of complicated diagrams. 
-				| Please try to make your document simpler, or contact support for help.
+		.alert.alert-danger(ng-show="pdf.timedout") 
+			p
+				strong Your compile timed out.
+				|  Sorry, your compile was taking too long and timed out.
+				| This may be due to a problem with your LaTeX code, or too many high-res images.
+			p
+				a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
+					| Please see our help guide for more information.
 
 	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
