@@ -13,9 +13,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css",rel="stylesheet")
 
-
-		each subdomainDetails in settings.i18n.subdomainLang
-			link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
 
 		meta(itemprop="name" ,content="ShareLaTeX - Real Time Online LaTeX Collaborative Editor in Your Browser")
 		meta(itemprop="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")
