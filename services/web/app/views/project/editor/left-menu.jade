@@ -2,7 +2,7 @@ aside#left-menu.full-size(
 	ng-class="{ 'shown': ui.leftMenuShown }"
 	ng-cloak
 )
-	h4 Download
+	h4 #{translate("download")}
 
 	ul.list-unstyled.nav.nav-downloads.text-center
 		li
@@ -12,7 +12,7 @@ aside#left-menu.full-size(
 			)
 				i.fa.fa-file-archive-o.fa-2x
 				br
-				| Source
+				| #{translate("source")}
 		li
 			a(
 				ng-href="{{pdf.url}}"
@@ -32,7 +32,7 @@ aside#left-menu.full-size(
 				| PDF
 				
 	span(ng-show="!anonymous")
-		h4 Actions
+		h4 #{translate("Actions")}
 		ul.list-unstyled.nav
 			li(ng-controller="CloneProjectController")
 				a(
@@ -40,26 +40,26 @@ aside#left-menu.full-size(
 					ng-click="openCloneProjectModal()"
 				)
 					i.fa.fa-fw.fa-copy
-					| &nbsp;&nbsp;Copy Project
+					| &nbsp;&nbsp;#{translate("copy_project")}
 			li(ng-controller="TemplatesController", ng-show="permissions.admin")
 				a(ng-click="openPublishTemplateModal()")
 					i.fa.fa-external-link.fa-fw 
-					| &nbsp;&nbsp;Publish as Template
+					| &nbsp;&nbsp; #{translate("publish_as_template")}
 
 
 	span(ng-controller="DropboxController", ng-show="permissions.admin")
-		h4() Sync
+		h4() #{translate("sync")}
 		ul.list-unstyled.nav()
 			li
 				a(ng-click="openDropboxModal()")
 					i.fa.fa-dropbox.fa-fw
 					| &nbsp;&nbsp; Dropbox
 
-	h4(ng-show="!anonymous") Settings
+	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
 		.containter-fluid
 			.form-controls(ng-show="permissions.write")
-				label(for="compiler") Compiler
+				label(for="compiler") #{translate("compiler")}
 				select(
 					name="compiler"
 					ng-model="project.compiler"
@@ -70,7 +70,7 @@ aside#left-menu.full-size(
 					option(value='lualatex') LuaLaTeX
 					
 			.form-controls(ng-show="permissions.write")
-				label(for="rootDoc_id") Main document
+				label(for="rootDoc_id") #{translate("main_document")}
 				select(
 					name="rootDoc_id",
 					ng-model="project.rootDoc_id",
@@ -78,12 +78,12 @@ aside#left-menu.full-size(
 				)
 
 			.form-controls
-				label(for="spellCheckLanguage") Spell Check
+				label(for="spellCheckLanguage") #{translate("spell_check")}
 				select(
 					name="spellCheckLanguage"
 					ng-model="project.spellCheckLanguage"
 				)
-					option(value="") Off
+					option(value="") #{translate("off")}
 					optgroup(label="Language")
 						for language in languages
 							option(
@@ -91,7 +91,7 @@ aside#left-menu.full-size(
 							)= language.name
 
 			.form-controls
-				label(for="autoComplete") Auto-Complete
+				label(for="autoComplete") #{translate("auto_complete")}
 				select(
 					name="autoComplete"
 					ng-model="settings.autoComplete"
@@ -99,7 +99,7 @@ aside#left-menu.full-size(
 				)
 
 			.form-controls
-				label(for="theme") Theme
+				label(for="theme") #{translate("theme")}
 				select(
 					name="theme"
 					ng-model="settings.theme"
@@ -108,7 +108,7 @@ aside#left-menu.full-size(
 						option(value=theme) #{theme.replace(/_/g, ' ')}
 
 			.form-controls(ng-show="!anonymous")
-				label(for="mode") Keybindings
+				label(for="mode") #{translate("keybindings")}
 				select(
 					name="mode"
 					ng-model="settings.mode"
@@ -118,7 +118,7 @@ aside#left-menu.full-size(
 					option(value='emacs') Emacs
 
 			.form-controls
-				label(for="fontSize") Font Size
+				label(for="fontSize") #{translate("font_size")}
 				select(
 					name="fontSize"
 					ng-model="settings.fontSize"
@@ -127,20 +127,20 @@ aside#left-menu.full-size(
 						option(value=size) #{size}px
 
 			.form-controls
-				label(for="pdfViewer") PDF Viewer
+				label(for="pdfViewer")
 				select(
 					name="pdfViewer"
 					ng-model="settings.pdfViewer"
 				)
-					option(value="pdfjs") Built-In
-					option(value="native") Native
+					option(value="pdfjs") #{translate("built_in")}
+					option(value="native") #{translate("native")}
 
-	h4 Hotkeys
+	h4 #{translate("hotkeys")}
 	ul.list-unstyled.nav
 		li(ng-controller="HotkeysController")
 			a(ng-click="openHotkeysModal()")
 				i.fa.fa-keyboard-o.fa-fw
-				| &nbsp;&nbsp; Show Hotkeys
+				| &nbsp;&nbsp; #{translate("show_hotkeys")}
 
 #left-menu-mask(
 	ng-show="ui.leftMenuShown",
@@ -150,11 +150,11 @@ aside#left-menu.full-size(
 
 script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
-		h3 Copy Project
+		h3 #{translate("copy_project")}
 	.modal-body
 		form(name="cloneProjectForm", novalidate)
 			.form-group
-				label New Name
+				label #{translate("new_name")}
 				input.form-control(
 					type="text",
 					placeholder="New Project Name",
@@ -167,10 +167,10 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-disabled="cloneProjectForm.$invalid || state.inflight"
 			ng-click="clone()"
 		)
-			span(ng-hide="state.inflight") Copy
-			span(ng-show="state.inflight") Copying...
+			span(ng-hide="state.inflight") #{translate("copy")}
+			span(ng-show="state.inflight") #{translate("copying")}...

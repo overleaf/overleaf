@@ -5,7 +5,7 @@ script(type='text/ng-template', id='newTagModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Create New Folder
+		h3 #{translate("create_new_folder")}
 	.modal-body
 		form(name="newTagForm", novalidate)
 			input.form-control(
@@ -23,12 +23,12 @@ script(type='text/ng-template', id='newTagModalTemplate')
 		button.btn.btn-default(
 			ng-click="cancel()"
 			stop-propagation="click"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-disabled="newTagForm.$invalid"
 			ng-click="create()"
 			stop-propagation="click"
-		) Create
+		) #{translate("create")}
 
 script(type='text/ng-template', id='renameProjectModalTemplate')
 	.modal-header
@@ -37,7 +37,7 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Rename Project
+		h3 #{translate("rename_project")}
 	.modal-body
 		form(name="renameProjectForm", novalidate)
 			input.form-control(
@@ -49,11 +49,11 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 				focus-on="open"
 			)
 	.modal-footer
-		button.btn.btn-default(ng-click="cancel()") Cancel
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-click="rename()",
 			ng-disabled="renameProjectForm.$invalid"
-		) Rename
+		) #{translate("rename")}
 
 script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
@@ -62,11 +62,11 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Copy Project
+		h3 #{translate("copy_project")}
 	.modal-body
 		form(name="cloneProjectForm", novalidate)
 			.form-group
-				label New Name
+				label #{translate("new_name")}
 				input.form-control(
 					type="text",
 					placeholder="New Project Name",
@@ -79,13 +79,13 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-disabled="cloneProjectForm.$invalid || state.inflight"
 			ng-click="clone()"
 		)
-			span(ng-hide="state.inflight") Copy
-			span(ng-show="state.inflight") Copying...
+			span(ng-hide="state.inflight") #{translate("copy")}
+			span(ng-show="state.inflight") #{translate("copying")} ...
 
 script(type='text/ng-template', id='newProjectModalTemplate')
 	.modal-header
@@ -94,7 +94,7 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 New Project
+		h3 #{translate("new_project")}
 	.modal-body
 		form(novalidate, name="newProjectForm")
 			input.form-control(
@@ -109,13 +109,13 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
 			ng-click="cancel()"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-disabled="newProjectForm.$invalid || state.inflight"
 			ng-click="create()"
 		)
-			span(ng-hide="state.inflight") Create
-			span(ng-show="state.inflight") Creating...
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")} ...
 
 script(type='text/ng-template', id='deleteProjectsModalTemplate')
 	.modal-header
@@ -124,22 +124,22 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 {{action}} Projects
+		h3 {{action}} #{translate("projects")}
 	.modal-body
 		div(ng-show="projectsToDelete.length > 0")
-			p You are about to delete the following projects:
+			p #{translate("about_to_delete_projects")}
 			ul
 				li(ng-repeat="project in projectsToDelete | orderBy:'name'")
 					strong {{project.name}}
 		div(ng-show="projectsToLeave.length > 0")
-			p You are about to leave the following projects:
+			p #{translate("about_to_leave_projects")}
 			ul
 				li(ng-repeat="project in projectsToLeave | orderBy:'name'")
 					strong {{project.name}}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-danger(
 			ng-click="delete()"
 		) {{action}}
@@ -151,7 +151,7 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Upload Zipped Project
+		h3 #{translate("upload_zipped_project")}
 	.modal-body(
 		fine-upload
 		endpoint="/project/new/upload"
@@ -163,9 +163,9 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 		allowed-extensions="['zip']"
 		on-complete-callback="onComplete"
 	)
-		span Upload a zipped project
+		span #{translate("upload_a_zipped_project")}
 	.modal-footer
-		button.btn.btn-default(ng-click="cancel()") Cancel
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
 
 script(type="text/ng-template", id="userProfileModalTemplate")
 	.modal-header
@@ -174,12 +174,12 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 			data-dismiss="modal"
 			ng-click="done()"
 		) &times;
-		h3 Your Profile
+		h3 #{translate("your_profile")}
 	.modal-body
 		form(enctype='multipart/form-data', method='post')
 
 			.form-group
-				label(for="first_name") First Name
+				label(for="first_name") #{translate("first_name")}
 				input.form-control(
 					type='text',
 					name='first_name',
@@ -189,7 +189,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 				)
 
 			.form-group
-				label(for="last_name") Last Name
+				label(for="last_name") #{translate("last_name")}
 				input.form-control(
 					type='text',
 					name='last_name',
@@ -198,7 +198,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 				)
 
 			.form-group.user_details_auto_complete
-				label(for="institution") Institution
+				label(for="institution") #{translate("institution")}
 				autocomplete(
 					ng-model="userInfoForm.institution",
 					name="institution",
@@ -209,7 +209,7 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 				)
 
 			.form-group.user_details_auto_complete
-				label(for="role") Role
+				label(for="role") #{translate("role")}
 				autocomplete(
 					ng-model="userInfoForm.role",
 					name="role",
@@ -220,4 +220,4 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 
 
 	.modal-footer
-		button.btn.btn-info(ng-click="done()") Done
+		button.btn.btn-info(ng-click="done()") #{translate("done")}

@@ -30,6 +30,8 @@ describe "PasswordResetController", ->
 				email:@email
 				passwordResetToken:@token
 				password:@password
+			i18n:
+				translate:->
 
 		@res = {}
 

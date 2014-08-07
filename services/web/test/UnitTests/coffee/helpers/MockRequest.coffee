@@ -5,6 +5,8 @@ class MockRequest
 
 	params: {}
 	query: {}
+	i18n:
+		translate:->
 	
 module.exports = MockRequest
 

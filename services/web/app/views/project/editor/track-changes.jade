@@ -1,15 +1,15 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
 	.upgrade-prompt(ng-show="!project.features.versioning")
 		.message(ng-show="project.owner._id == user.id")
-			p You need to upgrade your account to use the History feature.
+			p #{translate("need_to_upgrade_for_history")}
 			p
 				a.btn.btn-info(
 					href
 					ng-click="startFreeTrial('track-changes')"
-				) Start Free Trial
-			p.small(ng-show="startedFreeTrial") Please refresh the page after starting your free trial.
+				) #{translate("start_free_trial")}
+			p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
 		.message(ng-show="project.owner._id != user.id")
-			p Please ask the project owner to upgrade to use the History feature.
+			p #{translate("ask_proj_owner_to_upgrade_for_history")}
 
 	aside.change-list(
 		ng-controller="TrackChangesListController"
@@ -73,11 +73,11 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 								.name(ng-if="update_user.id == user.id") You
 							div.user(ng-if="update.meta.users.length == 0")
 								.color-square(style="background-color: hsl(100, 100%, 50%)")
-								span Anonymous
+								span #{translate("anonymous")}
 
 			.loading(ng-show="trackChanges.loading")
 				i.fa.fa-spin.fa-refresh
-				| &nbsp;&nbsp;Loading...
+				| &nbsp;&nbsp; #{translate("loading")}...
 
 	.diff-panel.full-size(ng-controller="TrackChangesDiffController")
 		.diff(
@@ -98,7 +98,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					a.btn.btn-danger.btn-sm(
 						href,
 						ng-click="openRestoreDiffModal()"
-					) Restore to before these changes
+					) #{translate("restore_to_before_these_changes")}
 			.diff-editor.hide-ace-cursor(
 				ace-editor="track-changes",
 				theme="settings.theme",
@@ -112,17 +112,18 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 		.diff-deleted.text-centered(
 			ng-show="trackChanges.diff.deleted"
 		)
-			p.text-serif {{ trackChanges.diff.doc.name }} has been deleted.
+			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ trackChanges.diff.doc.name }} "})}
+
 			p
 				a.btn.btn-primary.btn-lg(
 					href,
 					ng-click="restoreDeletedDoc()"
-				) Restore
+				) #{translate("restore")}
 		.loading-panel(ng-show="trackChanges.diff.loading")
 			i.fa.fa-spin.fa-refresh
-			| &nbsp;&nbsp;Loading...
+			| &nbsp;&nbsp;#{translate("loading")}...
 		.error-panel(ng-show="trackChanges.diff.error")
-			.alert.alert-danger Sorry, something went wrong :(
+			.alert.alert-danger #{translate("generic_something_went_wrong")}
 
 script(type="text/ng-template", id="trackChangesRestoreDiffModalTemplate")
 	.modal-header
@@ -131,17 +132,17 @@ script(type="text/ng-template", id="trackChangesRestoreDiffModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Restore {{diff.doc.name}}
+		h3 #{translate("restore")} {{diff.doc.name}}
 	.modal-body.modal-body-share
-		p Are you sure you want to restore <strong>{{diff.doc.name}}</strong> to before the changes on {{diff.start_ts | formatDate}}?
+		p #{translate("sure_you_want_to_restore_before", {filename:"<strong>{{diff.doc.name}}</strong>", date:"{{diff.start_ts | formatDate}}"})}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()",
 			ng-disabled="state.inflight"
-		) Cancel
+		) #{translate("cancel")}
 		button.btn.btn-danger(
 			ng-click="restore()",
 			ng-disabled="state.inflight"
 		)
-			span(ng-show="!state.inflight") Restore
-			span(ng-show="state.inflight") Restoring...
+			span(ng-show="!state.inflight") #{translate("restore")}
+			span(ng-show="state.inflight") #{translate("restoring")} ...

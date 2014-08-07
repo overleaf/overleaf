@@ -6,7 +6,7 @@ module.exports =
 
 	renderRequestResetForm: (req, res)->
 		res.render "user/passwordReset", 
-			title:"Reset Password"
+			title:"reset_password"
 
 	requestReset: (req, res)->
 		email = req.body.email.trim().toLowerCase()
@@ -17,7 +17,7 @@ module.exports =
 			throttle: 6
 		RateLimiter.addCount opts, (err, canCompile)->
 			if !canCompile
-				return res.send 500, { message: "Rate limit hit. Please wait a while before retrying" }
+				return res.send 500, { message: req.i18n.translate("rate_limit_hit_wait")}
 			PasswordResetHandler.generateAndEmailResetToken email, (err)->
 				if err?
 					res.send 500, {message:err?.message}
@@ -26,7 +26,7 @@ module.exports =
 
 	renderSetPasswordForm: (req, res)->
 		res.render "user/setPassword", 
-			title:"Set Password"
+			title:"set_password"
 			passwordResetToken:req.query.passwordResetToken
 
 	setNewUserPassword: (req, res)->

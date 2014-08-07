@@ -10,12 +10,12 @@ block content
 							.row
 								.col-md-12
 									.page-header
-										h1 Help us spread the word about ShareLaTeX.
+										h1 #{translate("help_us_spread_word")}.
 
 
 							.row
 								.col-md-10.col-md-offset-1
-									h2 Share ShareLaTeX with your friends and colleagues and unlock the rewards below
+									h2 #{translate("share_sl_to_get_rewards")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -29,31 +29,31 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#', onclick='postToFeed(); return false;').facebook Post on Facebook
+										a(href='#', onclick='postToFeed(); return false;').facebook #{translate("post_on_facebook")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href="https://plus.google.com/share?url=#{encodeURIComponent(buildReferalUrl('gp'))}", onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus Share us on Google+
+										a(href="https://plus.google.com/share?url=#{encodeURIComponent(buildReferalUrl('gp'))}", onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus #{translate("share_us_on_googleplus")}
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email Email us to your friends
+										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email #{translate("email_us_to_your_friends")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link Link to us from your website
+										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link #{translate("link_to_us")}
 
 							.row
 								.col-md-10.col-md-offset-1.bonus-banner
-									h2.direct-link Direct Link
+									h2.direct-link #{translate("direct_link")}
 									pre.text-centered #{buildReferalUrl("d")}
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
-									p.thanks When someone starts using ShareLaTeX after your recommendation we'll give you some <strong>free stuff</strong> to say thanks! Check your progress below.
+									p.thanks #{translate("sl_gives_you_free_stuff_see_progress_below")}
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
 									- for (var i = 0; i <= 10; i++) {
@@ -67,24 +67,24 @@ block content
 								.col-md-10.col-md-offset-1.bonus-banner
 									.progress
 										- if (refered_user_count == 0)
-											div(style="text-align: center; padding: 4px;") Spread the word and fill this bar up
+											div(style="text-align: center; padding: 4px;") #{translate("spread_the_word_and_fill_bar")}
 										.progress-bar.progress-bar-info(style="width: #{refered_user_count}0%")
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")
-									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") One free collaborator
-									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") Three free collaborators
-									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") Free Dropbox and History
-									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") Free Professional account
+									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
+									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
+									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")}
+									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_prof_account")}
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
 									- if (refered_user_count == 0)
-										p.thanks You've not introduced anyone to ShareLaTeX yet. Get sharing!
+										p.thanks #{translate("you_not_introed_anyone_to_sl")}
 									- else if (refered_user_count == 1)
-										p.thanks You've introduced <strong>#{refered_user_count}</strong> person to ShareLaTeX. Good job, but can you get some more?
+										p.thanks #{translate("you_introed_small_number", {numberOfPeople:"<strong>#{refered_user_count}</strong>"})}
 									- else
-										p.thanks You've introduced <strong>#{refered_user_count}</strong> people to ShareLaTeX. Good job!
+										p.thanks #{translate("you_introed_high_number", {numberOfPeople:"<strong>#{refered_user_count}</strong>"})}
 						
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
@@ -93,22 +93,22 @@ block content
 									data-dismiss="modal"
 									ng-click="cancel()"
 								) &times;
-								h3 Link to ShareLaTeX
+								h3 #{translate("link_to_sl")}
 							.modal-body.modal-body-share.link-modal
 
-								p You can link to ShareLaTeX with the following HTML:
+								p #{translate("can_link_to_sl_with_html")}
 								p
 									textarea.col-md-12(readonly=true)
 										<a href="#{buildReferalUrl("d")}">Online LaTeX Editor ShareLaTeX</a>
 
-								p Thanks!
+								p #{translate("thanks")}!
 
 
 							.modal-footer()
 								button.btn.btn-default(
 									ng-click="cancel()",
 								)
-									span Close
+									span #{translate("close")}
 
 
 

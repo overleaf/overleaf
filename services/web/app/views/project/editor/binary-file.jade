@@ -13,7 +13,7 @@ div.binary-file.full-size(
 	)
 	p.no-preview(
 		ng-if="['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
-	) Sorry, no preview is available.
+	) #{translate("no_preview_available")}
 	a.btn.btn-info(
 		ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
-	) Download {{ openFile.name }}
+	) #{translate("download")} {{ openFile.name }}

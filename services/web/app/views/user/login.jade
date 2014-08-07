@@ -7,7 +7,7 @@ block content
 				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
 					.card
 						.page-header
-							h1 Log In
+							h1 #{translate("log_in")}
 						form(async-form="login", name="loginForm", action='/login', ng-cloak)
 							input(name='_csrf', type='hidden', value=csrfToken)
 							input(name='redir', type='hidden', value=redir)
@@ -23,7 +23,7 @@ block content
 									focus="true"
 								)
 								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
-									| Must be an email address
+									| #{translate("must_be_email_address")}
 							.form-group
 								input.form-control(
 									type='password',
@@ -33,12 +33,12 @@ block content
 									ng-model="password"
 								)
 								span.small.text-primary(ng-show="loginForm.password.$invalid && loginForm.password.$dirty")
-									| Required
+									| #{translate("required")}
 							.actions
 								button.btn-primary.btn(
 									type='submit',
 									ng-disabled="loginForm.inflight"
 								)
-									span(ng-show="!loginForm.inflight") Login
-									span(ng-show="loginForm.inflight") Logging in...
-								a.pull-right(href='/user/password/reset') Forgot your password?
+									span(ng-show="!loginForm.inflight") #{translate("login")}
+									span(ng-show="loginForm.inflight") #{translate("logging_in")}...
+								a.pull-right(href='/user/password/reset') #{translate("forgot_your_password")}?

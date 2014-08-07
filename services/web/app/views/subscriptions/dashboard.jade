@@ -9,14 +9,14 @@ mixin printPlan(plan)
 				strong #{plan.name}
 			td
 				-if (plan.annual)
-					| $#{plan.price / 100} / year
+					| $#{plan.price / 100} / #{translate("year")}
 				-else
-					| $#{plan.price / 100} / month	
+					| $#{plan.price / 100} / #{translate("month")}	
 			td
 				-if (subscription.state == "free-trial")
-					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success Subscribe to this plan
+					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success #{translate("subscribe_to_this_plan")}
 				-else if (plan.planCode == subscription.planCode)
-					button.btn.disabled Your plan
+					button.btn.disabled #{translate("your_plan")}
 				-else
 					form(action="/user/subscription/update",method="post")
 						input(type="hidden", name="_csrf", value=csrfToken)
@@ -34,44 +34,44 @@ block content
 				.col-md-8.col-md-offset-2
 					.card
 						.page-header
-							h1 Your Subscription
+							h1 #{translate("your_subscription")}
 						case subscription.state
 							when "free-trial"
-								p You are currently using a free trial which expires on <strong>#{subscription.expiresAt}</strong>.
-								p Choose a plan below to subscribe to.
+								p #{translate("on_free_trial_expiring_at", {expiresAt:"<strong>#{subscription.expiresAt}</strong>"})}
+								p #{translate("choose_a_plan_below")}
 							when "active"
-								p You are currently subscribed to the <strong>#{subscription.name}</strong> plan. 
-									a(href, ng-click="changePlan = true") Change Plan.
-								p The next payment of <strong>#{subscription.price}</strong> will be collected on <strong>#{subscription.nextPaymentDueAt}</strong>
+								p #{translate("currently_subscribed_to_plan", {planName:"<strong>#{subscription.name}</strong>"})}
+									a(href, ng-click="changePlan = true") #{translate("change_plan")}.
+								p #{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>#{subscription.price}</strong>", collectionDate:"<strong>#{subscription.nextPaymentDueAt}</strong>"})}
 								p.pull-right
 
 								p: form(action="/user/subscription/cancel",method="post")
 									input(type="hidden", name="_csrf", value=csrfToken)
-									a(href="/user/subscription/billing-details/edit").btn.btn-info Update your billing details
+									a(href="/user/subscription/billing-details/edit").btn.btn-info #{translate("update_your_billing_details")}
 									| &nbsp;
 									input(type="submit", value="Cancel your subscription").btn.btn-primary#cancelSubscription
 							when "canceled"
-								p You are currently subscribed to the <strong>#{subscription.name}</strong> plan.
-								p Your subscription has been canceled and will terminate on <strong>#{subscription.nextPaymentDueAt}</strong>. No further payments will be taken.
+								p #{translate("currently_subscribed_to_plan", {planName:"<strong>#{subscription.name}</strong>"})}
+								p #{translate("subscription_canceled_and_terminate_on_x", {terminateDate:"<strong>#{subscription.nextPaymentDueAt}</strong>"})}
 								p: form(action="/user/subscription/reactivate",method="post")
 									input(type="hidden", name="_csrf", value=csrfToken)
 									input(type="submit",value="Reactivate your subscription").btn.btn-success
 							when "expired"
-								p Your subscription has expired.	
-									a(href="/user/subscription/plans") Create New Subscription
+								p #{translate("your_subscription_has_expired")}	
+									a(href="/user/subscription/plans") #{translate("create_new_subscription")}
 							default
-								p There is a problem with your subscription. Please contact us for more information.
+								p #{translate("problem_with_subscription_contact_us")}
 
 						-if(subscription.groupPlan)
-							a(href="/subscription/group").btn.btn-success Manage Group
+							a(href="/subscription/group").btn.btn-success #{translate("manage_group")}
 
 						div(ng-show="changePlan", ng-cloak)
 							hr
-							h2 Change plan
+							h2 #{translate("change_plan")}
 							p: table.table
 								tr
-									th Name
-									th Price
+									th #{translate("name")}
+									th #{translate("price")}
 									th
 								mixin printPlans(plans.studentAccounts)
 								mixin printPlans(plans.individualMonthlyPlans)

@@ -78,7 +78,6 @@ describe "Subscription controller sanboxed", ->
 
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.title.should.equal "Update Billing Details"
 				@res.renderedVariables.successURL.should.equal "#{Settings.siteUrl}/user/subscription/update"
 				@res.renderedVariables.user.id.should.equal @user.id
 
@@ -137,9 +136,6 @@ describe "Subscription controller sanboxed", ->
 			@res.callback = done
 			@SubscriptionController.successful_subscription @req, @res
 
-		it "should render the thank you page", ->
-			@res.renderedVariables.title.should.equal "Thank you!"
-
 	describe "userSubscriptionPage", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
@@ -164,7 +160,6 @@ describe "Subscription controller sanboxed", ->
 				done()
 			
 			it "should set the correct subscription details", ->
-				@res.renderedVariables.title.should.equal "Your Subscription"
 				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
 
 		describe "with a user with a free trial", ->
@@ -175,11 +170,9 @@ describe "Subscription controller sanboxed", ->
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", ->
-				@res.rendered.should.equal true
 				@res.renderedTemplate.should.equal "subscriptions/dashboard"
 			
 			it "should set the correct subscription details", ->
-				@res.renderedVariables.title.should.equal "Your Subscription"
 				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
 
 	describe "createSubscription", ->

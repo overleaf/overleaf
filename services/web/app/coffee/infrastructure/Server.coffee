@@ -18,7 +18,7 @@ oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
-translations = require "translations-sharelatex"
+translations = require("translations-sharelatex").setup(Settings.i18n)
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -40,6 +40,8 @@ ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
 	ignoreCsrfRoutes.push new express.Route(method, route)
 
+
+
 app.configure () ->
 	if Settings.behindProxy
 		app.enable('trust proxy')
@@ -49,10 +51,12 @@ app.configure () ->
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
 	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
 	app.use translations.expressMiddlewear
+	app.use translations.setLangBasedOnDomainMiddlewear
 	app.use cookieParser
 	app.use express.session
 		proxy: Settings.behindProxy
 		cookie:
+			domain: Settings.cookieDomain
 			maxAge: cookieSessionLength
 			secure: Settings.secureCookie
 		store: sessionStore
@@ -90,7 +94,7 @@ app.use (req, res, next)->
 app.use (req, res, next) ->
 	if !Settings.editorIsOpen
 		res.status(503)
-		res.render("general/closed", {title:"Maintenance"})
+		res.render("general/closed", {title:"maintenance"})
 	else
 		next()
 

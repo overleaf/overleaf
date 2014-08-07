@@ -29,6 +29,6 @@ module.exports =
 				return res.redirect("/")
 			SubscriptionGroupHandler.getPopulatedListOfMembers user_id, (err, users)->
 				res.render "subscriptions/group_admin",
-					title: 'Group Admin'
+					title: 'group_admin'
 					users: users
 					subscription: subscription

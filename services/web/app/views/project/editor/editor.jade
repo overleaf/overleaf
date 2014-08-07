@@ -10,7 +10,7 @@ div.full-size(
 	.ui-layout-center
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
 			i.fa.fa-spin.fa-refresh
-			| &nbsp;&nbsp;Loading...
+			| &nbsp;&nbsp;#{translate("loading")}...
 
 		#editor(
 			ace-editor="editor",

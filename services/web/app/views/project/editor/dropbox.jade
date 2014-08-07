@@ -5,44 +5,41 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Dropbox Sync
+		h3 #{translate("dropbox_sync")}
 	.modal-body.modal-body-share
 
 		div(ng-show="dbState.gotLinkStatus")
 			div(ng-hide="dbState.userIsLinkedToDropbox || !dbState.hasDropboxFeature")
 
-				span(ng-hide="dbState.startedLinkProcess") Your account is not linked to dropbox
+				span(ng-hide="dbState.startedLinkProcess") #{translate("account_not_linked_to_dropbox")}
 					| &nbsp; &nbsp;
-					a(ng-click="linkToDropbox()").btn.btn-info Update Dropbox Settings
+					a(ng-click="linkToDropbox()").btn.btn-info #{translate("update_dropbox_settings")}
 
 				p.small.text-center(ng-show="dbState.startedLinkProcess")
-					| Please refresh this page after starting your free trial.
+					| #{translate("refresh_page_after_starting_free_trial")}
 
 
 			div(ng-show="dbState.hasDropboxFeature && dbState.userIsLinkedToDropbox")
 				progressbar.progress-striped.active(value='dbState.percentageLeftTillNextPoll', type="info")
 				p
-					strong {{dbState.minsTillNextPoll}} minutes 
-					span until Dropbox is next checked for changes.
+					strong {{dbState.minsTillNextPoll}} #{translate("minutes")} 
+					span #{translate("until_db_checked_for_changes")}
 				p.small
-					| This project will appear in your Dropbox folder at 
+					| #{translate("this_project_will_appear_in_your_dropbox_folder_at")}
 					strong Dropbox/sharelatex/{{ project.name }}
-
 			div.text-center(ng-hide="dbState.hasDropboxFeature")
-				p You need to upgrade your account to link to dropbox.
+				p #{translate("need_to_upgrade_for_dropbox")}
 				p
-					a.btn.btn-info(ng-click="startFreeTrial('dropbox')") Start Free Trial
+					a.btn.btn-info(ng-click="startFreeTrial('dropbox')") #{translate("start_free_trial")}
 				p.small(ng-show="startedFreeTrial")
-					| Please refresh this page after starting your free trial.
+					| #{translate("refresh_page_after_starting_free_trial")}
 
 		div(ng-hide="dbState.gotLinkStatus")
 			i.fa.fa-refresh.fa-spin 
-			span.small &nbsp; Checking dropbox status
-
-
+			span.small &nbsp; #{translate("checking_dropbox_status")}
 
 	.modal-footer()
 		button.btn.btn-default(
 			ng-click="cancel()",
 		)
-			span Dismiss
+			span #{translate("dismiss")}

@@ -3,13 +3,20 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
-		-if (typeof(title) == "undefined")
-			title ShareLaTeX, the Online LaTeX Editor
-		-else
-			title= title + ' - ShareLaTeX, the Online LaTeX Editor'
+
+		- if (typeof(priority_title) !== "undefined" && priority_title)
+			title= title + ' - '+ translate("online_latex_editor")
+		- else
+			title=  translate("online_latex_editor") +' ShareLaTeX - ' +translate(title)
+			title= translate(title) + ' - ShareLaTeX, '+
+
 		link(rel="icon", href="/favicon.ico")
 		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css",rel="stylesheet")
+
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
 
 		meta(itemprop="name" ,content="ShareLaTeX - Real Time Online LaTeX Collaborative Editor in Your Browser")
 		meta(itemprop="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")

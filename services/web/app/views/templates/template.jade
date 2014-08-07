@@ -6,7 +6,7 @@ block content
 			.row
 				.page-header
 					h2
-						a(href="/templates") Templates
+						a(href="/templates") #{translate("templates")}
 						|  ›
 						- if(tag)
 							a(href=tag.tagPagePath)  #{tag.name}
@@ -22,7 +22,7 @@ block content
 
 					.col-md-6
 						.template-details-section
-							h3 About
+							h3 #{translate("about")}
 							div !{template.description}
 							div(ng-controller="openInSlController").download-buttons
 								a.btn.btn-primary.btn-large(href=template.open_in_sharelatex_url, ng-click='open()', ng-disabled="isDisabled", rel='nofollow') {{openInSlText}}
@@ -47,7 +47,7 @@ block content
 								a.addthis_button_compact
 							script(type='text/javascript', src='//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-517c16586439faa7')
 
-						h3 Comment
+						h3 #{translate("comment")}
 						#disqus_thread
 						script(type='text/javascript').
 							/* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */

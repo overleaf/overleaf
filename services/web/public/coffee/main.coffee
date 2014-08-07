@@ -18,6 +18,5 @@ define [
 	"directives/selectAll"
 	"directives/maxHeight"
 	"filters/formatDate"
-
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])

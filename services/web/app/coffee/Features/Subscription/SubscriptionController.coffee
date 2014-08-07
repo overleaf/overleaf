@@ -21,7 +21,7 @@ module.exports = SubscriptionController =
 		viewName = "subscriptions/plans"
 		logger.log viewName:viewName, "showing plans page"
 		res.render viewName,
-			title: "Plans and Pricing"
+			title: "plans_and_pricing"
 			plans: plans
 			baseUrl: baseUrl
 
@@ -41,7 +41,7 @@ module.exports = SubscriptionController =
 					}, (error, signature) ->
 						return next(error) if error?
 						res.render "subscriptions/new",
-							title      : "Subscribe"
+							title      : "subscribe"
 							plan_code: req.query.planCode
 							recurlyConfig: JSON.stringify
 								currency: "USD"
@@ -74,7 +74,7 @@ module.exports = SubscriptionController =
 						logger.log user: user, subscription:subscription, hasSubOrFreeTrial:hasSubOrFreeTrial, "showing subscription dashboard"
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
-							title: "Your Subscription"
+							title: "your_subscription"
 							plans: plans
 							subscription: subscription
 							subscriptionTabActive: true
@@ -92,7 +92,7 @@ module.exports = SubscriptionController =
 					}, (error, signature) ->
 						return next(error) if error?
 						res.render "subscriptions/edit-billing-details",
-							title      : "Update Billing Details"
+							title      : "update_billing_details"
 							recurlyConfig: JSON.stringify
 								currency: "USD"
 								subdomain: Settings.apis.recurly.subdomain
@@ -115,7 +115,7 @@ module.exports = SubscriptionController =
 		SecurityManager.getCurrentUser req, (error, user) =>
 			SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription) ->
 				res.render "subscriptions/successful_subscription",
-					title: "Thank you!"
+					title: "thank_you"
 					subscription:subscription
 
 	cancelSubscription: (req, res, next) ->

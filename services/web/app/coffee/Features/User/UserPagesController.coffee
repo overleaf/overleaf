@@ -16,16 +16,15 @@ module.exports =
 			newTemplateData.templateName = req.session.templateData.templateName
 
 		res.render 'user/register',
-			title: 'Register'
+			title: 'register'
 			redir: req.query.redir
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
 
 	loginPage : (req, res)->
-		console.info req
 		res.render 'user/login',
-			title: 'Login',
+			title: 'login',
 			redir: req.query.redir
 
 	settingsPage : (req, res)->
@@ -34,7 +33,7 @@ module.exports =
 			dropboxHandler.getUserRegistrationStatus user._id, (err, status)->
 				userIsRegisteredWithDropbox = !err? and status.registered
 				res.render 'user/settings',
-					title:'Account Settings',
+					title:'account_settings',
 					userHasDropboxFeature: user.features.dropbox
 					userIsRegisteredWithDropbox: userIsRegisteredWithDropbox
 					user: user,

@@ -52,7 +52,7 @@
 						role="menu"
 						ng-controller="TagListController"
 					)
-						li.dropdown-header Add to folder
+						li.dropdown-header #{translate("add_to_folder")}
 						li(
 							ng-repeat="tag in tags | filter:nonEmpty | orderBy:'name'",
 							ng-controller="TagDropdownItemController"
@@ -68,25 +68,25 @@
 								|  {{tag.name}}
 						li.divider
 						li
-							a(href="#", ng-click="openNewTagModal()", stop-propagation="click") Create New Folder
+							a(href="#", ng-click="openNewTagModal()", stop-propagation="click") #{translate("create_new_folder")}
 
 				.btn-group(ng-hide="selectedProjects.length != 1").dropdown
 					a.btn.btn-default.dropdown-toggle(
 						href='#',
 						data-toggle="dropdown"
-					) More 
+					) #{translate("more")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right(role="menu")
 						li(ng-show="getFirstSelectedProject().accessLevel == 'owner'")
 							a(
 								href='#',
 								ng-click="openRenameProjectModal()"
-							) Rename
+							) #{translate("rename")}
 						li
 							a(
 								href='#',
 								ng-click="openCloneProjectModal()"
-							) Make a copy
+							) #{translate("make_copy")}
 
 			.btn-toolbar(ng-show="filter == 'archived'")
 				.btn-group(ng-hide="selectedProjects.length < 1")
@@ -96,7 +96,7 @@
 						data-toggle="tooltip",
 						data-placement="bottom",
 						ng-click="restoreSelectedProjects()"
-					) Restore
+					) #{translate("restore")}
 
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-danger(
@@ -105,7 +105,7 @@
 						data-toggle="tooltip",
 						data-placement="bottom",
 						ng-click="openDeleteProjectsModal()"
-					) Delete Forever
+					) #{translate("delete_forever")}
 
 .row.row-spaced
 	.col-xs-12
@@ -123,13 +123,13 @@
 								select-all,
 								type="checkbox"
 							)
-							span.header.clickable(ng-click="changePredicate('name')") Title
+							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
 								i.tablesort.fa(ng-class="getSortIconClass('name')")
 						.col-xs-2
-							span.header.clickable(ng-click="changePredicate('accessLevel')") Owner
+							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
 								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
 						.col-xs-4
-							span.header.clickable(ng-click="changePredicate('lastUpdated')") Last Modified
+							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
 				li.project_entry.container-fluid(
 					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
@@ -162,13 +162,13 @@
 				)
 					.row
 						.col-xs-12.text-centered
-							small No projects
+							small #{translate("no_projects")}
 			div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
-				h2 Welcome to ShareLaTeX!
-				p New to LaTeX? Start by having a look at our
-					a(href="/templates")  templates
-					|  or
-					a(href="/learn")  help guides
+				h2 #{translate("welcome_to_sl")}
+				p #{translate("new_to_latex_look_at")}
+					a(href="/templates") #{translate("templates").toLowerCase()}
+					|   #{translate("or")}
+					a(href="/learn")  #{translate("latex_help_guide")}
 					| ,
 					br 
-					| or create your first project on the left.
+					|  #{translate("or_create_project_left")}

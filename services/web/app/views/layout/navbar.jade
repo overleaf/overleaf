@@ -6,13 +6,14 @@ nav.navbar.navbar-default
 			a(href='/').navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
+
 			ul.nav.navbar-nav.navbar-right
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown
 							li.dropdown(class=item.class)
 								a.dropdown-toggle(href)
-									| !{item.text} 
+									| !{translate(item.text)}
 									b.caret
 								ul.dropdown-menu
 									each child in item.dropdown
@@ -21,14 +22,14 @@ nav.navbar.navbar-default
 										else
 											li
 												if child.url
-													a(href=child.url, class=child.class) !{child.text}
+													a(href=child.url, class=child.class) !{translate(child.text)}
 												else
-													| !{child.text}
+													| !{translate(child.text)}
 						else
 							li(class=item.class)
 								if item.url
-									a(href=item.url, class=item.class) !{item.text}
+									a(href=item.url, class=item.class) !{translate(item.text)}
 								else
-									| !{item.text}
+									| !{translate(item.text)}
 
 
