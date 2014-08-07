@@ -112,7 +112,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 		.diff-deleted.text-centered(
 			ng-show="trackChanges.diff.deleted"
 		)
-			p.text-serif #{translate("file_has_been_deleted", filename:"{{ trackChanges.diff.doc.name }} ")}
+			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ trackChanges.diff.doc.name }} "})}
 
 			p
 				a.btn.btn-primary.btn-lg(
