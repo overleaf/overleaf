@@ -3,6 +3,7 @@ logger = require('logger-sharelatex')
 Keys = require('./RedisKeyBuilder')
 redis = require('redis')
 UpdateManager = require('./UpdateManager')
+Metrics = require('./Metrics')
 
 module.exports = WorkersManager =
 	createWorker: () ->
@@ -13,7 +14,9 @@ module.exports = WorkersManager =
 		worker = {
 			client: client
 			waitForAndProcessUpdate: (callback = (error) ->) ->
+				timer = new Metrics.Timer "worker.waiting"
 				worker.client.blpop "pending-updates-list", 0, (error, result) ->
+					timer.done()
 					return callback(error) if error?
 					return callback() if !result?
 					[list_name, doc_key] = result
