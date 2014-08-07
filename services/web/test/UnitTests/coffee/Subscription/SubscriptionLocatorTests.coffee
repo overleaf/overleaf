@@ -14,6 +14,7 @@ describe "Subscription Locator Tests", ->
 		@subscription = {hello:"world"}
 		@Subscription =
 			findOne: sinon.stub()
+			find: sinon.stub()
 		@SubscriptionLocator = SandboxedModule.require modulePath, requires:
 			'../../models/Subscription': Subscription:@Subscription
 			"logger-sharelatex": log:->

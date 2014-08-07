@@ -126,87 +126,60 @@ describe "LimitationsManager", ->
 		it "should return the subscription", (done)->
 			stubbedSubscription = {freeTrial:{}, token:""}
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, stubbedSubscription)
-			@LimitationsManager.userHasSubscription @user, (err, hasSubOrFreeTrial, subscription)->
+			@LimitationsManager.userHasSubscription @user, (err, hasSubOrIsGroupMember, subscription)->
 				subscription.should.deep.equal stubbedSubscription
 				done()
-
-	describe "userHasFreeTrial", ->
+				
+	describe "userIsMemberOfGroupSubscription", ->
 		beforeEach ->
-			@SubscriptionLocator.getUsersSubscription = sinon.stub()
+			@SubscriptionLocator.getMemberSubscriptions = sinon.stub()
 
-		it "should return true if the free trial is set", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, freeTrial:{expiresAt : "1234"})
-			@LimitationsManager.userHasFreeTrial @user, (err, hasFreeTrial)->
-				hasFreeTrial.should.equal true
+		it "should return false if there are no groups subcriptions", (done)->
+			@SubscriptionLocator.getMemberSubscriptions.callsArgWith(1, null, [])
+			@LimitationsManager.userIsMemberOfGroupSubscription @user, (err, isMember)->
+				isMember.should.equal false
 				done()
 
-		it "should return false if the free trial is not set", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {freeTrial:{}})
-			@LimitationsManager.userHasFreeTrial @user, (err, hasFreeTrial)->
-				hasFreeTrial.should.equal false
+		it "should return true if there are no groups subcriptions", (done)->
+			@SubscriptionLocator.getMemberSubscriptions.callsArgWith(1, null, subscriptions = ["mock-subscription"])
+			@LimitationsManager.userIsMemberOfGroupSubscription @user, (err, isMember, retSubscriptions)->
+				isMember.should.equal true
+				retSubscriptions.should.equal subscriptions
 				done()
 
-		it "should return false if the free trial is not there", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
-			@LimitationsManager.userHasFreeTrial @user, (err, hasFreeTrial)->
-				hasFreeTrial.should.equal false
-				done()
-
-		it "should return false if the free trial is undefined", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1)
-			@LimitationsManager.userHasFreeTrial @user, (err, hasFreeTrial)->
-				hasFreeTrial.should.equal false
-				done()
-
-		it "should return the subscription", (done)->
-			stubbedSubscription = {freeTrial:{}, token:""}
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, stubbedSubscription)
-			@LimitationsManager.userHasFreeTrial @user, (err, hasSubOrFreeTrial, subscription)->
-				subscription.should.deep.equal stubbedSubscription
-				done()
-
-	describe "userHasSubscriptionOrFreeTrial", ->
+	describe "userHasSubscriptionOrIsGroupMember", ->
 		beforeEach ->
-			@hasFreeTrial = true
-			@hasSubscription = true
-			@LimitationsManager.userHasFreeTrial = sinon.stub().callsArgWith(1, null, @hasFreeTrial)
-			@LimitationsManager.userHasSubscription = sinon.stub().callsArgWith(1, null, @hasSubscription)
+			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub()
+			@LimitationsManager.userHasSubscription = sinon.stub()
 
 		it "should return true if both are true", (done)->
-			@hasFreeTrial = true
-			@hasSubscription = true
-			@LimitationsManager.userHasSubscriptionOrFreeTrial @user, (err, hasSubOrFreeTrial)->
-				hasSubOrFreeTrial.should.equal true
+			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+				hasSubOrIsGroupMember.should.equal true
 				done()
 
 		it "should return true if one is true", (done)->
-			@hasFreeTrial = false
-			@hasSubscription = true
-			@LimitationsManager.userHasSubscriptionOrFreeTrial @user, (err, hasSubOrFreeTrial)->
-				hasSubOrFreeTrial.should.equal true
+			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+				hasSubOrIsGroupMember.should.equal true
 				done()
 
 		it "should return true if other is true", (done)->
-			@hasFreeTrial = true
-			@hasSubscription = false
-			@LimitationsManager.userHasSubscriptionOrFreeTrial @user, (err, hasSubOrFreeTrial)->
-				hasSubOrFreeTrial.should.equal true
+			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, false)
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+				hasSubOrIsGroupMember.should.equal true
 				done()
 
 		it "should return false if both are false", (done)->
-			@hasSubscription = false
-			@hasFreeTrial = false
-			@LimitationsManager.userHasSubscriptionOrFreeTrial @user, (err, hasSubOrFreeTrial)->
-				hasSubOrFreeTrial.should.equal true
+			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, false)
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+				hasSubOrIsGroupMember.should.equal false
 				done()
-
-		it "should return the subscription", (done)->
-			stubbedSubscription = {freeTrial:{}, token:""}
-			@LimitationsManager.userHasSubscription = sinon.stub().callsArgWith(1, null, null, stubbedSubscription)
-			@LimitationsManager.userHasSubscriptionOrFreeTrial @user, (err, hasSubOrFreeTrial, subscription)->
-				subscription.should.deep.equal stubbedSubscription
-				done()
-
+				
 	describe "hasGroupMembersLimitReached", ->
 
 		beforeEach ->

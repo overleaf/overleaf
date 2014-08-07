@@ -29,6 +29,8 @@ describe "ProjectController", ->
 			createBasicProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
+		@LimitationsManager = 
+			userHasSubscriptionOrIsGroupMember: sinon.stub()
 		@TagsHandler =
 			getAllTags: sinon.stub()
 		@ProjectModel =
@@ -50,6 +52,7 @@ describe "ProjectController", ->
 			"./ProjectCreationHandler": @ProjectCreationHandler
 			"../Editor/EditorController": @EditorController
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator
+			"../Subscription/LimitationsManager": @LimitationsManager
 			"../Tags/TagsHandler":@TagsHandler
 			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
@@ -199,7 +202,7 @@ describe "ProjectController", ->
 				fields.should.equal 'first_name last_name'
 				callback null, @users[id]
 
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 

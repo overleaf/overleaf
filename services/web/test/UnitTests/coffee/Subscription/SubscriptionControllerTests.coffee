@@ -38,7 +38,7 @@ describe "Subscription controller sanboxed", ->
 			findLocalPlanInSettings: sinon.stub()
 
 		@LimitationsManager = 
-			userHasSubscriptionOrFreeTrial: sinon.stub()
+			userHasSubscriptionOrIsGroupMember: sinon.stub()
 			userHasSubscription : sinon.stub()
 
 		@RecurlyWrapper = 
@@ -140,7 +140,7 @@ describe "Subscription controller sanboxed", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
 				@res.callback = done
-				@LimitationsManager.userHasSubscriptionOrFreeTrial.callsArgWith(1, null, false)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should redirect to the plans page", ->
@@ -151,7 +151,7 @@ describe "Subscription controller sanboxed", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrFreeTrial.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", (done)->
@@ -166,7 +166,7 @@ describe "Subscription controller sanboxed", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrFreeTrial.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", ->

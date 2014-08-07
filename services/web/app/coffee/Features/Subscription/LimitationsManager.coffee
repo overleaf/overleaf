@@ -29,11 +29,13 @@ module.exports =
 				else
 					callback null, true
 
-	userHasSubscriptionOrFreeTrial: (user, callback = (err, hasSubscriptionOrTrial, subscription)->) ->
-		@userHasSubscription user, (err, hasSubscription, subscription)=>
-			@userHasFreeTrial user, (err, hasFreeTrial)=>
-				logger.log user_id:user._id, subscription:subscription, hasFreeTrial:hasFreeTrial, hasSubscription:hasSubscription, "checking if user has subscription or free trial"
-				callback err, hasFreeTrial or hasSubscription, subscription
+	userHasSubscriptionOrIsGroupMember: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
+		@userHasSubscription user, (err, hasSubscription)=>
+			return callback(err) if err?
+			@userIsMemberOfGroupSubscription user, (err, isMember)=>
+				return callback(err) if err?
+				logger.log user_id:user._id, isMember:isMember, hasSubscription:hasSubscription, "checking if user has subscription or is group member"
+				callback err, isMember or hasSubscription
 
 	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
@@ -43,11 +45,12 @@ module.exports =
 			hasValidSubscription = subscription? and subscription.recurlySubscription_id?
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
-
-	userHasFreeTrial: (user, callback = (err, hasFreeTrial, subscription)->) ->
-		logger.log user_id:user._id, "checking if user has free trial"
-		SubscriptionLocator.getUsersSubscription user, (err, subscription)->
-			callback err, subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?, subscription
+			
+	userIsMemberOfGroupSubscription: (user, callback = (error, isMember, subscriptions) ->) ->
+		logger.log user_id: user._ud, "checking is user is member of subscription groups"
+		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
+			return callback(err) if err?
+			callback err, subscriptions.length > 0, subscriptions
 
 	hasGroupMembersLimitReached: (user_id, callback)->
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->

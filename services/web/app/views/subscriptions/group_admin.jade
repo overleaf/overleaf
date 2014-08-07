@@ -8,7 +8,7 @@ block content
 					.card(ng-controller="GroupMembersController")
 						.page-header
 							.pull-right(ng-cloak)
-								small(ng-show="selectedUsers.length == 0") #{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
+								small(ng-show="selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
 								a.btn.btn-danger(
 									href,
 									ng-show="selectedUsers.length > 0"

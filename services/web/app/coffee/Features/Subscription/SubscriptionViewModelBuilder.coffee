@@ -8,32 +8,25 @@ _ = require("underscore")
 
 module.exports =
 
-	buildUsersSubscriptionViewModel: (user, callback) ->
-		SubscriptionLocator.getUsersSubscription user, (err, subscription)->
-				LimitationsManager.userHasFreeTrial user, (err, hasFreeTrial)->
-					LimitationsManager.userHasSubscription user, (err, hasSubscription)->
-						if hasSubscription
-							return callback(error) if error?
-							plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
-							RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
-								callback null,
-									name: plan.name
-									nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription.current_period_ends_at)
-									state: recurlySubscription.state
-									price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents
-									planCode: subscription.planCode
-									groupPlan: subscription.groupPlan
-						else if hasFreeTrial
-							plan = PlansLocator.findLocalPlanInSettings(subscription.freeTrial.planCode)
-							callback null,
-								name: plan.name
-								state: "free-trial"
-								planCode: plan.planCode
-								groupPlan: subscription.groupPlan
-								expiresAt: SubscriptionFormatters.formatDate(subscription.freeTrial.expiresAt)
-						else
-							callback "User has no subscription"
-
+	buildUsersSubscriptionViewModel: (user, callback = (error, subscription, groups) ->) ->
+		SubscriptionLocator.getUsersSubscription user, (err, subscription) ->
+			return callback(err) if err?
+			SubscriptionLocator.getMemberSubscriptions user, (err, memberSubscriptions = []) ->
+				return callback(err) if err?
+				if subscription?
+					return callback(error) if error?
+					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
+						callback null, {
+							name: plan.name
+							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription.current_period_ends_at)
+							state: recurlySubscription.state
+							price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents
+							planCode: subscription.planCode
+							groupPlan: subscription.groupPlan
+						}, memberSubscriptions
+				else
+					callback null, null, memberSubscriptions
 
 	buildViewModel : ->
 		plans = Settings.plans

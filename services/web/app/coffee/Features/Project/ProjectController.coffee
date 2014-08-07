@@ -10,6 +10,7 @@ Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
+LimitationsManager = require("../Subscription/LimitationsManager")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
 SecurityManager = require("../../managers/SecurityManager")
@@ -123,8 +124,8 @@ module.exports = ProjectController =
 				TagsHandler.getAllTags user_id, cb
 			projects: (cb)->
 				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
-			subscription: (cb)->
-				SubscriptionLocator.getUsersSubscription user_id, cb
+			hasSubscription: (cb)->
+				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -140,7 +141,7 @@ module.exports = ProjectController =
 						priority_title: true
 						projects: projects
 						tags: tags
-						hasSubscription: !!results.subscription
+						hasSubscription: results.hasSubscription
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?

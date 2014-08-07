@@ -64,19 +64,20 @@ module.exports = SubscriptionController =
 	userSubscriptionPage: (req, res, next) ->
 		SecurityManager.getCurrentUser req, (error, user) =>
 			return next(error) if error?
-			LimitationsManager.userHasSubscriptionOrFreeTrial user, (err, hasSubOrFreeTrial)->
-				if !hasSubOrFreeTrial
+			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember)->
+				if !hasSubOrIsGroupMember
 					logger.log user: user, "redirecting to plans"
 					res.redirect "/user/subscription/plans"
 				else
-					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription) ->
+					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groups) ->
 						return next(error) if error?
-						logger.log user: user, subscription:subscription, hasSubOrFreeTrial:hasSubOrFreeTrial, "showing subscription dashboard"
+						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, "showing subscription dashboard"
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
 							plans: plans
 							subscription: subscription
+							groups: groups
 							subscriptionTabActive: true
 
 
