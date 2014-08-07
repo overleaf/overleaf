@@ -96,11 +96,10 @@ describe "AuthenticationController", ->
 				@AuthenticationController.login(@req, @res)
 
 			it "should return an error", ->
-				# @res.body.should.exist
 				expect(@res.body.message).to.exist
-					# message:
-					# 	text: 'Your email or password were incorrect. Please try again',
-					# 	type: 'error'
+
+			it "should set the res code to 401", ->
+				@res.statusCode.should.equal 401
 
 			it "should not establish a session", ->
 				@AuthenticationController._establishUserSession.called.should.equal false

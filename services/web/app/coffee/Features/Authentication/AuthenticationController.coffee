@@ -32,7 +32,7 @@ module.exports = AuthenticationController =
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
-					res.send message:
+					res.send 401, message:
 						text: req.i18n.translate("email_or_password_wrong_try_again"),
 						type: 'error'
 
