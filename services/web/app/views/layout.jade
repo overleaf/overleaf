@@ -3,11 +3,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
-
-		- if (typeof(priority_title) !== "undefined" && priority_title)
-			title= title + ' - '+ translate("online_latex_editor")
-		- else
-			title=  translate("online_latex_editor") +' ShareLaTeX - ' +translate(title)
+		-if (typeof(title) == "undefined")
+			title ShareLaTeX, the Online LaTeX Editor
+		-else
 			title= translate(title) + ' - ShareLaTeX, '+translate("online_latex_editor") 
 
 		link(rel="icon", href="/favicon.ico")
