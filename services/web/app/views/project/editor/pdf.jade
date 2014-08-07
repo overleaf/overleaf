@@ -130,7 +130,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						href
 						dropdown-toggle
 					)
-						| #{translate("other_logs_and_files")} 
+						| !{translate("other_logs_and_files")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
