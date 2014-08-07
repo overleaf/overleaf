@@ -27,8 +27,7 @@ aside.chat(
 					ng-controller="ChatMessageController"
 					ng-class="{'self': message.user.id == user.id }"
 				)
-					div.date(ng-if="$index == 0 || (message.timestamp - chat.messages[$index - 1].timestamp) > 5 * 60 * 1000")
-						{{ message.timestamp | formatDate:'h:mm a' }} {{ message.timestamp | relativeDate }}
+					div.date(ng-if="$index == 0 || (message.timestamp - chat.messages[$index - 1].timestamp) > 5 * 60 * 1000") {{ message.timestamp | formatDate:'h:mm a' }} {{ message.timestamp | relativeDate }}
 					span.avatar
 						img(ng-src="{{message.user.gravatar_url}}?d=mm&s=50")
 					div.message-wrapper
