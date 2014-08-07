@@ -18,10 +18,14 @@ html(itemscope, itemtype='http://schema.org/Product')
 			each subdomainDetails in settings.i18n.subdomainLang
 				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
 
-		meta(itemprop="name" ,content="ShareLaTeX - Real Time Online LaTeX Collaborative Editor in Your Browser")
-		meta(itemprop="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")
+		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
+		
+		-if (typeof(meta) == "undefined")
+			meta(itemprop="description", content="An online LaTeX editor that's easy to use. No installation, real-time collaboration, version control, hundreds of LaTeX templates, and more.")
+		-else
+			meta(itemprop="description", content=meta)
+		
 		meta(itemprop="image", content="https://www.sharelatex.com/favicon.ico")
-		meta(name="description", content="Online LaTeX editor for collaborative editing, great for Maths or Sciences. You don't need to install LaTeX so it's great for beginners too.")
 
 		- if (typeof(gaToken) != "undefined")
 			script(type='text/javascript').
