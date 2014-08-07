@@ -3,8 +3,9 @@ http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 logger.initialize("documentupdater")
-RedisManager = require('./app/js/RedisManager.js')
-UpdateManager = require('./app/js/UpdateManager.js')
+RedisManager = require('./app/js/RedisManager')
+UpdateManager = require('./app/js/UpdateManager')
+WorkersManager = require('./app/js/WorkersManager')
 Keys = require('./app/js/RedisKeyBuilder')
 redis = require('redis')
 Errors = require "./app/js/Errors"
@@ -32,7 +33,9 @@ rclient.on "message", (channel, doc_key) ->
 		UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
 			logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
 	else
-		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update" 
+		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update"
+
+WorkersManager.createAndStartWorkers(Settings.workerCount || 10)
 
 UpdateManager.resumeProcessing()
 

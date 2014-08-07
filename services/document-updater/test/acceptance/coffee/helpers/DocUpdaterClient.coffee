@@ -14,7 +14,7 @@ module.exports = DocUpdaterClient =
 			doc_key = "#{project_id}:#{doc_id}"
 			rclient.sadd "DocsWithPendingUpdates", doc_key, (error) ->
 				return callback(error) if error?
-				rclient.publish "pending-updates", doc_key, callback
+				rclient.rpush "pending-updates-list", doc_key, callback
 
 	sendUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
 		DocUpdaterClient.preloadDoc project_id, doc_id, (error) ->
