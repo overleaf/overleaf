@@ -23,49 +23,55 @@ define [
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
-				@$scope.$apply () ->
+				@$scope.$apply () =>
 					parent_folder.children.push {
 						name: doc.name
 						id:   doc._id
 						type: "doc"
 					}
+					@recalculateDocList()
 
 			@ide.socket.on "reciveNewFile", (parent_folder_id, file) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
-				@$scope.$apply () ->
+				@$scope.$apply () =>
 					parent_folder.children.push {
 						name: file.name
 						id:   file._id
 						type: "file"
 					}
-
+					@recalculateDocList()
+					
 			@ide.socket.on "reciveNewFolder", (parent_folder_id, folder) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
-				@$scope.$apply () ->
+				@$scope.$apply () =>
 					parent_folder.children.push {
 						name: folder.name
 						id:   folder._id
 						type: "folder"
 						children: []
 					}
+					@recalculateDocList()
 
 			@ide.socket.on "reciveEntityRename", (entity_id, name) =>
 				entity = @findEntityById(entity_id)
 				return if !entity?
-				@$scope.$apply () ->
+				@$scope.$apply () =>
 					entity.name = name
+					@recalculateDocList()
 
 			@ide.socket.on "removeEntity", (entity_id) =>
 				entity = @findEntityById(entity_id)
 				return if !entity?
 				@$scope.$apply () =>
 					@_deleteEntityFromScope entity
+					@recalculateDocList()
 
 			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
 				entity = @findEntityById(entity_id)
 				folder = @findEntityById(folder_id)
 				@$scope.$apply () =>
 					@_moveEntityInScope(entity, folder)
+					@recalculateDocList()
 
 		selectEntity: (entity) ->
 			@selected_entity_id = entity.id # For reselecting after a reconnect

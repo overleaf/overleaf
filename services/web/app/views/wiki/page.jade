@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container.wiki
+			.row
+				.col-xs-3.contents
+					| !{contents.content}
+				.col-xs-9.page
+					.card
+						.page-header
+							h1 #{title}
+							
+						| !{page.content}

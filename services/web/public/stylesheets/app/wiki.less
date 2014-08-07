@@ -1,0 +1,107 @@
+.wiki {
+	.contents {
+		ul {
+			padding: 0;
+			li {
+				font-size: 14px;
+				list-style: none;
+				margin-bottom: 6px;
+			}
+		}
+		
+		h2 {
+			font-size: 18px;
+		}
+	}
+	
+	.page-header {
+		a {
+			font-size: 0.8em;
+			line-height: 1;
+		}
+	}
+	
+	.editsection {
+		display: none;
+	}
+	
+	table {
+		th, td {
+			padding: (@line-height-computed / 4) (@line-height-computed / 2);
+			border-bottom: 1px solid @gray-lighter;
+		}
+		th {
+			font-weight: 700;
+			text-align: left;
+			font-family: @font-family-serif;
+		}
+		margin-bottom: @line-height-computed / 2;
+	}
+	
+	.example {
+		.code {
+			pre {
+				background-color: @gray-lightest;
+				border-radius: 6px;
+				padding: (@line-height-computed / 2);
+				white-space: pre-wrap;
+				margin: 0;
+			}
+		}
+		.output {
+			img {
+				width: auto !important;
+				height: auto !important;
+				max-width: 100% !important;
+				box-shadow: 0 1px 3px @gray-light;
+				border-radius: 6px;
+			}
+		}
+	}
+	@media (min-width: 1360px) {
+		.example {
+			margin-right: -200px;
+		}
+	}
+	
+	/*<![CDATA[*/
+	.source-latex {line-height: normal;}
+	.source-latex li, .source-latex pre {
+		line-height: normal; border: 0px none white;
+	}
+	/**
+	 * GeSHi Dynamically Generated Stylesheet
+	 * --------------------------------------
+	 * Dynamically generated stylesheet for latex
+	 * CSS class: source-latex, CSS id: 
+	 * GeSHi (C) 2004 - 2007 Nigel McNie, 2007 - 2008 Benny Baumann
+	 * (http://qbnz.com/highlighter/ and http://geshi.org/)
+	 * --------------------------------------
+	 */
+	.latex.source-latex .imp {font-weight: bold; color: red;}
+	.latex.source-latex li, .latex.source-latex .li1 {font-weight: normal; vertical-align:top;}
+	.latex.source-latex .ln {width:1px;text-align:right;margin:0;padding:0 2px;vertical-align:top;}
+	.latex.source-latex .li2 {font-weight: bold; vertical-align:top;}
+	.latex.source-latex .kw1 {color: #800000;}
+	.latex.source-latex .co1 {color: #2C922C; font-style: italic;}
+	.latex.source-latex .es0 {color: #000000; font-weight: bold;}
+	.latex.source-latex .sy0 {color: #E02020; }
+	.latex.source-latex .st0 {color: #000000;}
+	.latex.source-latex .re1 {color: #8020E0; font-weight: normal;}
+	.latex.source-latex .re2 {color: #C08020; font-weight: normal;}
+	.latex.source-latex .re3 {color: #8020E0; font-weight: normal;}
+	.latex.source-latex .re4 {color: #800000; font-weight: normal;}
+	.latex.source-latex .re5 {color: #00008B; font-weight: bold;}
+	.latex.source-latex .re6 {color: #800000; font-weight: normal;}
+	.latex.source-latex .re7 {color: #0000D0; font-weight: normal;}
+	.latex.source-latex .re8 {color: #C00000; font-weight: normal;}
+	.latex.source-latex .re9 {color: #2020C0; font-weight: normal;}
+	.latex.source-latex .re10 {color: #800000; font-weight: normal;}
+	.latex.source-latex .re11 {color: #E00000; font-weight: normal;}
+	.latex.source-latex .re12 {color: #800000; font-weight: normal;}
+	.latex.source-latex .ln-xtra, .latex.source-latex li.ln-xtra, .latex.source-latex div.ln-xtra {background-color: #ffc;}
+	.latex.source-latex span.xtra { display:block; }
+
+	/*]]>*/
+
+}

@@ -134,15 +134,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ul.dropdown-menu.dropdown-menu-right
 						li
 							a(
-								href="#"
-								prevent-default="click"
+								href
 								ng-click="startRenaming()"
+								right-click="startRenaming()"
 							) Rename
 						li
 							a(
-								href="#"
-								prevent-default="click"
+								href
 								ng-click="openDeleteModal()"
+								right-click="openDeleteModal()"
 							) Delete
 
 				div.dropdown.context-menu(
@@ -152,17 +152,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ul.dropdown-menu
 						li
 							a(
-								href="#"
-								prevent-default="click"
-								stop-propagation="click"
+								href
 								ng-click="startRenaming()"
+								right-click="startRenaming()"
 							) Rename
 						li
 							a(
-								href="#"
-								prevent-default="click"
-								stop-propagation="click"
+								href
 								ng-click="openDeleteModal()"
+								right-click="openDeleteModal()"
 							) Delete
 
 
@@ -218,34 +216,34 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						ul.dropdown-menu.dropdown-menu-right
 							li
 								a(
-									href="#"
-									prevent-default="click"
+									href
 									ng-click="startRenaming()"
+									right-click="startRenaming()"
 								) Rename
 							li
 								a(
-									href="#"
-									prevent-default="click"
+									href
 									ng-click="openDeleteModal()"
+									right-click="openDeleteModal()"
 								) Delete
 							li.divider
 							li
 								a(
-									href="#"
-									prevent-default="click"
+									href
 									ng-click="openNewDocModal()"
+									right-click="openNewDocModal()"
 								) New File
 							li
 								a(
-									href="#"
-									prevent-default="click"
+									href
 									ng-click="openNewFolderModal()"
+									right-click="openNewFolderModal()"
 								) New Folder
 							li
 								a(
-									href="#"
-									prevent-default="click"
+									href
 									ng-click="openUploadFileModal()"
+									right-click="openUploadFileModal()"
 								) Upload File
 
 					.dropdown.context-menu(
@@ -255,39 +253,34 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						ul.dropdown-menu
 							li
 								a(
-									href="#"
-									prevent-default="click"
-									stop-propagation="click"
+									href
 									ng-click="startRenaming()"
+									right-click="startRenaming()"
 								) Rename
 							li
 								a(
-									href="#"
-									prevent-default="click"
-									stop-propagation="click"
+									href
 									ng-click="openDeleteModal()"
+									right-click="openDeleteModal()"
 								) Delete
 							li.divider
 							li
 								a(
-									href="#"
-									prevent-default="click"
-									stop-propagation="click"
+									href
 									ng-click="openNewDocModal()"
+									right-click="openNewDocModal()"
 								) New File
 							li
 								a(
-									href="#"
-									prevent-default="click"
-									stop-propagation="click"
+									href
 									ng-click="openNewFolderModal()"
+									right-click="openNewFolderModal()"
 								) New Folder
 							li
 								a(
-									href="#"
-									prevent-default="click"
-									stop-propagation="click"
+									href
 									ng-click="openUploadFileModal()"
+									right-click="openUploadFileModal()"
 								) Upload File
 
 			ul.list-unstyled(

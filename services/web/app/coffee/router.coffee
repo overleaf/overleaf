@@ -37,6 +37,7 @@ PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
+WikiController = require("./Features/Wiki/WikiController")
 ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
 
 logger = require("logger-sharelatex")
@@ -162,6 +163,8 @@ module.exports = class Router
 
 		app.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+		
+		app.get  /learn(\/.*)?/, WikiController.getPage
 
 		#Admin Stuff
 		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index

@@ -16,16 +16,11 @@ module.exports = HomeController =
 			else
 				res.redirect '/project'
 		else
-			if homepageExists
-				res.render 'external/home',
-					title: 'ShareLaTeX.com'
-			else
-				res.redirect "/login"
+			HomeController.home(req, res)
 
 	home: (req, res)->
 		if homepageExists
-			res.render 'external/home',
-				title: 'ShareLaTeX.com'
+			res.render 'external/home'
 		else
 			res.redirect "/login"
 

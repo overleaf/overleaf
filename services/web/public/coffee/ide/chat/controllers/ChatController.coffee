@@ -21,10 +21,10 @@ define [
 			ide.$scope.$broadcast "chat:resetUnreadMessages"
 				
 		$scope.sendMessage = ->
+			message = $scope.newMessageContent
+			$scope.newMessageContent = ""
 			chatMessages
-				.sendMessage $scope.newMessageContent
-				.then () ->
-					$scope.newMessageContent = ""
+				.sendMessage message
 				
 		$scope.loadMoreMessages = ->
 			chatMessages.loadMoreMessages()

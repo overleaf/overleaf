@@ -5,7 +5,7 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 Dropbox link
+		h3 Dropbox Sync
 	.modal-body.modal-body-share
 
 		div(ng-show="dbState.gotLinkStatus")
@@ -21,9 +21,12 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 
 			div(ng-show="dbState.hasDropboxFeature && dbState.userIsLinkedToDropbox")
 				progressbar.progress-striped.active(value='dbState.percentageLeftTillNextPoll', type="info")
-				span 
+				p
 					strong {{dbState.minsTillNextPoll}} minutes 
-					span until dropbox is next checked for changes.
+					span until Dropbox is next checked for changes.
+				p.small
+					| This project will appear in your Dropbox folder at 
+					strong Dropbox/sharelatex/{{ project.name }}
 
 			div.text-center(ng-hide="dbState.hasDropboxFeature")
 				p You need to upgrade your account to link to dropbox.
@@ -33,8 +36,8 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 					| Please refresh this page after starting your free trial.
 
 		div(ng-hide="dbState.gotLinkStatus")
-			span.small &nbsp; checking dropbox status &nbsp;
 			i.fa.fa-refresh.fa-spin 
+			span.small &nbsp; Checking dropbox status
 
 
 

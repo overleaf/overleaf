@@ -21,6 +21,8 @@ define [
 	"directives/fineUpload"
 	"directives/scroll"
 	"directives/onEnter"
+	"directives/stopPropagation"
+	"directives/rightClick"
 	"filters/formatDate"
 	"main/event-tracking"
 ], (
