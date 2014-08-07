@@ -18,12 +18,14 @@ module.exports = DocumentUpdaterHandler =
 	queueChange : (project_id, doc_id, change, sl_req_id, callback = ()->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
 		jsonChange = JSON.stringify change
-		rclient.rpush keys.pendingUpdates(doc_id:doc_id), jsonChange, (error)->
+		doc_key = keys.combineProjectIdAndDocId(project_id, doc_id)
+		multi = rclient.multi()
+		multi.rpush keys.pendingUpdates(doc_id:doc_id), jsonChange
+		multi.sadd  keys.docsWithPendingUpdates, doc_key
+		multi.rpush "pending-updates-list", doc_key
+		multi.exec (error) ->
 			return callback(error) if error?
-			doc_key = keys.combineProjectIdAndDocId(project_id, doc_id)
-			rclient.sadd keys.docsWithPendingUpdates, doc_key, (error) ->
-				return callback(error) if error?
-				rclient.publish "pending-updates", doc_key, callback
+			callback()
 
 	flushProjectToMongo: (project_id, sl_req_id, callback = (error) ->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
