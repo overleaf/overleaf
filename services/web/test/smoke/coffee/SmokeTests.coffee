@@ -58,6 +58,7 @@ describe "Opening", ->
 			expect(match, "smoke test: project page html does not have project_id").to.equal true
 			done()
 
+
 	it "the project list", (done) ->
 		request {
 			url: buildUrl("project")
@@ -66,7 +67,7 @@ describe "Opening", ->
 		}, (error, response, body) ->
 			expect(error, "smoke test: error returned in getting project list").to.not.exist
 			expect(response.statusCode, "smoke test: response code is not 200 getting project list").to.equal(200)
-			expect(!!body.match("<title>Your Projects - ShareLaTeX, the Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
+			expect(!!body.match("<title>Your Projects - ShareLaTeX, Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
 			expect(!!body.match("ProjectPageController"), "smoke test: body does not have correct angular controller").to.equal true
 			done()
 	
