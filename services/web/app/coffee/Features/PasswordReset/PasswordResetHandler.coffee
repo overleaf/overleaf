@@ -8,18 +8,20 @@ logger = require("logger-sharelatex")
 
 module.exports =
 
-	generateAndEmailResetToken:(email, callback)->
+	generateAndEmailResetToken:(email, callback = (error, exists) ->)->
 		UserGetter.getUser email:email, (err, user)->
 			if err then return callback(err)
 			if !user?
 				logger.err email:email, "user could not be found for password reset"
-				return callback(message:"Can't find that email, sorry.")
+				return callback(null, false)
 			PasswordResetTokenHandler.getNewToken user._id, (err, token)->
 				if err then return callback(err)
 				emailOptions =
 					to : email
 					setNewPasswordUrl : "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}"
-				EmailHandler.sendEmail "passwordResetRequested", emailOptions, callback		
+				EmailHandler.sendEmail "passwordResetRequested", emailOptions, (error) ->
+					return callback(error) if error?
+					callback null, true
 
 	setNewUserPassword: (token, password, callback)->
 		PasswordResetTokenHandler.getUserIdFromTokenAndExpire token, (err, user_id)->

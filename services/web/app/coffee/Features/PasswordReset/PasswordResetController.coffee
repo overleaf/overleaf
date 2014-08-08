@@ -1,6 +1,6 @@
 PasswordResetHandler = require("./PasswordResetHandler")
 RateLimiter = require("../../infrastructure/RateLimiter")
-
+logger = require "logger-sharelatex"
 
 module.exports =
 
@@ -18,11 +18,13 @@ module.exports =
 		RateLimiter.addCount opts, (err, canCompile)->
 			if !canCompile
 				return res.send 500, { message: req.i18n.translate("rate_limit_hit_wait")}
-			PasswordResetHandler.generateAndEmailResetToken email, (err)->
+			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
 				if err?
 					res.send 500, {message:err?.message}
-				else
+				else if exists
 					res.send 200
+				else
+					res.send 404, {message: req.i18n.translate("cant_find_email")}
 
 	renderSetPasswordForm: (req, res)->
 		res.render "user/setPassword", 
