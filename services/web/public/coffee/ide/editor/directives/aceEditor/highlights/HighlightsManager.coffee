@@ -216,7 +216,7 @@ define [
 			@_addMarkerWithCustomStyle(
 				new Range(
 					annotation.highlight.start.row, annotation.highlight.start.column,
-					annotation.highlight.end.row,   annotation.highlight.end.column + 1
+					annotation.highlight.end.row,   annotation.highlight.end.column
 				),
 				"annotation highlight",
 				false,
@@ -228,7 +228,7 @@ define [
 			@_addMarkerWithCustomStyle(
 				new Range(
 					annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column + 1
+					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
 				),
 				"annotation strike-through-background",
 				false,
@@ -237,7 +237,7 @@ define [
 			@_addMarkerWithCustomStyle(
 				new Range(
 					annotation.strikeThrough.start.row, annotation.strikeThrough.start.column,
-					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column + 1
+					annotation.strikeThrough.end.row,   annotation.strikeThrough.end.column
 				),
 				"annotation strike-through-foreground",
 				true,
