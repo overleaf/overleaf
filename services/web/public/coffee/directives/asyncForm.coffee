@@ -43,7 +43,7 @@ define [
 							response.success = false
 							response.error = true
 							response.message =
-								text: data.message?.text or "Something went wrong talking to the server :(. Please try again."
+								text: data.message?.text or data.message or "Something went wrong talking to the server :(. Please try again."
 								type: 'error'
 							ga('send', 'event', formName, 'failure', data.message)
 		}

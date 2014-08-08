@@ -42,8 +42,8 @@ describe "PasswordResetHandler", ->
 		it "should check the user exists", (done)->
 			@UserGetter.getUser.callsArgWith(1)
 			@PasswordResetTokenHandler.getNewToken.callsArgWith(1)
-			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err)=>
-				should.exist(err)
+			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
+				exists.should.equal false
 				done()
 
 
@@ -52,8 +52,9 @@ describe "PasswordResetHandler", ->
 			@UserGetter.getUser.callsArgWith(1, null, @user)
 			@PasswordResetTokenHandler.getNewToken.callsArgWith(1, null, @token)
 			@EmailHandler.sendEmail.callsArgWith(2)
-			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err)=>
+			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				@EmailHandler.sendEmail.called.should.equal true
+				exists.should.equal true
 				args = @EmailHandler.sendEmail.args[0]
 				args[0].should.equal "passwordResetRequested"
 				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
