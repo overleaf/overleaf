@@ -1,5 +1,9 @@
 extends ../layout
 
+block vars
+	- var meta = template.description
+	- title = title + " - LaTeX Template"
+
 block content
 	.content.content-alt
 		.container

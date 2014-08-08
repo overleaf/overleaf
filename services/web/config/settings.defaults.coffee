@@ -105,7 +105,7 @@ module.exports =
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
-	siteUrl : 'http://localhost:3000'
+	siteUrl : siteUrl = 'http://localhost:3000'
 
 	# cooke domain
 	# use full domain for cookies to only be accesabble from that domain,
@@ -144,7 +144,9 @@ module.exports =
 	# ------
 	# 
 	i18n:
-		defaultLng:"en-US"
+		subdomainLang:
+			www: {lngCode:"en", url: siteUrl}
+		defaultLng: "en"
 
 	# Spelling languages
 	# ------------------
