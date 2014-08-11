@@ -370,7 +370,7 @@ script(type='text/ng-template', id='deleteEntityModalTemplate')
 	.modal-header
 		h3 #{translate("delete")} {{ entity.name }}
 	.modal-body
-		p #{translate("sure_you_want_to_delete")}
+		p !{translate("sure_you_want_to_delete")}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
