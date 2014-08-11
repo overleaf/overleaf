@@ -40,9 +40,10 @@ describe 'Flushing documents :', ->
 				"range":{"start":{"row":2,"column":2},"end":{"row":2,"column":3}},
 				"text":"e"
 			}
-			@rclient.rpush = sinon.stub().callsArg(2)
-			@rclient.publish = sinon.stub().callsArg(2)
-			@rclient.sadd = sinon.stub().callsArg(2)
+			@rclient.multi = sinon.stub().returns @rclient
+			@rclient.exec = sinon.stub().callsArg(0)
+			@rclient.rpush = sinon.stub()
+			@rclient.sadd = sinon.stub()
 			@callback = sinon.stub()
 
 		describe "successfully", ->
@@ -54,9 +55,9 @@ describe 'Flushing documents :', ->
 					.calledWith("PendingUpdates:#{@doc_id}", JSON.stringify(@change))
 					.should.equal true
 
-			it "should notify the doc updater of the change via pub/sub", ->
-				@rclient.publish
-					.calledWith("pending-updates", "#{@project_id}:#{@doc_id}")
+			it "should notify the doc updater of the change via the pending-updates-list queue", ->
+				@rclient.rpush
+					.calledWith("pending-updates-list", "#{@project_id}:#{@doc_id}")
 					.should.equal true
 
 			it "should push the doc id into the pending updates set", ->
@@ -64,29 +65,14 @@ describe 'Flushing documents :', ->
 					.calledWith("DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}")
 					.should.equal true
 
-		describe "with error connecting to redis during push", ->
+		describe "with error connecting to redis during exec", ->
 			beforeEach ->
-				@rclient.rpush = sinon.stub().callsArgWith(2, new Error("something went wrong"))
+				@rclient.exec = sinon.stub().callsArgWith(0, new Error("something went wrong"))
 				@handler.queueChange(@project_id, @doc_id, @change, @callback)
 
 			it "should return an error", ->
 				@callback.calledWithExactly(sinon.match(Error)).should.equal true
 
-		describe "with error connecting to redis during publish", ->
-			beforeEach ->
-				@rclient.publish = sinon.stub().callsArgWith(2, new Error("something went wrong"))
-				@handler.queueChange(@project_id, @doc_id, @change, @callback)
-
-			it "should return an error", ->
-				@callback.calledWithExactly(sinon.match(Error)).should.equal true
-
-		describe "with error connecting to redis during sadd", ->
-			beforeEach ->
-				@rclient.sadd = sinon.stub().callsArgWith(2, new Error("something went wrong"))
-				@handler.queueChange(@project_id, @doc_id, @change, @callback)
-
-			it "should return an error", ->
-				@callback.calledWithExactly(sinon.match(Error)).should.equal true
 
 	describe 'flushProjectToMongo', ->
 		beforeEach ->
