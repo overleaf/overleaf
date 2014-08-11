@@ -1,12 +1,12 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
-modulePath = "../../../../app/js/WorkersManager.js"
+modulePath = "../../../../app/js/DispatchManager.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "WorkersManager", ->
+describe "DispatchManager", ->
 	beforeEach ->
-		@WorkersManager = SandboxedModule.require modulePath, requires:
+		@DispatchManager = SandboxedModule.require modulePath, requires:
 			"./UpdateManager" : @UpdateManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"settings-sharelatex": @settings =
@@ -21,12 +21,12 @@ describe "WorkersManager", ->
 				auth: sinon.stub()
 			@redis.createClient = sinon.stub().returns @client
 			
-			@worker = @WorkersManager.createWorker()
+			@worker = @DispatchManager.createDispatcher()
 			
 		it "should create a new redis client", ->
 			@redis.createClient.called.should.equal true
 			
-		describe "waitForAndProcessUpdate", ->
+		describe "_waitForUpdateThenDispatchWorker", ->
 			beforeEach ->
 				@project_id = "project-id-123"
 				@doc_id = "doc-id-123"
@@ -34,7 +34,7 @@ describe "WorkersManager", ->
 				@client.blpop = sinon.stub().callsArgWith(2, null, ["pending-updates-list", @doc_key])
 				@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
 				
-				@worker.waitForAndProcessUpdate @callback
+				@worker._waitForUpdateThenDispatchWorker @callback
 				
 			it "should call redis with BLPOP", ->
 				@client.blpop
@@ -50,22 +50,22 @@ describe "WorkersManager", ->
 				@callback.called.should.equal true
 				
 		describe "run", ->
-			it "should call waitForAndProcessUpdate until shutting down", (done) ->
+			it "should call _waitForUpdateThenDispatchWorker until shutting down", (done) ->
 				callCount = 0
-				@worker.waitForAndProcessUpdate = (callback = (error) ->) =>
+				@worker._waitForUpdateThenDispatchWorker = (callback = (error) ->) =>
 					callCount++
 					if callCount == 3
 						@settings.shuttingDown = true
 					setTimeout () ->
 						callback()
 					, 10
-				sinon.spy @worker, "waitForAndProcessUpdate"
+				sinon.spy @worker, "_waitForUpdateThenDispatchWorker"
 				
 			
 				@worker.run()
 				
 				setTimeout () =>
-					@worker.waitForAndProcessUpdate.callCount.should.equal 3
+					@worker._waitForUpdateThenDispatchWorker.callCount.should.equal 3
 					done()
 				, 100
 					

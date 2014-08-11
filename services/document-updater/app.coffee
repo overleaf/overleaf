@@ -5,7 +5,7 @@ logger = require('logger-sharelatex')
 logger.initialize("documentupdater")
 RedisManager = require('./app/js/RedisManager')
 UpdateManager = require('./app/js/UpdateManager')
-WorkersManager = require('./app/js/WorkersManager')
+DispatchManager = require('./app/js/DispatchManager')
 Keys = require('./app/js/RedisKeyBuilder')
 redis = require('redis')
 Errors = require "./app/js/Errors"
@@ -35,7 +35,7 @@ rclient.on "message", (channel, doc_key) ->
 	else
 		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update"
 
-WorkersManager.createAndStartWorkers(Settings.workerCount || 10)
+DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
 UpdateManager.resumeProcessing()
 
