@@ -115,14 +115,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
-				input(
-					ng-if="permissions.write",
-					ng-show="entity.renaming",
-					ng-model="inputs.name",
-					ng-blur="finishRenaming()",
-					select-name-when="entity.renaming",
-					on-enter="finishRenaming()"
-				)
+				span.rename-input
+					input(
+						ng-if="permissions.write",
+						ng-show="entity.renaming",
+						ng-model="inputs.name",
+						ng-blur="finishRenaming()",
+						select-name-when="entity.renaming",
+						on-enter="finishRenaming()"
+					)
 
 				span.dropdown(
 					ng-show="entity.selected",
@@ -197,14 +198,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					span(
 						ng-hide="entity.renaming"
 					)  {{ entity.name }}
-					input(
-						ng-if="permissions.write",
-						ng-show="entity.renaming",
-						ng-model="inputs.name",
-						ng-blur="finishRenaming()",
-						select-name-when="entity.renaming",
-						on-enter="finishRenaming()"
-					)
+					span.rename-input
+						input(
+							ng-if="permissions.write",
+							ng-show="entity.renaming",
+							ng-model="inputs.name",
+							ng-blur="finishRenaming()",
+							select-name-when="entity.renaming",
+							on-enter="finishRenaming()"
+						)
 
 					span.dropdown(
 						ng-if="permissions.write"
