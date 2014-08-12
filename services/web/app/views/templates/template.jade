@@ -20,8 +20,8 @@ block content
 					.col-md-6
 						.entry
 							.row
-								.col-md-12
-									a(href=template.pdfUrl)
+								.col-md-12.template-large-pdf-preview
+									a(href="#{template.pdfUrl}?inline=true&name=#{template.name}")
 										img(src="#{template.previewUrl}")
 
 					.col-md-6
@@ -33,7 +33,7 @@ block content
 								| &nbsp;
 
 								a.btn.btn-default(
-									href=template.zipUrl,
+									href="#{template.zipUrl}?name=#{template.name}",
 									rel='nofollow', 
 									ng-click='downloadZip()',
 									tooltip-placement="bottom",
