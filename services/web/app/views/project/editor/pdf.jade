@@ -80,12 +80,12 @@ div.full-size.pdf(ng-controller="PdfController")
 
 	.pdf-errors(ng-show="pdf.timedout || pdf.error")
 		.alert.alert-danger(ng-show="pdf.error")
-			strong #{translate("server_error")}
+			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
 
 		.alert.alert-danger(ng-show="pdf.timedout")
 			p
-				strong #{translate("timedout")}.
+				strong #{translate("timedout")}. 
 				span #{translate("proj_timed_out_reason")}
 			p
 				a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
