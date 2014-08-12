@@ -1,5 +1,6 @@
 define [
 	"ide/pdf/controllers/PdfController"
+	"ide/pdf/controllers/PdfViewToggleController"
 	"ide/pdf/directives/pdfJs"
 ], () ->
 	class PdfManager

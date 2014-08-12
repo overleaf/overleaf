@@ -14,6 +14,17 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		tooltip-append-to-body="true"
 	)
 		i.fa.fa-fw.fa-level-up
+	span(ng-controller="PdfViewToggleController")
+		a(
+			href,
+			ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
+			tooltip="PDF",
+			tooltip-placement="bottom",
+			tooltip-append-to-body="true",
+			ng-click="togglePdfView()",
+			ng-class="{ 'active': ui.view == 'pdf' }"
+		)
+			i.fa.fa-file-pdf-o
 
 	.toolbar-center.project-name(ng-controller="ProjectNameController")
 		span.name(
