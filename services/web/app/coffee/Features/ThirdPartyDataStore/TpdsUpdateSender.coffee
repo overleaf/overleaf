@@ -87,7 +87,16 @@ module.exports =
 				title:"deleteEntity"
 				sl_all_user_ids:JSON.stringify(allUserIds)
 			queue.enqueue options.project_id, "standardHttpRequest", deleteOptions, callback
-
+			
+	pollDropboxForUser: (user_id, callback = (err) ->) ->
+		metrics.inc("tpds.poll-dropbox")
+		logger.log user_id: user_id, "polling dropbox for user"
+		options =
+			method: "POST"
+			uri:"#{settings.apis.thirdPartyDataStore.url}/user/poll"
+			json:
+				user_ids: [user_id]
+		queue.enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
 
 getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
 	Project.findById project_id, "_id owner_ref readOnly_refs collaberator_refs", (err, project)->

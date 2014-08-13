@@ -105,3 +105,20 @@ describe 'TpdsUpdateSender', ->
 				job.headers.sl_all_user_ids.should.eql(JSON.stringify([collaberator_ref_1, read_only_ref_1, user_id]))
 				done()
 			@updateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newProjectName}
+			
+		it "pollDropboxForUser", (done) ->
+			@requestQueuer.enqueue = sinon.stub().callsArg(3)
+			@updateSender.pollDropboxForUser user_id, (error) =>
+				@requestQueuer.enqueue
+					.calledWith(
+						"poll-dropbox:#{user_id}",
+						"standardHttpRequest",
+						{
+							method: "POST"
+							uri: "#{thirdPartyDataStoreApiUrl}/user/poll"
+							json:
+								user_ids: [user_id]
+						}
+					)
+					.should.equal true
+				done()

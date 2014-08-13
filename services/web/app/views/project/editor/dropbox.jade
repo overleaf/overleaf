@@ -20,10 +20,6 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 
 
 			div(ng-show="dbState.hasDropboxFeature && dbState.userIsLinkedToDropbox")
-				progressbar.progress-striped.active(value='dbState.percentageLeftTillNextPoll', type="info")
-				p
-					strong {{dbState.minsTillNextPoll}} #{translate("minutes")} 
-					span #{translate("until_db_checked_for_changes")}
 				p.small
 					| #{translate("this_project_will_appear_in_your_dropbox_folder_at")}
 					strong Dropbox/sharelatex/{{ project.name }}

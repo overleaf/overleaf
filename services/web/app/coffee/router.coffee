@@ -10,7 +10,6 @@ EditorHttpController = require("./Features/Editor/EditorHttpController")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
-dropboxHandler = require('./Features/Dropbox/DropboxHandler')
 SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
 UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
@@ -32,13 +31,14 @@ HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
 TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
-DropboxUserController = require("./Features/Dropbox/DropboxUserController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
 ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
+DropboxRouter = require "./Features/Dropbox/DropboxRouter"
+dropboxHandler = require "./Features/Dropbox/DropboxHandler"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -66,6 +66,7 @@ module.exports = class Router
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
+		DropboxRouter.apply(app)
 
 		app.get '/blog', BlogController.getIndexPage
 		app.get '/blog/*', BlogController.getPage
@@ -79,10 +80,6 @@ module.exports = class Router
 
 		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
-
-		app.get  '/dropbox/beginAuth', DropboxUserController.redirectUserToDropboxAuth
-		app.get  '/dropbox/completeRegistration', DropboxUserController.completeDropboxRegistration
-		app.get  '/dropbox/unlink', DropboxUserController.unlinkDropbox
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
@@ -172,7 +169,6 @@ module.exports = class Router
 		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
 		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
-		app.post '/admin/pollUsersWithDropbox', SecurityManager.requestIsAdmin, AdminController.pollUsersWithDropbox
 		app.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
 		app.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
 

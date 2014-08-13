@@ -73,10 +73,6 @@ module.exports = AdminController =
 	flushProjectToTpds: (req, res)->
 		projectEntityHandler.flushProjectToThirdPartyDataStore req.body.project_id, (err)->
 			res.send 200
-
-	pollUsersWithDropbox: (req, res)->
-		TpdsPollingBackgroundTasks.pollUsersWithDropbox ->
-			res.send 200
 			
 	createMessage: (req, res, next) ->
 		SystemMessageManager.createMessage req.body.content, (error) ->
