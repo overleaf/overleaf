@@ -4,7 +4,7 @@
 			.container
 				.row
 					.col-md-12
-						a(href=recomendSubdomain.url) #{translate("click_here_to_view_sl_in_lng", {lngName:translate(recomendSubdomain.lngCode)})}
+						a(href=recomendSubdomain.url+currentUrl) #{translate("click_here_to_view_sl_in_lng", {lngName:translate(recomendSubdomain.lngCode)})}
 							img(src="/img/flags/32/#{recomendSubdomain.lngCode}.png")
 						button.close
 							span(aria-hidden="true", ng-click="dismiss()") ×

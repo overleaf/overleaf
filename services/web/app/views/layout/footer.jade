@@ -9,13 +9,26 @@ footer.site-footer
 						else
 							| !{item.text}
 							
-			ul.col-md-6
+			ul.col-md-3
+
+				each subdomainDetails, subdomain in settings.i18n.subdomainLang
+					li
+						a(href=subdomainDetails.url+currentUrl)
+							p #{translate(subdomainDetails.lngCode)}
+							img(src="/img/flags/32/#{subdomainDetails.lngCode}.png")
+
+
+			ul.col-md-3
+
 				each item in nav.right_footer
 					li
 						if item.url
 							a(href=item.url, class=item.class) !{item.text}
 						else
 							| !{item.text}
+
+
+
 
 				//- li
 				//- 	a(href="http://www.twitter.com/sharelatex")
