@@ -1,3 +1,5 @@
+
+
 footer.site-footer
 	.container
 		.row
@@ -9,14 +11,22 @@ footer.site-footer
 						else
 							| !{item.text}
 							
-			ul.col-md-3
+			
+			.col-md-3 
+				.dropdown.dropup.subdued
+					a.dropdown-toggle(
+						href="#",
+						data-toggle="dropdown",
+						aria-haspopup="true",
+						aria-expanded="false"
+					) #{translate("language")} 
+						img(src="/img/flags/24/#{currentLngCode}.png")
 
-				each subdomainDetails, subdomain in settings.i18n.subdomainLang
-					li
-						a(href=subdomainDetails.url+currentUrl)
-							p #{translate(subdomainDetails.lngCode)}
-							img(src="/img/flags/32/#{subdomainDetails.lngCode}.png")
-
+					ul.dropdown-menu(role="menu")
+						each subdomainDetails, subdomain in settings.i18n.subdomainLang
+							li.lngOption
+								a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
+									img(src="/img/flags/32/#{subdomainDetails.lngCode}.png")
 
 			ul.col-md-3
 
