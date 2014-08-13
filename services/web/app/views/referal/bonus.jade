@@ -80,11 +80,11 @@ block content
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
 									- if (refered_user_count == 0)
-										p.thanks #{translate("you_not_introed_anyone_to_sl")}
+										p.thanks !{translate("you_not_introed_anyone_to_sl")}
 									- else if (refered_user_count == 1)
-										p.thanks #{translate("you_introed_small_number", {numberOfPeople:"<strong>#{refered_user_count}</strong>"})}
+										p.thanks !{translate("you_introed_small_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
 									- else
-										p.thanks #{translate("you_introed_high_number", {numberOfPeople:"<strong>#{refered_user_count}</strong>"})}
+										p.thanks !{translate("you_introed_high_number", {numberOfPeople:"<strong>" + refered_user_count + "</strong>"})}
 						
 						script(type="text/ng-template", id="BonusLinkToUsModal")
 							.modal-header
