@@ -139,7 +139,6 @@ module.exports =
 		features: defaultFeatures
 	}]
 
-
 	# i18n
 	# ------
 	# 

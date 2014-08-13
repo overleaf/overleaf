@@ -5,6 +5,7 @@ Settings = require('settings-sharelatex')
 SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatters')
 querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
+_ = require("underscore")
 
 fingerprints = {}
 Path = require 'path'
@@ -136,4 +137,10 @@ module.exports = (app)->
 		SystemMessageManager.getMessages (error, messages = []) ->
 			res.locals.systemMessages = messages
 			next()
+
+	app.use (req, res, next)->
+		subdomain = _.find Settings.i18n.subdomainLang, (subdomain)->
+			subdomain.lngCode == req.showUserOtherLng
+		res.locals.recomendSubdomain = subdomain
+		next()
 
