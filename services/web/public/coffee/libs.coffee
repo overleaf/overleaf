@@ -8,4 +8,5 @@ define [
 	"libs/jquery.storage"
 	"libs/fineuploader"
 	"libs/angular-sanitize-1.2.17"
+	"libs/angular-cookies-1.2.22"
 ], () ->

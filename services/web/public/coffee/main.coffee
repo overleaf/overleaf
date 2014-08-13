@@ -9,6 +9,7 @@ define [
 	"main/event-tracking"
 	"main/bonus"
 	"main/system-messages"
+	"main/translations"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
