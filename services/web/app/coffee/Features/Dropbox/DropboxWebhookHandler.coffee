@@ -14,7 +14,7 @@ module.exports = DropboxWebhookHandler =
 		
 	pollDropboxUid: (dropbox_uid, callback = (error) ->) ->
 		User.find {
-			"dropbox.access_token.uid": dropbox_uid
+			"dropbox.access_token.uid": dropbox_uid.toString()
 			"features.dropbox": true
 		}, (error, users = []) ->
 			return callback(error) if error?
