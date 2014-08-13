@@ -1,10 +1,10 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "TranslationsPopupController", ($scope, $cookies) ->
+	App.controller "TranslationsPopupController", ($scope, ipCookie) ->
 
-		$scope.hidei18nNotification = $cookies.hidei18nNotification
+		$scope.hidei18nNotification = ipCookie("hidei18nNotification")
 
 		$scope.dismiss = ->
-			$cookies.hidei18nNotification = true
-			$scope.hidei18nNotification = $cookies.hidei18nNotification
+			ipCookie("hidei18nNotification", true, {expires:180})
+			$scope.hidei18nNotification = ipCookie("hidei18nNotification")

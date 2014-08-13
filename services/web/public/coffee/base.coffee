@@ -10,7 +10,7 @@ define [
 		"ng-context-menu"
 		"underscore"
 		"ngSanitize"
-		"ngCookies"
+		"ipCookie"
 	])
 
 	return App
