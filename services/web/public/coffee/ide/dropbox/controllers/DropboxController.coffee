@@ -27,20 +27,10 @@ define [
 
 		$scope.dbState = cachedState
 		$scope.dbState.hasDropboxFeature = $scope.project.features.dropbox
-		
-		calculatePollTime = ->
-			ide.socket.emit "getLastTimePollHappned", (err, lastTimePollHappened)=>
-				milisecondsSinceLastPoll = new Date().getTime() - lastTimePollHappened
-				roundedMinsSinceLastPoll = Math.round(milisecondsSinceLastPoll / ONE_MIN_MILI)
-
-				$scope.dbState.minsTillNextPoll = POLLING_INTERVAL - roundedMinsSinceLastPoll
-				$scope.dbState.percentageLeftTillNextPoll = ((roundedMinsSinceLastPoll / POLLING_INTERVAL) * 100)
-				$timeout calculatePollTime, 60 * 1000
 
 		ide.socket.emit "getUserDropboxLinkStatus", user_id, (err, status)=>
 			$scope.dbState.gotLinkStatus = true
-			if status.registered 
-				calculatePollTime()
+			if status.registered
 				$scope.dbState.userIsLinkedToDropbox = true
 				cachedState = $scope.dbState
 		

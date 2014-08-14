@@ -16,13 +16,24 @@
 	a:not(.btn) {
 		display: inline-block;
 		color: @gray-light;
-		padding: 5px 12px 6px;
-		margin: 0;
+		padding: 4px 10px 5px;
+		margin: 1px 2px;
 		border-radius: @border-radius-small;
 		&:hover {
 			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
 			color: @gray-dark;
 			text-decoration: none;
+		}
+		&.active, &:active {
+			.label {
+				display: none;
+			}
+			color: white;
+			background-color: @link-color;
+			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
+			&:hover {
+				color: white;
+			}
 		}
 	}
 
@@ -81,6 +92,7 @@
 		height: 32px;
 		a {
 			padding: 4px 2px 2px;
+			margin: 0;
 			margin-left: 6px;
 		}
 		.toolbar-right {

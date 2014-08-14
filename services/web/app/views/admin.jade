@@ -45,7 +45,7 @@ block content
 										.form-group
 											button.btn-primary.btn(type='submit') Link
 											
-							tab(heading="TPDS Management")
+							tab(heading="TPDS/Dropbox Management")
 								h3 Flush project to TPDS
 								.row
 									form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/flushProjectToTpds')
@@ -56,10 +56,15 @@ block content
 										.form-group
 											button.btn-primary.btn(type='submit') Flush
 								hr
-								.row-spaced
-									form(enctype='multipart/form-data', method='post',action='/admin/pollUsersWithDropbox')
+								h3 Poll Dropbox for user
+								.row
+									form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/pollDropboxForUser')
 										input(name="_csrf", type="hidden", value=csrfToken)
-										button.btn.btn-primary(type="submit") Poll users with dropbox
+										.form-group
+											label(for='user_id') user_id 
+											input.form-control(type='text',  name='user_id', placeholder='user_id', required)
+										.form-group
+											button.btn-primary.btn(type='submit') Poll
 										
 							tab(heading="System Messages")
 								each message in systemMessages 

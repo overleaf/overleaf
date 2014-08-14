@@ -46,14 +46,15 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
 
-		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf')")
+		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')")
 			ul.list-unstyled.file-tree-list
 				li(
 					ng-class="{ 'selected': ui.view == 'pdf' }"
+					ng-controller="PdfViewToggleController"
 				)
 					.entity
 						.entity-name(
-							ng-click="ui.view = 'pdf'"
+							ng-click="togglePdfView()"
 						)
 							i.fa.fa-fw.toggle
 							i.fa.fa-fw.fa-file-pdf-o
@@ -115,14 +116,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
-				input(
-					ng-if="permissions.write",
-					ng-show="entity.renaming",
-					ng-model="inputs.name",
-					ng-blur="finishRenaming()",
-					select-name-when="entity.renaming",
-					on-enter="finishRenaming()"
-				)
+				span.rename-input
+					input(
+						ng-if="permissions.write",
+						ng-show="entity.renaming",
+						ng-model="inputs.name",
+						ng-blur="finishRenaming()",
+						select-name-when="entity.renaming",
+						on-enter="finishRenaming()"
+					)
 
 				span.dropdown(
 					ng-show="entity.selected",
@@ -197,14 +199,15 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					span(
 						ng-hide="entity.renaming"
 					)  {{ entity.name }}
-					input(
-						ng-if="permissions.write",
-						ng-show="entity.renaming",
-						ng-model="inputs.name",
-						ng-blur="finishRenaming()",
-						select-name-when="entity.renaming",
-						on-enter="finishRenaming()"
-					)
+					span.rename-input
+						input(
+							ng-if="permissions.write",
+							ng-show="entity.renaming",
+							ng-model="inputs.name",
+							ng-blur="finishRenaming()",
+							select-name-when="entity.renaming",
+							on-enter="finishRenaming()"
+						)
 
 					span.dropdown(
 						ng-if="permissions.write"

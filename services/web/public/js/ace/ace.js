@@ -11428,6 +11428,7 @@ var Editor = function(renderer, session) {
 
         this._signal("change", e);
         this.$cursorChange();
+        this.$updateHighlightActiveLine();
     };
 
     this.onTokenizerUpdate = function(e) {
@@ -14853,8 +14854,10 @@ var VirtualRenderer = function(container, theme) {
                 this.$changedLines.lastRow = lastRow;
         }
 
-        if (this.$changedLines.firstRow > this.layerConfig.lastRow ||
-            this.$changedLines.lastRow < this.layerConfig.firstRow)
+        if (this.$changedLines.lastRow < this.layerConfig.firstRow)
+            this.$changedLines.lastRow = this.layerConfig.lastRow
+
+        if (this.$changedLines.firstRow > this.layerConfig.lastRow)
             return;
         this.$loop.schedule(this.CHANGE_LINES);
     };
@@ -15218,6 +15221,11 @@ var VirtualRenderer = function(container, theme) {
             changes & this.CHANGE_H_SCROLL
         ) {
             changes |= this.$computeLayerConfig();
+            if (config.firstRow != this.layerConfig.firstRow && config.firstRowScreen == this.layerConfig.firstRowScreen) {
+                this.scrollTop = this.scrollTop + (config.firstRow - this.layerConfig.firstRow) * this.lineHeight;
+                changes = changes | this.CHANGE_SCROLL;
+                changes |= this.$computeLayerConfig();
+            }
             config = this.layerConfig;
             this.$updateScrollBarV();
             if (changes & this.CHANGE_H_SCROLL)

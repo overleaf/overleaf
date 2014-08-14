@@ -12,7 +12,7 @@ rclient.auth(Settings.redis.web.password)
 RecurlyWrapper = require('../Subscription/RecurlyWrapper')
 SubscriptionHandler = require('../Subscription/SubscriptionHandler')
 projectEntityHandler = require('../Project/ProjectEntityHandler')
-TpdsPollingBackgroundTasks = require("../ThirdPartyDataStore/TpdsPollingBackgroundTasks")
+TpdsUpdateSender = require("../ThirdPartyDataStore/TpdsUpdateSender")
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 SystemMessageManager = require("../SystemMessages/SystemMessageManager")
 
@@ -74,8 +74,9 @@ module.exports = AdminController =
 		projectEntityHandler.flushProjectToThirdPartyDataStore req.body.project_id, (err)->
 			res.send 200
 
-	pollUsersWithDropbox: (req, res)->
-		TpdsPollingBackgroundTasks.pollUsersWithDropbox ->
+	pollDropboxForUser: (req, res)->
+		user_id = req.body.user_id
+		TpdsUpdateSender.pollDropboxForUser user_id, () ->
 			res.send 200
 			
 	createMessage: (req, res, next) ->

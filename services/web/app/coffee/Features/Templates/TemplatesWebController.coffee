@@ -36,7 +36,17 @@ module.exports = TemplatesWebController =
 
 	proxyToTemplatesApi: (req, res)->
 		url = req.url
-		logger.log url:url, "proxying request to templates api"
+		
+		name = req.query.name or "Template"
+		if req.query.inline?
+			disposition = "inline"
+		else
+			disposition = "attachment"
+		console.log "HEADER", "#{disposition}; filename=#{name};"
+		res.header({"content-disposition": "#{disposition}; filename=#{name}.#{req.params.file_type};"})
+		
+		logger.log url:url, template_name: name, disposition: disposition, "proxying request to templates api"
+		
 		getReq = request.get("#{settings.apis.templates_api.url}#{url}")
 		getReq.pipe(res)
 		getReq.on "error", (error) ->
