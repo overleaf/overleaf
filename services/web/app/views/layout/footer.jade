@@ -13,22 +13,23 @@ footer.site-footer
 							
 			
 			.col-md-3 
-				.dropdown.dropup.subdued
-					a.dropdown-toggle(
-						href="#",
-						data-toggle="dropdown",
-						aria-haspopup="true",
-						aria-expanded="false"
-					) #{translate("language")}
-						| &nbsp;
-						img(src="/img/flags/24/#{currentLngCode}.png")
+				if Object.keys(settings.i18n.subdomainLang).length > 1
+					.dropdown.dropup.subdued
+						a.dropdown-toggle(
+							href="#",
+							data-toggle="dropdown",
+							aria-haspopup="true",
+							aria-expanded="false"
+						) #{translate("language")}
+							| &nbsp;
+							img(src="/img/flags/24/#{currentLngCode}.png")
 
-					ul.dropdown-menu(role="menu")
-						each subdomainDetails, subdomain in settings.i18n.subdomainLang
-							li.lngOption
-								a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
+						ul.dropdown-menu(role="menu")
+							each subdomainDetails, subdomain in settings.i18n.subdomainLang
+								li.lngOption
+									a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
 
-									img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
+										img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
 
 			ul.col-md-3
 
