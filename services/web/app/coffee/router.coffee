@@ -169,6 +169,7 @@ module.exports = class Router
 		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
 		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
 		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
+		app.post '/admin/pollDropboxForUser', SecurityManager.requestIsAdmin, AdminController.pollDropboxForUser
 		app.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
 		app.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
 
