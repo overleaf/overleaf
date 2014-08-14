@@ -20,8 +20,9 @@ footer.site-footer
 							li.dropdown-header #{translate("language")}
 							each subdomainDetails, subdomain in settings.i18n.subdomainLang
 								li.lngOption
-									a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
+									a.menu-indent(href=subdomainDetails.url+currentUrl)
 										img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
+										|  #{translate(subdomainDetails.lngCode)}
 										
 				each item in nav.left_footer
 					li
