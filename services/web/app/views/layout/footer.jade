@@ -4,34 +4,33 @@ footer.site-footer
 	.container
 		.row
 			ul.col-md-6
+				
+				if Object.keys(settings.i18n.subdomainLang).length > 1
+					li.dropdown.dropup.subdued
+						a.dropdown-toggle(
+							href="#",
+							data-toggle="dropdown",
+							aria-haspopup="true",
+							aria-expanded="false",
+							tooltip="#{translate('language')}"
+						)
+							img(src="/img/flags/24/#{currentLngCode}.png")
+
+						ul.dropdown-menu(role="menu")
+							li.dropdown-header #{translate("language")}
+							each subdomainDetails, subdomain in settings.i18n.subdomainLang
+								li.lngOption
+									a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
+										img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
+										
 				each item in nav.left_footer
 					li
 						if item.url
 							a(href=item.url, class=item.class) !{item.text}
 						else
 							| !{item.text}
-							
-			
-			.col-md-3 
-				if Object.keys(settings.i18n.subdomainLang).length > 1
-					.dropdown.dropup.subdued
-						a.dropdown-toggle(
-							href="#",
-							data-toggle="dropdown",
-							aria-haspopup="true",
-							aria-expanded="false"
-						) #{translate("language")}
-							| &nbsp;
-							img(src="/img/flags/24/#{currentLngCode}.png")
 
-						ul.dropdown-menu(role="menu")
-							each subdomainDetails, subdomain in settings.i18n.subdomainLang
-								li.lngOption
-									a.menu-indent(href=subdomainDetails.url+currentUrl) #{translate(subdomainDetails.lngCode)}
-
-										img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
-
-			ul.col-md-3
+			ul.col-md-6.text-right
 
 				each item in nav.right_footer
 					li

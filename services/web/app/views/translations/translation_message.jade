@@ -1,11 +1,8 @@
 - if(typeof(recomendSubdomain) != "undefined")
 	span(ng-controller="TranslationsPopupController", ng-cloak)
 		.translations-message(ng-hide="hidei18nNotification")
-			.container
-				.row
-					.col-md-12
-						a(href=recomendSubdomain.url+currentUrl) #{translate("click_here_to_view_sl_in_lng", {lngName:translate(recomendSubdomain.lngCode)})}
-							img(src="/img/flags/32/#{recomendSubdomain.lngCode}.png")
-						button.close
-							span(aria-hidden="true", ng-click="dismiss()") ×
-							span.sr-only Close
+			a(href=recomendSubdomain.url+currentUrl) !{translate("click_here_to_view_sl_in_lng", {lngName:"<strong>" + translate(recomendSubdomain.lngCode) + "</strong>"})} 
+				img(src="/img/flags/24/#{recomendSubdomain.lngCode}.png")
+			button.close.pull-right
+				span(aria-hidden="true", ng-click="dismiss()") &times;
+				span.sr-only Close
