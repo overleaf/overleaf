@@ -116,9 +116,11 @@ module.exports = (grunt) ->
 		Helpers.checkS3 @async()
 	grunt.registerTask "check:fs", "Check that local filesystem options are configured", () ->
 		Helpers.checkFS @async()
+	grunt.registerTask "check:aspell", "Check that aspell is installed", () ->
+		Helpers.checkAspell @async()
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
-	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs"]
+	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs", "check:aspell"]
 
 	grunt.registerTask "build_deb", "Build an installable .deb file from the current directory", () ->
 		Helpers.buildDeb @async()
@@ -235,6 +237,33 @@ module.exports = (grunt) ->
 							"""
 							error = new Error("latexmk is too old")
 				callback(error)
+				
+		checkAspell: (callback = (error) ->) ->
+			grunt.log.write "Checking aspell is installed... "
+			exec "aspell dump dicts", (error, stdout, stderr) ->
+				if error? and error.message.match("command not found")
+					grunt.log.error "FAIL."
+					grunt.log.errorlns """
+					Either aspell is not installed or is not in your PATH.
+					
+					On Ubuntu you can install aspell with:
+						sudo apt-get install aspell
+						
+					Or on a mac:
+						brew install aspell
+						
+					This is not a fatal error, but the spell-checker will not work
+					without aspell
+					"""
+					return callback(error)
+				else if error?
+					return callback(error)
+				else
+					grunt.log.writeln "OK."
+					grunt.log.writeln "The following spell check dictionaries are available:"
+					grunt.log.write stdout
+					callback()
+				callback(error)
 
 		checkS3: (callback = (error) ->) ->
 			Settings = require "settings-sharelatex"
@@ -269,7 +298,7 @@ module.exports = (grunt) ->
 						Could not connect to Amazon S3. Please check your credentials.
 						"""
 					else
-						grunt.log.write "OK."
+						grunt.log.writeln "OK."
 					callback()
 			else
 				grunt.log.writeln "Filestore other than S3 configured. Not checking S3."
