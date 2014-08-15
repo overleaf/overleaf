@@ -23,7 +23,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     chef.add_recipe 'mongodb'
     chef.add_recipe 'nodejs'
     chef.add_recipe 'texlive'
-    chef.add_recipe 'sharelatex'
+    chef.add_recipe 'packages'
 
     # You may also specify custom JSON attributes:
     chef.json = {}

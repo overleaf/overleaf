@@ -207,7 +207,7 @@ module.exports = (grunt) ->
 		checkLatexmk: (callback = (error) ->) ->
 			grunt.log.write "Checking latexmk is installed... "
 			exec "latexmk --version", (error, stdout, stderr) ->
-				if error? and error.message.match("command not found")
+				if error? and error.message.match("not found")
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either latexmk is not installed or is not in your PATH.
@@ -241,7 +241,7 @@ module.exports = (grunt) ->
 		checkAspell: (callback = (error) ->) ->
 			grunt.log.write "Checking aspell is installed... "
 			exec "aspell dump dicts", (error, stdout, stderr) ->
-				if error? and error.message.match("command not found")
+				if error? and error.message.match("not found")
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either aspell is not installed or is not in your PATH.
@@ -326,7 +326,7 @@ module.exports = (grunt) ->
 		checkMake: (callback = (error) ->) ->
 			grunt.log.write "Checking make is installed... "
 			exec "make --version", (error, stdout, stderr) ->
-				if error? and error.message.match("command not found")
+				if error? and error.message.match("not found")
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either make is not installed or is not in your path.
