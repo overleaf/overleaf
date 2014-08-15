@@ -1,0 +1,39 @@
+{
+  "name": "chat-sharelatex",
+  "version": "0.0.1",
+  "dependencies": {
+    "async": "0.2.9",
+    "express": "3.3.1",
+    "lynx": "0.0.11",
+    "request": "2.21.0",
+    "socket.io": "0.9.14",
+    "settings": "git+ssh://git@bitbucket.org:sharelatex/settings-sharelatex.git#master",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "logger": "git+ssh://git@bitbucket.org:sharelatex/logger-sharelatex.git#bunyan",
+    "grunt-requirejs": "~0.4.0",
+    "grunt-mocha-test": "~0.8.0",
+    "mongojs": "0.9.11",
+    "redis": "~0.10.1",
+    "coffee-script": "~1.7.1",
+    "timekeeper": "0.0.4"
+  },
+  "devDependencies": {
+    "chai": "",
+    "sandboxed-module": "",
+    "sinon": "",
+    "timekeeper": "",
+    "grunt": "~0.4.1",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-copy": "~0.4.1",
+    "grunt-contrib-less": "~0.8.2",
+    "grunt-contrib-jade": "~0.8.0",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-nodemon": "~0.1.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-concurrent": "~0.4.2",
+    "grunt-plato": "~0.2.1",
+    "grunt-notify": "~0.2.16"
+  }
+}
