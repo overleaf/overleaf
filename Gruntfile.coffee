@@ -324,10 +324,10 @@ module.exports = (grunt) ->
 						Could not find directory "#{Settings.filestore.stores.user_files}". 
 						Please check your configuration.
 						"""
+					callback()
 			else
 				grunt.log.writeln "Filestore other than FS configured. Not checking FS."
-			callback()
-
+				callback()
 
 		checkMake: (callback = (error) ->) ->
 			grunt.log.write "Checking make is installed... "
