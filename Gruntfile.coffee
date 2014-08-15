@@ -24,6 +24,12 @@ SERVICES = [{
 }, {
 	name: "docstore"
 	repo: "https://github.com/sharelatex/docstore-sharelatex.git"
+}, {
+	name: "chat"
+	repo: "https://github.com/sharelatex/chat-sharelatex.git"
+}, {
+	name: "tags"
+	repo: "https://github.com/sharelatex/tags-sharelatex.git"
 }]
 
 module.exports = (grunt) ->
