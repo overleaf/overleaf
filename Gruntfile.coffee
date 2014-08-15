@@ -247,9 +247,11 @@ module.exports = (grunt) ->
 					Either aspell is not installed or is not in your PATH.
 					
 					On Ubuntu you can install aspell with:
+					
 						sudo apt-get install aspell
 						
 					Or on a mac:
+					
 						brew install aspell
 						
 					This is not a fatal error, but the spell-checker will not work
@@ -330,11 +332,11 @@ module.exports = (grunt) ->
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either make is not installed or is not in your path.
-
+					
 					On Ubuntu you can install make with:
-
+					
 					    sudo apt-get install build-essential
-
+					
 					"""
 					return callback(error)
 				else if error?
