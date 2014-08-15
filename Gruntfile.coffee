@@ -313,11 +313,11 @@ module.exports = (grunt) ->
 		checkFS: (callback = (error) ->) ->
 			Settings = require "settings-sharelatex"
 			if Settings.filestore.backend=="fs"
-				grunt.log.write "Checking FS configuration..."
+				grunt.log.write "Checking FS configuration... "
 				fs = require("fs")
 				fs.exists Settings.filestore.stores.user_files, (exists) ->
 					if exists
-						grunt.log.write "OK."
+						grunt.log.writeln "OK."
 					else
 						grunt.log.error "FAIL."
 						grunt.log.errorlns """
