@@ -20,7 +20,8 @@ server.post "/user/:user_id/learn", SpellingAPIController.learn
 server.get "/status", (req, res)->
 	res.send(status:'spelling api is up')
 
-host = Settings.host || "localhost"
-port = Settings.port || 3005
-server.listen port, host, () ->
-	console.log "#{server.name} listening at #{host}:#{port}"
+host = Settings.internal?.spelling?.host || "localhost"
+port = Settings.internal?.spelling?.port || 3005
+server.listen port, host, (error) ->
+	throw error if error?
+	logger.log "spelling-sharelatex listening at #{host}:#{port}"

@@ -47,7 +47,7 @@ class ASpellRunner
 				word = words[i]
 				@sendWord(word)
 				i++
-				process.nextTick tick
+				setTimeout tick, 0
 			else
 				@close()
 

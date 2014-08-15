@@ -11,14 +11,8 @@ describe "LearnedWordsManager", ->
 		@db =
 			spellingPreferences:
 				update: sinon.stub().callsArg(3)
-		@cache =
-			get: sinon.stub()
-			set: sinon.stub()
-			break: sinon.stub()
 		@LearnedWordsManager = SandboxedModule.require modulePath, requires:
 			"./DB" : @db
-			"./Cache":@cache
-
 
 	describe "learnWord", ->
 		beforeEach ->
@@ -41,7 +35,6 @@ describe "LearnedWordsManager", ->
 
 	describe "getLearnedWords", ->
 		beforeEach ->
-			@cache.get.callsArgWith(1)
 			@wordList = ["apples", "bananas", "pears"]
 			@db.spellingPreferences.findOne = (conditions, callback) =>
 				callback null, learnedWords: @wordList
