@@ -2,6 +2,10 @@ module.exports = (grunt) ->
 
 	# Project configuration.
 	grunt.initConfig
+		execute:
+			app:
+				src: "app.js"
+
 		coffee:
 			client: 
 				expand: true,
@@ -115,9 +119,13 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks 'grunt-mocha-test'
 	grunt.loadNpmTasks 'grunt-plato'
+	grunt.loadNpmTasks 'grunt-execute'
+	grunt.loadNpmTasks 'grunt-bunyan'
+	
 
 	grunt.registerTask 'compile', ['clean',  'copy', 'coffee', 'less', 'jade', 'requirejs']
 	grunt.registerTask 'install', ['compile']
+	grunt.registerTask 'run', ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'compileAndCompress', ['compile', 'uglify']
 	grunt.registerTask 'default', ['compile', 'concurrent']
 	grunt.registerTask 'test:unit', ['compile', 'mochaTest:unit']
