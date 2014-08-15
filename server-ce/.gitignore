@@ -8,6 +8,9 @@ clsi
 filestore
 track-changes
 docstore
+tags
+chat
+spelling
 
 compiles
 cache

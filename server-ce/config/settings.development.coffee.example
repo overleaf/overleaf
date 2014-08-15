@@ -85,11 +85,17 @@ module.exports =
 		documentupdater:
 			port: docUpdaterPort = 3003
 			host: "localhost"
-		clsi:
-			port: clsiPort = 3013
-			host: "localhost"
 		filestore:
 			port: filestorePort = 3009
+			host: "localhost"
+		chat:
+			port: chatPort = 3010
+			host: "localhost"
+		tags:
+			port: tagsPort = 3012
+			host: "localhost"
+		clsi:
+			port: clsiPort = 3013
 			host: "localhost"
 		trackchanges:
 			port: trackchangesPort = 3015
@@ -120,7 +126,7 @@ module.exports =
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
 		tags:
-			url :"http://localhost:3012"
+			url :"http://localhost:#{tagsPort}"
 		spelling:
 			url : "http://localhost:3005"
 		versioning:
@@ -133,7 +139,7 @@ module.exports =
 			apiKey: ""
 			subdomain: ""
 		chat:
-			url: "http://localhost:3010"
+			url: "http://localhost:#{chatPort}"
 		templates:
 			port: 3007
 		blog:
