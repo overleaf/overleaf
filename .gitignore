@@ -16,6 +16,7 @@ compiles
 cache
 user_files
 template_files
+data
 
 db.sqlite
 
