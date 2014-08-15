@@ -116,6 +116,11 @@ between any two time points.
 
 The backend API for storing and fetching chat messages.
 
+### [tags](https://github.com/sharelatex/tags-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/tags-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/tags-sharelatex)
+
+The backend API for managing project tags (folders).
+
+
 Contributing
 ------------
 
