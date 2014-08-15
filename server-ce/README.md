@@ -120,6 +120,10 @@ The backend API for storing and fetching chat messages.
 
 The backend API for managing project tags (folders).
 
+### [spelling](https://github.com/sharelatex/spelling-sharelatex)
+
+An API for running server-side spelling checking on ShareLaTeX documents.
+
 
 Contributing
 ------------

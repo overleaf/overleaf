@@ -30,6 +30,9 @@ SERVICES = [{
 }, {
 	name: "tags"
 	repo: "https://github.com/sharelatex/tags-sharelatex.git"
+}, {
+	name: "spelling"
+	repo: "https://github.com/sharelatex/spelling-sharelatex.git"
 }]
 
 module.exports = (grunt) ->
