@@ -7,3 +7,4 @@
 
 package 'git'
 package 'vim'
+package 'build-essential'
