@@ -97,6 +97,11 @@ modifications.
 The Common LaTeX Service Interface (CLSI) which provides an API for compiling LaTeX 
 documents.
 
+### [docstore](https://github.com/sharelatex/docstore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/docstore-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/docstore-sharelatex)
+
+An API for performing CRUD (Create, Read, Update and Delete) operations on text files
+stored in ShareLaTeX.
+
 ### [filestore](https://github.com/sharelatex/filestore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/filestore-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/filestore-sharelatex)
 
 An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
