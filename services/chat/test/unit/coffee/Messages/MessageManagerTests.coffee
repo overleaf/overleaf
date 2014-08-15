@@ -11,6 +11,7 @@ describe "MessageManager", ->
 	beforeEach ->
 		@MessageManager = SandboxedModule.require modulePath, requires:
 			"../WebApi/WebApiManager": @WebApiManager = {}
+			"../../mongojs": {} 
 		@callback = sinon.stub()
 
 	describe "populateMessagesWithUsers", ->
