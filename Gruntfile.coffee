@@ -213,7 +213,12 @@ module.exports = (grunt) ->
 					Either latexmk is not installed or is not in your PATH.
 
 					latexmk comes with TexLive 2013, and must be a version from 2013 or later.
-					This is a not a fatal error, but compiling will not work without latexmk
+					If you have already have TeXLive installed, then make sure it is
+					included in your PATH (example for 64-bit linux):
+					
+						export PATH=$PATH:/usr/local/texlive/2014/bin/x86_64-linux/
+					
+					This is a not a fatal error, but compiling will not work without latexmk.
 					"""
 					return callback(error)
 				else if error?
@@ -254,8 +259,7 @@ module.exports = (grunt) ->
 					
 						brew install aspell
 						
-					This is not a fatal error, but the spell-checker will not work
-					without aspell
+					This is not a fatal error, but the spell-checker will not work without aspell
 					"""
 					return callback(error)
 				else if error?
