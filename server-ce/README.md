@@ -105,7 +105,11 @@ An API for performing CRUD (Create, Read, Update and Delete) operations on binar
 ### [track-changes](https://github.com/sharelatex/track-changes-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/track-changes-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/track-changes-sharelatex)
 
 An API for compressing and storing the updates applied to a document, and then rendering a diff of the changes
-between any two time points. *Still in development and not hooked into the UI yet*.
+between any two time points.
+
+### [chat](https://github.com/sharelatex/chat-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/chat-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/chat-sharelatex)
+
+The backend API for storing and fetching chat messages.
 
 Contributing
 ------------
