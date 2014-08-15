@@ -12,11 +12,8 @@ tags
 chat
 spelling
 
-compiles
-cache
-user_files
-template_files
 data
+tmp
 
 db.sqlite
 

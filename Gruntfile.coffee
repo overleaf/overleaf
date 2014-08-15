@@ -5,6 +5,8 @@ rimraf = require "rimraf"
 Path = require "path"
 semver = require "semver"
 knox = require "knox"
+crypto = require "crypto"
+async = require "async"
 
 SERVICES = [{
 	name: "web"
@@ -75,7 +77,7 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
-						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:config"])
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:dirs", "install:config"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
 						"Config tasks": ["install:config"]
 						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
@@ -92,6 +94,8 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
 		Helpers.installConfig @async()
+	grunt.registerTask 'install:dirs', "Copy the example config into the real config", () ->
+		Helpers.createDataDirs @async()
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		["check:make"].concat(
 			("install:#{service.name}" for service in SERVICES)
@@ -164,12 +168,34 @@ module.exports = (grunt) ->
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
+				
+		createDataDirs: (callback = (error) ->) ->
+			DIRS = [
+				"tmp/dumpFolder"
+				"tmp/uploads"
+				"data/user_files"
+				"data/compiles"
+				"data/cache"
+			]
+			jobs = []
+			for dir in DIRS
+				do (dir) ->
+					jobs.push (callback) ->
+						path = Path.join(__dirname, dir)
+						grunt.log.writeln "Ensuring '#{path}' exists"
+						exec "mkdir -p #{path}", callback
+			async.series jobs, callback
 
 		installConfig: (callback = (error) ->) ->
-			if !fs.existsSync("config/settings.development.coffee")
-				grunt.log.writeln "Copying example config into config/settings.development.coffee"
-				exec "cp config/settings.development.coffee.example config/settings.development.coffee", (error, stdout, stderr) ->
-					callback(error)
+			src = "config/settings.development.coffee.example"
+			dest = "config/settings.development.coffee"
+			if !fs.existsSync(dest)
+				grunt.log.writeln "Creating config at #{dest}"
+				config = fs.readFileSync(src).toString()
+				config = config.replace /CRYPTO_RANDOM/g, () ->
+					crypto.randomBytes(64).toString("hex")
+				fs.writeFileSync dest, config
+				callback()
 			else
 				grunt.log.writeln "Config file already exists. Skipping."
 				callback()
