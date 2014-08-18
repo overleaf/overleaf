@@ -283,23 +283,23 @@ module.exports =
 #		name : "cv_or_resume",
 #		url : "/templates/cv"
 #	}, {
-#                name : "cover_letter",
-#                url : "/templates/cover-letters"
-#        }, {
-#                name : "journal_article",
-#                url : "/templates/journals"
-#        }, {
-#                name : "presentation",
-#                url : "/templates/presentations"
-#        }, {
-#                name : "thesis",
-#                url : "/templates/thesis"
-#        }, {
-#                name : "bibliographies",
-#                url : "/templates/bibliographies"
-#        }, {
-#                name : "view_all",
-#                url : "/templates"
+#		name : "cover_letter",
+#		url : "/templates/cover-letters"
+#	}, {
+#		name : "journal_article",
+#		url : "/templates/journals"
+#	}, {
+#		name : "presentation",
+#		url : "/templates/presentations"
+#	}, {
+#		name : "thesis",
+#		url : "/templates/thesis"
+#	}, {
+#		name : "bibliographies",
+#		url : "/templates/bibliographies"
+#	}, {
+#		name : "view_all",
+#		url : "/templates"
 #	}]
 
 
