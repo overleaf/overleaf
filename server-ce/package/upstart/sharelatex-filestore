@@ -1,4 +1,4 @@
-description "sharelatex-filestore"
+description "sharelatex-web"
 author      "ShareLaTeX <team@sharelatex.com>"
 
 start on started mountall
@@ -9,11 +9,19 @@ respawn
 limit nofile 8192 8192
 
 pre-start script
-	mkdir -p /var/log/sharelatex
+    mkdir -p /var/log/sharelatex
 end script
 
 script
-	echo $$ > /var/run/sharelatex-filestore.pid
-	chdir /var/www/sharelatex/filestore
-	exec sudo -u sharelatex -g sharelatex env SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee NODE_ENV=production node app.js >> /var/log/sharelatex/filestore.log 2>&1
+    SERVICE=filestore
+    USER=sharelatex
+    GROUP=sharelatex
+    # You may need to replace this with an absolute 
+    # path to Node.js if it's not in your system PATH.
+    NODE=node
+    SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee
+
+    echo $$ > /var/run/sharelatex-$SERVICE.pid
+    chdir /var/www/sharelatex/$SERVICE
+    exec sudo -u $USER -g $GROUP env SHARELATEX_CONFIG=$SHARELATEX_CONFIG NODE_ENV=production $NODE app.js >> /var/log/sharelatex/$SERVICE.log 2>&1
 end script

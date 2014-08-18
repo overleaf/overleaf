@@ -126,8 +126,10 @@ module.exports = (grunt) ->
 		Helpers.checkMake @async()
 	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs", "check:aspell"]
 
-	grunt.registerTask "build_deb", "Build an installable .deb file from the current directory", () ->
+	grunt.registerTask "build:deb", "Build an installable .deb file from the current directory", () ->
 		Helpers.buildDeb @async()
+	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
+		Helpers.buildUpstartScripts()
 
 	Helpers =
 		installService: (repo_src, dir, callback = (error) ->) ->
@@ -375,13 +377,18 @@ module.exports = (grunt) ->
 					grunt.log.write "OK."
 					return callback()
 
+		buildUpstartScripts: () ->
+			template = fs.readFileSync("package/upstart/sharelatex-template").toString()
+			for service in SERVICES
+				fs.writeFileSync "package/upstart/sharelatex-#{service.name}", template.replace(/__SERVICE__/g, service.name)
+
 		buildDeb: (callback = (error) ->) ->
 			# TODO: filestore uses local 'uploads' directory, not configurable in settings
 			command = ["-s", "dir", "-t", "deb", "-n", "sharelatex", "-v", "0.0.1", "--verbose"]
 			command.push(
 				"--maintainer", "ShareLaTeX <team@sharelatex.com>"
 				"--config-files", "/etc/sharelatex/settings.coffee",
-				"--directories",  "/var/data/sharelatex"
+				"--directories",  "/var/lib/sharelatex"
 				"--directories",  "/var/log/sharelatex"
 			)
 
@@ -391,9 +398,8 @@ module.exports = (grunt) ->
 				"--depends", "nodejs > 0.10.0"
 			)
 
-			template = fs.readFileSync("package/upstart/sharelatex-template").toString()
+			@buildUpstartScripts()
 			for service in SERVICES
-				fs.writeFileSync "package/upstart/sharelatex-#{service.name}", template.replace(/SERVICE/g, service.name)
 				command.push(
 					"--deb-upstart", "package/upstart/sharelatex-#{service.name}"
 				)
@@ -409,8 +415,8 @@ module.exports = (grunt) ->
 
 			for dir in ["user_files", "uploads", "compiles", "cache", "dump"]
 				after_install_script += """
-					mkdir -p /var/data/sharelatex/#{dir}
-					chown sharelatex:sharelatex /var/data/sharelatex/#{dir}
+					mkdir -p /var/lib/sharelatex/#{dir}
+					chown sharelatex:sharelatex /var/lib/sharelatex/#{dir}
 					
 				"""
 
