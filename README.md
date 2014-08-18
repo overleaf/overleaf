@@ -1,58 +1,17 @@
 ShareLaTeX
 ==========
 
-[ShareLaTeX](https://www.sharelatex.com) is now open source! ShareLaTeX is an online real-time collaborative LaTeX editor, and you can now run your own local version where you can host, edit, collaborate in real-time, and compile your LaTeX documents. We’re still 100% focused on running the hosted version at http://www.sharelatex.com, but we want to be more flexible in how you can use ShareLaTeX, and give something back to our wonderful community.
-
-**[Read more on our blog](https://www.sharelatex.com/blog/2014/02/21/sharelatex-is-now-open-source.html#.UwcnsEJ_ugc)**
+[ShareLaTeX](https://www.sharelatex.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at http://www.sharelatex.com, but you can also run your own local version, and contribute to the development of ShareLaTeX.
 
 Installation
 ------------
 
+We have detailed installation instructions in our wiki:
+
+* [Installing ShareLaTeX in Production](https://github.com/sharelatex/sharelatex/wiki/Production-Installation-Instructions)
+* [Setting up a ShareLaTeX Development Environment](https://github.com/sharelatex/sharelatex/wiki/Setting-up-a-Development-Environment)
+
 **[Please help us make ShareLaTeX as easy to install as possible by answering our quick survey about your system and needs](https://sharelatex.typeform.com/to/PLNits)**
-
-We're still figuring out the easiest way to let you install ShareLaTeX and get up and running quickly. If you fill in the above survey in we will be eternally grateful and it will help us make this install process as smooth as possible. For now, here is the best ways:
-
-### Manually
-
-First, check out a local copy of this repository:
-
-```bash
-git clone https://github.com/sharelatex/sharelatex.git
-cd sharelatex
-```
-
-Next install all the node modules and ShareLaTeX services:
-
-```bash
-npm install
-grunt install
-```
-
-This will create a config file in `config/settings.development.coffee`. You should open
-this now and configure your AWS S3 credentials, and other custom settings.
-
-Now check that your system is set up correctly to run ShareLaTeX (checks that you have
-the required dependencies installed.) Watch out for any failures.
-
-```bash
-grunt check --force
-```
-
-When that has finished, run ShareLaTeX with
-
-```bash
-grunt run
-```
-
-ShareLaTeX should now be running at http://localhost:3000.
-
-### With Vagrant
-
-There is a Vagrant and Ansible backed VM installation script for ShareLaTeX, maintained by [@palkan](https://github/palkan), available here: https://github.com/palkan/sharelatex-vagrant-ansible
-
-### With Docker
-
-An [automatic docker-based installer](https://github.com/tiagoboldt/sharelatex-docker) is available. It depends on docker and will build a production environment for running ShareLaTeX on any supported platform.
 
 Dependencies
 ------------
@@ -64,18 +23,10 @@ ShareLaTeX should run on OS X and Linux. You need:
 * A local instance of [Redis](http://redis.io/topics/quickstart) (version 2.6.12 or later) and [MongoDB](http://docs.mongodb.org/manual/installation/) running on their standard ports.
 * [TeXLive](https://www.tug.org/texlive/) 2013 or later with the `latexmk` program installed.
 
-Config
-------
-
-ShareLaTeX should run out of the box, but if you want to adjust any settings you can do so by
-editing the `config/settings.development.coffee` file. Available options are explained inline.
-
 Other repositories
 ------------------
 
-ShareLaTeX consists of many separate services, each with their own Node.js process
-and source code repository. These are all downloaded and set upwhen you run
-`grunt install`
+This repository does not contain any code. It acts a wrapper and toolkit for managing the many different ShareLaTeX  services. These each run as their own Node.js process and have their own Github repository. These are all downloaded and set up when you run `grunt install`
 
 The different services are:
 
