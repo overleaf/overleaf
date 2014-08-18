@@ -13,7 +13,7 @@ pre-start script
 end script
 
 script
-    SERVICE=docstore
+    SERVICE=spelling
     USER=sharelatex
     GROUP=sharelatex
     # You may need to replace this with an absolute 
