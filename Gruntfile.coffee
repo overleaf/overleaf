@@ -130,6 +130,7 @@ module.exports = (grunt) ->
 		Helpers.buildDeb @async()
 	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
 		Helpers.buildUpstartScripts()
+	
 
 	Helpers =
 		installService: (repo_src, dir, callback = (error) ->) ->
@@ -382,8 +383,13 @@ module.exports = (grunt) ->
 			for service in SERVICES
 				fs.writeFileSync "package/upstart/sharelatex-#{service.name}", template.replace(/__SERVICE__/g, service.name)
 
+		buildPackageSettingsFile: () ->
+			config = fs.readFileSync("config/settings.development.coffee.example").toString()
+			config = config.replace /DATA_DIR.*/, "DATA_DIR = '/var/lib/sharelatex/data'"
+			config = config.replace /TMP_DIR.*/, "TMP_DIR = '/var/lib/sharelatex/tmp'"
+			fs.writeFileSync "package/config/settings.coffee", config
+
 		buildDeb: (callback = (error) ->) ->
-			# TODO: filestore uses local 'uploads' directory, not configurable in settings
 			command = ["-s", "dir", "-t", "deb", "-n", "sharelatex", "-v", "0.0.1", "--verbose"]
 			command.push(
 				"--maintainer", "ShareLaTeX <team@sharelatex.com>"
@@ -394,9 +400,11 @@ module.exports = (grunt) ->
 
 			command.push(
 				"--depends", "redis-server > 2.6.12"
-				"--depends", "mongodb-10gen > 2.4.0"
+				"--depends", "mongodb-org > 2.4.0"
 				"--depends", "nodejs > 0.10.0"
 			)
+			
+			@buildPackageSettingsFile()
 
 			@buildUpstartScripts()
 			for service in SERVICES
@@ -406,14 +414,21 @@ module.exports = (grunt) ->
 
 			after_install_script = """
 				#!/bin/sh
+				# Create random secret keys
+				sed -i "s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
+				sed -i "s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
+				
 				sudo adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex
 
 				mkdir -p /var/log/sharelatex
 				chown sharelatex:sharelatex /var/log/sharelatex
+				
+				mkdir -p /var/lib/sharelatex
+				chown sharelatex:sharelatex /var/lib/sharelatex
 
 			"""
 
-			for dir in ["user_files", "uploads", "compiles", "cache", "dump"]
+			for dir in ["data/user_files", "tmp/uploads", "data/compiles", "data/cache", "tmp/dumpFolder"]
 				after_install_script += """
 					mkdir -p /var/lib/sharelatex/#{dir}
 					chown sharelatex:sharelatex /var/lib/sharelatex/#{dir}
