@@ -21,22 +21,12 @@
 				href,
 				ng-click="openUploadProjectModal()"
 			) #{translate("upload_project")}
-		li.divider
-		li.dropdown-header #{translate("templates")}
-		li
-			a.menu-indent(href="/templates/cv") #{translate("cv_or_resume")}
-		li
-			a.menu-indent(href="/templates/cover-letters") #{translate("cover_letter")}
-		li
-			a.menu-indent(href="/templates/journals") #{translate("journal_article")}
-		li
-			a.menu-indent(href="/templates/presentations") #{translate("presentation")}
-		li
-			a.menu-indent(href="/templates/thesis") #{translate("thesis")}
-		li
-			a.menu-indent(href="/templates/bibliographies") #{translate("bibliographies")}
-		li
-			a.menu-indent(href="/templates") #{translate("view_all")} »
+		if (templates)
+			li.divider
+			li.dropdown-header #{translate("templates")}
+			each item in templates
+				li
+					a.menu-indent(href=item.url) #{translate(item.name)}
 
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
