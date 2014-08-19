@@ -131,6 +131,7 @@ module.exports = (app)->
 
 	app.use (req, res, next) ->
 		res.locals.nav = Settings.nav
+		res.locals.templates = Settings.templates
 		next()
 		
 	app.use (req, res, next) ->
