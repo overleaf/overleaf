@@ -1,13 +1,18 @@
 {
   "name": "history-sharelatex",
   "version": "0.0.1",
+  "description": "An API for saving and compressing individual document updates into a browsable history",
+  "repository": {
+    "type": "git", 
+    "url": "https://github.com/sharelatex/track-changes-sharelatex.git"
+  },
   "dependencies": {
     "async": "~0.2.10",
     "express": "3.3.5",
     "mongojs": "~0.9.11",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "request": "~2.33.0",
     "redis": "~0.10.1"
   },
