@@ -1,7 +1,12 @@
 {
   "name": "settings-sharelatex",
   "homepage": "www.sharelatex.com",
-  "version": "0.0.1",
+  "description": "A centralised settings system for ShareLaTeX",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/settings-sharelatex.git"
+  },
   "dependencies": {
   	"coffee-script":"1.6.0"
   }
