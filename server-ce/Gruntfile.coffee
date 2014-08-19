@@ -415,9 +415,9 @@ module.exports = (grunt) ->
 
 			after_install_script = """
 				#!/bin/sh
-				# Create random secret keys
-				sed -i "s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
-				sed -i "s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
+				# Create random secret keys (twice, once for http auth pass, once for cookie secret).
+				sed -i "0,/CRYPTO_RANDOM/s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
+				sed -i "0,/CRYPTO_RANDOM/s/CRYPTO_RANDOM/$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 64 | head -n 1)/" /etc/sharelatex/settings.coffee
 				
 				sudo adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex
 
