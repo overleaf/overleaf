@@ -1,15 +1,20 @@
 {
   "name": "chat-sharelatex",
   "version": "0.0.1",
+  "description": "The backend API that powers ShareLaTeX chat",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/chat-sharelatex.git"
+  },
   "dependencies": {
     "async": "0.2.9",
     "express": "3.3.1",
     "lynx": "0.0.11",
     "request": "2.21.0",
     "socket.io": "0.9.14",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "grunt-requirejs": "~0.4.0",
     "grunt-mocha-test": "~0.8.0",
     "mongojs": "0.9.11",
