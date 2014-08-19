@@ -1,7 +1,12 @@
 {
   "name": "logger-sharelatex",
   "homepage": "www.sharelatex.com",
-  "version": "0.0.1",
+  "description": "A centralised logging system for ShareLaTeX",
+  "repository": {
+      "type": "git",
+      "url": "http://github.com/sharelatex/logger-sharelatex.git"
+  },
+  "version": "1.0.0",
   "dependencies": {
     "coffee-script": "1.4.0",
     "bunyan": "0.16.x"
