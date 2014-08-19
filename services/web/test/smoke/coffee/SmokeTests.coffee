@@ -6,7 +6,8 @@ chai.should()
 expect = chai.expect
 Settings = require "settings-sharelatex"
 port = Settings.internal?.web?.port or Settings.port or 3000
-buildUrl = (path) -> "-b cookies.txt -c cookies.txt --resolve 'smoke.sharelatex.dev:#{port}:127.0.0.1' http://smoke.sharelatex.dev:#{port}/#{path}?setLng=en"
+cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
+buildUrl = (path) -> "-b #{cookeFilePath} -c #{cookeFilePath} --resolve 'smoke.sharelatex.dev:#{port}:127.0.0.1' http://smoke.sharelatex.dev:#{port}/#{path}?setLng=en"
 
 describe "Opening", ->
 
@@ -23,7 +24,7 @@ describe "Opening", ->
 				done(err)
 
 	after (done)-> 
-		fs.unlink "cookies.txt", done
+		fs.unlink cookeFilePath, done
 	
 
 	it "a project", (done) ->
