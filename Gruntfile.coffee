@@ -11,30 +11,39 @@ async = require "async"
 SERVICES = [{
 	name: "web"
 	repo: "https://github.com/sharelatex/web-sharelatex.git"
+	version: "master"
 }, {
 	name: "document-updater"
 	repo: "https://github.com/sharelatex/document-updater-sharelatex.git"
+	version: "master"
 }, {
 	name: "clsi"
 	repo: "https://github.com/sharelatex/clsi-sharelatex.git"
+	version: "master"
 }, {
 	name: "filestore"
 	repo: "https://github.com/sharelatex/filestore-sharelatex.git"
+	version: "master"
 }, {
 	name: "track-changes"
 	repo: "https://github.com/sharelatex/track-changes-sharelatex.git"
+	version: "master"
 }, {
 	name: "docstore"
 	repo: "https://github.com/sharelatex/docstore-sharelatex.git"
+	version: "master"
 }, {
 	name: "chat"
 	repo: "https://github.com/sharelatex/chat-sharelatex.git"
+	version: "master"
 }, {
 	name: "tags"
 	repo: "https://github.com/sharelatex/tags-sharelatex.git"
+	version: "master"
 }, {
 	name: "spelling"
 	repo: "https://github.com/sharelatex/spelling-sharelatex.git"
+	version: "master"
 }]
 
 module.exports = (grunt) ->
@@ -86,10 +95,10 @@ module.exports = (grunt) ->
 		do (service) ->
 			grunt.registerTask "install:#{service.name}", "Download and set up the #{service.name} service", () ->
 				done = @async()
-				Helpers.installService(service.repo, service.name, done)
+				Helpers.installService(service, done)
 			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
 				done = @async()
-				Helpers.updateService(service.name, done)
+				Helpers.updateService(service, done)
 			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:#{service.name}"]
 
 	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
@@ -133,41 +142,50 @@ module.exports = (grunt) ->
 	
 
 	Helpers =
-		installService: (repo_src, dir, callback = (error) ->) ->
-			Helpers.cloneGitRepo repo_src, dir, (error) ->
+		installService: (service, callback = (error) ->) ->
+			Helpers.cloneGitRepo service, (error) ->
 				return callback(error) if error?
-				Helpers.installNpmModules dir, (error) ->
+				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall dir, (error) ->
+					Helpers.runGruntInstall service, (error) ->
 						return callback(error) if error?
 						callback()
 
-		updateService: (dir, callback = (error) ->) ->
-			Helpers.updateGitRepo dir, (error) ->
+		updateService: (service, callback = (error) ->) ->
+			Helpers.updateGitRepo service, (error) ->
 				return callback(error) if error?
-				Helpers.installNpmModules dir, (error) ->
+				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall dir, (error) ->
+					Helpers.runGruntInstall service, (error) ->
 						return callback(error) if error?
 						callback()
 
-		cloneGitRepo: (repo_src, dir, callback = (error) ->) ->
+		cloneGitRepo: (service, callback = (error) ->) ->
+			repo_src = service.repo
+			dir = service.name
 			if !fs.existsSync(dir)
-				proc = spawn "git", ["clone", repo_src, dir], stdio: "inherit"
+				proc = spawn "git", [
+					"clone",
+					"-b", service.version,
+					repo_src,
+					dir
+				], stdio: "inherit"
 				proc.on "close", () ->
 					callback()
 			else
 				console.log "#{dir} already installed, skipping."
 				callback()
 
-		updateGitRepo: (dir, callback = (error) ->) ->
-			proc = spawn "git", ["checkout", "master"], cwd: dir, stdio: "inherit"
+		updateGitRepo: (service, callback = (error) ->) ->
+			dir = service.name
+			proc = spawn "git", ["checkout", service.version], cwd: dir, stdio: "inherit"
 			proc.on "close", () ->
 				proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
 				proc.on "close", () ->
 					callback()
 
-		installNpmModules: (dir, callback = (error) ->) ->
+		installNpmModules: (service, callback = (error) ->) ->
+			dir = service.name
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
