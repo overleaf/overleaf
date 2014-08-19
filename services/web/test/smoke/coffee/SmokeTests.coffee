@@ -5,59 +5,55 @@ chai = require("chai")
 chai.should()
 expect = chai.expect
 Settings = require "settings-sharelatex"
-
-
 port = Settings.internal?.web?.port or Settings.port or 3000
-buildUrl = (path) -> "http://www.sharelatex.dev:#{port}/#{path}"
-
+buildUrl = (path) -> "-b cookies.txt -c cookies.txt --resolve 'smoke.sharelatex.dev:#{port}:127.0.0.1' http://smoke.sharelatex.dev:#{port}/#{path}?setLng=en"
 
 describe "Opening", ->
 
 	before (done) ->
 
-		command =  "curl -b cookies.txt -c cookies.txt #{buildUrl('register')}"
+		command =  "curl #{buildUrl('register')}"
 		child.exec command, (err, stdout, stderr)->
+			if err? then done(err)
 			csrf = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")[1]
-
 			command = """
-				curl -b cookies.txt -c cookies.txt -H "Content-Type: application/json" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' http://www.sharelatex.dev:3000/register
+				curl -H "Content-Type: application/json" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
 			"""
-			console.log csrf
-
 			child.exec command, (err, stdout, stderr)->
-				done()
+				done(err)
 
 	after (done)-> 
 		fs.unlink "cookies.txt", done
 	
 
 	it "a project", (done) ->
-
-		# request {
-		# 	url: buildUrl("project/#{Settings.smokeTest.projectId}")
-		# 	headers:
-		# 		"X-Forwarded-Proto": "https"
-		# }, (error, response, body) ->
-		# 	expect(error, "smoke test: error in getting project").to.not.exist
-		# 	expect(response.statusCode, "smoke test: response code is not 200 getting project").to.equal(200)
-		# 	# Check that the project id is present in the javascript that loads up the project
-		# 	match = !!body.match("window.project_id = \"#{Settings.smokeTest.projectId}\"")
-		# 	expect(match, "smoke test: project page html does not have project_id").to.equal true
-		# 	done()
-		done()
+		@timeout(4000)
+		command =  """
+			curl -H 'X-Forwarded-Proto: https' -v #{buildUrl("project/#{Settings.smokeTest.projectId}")}
+		"""
+		child.exec command, (error, stdout, stderr)->
+			expect(error, "smoke test: error in getting project").to.not.exist
+		
+			statusCodeMatch = !!stderr.match("200 OK")
+			expect(statusCodeMatch, "smoke test: response code is not 200 getting project").to.equal true
+			
+			# Check that the project id is present in the javascript that loads up the project
+			match = !!stdout.match("window.project_id = \"#{Settings.smokeTest.projectId}\"")
+			expect(match, "smoke test: project page html does not have project_id").to.equal true
+			done()
 
 
 	it "the project list", (done) ->
-		# request {
-		# 	url: buildUrl("project")
-		# 	headers:
-		# 		"X-Forwarded-Proto": "https"
-		# }, (error, response, body) ->
-		# 	expect(error, "smoke test: error returned in getting project list").to.not.exist
-		# 	expect(response.statusCode, "smoke test: response code is not 200 getting project list").to.equal(200)
-		# 	expect(!!body.match("<title>Your Projects - ShareLaTeX, Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
-		# 	expect(!!body.match("ProjectPageController"), "smoke test: body does not have correct angular controller").to.equal true
-		# 	done()
-		done()
+		@timeout(4000)
+		command =  """
+			curl -H 'X-Forwarded-Proto: https' -v #{buildUrl("project")}
+		"""
+		child.exec command, (error, stdout, stderr)->
+		
+			expect(error, "smoke test: error returned in getting project list").to.not.exist
+			expect(!!stderr.match("200 OK"), "smoke test: response code is not 200 getting project list").to.equal true
+			expect(!!stdout.match("<title>Your Projects - ShareLaTeX, Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
+			expect(!!stdout.match("ProjectPageController"), "smoke test: body does not have correct angular controller").to.equal true
+			done()
 	
 
