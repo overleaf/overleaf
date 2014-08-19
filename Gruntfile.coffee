@@ -441,7 +441,8 @@ module.exports = (grunt) ->
 			fs.writeFileSync "package/scripts/after_install.sh", after_install_script
 			command.push("--after-install", "package/scripts/after_install.sh")
 
-			command.push("--exclude", "'**/.git'")
+			command.push("--exclude", "**/.git")
+			command.push("--exclude", "**/node_modules/grunt-*")
 			for path in ["filestore/user_files", "filestore/uploads", "clsi/cache", "clsi/compiles"]
 				command.push "--exclude", path
 
