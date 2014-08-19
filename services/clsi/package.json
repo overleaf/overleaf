@@ -1,7 +1,7 @@
 {
   "name": "node-clsi",
   "description": "A Node.js implementation of the CLSI LaTeX web-API",
-  "version": "0.0.1-dev",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/sharelatex/clsi-sharelatex.git"
