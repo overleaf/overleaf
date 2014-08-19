@@ -1,7 +1,7 @@
 description "sharelatex-web"
 author      "ShareLaTeX <team@sharelatex.com>"
 
-start on started mountall
+start on (local-filesystems and net-device-up IFACE!=lo)
 stop on shutdown
 
 respawn
