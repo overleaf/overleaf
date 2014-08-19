@@ -2,6 +2,10 @@
   "name": "node-clsi",
   "description": "A Node.js implementation of the CLSI LaTeX web-API",
   "version": "0.0.1-dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/clsi-sharelatex.git"
+  },
   "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
     "async": "0.2.9",
@@ -9,12 +13,12 @@
     "mkdirp": "0.3.5",
     "mysql": "2.0.0-alpha7",
     "request": "~2.21.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "sequelize": "~2.0.0-beta.2",
     "wrench": "~1.5.4",
-    "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#master",
+    "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v1.0.0",
     "sqlite3": "~2.2.0",
     "express": "^4.2.0",
     "body-parser": "^1.2.0"
