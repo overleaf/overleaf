@@ -1,6 +1,11 @@
 {
   "name": "web-sharelatex",
   "version": "0.0.1",
+  "description": "The HTTP front end for ShareLaTeX",
+  "repository": {
+    "type": "git", 
+    "url": "https://github.com/sharelatex/web-sharelatex.git"
+  },
   "directories": {
     "public": "./public"
   },
@@ -22,11 +27,11 @@
     "socket.io": "0.9.16",
     "mimelib": "0.2.14",
     "bufferedstream": "1.6.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
-    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
-    "soa-req-id": "git+https://github.com/sharelatex/soa-req-id.git#master",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#v0.1.0",
+    "soa-req-id": "git+https://github.com/sharelatex/soa-req-id.git#v1.0.0",
     "fairy": "0.0.2",
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.1",
