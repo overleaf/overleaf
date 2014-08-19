@@ -394,7 +394,7 @@ module.exports = (grunt) ->
 			command.push(
 				"--maintainer", "ShareLaTeX <team@sharelatex.com>"
 				"--config-files", "/etc/sharelatex/settings.coffee"
-				"--config-files", "/etc/nginx/sites-enabled/sharelatex"
+				"--config-files", "/etc/nginx/conf.d/sharelatex.conf"
 				"--directories",  "/var/lib/sharelatex"
 				"--directories",  "/var/log/sharelatex"
 			)
@@ -452,7 +452,7 @@ module.exports = (grunt) ->
 
 			command.push(
 				"package/config/settings.coffee=/etc/sharelatex/settings.coffee"
-				"package/nginx/sharelatex=/etc/nginx/sites-enabled/sharelatex"
+				"package/nginx/sharelatex=/etc/nginx/conf.d/sharelatex.conf"
 			)
 			console.log "fpm " + command.join(" ")
 			proc = spawn "fpm", command, stdio: "inherit"
