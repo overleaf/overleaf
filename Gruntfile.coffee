@@ -11,39 +11,39 @@ async = require "async"
 SERVICES = [{
 	name: "web"
 	repo: "https://github.com/sharelatex/web-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "document-updater"
 	repo: "https://github.com/sharelatex/document-updater-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "clsi"
 	repo: "https://github.com/sharelatex/clsi-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "filestore"
 	repo: "https://github.com/sharelatex/filestore-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "track-changes"
 	repo: "https://github.com/sharelatex/track-changes-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "docstore"
 	repo: "https://github.com/sharelatex/docstore-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "chat"
 	repo: "https://github.com/sharelatex/chat-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "tags"
 	repo: "https://github.com/sharelatex/tags-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }, {
 	name: "spelling"
 	repo: "https://github.com/sharelatex/spelling-sharelatex.git"
-	version: "master"
+	version: "v0.1.0"
 }]
 
 module.exports = (grunt) ->
