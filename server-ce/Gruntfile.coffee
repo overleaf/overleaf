@@ -425,16 +425,17 @@ module.exports = (grunt) ->
 				chown sharelatex:sharelatex /var/log/sharelatex
 				
 				mkdir -p /var/lib/sharelatex
-				chown sharelatex:sharelatex /var/lib/sharelatex
 
 			"""
 
 			for dir in ["data/user_files", "tmp/uploads", "data/compiles", "data/cache", "tmp/dumpFolder"]
 				after_install_script += """
 					mkdir -p /var/lib/sharelatex/#{dir}
-					chown sharelatex:sharelatex /var/lib/sharelatex/#{dir}
-					
 				"""
+			
+			after_install_script += """
+				chown -R sharelatex:sharelatex /var/lib/sharelatex
+			"""	
 
 			for service in SERVICES
 				after_install_script += "service sharelatex-#{service.name} restart\n"

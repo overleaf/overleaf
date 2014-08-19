@@ -20,8 +20,9 @@ script
     # path to Node.js if it's not in your system PATH.
     NODE=node
     SHARELATEX_CONFIG=/etc/sharelatex/settings.coffee
+    LATEX_PATH=/usr/local/texlive/2014/bin/x86_64-linux
 
     echo $$ > /var/run/sharelatex-$SERVICE.pid
     chdir /var/www/sharelatex/$SERVICE
-    exec sudo -u $USER -g $GROUP env SHARELATEX_CONFIG=$SHARELATEX_CONFIG NODE_ENV=production $NODE app.js >> /var/log/sharelatex/$SERVICE.log 2>&1
+    exec sudo -u $USER -g $GROUP env SHARELATEX_CONFIG=$SHARELATEX_CONFIG NODE_ENV=production PATH=$PATH:$LATEX_PATH $NODE app.js >> /var/log/sharelatex/$SERVICE.log 2>&1
 end script
