@@ -7,7 +7,7 @@ expect = chai.expect
 Settings = require "settings-sharelatex"
 port = Settings.internal?.web?.port or Settings.port or 3000
 cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
-buildUrl = (path) -> "-b #{cookeFilePath} -c #{cookeFilePath} --resolve 'smoke.sharelatex.dev:#{port}:127.0.0.1' http://smoke.sharelatex.dev:#{port}/#{path}?setLng=en"
+buildUrl = (path) -> "-b #{cookeFilePath} -c #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
 
 describe "Opening", ->
 
