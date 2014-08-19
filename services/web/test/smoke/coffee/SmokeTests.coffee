@@ -7,26 +7,33 @@ expect = chai.expect
 Settings = require "settings-sharelatex"
 port = Settings.internal?.web?.port or Settings.port or 3000
 cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
-buildUrl = (path) -> " -b #{cookeFilePath} -c #{cookeFilePath}  -H 'X-Forwarded-Proto: https' --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
+buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
 
 describe "Opening", ->
 
 	before (done) ->
 
 		command =  """
-			curl #{buildUrl('register')}
+			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('register')}
 		"""
 		child.exec command, (err, stdout, stderr)->
 			if err? then done(err)
 			csrf = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")[1]
-		
-			command = """
-				curl -H "Content-Type: application/json" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
-			"""
 
-			child.exec command, (err, stdout, stderr)->
+			# Change cookie to be non secure so curl will send it
+			fs = require("fs")
+			fs.readFile cookeFilePath, "utf8", (err, data) ->
+				return done(err) if err
+				firstTrue = data.indexOf("TRUE")
+				secondTrue = data.indexOf("TRUE", firstTrue+4)
+				result = data.slice(0, secondTrue)+"FALSE"+data.slice(secondTrue+4)
+				fs.writeFile cookeFilePath, result, "utf8", (err) ->
+					return done(err) if err
 
-				done(err)
+					command = """
+						curl -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
+					"""
+					child.exec command, done
 
 	after (done)-> 
 		fs.unlink cookeFilePath, done
@@ -35,7 +42,7 @@ describe "Opening", ->
 	it "a project", (done) ->
 		@timeout(4000)
 		command =  """
-			curl -v #{buildUrl("project/#{Settings.smokeTest.projectId}")}
+			curl -H "X-Forwarded-Proto: https" -v #{buildUrl("project/#{Settings.smokeTest.projectId}")}
 		"""
 		child.exec command, (error, stdout, stderr)->
 			expect(error, "smoke test: error in getting project").to.not.exist
@@ -52,7 +59,7 @@ describe "Opening", ->
 	it "the project list", (done) ->
 		@timeout(4000)
 		command =  """
-			curl -v #{buildUrl("project")}
+			curl -H "X-Forwarded-Proto: https" -v #{buildUrl("project")}
 		"""
 		child.exec command, (error, stdout, stderr)->
 		
