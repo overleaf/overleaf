@@ -241,7 +241,8 @@ module.exports = (grunt) ->
 				grunt.log.writeln "Config file already exists. Skipping."
 				callback()
 
-		runGruntInstall: (dir, callback = (error) ->) ->
+		runGruntInstall: (service, callback = (error) ->) ->
+			dir = service.name
 			proc = spawn "grunt", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
