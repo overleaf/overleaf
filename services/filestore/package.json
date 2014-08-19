@@ -1,10 +1,15 @@
 {
   "name": "filestore-sharelatex",
   "version": "0.0.1",
+  "description": "An API for CRUD operations on binary files stored in S3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/filestore-sharelatex.git"
+  },
   "dependencies": {
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#master",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "request": "2.14.0",
     "lynx": "0.0.11",
     "grunt-mocha-test": "~0.8.2",
