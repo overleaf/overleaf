@@ -9,7 +9,13 @@ mkdir -p /var/log/sharelatex
 chown sharelatex:sharelatex /var/log/sharelatex
 
 mkdir -p /var/lib/sharelatex
-mkdir -p /var/lib/sharelatex/data/user_filesmkdir -p /var/lib/sharelatex/tmp/uploadsmkdir -p /var/lib/sharelatex/data/compilesmkdir -p /var/lib/sharelatex/data/cachemkdir -p /var/lib/sharelatex/tmp/dumpFolderchown -R sharelatex:sharelatex /var/lib/sharelatexservice sharelatex-web restart
+mkdir -p /var/lib/sharelatex/data/user_files
+mkdir -p /var/lib/sharelatex/tmp/uploads
+mkdir -p /var/lib/sharelatex/data/compiles
+mkdir -p /var/lib/sharelatex/data/cache
+mkdir -p /var/lib/sharelatex/tmp/dumpFolder
+chown -R sharelatex:sharelatex /var/lib/sharelatex
+service sharelatex-web restart
 service sharelatex-document-updater restart
 service sharelatex-clsi restart
 service sharelatex-filestore restart
