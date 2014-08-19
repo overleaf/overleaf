@@ -6,7 +6,7 @@
 #
 
 # See http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
-apt_repository 'mongodb-10gen' do
+apt_repository 'mongodb-org' do
   uri          'http://downloads-distro.mongodb.org/repo/ubuntu-upstart'
   distribution 'dist'
   components   ['10gen']
@@ -14,6 +14,6 @@ apt_repository 'mongodb-10gen' do
   key          '7F0CEB10'
 end
 
-package 'mongodb-10gen' do
+package 'mongodb-org' do
   action :install
 end
