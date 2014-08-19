@@ -100,6 +100,9 @@ module.exports = (grunt) ->
 				done = @async()
 				Helpers.updateService(service, done)
 			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:#{service.name}"]
+			grunt.registerTask "release:#{service.name}", "Create a new release version of #{service.name} (specify with --release option)", () ->
+				done = @async()
+				Helpers.createNewRelease(service, grunt.option("release"), done)
 
 	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
 		Helpers.installConfig @async()
@@ -139,7 +142,6 @@ module.exports = (grunt) ->
 		Helpers.buildDeb @async()
 	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
 		Helpers.buildUpstartScripts()
-	
 
 	Helpers =
 		installService: (service, callback = (error) ->) ->
@@ -183,7 +185,25 @@ module.exports = (grunt) ->
 				proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
 				proc.on "close", () ->
 					callback()
-
+					
+		createNewRelease: (service, version, callback = (error) ->) ->
+			dir = service.name
+			proc = spawn "sed", [
+				"-i", "",
+				"s/\"version\".*$/\"version\": \"#{version}\",/g",
+				"package.json"
+			], cwd: dir, stdio: "inherit"
+			proc.on "close", () ->
+				proc = spawn "git", ["commit", "-a", "-m", "Release version #{version}"], cwd: dir, stdio: "inherit"
+				proc.on "close", () ->
+					proc = spawn "git", ["tag", "v#{version}"], cwd: dir, stdio: "inherit"
+					proc.on "close", () ->
+						proc = spawn "git", ["push"], cwd: dir, stdio: "inherit"
+						proc.on "close", () ->
+							proc = spawn "git", ["push", "--tags"], cwd: dir, stdio: "inherit"
+							proc.on "close", () ->
+								callback()
+								
 		installNpmModules: (service, callback = (error) ->) ->
 			dir = service.name
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
