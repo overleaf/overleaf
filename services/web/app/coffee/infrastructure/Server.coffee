@@ -68,7 +68,6 @@ app.configure () ->
 		next()
 	
 	app.use (req, res, next) ->
-		console.log req.sessionID
 		for route in ignoreCsrfRoutes
 			if route.method == req.method?.toLowerCase() and route.match(req.path)
 				return next()
