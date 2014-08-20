@@ -76,7 +76,7 @@ div.full-size.pdf(ng-controller="PdfController")
 	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
 		| &nbsp;
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
-		| &nbsp;&nbsp;#{translate("click_here_to_preview_pdf")}
+		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
 
 	.pdf-errors(ng-show="pdf.timedout || pdf.error")
 		.alert.alert-danger(ng-show="pdf.error")
@@ -118,7 +118,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			.pull-right
 				a.btn.btn-default.btn-sm(
 					href,
-					tooltip="#{translate("clear_cached_files")}",
+					tooltip="#{translate('clear_cached_files')}",
 					tooltip-placement="top",
 					tooltip-append-to-body="true",
 					ng-click="openClearCacheModal()"
