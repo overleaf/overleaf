@@ -31,7 +31,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			ng-href="{{pdf.url}}"
 			target="_blank"
 			ng-if="pdf.url"
-			tooltip="Download PDF"
+			tooltip="#{translate('download_pdf')}"
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-download
@@ -50,7 +50,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				href,
 				ng-click="switchToSideBySideLayout()"
 				ng-show="ui.pdfLayout == 'flat'"
-				tooltip="Split screen"
+				tooltip="#{translate('split_screen')}"
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)
@@ -118,7 +118,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			.pull-right
 				a.btn.btn-default.btn-sm(
 					href,
-					tooltip="Clear cached files",
+					tooltip="#{translate("clear_cached_files")}",
 					tooltip-placement="top",
 					tooltip-append-to-body="true",
 					ng-click="openClearCacheModal()"

@@ -22,7 +22,7 @@
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-default(
 						href='#',
-						tooltip="Download",
+						tooltip="#{translate('download')}",
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="downloadSelectedProjects()"
@@ -30,7 +30,7 @@
 						i.fa.fa-cloud-download
 					a.btn.btn-default(
 						href='#',
-						tooltip="Delete",
+						tooltip="#{translate('delete')}",
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
@@ -41,7 +41,7 @@
 					a.btn.btn-default.dropdown-toggle(
 						href="#",
 						data-toggle="dropdown",
-						tooltip="Add to folders",
+						tooltip="#{translate("add_to_folders")}",
 						tooltip-append-to-body="true",
 						tooltip-placement="bottom"
 					)

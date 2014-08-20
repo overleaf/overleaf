@@ -24,7 +24,7 @@ aside#left-menu.full-size(
 				| PDF
 			div.pdf-disabled(
 				ng-if="!pdf.url"
-				tooltip="Please compile your project before downloading the PDF"
+				tooltip="#{translate('please_compile_pdf_before_download')}"
 				tooltip-placement="bottom"
 			)
 				i.fa.fa-file-pdf-o.fa-2x
