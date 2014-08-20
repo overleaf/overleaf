@@ -15,7 +15,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			href
 			ng-click="toggleLogs()"
 			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled }"
-			tooltip="Logs and output files"
+			tooltip="#{translate('logs_and_output_files')}"
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file-text-o
@@ -41,7 +41,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				href,
 				ng-click="switchToFlatLayout()"
 				ng-show="ui.pdfLayout == 'sideBySide'"
-				tooltip="Full screen"
+				tooltip="#{translate('full_screen')}"
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)

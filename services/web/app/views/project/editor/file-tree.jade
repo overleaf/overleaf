@@ -3,21 +3,21 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 		a(
 			href,
 			ng-click="openNewDocModal()",
-			tooltip-html-unsafe="New<br>File",
+			tooltip-html-unsafe="#{translate('new_file').replace(' ', '<br>')}",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file
 		a(
 			href,
 			ng-click="openNewFolderModal()",
-			tooltip="New Folder",
+			tooltip-html-unsafe="#{translate('new_folder').replace(' ', '<br>')}",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-folder
 		a(
 			href,
 			ng-click="openUploadFileModal()",
-			tooltip="Upload",
+			tooltip="#{translate('upload')}",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-upload
@@ -26,14 +26,14 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 			a(
 				href,
 				ng-click="startRenamingSelected()",
-				tooltip="Rename",
+				tooltip="#{translate('rename')}",
 				tooltip-placement="bottom"
 			)
 				i.fa.fa-pencil
 			a(
 				href,
 				ng-click="openDeleteModalForSelected()",
-				tooltip="Delete",
+				tooltip="#{translate('rename')}",
 				tooltip-placement="bottom",
 				tooltip-append-to-body="true"
 			)

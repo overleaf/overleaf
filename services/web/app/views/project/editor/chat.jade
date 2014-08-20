@@ -46,7 +46,7 @@ aside.chat(
 
 	.new-message
 		textarea(
-			placeholder="Your message...",
+			placeholder="#{translate('your_message')}...",
 			on-enter="sendMessage()",
 			ng-model="newMessageContent",
 			ng-click="resetUnreadMessages()"

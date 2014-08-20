@@ -2,14 +2,14 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 	a.btn.btn-full-height(
 		href,
 		ng-click="ui.leftMenuShown = true"
-		tooltip="Menu",
+		tooltip='#{translate("menu")}',
 		tooltip-placement="bottom",
 		tooltip-append-to-body="true"
 	)
 		i.fa.fa-fw.fa-bars
 	a(
 		href="/project"
-		tooltip="Back to projects",
+		tooltip="#{translate('back_to_projects')}",
 		tooltip-placement="bottom",
 		tooltip-append-to-body="true"
 	)
@@ -44,7 +44,7 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		a.rename(
 			href='#',
 			tooltip-placement="bottom",
-			tooltip="Rename",
+			tooltip="#{translate('rename')}",
 			tooltip-append-to-body="true",
 			ng-click="startRenaming()",
 			ng-show="!state.renaming"
@@ -69,7 +69,7 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 		a.btn.btn-full-height(
 			href,
 			ng-if="permissions.admin",
-			tooltip="Share",
+			tooltip="#{translate('share')}",
 			tooltip-placement="bottom",
 			ng-click="openShareProjectModal()",
 			ng-controller="ShareController"
@@ -79,13 +79,13 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			href,
 			ng-click="toggleTrackChanges()",
 			ng-class="{ active: (ui.view == 'track-changes') }"
-			tooltip="Recent Changes",
+			tooltip="#{translate('recent_changes')}",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-fw.fa-history
 		a.btn.btn-full-height(
 			href,
-			tooltip="Chat",
+			tooltip="#{translate('chat')}",
 			tooltip-placement="bottom",
 			ng-class="{ active: ui.chatOpen }",
 			ng-click="toggleChat()",
