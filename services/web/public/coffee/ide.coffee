@@ -25,7 +25,6 @@ define [
 	"directives/rightClick"
 	"filters/formatDate"
 	"main/event-tracking"
-	"main/translations"
 ], (
 	App
 	FileTreeManager

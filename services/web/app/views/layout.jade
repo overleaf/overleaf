@@ -81,7 +81,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 					a(href, ng-click="hide()").pull-right &times;
 					.system-message-content(ng-bind-html="htmlContent")
 	
-		include translations/translation_message
+			include translations/translation_message
 
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
