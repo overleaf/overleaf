@@ -32,7 +32,7 @@ else
 
 app = express()
 
-cookieKey = "sharelatex.sid"
+cookieKey = Settings.cookieName
 cookieSessionLength = 5 * oneDayInMilliseconds
 
 csrf = express.csrf()

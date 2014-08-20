@@ -111,6 +111,7 @@ module.exports =
 	# use full domain for cookies to only be accesabble from that domain,
 	# replace subdomain with dot to have them accessable on all subdomains
 	# cookieDomain: ".sharelatex.dev"
+	cookieName:"sharelatex.sid"
 
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
