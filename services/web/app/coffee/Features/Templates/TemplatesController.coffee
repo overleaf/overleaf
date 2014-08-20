@@ -24,7 +24,7 @@ module.exports =
 		if zipUrl.slice(0,12).indexOf("templates") == -1
 			zipUrl = "#{settings.apis.web.url}#{zipUrl}"
 		else
-			zipUrl = "#{settings.apis.templates_api.url}#{zipUrl}"
+			zipUrl = "#{settings.apis.templates.url}#{zipUrl}"
 		request(zipUrl).pipe(writeStream)
 		writeStream.on 'close', ->
 			ProjectUploadManager.createProjectFromZipArchive req.session.user._id, req.session.templateData.templateName, dumpPath, (err, project)->

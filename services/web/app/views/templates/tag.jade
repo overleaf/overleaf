@@ -10,10 +10,11 @@ block content
 						|  ›
 						a(href=tag.tagPagePath)  #{tag.name}
 				.row
-					-each template in templates
-						a(href=template.templatePagePath || template.canonicalUrl) 
-							.col-md-3.template-thumbnail
-								a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
-									img(src=template.thumbnailUrl)
-									div.caption
-										h3 #{template.name}
+					- _.groupBy(templates, function(e, i) { return Math.floor(index/4) });
+					//- -each template in templates
+					//- 	a(href=template.templatePagePath || template.canonicalUrl) 
+					//- 		.col-md-3.template-thumbnail
+					//- 			a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
+					//- 				img(src=template.thumbnailUrl)
+					//- 				div.caption
+					//- 					h3 #{template.name}
