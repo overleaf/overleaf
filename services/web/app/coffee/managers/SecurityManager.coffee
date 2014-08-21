@@ -15,7 +15,7 @@ module.exports = SecurityManager =
 	restricted : (req, res, next)->
 		if req.session.user?
 			res.render 'user/restricted',
-				title:'Restricted'
+				title:'restricted'
 		else
 			logger.log "user not logged in and trying to access #{req.url}, being redirected to login"
 			res.redirect '/register'
