@@ -141,7 +141,7 @@ module.exports = (app)->
 
 	app.use (req, res, next)->
 		subdomain = _.find Settings.i18n.subdomainLang, (subdomain)->
-			subdomain.lngCode == req.showUserOtherLng
+			subdomain.lngCode == req.showUserOtherLng and !subdomain.hide
 		res.locals.recomendSubdomain = subdomain
 		res.locals.currentLngCode = req.lng
 		next()

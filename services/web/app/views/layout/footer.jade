@@ -19,10 +19,11 @@ footer.site-footer
 						ul.dropdown-menu(role="menu")
 							li.dropdown-header #{translate("language")}
 							each subdomainDetails, subdomain in settings.i18n.subdomainLang
-								li.lngOption
-									a.menu-indent(href=subdomainDetails.url+currentUrl)
-										img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
-										|  #{translate(subdomainDetails.lngCode)}
+								if !subdomainDetails.hide
+									li.lngOption
+										a.menu-indent(href=subdomainDetails.url+currentUrl)
+											img(src="/img/flags/24/#{subdomainDetails.lngCode}.png")
+											|  #{translate(subdomainDetails.lngCode)}
 										
 				each item in nav.left_footer
 					li
