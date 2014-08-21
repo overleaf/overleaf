@@ -300,9 +300,6 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorController.updateProjectDescription project_id, description, callback
 
-			client.on "getLastTimePollHappned", (callback)->
-				EditorController.getLastTimePollHappned(callback)
-
 			client.on "getPublishedDetails", (user_id, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					TemplatesController.getTemplateDetails user_id, project_id, callback

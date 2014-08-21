@@ -15,7 +15,6 @@ EditorRealTimeController = require("./EditorRealTimeController")
 TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 settings = require('settings-sharelatex')
 slReqIdHelper = require('soa-req-id')
-tpdsPollingBackgroundTasks = require('../ThirdPartyDataStore/TpdsPollingBackgroundTasks')
 async = require('async')
 ConnectedUsersManager = require("../ConnectedUsers/ConnectedUsersManager")
 _ = require('underscore')
@@ -229,10 +228,6 @@ module.exports = EditorController =
 	notifyUsersProjectHasBeenDeletedOrRenamed: (project_id, callback)->
 		EditorRealTimeController.emitToRoom(project_id, 'projectRenamedOrDeletedByExternalSource')
 		callback()
-
-	getLastTimePollHappned: (callback)->
-		logger.log "getting last time a poll happened in dropbox"
-		tpdsPollingBackgroundTasks.getLastTimePollHappned callback
 
 	updateProjectDescription: (project_id, description, callback = ->)->
 		logger.log project_id:project_id, description:description, "updating project description"

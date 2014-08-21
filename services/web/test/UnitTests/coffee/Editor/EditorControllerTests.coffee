@@ -45,7 +45,6 @@ describe "EditorController", ->
 			redis: web:{}
 		@dropboxProjectLinker = {}
 		@callback = sinon.stub()
-		@TpdsPollingBackgroundTasks = {}
 		@ProjectDetailsHandler = 
 			setProjectDescription:sinon.stub()
 		@CollaboratorsHandler = 
@@ -72,7 +71,6 @@ describe "EditorController", ->
 			'../../models/Project' : Project: @Project
 			"settings-sharelatex":@settings
 			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker
-			'../ThirdPartyDataStore/TpdsPollingBackgroundTasks':@TpdsPollingBackgroundTasks
 			'./EditorRealTimeController':@EditorRealTimeController = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
@@ -622,14 +620,6 @@ describe "EditorController", ->
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "projectRenamedOrDeletedByExternalSource")
 					.should.equal true
-				done()
-
-	describe "gettingTimeOfLastTpdsPoll", ->
-		it "should ask the tpdsPollingBackgroundTask", (done)->
-			date = new Date()
-			@TpdsPollingBackgroundTasks.getLastTimePollHappned = sinon.stub().callsArgWith(0, null, date)
-			@EditorController.getLastTimePollHappned (err, lastTimePollHappened)->
-				lastTimePollHappened.should.equal date
 				done()
 
 	describe "updateProjectDescription", ->
