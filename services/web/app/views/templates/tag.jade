@@ -1,5 +1,12 @@
 extends ../layout
 
+mixin template(template)
+	.template-thumbnail
+		a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
+			img(src=template.thumbnailUrl)
+			div.caption
+				h3 #{template.name}
+					
 block content
 	.content.content-alt
 		.container
@@ -9,11 +16,16 @@ block content
 						a(href="/templates") #{translate("templates")}
 						|  ›
 						a(href=tag.tagPagePath)  #{tag.name}
-				.row
-					-each template in templates
-						a(href=template.templatePagePath || template.canonicalUrl) 
-							.col-md-3.template-thumbnail
-								a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
-									img(src=template.thumbnailUrl)
-									div.caption
-										h3 #{template.name}
+				- for (var row = 0; row <= Math.floor(templates.length / 4); row++)
+					.row
+						- for (var column = 0; column < 4; column++)
+							- if (templates[row*4 + column])
+								.col-md-3
+									+template(templates[row*4 + column])
+					//- -each template in templates
+					//- 	a(href=template.templatePagePath || template.canonicalUrl) 
+					//- 		.col-md-3.template-thumbnail
+					//- 			a(href=template.templatePagePath ? template.templatePagePath : template.canonicalUrl).thumbnail
+					//- 				img(src=template.thumbnailUrl)
+					//- 				div.caption
+					//- 					h3 #{template.name}

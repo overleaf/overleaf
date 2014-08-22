@@ -33,4 +33,4 @@ module.exports =
 
 
 buildUrl = (user_id, project_id)->
-	url = "#{settings.apis.templates_api.url}/templates/user/#{user_id}/project/#{project_id}"
+	url = "#{settings.apis.templates.url}/templates/user/#{user_id}/project/#{project_id}"
