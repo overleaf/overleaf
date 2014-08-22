@@ -137,7 +137,7 @@ module.exports = ProjectController =
 					return next(error) if error?
 
 					viewModel = {
-						title:'Your Projects'
+						title:'your_projects'
 						priority_title: true
 						projects: projects
 						tags: tags
