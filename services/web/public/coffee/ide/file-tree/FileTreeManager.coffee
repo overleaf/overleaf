@@ -289,11 +289,20 @@ define [
 			}
 
 		moveEntity: (entity, parent_folder, callback = (error) ->) ->
+			# Abort move if the folder being moved (entity) has the parent_folder as child
+			# since that would break the tree structure.
+			return if @_isChildFolder(entity, parent_folder)
 			@_moveEntityInScope(entity, parent_folder)
 			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
 			}
+			
+		_isChildFolder: (parent_folder, child_folder) ->
+			parent_path = @getEntityPath(parent_folder) or "" # null if root folder
+			child_path = @getEntityPath(child_folder) or "" # null if root folder
+			# is parent path the beginning of child path?
+			return (child_path.slice(0, parent_path.length) == parent_path)
 
 		_deleteEntityFromScope: (entity, options = { moveToDeleted: true }) ->
 			parent_folder = null

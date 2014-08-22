@@ -279,29 +279,44 @@ module.exports = ProjectEntityHandler =
 					else
 						callback()
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, sl_req_id, callback = (error) ->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	moveEntity: (project_id, entity_id, folder_id, entityType, callback = (error) ->)->
 		self = @
 		destinationFolder_id = folder_id
-		logger.log sl_req_id: sl_req_id, entityType:entityType, entity_id:entity_id, project_id:project_id, folder_id:folder_id, "moving entity"
+		logger.log entityType:entityType, entity_id:entity_id, project_id:project_id, folder_id:folder_id, "moving entity"
 		if !entityType?
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
 		Project.findById project_id, (err, project)=>
+			return callback(err) if err?
 			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
 				return callback(err) if err?
-				self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
-					return callback(err) if err?
-					Project.putElement project_id, destinationFolder_id, entity, entityType, (err, result)->
+				
+				if entityType.match(/folder/)
+					ensureFolderIsNotMovedIntoChild = (callback = (error) ->) ->
+						projectLocator.findElement {project: project, element_id: folder_id, type:"folder"}, (err, destEntity, destPath) ->
+							logger.log destPath: destPath.fileSystem, folderPath: path.fileSystem, "checking folder is not moving into child folder"
+							if (destPath.fileSystem.slice(0, path.fileSystem.length) == path.fileSystem)
+								logger.log "destination is a child folder, aborting"
+								callback(new Error("destination folder is a child folder of me"))
+							else
+								callback()
+				else
+					ensureFolderIsNotMovedIntoChild = (callback = () ->) -> callback()
+					
+				ensureFolderIsNotMovedIntoChild (error) ->
+					return callback(error) if error?
+					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
 						return callback(err) if err?
-						opts = 
-							project_id:project_id
-							project_name:project.name
-							startPath:path.fileSystem
-							endPath:result.path.fileSystem,
-							rev:entity.rev
-						tpdsUpdateSender.moveEntity opts, sl_req_id, callback
+						Project.putElement project_id, destinationFolder_id, entity, entityType, (err, result)->
+							return callback(err) if err?
+							opts = 
+								project_id:project_id
+								project_name:project.name
+								startPath:path.fileSystem
+								endPath:result.path.fileSystem,
+								rev:entity.rev
+							tpdsUpdateSender.moveEntity opts, callback
 
 	deleteEntity: (project_id, entity_id, entityType, sl_req_id, callback = (error) ->)->
 		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)

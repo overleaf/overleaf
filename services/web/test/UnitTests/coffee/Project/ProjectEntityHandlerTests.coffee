@@ -217,52 +217,153 @@ describe 'ProjectEntityHandler', ->
 				@ProjectEntityHandler._cleanUpDoc.calledWith(@project, @doc1).should.equal true
 				@ProjectEntityHandler._cleanUpDoc.calledWith(@project, @doc2).should.equal true
 
-	describe 'moving an element', ->
+	describe 'moveEntity', ->
 		beforeEach ->
-			@docId = "4eecaffcbffa66588e000009"
-			@doc = {lines:["1234","312343d"], rev: "1234"}
+			@pathAfterMove = {
+				fileSystem: "/somewhere/else.txt"
+			}
+			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
+			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
+			@tpdsUpdateSender.moveEntity = sinon.stub().callsArg(1)
+			
+		describe "moving a doc", ->
+			beforeEach (done) ->
+				@docId = "4eecaffcbffa66588e000009"
+				@doc = {lines:["1234","312343d"], rev: "1234"}
+				@path = {
+					mongo:"folders[0]"
+					fileSystem:"/somewhere.txt"
+				}
+				@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @doc, @path)
+				@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", done
 
-		it 'should find the project then element', (done)->
-			@projectLocator.findElement = (options, callback)=>
-				options.element_id.should.equal @docId
-				options.type.should.equal 'docs'
-				done()
-			@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", ->
+			it 'should find the project then element', ->
+				@projectLocator.findElement
+					.calledWith({
+						element_id: @docId,
+						type: "docs",
+						project: @project
+					})
+					.should.equal true
 
-		it 'should remove the element then add it back in', (done)->
+			it 'should remove the element from its current position', ->
+				@ProjectEntityHandler._removeElementFromMongoArray
+					.calledWith(
+						@ProjectModel,
+						project_id,
+						@path.mongo
+					)
+					.should.equal true
+					
+			it "should put the element back in the new folder", ->
+				@ProjectModel.putElement
+					.calledWith(
+						project_id,
+						folder_id,
+						@doc,
+						"docs"
+					)
+					.should.equal true
+					
+			it 'should tell the third party data store', ->
+				@tpdsUpdateSender.moveEntity
+					.calledWith({
+						project_id: project_id,
+						startPath: @path.fileSystem
+						endPath: @pathAfterMove.fileSystem
+						project_name: @project.name
+						rev: @doc.rev
+					})
+					.should.equal true
+					
+		describe "moving a folder", ->
+			beforeEach ->
+				@folder_id = "folder-to-move"
+				@move_to_folder_id = "folder-to-move-to"
+				@folder = { name: "folder" }
+				@folder_to_move_to = { name: "folder to move to" }
+				@path = {
+					mongo:      "folders[0]"
+					fileSystem: "/somewhere.txt"
+				}
+				@pathToMoveTo = {
+					mongo:      "folders[0]"
+					fileSystem: "/somewhere.txt"
+				}
+				@projectLocator.findElement = (options, callback) =>
+					if options.element_id == @folder_id
+						callback(null, @folder, @path)
+					else if options.element_id == @move_to_folder_id
+						callback(null, @folder_to_move_to, @pathToMoveTo)
+					else
+						console.log "UNKNOWN ID", options
+				sinon.spy @projectLocator, "findElement"
+						
+			describe "when the destination folder is outside the moving folder", ->
+				beforeEach (done) ->
+					@path.fileSystem = "/one/directory"
+					@pathToMoveTo.fileSystem = "/another/directory"
+					@ProjectEntityHandler.moveEntity project_id, @folder_id, @move_to_folder_id, "folder", done
 
-			path = {mongo:"folders[0]"}
-			@projectLocator.findElement = (opts, callback)=>
-				callback(null, @doc, path)
-			@ProjectEntityHandler._removeElementFromMongoArray = (model, model_id, path, callback)-> callback()
+				it 'should find the project then element', ->
+					@projectLocator.findElement
+						.calledWith({
+							element_id: @folder_id,
+							type: "folder",
+							project: @project
+						})
+						.should.equal true
 
-			@ProjectModel.putElement = (passedProject_id, destinationFolder_id, entity, entityType, callback)=>
-				passedProject_id.should.equal project_id
-				destinationFolder_id.should.equal folder_id
-				entity.should.deep.equal @doc
-				entityType.should.equal 'docs'
-				done()
-			@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", ->
+				it 'should remove the element from its current position', ->
+					@ProjectEntityHandler._removeElementFromMongoArray
+						.calledWith(
+							@ProjectModel,
+							project_id,
+							@path.mongo
+						)
+						.should.equal true
+						
+				it "should put the element back in the new folder", ->
+					@ProjectModel.putElement
+						.calledWith(
+							project_id,
+							@move_to_folder_id,
+							@folder,
+							"folder"
+						)
+						.should.equal true
+						
+				it 'should tell the third party data store', ->
+					@tpdsUpdateSender.moveEntity
+						.calledWith({
+							project_id: project_id,
+							startPath: @path.fileSystem
+							endPath: @pathAfterMove.fileSystem
+							project_name: @project.name,
+							rev: @folder.rev
+						})
+						.should.equal true
+						
+			describe "when the destination folder is inside the moving folder", ->
+				beforeEach ->
+					@path.fileSystem = "/one/two"
+					@pathToMoveTo.fileSystem = "/one/two/three"
+					@callback = sinon.stub()
+					@ProjectEntityHandler.moveEntity project_id, @folder_id, @move_to_folder_id, "folder", @callback
 
-		it 'should tell the third party data store', (done)->
-			startPath = {fileSystem:"/somewhere.txt"}
-			endPath = {fileSystem:"/somewhere.txt"}
-
-			@projectLocator.findElement = (opts, callback)=>
-				callback(null, @doc, startPath)
-			@ProjectEntityHandler._removeElementFromMongoArray = (model, model_id, path, callback)-> callback()
-			@ProjectModel.putElement = (passedProject_id, destinationFolder_id, entity, entityType, callback)->
-				callback null, path:endPath
-
-			@tpdsUpdateSender.moveEntity = (opts)=>
-				opts.project_id.should.equal project_id
-				opts.startPath.should.equal startPath.fileSystem
-				opts.endPath.should.equal endPath.fileSystem
-				opts.project_name.should.equal @project.name
-				opts.rev.should.equal @doc.rev
-				done()
-			@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", ->
-
+				it 'should find the folder we are moving to as well element', ->
+					@projectLocator.findElement
+						.calledWith({
+							element_id: @move_to_folder_id,
+							type: "folder",
+							project: @project
+						})
+						.should.equal true
+						
+				it "should return an error", ->
+					@callback
+						.calledWith(new Error("destination folder is a child folder of me"))
+						.should.equal true
 
 	describe 'removing element from mongo array', ->
 		it 'should call update with log the path', (done)->
