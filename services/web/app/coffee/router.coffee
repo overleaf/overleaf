@@ -44,7 +44,6 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 
 httpAuth = require('express').basicAuth (user, pass)->
-	console.log "AUTH", user, pass, Settings.httpAuthUsers
 	isValid = Settings.httpAuthUsers[user] == pass
 	if !isValid
 		logger.err user:user, pass:pass, "invalid login details"
