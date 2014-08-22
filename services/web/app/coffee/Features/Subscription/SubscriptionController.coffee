@@ -19,6 +19,8 @@ module.exports = SubscriptionController =
 		else
 			baseUrl = ""
 		viewName = "subscriptions/plans"
+		if req.query.v?
+			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
 		res.render viewName,
 			title: "plans_and_pricing"
