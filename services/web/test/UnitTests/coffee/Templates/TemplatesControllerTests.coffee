@@ -40,7 +40,7 @@ describe 'TemplatesController', ->
 					dumpFolder:@dumpFolder
 				siteUrl: "http://localhost:3000"
 				apis:
-					templates_api:
+					templates:
 						url: @templateApiUrl="http://templates.sharelatex.env"
 					web:
 						url: @webApiUrl="http://web-api.sharelatex.env"

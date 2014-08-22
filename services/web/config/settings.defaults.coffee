@@ -77,31 +77,24 @@ module.exports =
 		docstore:
 			url : "http://localhost:3016"
 			pubUrl: "http://localhost:3016"
-		versioning:
-			snapshotwaitms:3000
-			url: "http://localhost:4000"
-			username: httpAuthUser
-			password: httpAuthPass
-		recurly:
-			privateKey: ""
-			apiKey: ""
-			subdomain: ""
 		chat:
 			url: "http://localhost:3010"
 			internal_url: "http://localhost:3010"
-		templates:
-			port: 3007
-			user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
-			cdnDomain: "https://d340ybc4pnuh67.cloudfront.net"
-			indexName:"templates-development"
 		blog:
 			port: 3008
 		filestore:
 			url: "http://localhost:3009"
 		clsi:
 			url: "http://localhost:3013"
-		templates_api:
+		templates:
 			url: "http://localhost:3007"
+		recurly:
+			privateKey: ""
+			apiKey: ""
+			subdomain: ""
+			
+	templates:
+		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.

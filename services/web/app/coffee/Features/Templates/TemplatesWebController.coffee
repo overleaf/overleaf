@@ -47,7 +47,7 @@ module.exports = TemplatesWebController =
 		
 		logger.log url:url, template_name: name, disposition: disposition, "proxying request to templates api"
 		
-		getReq = request.get("#{settings.apis.templates_api.url}#{url}")
+		getReq = request.get("#{settings.apis.templates.url}#{url}")
 		getReq.pipe(res)
 		getReq.on "error", (error) ->
 			logger.error err: error, "templates proxy API error"
@@ -86,7 +86,7 @@ module.exports = TemplatesWebController =
 
 	_getDataFromTemplatesApi: (path, callback)->
 		opts = 
-			url: "#{settings.apis.templates_api.url}#{path}"
+			url: "#{settings.apis.templates.url}#{path}"
 			json:true
 		request.get opts, (err, response, data)->
 			callback err, data
