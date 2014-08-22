@@ -59,12 +59,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 					indexes:!{JSON.stringify(settings.algolia.indexes)}
 				}
 
-		- if (typeof(settings.apis) != "undefined" && typeof(settings.apis.templates_api) != "undefined")
+		- if (typeof(settings.templates) != "undefined")
 			script.
 				window.sharelatex.templates = {
-					user_id : '!{settings.apis.templates_api.user_id}',
-					cdnDomain : '!{settings.apis.templates_api.cdnDomain}',
-					indexName : '!{settings.apis.templates_api.indexName}'
+					user_id : '!{settings.templates.user_id}',
+					cdnDomain : '!{settings.templates.cdnDomain}',
+					indexName : '!{settings.templates.indexName}'
 				}
 				
 	body
