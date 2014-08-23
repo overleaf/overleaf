@@ -4,7 +4,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 	head
 		-if (typeof(settings.gaExperiments) != "undefined")
-			script. !{settings.gaExperiments}
+			|!{settings.gaExperiments}
 		
 
 		-if (typeof(title) == "undefined")
