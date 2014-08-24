@@ -72,7 +72,7 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 			)
 
 		div(ng-show="deletedDocs.length > 0 && ui.view == 'track-changes'")
-			h3 Deleted Files
+			h3 #{translate("deleted_files")}
 			ul.list-unstyled.file-tree-list.deleted-docs
 				li(
 					ng-class="{ 'selected': entity.selected }",
