@@ -26,6 +26,7 @@ module.exports = SubscriptionController =
 			title: "plans_and_pricing"
 			plans: plans
 			baseUrl: baseUrl
+			gaExperiments: Settings.gaExperiments.plansPage
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->

@@ -3,8 +3,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
-		-if (typeof(settings.gaExperiments) != "undefined")
-			|!{settings.gaExperiments}
+		-if (typeof(gaExperiments) != "undefined")
+			|!{gaExperiments}
 		
 
 		-if (typeof(title) == "undefined")
