@@ -28,9 +28,9 @@ footer.site-footer
 				each item in nav.left_footer
 					li
 						if item.url
-							a(href=item.url, class=item.class) !{item.text}
+							a(href=item.url, class=item.class) !{translate(item.text)}
 						else
-							| !{item.text}
+							| !{translate(item.text)}
 
 			ul.col-md-6.text-right
 
