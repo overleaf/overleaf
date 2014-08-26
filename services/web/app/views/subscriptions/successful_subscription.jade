@@ -10,7 +10,7 @@ block content
 							h2 #{translate("thanks_for_subscribing")}
 						.alert.alert-success
 							p #{translate("your_card_will_be_charged_soon")}
-							p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>#{subscription.price}</strong>", collectionDate:"<strong>#{subscription.nextPaymentDueAt}</strong>"})}
+							p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>"+subscription.price+"</strong>", collectionDate:"<strong>"+subscription.nextPaymentDueAt+"</strong>"})}
 							p #{translate("if_you_dont_want_to_be_charged")}
 								a(href="/user/subscription") #{translate("click_here_to_cancel")}.
 
@@ -28,7 +28,7 @@ block content
 							.portraits
 								span.img-circle
 									img(src="/img/about/henry_oswald.jpg") 
-								&nbsp;
+								| &nbsp;
 								span.img-circle
 									img(src="/img/about/james_allen.jpg") 
 						p
