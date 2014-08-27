@@ -1,0 +1,25 @@
+extends ../layout
+
+block content
+
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3
+					.card
+						.page-header
+							h1.text-centered Move to Annual Billing
+
+						if planName.indexOf("student") != -1
+							| Upgarde from Student to Student Annual and save 20% equivilent to $19.2
+
+						if planName.indexOf("collaborator") != -1
+							| Upgarde from Collaborator to Collaborator Annual and save 20% equivilent to $36
+
+
+						form(action="/user/subscription/upgrade-annual", method="post")
+							input(name="_csrf", type="hidden", value=csrfToken)
+							input(name="planName", type="hidden", value=planName)
+							input.btn.btn-success(type="submit", value="Move to annual billing now")
+
+

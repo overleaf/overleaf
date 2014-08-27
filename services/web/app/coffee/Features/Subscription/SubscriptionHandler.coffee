@@ -1,3 +1,4 @@
+async = require("async")
 RecurlyWrapper = require("./RecurlyWrapper")
 Settings = require "settings-sharelatex"
 User = require('../../models/User').User
@@ -16,15 +17,25 @@ module.exports =
 				return callback(error) if error?
 				callback()
 
-	updateSubscription: (user, plan_code, callback)->
+	updateSubscription: (user, plan_code, coupon_code, callback)->
 		logger.log user:user, plan_code:plan_code, "updating subscription"
 		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
-			if hasSubscription
-				RecurlyWrapper.updateSubscription subscription.recurlySubscription_id, {plan_code: plan_code, timeframe: "now"}, (error, recurlySubscription) ->
-					return callback(error) if error?
-					SubscriptionUpdater.syncSubscription recurlySubscription, user._id, callback
+			if !hasSubscription
+				return callback()
 			else
-				callback()
+				async.series [
+					(cb)->
+						return cb() if !coupon_code?
+						RecurlyWrapper.getSubscription subscription.recurlySubscription_id, includeAccount: true, (err, usersSubscription)->
+							return callback(err) if err?
+							account_code = usersSubscription.account.account_code
+							RecurlyWrapper.redeemCoupon account_code, coupon_code, cb
+					(cb)->
+						RecurlyWrapper.updateSubscription subscription.recurlySubscription_id, {plan_code: plan_code, timeframe: "now"}, (error, recurlySubscription) ->
+							return callback(error) if error?
+							SubscriptionUpdater.syncSubscription recurlySubscription, user._id, cb
+				], callback
+		
 
 	cancelSubscription: (user, callback) ->
 		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->

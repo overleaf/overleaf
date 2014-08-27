@@ -26,11 +26,14 @@ module.exports =
 		app.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback
 		app.ignoreCsrf("post", '/user/subscription/callback')
 
-		#user changes there account state
+		#user changes their account state
 		app.post '/user/subscription/create',     AuthenticationController.requireLogin(), SubscriptionController.createSubscription
 		app.post '/user/subscription/update',     AuthenticationController.requireLogin(), SubscriptionController.updateSubscription
 		app.post '/user/subscription/cancel',     AuthenticationController.requireLogin(), SubscriptionController.cancelSubscription
 		app.post '/user/subscription/reactivate', AuthenticationController.requireLogin(), SubscriptionController.reactivateSubscription
 
+
+		app.get "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.renderUpgradeToAnnualPlanPage
+		app.post "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.processUpgradeToAnnualPlan
 
 

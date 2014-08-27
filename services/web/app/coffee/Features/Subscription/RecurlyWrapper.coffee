@@ -72,6 +72,8 @@ module.exports = RecurlyWrapper =
 					@getAccount accountId, (error, account) ->
 						return callback(error) if error?
 						recurlySubscription.account = account
+						console.log recurlySubscription
+
 						callback null, recurlySubscription
 
 				else
@@ -121,6 +123,23 @@ module.exports = RecurlyWrapper =
 			callback(error)
 		)
 		
+
+	redeemCoupon: (account_code, coupon_code, callback)->
+		requestBody = """
+			<subscription>
+				<account_code>#{account_code}</account_code>
+				<currency>USD</currency>
+			</subscription>
+		"""
+		@apiRequest({
+			url    : "coupons/#{coupon_code}/redeem"
+			method : "post"
+			body   : requestBody
+		}, (error, response, responseBody) =>
+			callback(error)
+		)
+
+
 	_parseSubscriptionXml: (xml, callback) ->
 		@_parseXml xml, (error, data) ->
 			return callback(error) if error?

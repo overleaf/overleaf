@@ -309,7 +309,25 @@ describe "RecurlyWrapper", ->
 	
 		
 
+	describe "redeemCoupon", ->
 
+		beforeEach (done) ->
+			@recurlyAccountId = "account-id-123"
+			@coupon_code = "312321312"
+			@apiRequest = sinon.stub RecurlyWrapper, "apiRequest", (options, callback) =>
+				options.url.should.equal "coupons/#{@coupon_code}/redeem"
+				options.body.indexOf("<account_code>#{@recurlyAccountId}</account_code>").should.not.equal -1
+				options.body.indexOf("<currency>USD</currency>").should.not.equal -1
+				options.method.should.equal "post"
+				callback()
+			RecurlyWrapper.redeemCoupon(@recurlyAccountId, @coupon_code, done)
+
+		afterEach ->
+			RecurlyWrapper.apiRequest.restore()
+
+		it "should send the request to redem the coupon", ->
+			@apiRequest.called.should.equal true
+	
 
 
 

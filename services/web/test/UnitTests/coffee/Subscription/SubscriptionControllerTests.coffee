@@ -28,7 +28,7 @@ describe "Subscription controller sanboxed", ->
 			getCurrentUser: sinon.stub().callsArgWith(1, null, @user)
 		@SubscriptionHandler = 
 			createSubscription: sinon.stub().callsArgWith(2)
-			updateSubscription: sinon.stub().callsArgWith(2)
+			updateSubscription: sinon.stub().callsArgWith(3)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 			cancelSubscription: sinon.stub().callsArgWith(1)
 			recurlyCallback: sinon.stub().callsArgWith(1)
@@ -193,7 +193,7 @@ describe "Subscription controller sanboxed", ->
 			done()
 
 
-	describe "updateSubscription", ->
+	describe "updateSubscription via post", ->
 		beforeEach (done)->
 			@res =
 				redirect:->
@@ -210,7 +210,6 @@ describe "Subscription controller sanboxed", ->
 		it "should redurect to the subscription page", (done)->
 			@res.redirect.calledWith("/user/subscription").should.equal true
 			done()
-
 
 	describe "reactivateSubscription", ->
 		beforeEach (done)->
@@ -287,5 +286,29 @@ describe "Subscription controller sanboxed", ->
 				@res.send.calledWith(200)
 
 
+	describe "renderUpgradeToAnnualPlanPage", ->
 
 
+		it "should redirect to the plans page if the user does not have a subscription", (done)->
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+			@res.redirect = (url)->
+				url.should.equal "/user/subscription/plans"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+
+	describe "processUpgradeToAnnualPlan", ->
+
+		beforeEach ->
+			@req.body =
+				coupon_code:"1234"
+				plan_code:"student-annual"
+
+			@res = {}
+
+		it "should tell the subscription handler to update the subscription with the annual plan and apply a coupon code", (done)->
+			@res.send = ()=>
+				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "1234").should.equal true
+				done()
+
+			@SubscriptionController.processUpgradeToAnnualPlan @req, @res

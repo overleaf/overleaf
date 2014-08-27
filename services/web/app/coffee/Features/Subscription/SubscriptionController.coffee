@@ -131,13 +131,12 @@ module.exports = SubscriptionController =
 					logger.err err:err, user_id:user._id, "something went wrong canceling subscription"
 				res.redirect "/user/subscription"
  
-
 	updateSubscription: (req, res)->
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return next(error) if error?
 			planCode = req.body.plan_code
 			logger.log planCode: planCode, user_id:user._id, "updating subscription"
-			SubscriptionHandler.updateSubscription user, planCode, (err)->
+			SubscriptionHandler.updateSubscription user, planCode, null, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong updating subscription"
 				res.redirect "/user/subscription"
@@ -160,6 +159,24 @@ module.exports = SubscriptionController =
 				res.send 200
 		else
 			res.send 200
+
+
+	renderUpgradeToAnnualPlanPage: (req, res)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+
+			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+				if !hasSubscription
+					return res.redirect("/user/subscription/plans")
+				res.render "subscriptions/upgradeToAnnual",
+					title: "Upgrade to annual"
+					planName: req.query.planName
+
+
+	processUpgradeToAnnualPlan: (req, res)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			{plan_code, coupon_code} = req.body
+			SubscriptionHandler.updateSubscription user, plan_code, coupon_code, ->
+				res.send 200
 
 	recurlyNotificationParser: (req, res, next) ->
 		xml = ""
