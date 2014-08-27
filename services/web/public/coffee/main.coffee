@@ -10,6 +10,7 @@ define [
 	"main/bonus"
 	"main/system-messages"
 	"main/translations"
+	"main/subscription-dashboard"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"

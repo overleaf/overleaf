@@ -4,8 +4,8 @@ extends ../layout
 
 mixin printPlan(plan)
 	-if (!plan.hideFromUsers)
-		tr
-			td
+		tr(ng-controller="ChangePlanFormController")
+			td(ng-init="plan=#{JSON.stringify(plan)}")
 				strong #{plan.name}
 			td
 				-if (plan.annual)
@@ -18,10 +18,10 @@ mixin printPlan(plan)
 				-else if (plan.planCode == subscription.planCode)
 					button.btn.disabled #{translate("your_plan")}
 				-else
-					form(action="/user/subscription/update",method="post")
-						input(type="hidden", name="_csrf", value=csrfToken)
-						input(type="hidden",name="plan_code",value="#{plan.planCode}")
-						input(type="submit",value="Change to this plan").btn.btn-success
+					form
+						input(type="hidden", ng-model="plan_code", name="plan_code", value="#{plan.planCode}")
+						input(type="submit", ng-click="changePlan()", value=translate("change_to_this_plan")).btn.btn-success
+
 
 mixin printPlans(plans)
 	-each plan in plans
@@ -89,6 +89,23 @@ block content
 			ga('send', 'event', 'subscription-funnel', 'cancelation')
 		})
 
+
+	script(type='text/ng-template', id='confirmChangePlanModalTemplate')
+		.modal-header
+			h3 Change plan?
+		.modal-body
+			p !{translate("sure_you_want_to_change_plan", {planName:"<strong>{{plan.name}}</strong>"})}
+		.modal-footer
+			button.btn.btn-default(
+				ng-disabled="inflight"
+				ng-click="cancel()"
+			) #{translate("cancel")}
+			button.btn.btn-success(
+				ng-disabled="state.inflight"
+				ng-click="confirmChangePlan()"
+			)
+				span(ng-hide="inflight") #{translate("change_plan")}
+				span(ng-show="inflight") #{translate("processing")}...
 
 
 
