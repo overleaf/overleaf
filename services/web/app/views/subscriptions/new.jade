@@ -14,7 +14,7 @@ block content
 							h1.text-centered #{translate("new_subscription")}
 						#subscribeForm #{translate("loading_billing_form")}...
 
-	script(type="text/javascript")
+	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
 
 
