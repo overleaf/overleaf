@@ -160,23 +160,34 @@ module.exports = SubscriptionController =
 		else
 			res.send 200
 
-
 	renderUpgradeToAnnualPlanPage: (req, res)->
 		SecurityManager.getCurrentUser req, (error, user) ->
-
-			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				planCode = subscription?.planCode.toLowerCase()
+				if planCode?.indexOf("student") != -1
+					planName = "student"
+				else if planCode?.indexOf("collaborator") != -1
+					planName = "collaborator"
 				if !hasSubscription
 					return res.redirect("/user/subscription/plans")
+				logger.log planName:planName, user_id:user._id, "rendering upgrade to annual page"
 				res.render "subscriptions/upgradeToAnnual",
 					title: "Upgrade to annual"
-					planName: req.query.planName
-
+					planName: planName
 
 	processUpgradeToAnnualPlan: (req, res)->
 		SecurityManager.getCurrentUser req, (error, user) ->
-			{plan_code, coupon_code} = req.body
-			SubscriptionHandler.updateSubscription user, plan_code, coupon_code, ->
-				res.send 200
+			{planName} = req.body
+			coupon_code = Settings.coupon_codes.upgradeToAnnualPromo[planName]
+			annualPlanName = "#{planName}-annual"
+			logger.log user_id:user._id, planName:annualPlanName, "user is upgrading to annual billing with discount"
+			SubscriptionHandler.updateSubscription user, annualPlanName, coupon_code, (err)->
+				if err?
+					logger.err err:err, user_id:user._id, "error updating subscription"
+					res.send 500
+				else
+					res.send 200
+
 
 	recurlyNotificationParser: (req, res, next) ->
 		xml = ""

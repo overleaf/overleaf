@@ -16,6 +16,7 @@ module.exports = RecurlyWrapper =
 			"Content-Type"  : "application/xml; charset=utf-8"
 		request options, (error, response, body) ->
 			unless error? or response.statusCode == 200 or response.statusCode == 201 or response.statusCode == 204
+				logger.err err:error, options:options, "error returned from recurly"
 				error = "Recurly API returned with status code: #{response.statusCode}"
 			callback(error, response, body)
 
@@ -72,8 +73,6 @@ module.exports = RecurlyWrapper =
 					@getAccount accountId, (error, account) ->
 						return callback(error) if error?
 						recurlySubscription.account = account
-						console.log recurlySubscription
-
 						callback null, recurlySubscription
 
 				else
@@ -126,16 +125,19 @@ module.exports = RecurlyWrapper =
 
 	redeemCoupon: (account_code, coupon_code, callback)->
 		requestBody = """
-			<subscription>
+			<redemption>
 				<account_code>#{account_code}</account_code>
 				<currency>USD</currency>
-			</subscription>
+			</redemption>
 		"""
+		logger.log account_code:account_code, coupon_code:coupon_code, requestBody:requestBody, "redeeming coupon for user"
 		@apiRequest({
 			url    : "coupons/#{coupon_code}/redeem"
 			method : "post"
 			body   : requestBody
 		}, (error, response, responseBody) =>
+			if error?
+				logger.err err:error, account_code:account_code, coupon_code:coupon_code, "error redeeming coupon"
 			callback(error)
 		)
 

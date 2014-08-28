@@ -18,7 +18,7 @@ mockSubscriptions =
 		account:
 			account_code: "user-123"
 
-describe "Subscription controller sanboxed", ->
+describe "SubscriptionController sanboxed", ->
 
 	beforeEach ->
 		@user = {}
@@ -47,6 +47,15 @@ describe "Subscription controller sanboxed", ->
 		@SubscriptionViewModelBuilder = 
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
 			buildViewModel: sinon.stub()
+		@settings = 
+			coupon_codes:
+				upgradeToAnnualPromo: 
+					student:"STUDENTCODEHERE"
+					collaborator:"COLLABORATORCODEHERE"
+			apis:
+				recurly:
+					subdomain:"sl.recurly.com"
+			siteUrl: "http://www.sharelatex.dev:3000"
 
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
@@ -56,6 +65,7 @@ describe "Subscription controller sanboxed", ->
 			"./LimitationsManager": @LimitationsManager
 			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex": log:->
+			"settings-sharelatex": @settings
 
 
 		@res = new MockResponse()
@@ -297,18 +307,48 @@ describe "Subscription controller sanboxed", ->
 			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
 
 
+		it "should pass the plan code to the view - student", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"Student free trial 14 days"})
+			@res.render = (view, opts)->
+				view.should.equal "subscriptions/upgradeToAnnual"
+				opts.planName.should.equal "student"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+		it "should pass the plan code to the view - collaborator", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"free trial for Collaborator free trial 14 days"})
+			@res.render = (view, opts)->
+				opts.planName.should.equal "collaborator"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
 	describe "processUpgradeToAnnualPlan", ->
 
 		beforeEach ->
-			@req.body =
-				coupon_code:"1234"
-				plan_code:"student-annual"
-
-			@res = {}
-
+			
 		it "should tell the subscription handler to update the subscription with the annual plan and apply a coupon code", (done)->
-			@res.send = ()=>
-				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "1234").should.equal true
+			@req.body =
+				planName:"student"
+
+			@res.redirect = ()=>
+				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "STUDENTCODEHERE").should.equal true
 				done()
 
 			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
+
+		it "should get the collaborator coupon code", (done)->
+
+			@req.body =
+				planName:"collaborator"
+
+			@res.redirect = (url)=>
+				@SubscriptionHandler.updateSubscription.calledWith(@user, "collaborator-annual", "COLLABORATORCODEHERE").should.equal true
+				url.should.equal  "/user/subscription/thank-you"
+				done()
+
+			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
+
+
+

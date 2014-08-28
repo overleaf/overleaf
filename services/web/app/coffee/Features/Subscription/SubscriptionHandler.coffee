@@ -18,7 +18,7 @@ module.exports =
 				callback()
 
 	updateSubscription: (user, plan_code, coupon_code, callback)->
-		logger.log user:user, plan_code:plan_code, "updating subscription"
+		logger.log user:user, plan_code:plan_code, coupon_code:coupon_code, "updating subscription"
 		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
 			if !hasSubscription
 				return callback()
@@ -26,6 +26,7 @@ module.exports =
 				async.series [
 					(cb)->
 						return cb() if !coupon_code?
+						logger.log user_id:user._id, plan_code:plan_code, coupon_code:coupon_code, "updating subscription with coupon code applied first"
 						RecurlyWrapper.getSubscription subscription.recurlySubscription_id, includeAccount: true, (err, usersSubscription)->
 							return callback(err) if err?
 							account_code = usersSubscription.account.account_code

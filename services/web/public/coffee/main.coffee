@@ -11,6 +11,7 @@ define [
 	"main/system-messages"
 	"main/translations"
 	"main/subscription-dashboard"
+	"main/annual-upgrade"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
