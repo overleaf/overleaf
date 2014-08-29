@@ -332,7 +332,7 @@ describe "SubscriptionController sanboxed", ->
 			@req.body =
 				planName:"student"
 
-			@res.redirect = ()=>
+			@res.send = ()=>
 				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "STUDENTCODEHERE").should.equal true
 				done()
 
@@ -343,9 +343,8 @@ describe "SubscriptionController sanboxed", ->
 			@req.body =
 				planName:"collaborator"
 
-			@res.redirect = (url)=>
+			@res.send = (url)=>
 				@SubscriptionHandler.updateSubscription.calledWith(@user, "collaborator-annual", "COLLABORATORCODEHERE").should.equal true
-				url.should.equal  "/user/subscription/thank-you"
 				done()
 
 			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
