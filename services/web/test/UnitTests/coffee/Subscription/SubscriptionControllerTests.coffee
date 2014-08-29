@@ -323,6 +323,15 @@ describe "SubscriptionController sanboxed", ->
 				done()
 			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
 
+		it "should pass annual as the plan name if the user is already on an annual plan", (done)->
+
+			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"student annual with free trial"})
+			@res.render = (view, opts)->
+				opts.planName.should.equal "annual"
+				done()
+			@SubscriptionController.renderUpgradeToAnnualPlanPage @req, @res
+
+
 	describe "processUpgradeToAnnualPlan", ->
 
 		beforeEach ->

@@ -11,7 +11,8 @@ define [
 			collaborator:"36"
 		$scope.$watch $scope.planName, ->
 			$scope.yearlySaving = savings[$scope.planName]
-
+			if $scope.planName == "annual"
+				$scope.upgradeComplete = true
 		$scope.completeAnnualUpgrade = ->
 			body = 
 				planName: $scope.planName

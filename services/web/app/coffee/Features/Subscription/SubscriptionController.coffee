@@ -164,7 +164,9 @@ module.exports = SubscriptionController =
 		SecurityManager.getCurrentUser req, (error, user) ->
 			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
 				planCode = subscription?.planCode.toLowerCase()
-				if planCode?.indexOf("student") != -1
+				if planCode?.indexOf("annual") != -1
+					planName = "annual"
+				else if planCode?.indexOf("student") != -1
 					planName = "student"
 				else if planCode?.indexOf("collaborator") != -1
 					planName = "collaborator"
