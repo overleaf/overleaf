@@ -8,24 +8,19 @@ block content
 				.col-md-6.col-md-offset-3
 					.card(ng-init="planName = #{JSON.stringify(planName)}")
 						.page-header
-							h1.text-centered Move to Annual Billing
+							h1.text-centered #{translate("move_to_annual_billing")}
 						div(ng-hide="upgradeComplete")
 							.row
-								div.col-md-12
-									| Change to Annual Billing and save 
-									strong 20% 
-									| equivilent to 
-									strong ${{yearlySaving}} 
-									| per year.
+								div.col-md-12 !{translate("change_to_annual_billing_and_save", {percentage:'<strong>20</strong>', yearlySaving:"<strong>{{yearlySaving}}%</strong>"})}
 							.row &nbsp;
-									
 							.row
 								div.col-md-12
 									center
 										button.btn.btn-success(ng-click="completeAnnualUpgrade()", ng-disabled="inflight")
 											span(ng-show="inflight") #{translate("processing")}
-											span(ng-hide="inflight") Move to annual billing now
+											span(ng-hide="inflight") #{translate("move_to_annual_billing")} now
+
 						div(ng-show="upgradeComplete")
-							h3  Annual billing enabled, #{translate("thank_you")}.
+							h3  #{translate("annual_billing_enabled")}, #{translate("thank_you")}.
 
 
