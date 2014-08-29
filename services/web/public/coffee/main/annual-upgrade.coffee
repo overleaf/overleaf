@@ -5,7 +5,7 @@ define [
 
 		MESSAGES_URL = "/user/subscription/upgrade-annual"
 
-		$scope.upgradeComplete = true
+		$scope.upgradeComplete = false
 		savings = 
 			student:"19.2"
 			collaborator:"36"
