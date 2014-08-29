@@ -1,6 +1,5 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require 'sinon'
-Settings   = require 'settings-sharelatex'
 should = require("chai").should()
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
@@ -55,7 +54,7 @@ describe "SubscriptionController sanboxed", ->
 			apis:
 				recurly:
 					subdomain:"sl.recurly.com"
-			siteUrl: "http://www.sharelatex.dev:3000"
+			siteUrl: "http://de.sharelatex.dev:3000"
 
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
@@ -88,7 +87,7 @@ describe "SubscriptionController sanboxed", ->
 
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{Settings.siteUrl}/user/subscription/update"
+				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
 				@res.renderedVariables.user.id.should.equal @user.id
 
 		describe "with a user without subscription", ->
@@ -119,7 +118,7 @@ describe "SubscriptionController sanboxed", ->
 					@req.session._csrf = @csrfToken = "mock-csrf-token"
 					@res.render = (page, opts)=>
 						url = JSON.parse(opts.subscriptionFormOptions).successURL
-						url.should.equal("#{Settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
+						url.should.equal("#{@settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
 						done()
 					@SubscriptionController.paymentPage @req, @res
 
