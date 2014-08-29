@@ -11,7 +11,7 @@ block content
 							h1.text-centered #{translate("move_to_annual_billing")}
 						div(ng-hide="upgradeComplete")
 							.row
-								div.col-md-12 !{translate("change_to_annual_billing_and_save", {percentage:'<strong>20</strong>', yearlySaving:"<strong>{{yearlySaving}}%</strong>"})}
+								div.col-md-12 !{translate("change_to_annual_billing_and_save", {percentage:'<strong>20%</strong>', yearlySaving:"<strong>${{yearlySaving}}</strong>"})}
 							.row &nbsp;
 							.row
 								div.col-md-12
