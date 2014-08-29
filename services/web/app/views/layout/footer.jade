@@ -3,7 +3,7 @@
 footer.site-footer
 	.container
 		.row
-			ul.col-md-7
+			ul.col-md-8
 				
 				if Object.keys(settings.i18n.subdomainLang).length > 1
 					li.dropdown.dropup.subdued
@@ -32,7 +32,7 @@ footer.site-footer
 						else
 							| !{translate(item.text)}
 
-			ul.col-md-5.text-right
+			ul.col-md-4.text-right
 
 				each item in nav.right_footer
 					li
