@@ -5,8 +5,13 @@ define [
 
 		MESSAGES_URL = "/user/subscription/upgrade-annual"
 
-		$scope.upgradeComplete = false
-		
+		$scope.upgradeComplete = true
+		savings = 
+			student:"19.2"
+			collaborator:"36"
+		$scope.$watch $scope.planName, ->
+			$scope.yearlySaving = savings[$scope.planName]
+
 		$scope.completeAnnualUpgrade = ->
 			body = 
 				planName: $scope.planName

@@ -10,17 +10,22 @@ block content
 						.page-header
 							h1.text-centered Move to Annual Billing
 						div(ng-hide="upgradeComplete")
-							span(ng-show="planName == 'student'")
-								| Upgarde from Student to Student Annual and save 20% equivilent to $19.2
-
-							span(ng-show="planName == 'collaborator'")
-								| Upgarde from Collaborator to Collaborator Annual and save 20% equivilent to $36
-
-
-							button.btn.btn-success(ng-click="completeAnnualUpgrade()", ng-disabled="inflight")
-								span(ng-show="inflight") #{translate("processing")}
-								span(ng-hide="inflight") Move to annual billing now
+							.row
+								div.col-md-12
+									| Change to Annual Billing and save 
+									strong 20% 
+									| equivilent to 
+									strong ${{yearlySaving}} 
+									| per year.
+							.row &nbsp;
+									
+							.row
+								div.col-md-12
+									center
+										button.btn.btn-success(ng-click="completeAnnualUpgrade()", ng-disabled="inflight")
+											span(ng-show="inflight") #{translate("processing")}
+											span(ng-hide="inflight") Move to annual billing now
 						div(ng-show="upgradeComplete")
-							span Upgrade to annual Complete
+							h3  Annual billing enabled, #{translate("thank_you")}.
 
 
