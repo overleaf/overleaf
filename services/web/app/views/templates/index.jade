@@ -6,12 +6,12 @@ block vars
 block content
 	.content.content-alt
 		.container
-			.row.template-page-header(ng-controller="SearchController")
+			.row.template-page-header
 				
 				.col-md-2
 					h2
 						a(href="/templates") #{translate("templates")}
-				.col-md-8
+				.col-md-8(ng-controller="SearchController")
 					form.project-search.form-horizontal(role="form")
 						.form-group.has-feedback.has-feedback-left.col-md-12
 							input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search template library....")
@@ -21,7 +21,9 @@ block content
 								style="cursor: pointer;",
 								ng-show="searchQueryText.length > 0"
 							)
-				.col-md-12
+				.col-md-2(ng-controller="MissingTemplateController")
+					a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_template_question")}
+				.col-md-12(ng-cloak)
 					ul.list-unstyled
 						li(ng-repeat='hit in hits')
 							.thumbnail.searchResult
@@ -32,6 +34,7 @@ block content
 										.col-md-7
 											h1(ng-bind-html='hit.name')
 											p(ng-bind-html='hit.description')
+
 
 
 
@@ -54,6 +57,24 @@ block content
 							.row
 								.col-md-12.text-center
 									a(href=tag.tagPagePath) View all #{tag.totalNumberOfTemplates} #{tag.name} templates »
+
+
+
+	script(type="text/ng-template", id="missingTemplateModal")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="cancel()"
+			) &times;
+			h3 #{translate("missing_template_question")}
+		.modal-body #{translate("tell_us_about_the_template")}
+		.modal-footer
+			button.btn.btn-default(
+				ng-click="cancel()",
+			)
+				span #{translate("dismiss")}
+			button.btn.btn-info #{translate("email_us")}
 
 
 

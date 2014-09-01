@@ -22,6 +22,8 @@ define [
 			index = client.initIndex(window.sharelatex.algolia?.indexes?.templates)
 			return index
 
+
+
 	App.controller "SearchController", ($scope, algolia, _) ->
 		$scope.hits = []
 
@@ -60,3 +62,16 @@ define [
 				else
 					hits = _.map response.hits, buildHitViewModel
 					updateHits hits
+
+
+	App.controller "MissingTemplateController", ($scope, $modal)->
+		$scope.showMissingTemplateModal = ->
+			$modal.open {
+				templateUrl: "missingTemplateModal"
+				controller:"MissingTemplateModalController"
+			}
+
+	App.controller "MissingTemplateModalController", ($scope, $modalInstance) ->
+		$scope.cancel = () ->
+			$modalInstance.dismiss()
+
