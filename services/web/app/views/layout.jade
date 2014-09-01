@@ -43,7 +43,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
-		
+			
 		block scripts
 		script(src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js")
 		script(src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.14/angular.min.js")
@@ -54,6 +54,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				jsPath:  '#{jsPath}'
 			};
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
+			window.ab = {}
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
@@ -125,5 +126,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 					category: "questions"
 				};
 
-	
+		span(ng-controller="AbTestController")
+		script.
+			window.ab.plan14 = {step:1}
+
 

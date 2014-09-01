@@ -12,6 +12,7 @@ define [
 	"main/translations"
 	"main/subscription-dashboard"
 	"main/annual-upgrade"
+	"analytics/AbTestingmanager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
 	"directives/focus"
