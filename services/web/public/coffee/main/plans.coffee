@@ -1,8 +1,18 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "PlansController", ($scope, $modal, event_tracking) ->
+	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager) ->
 		
+
+		buckets = [
+			{ bucketName:"30d", queryString: "_free_trial", trial_len:30 }
+			{ bucketName:"14d", queryString: "_free_trial_14_days", trial_len:14 }
+		]
+		bucket = abTestManager.getABTestBucket "trial_len", buckets
+
+		$scope.trial_len = bucket.trial_len
+		$scope.planQueryString = bucket.queryString
+
 		$scope.ui =
 			view: "monthly"
 

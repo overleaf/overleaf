@@ -17,6 +17,7 @@ define [
 	"ide/hotkeys/index"
 	"ide/directives/layout"
 	"ide/services/ide"
+	"analytics/AbTestingmanager"
 	"directives/focus"
 	"directives/fineUpload"
 	"directives/scroll"
@@ -36,7 +37,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 ) ->
-	App.controller "IdeController", ["$scope", "$timeout", "ide", ($scope, $timeout, ide) ->
+	App.controller "IdeController", ($scope, $timeout, ide, abTestManager) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -61,10 +62,17 @@ define [
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
-		
+
 		$scope.startFreeTrial = (source) ->
-			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
-			window.open("/user/subscription/new?planCode=student_free_trial")
+
+			buckets = [
+				{ bucketName:"30d", planCode: "student_free_trial" }
+				{ bucketName:"14d", planCode: "student_free_trial_14_days" }
+			]
+			bucket = abTestManager.getABTestBucket "trial_len", buckets
+			abTestManager.processTestWithStep("trial_len", bucket.bucketName, 0)
+
+			window.open("/user/subscription/new?planCode=#{bucket.planCode}")
 			$scope.startedFreeTrial = true
 
 		window._ide = ide
@@ -105,7 +113,5 @@ define [
 				$scope.darkTheme = true
 			else
 				$scope.darkTheme = false
-			
-	]
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

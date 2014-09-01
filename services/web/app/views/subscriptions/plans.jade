@@ -7,7 +7,8 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-							h1 #{translate("start_x_day_trial", {len:30})}
+
+							h1(ng-cloak) #{translate("start_x_day_trial", {len:'{{trial_len}}'})}
 				.row
 					.col-md-8.col-md-offset-2
 						p.text-centered #{translate("sl_benefits_plans")}
@@ -63,7 +64,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || '_free_trial'}}", ng-click="signUpNowClicked('collaborator')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}", ng-click="signUpNowClicked('collaborator')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -85,7 +86,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || '_free_trial'}}", ng-click="signUpNowClicked('professional')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}", ng-click="signUpNowClicked('professional')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -117,7 +118,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student_free_trial", ng-click="signUpNowClicked('student')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}", ng-click="signUpNowClicked('student')"
 										) #{translate("start_free_trial")}
 							.card
 								.card-header

@@ -5,15 +5,15 @@ define [
 	
 	App.factory "abTestManager", ($http, ipCookie) ->
 
-		_buildCookieKey = (testName)-> "sl_abt_#{testName}"
+		_buildCookieKey = (testName, bucket)-> "sl_abt_#{testName}_#{bucket}"
 
-		_getTestCookie = (testName)->
-			cookieKey = _buildCookieKey(testName)
+		_getTestCookie = (testName, bucket)->
+			cookieKey = _buildCookieKey(testName, bucket)
 			return ipCookie(cookieKey)
 
-		_persistCookieStep = (testName, newStep)->
-			ipCookie(_buildCookieKey(testName), step:newStep, {expires:10})
-			ga('send', 'event', 'ab_tests', testName, {step:newStep})
+		_persistCookieStep = (testName, bucket, newStep)->
+			ipCookie(_buildCookieKey(testName, bucket), {step:newStep}, {expires:100})
+			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", {step:newStep})
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
 			if !cookieStep? and newStep != 0
@@ -25,18 +25,29 @@ define [
 			else 
 				return false
 
-		processTestWithStep: processTestWithStep = (testName, newStep)->
-			currentCookieStep = _getTestCookie(testName)?.step
-			if _checkIfStepIsNext(currentCookieStep, newStep)
-				_persistCookieStep(testName, newStep)
+		_getUsersHash = (testName)->
+			sl_user_test_token = "sl_utt"
+			user_uuid = ipCookie(sl_user_test_token)
+			if !user_uuid?
+				user_uuid = Math.random()
+				ipCookie(sl_user_test_token, user_uuid, {expires:365})
+			hash = CryptoJS.MD5("#{user_uuid}:#{testName}")
+			return hash
 
-		getABTestBucket: getABTestBucket = (user_id, test_name, buckets) ->
-			hash = CryptoJS.MD5("#{user_id}:#{test_name}")
+		processTestWithStep: processTestWithStep = (testName, bucket, newStep)->
+			currentCookieStep = _getTestCookie(testName, bucket)?.step
+			if _checkIfStepIsNext(currentCookieStep, newStep)
+				_persistCookieStep(testName, bucket, newStep)
+
+		getABTestBucket: getABTestBucket = (test_name, buckets) ->
+			hash = _getUsersHash(test_name)
 			bucketIndex = parseInt(hash.toString().slice(0,2), 16) % (buckets?.length or 2)
 			return buckets[bucketIndex]
+
+
 
 	App.controller "AbTestController", ($scope, abTestManager)->
 		testKeys = _.keys(window.ab)
 
-		_.each testKeys, (testName)->
-			abTestManager.processTestWithStep testName, window.ab[testName]?.step
+		_.each window.ab, (event)->
+			abTestManager.processTestWithStep event.testName, event.bucket, event.step
