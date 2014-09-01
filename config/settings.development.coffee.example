@@ -121,6 +121,12 @@ module.exports =
 	# address and http/https protocol information.
 	behindProxy: false
 
+	# If you are running ShareLaTeX behind a proxy or you are running a local 
+	# installation purely for development purposes you may want to bind the
+	# http server to a specific interface/host, or just localhost.
+	# By default, the http server will bind to all interfaces.
+	interface: "0.0.0.0"
+
 	# Sending Email
 	# -------------
 	#
