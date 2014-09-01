@@ -2,54 +2,6 @@ define [
 	"base"
 ], (App) ->
 
-
-	App.factory "queuedHttp", ($http, $q) ->
-		pendingRequests = []
-		inflight = false
-
-		processPendingRequests = () ->
-			return if inflight
-			doRequest = pendingRequests.shift()
-			if doRequest?
-				inflight = true
-				doRequest()
-					.success () ->
-						inflight = false
-						processPendingRequests()
-					.error () ->
-						inflight = false
-						processPendingRequests()
-
-		queuedHttp = (args...) ->
-			deferred = $q.defer()
-			promise = deferred.promise
-
-			# Adhere to the $http promise conventions
-			promise.success = (callback) ->
-				promise.then(callback)
-				return promise
-
-			promise.error = (callback) ->
-				promise.catch(callback)
-				return promise
-
-			doRequest = () ->
-				$http(args...)
-					.success (successArgs...) ->
-						deferred.resolve(successArgs...)
-					.error (errorArgs...) ->
-						deferred.reject(errorArgs...)
-
-			pendingRequests.push doRequest
-			processPendingRequests()
-
-			return promise
-
-		queuedHttp.post = (url, data) ->
-			queuedHttp({method: "POST", url: url, data: data})
-
-		return queuedHttp
-
 	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
@@ -259,6 +211,10 @@ define [
 			modalInstance.result.then(
 				(newTagName) ->
 					$scope.createTag(newTagName)
+					console.log $scope.tag, $scope.addSelectedProjectsToTag, newTagName
+					$scope.addSelectedProjectsToTag($scope.tag)
+
+					# add selected projects to this new tag
 			)
 
 		$scope.createProject = (name, template = "none") ->
@@ -481,147 +437,3 @@ define [
 		$scope.$watch "project.selected", (value) ->
 			if value?
 				$scope.updateSelectedProjects()
-
-	App.controller "TagListController", ($scope) ->
-		$scope.filterProjects = (filter = "all") ->
-			$scope._clearTags()
-			$scope.setFilter(filter)
-
-		$scope._clearTags = () ->
-			for tag in $scope.tags
-				tag.selected = false
-
-		$scope.nonEmpty = (tag) ->
-			# The showWhenEmpty property will be set on any tag which we have
-			# modified during this session. Otherwise, tags which are empty
-			# when loading the page are not shown.
-			tag.project_ids.length > 0 or !!tag.showWhenEmpty
-			
-		$scope.selectTag = (tag) ->
-			$scope._clearTags()
-			tag.selected = true
-			$scope.setFilter("tag")
-
-	App.controller "TagDropdownItemController", ($scope) ->
-		$scope.recalculateProjectsInTag = () ->
-			$scope.areSelectedProjectsInTag = false
-			for project_id in $scope.getSelectedProjectIds()
-				if project_id in $scope.tag.project_ids
-					$scope.areSelectedProjectsInTag = true
-				else
-					partialSelection = true
-
-			if $scope.areSelectedProjectsInTag and partialSelection
-				$scope.areSelectedProjectsInTag = "partial"
-
-		$scope.addOrRemoveProjectsFromTag = () ->
-			if $scope.areSelectedProjectsInTag == true
-				$scope.removeSelectedProjectsFromTag($scope.tag)
-				$scope.areSelectedProjectsInTag = false
-			else if $scope.areSelectedProjectsInTag == false or $scope.areSelectedProjectsInTag == "partial"
-				$scope.addSelectedProjectsToTag($scope.tag)
-				$scope.areSelectedProjectsInTag = true
-
-		$scope.$watch "selectedProjects", () ->
-			$scope.recalculateProjectsInTag()
-		$scope.recalculateProjectsInTag()
-
-	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
-		$scope.inputs = 
-			newTagName: ""
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.create = () ->
-			$modalInstance.close($scope.inputs.newTagName)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, projectName) ->
-		$scope.inputs = 
-			projectName: projectName
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.rename = () ->
-			$modalInstance.close($scope.inputs.projectName)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-	App.controller 'CloneProjectModalController', ($scope, $modalInstance, $timeout, project) ->
-		$scope.inputs = 
-			projectName: project.name + " (Copy)"
-		$scope.state =
-			inflight: false
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.clone = () ->
-			$scope.state.inflight = true
-			$scope
-				.cloneProject(project, $scope.inputs.projectName)
-				.then (project_id) ->
-					$scope.state.inflight = false
-					$modalInstance.close(project_id)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-	App.controller 'NewProjectModalController', ($scope, $modalInstance, $timeout, template) ->
-		$scope.inputs = 
-			projectName: ""
-		$scope.state =
-			inflight: false
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.create = () ->
-			$scope.state.inflight = true
-			$scope
-				.createProject($scope.inputs.projectName, template)
-				.then (project_id) ->
-					$scope.state.inflight = false
-					$modalInstance.close(project_id)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-	App.controller 'DeleteProjectsModalController', ($scope, $modalInstance, $timeout, projects) ->
-		$scope.projectsToDelete = projects.filter (project) -> project.accessLevel == "owner"
-		$scope.projectsToLeave = projects.filter (project) -> project.accessLevel != "owner"
-
-		if $scope.projectsToLeave.length > 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "Delete & Leave"
-		else if $scope.projectsToLeave.length == 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "Delete"
-		else
-			$scope.action = "Leave"
-
-		$scope.delete = () ->
-			$modalInstance.close()
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-
-	App.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout) ->
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
-		$scope.onComplete = (error, name, response) ->
-			if response.project_id?
-				window.location = '/project/' + response.project_id

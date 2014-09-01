@@ -1,5 +1,5 @@
 define [
-	"main/project-list"
+	"main/project-list/index"
 	"main/user-details"
 	"main/account-settings"
 	"main/templates"
