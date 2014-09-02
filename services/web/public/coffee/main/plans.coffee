@@ -19,6 +19,8 @@ define [
 		$scope.signUpNowClicked = (plan, annual)->
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
+			else
+				abTestManager.processTestWithStep("trial_len", bucket.bucketName, 0)
 			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
 
 		$scope.switchToMonthly = ->

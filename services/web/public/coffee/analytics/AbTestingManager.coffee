@@ -12,7 +12,7 @@ define [
 			return ipCookie(cookieKey)
 
 		_persistCookieStep = (testName, bucket, newStep)->
-			ipCookie(_buildCookieKey(testName, bucket), {step:newStep}, {expires:100})
+			ipCookie(_buildCookieKey(testName, bucket), {step:newStep}, {expires:100, path:"/"})
 			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
@@ -30,7 +30,7 @@ define [
 			user_uuid = ipCookie(sl_user_test_token)
 			if !user_uuid?
 				user_uuid = Math.random()
-				ipCookie(sl_user_test_token, user_uuid, {expires:365})
+				ipCookie(sl_user_test_token, user_uuid, {expires:365, path:"/"})
 			hash = CryptoJS.MD5("#{user_uuid}:#{testName}")
 			return hash
 
