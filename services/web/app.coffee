@@ -35,7 +35,8 @@ if Settings.catchErrors
 BackgroundTasks.run()
 
 port = Settings.port or Settings.internal?.web?.port or 3000
-Server.server.listen port, ->
+localInterface = Settings.interface or "0.0.0.0"
+Server.server.listen port, localInterface, ->
 	logger.info("web-sharelatex listening on port #{port}")
 	logger.info("#{require('http').globalAgent.maxSockets} sockets enabled")
 	if argv.user
