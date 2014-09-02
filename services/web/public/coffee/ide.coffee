@@ -17,7 +17,7 @@ define [
 	"ide/hotkeys/index"
 	"ide/directives/layout"
 	"ide/services/ide"
-	"analytics/AbTestingmanager"
+	"analytics/AbTestingManager"
 	"directives/focus"
 	"directives/fineUpload"
 	"directives/scroll"
