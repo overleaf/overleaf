@@ -14,12 +14,13 @@ define [
 		_getTestCookie = (testName, bucket)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			cookie =  ipCookie(cookieKey)
-			console.log cookie
+			console.log cookieKey, cookie
 			return cookie
 
 		_persistCookieStep = (testName, bucket, newStep)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			ipCookie(cookieKey, {step:newStep}, {expires:100, path:"/"})
+			console.log("persisting", cookieKey, {step:newStep})
 			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
