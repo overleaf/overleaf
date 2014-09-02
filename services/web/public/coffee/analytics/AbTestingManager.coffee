@@ -13,7 +13,7 @@ define [
 
 		_persistCookieStep = (testName, bucket, newStep)->
 			ipCookie(_buildCookieKey(testName, bucket), {step:newStep}, {expires:100})
-			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", {step:newStep})
+			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
 			if !cookieStep? and newStep != 0
