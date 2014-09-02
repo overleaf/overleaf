@@ -5,17 +5,25 @@ define [
 	
 	App.factory "abTestManager", ($http, ipCookie) ->
 
-		_buildCookieKey = (testName, bucket)-> "sl_abt_#{testName}_#{bucket}"
+		_buildCookieKey = (testName, bucket)-> 
+			key = "sl_abt_#{testName}_#{bucket}"
+			console.log key
+			return key
+
 
 		_getTestCookie = (testName, bucket)->
 			cookieKey = _buildCookieKey(testName, bucket)
-			return ipCookie(cookieKey)
+			cookie =  ipCookie(cookieKey)
+			console.log cookie
+			return cookie
 
 		_persistCookieStep = (testName, bucket, newStep)->
-			ipCookie(_buildCookieKey(testName, bucket), {step:newStep}, {expires:100, path:"/"})
+			cookieKey = _buildCookieKey(testName, bucket)
+			ipCookie(cookieKey, {step:newStep}, {expires:100, path:"/"})
 			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
+			console.log cookieStep, newStep, "checking if step is next"
 			if !cookieStep? and newStep != 0
 				return false
 			else if newStep == 0
