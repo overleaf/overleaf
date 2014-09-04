@@ -40,6 +40,8 @@ describe "Opening", ->
 			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('logout')}
 		"""
 		child.exec command, (err, stdout, stderr)->
+			if err?
+				return done(err)
 			fs.unlink cookeFilePath, done
 
 	it "a project", (done) ->
