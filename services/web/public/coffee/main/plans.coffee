@@ -1,8 +1,17 @@
 define [
 	"base"
-], (App) ->
+	"libs/recurly-3.0.5"
+], (App, recurly) ->
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager) ->
 		
+		recurly.configure(window.recurlyPublicToken);
+
+		pricing = recurly.Pricing()
+		window.pricing = pricing
+
+		$scope.currencyCode = pricing.items.currency
+		pricing.on "set.currency", (currency)->
+			$scope.currencyCode = pricing.items.currency
 
 		buckets = [
 			{ bucketName:"30d", queryString: "_free_trial", trial_len:30 }
@@ -15,6 +24,47 @@ define [
 
 		$scope.ui =
 			view: "monthly"
+
+		$scope.plans = 
+			usd:
+				symbol: "$"
+				student:
+					monthly: "$8"
+					annual: "$80"
+				collaborator:
+					monthly: "$15"
+					annual: "$180"
+				professional:
+					monthly: "$30"
+					annual: "$360"
+
+			eur: 
+				symbol: "€"
+				student:
+					monthly: "€8"
+					annual: "€80"
+				collaborator:
+					monthly: "€15"
+					annual: "€180"
+				professional:
+					monthly: "€30"
+					annual: "€360"
+			gbp:
+				symbol: "£"
+				student:
+					monthly: "£8"
+					annual: "£80"
+				collaborator:
+					monthly: "£15"
+					annual: "£180"
+				professional:
+					monthly: "£30"
+					annual: "£360"
+
+		$scope.currencies = ["usd", "eur", "gbp"]
+
+		$scope.changeCurreny = (newCurrency)->
+			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
 			if $scope.ui.view == "annual"
