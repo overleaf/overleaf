@@ -27,6 +27,6 @@
     "grunt-contrib-coffee": "~0.10.0",
     "bunyan": "~0.22.1",
     "grunt-bunyan": "~0.5.0",
-    "grunt-forever": "~0.4.2"
+    "grunt-forever": "~0.4.4"
   }
 }
