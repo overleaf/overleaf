@@ -64,7 +64,7 @@ app.configure () ->
 
 	# Measure expiry from last request, not last login
 	app.use (req, res, next) ->
-		req.session.expires = Date.now() + cookieSessionLength
+		req.session.touch()
 		next()
 	
 	app.use (req, res, next) ->
