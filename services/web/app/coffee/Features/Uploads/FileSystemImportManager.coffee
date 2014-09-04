@@ -56,7 +56,7 @@ module.exports = FileSystemImportManager =
 			if isDirectory
 				@addFolder project_id, folder_id, name, path, replace, callback
 			else
-				FileTypeManager.isBinary name, (error, isBinary) =>
+				FileTypeManager.isBinary name, path, (error, isBinary) =>
 					return callback(error) if error?
 					if isBinary
 						@addFile project_id, folder_id, name, path, replace, callback

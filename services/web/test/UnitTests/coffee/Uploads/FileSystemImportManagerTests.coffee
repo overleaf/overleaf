@@ -151,7 +151,7 @@ describe "FileSystemImportManager", ->
 		describe "with binary file", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
-				@FileTypeManager.isBinary = sinon.stub().callsArgWith(1, null, true)
+				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, true)
 				@FileSystemImportManager.addFile = sinon.stub().callsArg(5)
 				@FileSystemImportManager.addEntity @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
@@ -162,7 +162,7 @@ describe "FileSystemImportManager", ->
 		describe "with text file", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
-				@FileTypeManager.isBinary = sinon.stub().callsArgWith(1, null, false)
+				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, false)
 				@FileSystemImportManager.addDoc = sinon.stub().callsArg(5)
 				@FileSystemImportManager.addEntity @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 

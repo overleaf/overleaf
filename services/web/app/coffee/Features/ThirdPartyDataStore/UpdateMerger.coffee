@@ -22,7 +22,7 @@ module.exports =
 				FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
 					if shouldIgnore
 						return callback()
-					FileTypeManager.isBinary path, (err, isFile)->
+					FileTypeManager.isBinary path, fsPath, (err, isFile)->
 						if isFile
 							self.p.processFile project_id, elementId, fsPath, path, callback #TODO clean up the stream written to disk here
 						else

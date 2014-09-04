@@ -56,28 +56,28 @@ describe 'UpdateMerger :', ->
 
 		it 'should process update as doc when it is a doc', (done)->
 			doc_id = "231312s"
-			@FileTypeManager.isBinary.callsArgWith(1, null, false)
+			@FileTypeManager.isBinary.callsArgWith(2, null, false)
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:doc_id})
 			@FileTypeManager.shouldIgnore.callsArgWith(1, null, false)
 			@updateMerger.p.processDoc = sinon.stub().callsArgWith(5)
 			filePath = "/folder/doc.tex"
 
 			@updateMerger.mergeUpdate @project_id, filePath, @update, "", =>
-				@FileTypeManager.isBinary.calledWith(filePath).should.equal true
+				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @fsPath).should.equal true
 				done()
 
 		it 'should process update as file when it is not a doc', (done)->
 			file_id = "1231"
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:file_id})
-			@FileTypeManager.isBinary.callsArgWith(1, null, true)
+			@FileTypeManager.isBinary.callsArgWith(2, null, true)
 			@FileTypeManager.shouldIgnore.callsArgWith(1, null, false)
 			@updateMerger.p.processFile = sinon.stub().callsArgWith(4)
 			filePath = "/folder/file1.png"
 
 			@updateMerger.mergeUpdate @project_id, filePath, @update, "", =>
 				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath).should.equal true
-				@FileTypeManager.isBinary.calledWith(filePath).should.equal true
+				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				done()
 
 
