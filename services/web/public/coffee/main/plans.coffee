@@ -26,7 +26,7 @@ define [
 			view: "monthly"
 
 		$scope.plans = 
-			usd:
+			USD:
 				symbol: "$"
 				student:
 					monthly: "$8"
@@ -38,7 +38,7 @@ define [
 					monthly: "$30"
 					annual: "$360"
 
-			eur: 
+			EUR: 
 				symbol: "€"
 				student:
 					monthly: "€8"
@@ -49,7 +49,7 @@ define [
 				professional:
 					monthly: "€30"
 					annual: "€360"
-			gbp:
+			GBP:
 				symbol: "£"
 				student:
 					monthly: "£8"
@@ -60,8 +60,6 @@ define [
 				professional:
 					monthly: "£30"
 					annual: "£360"
-
-		$scope.currencies = ["usd", "eur", "gbp"]
 
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency

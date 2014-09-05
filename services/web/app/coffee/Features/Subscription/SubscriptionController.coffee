@@ -47,7 +47,7 @@ module.exports = SubscriptionController =
 							title      : "subscribe"
 							plan_code: req.query.planCode
 							recurlyConfig: JSON.stringify
-								currency: "USD"
+								currency: req.query.currency
 								subdomain: Settings.apis.recurly.subdomain
 							subscriptionFormOptions: JSON.stringify
 								acceptedCards: ['discover', 'mastercard', 'visa']

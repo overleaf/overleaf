@@ -39,14 +39,14 @@ block content
 								href="#",
 								data-toggle="dropdown"
 							)
-								| {{currencyCode.toUpperCase()}} ({{plans[currencyCode.toLowerCase()]['symbol']}})
+								| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
 
 							ul.dropdown-menu(role="menu")
 								li(ng-repeat="(currency, value) in plans")
 									a(
 										href,
 										ng-click="changeCurreny(currency)"
-									) {{currency.toUpperCase()}} ({{value['symbol']}})
+									) {{currency}} ({{value['symbol']}})
 
 
 				.row(ng-cloak)
@@ -68,10 +68,10 @@ block content
 									h2 #{translate("collaborator")}
 								.circle
 									span(ng-if="ui.view == 'monthly'")
-										| {{plans[currencyCode.toLowerCase()]['collaborator']['monthly']}}
+										| {{plans[currencyCode]['collaborator']['monthly']}}
 										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| {{plans[currencyCode.toLowerCase()]['collaborator']['annual']}}
+										| {{plans[currencyCode]['collaborator']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li 
@@ -81,7 +81,8 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}", ng-click="signUpNowClicked('collaborator')"
+
+											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -90,10 +91,10 @@ block content
 									h2 #{translate("professional")}
 								.circle 
 									span(ng-if="ui.view == 'monthly'")
-										| {{plans[currencyCode.toLowerCase()]['professional']['monthly']}}
+										| {{plans[currencyCode]['professional']['monthly']}}
 										span.small /mo
 									span(ng-if="ui.view == 'annual'")
-										| {{plans[currencyCode.toLowerCase()]['professional']['annual']}}
+										| {{plans[currencyCode]['professional']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li
@@ -103,7 +104,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}", ng-click="signUpNowClicked('professional')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -125,7 +126,7 @@ block content
 									h2 #{translate("student")}
 								.circle
 									span
-										| {{plans[currencyCode.toLowerCase()]['student']['monthly']}}
+										| {{plans[currencyCode]['student']['monthly']}}
 										span.small /mo
 								ul.list-unstyled
 									li
@@ -135,14 +136,14 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}", ng-click="signUpNowClicked('student')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("start_free_trial")}
 							.card
 								.card-header
 									h2 #{translate("student")} (#{translate("annual")})
 								.circle
 									span
-										| {{plans[currencyCode.toLowerCase()]['student']['annual']}}
+										| {{plans[currencyCode]['student']['annual']}}
 										span.small /yr
 								ul.list-unstyled
 									li
@@ -152,7 +153,7 @@ block content
 									li
 										br
 										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual", ng-click="signUpNowClicked('student')"
+											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("buy_now")}
 
 				.row(ng-cloak)
