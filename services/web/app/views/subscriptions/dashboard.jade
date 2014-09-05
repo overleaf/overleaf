@@ -68,9 +68,13 @@ block content
 							-if(subscription.groupPlan)
 								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
 
-							span(ng-controller="CurrenyDropdownController")
-								.dropdown
-									a.btn.btn-primary.dropdown-toggle#currenyDropdown(
+								
+
+
+							div(ng-hide="changePlan", ng-cloak)#changePlanSection
+								h2.col-md-7 !{translate("change_plan")}
+								span.dropdown.col-md-1.changePlanButton(ng-controller="CurrenyDropdownController")
+									a.btn.btn-primary.dropdown-toggle(
 										href="#",
 										data-toggle="dropdown"
 									)
@@ -81,11 +85,6 @@ block content
 												href,
 												ng-click="changeCurreny(currency)"
 											) {{currency}} ({{value['symbol']}})
-
-
-							div(ng-hide="changePlan", ng-cloak)
-								hr
-								h2 !{translate("change_plan")}
 								p: table.table
 									tr
 										th !{translate("name")}
