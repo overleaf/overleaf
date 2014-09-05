@@ -1,9 +1,19 @@
 define [
 	"base"
 ], (App)->
-	MESSAGES_URL = "/user/subscription/update"
+	SUBSCRIPTION_URL = "/user/subscription/update"
 
-	App.controller "ChangePlanFormController", ($scope, $modal)->
+
+	App.controller "CurrenyDropdownController", ($scope, MultiCurrencyPricing)->
+
+		$scope.plans = MultiCurrencyPricing.plans
+		$scope.currencyCode = MultiCurrencyPricing.currencyCode
+
+		$scope.changeCurreny = (newCurrency)->
+			MultiCurrencyPricing.currencyCode = newCurrency
+
+
+	App.controller "ChangePlanFormController", ($scope, $modal, MultiCurrencyPricing)->
 
 		$scope.changePlan = ->
 			$modal.open(
@@ -11,6 +21,14 @@ define [
 				controller:  "ConfirmChangePlanController"
 				scope: $scope
 			)
+
+		$scope.$watch "pricing.currencyCode", ->
+			$scope.currencyCode = MultiCurrencyPricing.currencyCode
+
+		$scope.pricing = MultiCurrencyPricing
+		$scope.plans = MultiCurrencyPricing.plans
+
+		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
 
 
@@ -25,7 +43,7 @@ define [
 			$scope.inflight = true
 
 
-			$http.post(MESSAGES_URL, body)
+			$http.post(SUBSCRIPTION_URL, body)
 				.success ->
 					location.reload()
 				.error ->

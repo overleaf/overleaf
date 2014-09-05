@@ -1,5 +1,7 @@
 extends ../layout
-
+block scripts
+	script(type='text/javascript').
+		window.recurlyPublicToken = '#{settings.apis.recurly.publicKey}'
 
 
 mixin printPlan(plan)
@@ -9,9 +11,9 @@ mixin printPlan(plan)
 				strong #{plan.name}
 			td
 				-if (plan.annual)
-					| $#{plan.price / 100} / #{translate("year")}
+					| {{plans[currencyCode][plan.planCode.replace("-annual","")]['annual']}} / #{translate("year")}
 				-else
-					| $#{plan.price / 100} / #{translate("month")}	
+					| {{plans[currencyCode][plan.planCode]['monthly']}} / #{translate("month")}	
 			td
 				-if (subscription.state == "free-trial")
 					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success #{translate("subscribe_to_this_plan")}
@@ -66,7 +68,22 @@ block content
 							-if(subscription.groupPlan)
 								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
 
-							div(ng-show="changePlan", ng-cloak)
+							span(ng-controller="CurrenyDropdownController")
+								.dropdown
+									a.btn.btn-primary.dropdown-toggle#currenyDropdown(
+										href="#",
+										data-toggle="dropdown"
+									)
+										| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+									ul.dropdown-menu(role="menu")
+										li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+											a(
+												href,
+												ng-click="changeCurreny(currency)"
+											) {{currency}} ({{value['symbol']}})
+
+
+							div(ng-hide="changePlan", ng-cloak)
 								hr
 								h2 !{translate("change_plan")}
 								p: table.table
