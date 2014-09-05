@@ -42,12 +42,11 @@ block content
 								| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
 
 							ul.dropdown-menu(role="menu")
-								li(ng-repeat="(currency, value) in plans")
+								li(ng-repeat="(currency, value) in plans", dropdown-toggle)
 									a(
 										href,
 										ng-click="changeCurreny(currency)"
 									) {{currency}} ({{value['symbol']}})
-
 
 				.row(ng-cloak)
 					.col-md-12
