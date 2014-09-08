@@ -102,14 +102,17 @@ block content
 								span.small
 									a(href='/help/kb/dropbox-2') (#{translate("learn_more")})
 							- if(!userHasDropboxFeature)
-										.alert.alert-info #{translate("dropbox_is_premium")} &nbsp; &nbsp;
-											a.btn.btn-info(href='/user/subscription/plans') #{translate("upgrade")}
-									- else if(userIsRegisteredWithDropbox)
-										.alert.alert-success #{translate("account_is_linked")}
-										row
-											a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
-									- else
-										a.btn.btn-info(href='/dropbox/beginAuth') #{translate("link_to_dropbox")}
+								.alert.alert-info #{translate("dropbox_is_premium")} &nbsp; &nbsp;
+									a.btn.btn-info(href='/user/subscription/plans') #{translate("upgrade")}
+							- else if(userIsRegisteredWithDropbox)
+								.alert.alert-success #{translate("account_is_linked")}
+								row
+									a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
+							- else
+								p
+									a.btn.btn-info(href='/dropbox/beginAuth') #{translate("link_to_dropbox")}
+										
+							| !{moduleIncludes("userSettings", locals)}
 
 							hr.soften
 

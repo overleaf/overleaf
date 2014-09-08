@@ -19,6 +19,7 @@ ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
 OldAssetProxy = require("./OldAssetProxy")
 translations = require("translations-sharelatex").setup(Settings.i18n)
+Modules = require "./Modules"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -41,13 +42,13 @@ app.ignoreCsrf = (method, route) ->
 	ignoreCsrfRoutes.push new express.Route(method, route)
 
 
-
 app.configure () ->
 	if Settings.behindProxy
 		app.enable('trust proxy')
 	app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 	app.set 'views', __dirname + '/../../views'
 	app.set 'view engine', 'jade'
+	Modules.loadViewIncludes app
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
 	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
 	app.use translations.expressMiddlewear
