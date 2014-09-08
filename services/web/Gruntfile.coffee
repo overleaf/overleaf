@@ -10,7 +10,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
 	
-	grunt.initConfig
+	config =
 		execute:
 			app:
 				src: "app.js"
@@ -27,10 +27,6 @@ module.exports = (grunt) ->
 			app: 
 				src: 'app.coffee'
 				dest: 'app.js'
-				
-			BackgroundJobsWorker: 
-				src: 'BackgroundJobsWorker.coffee'
-				dest: 'BackgroundJobsWorker.js'
 
 			sharejs:
 				options:
@@ -163,6 +159,46 @@ module.exports = (grunt) ->
 		            		"help"
 		            	]
 
+	moduleCompileServerTasks = []
+	moduleCompileUnitTestTasks = []
+	moduleUnitTestTasks = []
+	for module in fs.readdirSync "./modules"
+		config.coffee["module_#{module}_server"] = {
+			expand: true,
+			flatten: false,
+			cwd: "modules/#{module}/app/coffee",
+			src: ['**/*.coffee'],
+			dest: "modules/#{module}/app/js",
+			ext: '.js'
+		}
+		config.coffee["module_#{module}_index"] = {
+			src: "modules/#{module}/index.coffee",
+			dest: "modules/#{module}/index.js"
+		}
+		
+		moduleCompileServerTasks.push "coffee:module_#{module}_server"
+		moduleCompileServerTasks.push "coffee:module_#{module}_index"
+		
+		config.coffee["module_#{module}_unit_tests"] = {
+			expand: true,
+			flatten: false,
+			cwd: "modules/#{module}/test/unit/coffee",
+			src: ['**/*.coffee'],
+			dest: "modules/#{module}/test/unit/js",
+			ext: '.js'
+		}
+		config.mochaTest["module_#{module}_unit"] = {
+			src: ["modules/#{module}/test/unit/js/*.js"]
+			options:
+				reporter: grunt.option('reporter') or 'spec'
+				grep: grunt.option("grep")
+		}
+		
+		moduleCompileUnitTestTasks.push "coffee:module_#{module}_unit_tests"
+		moduleUnitTestTasks.push "mochaTest:module_#{module}_unit"
+	
+	grunt.initConfig config
+
 	grunt.registerTask 'wrap_sharejs', 'Wrap the compiled ShareJS code for AMD module loading', () ->
 		content = fs.readFileSync "public/js/libs/sharejs.js"
 		fs.writeFileSync "public/js/libs/sharejs.js", """
@@ -174,7 +210,9 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 
-	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir']
+	grunt.registerTask 'compile:modules:server', 'Compile all the modules', moduleCompileServerTasks
+	grunt.registerTask 'compile:modules:unit_tests', 'Compile all the modules unit tests', moduleCompileUnitTestTasks
+	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
 	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs']
@@ -187,6 +225,8 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:server', 'compile:unit_tests', 'mochaTest:unit']
 	grunt.registerTask 'test:smoke', 'Run the smoke tests', ['compile:smoke_tests', 'mochaTest:smoke']
+	
+	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 
 	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'default', 'run'

@@ -39,6 +39,7 @@ WikiController = require("./Features/Wiki/WikiController")
 ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
 DropboxRouter = require "./Features/Dropbox/DropboxRouter"
 dropboxHandler = require "./Features/Dropbox/DropboxHandler"
+Modules = require "./infrastructure/Modules"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -67,6 +68,8 @@ module.exports = class Router
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
 		DropboxRouter.apply(app)
+		
+		Modules.applyRouter(app)
 
 		app.get '/blog', BlogController.getIndexPage
 		app.get '/blog/*', BlogController.getPage

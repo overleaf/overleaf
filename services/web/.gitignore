@@ -67,3 +67,5 @@ Gemfile.lock
 .DS_Store
 
 app/views/external
+
+modules
