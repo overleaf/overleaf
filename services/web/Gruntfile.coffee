@@ -162,40 +162,41 @@ module.exports = (grunt) ->
 	moduleCompileServerTasks = []
 	moduleCompileUnitTestTasks = []
 	moduleUnitTestTasks = []
-	for module in fs.readdirSync "./modules"
-		config.coffee["module_#{module}_server"] = {
-			expand: true,
-			flatten: false,
-			cwd: "modules/#{module}/app/coffee",
-			src: ['**/*.coffee'],
-			dest: "modules/#{module}/app/js",
-			ext: '.js'
-		}
-		config.coffee["module_#{module}_index"] = {
-			src: "modules/#{module}/index.coffee",
-			dest: "modules/#{module}/index.js"
-		}
-		
-		moduleCompileServerTasks.push "coffee:module_#{module}_server"
-		moduleCompileServerTasks.push "coffee:module_#{module}_index"
-		
-		config.coffee["module_#{module}_unit_tests"] = {
-			expand: true,
-			flatten: false,
-			cwd: "modules/#{module}/test/unit/coffee",
-			src: ['**/*.coffee'],
-			dest: "modules/#{module}/test/unit/js",
-			ext: '.js'
-		}
-		config.mochaTest["module_#{module}_unit"] = {
-			src: ["modules/#{module}/test/unit/js/*.js"]
-			options:
-				reporter: grunt.option('reporter') or 'spec'
-				grep: grunt.option("grep")
-		}
-		
-		moduleCompileUnitTestTasks.push "coffee:module_#{module}_unit_tests"
-		moduleUnitTestTasks.push "mochaTest:module_#{module}_unit"
+	if fs.existsSync "./modules"
+		for module in fs.readdirSync "./modules"
+			config.coffee["module_#{module}_server"] = {
+				expand: true,
+				flatten: false,
+				cwd: "modules/#{module}/app/coffee",
+				src: ['**/*.coffee'],
+				dest: "modules/#{module}/app/js",
+				ext: '.js'
+			}
+			config.coffee["module_#{module}_index"] = {
+				src: "modules/#{module}/index.coffee",
+				dest: "modules/#{module}/index.js"
+			}
+			
+			moduleCompileServerTasks.push "coffee:module_#{module}_server"
+			moduleCompileServerTasks.push "coffee:module_#{module}_index"
+			
+			config.coffee["module_#{module}_unit_tests"] = {
+				expand: true,
+				flatten: false,
+				cwd: "modules/#{module}/test/unit/coffee",
+				src: ['**/*.coffee'],
+				dest: "modules/#{module}/test/unit/js",
+				ext: '.js'
+			}
+			config.mochaTest["module_#{module}_unit"] = {
+				src: ["modules/#{module}/test/unit/js/*.js"]
+				options:
+					reporter: grunt.option('reporter') or 'spec'
+					grep: grunt.option("grep")
+			}
+			
+			moduleCompileUnitTestTasks.push "coffee:module_#{module}_unit_tests"
+			moduleUnitTestTasks.push "mochaTest:module_#{module}_unit"
 	
 	grunt.initConfig config
 
