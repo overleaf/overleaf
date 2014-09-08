@@ -40,6 +40,7 @@ module.exports = SubscriptionController =
 					RecurlyWrapper.sign {
 						subscription:
 							plan_code : req.query.planCode
+							currency: req.query.currency
 						account_code: user.id
 					}, (error, signature) ->
 						return next(error) if error?
