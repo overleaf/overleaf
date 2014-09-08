@@ -162,6 +162,8 @@ module.exports = (grunt) ->
 	moduleCompileServerTasks = []
 	moduleCompileUnitTestTasks = []
 	moduleUnitTestTasks = []
+	moduleCompileClientTasks = []
+	moduleIdeClientSideIncludes = []
 	if fs.existsSync "./modules"
 		for module in fs.readdirSync "./modules"
 			if fs.existsSync "./modules/#{module}/index.coffee"
@@ -198,6 +200,17 @@ module.exports = (grunt) ->
 				
 				moduleCompileUnitTestTasks.push "coffee:module_#{module}_unit_tests"
 				moduleUnitTestTasks.push "mochaTest:module_#{module}_unit"
+				
+				config.coffee["module_#{module}_client_ide"] = {
+					expand: true,
+					flatten: false,
+					cwd: "modules/#{module}/public/coffee/ide",
+					src: ['**/*.coffee'],
+					dest: "public/js/ide/#{module}",
+					ext: '.js'
+				}
+				moduleCompileClientTasks.push "coffee:module_#{module}_client_ide"
+				moduleIdeClientSideIncludes.push "ide/#{module}/index"
 	
 	grunt.initConfig config
 
@@ -214,8 +227,14 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'compile:modules:server', 'Compile all the modules', moduleCompileServerTasks
 	grunt.registerTask 'compile:modules:unit_tests', 'Compile all the modules unit tests', moduleCompileUnitTestTasks
+	grunt.registerTask 'compile:modules:client', 'Compile all the module client side code', moduleCompileClientTasks
+	grunt.registerTask 'compile:modules:inject_clientside_includes', () ->
+		content = fs.readFileSync("public/js/ide.js").toString()
+		content = content.replace(/"__IDE_CLIENTSIDE_INCLUDES__"/g, moduleIdeClientSideIncludes.map((i) -> "\"#{i}\"").join(", "))
+		fs.writeFileSync "public/js/ide.js", content
+	
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
-	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs']
+	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
 	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs']
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']

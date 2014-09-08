@@ -46,14 +46,15 @@ aside#left-menu.full-size(
 					i.fa.fa-external-link.fa-fw 
 					| &nbsp;&nbsp; #{translate("publish_as_template")}
 
-
+	h4() #{translate("sync")}
 	span(ng-controller="DropboxController", ng-show="permissions.admin")
-		h4() #{translate("sync")}
 		ul.list-unstyled.nav()
 			li
 				a(ng-click="openDropboxModal()")
 					i.fa.fa-dropbox.fa-fw
 					| &nbsp;&nbsp; Dropbox
+					
+	!{moduleIncludes("editorLeftMenu", locals)}
 
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
