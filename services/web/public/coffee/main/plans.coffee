@@ -30,28 +30,28 @@ define [
 					monthly: "$30"
 					annual: "$360"
 
-			EUR: 
-				symbol: "€"
-				student:
-					monthly: "€7"
-					annual: "€70"
-				collaborator:
-					monthly: "€12"
-					annual: "€144"
-				professional:
-					monthly: "€25"
-					annual: "€300"
-			GBP:
-				symbol: "£"
-				student:
-					monthly: "£6"
-					annual: "£60"
-				collaborator:
-					monthly: "£10"
-					annual: "£120"
-				professional:
-					monthly: "£22"
-					annual: "£264"
+			# EUR: 
+			# 	symbol: "€"
+			# 	student:
+			# 		monthly: "€7"
+			# 		annual: "€70"
+			# 	collaborator:
+			# 		monthly: "€12"
+			# 		annual: "€144"
+			# 	professional:
+			# 		monthly: "€25"
+			# 		annual: "€300"
+			# GBP:
+			# 	symbol: "£"
+			# 	student:
+			# 		monthly: "£6"
+			# 		annual: "£60"
+			# 	collaborator:
+			# 		monthly: "£10"
+			# 		annual: "£120"
+			# 	professional:
+			# 		monthly: "£22"
+			# 		annual: "£264"
 
 	
 
