@@ -21,7 +21,7 @@ module.exports =
 							name: plan.name
 							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription.current_period_ends_at)
 							state: recurlySubscription.state
-							price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents
+							price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents, recurlySubscription.currency
 							planCode: subscription.planCode
 							groupPlan: subscription.groupPlan
 						}, memberSubscriptions
