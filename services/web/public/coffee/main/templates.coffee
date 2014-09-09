@@ -47,6 +47,7 @@ define [
 
 		updateHits = (hits)->
 			$scope.safeApply ->
+				console.log hits
 				$scope.hits = hits
 
 		$scope.search = ->
