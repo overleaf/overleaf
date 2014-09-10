@@ -6,12 +6,12 @@ block vars
 block content
 	.content.content-alt
 		.container
-			.row.template-page-header
+			.row.template-page-header(ng-controller="SearchController")
 				
 				.col-md-2
 					h2
 						a(href="/templates") #{translate("templates")}
-				.col-md-8(ng-controller="SearchController")
+				.col-md-8
 					form.project-search.form-horizontal(role="form")
 						.form-group.has-feedback.has-feedback-left.col-md-12
 							input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search template library....")
@@ -23,7 +23,7 @@ block content
 							)
 				.col-md-2(ng-controller="MissingTemplateController")
 					a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_template_question")}
-				.col-md-12(ng-cloak)
+				.col-md-8(ng-cloak)
 					ul.list-unstyled
 						li(ng-repeat='hit in hits')
 							.thumbnail.searchResult
