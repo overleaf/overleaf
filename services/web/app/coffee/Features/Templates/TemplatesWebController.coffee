@@ -42,7 +42,6 @@ module.exports = TemplatesWebController =
 			disposition = "inline"
 		else
 			disposition = "attachment"
-		console.log "HEADER", "#{disposition}; filename=#{name};"
 		res.header({"content-disposition": "#{disposition}; filename=#{name}.#{req.params.file_type};"})
 		
 		logger.log url:url, template_name: name, disposition: disposition, "proxying request to templates api"
