@@ -61,10 +61,7 @@ app.configure () ->
 			secure: Settings.secureCookie
 		store: sessionStore
 		key: cookieKey
-	app.use (req, res, next)->
-		logger.log session:req.session, sessionID:req.sessionID, url:req.url, "session log"
-		next()
-
+	
 	# Measure expiry from last request, not last login
 	app.use (req, res, next) ->
 		req.session.touch()
