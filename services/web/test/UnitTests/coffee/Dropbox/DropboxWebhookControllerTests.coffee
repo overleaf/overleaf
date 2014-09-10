@@ -6,6 +6,9 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Dropbo
 
 describe 'DropboxWebhookController', ->
 	beforeEach ->
+		@req =
+			session:
+				destroy: ->
 
 		@DropboxWebhookController = SandboxedModule.require modulePath, requires:
 			"./DropboxWebhookHandler": @DropboxWebhookHandler = {}
