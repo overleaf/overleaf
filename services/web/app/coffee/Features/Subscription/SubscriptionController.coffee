@@ -37,10 +37,11 @@ module.exports = SubscriptionController =
 				if hasSubscription or !plan?
 					res.redirect "/user/subscription"
 				else
+					currency = req.query.currency || "USD"
 					RecurlyWrapper.sign {
 						subscription:
 							plan_code : req.query.planCode
-							currency: req.query.currency
+							currency: currency
 						account_code: user.id
 					}, (error, signature) ->
 						return next(error) if error?
@@ -48,7 +49,7 @@ module.exports = SubscriptionController =
 							title      : "subscribe"
 							plan_code: req.query.planCode
 							recurlyConfig: JSON.stringify
-								currency: req.query.currency || "USD"
+								currency: currency
 								subdomain: Settings.apis.recurly.subdomain
 							subscriptionFormOptions: JSON.stringify
 								acceptedCards: ['discover', 'mastercard', 'visa']
