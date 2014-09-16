@@ -46,7 +46,9 @@ module.exports =
 					emailOpts =
 						to: user.email
 						first_name: user.first_name
-					EmailHandler.sendEmail "canceledSubscription", emailOpts
+					ONE_HOUR_IN_MS = 1000 * 60 * 60
+					setTimeout (-> EmailHandler.sendEmail "canceledSubscription", emailOpts
+					), ONE_HOUR_IN_MS
 					callback()
 			else
 				callback()
