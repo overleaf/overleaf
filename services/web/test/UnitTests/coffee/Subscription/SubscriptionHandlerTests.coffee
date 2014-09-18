@@ -152,9 +152,6 @@ describe "Subscription Handler sanboxed", ->
 				@RecurlyWrapper.cancelSubscription.called.should.equal true
 				@RecurlyWrapper.cancelSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
 
-			it "should send a cancellation email", ->
-				@EmailHandler.sendEmail.calledWith("canceledSubscription", {to:@user.email, first_name:@user.first_name}).should.equal true
-
 	describe "reactiveRecurlySubscription", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
