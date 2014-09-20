@@ -19,7 +19,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
 				.col-xs-12.text-center
 					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") #{translate("this_project_is_public")}
-					strong(ng-if="project.publicAccesLevel == 'readOnly'") #{translate("this_project_is_public")}
+					strong(ng-if="project.publicAccesLevel == 'readOnly'") #{translate("this_project_is_public_read_only")}
 					| &nbsp;&nbsp;
 					a(
 						href
