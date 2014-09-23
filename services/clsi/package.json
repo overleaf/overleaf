@@ -16,7 +16,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
-    "sequelize": "~2.0.0-beta.2",
+    "sequelize": "2.0.0-beta.2",
     "wrench": "~1.5.4",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v1.0.0",
     "sqlite3": "~2.2.0",
