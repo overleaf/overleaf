@@ -13,7 +13,7 @@ describe 'Document Manager - getUpdatesLength ', ->
 
 		@llenStub = sinon.stub()
 		@redisManager = SandboxedModule.require modulePath, requires:
-			redis:
+			"redis-sharelatex":
 				createClient:=>
 					auth:->
 					llen:@llenStub

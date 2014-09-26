@@ -8,7 +8,7 @@ describe "RedisManager.getPreviousDocOpsTests", ->
 	beforeEach ->
 		@callback = sinon.stub()
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis" : createClient: () =>
+			"redis-sharelatex" : createClient: () =>
 				@rclient =
 					auth: ->
 					multi: => @rclient

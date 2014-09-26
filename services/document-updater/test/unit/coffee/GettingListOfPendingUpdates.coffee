@@ -18,7 +18,7 @@ describe 'getting entire list of pending updates', ()->
 	redisReturn = []
 
 	mocks =
-		redis:
+		"redis-sharelatex":
 			createClient: ()->
 				auth:->
 				multi: ()->

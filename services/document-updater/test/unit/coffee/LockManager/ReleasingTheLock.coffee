@@ -14,7 +14,7 @@ describe 'LockManager - releasing the lock', ()->
 	mocks =
 		"logger-sharelatex": log:->
 
-		redis:
+		"redis-sharelatex":
 			createClient : ()->
 				auth:->
 				del:deleteStub
