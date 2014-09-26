@@ -1,8 +1,6 @@
 Settings = require "settings-sharelatex"
-redis = require('redis')
-redisConf = Settings.redis?.web or {host: "localhost", port: 6379}
-rclient = redis.createClient(redisConf.port, redisConf.host)
-rclient.auth(redisConf.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock

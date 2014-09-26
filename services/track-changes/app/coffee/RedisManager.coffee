@@ -1,8 +1,6 @@
 Settings = require "settings-sharelatex"
-redis = require('redis')
-redisConf = Settings.redis?.web or {host: "localhost", port: 6379}
-rclient = redis.createClient(redisConf.port, redisConf.host)
-rclient.auth(redisConf.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 
 rawUpdatesKey = (doc_id) -> "UncompressedHistoryOps:#{doc_id}"
 docsWithHistoryOpsKey = (project_id) -> "DocsWithHistoryOps:#{project_id}"
