@@ -29,7 +29,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-8 {{ project.owner.email }}
 				.text-right(
 					ng-class="{'col-xs-3': project.members.length > 0, 'col-xs-4': project.members.length == 0}"
-				) Owner
+				) #{translate("owner")}
 			.row.project-member(ng-repeat="member in project.members")
 				.col-xs-8 {{ member.email }}
 				.col-xs-3.text-right
