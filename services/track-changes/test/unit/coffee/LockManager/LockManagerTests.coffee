@@ -7,11 +7,15 @@ SandboxedModule = require('sandboxed-module')
 
 describe "LockManager", ->
 	beforeEach ->
+		@Settings = 		
+			redis:
+				web:{}
 		@LockManager = SandboxedModule.require modulePath, requires:
-			"redis":
+			"redis-sharelatex":
 				createClient: () => @rclient =
 					auth: sinon.stub()
-			"settings-sharelatex": @Settings = {}
+			"settings-sharelatex": @Settings
+
 		@key = "lock-key"
 		@callback = sinon.stub()
 

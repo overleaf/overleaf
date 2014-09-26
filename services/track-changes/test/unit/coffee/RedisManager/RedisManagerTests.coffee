@@ -8,11 +8,13 @@ SandboxedModule = require('sandboxed-module')
 describe "RedisManager", ->
 	beforeEach ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis" : 
+			"redis-sharelatex" : 
 				createClient: () => @rclient =
 					auth: sinon.stub()
 					multi: () => @rclient
-			"settings-sharelatex": {}
+			"settings-sharelatex":
+				redis:
+					web:{}
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@batchSize = 100
