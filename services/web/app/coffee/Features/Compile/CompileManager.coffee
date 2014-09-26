@@ -1,7 +1,8 @@
 Settings = require('settings-sharelatex')
-redis = require('redis')
-rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
-rclient.auth(Settings.redis.web.password)
+
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
+
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"

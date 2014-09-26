@@ -1,7 +1,6 @@
 Settings = require('settings-sharelatex')
-redis = require('redis')
-rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
-rclient.auth(Settings.redis.web.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 crypto = require("crypto")
 logger = require("logger-sharelatex")
 

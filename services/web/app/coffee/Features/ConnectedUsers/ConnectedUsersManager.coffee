@@ -2,9 +2,8 @@ _ = require("underscore")
 async = require("async")
 Settings = require('settings-sharelatex')
 logger = require("logger-sharelatex")
-redis = require('redis')
-rclient = redis.createClient(Settings.redis.web.port, Settings.redis.web.host)
-rclient.auth(Settings.redis.web.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 
 
 ONE_HOUR_IN_S = 60 * 60

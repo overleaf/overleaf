@@ -4,9 +4,8 @@ async = require "async"
 User = require("../../models/User").User
 TpdsUpdateSender = require "../ThirdPartyDataStore/TpdsUpdateSender"
 
-redis = require('redis')
-rclient = redis.createClient(settings.redis.web.port, settings.redis.web.host)
-rclient.auth(settings.redis.web.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(settings.redis.web)
 
 module.exports = DropboxWebhookHandler =
 	pollDropboxUids: (dropbox_uids, callback = (error) ->) ->
