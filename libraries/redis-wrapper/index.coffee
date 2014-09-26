@@ -1,10 +1,19 @@
+_ = require("underscore")
+
 module.exports =
 
-	createClient: ()->
-		if arguments[0] instanceof Array
-			client = require("redis-sentinel").createClient.apply null, arguments
+	createClient: (opts)->
+
+		if opts.endpoints?
+			standardOpts = _.clone(opts)
+			delete standardOpts.endpoints
+			delete standardOpts.masterName
+			client = require("redis-sentinel").createClient opts.endpoints, opts.masterName, standardOpts
 		else
-			client = require("redis").createClient.apply null, arguments
+			standardOpts = _.clone(opts)
+			delete standardOpts.port
+			delete standardOpts.host
+			client = require("redis").createClient opts.port, opts.host, standardOpts
 		return client
 
 

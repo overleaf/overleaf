@@ -1,23 +1,21 @@
 {
   "name": "redis-sharelatex",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "redis wrapper for node which will either use sentinal or normal redis",
   "main": "index.coffee",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "author": "henry oswald @ sharelatex",
   "license": "ISC",
   "dependencies": {
-    "chai": "^1.9.1",
-    "coffee-script": "^1.8.0",
-    "grunt": "^0.4.5",
-    "grunt-contrib-coffee": "^0.11.1",
-    "grunt-mocha-test": "^0.12.0",
-    "mocha": "^1.21.4",
-    "redis": "^0.12.1",
-    "redis-sentinel": "^0.1.1",
-    "sandboxed-module": "^1.0.1",
-    "sinon": "^1.10.3"
+    "chai": "1.9.1",
+    "coffee-script": "1.8.0",
+    "grunt": "0.4.5",
+    "grunt-contrib-coffee": "0.11.1",
+    "grunt-mocha-test": "0.12.0",
+    "mocha": "1.21.4",
+    "redis": "0.12.1",
+    "redis-sentinel": "0.1.1",
+    "sandboxed-module": "1.0.1",
+    "sinon": "1.10.3",
+    "underscore": "^1.7.0"
   }
 }
