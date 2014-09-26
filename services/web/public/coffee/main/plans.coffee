@@ -60,7 +60,7 @@ define [
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing) ->
 		
 		buckets = [
-			{ bucketName:"7d", queryString: "_free_trial_7_days", trial_len:30 }
+			{ bucketName:"7d", queryString: "_free_trial_7_days", trial_len:7 }
 			{ bucketName:"14d", queryString: "_free_trial_14_days", trial_len:14 }
 		]
 		bucket = abTestManager.getABTestBucket "trial_len", buckets
