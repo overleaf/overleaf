@@ -34,7 +34,7 @@ describe "ConnectedUsersManager", ->
 		@ConnectedUsersManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
-			"redis": createClient:=> 
+			"redis-sharelatex": createClient:=> 
 				return @rClient
 		@client_id = "32132132"
 		@project_id = "dskjh2u21321"

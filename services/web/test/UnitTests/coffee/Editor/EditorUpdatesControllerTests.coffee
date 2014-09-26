@@ -17,7 +17,7 @@ describe "EditorUpdatesController", ->
 			"../DocumentUpdater/DocumentUpdaterHandler" : @DocumentUpdaterHandler = {}
 			"../../infrastructure/Metrics" : @metrics = { set: sinon.stub(), inc: sinon.stub() }
 			"../../infrastructure/Server" : io: @io = {}
-			"redis" : 
+			"redis-sharelatex" : 
 				createClient: ()=> 
 					@rclient = {auth:->}
 

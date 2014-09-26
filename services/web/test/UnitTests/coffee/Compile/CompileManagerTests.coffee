@@ -15,7 +15,7 @@ describe "CompileManager", ->
 		@CompileManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				redis: web: {host: "localhost", port: 42}
-			"redis":
+			"redis-sharelatex":
 				createClient: () => @rclient = { auth: () -> }
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 			"../Project/ProjectRootDocManager": @ProjectRootDocManager = {}

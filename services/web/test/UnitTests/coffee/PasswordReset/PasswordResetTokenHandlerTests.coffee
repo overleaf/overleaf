@@ -23,7 +23,7 @@ describe "PasswordResetTokenHandler", ->
 			exec:sinon.stub()
 		self = @
 		@PasswordResetTokenHandler = SandboxedModule.require modulePath, requires:
-			"redis" :
+			"redis-sharelatex" :
 				createClient: =>
 					auth:->
 					multi: -> return self.redisMulti

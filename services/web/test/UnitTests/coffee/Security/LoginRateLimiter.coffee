@@ -25,7 +25,7 @@ describe "LoginRateLimiter", ->
 				exec: @execStub
 
 		@LoginRateLimiter = SandboxedModule.require modulePath, requires:
-			'redis' : createClient: () => @rclient
+			'redis-sharelatex' : createClient: () => @rclient
 	
 	describe "processLoginRequest", ->
 

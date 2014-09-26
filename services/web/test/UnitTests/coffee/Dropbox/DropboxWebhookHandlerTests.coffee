@@ -10,7 +10,7 @@ describe 'DropboxWebhookHandler', ->
 		@DropboxWebhookHandler = SandboxedModule.require modulePath, requires:
 			"../../models/User": User: @User = {}
 			"../ThirdPartyDataStore/TpdsUpdateSender": @TpdsUpdateSender = {}
-			"redis":
+			"redis-sharelatex":
 				createClient: () => @rclient =
 					auth: sinon.stub()
 			'settings-sharelatex': redis: web: {}

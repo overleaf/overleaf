@@ -75,7 +75,7 @@ describe "EditorController", ->
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
 			"../ConnectedUsers/ConnectedUsersManager":@ConnectedUsersManager
-			'redis':createClient:-> auth:->
+			'redis-sharelatex':createClient:-> auth:->
 			"logger-sharelatex": @logger =
 				log: sinon.stub()
 				err: sinon.stub()

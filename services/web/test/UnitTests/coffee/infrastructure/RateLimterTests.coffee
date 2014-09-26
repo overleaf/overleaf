@@ -27,7 +27,7 @@ describe "FileStoreHandler", ->
 		@limiter = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
-			"redis": @redis
+			"redis-sharelatex": @redis
 			"redback": use: => @redback
 
 		@endpointName = "compiles"

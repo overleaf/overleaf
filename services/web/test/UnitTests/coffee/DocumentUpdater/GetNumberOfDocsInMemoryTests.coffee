@@ -10,7 +10,7 @@ describe "getNumberOfDocsInMemory", ->
 		@noOfDocs = 42
 		@callback = sinon.stub()
 		@DocumentUpdateHandler = SandboxedModule.require modulePath, requires:
-			"redis" : 
+			"redis-sharelatex" : 
 				createClient: () ->
 					auth:->
 			"soa-req-id": null

@@ -31,7 +31,7 @@ describe 'Flushing documents :', ->
 			'../Project/ProjectEntityHandler':@projectEntityHandler
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}
-			'redis' : createClient: () => @rclient
+			'redis-sharelatex' : createClient: () => @rclient
 
 	describe 'queueChange', ->
 		beforeEach ->

@@ -6,7 +6,7 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Editor
 describe "EditorRealTimeController", ->
 	beforeEach ->
 		@EditorRealTimeController = SandboxedModule.require modulePath, requires:
-			"redis": 
+			"redis-sharelatex": 
 				createClient: () ->
 					auth:->
 			"../../infrastructure/Server" : io: @io = {}
