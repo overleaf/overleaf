@@ -1,8 +1,7 @@
-settings = require 'settings-sharelatex'
-rclientPub = require("redis").createClient(settings.redis.web.port, settings.redis.web.host)
-rclientPub.auth(settings.redis.web.password)
-rclientSub = require("redis").createClient(settings.redis.web.port, settings.redis.web.host)
-rclientSub.auth(settings.redis.web.password)
+Settings = require 'settings-sharelatex'
+redis = require("redis-sharelatex")
+rclientPub = redis.createClient(Settings.redis.web)
+rclientSub = redis.createClient(Settings.redis.web)
 
 module.exports = EditorRealTimeController =
 	rclientPub: rclientPub

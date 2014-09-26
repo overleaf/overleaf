@@ -1,8 +1,8 @@
 logger = require "logger-sharelatex"
 metrics = require('../../infrastructure/Metrics')
 Settings = require 'settings-sharelatex'
-rclient = require("redis").createClient(Settings.redis.web.port, Settings.redis.web.host)
-rclient.auth(Settings.redis.web.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 EditorRealTimeController = require("./EditorRealTimeController")
 
