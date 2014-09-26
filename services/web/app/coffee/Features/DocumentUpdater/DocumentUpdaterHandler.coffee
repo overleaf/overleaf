@@ -7,9 +7,8 @@ async = require 'async'
 logger = require('logger-sharelatex')
 metrics = require('../../infrastructure/Metrics')
 slReqIdHelper = require('soa-req-id')
-redis = require('redis')
-rclient = redis.createClient(settings.redis.web.port, settings.redis.web.host)
-rclient.auth(settings.redis.web.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(settings.redis.web)
 Project = require("../../models/Project").Project
 ProjectLocator = require('../../Features/Project/ProjectLocator')
 
