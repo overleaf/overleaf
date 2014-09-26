@@ -66,7 +66,7 @@ define [
 		$scope.startFreeTrial = (source) ->
 
 			buckets = [
-				{ bucketName:"30d", planCode: "student_free_trial" }
+				{ bucketName:"7d", planCode: "student_free_trial_7_days" }
 				{ bucketName:"14d", planCode: "student_free_trial_14_days" }
 			]
 			bucket = abTestManager.getABTestBucket "trial_len", buckets
