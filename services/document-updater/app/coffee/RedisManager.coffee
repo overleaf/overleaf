@@ -1,8 +1,6 @@
 Settings = require('settings-sharelatex')
-redis = require('redis')
-redisConf = Settings.redis.web
-rclient = redis.createClient(redisConf.port, redisConf.host)
-rclient.auth(redisConf.password)
+redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 async = require('async')
 _ = require('underscore')
 keys = require('./RedisKeyBuilder')
