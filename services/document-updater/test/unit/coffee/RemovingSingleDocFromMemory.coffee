@@ -24,7 +24,7 @@ describe 'removing single doc from memory', ()->
 			"logger-sharelatex":
 				error:->
 				log:->
-			redis:
+			"redis-sharelatex":
 				createClient : ->
 					auth:->
 					multi: ->
