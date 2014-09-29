@@ -60,6 +60,15 @@ describe "LoginRateLimiter", ->
 				done()
 
 
+	describe "smoke test user", ->
+
+		it "should have a higher limit", (done)->
+			done()
+
+
+
+
+
 	describe "recordSuccessfulLogin", ->
 
 		it "should delete the user key", (done)->
