@@ -88,11 +88,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 	
 			include translations/translation_message
 
+
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
 
 		block content
-			
+		div(ng-controller="AbTestController")
 		- if(typeof(suppressFooter) == "undefined")
 			include layout/footer
 
