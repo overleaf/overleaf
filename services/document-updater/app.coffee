@@ -7,11 +7,13 @@ RedisManager = require('./app/js/RedisManager')
 UpdateManager = require('./app/js/UpdateManager')
 DispatchManager = require('./app/js/DispatchManager')
 Keys = require('./app/js/RedisKeyBuilder')
+redis = require('redis')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+redisConf = Settings.redis.web
+rclient = redis.createClient(redisConf.port, redisConf.host)
+rclient.auth(redisConf.password)
 
 Path = require "path"
 Metrics = require "metrics-sharelatex"

@@ -19,7 +19,7 @@ describe 'getting cound of docs from memory', ()->
 	beforeEach (done)->
 		mocks =
 			"logger-sharelatex": log:->
-			"redis-sharelatex":
+			redis:
 				createClient : ()->
 					auth:->
 					smembers:(key, callback)->

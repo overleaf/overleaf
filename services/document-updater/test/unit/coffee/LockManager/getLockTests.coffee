@@ -8,7 +8,7 @@ describe 'LockManager - getting the lock', ->
 	beforeEach ->
 		@LockManager = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
-			"redis-sharelatex":
+			redis:
 				createClient : () =>
 					auth:->
 		@callback = sinon.stub()

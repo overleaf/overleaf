@@ -1,14 +1,16 @@
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 Keys = require('./RedisKeyBuilder')
+redis = require('redis')
 UpdateManager = require('./UpdateManager')
 Metrics = require('./Metrics')
-redis = require("redis-sharelatex")
 
 module.exports = DispatchManager =
 	createDispatcher: () ->
-		client = redis.createClient(Settings.redis.web)
-
+		redisConf = Settings.redis.web
+		client = redis.createClient(redisConf.port, redisConf.host)
+		client.auth(redisConf.password)
+		
 		worker = {
 			client: client
 			_waitForUpdateThenDispatchWorker: (callback = (error) ->) ->

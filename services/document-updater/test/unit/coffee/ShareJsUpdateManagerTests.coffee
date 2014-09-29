@@ -15,7 +15,7 @@ describe "ShareJsUpdateManager", ->
 					class Model
 						constructor: (@db) ->
 				"./ShareJsDB" : @ShareJsDB = { mockDB: true }
-				"redis-sharelatex" : createClient: () => @rclient = auth:->
+				"redis" : createClient: () => @rclient = auth:->
 				"logger-sharelatex": @logger = { log: sinon.stub() }
 			globals:
 				clearTimeout: @clearTimeout = sinon.stub()

@@ -19,7 +19,7 @@ describe 'Lock Manager - checking the lock', ()->
 	mocks =
 		"logger-sharelatex": log:->
 
-		"redis-sharelatex":
+		redis:
 			createClient : ()->
 				auth:->
 				multi: ->

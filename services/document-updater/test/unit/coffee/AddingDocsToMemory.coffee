@@ -22,7 +22,7 @@ describe 'putting a doc into memory', ()->
 
 	mocks =
 		"logger-sharelatex": log:->
-		"redis-sharelatex":
+		redis:
 			createClient : ()->
 				auth:->
 				multi: ()->

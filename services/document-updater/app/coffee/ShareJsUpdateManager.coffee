@@ -7,8 +7,10 @@ Keys = require "./RedisKeyBuilder"
 {EventEmitter} = require "events"
 util = require "util"
 
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+redis = require('redis')
+redisConf = Settings.redis.web
+rclient = redis.createClient(redisConf.port, redisConf.host)
+rclient.auth(redisConf.password)
 
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter

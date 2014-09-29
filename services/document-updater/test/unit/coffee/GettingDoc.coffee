@@ -11,7 +11,7 @@ describe 'RedisManager - getDoc', ->
 		@rclient.multi = () => @rclient
 
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": @redis =
+			"redis": @redis =
 				createClient: () => @rclient
 
 		@doc_id = "doc-id-123"

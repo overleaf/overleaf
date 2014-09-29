@@ -12,7 +12,7 @@ describe "DispatchManager", ->
 			"settings-sharelatex": @settings =
 				redis:
 					web: {}
-			"redis-sharelatex": @redis = {}
+			"redis": @redis = {}
 		@callback = sinon.stub()
 
 	describe "each worker", ->

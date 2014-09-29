@@ -7,7 +7,7 @@ SandboxedModule = require('sandboxed-module')
 describe "RedisManager.pushDocOp", ->
 	beforeEach ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": createClient: () =>
+			"redis": createClient: () =>
 				@rclient =
 					auth: () ->
 					multi: () => @rclient

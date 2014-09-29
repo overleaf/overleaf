@@ -21,8 +21,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "sinon": "~1.5.2",
-    "mongojs": "0.9.11",
-    "redis-sharelatex": "0.0.3"
+    "mongojs": "0.9.11"
   },
   "devDependencies": {
     "grunt-execute": "~0.1.5",
