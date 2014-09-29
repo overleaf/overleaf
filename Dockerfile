@@ -1,7 +1,11 @@
 # 
-# ShareLaTeX Dockerfile
+# ShareLaTeX all-in-one Dockerfile
 #
 # https://github.com/wtsi-hgi/sharelatex
+# 
+# Builds a docker container with ShareLaTeX and all prerequisites installed.
+# Note that if using docker in production, you may want to split out individual 
+# components into their own containers and connect them using networking.
 
 FROM ubuntu:12.04
 MAINTAINER "Joshua C. Randall" <jcrandall@alum.mit.edu>
@@ -67,9 +71,16 @@ RUN mkdir -p /etc/sharelatex \
 # Workaround for "Error: Could not load the bindings file" error
 RUN (cd web && rm -r node_modules/bcrypt && npm install bcrypt)
 
-# Declare directories as volumes
+# Install supervisord to manage all-in-one-container process management
+RUN apt-get -qqy install supervisor
+ADD package/docker/supervisor_conf.d /etc/supervisor/conf.d
+
+# Set supervisord as the default entrypoint
+ENTRYPOINT ["/usr/bin/supervisord"]
+
+# Declare data and logging directories as volumes
 VOLUME ["/data"]
-VOLUME ["/log"]
+VOLUME ["/var/log"]
 
 # nginx listens on port 80
 EXPOSE 80
