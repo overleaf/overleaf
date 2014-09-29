@@ -1,6 +1,6 @@
 {
   "name": "redis-sharelatex",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "redis wrapper for node which will either use sentinal or normal redis",
   "main": "index.coffee",
   "author": "henry oswald @ sharelatex",

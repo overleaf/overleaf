@@ -3,7 +3,9 @@ _ = require("underscore")
 module.exports =
 
 	createClient: (opts)->
-
+		if opts.password?
+			opts.auth_pass = opts.password
+			delete opts.password
 		if opts.endpoints?
 			standardOpts = _.clone(opts)
 			delete standardOpts.endpoints

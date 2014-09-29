@@ -22,14 +22,14 @@ describe "index", ->
 			"redis-sentinel":@sentinel
 			"redis":@normalRedis
 		@auth_pass = "1234 pass"
-
-	describe "sentinel", ->
-
-		beforeEach ->
-			@endpoints = [
+		@endpoints = [
 				{host: '127.0.0.1', port: 26379},
 				{host: '127.0.0.1', port: 26380}
 			]
+	describe "sentinel", ->
+
+		beforeEach ->
+			
 			@masterName = "my master"
 			@sentinelOptions =
 				endpoints:@endpoints
@@ -67,5 +67,24 @@ describe "index", ->
 
 
 
+	describe "setting the password", ->
+		beforeEach ->
+			@standardOpts =
+				password: @auth_pass
+				port: 1234
+				host: "redis.mysite.env"
+
+			@sentinelOptions =
+				endpoints:@endpoints
+				masterName:@masterName
+				password: @auth_pass
+
+		it "should set the auth_pass from password if password exists for normal redis", ->
+			client = @redis.createClient @standardOpts
+			@normalRedis.createClient.calledWith(@standardOpts.port, @standardOpts.host, auth_pass:@auth_pass).should.equal true
+		
+		it "should set the auth_pass from password if password exists for sentinal", ->
+			client = @redis.createClient @sentinelOptions
+			@sentinel.createClient.calledWith(@endpoints, @masterName, auth_pass:@auth_pass).should.equal true
 
 
