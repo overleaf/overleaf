@@ -15,7 +15,6 @@ before_script:
 
 script:
     - grunt test:unit
-    - grunt test:acceptance
 
 services:
     - redis-server
