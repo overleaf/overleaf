@@ -12,28 +12,28 @@ buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDoma
 describe "Opening", ->
 
 	before (done) ->
+		require("../../../app/js/Features/Security/LoginRateLimiter.js").recordSuccessfulLogin Settings.smokeTest.user, ->
+			command =  """
+				curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('register')}
+			"""
+			child.exec command, (err, stdout, stderr)->
+				if err? then done(err)
+				csrf = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")[1]
 
-		command =  """
-			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('register')}
-		"""
-		child.exec command, (err, stdout, stderr)->
-			if err? then done(err)
-			csrf = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")[1]
-
-			# Change cookie to be non secure so curl will send it
-			fs = require("fs")
-			fs.readFile cookeFilePath, "utf8", (err, data) ->
-				return done(err) if err
-				firstTrue = data.indexOf("TRUE")
-				secondTrue = data.indexOf("TRUE", firstTrue+4)
-				result = data.slice(0, secondTrue)+"FALSE"+data.slice(secondTrue+4)
-				fs.writeFile cookeFilePath, result, "utf8", (err) ->
+				# Change cookie to be non secure so curl will send it
+				fs = require("fs")
+				fs.readFile cookeFilePath, "utf8", (err, data) ->
 					return done(err) if err
+					firstTrue = data.indexOf("TRUE")
+					secondTrue = data.indexOf("TRUE", firstTrue+4)
+					result = data.slice(0, secondTrue)+"FALSE"+data.slice(secondTrue+4)
+					fs.writeFile cookeFilePath, result, "utf8", (err) ->
+						return done(err) if err
 
-					command = """
-						curl -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
-					"""
-					child.exec command, done
+						command = """
+							curl -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
+						"""
+						child.exec command, done
 
 	after (done)-> 
 		command =  """
