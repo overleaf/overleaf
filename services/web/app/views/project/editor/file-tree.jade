@@ -355,11 +355,11 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-body(
 		fine-upload
 		endpoint="/project/{{ project_id }}/upload"
-		waiting-for-response-text="Inserting file..."
-		failed-upload-text="Upload failed, sorry :("
-		upload-button-text="Select file(s)"
-		drag-area-text="drag file(s)"
-		hint-text="Hint: Press and hold the Control (Ctrl) key to select multiple files"
+		waiting-for-response-text="{{inserting_files}}"
+		failed-upload-text="{{upload_failed_sorry}}"
+		upload-button-text="{{select_files}}"
+		drag-area-text="{{drag_files}}"
+		hint-text="{{hint_press_and_hold_control_key}}"
 		multiple="true"
 		on-complete-callback="onComplete"
 		on-upload-callback="onUpload"
