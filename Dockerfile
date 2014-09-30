@@ -75,8 +75,11 @@ RUN (cd web && rm -r node_modules/bcrypt && npm install bcrypt)
 RUN apt-get -qqy install supervisor
 ADD package/docker/supervisor_conf.d /etc/supervisor/conf.d
 
+# Install entrypoint script
+ADD package/docker/sharelatex-entrypoint.sh /usr/bin/sharelatex-entrypoint.sh
+
 # Set supervisord as the default entrypoint
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT ["/usr/bin/sharelatex-entrypoint.sh"]
 
 # Declare data and logging directories as volumes
 VOLUME ["/data"]
