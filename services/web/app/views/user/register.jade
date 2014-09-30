@@ -9,7 +9,7 @@ block content
 						h1  #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:sharedProjectData.project_name})}
 						div #{translate("join_sl_to_view_project")}
 					else if newTemplateData.templateName !== undefined
-						h1 #{translate("register_to_edit_template", {templatename:newTemplateData.templateName})}
+						h1 #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
 
 						div #{translate("already_have_sl_account")}
 							a(href="/login") #{translate("login_here")}
