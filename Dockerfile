@@ -7,7 +7,7 @@
 # Note that if using docker in production, you may want to split out individual 
 # components into their own containers and connect them using networking.
 
-FROM ubuntu:12.04
+FROM jrandall/texlive
 MAINTAINER "Joshua C. Randall" <jcrandall@alum.mit.edu>
 
 # Install basic prerequisites
@@ -33,16 +33,6 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 \
 
 # Install Aspell
 RUN apt-get -qqy install aspell
-
-# Install TeXLive
-RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz \
-&& tar -xvf install-tl-unx.tar.gz \
-&& cd install-tl-* \
-&& echo "selected_scheme scheme-full" > texlive.profile \
-&& echo "TEXDIR /usr/local/texlive/2014" >> texlive.profile \
-&& ./install-tl -profile texlive.profile
-ENV PATH /usr/local/texlive/2014/bin/i386:/usr/local/texlive/2014/bin/x86_64-linux:$PATH
-RUN tlmgr install latexmk
 
 # Install nginx
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv ABF5BD827BD9BF62 \
