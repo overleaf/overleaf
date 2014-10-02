@@ -157,6 +157,11 @@ module.exports = class Router
 		app.del  '/user/:user_id/update/*', httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
+		
+		app.post '/project/:project_id/contents/*', httpAuth, TpdsController.updateProjectContents
+		app.del  '/project/:project_id/contents/*', httpAuth, TpdsController.deleteProjectContents
+		app.ignoreCsrf('post', '/project/:project_id/contents/*')
+		app.ignoreCsrf('delete', '/project/:project_id/contents/*')
 
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
