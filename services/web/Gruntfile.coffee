@@ -164,6 +164,7 @@ module.exports = (grunt) ->
 	moduleUnitTestTasks = []
 	moduleCompileClientTasks = []
 	moduleIdeClientSideIncludes = []
+	moduleMainClientSideIncludes = []
 	if fs.existsSync "./modules"
 		for module in fs.readdirSync "./modules"
 			if fs.existsSync "./modules/#{module}/index.coffee"
@@ -201,6 +202,7 @@ module.exports = (grunt) ->
 				moduleCompileUnitTestTasks.push "coffee:module_#{module}_unit_tests"
 				moduleUnitTestTasks.push "mochaTest:module_#{module}_unit"
 				
+			if fs.existsSync "./modules/#{module}/public/coffee/ide/index.coffee"
 				config.coffee["module_#{module}_client_ide"] = {
 					expand: true,
 					flatten: false,
@@ -211,6 +213,18 @@ module.exports = (grunt) ->
 				}
 				moduleCompileClientTasks.push "coffee:module_#{module}_client_ide"
 				moduleIdeClientSideIncludes.push "ide/#{module}/index"
+				
+			if fs.existsSync "./modules/#{module}/public/coffee/main/index.coffee"
+				config.coffee["module_#{module}_client_main"] = {
+					expand: true,
+					flatten: false,
+					cwd: "modules/#{module}/public/coffee/main",
+					src: ['**/*.coffee'],
+					dest: "public/js/main/#{module}",
+					ext: '.js'
+				}
+				moduleCompileClientTasks.push "coffee:module_#{module}_client_main"
+				moduleMainClientSideIncludes.push "main/#{module}/index"
 	
 	grunt.initConfig config
 
@@ -232,6 +246,10 @@ module.exports = (grunt) ->
 		content = fs.readFileSync("public/js/ide.js").toString()
 		content = content.replace(/"__IDE_CLIENTSIDE_INCLUDES__"/g, moduleIdeClientSideIncludes.map((i) -> "\"#{i}\"").join(", "))
 		fs.writeFileSync "public/js/ide.js", content
+		
+		content = fs.readFileSync("public/js/main.js").toString()
+		content = content.replace(/"__MAIN_CLIENTSIDE_INCLUDES__"/g, moduleMainClientSideIncludes.map((i) -> "\"#{i}\"").join(", "))
+		fs.writeFileSync "public/js/main.js", content
 	
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']

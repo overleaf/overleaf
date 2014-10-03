@@ -29,7 +29,7 @@ module.exports = Modules =
 		partials = Modules.viewIncludes[view] or []
 		html = ""
 		for partial in partials
-			compiler = jade.compile(partial)
+			compiler = jade.compile(partial, doctype: "html")
 			html += compiler(locals)
 		return html
 		
