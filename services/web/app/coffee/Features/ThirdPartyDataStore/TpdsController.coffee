@@ -35,7 +35,7 @@ module.exports =
 	
 	updateProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
-		path = req.params[0]
+		path = "/" + req.params[0] # UpdateMerger expects leading slash
 		logger.log project_id: project_id, path: path, "received project contents update"
 		UpdateMerger.mergeUpdate project_id, path, req, (error) ->
 			return next(error) if error?
@@ -44,7 +44,7 @@ module.exports =
 			
 	deleteProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
-		path = req.params[0]
+		path = "/" + req.params[0] # UpdateMerger expects leading slash
 		logger.log project_id: project_id, path: path, "received project contents delete request"
 		UpdateMerger.deleteUpdate project_id, path, (error) ->
 			return next(error) if error?

@@ -86,7 +86,7 @@ describe 'TpdsController', ->
 			
 		it "should merge the update", ->
 			@UpdateMerger.mergeUpdate
-				.calledWith(@project_id, @path, @req)
+				.calledWith(@project_id, "/" + @path, @req)
 				.should.equal true
 				
 		it "should return a success", ->
@@ -111,7 +111,7 @@ describe 'TpdsController', ->
 			
 		it "should delete the file", ->
 			@UpdateMerger.deleteUpdate
-				.calledWith(@project_id, @path)
+				.calledWith(@project_id, "/" + @path)
 				.should.equal true
 				
 		it "should return a success", ->
