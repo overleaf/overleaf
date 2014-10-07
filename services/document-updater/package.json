@@ -9,7 +9,6 @@
   "dependencies": {
     "express": "3.3.4",
     "underscore": "1.2.2",
-    "redis": "0.7.2",
     "chai": "",
     "request": "2.25.0",
     "sandboxed-module": "~0.2.0",
@@ -21,7 +20,8 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "sinon": "~1.5.2",
-    "mongojs": "0.9.11"
+    "mongojs": "0.9.11",
+    "redis-sharelatex": "~0.0.4"
   },
   "devDependencies": {
     "grunt-execute": "~0.1.5",

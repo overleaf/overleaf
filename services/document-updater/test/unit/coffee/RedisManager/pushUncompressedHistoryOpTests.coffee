@@ -7,7 +7,7 @@ SandboxedModule = require('sandboxed-module')
 describe "RedisManager.pushUncompressedHistoryOp", ->
 	beforeEach ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis": createClient: () =>
+			"redis-sharelatex": createClient: () =>
 				@rclient =
 					auth: () ->
 					multi: () => @rclient

@@ -7,7 +7,7 @@ SandboxedModule = require('sandboxed-module')
 describe "RedisManager.getPendingUpdatesForDoc", ->
 	beforeEach ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis": createClient: () =>
+			"redis-sharelatex": createClient: () =>
 				@rclient =
 					auth: () ->
 					multi: () => @rclient

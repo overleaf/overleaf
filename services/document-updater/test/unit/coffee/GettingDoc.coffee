@@ -4,14 +4,14 @@ should = chai.should()
 modulePath = "../../../app/js/RedisManager.js"
 SandboxedModule = require('sandboxed-module')
 
-describe 'RedisManager - getDoc', ->
+describe 'RedisManager.getDoc', ->
 	beforeEach ->
 		@rclient = {}
 		@rclient.auth = () ->
 		@rclient.multi = () => @rclient
 
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis": @redis =
+			"redis-sharelatex": @redis =
 				createClient: () => @rclient
 
 		@doc_id = "doc-id-123"
