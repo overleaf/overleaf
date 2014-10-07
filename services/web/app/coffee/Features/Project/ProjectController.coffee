@@ -109,6 +109,8 @@ module.exports = ProjectController =
 	renameProject: (req, res)->
 		project_id = req.params.Project_id
 		newName = req.body.newProjectName
+		if newName.length > 150
+			return res.send 400
 		editorController.renameProject project_id, newName, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, newName:newName, "problem renaming project"

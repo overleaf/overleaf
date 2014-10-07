@@ -252,6 +252,13 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.renameProject @req, @res
 
+		it "should return an error if the name is over 150 chars", (done)->
+			@req.body.newProjectName = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
+			@res.send = (code)=>
+				code.should.equal 400
+				done()
+			@ProjectController.renameProject @req, @res
+
 	describe "loadEditor", ->
 		beforeEach ->
 			@settings.editorIsOpen = true
