@@ -112,6 +112,7 @@ block content
 								row
 									a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
 							- else
+								p.small #{translate("dropbox_sync_description")}
 								p
 									a.btn.btn-info(href='/dropbox/beginAuth') #{translate("link_to_dropbox")}
 										
