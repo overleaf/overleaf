@@ -126,6 +126,8 @@ module.exports = ProjectController =
 				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
+			user: (cb) ->
+				User.findById user_id, "featureSwitches", cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -133,6 +135,7 @@ module.exports = ProjectController =
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
 
@@ -141,6 +144,7 @@ module.exports = ProjectController =
 						priority_title: true
 						projects: projects
 						tags: tags
+						user: user
 						hasSubscription: results.hasSubscription
 					}
 
@@ -210,6 +214,7 @@ module.exports = ProjectController =
 						referal_id : user.referal_id
 						subscription :
 							freeTrial: {allowed: allowedFreeTrial}
+						featureSwitches: user.featureSwitches
 					}
 					userSettings: {
 						mode  : user.ace.mode
@@ -281,8 +286,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 		freeTrial:
 			allowed: true
 	featureSwitches:
-		dropbox: false
-		trackChanges: false
+		github: false
 
 THEME_LIST = []
 do generateThemeList = () ->
