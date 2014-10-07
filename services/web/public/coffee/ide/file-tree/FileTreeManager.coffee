@@ -272,9 +272,10 @@ define [
 
 		renameEntity: (entity, name, callback = (error) ->) ->
 			return if entity.name == name
-			entity.name = name
+			if name.length < 150
+				entity.name = name
 			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
-				name: name,
+				name: entity.name,
 				_csrf: window.csrfToken
 			}
 

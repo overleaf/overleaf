@@ -257,9 +257,10 @@ define [
 				window.location = "/project/#{project_id}"
 
 		$scope.renameProject = (project, newName) ->
-			project.name = newName
+			if newName.length < 150
+				project.name = newName
 			queuedHttp.post "/project/#{project.id}/rename", {
-				newProjectName: newName
+				newProjectName: project.name
 				_csrf: window.csrfToken
 			}
 

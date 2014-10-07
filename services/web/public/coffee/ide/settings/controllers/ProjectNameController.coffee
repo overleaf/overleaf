@@ -12,8 +12,10 @@ define [
 			$scope.$emit "project:rename:start"
 
 		$scope.finishRenaming = () ->
-			$scope.project.name = $scope.inputs.name
-			settings.saveProjectSettings({name: $scope.inputs.name})
+			newName = $scope.inputs.name
+			if newName.length < 150
+				$scope.project.name = newName
+			settings.saveProjectSettings({name: $scope.project.name})
 			$scope.state.renaming = false
 
 		ide.socket.on "projectNameUpdated", (name) ->
