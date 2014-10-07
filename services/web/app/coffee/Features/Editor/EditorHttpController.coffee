@@ -42,6 +42,8 @@ module.exports = EditorHttpController =
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
 		name = req.body.name
+		if name.length > 150
+			return res.send 400
 		EditorController.renameEntity project_id, entity_id, entity_type, name, (error) ->
 			return next(error) if error?
 			res.send 204

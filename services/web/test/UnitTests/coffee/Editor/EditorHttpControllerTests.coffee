@@ -108,6 +108,20 @@ describe "EditorHttpController", ->
 		it "should send back a success response", ->
 			@res.send.calledWith(204).should.equal true
 
+	describe "renameEntity with long name", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				entity_id: @entity_id = "entity-id-123"
+				entity_type: @entity_type = "entity-type"
+			@req.body =
+				name: @name = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
+			@EditorController.renameEntity = sinon.stub().callsArg(4)
+			@EditorHttpController.renameEntity @req, @res
+
+		it "should send back a bad request status code", ->
+			@res.send.calledWith(400).should.equal true
+
 	describe "moveEntity", ->
 		beforeEach ->
 			@req.params =
