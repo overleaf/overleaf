@@ -1,4 +1,6 @@
 HomeController = require('./HomeController')
+UniversityController = require("./UniversityController")
+
 
 module.exports =
 	apply: (app) ->
@@ -13,3 +15,6 @@ module.exports =
 		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 
 		app.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
+
+		app.get '/university', UniversityController.getIndexPage
+		app.get '/university/*', UniversityController.getPage
