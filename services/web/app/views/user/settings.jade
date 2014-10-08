@@ -108,9 +108,10 @@ block content
 									p
 										a.btn.btn-info(href='/user/subscription/plans') #{translate("upgrade")}
 							- else if(userIsRegisteredWithDropbox)
-								.alert.alert-success #{translate("account_is_linked")}
-								row
-									a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
+								.alert.alert-success
+									| #{translate("account_is_linked")}.
+									| 
+									a(href='/dropbox/unlink') #{translate("unlink_dropbox")}
 							- else
 								p.small #{translate("dropbox_sync_description")}
 								p
