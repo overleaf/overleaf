@@ -33,8 +33,7 @@ UserSchema = new Schema
 							dropbox:       { type:Boolean, default: Settings.defaultFeatures.dropbox }
 						}
 	featureSwitches	  : {
-							dropbox: {type:Boolean, default:true},
-							oldHistory: {type:Boolean}
+							github: {type: Boolean}
 						}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]

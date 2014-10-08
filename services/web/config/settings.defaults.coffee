@@ -88,6 +88,8 @@ module.exports =
 			url: "http://localhost:3013"
 		templates:
 			url: "http://localhost:3007"
+		githubSync:
+			url: "http://localhost:3022"
 		recurly:
 			privateKey: ""
 			apiKey: ""

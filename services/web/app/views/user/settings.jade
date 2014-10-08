@@ -96,22 +96,29 @@ block content
 													ng-disabled="changePasswordForm.$invalid"
 												) #{translate("change")}
 
-							hr.soften
+							hr
 
 							h3 #{translate("dropbox_integration")} 
 								span.small
 									a(href='/help/kb/dropbox-2') (#{translate("learn_more")})
-							- if(!userHasDropboxFeature)
-										.alert.alert-info #{translate("dropbox_is_premium")} &nbsp; &nbsp;
-											a.btn.btn-info(href='/user/subscription/plans') #{translate("upgrade")}
-									- else if(userIsRegisteredWithDropbox)
-										.alert.alert-success #{translate("account_is_linked")}
-										row
-											a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
-									- else
-										a.btn.btn-info(href='/dropbox/beginAuth') #{translate("link_to_dropbox")}
+							- if(!user.features.dropbox)
+								p.small #{translate("dropbox_sync_description")}
+								.alert.alert-info
+									p #{translate("dropbox_is_premium")}
+									p
+										a.btn.btn-info(href='/user/subscription/plans') #{translate("upgrade")}
+							- else if(userIsRegisteredWithDropbox)
+								.alert.alert-success #{translate("account_is_linked")}
+								row
+									a(href='/dropbox/unlink').btn #{translate("unlink_dropbox")}
+							- else
+								p.small #{translate("dropbox_sync_description")}
+								p
+									a.btn.btn-info(href='/dropbox/beginAuth') #{translate("link_to_dropbox")}
+										
+							| !{moduleIncludes("userSettings", locals)}
 
-							hr.soften
+							hr
 
 							p.small
 								| #{translate("newsletter_info_and_unsubscribe")} 

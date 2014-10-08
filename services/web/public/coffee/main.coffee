@@ -22,5 +22,6 @@ define [
 	"directives/selectAll"
 	"directives/maxHeight"
 	"filters/formatDate"
+	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])

@@ -1,4 +1,5 @@
 tpdsUpdateHandler = require('./TpdsUpdateHandler')
+UpdateMerger = require "./UpdateMerger"
 logger = require('logger-sharelatex')
 Path = require('path')
 metrics = require("../../infrastructure/Metrics")
@@ -30,6 +31,24 @@ module.exports =
 			else
 				logger.log user_id:user_id, filePath:filePath, projectName:projectName, "telling tpds delete has been processed"
 				res.send 200
+			req.session.destroy()
+	
+	updateProjectContents: (req, res, next = (error) ->) ->
+		{project_id} = req.params
+		path = "/" + req.params[0] # UpdateMerger expects leading slash
+		logger.log project_id: project_id, path: path, "received project contents update"
+		UpdateMerger.mergeUpdate project_id, path, req, (error) ->
+			return next(error) if error?
+			res.send(200)
+			req.session.destroy()
+			
+	deleteProjectContents: (req, res, next = (error) ->) ->
+		{project_id} = req.params
+		path = "/" + req.params[0] # UpdateMerger expects leading slash
+		logger.log project_id: project_id, path: path, "received project contents delete request"
+		UpdateMerger.deleteUpdate project_id, path, (error) ->
+			return next(error) if error?
+			res.send(200)
 			req.session.destroy()
 
 	parseParams: parseParams = (req)->
