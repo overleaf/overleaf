@@ -148,7 +148,7 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next) ->
-		if !Settings.cacheModuleViewIncludes
+		if Settings.reloadModuleViewsOnEachRequest
 			Modules.loadViewIncludes()
 		res.locals.moduleIncludes = Modules.moduleIncludes
 		next()
