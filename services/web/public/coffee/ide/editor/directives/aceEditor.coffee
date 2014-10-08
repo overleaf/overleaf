@@ -97,13 +97,13 @@ define [
 					name: "italics",
 					bindKey: win: "Ctrl-I", mac: "Command-I"
 					exec: (editor) ->
-					selection = editor.getSelection()
-					if selection.isEmpty()
-						editor.insert("\\textit{}")
-						editor.navigateLeft(1)
-					else
-						text = editor.getCopyText()
-						editor.insert("\\textit{" + text + "}")
+						selection = editor.getSelection()
+						if selection.isEmpty()
+							editor.insert("\\textit{}")
+							editor.navigateLeft(1)
+						else
+							text = editor.getCopyText()
+							editor.insert("\\textit{" + text + "}")
 					readOnly: false
 
 				scope.$watch "onCtrlEnter", (callback) ->
