@@ -22,17 +22,14 @@
 }
 .recurly .plan {
 	color: #333;
-	overflow: hidden;
-	position: relative;
-	zoom: 1;
 	font-family: @font-family-serif;
+	padding: 0 20px 40px;
+	position: relative;
+	margin-top: -20px;
 }
 .recurly .plan .name {
-	float: left;
 	font-size: 32px;
-	min-width: 200px;
-	padding-left: 20px;
-	padding-right: 40px;
+	margin-right: 130px;
 }
 .recurly .plan .quantity.field {
 	clear: none;
@@ -56,9 +53,10 @@
 	color: #666;
 }
 .recurly .plan .recurring_cost {
-	float: right;
 	text-align: right;
-	padding-right: 20px;
+	position: absolute;
+	right: 20px;
+	top: 0;
 }
 .recurly .plan .recurring_cost .cost {
 	font-size: 32px;
@@ -68,14 +66,7 @@
 	padding-bottom: 20px;
 }
 .recurly .free_trial {
-	clear: left;
-	float: left;
 	font-size: 13px;
-	height: 22px;
-	margin: 0;
-	position: absolute;
-	top: 35px;
-	left: 20px;
 	font-style: italic;
 }
 .recurly .setup_fee {
