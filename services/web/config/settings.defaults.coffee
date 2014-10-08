@@ -303,4 +303,5 @@ module.exports =
 		"/templates/index": "/templates/"
 
 	proxyUrls: {}
-
+	
+	reloadModuleViewsOnEachRequest: true
