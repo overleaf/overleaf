@@ -23,10 +23,11 @@ module.exports =
 					return callback(error) if error?
 					callback null, true
 
-	setNewUserPassword: (token, password, callback)->
+	setNewUserPassword: (token, password, callback = (error, found) ->)->
 		PasswordResetTokenHandler.getUserIdFromTokenAndExpire token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
-				logger.err user_id:user_id, "token for password reset did not find user_id"
-				return callback("no user found")
-			AuthenticationManager.setUserPassword user_id, password, callback
+				return callback null, false
+			AuthenticationManager.setUserPassword user_id, password, (err) ->
+				if err then return callback(err)
+				callback null, true

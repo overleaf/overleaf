@@ -63,17 +63,18 @@ describe "PasswordResetHandler", ->
 
 	describe "setNewUserPassword", ->
 
-		it "should return err if no user id can be found", (done)->
+		it "should return false if no user id can be found", (done)->
 			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire.callsArgWith(1)
-			@PasswordResetHandler.setNewUserPassword @token, @password, (err)=>
-				err.should.exists
+			@PasswordResetHandler.setNewUserPassword @token, @password, (err, found) =>
+				found.should.equal false
 				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()		
 
 		it "should set the user password", (done)->
 			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire.callsArgWith(1, null, @user_id)
 			@AuthenticationManager.setUserPassword.callsArgWith(2)
-			@PasswordResetHandler.setNewUserPassword @token, @password, (err)=>
+			@PasswordResetHandler.setNewUserPassword @token, @password, (err, found) =>
+				found.should.equal true
 				@AuthenticationManager.setUserPassword.calledWith(@user_id, @password).should.equal true
 				done()			
 

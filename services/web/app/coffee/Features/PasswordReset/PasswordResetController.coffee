@@ -34,9 +34,10 @@ module.exports =
 	setNewUserPassword: (req, res)->
 		{passwordResetToken, password} = req.body
 		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0
-			return res.send 500
-		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err)->
-			if err?
-				res.send 500
-			else
+			return res.send 400
+		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found) ->
+			return next(err) if err?
+			if found
 				res.send 200
+			else
+				res.send 404, {message: req.i18n.translate("password_reset_token_expired")}

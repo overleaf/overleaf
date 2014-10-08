@@ -87,34 +87,34 @@ describe "PasswordResetController", ->
 	describe "setNewUserPassword", ->
 
 		it "should tell the user handler to reset the password", (done)->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
 			@res.send = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.setNewUserPassword.calledWith(@token, @password).should.equal true
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 
-		it "should send a 500 if there is an error", (done)->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, "error")
+		it "should send 404 if the token didn't work", (done)->
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, false)
 			@res.send = (code)=>
-				code.should.equal 500
+				code.should.equal 404
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 
-		it "should error if there is no password", (done)->
+		it "should return 400 (Bad Request) if there is no password", (done)->
 			@req.body.password = ""
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
 			@res.send = (code)=>
-				code.should.equal 500
+				code.should.equal 400
 				@PasswordResetHandler.setNewUserPassword.called.should.equal false
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 
-		it "should error if there is no password", (done)->
+		it "should return 400 (Bad Request) if there is no passwordResetToken", (done)->
 			@req.body.passwordResetToken = ""
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
 			@res.send = (code)=>
-				code.should.equal 500
+				code.should.equal 400
 				@PasswordResetHandler.setNewUserPassword.called.should.equal false
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
