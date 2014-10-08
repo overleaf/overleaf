@@ -78,6 +78,34 @@ define [
 					readOnly: true
 				editor.commands.removeCommand "replace"
 				
+				# Bold text on CMD+B
+				editor.commands.addCommand
+					name: "bold",
+					bindKey: win: "Ctrl-B", mac: "Command-B"
+					exec: (editor) ->
+						selection = editor.getSelection()
+						if selection.$isEmpty
+							editor.insert("\\textbf{}")
+							editor.navigateLeft(1)
+						else
+							text = editor.getCopyText()
+							editor.insert("\\textbf{" + text + "}")
+					readOnly: false
+                    
+				# Italicise text on CMD+I
+				editor.commands.addCommand
+					name: "italics",
+					bindKey: win: "Ctrl-I", mac: "Command-I"
+					exec: (editor) ->
+					selection = editor.getSelection()
+					if selection.$isEmpty
+						editor.insert("\\textit{}")
+						editor.navigateLeft(1)
+					else
+						text = editor.getCopyText()
+						editor.insert("\\textit{" + text + "}")
+					readOnly: false
+
 				scope.$watch "onCtrlEnter", (callback) ->
 					if callback?
 						editor.commands.addCommand 
