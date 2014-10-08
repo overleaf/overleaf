@@ -84,7 +84,7 @@ define [
 					bindKey: win: "Ctrl-B", mac: "Command-B"
 					exec: (editor) ->
 						selection = editor.getSelection()
-						if selection.$isEmpty
+						if selection.isEmpty()
 							editor.insert("\\textbf{}")
 							editor.navigateLeft(1)
 						else
@@ -98,7 +98,7 @@ define [
 					bindKey: win: "Ctrl-I", mac: "Command-I"
 					exec: (editor) ->
 					selection = editor.getSelection()
-					if selection.$isEmpty
+					if selection.isEmpty()
 						editor.insert("\\textit{}")
 						editor.navigateLeft(1)
 					else
