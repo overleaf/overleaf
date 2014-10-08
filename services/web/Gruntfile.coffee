@@ -244,11 +244,11 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:modules:client', 'Compile all the module client side code', moduleCompileClientTasks
 	grunt.registerTask 'compile:modules:inject_clientside_includes', () ->
 		content = fs.readFileSync("public/js/ide.js").toString()
-		content = content.replace(/"__IDE_CLIENTSIDE_INCLUDES__"/g, moduleIdeClientSideIncludes.map((i) -> "\"#{i}\"").join(", "))
+		content = content.replace(/, "__IDE_CLIENTSIDE_INCLUDES__"/g, moduleIdeClientSideIncludes.map((i) -> ", \"#{i}\"").join(""))
 		fs.writeFileSync "public/js/ide.js", content
 		
 		content = fs.readFileSync("public/js/main.js").toString()
-		content = content.replace(/"__MAIN_CLIENTSIDE_INCLUDES__"/g, moduleMainClientSideIncludes.map((i) -> "\"#{i}\"").join(", "))
+		content = content.replace(/, "__MAIN_CLIENTSIDE_INCLUDES__"/g, moduleMainClientSideIncludes.map((i) -> ", \"#{i}\"").join(""))
 		fs.writeFileSync "public/js/main.js", content
 	
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
