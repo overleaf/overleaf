@@ -281,6 +281,7 @@ describe "ProjectController", ->
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
+			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>

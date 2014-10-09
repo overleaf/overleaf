@@ -89,6 +89,7 @@ describe "EditorController", ->
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
+			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 
 		describe "when authorized", ->
 			beforeEach ->
@@ -122,8 +123,12 @@ describe "EditorController", ->
 
 			it "should mark the user as connected with the ConnectedUsersManager", ->
 				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, @user, null).should.equal true
-
-
+			
+			it "should remove the flag to send a user a message about the project being deleted", ->
+				@ProjectDeleter.unmarkAsDeletedByExternalSource
+					.calledWith(@project)
+					.should.equal true
+		
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
