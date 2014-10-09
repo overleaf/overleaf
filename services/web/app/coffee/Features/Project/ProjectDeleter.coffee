@@ -7,7 +7,7 @@ FileStoreHandler = require("../FileStore/FileStoreHandler")
 
 module.exports = ProjectDeleter =
 
-	markAsDeletedByExternalSource : (project_id, callback)->
+	markAsDeletedByExternalSource : (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "marking project as deleted by external data source"
 		conditions = {_id:project_id}
 		update = {deletedByExternalDataSource:true}
@@ -15,6 +15,15 @@ module.exports = ProjectDeleter =
 		Project.update conditions, update, {}, (err)->
 			require('../Editor/EditorController').notifyUsersProjectHasBeenDeletedOrRenamed project_id, ->
 				callback()
+				
+	unmarkAsDeletedByExternalSource: (project, callback = (error) ->) ->
+		logger.log project_id: "removing flag marking project as deleted by external data source"
+		if project.deletedByExternalDataSource
+			conditions = {_id:project._id.toString()}
+			update = {deletedByExternalDataSource: false}
+			Project.update conditions, update, {}, callback
+		else
+			callback()
 
 	deleteUsersProjects: (owner_id, callback)->
 		logger.log owner_id:owner_id, "deleting users projects"

@@ -50,6 +50,10 @@ module.exports = AuthenticationController =
 			callback null, null
 
 	getLoggedInUser: (req, options = {allow_auth_token: false}, callback = (error, user) ->) ->
+		if typeof(options) == "function"
+			callback = options
+			options = {allow_auth_token: false}
+
 		if req.session?.user?._id?
 			query = req.session.user._id
 		else if req.query?.auth_token? and options.allow_auth_token

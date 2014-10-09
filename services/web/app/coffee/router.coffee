@@ -39,6 +39,7 @@ WikiController = require("./Features/Wiki/WikiController")
 ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
 DropboxRouter = require "./Features/Dropbox/DropboxRouter"
 dropboxHandler = require "./Features/Dropbox/DropboxHandler"
+Modules = require "./infrastructure/Modules"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -67,6 +68,8 @@ module.exports = class Router
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
 		DropboxRouter.apply(app)
+		
+		Modules.applyRouter(app)
 
 		app.get '/blog', BlogController.getIndexPage
 		app.get '/blog/*', BlogController.getPage
@@ -154,6 +157,11 @@ module.exports = class Router
 		app.del  '/user/:user_id/update/*', httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
+		
+		app.post '/project/:project_id/contents/*', httpAuth, TpdsController.updateProjectContents
+		app.del  '/project/:project_id/contents/*', httpAuth, TpdsController.deleteProjectContents
+		app.ignoreCsrf('post', '/project/:project_id/contents/*')
+		app.ignoreCsrf('delete', '/project/:project_id/contents/*')
 
 		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi

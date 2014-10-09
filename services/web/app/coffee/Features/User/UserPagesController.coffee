@@ -33,8 +33,7 @@ module.exports =
 			dropboxHandler.getUserRegistrationStatus user._id, (err, status)->
 				userIsRegisteredWithDropbox = !err? and status.registered
 				res.render 'user/settings',
-					title:'account_settings',
-					userHasDropboxFeature: user.features.dropbox
+					title:'account_settings'
 					userIsRegisteredWithDropbox: userIsRegisteredWithDropbox
 					user: user,
 					languages: Settings.languages,

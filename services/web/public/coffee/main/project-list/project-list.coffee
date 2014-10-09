@@ -196,11 +196,12 @@ define [
 
 		$scope.createTag = (name) ->
 			event_tracking.send 'project-list-page-interaction', 'project action', 'createTag'
-			$scope.tags.push {
+			$scope.tags.push tag = {
 				name: name
 				project_ids: []
 				showWhenEmpty: true
 			}
+			return tag
 
 		$scope.openNewTagModal = (e) ->
 			modalInstance = $modal.open(
@@ -210,11 +211,8 @@ define [
 
 			modalInstance.result.then(
 				(newTagName) ->
-					$scope.createTag(newTagName)
-					console.log $scope.tag, $scope.addSelectedProjectsToTag, newTagName
-					$scope.addSelectedProjectsToTag($scope.tag)
-
-					# add selected projects to this new tag
+					tag = $scope.createTag(newTagName)
+					$scope.addSelectedProjectsToTag(tag)
 			)
 
 		$scope.createProject = (name, template = "none") ->

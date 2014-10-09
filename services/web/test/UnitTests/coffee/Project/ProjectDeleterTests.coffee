@@ -30,6 +30,7 @@ describe 'Project deleter', ->
 			'../../models/Project':{Project:@Project}
 			'../DocumentUpdater/DocumentUpdaterHandler': @documentUpdaterHandler
 			"../Tags/TagsHandler":@TagsHandler
+			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
 			'logger-sharelatex':
 				log:->
 
@@ -46,6 +47,32 @@ describe 'Project deleter', ->
 			@deleter.markAsDeletedByExternalSource project_id, =>
 				@editorController.notifyUsersProjectHasBeenDeletedOrRenamed.calledWith(project_id).should.equal true
 				done()
+				
+	describe "unmarkAsDeletedByExternalSource", ->
+		beforeEach ->
+			@Project.update = sinon.stub().callsArg(3)
+			@callback = sinon.stub()
+			@project = {
+				_id: @project_id
+			}
+	
+		describe "when the project does not have the flag set", ->
+			beforeEach ->
+				@project.deletedByExternalDataSource = false
+				@deleter.unmarkAsDeletedByExternalSource @project, @callback
+			
+			it "should not update the project", ->
+				@Project.update.called.should.equal false
+
+		describe "when the project does have the flag set", ->
+			beforeEach ->
+				@project.deletedByExternalDataSource = true
+				@deleter.unmarkAsDeletedByExternalSource @project, @callback
+			
+			it "should remove the flag from the project", ->
+				@Project.update
+					.calledWith({_id: @project_id}, {deletedByExternalDataSource:false})
+					.should.equal true
 
 	describe "deleteUsersProjects", ->
 

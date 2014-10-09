@@ -198,8 +198,8 @@ describe "ProjectController", ->
 					first_name: 'James'
 				'user-2':
 					first_name: 'Henry'
+			@users[@user._id] = @user # Owner
 			@UserModel.findById = (id, fields, callback) =>
-				fields.should.equal 'first_name last_name'
 				callback null, @users[id]
 
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
@@ -221,6 +221,12 @@ describe "ProjectController", ->
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
 				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it "should send the user", (done)->
+			@res.render = (pageName, opts)=>
+				opts.user.should.deep.equal @user
 				done()
 			@ProjectController.projectListPage @req, @res
 
@@ -275,6 +281,7 @@ describe "ProjectController", ->
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
+			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>

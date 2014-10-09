@@ -58,6 +58,10 @@ module.exports = EditorController =
 
 							# can be done affter the connection has happened
 							ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, ->
+							
+							# Only show the 'renamed or deleted' message once
+							ProjectDeleter.unmarkAsDeletedByExternalSource project
+
 
 	leaveProject: (client, user) ->
 		self = @

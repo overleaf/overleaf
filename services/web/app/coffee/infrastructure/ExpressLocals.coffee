@@ -6,6 +6,7 @@ SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatter
 querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 _ = require("underscore")
+Modules = require "./Modules"
 
 fingerprints = {}
 Path = require 'path'
@@ -144,5 +145,11 @@ module.exports = (app)->
 			subdomain.lngCode == req.showUserOtherLng and !subdomain.hide
 		res.locals.recomendSubdomain = subdomain
 		res.locals.currentLngCode = req.lng
+		next()
+
+	app.use (req, res, next) ->
+		if Settings.reloadModuleViewsOnEachRequest
+			Modules.loadViewIncludes()
+		res.locals.moduleIncludes = Modules.moduleIncludes
 		next()
 

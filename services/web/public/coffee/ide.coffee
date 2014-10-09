@@ -17,6 +17,7 @@ define [
 	"ide/hotkeys/index"
 	"ide/directives/layout"
 	"ide/services/ide"
+	"__IDE_CLIENTSIDE_INCLUDES__"
 	"analytics/AbTestingManager"
 	"directives/focus"
 	"directives/fineUpload"

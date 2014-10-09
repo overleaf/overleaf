@@ -159,15 +159,16 @@
 		position: absolute;
 		z-index: 2;
 	}
-	.highlights-before-label {
+	.highlights-before-label, .highlights-after-label {
 		position: absolute;
-		top:   @line-height-computed / 2;
 		right: @line-height-computed;
+		z-index: 1;
+	}
+	.highlights-before-label {
+		top:   @line-height-computed / 2;
 	}
 	.highlights-after-label {
-		position: absolute;
 		bottom: @line-height-computed / 2;
-		right:  @line-height-computed;
 	}
 }
 
