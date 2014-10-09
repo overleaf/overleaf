@@ -44,6 +44,9 @@ describe "Subscription Handler sanboxed", ->
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 			redeemCoupon:sinon.stub().callsArgWith(2)
 
+		@DropboxHandler =
+			unlinkAccount:sinon.stub().callsArgWith(1)
+
 		@SubscriptionUpdater = 
 			syncSubscription: sinon.stub().callsArgWith(2)
 			startFreeTrial: sinon.stub().callsArgWith(1)
@@ -62,6 +65,7 @@ describe "Subscription Handler sanboxed", ->
 			"logger-sharelatex":{log:->}
 			'./LimitationsManager':@LimitationsManager
 			"../Email/EmailHandler":@EmailHandler
+			"../Dropbox/DropboxHandler":@DropboxHandler
 
 		@SubscriptionHandler.syncSubscriptionToUser = sinon.stub().callsArgWith(2)
 
@@ -151,6 +155,11 @@ describe "Subscription Handler sanboxed", ->
 			it "should cancel the subscription", ->
 				@RecurlyWrapper.cancelSubscription.called.should.equal true
 				@RecurlyWrapper.cancelSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
+
+
+			it "should unlink dropbox", ->
+				@DropboxHandler.unlinkAccount.called.should.equal true
+				@DropboxHandler.unlinkAccount.calledWith(@user._id).should.equal true
 
 	describe "reactiveRecurlySubscription", ->
 		describe "with a user without a subscription", ->

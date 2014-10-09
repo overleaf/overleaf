@@ -6,6 +6,7 @@ logger = require('logger-sharelatex')
 SubscriptionUpdater = require("./SubscriptionUpdater")
 LimitationsManager = require('./LimitationsManager')
 EmailHandler = require("../Email/EmailHandler")
+DropboxHandler = require("../Dropbox/DropboxHandler")
 
 module.exports =
 
@@ -49,7 +50,8 @@ module.exports =
 					ONE_HOUR_IN_MS = 1000 * 60 * 60
 					setTimeout (-> EmailHandler.sendEmail "canceledSubscription", emailOpts
 					), ONE_HOUR_IN_MS
-					callback()
+					DropboxHandler.unlinkAccount user._id, ->
+						callback()
 			else
 				callback()
 
