@@ -49,8 +49,9 @@
     position: absolute;
     top: 50%;
     width: 100%;
-    margin-top: -8px;
+    margin-top: -12px;
     font-size: 16px;
+    color: white;
 }
 .qq-upload-extra-drop-area {
     position: relative;
@@ -74,7 +75,7 @@
     padding: 9px;
     line-height: 15px;
     font-size: 16px;
-    background-color: @gray-lighter;
+    background-color: @gray-lightest;
 }
 .qq-upload-file, .qq-upload-spinner, .qq-upload-size, .qq-upload-cancel, .qq-upload-retry, .qq-upload-failed-text, .qq-upload-finished, .qq-upload-delete {
     margin-right: 12px;
@@ -106,10 +107,10 @@
 }
 .qq-upload-retry, .qq-upload-delete {
     display: none;
-    color: #000000;
+    // color: #000000;
 }
 .qq-upload-cancel, .qq-upload-delete {
-	color: #000000;
+	// color: #000000;
 }
 .qq-upload-retryable .qq-upload-retry {
     display: inline;
@@ -145,15 +146,16 @@
     color: #FFFFFF;
 }
 .qq-progress-bar {
-    background: -moz-linear-gradient(top,  rgba(30,87,153,1) 0%, rgba(41,137,216,1) 50%, rgba(32,124,202,1) 51%, rgba(125,185,232,1) 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(50%,rgba(41,137,216,1)), color-stop(51%,rgba(32,124,202,1)), color-stop(100%,rgba(125,185,232,1))); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  rgba(30,87,153,1) 0%,rgba(41,137,216,1) 50%,rgba(32,124,202,1) 51%,rgba(125,185,232,1) 100%); /* W3C */
     width: 0%;
-    height: 15px;
-    border-radius: 6px;
-    margin-bottom: 3px;
+    height: @line-height-computed;
+    margin-bottom: @line-height-computed / 2;
+    font-size: @font-size-small;
+    line-height: @line-height-computed;
+    color: @progress-bar-color;
+    text-align: center;
+    background-color: @progress-bar-info-bg;
+    .box-shadow(inset 0 -1px 0 rgba(0,0,0,.15));
+    .transition(width .6s ease);
+    border-radius: @border-radius-base 0 0 @border-radius-base;
     display: none;
 }
