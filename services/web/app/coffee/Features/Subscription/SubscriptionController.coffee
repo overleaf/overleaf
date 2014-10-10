@@ -89,6 +89,14 @@ module.exports = SubscriptionController =
 							subscriptionTabActive: true
 
 
+	userCustomSubscriptionPage: (req, res, next)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+				res.render "subscriptions/custom_account",
+					title: "your_subscription"
+					subscription: subscription
+
+
 	editBillingDetailsPage: (req, res, next) ->
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return next(error) if error?

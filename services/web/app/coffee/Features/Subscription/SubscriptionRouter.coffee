@@ -10,6 +10,9 @@ module.exports =
 		app.get  '/user/subscription/plans',      SubscriptionController.plansPage
 
 		app.get  '/user/subscription',            AuthenticationController.requireLogin(), SubscriptionController.userSubscriptionPage
+
+		app.get  '/user/subscription/custom_account', AuthenticationController.requireLogin(), SubscriptionController.userCustomSubscriptionPage
+
 		
 		app.get  '/user/subscription/new',        AuthenticationController.requireLogin(), SubscriptionController.paymentPage 
 		app.get  '/user/subscription/billing-details/edit', AuthenticationController.requireLogin(), SubscriptionController.editBillingDetailsPage

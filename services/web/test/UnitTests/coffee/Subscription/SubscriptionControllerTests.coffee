@@ -193,6 +193,16 @@ describe "SubscriptionController sanboxed", ->
 			it "should redirect to /user/subscription/custom_account", ->
 				@res.redirectedTo.should.equal("/user/subscription/custom_account")
 
+	describe "userCustomSubscriptionPage", ->
+		beforeEach (done) ->
+			@res.callback = done
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+			@SubscriptionController.userCustomSubscriptionPage @req, @res
+
+		it "should render the page", (done)->
+			@res.rendered.should.equal true
+			@res.renderedTemplate.should.equal "subscriptions/custom_account"
+			done()
 
 
 	describe "createSubscription", ->

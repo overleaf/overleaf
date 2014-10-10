@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card
+						.page-header
+							h1 #{translate("your_subscription")}
+						div To make changes to your subscription please contact team@sharelatex.com
+						div &nbsp;
+						div
+							-if(subscription.groupPlan)
+								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
