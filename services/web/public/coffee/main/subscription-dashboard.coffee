@@ -9,7 +9,7 @@ define [
 		$scope.plans = MultiCurrencyPricing.plans
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
-		$scope.changeCurreny = (newCurrency)->
+		$scope.changeCurrency = (newCurrency)->
 			MultiCurrencyPricing.currencyCode = newCurrency
 
 

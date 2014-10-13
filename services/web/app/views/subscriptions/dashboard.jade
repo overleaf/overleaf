@@ -1,8 +1,7 @@
 extends ../layout
 block scripts
 	script(type='text/javascript').
-		window.recurlyPublicToken = '#{settings.apis.recurly.publicKey}'
-
+		window.recomendedCurrency = '#{recomendedCurrency}'
 
 mixin printPlan(plan)
 	-if (!plan.hideFromUsers)
@@ -13,7 +12,7 @@ mixin printPlan(plan)
 				-if (plan.annual)
 					| {{plans[currencyCode][plan.planCode.replace("-annual","")]['annual']}} / #{translate("year")}
 				-else
-					| {{plans[currencyCode][plan.planCode]['monthly']}} / #{translate("month")}	
+					| {{plans[currencyCode][plan.planCode]['monthly']}} / #{translate("month")}
 			td
 				-if (subscription.state == "free-trial")
 					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success #{translate("subscribe_to_this_plan")}
@@ -83,7 +82,7 @@ block content
 										li(ng-repeat="(currency, value) in plans", dropdown-toggle)
 											a(
 												href,
-												ng-click="changeCurreny(currency)"
+												ng-click="changeCurrency(currency)"
 											) {{currency}} ({{value['symbol']}})
 								p: table.table
 									tr
