@@ -19,17 +19,38 @@ block content
 							h1.text-centered #{translate("new_subscription")}
 						#subscribeForm #{translate("loading_billing_form")}...
 				.col-md-5(ng-controller="NewSubscriptionController" ng-cloak)
-					span.dropdown.col-md-1.changePlanButton()
-						a.btn.btn-primary.dropdown-toggle(
-							href="#",
-							data-toggle="dropdown"
-						)
-							| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
-						ul.dropdown-menu(role="menu")
-							li(ng-repeat="(currency, value) in plans", dropdown-toggle)
-								a(
-									ng-click="changeCurrency(currency)",
-								) {{currency}} ({{value['symbol']}})
+					.row
+						.col-md-12
+							span.dropdown.col-md-1.changePlanButton()
+								a.btn.btn-primary.dropdown-toggle(
+									href="#",
+									data-toggle="dropdown"
+								)
+									| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+								ul.dropdown-menu(role="menu")
+									li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+										a(
+											ng-click="changeCurrency(currency)",
+										) {{currency}} ({{value['symbol']}})
+
+					.row
+						.col-md-12.paymentPageFeatures
+							ul.list-unstyled
+								li 
+									i.fa.fa-check
+									|  #{translate("collabs_per_proj", {collabcount:6})}
+								li 
+									i.fa.fa-check
+									|  #{translate("full_doc_history")}
+								li 
+									i.fa.fa-check
+									|  #{translate("sync_to_dropbox")}
+								li 
+									i.fa.fa-check
+									|  Cancel Anytime
+								li 
+									i.fa.fa-check
+									|  100% Money Back Guarantee
 
 
 	script(type="text/javascript").
