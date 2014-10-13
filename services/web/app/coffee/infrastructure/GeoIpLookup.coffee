@@ -25,6 +25,7 @@ module.exports = GeoIpLookup =
 
 		opts = 
 			url: "#{settings.apis.geoIpLookup.url}/#{ip}"
+			timeout: 1000
 		request.get opts, (err, ipDetails)->
 			callback(err, ipDetails)
 
