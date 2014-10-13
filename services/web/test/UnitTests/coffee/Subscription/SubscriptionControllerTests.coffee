@@ -81,15 +81,14 @@ describe "SubscriptionController sanboxed", ->
 
 	describe "plansPage", ->
 		beforeEach (done) ->
-			@req.headers = 
-				"x-forwarded-for" : "1234.3123.3131.333 313.133.445.666 653.5345.5345.534"
+			@req.ip  = "1234.3123.3131.333 313.133.445.666 653.5345.5345.534"
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
 			@res.callback = done
 			@SubscriptionController.plansPage(@req, @res)
 
 		it "should set the recommended currency from the geoiplookup", (done)->
 			@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
-			@GeoIpLookup.getCurrencyCode.calledWith(@req.headers["x-forwarded-for"]).should.equal true
+			@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
 			done()
 
 	describe "editBillingDetailsPage", ->
