@@ -1,7 +1,6 @@
 extends ../layout
 block scripts
 	script(type='text/javascript').
-		window.recurlyPublicToken = '#{settings.apis.recurly.publicKey}'
 		window.recomendedCurrency = '#{recomendedCurrency}'
 block content
 	.content-alt
@@ -34,7 +33,7 @@ block content
 									ng-click="switchToStudent()"
 								) #{translate("half_price_student")} 
 					.col-md-2
-						.dropdown(style="display:none;")
+						.dropdown()
 							a.btn.btn-primary.dropdown-toggle#currenyDropdown(
 								href="#",
 								data-toggle="dropdown"

@@ -120,6 +120,10 @@ describe "SubscriptionController sanboxed", ->
 				@res.redirectedTo.should.equal "/user/subscription"
 
 	describe "paymentPage", ->
+		beforeEach ->
+			@req.headers = {}
+			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
+
 		describe "with a user without a subscription", ->
 			beforeEach ->
 				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
@@ -158,6 +162,34 @@ describe "SubscriptionController sanboxed", ->
 					done()
 				@SubscriptionController.paymentPage(@req, @res)
 
+		describe "which currency to use", ->
+			beforeEach ->
+				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@PlansLocator.findLocalPlanInSettings.returns({})
+
+			it "should use the set currency from the query string", (done)->
+				@req.query.currency = "EUR"
+				@res.render = (page, opts)=>
+					opts.currency.should.equal "EUR"
+					opts.currency.should.not.equal @stubbedCurrencyCode
+					done()
+				@SubscriptionController.paymentPage @req, @res
+
+			it "should upercase the currency code", (done)->
+				@req.query.currency = "eur"
+				@res.render = (page, opts)=>
+					opts.currency.should.equal "EUR"
+					done()
+				@SubscriptionController.paymentPage @req, @res	
+
+
+			it "should use the geo ip currency if non is provided", (done)->
+				@req.query.currency = null
+				@res.render = (page, opts)=>
+					opts.currency.should.equal @stubbedCurrencyCode
+					done()
+				@SubscriptionController.paymentPage @req, @res	
+		
 	describe "successful_subscription", ->
 		beforeEach (done) ->
 			@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, {})

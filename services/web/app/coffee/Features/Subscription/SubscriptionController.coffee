@@ -39,33 +39,37 @@ module.exports = SubscriptionController =
 				if hasSubscription or !plan?
 					res.redirect "/user/subscription"
 				else
-					currency = req.query.currency || "USD"
-					RecurlyWrapper.sign {
-						subscription:
-							plan_code : req.query.planCode
-							currency: currency
-						account_code: user.id
-					}, (error, signature) ->
-						return next(error) if error?
-						res.render "subscriptions/new",
-							title      : "subscribe"
-							plan_code: req.query.planCode
-							recurlyConfig: JSON.stringify
+					currency = req.query.currency?.toUpperCase()
+					GeoIpLookup.getCurrencyCode req.headers["x-forwarded-for"], (err, recomendedCurrency)->
+						if recomendedCurrency? and !currency?
+							currency = recomendedCurrency
+						RecurlyWrapper.sign {
+							subscription:
+								plan_code : req.query.planCode
 								currency: currency
-								subdomain: Settings.apis.recurly.subdomain
-							subscriptionFormOptions: JSON.stringify
-								acceptedCards: ['discover', 'mastercard', 'visa']
-								target      : "#subscribeForm"
-								signature   : signature
-								planCode    : req.query.planCode
-								successURL  : "#{Settings.siteUrl}/user/subscription/create?_csrf=#{req.session._csrf}"
-								accountCode : user.id
-								enableCoupons: true
-								acceptPaypal: true
-								account     :
-									firstName : user.first_name
-									lastName  : user.last_name
-									email     : user.email
+							account_code: user.id
+						}, (error, signature) ->
+							return next(error) if error?
+							res.render "subscriptions/new",
+								title      : "subscribe"
+								plan_code: req.query.planCode
+								currency: currency
+								recurlyConfig: JSON.stringify
+									currency: currency
+									subdomain: Settings.apis.recurly.subdomain
+								subscriptionFormOptions: JSON.stringify
+									acceptedCards: ['discover', 'mastercard', 'visa']
+									target      : "#subscribeForm"
+									signature   : signature
+									planCode    : req.query.planCode
+									successURL  : "#{Settings.siteUrl}/user/subscription/create?_csrf=#{req.session._csrf}"
+									accountCode : user.id
+									enableCoupons: true
+									acceptPaypal: true
+									account     :
+										firstName : user.first_name
+										lastName  : user.last_name
+										email     : user.email
 
 
 	userSubscriptionPage: (req, res, next) ->

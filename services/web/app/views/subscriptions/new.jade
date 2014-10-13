@@ -18,7 +18,7 @@ block content
 						.page-header
 							h1.text-centered #{translate("new_subscription")}
 						#subscribeForm #{translate("loading_billing_form")}...
-				.col-md-5(ng-controller="NewSubscriptionController")
+				.col-md-5(ng-controller="NewSubscriptionController" ng-cloak)
 					span.dropdown.col-md-1.changePlanButton()
 						a.btn.btn-primary.dropdown-toggle(
 							href="#",
