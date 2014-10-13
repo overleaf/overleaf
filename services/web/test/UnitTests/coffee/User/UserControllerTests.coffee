@@ -134,7 +134,7 @@ describe "UserController", ->
 			@UserController.updateUserSettings @req, @res
 
 		it "should call the user updater with the new email and user _id", (done)->
-			@req.body.email = @newEmail
+			@req.body.email = @newEmail.toUpperCase()
 			@UserUpdater.changeEmailAddress.callsArgWith(2)
 			@res.send = (code)=>
 				code.should.equal 200

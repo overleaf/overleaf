@@ -54,7 +54,7 @@ module.exports =
 			if req.body.pdfViewer?
 				user.ace.pdfViewer = req.body.pdfViewer
 			user.save (err)->
-				newEmail = req.body.email?.trim()
+				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email
 					return res.send 200
 				else if newEmail.indexOf("@") == -1
