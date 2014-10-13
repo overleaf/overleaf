@@ -30,5 +30,7 @@ module.exports = GeoIpLookup =
 
 	getCurrencyCode : (ip, callback)->
 		GeoIpLookup.getDetails ip, (err, ipDetails)->
+			if err? or !ipDetails?
+				return callback(null, "USD")
 			currencyCode = currencyMappings[ipDetails?.country_code?.toUpperCase()]
 			callback(err, currencyCode)

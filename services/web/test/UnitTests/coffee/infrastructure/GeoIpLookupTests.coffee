@@ -82,3 +82,15 @@ describe "GeoIpLookup", ->
 			@GeoIpLookup.getCurrencyCode @ipAddress, (err, currencyCode)->
 				currencyCode.should.equal "EUR"
 				done()
+
+		it "should default to USD if there is an error", (done)->
+			@GeoIpLookup.getDetails = sinon.stub().callsArgWith(1, "problem")
+			@GeoIpLookup.getCurrencyCode @ipAddress, (err, currencyCode)->
+				currencyCode.should.equal "USD"
+				done()
+
+		it "should default to USD if there are no details", (done)->
+			@GeoIpLookup.getDetails = sinon.stub().callsArgWith(1)
+			@GeoIpLookup.getCurrencyCode @ipAddress, (err, currencyCode)->
+				currencyCode.should.equal "USD"
+				done()
