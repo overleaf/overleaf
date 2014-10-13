@@ -7,7 +7,7 @@ LimitationsManager = require("./LimitationsManager")
 RecurlyWrapper = require './RecurlyWrapper'
 Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
-
+GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 
 
 module.exports = SubscriptionController =
@@ -22,11 +22,13 @@ module.exports = SubscriptionController =
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
-		res.render viewName,
-			title: "plans_and_pricing"
-			plans: plans
-			baseUrl: baseUrl
-			gaExperiments: Settings.gaExperiments.plansPage
+		GeoIpLookup.getCurrencyCode req.headers["x-forwarded-for"], (err, recomendedCurrency)->
+			res.render viewName,
+				title: "plans_and_pricing"
+				plans: plans
+				baseUrl: baseUrl
+				gaExperiments: Settings.gaExperiments.plansPage
+				recomendedCurrency:recomendedCurrency
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->

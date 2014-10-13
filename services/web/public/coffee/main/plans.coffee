@@ -5,16 +5,8 @@ define [
 
 
 	App.factory "MultiCurrencyPricing", () ->
-		recurly.configure(window.recurlyPublicToken);
-
-		pricing = recurly.Pricing()
-		window.pricing = pricing
 		
-		currencyCode = pricing.items.currency
-
-		pricing.on "set.currency", (currency)->
-			currencyCode = pricing.items.currency
-
+		currencyCode = window.recomendedCurrency
 
 		currencyCode:currencyCode
 		plans: 
@@ -30,34 +22,35 @@ define [
 					monthly: "$30"
 					annual: "$360"
 
-			# EUR: 
-			# 	symbol: "€"
-			# 	student:
-			# 		monthly: "€7"
-			# 		annual: "€70"
-			# 	collaborator:
-			# 		monthly: "€12"
-			# 		annual: "€144"
-			# 	professional:
-			# 		monthly: "€25"
-			# 		annual: "€300"
-			# GBP:
-			# 	symbol: "£"
-			# 	student:
-			# 		monthly: "£6"
-			# 		annual: "£60"
-			# 	collaborator:
-			# 		monthly: "£10"
-			# 		annual: "£120"
-			# 	professional:
-			# 		monthly: "£22"
-			# 		annual: "£264"
+			EUR: 
+				symbol: "€"
+				student:
+					monthly: "€7"
+					annual: "€70"
+				collaborator:
+					monthly: "€12"
+					annual: "€144"
+				professional:
+					monthly: "€25"
+					annual: "€300"
+					
+			GBP:
+				symbol: "£"
+				student:
+					monthly: "£6"
+					annual: "£60"
+				collaborator:
+					monthly: "£10"
+					annual: "£120"
+				professional:
+					monthly: "£22"
+					annual: "£264"
 
 	
 
 
 
-	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing) ->
+	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http) ->
 		
 		buckets = [
 			{ bucketName:"7d", queryString: "_free_trial_7_days", trial_len:7 }

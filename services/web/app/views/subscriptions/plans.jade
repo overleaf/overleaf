@@ -2,6 +2,7 @@ extends ../layout
 block scripts
 	script(type='text/javascript').
 		window.recurlyPublicToken = '#{settings.apis.recurly.publicKey}'
+		window.recomendedCurrency = '#{recomendedCurrency}'
 block content
 	.content-alt
 		.content.plans(ng-controller="PlansController")
@@ -9,7 +10,6 @@ block content
 				.row
 					.col-md-12
 						.page-header.centered.plans-header.text-centered
-
 							h1(ng-cloak) #{translate("start_x_day_trial", {len:'{{trial_len}}'})}
 				.row
 					.col-md-8.col-md-offset-2

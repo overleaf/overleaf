@@ -55,6 +55,9 @@ describe "SubscriptionController sanboxed", ->
 				recurly:
 					subdomain:"sl.recurly.com"
 			siteUrl: "http://de.sharelatex.dev:3000"
+			gaExperiments:{}
+		@GeoIpLookup =
+			getCurrencyCode:sinon.stub()
 
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
@@ -62,6 +65,7 @@ describe "SubscriptionController sanboxed", ->
 			"./PlansLocator": @PlansLocator
 			'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder
 			"./LimitationsManager": @LimitationsManager
+			"../../infrastructure/GeoIpLookup":@GeoIpLookup
 			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex": log:->
 			"settings-sharelatex": @settings
@@ -72,6 +76,21 @@ describe "SubscriptionController sanboxed", ->
 		@req.body = {}
 		@req.query = 
 			planCode:"123123"
+
+		@stubbedCurrencyCode = "GBP"
+
+	describe "plansPage", ->
+		beforeEach (done) ->
+			@req.headers = 
+				"x-forwarded-for" : "1234.3123.3131.333 313.133.445.666 653.5345.5345.534"
+			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
+			@res.callback = done
+			@SubscriptionController.plansPage(@req, @res)
+
+		it "should set the recommended currency from the geoiplookup", (done)->
+			@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
+			@GeoIpLookup.getCurrencyCode.calledWith(@req.headers["x-forwarded-for"]).should.equal true
+			done()
 
 	describe "editBillingDetailsPage", ->
 		describe "with a user with a subscription", ->

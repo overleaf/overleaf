@@ -19,7 +19,9 @@ describe "GeoIpLookup", ->
 		@GeoIpLookup = SandboxedModule.require modulePath, requires:
 			"request": @request
 			"settings-sharelatex":@settings
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				err:->
 		@ipAddress = "123.456.789.123"
 
 		@stubbedResponse = 
@@ -37,11 +39,11 @@ describe "GeoIpLookup", ->
 
 	describe "getDetails", ->
 		beforeEach ->
-			@request.get.callsArgWith(1, null, @stubbedResponse)
+			@request.get.callsArgWith(1, null, null, @stubbedResponse)
 
 		it "should request the details using the ip", (done)->
 			@GeoIpLookup.getDetails @ipAddress, (err)=>
-				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000}).should.equal true
+				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000, json:true}).should.equal true
 				done()
 
 		it "should return the ip details", (done)->
@@ -51,7 +53,7 @@ describe "GeoIpLookup", ->
 
 		it "should take the first ip in the string", (done)->
 			@GeoIpLookup.getDetails " #{@ipAddress} 456.312.452.102 432.433.888.234", (err)=>
-				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000}).should.equal true
+				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000, json:true}).should.equal true
 				done()
 
 	describe "getCurrencyCode", ->

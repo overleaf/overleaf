@@ -1,6 +1,7 @@
 request = require("request")
 settings = require("settings-sharelatex")
 _ = require("underscore")
+logger = require("logger-sharelatex")
 
 currencyMappings = {
 	"GB":"GBP"
@@ -22,16 +23,22 @@ module.exports = GeoIpLookup =
 			e = new Error("no ip passed")
 			return callback(e)
 		ip = ip.trim().split(" ")[0]
-
 		opts = 
 			url: "#{settings.apis.geoIpLookup.url}/#{ip}"
 			timeout: 1000
-		request.get opts, (err, ipDetails)->
+			json:true
+		logger.log ip:ip, opts:opts, "getting geo ip details"
+		request.get opts, (err, res, ipDetails)->
+			if err?
+				logger.err err:err, ip:ip, "error getting ip details"
 			callback(err, ipDetails)
 
 	getCurrencyCode : (ip, callback)->
 		GeoIpLookup.getDetails ip, (err, ipDetails)->
 			if err? or !ipDetails?
+				logger.err err:err, ip:ip, "problem getting currencyCode for ip, defaulting to USD"
 				return callback(null, "USD")
-			currencyCode = currencyMappings[ipDetails?.country_code?.toUpperCase()]
+			countryCode = ipDetails?.country_code?.toUpperCase()
+			currencyCode = currencyMappings[countryCode]
+			logger.log ip:ip, currencyCode:currencyCode, ipDetails:ipDetails, "got currencyCode for ip"
 			callback(err, currencyCode)
