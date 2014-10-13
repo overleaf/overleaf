@@ -23,6 +23,7 @@ module.exports =
 							state: recurlySubscription.state
 							price: SubscriptionFormatters.formatPrice recurlySubscription.unit_amount_in_cents, recurlySubscription.currency
 							planCode: subscription.planCode
+							currency:recurlySubscription.currency
 							groupPlan: subscription.groupPlan
 						}, memberSubscriptions
 				else

@@ -85,6 +85,7 @@ module.exports = SubscriptionController =
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
+							recomendedCurrency: subscription.currency
 							plans: plans
 							subscription: subscription
 							groups: groups
