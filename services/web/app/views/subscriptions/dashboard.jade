@@ -16,7 +16,7 @@ mixin printPlan(plan)
 			td
 				-if (subscription.state == "free-trial")
 					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success #{translate("subscribe_to_this_plan")}
-				-else if (plan.planCode == subscription.planCode)
+				-else if (typeof(subscription.planCode) != "undefined" && plan.planCode == subscription.planCode.split("_")[0])
 					button.btn.disabled #{translate("your_plan")}
 				-else
 					form
