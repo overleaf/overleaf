@@ -1,4 +1,9 @@
 extends ../layout
+block scripts
+	script(type='text/javascript').
+		window.recomendedCurrency = '#{currency}'
+		window.plan_code = '#{plan_code}'
+
 
 block content
 	- locals.supressDefaultJs = true
@@ -8,11 +13,24 @@ block content
 	.content.content-alt
 		.container
 			.row
-				.col-md-6.col-md-offset-3
+				.col-md-6.col-md-offset-1
 					.card
 						.page-header
 							h1.text-centered #{translate("new_subscription")}
 						#subscribeForm #{translate("loading_billing_form")}...
+				.col-md-5(ng-controller="NewSubscriptionController")
+					span.dropdown.col-md-1.changePlanButton()
+						a.btn.btn-primary.dropdown-toggle(
+							href="#",
+							data-toggle="dropdown"
+						)
+							| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+						ul.dropdown-menu(role="menu")
+							li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+								a(
+									ng-click="changeCurrency(currency)",
+								) {{currency}} ({{value['symbol']}})
+
 
 	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")

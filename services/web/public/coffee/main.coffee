@@ -11,6 +11,7 @@ define [
 	"main/system-messages"
 	"main/translations"
 	"main/subscription-dashboard"
+	"main/new-subscription"
 	"main/annual-upgrade"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
