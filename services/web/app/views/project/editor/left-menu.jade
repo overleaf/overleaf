@@ -40,7 +40,7 @@ aside#left-menu.full-size(
 					ng-click="openCloneProjectModal()"
 				)
 					i.fa.fa-fw.fa-copy
-					| &nbsp;&nbsp;#{translate("copy_project")}
+					| &nbsp;&nbsp; #{translate("copy_project")}
 			li(ng-controller="TemplatesController", ng-show="permissions.admin")
 				a(ng-click="openPublishTemplateModal()")
 					i.fa.fa-external-link.fa-fw 
