@@ -49,6 +49,11 @@ describe "GeoIpLookup", ->
 				assert.deepEqual returnedDetails, @stubbedResponse
 				done()
 
+		it "should take the first ip in the string", (done)->
+			@GeoIpLookup.getDetails " #{@ipAddress} 456.312.452.102 432.433.888.234", (err)=>
+				@request.get.calledWith(url:@settings.apis.geoIpLookup.url+"/"+@ipAddress).should.equal true
+				done()
+
 	describe "getCurrencyCode", ->
 
 		it "should return GBP for GB country", (done)->

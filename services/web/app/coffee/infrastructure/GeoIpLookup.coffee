@@ -18,6 +18,11 @@ _.each EuroCountries, (country)-> currencyMappings[country] = "EUR"
 module.exports = GeoIpLookup =
 
 	getDetails : (ip, callback)->
+		if !ip?
+			e = new Error("no ip passed")
+			return callback(e)
+		ip = ip.trim().split(" ")[0]
+
 		opts = 
 			url: "#{settings.apis.geoIpLookup.url}/#{ip}"
 		request.get opts, (err, ipDetails)->
