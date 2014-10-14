@@ -54,6 +54,7 @@ module.exports = SubscriptionController =
 								title      : "subscribe"
 								plan_code: req.query.planCode
 								currency: currency
+								plan:plan
 								recurlyConfig: JSON.stringify
 									currency: currency
 									subdomain: Settings.apis.recurly.subdomain

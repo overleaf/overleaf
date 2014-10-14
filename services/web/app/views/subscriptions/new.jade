@@ -33,12 +33,17 @@ block content
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
 
+
 					.row
 						.col-md-12.paymentPageFeatures
 							ul.list-unstyled
 								li 
+									if plan.features.collaborators == -1
+										- var collaboratorCount = 'Unlimited'
+									else
+										- var collaboratorCount = plan.features.collaborators
 									i.fa.fa-check
-									|  #{translate("collabs_per_proj", {collabcount:6})}
+									|  #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
 								li 
 									i.fa.fa-check
 									|  #{translate("full_doc_history")}
