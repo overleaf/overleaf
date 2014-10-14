@@ -31,6 +31,9 @@ UserSchema = new Schema
 							collaborators: { type:Number,  default: Settings.defaultFeatures.collaborators }
 							versioning:    { type:Boolean, default: Settings.defaultFeatures.versioning }
 							dropbox:       { type:Boolean, default: Settings.defaultFeatures.dropbox }
+							github:        { type:Boolean, default: Settings.defaultFeatures.github }
+							compileTimeout: { type:Number, default: Settings.defaultFeatures.compileTimeout }
+							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 						}
 	featureSwitches	  : {
 							github: {type: Boolean}
