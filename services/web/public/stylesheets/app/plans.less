@@ -26,76 +26,24 @@
 			margin: 0;
 		}
 	}
-	.card {
-		background-color: white;
-		border-radius: 3px;
-		-webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		margin: @line-height-computed 0;
-		padding: @line-height-computed;
-		.card-header {
-			border-bottom: 1px solid @gray-lighter;
-			padding-bottom: @line-height-computed;
-			margin-bottom: @line-height-computed;
-			h2 {
-				margin: 0;
-			}
-		}
-		.circle {
-			font-size: 1.5rem;
-			font-weight: 700;
-			padding: 38px 18px;
-			margin: 0 auto @line-height-computed;
-			text-shadow: 0 -1px 1px darken(@link-color, 10%);
-			width: 120px;
-			height: 120px;
-			small {
-				margin-top: @line-height-computed / 2;
-			}
-		}
-		&.first {
-			margin-top: 0;
-		}
-		&.card-thin {
-			padding: @line-height-computed / 4;
-		}
-	}
-
 	.card-group {
-		margin: @line-height-computed 0;
-		.card {
-			border-radius: 0;
-			display: inline-block;
-			margin: 0;
-			&:first-child {
-				border-top-left-radius: 3px;
-				border-bottom-left-radius: 3px;
-			}
-			&:last-child {
-				border-top-right-radius: 3px;
-				border-bottom-right-radius: 3px;
-			}
-			width: 300px;
-		}
-		.highlighted {
-			box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-			margin-top: -@line-height-computed * 2;
+		.card-highlighted {
 			padding-top: @line-height-computed * 2;
 			padding-bottom: @line-height-computed * 2;
-			position: relative;
-			z-index: 10;
 		}
 	}
-	> .card-group > .card {
-		padding-left: 1rem;
-		padding-right: 1rem;
-	}
+	
 	.circle {
+		font-size: 1.5rem;
+		font-weight: 700;
+		padding: 38px 18px;
+		margin: 0 auto @line-height-computed;
+		text-shadow: 0 -1px 1px darken(@link-color, 10%);
+		width: 120px;
+		height: 120px;
 		border-radius: 50%;
 		background-color: @red;
 		color: white;
-		padding: @line-height-computed / 2;
-		margin-bottom: @line-height-computed;
 		white-space: nowrap;
 		span.small {
 			color: rgba(255, 255, 255, 0.75);

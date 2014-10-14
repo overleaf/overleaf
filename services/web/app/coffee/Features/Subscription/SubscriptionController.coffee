@@ -36,11 +36,13 @@ module.exports = SubscriptionController =
 			return next(error) if error?
 			plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
 			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+				return next(err) if err?
 				if hasSubscription or !plan?
 					res.redirect "/user/subscription"
 				else
 					currency = req.query.currency?.toUpperCase()
 					GeoIpLookup.getCurrencyCode req.ip, (err, recomendedCurrency)->
+						return next(err) if err?
 						if recomendedCurrency? and !currency?
 							currency = recomendedCurrency
 						RecurlyWrapper.sign {

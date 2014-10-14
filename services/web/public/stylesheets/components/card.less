@@ -2,7 +2,7 @@
   background-color: white;
   border-radius: @border-radius-base;
   -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   padding: @line-height-computed;
   .page-header {
   	margin: 0 0 1.5625rem;
@@ -13,8 +13,42 @@
   > .container-fluid {
     padding: 0;
   }
+
+  .card-header {
+      border-bottom: 1px solid @gray-lighter;
+      padding-bottom: @line-height-computed;
+      margin-bottom: @line-height-computed;
+      h2 {
+          margin: 0;
+      }
+  }
 }
 
 .card-thin {
   padding: @line-height-computed / 2
+}
+
+.card-group {
+    .card {
+        margin: @line-height-computed -15px 0 -15px;
+        border-radius: 0;
+
+        &.card-highlighted {
+            // Bring card in front of other cards
+            position: relative;
+            z-index: 1;
+            // Make it taller and card like
+            margin-top: 0;
+            border-radius: @border-radius-base;
+        }
+
+        &.card-first {
+            border-top-left-radius: @border-radius-base;
+            border-bottom-left-radius: @border-radius-base;
+        }
+        &.card-last {
+            border-top-right-radius: @border-radius-base;
+            border-bottom-right-radius: @border-radius-base;
+        }
+    }
 }

@@ -32,15 +32,16 @@ block content
 									href,
 									ng-click="switchToStudent()"
 								) #{translate("half_price_student")} 
-					.col-md-2
-						.dropdown()
-							a.btn.btn-primary.dropdown-toggle#currenyDropdown(
+					.col-md-2.text-right
+						.dropdown.currency-dropdown
+							a.btn.btn-default.dropdown-toggle#currenyDropdown(
 								href="#",
 								data-toggle="dropdown"
 							)
-								| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+								| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
+								span.caret
 
-							ul.dropdown-menu(role="menu")
+							ul.dropdown-menu.dropdown-menu-right.text-left(role="menu")
 								li(ng-repeat="(currency, value) in plans", dropdown-toggle)
 									a(
 										href,
@@ -48,9 +49,9 @@ block content
 									) {{currency}} ({{value['symbol']}})
 
 				.row(ng-cloak)
-					.col-md-12
-						.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
-							.card
+					.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+						.col-md-3.col-md-offset-1
+							.card.card-first
 								.card-header
 									h2 #{translate("personal")} 
 								.circle #{translate("free")} 
@@ -61,7 +62,8 @@ block content
 									li
 										br
 										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
-							.card.highlighted
+						.col-md-4
+							.card.card-highlighted
 								.card-header
 									h2 #{translate("collaborator")}
 								.circle
@@ -84,7 +86,8 @@ block content
 										)
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
-							.card
+						.col-md-3
+							.card.card-last
 								.card-header
 									h2 #{translate("professional")}
 								.circle 
@@ -107,8 +110,9 @@ block content
 											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
 
-						.card-group.text-centered(ng-if="ui.view == 'student'")
-							.card
+					.card-group.text-centered(ng-if="ui.view == 'student'")
+						.col-md-3.col-md-offset-1
+							.card.card-first
 								.card-header
 									h2 #{translate("personal")}
 								.circle #{translate("free")}
@@ -119,7 +123,9 @@ block content
 									li
 										br
 										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
-							.card.highlighted
+						
+						.col-md-4
+							.card.card-highlighted
 								.card-header
 									h2 #{translate("student")}
 								.circle
@@ -136,7 +142,9 @@ block content
 										a.btn.btn-info(
 											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("start_free_trial")}
-							.card
+						
+						.col-md-3
+							.card.card-last
 								.card-header
 									h2 #{translate("student")} (#{translate("annual")})
 								.circle
@@ -154,7 +162,7 @@ block content
 											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
 										) #{translate("buy_now")}
 
-				.row(ng-cloak)
+				.row.row-spaced(ng-cloak)
 					p.text-centered #{translate("choose_plan_works_for_you", {len:14})}
 					
 				.row(ng-cloak)

@@ -11,31 +11,30 @@ block content
 	script(src=jsPath+'libs/recurly.min.js')
 
 	.content.content-alt
-		.container
-			.row
+		.container(ng-controller="NewSubscriptionController" ng-cloak)
+			.row.card-group
 				.col-md-6.col-md-offset-1
-					.card
+					.card.card-highlighted
 						.page-header
-							h1.text-centered #{translate("new_subscription")}
-						#subscribeForm #{translate("loading_billing_form")}...
-				.col-md-5(ng-controller="NewSubscriptionController" ng-cloak)
-					.row
-						.col-md-12
-							span.dropdown.col-md-1.changePlanButton()
-								a.btn.btn-primary.dropdown-toggle(
+							span.dropdown.changePlanButton.pull-right(ng-cloak)
+								a.btn.btn-default.dropdown-toggle(
 									href="#",
 									data-toggle="dropdown"
 								)
-									| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
+									| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
+									span.caret
 								ul.dropdown-menu(role="menu")
 									li(ng-repeat="(currency, value) in plans", dropdown-toggle)
 										a(
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
-
-
-					.row
-						.col-md-12.paymentPageFeatures
+							h1 #{translate("new_subscription")}
+						
+						#subscribeForm(style="min-height: 400px;") #{translate("loading_billing_form")}...
+						
+				.col-md-4
+					.card.card-last
+						.paymentPageFeatures
 							ul.list-unstyled
 								li 
 									if plan.features.collaborators == -1
@@ -55,7 +54,7 @@ block content
 									|  Cancel Anytime
 								li 
 									i.fa.fa-check
-									|  100% Money Back Guarantee
+								|  100% Money Back Guarantee
 
 
 	script(type="text/javascript").
