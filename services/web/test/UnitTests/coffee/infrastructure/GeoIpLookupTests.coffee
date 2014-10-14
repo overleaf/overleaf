@@ -96,3 +96,10 @@ describe "GeoIpLookup", ->
 			@GeoIpLookup.getCurrencyCode @ipAddress, (err, currencyCode)->
 				currencyCode.should.equal "USD"
 				done()
+
+		it "should default to USD if there is no match for their country", (done)->
+			@stubbedResponse.country_code = "Non existant"
+			@GeoIpLookup.getDetails = sinon.stub().callsArgWith(1, null, @stubbedResponse)
+			@GeoIpLookup.getCurrencyCode @ipAddress, (err, currencyCode)->
+				currencyCode.should.equal "USD"
+				done()

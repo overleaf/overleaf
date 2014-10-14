@@ -39,6 +39,6 @@ module.exports = GeoIpLookup =
 				logger.err err:err, ip:ip, "problem getting currencyCode for ip, defaulting to USD"
 				return callback(null, "USD")
 			countryCode = ipDetails?.country_code?.toUpperCase()
-			currencyCode = currencyMappings[countryCode]
+			currencyCode = currencyMappings[countryCode] || "USD"
 			logger.log ip:ip, currencyCode:currencyCode, ipDetails:ipDetails, "got currencyCode for ip"
 			callback(err, currencyCode)
