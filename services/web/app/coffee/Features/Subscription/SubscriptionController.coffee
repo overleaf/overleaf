@@ -22,7 +22,7 @@ module.exports = SubscriptionController =
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
-		GeoIpLookup.getCurrencyCode req.ip, (err, recomendedCurrency)->
+		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
 			res.render viewName,
 				title: "plans_and_pricing"
 				plans: plans
@@ -41,7 +41,7 @@ module.exports = SubscriptionController =
 					res.redirect "/user/subscription"
 				else
 					currency = req.query.currency?.toUpperCase()
-					GeoIpLookup.getCurrencyCode req.ip, (err, recomendedCurrency)->
+					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
 						return next(err) if err?
 						if recomendedCurrency? and !currency?
 							currency = recomendedCurrency
