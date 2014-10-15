@@ -227,8 +227,7 @@ describe 'Flushing documents :', ->
 						url: url
 						json:
 							lines: @lines
-						headers:
-							"x-sl-update-source": @source
+							source: @source
 					})
 					.should.equal true
 

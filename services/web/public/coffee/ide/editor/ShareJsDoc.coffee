@@ -57,7 +57,7 @@ define [
 				@_handleError(error)
 
 			if message?.meta?.type == "external"
-				@trigger "externalUpdate"
+				@trigger "externalUpdate", message
 
 		catchUp: (updates) ->
 			for update, i in updates

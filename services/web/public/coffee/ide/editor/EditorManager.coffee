@@ -84,7 +84,8 @@ define [
 					"Sorry, this file has gone out of sync and we need to do a full refresh. Please let us know if this happens frequently."
 				)
 
-			sharejs_doc.on "externalUpdate", () =>
+			sharejs_doc.on "externalUpdate", (update) =>
+				return if @_ignoreExternalUpdates
 				@ide.showGenericMessageModal(
 					"Document Updated Externally"
 					"This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history."
@@ -98,3 +99,9 @@ define [
 
 		getCurrentDocId: () ->
 			@$scope.editor.open_doc_id
+			
+		startIgnoringExternalUpdates: () ->
+			@_ignoreExternalUpdates = true
+			
+		stopIgnoringExternalUpdates: () ->
+			@_ignoreExternalUpdates = false
