@@ -23,6 +23,7 @@ describe 'UpdateMerger :', ->
 				log: ->
 				err: ->
 		@project_id = "project_id_here"
+		@source = "dropbox"
 		@update = new BufferedStream()
 		@update.headers = {}
 
@@ -38,7 +39,7 @@ describe 'UpdateMerger :', ->
 
 			@projectLocator.findElementByPath = sinon.spy()
 
-			@updateMerger.mergeUpdate @project_id, @path, @update, "", =>
+			@updateMerger.mergeUpdate @project_id, @path, @update, @source, =>
 
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 			done()
@@ -48,7 +49,7 @@ describe 'UpdateMerger :', ->
 			filePath = ".gitignore"
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:"id"})
 			@FileTypeManager.shouldIgnore.callsArgWith(1, null, true)
-			@updateMerger.mergeUpdate @project_id, filePath, @update, "", =>
+			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
 				@FileTypeManager.isBinary.called.should.equal false
 				@FileTypeManager.shouldIgnore.calledWith(filePath).should.equal true
 				done()
@@ -62,9 +63,9 @@ describe 'UpdateMerger :', ->
 			@updateMerger.p.processDoc = sinon.stub().callsArgWith(5)
 			filePath = "/folder/doc.tex"
 
-			@updateMerger.mergeUpdate @project_id, filePath, @update, "", =>
+			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
-				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @fsPath).should.equal true
+				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @fsPath, filePath, @source).should.equal true
 				done()
 
 		it 'should process update as file when it is not a doc', (done)->
@@ -72,11 +73,11 @@ describe 'UpdateMerger :', ->
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:file_id})
 			@FileTypeManager.isBinary.callsArgWith(2, null, true)
 			@FileTypeManager.shouldIgnore.callsArgWith(1, null, false)
-			@updateMerger.p.processFile = sinon.stub().callsArgWith(4)
+			@updateMerger.p.processFile = sinon.stub().callsArgWith(5)
 			filePath = "/folder/file1.png"
 
-			@updateMerger.mergeUpdate @project_id, filePath, @update, "", =>
-				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath).should.equal true
+			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
+				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source).should.equal true
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				done()
 
@@ -90,12 +91,12 @@ describe 'UpdateMerger :', ->
 
 		it 'should set the doc text in the editor controller', (done)->
 			@editorController.setDoc = ->
-			mock = sinon.mock(@editorController).expects("setDoc").withArgs(@project_id, @doc_id, @splitDocLines).callsArg(4)
+			mock = sinon.mock(@editorController).expects("setDoc").withArgs(@project_id, @doc_id, @splitDocLines, @source).callsArg(4)
 
 			@update.write(@docLines)
 			@update.end()
 
-			@updateMerger.p.processDoc @project_id, @doc_id, @update, "path", "", ->
+			@updateMerger.p.processDoc @project_id, @doc_id, @update, "path", @source, ->
 				mock.verify()
 				done()
 
@@ -105,12 +106,12 @@ describe 'UpdateMerger :', ->
 			path = "folder1/folder2/#{docName}"
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
 			@editorController.addDoc = ->
-			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines).callsArg(5)
+			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source).callsArg(5)
 
 			@update.write(@docLines)
 			@update.end()
 
-			@updateMerger.p.processDoc @project_id, undefined, @update, path, "", ->
+			@updateMerger.p.processDoc @project_id, undefined, @update, path, @source, ->
 				mock.verify()
 				done()
 
@@ -122,22 +123,22 @@ describe 'UpdateMerger :', ->
 			@folder = _id: @folder_id
 			@fileName = "file.png"
 			@fsPath = "fs/path.tex"
-			@editorController.addFile = sinon.stub().callsArg(4)
-			@editorController.replaceFile = sinon.stub().callsArg(3)
+			@editorController.addFile = sinon.stub().callsArg(5)
+			@editorController.replaceFile = sinon.stub().callsArg(4)
 			@editorController.deleteEntity = sinon.stub()
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
 			@updateMerger.p.writeStreamToDisk = sinon.stub().withArgs(@project_id, @file_id, @update).callsArgWith(3, null, @fsPath)
 
 		it 'should replace file if the file already exists', (done)->
-			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, =>
+			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, =>
 				@editorController.addFile.called.should.equal false
-				@editorController.replaceFile.calledWith(@project_id, @file_id, @fsPath).should.equal true
+				@editorController.replaceFile.calledWith(@project_id, @file_id, @fsPath, @source).should.equal true
 				done()
 
 		it 'should call add file if the file does not exist', (done)->
-			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, =>
+			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, @source, =>
 				@editorController.mkdirp.calledWith(@project_id, "folder/").should.equal true
-				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath).should.equal true
+				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source).should.equal true
 				@editorController.replaceFile.called.should.equal false
 				done()
 
@@ -152,26 +153,26 @@ describe 'UpdateMerger :', ->
 
 		it 'should get the element id', ->
 			@projectLocator.findElementByPath = sinon.spy()
-			@updateMerger.deleteUpdate @project_id, @path, "", ->
+			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 
 		it 'should delete the entity in the editor controller with type doc when entity has docLines array', (done)->
 			@entity.lines = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "doc").callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, "", ->
+			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "doc", @source).callsArg(4)
+			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 				mock.verify()
 				done()
 
 		it 'should delete the entity in the editor controller with type folder when entity has folders array', (done)->
 			@entity.folders = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "folder").callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, "", ->
+			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "folder", @source).callsArg(4)
+			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 				mock.verify()
 				done()
 
 		it 'should delete the entity in the editor controller with type file when entity has no interesting properties', (done)->
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "file").callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, "", ->
+			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "file", @source).callsArg(4)
+			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 				mock.verify()
 				done()
 

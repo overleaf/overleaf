@@ -14,7 +14,6 @@ AuthorizationManager = require("../Security/AuthorizationManager")
 EditorRealTimeController = require("./EditorRealTimeController")
 TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 Settings = require('settings-sharelatex')
-slReqIdHelper = require('soa-req-id')
 async = require('async')
 ConnectedUsersManager = require("../ConnectedUsers/ConnectedUsersManager")
 _ = require('underscore')
@@ -161,39 +160,33 @@ module.exports = EditorController =
 			if callback?
 				callback()
 
-	setDoc: (project_id, doc_id, docLines, sl_req_id, callback = (err)->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, (err)=>
+	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
+		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
-			EditorRealTimeController.emitToRoom(project_id, "entireDocUpdate", doc_id)
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, sl_req_id, callback = (error, doc)->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	addDoc: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
 		docName = docName.trim()
-		logger.log sl_req_id:sl_req_id, "sending new doc to project #{project_id}"
+		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
-		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, sl_req_id, (err, doc, folder_id)=>
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc)
+		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, (err, doc, folder_id)=>
+			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback(err, doc)
 
-	addFile: (project_id, folder_id, fileName, path, sl_req_id, callback = (error, file)->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	addFile: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
 		fileName = fileName.trim()
-		logger.log  sl_req_id:sl_req_id, "sending new file to project #{project_id} with folderid: #{folder_id}"
+		logger.log {project_id, folder_id, fileName, path}, "sending new file to project"
 		Metrics.inc "editor.add-file"
 		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, (err, fileRef, folder_id)=>
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef)
+			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef, source)
 			callback(err, fileRef)
 
-	replaceFile: (project_id, file_id, fsPath, callback)->
-		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, (err) ->
-			callback()
+	replaceFile: (project_id, file_id, fsPath, source, callback = (error) ->)->
+		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, callback
 
-	addFolder: (project_id, folder_id, folderName, sl_req_id, callback = (error, folder)->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	addFolder: (project_id, folder_id, folderName, callback = (error, folder)->)->
 		folderName = folderName.trim()
-		logger.log "sending new folder to project #{project_id}"
+		logger.log {project_id, folder_id, folderName}, "sending new folder to project"
 		Metrics.inc "editor.add-folder"
 		ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, folder_id)=>
 			@p.notifyProjectUsersOfNewFolder project_id, folder_id, folder, (error) ->
@@ -209,13 +202,12 @@ module.exports = EditorController =
 			async.series jobs, (err)->
 				callback err, newFolders, lastFolder
 
-	deleteEntity: (project_id, entity_id, entityType, sl_req_id, callback)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		logger.log project_id:project_id, entity_id:entity_id, entityType:entityType, "start delete process of entity"
+	deleteEntity: (project_id, entity_id, entityType, source, callback)->
+		logger.log {project_id, entity_id, entityType, source}, "start delete process of entity"
 		Metrics.inc "editor.delete-entity"
 		ProjectEntityHandler.deleteEntity project_id, entity_id, entityType, =>
-			logger.log sl_req_id: sl_req_id, project_id:project_id, entity_id:entity_id, entityType:entityType, "telling users entity has been deleted"
-			EditorRealTimeController.emitToRoom(project_id, 'removeEntity', entity_id)
+			logger.log project_id:project_id, entity_id:entity_id, entityType:entityType, "telling users entity has been deleted"
+			EditorRealTimeController.emitToRoom(project_id, 'removeEntity', entity_id, source)
 			if callback?
 				callback()
 

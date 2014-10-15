@@ -14,6 +14,7 @@ describe "EditorController", ->
 
 
 		@doc_id = "test-doc-id"
+		@source = "dropbox"
 
 		@projectModelView = "projectModelView"
 
@@ -410,38 +411,32 @@ describe "EditorController", ->
 			@ProjectOptionsHandler.setSpellCheckLanguage.args[0][2]()
 
 
-	describe 'set document', ->
+	describe 'setDoc', ->
 		beforeEach ->
 			@docLines = ["foo", "bar"]
 			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArg(2)
-			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(3)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(4)
 
 		it 'should send the document to the documentUpdaterHandler', (done)->
-			@DocumentUpdaterHandler.setDocument = sinon.stub().withArgs(@project_id, @doc_id, @docLines).callsArg(3)
-			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)->
-				done()
-
-		it 'should send the update to the connected users', (done)->
-			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)=>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "entireDocUpdate", @doc_id).should.equal true
+			@DocumentUpdaterHandler.setDocument = sinon.stub().withArgs(@project_id, @doc_id, @docLines, @source).callsArg(4)
+			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)->
 				done()
 
 		it 'should send the new doc lines to the doucment updater', (done)->
 			@DocumentUpdaterHandler.setDocument = ->
-			mock = sinon.mock(@DocumentUpdaterHandler).expects("setDocument").withArgs(@project_id, @doc_id, @docLines).once().callsArg(3)
+			mock = sinon.mock(@DocumentUpdaterHandler).expects("setDocument").withArgs(@project_id, @doc_id, @docLines, @source).once().callsArg(4)
 
-			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)=>
+			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)=>
 				mock.verify()
 				done()
 
 		it 'should flush the doc to mongo', (done)->
-			@EditorController.setDoc @project_id, @doc_id, @docLines, (err)=>
+			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)=>
 				@DocumentUpdaterHandler.flushDocToMongo.calledWith(@project_id, @doc_id).should.equal true
 				done()
 
 
-	describe 'add doc', ->
+	describe 'addDoc', ->
 		beforeEach ->
 			@ProjectEntityHandler.addDoc = ()->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
@@ -453,24 +448,24 @@ describe "EditorController", ->
 			@docLines = ["1234","dskl"]
 
 		it 'should add the doc using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(5)
+			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(4)
 
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", ->
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, ->
 				mock.verify()
 				done()
 
 		it 'should send the update out to the users in the project', (done)->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
 
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc)
+					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc, @source)
 					.should.equal true
 				done()
 
 		it 'should return the doc to the callback', (done) ->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", (error, doc) =>
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, (error, doc) =>
 				doc.should.equal @doc
 				done()
 
@@ -487,22 +482,22 @@ describe "EditorController", ->
 
 		it 'should add the folder using the project entity handler', (done)->
 			mock = sinon.mock(@ProjectEntityHandler).expects("addFile").withArgs(@project_id).callsArg(4)
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, =>
 				mock.verify()
 				done()
 
 		it 'should send the update of a new folder out to the users in the project', (done)->
 			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
 
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, =>
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "reciveNewFile", @folder_id, @file)
+					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
 					.should.equal true
 				done()
 
 		it "should return the file in the callback", (done) ->
 			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, (error, file) =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
 				file.should.equal @file
 				done()
 
@@ -515,7 +510,7 @@ describe "EditorController", ->
 
 		it 'should send the replace file message to the editor controller', (done)->
 			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(3)
-			@EditorController.replaceFile @project_id, @file_id, @fsPath, =>
+			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, =>
 				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath).should.equal true
 				done()
 
@@ -585,14 +580,14 @@ describe "EditorController", ->
 		it 'should delete the folder using the project entity handler', (done)->
 			mock = sinon.mock(@ProjectEntityHandler).expects("deleteEntity").withArgs(@project_id, @entity_id, @type).callsArg(3)
 
-			@EditorController.deleteEntity @project_id, @entity_id, @type, ->
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, ->
 				mock.verify()
 				done()
 
 		it 'notify users an entity has been deleted', (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, =>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, =>
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "removeEntity", @entity_id)
+					.calledWith(@project_id, "removeEntity", @entity_id, @source)
 					.should.equal true
 				done()
 

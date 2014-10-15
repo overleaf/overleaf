@@ -25,7 +25,7 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
-		EditorController.addDoc project_id, parent_folder_id, name, [], (error, doc) ->
+		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", (error, doc) ->
 			return next(error) if error?
 			res.json doc
 
@@ -61,7 +61,7 @@ module.exports = EditorHttpController =
 		project_id  = req.params.Project_id
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
-		EditorController.deleteEntity project_id, entity_id, entity_type, (error) ->
+		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", (error) ->
 			return next(error) if error?
 			res.send 204
 

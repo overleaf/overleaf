@@ -55,12 +55,12 @@ describe "EditorHttpController", ->
 			@req.body =
 				name: @name = "doc-name"
 				parent_folder_id: @parent_folder_id
-			@EditorController.addDoc = sinon.stub().callsArgWith(4, null, @doc)
+			@EditorController.addDoc = sinon.stub().callsArgWith(5, null, @doc)
 			@EditorHttpController.addDoc @req, @res
 
 		it "should call EditorController.addDoc", ->
 			@EditorController.addDoc
-				.calledWith(@project_id, @parent_folder_id, @name, [])
+				.calledWith(@project_id, @parent_folder_id, @name, [], "editor")
 				.should.equal true
 
 		it "should send the doc back as JSON", ->
@@ -147,12 +147,12 @@ describe "EditorHttpController", ->
 				Project_id: @project_id
 				entity_id: @entity_id = "entity-id-123"
 				entity_type: @entity_type = "entity-type"
-			@EditorController.deleteEntity = sinon.stub().callsArg(3)
+			@EditorController.deleteEntity = sinon.stub().callsArg(4)
 			@EditorHttpController.deleteEntity @req, @res
 
 		it "should call EditorController.deleteEntity", ->
 			@EditorController.deleteEntity
-				.calledWith(@project_id, @entity_id, @entity_type)
+				.calledWith(@project_id, @entity_id, @entity_type, "editor")
 				.should.equal true
 
 		it "should send back a success response", ->

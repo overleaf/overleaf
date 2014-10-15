@@ -6,7 +6,6 @@ _ = require 'underscore'
 async = require 'async'
 logger = require('logger-sharelatex')
 metrics = require('../../infrastructure/Metrics')
-slReqIdHelper = require('soa-req-id')
 redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.web)
 Project = require("../../models/Project").Project
@@ -14,8 +13,7 @@ ProjectLocator = require('../../Features/Project/ProjectLocator')
 
 module.exports = DocumentUpdaterHandler =
 	
-	queueChange : (project_id, doc_id, change, sl_req_id, callback = ()->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	queueChange : (project_id, doc_id, change, callback = ()->)->
 		jsonChange = JSON.stringify change
 		doc_key = keys.combineProjectIdAndDocId(project_id, doc_id)
 		multi = rclient.multi()
@@ -26,21 +24,20 @@ module.exports = DocumentUpdaterHandler =
 			return callback(error) if error?
 			callback()
 
-	flushProjectToMongo: (project_id, sl_req_id, callback = (error) ->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		logger.log project_id:project_id, sl_req_id:sl_req_id, "flushing project from document updater"
+	flushProjectToMongo: (project_id, callback = (error) ->)->
+		logger.log project_id:project_id, "flushing project from document updater"
 		timer = new metrics.Timer("flushing.mongo.project")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/flush"
 		request.post url, (error, res, body)->
 			if error?
-				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "error flushing project from document updater"
+				logger.error err: error, project_id: project_id, "error flushing project from document updater"
 				return callback(error)
 			else if res.statusCode >= 200 and res.statusCode < 300
-				logger.log project_id: project_id, sl_req_id: sl_req_id, "flushed project from document updater"
+				logger.log project_id: project_id, "flushed project from document updater"
 				return callback(null)
 			else
 				error = new Error("document updater returned a failure status code: #{res.statusCode}")
-				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "document updater returned failure status code: #{res.statusCode}"
+				logger.error err: error, project_id: project_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
 
 	flushMultipleProjectsToMongo: (project_ids, callback = (error) ->) ->
@@ -51,21 +48,20 @@ module.exports = DocumentUpdaterHandler =
 					DocumentUpdaterHandler.flushProjectToMongo project_id, callback
 		async.series jobs, callback
 
-	flushProjectToMongoAndDelete: (project_id, sl_req_id, callback = ()->) ->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		logger.log project_id:project_id, sl_req_id:sl_req_id, "deleting project from document updater"
+	flushProjectToMongoAndDelete: (project_id, callback = ()->) ->
+		logger.log project_id:project_id, "deleting project from document updater"
 		timer = new metrics.Timer("delete.mongo.project")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
 		request.del url, (error, res, body)->
 			if error?
-				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "error deleting project from document updater"
+				logger.error err: error, project_id: project_id, "error deleting project from document updater"
 				return callback(error)
 			else if res.statusCode >= 200 and res.statusCode < 300
-				logger.log project_id: project_id, sl_req_id: sl_req_id, "deleted project from document updater"
+				logger.log project_id: project_id, "deleted project from document updater"
 				return callback(null)
 			else
 				error = new Error("document updater returned a failure status code: #{res.statusCode}")
-				logger.error err: error, project_id: project_id, sl_req_id: sl_req_id, "document updater returned failure status code: #{res.statusCode}"
+				logger.error err: error, project_id: project_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
 
 	flushDocToMongo: (project_id, doc_id, callback = (error) ->) ->
@@ -84,28 +80,26 @@ module.exports = DocumentUpdaterHandler =
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
 	
-	deleteDoc : (project_id, doc_id, sl_req_id, callback = ()->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
-		logger.log project_id:project_id, doc_id: doc_id, sl_req_id:sl_req_id, "deleting doc from document updater"
+	deleteDoc : (project_id, doc_id, callback = ()->)->
+		logger.log project_id:project_id, doc_id: doc_id, "deleting doc from document updater"
 		timer = new metrics.Timer("delete.mongo.doc")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}"
 		request.del url, (error, res, body)->
 			if error?
-				logger.error err: error, project_id: project_id, doc_id: doc_id, sl_req_id: sl_req_id, "error deleting doc from document updater"
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "error deleting doc from document updater"
 				return callback(error)
 			else if res.statusCode >= 200 and res.statusCode < 300
-				logger.log project_id: project_id, doc_id: doc_id, sl_req_id: sl_req_id, "deleted doc from document updater"
+				logger.log project_id: project_id, doc_id: doc_id, "deleted doc from document updater"
 				return callback(null)
 			else
 				error = new Error("document updater returned a failure status code: #{res.statusCode}")
-				logger.error err: error, project_id: project_id, doc_id: doc_id, sl_req_id: sl_req_id, "document updater returned failure status code: #{res.statusCode}"
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
 
-	getDocument: (project_id, doc_id, fromVersion, sl_req_id, callback = (error, exists, doclines, version) ->) ->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
 		timer = new metrics.Timer("get-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}?fromVersion=#{fromVersion}"
-		logger.log project_id:project_id, doc_id: doc_id, sl_req_id:sl_req_id, "getting doc from document updater"
+		logger.log project_id:project_id, doc_id: doc_id, "getting doc from document updater"
 		request.get url, (error, res, body)->
 			timer.done()
 			if error?
@@ -122,22 +116,23 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	setDocument : (project_id, doc_id, docLines, sl_req_id, callback = (error) ->)->
-		{callback, sl_req_id} = slReqIdHelper.getCallbackAndReqId(callback, sl_req_id)
+	setDocument : (project_id, doc_id, docLines, source, callback = (error) ->)->
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}"
 		body =
 			url: url
 			json:
 				lines: docLines
-		logger.log project_id:project_id, doc_id: doc_id, sl_req_id:sl_req_id, "setting doc in document updater"
+			headers:
+				"x-sl-update-source": source
+		logger.log project_id:project_id, doc_id: doc_id, source: source, "setting doc in document updater"
 		request.post body, (error, res, body)->
 			timer.done()
 			if error?
 				logger.error err:error, url:url, project_id:project_id, doc_id:doc_id, "error setting doc in doc updater"
 				return callback(error)
 			if res.statusCode >= 200 and res.statusCode < 300
-				logger.log project_id: project_id, doc_id: doc_id, sl_req_id: sl_req_id, "set doc in document updater"
+				logger.log project_id: project_id, doc_id: doc_id, "set doc in document updater"
 				return callback(null)
 			else
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"

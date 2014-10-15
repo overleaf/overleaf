@@ -25,7 +25,7 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
+			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(4)
 			res =  send: => 
 				@TpdsUpdateHandler.newUpdate.calledWith(@user_id, "projectName","/here.txt", req).should.equal true
 				done()
@@ -38,7 +38,7 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
+			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(3)
 			res = send: => 
 				@TpdsUpdateHandler.deleteUpdate.calledWith(@user_id, "projectName", "/here.txt").should.equal true
 				done()
@@ -72,13 +72,15 @@ describe 'TpdsController', ->
 			
 	describe 'updateProjectContents', ->
 		beforeEach ->
-			@UpdateMerger.mergeUpdate = sinon.stub().callsArg(3)
+			@UpdateMerger.mergeUpdate = sinon.stub().callsArg(4)
 			@req =
 				params:
 					0: @path = "chapters/main.tex"
 					project_id: @project_id = "project-id-123"
 				session:
 					destroy: sinon.stub()
+				headers:
+					"x-sl-update-source": @source = "github"
 			@res =
 				send: sinon.stub()
 			
@@ -86,7 +88,7 @@ describe 'TpdsController', ->
 			
 		it "should merge the update", ->
 			@UpdateMerger.mergeUpdate
-				.calledWith(@project_id, "/" + @path, @req)
+				.calledWith(@project_id, "/" + @path, @req, @source)
 				.should.equal true
 				
 		it "should return a success", ->
@@ -97,13 +99,15 @@ describe 'TpdsController', ->
 			
 	describe 'deleteProjectContents', ->
 		beforeEach ->
-			@UpdateMerger.deleteUpdate = sinon.stub().callsArg(2)
+			@UpdateMerger.deleteUpdate = sinon.stub().callsArg(3)
 			@req =
 				params:
 					0: @path = "chapters/main.tex"
 					project_id: @project_id = "project-id-123"
 				session:
 					destroy: sinon.stub()
+				headers:
+					"x-sl-update-source": @source = "github"
 			@res =
 				send: sinon.stub()
 			
@@ -111,7 +115,7 @@ describe 'TpdsController', ->
 			
 		it "should delete the file", ->
 			@UpdateMerger.deleteUpdate
-				.calledWith(@project_id, "/" + @path)
+				.calledWith(@project_id, "/" + @path, @source)
 				.should.equal true
 				
 		it "should return a success", ->
