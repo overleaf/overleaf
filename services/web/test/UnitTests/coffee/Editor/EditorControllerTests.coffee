@@ -415,22 +415,16 @@ describe "EditorController", ->
 		beforeEach ->
 			@docLines = ["foo", "bar"]
 			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArg(2)
-			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(3)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(4)
 
 		it 'should send the document to the documentUpdaterHandler', (done)->
-			@DocumentUpdaterHandler.setDocument = sinon.stub().withArgs(@project_id, @doc_id, @docLines).callsArg(3)
+			@DocumentUpdaterHandler.setDocument = sinon.stub().withArgs(@project_id, @doc_id, @docLines, @source).callsArg(4)
 			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)->
-				done()
-
-		it 'should send the update to the connected users', (done)->
-			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)=>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "entireDocUpdate", @doc_id, @source).should.equal true
 				done()
 
 		it 'should send the new doc lines to the doucment updater', (done)->
 			@DocumentUpdaterHandler.setDocument = ->
-			mock = sinon.mock(@DocumentUpdaterHandler).expects("setDocument").withArgs(@project_id, @doc_id, @docLines).once().callsArg(3)
+			mock = sinon.mock(@DocumentUpdaterHandler).expects("setDocument").withArgs(@project_id, @doc_id, @docLines, @source).once().callsArg(4)
 
 			@EditorController.setDoc @project_id, @doc_id, @docLines, @source, (err)=>
 				mock.verify()

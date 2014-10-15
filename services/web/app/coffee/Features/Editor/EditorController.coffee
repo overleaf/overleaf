@@ -161,9 +161,8 @@ module.exports = EditorController =
 				callback()
 
 	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
-		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, (err)=>
+		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
-			EditorRealTimeController.emitToRoom(project_id, "entireDocUpdate", doc_id, source)
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
 	addDoc: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
