@@ -29,11 +29,11 @@ define [
 						monthly: "€7"
 						annual: "€70"
 					collaborator:
-						monthly: "€12"
-						annual: "€144"
+						monthly: "€14"
+						annual: "€168"
 					professional:
-						monthly: "€25"
-						annual: "€300"
+						monthly: "€28"
+						annual: "€336"
 						
 				GBP:
 					symbol: "£"
@@ -41,11 +41,11 @@ define [
 						monthly: "£6"
 						annual: "£60"
 					collaborator:
-						monthly: "£10"
-						annual: "£120"
+						monthly: "£12"
+						annual: "£144"
 					professional:
-						monthly: "£22"
-						annual: "£264"
+						monthly: "£24"
+						annual: "£288"
 		}
 	
 
@@ -53,10 +53,25 @@ define [
 
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http) ->
 		
+
+		$scope.plans = MultiCurrencyPricing.plans
+		$scope.currencyCode = MultiCurrencyPricing.currencyCode
+
+
 		buckets = [
 			{ bucketName:"7d", queryString: "_free_trial_7_days", trial_len:7 }
 			{ bucketName:"14d", queryString: "_free_trial_14_days", trial_len:14 }
 		]
+
+		if MultiCurrencyPricing.currencyCode != "USD"
+			currencyBuckets = [
+				{ bucketName:"eu-eu", currency:MultiCurrencyPricing.currencyCode}
+				{ bucketName:"eu-usd", currency:"USD"}
+			]
+			multiCurrencyBucket = abTestManager.getABTestBucket "multi_currency", currencyBuckets
+			$scope.currencyCode = multiCurrencyBucket.currency
+
+
 		bucket = abTestManager.getABTestBucket "trial_len", buckets
 
 		$scope.trial_len = bucket.trial_len
@@ -65,13 +80,15 @@ define [
 		$scope.ui =
 			view: "monthly"
 
-		$scope.plans = MultiCurrencyPricing.plans
-		$scope.currencyCode = MultiCurrencyPricing.currencyCode
+
 
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
+			if multiCurrencyBucket?
+				abTestManager.processTestWithStep("multi_currency", multiCurrencyBucket.bucketName, 0)
+
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			else

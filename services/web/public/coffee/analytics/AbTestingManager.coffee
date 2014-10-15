@@ -35,7 +35,7 @@ define [
 				return false
 
 		_getUsersHash = (testName)->
-			sl_user_test_token = "sl_utt"
+			sl_user_test_token = "sl_utt_#{testName}"
 			user_uuid = ipCookie(sl_user_test_token)
 			if !user_uuid?
 				user_uuid = Math.random()

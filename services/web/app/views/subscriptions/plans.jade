@@ -2,6 +2,7 @@ extends ../layout
 block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{recomendedCurrency}'
+		window.abCurrencyFlag = '#{abCurrencyFlag}'
 block content
 	.content-alt
 		.content.plans(ng-controller="PlansController")
