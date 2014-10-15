@@ -49,118 +49,120 @@ block content
 									) {{currency}} ({{value['symbol']}})
 
 				.row(ng-cloak)
-					.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
-						.col-md-3.col-md-offset-1
-							.card.card-first
-								.card-header
-									h2 #{translate("personal")} 
-								.circle #{translate("free")} 
-								ul.list-unstyled
-									li #{translate("one_collaborator")}
-									li &nbsp;
-									li &nbsp;
-									li
-										br
-										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
-						.col-md-4
-							.card.card-highlighted
-								.card-header
-									h2 #{translate("collaborator")}
-								.circle
-									span(ng-if="ui.view == 'monthly'")
-										| {{plans[currencyCode]['collaborator']['monthly']}}
-										span.small /mo
-									span(ng-if="ui.view == 'annual'")
-										| {{plans[currencyCode]['collaborator']['annual']}}
-										span.small /yr
-								ul.list-unstyled
-									li 
-										strong #{translate("collabs_per_proj", {collabcount:10})}
-									li #{translate("full_doc_history")}
-									li #{translate("sync_to_dropbox")}
-									li
-										br
-										a.btn.btn-info(
+					.col-md-10.col-md-offset-1
+						.row
+							.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+								.col-md-4
+									.card.card-first
+										.card-header
+											h2 #{translate("personal")} 
+										.circle #{translate("free")} 
+										ul.list-unstyled
+											li #{translate("one_collaborator")}
+											li &nbsp;
+											li &nbsp;
+											li
+												br
+												a.btn.btn-info(href="/register") #{translate("sign_up_now")}
+								.col-md-4
+									.card.card-highlighted
+										.card-header
+											h2 #{translate("collaborator")}
+										.circle
+											span(ng-if="ui.view == 'monthly'")
+												| {{plans[currencyCode]['collaborator']['monthly']}}
+												span.small /mo
+											span(ng-if="ui.view == 'annual'")
+												| {{plans[currencyCode]['collaborator']['annual']}}
+												span.small /yr
+										ul.list-unstyled
+											li 
+												strong #{translate("collabs_per_proj", {collabcount:10})}
+											li #{translate("full_doc_history")}
+											li #{translate("sync_to_dropbox")}
+											li
+												br
+												a.btn.btn-info(
 
-											ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
-										)
-											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
-											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
-						.col-md-3
-							.card.card-last
-								.card-header
-									h2 #{translate("professional")}
-								.circle 
-									span(ng-if="ui.view == 'monthly'")
-										| {{plans[currencyCode]['professional']['monthly']}}
-										span.small /mo
-									span(ng-if="ui.view == 'annual'")
-										| {{plans[currencyCode]['professional']['annual']}}
-										span.small /yr
-								ul.list-unstyled
-									li
-										strong #{translate("unlimited_collabs")}
-									li #{translate("full_doc_history")}
-									li #{translate("sync_to_dropbox")}
-									li
-										br
-										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
-										)
-											span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
-											span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+													ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
+												)
+													span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
+								.col-md-4
+									.card.card-last
+										.card-header
+											h2 #{translate("professional")}
+										.circle 
+											span(ng-if="ui.view == 'monthly'")
+												| {{plans[currencyCode]['professional']['monthly']}}
+												span.small /mo
+											span(ng-if="ui.view == 'annual'")
+												| {{plans[currencyCode]['professional']['annual']}}
+												span.small /yr
+										ul.list-unstyled
+											li
+												strong #{translate("unlimited_collabs")}
+											li #{translate("full_doc_history")}
+											li #{translate("sync_to_dropbox")}
+											li
+												br
+												a.btn.btn-info(
+													ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
+												)
+													span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
+													span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
 
-					.card-group.text-centered(ng-if="ui.view == 'student'")
-						.col-md-3.col-md-offset-1
-							.card.card-first
-								.card-header
-									h2 #{translate("personal")}
-								.circle #{translate("free")}
-								ul.list-unstyled
-									li #{translate("one_collaborator")}
-									li &nbsp;
-									li &nbsp;
-									li
-										br
-										a.btn.btn-info(href="/register") #{translate("sign_up_now")}
-						
-						.col-md-4
-							.card.card-highlighted
-								.card-header
-									h2 #{translate("student")}
-								.circle
-									span
-										| {{plans[currencyCode]['student']['monthly']}}
-										span.small /mo
-								ul.list-unstyled
-									li
-										strong #{translate("collabs_per_proj", {collabcount:6})}
-									li #{translate("full_doc_history")}
-									li #{translate("sync_to_dropbox")}
-									li
-										br
-										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
-										) #{translate("start_free_trial")}
-						
-						.col-md-3
-							.card.card-last
-								.card-header
-									h2 #{translate("student")} (#{translate("annual")})
-								.circle
-									span
-										| {{plans[currencyCode]['student']['annual']}}
-										span.small /yr
-								ul.list-unstyled
-									li
-										strong #{translate("collabs_per_proj", {collabcount:6})}
-									li #{translate("full_doc_history")}
-									li #{translate("sync_to_dropbox")}
-									li
-										br
-										a.btn.btn-info(
-											ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
-										) #{translate("buy_now")}
+							.card-group.text-centered(ng-if="ui.view == 'student'")
+								.col-md-4
+									.card.card-first
+										.card-header
+											h2 #{translate("personal")}
+										.circle #{translate("free")}
+										ul.list-unstyled
+											li #{translate("one_collaborator")}
+											li &nbsp;
+											li &nbsp;
+											li
+												br
+												a.btn.btn-info(href="/register") #{translate("sign_up_now")}
+								
+								.col-md-4
+									.card.card-highlighted
+										.card-header
+											h2 #{translate("student")}
+										.circle
+											span
+												| {{plans[currencyCode]['student']['monthly']}}
+												span.small /mo
+										ul.list-unstyled
+											li
+												strong #{translate("collabs_per_proj", {collabcount:6})}
+											li #{translate("full_doc_history")}
+											li #{translate("sync_to_dropbox")}
+											li
+												br
+												a.btn.btn-info(
+													ng-href="#{baseUrl}/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
+												) #{translate("start_free_trial")}
+								
+								.col-md-4
+									.card.card-last
+										.card-header
+											h2 #{translate("student")} (#{translate("annual")})
+										.circle
+											span
+												| {{plans[currencyCode]['student']['annual']}}
+												span.small /yr
+										ul.list-unstyled
+											li
+												strong #{translate("collabs_per_proj", {collabcount:6})}
+											li #{translate("full_doc_history")}
+											li #{translate("sync_to_dropbox")}
+											li
+												br
+												a.btn.btn-info(
+													ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual&currency={{currencyCode}}", ng-click="signUpNowClicked('student')"
+												) #{translate("buy_now")}
 
 				.row.row-spaced(ng-cloak)
 					p.text-centered #{translate("choose_plan_works_for_you", {len:14})}

@@ -13,7 +13,40 @@ block content
 	.content.content-alt
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
-				.col-md-6.col-md-offset-1
+						
+				.col-lg-3
+					.card.card-first
+						.paymentPageFeatures
+							.page-header
+								h3 #{translate("features")}
+							h3 #{translate("unlimited_projects")}
+							p #{translate("create_unlimited_projects")}
+						
+							h3
+								if plan.features.collaborators == -1
+									- var collaboratorCount = 'Unlimited'
+								else
+									- var collaboratorCount = plan.features.collaborators
+								| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
+							
+							h3 #{translate("full_doc_history")}
+							p #{translate("see_what_has_been")} 
+								span.added #{translate("added")} 
+								| #{translate("and")} 
+								span.removed #{translate("removed")}. 
+								| #{translate("restore_to_any_older_version")}.
+							
+							h3 #{translate("sync_to_dropbox")}
+							p
+								| #{translate("acces_work_from_anywhere")}. 
+								| #{translate("work_offline_and_sync_with_dropbox")}.
+								
+							hr
+							
+							p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
+
+				.col-lg-6
 					.card.card-highlighted
 						.page-header
 							span.dropdown.changePlanButton.pull-right(ng-cloak)
@@ -30,32 +63,7 @@ block content
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
 						
-						#subscribeForm(style="min-height: 400px;") #{translate("loading_billing_form")}...
-						
-				.col-md-4
-					.card.card-last
-						.paymentPageFeatures
-							ul.list-unstyled
-								li 
-									if plan.features.collaborators == -1
-										- var collaboratorCount = 'Unlimited'
-									else
-										- var collaboratorCount = plan.features.collaborators
-									i.fa.fa-check
-									|  #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
-								li 
-									i.fa.fa-check
-									|  #{translate("full_doc_history")}
-								li 
-									i.fa.fa-check
-									|  #{translate("sync_to_dropbox")}
-								li 
-									i.fa.fa-check
-									|  Cancel Anytime
-								li 
-									i.fa.fa-check
-								|  100% Money Back Guarantee
-
+						#subscribeForm(style="min-height: 700px;") #{translate("loading_billing_form")}...
 
 	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
