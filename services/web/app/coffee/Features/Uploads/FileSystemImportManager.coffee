@@ -11,7 +11,7 @@ module.exports = FileSystemImportManager =
 			return callback(error) if error?
 			content = content.replace(/\r/g, "")
 			lines = content.split("\n")
-			EditorController.addDoc project_id, folder_id, name, lines, callback
+			EditorController.addDoc project_id, folder_id, name, lines, "upload", callback
 
 	addFile: (project_id, folder_id, name, path, replace, callback = (error, file)-> )->
 		if replace
@@ -24,14 +24,14 @@ module.exports = FileSystemImportManager =
 						existingFile = fileRef
 						break
 				if existingFile?
-					EditorController.replaceFile project_id, existingFile._id, path, callback
+					EditorController.replaceFile project_id, existingFile._id, path, "upload", callback
 				else
-					EditorController.addFile project_id, folder_id, name, path, callback
+					EditorController.addFile project_id, folder_id, name, path, "upload", callback
 		else
-			EditorController.addFile project_id, folder_id, name, path, callback
+			EditorController.addFile project_id, folder_id, name, path, "upload", callback
 
 	addFolder: (project_id, folder_id, name, path, replace, callback = (error)-> ) ->
-		EditorController.addFolder project_id, folder_id, name, (error, new_folder) =>
+		EditorController.addFolder project_id, folder_id, name, "upload", (error, new_folder) =>
 			return callback(error) if error?
 			@addFolderContents project_id, new_folder._id, path, replace, (error) ->
 				return callback(error) if error?

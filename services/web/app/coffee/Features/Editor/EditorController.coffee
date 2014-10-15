@@ -160,29 +160,29 @@ module.exports = EditorController =
 			if callback?
 				callback()
 
-	setDoc: (project_id, doc_id, docLines, callback = (err)->)->
+	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
 		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, (err)=>
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
-			EditorRealTimeController.emitToRoom(project_id, "entireDocUpdate", doc_id)
+			EditorRealTimeController.emitToRoom(project_id, "entireDocUpdate", doc_id, source)
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc)->)->
+	addDoc: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
 		docName = docName.trim()
-		logger.log {project_id, folder_id, docName}, "sending new doc to project"
+		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
 		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, (err, doc, folder_id)=>
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc)
+			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback(err, doc)
 
-	addFile: (project_id, folder_id, fileName, path, callback = (error, file)->)->
+	addFile: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
 		fileName = fileName.trim()
 		logger.log {project_id, folder_id, fileName, path}, "sending new file to project"
 		Metrics.inc "editor.add-file"
 		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, (err, fileRef, folder_id)=>
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef)
+			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef, source)
 			callback(err, fileRef)
 
-	replaceFile: (project_id, file_id, fsPath, callback = (error) ->)->
+	replaceFile: (project_id, file_id, fsPath, source, callback = (error) ->)->
 		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, callback
 
 	addFolder: (project_id, folder_id, folderName, callback = (error, folder)->)->
@@ -203,12 +203,12 @@ module.exports = EditorController =
 			async.series jobs, (err)->
 				callback err, newFolders, lastFolder
 
-	deleteEntity: (project_id, entity_id, entityType, callback)->
-		logger.log {project_id, entity_id, entityType}, "start delete process of entity"
+	deleteEntity: (project_id, entity_id, entityType, source, callback)->
+		logger.log {project_id, entity_id, entityType, source}, "start delete process of entity"
 		Metrics.inc "editor.delete-entity"
 		ProjectEntityHandler.deleteEntity project_id, entity_id, entityType, =>
 			logger.log project_id:project_id, entity_id:entity_id, entityType:entityType, "telling users entity has been deleted"
-			EditorRealTimeController.emitToRoom(project_id, 'removeEntity', entity_id)
+			EditorRealTimeController.emitToRoom(project_id, 'removeEntity', entity_id, source)
 			if callback?
 				callback()
 

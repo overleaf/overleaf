@@ -36,8 +36,9 @@ module.exports =
 	updateProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
 		path = "/" + req.params[0] # UpdateMerger expects leading slash
-		logger.log project_id: project_id, path: path, "received project contents update"
-		UpdateMerger.mergeUpdate project_id, path, req, (error) ->
+		source = req.headers["x-sl-update-source"]
+		logger.log project_id: project_id, path: path, source: source, "received project contents update"
+		UpdateMerger.mergeUpdate project_id, path, req, source, (error) ->
 			return next(error) if error?
 			res.send(200)
 			req.session.destroy()
@@ -45,8 +46,9 @@ module.exports =
 	deleteProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
 		path = "/" + req.params[0] # UpdateMerger expects leading slash
-		logger.log project_id: project_id, path: path, "received project contents delete request"
-		UpdateMerger.deleteUpdate project_id, path, (error) ->
+		source = req.headers["x-sl-update-source"]
+		logger.log project_id: project_id, path: path, source: source, "received project contents delete request"
+		UpdateMerger.deleteUpdate project_id, path, source, (error) ->
 			return next(error) if error?
 			res.send(200)
 			req.session.destroy()
