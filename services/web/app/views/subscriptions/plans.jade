@@ -165,7 +165,7 @@ block content
 												) #{translate("buy_now")}
 
 				.row.row-spaced(ng-cloak)
-					p.text-centered #{translate("choose_plan_works_for_you", {len:14})}
+					p.text-centered #{translate("choose_plan_works_for_you", {len:'{{trial_len}}'})}
 					
 				.row(ng-cloak)
 					.col-md-8.col-md-offset-2
