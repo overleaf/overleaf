@@ -25,7 +25,7 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
+			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(4)
 			res =  send: => 
 				@TpdsUpdateHandler.newUpdate.calledWith(@user_id, "projectName","/here.txt", req).should.equal true
 				done()
@@ -38,7 +38,7 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
+			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(3)
 			res = send: => 
 				@TpdsUpdateHandler.deleteUpdate.calledWith(@user_id, "projectName", "/here.txt").should.equal true
 				done()
@@ -79,6 +79,8 @@ describe 'TpdsController', ->
 					project_id: @project_id = "project-id-123"
 				session:
 					destroy: sinon.stub()
+				headers:
+					"x-update-source": @source = "github"
 			@res =
 				send: sinon.stub()
 			
@@ -104,6 +106,8 @@ describe 'TpdsController', ->
 					project_id: @project_id = "project-id-123"
 				session:
 					destroy: sinon.stub()
+				headers:
+					"x-update-source": @source = "github"
 			@res =
 				send: sinon.stub()
 			

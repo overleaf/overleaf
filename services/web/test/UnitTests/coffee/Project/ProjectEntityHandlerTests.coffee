@@ -20,9 +20,9 @@ describe 'ProjectEntityHandler', ->
 			uploadFileFromDisk:(project_id, fileRef,  localImagePath, callback)->callback()
 			copyFile: sinon.stub().callsArgWith(4, null)
 		@tpdsUpdateSender =
-			addDoc:sinon.stub().callsArg(2)
-			addFile:sinon.stub().callsArg(2)
-			addFolder:sinon.stub().callsArg(2)
+			addDoc:sinon.stub().callsArg(1)
+			addFile:sinon.stub().callsArg(1)
+			addFolder:sinon.stub().callsArg(1)
 		@rootFolder = 
 			_id:rootFolderId, 
 			folders:[
@@ -84,7 +84,7 @@ describe 'ProjectEntityHandler', ->
 					cb "level1 is not the last foler "
 				else
 					cb null, @parentFolder
-			@ProjectEntityHandler.addFolder = (project_id, parentFolder_id, folderName, sl_req_id, callback)=>
+			@ProjectEntityHandler.addFolder = (project_id, parentFolder_id, folderName, callback)=>
 				callback null, {name:folderName}, @parentFolder_id 
 		
 		it 'should return the root folder if the path is just a slash', (done)->
@@ -134,10 +134,10 @@ describe 'ProjectEntityHandler', ->
 				lastFolder.parentFolder_id.should.equal @parentFolder_id
 				done()
 
-	describe 'deleting an element', ->
+	describe 'deleteEntity', ->
 		entity_id = "4eecaffcbffa66588e000009"
 		beforeEach ->
-			@tpdsUpdateSender.deleteEntity = sinon.stub().callsArg(2)
+			@tpdsUpdateSender.deleteEntity = sinon.stub().callsArg(1)
 			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
 			@ProjectEntityHandler._cleanUpEntity = sinon.stub().callsArg(3)
 			@path = mongo: "mongo.path", fileSystem: "/file/system/path"
@@ -186,7 +186,7 @@ describe 'ProjectEntityHandler', ->
 
 		describe "a doc", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(3)
+				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(2)
 				@ProjectEntityHandler._cleanUpEntity @project, @entity = {_id: @entity_id}, 'doc', done
 
 			it "should clean up the doc", ->
@@ -205,8 +205,8 @@ describe 'ProjectEntityHandler', ->
 					fileRefs: [ @file2 = { _id: "file-id-2" } ]
 					docs:     [ @doc2  = { _id: "doc-id-2" } ]
 
-				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(3)
-				@ProjectEntityHandler._cleanUpFile = sinon.stub().callsArg(3)
+				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(2)
+				@ProjectEntityHandler._cleanUpFile = sinon.stub().callsArg(2)
 				@ProjectEntityHandler._cleanUpEntity @project, @folder, "folder", done
 
 			it "should clean up all sub files", ->
@@ -406,7 +406,7 @@ describe 'ProjectEntityHandler', ->
 
 			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
-			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
+			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
 			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, true, 0)
 
 			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
@@ -465,7 +465,7 @@ describe 'ProjectEntityHandler', ->
 		it "should call the callback with the new folder and doc", ->
 			@callback.calledWith(null, @doc, @folder_id).should.equal true
 
-	describe 'adding file', ->
+	describe 'addFile', ->
 		fileName = "something.jpg"
 		beforeEach ->
 			@filePath = "somewhere"
@@ -786,8 +786,8 @@ describe 'ProjectEntityHandler', ->
 			}
 			@ProjectModel.findById = sinon.stub().callsArgWith(1, null, @project)
 			@documentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArg(2)
-			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(2)
-			@tpdsUpdateSender.addFile = sinon.stub().callsArg(2)
+			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
+			@tpdsUpdateSender.addFile = sinon.stub().callsArg(1)
 			@docs = {
 				"/doc/one": @doc1 = { _id: "mock-doc-1", lines: ["one"], rev: 5 }
 				"/doc/two": @doc2 = { _id: "mock-doc-2", lines: ["two"], rev: 6 }

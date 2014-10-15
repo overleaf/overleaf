@@ -30,7 +30,7 @@ describe 'ProjectCreationHandler', ->
 			constructor:(options)->
 				{@name} = options
 		@ProjectEntityHandler =
-			addDoc: sinon.stub().callsArgWith(5, null, {_id: docId})
+			addDoc: sinon.stub().callsArgWith(4, null, {_id: docId})
 			addFile: sinon.stub().callsArg(4)
 			setRootDoc: sinon.stub().callsArg(2)
 

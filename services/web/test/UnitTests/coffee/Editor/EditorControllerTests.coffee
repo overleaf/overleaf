@@ -410,7 +410,7 @@ describe "EditorController", ->
 			@ProjectOptionsHandler.setSpellCheckLanguage.args[0][2]()
 
 
-	describe 'set document', ->
+	describe 'setDoc', ->
 		beforeEach ->
 			@docLines = ["foo", "bar"]
 			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArg(2)
@@ -441,7 +441,7 @@ describe "EditorController", ->
 				done()
 
 
-	describe 'add doc', ->
+	describe 'addDoc', ->
 		beforeEach ->
 			@ProjectEntityHandler.addDoc = ()->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
@@ -453,24 +453,24 @@ describe "EditorController", ->
 			@docLines = ["1234","dskl"]
 
 		it 'should add the doc using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(5)
+			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(4)
 
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", ->
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, ->
 				mock.verify()
 				done()
 
 		it 'should send the update out to the users in the project', (done)->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
 
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, =>
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc)
 					.should.equal true
 				done()
 
 		it 'should return the doc to the callback', (done) ->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, "", (error, doc) =>
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, (error, doc) =>
 				doc.should.equal @doc
 				done()
 

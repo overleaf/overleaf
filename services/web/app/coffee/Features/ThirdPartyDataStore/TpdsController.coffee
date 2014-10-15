@@ -8,9 +8,9 @@ module.exports =
 	mergeUpdate: (req, res)->
 		metrics.inc("tpds.merge-update")
 		{filePath, user_id, projectName} = parseParams(req)
-		logger.log user_id:user_id, filePath:filePath, fullPath:req.params[0], projectName:projectName, sl_req_id:req.sl_req_id, "reciving update request from tpds"
-		tpdsUpdateHandler.newUpdate user_id, projectName, filePath, req, req.sl_req_id, (err)->
-			logger.log user_id:user_id, filePath:filePath, fullPath:req.params[0], sl_req_id:req.sl_req_id, "sending response that tpdsUpdate has been completed"
+		logger.log user_id:user_id, filePath:filePath, fullPath:req.params[0], projectName:projectName, "reciving update request from tpds"
+		tpdsUpdateHandler.newUpdate user_id, projectName, filePath, req, (err)->
+			logger.log user_id:user_id, filePath:filePath, fullPath:req.params[0], "sending response that tpdsUpdate has been completed"
 			if err?
 				logger.err err:err, user_id:user_id, filePath:filePath, "error reciving update from tpds"
 				res.send(500)
@@ -23,8 +23,8 @@ module.exports =
 	deleteUpdate: (req, res)->
 		metrics.inc("tpds.delete-update")
 		{filePath, user_id, projectName} = parseParams(req)
-		logger.log user_id:user_id, filePath:filePath, sl_req_id:req.sl_req_id, projectName:projectName, fullPath:req.params[0], "reciving delete request from tpds"
-		tpdsUpdateHandler.deleteUpdate user_id, projectName, filePath, req.sl_req_id, (err)->
+		logger.log user_id:user_id, filePath:filePath, projectName:projectName, fullPath:req.params[0], "reciving delete request from tpds"
+		tpdsUpdateHandler.deleteUpdate user_id, projectName, filePath, (err)->
 			if err?
 				logger.err err:err, user_id:user_id, filePath:filePath, "error reciving update from tpds"
 				res.send(500)
