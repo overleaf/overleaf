@@ -1,6 +1,7 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
+assert = require("chai").assert
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Compile/CompileController.js"
 SandboxedModule = require('sandboxed-module')
@@ -12,6 +13,8 @@ describe "CompileController", ->
 		@CompileManager = 
 			compile: sinon.stub()
 		@ClsiManager = {}
+		@UserGetter = 
+			getUser:sinon.stub()
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
@@ -22,9 +25,14 @@ describe "CompileController", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"../../infrastructure/Metrics": @Metrics =  { inc: sinon.stub() }
 			"./CompileManager":@CompileManager
+			"../User/UserGetter":@UserGetter
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 		@project_id = "project-id"
+		@user = 
+			features:
+				compileGroup: "premium"
+				compileTimeout: 100
 		@next = sinon.stub()
 		@req = new MockRequest()
 		@res = new MockResponse()
@@ -36,6 +44,7 @@ describe "CompileController", ->
 					Project_id: @project_id
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
+				@UserGetter.getUser.callsArgWith(2, null, @user)
 				@CompileController.compile @req, @res, @next
 
 			it "should look up the user id", ->
@@ -45,7 +54,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: false, settingsOverride:{} })
+					.calledWith(@project_id, @user_id, { isAutoCompile: false, settingsOverride:{timeout:@user.features.compileTimeout, compiler:@user.features.compileGroup} })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -60,6 +69,11 @@ describe "CompileController", ->
 					outputFiles: @outputFiles
 				})
 
+			it "should get the compile timeout from the users features",->
+				@UserGetter.getUser.args[0][0].should.equal @user_id
+				assert.deepEqual @UserGetter.getUser.args[0][1], {"features.compileGroup":1, "features.compileTimeout":1}
+
+
 		describe "when an auto compile", ->
 			beforeEach ->
 				@req.params =
@@ -68,12 +82,11 @@ describe "CompileController", ->
 					auto_compile: "true"
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
+				@UserGetter.getUser.callsArgWith(2, null, @user)
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
-				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: true, settingsOverride:{} })
-					.should.equal true
+				@CompileManager.compile.calledWith(@project_id, @user_id, { isAutoCompile: true, settingsOverride:{timeout:@user.features.compileTimeout, compiler:@user.features.compileGroup} }).should.equal true
 
 	describe "downloadPdf", ->
 		beforeEach ->
