@@ -33,7 +33,7 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
-		EditorController.addFolder project_id, parent_folder_id, name, (error, doc) ->
+		EditorController.addFolder project_id, parent_folder_id, name, "editor", (error, doc) ->
 			return next(error) if error?
 			res.json doc
 

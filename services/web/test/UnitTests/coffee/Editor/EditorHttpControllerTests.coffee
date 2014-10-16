@@ -76,12 +76,12 @@ describe "EditorHttpController", ->
 			@req.body =
 				name: @name = "folder-name"
 				parent_folder_id: @parent_folder_id
-			@EditorController.addFolder = sinon.stub().callsArgWith(3, null, @folder)
+			@EditorController.addFolder = sinon.stub().callsArgWith(4, null, @folder)
 			@EditorHttpController.addFolder @req, @res
 
 		it "should call EditorController.addFolder", ->
 			@EditorController.addFolder
-				.calledWith(@project_id, @parent_folder_id, @name)
+				.calledWith(@project_id, @parent_folder_id, @name, "editor")
 				.should.equal true
 
 		it "should send the folder back as JSON", ->

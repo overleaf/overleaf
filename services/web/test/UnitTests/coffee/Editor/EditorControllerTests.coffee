@@ -526,7 +526,7 @@ describe "EditorController", ->
 		it 'should add the folder using the project entity handler', (done)->
 			mock = sinon.mock(@ProjectEntityHandler).expects("addFolder").withArgs(@project_id, @folder_id, @folderName).callsArg(3)
 
-			@EditorController.addFolder @project_id, @folder_id, @folderName, ->
+			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, ->
 				mock.verify()
 				done()
 
@@ -534,7 +534,7 @@ describe "EditorController", ->
 			@ProjectEntityHandler.addFolder = (project_id, folder_id, folderName, callback)=> callback(null, @folder, @folder_id)
 			mock = sinon.mock(@EditorController.p).expects('notifyProjectUsersOfNewFolder').withArgs(@project_id, @folder_id, @folder).callsArg(3)
 
-			@EditorController.addFolder @project_id, @folder_id, @folderName, ->
+			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, ->
 				mock.verify()
 				done()
 
@@ -547,7 +547,7 @@ describe "EditorController", ->
 	
 		it 'should return the folder in the callback', (done) ->
 			@ProjectEntityHandler.addFolder = (project_id, folder_id, folderName, callback)=> callback(null, @folder, @folder_id)
-			@EditorController.addFolder @project_id, @folder_id, @folderName, (error, folder) =>
+			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (error, folder) =>
 				folder.should.equal @folder
 				done()
 
