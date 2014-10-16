@@ -25,9 +25,11 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(4)
+				headers:
+					"x-sl-update-source": @source = "dropbox"
+			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
 			res =  send: => 
-				@TpdsUpdateHandler.newUpdate.calledWith(@user_id, "projectName","/here.txt", req).should.equal true
+				@TpdsUpdateHandler.newUpdate.calledWith(@user_id, "projectName","/here.txt", req, @source).should.equal true
 				done()
 			@TpdsController.mergeUpdate req, res
 
@@ -38,9 +40,11 @@ describe 'TpdsController', ->
 				params:{0:path, "user_id":@user_id}
 				session:
 					destroy:->
-			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(3)
+				headers:
+					"x-sl-update-source": @source = "dropbox"
+			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
 			res = send: => 
-				@TpdsUpdateHandler.deleteUpdate.calledWith(@user_id, "projectName", "/here.txt").should.equal true
+				@TpdsUpdateHandler.deleteUpdate.calledWith(@user_id, "projectName", "/here.txt", @source).should.equal true
 				done()
 			@TpdsController.deleteUpdate req, res
 

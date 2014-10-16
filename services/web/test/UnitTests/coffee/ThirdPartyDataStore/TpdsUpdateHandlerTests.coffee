@@ -7,8 +7,8 @@ describe 'TpdsUpdateHandler', ->
 	beforeEach ->
 		@requestQueuer = {}
 		@updateMerger = 
-			deleteUpdate: (user_id, path, cb)->cb()
-			mergeUpdate:(user_id, path, update, cb)->cb()
+			deleteUpdate: (user_id, path, source, cb)->cb()
+			mergeUpdate:(user_id, path, update, source, cb)->cb()
 		@editorController = {}
 		@project_id = "dsjajilknaksdn"
 		@project = {_id:@project_id, name:"projectNameHere"}
@@ -33,15 +33,15 @@ describe 'TpdsUpdateHandler', ->
 			path = "/path/here"
 			update = {}
 			@updateMerger.mergeUpdate = sinon.stub()
-			@updateMerger.mergeUpdate.withArgs(@project_id, path, update).callsArg(3)
-			@handler.newUpdate @user_id, @project.name, path, update, =>
+			@updateMerger.mergeUpdate.withArgs(@project_id, path, update, @source).callsArg(4)
+			@handler.newUpdate @user_id, @project.name, path, update, @source, =>
 				@projectCreationHandler.createBlankProject.called.should.equal false
 				done()
 
 		it 'should create a new project if one does not already exit', (done)->
 			@projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
 			path = "/"
-			@handler.newUpdate @user_id, @project.name, path, {}, =>
+			@handler.newUpdate @user_id, @project.name, path, {}, @source, =>
 				@projectCreationHandler.createBlankProject.calledWith(@user_id, @project.name).should.equal true
 				done()
 
@@ -49,7 +49,7 @@ describe 'TpdsUpdateHandler', ->
 			@projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
 			@handler._rootDocTimeoutLength = 0
 			path = "/"
-			@handler.newUpdate @user_id, @project.name, path, {}, =>
+			@handler.newUpdate @user_id, @project.name, path, {}, @source, =>
 				setTimeout (=>
 					@rootDocManager.setRootDocAutomatically.calledWith(@project._id).should.equal true
 					done()
@@ -61,16 +61,16 @@ describe 'TpdsUpdateHandler', ->
 		it 'should call deleteEntity in the collaberation manager', (done)->
 			path = "/delete/this"
 			update = {}
-			@updateMerger.deleteUpdate = sinon.stub().callsArg(2)
+			@updateMerger.deleteUpdate = sinon.stub().callsArg(3)
 
-			@handler.deleteUpdate @user_id, @project.name, path, =>
+			@handler.deleteUpdate @user_id, @project.name, path, @source, =>
 				@projectDeleter.markAsDeletedByExternalSource.calledWith(@project._id).should.equal false
-				@updateMerger.deleteUpdate.calledWith(@project_id, path).should.equal true
+				@updateMerger.deleteUpdate.calledWith(@project_id, path, @source).should.equal true
 				done()
 
 		it 'should mark the project as deleted by external source if path is a single slash', (done)->
 			path = "/"
-			@handler.deleteUpdate @user_id, @project.name, path, =>
+			@handler.deleteUpdate @user_id, @project.name, path, @source, =>
 				@projectDeleter.markAsDeletedByExternalSource.calledWith(@project._id).should.equal true
 				done()
 
