@@ -15,6 +15,8 @@ describe "ClsiManager", ->
 						secret: "secret"
 					clsi:
 						url: "http://clsi.example.com"
+					clsi_priority:
+						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -28,7 +30,7 @@ describe "ClsiManager", ->
 
 		describe "with a successful compile", ->
 			beforeEach ->
-				@ClsiManager._postToClsi = sinon.stub().callsArgWith(2, null, {
+				@ClsiManager._postToClsi = sinon.stub().callsArgWith(3, null, {
 					compile:
 						status: @status = "success"
 						outputFiles: [{
@@ -39,7 +41,7 @@ describe "ClsiManager", ->
 							type: "log"
 						}]
 				})
-				@ClsiManager.sendRequest @project_id, {}, @callback
+				@ClsiManager.sendRequest @project_id, {compiler:"standard"}, @callback
 
 			it "should build the request", ->
 				@ClsiManager._buildRequest
@@ -48,7 +50,7 @@ describe "ClsiManager", ->
 
 			it "should send the request to the CLSI", ->
 				@ClsiManager._postToClsi
-					.calledWith(@project_id, @request)
+					.calledWith(@project_id, @request, "standard")
 					.should.equal true
 
 			it "should call the callback with the status and output files", ->
@@ -63,7 +65,7 @@ describe "ClsiManager", ->
 
 		describe "with a failed compile", ->
 			beforeEach ->
-				@ClsiManager._postToClsi = sinon.stub().callsArgWith(2, null, {
+				@ClsiManager._postToClsi = sinon.stub().callsArgWith(3, null, {
 					compile:
 						status: @status = "failure"
 				})
@@ -208,7 +210,7 @@ describe "ClsiManager", ->
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
-				@ClsiManager._postToClsi @project_id, @req, @callback
+				@ClsiManager._postToClsi @project_id, @req, "standard", @callback
 
 			it 'should send the request to the CLSI', ->
 				url = "#{@settings.apis.clsi.url}/project/#{@project_id}/compile"
@@ -224,8 +226,20 @@ describe "ClsiManager", ->
 		describe "when the CLSI returns an error", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
-				@ClsiManager._postToClsi @project_id, @req, @callback
+				@ClsiManager._postToClsi @project_id, @req, "standard", @callback
 
 			it "should call the callback with the body and the error", ->
 				@callback.calledWith(new Error("CLSI returned non-success code: 500"), @body).should.equal true
 
+		describe "when the compiler is priority", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
+				@ClsiManager._postToClsi @project_id, @req, "priority", @callback
+
+			it "should use the clsi_priority url", ->
+				url = "#{@settings.apis.clsi_priority.url}/project/#{@project_id}/compile"
+				@request.post.calledWith({
+					url: url
+					json: @req
+					jar: false
+				}).should.equal true

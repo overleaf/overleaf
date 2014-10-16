@@ -12,7 +12,7 @@ module.exports = ClsiManager =
 		ClsiManager._buildRequest project_id, settingsOverride, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._postToClsi project_id, req, (error, response) ->
+			ClsiManager._postToClsi project_id, req, settingsOverride.compiler, (error, response) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
 				callback(
@@ -29,9 +29,13 @@ module.exports = ClsiManager =
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		request.del "#{Settings.apis.clsi.url}/project/#{project_id}", callback
 
-	_postToClsi: (project_id, req, callback = (error, response) ->) ->
+	_postToClsi: (project_id, req, compiler, callback = (error, response) ->) ->
+		if compiler == "priority"
+			compilerUrl = Settings.apis.clsi_priority.url
+		else
+			compilerUrl = Settings.apis.clsi.url
 		request.post {
-			url:  "#{Settings.apis.clsi.url}/project/#{project_id}/compile"
+			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
 			jar:  false
 		}, (error, response, body) ->
