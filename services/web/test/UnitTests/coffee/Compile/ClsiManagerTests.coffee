@@ -123,7 +123,7 @@ describe "ClsiManager", ->
 
 		describe "with a valid project", ->
 			beforeEach (done) ->
-				@ClsiManager._buildRequest @project_id, null, (error, request) =>
+				@ClsiManager._buildRequest @project_id, {timeout:100}, (error, request) =>
 					@request = request
 					done()
 
@@ -147,6 +147,7 @@ describe "ClsiManager", ->
 					compile:
 						options:
 							compiler: @compiler
+							timeout : 100
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"

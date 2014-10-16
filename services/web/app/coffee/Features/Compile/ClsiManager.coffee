@@ -99,6 +99,7 @@ module.exports = ClsiManager =
 							compile:
 								options:
 									compiler: project.compiler
+									timeout: settingsOverride.timeout
 								rootResourcePath: rootResourcePath
 								resources: resources
 						}
