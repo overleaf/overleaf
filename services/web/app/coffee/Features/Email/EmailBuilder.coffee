@@ -11,15 +11,19 @@ templates.welcome =
 	layout: PersonalEmailLayout
 	type:"lifecycle"
 	compiledTemplate: _.template '''
-Hi <%= first_name %>, thanks for signing up to ShareLaTeX. If you ever get lost, you can log in again <a href="<%= siteUrl %>/login">here</a>.
-<p>
-I’m the co-founder of ShareLaTeX and I love talking to our users about our service. Please feel free to get in touch by replying to this email and I will get back to you within a day.
+<p>Hi <%= first_name %>,</p>
+
+<p>Thanks for signing up to ShareLaTeX! If you ever get lost, you can log in again <a href="<%= siteUrl %>/login">here</a>.</p>
+
+<p>If you're new to LaTeX, take a look at our <a href="<%= siteUrl %>/learn">Help Guides</a> and <a href="<%= siteUrl %>/templates">Templates</a>.</p>
 
 <p>
-
 Regards, <br>
 Henry <br>
 ShareLaTeX Co-founder
+</p>
+
+<p>PS. We love talking to our users about ShareLaTeX. Reply to this email to get in touch us with us directly, whatever the reason. Questions, comments, problems, suggestions, all welcome!<p>
 '''
 
 templates.canceledSubscription = 
@@ -27,15 +31,16 @@ templates.canceledSubscription =
 	layout: PersonalEmailLayout
 	type:"lifecycle"
 	compiledTemplate: _.template '''
-Hi <%= first_name %>,
+<p>Hi <%= first_name %>,</p>
 
-I am sorry to see you cancelled your premium account. I wondered if you would mind giving me some advice on what the site is lacking at the moment? Criticism from our users about what is missing is the best thing for us to help improve the tool. 
+<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment? Feedback from our users is the only way we can improve ShareLaTeX.</p>
 
-Thank you in advance. 
+<p>Thank you in advance.</p>
 
 <p>
 Henry <br>
 ShareLaTeX Co-founder
+</p>
 '''
 
 templates.passwordResetRequested =	

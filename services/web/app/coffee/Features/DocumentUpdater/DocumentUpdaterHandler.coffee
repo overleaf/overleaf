@@ -123,8 +123,7 @@ module.exports = DocumentUpdaterHandler =
 			url: url
 			json:
 				lines: docLines
-			headers:
-				"x-sl-update-source": source
+				source: source
 		logger.log project_id:project_id, doc_id: doc_id, source: source, "setting doc in document updater"
 		request.post body, (error, res, body)->
 			timer.done()

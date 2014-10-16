@@ -184,9 +184,9 @@ module.exports = EditorController =
 	replaceFile: (project_id, file_id, fsPath, source, callback = (error) ->)->
 		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, callback
 
-	addFolder: (project_id, folder_id, folderName, callback = (error, folder)->)->
+	addFolder: (project_id, folder_id, folderName, source, callback = (error, folder)->)->
 		folderName = folderName.trim()
-		logger.log {project_id, folder_id, folderName}, "sending new folder to project"
+		logger.log {project_id, folder_id, folderName, source}, "sending new folder to project"
 		Metrics.inc "editor.add-folder"
 		ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, folder_id)=>
 			@p.notifyProjectUsersOfNewFolder project_id, folder_id, folder, (error) ->

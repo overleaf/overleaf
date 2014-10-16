@@ -210,10 +210,10 @@ define [
 
 		_bindToShareJsDocEvents: () ->
 			@doc.on "error", (error, meta) => @_onError error, meta
-			@doc.on "externalUpdate", () => 
+			@doc.on "externalUpdate", (update) => 
 				@ide.pushEvent "externalUpdate",
 					doc_id: @doc_id
-				@trigger "externalUpdate"
+				@trigger "externalUpdate", update
 			@doc.on "remoteop", () => 
 				@ide.pushEvent "remoteop",
 					doc_id: @doc_id

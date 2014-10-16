@@ -9,7 +9,7 @@ commitMessage = "Before update from Dropbox"
 
 module.exports =
 
-	newUpdate: (user_id, projectName, path, updateRequest, callback)->
+	newUpdate: (user_id, projectName, path, updateRequest, source, callback)->
 		getOrCreateProject = (cb)=>
 			projectLocator.findUsersProjectByName user_id, projectName, (err, project)=>
 				logger.log user_id:user_id, filePath:path, projectName:projectName, "handling new update from tpds"
@@ -22,11 +22,11 @@ module.exports =
 				else
 					cb err, project
 		getOrCreateProject (err, project)->
-			updateMerger.mergeUpdate project._id, path, updateRequest, (err)->
+			updateMerger.mergeUpdate project._id, path, updateRequest, source, (err)->
 				callback(err)
 
 
-	deleteUpdate: (user_id, projectName, path, callback)->	
+	deleteUpdate: (user_id, projectName, path, source, callback)->	
 		logger.log user_id:user_id, filePath:path, "handling delete update from tpds"
 		projectLocator.findUsersProjectByName user_id, projectName, (err, project)->
 			if !project?
@@ -36,7 +36,7 @@ module.exports =
 				logger.log user_id:user_id, filePath:path, projectName:projectName, project_id:project._id, "project found for delete update, path is root so marking project as deleted"
 				return projectDeleter.markAsDeletedByExternalSource project._id, callback
 			else
-				updateMerger.deleteUpdate project._id, path, (err)->
+				updateMerger.deleteUpdate project._id, path, source, (err)->
 					callback(err)
 
 

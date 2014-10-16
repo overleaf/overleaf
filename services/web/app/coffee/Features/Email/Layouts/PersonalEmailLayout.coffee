@@ -10,7 +10,7 @@ module.exports = _.template '''
 		<meta property="og:title" />
 		
 	</head>
-	<body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+	<body>
 		<%= body %>
 	</body>
 </html>
