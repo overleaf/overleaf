@@ -11,6 +11,7 @@ describe "CompileController", ->
 	beforeEach ->
 		@CompileManager = 
 			compile: sinon.stub()
+		@ClsiManager = {}
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
