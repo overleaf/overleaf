@@ -39,6 +39,8 @@ class MockResponse
 	setHeader: (header, value) ->
 		@headers[header] = value
 
+	setTimeout: (@timout)->
+
 	header: sinon.stub()
 
 	contentType: sinon.stub()

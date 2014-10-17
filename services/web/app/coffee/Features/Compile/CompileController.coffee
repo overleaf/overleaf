@@ -10,6 +10,7 @@ UserGetter = require "../User/UserGetter"
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
+		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
 		settingsOverride = req.body?.settingsOverride ? {};

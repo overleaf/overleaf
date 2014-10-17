@@ -38,6 +38,11 @@ describe "CompileController", ->
 		@res = new MockResponse()
 
 	describe "compile", ->
+
+
+
+
+
 		describe "when not an auto compile", ->
 			beforeEach ->
 				@req.params =
@@ -73,6 +78,8 @@ describe "CompileController", ->
 				@UserGetter.getUser.args[0][0].should.equal @user_id
 				assert.deepEqual @UserGetter.getUser.args[0][1], {"features.compileGroup":1, "features.compileTimeout":1}
 
+			it "should set the timeout", ->
+				assert @res.timout > 1000 * 60 * 3
 
 		describe "when an auto compile", ->
 			beforeEach ->
