@@ -11,7 +11,6 @@ module.exports =
 			dialect: "sqlite"
 			storage: Path.resolve(__dirname + "/../db.sqlite")
 
-
 	path:
 		compilesDir:  Path.resolve(__dirname + "/../compiles")
 		clsiCacheDir: Path.resolve(__dirname + "/../cache")
@@ -36,5 +35,5 @@ module.exports =
 	apis:
 		clsi:
 			url: "http://localhost:3013"
-
-
+			
+	smokeTest: false
