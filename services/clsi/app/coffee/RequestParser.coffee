@@ -1,6 +1,6 @@
 module.exports = RequestParser =
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
-	MAX_TIMEOUT: 60
+	MAX_TIMEOUT: 300
 
 	parse: (body, callback = (error, data) ->) ->
 		response = {}
