@@ -82,6 +82,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		.alert.alert-danger(ng-show="pdf.error")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
+		
 
 		.alert.alert-danger(ng-show="pdf.timedout")
 			p
@@ -89,7 +90,19 @@ div.full-size.pdf(ng-controller="PdfController")
 				span #{translate("proj_timed_out_reason")}
 			p
 				a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
-					| #{translate("please_see_help_for_more_info")}
+					| #{translate("learn_how_to_make_documents_compile_quickly")}
+
+		.alert.alert-success(ng-show="pdf.timedout")
+					p
+						strong #{translate("upgrade_for_faster_compiles")}
+					p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+					p
+						a.btn.btn-info(
+							href
+							ng-click="startFreeTrial('compile-timeout')"
+						) #{translate("start_free_trial")}
+
+
 
 	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
