@@ -83,8 +83,7 @@ ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callba
 				mongo: path.mongo # TODO: This is not correct
 			if err?
 				callback(err)
-			logger.log project_id: project_id, element_id: element._id, type: type, folder_id: folder_id,
-				"adding element to project"
+			logger.log project_id: project_id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
 			id = element._id+''
 			element._id = concreteObjectId(id)
 			conditions = _id:project_id

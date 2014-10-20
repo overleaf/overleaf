@@ -36,7 +36,7 @@ module.exports =
 				type = 'doc'
 			else if element.folders?
 				type = 'folder'
-			logger.log project_id:project_id, path:path, type:type, element:element, "processing update to delete entity from tpds"
+			logger.log project_id:project_id, updateType:path, type:type, element:element, "processing update to delete entity from tpds"
 			editorController.deleteEntity project_id, element._id, type, source, (err)->
 				logger.log project_id:project_id, path:path, "finished processing update to delete entity from tpds"
 				callback()

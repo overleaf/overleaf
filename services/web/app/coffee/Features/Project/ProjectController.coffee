@@ -90,7 +90,7 @@ module.exports = ProjectController =
 		user = req.session.user
 		projectName = req.body.projectName?.trim()
 		template = req.body.template
-		logger.log user: user, type: template, name: projectName, "creating project"
+		logger.log user: user, projectType: template, name: projectName, "creating project"
 		async.waterfall [
 			(cb)->
 				if template == 'example'

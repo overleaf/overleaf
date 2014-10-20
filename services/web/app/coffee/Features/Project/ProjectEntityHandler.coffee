@@ -306,7 +306,7 @@ module.exports = ProjectEntityHandler =
 
 	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
 		self = @
-		logger.log entity_id:entity_id, type:entityType, project_id:project_id, "deleting project entity"
+		logger.log entity_id:entity_id, entityType:entityType, project_id:project_id, "deleting project entity"
 		if !entityType?
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
