@@ -22,6 +22,8 @@ module.exports = ProjectEditorHandler =
 				collaborators: -1 # Infinite
 				versioning: false
 				dropbox:false
+				compileTimeout: 60
+				compileGroup:"standard"
 
 			if project.owner_ref.features?
 				if project.owner_ref.features.collaborators?
@@ -30,6 +32,11 @@ module.exports = ProjectEditorHandler =
 					result.features.versioning = project.owner_ref.features.versioning
 				if project.owner_ref.features.dropbox?
 					result.features.dropbox = project.owner_ref.features.dropbox
+				if project.owner_ref.features.compileTimeout?
+					result.features.compileTimeout = project.owner_ref.features.compileTimeout
+				if project.owner_ref.features.compileGroup?
+					result.features.compileGroup = project.owner_ref.features.compileGroup	
+
 					
 			result.owner = @buildUserModelView project.owner_ref, "owner"
 			result.members = []

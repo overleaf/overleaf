@@ -92,7 +92,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
 					| #{translate("learn_how_to_make_documents_compile_quickly")}
 
-		.alert.alert-success(ng-show="pdf.timedout")
+		.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
 					p
 						strong #{translate("upgrade_for_faster_compiles")}
 					p #{translate("free_accounts_have_timeout_upgrade_to_increase")}

@@ -8,6 +8,7 @@ define [
 			return if !autoCompile
 			autoCompile = false
 			$scope.recompile(isAutoCompile: true)
+			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
