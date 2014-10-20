@@ -64,10 +64,17 @@ module.exports = CompileController =
 
 	proxyToClsi: (url, req, res, next = (error) ->) ->
 		logger.log url: url, "proxying to CLSI"
-		url = "#{Settings.apis.clsi.url}#{url}"
-		oneMinute = 60 * 1000
-		proxy = request(url: url, method: req.method, timeout: oneMinute)
-		proxy.pipe(res)
-		proxy.on "error", (error) ->
-			logger.warn err: error, url: url, "CLSI proxy error"
-	
+		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
+
+			UserGetter.getUser user_id, {"features.compileGroup":1, "features.compileTimeout":1}, (err, user)->
+				if user.features?.compileGroup == "priority"
+					compilerUrl = Settings.apis.clsi_priority.url
+				else
+					compilerUrl = Settings.apis.clsi.url
+				url = "#{compilerUrl}#{url}"
+				oneMinute = 60 * 1000
+				proxy = request(url: url, method: req.method, timeout: oneMinute)
+				proxy.pipe(res)
+				proxy.on "error", (error) ->
+					logger.warn err: error, url: url, "CLSI proxy error"
+		

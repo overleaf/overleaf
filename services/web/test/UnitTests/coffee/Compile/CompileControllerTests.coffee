@@ -20,6 +20,8 @@ describe "CompileController", ->
 				apis:
 					clsi:
 						url: "clsi.example.com"
+					clsi_priority:
+						url: "clsi-priority.example.com"
 			"request": @request = sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -145,24 +147,50 @@ describe "CompileController", ->
 				statusCode: 204
 				headers: { "mock": "header" }
 			@req.method = "mock-method"
-			@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 
-		it "should open a request to the CLSI", ->
-			@request
-				.calledWith(
-					method: @req.method
-					url: "#{@settings.apis.clsi.url}#{@url}",
-					timeout: 60 * 1000
-				)
-				.should.equal true
 
-		it "should pass the request on to the client", ->
-			@proxy.pipe
-				.calledWith(@res)
-				.should.equal true
+		describe "user with standard priority", ->
 
-		it "should bind an error handle to the request proxy", ->
-			@proxy.on.calledWith("error").should.equal true
+			beforeEach ->
+				@UserGetter.getUser.callsArgWith(2, null, @user)
+				@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)	
+
+			it "should open a request to the CLSI", ->
+				@request
+					.calledWith(
+						method: @req.method
+						url: "#{@settings.apis.clsi.url}#{@url}",
+						timeout: 60 * 1000
+					)
+					.should.equal true
+
+			it "should pass the request on to the client", ->
+				@proxy.pipe
+					.calledWith(@res)
+					.should.equal true
+
+			it "should bind an error handle to the request proxy", ->
+				@proxy.on.calledWith("error").should.equal true
+
+		describe "user with priority compile", ->
+
+			beforeEach ->
+				@user.features.compileGroup = "priority"
+				@UserGetter.getUser.callsArgWith(2, null, @user)
+				@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)	
+
+			it "should proxy to the priorty url if the user has the feature", ()->
+				@request
+					.calledWith(
+						method: @req.method
+						url: "#{@settings.apis.clsi_priority.url}#{@url}",
+						timeout: 60 * 1000
+					)
+					.should.equal true
+
+
+
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
@@ -201,3 +229,8 @@ describe "CompileController", ->
 			@CompileController.compileAndDownloadPdf @req, @res
 			@CompileController.proxyToClsi.calledWith("/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()
+
+
+
+
+
