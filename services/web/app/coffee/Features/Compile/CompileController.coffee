@@ -64,12 +64,12 @@ module.exports = CompileController =
 		CompileController.proxyToClsi(req.url, req, res, next)
 
 	proxyToClsi: (url, req, res, next = (error) ->) ->
-		logger.log url: url, "proxying to CLSI"
 		if req.session.compileGroup == "priority"
 			compilerUrl = Settings.apis.clsi_priority.url
 		else
 			compilerUrl = Settings.apis.clsi.url
 		url = "#{compilerUrl}#{url}"
+		logger.log url: url, "proxying to CLSI"
 		oneMinute = 60 * 1000
 		proxy = request(url: url, method: req.method, timeout: oneMinute)
 		proxy.pipe(res)

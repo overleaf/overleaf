@@ -58,10 +58,6 @@ define [
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
 
-		buckets = [
-			{ bucketName:"7d", queryString: "_free_trial_7_days", trial_len:7 }
-			{ bucketName:"14d", queryString: "_free_trial_14_days", trial_len:14 }
-		]
 
 		if MultiCurrencyPricing.currencyCode != "USD"
 			currencyBuckets = [
@@ -72,10 +68,9 @@ define [
 			$scope.currencyCode = multiCurrencyBucket.currency
 
 
-		bucket = abTestManager.getABTestBucket "trial_len", buckets
 
-		$scope.trial_len = bucket.trial_len
-		$scope.planQueryString = bucket.queryString
+		$scope.trial_len = 7
+		$scope.planQueryString = '_free_trial_7_days'
 
 		$scope.ui =
 			view: "monthly"
@@ -91,8 +86,7 @@ define [
 
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
-			else
-				abTestManager.processTestWithStep("trial_len", bucket.bucketName, 0)
+			
 			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
 
 		$scope.switchToMonthly = ->
