@@ -5,7 +5,7 @@
 	position: relative;
 	text-align: center;
 	overflow: hidden;
-	h1, p {
+	h1, p, label {
 		color: white;
 		text-align: center;
 	}
@@ -48,12 +48,12 @@
 	}
 	.screenshot {
 		height: 550px;
-		// Make sure the 
-		padding: 50px;
-		margin: -50px;
+		margin: auto;
+		margin-bottom: -50px;
 		overflow-y: hidden;
+		box-shadow: 0 0 50px rgba(0,0,0,.67);
+		max-width: 960px;
 		.img {
-			box-shadow: 0 0 50px rgba(0,0,0,.67);
 			max-width: 960px;
 			background-image: url('/img/screen.png');
 			background-size: 100%;
