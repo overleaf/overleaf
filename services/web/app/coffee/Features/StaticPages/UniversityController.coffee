@@ -10,7 +10,6 @@ module.exports = UniversityController =
 	getPage: (req, res, next)->
 		url = req.url?.toLowerCase()
 		universityUrl = "#{settings.apis.university.url}#{url}"
-		console.log universityUrl
 		if StaticPageHelpers.shouldProxy(url) 
 			return UniversityController._directProxy universityUrl, res
 
@@ -21,6 +20,7 @@ module.exports = UniversityController =
 			data = data.trim()
 			try
 				data = JSON.parse(data)
+				data.content = data.content.replace(/__ref__/g, req.query.ref)
 			catch err
 				logger.err err:err, data:data, "error parsing data from data"
 			res.render "university/university_holder", data
