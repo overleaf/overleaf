@@ -57,6 +57,18 @@ module.exports = EditorHttpController =
 			return next(error) if error?
 			res.send 204
 
+	deleteDoc: (req, res, next)->
+		req.params.entity_type  = "doc"
+		EditorHttpController.deleteEntity(req, res, next)
+
+	deleteFile: (req, res, next)->
+		req.params.entity_type = "file"
+		EditorHttpController.deleteEntity(req, res, next)
+
+	deleteFolder: (req, res, next)->
+		req.params.entity_type = "folder"
+		EditorHttpController.deleteEntity(req, res, next)
+
 	deleteEntity: (req, res, next) ->
 		project_id  = req.params.Project_id
 		entity_id   = req.params.entity_id
