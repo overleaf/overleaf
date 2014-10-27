@@ -216,8 +216,7 @@ define [
 					</div>
 					<div class="ace-editor-body"></div>
 					<div
-						id="spellCheckMenu"
-						class="dropdown context-menu"
+						class="dropdown context-menu spell-check-menu"
 						ng-show="spellingMenu.open"
 						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
 						ng-class="{open: spellingMenu.open}"

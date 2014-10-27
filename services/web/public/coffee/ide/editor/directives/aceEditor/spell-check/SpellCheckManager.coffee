@@ -6,6 +6,8 @@ define [
 
 	class SpellCheckManager
 		constructor: (@$scope, @editor, @element) ->
+			$(document.body).append @element.find(".spell-check-menu")
+			
 			@updatedLines = []
 			@highlightedWordManager = new HighlightedWordManager(@editor)
 
