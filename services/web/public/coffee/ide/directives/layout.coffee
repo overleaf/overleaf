@@ -22,6 +22,7 @@ define [
 						spacing_open: spacingOpen
 						spacing_closed: spacingClosed
 						slidable: false
+						enableCursorHotkey: false
 						onresize: () =>
 							onInternalResize()
 						maskIframesOnResize: scope.$eval(
