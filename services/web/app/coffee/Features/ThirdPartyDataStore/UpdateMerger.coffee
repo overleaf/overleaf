@@ -12,19 +12,20 @@ module.exports =
 		self = @
 		logger.log project_id:project_id, path:path, "merging update from tpds"
 		projectLocator.findElementByPath project_id, path, (err, element)=>
+			# Returns an error if the element is not found
+			#return callback(err) if err?
 			logger.log project_id:project_id, path:path, "found element by path for merging update from tpds"
 			elementId = undefined
 			if element?
 				elementId = element._id
 			self.p.writeStreamToDisk project_id, elementId, updateRequest, (err, fsPath)->
-				FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
-					if shouldIgnore
-						return callback()
-					FileTypeManager.isBinary path, fsPath, (err, isFile)->
-						if isFile
-							self.p.processFile project_id, elementId, fsPath, path, source, callback #TODO clean up the stream written to disk here
-						else
-							self.p.processDoc project_id, elementId, fsPath, path, source, callback
+				return callback(err) if err?
+				FileTypeManager.isBinary path, fsPath, (err, isFile)->
+					return callback(err) if err?
+					if isFile
+						self.p.processFile project_id, elementId, fsPath, path, source, callback #TODO clean up the stream written to disk here
+					else
+						self.p.processDoc project_id, elementId, fsPath, path, source, callback
 
 	deleteUpdate: (project_id, path, source, callback)->
 		projectLocator.findElementByPath project_id, path, (err, element)->

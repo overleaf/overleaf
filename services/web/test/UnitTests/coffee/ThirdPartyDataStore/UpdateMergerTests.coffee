@@ -33,33 +33,17 @@ describe 'UpdateMerger :', ->
 			@fsPath = "file/system/path.tex"
 			@updateMerger.p.writeStreamToDisk = sinon.stub().callsArgWith(3, null, @fsPath)
 			@FileTypeManager.isBinary = sinon.stub()
-			@FileTypeManager.shouldIgnore = sinon.stub()
 
 		it 'should get the element id', (done)->
-
 			@projectLocator.findElementByPath = sinon.spy()
-
 			@updateMerger.mergeUpdate @project_id, @path, @update, @source, =>
-
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 			done()
-
-
-		it 'should ignore update if FileTypeManger says ignore', (done)->
-			filePath = ".gitignore"
-			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:"id"})
-			@FileTypeManager.shouldIgnore.callsArgWith(1, null, true)
-			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
-				@FileTypeManager.isBinary.called.should.equal false
-				@FileTypeManager.shouldIgnore.calledWith(filePath).should.equal true
-				done()
-
 
 		it 'should process update as doc when it is a doc', (done)->
 			doc_id = "231312s"
 			@FileTypeManager.isBinary.callsArgWith(2, null, false)
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:doc_id})
-			@FileTypeManager.shouldIgnore.callsArgWith(1, null, false)
 			@updateMerger.p.processDoc = sinon.stub().callsArgWith(5)
 			filePath = "/folder/doc.tex"
 
@@ -72,7 +56,6 @@ describe 'UpdateMerger :', ->
 			file_id = "1231"
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:file_id})
 			@FileTypeManager.isBinary.callsArgWith(2, null, true)
-			@FileTypeManager.shouldIgnore.callsArgWith(1, null, false)
 			@updateMerger.p.processFile = sinon.stub().callsArgWith(5)
 			filePath = "/folder/file1.png"
 

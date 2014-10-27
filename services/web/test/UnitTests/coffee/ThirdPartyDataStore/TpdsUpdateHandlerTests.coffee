@@ -17,6 +17,8 @@ describe 'TpdsUpdateHandler', ->
 			createBlankProject : sinon.stub().callsArgWith(2, null, @project)
 		@projectDeleter = {markAsDeletedByExternalSource:sinon.stub().callsArgWith(1)}
 		@rootDocManager = setRootDocAutomatically:sinon.stub()
+		@FileTypeManager =
+			shouldIgnore: sinon.stub().callsArgWith(1, null, false)
 		@handler = SandboxedModule.require modulePath, requires:
 			'./UpdateMerger': @updateMerger
 			'./Editor/EditorController': @editorController
@@ -24,6 +26,7 @@ describe 'TpdsUpdateHandler', ->
 			'../Project/ProjectCreationHandler':@projectCreationHandler
 			'../Project/ProjectDeleter': @projectDeleter
 			"../Project/ProjectRootDocManager" : @rootDocManager
+			'../Uploads/FileTypeManager': @FileTypeManager
 			'logger-sharelatex': log:->
 		@user_id = "dsad29jlkjas"
 		@source = "dropbox"
@@ -55,7 +58,14 @@ describe 'TpdsUpdateHandler', ->
 					done()
 				), 1
 
-
+		it 'should not update files that should be ignored', (done) ->
+			@FileTypeManager.shouldIgnore = sinon.stub().callsArgWith(1, null, true)
+			@projectLocator.findUsersProjectByName = sinon.stub().callsArgWith(2)
+			path = "/.gitignore"
+			@updateMerger.mergeUpdate = sinon.stub()
+			@handler.newUpdate @user_id, @project.name, path, {}, @source, =>
+				@updateMerger.mergeUpdate.called.should.equal false
+				done()
 
 	describe 'getting a delete :', ->
 		it 'should call deleteEntity in the collaberation manager', (done)->

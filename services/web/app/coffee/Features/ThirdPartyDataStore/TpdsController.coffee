@@ -5,6 +5,9 @@ Path = require('path')
 metrics = require("../../infrastructure/Metrics")
 
 module.exports =
+	# mergeUpdate and deleteUpdate are used by Dropbox, where the project is only passed as the name, as the
+	# first part of the file path. They have to check the project exists, find it, and create it if not.
+	# They also ignore 'noisy' files like .DS_Store, .gitignore, etc.
 	mergeUpdate: (req, res)->
 		metrics.inc("tpds.merge-update")
 		{filePath, user_id, projectName} = parseParams(req)
@@ -35,6 +38,10 @@ module.exports =
 				res.send 200
 			req.session.destroy()
 	
+	# updateProjectContents and deleteProjectContents are used by GitHub. The project_id is known so we 
+	# can skip right ahead to creating/updating/deleting the file. These methods will not ignore noisy
+	# files like .DS_Store, .gitignore, etc because people are generally more explicit with the files they
+	# want in git.
 	updateProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
 		path = "/" + req.params[0] # UpdateMerger expects leading slash

@@ -4,6 +4,7 @@ projectLocator = require('../Project/ProjectLocator')
 projectCreationHandler = require('../Project/ProjectCreationHandler')
 projectDeleter = require('../Project/ProjectDeleter')
 ProjectRootDocManager   = require "../Project/ProjectRootDocManager"
+FileTypeManager = require('../Uploads/FileTypeManager')
 
 commitMessage = "Before update from Dropbox"
 
@@ -22,8 +23,11 @@ module.exports =
 				else
 					cb err, project
 		getOrCreateProject (err, project)->
-			updateMerger.mergeUpdate project._id, path, updateRequest, source, (err)->
-				callback(err)
+			return callback(err) if err?
+			FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
+				if shouldIgnore
+					return callback()
+				updateMerger.mergeUpdate project._id, path, updateRequest, source, callback
 
 
 	deleteUpdate: (user_id, projectName, path, source, callback)->	
