@@ -147,7 +147,7 @@ module.exports = ProjectController =
 						projects: projects
 						tags: tags
 						user: user
-						hasSubscription: results.hasSubscription
+						hasSubscription: results.hasSubscription[0]
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
