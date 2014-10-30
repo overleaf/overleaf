@@ -163,11 +163,14 @@ define [
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
 
+				editor.setOption("scrollPastEnd", true)
+
 				resetSession = () ->
 					session = editor.getSession()
 					session.setUseWrapMode(true)
 					session.setMode("ace/mode/latex")
 					session.setAnnotations scope.annotations
+
 
 				updateCount = 0
 				onChange = () ->
