@@ -15,8 +15,8 @@ module.exports =
 			timeInterval: 60
 			subjectName: req.ip
 			throttle: 6
-		RateLimiter.addCount opts, (err, canCompile)->
-			if !canCompile
+		RateLimiter.addCount opts, (err, canContinue)->
+			if !canContinue
 				return res.send 500, { message: req.i18n.translate("rate_limit_hit_wait")}
 			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
 				if err?
