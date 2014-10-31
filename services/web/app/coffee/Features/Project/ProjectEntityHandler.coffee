@@ -184,6 +184,9 @@ module.exports = ProjectEntityHandler =
 			logger.log project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
+				if !origonalFileRef?
+					logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
+					return callback()
 				fileRef = new File name : origonalFileRef.name
 				FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
 					if err?
