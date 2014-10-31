@@ -71,6 +71,10 @@ sanitizeTypeOfElement = (elementType)->
 	return elementType
 
 ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callback)->
+	if !element?
+		e = new Error("no element passed to be inserted")
+		logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
+		return callback(e)
 	type = sanitizeTypeOfElement type
 	this.findById project_id, (err, project)=>
 		if err?
