@@ -1,3 +1,5 @@
+_ = require("underscore")
+
 module.exports = ProjectEditorHandler =
 	buildProjectModelView: (project, options) ->
 		options ||= {}
@@ -55,10 +57,11 @@ module.exports = ProjectEditorHandler =
 		signUpDate : user.signUpDate
 
 	buildFolderModelView: (folder) ->
+		fileRefs = _.filter folder.fileRefs, (file)-> file?
 		_id        : folder._id
 		name       : folder.name
 		folders    : @buildFolderModelView childFolder for childFolder in folder.folders
-		fileRefs   : @buildFileModelView file for file in folder.fileRefs
+		fileRefs   : @buildFileModelView file for file in fileRefs
 		docs       : @buildDocModelView doc for doc in folder.docs
 
 	buildFileModelView: (file) ->

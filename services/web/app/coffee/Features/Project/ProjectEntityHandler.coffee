@@ -64,7 +64,8 @@ module.exports = ProjectEntityHandler =
 			files = {}
 			for folderPath, folder of folders
 				for file in folder.fileRefs
-					files[path.join(folderPath, file.name)] = file
+					if file?
+						files[path.join(folderPath, file.name)] = file
 			callback null, files
 
 	flushProjectToThirdPartyDataStore: (project_id, callback) ->
