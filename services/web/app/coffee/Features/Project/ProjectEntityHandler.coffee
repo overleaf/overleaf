@@ -72,7 +72,7 @@ module.exports = ProjectEntityHandler =
 		self = @
 		logger.log project_id:project_id, "flushing project to tpds"
 		documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-		documentUpdaterHandler.flushProjectToMongo project_id, undefined, (error) ->
+		documentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
 			Project.findById project_id, (error, project) ->
 				return callback(error) if error?

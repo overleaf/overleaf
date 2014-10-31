@@ -150,7 +150,7 @@ module.exports = EditorController =
 				callback null, false
 			else
 				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
-					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, "", ->
+					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, ->
 					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
 					callback null, ProjectEditorHandler.buildUserModelView(user, privileges)
 

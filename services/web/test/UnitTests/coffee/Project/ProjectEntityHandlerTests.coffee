@@ -785,7 +785,7 @@ describe 'ProjectEntityHandler', ->
 				name: "Mock project name"
 			}
 			@ProjectModel.findById = sinon.stub().callsArgWith(1, null, @project)
-			@documentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArg(2)
+			@documentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArg(1)
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
 			@tpdsUpdateSender.addFile = sinon.stub().callsArg(1)
 			@docs = {
