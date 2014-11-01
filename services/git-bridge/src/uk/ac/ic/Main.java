@@ -1,6 +1,7 @@
 package uk.ac.ic;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.http.server.GitServlet;
 import org.eclipse.jgit.lib.*;
 
 import java.io.IOException;

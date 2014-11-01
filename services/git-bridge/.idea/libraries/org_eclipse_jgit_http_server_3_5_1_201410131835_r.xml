@@ -3,7 +3,9 @@
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r.jar!/" />
     </CLASSES>
-    <JAVADOC />
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r-javadoc.jar!/" />
+    </JAVADOC>
     <SOURCES />
   </library>
 </component>

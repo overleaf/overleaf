@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0c822a5a-f421-4f3c-b941-5c2809c4546f" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/Main.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/Main.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/org_eclipse_jgit_http_server_3_5_1_201410131835_r.xml" afterPath="$PROJECT_DIR$/.idea/libraries/org_eclipse_jgit_http_server_3_5_1_201410131835_r.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/writelatex-git-bridge.iml" afterPath="$PROJECT_DIR$/writelatex-git-bridge.iml" />
     </list>
     <ignored path="writelatex-git-bridge.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -59,8 +60,8 @@
       <file leaf-file-name="Main.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.30279502" vertical-offset="0" max-vertical-offset="644">
-              <caret line="13" column="8" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
+            <state vertical-scroll-proportion="0.32608697" vertical-offset="0" max-vertical-offset="644">
+              <caret line="14" column="8" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -188,7 +189,7 @@
     <property name="GenerateAntBuildDialog.inclineRuntiemClasspath" value="false" />
     <property name="GenerateAntBuildDialog.generateIdeaHomeProperty" value="false" />
     <property name="GenerateAntBuildDialog.outputFileNameProperty" value="writelatex-git-bridge" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/org.eclipse.jgit-3.5.1.201410131835-r-javadoc.jar!/" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r-javadoc.jar!/" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -453,8 +454,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.30279502" vertical-offset="0" max-vertical-offset="644">
-          <caret line="13" column="8" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.32608697" vertical-offset="0" max-vertical-offset="644">
+          <caret line="14" column="8" selection-start-line="14" selection-start-column="8" selection-end-line="14" selection-end-column="8" />
           <folding />
         </state>
       </provider>
