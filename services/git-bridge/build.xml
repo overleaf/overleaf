@@ -96,12 +96,24 @@
   
   <!-- Project Libraries -->
   
+  <path id="library.hamcrest-core-1.3.classpath">
+    <pathelement location="${basedir}/libs/hamcrest-core-1.3.jar"/>
+  </path>
+  
+  <path id="library.hamcrest-library-1.3.classpath">
+    <pathelement location="${basedir}/libs/hamcrest-library-1.3.jar"/>
+  </path>
+  
   <path id="library.javax.servlet-api-3.1.0.classpath">
     <pathelement location="${basedir}/libs/javax.servlet-api-3.1.0.jar"/>
   </path>
   
   <path id="library.jetty-all-9.2.3.v20140905.classpath">
     <pathelement location="${basedir}/libs/jetty-all-9.2.3.v20140905.jar"/>
+  </path>
+  
+  <path id="library.junit-4.11.classpath">
+    <pathelement location="${basedir}/libs/junit-4.11.jar"/>
   </path>
   
   <path id="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath">
@@ -111,18 +123,6 @@
   <path id="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath">
     <pathelement location="${basedir}/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r.jar"/>
   </path>
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <pathelement location="${javac2.home}/javac2.jar"/>
-    <pathelement location="${javac2.home}/jdom.jar"/>
-    <pathelement location="${javac2.home}/asm4-all.jar"/>
-    <pathelement location="${javac2.home}/jgoodies-forms.jar"/>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
   
   <!-- Modules -->
   
@@ -151,6 +151,9 @@
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
     <path refid="library.javax.servlet-api-3.1.0.classpath"/>
     <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
+    <path refid="library.hamcrest-core-1.3.classpath"/>
+    <path refid="library.hamcrest-library-1.3.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.production.module.classpath">
@@ -159,6 +162,9 @@
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
     <path refid="library.javax.servlet-api-3.1.0.classpath"/>
     <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
+    <path refid="library.hamcrest-core-1.3.classpath"/>
+    <path refid="library.hamcrest-library-1.3.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.module.classpath">
@@ -168,9 +174,9 @@
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
     <path refid="library.javax.servlet-api-3.1.0.classpath"/>
     <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
-    <pathelement location="${idea.home}/lib/hamcrest-core-1.3.jar"/>
-    <pathelement location="${idea.home}/lib/hamcrest-library-1.3.jar"/>
-    <pathelement location="${idea.home}/lib/junit-4.11.jar"/>
+    <path refid="library.hamcrest-core-1.3.classpath"/>
+    <path refid="library.hamcrest-library-1.3.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.module.classpath">
@@ -180,9 +186,9 @@
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
     <path refid="library.javax.servlet-api-3.1.0.classpath"/>
     <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
-    <pathelement location="${idea.home}/lib/hamcrest-core-1.3.jar"/>
-    <pathelement location="${idea.home}/lib/hamcrest-library-1.3.jar"/>
-    <pathelement location="${idea.home}/lib/junit-4.11.jar"/>
+    <path refid="library.hamcrest-core-1.3.classpath"/>
+    <path refid="library.hamcrest-library-1.3.classpath"/>
+    <path refid="library.junit-4.11.classpath"/>
   </path>
   
   
@@ -209,15 +215,15 @@
   
   <target name="compile.module.writelatex-git-bridge" depends="compile.module.writelatex-git-bridge.production,compile.module.writelatex-git-bridge.tests" description="Compile module writelatex-git-bridge"/>
   
-  <target name="compile.module.writelatex-git-bridge.production" depends="register.custom.compilers" description="Compile module writelatex-git-bridge; production classes">
+  <target name="compile.module.writelatex-git-bridge.production" description="Compile module writelatex-git-bridge; production classes">
     <mkdir dir="${writelatex-git-bridge.output.dir}"/>
-    <javac2 destdir="${writelatex-git-bridge.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
+    <javac destdir="${writelatex-git-bridge.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
       <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
       <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
       <classpath refid="writelatex-git-bridge.module.production.classpath"/>
       <src refid="writelatex-git-bridge.module.sourcepath"/>
       <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
-    </javac2>
+    </javac>
     
     <copy todir="${writelatex-git-bridge.output.dir}">
       <fileset dir="${module.writelatex-git-bridge.basedir}/src">
@@ -227,15 +233,15 @@
     </copy>
   </target>
   
-  <target name="compile.module.writelatex-git-bridge.tests" depends="register.custom.compilers,compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
+  <target name="compile.module.writelatex-git-bridge.tests" depends="compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
     <mkdir dir="${writelatex-git-bridge.testoutput.dir}"/>
-    <javac2 destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
+    <javac destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
       <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
       <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
       <classpath refid="writelatex-git-bridge.module.classpath"/>
       <src refid="writelatex-git-bridge.module.test.sourcepath"/>
       <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
-    </javac2>
+    </javac>
     
     <copy todir="${writelatex-git-bridge.testoutput.dir}">
       <fileset dir="${module.writelatex-git-bridge.basedir}/test">
@@ -253,8 +259,22 @@
   <target name="init" description="Build initialization">
     <!-- Perform any build initialization in this target -->
   </target>
-  
-  <target name="clean" depends="clean.module.writelatex-git-bridge" description="cleanup all"/>
+
+  <target name="test" depends="compile.module.writelatex-git-bridge.tests">
+        <junit>
+            <classpath>
+                <path refid="writelatex-git-bridge.module.classpath"/>
+                <pathelement location="${writelatex-git-bridge.testoutput.dir}"/>
+            </classpath>
+            <batchtest>
+                <fileset dir="${writelatex-git-bridge.testoutput.dir}">
+                </fileset>
+            </batchtest>
+            <formatter type="brief" usefile="false"/>
+        </junit>
+    </target>
+
+    <target name="clean" depends="clean.module.writelatex-git-bridge" description="cleanup all"/>
   
   <target name="build.modules" depends="init, clean, compile.module.writelatex-git-bridge" description="build all modules"/>
   
