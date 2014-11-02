@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="writelatex-git-bridge" default="all">
   
-  
-  <property file="writelatex-git-bridge.properties"/>
+
   <!-- Uncomment the following property if no tests compilation is needed -->
   <!-- 
   <property name="skip.tests" value="true"/>
@@ -55,42 +54,8 @@
     <exclude name="**/?*.kt"/>
     <exclude name="**/?*.clj"/>
   </patternset>
-  
-  <!-- JDK definitions -->
-  
-  <property name="jdk.bin.1.7" value="${jdk.home.1.7}/bin"/>
-  <path id="jdk.classpath.1.7">
-    <fileset dir="${jdk.home.1.7}">
-      <include name="lib/ant-javafx.jar"/>
-      <include name="lib/dt.jar"/>
-      <include name="lib/javafx-doclet.jar"/>
-      <include name="lib/javafx-mx.jar"/>
-      <include name="lib/jconsole.jar"/>
-      <include name="lib/sa-jdi.jar"/>
-      <include name="lib/tools.jar"/>
-      <include name="jre/lib/charsets.jar"/>
-      <include name="jre/lib/deploy.jar"/>
-      <include name="jre/lib/htmlconverter.jar"/>
-      <include name="jre/lib/javaws.jar"/>
-      <include name="jre/lib/jce.jar"/>
-      <include name="jre/lib/jfr.jar"/>
-      <include name="jre/lib/jfxrt.jar"/>
-      <include name="jre/lib/jsse.jar"/>
-      <include name="jre/lib/management-agent.jar"/>
-      <include name="jre/lib/plugin.jar"/>
-      <include name="jre/lib/resources.jar"/>
-      <include name="jre/lib/rt.jar"/>
-      <include name="jre/lib/ext/dnsns.jar"/>
-      <include name="jre/lib/ext/localedata.jar"/>
-      <include name="jre/lib/ext/sunec.jar"/>
-      <include name="jre/lib/ext/sunjce_provider.jar"/>
-      <include name="jre/lib/ext/sunpkcs11.jar"/>
-      <include name="jre/lib/ext/zipfs.jar"/>
-    </fileset>
-  </path>
-  
-  <property name="project.jdk.home" value="${jdk.home.1.7}"/>
-  <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
+
+
   <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
   
   
@@ -131,9 +96,7 @@
   
   <dirname property="module.writelatex-git-bridge.basedir" file="${ant.file}"/>
   
-  
-  <property name="module.jdk.home.writelatex-git-bridge" value="${project.jdk.home}"/>
-  <property name="module.jdk.bin.writelatex-git-bridge" value="${project.jdk.bin}"/>
+
   <property name="module.jdk.classpath.writelatex-git-bridge" value="${project.jdk.classpath}"/>
   
   <property name="compiler.args.writelatex-git-bridge" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
@@ -146,7 +109,6 @@
   </path>
   
   <path id="writelatex-git-bridge.module.production.classpath">
-    <path refid="${module.jdk.classpath.writelatex-git-bridge}"/>
     <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
     <path refid="library.javax.servlet-api-3.1.0.classpath"/>
@@ -168,7 +130,6 @@
   </path>
   
   <path id="writelatex-git-bridge.module.classpath">
-    <path refid="${module.jdk.classpath.writelatex-git-bridge}"/>
     <pathelement location="${writelatex-git-bridge.output.dir}"/>
     <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
     <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
@@ -217,7 +178,7 @@
   
   <target name="compile.module.writelatex-git-bridge.production" description="Compile module writelatex-git-bridge; production classes">
     <mkdir dir="${writelatex-git-bridge.output.dir}"/>
-    <javac destdir="${writelatex-git-bridge.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
+    <javac destdir="${writelatex-git-bridge.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
       <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
       <classpath refid="writelatex-git-bridge.module.production.classpath"/>
@@ -235,7 +196,7 @@
   
   <target name="compile.module.writelatex-git-bridge.tests" depends="compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
     <mkdir dir="${writelatex-git-bridge.testoutput.dir}"/>
-    <javac destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
+    <javac destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
       <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
       <classpath refid="writelatex-git-bridge.module.classpath"/>
