@@ -1,2 +1,2 @@
 language: java
-install: ant deps
+install: ant all
