@@ -2,22 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0c822a5a-f421-4f3c-b941-5c2809c4546f" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/Main.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/application/WLGitBridgeApplication.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/application/WLGitBridgeServer.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/git/WLGitServlet.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/git/WLGitServletConfig.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServletConfig.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/git/WLReceivePackFactory.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLReceivePackFactory.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/git/WLRepositoryResolver.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLRepositoryResolver.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/git/WLUploadPackFactory.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLUploadPackFactory.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/MainTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/MainTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/application/WLGitBridgeApplicationTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeApplicationTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/application/WLGitBridgeServerTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeServerTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLGitServletConfigTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletConfigTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLGitServletTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLReceivePackFactoryTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLReceivePackFactoryTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLRepositoryResolverTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLRepositoryResolverTests.java" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLUploadPackTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLUploadPackTests.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/module_writelatex-git-bridge.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/writelatex-git-bridge.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/writelatex-git-bridge.xml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="writelatex-git-bridge.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -40,31 +28,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
+      <file leaf-file-name="writelatex-git-bridge.iml" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/writelatex-git-bridge.iml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.4805492" vertical-offset="0" max-vertical-offset="874">
+              <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="WLGitServlet.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="390">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="390">
               <caret line="16" column="48" selection-start-line="16" selection-start-column="48" selection-end-line="16" selection-end-column="48" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLGitBridgeApplicationTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeApplicationTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
-              <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLGitBridgeServerTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeServerTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="315">
-              <caret line="7" column="37" selection-start-line="7" selection-start-column="37" selection-end-line="12" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -72,16 +50,6 @@
       </file>
       <file leaf-file-name="WLGitServletTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
-              <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLGitServletConfigTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletConfigTests.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
               <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
@@ -120,10 +88,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MainTests.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="MainTests.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/MainTests.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.17097265" vertical-offset="0" max-vertical-offset="1316">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
               <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
               <folding />
             </state>
@@ -133,7 +101,7 @@
       <file leaf-file-name="WLGitBridgeApplication.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="345" max-vertical-offset="480">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
               <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
               <folding />
             </state>
@@ -187,6 +155,7 @@
         <option value="$PROJECT_DIR$/test/uk/ac/ic/test/git/WLUploadPackTests.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/test/MainTests.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/MainTests.java" />
+        <option value="$PROJECT_DIR$/writelatex-git-bridge.properties" />
       </list>
     </option>
   </component>
@@ -221,7 +190,7 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -380,7 +349,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -393,14 +362,14 @@
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="GenerateAntBuildDialog.generateSingleFile" value="false" />
+    <property name="GenerateAntBuildDialog.generateSingleFile" value="true" />
     <property name="GenerateAntBuildDialog.enableUiFormCompile" value="true" />
     <property name="GenerateAntBuildDialog.forceTargetJdk" value="true" />
     <property name="GenerateAntBuildDialog.backupFiles" value="false" />
-    <property name="GenerateAntBuildDialog.inclineRuntiemClasspath" value="false" />
-    <property name="GenerateAntBuildDialog.generateIdeaHomeProperty" value="false" />
+    <property name="GenerateAntBuildDialog.inclineRuntiemClasspath" value="true" />
+    <property name="GenerateAntBuildDialog.generateIdeaHomeProperty" value="true" />
     <property name="GenerateAntBuildDialog.outputFileNameProperty" value="writelatex-git-bridge" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r-javadoc.jar!/" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/writelatex-git-bridge.xml" />
     <property name="recentsLimit" value="5" />
     <property name="dynamic.classpath" value="false" />
     <property name="OverrideImplement.combined" value="true" />
@@ -487,19 +456,6 @@
       </ExternalSystemSettings>
       <method />
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <method />
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -525,6 +481,19 @@
       <envs />
       <properties />
       <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -638,23 +607,23 @@
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24970692" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24970692" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32886904" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13325518" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.13325518" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.16443452" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="100" y="123" width="1166" height="541" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32886904" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
@@ -681,8 +650,83 @@
   <component name="antWorkspaceConfiguration">
     <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
     <option name="FILTER_TARGETS" value="false" />
+    <buildFile url="file://$PROJECT_DIR$/writelatex-git-bridge.xml">
+      <expanded value="true" />
+    </buildFile>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeApplicationTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/WLGitBridgeServerTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="315">
+          <caret line="7" column="37" selection-start-line="7" selection-start-column="37" selection-end-line="12" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletConfigTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLReceivePackFactoryTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="315">
+          <caret line="7" column="40" selection-start-line="7" selection-start-column="40" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLRepositoryResolverTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLUploadPackTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
+          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/MainTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="225" max-vertical-offset="315">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="345" max-vertical-offset="480">
+          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="390">
@@ -849,36 +893,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/writelatex-git-bridge.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="420" max-vertical-offset="510">
-          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/writelatex-git-bridge.properties">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1095">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/module_writelatex-git-bridge.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-45.576923" vertical-offset="0" max-vertical-offset="1905">
-          <caret line="79" column="153" selection-start-line="79" selection-start-column="148" selection-end-line="79" selection-end-column="153" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/writelatex-git-bridge.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2175">
-          <caret line="17" column="31" selection-start-line="17" selection-start-column="31" selection-end-line="17" selection-end-column="31" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServletConfig.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="720">
@@ -923,22 +937,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="15" max-vertical-offset="810">
           <caret line="28" column="35" selection-start-line="28" selection-start-column="35" selection-end-line="28" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
-          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="390">
-          <caret line="16" column="48" selection-start-line="16" selection-start-column="48" selection-end-line="16" selection-end-column="48" />
           <folding />
         </state>
       </provider>
@@ -1001,8 +999,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/MainTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.17097265" vertical-offset="0" max-vertical-offset="1316">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
           <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="480">
+          <caret line="23" column="5" selection-start-line="23" selection-start-column="5" selection-end-line="23" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="390">
+          <caret line="16" column="48" selection-start-line="16" selection-start-column="48" selection-end-line="16" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/writelatex-git-bridge.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4805492" vertical-offset="0" max-vertical-offset="874">
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
           <folding />
         </state>
       </provider>
