@@ -9,6 +9,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="org.eclipse.jgit-3.5.1.201410131835-r" level="project" />
     <orderEntry type="library" name="org.eclipse.jgit.http.server-3.5.1.201410131835-r" level="project" />
+    <orderEntry type="library" name="javax.servlet-api-3.1.0" level="project" />
+    <orderEntry type="library" name="jetty-all-9.2.3.v20140905" level="project" />
   </component>
 </module>
 
