@@ -1,4 +1,4 @@
-package uk.ac.ic.test.application;
+package uk.ac.ic.wlgitbridge.test.application;
 
 import org.junit.Test;
 

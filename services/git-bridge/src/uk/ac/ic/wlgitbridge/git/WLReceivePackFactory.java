@@ -1,4 +1,4 @@
-package uk.ac.ic.git;
+package uk.ac.ic.wlgitbridge.git;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;

@@ -1,9 +1,9 @@
-package uk.ac.ic.application;
+package uk.ac.ic.wlgitbridge.application;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import uk.ac.ic.git.WLGitServlet;
+import uk.ac.ic.wlgitbridge.git.WLGitServlet;
 
 import javax.servlet.ServletException;
 import java.net.BindException;

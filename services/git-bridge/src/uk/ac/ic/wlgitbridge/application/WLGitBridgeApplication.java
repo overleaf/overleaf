@@ -1,4 +1,4 @@
-package uk.ac.ic.application;
+package uk.ac.ic.wlgitbridge.application;
 
 import javax.servlet.ServletException;
 

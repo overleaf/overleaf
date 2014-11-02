@@ -1,4 +1,4 @@
-package uk.ac.ic.git;
+package uk.ac.ic.wlgitbridge.git;
 
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jgit.http.server.GitServlet;

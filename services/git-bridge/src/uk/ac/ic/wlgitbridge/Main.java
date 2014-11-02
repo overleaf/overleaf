@@ -1,6 +1,6 @@
-package uk.ac.ic;
+package uk.ac.ic.wlgitbridge;
 
-import uk.ac.ic.application.WLGitBridgeApplication;
+import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
 
 /**
  * Created by Winston on 01/11/14.
