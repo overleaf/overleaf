@@ -92,6 +92,25 @@
   <property name="project.jdk.home" value="${jdk.home.1.7}"/>
   <property name="project.jdk.bin" value="${jdk.bin.1.7}"/>
   <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
+  
+  
+  <!-- Project Libraries -->
+  
+  <path id="library.javax.servlet-api-3.1.0.classpath">
+    <pathelement location="${basedir}/libs/javax.servlet-api-3.1.0.jar"/>
+  </path>
+  
+  <path id="library.jetty-all-9.2.3.v20140905.classpath">
+    <pathelement location="${basedir}/libs/jetty-all-9.2.3.v20140905.jar"/>
+  </path>
+  
+  <path id="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath">
+    <pathelement location="${basedir}/libs/org.eclipse.jgit-3.5.1.201410131835-r.jar"/>
+  </path>
+  
+  <path id="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath">
+    <pathelement location="${basedir}/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r.jar"/>
+  </path>
   <!-- Register Custom Compiler Taskdefs -->
   <property name="javac2.home" value="${idea.home}/lib"/>
   <path id="javac2.classpath">

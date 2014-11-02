@@ -17,20 +17,42 @@
   
   <path id="writelatex-git-bridge.module.production.classpath">
     <path refid="${module.jdk.classpath.writelatex-git-bridge}"/>
+    <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.javax.servlet-api-3.1.0.classpath"/>
+    <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.production.module.classpath">
     <pathelement location="${writelatex-git-bridge.output.dir}"/>
+    <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.javax.servlet-api-3.1.0.classpath"/>
+    <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.module.classpath">
     <path refid="${module.jdk.classpath.writelatex-git-bridge}"/>
     <pathelement location="${writelatex-git-bridge.output.dir}"/>
+    <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.javax.servlet-api-3.1.0.classpath"/>
+    <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
+    <pathelement location="${idea.home}/lib/hamcrest-core-1.3.jar"/>
+    <pathelement location="${idea.home}/lib/hamcrest-library-1.3.jar"/>
+    <pathelement location="${idea.home}/lib/junit-4.11.jar"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.module.classpath">
     <pathelement location="${writelatex-git-bridge.testoutput.dir}"/>
     <pathelement location="${writelatex-git-bridge.output.dir}"/>
+    <path refid="library.org.eclipse.jgit-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.org.eclipse.jgit.http.server-3.5.1.201410131835-r.classpath"/>
+    <path refid="library.javax.servlet-api-3.1.0.classpath"/>
+    <path refid="library.jetty-all-9.2.3.v20140905.classpath"/>
+    <pathelement location="${idea.home}/lib/hamcrest-core-1.3.jar"/>
+    <pathelement location="${idea.home}/lib/hamcrest-library-1.3.jar"/>
+    <pathelement location="${idea.home}/lib/junit-4.11.jar"/>
   </path>
   
   
@@ -45,6 +67,12 @@
   <path id="writelatex-git-bridge.module.sourcepath">
     <dirset dir="${module.writelatex-git-bridge.basedir}">
       <include name="src"/>
+    </dirset>
+  </path>
+  
+  <path id="writelatex-git-bridge.module.test.sourcepath">
+    <dirset dir="${module.writelatex-git-bridge.basedir}">
+      <include name="test"/>
     </dirset>
   </path>
   
@@ -69,7 +97,23 @@
     </copy>
   </target>
   
-  <target name="compile.module.writelatex-git-bridge.tests" depends="register.custom.compilers,compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests"/>
+  <target name="compile.module.writelatex-git-bridge.tests" depends="register.custom.compilers,compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
+    <mkdir dir="${writelatex-git-bridge.testoutput.dir}"/>
+    <javac2 destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.writelatex-git-bridge}/javac">
+      <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
+      <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
+      <classpath refid="writelatex-git-bridge.module.classpath"/>
+      <src refid="writelatex-git-bridge.module.test.sourcepath"/>
+      <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
+    </javac2>
+    
+    <copy todir="${writelatex-git-bridge.testoutput.dir}">
+      <fileset dir="${module.writelatex-git-bridge.basedir}/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
   
   <target name="clean.module.writelatex-git-bridge" description="cleanup module">
     <delete dir="${writelatex-git-bridge.output.dir}"/>

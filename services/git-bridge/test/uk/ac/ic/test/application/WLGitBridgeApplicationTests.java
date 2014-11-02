@@ -1,11 +1,11 @@
-package uk.ac.ic.test;
+package uk.ac.ic.test.application;
 
 import org.junit.Test;
 
 /**
  * Created by Winston on 02/11/14.
  */
-public class MainTests {
+public class WLGitBridgeApplicationTests {
 
     @Test
     public void nothingToTest() {
