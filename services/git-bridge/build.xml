@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="writelatex-git-bridge" default="all">
-  
 
   <!-- Uncomment the following property if no tests compilation is needed -->
   <!-- 
@@ -54,9 +53,6 @@
     <exclude name="**/?*.kt"/>
     <exclude name="**/?*.clj"/>
   </patternset>
-
-
-  <property name="project.jdk.classpath" value="jdk.classpath.1.7"/>
   
   
   <!-- Project Libraries -->
@@ -96,8 +92,7 @@
   
   <dirname property="module.writelatex-git-bridge.basedir" file="${ant.file}"/>
   
-
-  <property name="module.jdk.classpath.writelatex-git-bridge" value="${project.jdk.classpath}"/>
+  
   
   <property name="compiler.args.writelatex-git-bridge" value="-encoding UTF-8 -source 1.6 ${compiler.args}"/>
   
@@ -216,9 +211,53 @@
     <delete dir="${writelatex-git-bridge.output.dir}"/>
     <delete dir="${writelatex-git-bridge.testoutput.dir}"/>
   </target>
+
+  <target name="clean.modules" depends="clean.module.writelatex-git-bridge">
+    <delete dir="${module.writelatex-git-bridge.basedir}/out" />
+  </target>
   
   <target name="init" description="Build initialization">
     <!-- Perform any build initialization in this target -->
+  </target>
+  
+  <target name="clean" depends="clean.modules" description="cleanup all">
+      <delete dir="${module.writelatex-git-bridge.basedir}/bin" />
+  </target>
+  
+  <target name="build.modules" depends="init, clean, compile.module.writelatex-git-bridge" description="build all modules"/>
+  
+  <target name="init.artifacts">
+    <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
+    <property name="artifact.output.writelatex-git-bridge:jar" value="${basedir}/out/artifacts/writelatex_git_bridge_jar"/>
+    <mkdir dir="${artifacts.temp.dir}"/>
+    <property name="temp.jar.path.writelatex-git-bridge.jar" value="${artifacts.temp.dir}/writelatex-git-bridge.jar"/>
+  </target>
+  
+  <target name="artifact.writelatex-git-bridge:jar" depends="init.artifacts, compile.module.writelatex-git-bridge, compile.module.writelatex-git-bridge" description="Build &#39;writelatex-git-bridge:jar&#39; artifact">
+    <property name="artifact.temp.output.writelatex-git-bridge:jar" value="${artifacts.temp.dir}/writelatex_git_bridge_jar"/>
+    <mkdir dir="${artifact.temp.output.writelatex-git-bridge:jar}"/>
+    <jar destfile="${temp.jar.path.writelatex-git-bridge.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <zipfileset dir="${writelatex-git-bridge.output.dir}"/>
+      <zipfileset dir="${writelatex-git-bridge.testoutput.dir}"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/junit-4.11.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/javax.servlet-api-3.1.0.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/hamcrest-core-1.3.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/org.eclipse.jgit-3.5.1.201410131835-r.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/jetty-all-9.2.3.v20140905.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/hamcrest-library-1.3.jar"/>
+    </jar>
+    <copy file="${temp.jar.path.writelatex-git-bridge.jar}" tofile="${artifact.temp.output.writelatex-git-bridge:jar}/writelatex-git-bridge.jar"/>
+  </target>
+  
+  <target name="build.all.artifacts" depends="artifact.writelatex-git-bridge:jar" description="Build all artifacts">
+    <mkdir dir="${artifact.output.writelatex-git-bridge:jar}"/>
+    <copy todir="${artifact.output.writelatex-git-bridge:jar}">
+      <fileset dir="${artifact.temp.output.writelatex-git-bridge:jar}"/>
+    </copy>
+    
+    <!-- Delete temporary files -->
+    <delete dir="${artifacts.temp.dir}"/>
   </target>
 
   <target name="test" depends="compile.module.writelatex-git-bridge.tests">
@@ -235,9 +274,10 @@
     </junit>
   </target>
 
-    <target name="clean" depends="clean.module.writelatex-git-bridge" description="cleanup all"/>
+  <target name="package" depends="build.all.artifacts">
+    <mkdir dir="${module.writelatex-git-bridge.basedir}/bin" />
+    <copy file="${artifact.output.writelatex-git-bridge:jar}/writelatex-git-bridge.jar" tofile="${module.writelatex-git-bridge.basedir}/bin/writelatex-git-bridge.jar" />
+  </target>
   
-  <target name="build.modules" depends="init, clean, compile.module.writelatex-git-bridge" description="build all modules"/>
-  
-  <target name="all" depends="build.modules" description="build all"/>
+  <target name="all" depends="build.modules, test, package, clean.modules" description="build all"/>
 </project>
