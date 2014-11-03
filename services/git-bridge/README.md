@@ -1,5 +1,12 @@
 writelatex-git-bridge
 =====================
-Run ant all to build the server.
 
-then java -jar ./bin/writelatex-git-bridge <root git directory>
+ant test: run unit and system tests.
+
+ant all: build the server into ./bin/writelatex-git-bridge.jar
+
+ant clean: clean built files
+
+to run:
+
+java -jar ./bin/writelatex-git-bridge.jar port root_git_directory
