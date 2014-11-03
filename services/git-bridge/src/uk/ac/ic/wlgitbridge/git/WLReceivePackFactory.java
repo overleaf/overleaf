@@ -15,6 +15,7 @@ import java.util.Collection;
 /**
  * Created by Winston on 02/11/14.
  */
+/* */
 public class WLReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
 
     @Override
