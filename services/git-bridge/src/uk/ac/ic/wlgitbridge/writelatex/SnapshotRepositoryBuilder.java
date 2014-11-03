@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by Winston on 03/11/14.
  */
-public class SnapshotRepositorySource implements RepositorySource {
+public class SnapshotRepositoryBuilder implements RepositorySource {
 
     @Override
     public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException {
