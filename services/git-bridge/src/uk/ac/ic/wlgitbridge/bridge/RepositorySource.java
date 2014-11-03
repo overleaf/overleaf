@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.bridge;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;

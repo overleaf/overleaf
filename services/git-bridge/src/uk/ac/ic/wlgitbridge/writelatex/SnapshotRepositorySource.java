@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 
 import java.io.File;
 import java.io.IOException;

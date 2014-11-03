@@ -1,23 +1,17 @@
 package uk.ac.ic.wlgitbridge.git.handler;
 
-import org.eclipse.jgit.api.AddCommand;
-import org.eclipse.jgit.api.CommitCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
-import uk.ac.ic.wlgitbridge.writelatex.RepositorySource;
+import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositorySource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by Winston on 02/11/14.

@@ -7,11 +7,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0c822a5a-f421-4f3c-b941-5c2809c4546f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/RepositorySource.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/bridge/RepositorySource.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="writelatex-git-bridge.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,11 +32,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="InvalidRootDirectoryPathException.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="InvalidRootDirectoryPathException.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.04658385" vertical-offset="0" max-vertical-offset="644">
-              <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
+              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
+              <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SnapshotRepositorySource.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7131537" vertical-offset="0" max-vertical-offset="631">
+              <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -105,9 +123,9 @@
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/RepositorySource.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" />
+        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java" />
       </list>
     </option>
   </component>
@@ -537,6 +555,28 @@
               <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="bridge" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="writelatex-git-bridge" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="writelatex-git-bridge" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wlgitbridge" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="application" />
               <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -861,7 +901,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1366" height="741" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -879,7 +919,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2510981" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2510981" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3169643" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="100" y="123" width="1166" height="541" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1223,14 +1263,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
-          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.38193345" vertical-offset="554" max-vertical-offset="1185">
@@ -1271,18 +1303,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/RepositorySource.java">
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/bridge/RepositorySource.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="15" max-vertical-offset="315">
           <caret line="12" column="74" selection-start-line="12" selection-start-column="74" selection-end-line="12" selection-end-column="74" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
-          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -1313,8 +1337,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.04658385" vertical-offset="0" max-vertical-offset="644">
-          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="315">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
+          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7131537" vertical-offset="0" max-vertical-offset="631">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
           <folding />
         </state>
       </provider>
