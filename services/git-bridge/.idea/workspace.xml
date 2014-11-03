@@ -7,20 +7,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0c822a5a-f421-4f3c-b941-5c2809c4546f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLReceivePackFactory.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/handler/WLReceivePackFactoryTests.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/handler/WLRepositoryResolverTests.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLUploadPackFactory.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/handler/WLUploadPackTests.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLReceivePackFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLRepositoryResolver.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLUploadPackFactory.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLReceivePackFactoryTests.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLRepositoryResolverTests.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLUploadPackTests.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" afterPath="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" afterPath="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="writelatex-git-bridge.iws" />
@@ -44,101 +34,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="WLGitServlet.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="450">
-              <caret line="19" column="33" selection-start-line="19" selection-start-column="33" selection-end-line="19" selection-end-column="33" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CheckNonFastForwardHook.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/hook/CheckNonFastForwardHook.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="57" max-vertical-offset="465">
-              <caret line="18" column="23" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLRepositoryResolver.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="475" max-vertical-offset="945">
-              <caret line="24" column="34" selection-start-line="24" selection-start-column="34" selection-end-line="24" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLGitBridgeApplication.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1290">
-              <caret line="52" column="22" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLGitBridgeServer.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="521" max-vertical-offset="1185">
-              <caret line="53" column="9" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="9" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NullLogger.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/jetty/NullLogger.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="3.1558442" vertical-offset="30" max-vertical-offset="1365">
-              <caret line="83" column="0" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NullLoggerTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/jetty/NullLoggerTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
-              <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InvalidProgramArgumentsExceptionTests.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="195">
-              <caret line="5" column="50" selection-start-line="5" selection-start-column="50" selection-end-line="5" selection-end-column="50" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="InvalidRootDirectoryPathException.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="InvalidRootDirectoryPathException.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="195">
-              <caret line="5" column="46" selection-start-line="5" selection-start-column="46" selection-end-line="5" selection-end-column="46" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WLUploadPackFactory.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLUploadPackFactory.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375">
-              <caret line="6" column="52" selection-start-line="6" selection-start-column="52" selection-end-line="6" selection-end-column="52" />
+            <state vertical-scroll-proportion="0.04658385" vertical-offset="0" max-vertical-offset="644">
+              <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -157,10 +57,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/GitServletConfig.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/WLGitServletConfig.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/WriteLatexGitBridgeServer.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/WLGBridgeServer.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/WriteLatexReceivePackFactory.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/WLReceivePackFactory.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/WriteLatexRepositoryResolver.java" />
@@ -195,7 +91,6 @@
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/InvalidRootDirectoryPathException.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/exception/InvalidRootDirectoryPathException.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLGitServlet.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLRepositoryResolverTests.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLRepositoryResolver.java" />
         <option value="$PROJECT_DIR$/build.xml" />
@@ -203,11 +98,16 @@
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/WLReceivePackFactory.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/CheckNonFastForwardHook.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/CheckNonFastForwardHookTests.java" />
-        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/NullLogger.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java" />
         <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/jetty/NullLogger.java" />
         <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/jetty/NullLoggerTests.java" />
+        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java" />
+        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/RepositorySource.java" />
+        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java" />
+        <option value="$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java" />
+        <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java" />
+        <option value="$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java" />
       </list>
     </option>
   </component>
@@ -243,7 +143,6 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -512,6 +411,28 @@
               <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="writelatex" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="writelatex-git-bridge" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="writelatex-git-bridge" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wlgitbridge" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="git" />
               <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -688,6 +609,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -721,15 +643,16 @@
       <recent name="$PROJECT_DIR$/libs" />
     </key>
     <key name="CreateClassDialog.RecentsKey">
+      <recent name="uk.ac.ic.wlgitbridge.writelatex" />
       <recent name="uk.ac.ic.wlgitbridge.application" />
       <recent name="uk.ac.ic.wlgitbridge.git" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/libs" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="uk.ac.ic.wlgitbridge" />
       <recent name="uk.ac.ic" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/libs" />
     </key>
   </component>
   <component name="RunManager" selected="Application.writelatex-git-bridge">
@@ -783,6 +706,19 @@
       </ExternalSystemSettings>
       <method />
     </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <method />
+    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -808,19 +744,6 @@
       <envs />
       <properties />
       <listeners />
-      <method />
-    </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -957,7 +880,7 @@
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2510981" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3169643" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3169643" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="100" y="123" width="1166" height="541" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1012,20 +935,6 @@
     </buildFile>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/WLGitServletConfigTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
-          <caret line="13" column="0" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/handler/WLReceivePackFactoryTests.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="315">
-          <caret line="7" column="40" selection-start-line="7" selection-start-column="40" selection-end-line="13" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/handler/WLRepositoryResolverTests.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="195" max-vertical-offset="315">
@@ -1279,15 +1188,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="270">
           <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
-          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1307,26 +1207,42 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/hook/CheckNonFastForwardHook.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="57" max-vertical-offset="465">
+          <caret line="18" column="23" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/jetty/NullLogger.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1365">
+          <caret line="83" column="0" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
+          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.38193345" vertical-offset="554" max-vertical-offset="1185">
+          <caret line="53" column="9" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLReceivePackFactory.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="70" max-vertical-offset="465">
           <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="550" max-vertical-offset="945">
-          <caret line="24" column="34" selection-start-line="24" selection-start-column="34" selection-end-line="24" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLUploadPackFactory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="375">
-          <caret line="6" column="52" selection-start-line="6" selection-start-column="52" selection-end-line="6" selection-end-column="52" />
           <folding />
         </state>
       </provider>
@@ -1339,58 +1255,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/hook/CheckNonFastForwardHook.java">
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLUploadPackFactory.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="57" max-vertical-offset="465">
-          <caret line="18" column="23" selection-start-line="18" selection-start-column="23" selection-end-line="18" selection-end-column="23" />
+        <state vertical-scroll-proportion="0.30903327" vertical-offset="0" max-vertical-offset="631">
+          <caret line="13" column="13" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/git/handler/WLRepositoryResolver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="30" max-vertical-offset="1290">
-          <caret line="52" column="22" selection-start-line="52" selection-start-column="22" selection-end-line="52" selection-end-column="22" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="210" max-vertical-offset="840">
+          <caret line="31" column="49" selection-start-line="31" selection-start-column="49" selection-end-line="31" selection-end-column="49" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeServer.java">
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/RepositorySource.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="521" max-vertical-offset="1185">
-          <caret line="53" column="9" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="9" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="15" max-vertical-offset="315">
+          <caret line="12" column="74" selection-start-line="12" selection-start-column="74" selection-end-line="12" selection-end-column="74" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/jetty/NullLoggerTests.java">
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/writelatex/SnapshotRepositorySource.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="330">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="555">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/exception/InvalidProgramArgumentsExceptionTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="195">
-          <caret line="5" column="50" selection-start-line="5" selection-start-column="50" selection-end-line="5" selection-end-column="50" />
+        <state vertical-scroll-proportion="0.20962733" vertical-offset="0" max-vertical-offset="644">
+          <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/application/jetty/NullLoggerTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.2657005" vertical-offset="0" max-vertical-offset="621">
+          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/WLGitBridgeApplication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.22203948" vertical-offset="225" max-vertical-offset="1290">
+          <caret line="24" column="96" selection-start-line="24" selection-start-column="96" selection-end-line="24" selection-end-column="96" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/uk/ac/ic/wlgitbridge/test/git/exception/InvalidRootDirectoryPathException.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="195">
-          <caret line="5" column="46" selection-start-line="5" selection-start-column="46" selection-end-line="5" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/uk/ac/ic/wlgitbridge/application/jetty/NullLogger.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="3.1558442" vertical-offset="30" max-vertical-offset="1365">
-          <caret line="83" column="0" selection-start-line="83" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.04658385" vertical-offset="0" max-vertical-offset="644">
+          <caret line="2" column="22" selection-start-line="2" selection-start-column="22" selection-end-line="2" selection-end-column="22" />
           <folding />
         </state>
       </provider>
