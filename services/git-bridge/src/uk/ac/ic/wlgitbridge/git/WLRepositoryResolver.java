@@ -22,8 +22,8 @@ import java.io.IOException;
 public class WLRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
     @Override
-    public Repository open(HttpServletRequest httpServletRequest, String s) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
-        System.out.println(s);
+    public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
+        System.out.println(name);
 
 
         File workspace = new File("/Users/Roxy/git-test/hello");
@@ -52,7 +52,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
 
                 CommitCommand co = git.commit();
                 co.setAuthor("Winston", "wl3912@ic.ac.uk");
-                co.setMessage("Initial import of the existing contents");
+                co.setMessage("i am java miaow");
                 co.call();
             } catch (GitAPIException e) {
                 e.printStackTrace();
