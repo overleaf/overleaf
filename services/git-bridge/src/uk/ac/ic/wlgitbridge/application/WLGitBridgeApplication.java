@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.application;
 
 import javax.servlet.ServletException;
+import java.util.Arrays;
 
 /**
  * Created by Winston on 02/11/14.
@@ -20,7 +21,7 @@ public class WLGitBridgeApplication {
     }
 
     private void parseArguments(String[] args) {
-
+        System.out.println(Arrays.toString(args));
     }
 
 }
