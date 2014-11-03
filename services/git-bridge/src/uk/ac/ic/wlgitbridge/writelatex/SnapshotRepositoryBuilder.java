@@ -2,31 +2,40 @@ package uk.ac.ic.wlgitbridge.writelatex;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Winston on 03/11/14.
  */
-public class SnapshotRepositoryBuilder implements RepositorySource {
+public class SnapshotRepositoryBuilder implements RepositoryBuilder {
+
+    private SnapshotDBAPI snapshotDBAPI;
+    private SnapshotAPI snapshotAPI;
+
+    public SnapshotRepositoryBuilder() {
+        snapshotDBAPI = new DummySnapshotDBAPI();
+        snapshotAPI = new DummySnapshotAPI();
+    }
 
     @Override
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException {
-        File repositoryRoot = new File(rootDirectory.getAbsolutePath(), name);
+    public void buildRepository(Repository repository) throws RepositoryNotFoundException {
+        if (repository.getObjectDatabase().exists()) {
+            updateRepositoryFromSnapshots(repository);
+        } else {
+            buildRepositoryFromScratch(repository);
+        }
+    }
 
-        Repository repository = null;
-        try {
-            repository = new FileRepositoryBuilder().setWorkTree(repositoryRoot).build();
-        } catch (IOException e) {
-            throw new RepositoryNotFoundException(name);
+    private void updateRepositoryFromSnapshots(Repository repository) {
+        List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToRepository(repository);
+    }
+
+    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException {
+        if (!snapshotDBAPI.repositoryExists(repository)) {
+            throw new RepositoryNotFoundException(repository.getDirectory());
         }
-        if (!repository.getObjectDatabase().exists()) {
-            throw new RepositoryNotFoundException(name);
-        }
-        return repository;
+        updateRepositoryFromSnapshots(repository);
     }
 
 }

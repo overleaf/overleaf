@@ -8,7 +8,7 @@ import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositoryBuilder;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositorySource;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -21,7 +21,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
     private File rootGitDirectory;
     private RepositorySource repositorySource;
 
-    public WLRepositoryResolver(String rootGitDirectoryPath, SnapshotRepositoryBuilder repositorySource) throws InvalidRootDirectoryPathException {
+    public WLRepositoryResolver(String rootGitDirectoryPath, SnapshotRepositorySource repositorySource) throws InvalidRootDirectoryPathException {
         this.repositorySource = repositorySource;
         initRootGitDirectory(rootGitDirectoryPath);
     }
