@@ -7,6 +7,10 @@ import javax.servlet.ServletException;
 /**
  * Created by Winston on 02/11/14.
  */
+
+/**
+ * Class that represents the application. Parses arguments and gives them to the server, or dies with a usage message.
+ */
 public class WLGitBridgeApplication {
 
     public static final int EXIT_CODE_FAILED = 1;
@@ -15,6 +19,10 @@ public class WLGitBridgeApplication {
     private int port;
     private String rootGitDirectoryPath;
 
+    /**
+     * Constructs an instance of the WriteLatex-Git Bridge application.
+     * @param args args from main, which should be in the format "port root_git_directory_path"
+     */
     public WLGitBridgeApplication(String[] args) {
         try {
             parseArguments(args);
@@ -24,6 +32,9 @@ public class WLGitBridgeApplication {
         }
     }
 
+    /**
+     * Starts the server with the port number and root directory path given in the command-line arguments.
+     */
     public void run() {
         try {
             new WLGitBridgeServer(port, rootGitDirectoryPath).start();
@@ -31,6 +42,8 @@ public class WLGitBridgeApplication {
             e.printStackTrace();
         }
     }
+
+    /* Helper methods */
 
     private void parseArguments(String[] args) throws InvalidProgramArgumentsException {
         checkArgumentsLength(args);
