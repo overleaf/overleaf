@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.git;
+package uk.ac.ic.wlgitbridge.git.handler;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;

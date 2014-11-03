@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.test.git;
+package uk.ac.ic.wlgitbridge.test.git.handler;
 
 import org.junit.Test;
 
