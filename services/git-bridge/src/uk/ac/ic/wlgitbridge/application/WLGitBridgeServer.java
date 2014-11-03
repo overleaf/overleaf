@@ -16,7 +16,7 @@ public class WLGitBridgeServer {
     private final Server jettyServer;
     private final int port;
 
-    public WLGitBridgeServer(final int port) throws ServletException {
+    public WLGitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException {
         this.port = port;
         jettyServer = new Server(port);
         configureJettyServer();
