@@ -24,6 +24,8 @@ module.exports = WikiController =
 			WikiController._getPageContent lngPage, (error, pageData) ->
 				return next(error) if error?
 				if pageData.content?.length > 280
+					if _.include(other_lngs, req.lng)
+						pageData.title = pageData.title.slice(0, pageData.title.length - (req.lng.length+1) )
 					WikiController._renderPage(pageData, contents, res)
 				else
 					WikiController._getPageContent page, (error, pageData) ->
