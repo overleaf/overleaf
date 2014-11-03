@@ -1,6 +1,7 @@
 request = require("request")
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
+ErrorController = require("../Errors/ErrorController")
 
 module.exports = TemplatesWebController =
 
@@ -17,6 +18,8 @@ module.exports = TemplatesWebController =
 		{user_id, tag_name, template_name} = req.params
 		logger.log user_id:user_id, tag_name:tag_name, template_name:template_name, "rendering latex template page"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{user_id}/tag/#{tag_name}/template/#{template_name}", (err, data)->
+			if err? and err == 404
+				return ErrorController.notFound req, res
 			if err? or !data?
 				logger.err err:err, user_id:user_id, tag_name:tag_name, template_name:template_name, "something went wrong in renerTemplateInTag"
 				return res.send 500
@@ -56,6 +59,8 @@ module.exports = TemplatesWebController =
 		{user_id, template_id} = req.params
 		logger.log user_id:user_id, template_id:template_id, "rendering template page"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{user_id}/template/#{template_id}", (err, data)->
+			if err? and err == 404
+				return ErrorController.notFound req, res
 			if err?
 				logger.err err:err, user_id:user_id, template_id:template_id, "something went wrong in _renderCanonicalPage"
 				return res.send 500
@@ -67,6 +72,8 @@ module.exports = TemplatesWebController =
 		{user_id} = req.params
 		logger.log user_id:user_id, "rendering all templates page"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{user_id}/all", (err, data)->
+			if err? and err == 404
+				return ErrorController.notFound req, res
 			if err?
 				logger.err err:err, user_id:user_id, "something went wrong in _renderCanonicalPage"
 				return res.send 500
@@ -77,6 +84,8 @@ module.exports = TemplatesWebController =
 		{user_id, tag_name} = req.params
 		logger.log user_id:user_id, tag_name:tag_name, "rendinging tag page for templates"
 		TemplatesWebController._getDataFromTemplatesApi "/user/#{user_id}/tag/#{tag_name}", (err, data)->
+			if err? and err == 404
+				return ErrorController.notFound req, res
 			if err?
 				logger.err err:err, user_id:user_id, tag_name:tag_name, "something went wrong in _renderCanonicalPage"
 				return res.send 500
@@ -88,4 +97,6 @@ module.exports = TemplatesWebController =
 			url: "#{settings.apis.templates.url}#{path}"
 			json:true
 		request.get opts, (err, response, data)->
+			if response.statusCode == 404
+				return callback 404
 			callback err, data
