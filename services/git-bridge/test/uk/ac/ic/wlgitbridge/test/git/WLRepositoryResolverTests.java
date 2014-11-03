@@ -8,7 +8,7 @@ import org.junit.Test;
 public class WLRepositoryResolverTests {
 
     @Test
-    public void nothingToTest() {
+    public void joinsFilePathsTogether() {
 
     }
 

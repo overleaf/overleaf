@@ -11,6 +11,7 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -21,44 +22,36 @@ import java.io.IOException;
  */
 public class WLRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
+    private File rootGitDirectory;
+
+    public WLRepositoryResolver(String rootGitDirectoryPath) throws InvalidRootDirectoryPathException {
+        initRootGitDirectory(rootGitDirectoryPath);
+    }
+
     @Override
     public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
-        System.out.println(name);
+        File repositoryRoot = new File(rootGitDirectory.getAbsolutePath(), name);
 
-
-        File workspace = new File("/Users/Roxy/git-test/hello");
-        workspace.mkdirs();
-        Repository r = null;
+        Repository repository = null;
         try {
-            r = new FileRepositoryBuilder().setWorkTree(workspace).build();
+            repository = new FileRepositoryBuilder().setWorkTree(repositoryRoot).build();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RepositoryNotFoundException(name);
         }
-
-        // if the repository doesn't exist, create it
-        if (!r.getObjectDatabase().exists()) {
-            try {
-                r.create();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                // import initial content
-                Git git = new Git(r);
-                AddCommand cmd = git.add();
-                cmd.addFilepattern(".");
-                cmd.call();
-
-                CommitCommand co = git.commit();
-                co.setAuthor("Winston", "wl3912@ic.ac.uk");
-                co.setMessage("i am java miaow");
-                co.call();
-            } catch (GitAPIException e) {
-                e.printStackTrace();
-            }
+        if (!repository.getObjectDatabase().exists()) {
+            throw new RepositoryNotFoundException(name);
         }
-        return r;
+        return repository;
+    }
+
+    private void initRootGitDirectory(String rootGitDirectoryPath) throws InvalidRootDirectoryPathException {
+        rootGitDirectory = new File(rootGitDirectoryPath);
+        /* throws SecurityException */
+        rootGitDirectory.mkdirs();
+        rootGitDirectory.getAbsolutePath();
+        if (!rootGitDirectory.isDirectory()) {
+            throw new InvalidRootDirectoryPathException();
+        }
     }
 
 }

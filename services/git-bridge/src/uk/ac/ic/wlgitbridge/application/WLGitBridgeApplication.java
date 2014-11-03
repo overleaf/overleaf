@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.application;
 
 import uk.ac.ic.wlgitbridge.application.exception.InvalidProgramArgumentsException;
+import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 
 import javax.servlet.ServletException;
 
@@ -40,6 +41,9 @@ public class WLGitBridgeApplication {
             new WLGitBridgeServer(port, rootGitDirectoryPath).start();
         } catch (ServletException e) {
             e.printStackTrace();
+        } catch (InvalidRootDirectoryPathException e) {
+            printUsage();
+            System.exit(EXIT_CODE_FAILED);
         }
     }
 
