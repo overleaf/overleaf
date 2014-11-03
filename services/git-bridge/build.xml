@@ -222,18 +222,18 @@
   </target>
 
   <target name="test" depends="compile.module.writelatex-git-bridge.tests">
-        <junit>
-            <classpath>
-                <path refid="writelatex-git-bridge.module.classpath"/>
-                <pathelement location="${writelatex-git-bridge.testoutput.dir}"/>
-            </classpath>
-            <batchtest>
-                <fileset dir="${writelatex-git-bridge.testoutput.dir}">
-                </fileset>
-            </batchtest>
-            <formatter type="brief" usefile="false"/>
-        </junit>
-    </target>
+    <junit>
+      <classpath>
+        <path refid="writelatex-git-bridge.module.classpath"/>
+        <pathelement location="${writelatex-git-bridge.testoutput.dir}"/>
+      </classpath>
+      <batchtest>
+        <fileset dir="${writelatex-git-bridge.testoutput.dir}">
+        </fileset>
+      </batchtest>
+      <formatter type="brief" usefile="false"/>
+    </junit>
+  </target>
 
     <target name="clean" depends="clean.module.writelatex-git-bridge" description="cleanup all"/>
   
