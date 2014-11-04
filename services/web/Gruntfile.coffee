@@ -98,10 +98,15 @@ module.exports = (grunt) ->
 							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs", "libs/jquery-layout"]
+							exclude: ["libs"]
 						}, {
 							name: "libs"
+						},{
+							name: "libs/pdf.worker"
+						},{
+							name: "ace/mode-latex"
 						}
+
 					]
 
 		clean:
