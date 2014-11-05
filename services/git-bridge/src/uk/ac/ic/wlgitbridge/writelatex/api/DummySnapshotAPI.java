@@ -1,4 +1,6 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.api;
+
+import uk.ac.ic.wlgitbridge.writelatex.Snapshot;
 
 import java.util.List;
 
