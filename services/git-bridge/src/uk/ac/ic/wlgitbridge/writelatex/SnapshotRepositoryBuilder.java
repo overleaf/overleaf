@@ -18,8 +18,8 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
 
     private final SnapshotDBAPI snapshotDBAPI;
 
-    public SnapshotRepositoryBuilder() {
-        snapshotDBAPI = new DummySnapshotDBAPI();
+    public SnapshotRepositoryBuilder(SnapshotDBAPI snapshotDBAPI) {
+        this.snapshotDBAPI = snapshotDBAPI;
     }
 
     @Override

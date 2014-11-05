@@ -12,8 +12,8 @@ import java.util.List;
 public class DummySnapshotDBAPI implements SnapshotDBAPI {
 
     @Override
-    public boolean repositoryExists(Repository repository) {
-        return false;
+    public boolean repositoryExists(String name) {
+        return true;
     }
 
     @Override

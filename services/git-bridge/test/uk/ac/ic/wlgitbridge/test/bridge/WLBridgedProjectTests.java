@@ -12,4 +12,6 @@ public class WLBridgedProjectTests {
 
     }
 
+    /* repo doesn't exist in DB: don't create */
+
 }

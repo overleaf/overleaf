@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface SnapshotDBAPI {
 
-    public boolean repositoryExists(Repository repository);
+    public boolean repositoryExists(String name);
     public List<Snapshot> getSnapshotsToAddToRepository(Repository repository);
 
 }
