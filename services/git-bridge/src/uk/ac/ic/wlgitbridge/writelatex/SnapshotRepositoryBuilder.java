@@ -32,6 +32,7 @@ public class SnapshotRepositoryBuilder implements RepositoryBuilder {
     }
 
     private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException {
+        System.out.println("Need to build repo: " + repository.getDirectory().getAbsolutePath());
         if (!snapshotDBAPI.repositoryExists(repository)) {
             throw new RepositoryNotFoundException(repository.getDirectory());
         }

@@ -16,5 +16,5 @@ public class DummySnapshotAPI implements SnapshotAPI {
     public void putSnapshots(List<Snapshot> snapshots) {
 
     }
-    
+
 }
