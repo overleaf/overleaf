@@ -2,41 +2,36 @@ package uk.ac.ic.wlgitbridge.writelatex;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
+import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
 
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by Winston on 03/11/14.
  */
-public class SnapshotRepositoryBuilder implements RepositoryBuilder {
+public class SnapshotRepositoryBuilder implements RepositorySource {
 
-    private SnapshotDBAPI snapshotDBAPI;
-    private SnapshotAPI snapshotAPI;
+    private final SnapshotDBAPI snapshotDBAPI;
 
     public SnapshotRepositoryBuilder() {
         snapshotDBAPI = new DummySnapshotDBAPI();
-        snapshotAPI = new DummySnapshotAPI();
     }
 
     @Override
-    public void buildRepository(Repository repository) throws RepositoryNotFoundException {
-        if (repository.getObjectDatabase().exists()) {
-            updateRepositoryFromSnapshots(repository);
-        } else {
-            buildRepositoryFromScratch(repository);
-        }
-    }
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException {
+        File repositoryDirectory = new File(rootDirectory.getAbsolutePath(), name);
 
-    private void updateRepositoryFromSnapshots(Repository repository) {
-        List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToRepository(repository);
-    }
-
-    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException {
-        System.out.println("Need to build repo: " + repository.getDirectory().getAbsolutePath());
-        if (!snapshotDBAPI.repositoryExists(repository)) {
-            throw new RepositoryNotFoundException(repository.getDirectory());
+        Repository repository = null;
+        try {
+            repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
+        } catch (IOException e) {
+            throw new RepositoryNotFoundException(name);
         }
-        updateRepositoryFromSnapshots(repository);
+        new WLBridgedProject(repository, name, repositoryDirectory, snapshotDBAPI).buildRepository();
+        return repository;
     }
 
 }

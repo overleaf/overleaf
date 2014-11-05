@@ -5,11 +5,11 @@ import org.junit.Test;
 /**
  * Created by Winston on 05/11/14.
  */
-public class BridgedProjectTests {
+public class WLBridgedProjectTests {
 
     @Test
     public void nothingToTest() {
 
     }
-    
+
 }
