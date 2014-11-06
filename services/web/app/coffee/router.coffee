@@ -254,13 +254,6 @@ module.exports = class Router
 				metrics.inc ('socket-io.disconnect')
 				EditorController.leaveProject client, user
 
-			client.on 'reportError', (error, callback) ->
-				EditorController.reportError client, error, callback
-
-			client.on 'sendUpdate', (doc_id, windowName, change)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorUpdatesController.applyAceUpdate(client, project_id, doc_id, windowName, change)
-
 			client.on 'applyOtUpdate', (doc_id, update) ->
 				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
 					EditorUpdatesController.applyOtUpdate(client, project_id, doc_id, update)
@@ -268,14 +261,6 @@ module.exports = class Router
 			client.on 'clientTracking.updatePosition', (cursorData) ->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.updateClientPosition(client, cursorData)
-
-			client.on 'addUserToProject', (email, newPrivalageLevel, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.addUserToProject project_id, email, newPrivalageLevel, callback
-
-			client.on 'removeUserFromProject', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.removeUserFromProject(project_id, user_id, callback)
 
 			client.on 'leaveDoc', (doc_id, callback)->
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
@@ -285,19 +270,14 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
 					EditorController.joinDoc(client, project_id, args...)
 
-			# Deprecated and can be removed after deploying.
-			client.on 'pdfProject', (opts, callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					CompileManager.compile project_id, user._id, opts, (error, status, outputFiles) ->
-						return callback error, status == "success", outputFiles
-
-			client.on 'getRootDocumentsList', (callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.getListOfDocPaths project_id, callback
-
-			client.on 'forceResyncOfDropbox', (callback)->
+			# The remaining can be done via HTTP
+			client.on 'addUserToProject', (email, newPrivalageLevel, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.forceResyncOfDropbox project_id, callback
+					EditorController.addUserToProject project_id, email, newPrivalageLevel, callback
+
+			client.on 'removeUserFromProject', (user_id, callback)->
+				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+					EditorController.removeUserFromProject(project_id, user_id, callback)
 
 			client.on 'getUserDropboxLinkStatus', (owner_id, callback)->
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
