@@ -31,6 +31,8 @@ describe 'TemplatesController', ->
 			'../Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../Project/ProjectOptionsHandler':@ProjectOptionsHandler
 			'../Project/ProjectDetailsHandler':@ProjectDetailsHandler
+			'../Project/ProjectGetter':@ProjectGetter = {}
+			'../Editor/EditorController': @EditorController = {}
 			'./TemplatesPublisher':@TemplatesPublisher
 			"logger-sharelatex": 
 				log:->
@@ -86,42 +88,57 @@ describe 'TemplatesController', ->
 			res = redirect:redirect
 			@controller.createProjectFromZipTemplate @req, res
 
-	describe 'publishProject', (done)->
+	describe 'publishProject', ->
 		beforeEach ->
-			@user_id = "sdijdlsakjlkajdklaj"
-			@project_id = "23213kl2j13lk1"
+			@user_id = "user-id-123"
+			@project_id = "project-id-123"
+			@res =
+				send: sinon.stub()
+			@req.params =
+				Project_id: @project_id
+				
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, {owner_ref: @user_id})
+			@TemplatesPublisher.publish = sinon.stub().callsArgWith(2)
+			@controller.publishProject @req, @res
+			
+		it "should look up the project owner", ->
+			@ProjectGetter.getProject
+				.calledWith(@project_id, { owner_ref: 1 })
+				.should.equal true
+				
+		it "should publish the template", ->
+			@TemplatesPublisher.publish
+				.calledWith(@user_id, @project_id)
+				.should.equal true
+				
+		it "should return a success status", ->
+			@res.send.calledWith(204).should.equal true
 
-		it 'should pass the user id and project id to the handler', (done)->
-			@TemplatesPublisher.publish.callsArgWith(2)
-			@controller.publishProject @user_id, @project_id, =>
-				@TemplatesPublisher.publish.calledWith(@user_id, @project_id).should.equal true
-				done()
-
-		it 'should pass the error back', (done)->
-			error = "error"
-			@TemplatesPublisher.publish.callsArgWith(2, error)
-			@controller.publishProject @user_id, @project_id, (passedError)=>
-				passedError.should.equal error
-				done()
-
-	describe 'unpublish Project', (done)->
+	describe 'unpublishProject', ->
 		beforeEach ->
-			@user_id = "sdijdlsakjlkajdklaj"
-			@project_id = "23213kl2j13lk1"
-
-		it 'should pass the user id and project id to the handler', (done)->
-			@TemplatesPublisher.unpublish.callsArgWith(2)
-			@controller.unPublishProject @user_id, @project_id, =>
-				@TemplatesPublisher.unpublish.calledWith(@user_id, @project_id).should.equal true
-				done()
-
-		it 'should pass the error back', (done)->
-			error = "error"
-			@TemplatesPublisher.unpublish.callsArgWith(2, error)
-			@controller.unPublishProject @user_id, @project_id, (passedError)=>
-				passedError.should.equal error
-				done()
-
+			@user_id = "user-id-123"
+			@project_id = "project-id-123"
+			@res =
+				send: sinon.stub()
+			@req.params =
+				Project_id: @project_id
+				
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, {owner_ref: @user_id})
+			@TemplatesPublisher.unpublish = sinon.stub().callsArgWith(2)
+			@controller.unpublishProject @req, @res
+			
+		it "should look up the project owner", ->
+			@ProjectGetter.getProject
+				.calledWith(@project_id, { owner_ref: 1 })
+				.should.equal true
+				
+		it "should publish the template", ->
+			@TemplatesPublisher.unpublish
+				.calledWith(@user_id, @project_id)
+				.should.equal true
+				
+		it "should return a success status", ->
+			@res.send.calledWith(204).should.equal true
 
 	describe 'settings the compiler from the query string', ->
 		it 'should use the said compiler', (done)->
@@ -139,29 +156,51 @@ describe 'TemplatesController', ->
 			res = redirect:redirect
 			@controller.createProjectFromZipTemplate @req, res
 
+	describe "updateProjectDescription", ->
+		beforeEach ->
+			@EditorController.updateProjectDescription = sinon.stub().callsArg(2)
+			@res =
+				send: sinon.stub()
+			@req.params =
+				Project_id: @project_id = "project-id-123"
+			@req.body =
+				description: @description = "test description"
+				
+			@controller.updateProjectDescription @req, @res
+			
+		it "should update the project description", ->
+			@EditorController.updateProjectDescription
+				.calledWith(@project_id, @description)
+				.should.equal true
+				
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal true
 
 	describe 'getTemplateDetails', ->
 		beforeEach ->
-			@description = "this project is nice"
-			@ProjectDetailsHandler.getProjectDescription.callsArgWith(1, null, @description)
+			@user_id = "user-id-123"
+			@project_id = "project-id-123"
+			@res =
+				json: sinon.stub()
+			@req.params =
+				Project_id: @project_id
+				
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, {owner_ref: @user_id})
+			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, null, @details = {exists: true})
+			@ProjectDetailsHandler.getProjectDescription.callsArgWith(1, null, @description = "test description")
+			
+			@controller.getTemplateDetails @req, @res
 
-		it "should return an error the templatePublisher", (done)->
-			error = "error"
-			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, error)
-			@controller.getTemplateDetails @user_id, @project_id, (passedError)=>
-				passedError.should.equal error
-				done()
-
-		it "should return the details", (done)->
-			details = {exists:true}
-			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, null, details)
-			@controller.getTemplateDetails @user_id, @project_id, (err, passedDetails)=>
-				details.should.equal passedDetails
-				done()
-
-		it "should get the template description", (done)->
-			@TemplatesPublisher.getTemplateDetails.callsArgWith(2, null, {})
-			@controller.getTemplateDetails @user_id, @project_id, (err, passedDetails)=>
-				passedDetails.description.should.equal @description
-				done()
+		it "should get the template details for the user_id and project_id", ->
+			@TemplatesPublisher.getTemplateDetails
+				.calledWith(@user_id, @project_id)
+				.should.equal true
+				
+		it "should return the details and description", ->
+			@res.json
+				.calledWith({
+					exists: @details.exists
+					description: @description
+				})
+				.should.equal true
 

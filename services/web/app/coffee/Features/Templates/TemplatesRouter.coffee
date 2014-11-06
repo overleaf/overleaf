@@ -1,5 +1,6 @@
-
+SecurityManager = require("../../managers/SecurityManager")
 TemplatesWebController = require("./TemplatesWebController")
+TemplatesController = require("./TemplatesController")
 middleWear = require("./TemplatesMiddlewear")
 
 module.exports = 
@@ -16,4 +17,7 @@ module.exports =
 
 		app.get "/templates/:template_id/v/:version/:file_type", TemplatesWebController.proxyToTemplatesApi
 
-
+		app.post "/project/:Project_id/template/publish", SecurityManager.requestIsOwner, TemplatesController.publishProject
+		app.post "/project/:Project_id/template/unpublish", SecurityManager.requestIsOwner, TemplatesController.unpublishProject
+		app.post "/project/:Project_id/template/description", SecurityManager.requestCanModifyProject, TemplatesController.updateProjectDescription
+		app.get  "/project/:Project_id/template", SecurityManager.requestCanAccessProject, TemplatesController.getTemplateDetails

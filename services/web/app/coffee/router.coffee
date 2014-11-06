@@ -269,19 +269,19 @@ module.exports = class Router
 				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
 					dropboxHandler.getUserRegistrationStatus owner_id, callback
 
-			client.on 'publishProjectAsTemplate', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					TemplatesController.publishProject user_id, project_id, callback
-
-			client.on 'unPublishProjectAsTemplate', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					TemplatesController.unPublishProject user_id, project_id, callback
-
-			client.on 'updateProjectDescription', (description, callback)->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorController.updateProjectDescription project_id, description, callback
-
-			client.on "getPublishedDetails", (user_id, callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					TemplatesController.getTemplateDetails user_id, project_id, callback
+			# client.on 'publishProjectAsTemplate', (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+			# 		TemplatesController.publishProject user_id, project_id, callback
+			# 
+			# client.on 'unPublishProjectAsTemplate', (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
+			# 		TemplatesController.unPublishProject user_id, project_id, callback
+			# 
+			# client.on 'updateProjectDescription', (description, callback)->
+			# 	AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
+			# 		EditorController.updateProjectDescription project_id, description, callback
+			# 
+			# client.on "getPublishedDetails", (user_id, callback)->
+			# 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
+			# 		TemplatesController.getTemplateDetails user_id, project_id, callback
 
