@@ -1,13 +1,10 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.Request;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.SnapshotGetDocRequest;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.SnapshotGetForVersionRequest;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.SnapshotGetSavedVersRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Request;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotGetSavedVersRequest;
 
 import java.io.IOException;
 import java.util.*;
@@ -51,9 +48,9 @@ public class WLProject implements JSONModel {
 
         boolean result = false;
 
-        ids.add(getLatestVersionID(getDoc.getResponse()));
+//        ids.add(getLatestVersionID(getDoc.getResult()));
 
-        ids.addAll(getLatestVersionIDs(getSavedVers.getResponse()));
+//        ids.addAll(getLatestVersionIDs(getSavedVers.getResult()));
 
         List<Integer> idsToUpdate = new LinkedList<Integer>();
 
@@ -79,26 +76,6 @@ public class WLProject implements JSONModel {
             request.request();
         }
         
-    }
-
-    private int getLatestVersionID(String response) {
-        Gson gson = new Gson();
-        JsonObject responseObject = gson.fromJson(response, JsonObject.class);
-        return responseObject.get("latestVerId").getAsInt();
-    }
-
-    private Collection<? extends Integer> getLatestVersionIDs(String response) {
-        List<Integer> ids = new LinkedList<Integer>();
-        Gson gson = new Gson();
-        JsonArray responseArray = gson.fromJson(response, JsonArray.class);
-        for (JsonElement elem : responseArray) {
-            ids.add(getVersionID(elem.getAsJsonObject()));
-        }
-        return ids;
-    }
-
-    private Integer getVersionID(JsonObject object) {
-        return object.get("versionId").getAsInt();
     }
 
 }

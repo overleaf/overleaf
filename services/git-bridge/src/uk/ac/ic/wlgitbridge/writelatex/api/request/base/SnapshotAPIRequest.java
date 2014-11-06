@@ -1,11 +1,11 @@
-package uk.ac.ic.wlgitbridge.writelatex.api.request;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.base;
 
 import com.ning.http.client.Realm;
 
 /**
  * Created by Winston on 06/11/14.
  */
-public abstract class SnapshotAPIRequest extends Request {
+public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
     private static final String USERNAME = "staging";
     private static final String PASSWORD = "6kUfbv0R";

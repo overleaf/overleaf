@@ -87,6 +87,14 @@
   <path id="library.async-http-client-1.8.14.classpath">
     <pathelement location="${basedir}/libs/async-http-client-1.8.14.jar"/>
   </path>
+
+  <path id="library.slf4j-api-1.7.7.classpath">
+    <pathelement location="${basedir}/libs/slf4j-api-1.7.7.jar"/>
+  </path>
+
+  <path id="library.slf4j-nop-1.7.7.classpath">
+    <pathelement location="${basedir}/libs/slf4j-nop-1.7.7.jar"/>
+  </path>
   
   <!-- Modules -->
   
@@ -116,6 +124,8 @@
     <path refid="library.junit-4.11.classpath"/>
     <path refid="library.gson-2.3.classpath"/>
     <path refid="library.async-http-client-1.8.14.classpath"/>
+    <path refid="library.slf4j-api-1.7.7.classpath"/>
+    <path refid="library.slf4j-nop-1.7.7.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.production.module.classpath">
@@ -129,6 +139,8 @@
     <path refid="library.junit-4.11.classpath"/>
     <path refid="library.gson-2.3.classpath"/>
     <path refid="library.async-http-client-1.8.14.classpath"/>
+    <path refid="library.slf4j-api-1.7.7.classpath"/>
+    <path refid="library.slf4j-nop-1.7.7.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.module.classpath">
@@ -142,6 +154,8 @@
     <path refid="library.junit-4.11.classpath"/>
     <path refid="library.gson-2.3.classpath"/>
     <path refid="library.async-http-client-1.8.14.classpath"/>
+    <path refid="library.slf4j-api-1.7.7.classpath"/>
+    <path refid="library.slf4j-nop-1.7.7.classpath"/>
   </path>
   
   <path id="writelatex-git-bridge.runtime.module.classpath">
@@ -156,6 +170,8 @@
     <path refid="library.junit-4.11.classpath"/>
     <path refid="library.gson-2.3.classpath"/>
     <path refid="library.async-http-client-1.8.14.classpath"/>
+    <path refid="library.slf4j-api-1.7.7.classpath"/>
+    <path refid="library.slf4j-nop-1.7.7.classpath"/>
   </path>
   
   
@@ -259,6 +275,8 @@
       <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/hamcrest-library-1.3.jar"/>
       <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/gson-2.3.jar"/>
       <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/async-http-client-1.8.14.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/slf4j-api-1.7.7.jar"/>
+      <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/slf4j-nop-1.7.7.jar"/>
     </jar>
     <copy file="${temp.jar.path.writelatex-git-bridge.jar}" tofile="${artifact.temp.output.writelatex-git-bridge:jar}/writelatex-git-bridge.jar"/>
   </target>
