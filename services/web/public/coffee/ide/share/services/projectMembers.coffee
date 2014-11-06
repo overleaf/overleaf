@@ -1,30 +1,21 @@
 define [
 	"base"
 ], (App) ->
-	App.factory "projectMembers", ["ide", "$q", (ide, $q) ->
+	App.factory "projectMembers", ["ide", "$http", (ide, $http) ->
 		return {
 			removeMember: (member) ->
-				deferred = $q.defer()
-
-				ide.socket.emit "removeUserFromProject", member._id, (error) =>
-					if error?
-						return deferred.reject(error)
-					deferred.resolve()
-
-				return deferred.promise
+				$http({
+					url: "/project/#{ide.project_id}/users/#{member._id}"
+					method: "DELETE"
+					headers:
+						"X-Csrf-Token": window.csrfToken
+				})
 
 			addMember: (email, privileges) ->
-				deferred = $q.defer()
-
-				ide.socket.emit "addUserToProject", email, privileges, (error, user) =>
-					if error?
-						return deferred.reject(error)
-
-					if !user
-						deferred.reject()
-					else
-						deferred.resolve(user)
-
-				return deferred.promise
+				$http.post("/project/#{ide.project_id}/users", {
+					email: email
+					privileges: privileges
+					_csrf: window.csrfToken
+				})
 		}
 	]

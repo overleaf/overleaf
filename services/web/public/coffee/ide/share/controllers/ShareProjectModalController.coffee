@@ -28,11 +28,11 @@ define [
 			$scope.state.inflight = true
 			projectMembers
 				.addMember($scope.inputs.email, $scope.inputs.privileges)
-				.then (user) ->
+				.success (data) ->
 					$scope.state.inflight = false
 					$scope.inputs.email = ""
-					$scope.project.members.push user
-				.catch () ->
+					$scope.project.members.push data?.user
+				.error () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 
@@ -42,12 +42,12 @@ define [
 			$scope.state.inflight = true
 			projectMembers
 				.removeMember(member)
-				.then () ->
+				.success () ->
 					$scope.state.inflight = false
 					index = $scope.project.members.indexOf(member)
 					return if index == -1
 					$scope.project.members.splice(index, 1)
-				.catch () ->
+				.error () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 

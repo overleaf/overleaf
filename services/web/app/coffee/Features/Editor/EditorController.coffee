@@ -150,15 +150,17 @@ module.exports = EditorController =
 				callback null, false
 			else
 				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
+					return callback(err) if error?
+					# Flush to TPDS to add files to collaborator's Dropbox
 					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, ->
 					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
 					callback null, ProjectEditorHandler.buildUserModelView(user, privileges)
 
-	removeUserFromProject: (project_id, user_id, callback)->
-		CollaboratorsHandler.removeUserFromProject project_id, user_id, =>
+	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
+		CollaboratorsHandler.removeUserFromProject project_id, user_id, (error) =>
+			return callback(error) if error?
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
-			if callback?
-				callback()
+			callback()
 
 	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
 		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>

@@ -6,7 +6,7 @@ SpellingController = require('./Features/Spelling/SpellingController')
 SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
-EditorHttpController = require("./Features/Editor/EditorHttpController")
+EditorRouter = require("./Features/Editor/EditorRouter")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
@@ -62,6 +62,7 @@ module.exports = class Router
 		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.register
 
+		EditorRouter.apply(app)
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
@@ -98,16 +99,6 @@ module.exports = class Router
 
 		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
 
-		app.post '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
-		app.post '/project/:Project_id/folder', SecurityManager.requestCanModifyProject, EditorHttpController.addFolder
-
-		app.post '/project/:Project_id/:entity_type/:entity_id/rename', SecurityManager.requestCanModifyProject, EditorHttpController.renameEntity
-		app.post '/project/:Project_id/:entity_type/:entity_id/move', SecurityManager.requestCanModifyProject, EditorHttpController.moveEntity
-
-		app.delete '/project/:Project_id/file/:entity_id', SecurityManager.requestCanModifyProject, EditorHttpController.deleteFile
-		app.delete '/project/:Project_id/doc/:entity_id', SecurityManager.requestCanModifyProject, EditorHttpController.deleteDoc
-		app.delete '/project/:Project_id/folder/:entity_id', SecurityManager.requestCanModifyProject, EditorHttpController.deleteFolder
-
 		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
 		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
@@ -132,8 +123,6 @@ module.exports = class Router
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-
-		app.post "/project/:Project_id/doc/:doc_id/restore", SecurityManager.requestCanAccessProject, EditorHttpController.restoreDoc
 
 		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators

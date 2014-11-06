@@ -157,3 +157,37 @@ describe "EditorHttpController", ->
 
 		it "should send back a success response", ->
 			@res.send.calledWith(204).should.equal true
+			
+	describe "addUserToProject", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+			@req.body =
+				email: @email = "joe@example.com"
+				privileges: @privileges = "readAndWrite"
+			@EditorController.addUserToProject = sinon.stub().callsArgWith(3, null, @user = {"mock": "user"})
+			@EditorHttpController.addUserToProject @req, @res
+			
+		it "should add the user to the project", ->
+			@EditorController.addUserToProject
+				.calledWith(@project_id, @email, @privileges)
+				.should.equal true
+				
+		it "should send the back the added user", ->
+			@res.json.calledWith(user: @user).should.equal true
+			
+	describe "removeUserFromProject", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				user_id: @user_id = "user-id-123"
+			@EditorController.removeUserFromProject = sinon.stub().callsArg(2)
+			@EditorHttpController.removeUserFromProject @req, @res
+			
+		it "should from the user from the project", ->
+			@EditorController.removeUserFromProject
+				.calledWith(@project_id, @user_id)
+				.should.equal true
+				
+		it "should send the back a success response", ->
+			@res.send.calledWith(204).should.equal true
