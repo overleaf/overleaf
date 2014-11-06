@@ -1,7 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.api;
 
 import org.eclipse.jgit.lib.Repository;
-import uk.ac.ic.wlgitbridge.writelatex.Snapshot;
+import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.util.HashMap;
 import java.util.LinkedList;

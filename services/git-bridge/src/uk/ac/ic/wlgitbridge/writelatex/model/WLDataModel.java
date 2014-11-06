@@ -1,15 +1,13 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.google.gson.JsonElement;
-import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Realm;
 
 import java.util.Map;
 
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLDataModel implements JSONSource {
+public class WLDataModel implements JSONModel {
 
     private final Map<String, WLProject> projects;
 

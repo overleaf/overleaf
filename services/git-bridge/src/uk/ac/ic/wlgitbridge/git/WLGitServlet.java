@@ -7,7 +7,6 @@ import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.WLRepositoryResolver;
 import uk.ac.ic.wlgitbridge.git.handler.WLUploadPackFactory;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositoryBuilder;
-import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 
 import javax.servlet.ServletException;

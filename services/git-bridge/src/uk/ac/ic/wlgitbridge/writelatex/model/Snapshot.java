@@ -1,11 +1,11 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.google.gson.JsonElement;
 
 /**
  * Created by Winston on 03/11/14.
  */
-public class Snapshot implements JSONSource {
+public class Snapshot implements JSONModel {
 
     private int versionID;
 

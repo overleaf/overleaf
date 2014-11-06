@@ -6,7 +6,6 @@ import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.CheckNonFastForwardHook;
-import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 
 import javax.servlet.http.HttpServletRequest;

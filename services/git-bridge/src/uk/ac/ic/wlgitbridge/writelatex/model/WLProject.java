@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.google.gson.JsonElement;
 
@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLProject implements JSONSource {
+public class WLProject implements JSONModel {
 
     public static final int VERSION_ID_INVALID = -1;
     private final Map<Integer, Snapshot> snapshots;

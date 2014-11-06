@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.test.writelatex;
+package uk.ac.ic.wlgitbridge.test.writelatex.model;
 
 import org.junit.Test;
 

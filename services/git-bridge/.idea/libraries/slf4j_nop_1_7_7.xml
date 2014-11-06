@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="slf4j-nop-1.7.7">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/slf4j-nop-1.7.7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/libs/slf4j-nop-1.7.7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>
