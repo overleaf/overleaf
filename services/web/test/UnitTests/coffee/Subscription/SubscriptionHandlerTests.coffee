@@ -3,7 +3,6 @@ should = require('chai').should()
 sinon = require 'sinon'
 querystring = require 'querystring'
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionHandler"
-SubscriptionHandler = require modulePath
 
 mockRecurlySubscriptions =
 	"subscription-123-active":
