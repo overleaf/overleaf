@@ -1,7 +1,5 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request;
 
-import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotAPI;
-
 /**
  * Created by Winston on 06/11/14.
  */

@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.sun.javafx.collections.transformation.SortedList;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.Request;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.SnapshotGetForVersionRequest;

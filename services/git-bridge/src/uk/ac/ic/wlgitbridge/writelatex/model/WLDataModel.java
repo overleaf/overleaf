@@ -1,7 +1,5 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import com.google.gson.JsonElement;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;

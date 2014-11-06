@@ -2,8 +2,8 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
-import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
 import java.io.IOException;

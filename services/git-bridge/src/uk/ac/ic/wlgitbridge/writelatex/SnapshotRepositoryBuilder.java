@@ -5,7 +5,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
-import uk.ac.ic.wlgitbridge.writelatex.api.DummySnapshotDBAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 
 import java.io.File;

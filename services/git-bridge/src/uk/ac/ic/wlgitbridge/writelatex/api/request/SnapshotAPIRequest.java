@@ -1,7 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request;
 
 import com.ning.http.client.Realm;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.Request;
 
 /**
  * Created by Winston on 06/11/14.

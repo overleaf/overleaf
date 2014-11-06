@@ -1,6 +1,8 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request;
 
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Realm;
+import com.ning.http.client.Response;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
