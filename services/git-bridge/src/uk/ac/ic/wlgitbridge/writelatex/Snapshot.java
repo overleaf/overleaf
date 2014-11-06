@@ -7,7 +7,7 @@ import com.google.gson.JsonElement;
  */
 public class Snapshot implements JSONSource {
 
-    private int version;
+    private int versionID;
 
     public Snapshot() {
 

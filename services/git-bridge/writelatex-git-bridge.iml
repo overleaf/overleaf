@@ -16,6 +16,7 @@
     <orderEntry type="library" name="hamcrest-library-1.3" level="project" />
     <orderEntry type="library" name="junit-4.11" level="project" />
     <orderEntry type="library" name="gson-2.3" level="project" />
+    <orderEntry type="library" name="async-http-client-1.8.14" level="project" />
   </component>
 </module>
 
