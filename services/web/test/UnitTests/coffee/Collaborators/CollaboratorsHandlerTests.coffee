@@ -26,6 +26,7 @@ describe "CollaboratorsHandler", ->
 				err:->
 			'../../models/User': User:@UserModel
 			"../../models/Project": Project:@ProjectModel
+			"../Email/EmailHandler": {}
 
 		@project_id = "123l2j13lkj"
 		@user_id = "132kj1lk2j"

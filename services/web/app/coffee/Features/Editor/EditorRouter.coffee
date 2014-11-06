@@ -14,6 +14,3 @@ module.exports =
 		app.delete '/project/:Project_id/folder/:entity_id', SecurityManager.requestCanModifyProject, EditorHttpController.deleteFolder
 
 		app.post   '/project/:Project_id/doc/:doc_id/restore', SecurityManager.requestCanModifyProject, EditorHttpController.restoreDoc
-
-		app.post   '/project/:Project_id/users', SecurityManager.requestIsOwner, EditorHttpController.addUserToProject
-		app.delete '/project/:Project_id/users/:user_id', SecurityManager.requestIsOwner, EditorHttpController.removeUserFromProject

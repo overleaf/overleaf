@@ -76,18 +76,5 @@ module.exports = EditorHttpController =
 		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", (error) ->
 			return next(error) if error?
 			res.send 204
-			
-	addUserToProject: (req, res, next) ->
-		project_id = req.params.Project_id
-		{email, privileges} = req.body
-		EditorController.addUserToProject project_id, email, privileges, (error, user) ->
-			return next(error) if error?
-			res.json user: user
-			
-	removeUserFromProject: (req, res, next) ->
-		project_id = req.params.Project_id
-		user_id    = req.params.user_id
-		EditorController.removeUserFromProject project_id, user_id, (error)->
-			return next(error) if error?
-			res.send 204
+
 

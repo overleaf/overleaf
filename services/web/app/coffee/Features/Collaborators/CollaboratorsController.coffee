@@ -1,6 +1,6 @@
 ProjectGetter = require "../Project/ProjectGetter"
 CollaboratorsHandler = require "./CollaboratorsHandler"
-
+EditorController = require "../Editor/EditorController"
 
 module.exports = CollaboratorsController =
 	getCollaborators: (req, res, next = (error) ->) ->
@@ -18,6 +18,20 @@ module.exports = CollaboratorsController =
 		if !user_id?
 			return next(new Error("User should be logged in"))
 		CollaboratorsHandler.removeUserFromProject req.params.project_id, user_id, (error) ->
+			return next(error) if error?
+			res.send 204
+			
+	addUserToProject: (req, res, next) ->
+		project_id = req.params.Project_id
+		{email, privileges} = req.body
+		EditorController.addUserToProject project_id, email, privileges, (error, user) ->
+			return next(error) if error?
+			res.json user: user
+			
+	removeUserFromProject: (req, res, next) ->
+		project_id = req.params.Project_id
+		user_id    = req.params.user_id
+		EditorController.removeUserFromProject project_id, user_id, (error)->
 			return next(error) if error?
 			res.send 204
 

@@ -20,7 +20,7 @@ TemplatesController = require('./Features/Templates/TemplatesController')
 TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
-CollaboratorsController = require('./Features/Collaborators/CollaboratorsController')
+CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
 UserController = require("./Features/User/UserController")
 UserPagesController = require('./Features/User/UserPagesController')
@@ -63,6 +63,7 @@ module.exports = class Router
 		app.post '/register', UserController.register
 
 		EditorRouter.apply(app)
+		CollaboratorsRouter.apply(app)
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
@@ -113,7 +114,6 @@ module.exports = class Router
 		app.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
 		app.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
 
-
 		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
 		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
@@ -123,9 +123,6 @@ module.exports = class Router
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-
-		app.post '/project/:project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
-		app.get  '/project/:Project_id/collaborators', SecurityManager.requestCanAccessProject(allow_auth_token: true), CollaboratorsController.getCollaborators
 
 		app.get  '/project/:Project_id/connected_users', SecurityManager.requestCanAccessProject, ConnectedUsersController.getConnectedUsers
 
