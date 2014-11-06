@@ -22,17 +22,18 @@ define [
 				scope:$scope
 			}
 
-	App.controller "DropboxModalController", ($scope, $modalInstance, ide, $timeout) ->
+	App.controller "DropboxModalController", ($scope, $modalInstance, ide, $timeout, $http) ->
 		user_id = ide.$scope.user.id
 
 		$scope.dbState = cachedState
 		$scope.dbState.hasDropboxFeature = $scope.project.features.dropbox
 
-		ide.socket.emit "getUserDropboxLinkStatus", user_id, (err, status)=>
-			$scope.dbState.gotLinkStatus = true
-			if status.registered
-				$scope.dbState.userIsLinkedToDropbox = true
-				cachedState = $scope.dbState
+		$http.get("/project/#{ide.project_id}/dropbox/status")
+			.success (status) ->
+				$scope.dbState.gotLinkStatus = true
+				if status.registered
+					$scope.dbState.userIsLinkedToDropbox = true
+					cachedState = $scope.dbState
 		
 		$scope.linkToDropbox = ->
 			window.open("/user/settings#dropboxSettings")
