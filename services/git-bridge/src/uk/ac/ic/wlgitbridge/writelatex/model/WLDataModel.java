@@ -2,12 +2,14 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.google.gson.JsonElement;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLDataModel implements JSONModel {
+public class WLDataModel {
 
     private final Map<String, WLProject> projects;
 
@@ -15,8 +17,8 @@ public class WLDataModel implements JSONModel {
         this.projects = projects;
     }
 
-    @Override
-    public void updateFromJSON(JsonElement json) {
-
+    public void updateProjectWithName(String name) throws InterruptedException, ExecutionException, IOException {
+        projects.get(name).update();
     }
+
 }
