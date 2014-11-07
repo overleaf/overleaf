@@ -47,6 +47,9 @@ define [
 				description: $scope.templateDetails.description
 				_csrf: window.csrfToken
 			})
+			
+		# Save the description on modal close
+		$modalInstance.result.finally () -> updateProjectDescription()
 
 		$scope.publishTemplate = ->
 			$scope.state.publishInflight = true
