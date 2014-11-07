@@ -1,6 +1,8 @@
 SecurityManager = require("../../managers/SecurityManager")
+AuthenticationController = require("../Authentication/AuthenticationController")
 TemplatesWebController = require("./TemplatesWebController")
 TemplatesController = require("./TemplatesController")
+TemplatesMiddlewear = require('./TemplatesMiddlewear')
 middleWear = require("./TemplatesMiddlewear")
 
 module.exports = 
@@ -20,4 +22,9 @@ module.exports =
 		app.post "/project/:Project_id/template/publish", SecurityManager.requestIsOwner, TemplatesController.publishProject
 		app.post "/project/:Project_id/template/unpublish", SecurityManager.requestIsOwner, TemplatesController.unpublishProject
 		app.post "/project/:Project_id/template/description", SecurityManager.requestCanModifyProject, TemplatesController.updateProjectDescription
+
+		# Make sure the /project/new/template route comes before the /project/:project_id/template route
+		# This is a get request so that it can be linked to.
+		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
+		
 		app.get  "/project/:Project_id/template", SecurityManager.requestCanAccessProject, TemplatesController.getTemplateDetails

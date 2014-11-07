@@ -16,8 +16,6 @@ metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 TemplatesRouter = require('./Features/Templates/TemplatesRouter')
-TemplatesController = require('./Features/Templates/TemplatesController')
-TemplatesMiddlewear = require('./Features/Templates/TemplatesMiddlewear')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
@@ -92,8 +90,6 @@ module.exports = class Router
 
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
-
-		app.get '/project/new/template', TemplatesMiddlewear.saveTemplateDataInSession, AuthenticationController.requireLogin(), TemplatesController.createProjectFromZipTemplate
 
 		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
