@@ -16,7 +16,9 @@ describe "EditorController", ->
 		@doc_id = "test-doc-id"
 		@source = "dropbox"
 
-		@projectModelView = "projectModelView"
+		@projectModelView = 
+			_id: @project_id
+			owner:{_id:"something"}
 
 		@user =
 			_id: @user_id = "user-id"
@@ -65,6 +67,7 @@ describe "EditorController", ->
 			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler
 			'../Project/ProjectDeleter' : @ProjectDeleter
 			'../Project/ProjectGetter' : @ProjectGetter = {}
+			'../User/UserGetter': @UserGetter = {}
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
 			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler
 			'../Subscription/LimitationsManager' : @LimitationsManager
@@ -85,8 +88,6 @@ describe "EditorController", ->
 		beforeEach ->
 			sinon.spy(@client, "set")
 			sinon.spy(@client, "get")
-			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
-			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
 			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
@@ -94,19 +95,8 @@ describe "EditorController", ->
 
 		describe "when authorized", ->
 			beforeEach ->
-				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, true, "owner")
+				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectModelView, "owner")
 				@EditorController.joinProject(@client, @user, @project_id, @callback)
-
-			it "should find the project without doc lines", ->
-				@ProjectGetter.getProjectWithoutDocLines
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should populate the user references in the project", ->
-				@ProjectGetter.populateProjectWithUsers
-					.calledWith(@project)
-					.should.equal true
 
 			it "should set the privilege level on the client", ->
 				@AuthorizationManager.setPrivilegeLevelOnClient
@@ -119,21 +109,15 @@ describe "EditorController", ->
 			it "should set the project_id of the client", ->
 				@client.set.calledWith("project_id", @project_id).should.equal true
 
-			it "should return the project model view, privilege level and protocol version", ->
-				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
-
 			it "should mark the user as connected with the ConnectedUsersManager", ->
 				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, @user, null).should.equal true
-			
-			it "should remove the flag to send a user a message about the project being deleted", ->
-				@ProjectDeleter.unmarkAsDeletedByExternalSource
-					.calledWith(@project)
-					.should.equal true
+
+			it "should return the project model view, privilege level and protocol version", ->
+				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
 		
 		describe "when not authorized", ->
 			beforeEach ->
-				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, false)
+				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, null, false)
 				@EditorController.joinProject(@client, @user, @project_id, @callback)
 
 			it "should not set the privilege level on the client", ->
@@ -148,6 +132,61 @@ describe "EditorController", ->
 
 			it "should return an error", ->
 				@callback.calledWith(sinon.match.truthy).should.equal true
+				
+		describe "when the project is marked as deleted", ->
+			beforeEach ->
+				@projectModelView.deletedByExternalDataSource = true
+				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectModelView, "owner")
+				@EditorController.joinProject(@client, @user, @project_id, @callback)	
+			
+			it "should remove the flag to send a user a message about the project being deleted", ->
+				@ProjectDeleter.unmarkAsDeletedByExternalSource
+					.calledWith(@project_id)
+					.should.equal true
+				
+	describe "buildJoinProjectView", ->
+		beforeEach ->
+			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
+			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+				
+		describe "when authorized", ->
+			beforeEach ->
+				@AuthorizationManager.getPrivilegeLevelForProject =
+					sinon.stub().callsArgWith(2, null, true, "owner")
+				@EditorController.buildJoinProjectView(@project_id, @user_id, @callback)
+				
+			it "should find the project without doc lines", ->
+				@ProjectGetter.getProjectWithoutDocLines
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should populate the user references in the project", ->
+				@ProjectGetter.populateProjectWithUsers
+					.calledWith(@project)
+					.should.equal true
+			
+			it "should look up the user", ->
+				@UserGetter.getUser
+					.calledWith(@user_id, { isAdmin: true })
+					.should.equal true
+					
+			it "should check the privilege level", ->
+				@AuthorizationManager.getPrivilegeLevelForProject
+					.calledWith(@project, @user)
+					.should.equal true
+
+			it "should return the project model view, privilege level and protocol version", ->
+				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
+				
+		describe "when not authorized", ->
+			beforeEach ->
+				@AuthorizationManager.getPrivilegeLevelForProject =
+					sinon.stub().callsArgWith(2, null, false, null)
+				@EditorController.buildJoinProjectView(@project_id, @user_id, @callback)
+				
+			it "should return false in the callback", ->
+				@callback.calledWith(null, null, false, @EditorController.protocolVersion).should.equal true
 
 
 	describe "leaveProject", ->

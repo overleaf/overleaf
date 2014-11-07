@@ -4,7 +4,7 @@ SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 
 
-describe 'Project deleter', ->
+describe 'ProjectDeleter', ->
 
 	beforeEach ->
 		@project_id = "12312"
@@ -55,24 +55,12 @@ describe 'Project deleter', ->
 			@project = {
 				_id: @project_id
 			}
-	
-		describe "when the project does not have the flag set", ->
-			beforeEach ->
-				@project.deletedByExternalDataSource = false
-				@deleter.unmarkAsDeletedByExternalSource @project, @callback
-			
-			it "should not update the project", ->
-				@Project.update.called.should.equal false
-
-		describe "when the project does have the flag set", ->
-			beforeEach ->
-				@project.deletedByExternalDataSource = true
-				@deleter.unmarkAsDeletedByExternalSource @project, @callback
-			
-			it "should remove the flag from the project", ->
-				@Project.update
-					.calledWith({_id: @project_id}, {deletedByExternalDataSource:false})
-					.should.equal true
+			@deleter.unmarkAsDeletedByExternalSource @project_id, @callback
+		
+		it "should remove the flag from the project", ->
+			@Project.update
+				.calledWith({_id: @project_id}, {deletedByExternalDataSource:false})
+				.should.equal true
 
 	describe "deleteUsersProjects", ->
 

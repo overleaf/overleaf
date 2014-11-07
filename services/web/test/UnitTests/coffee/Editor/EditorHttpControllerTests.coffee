@@ -7,16 +7,69 @@ describe "EditorHttpController", ->
 	beforeEach ->
 		@EditorHttpController = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectEntityHandler' : @ProjectEntityHandler = {}
+			'../Project/ProjectDeleter' : @ProjectDeleter = {}
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./EditorController": @EditorController = {}
+			'../../infrastructure/Metrics': @Metrics = {inc: sinon.stub()}
+			
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
+		@user_id = "mock-user-id"
 		@parent_folder_id = "mock-folder-id"
 		@req = {}
 		@res =
 			send: sinon.stub()
 			json: sinon.stub()
+			
+	describe "joinProject", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+			@req.query =
+				user_id: @user_id
+			@projectView = {
+				_id: @project_id
+			}
+			@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectView, "owner")
+			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
+			
+		describe "successfully", ->
+			beforeEach ->
+				@EditorHttpController.joinProject @req, @res
+				
+			it "should get the project view", ->
+				@EditorController.buildJoinProjectView
+					.calledWith(@project_id, @user_id)
+					.should.equal true
+					
+			it "should return the project and privilege level", ->
+				@res.json
+					.calledWith({
+						project: @projectView
+						privilegeLevel: "owner"
+					})
+					.should.equal true
+					
+			it "should not try to unmark the project as deleted", ->
+				@ProjectDeleter.unmarkAsDeletedByExternalSource 
+					.called
+					.should.equal false
+					
+			it "should send an inc metric", ->
+				@Metrics.inc
+					.calledWith("editor.join-project")
+					.should.equal true
+					
+		describe "when the project is marked as deleted", ->	
+			beforeEach ->
+				@projectView.deletedByExternalDataSource = true
+				@EditorHttpController.joinProject @req, @res
+				
+			it "should unmark the project as deleted", ->
+				@ProjectDeleter.unmarkAsDeletedByExternalSource 
+					.calledWith(@project_id)
+					.should.equal true
 
 	describe "restoreDoc", ->
 		beforeEach ->

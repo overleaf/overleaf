@@ -60,7 +60,7 @@ module.exports = class Router
 		app.get  '/register', UserPagesController.registerPage
 		app.post '/register', UserController.register
 
-		EditorRouter.apply(app)
+		EditorRouter.apply(app, httpAuth)
 		CollaboratorsRouter.apply(app)
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)

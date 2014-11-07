@@ -1,9 +1,26 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
+ProjectDeleter = require "../Project/ProjectDeleter"
 logger = require "logger-sharelatex"
 EditorRealTimeController = require "./EditorRealTimeController"
 EditorController = require "./EditorController"
+Metrics = require('../../infrastructure/Metrics')
 
 module.exports = EditorHttpController =
+	joinProject: (req, res, next) ->
+		project_id = req.params.Project_id
+		user_id = req.query.user_id
+		logger.log {user_id, project_id}, "join project request"
+		Metrics.inc "editor.join-project"
+		EditorController.buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
+			return next(error) if error?
+			res.json {
+				project: project
+				privilegeLevel: privilegeLevel
+			}
+			# Only show the 'renamed or deleted' message once
+			if project.deletedByExternalDataSource
+				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
+
 	restoreDoc: (req, res, next) ->
 		project_id = req.params.Project_id
 		doc_id = req.params.doc_id

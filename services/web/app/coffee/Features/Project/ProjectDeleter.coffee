@@ -16,14 +16,11 @@ module.exports = ProjectDeleter =
 			require('../Editor/EditorController').notifyUsersProjectHasBeenDeletedOrRenamed project_id, ->
 				callback()
 				
-	unmarkAsDeletedByExternalSource: (project, callback = (error) ->) ->
-		logger.log project_id: "removing flag marking project as deleted by external data source"
-		if project.deletedByExternalDataSource
-			conditions = {_id:project._id.toString()}
-			update = {deletedByExternalDataSource: false}
-			Project.update conditions, update, {}, callback
-		else
-			callback()
+	unmarkAsDeletedByExternalSource: (project_id, callback = (error) ->) ->
+		logger.log project_id: project_id, "removing flag marking project as deleted by external data source"
+		conditions = {_id:project_id.toString()}
+		update = {deletedByExternalDataSource: false}
+		Project.update conditions, update, {}, callback
 
 	deleteUsersProjects: (owner_id, callback)->
 		logger.log owner_id:owner_id, "deleting users projects"
