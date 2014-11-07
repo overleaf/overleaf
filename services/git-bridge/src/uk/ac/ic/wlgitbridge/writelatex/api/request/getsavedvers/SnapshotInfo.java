@@ -14,6 +14,7 @@ public class SnapshotInfo {
     private String createdAt;
 
     public SnapshotInfo(int versionID) {
+        this.versionId = versionID;
         comment = "Update on WriteLatex.com.";
         user = new WLUser();
     }

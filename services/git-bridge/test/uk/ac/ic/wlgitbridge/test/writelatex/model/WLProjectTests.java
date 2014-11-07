@@ -15,7 +15,7 @@ public class WLProjectTests {
     public void nothingToTest() {
         WLProject project = new WLProject("1826rqgsdb");
         try {
-            project.update();
+            project.fetchNewSnapshots();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
