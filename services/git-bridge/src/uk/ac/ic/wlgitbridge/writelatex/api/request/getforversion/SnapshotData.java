@@ -7,6 +7,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -41,6 +42,16 @@ public class SnapshotData implements JSONSource {
     private void populateAtts(JsonArray jsonArray) {
         for (JsonElement json : jsonArray) {
             atts.add(new WLAttachment(json));
+        }
+        System.out.println(atts);
+    }
+
+    public void writeAll(String repoDir) throws InterruptedException, ExecutionException, IOException {
+        for (WLFile src : srcs) {
+            src.writeToDisk(repoDir);
+        }
+        for (WLFile att : atts) {
+            att.writeToDisk(repoDir);
         }
     }
 

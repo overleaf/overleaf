@@ -10,13 +10,20 @@ public class SnapshotGetForVersionRequest extends SnapshotAPIRequest<SnapshotGet
 
     public static final String API_CALL = "/snapshots";
 
+    private int versionID;
+
     public SnapshotGetForVersionRequest(String projectName, int versionID) {
         super(projectName, API_CALL + "/" + versionID);
+        this.versionID = versionID;
     }
 
     @Override
     protected SnapshotGetForVersionResult parseResponse(JsonElement json) {
         return new SnapshotGetForVersionResult(this, json);
+    }
+
+    public int getVersionID() {
+        return versionID;
     }
 
 }

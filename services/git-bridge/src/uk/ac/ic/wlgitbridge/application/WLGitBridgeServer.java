@@ -7,7 +7,7 @@ import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.git.WLGitServlet;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
-import uk.ac.ic.wlgitbridge.writelatex.api.DummySnapshotDBAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import javax.servlet.ServletException;
 import java.net.BindException;
@@ -65,7 +65,7 @@ public class WLGitBridgeServer {
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, new DummySnapshotDBAPI(), rootGitDirectoryPath)),
+                        new WLGitServlet(servletContextHandler, new WLDataModel(), rootGitDirectoryPath)),
                 "/*"
         );
         jettyServer.setHandler(servletContextHandler);

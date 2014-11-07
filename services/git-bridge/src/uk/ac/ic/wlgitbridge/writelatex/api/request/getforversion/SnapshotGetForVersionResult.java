@@ -25,4 +25,8 @@ public class SnapshotGetForVersionResult extends Result {
         snapshotData = new SnapshotData(json);
     }
 
+    public SnapshotData getSnapshotData() {
+        return snapshotData;
+    }
+
 }

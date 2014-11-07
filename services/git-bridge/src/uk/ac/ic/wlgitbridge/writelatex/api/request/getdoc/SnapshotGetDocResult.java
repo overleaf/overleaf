@@ -19,4 +19,9 @@ public class SnapshotGetDocResult extends Result {
     public void fromJSON(JsonElement json) {
         versionID = json.getAsJsonObject().get("latestVerId").getAsInt();
     }
+
+    public int getVersionID() {
+        return versionID;
+    }
+
 }

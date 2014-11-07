@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 
 import java.io.File;
 
@@ -10,6 +11,6 @@ import java.io.File;
  */
 public interface RepositorySource {
 
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException;
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceNotEnabledException;
 
 }

@@ -11,6 +11,6 @@ import java.util.List;
 public interface SnapshotDBAPI {
 
     public boolean repositoryExists(String name);
-    public List<Snapshot> getSnapshotsToAddToRepository(Repository repository);
+    public List<Snapshot> getSnapshotsToAddToProject(String name) throws Throwable;
 
 }

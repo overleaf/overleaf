@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Request;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Result;
@@ -21,7 +22,10 @@ public class SnapshotGetSavedVersResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        savedVers = new Gson().fromJson(json, LinkedList.class);
+        savedVers = new LinkedList<SnapshotInfo>();
+        for (JsonElement elem : json.getAsJsonArray()) {
+            savedVers.add(new Gson().fromJson(elem.getAsJsonObject(), SnapshotInfo.class));
+        }
     }
 
     public List<SnapshotInfo> getSavedVers() {

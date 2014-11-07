@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -42,5 +42,37 @@ public class WLFile implements JSONSource {
     protected void getPathFromJSON(JsonArray jsonArray) {
         path = jsonArray.get(1).getAsString();
     }
+
+    public void writeToDisk(String repoDir) throws IOException, ExecutionException, InterruptedException {
+        System.out.println("write to " + repoDir);
+        File file = new File(repoDir, path);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        OutputStream out = new FileOutputStream(file);
+        out.write(getContents());
+        out.close();
+    }
+
+//    @Override
+//    public String toString() {
+//        try {
+//            File file = new File("/Users/Roxy/git-test-files/" + path);
+//            file.getParentFile().mkdirs();
+//            file.createNewFile();
+//            OutputStream out = new FileOutputStream(file);
+//            out.write(getContents());
+//            out.close();
+//            return "{ path: " + path + ", contents: " + getContents().toString() + " }";
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return "Exception";
+//    }
 
 }

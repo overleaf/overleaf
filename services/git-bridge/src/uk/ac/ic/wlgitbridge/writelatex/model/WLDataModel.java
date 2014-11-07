@@ -1,13 +1,18 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import org.eclipse.jgit.lib.Repository;
+import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLDataModel {
+public class WLDataModel implements SnapshotDBAPI {
 
     private final Map<String, WLProject> projects;
 
@@ -15,8 +20,32 @@ public class WLDataModel {
         this.projects = projects;
     }
 
-    public void updateProjectWithName(String name) throws InterruptedException, ExecutionException, IOException {
+    public WLDataModel() {
+        projects = new HashMap<String, WLProject>();
+    }
+
+    public void updateProjectWithName(String name) throws Throwable {
+        if (!projects.containsKey(name)) {
+            projects.put(name, new WLProject(name));
+        }
+        System.out.println(projects);
+        System.out.println(projects.get(name));
+        System.out.println(name);
         projects.get(name).update();
+    }
+
+    @Override
+    public boolean repositoryExists(String name) {
+        if (!projects.containsKey(name)) {
+            projects.put(name, new WLProject(name));
+        }
+        return projects.containsKey(name);
+    }
+
+    @Override
+    public List<Snapshot> getSnapshotsToAddToProject(String name) throws Throwable {
+        updateProjectWithName(name);
+        return projects.get(name).getSnapshotsToAdd();
     }
 
 }

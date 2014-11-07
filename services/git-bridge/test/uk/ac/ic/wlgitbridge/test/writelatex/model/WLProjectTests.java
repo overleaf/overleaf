@@ -22,6 +22,8 @@ public class WLProjectTests {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
     }
 

@@ -1,7 +1,11 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
+import org.eclipse.jgit.api.AddCommand;
+import org.eclipse.jgit.api.CommitCommand;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
@@ -26,7 +30,7 @@ public class WLBridgedProject {
         this.snapshotDBAPI = snapshotDBAPI;
     }
 
-    public void buildRepository() throws RepositoryNotFoundException {
+    public void buildRepository() throws RepositoryNotFoundException, ServiceNotEnabledException {
         if (repository.getObjectDatabase().exists()) {
             updateRepositoryFromSnapshots(repository);
         } else {
@@ -34,11 +38,26 @@ public class WLBridgedProject {
         }
     }
 
-    private void updateRepositoryFromSnapshots(Repository repository) {
-        List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToRepository(repository);
+    private void updateRepositoryFromSnapshots(Repository repository) throws ServiceNotEnabledException {
+        try {
+            List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToProject(name);
+            for (Snapshot snapshot : snapshotsToAdd) {
+                snapshot.getData().writeAll(repositoryDirectory.getAbsolutePath());
+                Git git = new Git(repository);
+                AddCommand add = git.add();
+                add.addFilepattern(".");
+                add.call();
+                CommitCommand commit = git.commit();
+                commit.setMessage("Commit");
+                commit.call();
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            throw new ServiceNotEnabledException();
+        }
     }
 
-    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException {
+    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceNotEnabledException {
         if (!snapshotDBAPI.repositoryExists(name)) {
             throw new RepositoryNotFoundException(name);
         }

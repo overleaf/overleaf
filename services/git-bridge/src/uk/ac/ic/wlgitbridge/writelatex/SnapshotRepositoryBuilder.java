@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
@@ -22,7 +23,7 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
     }
 
     @Override
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException {
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceNotEnabledException {
         File repositoryDirectory = new File(rootDirectory.getAbsolutePath(), name);
 
         Repository repository = null;
