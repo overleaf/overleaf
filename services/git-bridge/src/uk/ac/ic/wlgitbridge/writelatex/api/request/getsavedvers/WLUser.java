@@ -6,14 +6,17 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLUser implements JSONSource {
+public class WLUser {
 
     private String name;
     private String email;
 
-    @Override
-    public void fromJSON(JsonElement json) {
+    public String getName() {
+        return name;
+    }
 
+    public String getEmail() {
+        return email;
     }
 
 }
