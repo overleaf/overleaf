@@ -177,7 +177,7 @@ describe "EditorController", ->
 					.should.equal true
 
 			it "should return the project model view, privilege level and protocol version", ->
-				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
+				@callback.calledWith(null, @projectModelView, "owner").should.equal true
 				
 		describe "when not authorized", ->
 			beforeEach ->
@@ -186,7 +186,7 @@ describe "EditorController", ->
 				@EditorController.buildJoinProjectView(@project_id, @user_id, @callback)
 				
 			it "should return false in the callback", ->
-				@callback.calledWith(null, null, false, @EditorController.protocolVersion).should.equal true
+				@callback.calledWith(null, null, false).should.equal true
 
 
 	describe "leaveProject", ->
