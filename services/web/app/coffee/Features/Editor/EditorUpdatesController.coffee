@@ -27,12 +27,6 @@ module.exports = EditorUpdatesController =
 		client.get "user_id", (error, user_id) ->
 			update.meta.user_id = user_id
 			EditorUpdatesController._applyUpdate client, project_id, doc_id, update
-
-	applyAceUpdate: (client, project_id, doc_id, window_name, update) ->
-		# This is deprecated now and should never be used. Kick the client off if they call it.
-		# After the initial deploy this can be removed safely
-		logger.err project_id: project_id, doc_id: doc_id, "client using old Ace Update method"
-		client.disconnect()
 		
 	listenForUpdatesFromDocumentUpdater: () ->
 		rclient.subscribe "applied-ops"
