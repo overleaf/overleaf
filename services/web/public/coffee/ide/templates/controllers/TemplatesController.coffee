@@ -38,30 +38,32 @@ define [
 					problemTalkingToTemplateApi()
 
 		refreshPublishedStatus()
-		$scope.$watch $scope.problemTalkingToTemplateApi, refreshPublishedStatus
+		$scope.$watch $scope.problemTalkingToTemplateApi, (value) ->
+			if value?
+				refreshPublishedStatus()
 
-		$scope.updateProjectDescription = ->
-			description = $scope.templateDetails.description
-			if description?
-				$http
-					.post("/project/#{ide.project_id}/template/description", {
-						description: description
-						_csrf: window.csrfToken
-					})
-					.error () ->
-						problemTalkingToTemplateApi()
+		updateProjectDescription = ->
+			$http.post("/project/#{ide.project_id}/template/description", {
+				description: $scope.templateDetails.description
+				_csrf: window.csrfToken
+			})
 
 		$scope.publishTemplate = ->
 			$scope.state.publishInflight = true
-			$http
-				.post("/project/#{ide.project_id}/template/publish", {
-					_csrf: window.csrfToken
-				})
-				.success () ->
-					refreshPublishedStatus()
-					$scope.state.publishInflight = false
+			updateProjectDescription()
 				.error () ->
 					problemTalkingToTemplateApi()
+				.success () ->
+					$http
+						.post("/project/#{ide.project_id}/template/publish", {
+							_csrf: window.csrfToken
+						})
+						.error () ->
+							problemTalkingToTemplateApi()
+						.success () ->
+							refreshPublishedStatus()
+							$scope.state.publishInflight = false
+					
 
 		$scope.unpublishTemplate = ->
 			$scope.state.unpublishInflight = true

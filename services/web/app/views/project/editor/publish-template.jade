@@ -15,7 +15,6 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 					rows=5,
 					name='Description',
 					ng-model="templateDetails.description",
-					ng-blur="updateProjectDescription()",
 					value=""
 				)
 			div(ng-show="templateDetails.exists").text-center.templateDetails
