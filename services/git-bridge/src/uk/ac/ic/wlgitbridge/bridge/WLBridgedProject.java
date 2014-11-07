@@ -42,14 +42,10 @@ public class WLBridgedProject {
         try {
             List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToProject(name);
             for (Snapshot snapshot : snapshotsToAdd) {
-                snapshot.getData().writeAll(repositoryDirectory.getAbsolutePath());
+                snapshot.writeToDisk(repositoryDirectory.getAbsolutePath());
                 Git git = new Git(repository);
-                AddCommand add = git.add();
-                add.addFilepattern(".");
-                add.call();
-                CommitCommand commit = git.commit();
-                commit.setMessage("Commit");
-                commit.call();
+                git.add().addFilepattern(".").call();
+                git.commit().setAuthor(snapshot.getUserName(), snapshot.getUserEmail()).setMessage(snapshot.getComment()).call();
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();

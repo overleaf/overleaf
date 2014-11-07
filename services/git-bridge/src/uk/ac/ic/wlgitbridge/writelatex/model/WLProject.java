@@ -17,27 +17,17 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLProject implements JSONModel {
+public class WLProject {
 
     private final String name;
-    public static final int VERSION_ID_INVALID = -1;
     private final Map<Integer, Snapshot> snapshots;
     private final SortedSet<Integer> versions;
-    private int latestVersionID;
     private List<Snapshot> snapshotsToAdd;
-    private SortedSet<Integer> idsToUpdate;
-    private HashMap<Integer, SnapshotInfo> msg;
 
     public WLProject(String name) {
         this.name = name;
         snapshots = new HashMap<Integer, Snapshot>();
         versions = new TreeSet<Integer>();
-        latestVersionID = VERSION_ID_INVALID;
-    }
-
-    @Override
-    public void updateFromJSON(JsonElement json) {
-
     }
 
     public void update() throws Throwable {
@@ -51,22 +41,22 @@ public class WLProject implements JSONModel {
         getDoc.request();
         getSavedVers.request();
 
-        List<Integer> fetchedIDs = new LinkedList<Integer>();
-        fetchedIDs.add(getDoc.getResult().getVersionID());
+        Set<Integer> fetchedIDs = new HashSet<Integer>();
+        Map<Integer, SnapshotInfo> fetchedSnapshotInfos = new HashMap<Integer, SnapshotInfo>();
+
+        int latestVersionID = getDoc.getResult().getVersionID();
+        fetchedSnapshotInfos.put(latestVersionID, new SnapshotInfo(latestVersionID));
+        fetchedIDs.add(latestVersionID);
 
         for (SnapshotInfo snapshotInfo : getSavedVers.getResult().getSavedVers()) {
-            msg = new HashMap<Integer, SnapshotInfo>();
-            msg.put(snapshotInfo.getVersionId(), snapshotInfo);
-            fetchedIDs.add(snapshotInfo.getVersionId());
+            int versionId = snapshotInfo.getVersionId();
+            fetchedSnapshotInfos.put(versionId, snapshotInfo);
+            fetchedIDs.add(versionId);
         }
 
         boolean result = false;
 
-//        ids.add(getLatestVersionID(getDoc.getResult()));
-
-//        ids.addAll(getLatestVersionIDs(getSavedVers.getResult()));
-
-        idsToUpdate = new TreeSet<Integer>();
+        List<Integer> idsToUpdate = new LinkedList<Integer>();
 
         boolean hasNew = false;
         for (Integer id : fetchedIDs) {
@@ -77,12 +67,16 @@ public class WLProject implements JSONModel {
             }
         }
 
-        updateIDs(idsToUpdate);
+        versions.addAll(fetchedIDs);
+        versions.add(latestVersionID);
+
+        updateIDs(idsToUpdate, fetchedSnapshotInfos);
 
         return result;
     }
 
-    private void updateIDs(SortedSet<Integer> idsToUpdate) throws Throwable {
+    private void updateIDs(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws Throwable {
+        System.out.println(idsToUpdate);
         List<SnapshotGetForVersionRequest> requests = new LinkedList<SnapshotGetForVersionRequest>();
         for (int id : idsToUpdate) {
             SnapshotGetForVersionRequest request = new SnapshotGetForVersionRequest(name, id);
@@ -92,7 +86,7 @@ public class WLProject implements JSONModel {
         for (SnapshotGetForVersionRequest request : requests) {
             SnapshotGetForVersionResult result = request.getResult();
             SnapshotData data = result.getSnapshotData();
-            Snapshot snapshot = new Snapshot(request.getVersionID(), data);
+            Snapshot snapshot = new Snapshot(fetchedSnapshotInfos.get(request.getVersionID()), data);
             snapshots.put(request.getVersionID(), snapshot);
         }
         snapshotsToAdd = new LinkedList<Snapshot>();

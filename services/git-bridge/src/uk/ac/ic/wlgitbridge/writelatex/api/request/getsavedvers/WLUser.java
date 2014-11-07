@@ -11,6 +11,11 @@ public class WLUser {
     private String name;
     private String email;
 
+    public WLUser() {
+        name = "Anonymous";
+        email = "anonymous@writelatex.com";
+    }
+
     public String getName() {
         return name;
     }

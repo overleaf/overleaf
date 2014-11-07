@@ -13,6 +13,11 @@ public class SnapshotInfo {
     private WLUser user;
     private String createdAt;
 
+    public SnapshotInfo(int versionID) {
+        comment = "Update on WriteLatex.com.";
+        user = new WLUser();
+    }
+
     public int getVersionId() {
         return versionId;
     }

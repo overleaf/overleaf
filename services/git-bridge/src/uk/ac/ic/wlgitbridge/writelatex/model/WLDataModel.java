@@ -24,13 +24,10 @@ public class WLDataModel implements SnapshotDBAPI {
         projects = new HashMap<String, WLProject>();
     }
 
-    public void updateProjectWithName(String name) throws Throwable {
+    private void updateProjectWithName(String name) throws Throwable {
         if (!projects.containsKey(name)) {
             projects.put(name, new WLProject(name));
         }
-        System.out.println(projects);
-        System.out.println(projects.get(name));
-        System.out.println(name);
         projects.get(name).update();
     }
 

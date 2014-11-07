@@ -2,38 +2,61 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.WLFile;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 03/11/14.
  */
-public class Snapshot implements JSONModel {
+public class Snapshot {
 
-    private int versionID;
-    private String comment;
-    private WLUser user;
-    private SnapshotData data;
+    private final int versionID;
+    private final String comment;
+    private final String userName;
+    private final String userEmail;
 
-    public Snapshot(int versionID, SnapshotData data) {
-        this.comment = comment;
+    private final List<WLFile> srcs;
+    private final List<WLFile> atts;
 
-        this.data = data;
+    public Snapshot(SnapshotInfo info, SnapshotData data) {
+        versionID = info.getVersionId();
+        comment = info.getComment();
+        WLUser user = info.getUser();
+        userName = user.getName();
+        userEmail = user.getEmail();
+
+        srcs = data.getSrcs();
+        atts = data.getAtts();
     }
 
-    @Override
-    public void updateFromJSON(JsonElement json) {
-
+    public void writeToDisk(String basePath) throws InterruptedException, ExecutionException, IOException {
+        for (WLFile file : srcs) {
+            file.writeToDisk(basePath);
+        }
+        for (WLFile file : atts) {
+            file.writeToDisk(basePath);
+        }
     }
 
-    public void writeToDisk() {
-
-    }
-
-    public SnapshotData getData() {
-        return data;
+    public int getVersionID() {
+        return versionID;
     }
 
     public String getComment() {
         return comment;
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
 }

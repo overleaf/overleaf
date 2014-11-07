@@ -36,14 +36,12 @@ public class SnapshotData implements JSONSource {
         for (JsonElement json : jsonArray) {
             srcs.add(new WLFile(json));
         }
-        System.out.println(srcs);
     }
 
     private void populateAtts(JsonArray jsonArray) {
         for (JsonElement json : jsonArray) {
             atts.add(new WLAttachment(json));
         }
-        System.out.println(atts);
     }
 
     public void writeAll(String repoDir) throws InterruptedException, ExecutionException, IOException {
@@ -55,4 +53,11 @@ public class SnapshotData implements JSONSource {
         }
     }
 
+    public List<WLFile> getSrcs() {
+        return srcs;
+    }
+
+    public List<WLFile> getAtts() {
+        return atts;
+    }
 }
