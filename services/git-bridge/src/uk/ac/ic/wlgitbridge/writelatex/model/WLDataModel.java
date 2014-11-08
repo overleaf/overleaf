@@ -13,19 +13,8 @@ public class WLDataModel implements SnapshotDBAPI {
 
     private final Map<String, WLProject> projects;
 
-    public WLDataModel(Map<String, WLProject> projects) {
-        this.projects = projects;
-    }
-
     public WLDataModel() {
         projects = new HashMap<String, WLProject>();
-    }
-
-    private List<Snapshot> updateProjectWithName(String name) throws Throwable {
-        if (!projects.containsKey(name)) {
-            projects.put(name, new WLProject(name));
-        }
-        return projects.get(name).fetchNewSnapshots();
     }
 
     @Override
@@ -39,6 +28,13 @@ public class WLDataModel implements SnapshotDBAPI {
     @Override
     public List<Snapshot> getSnapshotsToAddToProject(String name) throws Throwable {
         return updateProjectWithName(name);
+    }
+
+    private List<Snapshot> updateProjectWithName(String name) throws Throwable {
+        if (!projects.containsKey(name)) {
+            projects.put(name, new WLProject(name));
+        }
+        return projects.get(name).fetchNewSnapshots();
     }
 
 }
