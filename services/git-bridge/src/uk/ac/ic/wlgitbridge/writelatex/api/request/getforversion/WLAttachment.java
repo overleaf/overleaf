@@ -2,7 +2,11 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncCompletionHandler;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.HttpResponseBodyPart;
+import com.ning.http.client.Response;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,42 +20,48 @@ public class WLAttachment extends WLFile {
 
     private Future<byte[]> future;
 
-    public WLAttachment(JsonElement json) {
+    public WLAttachment(JsonElement json) throws FailedConnectionException {
         super(json);
     }
 
     @Override
-    public byte[] getContents() throws ExecutionException, InterruptedException {
-        return future.get();
-    }
-
-    @Override
-    protected void getContentsFromJSON(JsonArray jsonArray) {
+    public byte[] getContents() throws FailedConnectionException {
         try {
-            fetchContents(jsonArray.get(0).getAsString());
-        } catch (IOException e) {
-            throw new RuntimeException();
+            return future.get();
+        } catch (InterruptedException e) {
+            throw new FailedConnectionException();
+        } catch (ExecutionException e) {
+            throw new FailedConnectionException();
         }
     }
 
-    private void fetchContents(String url) throws IOException {
+    @Override
+    protected void getContentsFromJSON(JsonArray jsonArray) throws FailedConnectionException {
+        fetchContents(jsonArray.get(0).getAsString());
+    }
+
+    private void fetchContents(String url) throws FailedConnectionException {
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
-        future = asyncHttpClient.prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
+        try {
+            future = asyncHttpClient.prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
 
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
-            @Override
-            public STATE onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception {
-                bytes.write(bodyPart.getBodyPartBytes());
-                return STATE.CONTINUE;
-            }
+                @Override
+                public STATE onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception {
+                    bytes.write(bodyPart.getBodyPartBytes());
+                    return STATE.CONTINUE;
+                }
 
-            @Override
-            public byte[] onCompleted(Response response) throws Exception {
-                return bytes.toByteArray();
-            }
+                @Override
+                public byte[] onCompleted(Response response) throws Exception {
+                    return bytes.toByteArray();
+                }
 
-        });
+            });
+        } catch (IOException e) {
+            throw new FailedConnectionException();
+        }
     }
 
 }

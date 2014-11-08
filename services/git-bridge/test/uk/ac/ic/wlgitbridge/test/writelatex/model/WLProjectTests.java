@@ -1,6 +1,8 @@
 package uk.ac.ic.wlgitbridge.test.writelatex.model;
 
 import org.junit.Test;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
 import java.io.IOException;
@@ -16,14 +18,10 @@ public class WLProjectTests {
         WLProject project = new WLProject("1826rqgsdb");
         try {
             project.fetchNewSnapshots();
-        } catch (InterruptedException e) {
+        } catch (FailedConnectionException e) {
             e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InvalidProjectException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
         }
     }
 

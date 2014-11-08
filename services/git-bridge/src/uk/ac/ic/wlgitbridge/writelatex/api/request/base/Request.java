@@ -6,8 +6,10 @@ import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -18,17 +20,15 @@ public abstract class Request<T extends Result> {
     private final String url;
 
     private Future<T> future;
-    private Throwable throwable;
-
-    private boolean finished;
+    private boolean error;
 
     public Request(String url) {
         this.url = url;
-        finished = false;
+        error = false;
     }
 
     protected abstract Realm buildRequestRealm();
-    protected abstract T parseResponse(JsonElement json);
+    protected abstract T parseResponse(JsonElement json) throws FailedConnectionException;
 
     public void request() {
         AsyncHttpClient client = new AsyncHttpClient();
@@ -42,20 +42,26 @@ public abstract class Request<T extends Result> {
 
                 @Override
                 public void onThrowable(Throwable t) {
-                    throwable = t;
+                    error = true;
                 }
 
             });
         } catch (IOException e) {
-            throwable = e;
+            error = true;
         }
     }
 
-    public T getResult() throws Throwable {
-        if (throwable != null) {
-            throw throwable;
+    public T getResult() throws FailedConnectionException {
+        if (error) {
+            throw new FailedConnectionException();
         }
-        return future.get();
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            throw new FailedConnectionException();
+        } catch (ExecutionException e) {
+            throw new FailedConnectionException();
+        }
     }
 
 }

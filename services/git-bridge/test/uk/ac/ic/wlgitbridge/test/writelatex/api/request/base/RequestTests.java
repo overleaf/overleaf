@@ -6,9 +6,6 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotGetSavedVersRequest;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-
 /**
  * Created by Winston on 06/11/14.
  */

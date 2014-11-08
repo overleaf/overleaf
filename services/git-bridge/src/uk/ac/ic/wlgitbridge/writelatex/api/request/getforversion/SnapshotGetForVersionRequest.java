@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -18,7 +19,7 @@ public class SnapshotGetForVersionRequest extends SnapshotAPIRequest<SnapshotGet
     }
 
     @Override
-    protected SnapshotGetForVersionResult parseResponse(JsonElement json) {
+    protected SnapshotGetForVersionResult parseResponse(JsonElement json) throws FailedConnectionException {
         return new SnapshotGetForVersionResult(this, json);
     }
 

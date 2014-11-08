@@ -1,12 +1,11 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
-import org.eclipse.jgit.api.AddCommand;
-import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
@@ -30,7 +29,7 @@ public class WLBridgedProject {
         this.snapshotDBAPI = snapshotDBAPI;
     }
 
-    public void buildRepository() throws RepositoryNotFoundException, ServiceNotEnabledException {
+    public void buildRepository() throws RepositoryNotFoundException, ServiceNotEnabledException, FailedConnectionException {
         if (repository.getObjectDatabase().exists()) {
             updateRepositoryFromSnapshots(repository);
         } else {
@@ -53,7 +52,7 @@ public class WLBridgedProject {
         }
     }
 
-    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceNotEnabledException {
+    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceNotEnabledException, FailedConnectionException {
         if (!snapshotDBAPI.repositoryExists(name)) {
             throw new RepositoryNotFoundException(name);
         }

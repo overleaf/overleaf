@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -20,36 +21,27 @@ public class SnapshotData implements JSONSource {
     private List<WLFile> srcs;
     private List<WLFile> atts;
 
-    public SnapshotData(JsonElement json) {
+    public SnapshotData(JsonElement json) throws FailedConnectionException {
         srcs = new LinkedList<WLFile>();
         atts = new LinkedList<WLFile>();
         fromJSON(json);
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
+    public void fromJSON(JsonElement json) throws FailedConnectionException {
         populateSrcs(json.getAsJsonObject().get(JSON_KEY_SRCS).getAsJsonArray());
         populateAtts(json.getAsJsonObject().get(JSON_KEY_ATTS).getAsJsonArray());
     }
 
-    private void populateSrcs(JsonArray jsonArray) {
+    private void populateSrcs(JsonArray jsonArray) throws FailedConnectionException {
         for (JsonElement json : jsonArray) {
             srcs.add(new WLFile(json));
         }
     }
 
-    private void populateAtts(JsonArray jsonArray) {
+    private void populateAtts(JsonArray jsonArray) throws FailedConnectionException {
         for (JsonElement json : jsonArray) {
             atts.add(new WLAttachment(json));
-        }
-    }
-
-    public void writeAll(String repoDir) throws InterruptedException, ExecutionException, IOException {
-        for (WLFile src : srcs) {
-            src.writeToDisk(repoDir);
-        }
-        for (WLFile att : atts) {
-            att.writeToDisk(repoDir);
         }
     }
 

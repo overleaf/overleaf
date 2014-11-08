@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import com.google.gson.JsonElement;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.WLFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
@@ -34,7 +34,7 @@ public class Snapshot {
         atts = data.getAtts();
     }
 
-    public void writeToDisk(String basePath) throws InterruptedException, ExecutionException, IOException {
+    public void writeToDisk(String basePath) throws IOException, FailedConnectionException {
         for (WLFile file : srcs) {
             file.writeToDisk(basePath);
         }

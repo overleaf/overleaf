@@ -1,13 +1,9 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Request;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Result;
-
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -16,12 +12,12 @@ public class SnapshotGetForVersionResult extends Result {
 
     private SnapshotData snapshotData;
 
-    public SnapshotGetForVersionResult(Request request, JsonElement json) {
+    public SnapshotGetForVersionResult(Request request, JsonElement json) throws FailedConnectionException {
         super(request, json);
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
+    public void fromJSON(JsonElement json) throws FailedConnectionException {
         snapshotData = new SnapshotData(json);
     }
 

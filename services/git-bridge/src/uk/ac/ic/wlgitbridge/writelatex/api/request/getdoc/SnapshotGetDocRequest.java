@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc;
 
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -15,7 +16,7 @@ public class SnapshotGetDocRequest extends SnapshotAPIRequest<SnapshotGetDocResu
     }
 
     @Override
-    protected SnapshotGetDocResult parseResponse(JsonElement json) {
+    protected SnapshotGetDocResult parseResponse(JsonElement json) throws FailedConnectionException {
         return new SnapshotGetDocResult(this, json);
     }
 

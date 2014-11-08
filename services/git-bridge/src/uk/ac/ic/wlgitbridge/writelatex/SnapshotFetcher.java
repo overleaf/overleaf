@@ -1,6 +1,8 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionResult;
@@ -25,13 +27,13 @@ public class SnapshotFetcher {
         versions = new TreeSet<Integer>();
     }
 
-    public List<Snapshot> fetchNewSnapshots() throws Throwable {
+    public List<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
         List<Snapshot> newSnapshots = new LinkedList<Snapshot>();
         while (getNew(newSnapshots));
         return newSnapshots;
     }
 
-    private boolean getNew(List<Snapshot> newSnapshots) throws Throwable {
+    private boolean getNew(List<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {
         SnapshotGetDocRequest getDoc = new SnapshotGetDocRequest(projectName);
         SnapshotGetSavedVersRequest getSavedVers = new SnapshotGetSavedVersRequest(projectName);
 
@@ -59,13 +61,13 @@ public class SnapshotFetcher {
         ids.add(versionID);
     }
 
-    private int putLatestDoc(SnapshotGetDocRequest getDoc, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws Throwable {
+    private int putLatestDoc(SnapshotGetDocRequest getDoc, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws FailedConnectionException, InvalidProjectException {
         int latestVersionID = getDoc.getResult().getVersionID();
         putFetchedResult(new SnapshotInfo(latestVersionID), fetchedIDs, fetchedSnapshotInfos);
         return latestVersionID;
     }
 
-    private void putSavedVers(SnapshotGetSavedVersRequest getSavedVers, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws Throwable {
+    private void putSavedVers(SnapshotGetSavedVersRequest getSavedVers, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws FailedConnectionException {
         for (SnapshotInfo snapshotInfo : getSavedVers.getResult().getSavedVers()) {
             putFetchedResult(snapshotInfo, fetchedIDs, fetchedSnapshotInfos);
         }
@@ -81,7 +83,7 @@ public class SnapshotFetcher {
         return idsToUpdate;
     }
 
-    private boolean updateIDs(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws Throwable {
+    private boolean updateIDs(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws FailedConnectionException {
         if (idsToUpdate.isEmpty()) {
             return false;
         }
@@ -90,7 +92,7 @@ public class SnapshotFetcher {
         return true;
     }
 
-    private void fetchVersions(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws Throwable {
+    private void fetchVersions(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws FailedConnectionException {
         List<SnapshotGetForVersionRequest> requests = createFiredRequests(idsToUpdate);
         processResults(fetchedSnapshotInfos, newSnapshots, requests);
     }
@@ -105,13 +107,13 @@ public class SnapshotFetcher {
         return requests;
     }
 
-    private void processResults(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, List<SnapshotGetForVersionRequest> requests) throws Throwable {
+    private void processResults(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, List<SnapshotGetForVersionRequest> requests) throws FailedConnectionException {
         for (SnapshotGetForVersionRequest request : requests) {
             processResult(fetchedSnapshotInfos, newSnapshots, request);
         }
     }
 
-    private void processResult(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, SnapshotGetForVersionRequest request) throws Throwable {
+    private void processResult(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, SnapshotGetForVersionRequest request) throws FailedConnectionException {
         SnapshotGetForVersionResult result = request.getResult();
         SnapshotData data = result.getSnapshotData();
         Snapshot snapshot = new Snapshot(fetchedSnapshotInfos.get(request.getVersionID()), data);

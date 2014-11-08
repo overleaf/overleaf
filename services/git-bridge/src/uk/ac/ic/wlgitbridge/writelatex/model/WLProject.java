@@ -1,14 +1,12 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionRequest;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionResult;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotGetSavedVersRequest;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Winston on 06/11/14.
@@ -25,7 +23,7 @@ public class WLProject {
         snapshotFetcher = new SnapshotFetcher(name, snapshots);
     }
 
-    public List<Snapshot> fetchNewSnapshots() throws Throwable {
+    public List<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
         return snapshotFetcher.fetchNewSnapshots();
     }
 

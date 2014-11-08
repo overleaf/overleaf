@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.api;
 
-import org.eclipse.jgit.lib.Repository;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface SnapshotDBAPI {
 
-    public boolean repositoryExists(String name);
-    public List<Snapshot> getSnapshotsToAddToProject(String name) throws Throwable;
+    public boolean repositoryExists(String name) throws FailedConnectionException;
+    public List<Snapshot> getSnapshotsToAddToProject(String name) throws FailedConnectionException, InvalidProjectException;
 
 }
