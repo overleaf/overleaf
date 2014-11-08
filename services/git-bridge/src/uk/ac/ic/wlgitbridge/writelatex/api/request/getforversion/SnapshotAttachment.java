@@ -16,11 +16,11 @@ import java.util.concurrent.Future;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLAttachment extends WLFile {
+public class SnapshotAttachment extends SnapshotFile {
 
     private Future<byte[]> future;
 
-    public WLAttachment(JsonElement json) throws FailedConnectionException {
+    public SnapshotAttachment(JsonElement json) throws FailedConnectionException {
         super(json);
     }
 

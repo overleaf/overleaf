@@ -5,10 +5,8 @@ import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -18,12 +16,12 @@ public class SnapshotData implements JSONSource {
     public static final String JSON_KEY_SRCS = "srcs";
     public static final String JSON_KEY_ATTS = "atts";
 
-    private List<WLFile> srcs;
-    private List<WLFile> atts;
+    private List<SnapshotFile> srcs;
+    private List<SnapshotFile> atts;
 
     public SnapshotData(JsonElement json) throws FailedConnectionException {
-        srcs = new LinkedList<WLFile>();
-        atts = new LinkedList<WLFile>();
+        srcs = new LinkedList<SnapshotFile>();
+        atts = new LinkedList<SnapshotFile>();
         fromJSON(json);
     }
 
@@ -35,21 +33,21 @@ public class SnapshotData implements JSONSource {
 
     private void populateSrcs(JsonArray jsonArray) throws FailedConnectionException {
         for (JsonElement json : jsonArray) {
-            srcs.add(new WLFile(json));
+            srcs.add(new SnapshotFile(json));
         }
     }
 
     private void populateAtts(JsonArray jsonArray) throws FailedConnectionException {
         for (JsonElement json : jsonArray) {
-            atts.add(new WLAttachment(json));
+            atts.add(new SnapshotAttachment(json));
         }
     }
 
-    public List<WLFile> getSrcs() {
+    public List<SnapshotFile> getSrcs() {
         return srcs;
     }
 
-    public List<WLFile> getAtts() {
+    public List<SnapshotFile> getAtts() {
         return atts;
     }
 }

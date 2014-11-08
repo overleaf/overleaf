@@ -2,13 +2,12 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.WLFile;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Winston on 03/11/14.
@@ -20,8 +19,8 @@ public class Snapshot {
     private final String userName;
     private final String userEmail;
 
-    private final List<WLFile> srcs;
-    private final List<WLFile> atts;
+    private final List<SnapshotFile> srcs;
+    private final List<SnapshotFile> atts;
 
     public Snapshot(SnapshotInfo info, SnapshotData data) {
         versionID = info.getVersionId();
@@ -35,10 +34,10 @@ public class Snapshot {
     }
 
     public void writeToDisk(String basePath) throws IOException, FailedConnectionException {
-        for (WLFile file : srcs) {
+        for (SnapshotFile file : srcs) {
             file.writeToDisk(basePath);
         }
-        for (WLFile file : atts) {
+        for (SnapshotFile file : atts) {
             file.writeToDisk(basePath);
         }
     }

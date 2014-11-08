@@ -18,9 +18,9 @@ public class WLDataModel implements SnapshotDBAPI {
     private final Map<String, WLProject> projects;
     private final WLFileStore fileStore;
 
-    public WLDataModel() {
+    public WLDataModel(String rootGitDirectoryPath) {
         projects = new HashMap<String, WLProject>();
-        fileStore = new WLFileStore();
+        fileStore = new WLFileStore(rootGitDirectoryPath);
     }
 
     @Override
@@ -41,10 +41,16 @@ public class WLDataModel implements SnapshotDBAPI {
     }
 
     private List<Snapshot> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
-        if (!projects.containsKey(name)) {
-            projects.put(name, new WLProject(name));
+        WLProject project;
+        if (projects.containsKey(name)) {
+            project = projects.get(name);
+        } else {
+            project = new WLProject(name);
+            projects.put(name, project);
         }
-        return projects.get(name).fetchNewSnapshots();
+        List<Snapshot> newSnapshots = project.fetchNewSnapshots();
+        fileStore.updateForProject(project);
+        return newSnapshots;
     }
 
 }

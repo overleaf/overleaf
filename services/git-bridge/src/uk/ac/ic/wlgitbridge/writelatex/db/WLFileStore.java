@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.db;
 
+import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,12 +10,22 @@ import java.util.Map;
  */
 public class WLFileStore {
 
-    private final Map<String, WLFileNode> fileStore;
+    private final Map<String, WLDirectoryNode> fileStore;
+    private final String rootGitDirectoryPath;
 
-    public WLFileStore() {
-        fileStore = new HashMap<String, WLFileNode>();
+    public WLFileStore(String rootGitDirectoryPath) {
+        fileStore = new HashMap<String, WLDirectoryNode>();
+        this.rootGitDirectoryPath = rootGitDirectoryPath;
     }
 
-
+    public void updateForProject(WLProject project) {
+        String projectName = project.getName();
+        WLDirectoryNode directoryNode = fileStore.get(projectName);
+        if (directoryNode == null) {
+            directoryNode = new WLDirectoryNode(rootGitDirectoryPath, projectName);
+            fileStore.put(projectName, directoryNode);
+        }
+        directoryNode.updateFromProject(project);
+    }
 
 }

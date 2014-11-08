@@ -65,7 +65,7 @@ public class WLGitBridgeServer {
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, new WLDataModel(), rootGitDirectoryPath)),
+                        new WLGitServlet(servletContextHandler, new WLDataModel(rootGitDirectoryPath), rootGitDirectoryPath)),
                 "/*"
         );
         jettyServer.setHandler(servletContextHandler);

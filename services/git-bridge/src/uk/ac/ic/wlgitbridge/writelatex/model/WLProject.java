@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.db.WLFileStore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,8 @@ public class WLProject {
     private final Map<Integer, Snapshot> snapshots;
     private final SnapshotFetcher snapshotFetcher;
 
+    private Snapshot latestSnapshot;
+
     public WLProject(String name) {
         this.name = name;
         snapshots = new HashMap<Integer, Snapshot>();
@@ -24,7 +27,17 @@ public class WLProject {
     }
 
     public List<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
-        return snapshotFetcher.fetchNewSnapshots();
+        List<Snapshot> newSnapshots = snapshotFetcher.fetchNewSnapshots();
+        latestSnapshot = snapshotFetcher.getLatestSnapshot();
+        return newSnapshots;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Snapshot getLatestSnapshot() {
+        return latestSnapshot;
     }
 
 }

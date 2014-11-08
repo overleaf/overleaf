@@ -14,12 +14,12 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLFile implements JSONSource {
+public class SnapshotFile implements JSONSource {
 
     protected byte[] contents;
     private String path;
 
-    public WLFile(JsonElement json) throws FailedConnectionException {
+    public SnapshotFile(JsonElement json) throws FailedConnectionException {
         fromJSON(json);
     }
 

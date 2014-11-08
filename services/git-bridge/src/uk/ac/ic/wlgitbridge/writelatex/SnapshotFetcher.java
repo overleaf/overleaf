@@ -33,6 +33,10 @@ public class SnapshotFetcher {
         return newSnapshots;
     }
 
+    public Snapshot getLatestSnapshot() {
+        return snapshots.get(versions.last());
+    }
+
     private boolean getNew(List<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {
         SnapshotGetDocRequest getDoc = new SnapshotGetDocRequest(projectName);
         SnapshotGetSavedVersRequest getSavedVers = new SnapshotGetSavedVersRequest(projectName);
