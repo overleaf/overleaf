@@ -8,7 +8,10 @@ module.exports = UserGetter =
 			callback = projection
 			projection = {}
 		if typeof query == "string"
-			query = _id: ObjectId(query)
+			try
+				query = _id: ObjectId(query)
+			catch e
+				return callback(null, null)
 		else if query instanceof ObjectId
 			query = _id: query
 
