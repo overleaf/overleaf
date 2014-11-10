@@ -18,8 +18,8 @@ module.exports = CompileController =
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
 			return next(error) if error?
 			UserGetter.getUser user_id, {"features.compileGroup":1, "features.compileTimeout":1}, (err, user)->
-				settingsOverride.timeout = user.features.compileTimeout || Settings.defaultFeatures.compileTimeout
-				settingsOverride.compiler = user.features.compileGroup || Settings.defaultFeatures.compileGroup
+				settingsOverride.timeout = user?.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
+				settingsOverride.compiler = user?.features?.compileGroup || Settings.defaultFeatures.compileGroup
 				req.session.compileGroup = settingsOverride.compiler
 				CompileManager.compile project_id, user_id, { isAutoCompile, settingsOverride }, (error, status, outputFiles) ->
 					return next(error) if error?
