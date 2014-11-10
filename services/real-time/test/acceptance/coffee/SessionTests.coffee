@@ -6,6 +6,7 @@ RealTimeClient = require "./helpers/RealTimeClient"
 describe "Session", ->
 	describe "with an established session", ->
 		beforeEach (done) ->
+			@user_id = "mock-user-id"
 			RealTimeClient.setSession {
 				user: { _id: @user_id }
 			}, (error) =>
@@ -33,7 +34,7 @@ describe "Session", ->
 			@client.on "disconnect", () ->
 				done()
 				
-	describe "with a user set on the session", ->
+	describe "without a valid user set on the session", ->
 		beforeEach (done) ->
 			RealTimeClient.setSession {
 				foo: "bar"

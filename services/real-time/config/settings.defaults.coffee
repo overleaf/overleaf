@@ -10,6 +10,10 @@ module.exports =
 			port: 3026
 			host: "localhost"
 			
+	apis:
+		web:
+			url: "http://localhost:3000"
+			
 	security:
 		sessionSecret: "secret-please-change"
 		

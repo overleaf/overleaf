@@ -34,6 +34,7 @@
     "request": "~2.34.0",
     "sandboxed-module": "~0.3.0",
     "sinon": "~1.5.2",
-    "uid-safe": "^1.0.1"
+    "uid-safe": "^1.0.1",
+    "timekeeper": "0.0.4"
   }
 }
