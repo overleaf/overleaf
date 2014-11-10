@@ -20,8 +20,8 @@ describe "Opening", ->
 				if err? then done(err)
 				csrfMatches = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")
 				if !csrfMatches?
-					logger.err stdout:stdout, "smoke test: does not hace csrf token"
-					return("smoke test: does not hace csrf token")
+					logger.err stdout:stdout, "smoke test: does not have csrf token"
+					return done("smoke test: does not have csrf token")
 				csrf = csrfMatches[1]
 
 				# Change cookie to be non secure so curl will send it
