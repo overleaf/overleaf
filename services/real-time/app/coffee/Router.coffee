@@ -21,5 +21,5 @@ module.exports = Router =
 				return
 				
 			client.on "joinProject", (data = {}, callback) ->
-				WebsocketController.joinProject(client, user, data.project_id, callback)
+				WebsocketController.joinProject(client, user, data?.project_id, callback)
 				
