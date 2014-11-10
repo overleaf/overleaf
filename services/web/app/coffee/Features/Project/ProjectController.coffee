@@ -72,7 +72,7 @@ module.exports = ProjectController =
 			else
 				res.send 200
 
-	cloneProject: (req, res)->
+	cloneProject: (req, res, next)->
 		metrics.inc "cloned-project"
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
