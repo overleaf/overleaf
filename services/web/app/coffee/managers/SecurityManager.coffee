@@ -72,7 +72,7 @@ module.exports = SecurityManager =
 				if canModify
 					next()
 				else
-					logger.log "user_id: #{user._id} email: #{user.email} can not modify project redirecting to restricted page"
+					logger.log "user_id: #{user?._id} email: #{user?.email} can not modify project redirecting to restricted page"
 					res.redirect('/restricted')
 
 	userCanModifyProject : userCanModifyProject = (user, project, callback)->
