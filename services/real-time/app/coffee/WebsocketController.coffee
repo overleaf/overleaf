@@ -16,7 +16,9 @@ module.exports = WebsocketController =
 			if !privilegeLevel or privilegeLevel == ""
 				err = new Error("not authorized")
 				logger.error {err, project_id, user_id}, "user is not authorized to join project"
-				return callback(err)
+				# Don't send an error object since socket.io can apparently
+				# only serialize JSON.
+				return callback({message: err.message})
 
 			client.set("user_id", user_id)
 			client.set("project_id", project_id)

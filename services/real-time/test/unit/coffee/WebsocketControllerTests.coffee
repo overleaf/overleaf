@@ -85,5 +85,5 @@ describe 'WebsocketController', ->
 
 			it "should return an error", ->
 				@callback
-					.calledWith(new Error("not authorized"))
+					.calledWith({message: "not authorized"})
 					.should.equal true
