@@ -69,13 +69,13 @@ module.exports =
 				return cb null, haystackFolder
 			needleFolderName = foldersList[level]
 			found = false
-			_.each haystackFolder.folders, (folder)->
+			for folder in haystackFolder.folders
 				if folder.name.toLowerCase() == needleFolderName.toLowerCase()
 					found = true
 					if level == foldersList.length-1
-						cb null, folder
+						return cb null, folder
 					else
-						getParentFolder(folder, foldersList, ++level, cb)
+						return getParentFolder(folder, foldersList, level+1, cb)
 			if !found
 				cb("not found project_or_id: #{project_or_id} search path: #{needlePath}, folder #{foldersList[level]} could not be found")
 
@@ -84,7 +84,7 @@ module.exports =
 				return cb null, folder
 			enteties = _.union folder.fileRefs, folder.docs, folder.folders
 			result = _.find enteties, (entity)->
-				entity.name.toLowerCase() == entityName.toLowerCase()
+				entity?.name.toLowerCase() == entityName.toLowerCase()
 			if result?
 				cb null, result
 			else

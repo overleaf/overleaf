@@ -160,7 +160,7 @@ describe 'project model', ->
 				doc._id.should.equal rootDoc._id
 				done()
 
-	describe 'finding an entity by path', (done)->
+	describe 'findElementByPath', ->
 
 		it 'should take a doc path and return the element for a root level document', (done)->
 			path = "#{doc1.name}"
@@ -220,6 +220,53 @@ describe 'project model', ->
 				err.should.not.equal undefined
 				assert.equal element, undefined
 				done()
+
+		describe "where duplicate folder exists", ->
+
+			beforeEach ->
+				@duplicateFolder = {name:"duplicate1", _id:"1234", folders:[{
+					name: "1"
+					docs:[{name:"main.tex", _id:"456"}]
+					folders: []
+					fileRefs: []
+				}], docs:[@doc = {name:"main.tex", _id:"456"}], fileRefs:[]}
+				@project =
+					rootFolder:[
+						folders: [@duplicateFolder, @duplicateFolder]
+						fileRefs: []
+						docs: []
+					]
+				Project.getProject = sinon.stub()
+				Project.getProject.callsArgWith(2, null, @project)
+
+
+			it "should not call the callback more than once", (done)->
+				@locator.findElementByPath project._id, "#{@duplicateFolder.name}/#{@doc.name}", ->
+					done() #mocha will throw exception if done called multiple times
+
+
+			it "should not call the callback more than once when the path is longer than 1 level below the duplicate level", (done)->
+				@locator.findElementByPath project._id, "#{@duplicateFolder.name}/1/main.tex", ->
+					done() #mocha will throw exception if done called multiple times
+
+		describe "with a null doc", ->
+			beforeEach ->
+				@project =
+					rootFolder:[
+						folders: []
+						fileRefs: []
+						docs: [{name:"main.tex"}, null, {name:"other.tex"}]
+					]
+				Project.getProject = sinon.stub()
+				Project.getProject.callsArgWith(2, null, @project)
+
+			it "should not crash with a null", (done)->
+				callback = sinon.stub()
+				@locator.findElementByPath project._id, "/other.tex", (err, element)->
+					element.name.should.equal "other.tex"
+					done()
+
+			
 
 
 	describe 'finding a project by user_id and project name', ()->
