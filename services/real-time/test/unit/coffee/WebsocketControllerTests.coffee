@@ -23,6 +23,7 @@ describe 'WebsocketController', ->
 			set: sinon.stub()
 			get: (param, cb) -> cb null, @params[param]
 			join: sinon.stub()
+			leave: sinon.stub()
 		@WebsocketController = SandboxedModule.require modulePath, requires:
 			"./WebApiManager": @WebApiManager = {}
 			"./AuthorizationManager": @AuthorizationManager = {}
@@ -154,3 +155,16 @@ describe 'WebsocketController', ->
 			
 			it "should not call the DocumentUpdaterManager", ->
 				@DocumentUpdaterManager.getDocument.called.should.equal false
+				
+	describe "leaveDoc", ->
+		beforeEach ->
+			@doc_id = "doc-id-123"			
+			@client.params.project_id = @project_id
+			@WebsocketController.leaveDoc @client, @doc_id, @callback
+			
+		it "should remove the client from the doc_id room", ->
+			@client.leave
+				.calledWith(@doc_id).should.equal true
+				
+		it "should call the callback", ->
+			@callback.called.should.equal true

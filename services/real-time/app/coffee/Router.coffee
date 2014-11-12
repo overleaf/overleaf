@@ -62,4 +62,13 @@ module.exports = Router =
 						return callback {message: "Something went wrong"}
 					else
 						callback(null, args...)
-				
+						
+			client.on "leaveDoc", (doc_id, callback) ->
+				WebsocketController.leaveDoc client, doc_id, (err, args...) ->
+					if err?
+						Router._getClientData client, (_, client) ->
+							logger.error {err, client, doc_id}, "server side error in leaveDoc"
+						# Don't return raw error to prevent leaking server side info
+						return callback {message: "Something went wrong"}
+					else
+						callback(null, args...)

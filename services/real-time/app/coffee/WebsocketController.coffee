@@ -34,9 +34,8 @@ module.exports = WebsocketController =
 			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 			
 	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
-		client.get "user_id", (error, user_id) ->
-			client.get "project_id", (error, project_id) ->
-				logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
+		WebsocketController._getClientData client, (error, {client_id, user_id, project_id}) ->
+			logger.log {user_id, project_id, doc_id, fromVersion, client_id}, "client joining doc"
 					
 		AuthorizationManager.assertClientCanViewProject client, (error) ->
 			return callback(error) if error?
@@ -57,4 +56,16 @@ module.exports = WebsocketController =
 						escapedLines.push line
 					client.join(doc_id)
 					callback null, escapedLines, version, ops
+					
+	leaveDoc: (client, doc_id, callback = (error) ->) ->
+		WebsocketController._getClientData client, (error, {client_id, user_id, project_id}) ->
+			logger.log {user_id, project_id, doc_id, client_id}, "client leaving doc"
+		client.leave doc_id
+		callback()
+		
+	# Only used in logging.
+	_getClientData: (client, callback = (error, data) ->) ->
+		client.get "user_id", (error, user_id) ->
+			client.get "project_id", (error, project_id) ->
+				callback null, {client_id: client.id, project_id, user_id}
 			
