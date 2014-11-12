@@ -17,11 +17,11 @@ public class SnapshotData implements JSONSource {
     public static final String JSON_KEY_ATTS = "atts";
 
     private List<SnapshotFile> srcs;
-    private List<SnapshotFile> atts;
+    private List<SnapshotAttachment> atts;
 
     public SnapshotData(JsonElement json) throws FailedConnectionException {
         srcs = new LinkedList<SnapshotFile>();
-        atts = new LinkedList<SnapshotFile>();
+        atts = new LinkedList<SnapshotAttachment>();
         fromJSON(json);
     }
 
@@ -47,7 +47,7 @@ public class SnapshotData implements JSONSource {
         return srcs;
     }
 
-    public List<SnapshotFile> getAtts() {
+    public List<SnapshotAttachment> getAtts() {
         return atts;
     }
 }

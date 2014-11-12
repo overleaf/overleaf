@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
@@ -20,7 +21,7 @@ public class Snapshot {
     private final String userEmail;
 
     private final List<SnapshotFile> srcs;
-    private final List<SnapshotFile> atts;
+    private final List<SnapshotAttachment> atts;
 
     public Snapshot(SnapshotInfo info, SnapshotData data) {
         versionID = info.getVersionId();
@@ -56,6 +57,14 @@ public class Snapshot {
 
     public String getUserEmail() {
         return userEmail;
+    }
+
+    public List<SnapshotFile> getSrcs() {
+        return srcs;
+    }
+
+    public List<SnapshotAttachment> getAtts() {
+        return atts;
     }
 
 }

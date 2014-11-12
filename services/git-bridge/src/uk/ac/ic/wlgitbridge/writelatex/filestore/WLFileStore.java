@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
+import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class WLFileStore {
             directoryNode = new WLDirectoryNode(rootGitDirectoryPath, projectName);
             fileStore.put(projectName, directoryNode);
         }
-        directoryNode.updateFromProject(project);
+        directoryNode.updateFromSnapshot(project.getLatestSnapshot());
     }
 
 }
