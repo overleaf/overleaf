@@ -30,13 +30,11 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
         Repository repository = null;
         try {
             repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             new WLBridgedProject(repository, name, repositoryDirectory, snapshotDBAPI).buildRepository();
         } catch (FailedConnectionException e) {
-            e.printStackTrace();
+            throw new ServiceNotEnabledException();
+        } catch (IOException e) {
+            throw new ServiceNotEnabledException();
         }
         return repository;
     }

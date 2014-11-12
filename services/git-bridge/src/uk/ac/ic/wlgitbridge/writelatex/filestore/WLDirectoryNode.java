@@ -3,8 +3,6 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 

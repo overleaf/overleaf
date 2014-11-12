@@ -16,6 +16,8 @@ public class FileIndexStore {
         urlMappings = new HashMap<String, String>();
     }
 
-
+    public void addAttachment(String url, String filePath) {
+        urlMappings.put(url, filePath);
+    }
 
 }

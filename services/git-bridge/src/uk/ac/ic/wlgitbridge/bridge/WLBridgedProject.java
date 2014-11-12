@@ -1,11 +1,13 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
@@ -37,17 +39,23 @@ public class WLBridgedProject {
         }
     }
 
-    private void updateRepositoryFromSnapshots(Repository repository) throws ServiceNotEnabledException {
+    private void updateRepositoryFromSnapshots(Repository repository) throws ServiceNotEnabledException, RepositoryNotFoundException, FailedConnectionException {
+        List<Snapshot> snapshotsToAdd;
         try {
-            List<Snapshot> snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToProject(name);
+            snapshotsToAdd = snapshotDBAPI.getSnapshotsToAddToProject(name);
+        } catch (InvalidProjectException e) {
+            throw new RepositoryNotFoundException(name);
+        }
+        try {
             for (Snapshot snapshot : snapshotsToAdd) {
                 snapshot.writeToDisk(repositoryDirectory.getAbsolutePath());
                 Git git = new Git(repository);
                 git.add().addFilepattern(".").call();
                 git.commit().setAuthor(snapshot.getUserName(), snapshot.getUserEmail()).setMessage(snapshot.getComment()).call();
             }
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
+        } catch (GitAPIException e) {
+            throw new ServiceNotEnabledException();
+        } catch (IOException e) {
             throw new ServiceNotEnabledException();
         }
     }
