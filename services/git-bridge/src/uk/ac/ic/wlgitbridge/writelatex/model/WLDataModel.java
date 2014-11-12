@@ -4,7 +4,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.db.WLFileStore;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.WLFileStore;
 
 import java.util.HashMap;
 import java.util.List;

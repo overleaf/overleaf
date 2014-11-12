@@ -3,7 +3,6 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.db.WLFileStore;
 
 import java.util.HashMap;
 import java.util.List;
