@@ -1,5 +1,7 @@
 logger = require "logger-sharelatex"
 WebApiManager = require "./WebApiManager"
+AuthorizationManager = require "./AuthorizationManager"
+DocumentUpdaterManager = require "./DocumentUpdaterManager"
 
 module.exports = WebsocketController =
 	# If the protocol version changes when the client reconnects,
@@ -9,17 +11,16 @@ module.exports = WebsocketController =
 	
 	joinProject: (client, user, project_id, callback = (error, project, privilegeLevel, protocolVersion) ->) ->
 		user_id = user?._id
-		logger.log {user_id, project_id}, "user joining project"
+		logger.log {user_id, project_id, client_id: client.id}, "user joining project"
 		WebApiManager.joinProject project_id, user_id, (error, project, privilegeLevel) ->
 			return callback(error) if error?
 
 			if !privilegeLevel or privilegeLevel == ""
 				err = new Error("not authorized")
-				logger.error {err, project_id, user_id}, "user is not authorized to join project"
-				# Don't send an error object since socket.io can apparently
-				# only serialize JSON.
-				return callback({message: err.message})
+				logger.error {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
+				return callback(err)
 
+			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
 			client.set("project_id", project_id)
 			client.set("owner_id", project?.owner?._id)
@@ -31,3 +32,29 @@ module.exports = WebsocketController =
 			client.set("login_count", user?.loginCount)
 			
 			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
+			
+	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
+		client.get "user_id", (error, user_id) ->
+			client.get "project_id", (error, project_id) ->
+				logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
+					
+		AuthorizationManager.assertClientCanViewProject client, (error) ->
+			return callback(error) if error?
+			client.get "project_id", (error, project_id) ->
+				return callback(error) if error?
+				return callback(new Error("no project_id found on client")) if !project_id?
+				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ops) ->
+					return callback(error) if error?
+					# Encode any binary bits of data so it can go via WebSockets
+					# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+					escapedLines = []
+					for line in lines
+						try
+							line = unescape(encodeURIComponent(line))
+						catch err
+							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
+							return callback(err)
+						escapedLines.push line
+					client.join(doc_id)
+					callback null, escapedLines, version, ops
+			

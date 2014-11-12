@@ -3,33 +3,30 @@ expect = chai.expect
 chai.should()
 
 RealTimeClient = require "./helpers/RealTimeClient"
-MockWebClient = require "./helpers/MockWebClient"
+MockWebServer = require "./helpers/MockWebServer"
+FixturesManager = require "./helpers/FixturesManager"
+
 
 describe "joinProject", ->
 	describe "when authorized", ->
 		before (done) ->
-			@user_id    = "mock-user-id"
-			@project_id = "mock-project-id"
-			privileges = {}
-			privileges[@user_id] = "owner"
-			MockWebClient.createMockProject(@project_id, privileges, {
-				name: "Test Project"
-			})
-			MockWebClient.run (error) =>
+			FixturesManager.setUpProject {
+				privilegeLevel: "owner"
+				project: {
+					name: "Test Project"
+				}
+			}, (error, data) =>
 				throw error if error?
-				RealTimeClient.setSession {
-					user: { _id: @user_id }
-				}, (error) =>
+				{@user_id, @project_id} = data
+				@client = RealTimeClient.connect()
+				@client.emit "joinProject", {
+					project_id: @project_id
+				}, (error, @project, @privilegeLevel, @protocolVersion) =>
 					throw error if error?
-					@client = RealTimeClient.connect()
-					@client.emit "joinProject", {
-						project_id: @project_id
-					}, (error, @project, @privilegeLevel, @protocolVersion) =>
-						throw error if error?
-						done()
+					done()
 					
 		it "should get the project from web", ->
-			MockWebClient.joinProject
+			MockWebServer.joinProject
 				.calledWith(@project_id, @user_id)
 				.should.equal true
 					
@@ -46,23 +43,20 @@ describe "joinProject", ->
 			
 	describe "when not authorized", ->
 		before (done) ->
-			@user_id    = "mock-user-id-2"
-			@project_id = "mock-project-id-2"
-			privileges = {}
-			MockWebClient.createMockProject(@project_id, privileges, {
-				name: "Test Project"
-			})
-			MockWebClient.run (error) =>
+			FixturesManager.setUpProject {
+				privilegeLevel: null
+				project: {
+					name: "Test Project"
+				}
+			}, (error, data) =>
 				throw error if error?
-				RealTimeClient.setSession {
-					user: { _id: @user_id }
-				}, (error) =>
-					throw error if error?
-					@client = RealTimeClient.connect()
-					@client.emit "joinProject", {
-						project_id: @project_id
-					}, (@error, @project, @privilegeLevel, @protocolVersion) =>
-						done()
+				{@user_id, @project_id} = data
+				@client = RealTimeClient.connect()
+				@client.emit "joinProject", {
+					project_id: @project_id
+				}, (@error, @project, @privilegeLevel, @protocolVersion) =>
+					done()
 		
 		it "should return an error", ->
-			@error.message.should.equal "not authorized"
+			# We don't return specific errors
+			@error.message.should.equal "Something went wrong"

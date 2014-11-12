@@ -13,6 +13,8 @@ module.exports =
 	apis:
 		web:
 			url: "http://localhost:3000"
+		documentupdater:
+			url: "http://localhost:3003"
 			
 	security:
 		sessionSecret: "secret-please-change"
