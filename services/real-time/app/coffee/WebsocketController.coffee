@@ -109,3 +109,27 @@ module.exports = WebsocketController =
 				ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
 					return callback(error) if error?
 					callback null, users
+
+	applyOtUpdate: (client, project_id, doc_id, update, callback = (error) ->) ->
+		AuthorizationManager.assertClientCanEditProject client, (error) ->
+			if error?
+				logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
+				client.disconnect()
+				return callback(error)
+			
+			Utils.getClientAttributes client, ["user_id"], (error, {user_id}) ->
+				return callback(error) if error?
+				update.meta ||= {}
+				update.meta.source = client.id
+				update.meta.user_id = user_id
+				# metrics.inc "editor.doc-update", 0.3
+				# metrics.set "editor.active-projects", project_id, 0.3
+				# metrics.set "editor.active-users", user_id, 0.3
+
+				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v}, "sending update to doc updater"
+
+				DocumentUpdaterManager.queueChange project_id, doc_id, update, (error) ->
+					if error?
+						logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "document was not available for update"
+						client.disconnect()
+					callback(error)

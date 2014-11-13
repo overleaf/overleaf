@@ -37,3 +37,28 @@ describe 'AuthorizationManager', ->
 			@AuthorizationManager.assertClientCanViewProject @client, (error) ->
 				error.message.should.equal "not authorized"
 				done()
+
+	describe "assertClientCanEditProject", ->
+		it "should not allow the readOnly privilegeLevel", (done) ->
+			@client.params.privilege_level = "readOnly"
+			@AuthorizationManager.assertClientCanEditProject @client, (error) ->
+				error.message.should.equal "not authorized"
+				done()
+	
+		it "should allow the readAndWrite privilegeLevel", (done) ->
+			@client.params.privilege_level = "readAndWrite"
+			@AuthorizationManager.assertClientCanEditProject @client, (error) ->
+				expect(error).to.be.null
+				done()
+				
+		it "should allow the owner privilegeLevel", (done) ->
+			@client.params.privilege_level = "owner"
+			@AuthorizationManager.assertClientCanEditProject @client, (error) ->
+				expect(error).to.be.null
+				done()
+				
+		it "should return an error with any other privilegeLevel", (done) ->
+			@client.params.privilege_level = "unknown"
+			@AuthorizationManager.assertClientCanEditProject @client, (error) ->
+				error.message.should.equal "not authorized"
+				done()

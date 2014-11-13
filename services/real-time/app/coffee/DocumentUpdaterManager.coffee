@@ -2,6 +2,9 @@ request = require "request"
 logger = require "logger-sharelatex"
 settings = require "settings-sharelatex"
 
+redis = require("redis-sharelatex")
+rclient = redis.createClient(settings.redis.web)
+
 module.exports = DocumentUpdaterManager =
 	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
 		#timer = new metrics.Timer("get-document")
@@ -24,3 +27,14 @@ module.exports = DocumentUpdaterManager =
 				err.statusCode = res.statusCode
 				logger.error {err, project_id, doc_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback err
+				
+	queueChange: (project_id, doc_id, change, callback = ()->)->
+		jsonChange = JSON.stringify change
+		doc_key = "#{project_id}:#{doc_id}"
+		multi = rclient.multi()
+		multi.rpush "PendingUpdates:#{doc_id}", jsonChange
+		multi.sadd  "DocsWithPendingUpdates", doc_key
+		multi.rpush "pending-updates-list", doc_key
+		multi.exec (error) ->
+			return callback(error) if error?
+			callback()

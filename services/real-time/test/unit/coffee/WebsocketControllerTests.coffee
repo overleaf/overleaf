@@ -10,7 +10,7 @@ describe 'WebsocketController', ->
 		tk.freeze(new Date())
 		@project_id = "project-id-123"
 		@user = {
-			_id: "user-id-123"
+			_id: @user_id = "user-id-123"
 			first_name: "James"
 			last_name: "Allen"
 			email: "james@example.com"
@@ -19,6 +19,7 @@ describe 'WebsocketController', ->
 		}
 		@callback = sinon.stub()
 		@client =
+			id: @client_id = "mock-client-id-123"
 			params: {}
 			set: sinon.stub()
 			get: (param, cb) -> cb null, @params[param]
@@ -287,3 +288,68 @@ describe 'WebsocketController', ->
 			it "should not send cursor data to the connected user manager", (done)->
 				@ConnectedUsersManager.updateUserPosition.called.should.equal false
 				done()
+
+	describe "applyOtUpdate", ->
+		beforeEach ->
+			@update = {op: {p: 12, t: "foo"}}
+			@client.params.user_id = @user_id
+			@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArg(1)
+			@DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
+
+		describe "succesfully", ->
+			beforeEach ->
+				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+
+			it "should set the source of the update to the client id", ->
+				@update.meta.source.should.equal @client.id
+
+			it "should set the user_id of the update to the user id", ->
+				@update.meta.user_id.should.equal @user_id
+
+			it "should queue the update", ->
+				@DocumentUpdaterManager.queueChange
+					.calledWith(@project_id, @doc_id, @update)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+			# it "should update the active users metric", ->
+			# 	@metrics.set.calledWith("editor.active-users", @user_id).should.equal true
+			# 
+			# it "should update the active projects metric", ->
+			# 	@metrics.set.calledWith("editor.active-projects", @project_id).should.equal true
+			# 
+			# it "should increment the doc updates", ->
+			# 	@metrics.inc.calledWith("editor.doc-update").should.equal true
+
+		describe "unsuccessfully", ->
+			beforeEach ->
+				@client.disconnect = sinon.stub()
+				@DocumentUpdaterManager.queueChange = sinon.stub().callsArgWith(3, @error = new Error("Something went wrong"))
+				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+
+			it "should disconnect the client", ->
+				@client.disconnect.called.should.equal true
+
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+				
+		describe "when not authorized", ->
+			beforeEach ->
+				@client.disconnect = sinon.stub()
+				@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArgWith(1, @error = new Error("not authorized"))
+				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+
+			it "should disconnect the client", ->
+				@client.disconnect.called.should.equal true
+
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+			

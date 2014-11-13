@@ -1,7 +1,10 @@
 module.exports = AuthorizationManager =
 	assertClientCanViewProject: (client, callback = (error) ->) ->
 		AuthorizationManager._assertClientHasPrivilegeLevel client, ["readOnly", "readAndWrite", "owner"], callback
-		
+
+	assertClientCanEditProject: (client, callback = (error) ->) ->
+		AuthorizationManager._assertClientHasPrivilegeLevel client, ["readAndWrite", "owner"], callback
+				
 	_assertClientHasPrivilegeLevel: (client, allowedLevels, callback = (error) ->) ->
 		client.get "privilege_level", (error, privilegeLevel) ->
 			return callback(error) if error?
