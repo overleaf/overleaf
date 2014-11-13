@@ -5,6 +5,16 @@ HttpController = require "./HttpController"
 Utils = require "./Utils"
 
 module.exports = Router =
+	_handleError: (callback, error, client, method, extraAttrs = {}) ->
+		Utils.getClientAttributes client, ["project_id", "doc_id", "user_id"], (_, attrs) ->
+			for key, value of extraAttrs
+				attrs[key] = value
+			attrs.client_id = client.id
+			attrs.err = error
+			logger.error attrs, "server side error in #{method}"
+		# Don't return raw error to prevent leaking server side info
+		return callback {message: "Something went wrong"}
+
 	configure: (app, io, session) ->
 		app.set("io", io)
 		app.get "/clients", HttpController.getConnectedClients
@@ -29,9 +39,7 @@ module.exports = Router =
 			client.on "joinProject", (data = {}, callback) ->
 				WebsocketController.joinProject client, user, data.project_id, (err, args...) ->
 					if err?
-						logger.error {err, user_id: user?.id, project_id: data.project_id}, "server side error in joinProject"
-						# Don't return raw error to prevent leaking server side info
-						return callback {message: "Something went wrong"}
+						Router._handleError callback, err, client, "joinProject", {project_id: data.project_id, user_id: user?.id}
 					else
 						callback(null, args...)
 						
@@ -44,30 +52,27 @@ module.exports = Router =
 				
 				WebsocketController.joinDoc client, doc_id, fromVersion, (err, args...) ->
 					if err?
-						Utils.getClientAttributes client, ["project_id", "user_id"], (_, {project_id, user_id}) ->
-							logger.error {err, client_id: client.id, user_id, project_id, doc_id, fromVersion}, "server side error in joinDoc"
-						# Don't return raw error to prevent leaking server side info
-						return callback {message: "Something went wrong"}
+						Router._handleError callback, err, client, "joinDoc", {doc_id, fromVersion}
 					else
 						callback(null, args...)
 						
 			client.on "leaveDoc", (doc_id, callback) ->
 				WebsocketController.leaveDoc client, doc_id, (err, args...) ->
 					if err?
-						Utils.getClientAttributes client, ["project_id", "user_id"], (_, {project_id, user_id}) ->
-							logger.error {err, client_id: client.id, user_id, project_id, doc_id}, "server side error in leaveDoc"
-						# Don't return raw error to prevent leaking server side info
-						return callback {message: "Something went wrong"}
+						Router._handleError callback, err, client, "leaveDoc"
 					else
 						callback(null, args...)
 						
-			client.on "getConnectedUsers", (callback = (error, users) ->) ->
+			client.on "clientTracking.getConnectedUsers", (callback = (error, users) ->) ->
 				WebsocketController.getConnectedUsers client, (err, users) ->
 					if err?
-						Utils.getClientAttributes client, ["project_id", "user_id", "doc_id"], (_, {project_id, user_id, doc_id}) ->
-							logger.error {err, client_id: client.id, user_id, project_id, doc_id}, "server side error in getConnectedUsers"
-						# Don't return raw error to prevent leaking server side info
-						return callback {message: "Something went wrong"}
+						Router._handleError callback, err, client, "clientTracking.getConnectedUsers"
 					else
 						callback(null, users)
-		
+						
+			client.on "clientTracking.updatePosition", (cursorData, callback = (error) ->) ->
+				WebsocketController.updateClientPosition client, cursorData, (err) ->
+					if err?
+						Router._handleError callback, err, client, "clientTracking.updatePosition"
+					else
+						callback()

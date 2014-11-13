@@ -70,7 +70,37 @@ module.exports = WebsocketController =
 		client.leave doc_id
 		callback()
 		
+	updateClientPosition: (client, cursorData, callback = (error) ->) ->
+		Utils.getClientAttributes client, [
+			"project_id", "first_name", "last_name", "email", "user_id"
+		], (error, {project_id, first_name, last_name, email, user_id}) ->
+			return callback(error) if error?
+			logger.log {user_id, project_id, client_id: client.id, cursorData: cursorData}, "updating client position"
+			cursorData.id      = client.id
+			cursorData.user_id = user_id if user_id?
+			cursorData.email   = email   if email?
+			if first_name? and last_name?
+				cursorData.name = first_name + " " + last_name
+				ConnectedUsersManager.updateUserPosition(project_id, client.id, {
+					first_name: first_name,
+					last_name:  last_name,
+					email:      email,
+					user_id:    user_id
+				}, {
+					row:    cursorData.row,
+					column: cursorData.column,
+					doc_id: cursorData.doc_id
+				}, callback)
+			else
+				cursorData.name = "Anonymous"
+				callback()
+			#EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
+			#callback()
+		
 	getConnectedUsers: (client, callback = (error, users) ->) ->
+		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
+			
 		AuthorizationManager.assertClientCanViewProject client, (error) ->
 			return callback(error) if error?
 			client.get "project_id", (error, project_id) ->

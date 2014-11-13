@@ -16,7 +16,11 @@ module.exports = FixturesManager =
 		MockWebServer.run (error) =>
 			throw error if error?
 			RealTimeClient.setSession {
-				user: { _id: user_id }
+				user: {
+					_id: user_id
+					first_name: "Joe"
+					last_name: "Bloggs"
+				}
 			}, (error) =>
 				throw error if error?
 				callback null, {project_id, user_id, privilegeLevel, project}

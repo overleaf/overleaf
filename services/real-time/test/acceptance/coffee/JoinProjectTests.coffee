@@ -47,7 +47,7 @@ describe "joinProject", ->
 				done()
 				
 		it "should have marked the user as connected", (done) ->
-			@client.emit "getConnectedUsers", (error, users) =>
+			@client.emit "clientTracking.getConnectedUsers", (error, users) =>
 				connected = false
 				for user in users
 					if user.client_id == @client.socket.sessionid and user.user_id == @user_id

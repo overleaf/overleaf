@@ -217,4 +217,72 @@ describe 'WebsocketController', ->
 			it "should return an error", ->
 				@callback.calledWith(@err).should.equal true
 				
-		
+	describe "updateClientPosition", ->
+		beforeEach ->
+			#@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArgWith(4)
+			@update = {
+				doc_id: @doc_id = "doc-id-123"
+				row: @row = 42
+				column: @column = 37
+			}
+
+		describe "with a logged in user", ->
+			beforeEach ->
+				@clientParams = {
+					project_id: @project_id
+					first_name: @first_name = "Douglas"
+					last_name: @last_name = "Adams"
+					email: @email = "joe@example.com"
+					user_id: @user_id = "user-id-123"
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
+				@WebsocketController.updateClientPosition @client, @update
+
+				@populatedCursorData = 
+					doc_id: @doc_id,
+					id: @client.id
+					name: "#{@first_name} #{@last_name}"
+					row: @row
+					column: @column
+					email: @email
+					user_id: @user_id
+
+			# it "should send the update to the project room with the user's name", ->
+			# 	@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
+
+			it "should send the  cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+					user_id: @user_id,
+					email: @email,
+					first_name: @first_name,
+					last_name: @last_name
+				}, {
+					row: @row
+					column: @column
+					doc_id: @doc_id
+				}).should.equal true
+				done()
+
+		describe "with an anonymous user", ->
+			beforeEach ->
+				@clientParams = {
+					project_id: @project_id
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
+				@WebsocketController.updateClientPosition @client, @update
+
+			# it "should send the update to the project room with an anonymous name", ->
+			# 	@EditorRealTimeController.emitToRoom
+			# 		.calledWith(@project_id, "clientTracking.clientUpdated", {
+			# 			doc_id: @doc_id,
+			# 			id: @client.id
+			# 			name: "Anonymous"
+			# 			row: @row
+			# 			column: @column
+			# 		})
+			# 		.should.equal true
+				
+			it "should not send cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.updateUserPosition.called.should.equal false
+				done()
