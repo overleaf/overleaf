@@ -71,17 +71,32 @@ module.exports = AuthenticationController =
 			if load_from_db
 				AuthenticationController.getLoggedInUser req, { allow_auth_token: options.allow_auth_token }, (error, user) ->
 					return next(error) if error?
-					return AuthenticationController._redirectToRegisterPage(req, res) if !user?
+					return AuthenticationController._redirectToLoginOrRegisterPage(req, res) if !user?
 					req.user = user
 					return next()
 			else
 				if !req.session.user?
-					return AuthenticationController._redirectToRegisterPage(req, res)
+					AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
 				else
 					req.user = req.session.user
 					return next()
 
 		return doRequest
+
+
+	_redirectToLoginOrRegisterPage: (req, res)->
+		if req.query.zipUrl? or req.query.project_name?
+			return AuthenticationController._redirectToRegisterPage(req, res) 
+		else
+			AuthenticationController._redirectToLoginPage(req, res) 
+
+
+	_redirectToLoginPage: (req, res) ->
+		logger.log url: req.url, "user not logged in so redirecting to login page"
+		req.query.redir = req.path
+		url = "/login?#{querystring.stringify(req.query)}"
+		res.redirect url
+		Metrics.inc "security.login-redirect"
 
 	_redirectToRegisterPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"

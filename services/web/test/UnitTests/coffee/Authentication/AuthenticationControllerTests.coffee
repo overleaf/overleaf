@@ -214,9 +214,7 @@ describe "AuthenticationController", ->
 					@middleware(@req, @res, @next)
 
 				it "should call getLoggedInUser with the passed options", ->
-					@AuthenticationController.getLoggedInUser
-						.calledWith(@req, { allow_auth_token: true })
-						.should.equal true
+					@AuthenticationController.getLoggedInUser.calledWith(@req, { allow_auth_token: true }).should.equal true
 
 				it "should set the user property on the request", ->
 					@req.user.should.deep.equal @user
@@ -226,14 +224,12 @@ describe "AuthenticationController", ->
 
 			describe "when the user is not logged in", ->
 				beforeEach ->
-					@AuthenticationController._redirectToRegisterPage = sinon.stub()
+					@AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
 					@AuthenticationController.getLoggedInUser = sinon.stub().callsArgWith(2, null, null)
 					@middleware(@req, @res, @next)
 
 				it "should redirect to the register page", ->
-					@AuthenticationController._redirectToRegisterPage
-						.calledWith(@req, @res)
-						.should.equal true
+					@AuthenticationController._redirectToLoginOrRegisterPage.calledWith(@req, @res).should.equal true
 
 		describe "when not loading from the database", ->
 			beforeEach ->
@@ -257,13 +253,12 @@ describe "AuthenticationController", ->
 			describe "when the user is not logged in", ->
 				beforeEach ->
 					@req.session = {}
-					@AuthenticationController._redirectToRegisterPage = sinon.stub()
+					@AuthenticationController._redirectToLoginOrRegisterPage = sinon.stub()
+					@req.query = {}
 					@middleware(@req, @res, @next)
 
-				it "should redirect to the register page", ->
-					@AuthenticationController._redirectToRegisterPage
-						.calledWith(@req, @res)
-						.should.equal true
+				it "should redirect to the register or login page", ->
+					@AuthenticationController._redirectToLoginOrRegisterPage.calledWith(@req, @res).should.equal true
 
 		describe "when not loading from the database but an auth_token is provided", ->
 			beforeEach ->
@@ -276,6 +271,49 @@ describe "AuthenticationController", ->
 				@AuthenticationController.getLoggedInUser
 					.calledWith(@req, {allow_auth_token: true})
 					.should.equal true
+
+
+
+		describe "_redirectToLoginOrRegisterPage", ->
+
+			beforeEach ->
+				@middleware = @AuthenticationController.requireLogin(@options = { load_from_db: false })
+				@req.session = {}
+				@AuthenticationController._redirectToRegisterPage = sinon.stub()
+				@AuthenticationController._redirectToLoginPage = sinon.stub()
+				@req.query = {}
+
+			describe "they have come directly to the url", ->
+				beforeEach -> 
+					@req.query = {}
+					@middleware(@req, @res, @next)
+
+				it "should redirect to the login page", ->
+					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal false
+					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal true
+
+			describe "they have come via a templates link", ->
+
+				beforeEach -> 
+					@req.query.zipUrl = "something"
+					@middleware(@req, @res, @next)
+
+				it "should redirect to the register page", ->
+					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
+					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
+
+			describe "they have been invited to a project", ->
+				
+				beforeEach -> 
+					@req.query.project_name = "something"
+					@middleware(@req, @res, @next)
+
+				it "should redirect to the register page", ->
+					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
+					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
+
+
+
 
 	describe "_redirectToRegisterPage", ->
 		beforeEach ->
@@ -293,9 +331,16 @@ describe "AuthenticationController", ->
 				.calledWith(url: @url, "user not logged in so redirecting to register page")
 				.should.equal true
 
-		it "should increase the security.login-redirect metric", ->
-			@Metrics.inc.calledWith("security.login-redirect").should.equal true
-				
+	describe "_redirectToLoginPage", ->
+		beforeEach ->
+			@req.path = "/target/url"
+			@req.query =
+				extra_query: "foo"
+			@AuthenticationController._redirectToLoginPage(@req, @res)
+
+		it "should redirect to the register page with a query string attached", ->
+			@res.redirectedTo.should.equal "/login?extra_query=foo&redir=%2Ftarget%2Furl"
+
 
 	describe "_recordSuccessfulLogin", ->
 		beforeEach ->
