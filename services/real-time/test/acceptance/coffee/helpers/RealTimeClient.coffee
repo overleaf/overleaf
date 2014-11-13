@@ -1,6 +1,7 @@
 XMLHttpRequest = require("../../libs/XMLHttpRequest").XMLHttpRequest
 io = require("socket.io-client")
 
+request = require "request"
 Settings = require "settings-sharelatex"
 redis = require "redis-sharelatex"
 rclient = redis.createClient(Settings.redis.web)
@@ -37,4 +38,18 @@ module.exports = Client =
 	connect: (cookie) ->
 		client = io.connect("http://localhost:3026", 'force new connection': true)
 		return client
+		
+	getConnectedClients: (callback = (error, clients) ->) ->
+		request.get {
+			url: "http://localhost:3026/clients"
+			json: true
+		}, (error, response, data) ->
+			callback error, data
+		
+	getConnectedClient: (client_id, callback = (error, clients) ->) ->
+		request.get {
+			url: "http://localhost:3026/clients/#{client_id}"
+			json: true
+		}, (error, response, data) ->
+			callback error, data
 

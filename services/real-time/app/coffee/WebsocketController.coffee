@@ -19,6 +19,8 @@ module.exports = WebsocketController =
 				err = new Error("not authorized")
 				logger.error {err, project_id, user_id, client_id: client.id}, "user is not authorized to join project"
 				return callback(err)
+				
+			client.join project_id
 
 			client.set("privilege_level", privilegeLevel)
 			client.set("user_id", user_id)
@@ -68,4 +70,3 @@ module.exports = WebsocketController =
 		client.get "user_id", (error, user_id) ->
 			client.get "project_id", (error, project_id) ->
 				callback null, {client_id: client.id, project_id, user_id}
-			

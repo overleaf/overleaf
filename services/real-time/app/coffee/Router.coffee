@@ -1,6 +1,7 @@
 Metrics = require "metrics-sharelatex"
 logger = require "logger-sharelatex"
 WebsocketController = require "./WebsocketController"
+HttpController = require "./HttpController"
 
 module.exports = Router =
 	# We don't want to send raw errors back to the client, in case they
@@ -72,3 +73,7 @@ module.exports = Router =
 						return callback {message: "Something went wrong"}
 					else
 						callback(null, args...)
+		
+		app.set("io", io)
+		app.get "/clients", HttpController.getConnectedClients
+		app.get "/clients/:client_id", HttpController.getConnectedClient

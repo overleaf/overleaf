@@ -51,6 +51,9 @@ describe 'WebsocketController', ->
 					.calledWith(@project_id, @user._id)
 					.should.equal true
 					
+			it "should join the project room", ->
+				@client.join.calledWith(@project_id).should.equal true
+					
 			it "should set the privilege level on the client", ->
 				@client.set.calledWith("privilege_level", @privilegeLevel).should.equal true
 					

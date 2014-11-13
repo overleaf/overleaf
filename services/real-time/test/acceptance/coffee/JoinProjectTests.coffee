@@ -41,6 +41,11 @@ describe "joinProject", ->
 		it "should return the protocolVersion", ->
 			@protocolVersion.should.equal 2
 			
+		it "should have joined the project room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@project_id in client.rooms).to.equal true
+				done()
+			
 	describe "when not authorized", ->
 		before (done) ->
 			FixturesManager.setUpProject {
@@ -60,3 +65,8 @@ describe "joinProject", ->
 		it "should return an error", ->
 			# We don't return specific errors
 			@error.message.should.equal "Something went wrong"
+			
+		it "should not have joined the project room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@project_id in client.rooms).to.equal false
+				done()
