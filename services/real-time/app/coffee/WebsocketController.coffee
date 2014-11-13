@@ -2,6 +2,7 @@ logger = require "logger-sharelatex"
 WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
+ConnectedUsersManager = require "./ConnectedUsersManager"
 Utils = require "./Utils"
 
 module.exports = WebsocketController =
@@ -36,6 +37,9 @@ module.exports = WebsocketController =
 			
 			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
 			
+			# No need to block for setting the user as connected in the cursor tracking
+			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
+			
 	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
@@ -65,3 +69,13 @@ module.exports = WebsocketController =
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
 		client.leave doc_id
 		callback()
+		
+	getConnectedUsers: (client, callback = (error, users) ->) ->
+		AuthorizationManager.assertClientCanViewProject client, (error) ->
+			return callback(error) if error?
+			client.get "project_id", (error, project_id) ->
+				return callback(error) if error?
+				return callback(new Error("no project_id found on client")) if !project_id?
+				ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
+					return callback(error) if error?
+					callback null, users

@@ -60,4 +60,14 @@ module.exports = Router =
 						return callback {message: "Something went wrong"}
 					else
 						callback(null, args...)
+						
+			client.on "getConnectedUsers", (callback = (error, users) ->) ->
+				WebsocketController.getConnectedUsers client, (err, users) ->
+					if err?
+						Utils.getClientAttributes client, ["project_id", "user_id", "doc_id"], (_, {project_id, user_id, doc_id}) ->
+							logger.error {err, client_id: client.id, user_id, project_id, doc_id}, "server side error in getConnectedUsers"
+						# Don't return raw error to prevent leaking server side info
+						return callback {message: "Something went wrong"}
+					else
+						callback(null, users)
 		

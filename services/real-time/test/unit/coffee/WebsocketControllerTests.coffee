@@ -28,6 +28,7 @@ describe 'WebsocketController', ->
 			"./WebApiManager": @WebApiManager = {}
 			"./AuthorizationManager": @AuthorizationManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
+			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 	
 	afterEach ->
@@ -36,6 +37,7 @@ describe 'WebsocketController', ->
 	describe "joinProject", ->
 		describe "when authorised", ->
 			beforeEach ->
+				@client.id = "mock-client-id"
 				@project = {
 					name: "Test Project"
 					owner: {
@@ -43,6 +45,7 @@ describe 'WebsocketController', ->
 					}
 				}
 				@privilegeLevel = "owner"
+				@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArg(4)
 				@WebApiManager.joinProject = sinon.stub().callsArgWith(2, null, @project, @privilegeLevel)
 				@WebsocketController.joinProject @client, @user, @project_id, @callback
 				
@@ -87,6 +90,11 @@ describe 'WebsocketController', ->
 			it "should call the callback with the project, privilegeLevel and protocolVersion", ->
 				@callback
 					.calledWith(null, @project, @privilegeLevel, @WebsocketController.PROTOCOL_VERSION)
+					.should.equal true
+					
+			it "should mark the user as connected in ConnectedUsersManager", ->
+				@ConnectedUsersManager.updateUserPosition
+					.calledWith(@project_id, @client.id, @user, null)
 					.should.equal true
 				
 		describe "when not authorized", ->
@@ -171,3 +179,42 @@ describe 'WebsocketController', ->
 				
 		it "should call the callback", ->
 			@callback.called.should.equal true
+			
+	describe "getConnectedUsers", ->
+		beforeEach ->
+			@client.params.project_id = @project_id
+			@users = ["mock", "users"]
+			@ConnectedUsersManager.getConnectedUsers = sinon.stub().callsArgWith(1, null, @users)
+			
+		describe "when authorized", ->
+			beforeEach ->
+				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
+				@WebsocketController.getConnectedUsers @client, @callback
+				
+			it "should check that the client is authorized to view the project", ->
+				@AuthorizationManager.assertClientCanViewProject
+					.calledWith(@client)
+					.should.equal true
+					
+			it "should get the connected users for the project", ->
+				@ConnectedUsersManager.getConnectedUsers
+					.calledWith(@project_id)
+					.should.equal true
+					
+			it "should return the users", ->
+				@callback.calledWith(null, @users).should.equal true
+			
+		describe "when not authorized", ->
+			beforeEach ->
+				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, @err = new Error("not authorized"))
+				@WebsocketController.getConnectedUsers @client, @callback
+					
+			it "should not get the connected users for the project", ->
+				@ConnectedUsersManager.getConnectedUsers
+					.called
+					.should.equal false
+					
+			it "should return an error", ->
+				@callback.calledWith(@err).should.equal true
+				
+		

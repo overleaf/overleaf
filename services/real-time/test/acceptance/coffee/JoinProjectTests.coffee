@@ -45,6 +45,16 @@ describe "joinProject", ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
 				expect(@project_id in client.rooms).to.equal true
 				done()
+				
+		it "should have marked the user as connected", (done) ->
+			@client.emit "getConnectedUsers", (error, users) =>
+				connected = false
+				for user in users
+					if user.client_id == @client.socket.sessionid and user.user_id == @user_id
+						connected = true
+						break
+				expect(connected).to.equal true
+				done()
 			
 	describe "when not authorized", ->
 		before (done) ->

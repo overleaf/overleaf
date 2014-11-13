@@ -21,7 +21,7 @@ module.exports =
 	# update. This way we don't care if the connected_user key has expired when
 	# we receive a cursor update. 
 	updateUserPosition: (project_id, client_id, user, cursorData, callback = (err)->)->
-		logger.log project_id:project_id, client_id:client_id, "marking user as connected"
+		logger.log project_id:project_id, client_id:client_id, "marking user as joined or connected"
 
 		multi = rclient.multi()
 		
@@ -30,9 +30,9 @@ module.exports =
 		
 		multi.hset buildUserKey(project_id, client_id), "last_updated_at", Date.now()
 		multi.hset buildUserKey(project_id, client_id), "user_id", user._id
-		multi.hset buildUserKey(project_id, client_id), "first_name", user.first_name
-		multi.hset buildUserKey(project_id, client_id), "last_name", user.last_name
-		multi.hset buildUserKey(project_id, client_id), "email", user.email
+		multi.hset buildUserKey(project_id, client_id), "first_name", user.first_name or ""
+		multi.hset buildUserKey(project_id, client_id), "last_name", user.last_name or ""
+		multi.hset buildUserKey(project_id, client_id), "email", user.email or ""
 		
 		if cursorData?
 			multi.hset buildUserKey(project_id, client_id), "cursorData", JSON.stringify(cursorData)
@@ -61,18 +61,25 @@ module.exports =
 			else
 				result.connected = true
 				result.client_id = client_id
+				console.log "RESULT", result
 				if result.cursorData?
-					result.cursorData = JSON.parse(result.cursorData)
+					try
+						result.cursorData = JSON.parse(result.cursorData)
+					catch e
+						logger.error {err: e, project_id, client_id, cursorData: result.cursorData}, "error parsing cursorData JSON" 
+						return callback e
 			callback err, result
 
 	getConnectedUsers: (project_id, callback)->
 		self = @
 		rclient.smembers buildProjectSetKey(project_id), (err, results)->
+			return callback(err) if err?
 			jobs = results.map (client_id)->
 				(cb)->
 					self._getConnectedUser(project_id, client_id, cb)
-			async.series jobs, (err, users)->
+			async.series jobs, (err, users = [])->
+				return callback(err) if err?
 				users = users.filter (user) ->
-					user.connected
-				callback err, users
+					user?.connected
+				callback null, users
 
