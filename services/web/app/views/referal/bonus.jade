@@ -74,8 +74,9 @@ block content
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")
 									.perk(style="left: 10%;", class = refered_user_count >= 1 ? "active" : "") #{translate("one_free_collab")}
 									.perk(style="left: 30%;", class = refered_user_count >= 3 ? "active" : "") #{translate("three_free_collab")}
-									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")}
-									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_prof_account")}
+									.perk(style="left: 60%;", class = refered_user_count >= 6 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("three_free_collab")}
+									.perk(style="left: 90%;", class = refered_user_count >= 9 ? "active" : "") #{translate("free_dropbox_and_history")} + #{translate("unlimited_collabs")}
+							.row &nbsp;
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner
