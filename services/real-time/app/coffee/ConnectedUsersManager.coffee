@@ -61,7 +61,6 @@ module.exports =
 			else
 				result.connected = true
 				result.client_id = client_id
-				console.log "RESULT", result
 				if result.cursorData?
 					try
 						result.cursorData = JSON.parse(result.cursorData)

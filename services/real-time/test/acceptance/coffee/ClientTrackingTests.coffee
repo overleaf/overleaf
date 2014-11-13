@@ -31,7 +31,7 @@ describe "clientTracking", ->
 	describe "when a client updates its cursor location", ->
 		before (done) ->
 			@updates = []
-			@clientB.on "clientTracking.clientUpdated", (data) ->
+			@clientB.on "clientTracking.clientUpdated", (data) =>
 				@updates.push data
 				
 			@clientA.emit "clientTracking.updatePosition", {
@@ -42,7 +42,17 @@ describe "clientTracking", ->
 				throw error if error?
 				done()
 			
-		it "should tell other clients about the update"
+		it "should tell other clients about the update", ->
+			@updates.should.deep.equal [
+				{
+					row: @row
+					column: @column
+					doc_id: @doc_id
+					id: @clientA.socket.sessionid
+					user_id: @user_id
+					name: "Joe Bloggs"
+				}
+			]
 		
 		it "should record the update in getConnectedUsers", (done) ->
 			@clientB.emit "clientTracking.getConnectedUsers", (error, users) =>

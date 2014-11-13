@@ -1,0 +1,89 @@
+SandboxedModule = require('sandboxed-module')
+sinon = require('sinon')
+require('chai').should()
+modulePath = require('path').join __dirname, '../../../app/js/WebsocketLoadBalancer'
+
+describe "WebsocketLoadBalancer", ->
+	beforeEach ->
+		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
+			"redis-sharelatex": 
+				createClient: () ->
+					auth:->
+		@io = {}
+		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
+		@WebsocketLoadBalancer.rclientSub =
+			subscribe: sinon.stub()
+			on: sinon.stub()
+		
+		@room_id = "room-id"
+		@message = "message-to-editor"
+		@payload = ["argument one", 42]
+
+	describe "emitToRoom", ->
+		beforeEach ->
+			@WebsocketLoadBalancer.emitToRoom(@room_id, @message, @payload...)
+
+		it "should publish the message to redis", ->
+			@WebsocketLoadBalancer.rclientPub.publish
+				.calledWith("editor-events", JSON.stringify(
+					room_id: @room_id,
+					message: @message
+					payload: @payload
+				))
+				.should.equal true
+
+	describe "emitToAll", ->
+		beforeEach ->
+			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
+			@WebsocketLoadBalancer.emitToAll @message, @payload...
+
+		it "should emit to the room 'all'", ->
+			@WebsocketLoadBalancer.emitToRoom
+				.calledWith("all", @message, @payload...)
+				.should.equal true
+			
+	describe "listenForEditorEvents", ->
+		beforeEach ->
+			@WebsocketLoadBalancer._processEditorEvent = sinon.stub()
+			@WebsocketLoadBalancer.listenForEditorEvents()
+
+		it "should subscribe to the editor-events channel", ->
+			@WebsocketLoadBalancer.rclientSub.subscribe
+				.calledWith("editor-events")
+				.should.equal true
+
+		it "should process the events with _processEditorEvent", ->
+			@WebsocketLoadBalancer.rclientSub.on
+				.calledWith("message", sinon.match.func)
+				.should.equal true
+
+	describe "_processEditorEvent", ->
+		describe "with a designated room", ->
+			beforeEach ->
+				@io.sockets =
+					in: sinon.stub().returns(emit: @emit = sinon.stub())
+				data = JSON.stringify
+					room_id: @room_id
+					message: @message
+					payload: @payload
+				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+
+			it "should send the message to all clients in the room", ->
+				@io.sockets.in
+					.calledWith(@room_id)
+					.should.equal true
+				@emit.calledWith(@message, @payload...).should.equal true
+
+		describe "when emitting to all", ->
+			beforeEach ->
+				@io.sockets =
+					emit: @emit = sinon.stub()
+				data = JSON.stringify
+					room_id: "all"
+					message: @message
+					payload: @payload
+				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
+
+			it "should send the message to all clients", ->
+				@emit.calledWith(@message, @payload...).should.equal true
+			

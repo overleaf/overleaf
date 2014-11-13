@@ -29,6 +29,7 @@ describe 'WebsocketController', ->
 			"./AuthorizationManager": @AuthorizationManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
+			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 	
 	afterEach ->
@@ -219,7 +220,7 @@ describe 'WebsocketController', ->
 				
 	describe "updateClientPosition", ->
 		beforeEach ->
-			#@EditorRealTimeController.emitToRoom = sinon.stub()
+			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArgWith(4)
 			@update = {
 				doc_id: @doc_id = "doc-id-123"
@@ -248,8 +249,8 @@ describe 'WebsocketController', ->
 					email: @email
 					user_id: @user_id
 
-			# it "should send the update to the project room with the user's name", ->
-			# 	@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
+			it "should send the update to the project room with the user's name", ->
+				@WebsocketLoadBalancer.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
 
 			it "should send the  cursor data to the connected user manager", (done)->
 				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
@@ -272,16 +273,16 @@ describe 'WebsocketController', ->
 				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
-			# it "should send the update to the project room with an anonymous name", ->
-			# 	@EditorRealTimeController.emitToRoom
-			# 		.calledWith(@project_id, "clientTracking.clientUpdated", {
-			# 			doc_id: @doc_id,
-			# 			id: @client.id
-			# 			name: "Anonymous"
-			# 			row: @row
-			# 			column: @column
-			# 		})
-			# 		.should.equal true
+			it "should send the update to the project room with an anonymous name", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.clientUpdated", {
+						doc_id: @doc_id,
+						id: @client.id
+						name: "Anonymous"
+						row: @row
+						column: @column
+					})
+					.should.equal true
 				
 			it "should not send cursor data to the connected user manager", (done)->
 				@ConnectedUsersManager.updateUserPosition.called.should.equal false

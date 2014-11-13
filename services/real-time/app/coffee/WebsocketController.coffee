@@ -3,6 +3,7 @@ WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
+WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
 Utils = require "./Utils"
 
 module.exports = WebsocketController =
@@ -94,8 +95,7 @@ module.exports = WebsocketController =
 			else
 				cursorData.name = "Anonymous"
 				callback()
-			#EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
-			#callback()
+			WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 		
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
