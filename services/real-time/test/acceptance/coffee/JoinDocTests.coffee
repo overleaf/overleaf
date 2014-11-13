@@ -36,6 +36,11 @@ describe "joinDoc", ->
 		
 		it "should return the doc lines, version and ops", ->
 			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+			
+		it "should have joined the doc room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@doc_id in client.rooms).to.equal true
+				done()
 		
 	describe "when authorised readOnly", ->
 		before (done) ->
@@ -61,6 +66,11 @@ describe "joinDoc", ->
 		
 		it "should return the doc lines, version and ops", ->
 			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+			
+		it "should have joined the doc room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@doc_id in client.rooms).to.equal true
+				done()
 		
 	describe "when authorised as owner", ->
 		before (done) ->
@@ -86,6 +96,11 @@ describe "joinDoc", ->
 		
 		it "should return the doc lines, version and ops", ->
 			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+			
+		it "should have joined the doc room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@doc_id in client.rooms).to.equal true
+				done()
 
 	# It is impossible to write an acceptance test to test joining an unauthorized
 	# project, since joinProject already catches that. If you can join a project,
@@ -116,3 +131,8 @@ describe "joinDoc", ->
 		
 		it "should return the doc lines, version and ops", ->
 			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+			
+		it "should have joined the doc room", (done) ->
+			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
+				expect(@doc_id in client.rooms).to.equal true
+				done()
