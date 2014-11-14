@@ -29,6 +29,7 @@ describe 'WebsocketController', ->
 			"./WebApiManager": @WebApiManager = {}
 			"./AuthorizationManager": @AuthorizationManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
+			"./TrackChangesManager": @TrackChangesManager = {}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -108,7 +109,62 @@ describe 'WebsocketController', ->
 				@callback
 					.calledWith(new Error("not authorized"))
 					.should.equal true
+	
+	describe "leaveProject", ->
+		beforeEach ->
+			@DocumentUpdaterManager.flushProjectToMongoAndDelete = sinon.stub().callsArg(1)
+			@TrackChangesManager.flushProject = sinon.stub().callsArg(1)
+			@ConnectedUsersManager.markUserAsDisconnected = sinon.stub().callsArg(2)
+			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
+			@clientsInRoom = []
+			@io =
+				sockets:
+					clients: (room_id) =>
+						if room_id != @project_id
+							throw "expected room_id to be project_id"
+						return @clientsInRoom
+			@client.params.project_id = @project_id
+			@WebsocketController.FLUSH_IF_EMPTY_DELAY = 0
+			tk.reset() # Allow setTimeout to work.
+			
+		describe "when the project is empty", ->
+			beforeEach (done) ->
+				@clientsInRoom = []
+				@WebsocketController.leaveProject @io, @client, done
+				
+			it "should end clientTracking.clientDisconnected to the project room", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.should.equal true
+			
+			it "should mark the user as disconnected", ->
+				@ConnectedUsersManager.markUserAsDisconnected
+					.calledWith(@project_id, @client.id)
+					.should.equal true
+			
+			it "should flush the project in the document updater", ->
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete
+					.calledWith(@project_id)
+					.should.equal true
 					
+			it "should flush the changes in the track changes api", ->
+				@TrackChangesManager.flushProject
+					.calledWith(@project_id)
+					.should.equal true
+			
+		describe "when the project is not empty", ->
+			beforeEach ->
+				@clientsInRoom = ["mock-remaining-client"]
+				@WebsocketController.leaveProject @io, @client
+				
+			it "should not flush the project in the document updater", ->
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete
+					.called.should.equal false
+			
+			it "should not flush the changes in the track changes api", ->
+				@TrackChangesManager.flushProject
+					.called.should.equal false
+						
 	describe "joinDoc", ->
 		beforeEach ->
 			@doc_id = "doc-id-123"

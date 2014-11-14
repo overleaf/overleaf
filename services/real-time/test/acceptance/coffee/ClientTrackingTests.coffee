@@ -48,7 +48,7 @@ describe "clientTracking", ->
 				doc_id: @doc_id = "mock-doc-id"
 			}, (error) ->
 				throw error if error?
-				done()
+				setTimeout done, 300 # Give the message a chance to reach client B.
 			
 		it "should tell other clients about the update", ->
 			@updates.should.deep.equal [

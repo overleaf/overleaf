@@ -3,6 +3,7 @@ WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
+TrackChangesManager = require "./TrackChangesManager"
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
 Utils = require "./Utils"
 
@@ -40,6 +41,34 @@ module.exports = WebsocketController =
 			
 			# No need to block for setting the user as connected in the cursor tracking
 			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
+		
+	# We want to flush a project if there are no more (local) connected clients
+	# but we need to wait for the triggering client to disconnect. How long we wait
+	# is determined by FLUSH_IF_EMPTY_DELAY.
+	FLUSH_IF_EMPTY_DELAY: 500 #ms		
+	leaveProject: (io, client, callback = (error) ->) ->
+		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+			return callback(error) if error?
+			logger.log {project_id, user_id, client_id: client.id}, "client leaving project"
+			WebsocketLoadBalancer.emitToRoom project_id, "clientTracking.clientDisconnected", client.id
+		
+			# We can do this in the background
+			ConnectedUsersManager.markUserAsDisconnected project_id, client.id, (err) ->
+				if err?
+					logger.error {err, project_id, user_id, client_id: client.id}, "error marking client as disconnected"
+					
+			setTimeout () ->
+				remainingClients = io.sockets.clients(project_id)
+				if remainingClients.length == 0
+					# Flush project in the background
+					DocumentUpdaterManager.flushProjectToMongoAndDelete project_id, (err) ->
+						if err?
+							logger.error {err, project_id, user_id, client_id: client.id}, "error flushing to doc updater after leaving project"
+					TrackChangesManager.flushProject project_id, (err) ->
+						if err?
+							logger.error {err, project_id, user_id, client_id: client.id}, "error flushing to track changes after leaving project"
+				callback()
+			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 			
 	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
