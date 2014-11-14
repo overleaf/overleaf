@@ -62,6 +62,42 @@ describe 'DocumentUpdaterManager', ->
 					.calledWith(err)
 					.should.equal true
 
+	describe 'flushProjectToMongoAndDelete', ->
+		beforeEach ->
+			@callback = sinon.stub()
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete @project_id, @callback
+
+			it 'should delete the project from the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
+				@request.del.calledWith(url).should.equal true
+
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete @project_id, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a failure error code", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete @project_id, @callback
+
+			it "should return the callback with an error", ->
+				err = new Error("doc updater returned failure status code: 500")
+				err.statusCode = 500
+				@callback
+					.calledWith(err)
+					.should.equal true
+
 	describe 'queueChange', ->
 		beforeEach ->
 			@change = {

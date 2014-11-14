@@ -27,6 +27,24 @@ module.exports = DocumentUpdaterManager =
 				err.statusCode = res.statusCode
 				logger.error {err, project_id, doc_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback err
+
+	flushProjectToMongoAndDelete: (project_id, callback = ()->) ->
+		logger.log project_id:project_id, "deleting project from document updater"
+		#timer = new metrics.Timer("delete.mongo.project")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+		request.del url, (err, res, body)->
+			#timer.done()
+			if err?
+				logger.error {err, project_id}, "error deleting project from document updater"
+				return callback(err)
+			else if 200 <= res.statusCode  < 300
+				logger.log {project_id}, "deleted project from document updater"
+				return callback(null)
+			else
+				err = new Error("document updater returned a failure status code: #{res.statusCode}")
+				err.statusCode = res.statusCode
+				logger.error {err, project_id}, "document updater returned failure status code: #{res.statusCode}"
+				return callback(err)
 				
 	queueChange: (project_id, doc_id, change, callback = ()->)->
 		jsonChange = JSON.stringify change

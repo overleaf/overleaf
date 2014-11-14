@@ -82,7 +82,6 @@ describe "receiveUpdate", ->
 			}]
 			
 	describe "with an error", ->
-	
 		before (done) ->
 			@clientAErrors = []
 			@clientA.on "otUpdateError", (error) => @clientAErrors.push(error)
