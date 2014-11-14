@@ -6,6 +6,8 @@ RealTimeClient = require "./helpers/RealTimeClient"
 MockDocUpdaterServer = require "./helpers/MockDocUpdaterServer"
 FixturesManager = require "./helpers/FixturesManager"
 
+async = require "async"
+
 describe "leaveDoc", ->
 	before ->
 		@lines = ["test", "doc", "lines"]
@@ -14,20 +16,27 @@ describe "leaveDoc", ->
 			
 	describe "when joined to a doc", ->
 		before (done) ->
-			FixturesManager.setUpProject {
-				privilegeLevel: "readAndWrite"
-			}, (error, data) =>
-				throw error if error?
-				{@project_id, @user_id} = data
-				FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (error, data) =>
-					throw error if error?
-					{@doc_id} = data
+			async.series [
+				(cb) =>
+					FixturesManager.setUpProject {
+						privilegeLevel: "readAndWrite"
+					}, (e, {@project_id, @user_id}) =>
+						cb(e)
+					
+				(cb) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+						cb(e)
+						
+				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.emit "joinProject", project_id: @project_id, (error) =>
-						throw error if error?
-						@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) =>
-							throw error if error?
-							done()
+					@client.on "connect", cb
+						
+				(cb) =>
+					@client.emit "joinProject", project_id: @project_id, cb
+				
+				(cb) =>
+					@client.emit "joinDoc", @doc_id, (error, @returnedArgs...) => cb(error)
+			], done
 							
 		describe "then leaving the doc", ->
 			before (done) ->

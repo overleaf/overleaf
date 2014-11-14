@@ -6,24 +6,29 @@ RealTimeClient = require "./helpers/RealTimeClient"
 MockWebServer = require "./helpers/MockWebServer"
 FixturesManager = require "./helpers/FixturesManager"
 
+async = require "async"
 
 describe "joinProject", ->
 	describe "when authorized", ->
 		before (done) ->
-			FixturesManager.setUpProject {
-				privilegeLevel: "owner"
-				project: {
-					name: "Test Project"
-				}
-			}, (error, data) =>
-				throw error if error?
-				{@user_id, @project_id} = data
-				@client = RealTimeClient.connect()
-				@client.emit "joinProject", {
-					project_id: @project_id
-				}, (error, @project, @privilegeLevel, @protocolVersion) =>
-					throw error if error?
-					done()
+			async.series [
+				(cb) =>
+					FixturesManager.setUpProject {
+						privilegeLevel: "owner"
+						project: {
+							name: "Test Project"
+						}
+					}, (e, {@project_id, @user_id}) =>
+						cb(e)
+						
+				(cb) =>
+					@client = RealTimeClient.connect()
+					@client.on "connect", cb
+						
+				(cb) =>
+					@client.emit "joinProject", project_id: @project_id, (error, @project, @privilegeLevel, @protocolVersion) =>
+						cb(error)
+			], done
 					
 		it "should get the project from web", ->
 			MockWebServer.joinProject
@@ -58,19 +63,24 @@ describe "joinProject", ->
 			
 	describe "when not authorized", ->
 		before (done) ->
-			FixturesManager.setUpProject {
-				privilegeLevel: null
-				project: {
-					name: "Test Project"
-				}
-			}, (error, data) =>
-				throw error if error?
-				{@user_id, @project_id} = data
-				@client = RealTimeClient.connect()
-				@client.emit "joinProject", {
-					project_id: @project_id
-				}, (@error, @project, @privilegeLevel, @protocolVersion) =>
-					done()
+			async.series [
+				(cb) =>
+					FixturesManager.setUpProject {
+						privilegeLevel: null
+						project: {
+							name: "Test Project"
+						}
+					}, (e, {@project_id, @user_id}) =>
+						cb(e)
+						
+				(cb) =>
+					@client = RealTimeClient.connect()
+					@client.on "connect", cb
+						
+				(cb) =>
+					@client.emit "joinProject", project_id: @project_id, (@error, @project, @privilegeLevel, @protocolVersion) =>
+						cb()
+			], done
 		
 		it "should return an error", ->
 			# We don't return specific errors

@@ -6,27 +6,35 @@ RealTimeClient = require "./helpers/RealTimeClient"
 MockWebServer = require "./helpers/MockWebServer"
 FixturesManager = require "./helpers/FixturesManager"
 
+async = require "async"
+
 describe "clientTracking", ->
 	before (done) ->
-		FixturesManager.setUpProject {
-			privilegeLevel: "owner"
-			project: {
-				name: "Test Project"
-			}
-		}, (error, data) =>
-			throw error if error?
-			{@user_id, @project_id} = data
-			@clientA = RealTimeClient.connect()
-			@clientB = RealTimeClient.connect()
-			@clientA.emit "joinProject", {
-				project_id: @project_id
-			}, (error) =>
-				throw error if error?
+		async.series [
+			(cb) =>
+				FixturesManager.setUpProject {
+					privilegeLevel: "owner"
+					project: { name: "Test Project"	}
+				}, (error, {@user_id, @project_id}) => cb()
+			
+			(cb) =>
+				@clientA = RealTimeClient.connect()
+				@clientA.on "connect", cb
+				
+			(cb) =>
+				@clientB = RealTimeClient.connect()
+				@clientB.on "connect", cb
+				
+			(cb) =>
+				@clientA.emit "joinProject", {
+					project_id: @project_id
+				}, cb
+				
+			(cb) =>
 				@clientB.emit "joinProject", {
 					project_id: @project_id
-				}, (error) =>
-					throw error if error?
-					done()
+				}, cb
+		], done
 					
 	describe "when a client updates its cursor location", ->
 		before (done) ->
