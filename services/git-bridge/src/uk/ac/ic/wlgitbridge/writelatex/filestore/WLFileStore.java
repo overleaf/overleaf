@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
@@ -19,7 +20,7 @@ public class WLFileStore {
         this.rootGitDirectoryPath = rootGitDirectoryPath;
     }
 
-    public void updateForProject(WLProject project) {
+    public void updateForProject(WLProject project) throws FailedConnectionException {
         String projectName = project.getName();
         WLDirectoryNode directoryNode = fileStore.get(projectName);
         if (directoryNode == null) {

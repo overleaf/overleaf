@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.FileIndexStore;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class WLDirectoryNode {
 
     private Map<String, FileNode> files;
-    private final FileIndexStore fileIndexes;
+    private FileIndexStore fileIndexes;
     private final String rootGitDirectoryPath;
 
     public WLDirectoryNode(String rootGitDirectoryPath, String projectName) {
@@ -25,7 +26,7 @@ public class WLDirectoryNode {
         fileIndexes = new FileIndexStore();
     }
 
-    public void updateFromSnapshot(Snapshot snapshot) {
+    public void updateFromSnapshot(Snapshot snapshot) throws FailedConnectionException {
         Map<String, FileNode> updatedFiles = new HashMap<String, FileNode>();
         List<SnapshotFile> srcs = snapshot.getSrcs();
         List<SnapshotAttachment> atts = snapshot.getAtts();
@@ -34,7 +35,7 @@ public class WLDirectoryNode {
             updatedFiles.put(blobNode.getFilePath(), blobNode);
         }
         for (SnapshotAttachment att : atts) {
-            AttachmentNode attachmentNode = new AttachmentNode(att, files);
+            AttachmentNode attachmentNode = new AttachmentNode(att, files, fileIndexes);
             updatedFiles.put(attachmentNode.getFilePath(), attachmentNode);
         }
         files = updatedFiles;

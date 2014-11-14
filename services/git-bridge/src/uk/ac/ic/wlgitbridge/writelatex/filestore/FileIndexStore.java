@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
+import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,16 +10,16 @@ import java.util.Map;
  */
 public class FileIndexStore {
 
-    private final Map<BlobHash, String> blobHashMappings;
-    private final Map<String, String> urlMappings;
+    private final Map<BlobHash, FileNode> blobHashMappings;
+    private final Map<String, FileNode> urlMappings;
 
     public FileIndexStore() {
-        blobHashMappings = new HashMap<BlobHash, String>();
-        urlMappings = new HashMap<String, String>();
+        blobHashMappings = new HashMap<BlobHash, FileNode>();
+        urlMappings = new HashMap<String, FileNode>();
     }
 
-    public void addAttachment(String url, String filePath) {
-        urlMappings.put(url, filePath);
+    public void addAttachment(String url, FileNode fileNode) {
+        urlMappings.put(url, fileNode);
     }
 
 }
