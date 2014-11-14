@@ -110,14 +110,17 @@ module.exports = WebsocketController =
 					return callback(error) if error?
 					callback null, users
 
-	applyOtUpdate: (client, project_id, doc_id, update, callback = (error) ->) ->
+	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
 		AuthorizationManager.assertClientCanEditProject client, (error) ->
 			if error?
-				logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
-				client.disconnect()
+				logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
+				setTimeout () ->
+					# Disconnect, but give the client the chance to receive the error
+					client.disconnect()
+				, 100
 				return callback(error)
 			
-			Utils.getClientAttributes client, ["user_id"], (error, {user_id}) ->
+			Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
 				return callback(error) if error?
 				update.meta ||= {}
 				update.meta.source = client.id

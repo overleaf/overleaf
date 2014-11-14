@@ -13,6 +13,7 @@ module.exports = Router =
 			attrs.err = error
 			logger.error attrs, "server side error in #{method}"
 		# Don't return raw error to prevent leaking server side info
+		console.log "CALLING CALLBACK", callback
 		return callback {message: "Something went wrong"}
 
 	configure: (app, io, session) ->
@@ -74,5 +75,12 @@ module.exports = Router =
 				WebsocketController.updateClientPosition client, cursorData, (err) ->
 					if err?
 						Router._handleError callback, err, client, "clientTracking.updatePosition"
+					else
+						callback()
+						
+			client.on "applyOtUpdate", (doc_id, update, callback = (error) ->) ->
+				WebsocketController.applyOtUpdate client, doc_id, update, (err) ->
+					if err?
+						Router._handleError callback, err, client, "applyOtUpdate", {doc_id, update}
 					else
 						callback()

@@ -293,12 +293,13 @@ describe 'WebsocketController', ->
 		beforeEach ->
 			@update = {op: {p: 12, t: "foo"}}
 			@client.params.user_id = @user_id
+			@client.params.project_id = @project_id
 			@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArg(1)
 			@DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
 
 		describe "succesfully", ->
 			beforeEach ->
-				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			it "should set the source of the update to the client id", ->
 				@update.meta.source.should.equal @client.id
@@ -327,7 +328,7 @@ describe 'WebsocketController', ->
 			beforeEach ->
 				@client.disconnect = sinon.stub()
 				@DocumentUpdaterManager.queueChange = sinon.stub().callsArgWith(3, @error = new Error("Something went wrong"))
-				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			it "should disconnect the client", ->
 				@client.disconnect.called.should.equal true
@@ -342,7 +343,7 @@ describe 'WebsocketController', ->
 			beforeEach ->
 				@client.disconnect = sinon.stub()
 				@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArgWith(1, @error = new Error("not authorized"))
-				@WebsocketController.applyOtUpdate @client, @project_id, @doc_id, @update, @callback
+				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			it "should disconnect the client", ->
 				@client.disconnect.called.should.equal true
