@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
 import org.junit.Test;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.BlobHash;
 
 public class BlobHashTest {
 

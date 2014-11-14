@@ -5,8 +5,8 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionExc
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * Created by Winston on 06/11/14.
@@ -25,8 +25,8 @@ public class WLProject {
         snapshotFetcher = new SnapshotFetcher(name, snapshots);
     }
 
-    public List<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
-        List<Snapshot> newSnapshots = snapshotFetcher.fetchNewSnapshots();
+    public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
+        SortedSet<Snapshot> newSnapshots = snapshotFetcher.fetchNewSnapshots();
         latestSnapshot = snapshotFetcher.getLatestSnapshot();
         return newSnapshots;
     }

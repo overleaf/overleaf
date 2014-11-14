@@ -30,7 +30,7 @@ public class SnapshotFile implements JSONSource {
         getPathFromJSON(jsonArray);
     }
 
-    public byte[] getContents() throws FailedConnectionException {
+    public byte[] getContents() {
         return contents;
     }
 
@@ -44,15 +44,6 @@ public class SnapshotFile implements JSONSource {
 
     protected void getPathFromJSON(JsonArray jsonArray) {
         path = jsonArray.get(1).getAsString();
-    }
-
-    public void writeToDisk(String repoDir) throws FailedConnectionException, IOException {
-        File file = new File(repoDir, path);
-        file.getParentFile().mkdirs();
-        file.createNewFile();
-        OutputStream out = new FileOutputStream(file);
-        out.write(getContents());
-        out.close();
     }
 
 }

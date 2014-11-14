@@ -1,7 +1,5 @@
-package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
+package uk.ac.ic.wlgitbridge.writelatex.filestore.blob;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.HttpResponseBodyPart;
@@ -14,33 +12,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * Created by Winston on 06/11/14.
+ * Created by Winston on 14/11/14.
  */
-public class SnapshotAttachment extends SnapshotFile {
+public class ExternalBlob extends Blob {
 
     private Future<byte[]> future;
-    private String url;
 
-    public SnapshotAttachment(JsonElement json) throws FailedConnectionException {
-        super(json);
+    public ExternalBlob(String url) throws FailedConnectionException {
+        super();
+        fetchContents(url);
     }
 
     @Override
-    public byte[] getContents() {
-        return null;
-//        try {
-//            return future.get();
-//        } catch (InterruptedException e) {
-//            throw new FailedConnectionException();
-//        } catch (ExecutionException e) {
-//            throw new FailedConnectionException();
-//        }
-    }
-
-    @Override
-    protected void getContentsFromJSON(JsonArray jsonArray) throws FailedConnectionException {
-        url = jsonArray.get(0).getAsString();
-//        fetchContents(jsonArray.get(0).getAsString());
+    public byte[] getContents() throws FailedConnectionException {
+        try {
+            return future.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new FailedConnectionException();
+        }
     }
 
     private void fetchContents(String url) throws FailedConnectionException {
@@ -65,10 +56,6 @@ public class SnapshotAttachment extends SnapshotFile {
         } catch (IOException e) {
             throw new FailedConnectionException();
         }
-    }
-
-    public String getUrl() {
-        return url;
     }
 
 }

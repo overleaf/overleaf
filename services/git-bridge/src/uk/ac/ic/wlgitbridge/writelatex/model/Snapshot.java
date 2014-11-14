@@ -1,19 +1,17 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
  * Created by Winston on 03/11/14.
  */
-public class Snapshot {
+public class Snapshot implements Comparable<Snapshot> {
 
     private final int versionID;
     private final String comment;
@@ -32,15 +30,6 @@ public class Snapshot {
 
         srcs = data.getSrcs();
         atts = data.getAtts();
-    }
-
-    public void writeToDisk(String basePath) throws IOException, FailedConnectionException {
-        for (SnapshotFile file : srcs) {
-            file.writeToDisk(basePath);
-        }
-        for (SnapshotFile file : atts) {
-            file.writeToDisk(basePath);
-        }
     }
 
     public int getVersionID() {
@@ -65,6 +54,16 @@ public class Snapshot {
 
     public List<SnapshotAttachment> getAtts() {
         return atts;
+    }
+
+    @Override
+    public int compareTo(Snapshot snapshot) {
+        return Integer.compare(versionID, snapshot.versionID);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(versionID);
     }
 
 }

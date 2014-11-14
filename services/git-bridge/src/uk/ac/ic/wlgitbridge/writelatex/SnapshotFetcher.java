@@ -27,9 +27,10 @@ public class SnapshotFetcher {
         versions = new TreeSet<Integer>();
     }
 
-    public List<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
-        List<Snapshot> newSnapshots = new LinkedList<Snapshot>();
+    public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
+        SortedSet<Snapshot> newSnapshots = new TreeSet<Snapshot>();
         while (getNew(newSnapshots));
+        System.out.println("Snapshots fetched: " + newSnapshots);
         return newSnapshots;
     }
 
@@ -37,7 +38,7 @@ public class SnapshotFetcher {
         return snapshots.get(versions.last());
     }
 
-    private boolean getNew(List<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {
+    private boolean getNew(SortedSet<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {
         SnapshotGetDocRequest getDoc = new SnapshotGetDocRequest(projectName);
         SnapshotGetSavedVersRequest getSavedVers = new SnapshotGetSavedVersRequest(projectName);
 
@@ -87,16 +88,15 @@ public class SnapshotFetcher {
         return idsToUpdate;
     }
 
-    private boolean updateIDs(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws FailedConnectionException {
+    private boolean updateIDs(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, SortedSet<Snapshot> newSnapshots) throws FailedConnectionException {
         if (idsToUpdate.isEmpty()) {
             return false;
         }
-        System.out.println("Fetching versions: " + idsToUpdate);
         fetchVersions(idsToUpdate, fetchedSnapshotInfos, newSnapshots);
         return true;
     }
 
-    private void fetchVersions(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots) throws FailedConnectionException {
+    private void fetchVersions(List<Integer> idsToUpdate, Map<Integer, SnapshotInfo> fetchedSnapshotInfos, SortedSet<Snapshot> newSnapshots) throws FailedConnectionException {
         List<SnapshotGetForVersionRequest> requests = createFiredRequests(idsToUpdate);
         processResults(fetchedSnapshotInfos, newSnapshots, requests);
     }
@@ -111,13 +111,13 @@ public class SnapshotFetcher {
         return requests;
     }
 
-    private void processResults(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, List<SnapshotGetForVersionRequest> requests) throws FailedConnectionException {
+    private void processResults(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, SortedSet<Snapshot> newSnapshots, List<SnapshotGetForVersionRequest> requests) throws FailedConnectionException {
         for (SnapshotGetForVersionRequest request : requests) {
             processResult(fetchedSnapshotInfos, newSnapshots, request);
         }
     }
 
-    private void processResult(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, List<Snapshot> newSnapshots, SnapshotGetForVersionRequest request) throws FailedConnectionException {
+    private void processResult(Map<Integer, SnapshotInfo> fetchedSnapshotInfos, SortedSet<Snapshot> newSnapshots, SnapshotGetForVersionRequest request) throws FailedConnectionException {
         SnapshotGetForVersionResult result = request.getResult();
         SnapshotData data = result.getSnapshotData();
         Snapshot snapshot = new Snapshot(fetchedSnapshotInfos.get(request.getVersionID()), data);

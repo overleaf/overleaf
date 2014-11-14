@@ -1,10 +1,11 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.WLFileStore;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +37,15 @@ public class WLDataModel implements SnapshotDBAPI {
     }
 
     @Override
-    public List<Snapshot> getSnapshotsToAddToProject(String name) throws FailedConnectionException, InvalidProjectException {
+    public List<WritableRepositoryContents> getWritableRepositories(String name) throws FailedConnectionException, InvalidProjectException {
         return updateProjectWithName(name);
     }
 
-    private List<Snapshot> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
+    private List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
+        return fileStore.updateForProject(getProjectWithName(name));
+    }
+
+    private WLProject getProjectWithName(String name) {
         WLProject project;
         if (projects.containsKey(name)) {
             project = projects.get(name);
@@ -48,9 +53,7 @@ public class WLDataModel implements SnapshotDBAPI {
             project = new WLProject(name);
             projects.put(name, project);
         }
-        List<Snapshot> newSnapshots = project.fetchNewSnapshots();
-        fileStore.updateForProject(project);
-        return newSnapshots;
+        return project;
     }
 
 }

@@ -28,7 +28,19 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
 
     @Override
     public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
-        return repositorySource.getRepositoryWithNameAtRootDirectory(name, rootGitDirectory);
+        try {
+            return repositorySource.getRepositoryWithNameAtRootDirectory(name, rootGitDirectory);
+        } catch (RepositoryNotFoundException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (ServiceNotEnabledException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.out.println("An exception occurred");
+            throw new ServiceNotEnabledException();
+        }
     }
 
     private void initRootGitDirectory(String rootGitDirectoryPath) throws InvalidRootDirectoryPathException {

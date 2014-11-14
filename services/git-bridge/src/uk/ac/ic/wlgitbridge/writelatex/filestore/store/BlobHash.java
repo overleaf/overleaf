@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.writelatex.filestore;
+package uk.ac.ic.wlgitbridge.writelatex.filestore.store;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
