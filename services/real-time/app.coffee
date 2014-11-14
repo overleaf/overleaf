@@ -44,6 +44,9 @@ Router.configure(app, io, sessionSockets)
 
 WebsocketLoadBalancer = require "./app/js/WebsocketLoadBalancer"
 WebsocketLoadBalancer.listenForEditorEvents(io)
+
+DocumentUpdaterController = require "./app/js/DocumentUpdaterController"
+DocumentUpdaterController.listenForUpdatesFromDocumentUpdater(io)
 	
 port = Settings.internal.realTime.port
 host = Settings.internal.realTime.host
