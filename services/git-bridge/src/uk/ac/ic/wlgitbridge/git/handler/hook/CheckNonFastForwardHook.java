@@ -21,16 +21,19 @@ public class CheckNonFastForwardHook implements PreReceiveHook {
 
     @Override
     public void onPreReceive(ReceivePack receivePack, Collection<ReceiveCommand> receiveCommands) {
+        System.out.println("There are " + receiveCommands.size() + " receive commands.");
+        System.out.println("All commits: ");
+        System.out.println(receiveCommands);
         for (ReceiveCommand receiveCommand : receiveCommands) {
-            receiveCommand.setResult(RefUpdate.Result.REJECTED);
-            System.out.println(receiveCommand.getRef());
+//            receiveCommand.setResult(RefUpdate.Result.REJECTED);
             try {
-
+                System.out.println("Old: " + receiveCommand.getOldId());
+                System.out.println("New: " + receiveCommand.getNewId());
                 // a RevWalk allows to walk over commits based on some filtering that is
                 // defined
                 RevWalk walk = new RevWalk(receivePack.getRepository());
-
                 RevCommit commit = walk.parseCommit(receiveCommand.getNewId());
+                System.out.println("Parent commit: " + commit.getParents()[0].getId());
                 RevTree tree = commit.getTree();
                 System.out.println("Having tree: " + tree);
 
