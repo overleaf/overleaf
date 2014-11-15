@@ -32,8 +32,8 @@ public abstract class FileNode {
         return getBlob().getContents();
     }
 
-    public void writeToDisk(String repoDir) throws FailedConnectionException, IOException {
-        File file = new File(repoDir, filePath);
+    public void writeToDisk(File directory) throws FailedConnectionException, IOException {
+        File file = new File(directory, filePath);
         file.getParentFile().mkdirs();
         file.createNewFile();
         OutputStream out = new FileOutputStream(file);

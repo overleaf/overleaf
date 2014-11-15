@@ -8,6 +8,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -16,11 +17,11 @@ import java.util.*;
 public class WLFileStore {
 
     private final Map<String, WLDirectoryNode> fileStore;
-    private final String rootGitDirectoryPath;
+    private final File rootGitDirectory;
 
     public WLFileStore(String rootGitDirectoryPath) {
         fileStore = new HashMap<String, WLDirectoryNode>();
-        this.rootGitDirectoryPath = rootGitDirectoryPath;
+        rootGitDirectory = new File(rootGitDirectoryPath);
     }
 
     public List<WritableRepositoryContents> updateForProject(WLProject project) throws FailedConnectionException,
@@ -31,7 +32,8 @@ public class WLFileStore {
         List<WritableRepositoryContents> writableRepositories = new LinkedList<WritableRepositoryContents>();
         for (Snapshot snapshot : snapshots) {
             writableRepositories.add(new GitDirectoryContents(directoryNode.updateFromSnapshot(snapshot),
-                                                              rootGitDirectoryPath,
+                                                              rootGitDirectory,
+                                                              projectName,
                                                               snapshot));
         }
         return writableRepositories;

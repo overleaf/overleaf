@@ -5,6 +5,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionExc
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -14,14 +15,14 @@ import java.util.List;
 public class GitDirectoryContents implements WritableRepositoryContents {
 
     private final List<FileNode> fileNodes;
-    private final String rootGitDirectoryPath;
+    private final File gitDirectory;
     private final String userName;
     private final String userEmail;
     private final String commitMessage;
 
-    public GitDirectoryContents(List<FileNode> fileNodes, String rootGitDirectoryPath, Snapshot snapshot) {
+    public GitDirectoryContents(List<FileNode> fileNodes, File rootGitDirectory, String projectName, Snapshot snapshot) {
         this.fileNodes = fileNodes;
-        this.rootGitDirectoryPath = rootGitDirectoryPath;
+        gitDirectory = new File(rootGitDirectory, projectName);
         userName = snapshot.getUserName();
         userEmail = snapshot.getUserEmail();
         commitMessage = snapshot.getComment();
@@ -30,7 +31,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
     @Override
     public void write() throws IOException, FailedConnectionException {
         for (FileNode fileNode : fileNodes) {
-            fileNode.writeToDisk(rootGitDirectoryPath);
+            fileNode.writeToDisk(gitDirectory);
         }
     }
 
