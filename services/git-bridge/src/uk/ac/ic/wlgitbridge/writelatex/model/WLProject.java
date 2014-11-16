@@ -17,7 +17,7 @@ public class WLProject {
     private final Map<Integer, Snapshot> snapshots;
     private final SnapshotFetcher snapshotFetcher;
 
-    private Snapshot latestSnapshot;
+    private int latestSnapshotID;
 
     public WLProject(String name) {
         this.name = name;
@@ -27,7 +27,7 @@ public class WLProject {
 
     public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
         SortedSet<Snapshot> newSnapshots = snapshotFetcher.fetchNewSnapshots();
-        latestSnapshot = snapshotFetcher.getLatestSnapshot();
+        latestSnapshotID = snapshotFetcher.getLatestSnapshot().getVersionID();
         return newSnapshots;
     }
 
@@ -35,8 +35,14 @@ public class WLProject {
         return name;
     }
 
-    public Snapshot getLatestSnapshot() {
-        return latestSnapshot;
+    public int getLatestSnapshotID() {
+        return latestSnapshotID;
+    }
+
+    public void putLatestSnapshot(int versionID) {
+        snapshots.put(versionID, null);
+        snapshotFetcher.putLatestVersion(versionID);
+        latestSnapshotID = versionID;
     }
 
 }

@@ -19,6 +19,7 @@ public interface WriteLatexDataSource {
     public void expectPostback(String projectName);
 
     /* Called by postback thread. */
-    public void postbackReceived(String projectName);
+    public void postbackReceivedSuccessfully(String projectName);
+    public void postbackReceivedWithException(String projectName, SnapshotPostException exception);
 
 }

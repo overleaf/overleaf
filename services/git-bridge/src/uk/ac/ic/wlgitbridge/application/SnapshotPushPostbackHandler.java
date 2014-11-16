@@ -1,11 +1,15 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
@@ -13,27 +17,29 @@ import java.io.IOException;
  */
 public class SnapshotPushPostbackHandler extends AbstractHandler {
 
+    private final WriteLatexDataSource writeLatexDataSource;
+
+    public SnapshotPushPostbackHandler(WriteLatexDataSource writeLatexDataSource) {
+        this.writeLatexDataSource = writeLatexDataSource;
+    }
+
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 //                System.out.println("handling");
 //                System.out.println(request.getMethod());
 //                response.setContentType("text/html;charset=utf-8");
 //                response.setStatus(HttpServletResponse.SC_OK);
-        baseRequest.setHandled(false);
         if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
-            System.out.println(request.getHeaderNames());
+            BufferedReader reader = request.getReader();
+            StringBuilder sb = new StringBuilder();
+            for (String line; (line = reader.readLine()) != null; ) {
+                sb.append(line);
+            }
+            String data = sb.toString();
+            JsonObject dataObj = new Gson().fromJson(data, JsonObject.class);
+            writeLatexDataSource.postbackReceivedSuccessfully(request.getRequestURI().split("/")[0]);
+            baseRequest.setHandled(true);
         }
-
-        System.out.println(request.getRemoteAddr());
-        System.out.println(request.getLocalName());
-        System.out.println("method: " + request.getMethod());
-        System.out.println("pathInfo: " + request.getPathInfo());
-        System.out.println("contextPath: " + request.getContextPath());
-        System.out.println("pathtranslated: " + request.getPathTranslated());
-        System.out.println("queryString: " + request.getQueryString());
-        System.out.println("remoteUser: " + request.getRemoteUser());
-        System.out.println("requestURI: " + request.getRequestURI());
-//                response.getWriter().println("<h1>Hello World</h1>");
     }
 
 }

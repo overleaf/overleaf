@@ -8,6 +8,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
+import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
@@ -67,20 +68,21 @@ public class WLGitBridgeServer {
 
     private void configureJettyServer() throws ServletException, InvalidRootDirectoryPathException {
         HandlerCollection handlers = new HandlerCollection();
+        WriteLatexAPI writeLatexDataSource = new WriteLatexAPI(new WLDataModel(rootGitDirectoryPath));
         handlers.setHandlers(new Handler[] {
                 initResourceHandler(),
-                new SnapshotPushPostbackHandler(),
-                initGitHandler()
+                new SnapshotPushPostbackHandler(writeLatexDataSource),
+                initGitHandler(writeLatexDataSource)
         });
         jettyServer.setHandler(handlers);
     }
 
-    private Handler initGitHandler() throws ServletException, InvalidRootDirectoryPathException {
+    private Handler initGitHandler(WriteLatexDataSource writeLatexDataSource) throws ServletException, InvalidRootDirectoryPathException {
         final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, new WriteLatexAPI(new WLDataModel(rootGitDirectoryPath)), rootGitDirectoryPath)),
+                        new WLGitServlet(servletContextHandler, writeLatexDataSource, rootGitDirectoryPath)),
                 "/*"
         );
         return servletContextHandler;

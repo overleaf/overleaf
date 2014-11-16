@@ -11,8 +11,9 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Winston on 16/11/14.
@@ -20,9 +21,11 @@ import java.util.List;
 public class WriteLatexAPI implements WriteLatexDataSource {
 
     private final WLDataModel dataModel;
+    private final Map<String, Object> postbackConds;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
+        postbackConds = new HashMap<String, Object>();
     }
 
     @Override
@@ -46,29 +49,31 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
         new SnapshotPushRequest(candidate).request();
-        throw new SnapshotPostException() {
-
-            @Override
-            public String getMessage() {
-                return "unimplemented";
-            }
-
-            @Override
-            public List<String> getDescriptionLines() {
-                return Arrays.asList("Currently implemented");
-            }
-        };
+        expectPostback(projectName);
+        candidate.approveWithVersionID(100);
     }
 
     @Override
     public void expectPostback(String projectName) {
-
+        Object value = new Object();
+        postbackConds.put(projectName, value);
+        try {
+            value.wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /* Called by postback thread. */
     @Override
-    public void postbackReceived(String projectName) {
+    public void postbackReceivedSuccessfully(String projectName) {
+        System.out.println("successfully received postback for " + projectName);
+        postbackConds.get(projectName).notifyAll();
+    }
 
+    @Override
+    public void postbackReceivedWithException(String projectName, SnapshotPostException exception) {
+        postbackReceivedSuccessfully(projectName);
     }
 
 }

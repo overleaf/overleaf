@@ -21,7 +21,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     private final CandidateSnapshotCallback callback;
 
     public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, CandidateSnapshotCallback callback) {
-        previousVersionID = project.getLatestSnapshot().getVersionID();
+        previousVersionID = project.getLatestSnapshotID();
         projectName = project.getName();
         projectURL = "http://" + hostname + "/" + projectName;
         this.directoryNode = directoryNode;

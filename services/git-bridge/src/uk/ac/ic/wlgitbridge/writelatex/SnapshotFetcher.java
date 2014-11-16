@@ -38,6 +38,10 @@ public class SnapshotFetcher {
         return snapshots.get(versions.last());
     }
 
+    public void putLatestVersion(int versionID) {
+        versions.add(versionID);
+    }
+
     private boolean getNew(SortedSet<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {
         SnapshotGetDocRequest getDoc = new SnapshotGetDocRequest(projectName);
         SnapshotGetSavedVersRequest getSavedVers = new SnapshotGetSavedVersRequest(projectName);

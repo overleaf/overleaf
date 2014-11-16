@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.store;
 
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
@@ -57,6 +58,10 @@ public class WLFileStore {
 
     public WLDirectoryNode createNextDirectoryNodeInProjectFromContents(WLProject project, RawDirectoryContents directoryContents) throws IOException, FailedConnectionException {
         return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents, attDirectory);
+    }
+
+    public void approveCandidateSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
+        fileStore.put(candidateSnapshot.getProjectName(), candidateSnapshot.getDirectoryNode());
     }
 
     private WLDirectoryNode getDirectoryNodeForProjectName(String projectName) {
