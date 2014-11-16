@@ -1,12 +1,15 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
-import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
+import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import javax.servlet.ServletException;
@@ -61,6 +64,16 @@ public class WLGitBridgeServer {
     }
 
     private void configureJettyServer() throws ServletException, InvalidRootDirectoryPathException {
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.setHandlers(new Handler[] {
+                initResourceHandler(),
+                new SnapshotPushPostbackHandler(),
+                initGitHandler()
+        });
+        jettyServer.setHandler(handlers);
+    }
+
+    private Handler initGitHandler() throws ServletException, InvalidRootDirectoryPathException {
         final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
@@ -68,7 +81,13 @@ public class WLGitBridgeServer {
                         new WLGitServlet(servletContextHandler, new WLDataModel(rootGitDirectoryPath), rootGitDirectoryPath)),
                 "/*"
         );
-        jettyServer.setHandler(servletContextHandler);
+        return servletContextHandler;
+    }
+
+    private Handler initResourceHandler() {
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(rootGitDirectoryPath);
+        return resourceHandler;
     }
 
 }

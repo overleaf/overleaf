@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.writelatex.model;
+package uk.ac.ic.wlgitbridge.writelatex;
 
 import java.util.List;
 

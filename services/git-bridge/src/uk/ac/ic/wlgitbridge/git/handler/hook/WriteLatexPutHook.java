@@ -8,8 +8,8 @@ import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
-import uk.ac.ic.wlgitbridge.writelatex.model.OutOfDateException;
-import uk.ac.ic.wlgitbridge.writelatex.model.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.OutOfDateException;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.Collection;

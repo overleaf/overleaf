@@ -1,7 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 
+import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 
 import java.io.File;
@@ -18,8 +18,12 @@ public abstract class FileNode {
     private final String filePath;
     private final boolean unchanged;
 
-    public FileNode(SnapshotFile snapshotFile, Map<String, FileNode> context) throws FailedConnectionException {
-        filePath = snapshotFile.getPath();
+    public FileNode(RawFile file, Map<String, FileNode> context) {
+        this(file.getPath(), context);
+    }
+
+    public FileNode(String filePath, Map<String, FileNode> context) {
+        this.filePath = filePath;
         FileNode currentFileNode = context.get(filePath);
         unchanged = currentFileNode != null && equals(currentFileNode);
     }
@@ -44,5 +48,15 @@ public abstract class FileNode {
     public abstract void handleIndexer(FileNodeIndexer fileNodeIndexer);
 
     protected abstract Blob getBlob();
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof FileNode && filePath.equals(((FileNode) obj).filePath);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(unchanged);
+    }
 
 }

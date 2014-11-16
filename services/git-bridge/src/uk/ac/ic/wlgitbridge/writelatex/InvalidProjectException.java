@@ -1,11 +1,11 @@
-package uk.ac.ic.wlgitbridge.writelatex.model;
+package uk.ac.ic.wlgitbridge.writelatex;
 
 import java.util.List;
 
 /**
  * Created by Winston on 16/11/14.
  */
-public class UnexpectedErrorException extends SnapshotPostException {
+public class InvalidProjectException extends SnapshotPostException {
 
     @Override
     public String getMessage() {

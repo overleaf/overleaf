@@ -2,7 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.model.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import java.util.List;
  */
 public interface WriteLatexDataSource {
 
-    public boolean repositoryExists(String name) throws FailedConnectionException;
-    public List<WritableRepositoryContents> getWritableRepositories(String name) throws FailedConnectionException, InvalidProjectException;
-    public void putDirectoryContentsToProjectWithName(String name, RawDirectoryContents directoryContents) throws SnapshotPostException;
+    public boolean repositoryExists(String projectName) throws FailedConnectionException;
+    public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException;
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException;
 
 }

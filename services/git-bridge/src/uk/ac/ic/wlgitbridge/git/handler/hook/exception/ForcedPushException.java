@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.git.handler.hook.exception;
 
-import uk.ac.ic.wlgitbridge.writelatex.model.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
 
 import java.util.Arrays;
 import java.util.List;

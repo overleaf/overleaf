@@ -1,9 +1,9 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
+import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.SnapshotFileBlob;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.RawFileBlob;
 
 import java.util.Map;
 
@@ -12,11 +12,11 @@ import java.util.Map;
  */
 public class BlobNode extends FileNode {
 
-    private SnapshotFileBlob blob;
+    private ByteBlob blob;
 
-    public BlobNode(SnapshotFile snapshotFile, Map<String, FileNode> context) throws FailedConnectionException {
-        super(snapshotFile, context);
-        blob = new SnapshotFileBlob(snapshotFile);
+    public BlobNode(RawFile rawFile, Map<String, FileNode> context) {
+        super(rawFile, context);
+        blob = new RawFileBlob(rawFile);
     }
 
     @Override

@@ -3,9 +3,11 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
 import java.util.Arrays;
@@ -27,8 +29,8 @@ public class WLDataModel implements WriteLatexDataSource {
     }
 
     @Override
-    public boolean repositoryExists(String name) throws FailedConnectionException {
-        SnapshotGetDocRequest snapshotGetDocRequest = new SnapshotGetDocRequest(name);
+    public boolean repositoryExists(String projectName) throws FailedConnectionException {
+        SnapshotGetDocRequest snapshotGetDocRequest = new SnapshotGetDocRequest(projectName);
         snapshotGetDocRequest.request();
         try {
             snapshotGetDocRequest.getResult().getVersionID();
@@ -39,14 +41,15 @@ public class WLDataModel implements WriteLatexDataSource {
     }
 
     @Override
-    public List<WritableRepositoryContents> getWritableRepositories(String name) throws FailedConnectionException, InvalidProjectException {
-        return updateProjectWithName(name);
+    public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException {
+        return updateProjectWithName(projectName);
     }
 
     @Override
-    public void putDirectoryContentsToProjectWithName(String name, RawDirectoryContents directoryContents) throws SnapshotPostException {
-        System.out.println("Pushing project with name: " + name);
-        System.out.println(directoryContents.getFileContentsTable());
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
+        WLDirectoryNode dn = fileStore.createCandidateDirectoryNodeForProjectWithContents(getProjectWithName(projectName), directoryContents);
+        System.out.println("Pushing project with name: " + projectName);
+        System.out.println(dn);
         throw new SnapshotPostException() {
 
             @Override
