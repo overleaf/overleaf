@@ -5,8 +5,8 @@ import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.git.handler.hook.CheckNonFastForwardHook;
-import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
+import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
+import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,14 +16,16 @@ import javax.servlet.http.HttpServletRequest;
 /* */
 public class WLReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
 
-    public WLReceivePackFactory(SnapshotDBAPI snapshotDBAPI) {
+    private final WriteLatexDataSource writeLatexDataSource;
 
+    public WLReceivePackFactory(WriteLatexDataSource writeLatexDataSource) {
+        this.writeLatexDataSource = writeLatexDataSource;
     }
 
     @Override
     public ReceivePack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
         ReceivePack receivePack = new ReceivePack(repository);
-        receivePack.setPreReceiveHook(new CheckNonFastForwardHook());
+        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource));
         return receivePack;
     }
 

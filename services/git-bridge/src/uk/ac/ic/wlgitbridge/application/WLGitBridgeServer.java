@@ -5,7 +5,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
-import uk.ac.ic.wlgitbridge.git.WLGitServlet;
+import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 

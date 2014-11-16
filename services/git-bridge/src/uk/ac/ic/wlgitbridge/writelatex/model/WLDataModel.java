@@ -1,7 +1,9 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
-import uk.ac.ic.wlgitbridge.writelatex.api.SnapshotDBAPI;
+import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
@@ -14,7 +16,7 @@ import java.util.Map;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLDataModel implements SnapshotDBAPI {
+public class WLDataModel implements WriteLatexDataSource {
 
     private final Map<String, WLProject> projects;
     private final WLFileStore fileStore;
@@ -39,6 +41,16 @@ public class WLDataModel implements SnapshotDBAPI {
     @Override
     public List<WritableRepositoryContents> getWritableRepositories(String name) throws FailedConnectionException, InvalidProjectException {
         return updateProjectWithName(name);
+    }
+
+    @Override
+    public CandidateSnapshot createCandidateSnapshot(RawDirectoryContents rawDirectoryContents) {
+        return null;
+    }
+
+    @Override
+    public void approveCandidateSnapshot(CandidateSnapshot candidateSnapshot) {
+
     }
 
     private List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
