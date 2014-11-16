@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
@@ -8,6 +9,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -40,7 +42,30 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
-        dataModel.put(projectName, directoryContents);
+        CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents);
+        throw new SnapshotPostException() {
+
+            @Override
+            public String getMessage() {
+                return "unimplemented";
+            }
+
+            @Override
+            public List<String> getDescriptionLines() {
+                return Arrays.asList("Currently implemented");
+            }
+        };
+    }
+
+    @Override
+    public void expectPostback(String projectName) {
+
+    }
+
+    /* Called by postback thread. */
+    @Override
+    public void postbackReceived(String projectName) {
+
     }
 
 }

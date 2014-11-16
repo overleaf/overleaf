@@ -51,7 +51,7 @@ public class WLFileStore {
         return writableRepositories;
     }
 
-    public WLDirectoryNode createCandidateDirectoryNodeForProjectWithContents(WLProject project, RawDirectoryContents directoryContents) {
+    public WLDirectoryNode createNextDirectoryNodeInProjectFromContents(WLProject project, RawDirectoryContents directoryContents) {
         return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents);
     }
 

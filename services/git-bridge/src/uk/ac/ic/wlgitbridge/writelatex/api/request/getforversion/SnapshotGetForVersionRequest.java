@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 
 import com.google.gson.JsonElement;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.base.HTTPMethod;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
@@ -16,6 +17,11 @@ public class SnapshotGetForVersionRequest extends SnapshotAPIRequest<SnapshotGet
     public SnapshotGetForVersionRequest(String projectName, int versionID) {
         super(projectName, API_CALL + "/" + versionID);
         this.versionID = versionID;
+    }
+
+    @Override
+    protected HTTPMethod httpMethod() {
+        return HTTPMethod.GET;
     }
 
     @Override

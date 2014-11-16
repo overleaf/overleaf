@@ -1,14 +1,15 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.WLDirectoryNodeSnapshot;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Map;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLDataModel {
+public class WLDataModel implements CandidateSnapshotCallback {
 
     private final Map<String, WLProject> projects;
     private final WLFileStore fileStore;
@@ -41,22 +42,16 @@ public class WLDataModel {
         return project;
     }
 
-    public void put(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
-        WLDirectoryNode dn = fileStore.createCandidateDirectoryNodeForProjectWithContents(getProjectWithName(projectName), directoryContents);
-        System.out.println("Pushing project with name: " + projectName);
-        System.out.println(dn);
-        throw new SnapshotPostException() {
+    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
+        return new WLDirectoryNodeSnapshot(getProjectWithName(projectName),
+                                           fileStore.createNextDirectoryNodeInProjectFromContents(getProjectWithName(projectName),
+                                                                                                  directoryContents),
+                                           this);
+    }
 
-            @Override
-            public String getMessage() {
-                return "unimplemented";
-            }
+    @Override
+    public void approveSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
 
-            @Override
-            public List<String> getDescriptionLines() {
-                return Arrays.asList("Not currently implemented");
-            }
-        };
     }
 
 }

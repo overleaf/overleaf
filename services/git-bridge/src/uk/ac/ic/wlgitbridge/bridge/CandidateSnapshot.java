@@ -9,7 +9,9 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 public interface CandidateSnapshot {
 
     public JsonElement getJsonRepresentation();
+    public int getPreviousVersionID();
     public void approveWithVersionID(int versionID);
+    public String getProjectName();
     public WLDirectoryNode getDirectoryNode();
 
 }
