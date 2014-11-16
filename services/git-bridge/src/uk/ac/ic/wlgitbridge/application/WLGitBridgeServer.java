@@ -14,6 +14,7 @@ import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.net.BindException;
 
 /**
@@ -87,7 +88,7 @@ public class WLGitBridgeServer {
 
     private Handler initResourceHandler() {
         ResourceHandler resourceHandler = new ResourceHandler();
-        resourceHandler.setResourceBase(rootGitDirectoryPath);
+        resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;
     }
 
