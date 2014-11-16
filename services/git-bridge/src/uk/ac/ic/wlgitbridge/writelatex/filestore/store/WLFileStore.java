@@ -22,6 +22,17 @@ public class WLFileStore {
     public WLFileStore(String rootGitDirectoryPath) {
         fileStore = new HashMap<String, WLDirectoryNode>();
         rootGitDirectory = new File(rootGitDirectoryPath);
+        rootGitDirectory.mkdirs();
+        deleteInDirectory(rootGitDirectory);
+    }
+
+    public static void deleteInDirectory(File directory) {
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+                deleteInDirectory(file);
+            }
+            file.delete();
+        }
     }
 
     public List<WritableRepositoryContents> updateForProject(WLProject project) throws FailedConnectionException,

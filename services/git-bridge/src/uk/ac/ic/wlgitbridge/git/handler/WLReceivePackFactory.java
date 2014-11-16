@@ -5,8 +5,8 @@ import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 
 import javax.servlet.http.HttpServletRequest;
 

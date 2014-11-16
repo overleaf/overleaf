@@ -1,6 +1,5 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
@@ -9,6 +8,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,13 +44,21 @@ public class WLDataModel implements WriteLatexDataSource {
     }
 
     @Override
-    public CandidateSnapshot createCandidateSnapshot(RawDirectoryContents rawDirectoryContents) {
-        return null;
-    }
+    public void putDirectoryContentsToProjectWithName(String name, RawDirectoryContents directoryContents) throws SnapshotPostException {
+        System.out.println("Pushing project with name: " + name);
+        System.out.println(directoryContents.getFileContentsTable());
+        throw new SnapshotPostException() {
 
-    @Override
-    public void approveCandidateSnapshot(CandidateSnapshot candidateSnapshot) {
+            @Override
+            public String getMessage() {
+                return "unimplemented";
+            }
 
+            @Override
+            public List<String> getDescriptionLines() {
+                return Arrays.asList("Not currently implemented");
+            }
+        };
     }
 
     private List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {

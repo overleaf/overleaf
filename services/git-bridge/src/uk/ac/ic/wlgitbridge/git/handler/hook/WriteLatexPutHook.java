@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.git.handler.hook;
 
-import org.eclipse.jgit.lib.RefUpdate.Result;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.PreReceiveHook;
 import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceivePack;
@@ -8,6 +8,8 @@ import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.writelatex.model.OutOfDateException;
+import uk.ac.ic.wlgitbridge.writelatex.model.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -27,20 +29,28 @@ public class WriteLatexPutHook implements PreReceiveHook {
     public void onPreReceive(ReceivePack receivePack, Collection<ReceiveCommand> receiveCommands) {
         for (ReceiveCommand receiveCommand : receiveCommands) {
             try {
-                handleReceiveCommand(receivePack, receiveCommand);
-            } catch (ForcedPushException e) {
-                receivePack.sendError("You can't do a force push");
-                receiveCommand.setResult(Result.REJECTED);
+                handleReceiveCommand(receivePack.getRepository(), receiveCommand);
             } catch (IOException e) {
                 receivePack.sendError("IOException");
-                receiveCommand.setResult(Result.REJECTED);
+                receiveCommand.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, "I/O Exception");
+            } catch (OutOfDateException e) {
+                receiveCommand.setResult(ReceiveCommand.Result.REJECTED_NONFASTFORWARD);
+            } catch (SnapshotPostException e) {
+                String message = e.getMessage();
+                receivePack.sendError(message);
+                for (String line : e.getDescriptionLines()) {
+                    receivePack.sendMessage("hint: " + line);
+                }
+                receiveCommand.setResult(ReceiveCommand.Result.REJECTED_OTHER_REASON, message);
             }
         }
     }
 
-    private void handleReceiveCommand(ReceivePack receivePack, ReceiveCommand receiveCommand) throws ForcedPushException, IOException {
+    private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws ForcedPushException, IOException, SnapshotPostException {
         checkForcedPush(receiveCommand);
-        RawDirectoryContents directoryContents = getPushedDirectoryContents(receivePack, receiveCommand);
+        writeLatexDataSource.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
+                                                                   getPushedDirectoryContents(repository,
+                                                                                              receiveCommand));
     }
 
     private void checkForcedPush(ReceiveCommand receiveCommand) throws ForcedPushException {
@@ -49,10 +59,10 @@ public class WriteLatexPutHook implements PreReceiveHook {
         }
     }
 
-    private RawDirectoryContents getPushedDirectoryContents(ReceivePack receivePack, ReceiveCommand receiveCommand) throws IOException {
-        return new RepositoryObjectTreeWalker(receivePack.getRepository(),
-                receiveCommand.getNewId())
-                .getDirectoryContents();
+    private RawDirectoryContents getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException {
+        return new RepositoryObjectTreeWalker(repository,
+                                              receiveCommand.getNewId())
+               .getDirectoryContents();
     }
 
 }

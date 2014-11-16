@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 public class WLUploadPackFactory implements UploadPackFactory<HttpServletRequest> {
     @Override
     public UploadPack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
-        return new UploadPack(repository);
+        UploadPack uploadPack = new UploadPack(repository);
+        uploadPack.sendMessage("Downloading files from WriteLatex");
+        return uploadPack;
     }
 }
