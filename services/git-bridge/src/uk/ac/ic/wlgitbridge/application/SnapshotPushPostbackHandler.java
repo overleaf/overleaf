@@ -37,7 +37,8 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
             }
             String data = sb.toString();
             JsonObject dataObj = new Gson().fromJson(data, JsonObject.class);
-            writeLatexDataSource.postbackReceivedSuccessfully(request.getRequestURI().split("/")[0]);
+            System.out.println(request.getRequestURI());
+            writeLatexDataSource.postbackReceivedSuccessfully(request.getRequestURI().split("/")[1]);
             baseRequest.setHandled(true);
         }
     }
