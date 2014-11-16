@@ -57,11 +57,13 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     public void expectPostback(String projectName) {
         Object value = new Object();
         postbackConds.put(projectName, value);
+        System.out.println("sleeping");
         try {
-            value.wait();
+            value.wait(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("finished sleep");
     }
 
     /* Called by postback thread. */

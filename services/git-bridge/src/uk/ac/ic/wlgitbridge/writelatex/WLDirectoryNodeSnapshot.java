@@ -67,6 +67,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
 
     @Override
     public void approveWithVersionID(int versionID) {
+        System.out.println("approve with version " + versionID);
         callback.approveSnapshot(versionID, this);
     }
 
