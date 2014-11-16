@@ -25,7 +25,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
         }
 
         System.out.println(request.getRemoteAddr());
-        System.out.println(request.getLocalAddr());
+        System.out.println(request.getLocalName());
         System.out.println("method: " + request.getMethod());
         System.out.println("pathInfo: " + request.getPathInfo());
         System.out.println("contextPath: " + request.getContextPath());

@@ -43,11 +43,11 @@ public class WLDataModel implements CandidateSnapshotCallback {
         return project;
     }
 
-    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String remoteAddr) throws SnapshotPostException, IOException, FailedConnectionException {
+    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
         return new WLDirectoryNodeSnapshot(getProjectWithName(projectName),
                                            fileStore.createNextDirectoryNodeInProjectFromContents(getProjectWithName(projectName),
                                                                                                   directoryContents),
-                                           remoteAddr,
+                                           hostname,
                                            this);
     }
 

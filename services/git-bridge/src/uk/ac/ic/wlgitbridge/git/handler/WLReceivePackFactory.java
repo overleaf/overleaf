@@ -25,7 +25,7 @@ public class WLReceivePackFactory implements ReceivePackFactory<HttpServletReque
     @Override
     public ReceivePack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
         ReceivePack receivePack = new ReceivePack(repository);
-        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource, httpServletRequest.getRemoteAddr()));
+        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource, httpServletRequest.getLocalName()));
         return receivePack;
     }
 

@@ -43,8 +43,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String remoteAddr) throws SnapshotPostException, IOException, FailedConnectionException {
-        CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, remoteAddr);
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
+        CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
         new SnapshotPushRequest(candidate).request();
         throw new SnapshotPostException() {
 

@@ -20,10 +20,10 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     private final WLDirectoryNode directoryNode;
     private final CandidateSnapshotCallback callback;
 
-    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String remoteAddr, CandidateSnapshotCallback callback) {
+    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, CandidateSnapshotCallback callback) {
         previousVersionID = project.getLatestSnapshot().getVersionID();
         projectName = project.getName();
-        projectURL = "http://" + remoteAddr + "/" + projectName;
+        projectURL = "http://" + hostname + "/" + projectName;
         this.directoryNode = directoryNode;
         this.callback = callback;
         System.out.println(getJsonRepresentation());

@@ -22,11 +22,11 @@ import java.util.Collection;
 public class WriteLatexPutHook implements PreReceiveHook {
 
     private final WriteLatexDataSource writeLatexDataSource;
-    private final String remoteAddr;
+    private final String hostname;
 
-    public WriteLatexPutHook(WriteLatexDataSource writeLatexDataSource, String remoteAddr) {
+    public WriteLatexPutHook(WriteLatexDataSource writeLatexDataSource, String hostname) {
         this.writeLatexDataSource = writeLatexDataSource;
-        this.remoteAddr = remoteAddr;
+        this.hostname = hostname;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
         writeLatexDataSource.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
                                                                    getPushedDirectoryContents(repository,
                                                                                               receiveCommand),
-                                                                   remoteAddr);
+                                                                   hostname);
     }
 
     private void checkForcedPush(ReceiveCommand receiveCommand) throws ForcedPushException {
