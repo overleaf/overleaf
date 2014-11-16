@@ -24,14 +24,15 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
             System.out.println(request.getHeaderNames());
         }
 
-//        System.out.println(request.getRemoteAddr());
-//        System.out.println("method: " + request.getMethod());
-//        System.out.println("pathInfo: " + request.getPathInfo());
-//        System.out.println("contextPath: " + request.getContextPath());
-//        System.out.println("pathtranslated: " + request.getPathTranslated());
-//        System.out.println("queryString: " + request.getQueryString());
-//        System.out.println("remoteUser: " + request.getRemoteUser());
-//        System.out.println("requestURI: " + request.getRequestURI());
+        System.out.println(request.getRemoteAddr());
+        System.out.println(request.getLocalAddr());
+        System.out.println("method: " + request.getMethod());
+        System.out.println("pathInfo: " + request.getPathInfo());
+        System.out.println("contextPath: " + request.getContextPath());
+        System.out.println("pathtranslated: " + request.getPathTranslated());
+        System.out.println("queryString: " + request.getQueryString());
+        System.out.println("remoteUser: " + request.getRemoteUser());
+        System.out.println("requestURI: " + request.getRequestURI());
 //                response.getWriter().println("<h1>Hello World</h1>");
     }
 
