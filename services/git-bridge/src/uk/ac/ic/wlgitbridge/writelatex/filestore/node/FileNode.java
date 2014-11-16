@@ -16,7 +16,7 @@ import java.util.Map;
 public abstract class FileNode {
 
     private final String filePath;
-    private final boolean unchanged;
+    private final boolean changed;
 
     public FileNode(RawFile file, Map<String, FileNode> context) {
         this(file.getPath(), context);
@@ -25,11 +25,15 @@ public abstract class FileNode {
     public FileNode(String filePath, Map<String, FileNode> context) {
         this.filePath = filePath;
         FileNode currentFileNode = context.get(filePath);
-        unchanged = currentFileNode != null && equals(currentFileNode);
+        changed = currentFileNode == null || !equals(currentFileNode);
     }
 
     public String getFilePath() {
         return filePath;
+    }
+
+    public boolean isChanged() {
+        return changed;
     }
 
     public byte[] getContents() throws FailedConnectionException {
@@ -56,7 +60,7 @@ public abstract class FileNode {
 
     @Override
     public String toString() {
-        return String.valueOf(unchanged);
+        return String.valueOf(changed);
     }
 
 }

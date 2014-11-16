@@ -7,8 +7,10 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,8 +43,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException, IOException, FailedConnectionException {
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents);
+        new SnapshotPushRequest(candidate);
         throw new SnapshotPostException() {
 
             @Override

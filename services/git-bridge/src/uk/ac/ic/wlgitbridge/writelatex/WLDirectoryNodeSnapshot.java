@@ -1,8 +1,11 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
@@ -21,11 +24,33 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         projectName = project.getName();
         this.directoryNode = directoryNode;
         this.callback = callback;
+        System.out.println(getJsonRepresentation());
     }
 
     @Override
     public JsonElement getJsonRepresentation() {
-        return null;
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("latestVerId", previousVersionID);
+        jsonObject.add("files", getFilesAsJson());
+        jsonObject.addProperty("postbackUrl", "wsomewhere");
+        return jsonObject;
+    }
+
+    private JsonArray getFilesAsJson() {
+        JsonArray filesArray = new JsonArray();
+        for (FileNode fileNode : directoryNode.getFileNodes()) {
+            filesArray.add(getFileAsJson(fileNode));
+        }
+        return filesArray;
+    }
+
+    private JsonObject getFileAsJson(FileNode fileNode) {
+        JsonObject file = new JsonObject();
+        file.addProperty("name", fileNode.getFilePath());
+        if (fileNode.isChanged()) {
+            file.addProperty("url", "url");
+        }
+        return file;
     }
 
     @Override

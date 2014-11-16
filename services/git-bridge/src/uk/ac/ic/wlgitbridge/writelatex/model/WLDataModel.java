@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionExc
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class WLDataModel implements CandidateSnapshotCallback {
         return project;
     }
 
-    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException {
+    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents) throws SnapshotPostException, IOException, FailedConnectionException {
         return new WLDirectoryNodeSnapshot(getProjectWithName(projectName),
                                            fileStore.createNextDirectoryNodeInProjectFromContents(getProjectWithName(projectName),
                                                                                                   directoryContents),

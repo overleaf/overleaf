@@ -8,6 +8,8 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,16 +21,22 @@ import java.util.Map.Entry;
  */
 public class WLDirectoryNode {
 
+    private final String projectName;
     private Map<String, FileNode> fileNodeTable;
     private FileIndexStore fileIndexStore;
 
-    public WLDirectoryNode() {
-        this(new HashMap<String, FileNode>(), new FileIndexStore());
+    public WLDirectoryNode(String projectName) {
+        this(projectName, new HashMap<String, FileNode>(), new FileIndexStore());
     }
 
-    public WLDirectoryNode(Map<String, FileNode> fileNodeTable, FileIndexStore fileIndexStore) {
+    public WLDirectoryNode(String projectName, Map<String, FileNode> fileNodeTable, FileIndexStore fileIndexStore) {
+        this.projectName = projectName;
         this.fileNodeTable = fileNodeTable;
         this.fileIndexStore = fileIndexStore;
+    }
+
+    public List<FileNode> getFileNodes() {
+        return new LinkedList<FileNode>(fileNodeTable.values());
     }
 
     public List<FileNode> updateFromSnapshot(Snapshot snapshot) throws FailedConnectionException {
@@ -49,13 +57,13 @@ public class WLDirectoryNode {
         return fileNodes;
     }
 
-    public WLDirectoryNode createFromRawDirectoryContents(RawDirectoryContents rawDirectoryContents) {
+    public WLDirectoryNode createFromRawDirectoryContents(RawDirectoryContents rawDirectoryContents, File attachmentDirectory) throws IOException, FailedConnectionException {
         Map<String, FileNode> candidateFileNodeTable = new HashMap<String, FileNode>();
         for (Entry<String, byte[]> fileContents : rawDirectoryContents.getFileContentsTable().entrySet()) {
-            BlobNode blobNode = new BlobNode(new RepositoryFile(fileContents), fileNodeTable);
+            BlobNode blobNode = new BlobNode(new RepositoryFile(fileContents), fileNodeTable, new File(attachmentDirectory, projectName));
             candidateFileNodeTable.put(blobNode.getFilePath(), blobNode);
         }
-        return new WLDirectoryNode(candidateFileNodeTable,
+        return new WLDirectoryNode(projectName, candidateFileNodeTable,
                                    new FileIndexStore(new LinkedList<FileNode>(candidateFileNodeTable.values())));
     }
 

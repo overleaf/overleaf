@@ -1,10 +1,14 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.RawFileBlob;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -19,6 +23,11 @@ public class BlobNode extends FileNode {
         blob = new RawFileBlob(rawFile);
     }
 
+    public BlobNode(RepositoryFile repositoryFile, Map<String, FileNode> fileNodeTable, File projectAttDirectory) throws IOException, FailedConnectionException {
+        this(repositoryFile, fileNodeTable);
+        writeChanged(projectAttDirectory);
+    }
+
     @Override
     public void handleIndexer(FileNodeIndexer fileNodeIndexer) {
         fileNodeIndexer.index(this);
@@ -27,6 +36,12 @@ public class BlobNode extends FileNode {
     @Override
     protected Blob getBlob() {
         return blob;
+    }
+
+    private void writeChanged(File projectAttDirectory) throws FailedConnectionException, IOException {
+        if (isChanged()) {
+            writeToDisk(projectAttDirectory);
+        }
     }
 
 }

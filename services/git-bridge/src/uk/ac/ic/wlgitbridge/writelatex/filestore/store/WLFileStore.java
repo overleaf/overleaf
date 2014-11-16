@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,12 +20,15 @@ public class WLFileStore {
 
     private final Map<String, WLDirectoryNode> fileStore;
     private final File rootGitDirectory;
+    private final File attDirectory;
 
     public WLFileStore(String rootGitDirectoryPath) {
         fileStore = new HashMap<String, WLDirectoryNode>();
         rootGitDirectory = new File(rootGitDirectoryPath);
         rootGitDirectory.mkdirs();
         deleteInDirectory(rootGitDirectory);
+        attDirectory = new File(rootGitDirectory, ".wlgb/atts");
+        attDirectory.mkdirs();
     }
 
     public static void deleteInDirectory(File directory) {
@@ -51,14 +55,14 @@ public class WLFileStore {
         return writableRepositories;
     }
 
-    public WLDirectoryNode createNextDirectoryNodeInProjectFromContents(WLProject project, RawDirectoryContents directoryContents) {
-        return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents);
+    public WLDirectoryNode createNextDirectoryNodeInProjectFromContents(WLProject project, RawDirectoryContents directoryContents) throws IOException, FailedConnectionException {
+        return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents, attDirectory);
     }
 
     private WLDirectoryNode getDirectoryNodeForProjectName(String projectName) {
         WLDirectoryNode directoryNode = fileStore.get(projectName);
         if (directoryNode == null) {
-            directoryNode = new WLDirectoryNode();
+            directoryNode = new WLDirectoryNode(projectName);
             fileStore.put(projectName, directoryNode);
         }
         return directoryNode;
