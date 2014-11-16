@@ -10,6 +10,7 @@ import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
+import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import javax.servlet.ServletException;
@@ -78,7 +79,7 @@ public class WLGitBridgeServer {
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, new WLDataModel(rootGitDirectoryPath), rootGitDirectoryPath)),
+                        new WLGitServlet(servletContextHandler, new WriteLatexAPI(new WLDataModel(rootGitDirectoryPath)), rootGitDirectoryPath)),
                 "/*"
         );
         return servletContextHandler;
