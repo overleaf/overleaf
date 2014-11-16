@@ -20,6 +20,11 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
 //                response.setContentType("text/html;charset=utf-8");
 //                response.setStatus(HttpServletResponse.SC_OK);
         baseRequest.setHandled(false);
+        if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
+            System.out.println(request.getHeaderNames());
+        }
+
+//        System.out.println(request.getRemoteAddr());
 //        System.out.println("method: " + request.getMethod());
 //        System.out.println("pathInfo: " + request.getPathInfo());
 //        System.out.println("contextPath: " + request.getContextPath());

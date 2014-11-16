@@ -16,12 +16,14 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
 
     private final int previousVersionID;
     private final String projectName;
+    private final String projectURL;
     private final WLDirectoryNode directoryNode;
     private final CandidateSnapshotCallback callback;
 
-    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, CandidateSnapshotCallback callback) {
+    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String remoteAddr, CandidateSnapshotCallback callback) {
         previousVersionID = project.getLatestSnapshot().getVersionID();
         projectName = project.getName();
+        projectURL = "http://" + remoteAddr + "/" + projectName;
         this.directoryNode = directoryNode;
         this.callback = callback;
         System.out.println(getJsonRepresentation());
@@ -32,7 +34,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("latestVerId", previousVersionID);
         jsonObject.add("files", getFilesAsJson());
-        jsonObject.addProperty("postbackUrl", "wsomewhere");
+        jsonObject.addProperty("postbackUrl", projectURL + "/postback");
         return jsonObject;
     }
 
@@ -48,7 +50,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         JsonObject file = new JsonObject();
         file.addProperty("name", fileNode.getFilePath());
         if (fileNode.isChanged()) {
-            file.addProperty("url", "url");
+            file.addProperty("url", projectURL + "/" + fileNode.getFilePath());
         }
         return file;
     }
@@ -56,6 +58,11 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     @Override
     public int getPreviousVersionID() {
         return previousVersionID;
+    }
+
+    @Override
+    public String getProjectURL() {
+        return projectURL;
     }
 
     @Override
