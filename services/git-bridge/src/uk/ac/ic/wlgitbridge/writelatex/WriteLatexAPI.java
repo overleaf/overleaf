@@ -23,6 +23,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     private final WLDataModel dataModel;
     private final Map<String, Object> postbackConds;
 
+    boolean cond = false;
+
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
         postbackConds = new HashMap<String, Object>();
@@ -57,9 +59,12 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     public void expectPostback(String projectName) {
         Object value = new Object();
         postbackConds.put(projectName, value);
+        cond = false;
         System.out.println("sleeping");
         try {
-            value.wait(5000);
+            while (!cond) {
+                wait();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -70,7 +75,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     @Override
     public void postbackReceivedSuccessfully(String projectName) {
         System.out.println("successfully received postback for " + projectName);
-        postbackConds.get(projectName).notifyAll();
+        cond = true;
+        notifyAll();
     }
 
     @Override
