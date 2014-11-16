@@ -67,7 +67,7 @@ public abstract class Request<T extends Result> {
     }
 
     private void performPostRequest() {
-        request(new AsyncHttpClient().preparePost(url).setBody(getPostBody()));
+        request(new AsyncHttpClient().preparePost(url).setBody(getPostBody()).setHeader("Content-Type", "application/json"));
     }
 
     private void request(BoundRequestBuilder boundRequestBuilder) {
