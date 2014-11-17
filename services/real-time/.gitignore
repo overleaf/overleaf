@@ -1,4 +1,5 @@
 node_modules
+forever
 app.js
 app/js
 test/unit/js
