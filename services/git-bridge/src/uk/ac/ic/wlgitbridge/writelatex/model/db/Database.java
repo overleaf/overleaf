@@ -1,5 +1,8 @@
 package uk.ac.ic.wlgitbridge.writelatex.model.db;
 
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
+import uk.ac.ic.wlgitbridge.writelatex.model.WLProjectStore;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,9 +11,12 @@ import java.sql.Statement;
 /**
  * Created by Winston on 17/11/14.
  */
-public class Database {
+public class Database implements WLDatabase {
+
+    private final File rootGitDirectory;
 
     public Database(File rootGitDirectory) {
+        this.rootGitDirectory = rootGitDirectory;
         File databaseFile = new File(rootGitDirectory, "/.wlgb/wlgb.db");
         System.out.println("Loading data...");
         Connection c = null;
@@ -33,6 +39,16 @@ public class Database {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             System.exit(0);
         }
+    }
+
+    @Override
+    public WLProjectStore loadProjectStore() {
+        return new WLProjectStore();
+    }
+
+    @Override
+    public WLFileStore loadFileStore() {
+        return new WLFileStore(rootGitDirectory);
     }
 
 }

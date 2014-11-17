@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProje
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.Database;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.WLDatabase;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,15 +21,15 @@ import java.util.List;
  */
 public class WLDataModel implements CandidateSnapshotCallback {
 
-    private final Database db;
+    private final WLDatabase db;
     private final WLProjectStore projectStore;
     private final WLFileStore fileStore;
 
     public WLDataModel(String rootGitDirectoryPath) {
         File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
         db = new Database(rootGitDirectory);
-        projectStore = new WLProjectStore();
-        fileStore = new WLFileStore(rootGitDirectory);
+        projectStore = db.loadProjectStore();
+        fileStore = db.loadFileStore();
     }
 
     public List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
