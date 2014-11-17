@@ -33,12 +33,7 @@ public class WLFileStore {
     }
 
     public static void deleteInDirectory(File directory) {
-        for (File file : directory.listFiles()) {
-            if (file.isDirectory()) {
-                deleteInDirectory(file);
-            }
-            file.delete();
-        }
+        deleteInDirectoryApartFrom(directory);
     }
 
     public static void deleteInDirectoryApartFrom(File directory, String... apartFrom) {
