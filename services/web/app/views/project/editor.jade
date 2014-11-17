@@ -80,7 +80,8 @@ block content
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
-		window.project_id = "!{project_id}"
+		window.project_id = "!{project_id}";
+		window.websocketsUrl = "!{settings.websocketsUrl}";
 		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
 		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
