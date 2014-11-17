@@ -38,6 +38,7 @@ module.exports = WebsocketController =
 			client.set("login_count", user?.loginCount)
 			
 			callback null, project, privilegeLevel, WebsocketController.PROTOCOL_VERSION
+			logger.log {user_id, project_id, client_id: client.id}, "user joined project"
 			
 			# No need to block for setting the user as connected in the cursor tracking
 			ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, () ->
@@ -72,13 +73,12 @@ module.exports = WebsocketController =
 			
 	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
+			return callback(error) if error?
+			return callback(new Error("no project_id found on client")) if !project_id?
 			logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joining doc"
 					
-		AuthorizationManager.assertClientCanViewProject client, (error) ->
-			return callback(error) if error?
-			client.get "project_id", (error, project_id) ->
+			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				return callback(new Error("no project_id found on client")) if !project_id?
 				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ops) ->
 					return callback(error) if error?
 					# Encode any binary bits of data so it can go via WebSockets
@@ -93,6 +93,7 @@ module.exports = WebsocketController =
 						escapedLines.push line
 					client.join(doc_id)
 					callback null, escapedLines, version, ops
+					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 					
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
@@ -128,29 +129,31 @@ module.exports = WebsocketController =
 		
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
-			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
-			
-		AuthorizationManager.assertClientCanViewProject client, (error) ->
 			return callback(error) if error?
-			client.get "project_id", (error, project_id) ->
+			return callback(new Error("no project_id found on client")) if !project_id?
+			logger.log {user_id, project_id, client_id: client.id}, "getting connected users"
+			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				return callback(new Error("no project_id found on client")) if !project_id?
 				ConnectedUsersManager.getConnectedUsers project_id, (error, users) ->
 					return callback(error) if error?
 					callback null, users
+					logger.log {user_id, project_id, client_id: client.id}, "got connected users"
+					
 
 	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
-		AuthorizationManager.assertClientCanEditProject client, (error) ->
-			if error?
-				logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
-				setTimeout () ->
-					# Disconnect, but give the client the chance to receive the error
-					client.disconnect()
-				, 100
-				return callback(error)
-			
-			Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
-				return callback(error) if error?
+		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
+			return callback(error) if error?
+			return callback(new Error("no project_id found on client")) if !project_id?
+			# Omit this logging for now since it's likely too noisey
+			#logger.log {user_id, project_id, doc_id, client_id: client.id, update: update}, "applying update"
+			AuthorizationManager.assertClientCanEditProject client, (error) ->
+				if error?
+					logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
+					setTimeout () ->
+						# Disconnect, but give the client the chance to receive the error
+						client.disconnect()
+					, 100
+					return callback(error)
 				update.meta ||= {}
 				update.meta.source = client.id
 				update.meta.user_id = user_id
@@ -165,3 +168,4 @@ module.exports = WebsocketController =
 						logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "document was not available for update"
 						client.disconnect()
 					callback(error)
+					#logger.log {user_id, project_id, doc_id, client_id: client.id}, "applied update"
