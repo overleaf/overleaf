@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -30,6 +31,15 @@ public class Snapshot implements Comparable<Snapshot> {
 
         srcs = data.getSrcs();
         atts = data.getAtts();
+    }
+
+    public Snapshot(int versionID) {
+        this.versionID = versionID;
+        comment = "Pushed update";
+        userName = "Anonymous";
+        userEmail = "anonymous@writelatex.com";
+        srcs = new LinkedList<SnapshotFile>();
+        atts = new LinkedList<SnapshotAttachment>();
     }
 
     public int getVersionID() {

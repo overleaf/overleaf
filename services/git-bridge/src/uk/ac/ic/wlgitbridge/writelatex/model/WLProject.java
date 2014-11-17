@@ -40,7 +40,7 @@ public class WLProject {
     }
 
     public void putLatestSnapshot(int versionID) {
-        snapshots.put(versionID, null);
+        snapshots.put(versionID, new Snapshot(versionID));
         snapshotFetcher.putLatestVersion(versionID);
         latestSnapshotID = versionID;
     }
