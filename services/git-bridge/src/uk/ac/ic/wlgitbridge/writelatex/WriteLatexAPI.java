@@ -13,9 +13,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackExcept
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Winston on 16/11/14.
@@ -24,8 +22,6 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     private final WLDataModel dataModel;
     private final PostbackManager postbackManager;
-
-    boolean cond = false;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
