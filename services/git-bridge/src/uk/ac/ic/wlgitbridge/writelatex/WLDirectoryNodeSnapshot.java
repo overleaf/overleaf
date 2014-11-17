@@ -26,7 +26,6 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         projectURL = "http://" + hostname + "/" + projectName;
         this.directoryNode = directoryNode;
         this.callback = callback;
-        System.out.println(getJsonRepresentation());
     }
 
     @Override
@@ -67,7 +66,6 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
 
     @Override
     public void approveWithVersionID(int versionID) {
-        System.out.println("approve with version " + versionID);
         callback.approveSnapshot(versionID, this);
     }
 

@@ -45,12 +45,15 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     @Override
     public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException {
+        System.out.println("Fetching project: " + projectName);
         return dataModel.updateProjectWithName(projectName);
     }
 
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
+        System.out.println("Pushing project: " + projectName);
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
+        System.out.println(candidate.getJsonRepresentation());
         SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
         snapshotPushRequest.request();
         SnapshotPushRequestResult result = snapshotPushRequest.getResult();

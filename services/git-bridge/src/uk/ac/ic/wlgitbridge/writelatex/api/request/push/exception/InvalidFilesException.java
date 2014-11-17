@@ -11,6 +11,11 @@ import java.util.List;
  */
 public class InvalidFilesException extends SnapshotPostException {
 
+    private static final String[] DESCRIPTION_LINES = {
+            "You have invalid files in your WriteLatex project.",
+            "Check your extensions."
+    };
+
     public InvalidFilesException(JsonObject json) {
         super(json);
     }
@@ -22,7 +27,7 @@ public class InvalidFilesException extends SnapshotPostException {
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList("invalid files, change ext or something");
+        return Arrays.asList(DESCRIPTION_LINES);
     }
 
     @Override

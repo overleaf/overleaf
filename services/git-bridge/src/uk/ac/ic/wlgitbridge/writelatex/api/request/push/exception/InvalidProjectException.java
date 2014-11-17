@@ -10,6 +10,11 @@ import java.util.List;
  */
 public class InvalidProjectException extends SnapshotPostException {
 
+    private static final String[] DESCRIPTION_LINES = {
+            "Your WriteLatex project is too big.",
+            "Delete some files and try again.."
+    };
+
     public InvalidProjectException(JsonElement jsonElement) {
         super(jsonElement);
     }
@@ -21,7 +26,7 @@ public class InvalidProjectException extends SnapshotPostException {
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList("your project is too big");
+        return Arrays.asList(DESCRIPTION_LINES);
     }
 
     @Override

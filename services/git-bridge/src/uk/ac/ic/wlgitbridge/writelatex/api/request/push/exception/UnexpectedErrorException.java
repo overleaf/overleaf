@@ -11,18 +11,23 @@ import java.util.List;
  */
 public class UnexpectedErrorException extends SnapshotPostException {
 
+    private static final String[] DESCRIPTION_LINES = {
+            "There was an internal error with the WriteLatex server.",
+            "Please contact WriteLatex."
+    };
+
     public UnexpectedErrorException(JsonObject json) {
         super(json);
     }
 
     @Override
     public String getMessage() {
-        return "unexpected error";
+        return "writelatex error";
     }
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList("writelatex error");
+        return Arrays.asList(DESCRIPTION_LINES);
     }
 
     @Override
