@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachm
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
@@ -59,8 +60,10 @@ public class WLDirectoryNode {
 
     public WLDirectoryNode createFromRawDirectoryContents(RawDirectoryContents rawDirectoryContents, File attachmentDirectory) throws IOException, FailedConnectionException {
         Map<String, FileNode> candidateFileNodeTable = new HashMap<String, FileNode>();
+        File projectAttDirectory = new File(attachmentDirectory, projectName);
+        WLFileStore.deleteInDirectory(projectAttDirectory);
         for (Entry<String, byte[]> fileContents : rawDirectoryContents.getFileContentsTable().entrySet()) {
-            BlobNode blobNode = new BlobNode(new RepositoryFile(fileContents), fileNodeTable, new File(attachmentDirectory, projectName));
+            BlobNode blobNode = new BlobNode(new RepositoryFile(fileContents), fileNodeTable, projectAttDirectory);
             candidateFileNodeTable.put(blobNode.getFilePath(), blobNode);
         }
         return new WLDirectoryNode(projectName, candidateFileNodeTable,

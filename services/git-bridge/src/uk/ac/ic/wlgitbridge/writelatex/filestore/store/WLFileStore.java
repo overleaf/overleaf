@@ -41,9 +41,10 @@ public class WLFileStore {
         }
     }
 
-    public static void deleteInDirectoryApartFrom(File directory, String apartFrom) {
+    public static void deleteInDirectoryApartFrom(File directory, String... apartFrom) {
+        Set<String> excluded = new HashSet<String>(Arrays.asList(apartFrom));
         for (File file : directory.listFiles()) {
-            if (!file.getName().equals(apartFrom)) {
+            if (!excluded.contains(file.getName())) {
                 if (file.isDirectory()) {
                     deleteInDirectory(file);
                 }
