@@ -33,6 +33,10 @@ describe 'WebsocketController', ->
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"metrics-sharelatex": @metrics =
+				inc: sinon.stub()
+				set: sinon.stub()
+				
 	
 	afterEach ->
 		tk.reset()
@@ -99,6 +103,9 @@ describe 'WebsocketController', ->
 				@ConnectedUsersManager.updateUserPosition
 					.calledWith(@project_id, @client.id, @user, null)
 					.should.equal true
+					
+			it "should increment the join-project metric", ->
+				@metrics.inc.calledWith("editor.join-project").should.equal true
 				
 		describe "when not authorized", ->
 			beforeEach ->
@@ -151,6 +158,9 @@ describe 'WebsocketController', ->
 				@TrackChangesManager.flushProject
 					.calledWith(@project_id)
 					.should.equal true
+					
+			it "should increment the leave-project metric", ->
+				@metrics.inc.calledWith("editor.leave-project").should.equal true
 			
 		describe "when the project is not empty", ->
 			beforeEach ->
@@ -202,6 +212,9 @@ describe 'WebsocketController', ->
 					.calledWith(null, @doc_lines, @version, @ops)
 					.should.equal true
 					
+			it "should increment the join-doc metric", ->
+				@metrics.inc.calledWith("editor.join-doc").should.equal true
+					
 		describe "with doclines that need escaping", ->
 			beforeEach ->
 				@doc_lines.push ["räksmörgås"]
@@ -238,6 +251,9 @@ describe 'WebsocketController', ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 			
+		it "should increment the leave-doc metric", ->
+			@metrics.inc.calledWith("editor.leave-doc").should.equal true
+			
 	describe "getConnectedUsers", ->
 		beforeEach ->
 			@client.params.project_id = @project_id
@@ -261,6 +277,9 @@ describe 'WebsocketController', ->
 					
 			it "should return the users", ->
 				@callback.calledWith(null, @users).should.equal true
+				
+			it "should increment the get-connected-users metric", ->
+				@metrics.inc.calledWith("editor.get-connected-users").should.equal true
 			
 		describe "when not authorized", ->
 			beforeEach ->
@@ -321,6 +340,9 @@ describe 'WebsocketController', ->
 					doc_id: @doc_id
 				}).should.equal true
 				done()
+				
+			it "should increment the update-client-position metric at 0.1 frequency", ->
+				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
 
 		describe "with an anonymous user", ->
 			beforeEach ->
@@ -371,14 +393,14 @@ describe 'WebsocketController', ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-			# it "should update the active users metric", ->
-			# 	@metrics.set.calledWith("editor.active-users", @user_id).should.equal true
-			# 
-			# it "should update the active projects metric", ->
-			# 	@metrics.set.calledWith("editor.active-projects", @project_id).should.equal true
-			# 
-			# it "should increment the doc updates", ->
-			# 	@metrics.inc.calledWith("editor.doc-update").should.equal true
+			it "should update the active users metric", ->
+				@metrics.set.calledWith("editor.active-users", @user_id).should.equal true
+			
+			it "should update the active projects metric", ->
+				@metrics.set.calledWith("editor.active-projects", @project_id).should.equal true
+			
+			it "should increment the doc updates", ->
+				@metrics.inc.calledWith("editor.doc-update").should.equal true
 
 		describe "unsuccessfully", ->
 			beforeEach ->

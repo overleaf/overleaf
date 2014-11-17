@@ -1,4 +1,5 @@
 logger = require "logger-sharelatex"
+metrics = require "metrics-sharelatex"
 WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
@@ -16,6 +17,7 @@ module.exports = WebsocketController =
 	joinProject: (client, user, project_id, callback = (error, project, privilegeLevel, protocolVersion) ->) ->
 		user_id = user?._id
 		logger.log {user_id, project_id, client_id: client.id}, "user joining project"
+		metrics.inc "editor.join-project"
 		WebApiManager.joinProject project_id, user_id, (error, project, privilegeLevel) ->
 			return callback(error) if error?
 
@@ -48,6 +50,7 @@ module.exports = WebsocketController =
 	# is determined by FLUSH_IF_EMPTY_DELAY.
 	FLUSH_IF_EMPTY_DELAY: 500 #ms		
 	leaveProject: (io, client, callback = (error) ->) ->
+		metrics.inc "editor.leave-project"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
 			logger.log {project_id, user_id, client_id: client.id}, "client leaving project"
@@ -72,6 +75,7 @@ module.exports = WebsocketController =
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 			
 	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
+		metrics.inc "editor.join-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
@@ -96,12 +100,14 @@ module.exports = WebsocketController =
 					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 					
 	leaveDoc: (client, doc_id, callback = (error) ->) ->
+		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
 		client.leave doc_id
 		callback()
 		
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
+		metrics.inc "editor.update-client-position", 0.1
 		Utils.getClientAttributes client, [
 			"project_id", "first_name", "last_name", "email", "user_id"
 		], (error, {project_id, first_name, last_name, email, user_id}) ->
@@ -128,6 +134,7 @@ module.exports = WebsocketController =
 			WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 		
 	getConnectedUsers: (client, callback = (error, users) ->) ->
+		metrics.inc "editor.get-connected-users"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
@@ -157,9 +164,9 @@ module.exports = WebsocketController =
 				update.meta ||= {}
 				update.meta.source = client.id
 				update.meta.user_id = user_id
-				# metrics.inc "editor.doc-update", 0.3
-				# metrics.set "editor.active-projects", project_id, 0.3
-				# metrics.set "editor.active-users", user_id, 0.3
+				metrics.inc "editor.doc-update", 0.3
+				metrics.set "editor.active-projects", project_id, 0.3
+				metrics.set "editor.active-users", user_id, 0.3
 
 				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v}, "sending update to doc updater"
 

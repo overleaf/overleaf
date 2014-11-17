@@ -1,4 +1,4 @@
-Metrics = require "metrics-sharelatex"
+metrics = require "metrics-sharelatex"
 logger = require "logger-sharelatex"
 WebsocketController = require "./WebsocketController"
 HttpController = require "./HttpController"
@@ -26,7 +26,7 @@ module.exports = Router =
 				client?.disconnect()
 				return
 			
-			Metrics.inc('socket-io.connection')
+			metrics.inc('socket-io.connection')
 			
 			logger.log session: session, client_id: client.id, "client connected"
 			
@@ -44,6 +44,7 @@ module.exports = Router =
 						callback(null, args...)
 						
 			client.on "disconnect", () ->
+				metrics.inc('socket-io.disconnect')
 				WebsocketController.leaveProject io, client, (err) ->
 					if err?
 						Router._handleError null, err, client, "leaveProject"
