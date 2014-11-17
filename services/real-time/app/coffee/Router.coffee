@@ -20,6 +20,9 @@ module.exports = Router =
 		app.get "/clients", HttpController.getConnectedClients
 		app.get "/clients/:client_id", HttpController.getConnectedClient
 		
+		app.get "/status", (req, res, next) ->
+			res.send "real-time-sharelatex is alive"
+		
 		session.on 'connection', (error, client, session) ->
 			if error?
 				logger.err err: error, "error when client connected"
