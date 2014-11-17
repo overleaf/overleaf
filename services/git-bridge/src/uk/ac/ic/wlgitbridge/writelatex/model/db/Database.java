@@ -11,12 +11,13 @@ import java.sql.Statement;
 public class Database {
 
     public Database(File rootGitDirectory) {
+        File databaseFile = new File(rootGitDirectory, "/.wlgb/wlgb.db");
         System.out.println("Loading data...");
         Connection c = null;
         Statement stmt = null;
         try {
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:" + rootGitDirectory.getAbsolutePath() + "/.wlgb/wlgb.db");
+            c = DriverManager.getConnection("jdbc:sqlite:" + databaseFile.getAbsolutePath());
 
             stmt = c.createStatement();
             String sql = "CREATE TABLE IF NOT EXISTS COMPANY " +

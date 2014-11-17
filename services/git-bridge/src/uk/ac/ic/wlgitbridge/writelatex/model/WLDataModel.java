@@ -13,9 +13,7 @@ import uk.ac.ic.wlgitbridge.writelatex.model.db.Database;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Winston on 06/11/14.
@@ -23,13 +21,13 @@ import java.util.Map;
 public class WLDataModel implements CandidateSnapshotCallback {
 
     private final Database db;
-    private final Map<String, WLProject> projects;
+    private final WLProjectStore projectStore;
     private final WLFileStore fileStore;
 
     public WLDataModel(String rootGitDirectoryPath) {
         File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
         db = new Database(rootGitDirectory);
-        projects = new HashMap<String, WLProject>();
+        projectStore = new WLProjectStore();
         fileStore = new WLFileStore(rootGitDirectory);
     }
 
@@ -38,14 +36,7 @@ public class WLDataModel implements CandidateSnapshotCallback {
     }
 
     public WLProject getProjectWithName(String name) {
-        WLProject project;
-        if (projects.containsKey(name)) {
-            project = projects.get(name);
-        } else {
-            project = new WLProject(name);
-            projects.put(name, project);
-        }
-        return project;
+        return projectStore.getProjectWithName(name);
     }
 
     public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
