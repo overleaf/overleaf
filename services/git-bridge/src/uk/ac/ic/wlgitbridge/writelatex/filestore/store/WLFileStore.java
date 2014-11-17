@@ -41,6 +41,17 @@ public class WLFileStore {
         }
     }
 
+    public static void deleteInDirectoryApartFrom(File directory, String apartFrom) {
+        for (File file : directory.listFiles()) {
+            if (!file.getName().equals(apartFrom)) {
+                if (file.isDirectory()) {
+                    deleteInDirectory(file);
+                }
+                file.delete();
+            }
+        }
+    }
+
     public List<WritableRepositoryContents> updateForProject(WLProject project) throws FailedConnectionException,
                                                                                        InvalidProjectException {
         SortedSet<Snapshot> snapshots = project.fetchNewSnapshots();

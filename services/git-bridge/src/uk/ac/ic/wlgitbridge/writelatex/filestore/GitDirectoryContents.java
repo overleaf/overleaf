@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
 
     @Override
     public void write() throws IOException, FailedConnectionException {
+        WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git");
         for (FileNode fileNode : fileNodes) {
             fileNode.writeToDisk(gitDirectory);
         }
