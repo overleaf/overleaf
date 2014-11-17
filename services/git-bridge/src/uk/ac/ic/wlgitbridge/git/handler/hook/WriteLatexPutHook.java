@@ -49,6 +49,8 @@ public class WriteLatexPutHook implements PreReceiveHook {
                     receivePack.sendMessage("hint: " + line);
                 }
                 receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
+            } catch (Throwable t) {
+                t.printStackTrace();
             }
         }
     }
