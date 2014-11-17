@@ -5,7 +5,7 @@ HttpController = require "./HttpController"
 Utils = require "./Utils"
 
 module.exports = Router =
-	_handleError: (callback, error, client, method, extraAttrs = {}) ->
+	_handleError: (callback = ((error) ->), error, client, method, extraAttrs = {}) ->
 		Utils.getClientAttributes client, ["project_id", "doc_id", "user_id"], (_, attrs) ->
 			for key, value of extraAttrs
 				attrs[key] = value
@@ -13,7 +13,6 @@ module.exports = Router =
 			attrs.err = error
 			logger.error attrs, "server side error in #{method}"
 		# Don't return raw error to prevent leaking server side info
-		console.log "CALLING CALLBACK", callback
 		return callback {message: "Something went wrong"}
 
 	configure: (app, io, session) ->
@@ -43,6 +42,11 @@ module.exports = Router =
 						Router._handleError callback, err, client, "joinProject", {project_id: data.project_id, user_id: user?.id}
 					else
 						callback(null, args...)
+						
+			client.on "disconnect", () ->
+				WebsocketController.leaveProject io, client, (err) ->
+					if err?
+						Router._handleError null, err, client, "leaveProject"
 						
 				
 			client.on "joinDoc", (doc_id, fromVersion, callback) ->

@@ -15,6 +15,8 @@ module.exports =
 			url: "http://localhost:3000"
 		documentupdater:
 			url: "http://localhost:3003"
+		trackchanges:
+			url: "http://localhost:3015"
 			
 	security:
 		sessionSecret: "secret-please-change"
