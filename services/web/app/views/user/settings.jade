@@ -17,7 +17,7 @@ block content
 								.row
 									.col-md-5
 										h3  #{translate("update_account_info")}
-										form(async-form="settings", name="settingsForm", action="/user/settings", novalidate)
+										form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
 											input(type="hidden", name="_csrf", value=csrfToken)
 											.form-group
 												label(for='email')  #{translate("email")}
@@ -54,7 +54,7 @@ block content
 
 									.col-md-5.col-md-offset-1
 										h3  #{translate("change_password")}
-										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", novalidate)
+										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
 											input(type="hidden", name="_csrf", value=csrfToken)
 											.form-group
 												label(for='currentPassword') #{translate("current_password")}
