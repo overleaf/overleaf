@@ -9,6 +9,10 @@ module.exports = WebApiManager =
 		request.post {
 			url: url
 			qs: {user_id}
+			auth:
+				user: settings.apis.web.user
+				pass: settings.apis.web.pass
+				sendImmediately: true
 			json: true
 			jar: false
 		}, (error, response, data) ->

@@ -15,6 +15,8 @@ describe 'WebApiManager', ->
 				apis:
 					web:
 						url: "http://web.example.com"
+						user: "username"
+						pass: "password"
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 	
 	describe "joinProject", ->
@@ -33,6 +35,10 @@ describe 'WebApiManager', ->
 						url: "#{@settings.apis.web.url}/project/#{@project_id}/join"
 						qs:
 							user_id: @user_id
+						auth:
+							user: @settings.apis.web.user
+							pass: @settings.apis.web.pass
+							sendImmediately: true
 						json: true
 						jar: false
 					})
