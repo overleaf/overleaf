@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import org.sqlite.JDBC;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
@@ -20,6 +21,7 @@ import java.util.Map;
  */
 public class WLDataModel implements CandidateSnapshotCallback {
 
+    private final JDBC jbdc = null;
     private final Map<String, WLProject> projects;
     private final WLFileStore fileStore;
 
