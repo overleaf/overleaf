@@ -32,8 +32,7 @@ public class SnapshotPushRequest extends SnapshotAPIRequest<SnapshotPushRequestR
 
     @Override
     protected SnapshotPushRequestResult parseResponse(JsonElement json) throws FailedConnectionException {
-        System.out.println(json);
-        return null;
+        return new SnapshotPushRequestResult(this, json);
     }
 
 }

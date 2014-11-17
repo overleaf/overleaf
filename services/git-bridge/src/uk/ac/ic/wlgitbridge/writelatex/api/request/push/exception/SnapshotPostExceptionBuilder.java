@@ -1,10 +1,6 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.writelatex.InvalidFilesException;
-import uk.ac.ic.wlgitbridge.writelatex.OutOfDateException;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.writelatex.UnexpectedErrorException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
 

@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
 
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 
 /**
  * Created by Winston on 17/11/14.
@@ -13,6 +13,7 @@ public class PostbackContents {
 
     public PostbackContents() {
         received = false;
+        exception = null;
     }
 
     public synchronized int waitForPostback() throws SnapshotPostException {

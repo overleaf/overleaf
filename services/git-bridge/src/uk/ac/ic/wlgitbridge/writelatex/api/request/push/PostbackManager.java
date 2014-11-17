@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
 
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 
 import java.util.HashMap;
 import java.util.Map;

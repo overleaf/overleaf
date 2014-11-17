@@ -1,7 +1,8 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import com.google.gson.JsonElement;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,12 +16,12 @@ public class InvalidProjectException extends SnapshotPostException {
 
     @Override
     public String getMessage() {
-        return null;
+        return "invalid project";
     }
 
     @Override
     public List<String> getDescriptionLines() {
-        return null;
+        return Arrays.asList("your project is too big");
     }
 
     @Override

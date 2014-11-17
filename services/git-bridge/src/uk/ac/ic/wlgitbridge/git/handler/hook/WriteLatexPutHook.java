@@ -9,8 +9,8 @@ import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
-import uk.ac.ic.wlgitbridge.writelatex.OutOfDateException;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.io.IOException;
@@ -51,7 +51,6 @@ public class WriteLatexPutHook implements PreReceiveHook {
                 receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
             }
         }
-        System.out.println("success");
     }
 
     private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {

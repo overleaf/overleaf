@@ -1,27 +1,32 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by Winston on 16/11/14.
  */
-public class InvalidFilesException extends SnapshotPostException {
+public class OutOfDateException extends SnapshotPostException {
 
-    public InvalidFilesException(JsonObject json) {
+    public OutOfDateException(JsonObject json) {
         super(json);
+    }
+
+    public OutOfDateException() {
+
     }
 
     @Override
     public String getMessage() {
-        return null;
+        return "out of date";
     }
 
     @Override
     public List<String> getDescriptionLines() {
-        return null;
+        return Arrays.asList("out of date (shouldn't print this)");
     }
 
     @Override

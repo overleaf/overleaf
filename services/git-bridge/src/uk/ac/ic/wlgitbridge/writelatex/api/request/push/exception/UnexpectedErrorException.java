@@ -1,27 +1,28 @@
-package uk.ac.ic.wlgitbridge.writelatex;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by Winston on 16/11/14.
  */
-public class OutOfDateException extends SnapshotPostException {
+public class UnexpectedErrorException extends SnapshotPostException {
 
-    public OutOfDateException(JsonObject json) {
+    public UnexpectedErrorException(JsonObject json) {
         super(json);
     }
 
     @Override
     public String getMessage() {
-        return null;
+        return "unexpected error";
     }
 
     @Override
     public List<String> getDescriptionLines() {
-        return null;
+        return Arrays.asList("writelatex error");
     }
 
     @Override

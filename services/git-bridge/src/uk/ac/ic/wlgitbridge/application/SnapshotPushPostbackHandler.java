@@ -33,7 +33,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
             String projectName = request.getRequestURI().split("/")[1];
             SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, contents);
             try {
-                postbackContents.sendPostback();
+                postbackContents.processPostback();
             } catch (UnexpectedPostbackException e) {
                 throw new ServletException();
             }

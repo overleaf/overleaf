@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostExceptionBuilder;
 
 /**
  * Created by Winston on 17/11/14.
@@ -37,7 +38,7 @@ public class SnapshotPushPostbackContents implements JSONSource {
         setResult(responseObject, code);
     }
 
-    public void sendPostback() throws UnexpectedPostbackException {
+    public void processPostback() throws UnexpectedPostbackException {
         if (exception == null) {
             writeLatexDataSource.postbackReceivedSuccessfully(projectName, versionID);
         } else {

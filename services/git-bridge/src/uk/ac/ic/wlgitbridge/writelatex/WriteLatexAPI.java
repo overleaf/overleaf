@@ -9,7 +9,10 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequestResult;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
@@ -48,8 +51,14 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
-        new SnapshotPushRequest(candidate).request();
-        candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
+        SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
+        snapshotPushRequest.request();
+        SnapshotPushRequestResult result = snapshotPushRequest.getResult();
+        if (result.wasSuccessful()) {
+            candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
+        } else {
+            throw new OutOfDateException();
+        }
     }
 
     /* Called by postback thread. */
