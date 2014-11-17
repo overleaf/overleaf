@@ -51,6 +51,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
                 receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
             }
         }
+        System.out.println("success");
     }
 
     private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {

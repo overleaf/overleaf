@@ -15,7 +15,7 @@ public class SnapshotPushRequestResult extends Result {
     }
 
     @Override
-    public void fromJSON(JsonElement json) throws FailedConnectionException {
+    public void fromJSON(JsonElement json) {
 
     }
 

@@ -1,10 +1,9 @@
 package uk.ac.ic.wlgitbridge.application;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,17 +29,24 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
 //                response.setContentType("text/html;charset=utf-8");
 //                response.setStatus(HttpServletResponse.SC_OK);
         if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
-            BufferedReader reader = request.getReader();
-            StringBuilder sb = new StringBuilder();
-            for (String line; (line = reader.readLine()) != null; ) {
-                sb.append(line);
+            String contents = getContentsOfReader(request.getReader());
+            String projectName = request.getRequestURI().split("/")[1];
+            SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, contents);
+            try {
+                postbackContents.sendPostback();
+            } catch (UnexpectedPostbackException e) {
+                throw new ServletException();
             }
-            String data = sb.toString();
-            JsonObject dataObj = new Gson().fromJson(data, JsonObject.class);
-            System.out.println(request.getRequestURI());
-            writeLatexDataSource.postbackReceivedSuccessfully(request.getRequestURI().split("/")[1]);
             baseRequest.setHandled(true);
         }
+    }
+
+    private static String getContentsOfReader(BufferedReader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (String line; (line = reader.readLine()) != null; ) {
+            sb.append(line);
+        }
+        return sb.toString();
     }
 
 }

@@ -54,7 +54,7 @@ public class WLDataModel implements CandidateSnapshotCallback {
     @Override
     public void approveSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
         getProjectWithName(candidateSnapshot.getProjectName()).putLatestSnapshot(versionID);
-        fileStore.approveCandidateSnapshot(versionID, candidateSnapshot);
+        fileStore.approveCandidateSnapshot(candidateSnapshot);
     }
 
 }

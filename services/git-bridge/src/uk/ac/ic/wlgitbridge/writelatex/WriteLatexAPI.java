@@ -7,7 +7,9 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
@@ -21,13 +23,13 @@ import java.util.Map;
 public class WriteLatexAPI implements WriteLatexDataSource {
 
     private final WLDataModel dataModel;
-    private final Map<String, Object> postbackConds;
+    private final PostbackManager postbackManager;
 
     boolean cond = false;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
-        postbackConds = new HashMap<String, Object>();
+        postbackManager = new PostbackManager();
     }
 
     @Override
@@ -51,37 +53,18 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
         new SnapshotPushRequest(candidate).request();
-        expectPostback(projectName);
-        candidate.approveWithVersionID(100);
-    }
-
-    @Override
-    public void expectPostback(String projectName) {
-        Object value = new Object();
-        postbackConds.put(projectName, value);
-        cond = false;
-        System.out.println("sleeping");
-        try {
-            while (!cond) {
-                wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("finished sleep");
+        candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
     }
 
     /* Called by postback thread. */
     @Override
-    public void postbackReceivedSuccessfully(String projectName) {
-        System.out.println("successfully received postback for " + projectName);
-        cond = true;
-        notifyAll();
+    public void postbackReceivedSuccessfully(String projectName, int versionID) throws UnexpectedPostbackException {
+        postbackManager.postVersionIDForProject(projectName, versionID);
     }
 
     @Override
-    public void postbackReceivedWithException(String projectName, SnapshotPostException exception) {
-        postbackReceivedSuccessfully(projectName);
+    public void postbackReceivedWithException(String projectName, SnapshotPostException exception) throws UnexpectedPostbackException {
+        postbackManager.postExceptionForProject(projectName, exception);
     }
 
 }

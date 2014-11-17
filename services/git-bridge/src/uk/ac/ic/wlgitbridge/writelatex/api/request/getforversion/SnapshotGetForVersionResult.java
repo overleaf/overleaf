@@ -12,12 +12,12 @@ public class SnapshotGetForVersionResult extends Result {
 
     private SnapshotData snapshotData;
 
-    public SnapshotGetForVersionResult(Request request, JsonElement json) throws FailedConnectionException {
+    public SnapshotGetForVersionResult(Request request, JsonElement json) {
         super(request, json);
     }
 
     @Override
-    public void fromJSON(JsonElement json) throws FailedConnectionException {
+    public void fromJSON(JsonElement json) {
         snapshotData = new SnapshotData(json);
     }
 

@@ -10,7 +10,6 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionExc
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -21,7 +20,7 @@ public class SnapshotAttachment extends SnapshotFile {
     private Future<byte[]> future;
     private String url;
 
-    public SnapshotAttachment(JsonElement json) throws FailedConnectionException {
+    public SnapshotAttachment(JsonElement json) {
         super(json);
     }
 
@@ -38,7 +37,7 @@ public class SnapshotAttachment extends SnapshotFile {
     }
 
     @Override
-    protected void getContentsFromJSON(JsonArray jsonArray) throws FailedConnectionException {
+    protected void getContentsFromJSON(JsonArray jsonArray) {
         url = jsonArray.get(0).getAsString();
 //        fetchContents(jsonArray.get(0).getAsString());
     }

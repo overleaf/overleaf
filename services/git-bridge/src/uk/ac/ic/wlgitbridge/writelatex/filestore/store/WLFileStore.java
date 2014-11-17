@@ -60,7 +60,7 @@ public class WLFileStore {
         return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents, attDirectory);
     }
 
-    public void approveCandidateSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
+    public void approveCandidateSnapshot(CandidateSnapshot candidateSnapshot) {
         fileStore.put(candidateSnapshot.getProjectName(), candidateSnapshot.getDirectoryNode());
     }
 

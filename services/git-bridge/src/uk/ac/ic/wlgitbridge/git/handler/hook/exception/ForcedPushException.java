@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.git.handler.hook.exception;
 
+import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotPostException;
 
 import java.util.Arrays;
@@ -26,4 +27,8 @@ public class ForcedPushException extends SnapshotPostException {
         return Arrays.asList(DESCRIPTION_LINES);
     }
 
+    @Override
+    public void fromJSON(JsonElement json) {
+
+    }
 }
