@@ -31,7 +31,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
 
     @Override
     public void write() throws IOException, FailedConnectionException {
-        WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git");
+        WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git", ".wlgb");
         for (FileNode fileNode : fileNodes) {
             fileNode.writeToDisk(gitDirectory);
         }

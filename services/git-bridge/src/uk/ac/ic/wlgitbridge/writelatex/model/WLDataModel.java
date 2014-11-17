@@ -1,16 +1,17 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import org.sqlite.JDBC;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.WLDirectoryNodeSnapshot;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.Database;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -21,13 +22,15 @@ import java.util.Map;
  */
 public class WLDataModel implements CandidateSnapshotCallback {
 
-    private final JDBC jbdc = null;
+    private final Database db;
     private final Map<String, WLProject> projects;
     private final WLFileStore fileStore;
 
     public WLDataModel(String rootGitDirectoryPath) {
+        File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
+        db = new Database(rootGitDirectory);
         projects = new HashMap<String, WLProject>();
-        fileStore = new WLFileStore(rootGitDirectoryPath);
+        fileStore = new WLFileStore(rootGitDirectory);
     }
 
     public List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
@@ -57,6 +60,12 @@ public class WLDataModel implements CandidateSnapshotCallback {
     public void approveSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
         getProjectWithName(candidateSnapshot.getProjectName()).putLatestSnapshot(versionID);
         fileStore.approveCandidateSnapshot(candidateSnapshot);
+    }
+
+    private File initRootGitDirectory(String rootGitDirectoryPath) {
+        File rootGitDirectory = new File(rootGitDirectoryPath);
+        rootGitDirectory.mkdirs();
+        return rootGitDirectory;
     }
 
 }

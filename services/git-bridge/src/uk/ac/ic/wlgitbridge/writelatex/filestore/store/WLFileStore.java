@@ -23,11 +23,10 @@ public class WLFileStore {
     private final File rootGitDirectory;
     private final File attDirectory;
 
-    public WLFileStore(String rootGitDirectoryPath) {
+    public WLFileStore(File rootGitDirectory) {
         fileStore = new HashMap<String, WLDirectoryNode>();
-        rootGitDirectory = new File(rootGitDirectoryPath);
-        rootGitDirectory.mkdirs();
-        deleteInDirectory(rootGitDirectory);
+        this.rootGitDirectory = rootGitDirectory;
+        deleteInDirectoryApartFrom(rootGitDirectory, ".wlgb");
         attDirectory = new File(rootGitDirectory, ".wlgb/atts");
         attDirectory.mkdirs();
     }
