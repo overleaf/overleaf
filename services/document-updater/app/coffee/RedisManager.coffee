@@ -81,6 +81,7 @@ module.exports = RedisManager =
 		multi.lrange keys.pendingUpdates(doc_id:doc_id), 0 , -1
 		multi.del keys.pendingUpdates(doc_id:doc_id)
 		multi.exec (error, replys) ->
+			return callback(error) if error?
 			jsonUpdates = replys[0]
 			updates = []
 			for jsonUpdate in jsonUpdates
