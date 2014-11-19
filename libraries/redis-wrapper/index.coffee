@@ -19,3 +19,38 @@ module.exports = RedisSharelatex =
 			delete standardOpts.host
 			client = require("redis").createClient opts.port, opts.host, standardOpts
 		return client
+
+
+	activeHealthCheckRedis: (connectionInfo)->
+		sub = RedisSharelatex.createClient(connectionInfo)
+		pub = RedisSharelatex.createClient(connectionInfo)
+		
+		heartbeatInterval = 2000 #ms
+		isAliveTimeout = 10000 #ms
+		
+		id = require("crypto").pseudoRandomBytes(16).toString("hex")
+		heartbeatChannel = "heartbeat-#{id}"
+		lastHeartbeat = Date.now()
+		
+		sub.subscribe heartbeatChannel, (error) ->
+			if error?
+				console.error "ERROR: failed to subscribe to #{heartbeatChannel} channel", error
+		sub.on "message", (channel, message) ->
+			if channel == heartbeatChannel
+				lastHeartbeat = Date.now()
+		
+		setInterval ->
+			pub.publish heartbeatChannel, "PING"
+		, heartbeatInterval
+
+		isAlive = ->
+			timeSinceLastHeartbeat = Date.now() - lastHeartbeat
+			if timeSinceLastHeartbeat > isAliveTimeout
+				console.error "heartbeat from redis timed out"
+				return false
+			else
+				return true
+
+		return {
+			isAlive:isAlive
+		}
