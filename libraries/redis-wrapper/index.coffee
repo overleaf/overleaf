@@ -39,10 +39,12 @@ module.exports = RedisSharelatex =
 				lastHeartbeat = Date.now()
 		
 		reconnectIfInactive = () ->
-			timeSinceLastHeartBeat = Date.now() - lastHeartbeat
-			if timeSinceLastHeartBeat > reconnectAfter
-				console.warn "No heartbeat for #{timeSinceLastHeartBeat}ms, reconnecting"
-				sub.connection_gone("no heartbeat for #{timeSinceLastHeartBeat}ms")
+			timeSinceLastHeartbeat = Date.now() - lastHeartbeat
+			if timeSinceLastHeartbeat > reconnectAfter
+				console.warn "No heartbeat for #{timeSinceLastHeartbeat}ms, reconnecting"
+				sub.connection_gone("no heartbeat for #{timeSinceLastHeartbeat}ms")
+				# Reset timer after triggering a reconnect to avoid potential cascading failure.
+				lastHeartbeat = Date.now()
 		
 		setInterval () ->
 			pub.publish heartbeatChannel, "PING"
