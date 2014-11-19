@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
-import uk.ac.ic.wlgitbridge.writelatex.model.db.WLDatabase;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.WLDatabaseSource;
 
 import java.util.HashMap;
@@ -29,8 +29,7 @@ public class WLProjectStore implements WLDatabaseSource {
     }
 
     @Override
-    public void initFromDatabase(WLDatabase database) {
+    public void initFromDatabase(PersistentStoreAPI database) {
 
     }
-
 }

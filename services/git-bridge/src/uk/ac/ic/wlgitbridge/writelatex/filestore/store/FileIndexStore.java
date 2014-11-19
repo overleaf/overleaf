@@ -22,7 +22,7 @@ public class FileIndexStore implements FileNodeIndexer {
         blobHashMappings = new HashMap<BlobHash, FileNode>();
         urlMappings = new HashMap<String, FileNode>();
         for (FileNode fileNode : fileNodes) {
-            fileNode.handleIndexer(this);
+            fileNode.indexWith(this);
         }
     }
 

@@ -9,12 +9,11 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionExc
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
-import uk.ac.ic.wlgitbridge.writelatex.model.db.SQLiteWLDatabase;
-import uk.ac.ic.wlgitbridge.writelatex.model.db.WLDatabase;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.WLGBPersistentStore;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -22,21 +21,15 @@ import java.util.List;
  */
 public class WLDataModel implements CandidateSnapshotCallback {
 
-    private WLDatabase db;
+    private final PersistentStoreAPI persistentStore;
     private final WLProjectStore projectStore;
     private final WLFileStore fileStore;
 
     public WLDataModel(String rootGitDirectoryPath) {
         File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
-        try {
-            db = new SQLiteWLDatabase(rootGitDirectory);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        projectStore = db.loadProjectStore();
-        fileStore = db.loadFileStore();
+        persistentStore = new WLGBPersistentStore(rootGitDirectory);
+        projectStore = persistentStore.loadProjectStore();
+        fileStore = persistentStore.loadFileStore();
     }
 
     public List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {

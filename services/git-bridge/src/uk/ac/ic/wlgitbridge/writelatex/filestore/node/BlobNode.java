@@ -28,8 +28,13 @@ public class BlobNode extends FileNode {
         writeChanged(projectAttDirectory);
     }
 
+    public BlobNode(String fileName, boolean changed, byte[] blob) {
+        super(fileName, changed);
+        this.blob = new ByteBlob(blob);
+    }
+
     @Override
-    public void handleIndexer(FileNodeIndexer fileNodeIndexer) {
+    public void indexWith(FileNodeIndexer fileNodeIndexer) {
         fileNodeIndexer.index(this);
     }
 

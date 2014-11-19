@@ -23,17 +23,19 @@ public abstract class FileNode {
     }
 
     public FileNode(String filePath, Map<String, FileNode> context) {
-        this.filePath = filePath;
         FileNode currentFileNode = context.get(filePath);
+        this.filePath = filePath;
         changed = currentFileNode == null || !equals(currentFileNode);
     }
 
-    public String getFilePath() {
-        return filePath;
+    protected FileNode(String filePath, boolean changed) {
+        this.filePath = filePath;
+        this.changed = changed;
     }
 
-    public boolean isChanged() {
-        return changed;
+    protected FileNode() {
+        filePath = "";
+        changed = false;
     }
 
     public byte[] getContents() throws FailedConnectionException {
@@ -49,8 +51,15 @@ public abstract class FileNode {
         out.close();
     }
 
-    public abstract void handleIndexer(FileNodeIndexer fileNodeIndexer);
+    public String getFilePath() {
+        return filePath;
+    }
 
+    public boolean isChanged() {
+        return changed;
+    }
+
+    public abstract void indexWith(FileNodeIndexer indexer);
     protected abstract Blob getBlob();
 
     @Override

@@ -5,6 +5,6 @@ package uk.ac.ic.wlgitbridge.writelatex.model.db;
  */
 public interface WLDatabaseSource {
 
-    public void initFromDatabase(WLDatabase database);
+    public void initFromDatabase(PersistentStoreAPI database);
 
 }

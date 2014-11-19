@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.AttachmentBlob;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ExternalBlob;
@@ -23,13 +24,24 @@ public class AttachmentNode extends FileNode {
         initBlob(fileIndexes);
     }
 
+    public AttachmentNode(String filePath, boolean changed, String url) {
+        super(filePath, changed);
+        this.url = url;
+    }
+
+    public AttachmentNode(String url, byte[] blob) {
+        super();
+        this.url = url;
+        this.blob = new ByteBlob(blob);
+    }
+
     @Override
-    public void handleIndexer(FileNodeIndexer fileNodeIndexer) {
+    public void indexWith(FileNodeIndexer fileNodeIndexer) {
         fileNodeIndexer.index(this);
     }
 
     @Override
-    protected Blob getBlob() {
+    public Blob getBlob() {
         return blob;
     }
 
