@@ -41,8 +41,17 @@ module.exports = RedisSharelatex =
 		reconnectIfInactive = () ->
 			timeSinceLastHeartbeat = Date.now() - lastHeartbeat
 			if timeSinceLastHeartbeat > reconnectAfter
-				console.warn "No heartbeat for #{timeSinceLastHeartbeat}ms, reconnecting"
-				sub.connection_gone("no heartbeat for #{timeSinceLastHeartbeat}ms")
+				console.warn "[#{new Date()}] No heartbeat for #{timeSinceLastHeartbeat}ms on #{heartbeatChannel}, reconnecting"
+				# If the client realises it isn't connected then will be trying to
+				# restablish the connection, so there's nothing for us to do. If
+				# it still thinks it's connected, then disconnect it and start to reconnect.
+				if sub.connected
+					sub.end()
+					# We ended the connection, but want to start it up again, so set
+					# the internal closing variable:
+					sub.closing = false
+					# Trigger the reconnect:
+					sub.connection_gone("no heartbeat for #{timeSinceLastHeartbeat}ms")
 				# Reset timer after triggering a reconnect to avoid potential cascading failure.
 				lastHeartbeat = Date.now()
 		
