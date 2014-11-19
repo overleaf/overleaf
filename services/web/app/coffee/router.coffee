@@ -8,6 +8,7 @@ AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
 EditorRouter = require("./Features/Editor/EditorRouter")
 EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
+EditorRealTimeController = require("./Features/Editor/EditorRealTimeController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
 SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
@@ -175,6 +176,18 @@ module.exports = class Router
 			req.session.destroy()
 
 		app.get '/health_check', HealthCheckController.check
+		
+		app.get '/health_check/redis/doc_updates', (req, res, next) ->
+			if EditorUpdatesController.isRedisPubSubAlive()
+				res.send(200)
+			else
+				res.send(500)
+		
+		app.get '/health_check/redis/websockets', (req, res, next) ->
+			if EditorRealTimeController.isRedisPubSubAlive()
+				res.send(200)
+			else
+				res.send(500)
 
 		app.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->

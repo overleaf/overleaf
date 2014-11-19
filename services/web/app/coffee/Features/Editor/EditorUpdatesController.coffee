@@ -5,7 +5,7 @@ redis = require("redis-sharelatex")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 EditorRealTimeController = require("./EditorRealTimeController")
 
-rclient = redis.createRobustSubscriptionClient(Settings.redis.web)
+rclient = redis.createMonitoredSubscriptionClient(Settings.redis.web)
 
 module.exports = EditorUpdatesController =
 	_applyUpdate: (client, project_id, doc_id, update, callback = (error) ->) ->
@@ -28,6 +28,9 @@ module.exports = EditorUpdatesController =
 		client.get "user_id", (error, user_id) ->
 			update.meta.user_id = user_id
 			EditorUpdatesController._applyUpdate client, project_id, doc_id, update
+		
+	isRedisPubSubAlive: () ->
+		rclient.isAlive()
 		
 	listenForUpdatesFromDocumentUpdater: () ->
 		rclient.subscribe "applied-ops"

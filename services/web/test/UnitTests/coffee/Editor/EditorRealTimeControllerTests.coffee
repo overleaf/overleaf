@@ -9,7 +9,7 @@ describe "EditorRealTimeController", ->
 			"redis-sharelatex": 
 				createClient: () ->
 					auth:->
-				createRobustSubscriptionClient: () ->
+				createMonitoredSubscriptionClient: () ->
 					auth:->
 			"../../infrastructure/Server" : io: @io = {}
 		@EditorRealTimeController.rclientPub = publish: sinon.stub()
