@@ -91,6 +91,7 @@ public class WLDirectoryNode implements PersistentStoreSource, PersistentStoreUp
     public WLDirectoryNode createFromRawDirectoryContents(RawDirectoryContents rawDirectoryContents, File attachmentDirectory) throws IOException, FailedConnectionException {
         Map<String, FileNode> candidateFileNodeTable = new HashMap<String, FileNode>();
         File projectAttDirectory = new File(attachmentDirectory, projectName);
+        projectAttDirectory.mkdirs();
         WLFileStore.deleteInDirectory(projectAttDirectory);
         for (Entry<String, byte[]> fileContents : rawDirectoryContents.getFileContentsTable().entrySet()) {
             BlobNode blobNode = new BlobNode(new RepositoryFile(fileContents), fileNodeTable, projectAttDirectory);
