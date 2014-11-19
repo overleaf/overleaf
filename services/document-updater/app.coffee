@@ -11,7 +11,7 @@ Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
 redis = require("redis-sharelatex")
-rclient = redis.createRobustSubscriptionClient(Settings.redis.web)
+rclient = redis.createClient(Settings.redis.web)
 
 
 Path = require "path"
