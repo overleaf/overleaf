@@ -27,7 +27,7 @@ module.exports = RedisSharelatex =
 		heartbeatInterval = heartbeatOpts.heartbeat_interval or 1000 #ms
 		reconnectAfter = heartbeatOpts.reconnect_after or 5000 #ms
 		
-		id = require("crypto").randomBytes(16).toString("hex")
+		id = require("crypto").pseudoRandomBytes(16).toString("hex")
 		heartbeatChannel = "heartbeat-#{id}"
 		lastHeartbeat = Date.now()
 		
