@@ -30,12 +30,12 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
 
     @Override
     public WLProjectStore loadProjectStore() {
-        return new WLProjectStore();
+        return new WLProjectStore(this);
     }
 
     @Override
     public WLFileStore loadFileStore() {
-        return new WLFileStore(rootGitDirectory);
+        return new WLFileStore(rootGitDirectory, this);
     }
 
     @Override

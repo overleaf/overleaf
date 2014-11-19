@@ -3,7 +3,9 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.WLDatabaseSource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,6 +19,11 @@ public class WLProjectStore implements WLDatabaseSource {
         projects = new HashMap<String, WLProject>();
     }
 
+    public WLProjectStore(PersistentStoreAPI persistentStore) {
+        this();
+        initFromDatabase(persistentStore);
+    }
+
     public WLProject getProjectWithName(String name) {
         WLProject project;
         if (projects.containsKey(name)) {
@@ -26,6 +33,10 @@ public class WLProjectStore implements WLDatabaseSource {
             projects.put(name, project);
         }
         return project;
+    }
+
+    public List<String> getProjectNames() {
+        return new ArrayList<String>(projects.keySet());
     }
 
     @Override

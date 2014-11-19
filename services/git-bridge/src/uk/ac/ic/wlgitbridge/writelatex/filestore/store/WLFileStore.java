@@ -9,6 +9,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +27,13 @@ public class WLFileStore {
     public WLFileStore(File rootGitDirectory) {
         fileStore = new HashMap<String, WLDirectoryNode>();
         this.rootGitDirectory = rootGitDirectory;
-        deleteInDirectoryApartFrom(rootGitDirectory, ".wlgb");
         attDirectory = new File(rootGitDirectory, ".wlgb/atts");
         attDirectory.mkdirs();
+    }
+
+    public WLFileStore(File rootGitDirectory, PersistentStoreAPI persistentStoreAPI) {
+        this(rootGitDirectory);
+
     }
 
     public static void deleteInDirectory(File directory) {

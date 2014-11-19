@@ -30,6 +30,10 @@ public class WLDataModel implements CandidateSnapshotCallback {
         persistentStore = new WLGBPersistentStore(rootGitDirectory);
         projectStore = persistentStore.loadProjectStore();
         fileStore = persistentStore.loadFileStore();
+        List<String> excludedFromDeletion = projectStore.getProjectNames();
+        excludedFromDeletion.add(".wlgb");
+        System.out.println("Not deleting: " + excludedFromDeletion);
+        WLFileStore.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[]{}));
     }
 
     public List<WritableRepositoryContents> updateProjectWithName(String name) throws FailedConnectionException, InvalidProjectException {
