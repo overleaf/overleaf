@@ -46,6 +46,29 @@ define [
 					professional:
 						monthly: "£24"
 						annual: "£288"
+
+				SEK:
+					symbol: "kr"
+					student:
+						monthly: "60 kr"
+						annual: "600 kr"
+					collaborator:
+						monthly: "110 kr"
+						annual: "1320 kr"
+					professional:
+						monthly: "220 kr"
+						annual: "2640 kr"
+				CAD:
+					symbol: "$"
+					student:
+						monthly: "$9"
+						annual: "$90"
+					collaborator:
+						monthly: "$17"
+						annual: "$204"
+					professional:
+						monthly: "$34"
+						annual: "$408"
 		}
 	
 
