@@ -18,7 +18,7 @@ describe "EditorUpdatesController", ->
 			"../../infrastructure/Metrics" : @metrics = { set: sinon.stub(), inc: sinon.stub() }
 			"../../infrastructure/Server" : io: @io = {}
 			"redis-sharelatex" : 
-				createClient: ()=> 
+				createRobustSubscriptionClient: ()=> 
 					@rclient = {auth:->}
 
 	describe "_applyUpdate", ->

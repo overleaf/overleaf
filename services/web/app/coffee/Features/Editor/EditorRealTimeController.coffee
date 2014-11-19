@@ -1,7 +1,7 @@
 Settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
 rclientPub = redis.createClient(Settings.redis.web)
-rclientSub = redis.createClient(Settings.redis.web)
+rclientSub = redis.createRobustSubscriptionClient(Settings.redis.web)
 
 module.exports = EditorRealTimeController =
 	rclientPub: rclientPub
@@ -18,7 +18,9 @@ module.exports = EditorRealTimeController =
 
 	listenForEditorEvents: () ->
 		@rclientSub.subscribe "editor-events"
-		@rclientSub.on "message", @_processEditorEvent.bind(@)
+		@rclientSub.on "message", (channel, message) ->
+			return unless channel == "editor-events"
+			EditorRealTimeController._processEditorEvent(channel, message)
 
 	_processEditorEvent: (channel, message) ->
 		io = require('../../infrastructure/Server').io
