@@ -51,6 +51,7 @@ public class WLGitBridgeServer {
     public void start() {
         try {
             jettyServer.start();
+            System.out.println();
             System.out.println("WriteLatex-Git Bridge server started");
             System.out.println("Listening on port: " + port);
             System.out.println("Root git directory path: " + rootGitDirectoryPath);

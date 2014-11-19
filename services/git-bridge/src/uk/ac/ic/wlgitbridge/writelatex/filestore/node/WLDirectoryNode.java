@@ -8,6 +8,9 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreSource;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreUpdater;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,20 +23,47 @@ import java.util.Map.Entry;
 /**
  * Created by Winston on 08/11/14.
  */
-public class WLDirectoryNode {
+public class WLDirectoryNode implements PersistentStoreSource, PersistentStoreUpdater<Void> {
 
     private final String projectName;
     private Map<String, FileNode> fileNodeTable;
     private FileIndexStore fileIndexStore;
 
-    public WLDirectoryNode(String projectName) {
-        this(projectName, new HashMap<String, FileNode>(), new FileIndexStore());
+    public WLDirectoryNode(String projectName, PersistentStoreAPI persistentStore) {
+        this(projectName);
+        initFromPersistentStore(persistentStore);
     }
 
-    public WLDirectoryNode(String projectName, Map<String, FileNode> fileNodeTable, FileIndexStore fileIndexStore) {
+    private WLDirectoryNode(String projectName) {
+        this.projectName = projectName;
+    }
+
+    private WLDirectoryNode(String projectName, Map<String, FileNode> fileNodeTable, FileIndexStore fileIndexStore) {
         this.projectName = projectName;
         this.fileNodeTable = fileNodeTable;
         this.fileIndexStore = fileIndexStore;
+    }
+
+    @Override
+    public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+        fileNodeTable = new HashMap<String, FileNode>();
+        for (FileNode fileNode : persistentStore.getFileNodesForProjectName(projectName)) {
+            fileNodeTable.put(fileNode.getFilePath(), fileNode);
+        }
+        fileIndexStore = new FileIndexStore(projectName, persistentStore);
+    }
+
+    @Override
+    public void updatePersistentStore(PersistentStoreAPI persistentStore, Void info) {
+        updateFileNodeTableInPersistentStore(persistentStore);
+        fileIndexStore.updatePersistentStore(persistentStore, projectName);
+    }
+
+    private void updateFileNodeTableInPersistentStore(PersistentStoreAPI persistentStore) {
+        persistentStore.deleteFileNodesForProjectName(projectName);
+        for (FileNode fileNode : fileNodeTable.values()) {
+            fileNode.updatePersistentStore(persistentStore, projectName);
+        }
     }
 
     public List<FileNode> getFileNodes() {

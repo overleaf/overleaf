@@ -17,13 +17,16 @@ public interface PersistentStoreAPI {
 
     public void addProject(String name);
     public void addSnapshot(String projectName, int versionID);
-    public void addFileNodeBlob(String projectName, String fileName, int changed, byte[] blob);
-    public void addFileNodeExternal(String projectName, String fileName, int changed, String url);
+    public void addFileNodeBlob(String projectName, String fileName, boolean changed, byte[] blob);
+    public void addFileNodeExternal(String projectName, String fileName, boolean changed, String url);
     public void addURLIndex(String projectName, String url, byte[] blob);
 
     public List<String> getProjectNames();
     public List<Integer> getVersionIDsForProjectName(String projectName);
     public List<FileNode> getFileNodesForProjectName(String projectName);
     public Map<String, FileNode> getURLIndexTableForProjectName(String projectName);
+
+    public void deleteFileNodesForProjectName(String projectName);
+    public void deleteURLIndexesForProjectName(String projectName);
 
 }

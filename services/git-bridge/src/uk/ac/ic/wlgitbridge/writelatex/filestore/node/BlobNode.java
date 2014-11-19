@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.RawFileBlob;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +44,18 @@ public class BlobNode extends FileNode {
         return blob;
     }
 
+    @Override
+    public void updatePersistentStore(PersistentStoreAPI persistentStore, String projectName) {
+        try {
+            persistentStore.addFileNodeBlob(projectName, getFilePath(), isChanged(), getBlob().getContents());
+        } catch (FailedConnectionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void writeChanged(File projectAttDirectory) throws FailedConnectionException, IOException {
         if (isChanged()) {
             writeToDisk(projectAttDirectory);
         }
     }
-
 }

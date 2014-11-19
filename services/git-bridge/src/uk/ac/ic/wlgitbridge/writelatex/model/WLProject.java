@@ -15,6 +15,7 @@ import java.util.SortedSet;
  */
 public class WLProject implements PersistentStoreSource {
 
+    public static final int INVALID_VERSION_ID = -1;
     private final String name;
     private final Map<Integer, Snapshot> snapshots;
     private final SnapshotFetcher snapshotFetcher;
@@ -49,7 +50,7 @@ public class WLProject implements PersistentStoreSource {
     private void updateLatestSnapshot() {
         Snapshot latest = snapshotFetcher.getLatestSnapshot();
         if (latest == null) {
-            latestSnapshotID = -1;
+            latestSnapshotID = INVALID_VERSION_ID;
         } else {
             latestSnapshotID = latest.getVersionID();
         }

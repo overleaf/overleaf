@@ -29,10 +29,11 @@ public class WLDataModel implements CandidateSnapshotCallback {
         File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
         persistentStore = new WLGBPersistentStore(rootGitDirectory);
         projectStore = persistentStore.loadProjectStore();
+        System.out.println("Loaded projects: " + projectStore.getProjectNames().size() + ".");
         fileStore = persistentStore.loadFileStore();
+        System.out.println("Loaded file store and index tables.");
         List<String> excludedFromDeletion = projectStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");
-        System.out.println("Not deleting: " + excludedFromDeletion);
         WLFileStore.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[]{}));
     }
 

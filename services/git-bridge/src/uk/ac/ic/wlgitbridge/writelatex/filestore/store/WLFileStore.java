@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,13 @@ import java.util.*;
 /**
  * Created by Winston on 08/11/14.
  */
-public class WLFileStore {
+public class WLFileStore implements PersistentStoreSource {
 
     private final Map<String, WLDirectoryNode> fileStore;
     private final File rootGitDirectory;
     private final File attDirectory;
+
+    private PersistentStoreAPI persistentStore;
 
     public WLFileStore(File rootGitDirectory) {
         fileStore = new HashMap<String, WLDirectoryNode>();
@@ -33,7 +36,15 @@ public class WLFileStore {
 
     public WLFileStore(File rootGitDirectory, PersistentStoreAPI persistentStoreAPI) {
         this(rootGitDirectory);
+        initFromPersistentStore(persistentStoreAPI);
+    }
 
+    @Override
+    public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+        this.persistentStore = persistentStore;
+        for (String projectName : persistentStore.getProjectNames()) {
+            fileStore.put(projectName, new WLDirectoryNode(projectName, persistentStore));
+        }
     }
 
     public static void deleteInDirectory(File directory) {
@@ -64,6 +75,7 @@ public class WLFileStore {
                                                               projectName,
                                                               snapshot));
         }
+        directoryNode.updatePersistentStore(persistentStore, null);
         return writableRepositories;
     }
 
@@ -72,13 +84,15 @@ public class WLFileStore {
     }
 
     public void approveCandidateSnapshot(CandidateSnapshot candidateSnapshot) {
-        fileStore.put(candidateSnapshot.getProjectName(), candidateSnapshot.getDirectoryNode());
+        WLDirectoryNode directoryNode = candidateSnapshot.getDirectoryNode();
+        fileStore.put(candidateSnapshot.getProjectName(), directoryNode);
+        directoryNode.updatePersistentStore(persistentStore, null);
     }
 
     private WLDirectoryNode getDirectoryNodeForProjectName(String projectName) {
         WLDirectoryNode directoryNode = fileStore.get(projectName);
         if (directoryNode == null) {
-            directoryNode = new WLDirectoryNode(projectName);
+            directoryNode = new WLDirectoryNode(projectName, persistentStore);
             fileStore.put(projectName, directoryNode);
         }
         return directoryNode;

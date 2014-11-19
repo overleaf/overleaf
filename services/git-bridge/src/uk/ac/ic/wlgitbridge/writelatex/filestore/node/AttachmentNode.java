@@ -7,6 +7,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ExternalBlob;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import java.util.Map;
  * Created by Winston on 12/11/14.
  */
 public class AttachmentNode extends FileNode {
+
+    private String projectName;
 
     private final String url;
     private Blob blob;
@@ -45,6 +48,12 @@ public class AttachmentNode extends FileNode {
         return blob;
     }
 
+    @Override
+    public void updatePersistentStore(PersistentStoreAPI persistentStore, String projectName) {
+        this.projectName = projectName;
+        getBlob().updatePersistentStore(persistentStore, this);
+    }
+
     public String getURL() {
         return url;
     }
@@ -56,6 +65,10 @@ public class AttachmentNode extends FileNode {
         } else {
             blob = new ExternalBlob(url);
         }
+    }
+
+    public String getProjectName() {
+        return projectName;
     }
 
 }

@@ -66,6 +66,11 @@ public class SQLiteWLDatabase {
     private static final String GET_URL_INDEXES_FOR_PROJECT_NAME =
             "SELECT `url`, `blob` FROM `url_index_store` WHERE `project_name` = ?";
 
+    private static final String DELETE_FILE_NODES_FOR_PROJECT_NAME =
+            "DELETE FROM `file_node_table` WHERE `project_name` = ?";
+    private static final String DELETE_URL_INDEXES_FOR_PROJECT_NAME =
+            "DELETE FROM `url_index_store` WHERE `project_name` = ?";
+
     private final File rootGitDirectory;
     private final Connection connection;
 
@@ -79,6 +84,9 @@ public class SQLiteWLDatabase {
     private PreparedStatement getVersionIDsForProjectNameStatement;
     private PreparedStatement getFileNodesForProjectNameStatement;
     private PreparedStatement getURLIndexesForProjectNameStatement;
+
+    private PreparedStatement deleteFileNodesForProjectNameStatement;
+    private PreparedStatement deleteURLIndexesForProjectNameStatement;
 
     public SQLiteWLDatabase(File rootGitDirectory) throws SQLException, ClassNotFoundException {
         this.rootGitDirectory = rootGitDirectory;
@@ -108,6 +116,9 @@ public class SQLiteWLDatabase {
         getVersionIDsForProjectNameStatement = connection.prepareStatement(GET_VERSION_IDS_FOR_PROJECT_NAME);
         getFileNodesForProjectNameStatement = connection.prepareStatement(GET_FILE_NODES_FOR_PROJECT_NAME);
         getURLIndexesForProjectNameStatement = connection.prepareStatement(GET_URL_INDEXES_FOR_PROJECT_NAME);
+
+        deleteFileNodesForProjectNameStatement = connection.prepareStatement(DELETE_FILE_NODES_FOR_PROJECT_NAME);
+        deleteURLIndexesForProjectNameStatement = connection.prepareStatement(DELETE_URL_INDEXES_FOR_PROJECT_NAME);
     }
 
     public void addProject(String name) throws SQLException {
@@ -202,6 +213,18 @@ public class SQLiteWLDatabase {
         return urlIndexTable;
     }
 
+    public void deleteFileNodesForProjectName(String projectName) throws SQLException {
+        deleteFileNodesForProjectNameStatement.clearParameters();
+        deleteFileNodesForProjectNameStatement.setString(1, projectName);
+        deleteFileNodesForProjectNameStatement.executeUpdate();
+    }
+
+    public void deleteURLIndexesForProjectName(String projectName) throws SQLException {
+        deleteURLIndexesForProjectNameStatement.clearParameters();
+        deleteURLIndexesForProjectNameStatement.setString(1, projectName);
+        deleteURLIndexesForProjectNameStatement.executeUpdate();
+    }
+
     private void test() throws SQLException {
         addProject("testproj12");
         addSnapshot("testproj12", 0);
@@ -211,7 +234,7 @@ public class SQLiteWLDatabase {
         addURLIndex("testproj12", "http://someurl.com/urlname.jpg", "thebytes".getBytes());
     }
 
-    private static int booleanToInt(boolean b) {
+    public static int booleanToInt(boolean b) {
         if (b) {
             return 1;
         } else {
@@ -219,7 +242,7 @@ public class SQLiteWLDatabase {
         }
     }
 
-    private static boolean intToBoolean(int i) {
+    public static boolean intToBoolean(int i) {
         return i != 0;
     }
 

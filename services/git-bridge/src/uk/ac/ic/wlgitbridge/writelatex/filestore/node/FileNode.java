@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreUpdater;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * Created by Winston on 12/11/14.
  */
-public abstract class FileNode {
+public abstract class FileNode implements PersistentStoreUpdater<String> {
 
     private final String filePath;
     private final boolean changed;

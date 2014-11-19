@@ -37,7 +37,7 @@ public class SnapshotFetcher implements PersistentStoreSource {
         for (Snapshot snapshot : newSnapshots) {
             persistentStore.addSnapshot(projectName, snapshot.getVersionID());
         }
-        System.out.println("Snapshots fetched: " + newSnapshots);
+        System.out.println("Fetched snapshots: " + newSnapshots);
         return newSnapshots;
     }
 
@@ -148,4 +148,7 @@ public class SnapshotFetcher implements PersistentStoreSource {
         newSnapshots.add(snapshot);
     }
 
+    public SortedSet<Integer> getVersions() {
+        return versions;
+    }
 }

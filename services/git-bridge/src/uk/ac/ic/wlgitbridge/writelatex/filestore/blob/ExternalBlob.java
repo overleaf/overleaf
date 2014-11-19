@@ -5,6 +5,8 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.HttpResponseBodyPart;
 import com.ning.http.client.Response;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.node.AttachmentNode;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,6 +58,11 @@ public class ExternalBlob extends Blob {
         } catch (IOException e) {
             throw new FailedConnectionException();
         }
+    }
+
+    @Override
+    public void updatePersistentStore(PersistentStoreAPI persistentStore, AttachmentNode node) {
+        persistentStore.addFileNodeExternal(node.getProjectName(), node.getFilePath(), node.isChanged(), node.getURL());
     }
 
 }

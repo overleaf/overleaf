@@ -57,18 +57,18 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
     }
 
     @Override
-    public void addFileNodeBlob(String projectName, String fileName, int changed, byte[] blob) {
+    public void addFileNodeBlob(String projectName, String fileName, boolean changed, byte[] blob) {
         try {
-            database.addFileNodeBlob(projectName, fileName, changed, blob);
+            database.addFileNodeBlob(projectName, fileName, SQLiteWLDatabase.booleanToInt(changed), blob);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void addFileNodeExternal(String projectName, String fileName, int changed, String url) {
+    public void addFileNodeExternal(String projectName, String fileName, boolean changed, String url) {
         try {
-            database.addFileNodeExternal(projectName, fileName, changed, url);
+            database.addFileNodeExternal(projectName, fileName, SQLiteWLDatabase.booleanToInt(changed), url);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -114,6 +114,24 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
     public Map<String, FileNode> getURLIndexTableForProjectName(String projectName) {
         try {
             return database.getURLIndexTableForProjectName(projectName);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteFileNodesForProjectName(String projectName) {
+        try {
+            database.deleteFileNodesForProjectName(projectName);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteURLIndexesForProjectName(String projectName) {
+        try {
+            database.deleteURLIndexesForProjectName(projectName);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
