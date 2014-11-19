@@ -1,14 +1,11 @@
 Settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
 rclientPub = redis.createClient(Settings.redis.web)
-rclientSub = redis.createMonitoredSubscriptionClient(Settings.redis.web)
+rclientSub = redis.createClient(Settings.redis.web)
 
 module.exports = EditorRealTimeController =
 	rclientPub: rclientPub
 	rclientSub: rclientSub
-	
-	isRedisPubSubAlive: () ->
-		rclientSub.isAlive()
 
 	emitToRoom: (room_id, message, payload...) ->
 		@rclientPub.publish "editor-events", JSON.stringify
@@ -21,9 +18,7 @@ module.exports = EditorRealTimeController =
 
 	listenForEditorEvents: () ->
 		@rclientSub.subscribe "editor-events"
-		@rclientSub.on "message", (channel, message) ->
-			return unless channel == "editor-events"
-			EditorRealTimeController._processEditorEvent(channel, message)
+		@rclientSub.on "message", @_processEditorEvent.bind(@)
 
 	_processEditorEvent: (channel, message) ->
 		io = require('../../infrastructure/Server').io

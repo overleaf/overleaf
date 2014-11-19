@@ -2,10 +2,9 @@ logger = require "logger-sharelatex"
 metrics = require('../../infrastructure/Metrics')
 Settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
+rclient = redis.createClient(Settings.redis.web)
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 EditorRealTimeController = require("./EditorRealTimeController")
-
-rclient = redis.createMonitoredSubscriptionClient(Settings.redis.web)
 
 module.exports = EditorUpdatesController =
 	_applyUpdate: (client, project_id, doc_id, update, callback = (error) ->) ->
@@ -29,14 +28,9 @@ module.exports = EditorUpdatesController =
 			update.meta.user_id = user_id
 			EditorUpdatesController._applyUpdate client, project_id, doc_id, update
 		
-	isRedisPubSubAlive: () ->
-		rclient.isAlive()
-		
 	listenForUpdatesFromDocumentUpdater: () ->
 		rclient.subscribe "applied-ops"
-		rclient.on "message", (channel, message) ->
-			return unless channel == "applied-ops"
-			EditorUpdatesController._processMessageFromDocumentUpdater(channel, message)
+		rclient.on "message", @_processMessageFromDocumentUpdater.bind(@)
 		
 	_processMessageFromDocumentUpdater: (channel, message) ->
 		message = JSON.parse message
