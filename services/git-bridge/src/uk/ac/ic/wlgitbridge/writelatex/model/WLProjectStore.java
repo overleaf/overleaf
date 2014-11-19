@@ -30,7 +30,7 @@ public class WLProjectStore implements PersistentStoreSource {
         if (projects.containsKey(name)) {
             project = projects.get(name);
         } else {
-            project = new WLProject(name);
+            project = new WLProject(name, persistentStore);
             projects.put(name, project);
             persistentStore.addProject(name);
         }

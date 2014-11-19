@@ -9,13 +9,17 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForV
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotGetSavedVersRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreSource;
 
 import java.util.*;
 
 /**
  * Created by Winston on 07/11/14.
  */
-public class SnapshotFetcher {
+public class SnapshotFetcher implements PersistentStoreSource {
+
+    private PersistentStoreAPI persistentStore;
 
     private final String projectName;
     private final Map<Integer, Snapshot> snapshots;
@@ -30,16 +34,31 @@ public class SnapshotFetcher {
     public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
         SortedSet<Snapshot> newSnapshots = new TreeSet<Snapshot>();
         while (getNew(newSnapshots));
+        for (Snapshot snapshot : newSnapshots) {
+            persistentStore.addSnapshot(projectName, snapshot.getVersionID());
+        }
         System.out.println("Snapshots fetched: " + newSnapshots);
         return newSnapshots;
     }
 
     public Snapshot getLatestSnapshot() {
+        if (versions.isEmpty()) {
+            return null;
+        }
         return snapshots.get(versions.last());
     }
 
     public void putLatestVersion(int versionID) {
         versions.add(versionID);
+    }
+
+    @Override
+    public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+        this.persistentStore = persistentStore;
+        for (Integer savedVersionID : persistentStore.getVersionIDsForProjectName(projectName)) {
+            snapshots.put(savedVersionID, new Snapshot(savedVersionID));
+            versions.add(savedVersionID);
+        }
     }
 
     private boolean getNew(SortedSet<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {

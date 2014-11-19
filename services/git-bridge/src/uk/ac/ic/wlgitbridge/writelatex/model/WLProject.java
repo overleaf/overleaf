@@ -34,7 +34,7 @@ public class WLProject implements PersistentStoreSource {
 
     public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
         SortedSet<Snapshot> newSnapshots = snapshotFetcher.fetchNewSnapshots();
-        latestSnapshotID = snapshotFetcher.getLatestSnapshot().getVersionID();
+        updateLatestSnapshot();
         return newSnapshots;
     }
 
@@ -46,6 +46,15 @@ public class WLProject implements PersistentStoreSource {
         return latestSnapshotID;
     }
 
+    private void updateLatestSnapshot() {
+        Snapshot latest = snapshotFetcher.getLatestSnapshot();
+        if (latest == null) {
+            latestSnapshotID = -1;
+        } else {
+            latestSnapshotID = latest.getVersionID();
+        }
+    }
+
     public void putLatestSnapshot(int versionID) {
         snapshots.put(versionID, new Snapshot(versionID));
         snapshotFetcher.putLatestVersion(versionID);
@@ -54,6 +63,8 @@ public class WLProject implements PersistentStoreSource {
 
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
-
+        snapshotFetcher.initFromPersistentStore(persistentStore);
+        updateLatestSnapshot();
     }
+
 }
