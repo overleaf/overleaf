@@ -175,6 +175,7 @@ module.exports = class Router
 			req.session.destroy()
 
 		app.get '/health_check', HealthCheckController.check
+		app.get '/health_check/redis', HealthCheckController.checkRedis
 
 		app.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->
