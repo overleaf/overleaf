@@ -91,6 +91,7 @@ public class SQLiteWLDatabase {
     public SQLiteWLDatabase(File rootGitDirectory) throws SQLException, ClassNotFoundException {
         this.rootGitDirectory = rootGitDirectory;
         File databaseFile = new File(rootGitDirectory, "/.wlgb/wlgb.db");
+        databaseFile.getParentFile().mkdirs();
         System.out.println("Loading data...");
         Class.forName("org.sqlite.JDBC");
         connection = DriverManager.getConnection("jdbc:sqlite:" + databaseFile.getAbsolutePath());
