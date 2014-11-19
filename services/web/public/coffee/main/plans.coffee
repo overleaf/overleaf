@@ -69,6 +69,78 @@ define [
 					professional:
 						monthly: "$34"
 						annual: "$408"
+
+				NOK:
+					symbol: "kr"
+					student:
+						monthly: "60 kr"
+						annual: "600 kr"
+					collaborator:
+						monthly: "110 kr"
+						annual: "1320 kr"
+					professional:
+						monthly: "220 kr"
+						annual: "2640 kr"
+
+				DKK:
+					symbol: "kr"
+					student:
+						monthly: "50 kr"
+						annual: "500 kr"
+					collaborator:
+						monthly: "90 kr"
+						annual: "1080 kr"
+					professional:
+						monthly: "180 kr"
+						annual: "2160 kr"
+
+				AUD:
+					symbol: "$"
+					student:
+						monthly: "$10"
+						annual: "$100"
+					collaborator:
+						monthly: "$18"
+						annual: "$216"
+					professional:
+						monthly: "$35"
+						annual: "$420"
+
+				NZD:
+					symbol: "$"
+					student:
+						monthly: "$10"
+						annual: "$100"
+					collaborator:
+						monthly: "$18"
+						annual: "$216"
+					professional:
+						monthly: "$35"
+						annual: "$420"
+						
+				CHF:
+					symbol: "Fr"
+					student:
+						monthly: "CHF 8"
+						annual: "CHF 80"
+					collaborator:
+						monthly: "CHF 15"
+						annual: "CHF 180"
+					professional:
+						monthly: "CHF 30"
+						annual: "CHF 360"
+
+				SGD:
+					symbol: "$"
+					student:
+						monthly: "$12"
+						annual: "$120"
+					collaborator:
+						monthly: "$~"
+						annual: "$240"
+					professional:
+						monthly: "$40"
+						annual: "$480"
 		}
 	
 
