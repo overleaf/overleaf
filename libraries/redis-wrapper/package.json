@@ -1,6 +1,6 @@
 {
   "name": "redis-sharelatex",
-  "version": "0.0.6",
+  "version": "0.0.5",
   "description": "redis wrapper for node which will either use sentinal or normal redis",
   "main": "index.js",
   "author": "henry oswald @ sharelatex",
@@ -13,7 +13,7 @@
     "grunt-mocha-test": "0.12.0",
     "mocha": "1.21.4",
     "redis": "0.12.1",
-    "redis-sentinel": "git+https://github.com/sharelatex/node-redis-sentinel.git#master",
+    "redis-sentinel": "0.1.1",
     "sandboxed-module": "1.0.1",
     "sinon": "1.10.3",
     "underscore": "1.7.0"
