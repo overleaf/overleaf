@@ -3,6 +3,8 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +13,7 @@ import java.util.SortedSet;
 /**
  * Created by Winston on 06/11/14.
  */
-public class WLProject {
+public class WLProject implements PersistentStoreSource {
 
     private final String name;
     private final Map<Integer, Snapshot> snapshots;
@@ -23,6 +25,11 @@ public class WLProject {
         this.name = name;
         snapshots = new HashMap<Integer, Snapshot>();
         snapshotFetcher = new SnapshotFetcher(name, snapshots);
+    }
+
+    public WLProject(String projectName, PersistentStoreAPI database) {
+        this(projectName);
+        initFromPersistentStore(database);
     }
 
     public SortedSet<Snapshot> fetchNewSnapshots() throws FailedConnectionException, InvalidProjectException {
@@ -45,4 +52,8 @@ public class WLProject {
         latestSnapshotID = versionID;
     }
 
+    @Override
+    public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+
+    }
 }
