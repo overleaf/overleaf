@@ -8,6 +8,7 @@ import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositoryBuilder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
     @Override
     public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
         try {
-            return repositorySource.getRepositoryWithNameAtRootDirectory(name, rootGitDirectory);
+            return repositorySource.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
         } catch (RepositoryNotFoundException e) {
             throw e;
         } catch (ServiceNotEnabledException e) {

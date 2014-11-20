@@ -25,4 +25,22 @@ public class Util {
         return i != 0;
     }
 
+    private static String removeAllSuffix(String str, String suffix) {
+        int lastIndexOfSuffix;
+        String result = str;
+        while ((lastIndexOfSuffix = result.lastIndexOf(suffix)) > -1) {
+            result = result.substring(0, lastIndexOfSuffix);
+        }
+        return result;
+    }
+
+    /* removeAllSuffixes("something.git///", "/", ".git") => "something" */
+    public static String removeAllSuffixes(String str, String... suffixes) {
+        String result = str;
+        for (String suffix : suffixes) {
+            result = removeAllSuffix(result, suffix);
+        }
+        return result;
+    }
+
 }
