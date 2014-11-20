@@ -25,6 +25,7 @@ module.exports = RedisSharelatex =
 		sub = RedisSharelatex.createClient(connectionInfo)
 		pub = RedisSharelatex.createClient(connectionInfo)
 		
+		redisIsOk = true
 		heartbeatInterval = 2000 #ms
 		isAliveTimeout = 10000 #ms
 		
@@ -45,8 +46,11 @@ module.exports = RedisSharelatex =
 
 		isAlive = ->
 			timeSinceLastHeartbeat = Date.now() - lastHeartbeat
-			if timeSinceLastHeartbeat > isAliveTimeout
+			if !redisIsOk
+				return false
+			else if timeSinceLastHeartbeat > isAliveTimeout
 				console.error "heartbeat from redis timed out"
+				redisIsOk = false
 				return false
 			else
 				return true
