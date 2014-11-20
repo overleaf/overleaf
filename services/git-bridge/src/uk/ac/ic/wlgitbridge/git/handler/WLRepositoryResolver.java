@@ -31,7 +31,6 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         try {
             return repositorySource.getRepositoryWithNameAtRootDirectory(name, rootGitDirectory);
         } catch (RepositoryNotFoundException e) {
-            e.printStackTrace();
             throw e;
         } catch (ServiceNotEnabledException e) {
             e.printStackTrace();

@@ -17,12 +17,10 @@ public class ProjectLock {
     }
 
     public void lockForProject(String projectName) {
-        System.out.println("Locking for: " + Thread.currentThread().getId());
         getLockForProjectName(projectName).lock();
     }
 
     public void unlockForProject(String projectName) {
-        System.out.println("Unlocking for: " + Thread.currentThread().getId());
         getLockForProjectName(projectName).unlock();
     }
 
