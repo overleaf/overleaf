@@ -84,6 +84,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
+        lockForProject(projectName);
         System.out.println("Pushing project: " + projectName);
         CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
         SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
@@ -91,7 +92,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         SnapshotPushRequestResult result = snapshotPushRequest.getResult();
         if (result.wasSuccessful()) {
             candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
+            unlockForProject(projectName);
         } else {
+            unlockForProject(projectName);
             throw new OutOfDateException();
         }
     }

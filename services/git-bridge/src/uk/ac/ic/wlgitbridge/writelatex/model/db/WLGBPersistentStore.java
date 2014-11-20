@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model.db;
 
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProjectStore;
@@ -59,7 +60,7 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
     @Override
     public void addFileNodeBlob(String projectName, String fileName, boolean changed, byte[] blob) {
         try {
-            database.addFileNodeBlob(projectName, fileName, SQLiteWLDatabase.booleanToInt(changed), blob);
+            database.addFileNodeBlob(projectName, fileName, Util.booleanToInt(changed), blob);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -68,7 +69,7 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
     @Override
     public void addFileNodeExternal(String projectName, String fileName, boolean changed, String url) {
         try {
-            database.addFileNodeExternal(projectName, fileName, SQLiteWLDatabase.booleanToInt(changed), url);
+            database.addFileNodeExternal(projectName, fileName, Util.booleanToInt(changed), url);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
