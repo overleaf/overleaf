@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Winston on 16/11/14.
@@ -30,34 +29,24 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     private final WLDataModel dataModel;
     private final PostbackManager postbackManager;
     private final Map<String, Lock> projectLocks;
-    private final Lock projectLocksLock;
+    private final ProjectLock mainProjectLock;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
         postbackManager = new PostbackManager();
         projectLocks = new HashMap<String, Lock>();
-        projectLocksLock = new ReentrantLock();
-    }
-
-    private Lock getLockForProjectName(String projectName) {
-        projectLocksLock.lock();
-        Lock lock = projectLocks.get(projectName);
-        if (lock == null) {
-            lock = new ReentrantLock();
-            projectLocks.put(projectName, lock);
-        }
-        projectLocksLock.unlock();
-        return lock;
+        mainProjectLock = new ProjectLock();
+//        postbackLock = new ProjectLock();
     }
 
     @Override
     public void lockForProject(String projectName) {
-        getLockForProjectName(projectName).lock();
+        mainProjectLock.lockForProject(projectName);
     }
 
     @Override
     public void unlockForProject(String projectName) {
-        getLockForProjectName(projectName).unlock();
+        mainProjectLock.unlockForProject(projectName);
     }
 
     @Override
@@ -69,6 +58,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
             snapshotGetDocRequest.getResult().getVersionID();
         } catch (InvalidProjectException e) {
             return false;
+        } catch (FailedConnectionException e) {
+            throw e;
         } finally {
             unlockForProject(projectName);
         }
@@ -84,18 +75,26 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
-        lockForProject(projectName);
-        System.out.println("Pushing project: " + projectName);
-        CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
-        SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
-        snapshotPushRequest.request();
-        SnapshotPushRequestResult result = snapshotPushRequest.getResult();
-        if (result.wasSuccessful()) {
-            candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
-            unlockForProject(projectName);
-        } else {
-            unlockForProject(projectName);
-            throw new OutOfDateException();
+        mainProjectLock.lockForProject(projectName);
+        try {
+            System.out.println("Pushing project: " + projectName);
+            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
+            SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
+            snapshotPushRequest.request();
+            SnapshotPushRequestResult result = snapshotPushRequest.getResult();
+            if (result.wasSuccessful()) {
+                candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
+            } else {
+                throw new OutOfDateException();
+            }
+        } catch (SnapshotPostException e) {
+            throw e;
+        } catch (IOException e) {
+            throw e;
+        } catch (FailedConnectionException e) {
+            throw e;
+        } finally {
+            mainProjectLock.unlockForProject(projectName);
         }
     }
 
