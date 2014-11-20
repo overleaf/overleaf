@@ -4,6 +4,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProjectStore;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.SQLiteWLDatabase;
 
 import java.io.File;
 import java.sql.SQLException;
