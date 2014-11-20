@@ -27,11 +27,13 @@ public class WLBridgedProject {
     }
 
     public void buildRepository() throws RepositoryNotFoundException, ServiceNotEnabledException, FailedConnectionException {
+        writeLatexDataSource.lockForProject(name);
         if (repository.getObjectDatabase().exists()) {
             updateRepositoryFromSnapshots(repository);
         } else {
             buildRepositoryFromScratch(repository);
         }
+        writeLatexDataSource.unlockForProject(name);
     }
 
     private void updateRepositoryFromSnapshots(Repository repository) throws ServiceNotEnabledException, RepositoryNotFoundException, FailedConnectionException {

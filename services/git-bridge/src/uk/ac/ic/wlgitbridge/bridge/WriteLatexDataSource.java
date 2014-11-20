@@ -13,6 +13,10 @@ import java.util.List;
  */
 public interface WriteLatexDataSource {
 
+    void lockForProject(String projectName);
+
+    void unlockForProject(String projectName);
+
     /* Called by request thread. */
     public boolean repositoryExists(String projectName) throws FailedConnectionException;
     public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException;

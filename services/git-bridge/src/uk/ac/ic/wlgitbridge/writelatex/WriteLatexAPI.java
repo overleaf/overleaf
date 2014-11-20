@@ -16,7 +16,11 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostEx
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Winston on 16/11/14.
@@ -25,20 +29,48 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     private final WLDataModel dataModel;
     private final PostbackManager postbackManager;
+    private final Map<String, Lock> projectLocks;
+    private final Lock projectLocksLock;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
         postbackManager = new PostbackManager();
+        projectLocks = new HashMap<String, Lock>();
+        projectLocksLock = new ReentrantLock();
+    }
+
+    private Lock getLockForProjectName(String projectName) {
+        projectLocksLock.lock();
+        Lock lock = projectLocks.get(projectName);
+        if (lock == null) {
+            lock = new ReentrantLock();
+            projectLocks.put(projectName, lock);
+        }
+        projectLocksLock.unlock();
+        return lock;
+    }
+
+    @Override
+    public void lockForProject(String projectName) {
+        getLockForProjectName(projectName).lock();
+    }
+
+    @Override
+    public void unlockForProject(String projectName) {
+        getLockForProjectName(projectName).unlock();
     }
 
     @Override
     public boolean repositoryExists(String projectName) throws FailedConnectionException {
+        lockForProject(projectName);
         SnapshotGetDocRequest snapshotGetDocRequest = new SnapshotGetDocRequest(projectName);
         snapshotGetDocRequest.request();
         try {
             snapshotGetDocRequest.getResult().getVersionID();
         } catch (InvalidProjectException e) {
             return false;
+        } finally {
+            unlockForProject(projectName);
         }
         return true;
     }
@@ -46,7 +78,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     @Override
     public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException {
         System.out.println("Fetching project: " + projectName);
-        return dataModel.updateProjectWithName(projectName);
+        List<WritableRepositoryContents> writableRepositoryContents = dataModel.updateProjectWithName(projectName);
+        return writableRepositoryContents;
     }
 
     @Override
