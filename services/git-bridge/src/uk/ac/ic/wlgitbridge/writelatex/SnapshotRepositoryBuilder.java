@@ -25,6 +25,13 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
 
     @Override
     public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceNotEnabledException {
+        try {
+            if (!writeLatexDataSource.repositoryExists(name)) {
+                throw new RepositoryNotFoundException(name);
+            }
+        } catch (FailedConnectionException e) {
+            throw new ServiceNotEnabledException();
+        }
         File repositoryDirectory = new File(rootDirectory, name);
 
         Repository repository = null;
