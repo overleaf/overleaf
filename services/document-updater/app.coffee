@@ -57,6 +57,15 @@ app.get '/status', (req, res)->
 	else
 		res.send('document updater is alive')
 
+
+redisCheck = require("redis-sharelatex").activeHealthCheckRedis(Settings.redis.web)
+app.get "/health_check/redis", (req, res, next)->
+	if redisCheck.isAlive()
+		res.send 200
+	else
+		res.send 500
+
+
 app.use (error, req, res, next) ->
 	logger.error err: error, "request errored"
 	if error instanceof Errors.NotFoundError
