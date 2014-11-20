@@ -26,6 +26,7 @@ module.exports = RedisSharelatex =
 		pub = RedisSharelatex.createClient(connectionInfo)
 		
 		redisIsOk = true
+		lastPingMessage = ""
 		heartbeatInterval = 2000 #ms
 		isAliveTimeout = 10000 #ms
 		
@@ -37,11 +38,15 @@ module.exports = RedisSharelatex =
 			if error?
 				console.error "ERROR: failed to subscribe to #{heartbeatChannel} channel", error
 		sub.on "message", (channel, message) ->
+			if lastPingMessage == message #we got the same message twice
+				redisIsOk = false
+			lastPingMessage = message
 			if channel == heartbeatChannel
 				lastHeartbeat = Date.now()
 		
 		setInterval ->
-			pub.publish heartbeatChannel, "PING"
+			message = "ping:#{Date.now()}"
+			pub.publish heartbeatChannel, message
 		, heartbeatInterval
 
 		isAlive = ->
