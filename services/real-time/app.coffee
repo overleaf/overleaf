@@ -38,6 +38,16 @@ io.configure ->
 	#io.enable('browser client gzip')
 	io.set('transports', ['websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'])
 	io.set('log level', 1)
+
+app.get "/status", (req, res, next) ->
+	res.send "real-time-sharelatex is alive"
+	
+redisCheck = redis.activeHealthCheckRedis(Settings.redis.web)
+app.get "/health_check/redis", (req, res, next) ->
+	if redisCheck.isAlive()
+		res.send 200
+	else
+		res.send 500
 	
 Router = require "./app/js/Router"
 Router.configure(app, io, sessionSockets)

@@ -15,7 +15,7 @@
     "express-session": "^1.9.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
-    "redis-sharelatex": "~0.0.4",
+    "redis-sharelatex": "0.0.9",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "socket.io": "0.9.16",
