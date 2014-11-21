@@ -110,7 +110,7 @@ module.exports =
 	# then websocketsUrl should be the same as siteUrl, with your reverse
 	# proxy responible for sending websocket traffic to the websocket service
 	# rather than connecting directly.
-	websocketsUrl: "http://localhost:3000"
+	websocketsUrl: "http://localhost:3026"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
