@@ -7,10 +7,12 @@ module.exports = FixturesManager =
 		options.user_id        ||= FixturesManager.getRandomId()
 		options.project_id     ||= FixturesManager.getRandomId()
 		options.project        ||= { name: "Test Project" }
-		{project_id, user_id, privilegeLevel, project} = options
+		{project_id, user_id, privilegeLevel, project, publicAccess} = options
 		
 		privileges = {}
 		privileges[user_id] = privilegeLevel
+		if publicAccess
+			privileges["anonymous-user"] = publicAccess
 		
 		MockWebServer.createMockProject(project_id, privileges, project)
 		MockWebServer.run (error) =>

@@ -30,11 +30,10 @@ module.exports = Router =
 			
 			logger.log session: session, client_id: client.id, "client connected"
 			
-			user = session.user
-			if !user? or !user._id?
-				logger.log "terminating session without authenticated user"
-				client.disconnect()
-				return
+			if !session or !session.user?
+				user = {_id: "anonymous-user"}
+			else
+				user = session.user
 				
 			client.on "joinProject", (data = {}, callback) ->
 				WebsocketController.joinProject client, user, data.project_id, (err, args...) ->
