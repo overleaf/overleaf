@@ -147,22 +147,9 @@ define [
 
 
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http) ->
-		
 
 		$scope.plans = MultiCurrencyPricing.plans
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
-
-
-
-		if MultiCurrencyPricing.currencyCode != "USD"
-			currencyBuckets = [
-				{ bucketName:"eu-eu", currency:MultiCurrencyPricing.currencyCode}
-				{ bucketName:"eu-usd", currency:"USD"}
-			]
-			multiCurrencyBucket = abTestManager.getABTestBucket "multi_currency", currencyBuckets
-			$scope.currencyCode = multiCurrencyBucket.currency
-
-
 
 		$scope.trial_len = 7
 		$scope.planQueryString = '_free_trial_7_days'
@@ -171,14 +158,10 @@ define [
 			view: "monthly"
 
 
-
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
-			if multiCurrencyBucket?
-				abTestManager.processTestWithStep("multi_currency", multiCurrencyBucket.bucketName, 0)
-
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			

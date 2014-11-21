@@ -6,13 +6,20 @@ logger = require("logger-sharelatex")
 currencyMappings = {
 	"GB":"GBP"
 	"US":"USD"
+	"CH":"CHF"
+	"NZ":"NZD"
+	"AU":"AUD"
+	"DK":"DKK"
+	"NO":"NOK"
+	"CA":"CAD"
+	"SE":"SEK"
 }
 
 # Countries which would likely prefer Euro's
-EuroCountries = ["AT", "BE", "BG", "HR", "CY", "CZ", 
-"DK", "EE", "FI", "FR", "DE", "EL", "HU", "IE", 
+EuroCountries = ["AT", "BE", "BG", "HR", "CY", "CZ",  
+"EE", "FI", "FR", "DE", "EL", "HU", "IE", 
 "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT",
-"RO", "SK", "SI", "ES", "SE"]
+"RO", "SK", "SI", "ES"]
 
 _.each EuroCountries, (country)-> currencyMappings[country] = "EUR"
 
