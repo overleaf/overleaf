@@ -298,6 +298,7 @@ describe 'WebsocketController', ->
 		beforeEach ->
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArgWith(4)
+			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@update = {
 				doc_id: @doc_id = "doc-id-123"
 				row: @row = 42
