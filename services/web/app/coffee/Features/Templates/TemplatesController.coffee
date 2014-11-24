@@ -27,7 +27,10 @@ module.exports =
 			zipUrl = "#{settings.apis.web.url}#{zipUrl}"
 		else
 			zipUrl = "#{settings.apis.templates.url}#{zipUrl}"
-		request(zipUrl).pipe(writeStream)
+		zipReq = request(zipUrl)
+		zipReq.on "error", (error) ->
+			logger.error err: error, "error getting zip from template API"
+		zipReq.pipe(writeStream)
 		writeStream.on 'close', ->
 			ProjectUploadManager.createProjectFromZipArchive req.session.user._id, req.session.templateData.templateName, dumpPath, (err, project)->
 				if err?
