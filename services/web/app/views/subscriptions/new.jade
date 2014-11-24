@@ -34,6 +34,12 @@ block content
 						
 				
 				.col-md-3.col-md-pull-6
+					if showStudentPlan == 'true'
+						a.btn-primary.btn.plansPageStudentLink(
+							href,
+							ng-click="switchToStudent()"
+						) #{translate("half_price_student")} 
+
 					.card.card-first
 						.paymentPageFeatures
 							.page-header

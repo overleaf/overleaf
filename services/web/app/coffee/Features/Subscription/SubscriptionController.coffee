@@ -57,6 +57,7 @@ module.exports = SubscriptionController =
 								plan_code: req.query.planCode
 								currency: currency
 								plan:plan
+								showStudentPlan: req.query.ssp
 								recurlyConfig: JSON.stringify
 									currency: currency
 									subdomain: Settings.apis.recurly.subdomain

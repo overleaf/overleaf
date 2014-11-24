@@ -9,3 +9,6 @@ define [
 
 		$scope.changeCurrency = (newCurrency)->
 			window.location = "/user/subscription/new?planCode=#{window.plan_code}&currency=#{newCurrency}"
+
+		$scope.switchToStudent = ()->
+			window.location = "/user/subscription/new?planCode=student&currency=#{$scope.currencyCode}"
