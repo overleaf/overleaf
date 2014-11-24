@@ -12,7 +12,10 @@ describe 'TemplatesController', ->
 
 	beforeEach ->
 		@request = sinon.stub()
-		@request.returns pipe:->
+		@request.returns {
+			pipe:->
+			on:->
+		}
 		@fs = {
 			unlink : sinon.stub()
 			createWriteStream : sinon.stub().returns(on:(_, cb)->cb())
