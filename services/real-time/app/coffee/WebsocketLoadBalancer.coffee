@@ -1,4 +1,5 @@
 Settings = require 'settings-sharelatex'
+logger = require 'logger-sharelatex'
 redis = require("redis-sharelatex")
 rclientPub = redis.createClient(Settings.redis.web)
 rclientSub = redis.createClient(Settings.redis.web)
@@ -8,6 +9,9 @@ module.exports = WebsocketLoadBalancer =
 	rclientSub: rclientSub
 
 	emitToRoom: (room_id, message, payload...) ->
+		if !room_id?
+			logger.err {err: new Error("Empty room_id"), message, payload}, "error emitting to room"
+			return
 		@rclientPub.publish "editor-events", JSON.stringify
 			room_id: room_id
 			message: message
@@ -25,6 +29,6 @@ module.exports = WebsocketLoadBalancer =
 		message = JSON.parse(message)
 		if message.room_id == "all"
 			io.sockets.emit(message.message, message.payload...)
-		else
+		else if message.room_id?
 			io.sockets.in(message.room_id).emit(message.message, message.payload...)
 		
