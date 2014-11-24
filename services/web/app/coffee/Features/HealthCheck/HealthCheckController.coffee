@@ -3,23 +3,26 @@ Base = require("mocha/lib/reporters/base")
 redis = require("redis-sharelatex")
 settings = require("settings-sharelatex")
 redisCheck = redis.activeHealthCheckRedis(settings.redis.web)
+logger = require "logger-sharelatex"
+domain = require "domain"
 
 module.exports = HealthCheckController =
 	check: (req, res, next = (error) ->) ->
-		mocha = new Mocha(reporter: Reporter(res), timeout: 10000)
-		mocha.addFile("test/smoke/js/SmokeTests.js")
-		mocha.run () ->
-			path = require.resolve(__dirname + "/../../../../test/smoke/js/SmokeTests.js")
-			delete require.cache[path]
+		d = domain.create()
+		d.on "error", (error) ->
+ 			logger.err err: error, "error in mocha"
+		d.run () ->
+			mocha = new Mocha(reporter: Reporter(res), timeout: 10000)
+			mocha.addFile("test/smoke/js/SmokeTests.js")
+			mocha.run () ->
+				path = require.resolve(__dirname + "/../../../../test/smoke/js/SmokeTests.js")
+				delete require.cache[path]
 
 	checkRedis: (req, res, next)->
 		if redisCheck.isAlive()
 			res.send 200
 		else
 			res.send 500
-
-
-
 		
 Reporter = (res) ->
 	(runner) ->
