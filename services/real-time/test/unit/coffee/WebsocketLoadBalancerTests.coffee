@@ -9,6 +9,7 @@ describe "WebsocketLoadBalancer", ->
 			"redis-sharelatex": 
 				createClient: () ->
 					auth:->
+			"logger-sharelatex": { log: sinon.stub(), err: sinon.stub() }
 		@io = {}
 		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
 		@WebsocketLoadBalancer.rclientSub =
