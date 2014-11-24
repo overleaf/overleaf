@@ -63,6 +63,7 @@ module.exports = EditorController =
 	buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
+			return callback(new Error("not found")) if !project?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
