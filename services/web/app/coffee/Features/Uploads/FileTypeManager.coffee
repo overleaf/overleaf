@@ -24,7 +24,8 @@ module.exports = FileTypeManager =
 
 	isDirectory: (path, callback = (error, result) ->) ->
 		fs.stat path, (error, stats) ->
-			callback(error, stats.isDirectory())
+			return callback(error) if error?
+			callback(null, stats?.isDirectory())
 
 	isBinary: (name, fsPath, callback = (error, result) ->) ->
 		parts = name.split(".")
