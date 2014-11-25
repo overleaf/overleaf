@@ -2,8 +2,23 @@ define [
 	"base"
 	"libs/md5"
 ], (App) ->
-	
+	oldKeys = [
+		"sl_abt_multi_currency_editor_eu-eu"
+		"sl_abt_multi_currency_eu-eu"
+		"sl_abt_multi_currency_editor_eu-usd"
+		"sl_abt_multi_currency_eu-usd"
+		"sl_abt_trial_len_14d"
+		"sl_abt_trial_len_7d"
+		"sl_abt_trial_len_30d"
+		"sl_utt"
+		"sl_utt_trial_len"
+		"sl_utt_multi_currency"
+	]
+
 	App.factory "abTestManager", ($http, ipCookie) ->
+		
+		_.each oldKeys, (oldKey)->
+			ipCookie.remove(oldKey)
 
 		_buildCookieKey = (testName, bucket)-> 
 			key = "sl_abt_#{testName}_#{bucket}"
