@@ -32,7 +32,7 @@ module.exports = GeoIpLookup =
 		ip = ip.trim().split(" ")[0]
 		opts = 
 			url: "#{settings.apis.geoIpLookup.url}/#{ip}"
-			timeout: 1000
+			timeout: 3000
 			json:true
 		logger.log ip:ip, opts:opts, "getting geo ip details"
 		request.get opts, (err, res, ipDetails)->

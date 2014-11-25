@@ -43,7 +43,7 @@ describe "GeoIpLookup", ->
 
 		it "should request the details using the ip", (done)->
 			@GeoIpLookup.getDetails @ipAddress, (err)=>
-				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000, json:true}).should.equal true
+				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:3000, json:true}).should.equal true
 				done()
 
 		it "should return the ip details", (done)->
@@ -53,7 +53,7 @@ describe "GeoIpLookup", ->
 
 		it "should take the first ip in the string", (done)->
 			@GeoIpLookup.getDetails " #{@ipAddress} 456.312.452.102 432.433.888.234", (err)=>
-				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:1000, json:true}).should.equal true
+				@request.get.calledWith({url:@settings.apis.geoIpLookup.url+"/"+@ipAddress, timeout:3000, json:true}).should.equal true
 				done()
 
 	describe "getCurrencyCode", ->
