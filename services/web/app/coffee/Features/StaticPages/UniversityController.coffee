@@ -31,4 +31,7 @@ module.exports = UniversityController =
 		UniversityController.getPage req, res
 
 	_directProxy: (originUrl, res)->
-		request.get(originUrl).pipe res
+		upstream = request.get(originUrl)
+		upstream.on "error", (error) ->
+			logger.error err: error, "university proxy error"
+		upstream.pipe res

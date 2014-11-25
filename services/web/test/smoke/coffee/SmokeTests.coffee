@@ -8,6 +8,7 @@ Settings = require "settings-sharelatex"
 port = Settings.internal?.web?.port or Settings.port or 3000
 cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
 buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
+logger = require "logger-sharelatex"
 
 describe "Opening", ->
 

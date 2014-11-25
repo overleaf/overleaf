@@ -22,6 +22,7 @@ module.exports = BlogController =
 
 		logger.log url:url, "proxying request to blog api"
 		request.get blogUrl, (err, r, data)->
+			return next(err) if err?
 			if r?.statusCode == 404
 				return ErrorController.notFound(req, res, next)
 			data = data.trim()
@@ -37,4 +38,7 @@ module.exports = BlogController =
 		BlogController.getPage req, res
 
 	_directProxy: (originUrl, res)->
-		request.get(originUrl).pipe res
+		upstream = request.get(originUrl)
+		upstream.on "error", (error) ->
+			logger.error err: error, "blog proxy error"
+		upstream.pipe res
