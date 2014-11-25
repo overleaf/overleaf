@@ -121,14 +121,14 @@ define [
 				CHF:
 					symbol: "Fr"
 					student:
-						monthly: "CHF 8"
-						annual: "CHF 80"
+						monthly: "Fr 8"
+						annual: "Fr 80"
 					collaborator:
-						monthly: "CHF 15"
-						annual: "CHF 180"
+						monthly: "Fr 15"
+						annual: "Fr 180"
 					professional:
-						monthly: "CHF 30"
-						annual: "CHF 360"
+						monthly: "Fr 30"
+						annual: "Fr 360"
 
 				SGD:
 					symbol: "$"
