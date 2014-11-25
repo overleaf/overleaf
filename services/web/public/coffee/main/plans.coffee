@@ -136,7 +136,7 @@ define [
 						monthly: "$12"
 						annual: "$120"
 					collaborator:
-						monthly: "$~"
+						monthly: "$20"
 						annual: "$240"
 					professional:
 						monthly: "$40"
