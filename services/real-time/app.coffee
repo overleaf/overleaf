@@ -64,3 +64,6 @@ host = Settings.internal.realTime.host
 server.listen port, host, (error) ->
 	throw error if error?
 	logger.log "real-time-sharelatex listening on #{host}:#{port}"
+	
+# Stop huge stack traces in logs from all the socket.io parsing steps.
+Error.stackTraceLimit = 10
