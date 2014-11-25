@@ -6,7 +6,7 @@ define [
 	"ide/online-users/OnlineUsersManager"
 	"ide/track-changes/TrackChangesManager"
 	"ide/permissions/PermissionsManager"
-	"ide/pdf/PdfManager"
+	"ide/pdfng/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/settings/index"
 	"ide/share/index"

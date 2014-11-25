@@ -11,6 +11,7 @@ define [
 		"underscore"
 		"ngSanitize"
 		"ipCookie"
+		"pdfViewerApp"
 	])
 
 	return App
