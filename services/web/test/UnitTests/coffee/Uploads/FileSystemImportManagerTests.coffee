@@ -22,14 +22,14 @@ describe "FileSystemImportManager", ->
 			@docContent = "one\ntwo\nthree"
 			@docLines = @docContent.split("\n")
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
-			@EditorController.addDoc = sinon.stub().callsArg(5)
+			@EditorController.addDocWithoutLock = sinon.stub().callsArg(5)
 			@FileSystemImportManager.addDoc @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should read the file from disk", ->
 			@fs.readFile.calledWith(@path_on_disk, "utf8").should.equal true
 
 		it "should insert the doc", ->
-			@EditorController.addDoc.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
+			@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
 				.should.equal true
 
 	describe "addDoc with windows line ending", ->
@@ -37,20 +37,20 @@ describe "FileSystemImportManager", ->
 			@docContent = "one\r\ntwo\r\nthree"
 			@docLines = ["one", "two", "three"]
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
-			@EditorController.addDoc = sinon.stub().callsArg(5)
+			@EditorController.addDocWithoutLock = sinon.stub().callsArg(5)
 			@FileSystemImportManager.addDoc @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should strip the \\r characters before adding", ->
-			@EditorController.addDoc.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
+			@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
 				.should.equal true
 
 	describe "addFile with replace set to false", ->
 		beforeEach ->
-			@EditorController.addFile = sinon.stub().callsArg(5)
+			@EditorController.addFileWithoutLock = sinon.stub().callsArg(5)
 			@FileSystemImportManager.addFile @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should add the file", ->
-			@EditorController.addFile.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload")
+			@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload")
 				.should.equal true
 
 	describe "addFile with replace set to true", ->
@@ -63,7 +63,7 @@ describe "FileSystemImportManager", ->
 					}]
 				}
 				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @folder)
-				@EditorController.addFile = sinon.stub().callsArg(5)
+				@EditorController.addFileWithoutLock = sinon.stub().callsArg(5)
 				@FileSystemImportManager.addFile @project_id, @folder_id, @name, @path_on_disk, true, @callback
 
 			it "should look up the folder", ->
@@ -72,7 +72,7 @@ describe "FileSystemImportManager", ->
 					.should.equal true
 
 			it "should add the file", ->
-				@EditorController.addFile.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload")
+				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload")
 					.should.equal true
 
 		describe "when the file does exist", ->
@@ -102,12 +102,12 @@ describe "FileSystemImportManager", ->
 	describe "addFolder", ->
 		beforeEach ->
 			@new_folder_id = "new-folder-id"
-			@EditorController.addFolder  = sinon.stub().callsArgWith(4, null, _id: @new_folder_id)
+			@EditorController.addFolderWithoutLock  = sinon.stub().callsArgWith(4, null, _id: @new_folder_id)
 			@FileSystemImportManager.addFolderContents = sinon.stub().callsArg(4)
 			@FileSystemImportManager.addFolder @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 		it "should add a folder to the project", ->
-			@EditorController.addFolder.calledWith(@project_id, @folder_id, @name, "upload")
+			@EditorController.addFolderWithoutLock.calledWith(@project_id, @folder_id, @name, "upload")
 				.should.equal true
 
 		it "should add the folders contents", ->
