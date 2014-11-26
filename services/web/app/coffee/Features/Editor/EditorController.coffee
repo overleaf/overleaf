@@ -17,6 +17,7 @@ TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 Settings = require('settings-sharelatex')
 async = require('async')
 ConnectedUsersManager = require("../ConnectedUsers/ConnectedUsersManager")
+LockManager = require("../../infrastructure/LockManager")
 _ = require('underscore')
 redis = require("redis-sharelatex")
 rclientPub = redis.createClient(Settings.redis.web)
@@ -189,7 +190,17 @@ module.exports = EditorController =
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
+
 	addDoc: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addDoc"
+				return callback(err)
+			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, (error, doc)->
+				LockManager.releaseLock project_id, ->
+					callback(error, doc)
+
+	addDocWithoutLock: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
 		docName = docName.trim()
 		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
@@ -197,7 +208,18 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback(err, doc)
 
+
 	addFile: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addFile"
+				return callback(err)
+			EditorController.addFileWithoutLock project_id, folder_id, fileName, path, source, (error, file)->
+				LockManager.releaseLock project_id, ->
+					callback(error, file)	
+
+
+	addFileWithoutLock: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
 		fileName = fileName.trim()
 		logger.log {project_id, folder_id, fileName, path}, "sending new file to project"
 		Metrics.inc "editor.add-file"
@@ -208,7 +230,18 @@ module.exports = EditorController =
 	replaceFile: (project_id, file_id, fsPath, source, callback = (error) ->)->
 		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, callback
 
-	addFolder: (project_id, folder_id, folderName, source, callback = (error, folder)->)->
+
+
+	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addFolder"
+				return callback(err)
+			EditorController.addFolderWithoutLock project_id, folder_id, folderName, source, (error, folder)->
+				LockManager.releaseLock project_id, ->
+					callback(error, folder)	
+
+	addFolderWithoutLock: (project_id, folder_id, folderName, source, callback = (error, folder)->)->
 		folderName = folderName.trim()
 		logger.log {project_id, folder_id, folderName, source}, "sending new folder to project"
 		Metrics.inc "editor.add-folder"
@@ -216,7 +249,17 @@ module.exports = EditorController =
 			@p.notifyProjectUsersOfNewFolder project_id, folder_id, folder, (error) ->
 				callback error, folder
 
-	mkdirp: (project_id, path, callback)->
+
+	mkdirp : (project_id, path, callback)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, "could not get lock to mkdirp"
+				return callback(err)
+			EditorController.mkdirpWithoutLock project_id, path, (err, newFolders, lastFolder)->
+				LockManager.releaseLock project_id, ->
+					callback(err, newFolders, lastFolder)	
+
+	mkdirpWithoutLock: (project_id, path, callback)->
 		logger.log project_id:project_id, path:path, "making directories if they don't exist"
 		ProjectEntityHandler.mkdirp project_id, path, (err, newFolders, lastFolder)=>
 			self = @
@@ -226,7 +269,16 @@ module.exports = EditorController =
 			async.series jobs, (err)->
 				callback err, newFolders, lastFolder
 
-	deleteEntity: (project_id, entity_id, entityType, source, callback)->
+	deleteEntity : (project_id, entity_id, entityType, source, callback)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, "could not get lock to deleteEntity"
+				return callback(err)
+			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, (err)->
+				LockManager.releaseLock project_id, ()->
+					callback(err)
+
+	deleteEntityWithoutLock: (project_id, entity_id, entityType, source, callback)->
 		logger.log {project_id, entity_id, entityType, source}, "start delete process of entity"
 		Metrics.inc "editor.delete-entity"
 		ProjectEntityHandler.deleteEntity project_id, entity_id, entityType, =>
@@ -270,7 +322,7 @@ module.exports = EditorController =
 			if newName.length > 0
 				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
 				callback?()
-
+#
 	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
 		Metrics.inc "editor.move-entity"
 		ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
