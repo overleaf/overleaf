@@ -14,7 +14,7 @@ describe 'ProjectRootDocManager', ->
 	
 	describe "setRootDocAutomatically", ->
 		describe "when there is a suitable root doc", ->
-			beforeEach ->
+			beforeEach (done)->
 				@docs =
 					"/chapter1.tex":
 						_id: "doc-id-1"
@@ -22,9 +22,16 @@ describe 'ProjectRootDocManager', ->
 					"/main.tex":
 						_id: "doc-id-2"
 						lines: ["\\documentclass{article}", "\\input{chapter1}"]
+					"/nested/chapter1a.tex":
+						_id: "doc-id-3"
+						lines: ["Hello world"]
+					"/nested/chapter1b.tex":
+						_id: "doc-id-4"
+						lines: ["Hello world"]
+
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2)
-				@ProjectRootDocManager.setRootDocAutomatically @project_id, @callback
+				@ProjectRootDocManager.setRootDocAutomatically @project_id, done
 
 			it "should check the docs of the project", ->
 				@ProjectEntityHandler.getAllDocs.calledWith(@project_id)
@@ -33,9 +40,6 @@ describe 'ProjectRootDocManager', ->
 			it "should set the root doc to the doc containing a documentclass", ->
 				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
 					.should.equal true
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
 
 		describe "when the root doc is an Rtex file", ->
 			beforeEach ->
@@ -55,7 +59,7 @@ describe 'ProjectRootDocManager', ->
 					.should.equal true
 
 		describe "when there is no suitable root doc", ->
-			beforeEach ->
+			beforeEach (done)->
 				@docs =
 					"/chapter1.tex":
 						_id: "doc-id-1"
@@ -65,11 +69,8 @@ describe 'ProjectRootDocManager', ->
 						lines: ["%Example: \\documentclass{article}"]
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2)
-				@ProjectRootDocManager.setRootDocAutomatically @project_id, @callback
+				@ProjectRootDocManager.setRootDocAutomatically @project_id, done
 
 			it "should not set the root doc to the doc containing a documentclass", ->
 				@ProjectEntityHandler.setRootDoc.called.should.equal false
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
 
