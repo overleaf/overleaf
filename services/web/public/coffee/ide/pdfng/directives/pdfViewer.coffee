@@ -61,7 +61,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 	@redraw = (position) ->
 		console.log 'in redraw'
 		console.log 'reseting pages array for', $scope.numPages
-		console.log 'position is', position
+		console.log 'position is', position.page, position.offset
 		$scope.pages = ({
 			pageNum: i
 		} for i in [1 .. $scope.numPages])
@@ -152,9 +152,10 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 		return newPosition
 
 	@computeOffset = (page, position) ->
+		console.log 'computing offset for', page, position
 		element = page.element
 		pageTop = $(element).offset().top - $(element).parent().offset().top
-		console.log('top of page scroll is', pageTop)
+		console.log('top of page scroll is', pageTop, 'vs', page.elemTop)
 		console.log('inner height is', $(element).innerHeight())
 		offset = position.offset
 		# convert offset to pixels
@@ -163,7 +164,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 			pageOffset = viewport.convertToViewportPoint(offset.left, offset.top)
 			console.log 'addition offset =', pageOffset
 			console.log 'total', pageTop + pageOffset[1]
-			Math.round(pageTop + pageOffset[1] + 10) ## 10 is margin
+			Math.round(pageTop + pageOffset[1]) ## 10 is margin
 
 	@setPdfPosition = (page, position) ->
 		console.log 'required pdf Position is', position
@@ -187,7 +188,9 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 			"dblClickCallback": "="
 		}
 		template: """
+		<div>
 		<div data-pdf-page class='pdf-page-container plv-page-view page-view' ng-repeat='page in pages'></div>
+		<div>
 		"""
 		link: (scope, element, attrs, ctrl) ->
 			console.log 'in pdfViewer element is', element
@@ -203,7 +206,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 					element.innerWidth()
 					element.innerHeight()
 					element.offset().top
-			]
+				]
 
 			doRescale = (scale) ->
 				console.log 'doRescale', scale
@@ -244,7 +247,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 					return
 				#console.log 'not from auto scroll'
 				scope.position = ctrl.getPdfPosition()
-				console.log 'position is', scope.position
+				console.log 'position is', scope.position.page, scope.position.offset
 				scope.$apply()
 
 			scope.$watch 'pdfSrc', (newVal, oldVal) ->

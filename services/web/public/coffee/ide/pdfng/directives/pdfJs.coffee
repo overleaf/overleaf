@@ -128,24 +128,31 @@ define [
 					# , 1000
 
 				scope.fitToHeight = () ->
-#					pdfListView.setToFitHeight()
+					scale = angular.copy (scope.scale)
+					scale.scaleMode = 'scale_mode_fit_height'
+					scope.scale = scale
 
 				scope.fitToWidth = () ->
-#					pdfListView.setToFitWidth()
+					scale = angular.copy (scope.scale)
+					scale.scaleMode = 'scale_mode_fit_width'
+					scope.scale = scale
 
 				scope.zoomIn = () ->
-#					scale = pdfListView.getScale()
-#					pdfListView.setScale(scale * 1.2)
+					scale = angular.copy (scope.scale)
+					scale.scaleMode = 'scale_mode_value'
+					scale.scale = scale.scale * 1.2
+					scope.scale = scale
 
 				scope.zoomOut = () ->
-#					scale = pdfListView.getScale()
-#					pdfListView.setScale(scale / 1.2)
+					scale = angular.copy (scope.scale)
+					scale.scaleMode = 'scale_mode_value'
+					scale.scale = scale.scale / 1.2
+					scope.scale = scale
 
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, (e) ->
 							console.log 'got a resize event', event, e
-#							pdfListView.onResize()
 
 			template: """
 				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale'></div>
