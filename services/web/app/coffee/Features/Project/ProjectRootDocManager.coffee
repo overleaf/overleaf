@@ -19,7 +19,7 @@ module.exports = ProjectRootDocManager =
 							return cb(doc?._id)
 						else
 							return cb()
-			async.parallel jobs, (root_doc_id)->
+			async.series jobs, (root_doc_id)->
 				if root_doc_id?
 					ProjectEntityHandler.setRootDoc project_id, root_doc_id, callback
 				else
