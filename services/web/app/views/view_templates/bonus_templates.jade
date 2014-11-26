@@ -28,7 +28,7 @@ script(type="text/ng-template", id="BonusLinkToUsModal")
 			div.text-center(ng-hide="dbState.hasDropboxFeature")
 				p You need to upgrade your account to link to dropbox.
 				p
-					a.btn.btn-info(ng-click="startFreeTrial('dropbox')") Start Free Trial
+					a.btn(ng-click="startFreeTrial('dropbox')", ng-class="buttonClass") Start Free Trial
 				p.small(ng-show="startedFreeTrial")
 					| Please refresh this page after starting your free trial.
 

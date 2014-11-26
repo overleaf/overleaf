@@ -27,6 +27,7 @@ define [
 	"directives/rightClick"
 	"filters/formatDate"
 	"main/event-tracking"
+	"main/account-upgrade"
 ], (
 	App
 	FileTreeManager
@@ -38,7 +39,8 @@ define [
 	PdfManager
 	BinaryFilesManager
 ) ->
-	App.controller "IdeController", ($scope, $timeout, ide, abTestManager) ->
+
+	App.controller "IdeController", ($scope, $timeout, ide) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -64,11 +66,7 @@ define [
 
 		$scope.chat = {}
 
-		$scope.startFreeTrial = (source) ->
-			ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
-			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
-			$scope.startedFreeTrial = true
-
+		
 		window._ide = ide
 
 		ide.project_id = $scope.project_id = window.project_id

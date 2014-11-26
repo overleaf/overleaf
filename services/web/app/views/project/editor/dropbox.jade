@@ -25,8 +25,8 @@ script(type="text/ng-template", id="dropboxModalTemplate")
 					strong Dropbox/sharelatex/{{ project.name }}
 			div.text-center(ng-hide="dbState.hasDropboxFeature")
 				p #{translate("need_to_upgrade_for_dropbox")}
-				p
-					a.btn.btn-info(ng-click="startFreeTrial('dropbox')") #{translate("start_free_trial")}
+				p(ng-controller="FreeTrialModalController")
+					a.btn(ng-click="startFreeTrial('dropbox')", ng-class="buttonClass") #{translate("start_free_trial")}
 				p.small(ng-show="startedFreeTrial")
 					| #{translate("refresh_page_after_starting_free_trial")}
 

@@ -2,9 +2,10 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 	.upgrade-prompt(ng-show="!project.features.versioning")
 		.message(ng-show="project.owner._id == user.id")
 			p #{translate("need_to_upgrade_for_history")}
-			p
-				a.btn.btn-info(
+			p(ng-controller="FreeTrialModalController")
+				a.btn(
 					href
+					ng-class="buttonClass"
 					ng-click="startFreeTrial('track-changes')"
 				) #{translate("start_free_trial")}
 			p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}

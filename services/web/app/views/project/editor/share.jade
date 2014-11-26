@@ -68,8 +68,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							) #{translate("share")}
 				div.text-center(ng-hide="canAddCollaborators")
 					p #{translate("need_to_upgrade_for_more_collabs")}.
-					p
-						a.btn.btn-info(href, ng-click="startFreeTrial('projectMembers')") #{translate("start_free_trial")}
+					p(ng-controller="FreeTrialModalController")
+						a.btn(href, ng-click="startFreeTrial('projectMembers')", ng-class="buttonClass") #{translate("start_free_trial")}
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}.
 

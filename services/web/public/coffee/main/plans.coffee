@@ -46,28 +46,110 @@ define [
 					professional:
 						monthly: "£24"
 						annual: "£288"
+
+				SEK:
+					symbol: "kr"
+					student:
+						monthly: "60 kr"
+						annual: "600 kr"
+					collaborator:
+						monthly: "110 kr"
+						annual: "1320 kr"
+					professional:
+						monthly: "220 kr"
+						annual: "2640 kr"
+				CAD:
+					symbol: "$"
+					student:
+						monthly: "$9"
+						annual: "$90"
+					collaborator:
+						monthly: "$17"
+						annual: "$204"
+					professional:
+						monthly: "$34"
+						annual: "$408"
+
+				NOK:
+					symbol: "kr"
+					student:
+						monthly: "60 kr"
+						annual: "600 kr"
+					collaborator:
+						monthly: "110 kr"
+						annual: "1320 kr"
+					professional:
+						monthly: "220 kr"
+						annual: "2640 kr"
+
+				DKK:
+					symbol: "kr"
+					student:
+						monthly: "50 kr"
+						annual: "500 kr"
+					collaborator:
+						monthly: "90 kr"
+						annual: "1080 kr"
+					professional:
+						monthly: "180 kr"
+						annual: "2160 kr"
+
+				AUD:
+					symbol: "$"
+					student:
+						monthly: "$10"
+						annual: "$100"
+					collaborator:
+						monthly: "$18"
+						annual: "$216"
+					professional:
+						monthly: "$35"
+						annual: "$420"
+
+				NZD:
+					symbol: "$"
+					student:
+						monthly: "$10"
+						annual: "$100"
+					collaborator:
+						monthly: "$18"
+						annual: "$216"
+					professional:
+						monthly: "$35"
+						annual: "$420"
+						
+				CHF:
+					symbol: "Fr"
+					student:
+						monthly: "Fr 8"
+						annual: "Fr 80"
+					collaborator:
+						monthly: "Fr 15"
+						annual: "Fr 180"
+					professional:
+						monthly: "Fr 30"
+						annual: "Fr 360"
+
+				SGD:
+					symbol: "$"
+					student:
+						monthly: "$12"
+						annual: "$120"
+					collaborator:
+						monthly: "$20"
+						annual: "$240"
+					professional:
+						monthly: "$40"
+						annual: "$480"
 		}
 	
 
 
 
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http) ->
-		
 
 		$scope.plans = MultiCurrencyPricing.plans
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
-
-
-
-		if MultiCurrencyPricing.currencyCode != "USD"
-			currencyBuckets = [
-				{ bucketName:"eu-eu", currency:MultiCurrencyPricing.currencyCode}
-				{ bucketName:"eu-usd", currency:"USD"}
-			]
-			multiCurrencyBucket = abTestManager.getABTestBucket "multi_currency", currencyBuckets
-			$scope.currencyCode = multiCurrencyBucket.currency
-
-
 
 		$scope.trial_len = 7
 		$scope.planQueryString = '_free_trial_7_days'
@@ -76,14 +158,10 @@ define [
 			view: "monthly"
 
 
-
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
-			if multiCurrencyBucket?
-				abTestManager.processTestWithStep("multi_currency", multiCurrencyBucket.bucketName, 0)
-
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			
