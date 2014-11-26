@@ -57,22 +57,18 @@ define [
 					initializedPosition = true
 
 					if (scale = $.localStorage("pdf.scale"))?
-						#pdfListView.setScaleMode(scale.scaleMode, scale.scale)
+						scope.scale = { scaleMode: scale.scaleMode, scale: +scale.scale}
 					else
 						scope.scale = { scaleMode: 'scale_mode_fit_width' }
 
 					if (position = $.localStorage("pdf.position.#{attrs.key}"))
-						1
-						#pdfListView.setPdfPosition(position)
+						scope.position = { page: +position.page, offset: { "top": +position.offset.top, "left": +position.offset.left } }
 
 					#scope.position = pdfListView.getPdfPosition(true)
 
 					$(window).unload () =>
-						$.localStorage "pdf.scale", {
-#							scaleMode: pdfListView.getScaleMode()
-#							scale: pdfListView.getScale()
-						}
-#						$.localStorage "pdf.position.#{attrs.key}", pdfListView.getPdfPosition()
+						$.localStorage "pdf.scale", scope.scale
+						$.localStorage "pdf.position.#{attrs.key}", scope.position
 
 				flashControls = () ->
 					scope.flashControls = true
@@ -80,7 +76,7 @@ define [
 						scope.flashControls = false
 					, 1000
 
-				element.find(".pdfjs-viewer").scroll () ->
+#				element.find(".pdfjs-viewer").scroll () ->
 #					scope.position = pdfListView.getPdfPosition(true)
 
 				onDoubleClick = (e) ->
