@@ -1,4 +1,3 @@
-require('coffee-script')
 sinon = require('sinon')
 assert = require('assert')
 path = require('path')
