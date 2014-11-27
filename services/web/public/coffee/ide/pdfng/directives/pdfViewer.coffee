@@ -157,6 +157,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 		pageTop = $(element).offset().top - $(element).parent().offset().top
 		console.log('top of page scroll is', pageTop, 'vs', page.elemTop)
 		console.log('inner height is', $(element).innerHeight())
+		currentScroll = $(element).parent().scrollTop()
 		offset = position.offset
 		# convert offset to pixels
 		return $scope.document.getPdfViewport(page.pageNum).then (viewport) ->
@@ -164,7 +165,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 			pageOffset = viewport.convertToViewportPoint(offset.left, offset.top)
 			console.log 'addition offset =', pageOffset
 			console.log 'total', pageTop + pageOffset[1]
-			Math.round(pageTop + pageOffset[1]) ## 10 is margin
+			Math.round(pageTop + pageOffset[1] + currentScroll) ## 10 is margin
 
 	@setPdfPosition = (page, position) ->
 		console.log 'required pdf Position is', position
