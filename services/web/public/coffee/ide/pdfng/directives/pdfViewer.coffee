@@ -38,7 +38,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 			scale = {} if not scale?
 			if scale.scaleMode == 'scale_mode_fit_width'
 				# TODO make this dynamic
-				numScale = (containerWidth - 15) / ($scope.pdfPageSize[1])
+				numScale = (containerWidth - 40) / ($scope.pdfPageSize[1])
 			else if scale.scaleMode == 'scale_mode_fit_height'
 				# TODO magic numbers for jquery ui layout
 				numScale = (containerHeight) / ($scope.pdfPageSize[0])
