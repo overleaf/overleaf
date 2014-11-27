@@ -1,6 +1,11 @@
 {
   "name": "filestore-sharelatex",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "An API for CRUD operations on binary files stored in S3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sharelatex/filestore-sharelatex.git"
+  },
   "dependencies": {
     "async": "~0.2.10",
     "coffee-script": "~1.7.1",
