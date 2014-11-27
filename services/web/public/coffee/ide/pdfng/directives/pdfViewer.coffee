@@ -41,14 +41,14 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 				numScale = (containerWidth - 40) / ($scope.pdfPageSize[1])
 			else if scale.scaleMode == 'scale_mode_fit_height'
 				# TODO magic numbers for jquery ui layout
-				numScale = (containerHeight) / ($scope.pdfPageSize[0])
+				numScale = (containerHeight - 20) / ($scope.pdfPageSize[0])
 			else if scale.scaleMode == 'scale_mode_value'
 				numScale = scale.scale
 			else if scale.scaleMode == 'scale_mode_auto'
 				# TODO
 			else
 				scale.scaleMode = 'scale_mode_fit_width'
-				numScale = (containerWidth - 15) / ($scope.pdfPageSize[1])
+				numScale = (containerWidth - 40) / ($scope.pdfPageSize[1])
 				# TODO
 			$scope.scale.scale = numScale
 			$scope.document.setScale(numScale)
