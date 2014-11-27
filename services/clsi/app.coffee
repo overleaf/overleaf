@@ -4,6 +4,8 @@ logger = require "logger-sharelatex"
 logger.initialize("clsi")
 smokeTest = require "smoke-test-sharelatex"
 
+Path = require "path"
+
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("clsi")
 Metrics.open_sockets.monitor(logger)
@@ -33,7 +35,13 @@ app.delete "/project/:project_id", CompileController.clearCache
 app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
 app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
 
-staticServer = express.static(Settings.path.compilesDir)
+staticServer = express.static Settings.path.compilesDir, setHeaders: (res, path, stat) ->
+	if Path.basename(path) == "output.pdf"
+		res.set("Content-Type", "application/pdf")
+	else
+		# Force plain treatment of other file types to prevent hosting of HTTP/JS files
+		# that could be used in same-origin/XSS attacks.
+		res.set("Content-Type", "text/plain")
 app.get "/project/:project_id/output/*", (req, res, next) ->
 	req.url = "/#{req.params.project_id}/#{req.params[0]}"
 	staticServer(req, res, next)
