@@ -102,6 +102,14 @@ div.full-size.pdf(ng-controller="PdfController")
 							ng-click="hello('compile-timeout')"
 						) #{translate("start_free_trial")}
 
+	.pdf-errors(ng-show="pdf.projectTooLarge")
+		.alert.alert-danger
+			strong #{translate("project_too_large")} 
+			span #{translate("project_too_large_please_reduce")}
+		
+
+		
+
 
 
 	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")

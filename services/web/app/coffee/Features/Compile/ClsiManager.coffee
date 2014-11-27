@@ -42,6 +42,8 @@ module.exports = ClsiManager =
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300
 				callback null, body
+			else if response.statusCode == 413
+				callback null, "project-too-large"
 			else
 				error = new Error("CLSI returned non-success code: #{response.statusCode}")
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"

@@ -32,6 +32,8 @@ define [
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
 				$scope.pdf.uncompiled = true
+			else if response.status == "project-too-large"
+				$scope.pdf.projectTooLarge = true
 			else if response.status == "failure"
 				$scope.pdf.failure = true
 				fetchLogs()
