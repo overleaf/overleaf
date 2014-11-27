@@ -4,10 +4,12 @@ app.directive 'pdfPage', ['$timeout', ($timeout) ->
 	{
 		require: '^pdfViewer',
 		template: '''
-		<div class="pdf-canvas"></div>
-		<div class="plv-text-layer text-layer"></div>
-		<div class="plv-annotations-layer annotations-layer"></div>
-		<div class="plv-highlights-layer highlights-layer"></div>
+		<div class="plv-page-view page-view">
+			<div class="pdf-canvas"></div>
+			<div class="plv-text-layer text-layer"></div>
+			<div class="plv-annotations-layer annotations-layer"></div>
+			<div class="plv-highlights-layer highlights-layer"></div>
+		</div>
 		'''
 		link: (scope, element, attrs, ctrl) ->
 			canvasElement = $(element).find('.pdf-canvas')

@@ -188,9 +188,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 			"dblClickCallback": "="
 		}
 		template: """
-		<div>
-		<div data-pdf-page class='pdf-page-container plv-page-view page-view' ng-repeat='page in pages'></div>
-		<div>
+		<div data-pdf-page class='pdf-page-container page-container' ng-repeat='page in pages'></div>
 		"""
 		link: (scope, element, attrs, ctrl) ->
 			console.log 'in pdfViewer element is', element
