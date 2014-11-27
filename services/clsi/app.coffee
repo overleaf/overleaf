@@ -62,7 +62,7 @@ app.get "/health_check", (req, res)->
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
-	res.send 500
+	res.send err?.statusCode || 500
 
 app.listen port = (Settings.internal?.clsi?.port or 3013), host = (Settings.internal?.clsi?.host or "localhost"), (error) ->
 	logger.log "CLSI listening on #{host}:#{port}"
