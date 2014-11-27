@@ -77,6 +77,7 @@ describe 'ProjectEntityHandler', ->
 			@parentFolder_id = "1jnjknjk"
 			@newFolder = {_id:"newFolder_id_here"}
 			@lastFolder = {_id:"123das", folders:[]}
+			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@projectLocator.findElementByPath = (project_id, path, cb)=>
 				@parentFolder = {_id:"parentFolder_id_here"}
 				lastFolder = path.substring(path.lastIndexOf("/"))
