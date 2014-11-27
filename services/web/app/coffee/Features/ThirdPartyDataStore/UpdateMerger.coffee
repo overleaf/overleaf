@@ -6,26 +6,35 @@ Settings = require('settings-sharelatex')
 FileTypeManager = require('../Uploads/FileTypeManager')
 uuid = require('node-uuid')
 fs = require('fs')
+LockManager = require("../../infrastructure/LockManager")
+
 
 module.exports =
 	mergeUpdate: (project_id, path, updateRequest, source, callback = (error) ->)->
 		self = @
 		logger.log project_id:project_id, path:path, "merging update from tpds"
-		projectLocator.findElementByPath project_id, path, (err, element)=>
-			# Returns an error if the element is not found
-			#return callback(err) if err?
-			logger.log project_id:project_id, path:path, "found element by path for merging update from tpds"
-			elementId = undefined
-			if element?
-				elementId = element._id
-			self.p.writeStreamToDisk project_id, elementId, updateRequest, (err, fsPath)->
-				return callback(err) if err?
-				FileTypeManager.isBinary path, fsPath, (err, isFile)->
+		LockManager.getLock project_id, (err)->
+			if err?
+				logger.err project_id:project_id, "could not get lock for merge update"
+				return callback()
+			projectLocator.findElementByPath project_id, path, (err, element)=>
+				# Returns an error if the element is not found
+				#return callback(err) if err?
+				logger.log project_id:project_id, path:path, "found element by path for merging update from tpds"
+				elementId = undefined
+				if element?
+					elementId = element._id
+				self.p.writeStreamToDisk project_id, elementId, updateRequest, (err, fsPath)->
 					return callback(err) if err?
-					if isFile
-						self.p.processFile project_id, elementId, fsPath, path, source, callback #TODO clean up the stream written to disk here
-					else
-						self.p.processDoc project_id, elementId, fsPath, path, source, callback
+					FileTypeManager.isBinary path, fsPath, (err, isFile)->
+						return callback(err) if err?
+						finish = (err)->
+							LockManager.releaseLock project_id, ->
+								callback(err)
+						if isFile
+							self.p.processFile project_id, elementId, fsPath, path, source, finish #TODO clean up the stream written to disk here
+						else
+							self.p.processDoc project_id, elementId, fsPath, path, source, finish
 
 	deleteUpdate: (project_id, path, source, callback)->
 		projectLocator.findElementByPath project_id, path, (err, element)->
@@ -38,7 +47,7 @@ module.exports =
 			else if element.folders?
 				type = 'folder'
 			logger.log project_id:project_id, updateType:path, updateType:type, element:element, "processing update to delete entity from tpds"
-			editorController.deleteEntity project_id, element._id, type, source, (err)->
+			editorController.deleteEntityWithoutLock project_id, element._id, type, source, (err)->
 				logger.log project_id:project_id, path:path, "finished processing update to delete entity from tpds"
 				callback()
 
@@ -55,7 +64,7 @@ module.exports =
 						callback()
 				else
 					setupNewEntity project_id, path, (err, folder, fileName)->
-						editorController.addDoc project_id, folder._id, fileName, docLines, source, (err)->
+						editorController.addDocWithoutLock project_id, folder._id, fileName, docLines, source, (err)->
 							callback()
 
 		processFile: (project_id, file_id, fsPath, path, source, callback)->
@@ -67,7 +76,7 @@ module.exports =
 				if file_id?
 					editorController.replaceFile project_id, file_id, fsPath, source, finish
 				else
-					editorController.addFile project_id, folder._id, fileName, fsPath, source, finish
+					editorController.addFileWithoutLock project_id, folder._id, fileName, fsPath, source, finish
 
 		writeStreamToDisk: (project_id, file_id, stream, callback = (err, fsPath)->)->
 			if !file_id?
@@ -103,5 +112,5 @@ setupNewEntity = (project_id, path, callback)->
 	lastIndexOfSlash = path.lastIndexOf("/")
 	fileName = path[lastIndexOfSlash+1 .. -1]
 	folderPath = path[0 .. lastIndexOfSlash]
-	editorController.mkdirp project_id, folderPath, (err, newFolders, lastFolder)->
+	editorController.mkdirpWithoutLock project_id, folderPath, (err, newFolders, lastFolder)->
 		callback err, lastFolder, fileName
