@@ -50,6 +50,7 @@ define [
 				# pdfListView.listView.pageHeightOffset = 20
 
 				scope.loading = false
+				scope.pleaseJumpTo = {}
 				scope.scale = {}
 				initializedPosition = false
 				initializePosition = () ->
@@ -80,12 +81,12 @@ define [
 #					scope.position = pdfListView.getPdfPosition(true)
 
 				onDoubleClick = (e) ->
+					console.log 'double click event'
 					scope.dblClickCallback?(page: e.page, offset: { top: e.y, left: e.x })
 
 				scope.$watch "pdfSrc", (url) ->
 					if url
 						scope.loading = true
-						scope.progress = 0
 						console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
@@ -100,10 +101,11 @@ define [
 						#				flashControls()
 
 				scope.$watch "highlights", (areas) ->
+					console.log 'got HIGHLIGHTS in pdfJS', areas
 					return if !areas?
 					highlights = for area in areas or []
 						{
-							page: area.page - 1
+							page: area.page
 							highlight:
 								left: area.h
 								top: area.v
@@ -113,13 +115,14 @@ define [
 
 					if highlights.length > 0
 						first = highlights[0]
-					#		pdfListView.setPdfPosition({
-					#			page: first.page
-					#			offset:
-					#				left: first.highlight.left
-					#				top: first.highlight.top - 80
-					#		}, true)
-
+						position = {
+							page: first.page
+							offset:
+								left: first.highlight.left
+								top: first.highlight.top - 80
+						}
+						console.log 'position is', position, 'in highlights'
+						scope.pleaseJumpTo = position
 					# pdfListView.clearHighlights()
 					# pdfListView.setHighlights(highlights, true)
 
@@ -155,7 +158,7 @@ define [
 							console.log 'got a resize event', event, e
 
 			template: """
-				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale'></div>
+				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' dbl-click-callback='dblClickCallback' please-jump-to='pleaseJumpTo'></div>
 				<div class="pdfjs-controls" ng-class="{'flash': flashControls }">
 					<div class="btn-group">
 						<a href

@@ -1,11 +1,5 @@
 app = angular.module 'pdfViewerApp', ['pdfPage', 'PDFRenderer', 'pdfHighlights']
 
-app.config [ "$logProvider", ($logProvider) ->
-	$logProvider.debugEnabled true
-]
-
-console.log "HELLO"
-
 app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element', 'pdfHighlights', ($scope, $q, PDFRenderer, $element, pdfHighlights) ->
 	@load = () ->
 		$scope.document = new PDFRenderer($scope.pdfSrc, {
@@ -187,6 +181,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 			"position": "="
 			"scale": "="
 			"dblClickCallback": "="
+			"pleaseJumpTo": "="
 		}
 		template: """
 		<div data-pdf-page class='pdf-page-container page-container' ng-repeat='page in pages'></div>
@@ -296,6 +291,11 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 				$(element).scrollTop(newVal)
 				scope.pleaseScrollTo = undefined
 
+			scope.$watch 'pleaseJumpTo', (newPosition, oldPosition) ->
+				console.log 'in pleaseJumpTo', newPosition, oldPosition
+				return unless newPosition?
+				ctrl.setPdfPosition scope.pages[newPosition.page-1], newPosition
+
 			scope.$watch 'navigateTo', (newVal, oldVal) ->
 				return unless newVal?
 				console.log 'got request to navigate to', newVal, 'oldVal', oldVal
@@ -320,34 +320,42 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 								ctrl.setPdfPosition scope.pages[pidx], newPosition
 
 			scope.$watch "highlights", (areas) ->
-					return if !areas?
-					console.log 'areas are', areas
-					highlights = for area in areas or []
-						{
-							page: area.page - 1
-							highlight:
-								left: area.h
-								top: area.v
-								height: area.height
-								width: area.width
-						}
-					console.log 'highlights', highlights
+				console.log 'got HIGHLIGHTS in pdfViewer', areas
+				return if !areas?
+				console.log 'areas are', areas
+				highlights = for area in areas or []
+					{
+						page: area.page - 1
+						highlight:
+							left: area.h
+							top: area.v
+							height: area.height
+							width: area.width
+					}
+				console.log 'highlights', highlights
 
-					if highlights.length > 0
-						first = highlights[0]
-						ctrl.setPdfPosition({
-							page: first.page
-							offset:
-								left: first.highlight.left
-								top: first.highlight.top - 80
-						}, true)
+				return if !highlights.length
 
-					# iterate over pages
-					# highlightsElement = $(element).find('.highlights-layer')
-					# highlightsLayer = new pdfHighlights({
-					#		highlights: element.highlights[0]
-					#		viewport: viewport
-					# })
+				first = highlights[0]
+				ctrl.setPdfPosition(scope.pages[first.page], {
+						page: scope.pages[first.page]
+						offset:
+							left: first.highlight.left
+							top: first.highlight.top - 80
+					})
+
+				for h in highlights
+					console.log 'iterating highlights', h
+					page = scope.pages[h.page]
+					element = page.element
+					viewport = page.viewport
+					highlightsElement = $(element).find('.highlights-layer')
+					highlightsLayer = new pdfHighlights({
+							highlights: highlightsElement
+							viewport: viewport
+					})
+					k=h.highlight
+					highlightsLayer.addHighlight(k.left,k.top,k.width,k.height)
 					#pdfListView.clearHighlights()
 					#ctrl.setHighlights(highlights, true)
 
