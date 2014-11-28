@@ -312,7 +312,8 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 					console.log 'page ref is', r[0]
 					scope.document.getPageIndex(r[0]).then (pidx) ->
 						console.log 'page num is', pidx
-						scope.document.getPdfViewport(pidx).then (viewport) ->
+						page = scope.pages[pidx]
+						scope.document.getPdfViewport(page.pageNum).then (viewport) ->
 							console.log 'got viewport', viewport
 							coords = viewport.convertToViewportPoint r[2], r[3]
 							console.log	'viewport position', coords
