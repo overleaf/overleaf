@@ -57,13 +57,13 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 		console.log 'reseting pages array for', $scope.numPages
 		console.log 'position is', position.page, position.offset
 		$scope.pages = ({
-			pageNum: i
-		} for i in [1 .. $scope.numPages])
+			pageNum: i + 1
+		} for i in [0 .. $scope.numPages-1])
 		if position? && position.page?
 			console.log 'setting current page', position.page
 			pagenum = position.page
-			$scope.pages[pagenum - 1].current = true
-			$scope.pages[pagenum - 1].position = position
+			$scope.pages[pagenum].current = true
+			$scope.pages[pagenum].position = position
 
 	@zoomIn = () ->
 		console.log 'zoom in'
@@ -105,13 +105,16 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 
 	@getPdfPosition = () ->
 		console.log 'in getPdfPosition'
-		visiblePages = $scope.pages.filter (page) ->
-			page.visible
-		if visiblePages.length
-			topPage = visiblePages[0]
+		topPageIdx = 0
+		topPage = $scope.pages[0]
+		# find first visible page
+		visible = $scope.pages.some (page, i) ->
+			[topPageIdx, topPage] = [i, page] if page.visible
+		if visible
+			console.log 'found it', topPageIdx
 		else
 			console.log 'CANNOT FIND TOP PAGE'
-			topPage = $scope.pages[0]
+
 		console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
 		top = topPage.elemTop
 		bottom = topPage.elemBottom
@@ -140,7 +143,7 @@ app.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element'
 			pdfOffset = viewport.convertToPdfPoint(0, scaledOffset);
 		console.log 'converted to offset = ', pdfOffset
 		newPosition = {
-			"page": topPage.pageNum,
+			"page": topPageIdx,
 			"offset" : { "top" : pdfOffset[1], "left": 0	}
 		}
 		return newPosition
@@ -316,8 +319,8 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 							console.log 'r is', r, 'r[1]', r[1], 'r[1].name', r[1].name
 							if r[1].name == 'XYZ'
 								console.log 'XYZ:', r[2], r[3]
-								newPosition = {page: pidx + 1, offset: {top: r[3], left: r[2]}}
-								ctrl.setPdfPosition scope.pages[pidx], newPosition
+								newPosition = {page: pidx, offset: {top: r[3], left: r[2]}}
+								ctrl.setPdfPosition scope.pages[pidx], newPosition # XXX?
 
 			scope.$watch "highlights", (areas) ->
 				console.log 'got HIGHLIGHTS in pdfViewer', areas
@@ -325,7 +328,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 				console.log 'areas are', areas
 				highlights = for area in areas or []
 					{
-						page: area.page 
+						page: area.page - 1
 						highlight:
 							left: area.h
 							top: area.v
@@ -338,14 +341,16 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 
 				first = highlights[0]
 
-				scope.document.getPdfViewport(first.page).then (viewport) ->
+				pageNum = scope.pages[first.page].pageNum
+
+				scope.document.getPdfViewport(pageNum).then (viewport) ->
 					position = {
 						page: first.page
 						offset:
 							left: first.highlight.left
 							top: viewport.viewBox[3] - first.highlight.top + first.highlight.height + 72
 					}
-					ctrl.setPdfPosition(scope.pages[first.page - 1], position)
+					ctrl.setPdfPosition(scope.pages[first.page], position)
 
 
 	}
