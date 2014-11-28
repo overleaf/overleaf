@@ -325,7 +325,7 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 				console.log 'areas are', areas
 				highlights = for area in areas or []
 					{
-						page: area.page - 1
+						page: area.page 
 						highlight:
 							left: area.h
 							top: area.v
@@ -337,31 +337,16 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 				return if !highlights.length
 
 				first = highlights[0]
-				ctrl.setPdfPosition(scope.pages[first.page], {
-						page: scope.pages[first.page]
+
+				scope.document.getPdfViewport(first.page).then (viewport) ->
+					position = {
+						page: first.page
 						offset:
 							left: first.highlight.left
-							top: first.highlight.top - 80
-					})
+							top: viewport.viewBox[3] - first.highlight.top + first.highlight.height + 72
+					}
+					ctrl.setPdfPosition(scope.pages[first.page - 1], position)
 
-				for h in highlights
-					console.log 'iterating highlights', h
-					page = scope.pages[h.page]
-					element = page.element
-					viewport = page.viewport
-					highlightsElement = $(element).find('.highlights-layer')
-					highlightsLayer = new pdfHighlights({
-							highlights: highlightsElement
-							viewport: viewport
-					})
-					k=h.highlight
-					highlightsLayer.addHighlight(k.left,k.top,k.width,k.height)
-					#pdfListView.clearHighlights()
-					#ctrl.setHighlights(highlights, true)
-
-					#setTimeout () =>
-					#	pdfListView.clearHighlights()
-					#, 1000
 
 	}
 ]

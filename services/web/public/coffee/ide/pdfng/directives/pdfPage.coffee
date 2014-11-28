@@ -1,6 +1,6 @@
-app = angular.module 'pdfPage', []
+app = angular.module 'pdfPage', ['pdfHighlights']
 
-app.directive 'pdfPage', ['$timeout', ($timeout) ->
+app.directive 'pdfPage', ['$timeout', 'pdfHighlights', ($timeout, pdfHighlights) ->
 	{
 		require: '^pdfViewer',
 		template: '''
@@ -77,6 +77,23 @@ app.directive 'pdfPage', ['$timeout', ($timeout) ->
 					#watchHandle()
 				else if !newVisible && oldVisible
 					pausePage()
+
+			highlightsLayer = new pdfHighlights({
+				highlights: highlightsElement
+			})
+
+			scope.$watch 'highlights', (highlights, oldVal) ->
+				console.log 'got highlight watch in pdfPage', scope.page
+				pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
+				return unless pageHighlights.length
+				scope.document.getPdfViewport(scope.page.pageNum).then (viewport) ->
+					for hl in pageHighlights
+						console.log 'adding highlight', h, viewport
+						top = viewport.viewBox[3] - hl.v
+						highlightsLayer.addHighlight viewport, hl.h, top, hl.width, hl.height
+				$timeout () ->
+					highlightsLayer.clearHighlights()
+				, 1000
 
 	}
 ]

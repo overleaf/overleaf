@@ -102,27 +102,28 @@ define [
 
 				scope.$watch "highlights", (areas) ->
 					console.log 'got HIGHLIGHTS in pdfJS', areas
-					return if !areas?
-					highlights = for area in areas or []
-						{
-							page: area.page
-							highlight:
-								left: area.h
-								top: area.v
-								height: area.height
-								width: area.width
-						}
+					
+					# return if !areas?
+					# highlights = for area in areas or []
+					# 	{
+					# 		page: area.page
+					# 		highlight:
+					# 			left: area.h
+					# 			top: area.v
+					# 			height: area.height
+					# 			width: area.width
+					# 	}
 
-					if highlights.length > 0
-						first = highlights[0]
-						position = {
-							page: first.page
-							offset:
-								left: first.highlight.left
-								top: first.highlight.top - 80
-						}
-						console.log 'position is', position, 'in highlights'
-						scope.pleaseJumpTo = position
+					# if highlights.length > 0
+					# 	first = highlights[0]
+					# 	position = {
+					# 		page: first.page
+					# 		offset:
+					# 			left: first.highlight.left
+					# 			top: first.highlight.top - 80
+					# 	}
+					# 	console.log 'position is', position, 'in highlights'
+					# 	scope.pleaseJumpTo = position
 					# pdfListView.clearHighlights()
 					# pdfListView.setHighlights(highlights, true)
 

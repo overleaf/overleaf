@@ -4,12 +4,11 @@ app.factory 'pdfHighlights', [ () ->
 	class pdfHighlights
 
 		constructor: (options) ->
-			@highlightsLayerDiv = options.highlights
-			@viewport = options.viewport
+			@highlightsLayerDiv = options.highlights[0]
 			@highlightElements = []
 
-		addHighlight: (left, top, width, height) ->
-			rect = @viewport.convertToViewportRectangle([left, top, left + width, top + height])
+		addHighlight: (viewport, left, top, width, height) ->
+			rect = viewport.convertToViewportRectangle([left, top, left + width, top + height])
 			rect = PDFJS.Util.normalizeRect(rect)
 			element = document.createElement("div")
 			element.style.left = Math.floor(rect[0]) + 'px'
