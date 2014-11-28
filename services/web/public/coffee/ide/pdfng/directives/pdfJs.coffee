@@ -6,7 +6,7 @@ define [
 	"ide/pdfng/directives/pdfRenderer"
 	"ide/pdfng/directives/pdfPage"
 	"ide/pdfng/directives/pdfViewer"
-	"libs/pdf"
+	"libs/pdfjs-1.0.712/pdf"
 	"text!libs/pdfListView/TextLayer.css"
 	"text!libs/pdfListView/AnnotationsLayer.css"
 	"text!libs/pdfListView/HighlightsLayer.css"

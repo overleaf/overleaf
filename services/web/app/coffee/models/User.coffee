@@ -35,7 +35,9 @@ UserSchema = new Schema
 							compileTimeout: { type:Number, default: Settings.defaultFeatures.compileTimeout }
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 						}
-	featureSwitches	  : {}
+	featureSwitches	  : {
+		pdfng: { type: Boolean }
+	}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]
 	refered_user_count: { type:Number, default: 0 }
