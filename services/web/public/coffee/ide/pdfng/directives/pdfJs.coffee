@@ -50,8 +50,8 @@ define [
 				# pdfListView.listView.pageHeightOffset = 20
 
 				scope.loading = false
-				scope.pleaseJumpTo = {}
-				scope.scale = {}
+				scope.pleaseJumpTo = null
+				scope.scale = null
 				initializedPosition = false
 				initializePosition = () ->
 					return if initializedPosition

@@ -83,6 +83,8 @@ app.directive 'pdfPage', ['$timeout', 'pdfHighlights', ($timeout, pdfHighlights)
 			})
 
 			scope.$watch 'highlights', (highlights, oldVal) ->
+				return unless highlights?
+				return unless highlights.length > 0
 				console.log 'got highlight watch in pdfPage', scope.page
 				pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
 				return unless pageHighlights.length
@@ -94,6 +96,9 @@ app.directive 'pdfPage', ['$timeout', 'pdfHighlights', ($timeout, pdfHighlights)
 				$timeout () ->
 					highlightsLayer.clearHighlights()
 				, 1000
+
+			scope.$on "$destroy", () ->
+				console.log 'in destroy handler, TODO need to clean up timeout/highlights'
 
 	}
 ]

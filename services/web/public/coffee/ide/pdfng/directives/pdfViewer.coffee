@@ -251,7 +251,8 @@ app.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
 				console.log 'loading pdf', newVal, oldVal
 				return unless newVal?
 				ctrl.load()
-				doRescale scope.scale
+				# trigger a redraw
+				scope.scale = angular.copy (scope.scale)
 
 			scope.$watch 'scale', (newVal, oldVal) ->
 				# no need to set scale when initialising, done in pdfSrc
