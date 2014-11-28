@@ -13,21 +13,25 @@ module.exports = CompileController =
 		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
-		settingsOverride = req.body?.settingsOverride ? {};
-		logger.log "root doc overriden" if settingsOverride.rootDoc_id?
 		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
 			return next(error) if error?
-			UserGetter.getUser user_id, {"features.compileGroup":1, "features.compileTimeout":1}, (err, user)->
-				settingsOverride.timeout = user?.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
-				settingsOverride.compiler = user?.features?.compileGroup || Settings.defaultFeatures.compileGroup
-				req.session.compileGroup = settingsOverride.compiler
-				CompileManager.compile project_id, user_id, { isAutoCompile, settingsOverride }, (error, status, outputFiles) ->
-					return next(error) if error?
-					res.contentType("application/json")
-					res.send 200, JSON.stringify {
-						status: status
-						outputFiles: outputFiles
-					}
+			options = {
+				isAutoCompile: isAutoCompile
+			}
+			if req.body?.rootDoc_id?
+				options.rootDoc_id = req.body.rootDoc_id
+			else if req.body?.settingsOverride?.rootDoc_id? # Can be removed after deploy
+				options.rootDoc_id = req.body.settingsOverride.rootDoc_id
+			if req.body?.compiler
+				options.compiler = req.body.compiler
+			logger.log {options, project_id}, "got compile request"
+			CompileManager.compile project_id, user_id, options, (error, status, outputFiles) ->
+				return next(error) if error?
+				res.contentType("application/json")
+				res.send 200, JSON.stringify {
+					status: status
+					outputFiles: outputFiles
+				}
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
@@ -40,7 +44,7 @@ module.exports = CompileController =
 			else
 				logger.log project_id: project_id, "download pdf to embed in browser"
 				res.header('Content-Disposition', "filename=#{project.getSafeProjectName()}.pdf")
-			CompileController.proxyToClsi("/project/#{project_id}/output/output.pdf", req, res, next)
+			CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/output.pdf", req, res, next)
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -55,25 +59,28 @@ module.exports = CompileController =
 				logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
 				res.send 500
 			url = "/project/#{project_id}/output/output.pdf"
-			CompileController.proxyToClsi url, req, res, next
+			CompileController.proxyToClsi project_id, url, req, res, next
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
-		CompileController.proxyToClsi("/project/#{req.params.Project_id}/output/#{req.params.file}", req, res, next)
+		project_id = req.params.Project_id
+		CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/#{req.params.file}", req, res, next)
 
 	proxySync: (req, res, next = (error) ->) ->
-		CompileController.proxyToClsi(req.url, req, res, next)
+		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
-	proxyToClsi: (url, req, res, next = (error) ->) ->
-		if req.session.compileGroup == "priority"
-			compilerUrl = Settings.apis.clsi_priority.url
-		else
-			compilerUrl = Settings.apis.clsi.url
-		url = "#{compilerUrl}#{url}"
-		logger.log url: url, "proxying to CLSI"
-		oneMinute = 60 * 1000
-		proxy = request(url: url, method: req.method, timeout: oneMinute)
-		proxy.pipe(res)
-		proxy.on "error", (error) ->
-			logger.warn err: error, url: url, "CLSI proxy error"
+	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return next(error) if error?
+			if limits.compileGroup == "priority"
+				compilerUrl = Settings.apis.clsi_priority.url
+			else
+				compilerUrl = Settings.apis.clsi.url
+			url = "#{compilerUrl}#{url}"
+			logger.log url: url, "proxying to CLSI"
+			oneMinute = 60 * 1000
+			proxy = request(url: url, method: req.method, timeout: oneMinute)
+			proxy.pipe(res)
+			proxy.on "error", (error) ->
+				logger.warn err: error, url: url, "CLSI proxy error"
 
 	

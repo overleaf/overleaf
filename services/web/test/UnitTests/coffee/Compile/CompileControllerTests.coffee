@@ -21,7 +21,7 @@ describe "CompileController", ->
 					clsi:
 						url: "clsi.example.com"
 					clsi_priority:
-						url: "clsi.example.com"
+						url: "clsi-priority.example.com"
 			"request": @request = sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -47,8 +47,7 @@ describe "CompileController", ->
 					Project_id: @project_id
 				@req.session = {}
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
-				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
-				@UserGetter.getUser.callsArgWith(2, null, @user)
+				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
 				@CompileController.compile @req, @res, @next
 
 			it "should look up the user id", ->
@@ -58,7 +57,7 @@ describe "CompileController", ->
 
 			it "should do the compile without the auto compile flag", ->
 				@CompileManager.compile
-					.calledWith(@project_id, @user_id, { isAutoCompile: false, settingsOverride:{timeout:@user.features.compileTimeout, compiler:@user.features.compileGroup} })
+					.calledWith(@project_id, @user_id, { isAutoCompile: false })
 					.should.equal true
 
 			it "should set the content-type of the response to application/json", ->
@@ -73,16 +72,6 @@ describe "CompileController", ->
 					outputFiles: @outputFiles
 				})
 
-			it "should get the compile timeout from the users features",->
-				@UserGetter.getUser.args[0][0].should.equal @user_id
-				assert.deepEqual @UserGetter.getUser.args[0][1], {"features.compileGroup":1, "features.compileTimeout":1}
-
-			it "should put the compile group on the req", ->
-				@req.session.compileGroup.should.equal @user.features.compileGroup
-
-			it "should set the timeout", ->
-				assert @res.timout > 1000 * 60 * 3
-
 		describe "when an auto compile", ->
 			beforeEach ->
 				@req.params =
@@ -91,11 +80,12 @@ describe "CompileController", ->
 					auto_compile: "true"
 				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
-				@UserGetter.getUser.callsArgWith(2, null, @user)
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
-				@CompileManager.compile.calledWith(@project_id, @user_id, { isAutoCompile: true, settingsOverride:{timeout:@user.features.compileTimeout, compiler:@user.features.compileGroup} }).should.equal true
+				@CompileManager.compile
+					.calledWith(@project_id, @user_id, { isAutoCompile: true })
+					.should.equal true
 
 	describe "downloadPdf", ->
 		beforeEach ->
@@ -134,7 +124,7 @@ describe "CompileController", ->
 
 			it "should proxy the PDF from the CLSI", ->
 				@CompileController.proxyToClsi
-					.calledWith("/project/#{@project_id}/output/output.pdf", @req, @res, @next)
+					.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res, @next)
 					.should.equal true
 
 	describe "proxyToClsi", ->
@@ -152,8 +142,8 @@ describe "CompileController", ->
 		describe "user with standard priority", ->
 
 			beforeEach ->
-				@UserGetter.getUser.callsArgWith(2, null, @user)
-				@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)	
+				@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "standard"})
+				@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)	
 
 
 			it "should open a request to the CLSI", ->
@@ -176,9 +166,8 @@ describe "CompileController", ->
 		describe "user with priority compile", ->
 
 			beforeEach ->
-				@req.session.compileGroup = "priority"
-				@UserGetter.getUser.callsArgWith(2, null, @user)
-				@CompileController.proxyToClsi(@url = "/test", @req, @res, @next)	
+				@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
+				@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)	
 
 			it "should proxy to the priorty url if the user has the feature", ()->
 				@request
@@ -225,5 +214,5 @@ describe "CompileController", ->
 
 		it "should proxy the res to the clsi with correct url", (done)->
 			@CompileController.compileAndDownloadPdf @req, @res
-			@CompileController.proxyToClsi.calledWith("/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
+			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()

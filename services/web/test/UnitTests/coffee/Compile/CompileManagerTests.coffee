@@ -20,6 +20,7 @@ describe "CompileManager", ->
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 			"../Project/ProjectRootDocManager": @ProjectRootDocManager = {}
 			"../../models/Project": Project: @Project = {}
+			"../User/UserGetter": @UserGetter = {}
 			"./ClsiManager": @ClsiManager = {}
 			"../../infrastructure/RateLimiter": @ratelimiter
 			"../../infrastructure/Metrics": @Metrics =
@@ -30,13 +31,18 @@ describe "CompileManager", ->
 		@project_id = "mock-project-id-123"
 		@user_id = "mock-user-id-123"
 		@callback = sinon.stub()
+		@limits = {
+			timeout: 42
+		}
 
+	
 	describe "compile", ->
 		beforeEach ->
 			@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, false)
 			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
-			@ClsiManager.sendRequest = sinon.stub().callsArgWith(2, null, @status = "mock-status")
+			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
+			@ClsiManager.sendRequest = sinon.stub().callsArgWith(2, null, @status = "mock-status", @outputFiles = "mock output files", @output = "mock output")
 
 		describe "succesfully", ->
 			beforeEach ->
@@ -58,14 +64,21 @@ describe "CompileManager", ->
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should run the compile with the new compiler API", ->
-				@ClsiManager.sendRequest
+			it "should get the project compile limits", ->
+				@CompileManager.getProjectCompileLimits
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should call the callback", ->
+			it "should run the compile with the compile limits", ->
+				@ClsiManager.sendRequest
+					.calledWith(@project_id, {
+						timeout: @limits.timeout
+					})
+					.should.equal true
+
+			it "should call the callback with the output", ->
 				@callback
-					.calledWith(null, @status)
+					.calledWith(null, @status, @outputFiles, @output)
 					.should.equal true
 
 			it "should time the compile", ->
@@ -93,6 +106,34 @@ describe "CompileManager", ->
 				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
 					status.should.equal "autocompile-backoff"
 					done()
+					
+	describe "getProjectCompileLimits", ->
+		beforeEach ->
+			@features = {
+				compileTimeout:   @timeout = 42
+				compileGroup:     @group = "priority"
+			}
+			@Project.findById = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { features: @features })
+			@CompileManager.getProjectCompileLimits @project_id, @callback
+			
+		it "should look up the owner of the project", ->
+			@Project.findById
+				.calledWith(@project_id, { owner_ref: 1 })
+				.should.equal true
+				
+		it "should look up the owner's features", ->
+			@UserGetter.getUser
+				.calledWith(@project.owner_ref, { features: 1 })
+				.should.equal true
+				
+		it "should return the limits", ->
+			@callback
+				.calledWith(null, {
+					timeout:      @timeout
+					compileGroup: @group
+				})
+				.should.equal true
 
 	describe "getLogLines", ->
 		beforeEach ->

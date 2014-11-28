@@ -15,8 +15,7 @@ define [
 			if options.isAutoCompile
 				url += "?auto_compile=true"
 			return $http.post url, {
-				settingsOverride:
-					rootDoc_id: options.rootDocOverride_id or null
+				rootDoc_id: options.rootDocOverride_id or null
 				_csrf: window.csrfToken
 			}
 
