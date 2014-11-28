@@ -17,12 +17,18 @@ define [
 
 			onChange = (e) =>
 				@runCheckOnChange(e)
+				
+			onScroll = () =>
+				@closeContextMenu()
 
 			@editor.on "changeSession", (e) =>
 				@runSpellCheckSoon(200)
 
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
+				
+				e.oldSession?.off "changeScrollTop", onScroll
+				e.session.on "changeScrollTop", onScroll
 
 			@$scope.spellingMenu = {left: '0px', top: '0px'}
 
