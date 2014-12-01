@@ -8,11 +8,11 @@ logger = require "logger-sharelatex"
 url = require("url")
 
 module.exports = ClsiManager =
-	sendRequest: (project_id, settingsOverride = {}, callback = (error, success) ->) ->
-		ClsiManager._buildRequest project_id, settingsOverride, (error, req) ->
+	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
+		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._postToClsi project_id, req, settingsOverride.compiler, (error, response) ->
+			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
 				callback(
@@ -29,8 +29,8 @@ module.exports = ClsiManager =
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		request.del "#{Settings.apis.clsi.url}/project/#{project_id}", callback
 
-	_postToClsi: (project_id, req, compiler, callback = (error, response) ->) ->
-		if compiler == "priority"
+	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
+		if compileGroup == "priority"
 			compilerUrl = Settings.apis.clsi_priority.url
 		else
 			compilerUrl = Settings.apis.clsi.url

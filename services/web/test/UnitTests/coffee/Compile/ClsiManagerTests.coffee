@@ -41,7 +41,7 @@ describe "ClsiManager", ->
 							type: "log"
 						}]
 				})
-				@ClsiManager.sendRequest @project_id, {compiler:"standard"}, @callback
+				@ClsiManager.sendRequest @project_id, {compileGroup:"standard"}, @callback
 
 			it "should build the request", ->
 				@ClsiManager._buildRequest
