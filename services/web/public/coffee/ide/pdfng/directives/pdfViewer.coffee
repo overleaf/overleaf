@@ -73,11 +73,11 @@ define [
 		@redraw = (position) ->
 			console.log 'in redraw'
 			console.log 'reseting pages array for', $scope.numPages
-			console.log 'position is', position.page, position.offset
 			$scope.pages = ({
 				pageNum: i + 1
 			} for i in [0 .. $scope.numPages-1])
 			if position? && position.page?
+				console.log 'position is', position.page, position.offset
 				console.log 'setting current page', position.page
 				pagenum = position.page
 				$scope.pages[pagenum].current = true
