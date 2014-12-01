@@ -1,24 +1,12 @@
 define [
 	"base"
-	"ide/pdfng/directives/pdfTextLayer"
-	"ide/pdfng/directives/pdfAnnotations"
-	"ide/pdfng/directives/pdfHighlights"
-	"ide/pdfng/directives/pdfRenderer"
-	"ide/pdfng/directives/pdfPage"
 	"ide/pdfng/directives/pdfViewer"
-	"libs/pdfjs-1.0.712/pdf"
 	"text!libs/pdfListView/TextLayer.css"
 	"text!libs/pdfListView/AnnotationsLayer.css"
 	"text!libs/pdfListView/HighlightsLayer.css"
 ], (
 	App
 	pdfViewer
-	pdfPage
-	pdfRenderer
-	pdfTextLayer
-	pdfAnnotations
-	pdfHighlights
-	pdf
 	textLayerCss
 	annotationsLayerCss
 	highlightsLayerCss
