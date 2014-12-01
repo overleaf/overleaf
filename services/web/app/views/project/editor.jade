@@ -112,12 +112,19 @@ block content
 
 	- locals.suppressDefaultJs = true
 
-	- var pdfPath = 'libs/pdf.worker.js'
-	- if (user.featureSwitches && user.featureSwitches.pdfng) { pdfPath = 'libs/pdfjs-1.0.712/pdf.worker.js'; }
+	- // user.featureSwitches = {} // override
+	- var usePdfNG = user.featureSwitches && user.featureSwitches.pdfng;
+	- var pdfPath = 'libs/pdf.worker.js';
+	- if (usePdfNG) { pdfPath = 'libs/pdfjs-1.0.712/pdf.worker.js'; }
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
 	- var pdfJsWorkerPath = jsPath+pdfPath+'?fingerprint='+fingerprintedPath
 	script(type='text/javascript').
 		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
+
+	// when using pdfng we need a different pdfjs version
+	if usePdfNG
+		script(type='text/javascript').
+			window.requirejs.paths['libs/pdf'] = 'libs/pdfjs-1.0.712/pdf'
 
 	script(
 		data-main=jsPath+"ide.js",

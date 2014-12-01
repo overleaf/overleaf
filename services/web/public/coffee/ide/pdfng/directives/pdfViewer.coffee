@@ -5,7 +5,7 @@ define [
 	"ide/pdfng/directives/pdfHighlights"
 	"ide/pdfng/directives/pdfRenderer"
 	"ide/pdfng/directives/pdfPage"
-	"libs/pdfjs-1.0.712/pdf"
+	"libs/pdf"  # needs pdfjs-1.0.712, override the path in require.js to get it
 ], (
 	App
 	pdfTextLayer
