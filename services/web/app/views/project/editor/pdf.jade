@@ -60,7 +60,17 @@ div.full-size.pdf(ng-controller="PdfController")
 	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
 		div(	
 			pdfjs
-			ng-if="settings.pdfViewer == 'pdfjs'"
+			ng-if="settings.pdfViewer == 'pdfjs' && !(user.featureSwitches && user.featureSwitches.pdfng)"
+			pdf-src="pdf.url"
+			key="{{ project_id }}"
+			resize-on="layout:main:resize,layout:pdf:resize"
+			highlights="pdf.highlights"
+			position="pdf.position"
+			dbl-click-callback="syncToCode"
+		)
+		div(
+			pdfng
+			ng-if="settings.pdfViewer == 'pdfjs' && user.featureSwitches && user.featureSwitches.pdfng"
 			pdf-src="pdf.url"
 			key="{{ project_id }}"
 			resize-on="layout:main:resize,layout:pdf:resize"
