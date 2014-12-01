@@ -18,10 +18,10 @@ describe 'ProjectRootDocManager', ->
 				@docs =
 					"/chapter1.tex":
 						_id: "doc-id-1"
-						lines: ["\\begin{document}", "Hello world", "\\end{document}"]
+						lines: ["something else","\\begin{document}", "Hello world", "\\end{document}"]
 					"/main.tex":
 						_id: "doc-id-2"
-						lines: ["\\documentclass{article}", "\\input{chapter1}"]
+						lines: ["different line","\\documentclass{article}", "\\input{chapter1}"]
 					"/nested/chapter1a.tex":
 						_id: "doc-id-3"
 						lines: ["Hello world"]
