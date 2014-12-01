@@ -125,10 +125,11 @@ define [
 				lastFontSize = undefined
 				lastFontFamily = undefined
 				i = 0
-
 				while i < textDivsLength
 					textDiv = textDivs[i]
-					continue if textDiv.dataset.isWhitespace
+					if textDiv.dataset.isWhitespace
+						i++
+						continue
 					fontSize = textDiv.style.fontSize
 					fontFamily = textDiv.style.fontFamily
 
