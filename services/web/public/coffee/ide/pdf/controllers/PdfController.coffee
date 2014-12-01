@@ -15,8 +15,7 @@ define [
 			if options.isAutoCompile
 				url += "?auto_compile=true"
 			return $http.post url, {
-				settingsOverride:
-					rootDoc_id: options.rootDocOverride_id or null
+				rootDoc_id: options.rootDocOverride_id or null
 				_csrf: window.csrfToken
 			}
 
@@ -32,6 +31,8 @@ define [
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
 				$scope.pdf.uncompiled = true
+			else if response.status == "project-too-large"
+				$scope.pdf.projectTooLarge = true
 			else if response.status == "failure"
 				$scope.pdf.failure = true
 				fetchLogs()

@@ -6,19 +6,20 @@ rclient = redis.createClient(Settings.redis.web)
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
+UserGetter = require "../User/UserGetter"
 ClsiManager = require "./ClsiManager"
 Metrics = require('../../infrastructure/Metrics')
 logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
-	compile: (project_id, user_id, opt = {}, _callback = (error) ->) ->
+	compile: (project_id, user_id, options = {}, _callback = (error) ->) ->
 		timer = new Metrics.Timer("editor.compile")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		@_checkIfAutoCompileLimitHasBeenHit opt.isAutoCompile, (err, canCompile)->
+		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, (err, canCompile)->
 			if !canCompile
 				return callback null, "autocompile-backoff", []
 			logger.log project_id: project_id, user_id: user_id, "compiling project"
@@ -31,11 +32,24 @@ module.exports = CompileManager =
 					return callback(error) if error?
 					DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 						return callback(error) if error?
-						ClsiManager.sendRequest project_id, opt.settingsOverride, (error, status, outputFiles) ->
+						CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 							return callback(error) if error?
-							logger.log files: outputFiles, "output files"
-							callback(null, status, outputFiles)
+							for key, value of limits
+								options[key] = value
+							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, output) ->
+								return callback(error) if error?
+								logger.log files: outputFiles, "output files"
+								callback(null, status, outputFiles, output)
 
+	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
+		Project.findById project_id, {owner_ref: 1}, (error, project) ->
+			return callback(error) if error?
+			UserGetter.getUser project.owner_ref, {"features":1}, (err, owner)->
+				return callback(error) if error?
+				callback null, {
+					timeout: owner.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
+					compileGroup: owner.features?.compileGroup || Settings.defaultFeatures.compileGroup
+				}
 
 	getLogLines: (project_id, callback)->
 		Metrics.inc "editor.raw-logs"

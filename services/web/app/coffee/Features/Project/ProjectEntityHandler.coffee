@@ -195,13 +195,13 @@ module.exports = ProjectEntityHandler =
 						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
 							callback(error, fileRef, folder_id)
 
-	mkdirp: (project_or_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
+	mkdirp: (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
 		self = @
 		folders = path.split('/')
 		folders = _.select folders, (folder)->
 			return folder.length != 0
 
-		Project.getProject project_or_id, "", (err, project)=>
+		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)=>
 			if path == '/'
 				logger.log project_id: project._id, "mkdir is only trying to make path of / so sending back root folder"
 				return callback(null, [], project.rootFolder[0])
@@ -214,10 +214,10 @@ module.exports = ProjectEntityHandler =
 				if parentFolder?  
 					parentFolder_id = parentFolder._id
 				builtUpPath = "#{builtUpPath}/#{folderName}"
-				projectLocator.findElementByPath project_or_id, builtUpPath, (err, foundFolder)=>
+				projectLocator.findElementByPath project_id, builtUpPath, (err, foundFolder)=>
 					if !foundFolder?
 						logger.log path:path, project_id:project._id, folderName:folderName, "making folder from mkdirp"
-						@addFolder project_or_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
+						@addFolder project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
 							newFolder.parentFolder_id = parentFolder_id
 							previousFolders.push newFolder
 							callback null, previousFolders
