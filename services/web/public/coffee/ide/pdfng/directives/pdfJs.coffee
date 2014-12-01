@@ -13,7 +13,6 @@ define [
 ) ->
 	if PDFJS?
 		PDFJS.workerSrc = window.pdfJsWorkerPath
-		PDFJS.disableAutoFetch = true
 
 	style = $("<style/>")
 	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)

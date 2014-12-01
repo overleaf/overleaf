@@ -11,6 +11,7 @@ define [
 			@JOB_QUEUE_INTERVAL: 100
 
 			constructor: (@url, @options) ->
+				PDFJS.disableAutoFetch = true
 				@scale = @options.scale || 1
 				@document = $q.when(PDFJS.getDocument @url)
 				@navigateFn = @options.navigateFn
