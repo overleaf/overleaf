@@ -19,7 +19,7 @@ define [
 	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)
 	$("body").append(style)
 
-	App.directive "pdfjs", ["$timeout", ($timeout) ->
+	App.directive "pdfng", ["$timeout", ($timeout) ->
 		return {
 			scope: {
 					"pdfSrc": "="
