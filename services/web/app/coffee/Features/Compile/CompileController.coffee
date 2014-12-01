@@ -48,7 +48,7 @@ module.exports = CompileController =
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
-		ClsiManager.deleteAuxFiles project_id, (error) ->
+		CompileManager.deleteAuxFiles project_id, (error) ->
 			return next(error) if error?
 			res.send(200)
 

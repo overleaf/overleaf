@@ -181,14 +181,14 @@ describe "CompileController", ->
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(1)
+			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(1)
 			@req.params =
 				Project_id: @project_id
 			@res.send = sinon.stub()
 			@CompileController.deleteAuxFiles @req, @res, @next
 
 		it "should proxy to the CLSI", ->
-			@ClsiManager.deleteAuxFiles
+			@CompileManager.deleteAuxFiles
 				.calledWith(@project_id)
 				.should.equal true
 

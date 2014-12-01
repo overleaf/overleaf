@@ -40,6 +40,11 @@ module.exports = CompileManager =
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, output)
+								
+	deleteAuxFiles: (project_id, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.deleteAuxFiles project_id, limits, callback
 
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
 		Project.findById project_id, {owner_ref: 1}, (error, project) ->
@@ -50,12 +55,6 @@ module.exports = CompileManager =
 					timeout: owner.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
 					compileGroup: owner.features?.compileGroup || Settings.defaultFeatures.compileGroup
 				}
-
-	getLogLines: (project_id, callback)->
-		Metrics.inc "editor.raw-logs"
-		ClsiManager.getLogLines project_id, (error, logLines)->
-			return callback(error) if error?
-			callback null, logLines
 
 	COMPILE_DELAY: 1 # seconds
 	_checkIfRecentlyCompiled: (project_id, user_id, callback = (error, recentlyCompiled) ->) ->

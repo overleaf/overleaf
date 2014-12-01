@@ -77,15 +77,27 @@ describe "ClsiManager", ->
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@request.del = sinon.stub().callsArg(1)
-			@ClsiManager.deleteAuxFiles @project_id, @callback
+			
+		describe "with the standard compileGroup", ->
+			beforeEach ->
+				@ClsiManager.deleteAuxFiles @project_id, {compileGroup: "standard"}, @callback
 
-		it "should call the delete method in the CLSI", ->
-			@request.del
-				.calledWith("#{@settings.apis.clsi.url}/project/#{@project_id}")
-				.should.equal true
+			it "should call the delete method in the standard CLSI", ->
+				@request.del
+					.calledWith("#{@settings.apis.clsi.url}/project/#{@project_id}")
+					.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should call the callback", ->
+				@callback.called.should.equal true
+				
+		describe "with the priority compileGroup", ->
+			beforeEach ->
+				@ClsiManager.deleteAuxFiles @project_id, {compileGroup: "priority"}, @callback
+
+			it "should call the delete method in the CLSI", ->
+				@request.del
+					.calledWith("#{@settings.apis.clsi_priority.url}/project/#{@project_id}")
+					.should.equal true
 
 	describe "_buildRequest", ->
 		beforeEach ->
