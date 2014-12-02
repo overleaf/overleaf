@@ -74,7 +74,7 @@ define [
 				scope.$watch "pdfSrc", (url) ->
 					if url
 						scope.loading = true
-						console.log 'pdfSrc =', url
+						# console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
 						scope.$broadcast 'layout-ready'
@@ -87,8 +87,8 @@ define [
 						#				initializePosition()
 						#				flashControls()
 
-				scope.$watch "highlights", (areas) ->
-					console.log 'got HIGHLIGHTS in pdfJS', areas
+				#scope.$watch "highlights", (areas) ->
+					# console.log 'got HIGHLIGHTS in pdfJS', areas
 					
 					# return if !areas?
 					# highlights = for area in areas or []
@@ -143,7 +143,7 @@ define [
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, (e) ->
-							console.log 'got a resize event', event, e
+							#console.log 'got a resize event', event, e
 
 			template: """
 				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' dbl-click-callback='dblClickCallback' please-jump-to='pleaseJumpTo'></div>

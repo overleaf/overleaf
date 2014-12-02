@@ -3,8 +3,6 @@ define [
 ], (App) ->
 	# App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
-	console.log 'hello from Renderer'
-
 	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', ($q, $timeout, pdfAnnotations, pdfTextLayer) ->
 
 		class PDFRenderer
@@ -18,7 +16,6 @@ define [
 				@resetState()
 
 			resetState: () ->
-				console.log 'reseting renderer state'
 				@page = []
 				@complete = []
 				@timeout = []
@@ -112,7 +109,7 @@ define [
 				scale = @scale
 
 				if (not scale?)
-					console.log 'scale is undefined, returning'
+					# console.log 'scale is undefined, returning'
 					return
 
 				canvas = $('<canvas class="pdf-canvas-new"></canvas>')
@@ -167,10 +164,8 @@ define [
 				}
 				.then () ->
 					page.getTextContent().then (textContent) ->
-						console.log 'text content is', textContent
 						textLayer.setTextContent textContent
 					page.getAnnotations().then (annotations) ->
-						console.log 'annotations are', annotations
 						annotationsLayer.setAnnotations annotations
 
 			addSpinner: (element) ->

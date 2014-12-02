@@ -60,8 +60,7 @@ define [
 					updatePageSize scope.defaultPageSize
 
 				if scope.page.current
-						console.log 'we must scroll to this page', scope.page.pageNum,
-							'at position', scope.page.position
+						# console.log 'we must scroll to this page', scope.page.pageNum, 'at position', scope.page.position
 						renderPage()
 						# this is the current page, we want to scroll it into view
 						scope.document.getPdfViewport(scope.page.pageNum).then (viewport) ->
@@ -92,12 +91,12 @@ define [
 				scope.$watch 'highlights', (highlights, oldVal) ->
 					return unless highlights?
 					return unless highlights.length > 0
-					console.log 'got highlight watch in pdfPage', scope.page
+					# console.log 'got highlight watch in pdfPage', scope.page
 					pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
 					return unless pageHighlights.length
 					scope.document.getPdfViewport(scope.page.pageNum).then (viewport) ->
 						for hl in pageHighlights
-							console.log 'adding highlight', h, viewport
+							# console.log 'adding highlight', h, viewport
 							top = viewport.viewBox[3] - hl.v
 							highlightsLayer.addHighlight viewport, hl.h, top, hl.width, hl.height
 					$timeout () ->
