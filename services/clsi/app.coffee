@@ -38,10 +38,17 @@ app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
 staticServer = express.static Settings.path.compilesDir, setHeaders: (res, path, stat) ->
 	if Path.basename(path) == "output.pdf"
 		res.set("Content-Type", "application/pdf")
+		# Calculate an etag in the same way as nginx
+		# https://github.com/tj/send/issues/65
+		etag = (path, stat) ->
+			'"' + Math.ceil(+stat.mtime / 1000).toString(16) +
+			'-' + Number(stat.size).toString(16) + '"'
+		res.set("Etag", etag(path, stat))
 	else
 		# Force plain treatment of other file types to prevent hosting of HTTP/JS files
 		# that could be used in same-origin/XSS attacks.
 		res.set("Content-Type", "text/plain")
+
 app.get "/project/:project_id/output/*", (req, res, next) ->
 	req.url = "/#{req.params.project_id}/#{req.params[0]}"
 	staticServer(req, res, next)
