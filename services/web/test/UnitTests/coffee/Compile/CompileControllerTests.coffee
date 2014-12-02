@@ -137,7 +137,7 @@ describe "CompileController", ->
 				statusCode: 204
 				headers: { "mock": "header" }
 			@req.method = "mock-method"
-
+			@req.headers = { 'Mock': 'Headers' }
 
 		describe "user with standard priority", ->
 
@@ -152,6 +152,7 @@ describe "CompileController", ->
 						method: @req.method
 						url: "#{@settings.apis.clsi.url}#{@url}",
 						timeout: 60 * 1000
+						headers: @req.headers
 					)
 					.should.equal true
 
@@ -175,6 +176,7 @@ describe "CompileController", ->
 						method: @req.method
 						url: "#{@settings.apis.clsi_priority.url}#{@url}",
 						timeout: 60 * 1000
+						headers: @req.headers
 					)
 					.should.equal true
 
