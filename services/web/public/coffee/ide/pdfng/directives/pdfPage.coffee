@@ -21,8 +21,12 @@ define [
 				highlightsElement = $(element).find('.highlights-layer')
 
 				updatePageSize = (size) ->
-					element.height(Math.floor(size[0]))
-					element.width(Math.floor(size[1]))
+					h = Math.floor(size[0])
+					w = Math.floor(size[1])
+					element.height(h)
+					element.width(w)
+					canvasElement.height(h)
+					canvasElement.width(w)
 					scope.page.sized = true
 
 				isVisible = (containerSize) ->

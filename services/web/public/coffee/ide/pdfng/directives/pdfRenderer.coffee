@@ -175,11 +175,10 @@ define [
 					canvas.removeClass('pdf-canvas-new')
 
 			addSpinner: (element) ->
-				element.css({position: 'relative'})
-				h = element.parent().height()
-				w = element.parent().width()
+				h = element.height()
+				w = element.width()
 				size = Math.floor(0.5 * Math.min(h, w))
-				spinner = $('<div style="position: absolute; top: 50%; left:50%; transform: translateX(-50%) translateY(50%);"><i class="fa fa-spinner fa-spin" style="color: #999"></i></div>')
+				spinner = $('<div style="position: absolute; top: 50%; left:50%; transform: translateX(-50%) translateY(-50%); z-index: 2"><i class="fa fa-spinner fa-spin" style="color: #999"></i></div>')
 				spinner.css({'font-size' : size + 'px'})
 				element.append(spinner)
 
