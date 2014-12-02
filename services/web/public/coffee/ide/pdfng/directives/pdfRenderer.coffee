@@ -151,28 +151,27 @@ define [
 					textLayerDiv: element.text[0]
 					viewport: viewport
 				})
-				page.getTextContent().then (textContent) ->
-					console.log 'text content is', textContent
-					window.RENDER_DELAY = 0
-					textLayer.setTextContent textContent
 
 				annotationsLayer = new pdfAnnotations({
 					annotations: element.annotations[0]
 					viewport: viewport
 					navigateFn: @navigateFn
 				})
-				page.getAnnotations().then (annotations) ->
-					console.log 'annotations are', annotations
-					window.RENDER_DELAY = 0
-					annotationsLayer.setAnnotations annotations
+
+				element.canvas.replaceWith(canvas)
+				canvas.removeClass('pdf-canvas-new')
 
 				return @renderTask = page.render {
 					canvasContext: ctx
 					viewport: viewport
 				}
 				.then () ->
-					element.canvas.replaceWith(canvas)
-					canvas.removeClass('pdf-canvas-new')
+					page.getTextContent().then (textContent) ->
+						console.log 'text content is', textContent
+						textLayer.setTextContent textContent
+					page.getAnnotations().then (annotations) ->
+						console.log 'annotations are', annotations
+						annotationsLayer.setAnnotations annotations
 
 			addSpinner: (element) ->
 				h = element.height()
