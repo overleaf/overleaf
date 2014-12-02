@@ -78,7 +78,7 @@ module.exports = CompileController =
 			url = "#{compilerUrl}#{url}"
 			logger.log url: url, "proxying to CLSI"
 			oneMinute = 60 * 1000
-			proxy = request(url: url, method: req.method, timeout: oneMinute)
+			proxy = request(url: url, method: req.method, timeout: oneMinute, headers: req.headers)
 			proxy.pipe(res)
 			proxy.on "error", (error) ->
 				logger.warn err: error, url: url, "CLSI proxy error"
