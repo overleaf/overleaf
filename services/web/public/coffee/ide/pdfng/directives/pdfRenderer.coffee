@@ -141,8 +141,8 @@ define [
 				canvas.height(newHeight + 'px')
 				canvas.width(newWidth + 'px')
 
-				element.canvas[0].height = newHeight
-				element.canvas[0].width = newWidth
+				element.canvas.height(newHeight)
+				element.canvas.width(newWidth)
 
 				if pixelRatio != 1
 					ctx.scale(pixelRatio, pixelRatio)
