@@ -10,6 +10,7 @@ define [
 
 			constructor: (@url, @options) ->
 				PDFJS.disableAutoFetch = true
+				PDFJS.disableFontFace = true
 				@scale = @options.scale || 1
 				@document = $q.when(PDFJS.getDocument @url)
 				@navigateFn = @options.navigateFn
