@@ -46,7 +46,7 @@ aside#left-menu.full-size(
 					i.fa.fa-external-link.fa-fw 
 					| &nbsp;&nbsp; #{translate("publish_as_template")}
 
-	div(ng-show="permissions.admin")
+	div(ng-show="!anonymous")
 		h4() #{translate("sync")}
 		span(ng-controller="DropboxController")
 			ul.list-unstyled.nav()
