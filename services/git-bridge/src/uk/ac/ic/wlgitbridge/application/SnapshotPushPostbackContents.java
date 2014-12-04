@@ -18,15 +18,17 @@ public class SnapshotPushPostbackContents implements JSONSource {
 
     private final WriteLatexDataSource writeLatexDataSource;
     private final String projectName;
+    private final String postbackKey;
 
     private final SnapshotPostExceptionBuilder snapshotPostExceptionBuilder;
 
     private int versionID;
     private SnapshotPostException exception;
 
-    public SnapshotPushPostbackContents(WriteLatexDataSource writeLatexDataSource, String projectName, String contents) {
-        this.projectName = projectName;
+    public SnapshotPushPostbackContents(WriteLatexDataSource writeLatexDataSource, String projectName, String postbackKey, String contents) {
         this.writeLatexDataSource = writeLatexDataSource;
+        this.projectName = projectName;
+        this.postbackKey = postbackKey;
         snapshotPostExceptionBuilder = new SnapshotPostExceptionBuilder();
         fromJSON(new Gson().fromJson(contents, JsonElement.class));
     }
@@ -41,9 +43,9 @@ public class SnapshotPushPostbackContents implements JSONSource {
 
     public void processPostback() throws UnexpectedPostbackException {
         if (exception == null) {
-            writeLatexDataSource.postbackReceivedSuccessfully(projectName, versionID);
+            writeLatexDataSource.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
         } else {
-            writeLatexDataSource.postbackReceivedWithException(projectName, exception);
+            writeLatexDataSource.postbackReceivedWithException(projectName, postbackKey, exception);
         }
     }
 

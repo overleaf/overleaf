@@ -28,7 +28,8 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
             String contents = getContentsOfReader(request.getReader());
             String projectName = request.getRequestURI().split("/")[1];
             System.out.println("Postback received for project: " + projectName);
-            SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, contents);
+            String postbackKey = "postback";
+            SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
             try {
                 postbackContents.processPostback();
             } catch (UnexpectedPostbackException e) {
