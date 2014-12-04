@@ -59,7 +59,7 @@ define [
 				return if @complete[pagenum]
 				@renderQueue = @renderQueue.filter (q) ->
 					q.pagenum != pagenum
-				@stopSpinner (element.canvas)
+				# @stopSpinner (element.canvas)
 
 			triggerRenderQueue: () ->
 				$timeout () =>
@@ -90,7 +90,7 @@ define [
 				return if @renderTask[pagenum]
 				@jobs = @jobs + 1
 
-				@addSpinner(element.canvas)
+				# @addSpinner(element.canvas)
 
 				pageLoad = @getPage(pagenum)
 
