@@ -52,7 +52,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         JsonObject file = new JsonObject();
         file.addProperty("name", fileNode.getFilePath());
         if (fileNode.isChanged()) {
-            file.addProperty("url", projectURL + "/" + fileNode.getFilePath());
+            file.addProperty("url", projectURL + "/" + fileNode.getFilePath() + "?key=" + postbackKey);
         }
         return file;
     }
