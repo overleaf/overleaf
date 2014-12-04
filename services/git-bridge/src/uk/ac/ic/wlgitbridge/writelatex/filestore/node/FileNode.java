@@ -17,16 +17,16 @@ import java.util.Map;
 public abstract class FileNode implements PersistentStoreUpdater<String> {
 
     private final String filePath;
-    private final boolean changed;
+    private FileNode previous;
+    private boolean changed;
 
     public FileNode(RawFile file, Map<String, FileNode> context) {
         this(file.getPath(), context);
     }
 
     public FileNode(String filePath, Map<String, FileNode> context) {
-        FileNode currentFileNode = context.get(filePath);
+        previous = context.get(filePath);
         this.filePath = filePath;
-        changed = currentFileNode == null || !equals(currentFileNode);
     }
 
     protected FileNode(String filePath, boolean changed) {
@@ -36,6 +36,7 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
 
     protected FileNode() {
         filePath = "";
+        previous = null;
         changed = false;
     }
 
@@ -57,7 +58,7 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
     }
 
     public boolean isChanged() {
-        return changed;
+        return changed || previous == null || !equals(previous);
     }
 
     public abstract void indexWith(FileNodeIndexer indexer);
@@ -70,7 +71,7 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
 
     @Override
     public String toString() {
-        return String.valueOf(changed);
+        return filePath;
     }
 
 }

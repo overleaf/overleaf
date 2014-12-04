@@ -3,10 +3,10 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.AttachmentBlob;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ByteBlob;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.ExternalBlob;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 
 import java.util.Map;
@@ -41,6 +41,15 @@ public class AttachmentNode extends FileNode {
         super();
         this.url = url;
         this.blob = new ByteBlob(blob);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AttachmentNode)) {
+            return false;
+        }
+        AttachmentNode that = (AttachmentNode) obj;
+        return super.equals(obj) && url.equals(that.url);
     }
 
     @Override
