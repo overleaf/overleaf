@@ -9,7 +9,8 @@ module.exports = OutputFileFinder =
 		for resource in resources
 			incomingResources[resource.path] = true
 
-		OutputFileFinder._getAllFiles directory, (error, allFiles) ->
+		OutputFileFinder._getAllFiles directory, (error, allFiles = []) ->
+			return callback(error) if error?
 			jobs = []
 			outputFiles = []
 			for file in allFiles
