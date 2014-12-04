@@ -90,7 +90,7 @@ public class WLGitBridgeServer {
     }
 
     private Handler initResourceHandler() {
-        ResourceHandler resourceHandler = new ResourceHandler();
+        ResourceHandler resourceHandler = new AttsResourceHandler();
         resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;
     }

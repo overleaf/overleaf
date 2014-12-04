@@ -66,7 +66,11 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof FileNode && filePath.equals(((FileNode) obj).filePath);
+        if (!(obj instanceof FileNode)) {
+            return false;
+        }
+        FileNode that = (FileNode) obj;
+        return filePath.equals(that.filePath) && getBlob().equals(that.getBlob());
     }
 
     @Override

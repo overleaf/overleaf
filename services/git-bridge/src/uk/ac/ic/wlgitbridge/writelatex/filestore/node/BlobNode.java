@@ -36,16 +36,6 @@ public class BlobNode extends FileNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof BlobNode)) {
-            return false;
-        }
-        BlobNode that = (BlobNode) obj;
-        System.out.println("that: " + that + ", blob: " + blob + ", that.blob: " + that.blob);
-        return super.equals(that) && blob.equals(that.blob);
-    }
-
-    @Override
     public void indexWith(FileNodeIndexer fileNodeIndexer) {
         fileNodeIndexer.index(this);
     }

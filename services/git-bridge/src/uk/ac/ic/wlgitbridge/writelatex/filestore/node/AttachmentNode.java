@@ -44,15 +44,6 @@ public class AttachmentNode extends FileNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof AttachmentNode)) {
-            return false;
-        }
-        AttachmentNode that = (AttachmentNode) obj;
-        return super.equals(obj) && url.equals(that.url);
-    }
-
-    @Override
     public void indexWith(FileNodeIndexer fileNodeIndexer) {
         fileNodeIndexer.index(this);
     }
