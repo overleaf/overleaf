@@ -35,7 +35,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("latestVerId", previousVersionID);
         jsonObject.add("files", getFilesAsJson());
-        jsonObject.addProperty("postbackUrl", projectURL + "/" + postbackKey);
+        jsonObject.addProperty("postbackUrl", projectURL + "/" + postbackKey + "/postback");
         System.out.println(jsonObject);
         return jsonObject;
     }

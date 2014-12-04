@@ -16,10 +16,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostEx
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Created by Winston on 16/11/14.
@@ -28,13 +25,11 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     private final WLDataModel dataModel;
     private final PostbackManager postbackManager;
-    private final Map<String, Lock> projectLocks;
     private final ProjectLock mainProjectLock;
 
     public WriteLatexAPI(WLDataModel dataModel) {
         this.dataModel = dataModel;
         postbackManager = new PostbackManager();
-        projectLocks = new HashMap<String, Lock>();
         mainProjectLock = new ProjectLock();
     }
 
