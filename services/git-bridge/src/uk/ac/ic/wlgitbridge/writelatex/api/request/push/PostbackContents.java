@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
 
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 
 /**
@@ -46,6 +47,12 @@ public class PostbackContents {
             this.exception = exception;
             received = true;
             notifyAll();
+        }
+    }
+
+    public void checkPostbackKey(String postbackKey) throws InvalidPostbackKeyException {
+        if (!postbackKey.equals(this.postbackKey)) {
+            throw new InvalidPostbackKeyException();
         }
     }
 

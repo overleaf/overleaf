@@ -3,7 +3,7 @@ package uk.ac.ic.wlgitbridge.application;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

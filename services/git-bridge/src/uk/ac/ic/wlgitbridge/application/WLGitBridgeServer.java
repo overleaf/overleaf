@@ -71,7 +71,7 @@ public class WLGitBridgeServer {
         HandlerCollection handlers = new HandlerCollection();
         WriteLatexAPI writeLatexDataSource = new WriteLatexAPI(new WLDataModel(rootGitDirectoryPath));
         handlers.setHandlers(new Handler[] {
-                initResourceHandler(),
+                initResourceHandler(writeLatexDataSource),
                 new SnapshotPushPostbackHandler(writeLatexDataSource),
                 initGitHandler(writeLatexDataSource)
         });
@@ -89,8 +89,8 @@ public class WLGitBridgeServer {
         return servletContextHandler;
     }
 
-    private Handler initResourceHandler() {
-        ResourceHandler resourceHandler = new AttsResourceHandler();
+    private Handler initResourceHandler(WriteLatexAPI writeLatexDataSource) {
+        ResourceHandler resourceHandler = new AttsResourceHandler(writeLatexDataSource);
         resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;
     }

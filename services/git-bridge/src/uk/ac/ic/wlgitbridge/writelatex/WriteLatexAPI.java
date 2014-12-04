@@ -7,10 +7,11 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequestResult;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
@@ -91,6 +92,11 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         } finally {
             mainProjectLock.unlockForProject(projectName);
         }
+    }
+
+    @Override
+    public void checkPostbackKey(String projectName, String postbackKey) throws InvalidPostbackKeyException {
+        postbackManager.checkPostbackKey(projectName, postbackKey);
     }
 
     /* Called by postback thread. */

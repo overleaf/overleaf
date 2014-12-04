@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostExceptionBuilder;
 
 /**

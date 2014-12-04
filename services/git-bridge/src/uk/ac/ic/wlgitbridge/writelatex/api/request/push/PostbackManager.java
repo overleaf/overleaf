@@ -1,6 +1,8 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
 
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -47,6 +49,10 @@ public class PostbackManager {
         PostbackContents contents = new PostbackContents(key);
         postbackContentsTable.put(projectName, contents);
         return key;
+    }
+
+    public void checkPostbackKey(String projectName, String postbackKey) throws InvalidPostbackKeyException {
+        postbackContentsTable.get(projectName).checkPostbackKey(postbackKey);
     }
 
     private String randomString() {

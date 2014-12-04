@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import org.junit.Test;
 
