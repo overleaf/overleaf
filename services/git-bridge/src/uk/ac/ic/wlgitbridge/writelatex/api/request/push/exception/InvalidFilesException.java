@@ -20,8 +20,6 @@ public class InvalidFilesException extends SnapshotPostException {
 
     public InvalidFilesException(JsonObject json) {
         super(json);
-        descriptionLines = new LinkedList<String>();
-        descriptionLines.addAll(Arrays.asList(DESCRIPTION_LINES));
     }
 
     @Override
@@ -36,9 +34,9 @@ public class InvalidFilesException extends SnapshotPostException {
 
     @Override
     public void fromJSON(JsonElement json) {
-        System.out.println(json);
+        descriptionLines = new LinkedList<String>();
+        descriptionLines.addAll(Arrays.asList(DESCRIPTION_LINES));
         try {
-
             for (JsonElement error : json.getAsJsonObject().get("errors").getAsJsonArray()) {
                 descriptionLines.add(describeError(error.getAsJsonObject()));
             }
