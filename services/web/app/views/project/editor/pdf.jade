@@ -60,7 +60,6 @@ div.full-size.pdf(ng-controller="PdfController")
 	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
 		- // user.featureSwitches = {} // override
 		- var usePdfNG = user.featureSwitches && user.featureSwitches.pdfng;
-		- console.log('USER FEATURE SWITCHES', user.featureSwitches, usePdfNG);
 		if !usePdfNG
 			div(
 				pdfjs
