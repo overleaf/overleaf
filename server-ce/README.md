@@ -78,6 +78,10 @@ The backend API for managing project tags (folders).
 
 An API for running server-side spelling checking on ShareLaTeX documents.
 
+Dropbox
+-------
+
+Please note that certain features like Dropbox integration are not functional in the open source code base yet, despite appearing in the user interface. We're working on this, sorry!
 
 Contributing
 ------------
