@@ -26,6 +26,7 @@ public class BlobNode extends FileNode {
 
     public BlobNode(RepositoryFile repositoryFile, Map<String, FileNode> fileNodeTable, File projectAttDirectory) throws IOException, FailedConnectionException {
         this(repositoryFile, fileNodeTable);
+        blob = new RawFileBlob(repositoryFile);
         writeChanged(projectAttDirectory);
     }
 
