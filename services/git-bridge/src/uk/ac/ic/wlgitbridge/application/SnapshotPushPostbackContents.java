@@ -33,6 +33,7 @@ public class SnapshotPushPostbackContents implements JSONSource {
 
     @Override
     public void fromJSON(JsonElement json) {
+        System.out.println(json);
         JsonObject responseObject = json.getAsJsonObject();
         String code = responseObject.get("code").getAsString();
         setResult(responseObject, code);
