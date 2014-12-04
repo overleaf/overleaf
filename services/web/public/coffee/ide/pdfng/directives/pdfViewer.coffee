@@ -258,16 +258,28 @@ define [
 					#scope.$apply()
 
 				element.on 'scroll', () ->
-					# console.log 'scroll detected', scope.adjustingScroll
-					updateContainer()
-					scope.$apply()
-					#console.log 'pdfposition', element.parent().scrollTop()
 					if scope.adjustingScroll
+						updateContainer()
+						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					#console.log 'not from auto scroll'
+					scope.scrolled = true
+					return if scope.handler?
+					scope.handler = requestAnimationFrame(scrollHandler)
+
+				scrollStart = null
+				SCROLL_TIMEOUT = 50
+				scrollHandler = (timestamp) ->
+					scrollStart = timestamp if !scrollStart?
+					progress = timestamp - scrollStart
+					if (progress < SCROLL_TIMEOUT)
+						scope.handler = requestAnimationFrame(scrollHandler)
+						return
+					scrollStart = null
+					scope.handler = null
+					updateContainer()
+					scope.$apply()
 					scope.position = ctrl.getPdfPosition()
-					# console.log 'position is', scope.position.page, scope.position.offset
 					scope.$apply()
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
