@@ -32,7 +32,7 @@ public class InvalidFilesException extends SnapshotPostException {
 
     @Override
     public void fromJSON(JsonElement json) {
-
+        System.out.println(json);
     }
 
 }
