@@ -1,8 +1,9 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -10,10 +11,7 @@ import java.util.List;
  */
 public class InvalidProjectException extends SnapshotPostException {
 
-    private static final String[] DESCRIPTION_LINES = {
-            "Your WriteLatex project is too big.",
-            "Delete some files and try again.."
-    };
+    private LinkedList<String> descriptionLines;
 
     public InvalidProjectException(JsonElement jsonElement) {
         super(jsonElement);
@@ -26,12 +24,16 @@ public class InvalidProjectException extends SnapshotPostException {
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList(DESCRIPTION_LINES);
+        return descriptionLines;
     }
 
     @Override
     public void fromJSON(JsonElement json) {
-
+        descriptionLines = new LinkedList<String>();
+        JsonArray errors = json.getAsJsonObject().get("errors").getAsJsonArray();
+        for (JsonElement error : errors) {
+            descriptionLines.add(error.getAsString());
+        }
     }
 
 }

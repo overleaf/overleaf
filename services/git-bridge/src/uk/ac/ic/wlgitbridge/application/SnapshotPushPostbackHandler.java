@@ -24,10 +24,6 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-//                System.out.println("handling");
-//                System.out.println(request.getMethod());
-//                response.setContentType("text/html;charset=utf-8");
-//                response.setStatus(HttpServletResponse.SC_OK);
         if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
             String contents = getContentsOfReader(request.getReader());
             String projectName = request.getRequestURI().split("/")[1];
