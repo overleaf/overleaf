@@ -2,6 +2,8 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.push;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +12,11 @@ import java.util.Map;
  */
 public class PostbackManager {
 
+    private final SecureRandom random;
     private final Map<String, PostbackContents> postbackContentsTable;
 
     public PostbackManager() {
+        random = new SecureRandom();
         postbackContentsTable = new HashMap<String, PostbackContents>();
     }
 
@@ -39,10 +43,14 @@ public class PostbackManager {
     }
 
     public String makeKeyForProject(String projectName) {
-        String key = "postback";
+        String key = System.currentTimeMillis() + randomString();
         PostbackContents contents = new PostbackContents(key);
         postbackContentsTable.put(projectName, contents);
         return key;
+    }
+
+    private String randomString() {
+        return new BigInteger(130, random).toString(32);
     }
 
 }

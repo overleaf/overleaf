@@ -26,9 +26,13 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
             String contents = getContentsOfReader(request.getReader());
-            String projectName = request.getRequestURI().split("/")[1];
+            String[] parts = request.getRequestURI().split("/");
+            if (parts.length < 4) {
+                throw new ServletException();
+            }
+            String projectName = parts[1];
+            String postbackKey = parts[2];
             System.out.println("Postback received for project: " + projectName);
-            String postbackKey = "postback";
             SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
             try {
                 postbackContents.processPostback();
