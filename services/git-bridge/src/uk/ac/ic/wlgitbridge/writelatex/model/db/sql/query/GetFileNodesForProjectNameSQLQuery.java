@@ -4,6 +4,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.AttachmentNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.BlobNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.SQLQuery;
 
 import java.sql.PreparedStatement;
@@ -21,9 +22,11 @@ public class GetFileNodesForProjectNameSQLQuery implements SQLQuery<List<FileNod
             "SELECT `file_name`, `changed`, `is_blob`, `blob`, `url` FROM `file_node_table` WHERE `project_name` = ?";
 
     private final String projectName;
+    private final FileIndexStore fileIndexStore;
 
-    public GetFileNodesForProjectNameSQLQuery(String projectName) {
+    public GetFileNodesForProjectNameSQLQuery(String projectName, FileIndexStore fileIndexStore) {
         this.projectName = projectName;
+        this.fileIndexStore = fileIndexStore;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class GetFileNodesForProjectNameSQLQuery implements SQLQuery<List<FileNod
             if (isBlob) {
                 fileNode = new BlobNode(fileName, changed, resultSet.getBytes("blob"));
             } else {
-                fileNode = new AttachmentNode(fileName, changed, resultSet.getString("url"));
+                fileNode = new AttachmentNode(fileName, changed, resultSet.getString("url"), fileIndexStore);
             }
             fileNodes.add(fileNode);
         }

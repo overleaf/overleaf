@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.model.db.sql;
 
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.query.GetFileNodesForProjectNameSQLQuery;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.query.GetProjectNamesSQLQuery;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.query.GetURLIndexTableForProjectNameSQLQuery;
@@ -63,8 +64,8 @@ public class SQLiteWLDatabase {
         return query(new GetVersionIDsForProjectNameSQLQuery(projectName));
     }
 
-    public List<FileNode> getFileNodesForProjectName(String projectName) throws SQLException {
-        return query(new GetFileNodesForProjectNameSQLQuery(projectName));
+    public List<FileNode> getFileNodesForProjectName(String projectName, FileIndexStore fileIndexStore) throws SQLException {
+        return query(new GetFileNodesForProjectNameSQLQuery(projectName, fileIndexStore));
     }
 
     public Map<String, FileNode> getURLIndexTableForProjectName(String projectName) throws SQLException {
