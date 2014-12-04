@@ -89,6 +89,11 @@ define [
 				scope.$watch 'highlights', (highlights, oldVal) ->
 					return unless highlights?
 					return unless highlights.length > 0
+					if scope.timeoutHandler
+						$timeout.cancel(scope.timeoutHandler)
+						highlightsLayer.clearHighlights()
+						scope.timeoutHandler
+
 					# console.log 'got highlight watch in pdfPage', scope.page
 					pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
 					return unless pageHighlights.length
@@ -97,12 +102,15 @@ define [
 							# console.log 'adding highlight', h, viewport
 							top = viewport.viewBox[3] - hl.v
 							highlightsLayer.addHighlight viewport, hl.h, top, hl.width, hl.height
-					$timeout () ->
+					scope.timeoutHandler = $timeout () ->
 						highlightsLayer.clearHighlights()
+						scope.timeoutHandler = null
 					, 1000
 
 				scope.$on "$destroy", () ->
-					console.log 'in destroy handler, TODO need to clean up timeout/highlights'
+					if scope.timeoutHandler
+						$timeout.cancel(scope.timeoutHandler)
+						highlightsLayer.clearHighlights()
 
 		}
 	]
