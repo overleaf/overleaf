@@ -15,7 +15,7 @@ public class AttsResourceHandler extends ResourceHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        System.out.println(baseRequest);
+        System.out.println(baseRequest.getMethod() + baseRequest.getUri());
         super.handle(target, baseRequest, request, response);
     }
 
