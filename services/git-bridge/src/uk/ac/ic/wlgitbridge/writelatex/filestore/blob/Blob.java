@@ -18,7 +18,7 @@ public abstract class Blob implements PersistentStoreUpdater<AttachmentNode> {
         if (!(obj instanceof Blob)) {
             return false;
         }
-        ByteBlob that = (ByteBlob) obj;
+        Blob that = (Blob) obj;
         try {
             return Arrays.equals(getContents(), that.getContents());
         } catch (FailedConnectionException e) {
