@@ -39,6 +39,7 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
             repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
             new WLBridgedProject(repository, name, writeLatexDataSource).buildRepository();
         } catch (FailedConnectionException e) {
+            e.printStackTrace();
             throw new ServiceNotEnabledException();
         } catch (IOException e) {
             throw new ServiceNotEnabledException();
