@@ -83,11 +83,14 @@ define [
 
 			processRenderQueue: () ->
 				return if @jobs > 0
-				current = @renderQueue.pop()
+				current = @renderQueue.shift()
 				return unless current?
 				[element, pagenum] = [current.element, current.pagenum]
-				return if @complete[pagenum]
-				return if @renderTask[pagenum]
+				# if task is underway or complete, go to the next entry in the
+				# render queue
+				if @renderTask[pagenum] or @complete[pagenum]
+					@processRenderQueue()
+					return
 				@jobs = @jobs + 1
 
 				# @addSpinner(element.canvas)
