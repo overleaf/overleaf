@@ -23,7 +23,7 @@ public interface WriteLatexDataSource {
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException;
 
     /* Called by postback thread. */
-    public void postbackReceivedSuccessfully(String projectName, int versionID) throws UnexpectedPostbackException;
-    public void postbackReceivedWithException(String projectName, SnapshotPostException exception) throws UnexpectedPostbackException;
+    public void postbackReceivedSuccessfully(String projectName, String postbackKey, int versionID) throws UnexpectedPostbackException;
+    public void postbackReceivedWithException(String projectName, String postbackKey, SnapshotPostException exception) throws UnexpectedPostbackException;
 
 }

@@ -17,19 +17,17 @@ public class PostbackManager {
     }
 
     public int getVersionID(String projectName) throws SnapshotPostException {
-        PostbackContents contents = new PostbackContents();
-        postbackContentsTable.put(projectName, contents);
-        int versionID = contents.waitForPostback();
+        int versionID = postbackContentsTable.get(projectName).waitForPostback();
         postbackContentsTable.remove(projectName);
         return versionID;
     }
 
-    public void postVersionIDForProject(String projectName, int versionID) throws UnexpectedPostbackException {
-        getPostbackForProject(projectName).receivedVersionID(versionID);
+    public void postVersionIDForProject(String projectName, int versionID, String postbackKey) throws UnexpectedPostbackException {
+        getPostbackForProject(projectName).receivedVersionID(versionID, postbackKey);
     }
 
-    public void postExceptionForProject(String projectName, SnapshotPostException exception) throws UnexpectedPostbackException {
-        getPostbackForProject(projectName).receivedException(exception);
+    public void postExceptionForProject(String projectName, SnapshotPostException exception, String postbackKey) throws UnexpectedPostbackException {
+        getPostbackForProject(projectName).receivedException(exception, postbackKey);
     }
 
     private PostbackContents getPostbackForProject(String projectName) throws UnexpectedPostbackException {
@@ -38,6 +36,13 @@ public class PostbackManager {
             throw new UnexpectedPostbackException();
         }
         return contents;
+    }
+
+    public String makeKeyForProject(String projectName) {
+        String key = "postback";
+        PostbackContents contents = new PostbackContents(key);
+        postbackContentsTable.put(projectName, contents);
+        return key;
     }
 
 }

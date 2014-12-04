@@ -45,11 +45,12 @@ public class WLDataModel implements CandidateSnapshotCallback {
         return projectStore.getProjectWithName(name);
     }
 
-    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
+    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String hostname, String postbackKey) throws SnapshotPostException, IOException, FailedConnectionException {
         return new WLDirectoryNodeSnapshot(getProjectWithName(projectName),
                                            fileStore.createNextDirectoryNodeInProjectFromContents(getProjectWithName(projectName),
                                                                                                   directoryContents),
                                            hostname,
+                                           postbackKey,
                                            this);
     }
 

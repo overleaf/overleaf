@@ -18,13 +18,15 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     private final String projectName;
     private final String projectURL;
     private final WLDirectoryNode directoryNode;
+    private final String postbackKey;
     private final CandidateSnapshotCallback callback;
 
-    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, CandidateSnapshotCallback callback) {
+    public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, String postbackKey, CandidateSnapshotCallback callback) {
         previousVersionID = project.getLatestSnapshotID();
         projectName = project.getName();
         projectURL = "http://" + hostname + "/" + projectName;
         this.directoryNode = directoryNode;
+        this.postbackKey = postbackKey;
         this.callback = callback;
     }
 
@@ -33,7 +35,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("latestVerId", previousVersionID);
         jsonObject.add("files", getFilesAsJson());
-        jsonObject.addProperty("postbackUrl", projectURL + "/postback");
+        jsonObject.addProperty("postbackUrl", projectURL + "/" + postbackKey);
         System.out.println(jsonObject);
         return jsonObject;
     }

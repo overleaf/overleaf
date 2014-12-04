@@ -36,7 +36,6 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         postbackManager = new PostbackManager();
         projectLocks = new HashMap<String, Lock>();
         mainProjectLock = new ProjectLock();
-//        postbackLock = new ProjectLock();
     }
 
     @Override
@@ -78,7 +77,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         mainProjectLock.lockForProject(projectName);
         try {
             System.out.println("Pushing project: " + projectName);
-            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname);
+            String postbackKey = postbackManager.makeKeyForProject(projectName);
+            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname, postbackKey);
             SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
             snapshotPushRequest.request();
             SnapshotPushRequestResult result = snapshotPushRequest.getResult();
@@ -100,13 +100,13 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     /* Called by postback thread. */
     @Override
-    public void postbackReceivedSuccessfully(String projectName, int versionID) throws UnexpectedPostbackException {
-        postbackManager.postVersionIDForProject(projectName, versionID);
+    public void postbackReceivedSuccessfully(String projectName, String postbackKey, int versionID) throws UnexpectedPostbackException {
+        postbackManager.postVersionIDForProject(projectName, versionID, postbackKey);
     }
 
     @Override
-    public void postbackReceivedWithException(String projectName, SnapshotPostException exception) throws UnexpectedPostbackException {
-        postbackManager.postExceptionForProject(projectName, exception);
+    public void postbackReceivedWithException(String projectName, String postbackKey, SnapshotPostException exception) throws UnexpectedPostbackException {
+        postbackManager.postExceptionForProject(projectName, exception, postbackKey);
     }
 
 }

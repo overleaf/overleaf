@@ -7,11 +7,14 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostEx
  */
 public class PostbackContents {
 
+    private final String postbackKey;
+
     private boolean received;
     private int versionID;
     private SnapshotPostException exception;
 
-    public PostbackContents() {
+    public PostbackContents(String postbackKey) {
+        this.postbackKey = postbackKey;
         received = false;
         exception = null;
     }
@@ -30,16 +33,20 @@ public class PostbackContents {
         return versionID;
     }
 
-    public synchronized void receivedVersionID(int versionID) {
-        this.versionID = versionID;
-        received = true;
-        notifyAll();
+    public synchronized void receivedVersionID(int versionID, String postbackKey) {
+        if (postbackKey.equals(this.postbackKey)) {
+            this.versionID = versionID;
+            received = true;
+            notifyAll();
+        }
     }
 
-    public synchronized void receivedException(SnapshotPostException exception) {
-        this.exception = exception;
-        received = true;
-        notifyAll();
+    public synchronized void receivedException(SnapshotPostException exception, String postbackKey) {
+        if (postbackKey.equals(this.postbackKey)) {
+            this.exception = exception;
+            received = true;
+            notifyAll();
+        }
     }
 
 }
