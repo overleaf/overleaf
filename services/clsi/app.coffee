@@ -50,26 +50,9 @@ staticServer = express.static Settings.path.compilesDir, setHeaders: (res, path,
 		# that could be used in same-origin/XSS attacks.
 		res.set("Content-Type", "text/plain")
 
-
-
-app.get "/project/:project_id/output/*", (req, res, next) ->
-	basePath = Path.resolve("#{Settings.path.compilesDir}/#{req.params.project_id}")
-	path = Path.normalize("#{basePath}/#{req.params[0]}")
-	if path.slice(0, basePath.length) != basePath
-		logger.warn path: req.params[0], project_id: req.params.project_id, "trying to leave project directory, aborting"
-		res.send(404)
-		return
-	fs.lstat path, (error, stats) ->
-		if error?
-			if error.code == "ENOENT"
-				error.statusCode = 404
-			return next(error)
-		if stats.isSymbolicLink()
-			error = new Error("file is a symlink")
-			error.statusCode = 404
-			return next(error)
-		req.url = "/#{req.params.project_id}/#{req.params[0]}"
-		staticServer(req, res, next)
+app.get "/project/:project_id/output/*", require("./app/js/SymlinkCheckerMiddlewear"), (req, res, next) ->
+	req.url = "/#{req.params.project_id}/#{req.params[0]}"
+	staticServer(req, res, next)
 
 app.get "/status", (req, res, next) ->
 	res.send "CLSI is alive\n"
