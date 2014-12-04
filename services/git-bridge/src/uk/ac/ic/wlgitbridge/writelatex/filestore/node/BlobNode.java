@@ -41,6 +41,7 @@ public class BlobNode extends FileNode {
             return false;
         }
         BlobNode that = (BlobNode) obj;
+        System.out.println("that: " + that + ", blob: " + blob + ", that.blob: " + that.blob);
         return super.equals(that) && blob.equals(that.blob);
     }
 
