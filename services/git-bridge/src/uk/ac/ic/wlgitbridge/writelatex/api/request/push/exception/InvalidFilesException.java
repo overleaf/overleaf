@@ -37,8 +37,13 @@ public class InvalidFilesException extends SnapshotPostException {
     @Override
     public void fromJSON(JsonElement json) {
         System.out.println(json);
-        for (JsonElement error : json.getAsJsonObject().get("errors").getAsJsonArray()) {
-            descriptionLines.add(describeError(error.getAsJsonObject()));
+        try {
+
+            for (JsonElement error : json.getAsJsonObject().get("errors").getAsJsonArray()) {
+                descriptionLines.add(describeError(error.getAsJsonObject()));
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
     }
 
