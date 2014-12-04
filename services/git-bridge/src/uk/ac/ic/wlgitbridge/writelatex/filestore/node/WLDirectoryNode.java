@@ -29,13 +29,15 @@ public class WLDirectoryNode implements PersistentStoreSource, PersistentStoreUp
     private Map<String, FileNode> fileNodeTable;
     private FileIndexStore fileIndexStore;
 
-    public WLDirectoryNode(String projectName, PersistentStoreAPI persistentStore) {
-        this(projectName);
+    public WLDirectoryNode(String projectName, File attsDirectory, File rootGitDirectory, PersistentStoreAPI persistentStore) {
+        this(projectName, attsDirectory, rootGitDirectory);
         initFromPersistentStore(persistentStore);
     }
 
-    private WLDirectoryNode(String projectName) {
+    private WLDirectoryNode(String projectName, File attsDirectory, File rootGitDirectory) {
         this.projectName = projectName;
+        new File(attsDirectory, projectName).mkdirs();
+        new File(rootGitDirectory, projectName).mkdirs();
     }
 
     private WLDirectoryNode(String projectName, Map<String, FileNode> fileNodeTable, FileIndexStore fileIndexStore) {

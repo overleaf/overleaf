@@ -43,7 +43,7 @@ public class WLFileStore implements PersistentStoreSource {
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
         this.persistentStore = persistentStore;
         for (String projectName : persistentStore.getProjectNames()) {
-            fileStore.put(projectName, new WLDirectoryNode(projectName, persistentStore));
+            fileStore.put(projectName, new WLDirectoryNode(projectName, attDirectory, rootGitDirectory, persistentStore));
         }
     }
 
@@ -92,7 +92,7 @@ public class WLFileStore implements PersistentStoreSource {
     private WLDirectoryNode getDirectoryNodeForProjectName(String projectName) {
         WLDirectoryNode directoryNode = fileStore.get(projectName);
         if (directoryNode == null) {
-            directoryNode = new WLDirectoryNode(projectName, persistentStore);
+            directoryNode = new WLDirectoryNode(projectName, attDirectory, rootGitDirectory, persistentStore);
             fileStore.put(projectName, directoryNode);
         }
         return directoryNode;
