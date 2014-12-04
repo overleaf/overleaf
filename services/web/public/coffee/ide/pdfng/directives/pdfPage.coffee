@@ -63,9 +63,7 @@ define [
 						# console.log 'we must scroll to this page', scope.page.pageNum, 'at position', scope.page.position
 						renderPage()
 						# this is the current page, we want to scroll it into view
-						scope.document.getPdfViewport(scope.page.pageNum).then (viewport) ->
-							scope.page.viewport = viewport
-							ctrl.setPdfPosition(scope.page, scope.page.position)
+						ctrl.setPdfPosition(scope.page, scope.page.position)
 
 				scope.$watch 'defaultPageSize', (defaultPageSize) ->
 					return unless defaultPageSize?
