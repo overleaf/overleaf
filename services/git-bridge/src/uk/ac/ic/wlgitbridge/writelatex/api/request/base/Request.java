@@ -81,6 +81,7 @@ public abstract class Request<T extends Result> {
 
                 @Override
                 public void onThrowable(Throwable t) {
+                    t.printStackTrace();
                     error = true;
                 }
 
