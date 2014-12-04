@@ -37,7 +37,7 @@ public class PostbackManager {
     }
 
     private PostbackContents getPostbackForProject(String projectName) throws UnexpectedPostbackException {
-        PostbackContents contents = postbackContentsTable.get(projectName);
+        PostbackContents contents = postbackContentsTable.remove(projectName);
         if (contents == null) {
             throw new UnexpectedPostbackException();
         }

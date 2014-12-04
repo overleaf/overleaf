@@ -39,7 +39,6 @@ public class AttsResourceHandler extends ResourceHandler {
         } catch (InvalidPostbackKeyException e) {
             throw new ServletException();
         }
-        System.out.println(multimap);
 
         if (false) {
             throw new ServletException();

@@ -21,6 +21,7 @@ public class WLProject implements PersistentStoreSource {
     private final SnapshotFetcher snapshotFetcher;
 
     private int latestSnapshotID;
+    private PersistentStoreAPI persistentStore;
 
     public WLProject(String name) {
         this.name = name;
@@ -60,10 +61,12 @@ public class WLProject implements PersistentStoreSource {
         snapshots.put(versionID, new Snapshot(versionID));
         snapshotFetcher.putLatestVersion(versionID);
         latestSnapshotID = versionID;
+        persistentStore.addSnapshot(name, versionID);
     }
 
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+        this.persistentStore = persistentStore;
         snapshotFetcher.initFromPersistentStore(persistentStore);
         updateLatestSnapshot();
     }
