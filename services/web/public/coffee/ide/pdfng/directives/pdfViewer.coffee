@@ -169,6 +169,11 @@ define [
 		@computeOffset = (page, position) ->
 			# console.log 'computing offset for', page, position
 			element = page.element
+			#console.log 'element =', $(element), 'parent =', $(element).parent()
+			t1 = $(element).offset()?.top
+			t2 = $(element).parent().offset()?.top
+			if not (t1? and t2?)
+				return $q((resolve, reject) -> reject('elements destroyed'))
 			pageTop = $(element).offset().top - $(element).parent().offset().top
 			# console.log('top of page scroll is', pageTop, 'vs', page.elemTop)
 			# console.log('inner height is', $(element).innerHeight())
