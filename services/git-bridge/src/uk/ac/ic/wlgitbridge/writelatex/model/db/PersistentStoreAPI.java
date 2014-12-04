@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.model.db;
 
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProjectStore;
 
@@ -23,7 +24,7 @@ public interface PersistentStoreAPI {
 
     public List<String> getProjectNames();
     public List<Integer> getVersionIDsForProjectName(String projectName);
-    public List<FileNode> getFileNodesForProjectName(String projectName);
+    public List<FileNode> getFileNodesForProjectName(String projectName, FileIndexStore fileIndexStore);
     public Map<String, FileNode> getURLIndexTableForProjectName(String projectName);
 
     public void deleteFileNodesForProjectName(String projectName);

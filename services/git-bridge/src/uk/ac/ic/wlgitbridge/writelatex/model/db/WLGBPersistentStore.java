@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.model.db;
 
 import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.FileIndexStore;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProjectStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.SQLiteWLDatabase;
@@ -104,9 +105,9 @@ public class WLGBPersistentStore implements PersistentStoreAPI {
     }
 
     @Override
-    public List<FileNode> getFileNodesForProjectName(String projectName) {
+    public List<FileNode> getFileNodesForProjectName(String projectName, FileIndexStore fileIndexStore) {
         try {
-            return database.getFileNodesForProjectName(projectName);
+            return database.getFileNodesForProjectName(projectName, fileIndexStore);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

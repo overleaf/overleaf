@@ -27,9 +27,14 @@ public class AttachmentNode extends FileNode {
         initBlob(fileIndexes);
     }
 
-    public AttachmentNode(String filePath, boolean changed, String url) {
+    public AttachmentNode(String filePath, boolean changed, String url, FileIndexStore fileIndexStore) {
         super(filePath, changed);
         this.url = url;
+        try {
+            initBlob(fileIndexStore);
+        } catch (FailedConnectionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AttachmentNode(String url, byte[] blob) {

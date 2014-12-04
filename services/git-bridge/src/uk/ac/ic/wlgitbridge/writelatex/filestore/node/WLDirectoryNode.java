@@ -46,11 +46,11 @@ public class WLDirectoryNode implements PersistentStoreSource, PersistentStoreUp
 
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
+        fileIndexStore = new FileIndexStore(projectName, persistentStore);
         fileNodeTable = new HashMap<String, FileNode>();
-        for (FileNode fileNode : persistentStore.getFileNodesForProjectName(projectName)) {
+        for (FileNode fileNode : persistentStore.getFileNodesForProjectName(projectName, fileIndexStore)) {
             fileNodeTable.put(fileNode.getFilePath(), fileNode);
         }
-        fileIndexStore = new FileIndexStore(projectName, persistentStore);
     }
 
     @Override
