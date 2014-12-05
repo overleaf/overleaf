@@ -344,10 +344,10 @@
     <junit>
       <classpath>
         <path refid="writelatex-git-bridge.module.classpath"/>
-        <pathelement location="${writelatex-git-bridge.testoutput.unit.dir}"/>
+        <pathelement location="${writelatex-git-bridge.testoutput.system.dir}"/>
       </classpath>
       <batchtest>
-        <fileset dir="${writelatex-git-bridge.testoutput.unit.dir}">
+        <fileset dir="${writelatex-git-bridge.testoutput.system.dir}">
         </fileset>
       </batchtest>
       <formatter type="brief" usefile="false"/>
