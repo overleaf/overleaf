@@ -282,7 +282,7 @@
   </target>
   
   <target name="clean" depends="clean.modules" description="cleanup all">
-      <delete dir="${module.writelatex-git-bridge.basedir}/bin" />
+      <delete dir="${module.writelatex-git-bridge.basedir}/bin/writelatex-git-bridge.jar" />
   </target>
   
   <target name="build.modules" depends="init, clean, compile.module.writelatex-git-bridge" description="build all modules"/>
