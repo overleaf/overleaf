@@ -108,7 +108,7 @@ define [
 					, 1000
 
 				scope.$on "$destroy", () ->
-					if scope.timeoutHandler
+					if scope.timeoutHandler?
 						$timeout.cancel(scope.timeoutHandler)
 						highlightsLayer.clearHighlights()
 
