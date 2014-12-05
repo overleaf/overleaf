@@ -304,9 +304,9 @@ define [
 
 				scope.$watch('parentSize', (newVal, oldVal) ->
 					# console.log 'XXX in parentSize watch', newVal, oldVal
-					if newVal == oldVal
-						# console.log 'returning because old and new are the same'
-						return
+					# if newVal == oldVal
+					# 	console.log 'returning because old and new are the same'
+					# 	return
 					return unless oldVal?
 					# console.log 'XXX calling setScale in parentSize watcher'
 					doRescale scope.scale
