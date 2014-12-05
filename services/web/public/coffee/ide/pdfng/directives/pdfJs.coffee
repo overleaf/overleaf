@@ -64,12 +64,8 @@ define [
 						scope.flashControls = false
 					, 1000
 
-#				element.find(".pdfjs-viewer").scroll () ->
-#					scope.position = pdfListView.getPdfPosition(true)
-
-				onDoubleClick = (e) ->
-					console.log 'double click event'
-					scope.dblClickCallback?(page: e.page, offset: { top: e.y, left: e.x })
+				scope.$on 'pdfDoubleClick', (event, e) ->
+					scope.dblClickCallback?(page: e.page - 1, offset: { top: e.y, left: e.x })
 
 				scope.$watch "pdfSrc", (url) ->
 					if url
@@ -146,7 +142,7 @@ define [
 							#console.log 'got a resize event', event, e
 
 			template: """
-				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' dbl-click-callback='dblClickCallback' please-jump-to='pleaseJumpTo'></div>
+				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' please-jump-to='pleaseJumpTo'></div>
 				<div class="pdfjs-controls" ng-class="{'flash': flashControls }">
 					<div class="btn-group">
 						<a href

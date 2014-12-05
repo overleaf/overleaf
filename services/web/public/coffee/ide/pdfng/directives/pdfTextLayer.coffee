@@ -182,6 +182,12 @@ define [
 				textDiv.style.fontFamily = style.fontFamily
 				textDiv.textContent = geom.str
 
+				textDiv.ondblclick = (e) ->
+					if (window.getSelection)
+						window.getSelection().removeAllRanges();
+					else if (document.selection)
+						document.selection.empty();
+
 				# |fontName| is only used by the Font Inspector. This test will succeed
 				# when e.g. the Font Inspector is off but the Stepper is on, but it's
 				# not worth the effort to do a more accurate test.

@@ -82,6 +82,19 @@ define [
 					else if !newVisible && oldVisible
 						pausePage()
 
+				element.on 'dblclick', (e) ->
+					offset = $(element).find('.pdf-canvas').offset()
+					dx = e.pageX - offset.left
+					dy = e.pageY - offset.top
+					scope.document.getPdfViewport(scope.page.pageNum).then (viewport) ->
+						pdfPoint = viewport.convertToPdfPoint(dx, dy);
+						event = {
+							page: scope.page.pageNum
+							x: pdfPoint[0],
+							y: viewport.viewBox[3] - pdfPoint[1]
+						}
+						scope.$emit 'pdfDoubleClick', event
+
 				highlightsLayer = new pdfHighlights({
 					highlights: highlightsElement
 				})

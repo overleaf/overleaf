@@ -116,7 +116,7 @@ define [
 					# console.log 'scale is undefined, returning'
 					return
 
-				canvas = $('<canvas class="pdf-canvas-new"></canvas>')
+				canvas = $('<canvas class="pdf-canvas pdf-canvas-new"></canvas>')
 
 				viewport = page.getViewport (scale)
 

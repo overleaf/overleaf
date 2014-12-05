@@ -206,7 +206,6 @@ define [
 				"highlights": "="
 				"position": "="
 				"scale": "="
-				"dblClickCallback": "="
 				"pleaseJumpTo": "="
 			}
 			template: """
