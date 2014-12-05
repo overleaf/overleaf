@@ -18,7 +18,7 @@ define [
 
 	# App = angular.module 'pdfViewerApp', ['pdfPage', 'PDFRenderer', 'pdfHighlights']
 
-	App.controller 'pdfViewerController', ['$scope', '$q', 'PDFRenderer', '$element', 'pdfHighlights', ($scope, $q, PDFRenderer, $element, pdfHighlights) ->
+	App.controller 'pdfViewerController', ['$scope', '$q', '$timeout', 'PDFRenderer', '$element', 'pdfHighlights', ($scope, $q, $timeout, PDFRenderer, $element, pdfHighlights) ->
 		@load = () ->
 			$scope.document = new PDFRenderer($scope.pdfSrc, {
 				scale: 1,
@@ -258,25 +258,19 @@ define [
 					#scope.$apply()
 
 				element.on 'scroll', () ->
+					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
 					if scope.adjustingScroll
 						updateContainer()
 						scope.$apply()
 						scope.adjustingScroll = false
 						return
 					scope.scrolled = true
-					return if scope.handler?
-					scope.handler = requestAnimationFrame(scrollHandler)
+					if scope.scrollHandlerTimeout
+						$timeout.cancel(scope.scrollHandlerTimeout)
+					scope.scrollHandlerTimeout = $timeout scrollHandler, 100
 
-				scrollStart = null
-				SCROLL_TIMEOUT = 50
-				scrollHandler = (timestamp) ->
-					scrollStart = timestamp if !scrollStart?
-					progress = timestamp - scrollStart
-					if (progress < SCROLL_TIMEOUT)
-						scope.handler = requestAnimationFrame(scrollHandler)
-						return
-					scrollStart = null
-					scope.handler = null
+				scrollHandler = () ->
+					scope.scrollHandlerTimeout = null
 					updateContainer()
 					scope.$apply()
 					scope.position = ctrl.getPdfPosition()
