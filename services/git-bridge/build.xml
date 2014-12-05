@@ -202,6 +202,12 @@
       <include name="unit"/>
     </dirset>
   </path>
+
+  <path id="writelatex-git-bridge.module.test.system.sourcepath">
+    <dirset dir="${module.writelatex-git-bridge.basedir}/test">
+      <include name="system"/>
+    </dirset>
+  </path>
   
   
   <target name="compile.module.writelatex-git-bridge" depends="compile.module.writelatex-git-bridge.production,compile.module.writelatex-git-bridge.tests.unit" description="Compile module writelatex-git-bridge"/>
@@ -234,6 +240,24 @@
       <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
     </javac>
     
+    <copy todir="${writelatex-git-bridge.testoutput.dir}">
+      <fileset dir="${module.writelatex-git-bridge.basedir}/test">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="compile.module.writelatex-git-bridge.tests.system" depends="compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
+    <mkdir dir="${writelatex-git-bridge.testoutput.dir}"/>
+    <javac destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
+      <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
+      <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
+      <classpath refid="writelatex-git-bridge.module.classpath"/>
+      <src refid="writelatex-git-bridge.module.test.system.sourcepath"/>
+      <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
+    </javac>
+
     <copy todir="${writelatex-git-bridge.testoutput.dir}">
       <fileset dir="${module.writelatex-git-bridge.basedir}/test">
         <patternset refid="compiler.resources"/>
@@ -314,10 +338,18 @@
     </junit>
   </target>
 
-  <target name="test.system" depends="package">
-      <property name="executable-full-path"
-                location="${module.writelatex-git-bridge.basedir}/test/system"/>
-      <exec executable="${executable-full-path}/main.sh" />
+  <target name="test.system" depends="compile.module.writelatex-git-bridge.tests.system">
+    <junit>
+      <classpath>
+        <path refid="writelatex-git-bridge.module.classpath"/>
+        <pathelement location="${writelatex-git-bridge.testoutput.dir}"/>
+      </classpath>
+      <batchtest>
+        <fileset dir="${writelatex-git-bridge.testoutput.dir}">
+        </fileset>
+      </batchtest>
+      <formatter type="brief" usefile="false"/>
+    </junit>
   </target>
 
   <target name="test" depends="test.unit, test.system, clean" />
