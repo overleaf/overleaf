@@ -4,6 +4,6 @@ if [ "$(id -u)" != "0" ]; then
 fi
 command -v ant >/dev/null 2>&1 && command -v /usr/lib/jvm/java-7-openjdk-amd64/bin/javac >/dev/null 2>&1 || ./install-deps.sh
 ant all &&\
-cp ./bin/writelatex-git-bridge.jar /usr/local/sbin/ &&\
+mv ./bin/writelatex-git-bridge.jar /usr/local/sbin/ &&\
 cp ./bin/wlgb /etc/init.d/ &&\
 /usr/sbin/update-rc.d -f wlgb defaults
