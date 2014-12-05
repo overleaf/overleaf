@@ -6,4 +6,5 @@ command -v ant >/dev/null 2>&1 && command -v /usr/lib/jvm/java-7-openjdk-amd64/b
 ant all &&\
 mv ./bin/writelatex-git-bridge.jar /usr/local/sbin/ &&\
 cp ./bin/wlgb /etc/init.d/ &&\
+mkdir /var/log/wlgb
 /usr/sbin/update-rc.d -f wlgb defaults
