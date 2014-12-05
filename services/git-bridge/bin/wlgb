@@ -55,7 +55,7 @@ do_start()
 	fi
 	echo "Starting WriteLatex-Git Bridge..."
 	start-stop-daemon --start --quiet --make-pidfile --pidfile $PIDFILE --exec $DAEMON -- \
-		$DAEMON_ARGS &
+		$DAEMON_ARGS >> /var/log/wlgb/out.log 2>> /var/log/err.log &
 	echo "WriteLatex-Git Bridge started."
 	return 0
 	# Add code here, if necessary, that waits for the process to be ready
