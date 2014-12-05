@@ -6,7 +6,7 @@ define [
 	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', ($q, $timeout, pdfAnnotations, pdfTextLayer) ->
 
 		class PDFRenderer
-			@JOB_QUEUE_INTERVAL: 100
+			JOB_QUEUE_INTERVAL: 25
 
 			constructor: (@url, @options) ->
 				PDFJS.disableAutoFetch = true
@@ -61,16 +61,16 @@ define [
 					q.pagenum != pagenum
 				# @stopSpinner (element.canvas)
 
-			triggerRenderQueue: () ->
+			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
 				$timeout () =>
 					@processRenderQueue()
-				, @JOB_QUEUE_INTERVAL
+				, interval
 
 			removeCompletedJob: (pagenum) ->
 				# may need to clean up deferred object here
 				delete @renderTask[pagenum]
 				@jobs = @jobs - 1
-				@triggerRenderQueue()
+				@triggerRenderQueue(0)
 
 			renderPage: (element, pagenum) ->
 				viewport = $q.defer()
