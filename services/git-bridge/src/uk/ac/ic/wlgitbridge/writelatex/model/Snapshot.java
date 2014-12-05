@@ -6,9 +6,9 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by Winston on 03/11/14.
@@ -30,7 +30,16 @@ public class Snapshot implements Comparable<Snapshot> {
         WLUser user = info.getUser();
         userName = user.getName();
         userEmail = user.getEmail();
-        createdAt = new Date();
+        TimeZone tz = TimeZone.getDefault();
+        Calendar cal = Calendar.getInstance(tz);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setCalendar(cal);
+        try {
+            cal.setTime(sdf.parse(info.getCreatedAt()));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        createdAt = cal.getTime();
 
         srcs = data.getSrcs();
         atts = data.getAtts();
