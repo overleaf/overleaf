@@ -54,6 +54,10 @@ define [
 
 					#scope.position = pdfListView.getPdfPosition(true)
 
+					scope.$on "$destroy", () =>
+						$.localStorage "pdf.scale", scope.scale
+						$.localStorage "pdf.position.#{attrs.key}", scope.position
+
 					$(window).unload () =>
 						$.localStorage "pdf.scale", scope.scale
 						$.localStorage "pdf.position.#{attrs.key}", scope.position
