@@ -4,4 +4,5 @@ if [ "$(id -u)" != "0" ]; then
 fi
 rm -f /usr/local/sbin/writelatex-git-bridge.jar &&\
 rm -f /etc/init.d/wlgb &&\
+rm -rf /etc/wlgb
 /usr/sbin/update-rc.d -f wlgb remove
