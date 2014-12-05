@@ -25,6 +25,7 @@ define [
 			$scope.pdf.timedout   = false
 			$scope.pdf.failure    = false
 			$scope.pdf.uncompiled = false
+			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
 
 			if response.status == "timedout"
