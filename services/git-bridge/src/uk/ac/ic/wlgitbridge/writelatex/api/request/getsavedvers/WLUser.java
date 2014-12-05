@@ -5,12 +5,16 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers;
  */
 public class WLUser {
 
-    private String name;
-    private String email;
+    private final String name;
+    private final String email;
 
     public WLUser() {
-        name = "Anonymous";
-        email = "anonymous@writelatex.com";
+        this("Anonymous", "anonymous@writelatex.com");
+    }
+
+    public WLUser(String name, String email) {
+        this.name = name;
+        this.email = email;
     }
 
     public String getName() {

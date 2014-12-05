@@ -13,6 +13,9 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProje
 public class SnapshotGetDocResult extends Result {
 
     private int versionID;
+    private String createdAt;
+    private String name;
+    private String email;
 
     private InvalidProjectException invalidProjectException;
 
@@ -26,7 +29,17 @@ public class SnapshotGetDocResult extends Result {
         if (jsonObject.has("status") && jsonObject.get("status").getAsInt() == 404) {
             invalidProjectException = new InvalidProjectException();
         } else {
-            versionID = json.getAsJsonObject().get("latestVerId").getAsInt();
+            versionID = jsonObject.get("latestVerId").getAsInt();
+            createdAt = jsonObject.get("latestVerAt").getAsString();
+            JsonElement latestVerBy = jsonObject.get("latestVerBy");
+            if (latestVerBy.isJsonObject()) {
+                JsonObject userObject = latestVerBy.getAsJsonObject();
+                name = userObject.get("name").getAsString();
+                email = userObject.get("email").getAsString();
+            } else {
+                name = "Anonymous";
+                email = "anonymous@writelatex.com";
+            }
         }
     }
 
@@ -35,6 +48,18 @@ public class SnapshotGetDocResult extends Result {
             throw invalidProjectException;
         }
         return versionID;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
 }

@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class Snapshot implements Comparable<Snapshot> {
     private final String comment;
     private final String userName;
     private final String userEmail;
+    private final Date createdAt;
 
     private final List<SnapshotFile> srcs;
     private final List<SnapshotAttachment> atts;
@@ -28,6 +30,7 @@ public class Snapshot implements Comparable<Snapshot> {
         WLUser user = info.getUser();
         userName = user.getName();
         userEmail = user.getEmail();
+        createdAt = new Date();
 
         srcs = data.getSrcs();
         atts = data.getAtts();
@@ -35,9 +38,11 @@ public class Snapshot implements Comparable<Snapshot> {
 
     public Snapshot(int versionID) {
         this.versionID = versionID;
-        comment = "Pushed update";
+        comment = "Most recent update";
         userName = "Anonymous";
         userEmail = "anonymous@writelatex.com";
+        createdAt = new Date();
+
         srcs = new LinkedList<SnapshotFile>();
         atts = new LinkedList<SnapshotAttachment>();
     }
@@ -64,6 +69,10 @@ public class Snapshot implements Comparable<Snapshot> {
 
     public List<SnapshotAttachment> getAtts() {
         return atts;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     @Override

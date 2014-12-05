@@ -10,10 +10,11 @@ public class SnapshotInfo {
     private WLUser user;
     private String createdAt;
 
-    public SnapshotInfo(int versionID) {
+    public SnapshotInfo(int versionID, String createdAt, String name, String email) {
         this.versionId = versionID;
         comment = "Update on WriteLatex.com.";
-        user = new WLUser();
+        user = new WLUser(name, email);
+        this.createdAt = createdAt;
     }
 
     public int getVersionId() {

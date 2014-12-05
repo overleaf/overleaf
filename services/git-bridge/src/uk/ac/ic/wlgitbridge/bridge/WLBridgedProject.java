@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
@@ -10,6 +11,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProje
 
 import java.io.IOException;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by Winston on 05/11/14.
@@ -44,13 +46,12 @@ public class WLBridgedProject {
             throw new RepositoryNotFoundException(name);
         }
         try {
-            for (WritableRepositoryContents writableRepositoryContents : writableRepositories) {
-                writableRepositoryContents.write();
+            for (WritableRepositoryContents contents : writableRepositories) {
+                contents.write();
                 Git git = new Git(repository);
                 git.add().addFilepattern(".").call();
-                git.commit().setAuthor(writableRepositoryContents.getUserName(),
-                                       writableRepositoryContents.getUserEmail())
-                            .setMessage(writableRepositoryContents.getCommitMessage())
+                git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
+                            .setMessage(contents.getCommitMessage())
                             .call();
             }
         } catch (GitAPIException e) {

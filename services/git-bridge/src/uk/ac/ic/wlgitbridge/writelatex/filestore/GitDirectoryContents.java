@@ -8,6 +8,7 @@ import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,6 +21,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
     private final String userName;
     private final String userEmail;
     private final String commitMessage;
+    private final Date when;
 
     public GitDirectoryContents(List<FileNode> fileNodes, File rootGitDirectory, String projectName, Snapshot snapshot) {
         this.fileNodes = fileNodes;
@@ -27,6 +29,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
         userName = snapshot.getUserName();
         userEmail = snapshot.getUserEmail();
         commitMessage = snapshot.getComment();
+        when = snapshot.getCreatedAt();
     }
 
     @Override
@@ -50,6 +53,11 @@ public class GitDirectoryContents implements WritableRepositoryContents {
     @Override
     public String getCommitMessage() {
         return commitMessage;
+    }
+
+    @Override
+    public Date getWhen() {
+        return when;
     }
 
 }

@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocResult;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionRequest;
@@ -90,8 +91,9 @@ public class SnapshotFetcher implements PersistentStoreSource {
     }
 
     private int putLatestDoc(SnapshotGetDocRequest getDoc, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws FailedConnectionException, InvalidProjectException {
-        int latestVersionID = getDoc.getResult().getVersionID();
-        putFetchedResult(new SnapshotInfo(latestVersionID), fetchedIDs, fetchedSnapshotInfos);
+        SnapshotGetDocResult result = getDoc.getResult();
+        int latestVersionID = result.getVersionID();
+        putFetchedResult(new SnapshotInfo(latestVersionID, result.getCreatedAt(), result.getName(), result.getEmail()), fetchedIDs, fetchedSnapshotInfos);
         return latestVersionID;
     }
 
