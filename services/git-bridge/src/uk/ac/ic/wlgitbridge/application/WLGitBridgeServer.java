@@ -35,9 +35,10 @@ public class WLGitBridgeServer {
      * Constructs an instance of the server.
      * @param port the port number to listen on
      * @param rootGitDirectoryPath the root directory path containing the git repositories
+     * @param apiKey
      * @throws ServletException if the servlet throws an exception
      */
-    public WLGitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+    public WLGitBridgeServer(final int port, String rootGitDirectoryPath, String apiKey) throws ServletException, InvalidRootDirectoryPathException {
         this.port = port;
         this.rootGitDirectoryPath = rootGitDirectoryPath;
         Log.setLog(new NullLogger());

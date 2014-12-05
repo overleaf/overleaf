@@ -1,9 +1,11 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import uk.ac.ic.wlgitbridge.application.exception.InvalidConfigFileException;
 import uk.ac.ic.wlgitbridge.application.exception.InvalidProgramArgumentsException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 
 import javax.servlet.ServletException;
+import java.io.IOException;
 
 /**
  * Created by Winston on 02/11/14.
@@ -15,10 +17,10 @@ import javax.servlet.ServletException;
 public class WLGitBridgeApplication {
 
     public static final int EXIT_CODE_FAILED = 1;
-    private static final String USAGE_MESSAGE = "usage: writelatex-git-bridge port root_git_directory_path";
+    private static final String USAGE_MESSAGE = "usage: writelatex-git-bridge config_file";
 
-    private int port;
-    private String rootGitDirectoryPath;
+    private String configFilePath;
+    private Config config;
 
     /**
      * Constructs an instance of the WriteLatex-Git Bridge application.
@@ -27,8 +29,15 @@ public class WLGitBridgeApplication {
     public WLGitBridgeApplication(String[] args) {
         try {
             parseArguments(args);
+            loadConfigFile();
         } catch (InvalidProgramArgumentsException e) {
             printUsage();
+            System.exit(EXIT_CODE_FAILED);
+        } catch (InvalidConfigFileException e) {
+            System.out.println("The property for " + e.getMissingMember() + " is invalid. Check your config file.");
+            System.exit(EXIT_CODE_FAILED);
+        } catch (IOException e) {
+            System.out.println("Invalid config file. Check the file path.");
             System.exit(EXIT_CODE_FAILED);
         }
     }
@@ -38,11 +47,11 @@ public class WLGitBridgeApplication {
      */
     public void run() {
         try {
-            new WLGitBridgeServer(port, rootGitDirectoryPath).start();
+            new WLGitBridgeServer(config.getPort(), config.getRootGitDirectory(), config.getAPIKey()).start();
         } catch (ServletException e) {
             e.printStackTrace();
         } catch (InvalidRootDirectoryPathException e) {
-            printUsage();
+            System.out.println("Invalid root git directory path. Check your config file.");
             System.exit(EXIT_CODE_FAILED);
         }
     }
@@ -51,26 +60,21 @@ public class WLGitBridgeApplication {
 
     private void parseArguments(String[] args) throws InvalidProgramArgumentsException {
         checkArgumentsLength(args);
-        parsePortNumber(args);
-        parseRootGitDirectoryPath(args);
+        parseConfigFilePath(args);
     }
 
     private void checkArgumentsLength(String[] args) throws InvalidProgramArgumentsException {
-        if (args.length < 2) {
+        if (args.length < 1) {
             throw new InvalidProgramArgumentsException();
         }
     }
 
-    private void parsePortNumber(String[] args) throws InvalidProgramArgumentsException {
-        try {
-            port = Integer.parseInt(args[0]);
-        } catch (NumberFormatException e) {
-            throw new InvalidProgramArgumentsException();
-        }
+    private void parseConfigFilePath(String[] args) throws InvalidProgramArgumentsException {
+        configFilePath = args[0];
     }
 
-    private void parseRootGitDirectoryPath(String[] args) {
-        rootGitDirectoryPath = args[1];
+    private void loadConfigFile() throws InvalidConfigFileException, IOException {
+        config = new Config(configFilePath);
     }
 
     private void printUsage() {

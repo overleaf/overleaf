@@ -3,12 +3,12 @@ package uk.ac.ic.wlgitbridge.application;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 
 /**
@@ -25,7 +25,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
-            String contents = getContentsOfReader(request.getReader());
+            String contents = Util.getContentsOfReader(request.getReader());
             String[] parts = request.getRequestURI().split("/");
             if (parts.length < 4) {
                 throw new ServletException();
@@ -41,14 +41,6 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
             }
             baseRequest.setHandled(true);
         }
-    }
-
-    private static String getContentsOfReader(BufferedReader reader) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        for (String line; (line = reader.readLine()) != null; ) {
-            sb.append(line);
-        }
-        return sb.toString();
     }
 
 }

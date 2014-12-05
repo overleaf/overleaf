@@ -1,5 +1,8 @@
 package uk.ac.ic.wlgitbridge.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 /**
  * Created by Winston on 19/11/14.
  */
@@ -41,6 +44,14 @@ public class Util {
             result = removeAllSuffix(result, suffix);
         }
         return result;
+    }
+
+    public static String getContentsOfReader(BufferedReader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (String line; (line = reader.readLine()) != null; ) {
+            sb.append(line);
+        }
+        return sb.toString();
     }
 
 }
