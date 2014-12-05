@@ -197,14 +197,14 @@
     </dirset>
   </path>
   
-  <path id="writelatex-git-bridge.module.test.sourcepath">
-    <dirset dir="${module.writelatex-git-bridge.basedir}">
-      <include name="test"/>
+  <path id="writelatex-git-bridge.module.test.unit.sourcepath">
+    <dirset dir="${module.writelatex-git-bridge.basedir}/test">
+      <include name="unit"/>
     </dirset>
   </path>
   
   
-  <target name="compile.module.writelatex-git-bridge" depends="compile.module.writelatex-git-bridge.production,compile.module.writelatex-git-bridge.tests" description="Compile module writelatex-git-bridge"/>
+  <target name="compile.module.writelatex-git-bridge" depends="compile.module.writelatex-git-bridge.production,compile.module.writelatex-git-bridge.tests.unit" description="Compile module writelatex-git-bridge"/>
   
   <target name="compile.module.writelatex-git-bridge.production" description="Compile module writelatex-git-bridge; production classes">
     <mkdir dir="${writelatex-git-bridge.output.dir}"/>
@@ -224,13 +224,13 @@
     </copy>
   </target>
   
-  <target name="compile.module.writelatex-git-bridge.tests" depends="compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
+  <target name="compile.module.writelatex-git-bridge.tests.unit" depends="compile.module.writelatex-git-bridge.production" description="compile module writelatex-git-bridge; test classes" unless="skip.tests">
     <mkdir dir="${writelatex-git-bridge.testoutput.dir}"/>
     <javac destdir="${writelatex-git-bridge.testoutput.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true">
       <compilerarg line="${compiler.args.writelatex-git-bridge}"/>
       <bootclasspath refid="writelatex-git-bridge.module.bootclasspath"/>
       <classpath refid="writelatex-git-bridge.module.classpath"/>
-      <src refid="writelatex-git-bridge.module.test.sourcepath"/>
+      <src refid="writelatex-git-bridge.module.test.unit.sourcepath"/>
       <patternset refid="excluded.from.compilation.writelatex-git-bridge"/>
     </javac>
     
@@ -300,7 +300,7 @@
     <delete dir="${artifacts.temp.dir}"/>
   </target>
 
-  <target name="test.unit" depends="compile.module.writelatex-git-bridge.tests">
+  <target name="test.unit" depends="compile.module.writelatex-git-bridge.tests.unit">
     <junit>
       <classpath>
         <path refid="writelatex-git-bridge.module.classpath"/>
