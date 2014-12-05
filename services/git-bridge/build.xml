@@ -361,5 +361,5 @@
     <copy file="${artifact.output.writelatex-git-bridge:jar}/writelatex-git-bridge.jar" tofile="${module.writelatex-git-bridge.basedir}/bin/writelatex-git-bridge.jar" />
   </target>
   
-  <target name="all" depends="build.modules, test.unit, package, clean.modules, test.system" description="build all"/>
+  <target name="all" depends="build.modules, test.unit, test.system, package, clean.modules" description="build all"/>
 </project>
