@@ -7,6 +7,6 @@ ant all &&\
 mv ./bin/writelatex-git-bridge.jar /usr/local/sbin/ &&\
 cp ./bin/wlgb /etc/init.d/ &&\
 mkdir /var/log/wlgb &&\
-mkdir /etc/wlgb
-cp ./bin/config.json /etc/wlgb/
+mkdir /etc/wlgb &&\
+cp ./bin/config.json /etc/wlgb/ &&\
 /usr/sbin/update-rc.d -f wlgb defaults
