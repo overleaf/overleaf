@@ -134,26 +134,25 @@ describe "CompileManager", ->
 					compileGroup: @group
 				})
 				.should.equal true
-
-	describe "getLogLines", ->
+				
+	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@ClsiManager.getLogLines = sinon.stub().callsArgWith(1, null, @lines = ["log", "lines"])
-			@CompileManager.getLogLines @project_id, @callback
-
-		it "should call the new api", ->
-			@ClsiManager.getLogLines
+			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
+			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(2)
+			@CompileManager.deleteAuxFiles @project_id, @callback
+			
+		it "should look up the compile group to use", ->
+			@CompileManager.getProjectCompileLimits
 				.calledWith(@project_id)
 				.should.equal true
-
-		it "should call the callback with the lines", ->
-			@callback
-				.calledWith(null, @lines)
+				
+		it "should delete the aux files", ->
+			@ClsiManager.deleteAuxFiles
+				.calledWith(@project_id, @limits)
 				.should.equal true
-
-		it "should increase the log count metric", ->
-			@Metrics.inc
-				.calledWith("editor.raw-logs")
-				.should.equal true
+				
+		it "should call the callback", ->
+			@callback.called.should.equal true
 
 	describe "_checkIfRecentlyCompiled", ->
 		describe "when the key exists in redis", ->

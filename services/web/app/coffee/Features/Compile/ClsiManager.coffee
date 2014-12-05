@@ -8,11 +8,11 @@ logger = require "logger-sharelatex"
 url = require("url")
 
 module.exports = ClsiManager =
-	sendRequest: (project_id, settingsOverride = {}, callback = (error, success) ->) ->
-		ClsiManager._buildRequest project_id, settingsOverride, (error, req) ->
+	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
+		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._postToClsi project_id, req, settingsOverride.compiler, (error, response) ->
+			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
 				callback(
@@ -21,19 +21,18 @@ module.exports = ClsiManager =
 					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
 				)
 
-	getLogLines: (project_id, callback = (error, lines) ->) ->
-		request "#{Settings.apis.clsi.url}/project/#{project_id}/output/output.log", (error, response, body) ->
-			return callback(error) if error?
-			callback null, body?.split("\n") or []
+	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup)
+		request.del "#{compilerUrl}/project/#{project_id}", callback
 
-	deleteAuxFiles: (project_id, callback = (error) ->) ->
-		request.del "#{Settings.apis.clsi.url}/project/#{project_id}", callback
-
-	_postToClsi: (project_id, req, compiler, callback = (error, response) ->) ->
-		if compiler == "priority"
-			compilerUrl = Settings.apis.clsi_priority.url
+	_getCompilerUrl: (compileGroup) ->
+		if compileGroup == "priority"
+			return Settings.apis.clsi_priority.url
 		else
-			compilerUrl = Settings.apis.clsi.url
+			return Settings.apis.clsi.url
+
+	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
+		compilerUrl = @_getCompilerUrl(compileGroup)
 		request.post {
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
