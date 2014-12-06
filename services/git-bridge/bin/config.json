@@ -4,5 +4,6 @@
 	"apiKey": "",
 	"hostname": "https://radiant-wind-3058.herokuapp.com/",
 	"username": "staging",
-	"password": "6kUfbv0R"
+	"password": "6kUfbv0R",
+	"serviceName": "WriteLatex"
 }

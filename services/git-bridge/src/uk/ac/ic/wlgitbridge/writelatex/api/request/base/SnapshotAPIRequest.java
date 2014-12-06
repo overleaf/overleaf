@@ -31,6 +31,9 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     }
 
     public static void setBaseURL(String baseURL) {
+        if (!(baseURL.endsWith("/"))) {
+            baseURL += "/";
+        }
         BASE_URL = baseURL;
     }
 

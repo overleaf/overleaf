@@ -8,6 +8,8 @@ import java.io.IOException;
  */
 public class Util {
 
+    private static String SERVICE_NAME;
+
     public static String entries(int entries) {
         if (entries == 1) {
             return "entry";
@@ -52,6 +54,14 @@ public class Util {
             sb.append(line);
         }
         return sb.toString();
+    }
+
+    public static void setServiceName(String serviceName) {
+        SERVICE_NAME = serviceName;
+    }
+
+    public static String getServiceName() {
+        return SERVICE_NAME;
     }
 
 }

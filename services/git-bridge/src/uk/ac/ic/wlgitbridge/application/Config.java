@@ -21,6 +21,7 @@ public class Config implements JSONSource {
     private String username;
     private String password;
     private String hostname;
+    private String serviceName;
 
     public Config(String configFilePath) throws InvalidConfigFileException, IOException {
         try {
@@ -36,9 +37,10 @@ public class Config implements JSONSource {
         port = getElement(configObject, "port").getAsInt();
         rootGitDirectory = getElement(configObject, "rootGitDirectory").getAsString();
         apiKey = getElement(configObject, "apiKey").getAsString();
-        username = getElement(configObject, "username").getAsString();
-        password = getElement(configObject, "password").getAsString();
+        username = getOptionalString(configObject, "username");
+        password = getOptionalString(configObject, "password");
         hostname = getElement(configObject, "hostname").getAsString();
+        serviceName = getElement(configObject, "serviceName").getAsString();
     }
 
     public int getPort() {
@@ -71,6 +73,18 @@ public class Config implements JSONSource {
             throw new RuntimeException(new InvalidConfigFileException(name));
         }
         return element;
+    }
+
+    private String getOptionalString(JsonObject configObject, String name) {
+        JsonElement element = configObject.get(name);
+        if (element == null || !element.isJsonPrimitive()) {
+            return "";
+        }
+        return element.getAsString();
+    }
+
+    public String getServiceName() {
+        return serviceName;
     }
 
 }

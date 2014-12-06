@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
@@ -49,7 +50,7 @@ public class Snapshot implements Comparable<Snapshot> {
         this.versionID = versionID;
         comment = "Most recent update";
         userName = "Anonymous";
-        userEmail = "anonymous@writelatex.com";
+        userEmail = "anonymous@" + Util.getServiceName() + ".com";
         createdAt = new Date();
 
         srcs = new LinkedList<SnapshotFile>();

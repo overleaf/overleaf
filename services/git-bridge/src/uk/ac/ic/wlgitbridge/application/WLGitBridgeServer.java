@@ -11,6 +11,7 @@ import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
@@ -31,6 +32,7 @@ public class WLGitBridgeServer {
     private final Server jettyServer;
     private final int port;
     private String rootGitDirectoryPath;
+    private String writeLatexHostname;
 
     /**
      * Constructs an instance of the server.
@@ -50,7 +52,9 @@ public class WLGitBridgeServer {
     public WLGitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
         this(config.getPort(), config.getRootGitDirectory(), config.getAPIKey());
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
-        SnapshotAPIRequest.setBaseURL(config.getHostname());
+        writeLatexHostname = config.getHostname();
+        SnapshotAPIRequest.setBaseURL(writeLatexHostname);
+        Util.setServiceName(config.getServiceName());
     }
 
     /**
@@ -62,6 +66,7 @@ public class WLGitBridgeServer {
             System.out.println();
             System.out.println("WriteLatex-Git Bridge server started");
             System.out.println("Listening on port: " + port);
+            System.out.println("Bridged to: " + writeLatexHostname);
             System.out.println("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
             e.printStackTrace();

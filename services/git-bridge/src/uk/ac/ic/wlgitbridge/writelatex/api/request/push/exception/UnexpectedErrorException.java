@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +13,8 @@ import java.util.List;
 public class UnexpectedErrorException extends SnapshotPostException {
 
     private static final String[] DESCRIPTION_LINES = {
-            "There was an internal error with the WriteLatex server.",
-            "Please contact WriteLatex."
+            "There was an internal error with the " + Util.getServiceName() + " server.",
+            "Please contact " + Util.getServiceName() + "."
     };
 
     public UnexpectedErrorException(JsonObject json) {
@@ -22,7 +23,7 @@ public class UnexpectedErrorException extends SnapshotPostException {
 
     @Override
     public String getMessage() {
-        return "writelatex error";
+        return Util.getServiceName() + " error";
     }
 
     @Override

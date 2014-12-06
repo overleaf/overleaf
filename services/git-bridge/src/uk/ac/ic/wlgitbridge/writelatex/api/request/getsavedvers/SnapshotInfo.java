@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers;
 
+import uk.ac.ic.wlgitbridge.util.Util;
+
 /**
  * Created by Winston on 06/11/14.
  */
@@ -12,7 +14,7 @@ public class SnapshotInfo {
 
     public SnapshotInfo(int versionID, String createdAt, String name, String email) {
         this.versionId = versionID;
-        comment = "Update on WriteLatex.com.";
+        comment = "Update on " + Util.getServiceName() + ".";
         user = new WLUser(name, email);
         this.createdAt = createdAt;
     }

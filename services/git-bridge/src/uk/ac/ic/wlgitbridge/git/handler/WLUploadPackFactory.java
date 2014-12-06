@@ -5,6 +5,7 @@ import org.eclipse.jgit.transport.UploadPack;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import org.eclipse.jgit.transport.resolver.UploadPackFactory;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,7 +16,7 @@ public class WLUploadPackFactory implements UploadPackFactory<HttpServletRequest
     @Override
     public UploadPack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
         UploadPack uploadPack = new UploadPack(repository);
-        uploadPack.sendMessage("Downloading files from WriteLatex");
+        uploadPack.sendMessage("Downloading files from " + Util.getServiceName());
         return uploadPack;
     }
 }

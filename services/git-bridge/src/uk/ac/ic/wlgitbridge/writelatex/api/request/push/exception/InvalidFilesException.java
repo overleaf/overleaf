@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class InvalidFilesException extends SnapshotPostException {
     public void fromJSON(JsonElement json) {
         descriptionLines = new LinkedList<String>();
         JsonArray errors = json.getAsJsonObject().get("errors").getAsJsonArray();
-        descriptionLines.add("You have " + errors.size() + " invalid files in your WriteLatex project:");
+        descriptionLines.add("You have " + errors.size() + " invalid files in your " + Util.getServiceName() + " project:");
         for (JsonElement error : errors) {
             descriptionLines.add(describeError(error.getAsJsonObject()));
         }
