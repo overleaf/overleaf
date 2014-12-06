@@ -52,7 +52,7 @@ public class WLGitBridgeServer {
     public WLGitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
         this(config.getPort(), config.getRootGitDirectory(), config.getAPIKey());
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
-        writeLatexHostname = config.getHostname();
+        writeLatexHostname = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(writeLatexHostname);
         Util.setServiceName(config.getServiceName());
     }

@@ -2,7 +2,7 @@
 	"port": 80,
 	"rootGitDirectory": "/var/wlgb/git",
 	"apiKey": "",
-	"hostname": "https://radiant-wind-3058.herokuapp.com/",
+	"apiBaseUrl": "https://radiant-wind-3058.herokuapp.com/api/v0",
 	"username": "staging",
 	"password": "6kUfbv0R",
 	"serviceName": "WriteLatex"

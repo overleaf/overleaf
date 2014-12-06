@@ -10,7 +10,6 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     private static String USERNAME;
     private static String PASSWORD;
 
-    /* Must end with / */
     private static String BASE_URL;
 
     public SnapshotAPIRequest(String projectName, String apiCall) {
@@ -31,8 +30,9 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
         PASSWORD = password;
     }
 
+    /* baseURL ends with / */
     public static void setBaseURL(String baseURL) {
-        BASE_URL = baseURL;
+        BASE_URL = baseURL + "/docs/";
     }
 
 }

@@ -20,7 +20,7 @@ public class Config implements JSONSource {
     private String apiKey;
     private String username;
     private String password;
-    private String hostname;
+    private String apiBaseURL;
     private String serviceName;
 
     public Config(String configFilePath) throws InvalidConfigFileException, IOException {
@@ -39,11 +39,11 @@ public class Config implements JSONSource {
         apiKey = getElement(configObject, "apiKey").getAsString();
         username = getOptionalString(configObject, "username");
         password = getOptionalString(configObject, "password");
-        String hostname = getElement(configObject, "hostname").getAsString();
-        if (!hostname.endsWith("/")) {
-            hostname += "/";
+        String apiBaseURL = getElement(configObject, "apiBaseUrl").getAsString();
+        if (!apiBaseURL.endsWith("/")) {
+            apiBaseURL += "/";
         }
-        this.hostname = hostname;
+        this.apiBaseURL = apiBaseURL;
         serviceName = getElement(configObject, "serviceName").getAsString();
     }
 
@@ -67,8 +67,8 @@ public class Config implements JSONSource {
         return password;
     }
 
-    public String getHostname() {
-        return hostname;
+    public String getAPIBaseURL() {
+        return apiBaseURL;
     }
 
     private JsonElement getElement(JsonObject configObject, String name) {
