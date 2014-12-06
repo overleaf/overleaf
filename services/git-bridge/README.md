@@ -9,11 +9,13 @@ Required
 Installation
 ------------
 ### Ubuntu ###
-Run `/install.sh` to get dependencies, build, test, package, and make it a service.
+Run `install.sh` to get dependencies, build, test, package, and make it a service.
 
 Use `service wlgb start` and `service wlgb stop` to start and stop the server.
 
 The configuration file will be at `/etc/wlgb/config.json`.
+
+Run `uninstall.sh` to undo what `install.sh` did.
 ### Manually ###
 Run `ant all` to build, test, and package it into a jar at `bin/writelatex-git-bridge.jar`.
 
