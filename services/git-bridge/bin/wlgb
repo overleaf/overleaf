@@ -59,7 +59,7 @@ do_start()
 	echo "WriteLatex-Git Bridge started."
 	echo "Config file at /etc/wlgb/config.json"
 	echo "Log file at /var/log/wlgb/out.log"
-	echo "Error file at /var/log/err.log"
+	echo "Error file at /var/log/wlgb/err.log"
 	echo 
 	return 0
 	# Add code here, if necessary, that waits for the process to be ready
