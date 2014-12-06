@@ -10,10 +10,11 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     private static String USERNAME;
     private static String PASSWORD;
 
+    /* Must end with / */
     private static String BASE_URL;
 
     public SnapshotAPIRequest(String projectName, String apiCall) {
-        super(BASE_URL + "/" + projectName + apiCall);
+        super(BASE_URL + projectName + apiCall);
     }
 
     protected Realm buildRequestRealm() {
@@ -31,9 +32,6 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
     }
 
     public static void setBaseURL(String baseURL) {
-        if (!(baseURL.endsWith("/"))) {
-            baseURL += "/";
-        }
         BASE_URL = baseURL;
     }
 

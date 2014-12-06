@@ -39,7 +39,11 @@ public class Config implements JSONSource {
         apiKey = getElement(configObject, "apiKey").getAsString();
         username = getOptionalString(configObject, "username");
         password = getOptionalString(configObject, "password");
-        hostname = getElement(configObject, "hostname").getAsString();
+        String hostname = getElement(configObject, "hostname").getAsString();
+        if (!hostname.endsWith("/")) {
+            hostname += "/";
+        }
+        this.hostname = hostname;
         serviceName = getElement(configObject, "serviceName").getAsString();
     }
 
