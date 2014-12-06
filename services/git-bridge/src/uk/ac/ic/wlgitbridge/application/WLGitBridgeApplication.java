@@ -47,7 +47,7 @@ public class WLGitBridgeApplication {
      */
     public void run() {
         try {
-            new WLGitBridgeServer(config.getPort(), config.getRootGitDirectory(), config.getAPIKey()).start();
+            new WLGitBridgeServer(config).start();
         } catch (ServletException e) {
             e.printStackTrace();
         } catch (InvalidRootDirectoryPathException e) {

@@ -12,6 +12,7 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import javax.servlet.ServletException;
@@ -38,12 +39,18 @@ public class WLGitBridgeServer {
      * @param apiKey
      * @throws ServletException if the servlet throws an exception
      */
-    public WLGitBridgeServer(final int port, String rootGitDirectoryPath, String apiKey) throws ServletException, InvalidRootDirectoryPathException {
+    private WLGitBridgeServer(final int port, String rootGitDirectoryPath, String apiKey) throws ServletException, InvalidRootDirectoryPathException {
         this.port = port;
         this.rootGitDirectoryPath = rootGitDirectoryPath;
         Log.setLog(new NullLogger());
         jettyServer = new Server(port);
         configureJettyServer();
+    }
+
+    public WLGitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
+        this(config.getPort(), config.getRootGitDirectory(), config.getAPIKey());
+        SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
+        SnapshotAPIRequest.setBaseURL(config.getHostname());
     }
 
     /**

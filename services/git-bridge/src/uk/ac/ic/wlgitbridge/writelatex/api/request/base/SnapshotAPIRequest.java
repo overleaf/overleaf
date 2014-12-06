@@ -7,10 +7,10 @@ import com.ning.http.client.Realm;
  */
 public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
-    private static final String USERNAME = "staging";
-    private static final String PASSWORD = "6kUfbv0R";
+    private static String USERNAME;
+    private static String PASSWORD;
 
-    private static final String BASE_URL = "https://radiant-wind-3058.herokuapp.com/api/v0/docs";
+    private static String BASE_URL;
 
     public SnapshotAPIRequest(String projectName, String apiCall) {
         super(BASE_URL + "/" + projectName + apiCall);
@@ -23,6 +23,15 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
                 .setUsePreemptiveAuth(true)
                 .setScheme(Realm.AuthScheme.BASIC)
                 .build();
+    }
+
+    public static void setBasicAuth(String username, String password) {
+        USERNAME = username;
+        PASSWORD = password;
+    }
+
+    public static void setBaseURL(String baseURL) {
+        BASE_URL = baseURL;
     }
 
 }
