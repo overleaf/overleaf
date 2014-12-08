@@ -48,7 +48,9 @@ define [
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->
 				scale = {} if not scale?
-				if scale.scaleMode == 'scale_mode_fit_width'
+				if containerHeight == 0 or containerWidth == 0
+					numScale = 1
+				else if scale.scaleMode == 'scale_mode_fit_width'
 					# TODO make this dynamic
 					numScale = (containerWidth - 40) / ($scope.pdfPageSize[1])
 				else if scale.scaleMode == 'scale_mode_fit_height'
@@ -248,8 +250,17 @@ define [
 					]
 					#scope.$apply()
 
-				scope.$on 'layout:pdf:resize', () ->
+				scope.$on 'layout:main:resize', () ->
 					# console.log 'GOT LAYOUT-RESIZE EVENT'
+					scope.parentSize = [
+						element.innerHeight(),
+						element.innerWidth()
+					]
+					scope.$apply()
+
+
+				scope.$on 'layout:pdf:resize', () ->
+					console.log 'GOT LAYOUT-RESIZE EVENT'
 					scope.parentSize = [
 						element.innerHeight(),
 						element.innerWidth()
