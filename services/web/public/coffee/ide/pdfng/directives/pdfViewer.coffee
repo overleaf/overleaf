@@ -22,7 +22,7 @@ define [
 
 	App.controller 'pdfViewerController', ['$scope', '$q', '$timeout', 'PDFRenderer', '$element', 'pdfHighlights', 'pdfSpinner', ($scope, $q, $timeout, PDFRenderer, $element, pdfHighlights, pdfSpinner) ->
 		@load = () ->
-			$scope.pages = []
+			# $scope.pages = []
 
 			$scope.document = new PDFRenderer($scope.pdfSrc, {
 				scale: 1,
