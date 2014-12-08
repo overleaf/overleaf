@@ -50,6 +50,7 @@ define [
 					$scope.destinations = result.destinations
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
+					$scope.$emit "loaded"
 
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->

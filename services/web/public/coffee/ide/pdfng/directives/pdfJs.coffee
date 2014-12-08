@@ -89,6 +89,10 @@ define [
 						#				delete scope.progress
 						#				initializePosition()
 						#				flashControls()
+				
+				scope.$on "loaded", () ->
+					console.log "LOADED"
+					scope.loading = false
 
 				#scope.$watch "highlights", (areas) ->
 					# console.log 'got HIGHLIGHTS in pdfJS', areas
@@ -151,7 +155,7 @@ define [
 
 				scope.$on 'progress', (event, progress) ->
 					scope.$apply () ->
-						console.log 'progress', progress.loaded, progress.total, progress
+						#console.log 'progress', progress.loaded, progress.total, progress
 						scope.progress = Math.floor(progress.loaded/progress.total*100)
 
 			template: """
