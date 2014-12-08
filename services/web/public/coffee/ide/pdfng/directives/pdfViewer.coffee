@@ -262,6 +262,7 @@ define [
 						element.innerHeight(),
 						element.innerWidth()
 					]
+					scope.$emit 'flash-controls'
 					#scope.$apply()
 
 				scope.$on 'layout:main:resize', () ->

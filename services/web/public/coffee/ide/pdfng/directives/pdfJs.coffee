@@ -71,6 +71,9 @@ define [
 				scope.$on 'pdfDoubleClick', (event, e) ->
 					scope.dblClickCallback?(page: e.page - 1, offset: { top: e.y, left: e.x })
 
+				scope.$on 'flash-controls', () ->
+					flashControls()
+
 				scope.$watch "pdfSrc", (url) ->
 					if url
 						scope.loading = true
