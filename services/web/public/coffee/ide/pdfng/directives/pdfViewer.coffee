@@ -5,6 +5,7 @@ define [
 	"ide/pdfng/directives/pdfHighlights"
 	"ide/pdfng/directives/pdfRenderer"
 	"ide/pdfng/directives/pdfPage"
+	"ide/pdfng/directives/pdfSpinner"
 	"libs/pdf"  # needs pdfjs-1.0.712, override the path in require.js to get it
 ], (
 	App
@@ -13,13 +14,16 @@ define [
 	pdfHighlights
 	pdfRenderer
 	pdfPage
+	pdfSpinner
 	pdf
 ) ->
 
 	# App = angular.module 'pdfViewerApp', ['pdfPage', 'PDFRenderer', 'pdfHighlights']
 
-	App.controller 'pdfViewerController', ['$scope', '$q', '$timeout', 'PDFRenderer', '$element', 'pdfHighlights', ($scope, $q, $timeout, PDFRenderer, $element, pdfHighlights) ->
+	App.controller 'pdfViewerController', ['$scope', '$q', '$timeout', 'PDFRenderer', '$element', 'pdfHighlights', 'pdfSpinner', ($scope, $q, $timeout, PDFRenderer, $element, pdfHighlights, pdfSpinner) ->
 		@load = () ->
+			$scope.pages = []
+
 			$scope.document = new PDFRenderer($scope.pdfSrc, {
 				scale: 1,
 				navigateFn: (ref) ->
@@ -199,7 +203,7 @@ define [
 
 	]
 
-	App.directive 'pdfViewer', ['$q', '$timeout', ($q, $timeout) ->
+	App.directive 'pdfViewer', ['$q', '$timeout', 'pdfSpinner', ($q, $timeout, pdfSpinner) ->
 		{
 			controller: 'pdfViewerController'
 			controllerAs: 'ctrl'
@@ -216,6 +220,7 @@ define [
 			link: (scope, element, attrs, ctrl) ->
 				# console.log 'in pdfViewer element is', element
 				# console.log 'attrs', attrs
+				spinner = new pdfSpinner
 				layoutReady = $q.defer()
 				layoutReady.notify 'waiting for layout'
 				layoutReady.promise.then () ->
@@ -237,12 +242,20 @@ define [
 						[h, w] = [element.innerHeight(), element.width()]
 						# console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
+							spinner.remove(element)
 							ctrl.redraw(origposition)
 
 				scope.$on 'layout-ready', () ->
 					# console.log 'GOT LAYOUT READY EVENT'
 					# console.log 'calling refresh'
+					if element.height() == 0 or element.width() == 0
+						# if element is zero-sized keep checking until it is ready
+						$timeout () ->
+							scope.$broadcast 'layout-ready'
+						, 250
+						return
 					updateContainer()
+					spinner.add(element)
 					layoutReady.resolve 'layout is ready'
 					scope.parentSize = [
 						element.innerHeight(),

@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	# App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
-	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', ($q, $timeout, pdfAnnotations, pdfTextLayer) ->
+	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', 'pdfSpinner', ($q, $timeout, pdfAnnotations, pdfTextLayer, pdfSpinner) ->
 
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
@@ -14,6 +14,7 @@ define [
 				@scale = @options.scale || 1
 				@document = $q.when(PDFJS.getDocument @url)
 				@navigateFn = @options.navigateFn
+				@spinner = new pdfSpinner
 				@resetState()
 
 			resetState: () ->
@@ -59,7 +60,7 @@ define [
 				return if @complete[pagenum]
 				@renderQueue = @renderQueue.filter (q) ->
 					q.pagenum != pagenum
-				# @stopSpinner (element.canvas)
+				@spinner.stop(element.canvas)
 
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
 				$timeout () =>
@@ -73,7 +74,6 @@ define [
 				@triggerRenderQueue(0)
 
 			renderPage: (element, pagenum) ->
-				viewport = $q.defer()
 				current = {
 					'element': element
 					'pagenum': pagenum
@@ -93,7 +93,8 @@ define [
 					return
 				@jobs = @jobs + 1
 
-				# @addSpinner(element.canvas)
+				element.canvas.addClass('pdfng-loading')
+				@spinner.add(element.canvas)
 
 				pageLoad = @getPage(pagenum)
 
@@ -116,7 +117,7 @@ define [
 					# console.log 'scale is undefined, returning'
 					return
 
-				canvas = $('<canvas class="pdf-canvas pdf-canvas-new"></canvas>')
+				canvas = $('<canvas class="pdf-canvas pdfng-rendering"></canvas>')
 
 				viewport = page.getViewport (scale)
 
@@ -160,27 +161,16 @@ define [
 				})
 
 				element.canvas.replaceWith(canvas)
-				canvas.removeClass('pdf-canvas-new')
 
 				return @renderTask = page.render {
 					canvasContext: ctx
 					viewport: viewport
 				}
 				.then () ->
+					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
 					page.getAnnotations().then (annotations) ->
 						annotationsLayer.setAnnotations annotations
-
-			addSpinner: (element) ->
-				h = element.height()
-				w = element.width()
-				size = Math.floor(0.5 * Math.min(h, w))
-				spinner = $('<div style="position: absolute; top: 50%; left:50%; transform: translateX(-50%) translateY(-50%); z-index: 2"><i class="fa fa-spinner fa-spin" style="color: #999"></i></div>')
-				spinner.css({'font-size' : size + 'px'})
-				element.append(spinner)
-
-			stopSpinner: (element) ->
-				element.find('.fa-spin').removeClass('fa-spin')
 
 		]

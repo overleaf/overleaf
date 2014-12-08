@@ -8,7 +8,7 @@ define [
 			require: '^pdfViewer',
 			template: '''
 			<div class="plv-page-view page-view">
-				<div class="pdf-canvas"></div>
+				<div class="pdf-canvas pdfng-empty"></div>
 				<div class="plv-text-layer text-layer"></div>
 				<div class="plv-annotations-layer annotations-layer"></div>
 				<div class="plv-highlights-layer highlights-layer"></div>
