@@ -137,7 +137,8 @@ define [
 			if visible
 				# console.log 'found it', topPageIdx
 			else
-				console.log 'CANNOT FIND TOP PAGE'
+				# console.log 'CANNOT FIND TOP PAGE'
+				return
 
 			# console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
 			top = topPage.elemTop
@@ -296,7 +297,9 @@ define [
 					scope.scrollHandlerTimeout = null
 					updateContainer()
 					scope.$apply()
-					scope.position = ctrl.getPdfPosition()
+					newPosition = ctrl.getPdfPosition()
+					if newPosition?
+						scope.position = newPosition
 					scope.$apply()
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
