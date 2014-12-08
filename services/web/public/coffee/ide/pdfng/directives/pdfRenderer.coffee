@@ -12,7 +12,7 @@ define [
 				PDFJS.disableAutoFetch = true
 				PDFJS.disableFontFace = true
 				@scale = @options.scale || 1
-				@document = $q.when(PDFJS.getDocument @url)
+				@document = $q.when(PDFJS.getDocument @url, null, null, @options.progressCallback)
 				@navigateFn = @options.navigateFn
 				@spinner = new pdfSpinner
 				@resetState()

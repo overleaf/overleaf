@@ -147,6 +147,12 @@ define [
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, (e) ->
 							#console.log 'got a resize event', event, e
+							#
+
+				scope.$on 'progress', (event, progress) ->
+					scope.$apply () ->
+						console.log 'progress', progress.loaded, progress.total, progress
+						scope.progress = Math.floor(progress.loaded/progress.total*100)
 
 			template: """
 				<div data-pdf-viewer class="pdfjs-viewer" pdf-src='pdfSrc' position='position' scale='scale' highlights='highlights' please-jump-to='pleaseJumpTo'></div>
@@ -189,6 +195,9 @@ define [
 							<i class="fa fa-fw fa-search-minus"></i>
 						</a>
 					</div>
+				</div>
+				<div class="progress-thin" ng-show="loading">
+					<div class="progress-bar" ng-style="{ 'width': progress + '%' }"></div>
 				</div>
 			"""
 		}

@@ -30,6 +30,8 @@ define [
 					# this function captures clicks on the annotation links
 					$scope.navigateTo = ref
 					$scope.$apply()
+				progressCallback: (progress) ->
+					$scope.$emit 'progress', progress
 			})
 
 			# we will have all the main information needed to start display
