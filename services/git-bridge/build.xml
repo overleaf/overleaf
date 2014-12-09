@@ -298,6 +298,9 @@
     <property name="artifact.temp.output.writelatex-git-bridge:jar" value="${artifacts.temp.dir}/writelatex_git_bridge_jar"/>
     <mkdir dir="${artifact.temp.output.writelatex-git-bridge:jar}"/>
     <jar destfile="${temp.jar.path.writelatex-git-bridge.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
+      <manifest>
+        <attribute name="Main-Class" value="uk.ac.ic.wlgitbridge.Main" />
+      </manifest>
       <zipfileset dir="${writelatex-git-bridge.output.dir}"/>
       <zipfileset dir="${writelatex-git-bridge.testoutput.dir}"/>
       <zipfileset excludes="META-INF/**/*" src="${basedir}/libs/org.eclipse.jgit.http.server-3.5.1.201410131835-r.jar"/>
