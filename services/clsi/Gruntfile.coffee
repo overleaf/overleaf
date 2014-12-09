@@ -50,6 +50,7 @@ module.exports = (grunt) ->
 			unit:
 				options:
 					reporter: "spec"
+					grep: grunt.option("grep")
 				src: ["test/unit/js/**/*.js"]
 			acceptance:
 				options:
