@@ -269,7 +269,7 @@ define [
 					#scope.$apply()
 
 				scope.$on 'layout:main:resize', () ->
-					# console.log 'GOT LAYOUT-RESIZE EVENT'
+					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
 					scope.parentSize = [
 						element.innerHeight(),
 						element.innerWidth()
@@ -278,7 +278,7 @@ define [
 
 
 				scope.$on 'layout:pdf:resize', () ->
-					console.log 'GOT LAYOUT-RESIZE EVENT'
+					# console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
 					scope.parentSize = [
 						element.innerHeight(),
 						element.innerWidth()
@@ -366,8 +366,8 @@ define [
 					# console.log 'navigate to', newVal
 					# console.log 'look up page num'
 					scope.document.getDestination(newVal.dest).then (r) ->
-						console.log 'need to go to', r
-						console.log 'page ref is', r[0]
+						# console.log 'need to go to', r
+						# console.log 'page ref is', r[0]
 						scope.document.getPageIndex(r[0]).then (pidx) ->
 							# console.log 'page num is', pidx
 							page = scope.pages[pidx]
@@ -412,7 +412,7 @@ define [
 						ctrl.setPdfPosition(scope.pages[first.page], position)
 
 				scope.$watch '$destroy', () ->
-					console.log 'handle pdfng directive destroy'
+					#console.log 'handle pdfng directive destroy'
 
 
 		}

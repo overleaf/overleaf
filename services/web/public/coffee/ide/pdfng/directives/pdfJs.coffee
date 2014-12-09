@@ -91,7 +91,7 @@ define [
 						#				flashControls()
 				
 				scope.$on "loaded", () ->
-					console.log "LOADED"
+					# console.log "LOADED"
 					scope.loading = false
 
 				#scope.$watch "highlights", (areas) ->

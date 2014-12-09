@@ -198,7 +198,7 @@ define [
 				return result
 
 			destroy: () ->
-				console.log 'in pdf renderer destroy', @renderQueue
+				# console.log 'in pdf renderer destroy', @renderQueue
 				@shuttingDown = true
 				@renderQueue = []
 				for task in @renderTask
