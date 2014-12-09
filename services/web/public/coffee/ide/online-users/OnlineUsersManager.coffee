@@ -22,13 +22,11 @@ define [
 								continue
 							# Store data in the same format returned by clientTracking.clientUpdated
 
-
-
 							@$scope.onlineUsers[user.client_id] = {
 								id:      user.client_id
 								user_id: user.user_id
 								email:   user.email
-								name:    user.first_name
+								name:    "#{user.first_name} #{user.last_name}"
 								doc_id:  user.cursorData?.doc_id
 								row:     user.cursorData?.row
 								column:  user.cursorData?.column
@@ -55,10 +53,10 @@ define [
 			for client_id, user of @$scope.onlineUsers
 				if user.doc_id?
 					user.doc = @ide.fileTreeManager.findEntityById(user.doc_id)
-				if user.first_name?.length == 0 and user.last_name.length == 0
+
+				if user.name?.trim().length == 0
 					user.name = user.email
-				else
-					user.name = "#{user.first_name} #{user.last_name}"	
+
 				@$scope.onlineUsersArray.push user
 
 			@$scope.onlineUserCursorHighlights = {}
