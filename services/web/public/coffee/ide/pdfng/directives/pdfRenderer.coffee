@@ -9,8 +9,10 @@ define [
 			JOB_QUEUE_INTERVAL: 25
 
 			constructor: (@url, @options) ->
-				PDFJS.disableAutoFetch = true
-				PDFJS.disableFontFace = true
+				PDFJS.disableFontFace = true  # avoids repaints, uses worker more
+				# PDFJS.disableAutoFetch = true # enable this to prevent loading whole file
+				# PDFJS.disableStream
+				# PDFJS.disableRange
 				@scale = @options.scale || 1
 				@document = $q.when(PDFJS.getDocument @url, null, null, @options.progressCallback)
 				@navigateFn = @options.navigateFn
