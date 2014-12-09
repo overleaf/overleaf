@@ -11,7 +11,7 @@ describe "OutputFileFinder", ->
 		@OutputFileFinder = SandboxedModule.require modulePath, requires:
 			"fs": @fs = {}
 			"child_process": spawn: @spawn = sinon.stub()
-			"logger-sharelatex": { log: sinon.stub() }
+			"logger-sharelatex": { log: sinon.stub(), warn: sinon.stub() }
 		@directory = "/test/dir"
 		@callback = sinon.stub()
 
@@ -43,15 +43,26 @@ describe "OutputFileFinder", ->
 			@directory = "/base/dir"
 			@OutputFileFinder._getAllFiles @directory, @callback
 			
-			@proc.stdout.emit(
-				"data",
-				["/base/dir/main.tex", "/base/dir/chapters/chapter1.tex"].join("\n") + "\n"
-			)
-			@proc.emit "close", 0
-			
-		it "should call the callback with the relative file paths", ->
-			@callback.calledWith(
-				null,
-				["main.tex", "chapters/chapter1.tex"]
-			).should.equal true
-	
+		describe "successfully", ->
+			beforeEach ->
+				@proc.stdout.emit(
+					"data",
+					["/base/dir/main.tex", "/base/dir/chapters/chapter1.tex"].join("\n") + "\n"
+				)
+				@proc.emit "close", 0
+				
+			it "should call the callback with the relative file paths", ->
+				@callback.calledWith(
+					null,
+					["main.tex", "chapters/chapter1.tex"]
+				).should.equal true
+
+		describe "when the directory doesn't exist", ->
+			beforeEach ->
+				@proc.emit "close", 1
+				
+			it "should call the callback with a blank array", ->
+				@callback.calledWith(
+					null,
+					[]
+				).should.equal true

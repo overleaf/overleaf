@@ -47,9 +47,8 @@ module.exports = OutputFileFinder =
 		proc.on "error", callback	
 		proc.on "close", (code) ->
 			if code != 0
-				error = new Error("find returned non-zero exit code: #{code}")
-				return callback(error)
-			
+				logger.warn {directory, code}, "find returned error, directory likely doesn't exist"
+				return callback null, []
 			fileList = stdout.trim().split("\n")
 			fileList = fileList.map (file) ->
 				# Strip leading directory
