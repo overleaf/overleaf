@@ -14,7 +14,8 @@ define [
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
-				@document = $q.when(PDFJS.getDocument @url, null, null, @options.progressCallback)
+				@pdfjs = PDFJS.getDocument @url, null, null, @options.progressCallback
+				@document = $q.when(@pdfjs)
 				@navigateFn = @options.navigateFn
 				@spinner = new pdfSpinner
 				@resetState()
@@ -23,6 +24,7 @@ define [
 				@page = []
 				@complete = []
 				@timeout = []
+				@pageLoad = []
 				@renderTask = []
 				@renderQueue = []
 				@jobs = 0
@@ -73,6 +75,7 @@ define [
 
 			pause: (element, pagenum) ->
 				return if @complete[pagenum]
+				return if @shuttingDown
 				@renderQueue = @renderQueue.filter (q) ->
 					q.pagenum != pagenum
 				@spinner.stop(element.canvas)
@@ -82,13 +85,14 @@ define [
 					@processRenderQueue()
 				, interval
 
-			removeCompletedJob: (pagenum) ->
+			removeCompletedJob: (taskRef, pagenum) ->
 				# may need to clean up deferred object here
-				delete @renderTask[pagenum]
+				delete taskRef[pagenum]
 				@jobs = @jobs - 1
 				@triggerRenderQueue(0)
 
 			renderPage: (element, pagenum) ->
+				return if @shuttingDown
 				current = {
 					'element': element
 					'pagenum': pagenum
@@ -103,7 +107,8 @@ define [
 				[element, pagenum] = [current.element, current.pagenum]
 				# if task is underway or complete, go to the next entry in the
 				# render queue
-				if @renderTask[pagenum] or @complete[pagenum]
+				# console.log 'processing renderq', pagenum, @renderTask[pagenum], @complete[pagenum]
+				if @pageLoad[pagenum] or @renderTask[pagenum] or @complete[pagenum]
 					@processRenderQueue()
 					return
 				@jobs = @jobs + 1
@@ -111,18 +116,19 @@ define [
 				element.canvas.addClass('pdfng-loading')
 				@spinner.add(element.canvas)
 
-				pageLoad = @getPage(pagenum)
+				completeRef = @complete
+				renderTaskRef = @renderTask
 
-				@renderTask[pagenum] = pageLoad.then (pageObject) =>
-					@doRender element, pagenum, pageObject
-
-				@renderTask[pagenum].then () =>
-					# complete
-					@complete[pagenum] = true
-					@removeCompletedJob pagenum
-				, () =>
-					# rejected
-					@removeCompletedJob pagenum
+				@pageLoad[pagenum] = @getPage(pagenum)
+				@pageLoad[pagenum].then (pageObject) =>
+					@renderTask[pagenum] = @doRender element, pagenum, pageObject
+					@renderTask[pagenum].then () =>
+						# complete
+						completeRef[pagenum] = true
+						@removeCompletedJob renderTaskRef, pagenum
+					, () =>
+						# rejected
+						@removeCompletedJob renderTaskRef, pagenum
 
 			doRender: (element, pagenum, page) ->
 				self = this
@@ -177,15 +183,28 @@ define [
 
 				element.canvas.replaceWith(canvas)
 
-				return @renderTask = page.render {
+				result = page.render {
 					canvasContext: ctx
 					viewport: viewport
 				}
-				.then () ->
+
+				result.then () ->
 					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
 					page.getAnnotations().then (annotations) ->
 						annotationsLayer.setAnnotations annotations
+
+				return result
+
+			destroy: () ->
+				console.log 'in pdf renderer destroy', @renderQueue
+				@shuttingDown = true
+				@renderQueue = []
+				for task in @renderTask
+					task.cancel() if task?
+				@pdfjs.then (document) ->
+					document.cleanup()
+					document.destroy()
 
 		]

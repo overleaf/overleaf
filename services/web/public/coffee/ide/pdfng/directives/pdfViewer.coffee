@@ -24,6 +24,8 @@ define [
 		@load = () ->
 			# $scope.pages = []
 
+			$scope.document.destroy() if $scope.document?
+
 			$scope.document = new PDFRenderer($scope.pdfSrc, {
 				scale: 1,
 				navigateFn: (ref) ->
@@ -408,6 +410,9 @@ define [
 								top: viewport.viewBox[3] - first.highlight.top + first.highlight.height + 72
 						}
 						ctrl.setPdfPosition(scope.pages[first.page], position)
+
+				scope.$watch '$destroy', () ->
+					console.log 'handle pdfng directive destroy'
 
 
 		}
