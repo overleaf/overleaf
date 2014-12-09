@@ -249,15 +249,20 @@ define [
 							spinner.remove(element)
 							ctrl.redraw(origposition)
 
+				checkElementReady = () ->
+					# if element is zero-sized keep checking until it is ready
+					if element.height() == 0 or element.width() == 0
+						$timeout () ->
+							checkElementReady()
+						, 250
+					else
+						scope.$broadcast 'layout-ready' if !scope.parentSize?
+
+				checkElementReady()
+
 				scope.$on 'layout-ready', () ->
 					# console.log 'GOT LAYOUT READY EVENT'
 					# console.log 'calling refresh'
-					if element.height() == 0 or element.width() == 0
-						# if element is zero-sized keep checking until it is ready
-						$timeout () ->
-							scope.$broadcast 'layout-ready'
-						, 250
-						return
 					updateContainer()
 					spinner.add(element)
 					layoutReady.resolve 'layout is ready'
