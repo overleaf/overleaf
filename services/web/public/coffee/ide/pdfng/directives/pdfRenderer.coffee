@@ -47,6 +47,19 @@ define [
 				@document.then (pdfDocument) ->
 					pdfDocument.getDestinations()
 
+# Not available in pdf.js-1.0.712, in later versions there is a direct
+# call for this - we should use it as soon as it is available in a
+# stable version
+			getDestination: (dest) ->
+				@destinations = @document.then (pdfDocument) ->
+					pdfDocument.getDestinations()
+				return @destinations.then (all) ->
+					all[dest]
+
+				@document.then (pdfDocument) ->
+					pdfDocument.getDestination(dest)
+
+
 			getPageIndex: (ref) ->
 				@document.then (pdfDocument) ->
 					pdfDocument.getPageIndex(ref).then (idx) ->

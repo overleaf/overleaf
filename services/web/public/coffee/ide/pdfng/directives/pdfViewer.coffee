@@ -38,7 +38,6 @@ define [
 			# after the following promise is resolved
 			$scope.loaded = $q.all({
 				numPages: $scope.document.getNumPages()
-				destinations: $scope.document.getDestinations()
 				# get size of first page as default @ scale 1
 				pdfViewport: $scope.document.getPdfViewport 1, 1
 				}).then (result) ->
@@ -47,7 +46,6 @@ define [
 						result.pdfViewport.height,
 						result.pdfViewport.width
 					]
-					$scope.destinations = result.destinations
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
 					$scope.$emit "loaded"
@@ -365,11 +363,9 @@ define [
 					scope.navigateTo = undefined
 					# console.log 'navigate to', newVal
 					# console.log 'look up page num'
-					scope.loaded.then () ->
-						# console.log 'destinations are', scope.destinations
-						r = scope.destinations[newVal.dest]
-						# console.log 'need to go to', r
-						# console.log 'page ref is', r[0]
+					scope.document.getDestination(newVal.dest).then (r) ->
+						console.log 'need to go to', r
+						console.log 'page ref is', r[0]
 						scope.document.getPageIndex(r[0]).then (pidx) ->
 							# console.log 'page num is', pidx
 							page = scope.pages[pidx]
