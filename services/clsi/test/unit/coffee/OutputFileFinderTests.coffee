@@ -11,6 +11,7 @@ describe "OutputFileFinder", ->
 		@OutputFileFinder = SandboxedModule.require modulePath, requires:
 			"fs": @fs = {}
 			"child_process": spawn: @spawn = sinon.stub()
+			"logger-sharelatex": { log: sinon.stub() }
 		@directory = "/test/dir"
 		@callback = sinon.stub()
 

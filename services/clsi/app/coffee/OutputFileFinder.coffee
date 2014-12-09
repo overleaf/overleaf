@@ -2,12 +2,15 @@ async = require "async"
 fs = require "fs"
 Path = require "path"
 spawn = require("child_process").spawn
+logger = require "logger-sharelatex"
 
 module.exports = OutputFileFinder =
 	findOutputFiles: (resources, directory, callback = (error, outputFiles) ->) ->
 		incomingResources = {}
 		for resource in resources
 			incomingResources[resource.path] = true
+			
+		logger.log directory: directory, "getting output files"
 
 		OutputFileFinder._getAllFiles directory, (error, allFiles = []) ->
 			return callback(error) if error?
@@ -33,8 +36,11 @@ module.exports = OutputFileFinder =
 		callback = (error, fileList) ->
 			_callback(error, fileList)
 			_callback = () ->
+				
+		args = [directory, "-type", "f"]
+		logger.log args: args, "running find command"
 
-		proc = spawn("find", [directory, "-type", "f"])
+		proc = spawn("find", args)
 		stdout = ""
 		proc.stdout.on "data", (chunk) ->
 			stdout += chunk.toString()	
