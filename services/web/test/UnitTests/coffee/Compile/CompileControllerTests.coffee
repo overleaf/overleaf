@@ -137,7 +137,12 @@ describe "CompileController", ->
 				statusCode: 204
 				headers: { "mock": "header" }
 			@req.method = "mock-method"
-
+			@req.headers = {
+				'Mock': 'Headers',
+				'Range': 'should be passed - Range'
+				'If-Range': 'should be passed - If-Range'
+				'If-Modified-Since': 'should be passed - If-Modified-Since'
+			}
 
 		describe "user with standard priority", ->
 
@@ -152,6 +157,11 @@ describe "CompileController", ->
 						method: @req.method
 						url: "#{@settings.apis.clsi.url}#{@url}",
 						timeout: 60 * 1000
+						headers: {
+							'Range': 'should be passed - Range'
+							'If-Range': 'should be passed - If-Range'
+							'If-Modified-Since': 'should be passed - If-Modified-Since'
+						}
 					)
 					.should.equal true
 
@@ -175,6 +185,11 @@ describe "CompileController", ->
 						method: @req.method
 						url: "#{@settings.apis.clsi_priority.url}#{@url}",
 						timeout: 60 * 1000
+						headers: {
+							'Range': 'should be passed - Range'
+							'If-Range': 'should be passed - If-Range'
+							'If-Modified-Since': 'should be passed - If-Modified-Since'
+						}
 					)
 					.should.equal true
 

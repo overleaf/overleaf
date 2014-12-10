@@ -23,9 +23,15 @@
 		.full-size;
 		background-color: @gray-lighter;
 		overflow: scroll;
-		canvas {
+		canvas, div.pdf-canvas {
 			background: white;
 			box-shadow: black 0px 0px 10px;
+		}
+		div.pdf-canvas.pdfng-empty {
+			background-color: white;
+		}
+		div.pdf-canvas.pdfng-loading {
+			background-color: white;
 		}
 		.page-container {
 			margin: 10px auto;

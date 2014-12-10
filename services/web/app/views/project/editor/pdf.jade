@@ -58,16 +58,31 @@ div.full-size.pdf(ng-controller="PdfController")
 				i.split-screen
 
 	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
-		div(	
-			pdfjs
-			ng-if="settings.pdfViewer == 'pdfjs'"
-			pdf-src="pdf.url"
-			key="{{ project_id }}"
-			resize-on="layout:main:resize,layout:pdf:resize"
-			highlights="pdf.highlights"
-			position="pdf.position"
-			dbl-click-callback="syncToCode"
-		)
+		- // user.featureSwitches = {} // override
+		- var usePdfNG = user.featureSwitches && user.featureSwitches.pdfng;
+		if !usePdfNG
+			div(
+				pdfjs
+				ng-if="settings.pdfViewer == 'pdfjs'"
+				pdf-src="pdf.url"
+				key="{{ project_id }}"
+				resize-on="layout:main:resize,layout:pdf:resize"
+				highlights="pdf.highlights"
+				position="pdf.position"
+				dbl-click-callback="syncToCode"
+			)
+		else
+			div(
+				pdfng
+				ng-if="settings.pdfViewer == 'pdfjs'"
+				pdf-src="pdf.url"
+				key="{{ project_id }}"
+				resize-on="layout:main:resize,layout:pdf:resize"
+				highlights="pdf.highlights"
+				position="pdf.position"
+				dbl-click-callback="syncToCode"
+			)
+
 		iframe(
 			ng-src="{{ pdf.url }}"
 			ng-if="settings.pdfViewer == 'native'"

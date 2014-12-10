@@ -18,14 +18,18 @@ jsPath =
 
 logger.log "Generating file fingerprints..."
 for path in [
-    "#{jsPath}libs/require.js",
-    "#{jsPath}ide.js",
-    "#{jsPath}main.js",
+	"#{jsPath}libs/require.js",
+	"#{jsPath}ide.js",
+	"#{jsPath}main.js",
 	"#{jsPath}libs.js",
 	"#{jsPath}ace/ace.js",
-    "#{jsPath}libs/pdf.js",
-    "#{jsPath}libs/pdf.worker.js",
-    "/stylesheets/style.css"
+	"#{jsPath}libs/pdf.js",
+	"#{jsPath}libs/pdf.worker.js",
+	"#{jsPath}libs/compatibility.js",
+	"#{jsPath}libs/pdfjs-1.0.712/pdf.js",
+	"#{jsPath}libs/pdfjs-1.0.712/pdf.worker.js",
+	"#{jsPath}libs/pdfjs-1.0.712/compatibility.js",
+	"/stylesheets/style.css"
 ]
 	filePath = Path.join __dirname, "../../../", "public#{path}"
 	exists = fs.existsSync filePath

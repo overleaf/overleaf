@@ -2,6 +2,7 @@ define [
 	"ide/pdf/controllers/PdfController"
 	"ide/pdf/controllers/PdfViewToggleController"
 	"ide/pdf/directives/pdfJs"
+	"ide/pdfng/directives/pdfJs"  # alternative incremental viewer
 ], () ->
 	class PdfManager
 		constructor: (@ide, @$scope) ->

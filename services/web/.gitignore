@@ -46,10 +46,10 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 
 public/js/history/versiondetail.js
-!public/js/libs/*
+!public/js/libs/
 public/js/*
 !public/js/ace/*
-!public/js/libs/*
+!public/js/libs/
 public/js/editor.js
 public/js/home.js
 public/js/forms.js

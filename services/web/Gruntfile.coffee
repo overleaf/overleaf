@@ -98,7 +98,7 @@ module.exports = (grunt) ->
 							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs"]
+							exclude: ["libs", "libs/pdf"]
 						}, {
 							name: "libs"
 						},{
