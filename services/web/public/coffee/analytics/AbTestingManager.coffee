@@ -22,24 +22,24 @@ define [
 
 		_buildCookieKey = (testName, bucket)-> 
 			key = "sl_abt_#{testName}_#{bucket}"
-			console.log key
+			#console.log key
 			return key
 
 
 		_getTestCookie = (testName, bucket)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			cookie =  ipCookie(cookieKey)
-			console.log cookieKey, cookie
+			#console.log cookieKey, cookie
 			return cookie
 
 		_persistCookieStep = (testName, bucket, newStep)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			ipCookie(cookieKey, {step:newStep}, {expires:100, path:"/"})
-			console.log("persisting", cookieKey, {step:newStep})
+			#console.log("persisting", cookieKey, {step:newStep})
 			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
-			console.log cookieStep, newStep, "checking if step is next"
+			#console.log cookieStep, newStep, "checking if step is next"
 			if !cookieStep? and newStep != 0
 				return false
 			else if newStep == 0
