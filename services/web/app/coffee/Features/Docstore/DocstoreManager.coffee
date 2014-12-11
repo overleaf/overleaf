@@ -61,6 +61,7 @@ module.exports = DocstoreManager =
 		}, (error, res, result) ->
 			return callback(error) if error?
 			if 200 <= res.statusCode < 300
+				logger.log project_id: project_id, doc_id: doc_id, "update doc in docstore url finished"
 				callback(null, result.modified, result.rev)
 			else
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
