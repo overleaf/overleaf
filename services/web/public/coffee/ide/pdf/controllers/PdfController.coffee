@@ -38,7 +38,12 @@ define [
 				$scope.pdf.failure = true
 				fetchLogs()
 			else if response.status == "success"
-				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
+				if response.compileGroup?
+					$scope.pdf.compileGroup = response.compileGroup
+					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}" +
+						"&compileGroup=#{$scope.pdf.compileGroup}"
+				else
+					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
 				fetchLogs()
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
