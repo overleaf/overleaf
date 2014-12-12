@@ -18,7 +18,7 @@ module.exports = EditorHttpController =
 				privilegeLevel: privilegeLevel
 			}
 			# Only show the 'renamed or deleted' message once
-			if project.deletedByExternalDataSource
+			if project?.deletedByExternalDataSource
 				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
 
 	restoreDoc: (req, res, next) ->
