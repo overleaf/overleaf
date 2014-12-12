@@ -1,6 +1,7 @@
 define [
 	"libs"
 	"modules/recursionHelper"
+	"modules/errorCatcher"
 	"utils/underscore"
 ], () ->
 	App = angular.module("SharelatexApp", [
@@ -11,6 +12,7 @@ define [
 		"underscore"
 		"ngSanitize"
 		"ipCookie"
+		"ErrorCatcher"
 	])
 
 	return App

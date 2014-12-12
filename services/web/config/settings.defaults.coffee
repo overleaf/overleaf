@@ -203,7 +203,15 @@ module.exports =
 	# ShareLaTeX's help desk is provided by tenderapp.com
 	# tenderUrl: ""
 	#
-
+	# Client-side error logging is provided by getsentry.com
+	# sentry:
+	#   src: ""
+	#   publicDSN: ""
+	#
+	# src should be either a remote url like
+	#    //cdn.ravenjs.com/1.1.16/jquery,native/raven.min.js
+	# or a local file in the js/libs directory.
+	# The publicDSN is the token for the client-side getSentry service.
 
 	# Production Settings
 	# -------------------

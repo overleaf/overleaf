@@ -126,6 +126,8 @@ module.exports = (app)->
 				delete req.session.justLoggedIn
 		res.locals.gaToken       = Settings.analytics?.ga?.token
 		res.locals.tenderUrl     = Settings.tenderUrl
+		res.locals.sentrySrc     = Settings.sentry?.src
+		res.locals.sentryPublicDSN = Settings.sentry?.publicDSN
 		next()
 
 	app.use (req, res, next) ->
