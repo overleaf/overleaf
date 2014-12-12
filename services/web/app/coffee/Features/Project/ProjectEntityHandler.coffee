@@ -257,11 +257,12 @@ module.exports = ProjectEntityHandler =
 					logger.error err: error, doc_id: doc_id, project_id: project_id, lines: lines, "doc not found while updating doc lines"
 					return callback(error)
 
+				logger.log project_id: project_id, doc_id: doc_id, "telling docstore manager to update doc"
 				DocstoreManager.updateDoc project_id, doc_id, lines, (err, modified, rev) ->
 					if err?
 						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, "error sending doc to docstore"
 						return callback(err)
-
+					logger.log project_id: project_id, doc_id: doc_id, modified:modified, "finished updating doc lines"
 					if modified
 						# Don't need to block for marking as updated
 						projectUpdateHandler.markAsUpdated project_id
