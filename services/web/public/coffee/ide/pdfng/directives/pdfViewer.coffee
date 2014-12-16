@@ -26,7 +26,8 @@ define [
 
 			$scope.document.destroy() if $scope.document?
 
-			$scope.document = new PDFRenderer($scope.pdfSrc, {
+			# TODO need a proper url manipulation library to add to query string
+			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
 				scale: 1,
 				navigateFn: (ref) ->
 					# this function captures clicks on the annotation links

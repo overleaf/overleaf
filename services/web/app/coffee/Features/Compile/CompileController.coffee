@@ -25,12 +25,13 @@ module.exports = CompileController =
 			if req.body?.compiler
 				options.compiler = req.body.compiler
 			logger.log {options, project_id}, "got compile request"
-			CompileManager.compile project_id, user_id, options, (error, status, outputFiles) ->
+			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, output, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
 				res.send 200, JSON.stringify {
 					status: status
 					outputFiles: outputFiles
+					compileGroup: limits?.compileGroup
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->
@@ -69,18 +70,30 @@ module.exports = CompileController =
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
-		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
-			return next(error) if error?
-			if limits.compileGroup == "priority"
-				compilerUrl = Settings.apis.clsi_priority.url
-			else
-				compilerUrl = Settings.apis.clsi.url
-			url = "#{compilerUrl}#{url}"
-			logger.log url: url, "proxying to CLSI"
-			oneMinute = 60 * 1000
-			proxy = request(url: url, method: req.method, timeout: oneMinute)
-			proxy.pipe(res)
-			proxy.on "error", (error) ->
-				logger.warn err: error, url: url, "CLSI proxy error"
+		if req.query?.compileGroup
+			CompileController.proxyToClsiWithLimits(project_id, url, {compileGroup: req.query.compileGroup}, req, res, next)
+		else
+			CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+				return next(error) if error?
+				CompileController.proxyToClsiWithLimits(project_id, url, limits, req, res, next)
 
-	
+	proxyToClsiWithLimits: (project_id, url, limits, req, res, next = (error) ->) ->
+		if limits.compileGroup == "priority"
+			compilerUrl = Settings.apis.clsi_priority.url
+		else
+			compilerUrl = Settings.apis.clsi.url
+		url = "#{compilerUrl}#{url}"
+		logger.log url: url, "proxying to CLSI"
+		oneMinute = 60 * 1000
+		# pass through If-* and Range headers for byte serving pdfs
+		# do not send any others, potential proxying loop if Host: is passed!
+		if req.query?.pdfng
+			newHeaders = {}
+			for h, v of req.headers
+				newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
+			proxy = request(url: url, method: req.method, timeout: oneMinute, headers: newHeaders)
+		else
+			proxy = request(url: url, method: req.method, timeout: oneMinute)
+		proxy.pipe(res)
+		proxy.on "error", (error) ->
+			logger.warn err: error, url: url, "CLSI proxy error"
