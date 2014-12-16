@@ -139,59 +139,147 @@ describe "CompileController", ->
 			@req.method = "mock-method"
 			@req.headers = {
 				'Mock': 'Headers',
-				'Range': 'should be passed - Range'
-				'If-Range': 'should be passed - If-Range'
-				'If-Modified-Since': 'should be passed - If-Modified-Since'
+				'Range': '123-456'
+				'If-Range': 'abcdef'
+				'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
 			}
 
-		describe "user with standard priority", ->
+		describe "old pdf viewer", ->
+			describe "user with standard priority", ->
+				beforeEach ->
+					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "standard"})
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
+				it "should open a request to the CLSI", ->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi.url}#{@url}",
+							timeout: 60 * 1000
+						)
+						.should.equal true
+
+				it "should pass the request on to the client", ->
+					@proxy.pipe
+						.calledWith(@res)
+						.should.equal true
+
+				it "should bind an error handle to the request proxy", ->
+					@proxy.on.calledWith("error").should.equal true
+
+			describe "user with priority compile", ->
+				beforeEach ->
+					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
+
+				it "should proxy to the priority url if the user has the feature", ()->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi_priority.url}#{@url}",
+							timeout: 60 * 1000
+						)
+						.should.equal true
+
+			describe "user with standard priority via query string", ->
+				beforeEach ->
+					@req.query = {compileGroup: 'standard'}
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
+
+				it "should open a request to the CLSI", ->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi.url}#{@url}",
+							timeout: 60 * 1000
+						)
+						.should.equal true
+
+				it "should pass the request on to the client", ->
+					@proxy.pipe
+						.calledWith(@res)
+						.should.equal true
+
+				it "should bind an error handle to the request proxy", ->
+					@proxy.on.calledWith("error").should.equal true
+
+			describe "user with priority compile via query string", ->
+				beforeEach ->
+					@req.query = {compileGroup: 'priority'}
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
+
+				it "should proxy to the priority url if the user has the feature", ()->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi_priority.url}#{@url}",
+							timeout: 60 * 1000
+						)
+						.should.equal true
+
+			describe "user with non-existent priority via query string", ->
+				beforeEach ->
+					@req.query = {compileGroup: 'foobar'}
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
+
+				it "should proxy to the standard url", ()->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi.url}#{@url}",
+							timeout: 60 * 1000
+						)
+						.should.equal true
+
+
+		describe "new pdf viewer", ->
 			beforeEach ->
-				@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "standard"})
-				@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)	
+				@req.query = {pdfng: true}
+			describe "user with standard priority", ->
+				beforeEach ->
+					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "standard"})
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
+				it "should open a request to the CLSI", ->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi.url}#{@url}",
+							timeout: 60 * 1000
+							headers: {
+								'Range': '123-456'
+								'If-Range': 'abcdef'
+								'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
+							}
+						)
+						.should.equal true
 
-			it "should open a request to the CLSI", ->
-				@request
-					.calledWith(
-						method: @req.method
-						url: "#{@settings.apis.clsi.url}#{@url}",
-						timeout: 60 * 1000
-						headers: {
-							'Range': 'should be passed - Range'
-							'If-Range': 'should be passed - If-Range'
-							'If-Modified-Since': 'should be passed - If-Modified-Since'
-						}
-					)
-					.should.equal true
+				it "should pass the request on to the client", ->
+					@proxy.pipe
+						.calledWith(@res)
+						.should.equal true
 
-			it "should pass the request on to the client", ->
-				@proxy.pipe
-					.calledWith(@res)
-					.should.equal true
+				it "should bind an error handle to the request proxy", ->
+					@proxy.on.calledWith("error").should.equal true
 
-			it "should bind an error handle to the request proxy", ->
-				@proxy.on.calledWith("error").should.equal true
+			describe "user with priority compile", ->
+				beforeEach ->
+					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-		describe "user with priority compile", ->
-
-			beforeEach ->
-				@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
-				@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)	
-
-			it "should proxy to the priorty url if the user has the feature", ()->
-				@request
-					.calledWith(
-						method: @req.method
-						url: "#{@settings.apis.clsi_priority.url}#{@url}",
-						timeout: 60 * 1000
-						headers: {
-							'Range': 'should be passed - Range'
-							'If-Range': 'should be passed - If-Range'
-							'If-Modified-Since': 'should be passed - If-Modified-Since'
-						}
-					)
-					.should.equal true
+				it "should proxy to the priority url if the user has the feature", ()->
+					@request
+						.calledWith(
+							method: @req.method
+							url: "#{@settings.apis.clsi_priority.url}#{@url}",
+							timeout: 60 * 1000
+							headers: {
+								'Range': '123-456'
+								'If-Range': 'abcdef'
+								'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
+							}
+						)
+						.should.equal true
 
 
 	describe "deleteAuxFiles", ->
