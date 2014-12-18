@@ -1,14 +1,19 @@
 extends ../layout
 block scripts
+
+
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{currency}'
 		window.plan_code = '#{plan_code}'
+
+		window.recurlyCreds = { apiKey : "", apiUrl:""}
 
 
 block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-	script(src=jsPath+'libs/recurly.min.js')
+	script(src="https://js.recurly.com/v3/recurly.js")
+
 
 	.content.content-alt
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
@@ -29,9 +34,38 @@ block content
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
-						
-						#subscribeForm(style="min-height: 700px;") #{translate("loading_billing_form")}...
-						
+							span {{ error }}	
+							form
+								.form-group
+									label #{translate("credit_card_number")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='number', ng-model='data.number')
+								.form-group
+									label #{translate("month")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='month', ng-model='data.month')
+								.form-group
+									label #{translate("year")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='year', ng-model='data.year')		
+								.form-group
+									label #{translate("cvv")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='cvv', ng-model='data.cvv')		
+								.form-group
+									label #{translate("first_name")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name")								
+								.form-group
+									label #{translate("last_name")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name")		
+										
+								.form-group
+									button.btn.btn-success(ng-click="submit()") #{translate("submit")} 						
+
+
+
+
+
+
+
+
+
 				
 				.col-md-3.col-md-pull-6
 					if showStudentPlan == 'true'
@@ -77,14 +111,6 @@ block content
 
 
 	script(type="text/javascript").
-		Recurly.config(!{recurlyConfig})
-		var recurlySubscriptionFormConfig = !{subscriptionFormOptions}
-		recurlySubscriptionFormConfig.successHandler = function(){
-			ga('send', 'event', 'subscription-funnel', 'subscribed')
-		}
-
-		Recurly.buildSubscriptionForm(recurlySubscriptionFormConfig);
-
 		window.ab = [
 			{step:1, bucket:"red", testName:"button_color"},
 			{step:1, bucket:"blue", testName:"button_color"}
