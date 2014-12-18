@@ -97,8 +97,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 						/metrics\.itunes\.apple\.com\.edgesuite\.net\//i
 					],
 					shouldSendCallback: function(data) {
-						// only send a percentage of errors
-						var sampleRate = 0.01;
+						// only send a fraction of errors
+						var sampleRate = 1.00;
 						return (Math.random() <= sampleRate);
 					}
 					// we highly recommend restricting exceptions to a domain in order to filter out clutter
