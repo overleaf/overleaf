@@ -6,7 +6,7 @@ block scripts
 		window.recomendedCurrency = '#{currency}'
 		window.plan_code = '#{plan_code}'
 
-		window.recurlyCreds = { apiKey : "", apiUrl:""}
+		window.recurlyCreds = { apiKey : "sc-GVdZOe7akgWbZRIFPllOx9", apiUrl:""}
 
 
 block content
@@ -34,7 +34,7 @@ block content
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
-							span {{ error }}	
+							
 							form
 								.form-group
 									label #{translate("credit_card_number")}
@@ -54,7 +54,19 @@ block content
 								.form-group
 									label #{translate("last_name")}
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name")		
-										
+								.form-group
+									label #{translate("address")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="address1", ng-model="data.address1")		
+								.form-group
+									label #{translate("city")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city")		
+								.form-group
+									label #{translate("country")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="country", ng-model="data.country")		
+								.form-group
+									label #{translate("country")}
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code")		
+																																							
 								.form-group
 									button.btn.btn-success(ng-click="submit()") #{translate("submit")} 						
 

@@ -132,9 +132,9 @@ module.exports = SubscriptionController =
 	createSubscription: (req, res, next)->
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return callback(error) if error?
-			subscriptionId = req.body.recurly_token
-			logger.log subscription_id: subscriptionId, user_id:user._id, "creating subscription"
-			SubscriptionHandler.createSubscription user, subscriptionId, (err)->
+			recurly_token_id = req.body.recurly_token_id
+			logger.log recurly_token_id: recurly_token_id, user_id:user._id, "creating subscription"
+			SubscriptionHandler.createSubscription user, recurly_token_id, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong creating subscription"
 				res.redirect "/user/subscription/thank-you"
