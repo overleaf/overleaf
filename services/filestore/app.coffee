@@ -68,6 +68,10 @@ app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileContro
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
 app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
 
+app.get "/heapdump", (req, res)->
+	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->
+		res.send filename
+
 app.post "/shutdown", (req, res)->
 	appIsOk = false
 	res.send()

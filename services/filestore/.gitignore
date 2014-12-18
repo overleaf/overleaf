@@ -56,6 +56,7 @@ test/unit/js/
 test/acceptence/js
 
 user_files/*
+template_files/*
 
 **.swp
 
