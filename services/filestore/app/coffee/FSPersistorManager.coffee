@@ -1,6 +1,7 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
+rimraf = require("rimraf")
 
 filterName = (key) ->
   return key.replace /\//g, "_"
@@ -57,10 +58,10 @@ module.exports =
       callback err
 
   deleteDirectory: (location, name, callback = (err)->)->
-    filteredName = filterName name
-    fs.rmdir "#{location}/#{filteredName}", (err) ->
-      logger.err err:err, location:location, name:filteredName, "Error on rmdir."
-      if err and err.code != 'ENOENT' 
+    filteredName = filterName name.replace(/\/$/,'')
+    rimraf "#{location}/#{filteredName}", (err) ->
+      if err
+        logger.err err:err, location:location, name:filteredName, "Error on rimraf rmdir."
         callback err
       else
         callback()

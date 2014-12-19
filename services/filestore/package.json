@@ -21,6 +21,7 @@
     "node-uuid": "~1.4.1",
     "pngcrush": "0.0.3",
     "request": "2.14.0",
+    "rimraf": "2.2.8",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "stream-buffers": "~0.2.5",
     "underscore": "~1.5.2"
