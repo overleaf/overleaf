@@ -16,10 +16,10 @@ module.exports =
 			PersistorManager.sendStream bucket, key, stream, callback
 
 	deleteFile: (bucket, key, callback)->
-		convetedKey = KeyBuilder.getConvertedFolderKey(bucket, key)
+		convetedKey = KeyBuilder.getConvertedFolderKey(key)
 		async.parallel [
 			(done)-> PersistorManager.deleteFile bucket, key, done
-			(done)-> PersistorManager.deleteFile bucket, convetedKey, done
+			(done)-> PersistorManager.deleteDirectory bucket, convetedKey, done
 		], callback
 
 	getFile: (bucket, key, opts = {}, callback)->
