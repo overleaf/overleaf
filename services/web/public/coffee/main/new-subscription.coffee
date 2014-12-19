@@ -27,7 +27,7 @@ define [
 			postal_code: "se153tt"
 			address1 : "7 somewhere"
 			city:"london"
-			country:"uk"
+			country:"GB"
 
 
 
@@ -42,7 +42,13 @@ define [
 				if err
 					$scope.error = err.message
 				else
-					$http.post("/user/subscription/create", {_csrf: window.csrfToken, recurly_token_id:recurly_token_id.id})
+					postData =
+						_csrf: window.csrfToken
+						recurly_token_id:recurly_token_id.id
+						subscriptionDetails:
+							currencyCode:"USD"
+							plan_code:"student"
+					$http.post("/user/subscription/create", postData)
 					.success ->
 						console.log "success"
 

@@ -34,20 +34,41 @@ block content
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
-							
+							hr
 							form
 								.form-group
-									label #{translate("credit_card_number")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='number', ng-model='data.number')
+									input.form-control.input-lg-1(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='number', ng-model='data.number', placeholder='Credit Card Number')
+									input.form-control.input-lg-1(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='cvv', ng-model='data.cvv')		
 								.form-group
 									label #{translate("month")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='month', ng-model='data.month')
+									select.form-control(data-recurly='month', ng-model='data.month')
+										option(value="01") 01 January
+										option(value="02") 02 February
+										option(value="03") 03 March
+										option(value="04") 04 April
+										option(value="05") 05 May
+										option(value="06") 06 June
+										option(value="07") 07 July
+										option(value="08") 08 August
+										option(value="09") 09 September
+										option(value="10") 10 October
+										option(value="11") 11 November
+										option(value="12") 12 December
 								.form-group
 									label #{translate("year")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='year', ng-model='data.year')		
-								.form-group
-									label #{translate("cvv")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='cvv', ng-model='data.cvv')		
+									select.form-control(data-recurly='year', ng-model='data.year')
+										option(value="2015") 2015
+										option(value="2016") 2016
+										option(value="2017") 2017
+										option(value="2018") 2018
+										option(value="2019") 2019
+										option(value="2020") 2020
+										option(value="2021") 2021
+										option(value="2022") 2022
+										option(value="2023") 2023
+										option(value="2024") 2024
+										option(value="2025") 2025
+										option(value="2026") 2026
 								.form-group
 									label #{translate("first_name")}
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name")								
@@ -62,7 +83,8 @@ block content
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city")		
 								.form-group
 									label #{translate("country")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="country", ng-model="data.country")		
+									select.form-control(data-recurly="country", ng-model="data.country")
+										mixin countries_options()
 								.form-group
 									label #{translate("country")}
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code")		
@@ -128,3 +150,258 @@ block content
 			{step:1, bucket:"blue", testName:"button_color"}
 		]
 
+
+mixin countries_options()
+	option(value='-') Select Country
+	option(value='-') --------------
+	option(value='AF') Afghanistan
+	option(value='AL') Albania
+	option(value='DZ') Algeria
+	option(value='AS') American Samoa
+	option(value='AD') Andorra
+	option(value='AO') Angola
+	option(value='AI') Anguilla
+	option(value='AQ') Antarctica
+	option(value='AG') Antigua and Barbuda
+	option(value='AR') Argentina
+	option(value='AM') Armenia
+	option(value='AW') Aruba
+	option(value='AC') Ascension Island
+	option(value='AU') Australia
+	option(value='AT') Austria
+	option(value='AZ') Azerbaijan
+	option(value='BS') Bahamas
+	option(value='BH') Bahrain
+	option(value='BD') Bangladesh
+	option(value='BB') Barbados
+	option(value='BE') Belgium
+	option(value='BZ') Belize
+	option(value='BJ') Benin
+	option(value='BM') Bermuda
+	option(value='BT') Bhutan
+	option(value='BO') Bolivia
+	option(value='BA') Bosnia and Herzegovina
+	option(value='BW') Botswana
+	option(value='BV') Bouvet Island
+	option(value='BR') Brazil
+	option(value='BQ') British Antarctic Territory
+	option(value='IO') British Indian Ocean Territory
+	option(value='VG') British Virgin Islands
+	option(value='BN') Brunei
+	option(value='BG') Bulgaria
+	option(value='BF') Burkina Faso
+	option(value='BI') Burundi
+	option(value='KH') Cambodia
+	option(value='CM') Cameroon
+	option(value='CA') Canada
+	option(value='IC') Canary Islands
+	option(value='CT') Canton and Enderbury Islands
+	option(value='CV') Cape Verde
+	option(value='KY') Cayman Islands
+	option(value='CF') Central African Republic
+	option(value='EA') Ceuta and Melilla
+	option(value='TD') Chad
+	option(value='CL') Chile
+	option(value='CN') China
+	option(value='CX') Christmas Island
+	option(value='CP') Clipperton Island
+	option(value='CC') Cocos [Keeling] Islands
+	option(value='CO') Colombia
+	option(value='KM') Comoros
+	option(value='CD') Congo [DRC]
+	option(value='CK') Cook Islands
+	option(value='CR') Costa Rica
+	option(value='HR') Croatia
+	option(value='CU') Cuba
+	option(value='CY') Cyprus
+	option(value='CZ') Czech Republic
+	option(value='DK') Denmark
+	option(value='DG') Diego Garcia
+	option(value='DJ') Djibouti
+	option(value='DM') Dominica
+	option(value='DO') Dominican Republic
+	option(value='NQ') Dronning Maud Land
+	option(value='TL') East Timor
+	option(value='EC') Ecuador
+	option(value='EG') Egypt
+	option(value='SV') El Salvador
+	option(value='EE') Estonia
+	option(value='ET') Ethiopia
+	option(value='FK') Falkland Islands [Islas Malvinas]
+	option(value='FO') Faroe Islands
+	option(value='FJ') Fiji
+	option(value='FI') Finland
+	option(value='FR') France
+	option(value='GF') French Guiana
+	option(value='PF') French Polynesia
+	option(value='TF') French Southern Territories
+	option(value='FQ') French Southern and Antarctic Territories
+	option(value='GA') Gabon
+	option(value='GM') Gambia
+	option(value='GE') Georgia
+	option(value='DE') Germany
+	option(value='GH') Ghana
+	option(value='GI') Gibraltar
+	option(value='GR') Greece
+	option(value='GL') Greenland
+	option(value='GD') Grenada
+	option(value='GP') Guadeloupe
+	option(value='GU') Guam
+	option(value='GT') Guatemala
+	option(value='GG') Guernsey
+	option(value='GW') Guinea-Bissau
+	option(value='GY') Guyana
+	option(value='HT') Haiti
+	option(value='HM') Heard Island and McDonald Islands
+	option(value='HN') Honduras
+	option(value='HK') Hong Kong
+	option(value='HU') Hungary
+	option(value='IS') Iceland
+	option(value='IN') India
+	option(value='ID') Indonesia
+	option(value='IE') Ireland
+	option(value='IM') Isle of Man
+	option(value='IL') Israel
+	option(value='IT') Italy
+	option(value='JM') Jamaica
+	option(value='JP') Japan
+	option(value='JE') Jersey
+	option(value='JT') Johnston Island
+	option(value='JO') Jordan
+	option(value='KZ') Kazakhstan
+	option(value='KE') Kenya
+	option(value='KI') Kiribati
+	option(value='KW') Kuwait
+	option(value='KG') Kyrgyzstan
+	option(value='LA') Laos
+	option(value='LV') Latvia
+	option(value='LS') Lesotho
+	option(value='LY') Libya
+	option(value='LI') Liechtenstein
+	option(value='LT') Lithuania
+	option(value='LU') Luxembourg
+	option(value='MO') Macau
+	option(value='MK') Macedonia [FYROM]
+	option(value='MG') Madagascar
+	option(value='MW') Malawi
+	option(value='MY') Malaysia
+	option(value='MV') Maldives
+	option(value='ML') Mali
+	option(value='MT') Malta
+	option(value='MH') Marshall Islands
+	option(value='MQ') Martinique
+	option(value='MR') Mauritania
+	option(value='MU') Mauritius
+	option(value='YT') Mayotte
+	option(value='FX') Metropolitan France
+	option(value='MX') Mexico
+	option(value='FM') Micronesia
+	option(value='MI') Midway Islands
+	option(value='MD') Moldova
+	option(value='MC') Monaco
+	option(value='MN') Mongolia
+	option(value='ME') Montenegro
+	option(value='MS') Montserrat
+	option(value='MA') Morocco
+	option(value='MZ') Mozambique
+	option(value='NA') Namibia
+	option(value='NR') Nauru
+	option(value='NP') Nepal
+	option(value='NL') Netherlands
+	option(value='AN') Netherlands Antilles
+	option(value='NT') Neutral Zone
+	option(value='NC') New Caledonia
+	option(value='NZ') New Zealand
+	option(value='NI') Nicaragua
+	option(value='NE') Niger
+	option(value='NG') Nigeria
+	option(value='NU') Niue
+	option(value='NF') Norfolk Island
+	option(value='VD') North Vietnam
+	option(value='MP') Northern Mariana Islands
+	option(value='NO') Norway
+	option(value='OM') Oman
+	option(value='QO') Outlying Oceania
+	option(value='PC') Pacific Islands Trust Territory
+	option(value='PK') Pakistan
+	option(value='PW') Palau
+	option(value='PS') Palestinian Territories
+	option(value='PA') Panama
+	option(value='PZ') Panama Canal Zone
+	option(value='PY') Paraguay
+	option(value='YD') People&apos;s Democratic Republic of Yemen
+	option(value='PE') Peru
+	option(value='PH') Philippines
+	option(value='PN') Pitcairn Islands
+	option(value='PL') Poland
+	option(value='PT') Portugal
+	option(value='PR') Puerto Rico
+	option(value='QA') Qatar
+	option(value='RO') Romania
+	option(value='RU') Russia
+	option(value='RW') Rwanda
+	option(value='RE') R&eacute;union
+	option(value='BL') Saint Barth&eacute;lemy
+	option(value='SH') Saint Helena
+	option(value='KN') Saint Kitts and Nevis
+	option(value='LC') Saint Lucia
+	option(value='MF') Saint Martin
+	option(value='PM') Saint Pierre and Miquelon
+	option(value='VC') Saint Vincent and the Grenadines
+	option(value='WS') Samoa
+	option(value='SM') San Marino
+	option(value='SA') Saudi Arabia
+	option(value='SN') Senegal
+	option(value='RS') Serbia
+	option(value='CS') Serbia and Montenegro
+	option(value='SC') Seychelles
+	option(value='SL') Sierra Leone
+	option(value='SG') Singapore
+	option(value='SK') Slovakia
+	option(value='SI') Slovenia
+	option(value='SB') Solomon Islands
+	option(value='ZA') South Africa
+	option(value='GS') South Georgia and the South Sandwich Islands
+	option(value='KR') South Korea
+	option(value='ES') Spain
+	option(value='LK') Sri Lanka
+	option(value='SR') Suriname
+	option(value='SJ') Svalbard and Jan Mayen
+	option(value='SZ') Swaziland
+	option(value='SE') Sweden
+	option(value='CH') Switzerland
+	option(value='ST') S&atilde;o Tom&eacute; and Pr&iacute;ncipe
+	option(value='TW') Taiwan
+	option(value='TJ') Tajikistan
+	option(value='TZ') Tanzania
+	option(value='TH') Thailand
+	option(value='TG') Togo
+	option(value='TK') Tokelau
+	option(value='TO') Tonga
+	option(value='TT') Trinidad and Tobago
+	option(value='TA') Tristan da Cunha
+	option(value='TN') Tunisia
+	option(value='TR') Turkey
+	option(value='TM') Turkmenistan
+	option(value='TC') Turks and Caicos Islands
+	option(value='TV') Tuvalu
+	option(value='UM') U.S. Minor Outlying Islands
+	option(value='PU') U.S. Miscellaneous Pacific Islands
+	option(value='VI') U.S. Virgin Islands
+	option(value='UG') Uganda
+	option(value='UA') Ukraine
+	option(value='AE') United Arab Emirates
+	option(value='GB') United Kingdom
+	option(value='US') United States
+	option(value='UY') Uruguay
+	option(value='UZ') Uzbekistan
+	option(value='VU') Vanuatu
+	option(value='VA') Vatican City
+	option(value='VE') Venezuela
+	option(value='VN') Vietnam
+	option(value='WK') Wake Island
+	option(value='WF') Wallis and Futuna
+	option(value='EH') Western Sahara
+	option(value='YE') Yemen
+	option(value='ZM') Zambia
+	option(value='AX') &angst;land Islands

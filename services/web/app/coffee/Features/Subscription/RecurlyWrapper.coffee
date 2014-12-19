@@ -8,13 +8,16 @@ logger = require("logger-sharelatex")
 module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
-	createSubscription: (subscription, recurly_token_id, callback)->
+	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
 		requestBody = """
 		          <subscription>
-		            <plan_code>student</plan_code>
-		            <currency>USD</currency>
+		            <plan_code>#{subscriptionDetails.plan_code}</plan_code>
+		            <currency>#{subscriptionDetails.currencyCode}</currency>
 		            <account>
-		            	<account_code>TEST_SUBSCRIPTION</account_code>
+		            	<account_code>#{user._id}</account_code>
+		            	<email>#{user.email}</email>
+		            	<first_name>#{user.first_name}</first_name>
+		            	<last_name>#{user.last_name}</last_name>
 		            	<billing_info>
 		            		<token_id>#{recurly_token_id}</token_id>
 		            	</billing_info>
