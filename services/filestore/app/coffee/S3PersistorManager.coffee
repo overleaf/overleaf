@@ -59,6 +59,7 @@ module.exports =
 			@sendFile bucketName, key, fsPath, callback
 			
 	getFileStream: (bucketName, key, callback = (err, res)->)->
+		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key
