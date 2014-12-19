@@ -8,6 +8,7 @@ import org.eclipse.jgit.transport.ReceivePack;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
+import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
@@ -56,11 +57,18 @@ public class WriteLatexPutHook implements PreReceiveHook {
     }
 
     private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {
+        checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
         writeLatexDataSource.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
-                                                                   getPushedDirectoryContents(repository,
-                                                                                              receiveCommand),
-                                                                   hostname);
+                getPushedDirectoryContents(repository,
+                        receiveCommand),
+                hostname);
+    }
+
+    private void checkBranch(ReceiveCommand receiveCommand) throws WrongBranchException {
+        if (!receiveCommand.getRefName().equals("refs/heads/master")) {
+            throw new WrongBranchException();
+        }
     }
 
     private void checkForcedPush(ReceiveCommand receiveCommand) throws ForcedPushException {
