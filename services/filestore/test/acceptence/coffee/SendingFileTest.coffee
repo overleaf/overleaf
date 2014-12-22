@@ -80,6 +80,7 @@ describe "Filestore", ->
 			request opts, (err, response, body)=>
 				response.statusCode.should.equal 200
 				request.del @fileUrl, (err, response, body)=>
+					response.statusCode.should.equal 204
 					request.get newFileUrl, (err, response, body)=>
 						body.should.equal @constantFileContent
 						done()
