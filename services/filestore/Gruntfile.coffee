@@ -76,6 +76,7 @@ module.exports = (grunt) ->
 
 	grunt.registerTask "test:unit", ["coffee", "mochaTest:unit"]
 	grunt.registerTask "test:acceptence", ["coffee", "mochaTest:acceptence"]
+	grunt.registerTask "test:acceptance", ["test:acceptence"]
 
 	grunt.registerTask "ci", "test:unit"
 	grunt.registerTask 'default', ['coffee', 'concurrent']
