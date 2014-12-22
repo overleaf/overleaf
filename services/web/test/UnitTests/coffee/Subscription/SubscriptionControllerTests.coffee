@@ -20,13 +20,13 @@ mockSubscriptions =
 describe "SubscriptionController sanboxed", ->
 
 	beforeEach ->
-		@user = {}
+		@user = {email:"tom@yahoo.com"}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
 
 		@SecurityManager =
 			getCurrentUser: sinon.stub().callsArgWith(1, null, @user)
 		@SubscriptionHandler = 
-			createSubscription: sinon.stub().callsArgWith(2)
+			createSubscription: sinon.stub().callsArgWith(3)
 			updateSubscription: sinon.stub().callsArgWith(3)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 			cancelSubscription: sinon.stub().callsArgWith(1)
@@ -258,18 +258,22 @@ describe "SubscriptionController sanboxed", ->
 	describe "createSubscription", ->
 		beforeEach (done)->
 			@res =
-				redirect:->
+				send:->
 					done()
-			sinon.spy @res, "redirect"
-			@req.body.recurly_token = "1234"
+			sinon.spy @res, "send"
+			@subscriptionDetails =
+				card:"1234"
+				cvv:"123"
+			@req.body.recurly_token_id = "1234"
+			@req.body.subscriptionDetails = @subscriptionDetails
 			@SubscriptionController.createSubscription @req, @res
 
 		it "should send the user and subscriptionId to the handler", (done)->
-			@SubscriptionHandler.createSubscription.calledWith(@user, @req.body.recurly_token).should.equal true
+			@SubscriptionHandler.createSubscription.calledWith(@user, @subscriptionDetails, @req.body.recurly_token_id).should.equal true
 			done()
 
 		it "should redurect to the subscription page", (done)->
-			@res.redirect.calledWith("/user/subscription/thank-you").should.equal true
+			@res.send.calledWith(201).should.equal true
 			done()
 
 

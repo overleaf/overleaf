@@ -14,6 +14,7 @@ module.exports =
 		self = @
 		clientTokenId = ""
 		RecurlyWrapper.createSubscription user, subscriptionDetails, recurly_token_id, (error, recurlySubscription)->
+			console.log recurlySubscription
 			return callback(error) if error?
 			SubscriptionUpdater.syncSubscription recurlySubscription, user._id, (error) ->
 				return callback(error) if error?

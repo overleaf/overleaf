@@ -82,7 +82,9 @@ define [
 							plan_code:"student"
 					$http.post("/user/subscription/create", postData)
 					.success ->
-						console.log "success"
+						window.location.href = "/user/subscription/thank-you"
+					.error ()->
+						console.log "something went wong"
 
 		$scope.submit = ->
 			if $scope.paymentMethod == 'paypal'
