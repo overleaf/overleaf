@@ -46,7 +46,7 @@ block content
 										h2.pull-right {{price}}
 										span.pull-right every {{billingCycleType}}
 
-								input(type='text', data-recurly='coupon')
+								input(type='text', ng-blur="applyCoupon()", ng-model="data.coupon")
 
 
 

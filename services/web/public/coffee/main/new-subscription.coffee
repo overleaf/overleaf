@@ -8,12 +8,11 @@ define [
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
 
-		$scope.changeCurrency = (newCurrency)->
-			$scope.currencyCode = newCurrency
-			updatePlan()
+
 
 		$scope.switchToStudent = ()->
 			window.location = "/user/subscription/new?planCode=student&currency=#{$scope.currencyCode}"
+
 
 		__api_key = recurlyCreds.apiKey
 		configured = false
@@ -37,11 +36,14 @@ define [
 
 		$scope.planName = "no yet set"
 		
-		updatePlan = ->
-			pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
+		pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
 
-		updatePlan()
+		$scope.applyCoupon = ->
+			pricing.coupon($scope.data.coupon).done()
 
+		$scope.changeCurrency = (newCurrency)->
+			$scope.currencyCode = newCurrency
+			pricing.currency(newCurrency).done()
 
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
