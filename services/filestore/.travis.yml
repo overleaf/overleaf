@@ -12,6 +12,7 @@ install:
 
 script:
     - grunt test:unit
+    - grunt test:acceptance
 
 services:
     - redis-server
