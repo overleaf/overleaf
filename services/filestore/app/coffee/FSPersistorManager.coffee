@@ -59,13 +59,16 @@ module.exports =
     filteredName = filterName name
     logger.log location:location, name:filteredName, "delete file"
     fs.unlink "#{location}/#{filteredName}", (err) ->
-      logger.err err:err, location:location, name:filteredName, "Error on delete."
-      callback err
+      if err?
+        logger.err err:err, location:location, name:filteredName, "Error on delete."
+        callback err
+      else
+        callback()
 
   deleteDirectory: (location, name, callback = (err)->)->
     filteredName = filterName name.replace(/\/$/,'')
     rimraf "#{location}/#{filteredName}", (err) ->
-      if err
+      if err?
         logger.err err:err, location:location, name:filteredName, "Error on rimraf rmdir."
         callback err
       else
