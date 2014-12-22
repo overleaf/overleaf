@@ -47,55 +47,60 @@ block content
 										span.pull-right every {{billingCycleType}}
 								hr
 
-
-
-
-
 								.row
 									.col-md-12
 										.form-group
-											div(ng-hide="validation.correctCvv") invalid cvv
-											div(ng-hide="validation.correctCardNumber") invalid card number
-									.col-md-9
-										.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
-											input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder='Credit Card Number')
-									.col-md-3
-										.form-group(ng-class="validation.correctCvv ? '' : 'has-error' ")
-											input.form-control(ng-model='data.cvv', ng-blur="validateCvv()")
-								.row
-									div(ng-hide="validation.correctExpiry") invalid expiry
-									.col-md-5
-										.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-											label #{translate("month")}
-											select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
-												option(value="01") 01 January
-												option(value="02") 02 February
-												option(value="03") 03 March
-												option(value="04") 04 April
-												option(value="05") 05 May
-												option(value="06") 06 June
-												option(value="07") 07 July
-												option(value="08") 08 August
-												option(value="09") 09 September
-												option(value="10") 10 October
-												option(value="11") 11 November
-												option(value="12") 12 December
-									.col-md-5
-										.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-											label #{translate("year")}
-											select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
-												option(value="2015") 2015
-												option(value="2016") 2016
-												option(value="2017") 2017
-												option(value="2018") 2018
-												option(value="2019") 2019
-												option(value="2020") 2020
-												option(value="2021") 2021
-												option(value="2022") 2022
-												option(value="2023") 2023
-												option(value="2024") 2024
-												option(value="2025") 2025
-												option(value="2026") 2026
+											label.radio-inline Credit Card
+												input(type="radio",value="credit_card", ng-model="paymentMethod")
+											label.radio-inline Paypal
+												input(type="radio", value="paypal", ng-model="paymentMethod")
+
+								.div(ng-hide="paymentMethod == 'paypal'")
+									.row
+										.col-md-12
+											.form-group
+												div(ng-hide="validation.correctCvv") invalid cvv
+												div(ng-hide="validation.correctCardNumber") invalid card number
+										.col-md-9
+											.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
+												input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder='Credit Card Number')
+										.col-md-3
+											.form-group(ng-class="validation.correctCvv ? '' : 'has-error' ")
+												input.form-control(ng-model='data.cvv', ng-blur="validateCvv()")
+									.row
+										div(ng-hide="validation.correctExpiry") invalid expiry
+										.col-md-5
+											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
+												label #{translate("month")}
+												select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+													option(value="01") 01 January
+													option(value="02") 02 February
+													option(value="03") 03 March
+													option(value="04") 04 April
+													option(value="05") 05 May
+													option(value="06") 06 June
+													option(value="07") 07 July
+													option(value="08") 08 August
+													option(value="09") 09 September
+													option(value="10") 10 October
+													option(value="11") 11 November
+													option(value="12") 12 December
+										.col-md-5
+											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
+												label #{translate("year")}
+												select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+													option(value="2015") 2015
+													option(value="2016") 2016
+													option(value="2017") 2017
+													option(value="2018") 2018
+													option(value="2019") 2019
+													option(value="2020") 2020
+													option(value="2021") 2021
+													option(value="2022") 2022
+													option(value="2023") 2023
+													option(value="2024") 2024
+													option(value="2025") 2025
+													option(value="2026") 2026
 								.row
 									.col-md-6
 										.form-group

@@ -13,6 +13,8 @@ define [
 
 		__api_key = recurlyCreds.apiKey
 
+		$scope.paymentMethod = "credit_card"
+
 		$scope.data =
 			number: "4111111111111111"
 			month: "02"
@@ -38,6 +40,14 @@ define [
 
 		pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
 
+
+		pricing.on "change", =>
+			$scope.planName = pricing.items.plan.name
+			$scope.price = pricing.price.currency.symbol+pricing.price.next.total
+			$scope.trialLength = pricing.items.plan.trial.length
+			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
+			$scope.$apply()
+
 		$scope.applyCoupon = ->
 			pricing.coupon($scope.data.coupon).done()
 
@@ -54,16 +64,13 @@ define [
 		$scope.validateCvv = ->
 			$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
-		pricing.on "change", =>
-			$scope.planName = pricing.items.plan.name
-			$scope.price = pricing.price.currency.symbol+pricing.price.next.total
-			$scope.trialLength = pricing.items.plan.trial.length
-			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
-			$scope.$apply()
+		$scope.changePaymentMethod = (paymentMethod)->
+			if paymentMethod == "paypal"
+				$scope.usePaypal = true
+			else
+				$scope.usePaypal = false
 
-		$scope.submit = ->
-			$scope.error = ""
-			recurly.token $scope.data, (err, recurly_token_id) ->
+		completeSubscription = (err, recurly_token_id) ->
 				if err
 					$scope.error = err.message
 				else
@@ -76,5 +83,13 @@ define [
 					$http.post("/user/subscription/create", postData)
 					.success ->
 						console.log "success"
+
+		$scope.submit = ->
+			if $scope.paymentMethod == 'paypal'
+				opts = { description: $scope.planName }
+				recurly.paypal opts, completeSubscription
+			else
+				recurly.token $scope.data, completeSubscription
+
 
 
