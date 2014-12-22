@@ -53,6 +53,8 @@ module.exports =
     targetStream.on 'error', (err) ->
       logger.err err:err, location:location, key:filteredToName, "Error writing to file"
       callback err
+    targetStream.on 'finish', () ->
+      callback null
     sourceStream.pipe targetStream
 
   deleteFile: (location, name, callback)->
