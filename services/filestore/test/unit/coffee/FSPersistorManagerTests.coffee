@@ -74,8 +74,8 @@ describe "FSPersistorManagerTests", ->
         on:->
       )
       @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
-        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
-        done()
+      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
+      done()
 
   describe "copyFile", ->
     beforeEach ->
