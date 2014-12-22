@@ -8,16 +8,11 @@ define [
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
 
-
-
 		$scope.switchToStudent = ()->
 			window.location = "/user/subscription/new?planCode=student&currency=#{$scope.currencyCode}"
 
-
 		__api_key = recurlyCreds.apiKey
-		configured = false
-		$scope.error = false
-		$scope.token = false
+
 		$scope.data =
 			number: "4111111111111111"
 			month: "02"
@@ -29,13 +24,17 @@ define [
 			address1 : "7 somewhere"
 			city:"london"
 			country:"GB"
+
+		$scope.validation =
+			correctCardNumber : true
+			correctExpiry: true
+			correctCvv:true
+
 		recurly.configure __api_key
+
 		pricing = recurly.Pricing()
-		#pricing.attach(document.querySelector('#pricing'))
 		window.pricing = pricing
 
-		$scope.planName = "no yet set"
-		
 		pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
 
 		$scope.applyCoupon = ->
@@ -44,6 +43,15 @@ define [
 		$scope.changeCurrency = (newCurrency)->
 			$scope.currencyCode = newCurrency
 			pricing.currency(newCurrency).done()
+
+		$scope.validateCardNumber = ->
+			$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
+
+		$scope.validateExpiry = ->
+			$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
+
+		$scope.validateCvv = ->
+			$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
