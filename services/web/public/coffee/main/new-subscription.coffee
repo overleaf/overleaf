@@ -22,6 +22,7 @@ define [
 			last_name: "o"
 			postal_code: "se153tt"
 			address1 : "7 somewhere"
+			address2 : "7 somewhere"
 			city:"london"
 			country:"GB"
 
