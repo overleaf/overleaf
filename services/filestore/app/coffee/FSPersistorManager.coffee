@@ -2,6 +2,7 @@ logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
 rimraf = require("rimraf")
+response = require ("response")
 
 filterName = (key) ->
   return key.replace /\//g, "_"
@@ -32,8 +33,12 @@ module.exports =
     sourceStream = fs.createReadStream "#{location}/#{filteredName}"
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
-      callback err
-    callback null,sourceStream
+      if err.code = 'ENOENT'
+        callback null, response().html('NoSuchKey: file not found\n')
+      else
+        callback err
+    sourceStream.on 'readable', () ->
+      callback null, sourceStream
 
 
   copyFile: (location, fromName, toName, callback = (err)->)->
