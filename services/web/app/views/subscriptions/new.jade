@@ -35,10 +35,25 @@ block content
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
 							hr
+
 							form
+
+								.row
+									.col-md-9
+										h2 {{planName}}
+										span First {{trialLength}} days free
+									.col-md-3
+										h2.pull-right {{price}}
+										span.pull-right every {{billingCycleType}}
+
+								input(type='text', data-recurly='coupon')
+
+
+
+
 								.form-group
 									input.form-control.input-lg-1(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='number', ng-model='data.number', placeholder='Credit Card Number')
-									input.form-control.input-lg-1(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='cvv', ng-model='data.cvv')		
+									input.form-control.input-lg-1(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly='cvv', ng-model='data.cvv')
 								.form-group
 									label #{translate("month")}
 									select.form-control(data-recurly='month', ng-model='data.month')
@@ -71,23 +86,23 @@ block content
 										option(value="2026") 2026
 								.form-group
 									label #{translate("first_name")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name")								
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name")
 								.form-group
 									label #{translate("last_name")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name")		
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name")
 								.form-group
 									label #{translate("address")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="address1", ng-model="data.address1")		
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="address1", ng-model="data.address1")
 								.form-group
 									label #{translate("city")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city")		
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city")
 								.form-group
 									label #{translate("country")}
 									select.form-control(data-recurly="country", ng-model="data.country")
 										mixin countries_options()
 								.form-group
 									label #{translate("country")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code")		
+									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code")
 																																							
 								.form-group
 									button.btn.btn-success(ng-click="submit()") #{translate("submit")} 						

@@ -3,12 +3,14 @@ define [
 ], (App)->
 
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http)->
+		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 	
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
 
 		$scope.changeCurrency = (newCurrency)->
-			window.location = "/user/subscription/new?planCode=#{window.plan_code}&currency=#{newCurrency}"
+			$scope.currencyCode = newCurrency
+			updatePlan()
 
 		$scope.switchToStudent = ()->
 			window.location = "/user/subscription/new?planCode=student&currency=#{$scope.currencyCode}"
@@ -28,16 +30,28 @@ define [
 			address1 : "7 somewhere"
 			city:"london"
 			country:"GB"
+		recurly.configure __api_key
+		pricing = recurly.Pricing()
+		#pricing.attach(document.querySelector('#pricing'))
+		window.pricing = pricing
+
+		$scope.planName = "no yet set"
+		
+		updatePlan = ->
+			pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
+
+		updatePlan()
 
 
+		pricing.on "change", =>
+			$scope.planName = pricing.items.plan.name
+			$scope.price = pricing.price.currency.symbol+pricing.price.next.total
+			$scope.trialLength = pricing.items.plan.trial.length
+			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
+			$scope.$apply()
 
 		$scope.submit = ->
-			throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
-			console.log $scope.data
 			$scope.error = ""
-			if !configured
-				recurly.configure __api_key
-				configured = true
 			recurly.token $scope.data, (err, recurly_token_id) ->
 				if err
 					$scope.error = err.message
