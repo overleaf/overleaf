@@ -37,6 +37,7 @@
     "grunt-contrib-watch": "0.5.3",
     "grunt-nodemon": "0.2.1",
     "grunt-contrib-clean": "0.5.0",
-    "grunt-concurrent": "0.4.2"
+    "grunt-concurrent": "0.4.2",
+    "grunt-forever": "~0.4.4"
   }
 }
