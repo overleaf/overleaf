@@ -1,18 +1,17 @@
 extends ../layout
 block scripts
 
+	script(src="https://js.recurly.com/v3/recurly.js")
 
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{currency}'
 		window.plan_code = '#{plan_code}'
-
 		window.recurlyCreds = { apiKey : "sc-GVdZOe7akgWbZRIFPllOx9", apiUrl:""}
 
 
 block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-	script(src="https://js.recurly.com/v3/recurly.js")
 
 
 	.content.content-alt
@@ -40,16 +39,18 @@ block content
 								.row
 									.col-md-9
 										h2 {{planName}}
-										span First {{trialLength}} days free
+										span !{translate("first_few_days_free", {trialLen:'{{trialLen}}'})}
+
+
 									.col-md-3
 										h2.pull-right {{price}}
-										span.pull-right every {{billingCycleType}}
+										span.pull-right #{translate("every")} {{billingCycleType}}
 								hr
 
 								.row
 									.col-md-12
 										.form-group
-											label.radio-inline Credit Card
+											label.radio-inline #{translate("credit_card")}
 												input(type="radio",value="credit_card", ng-model="paymentMethod")
 											label.radio-inline Paypal
 												input(type="radio", value="paypal", ng-model="paymentMethod")
@@ -61,32 +62,32 @@ block content
 									.row
 										.col-md-12
 											.form-group
-												div(ng-hide="validation.correctCvv") invalid cvv
-												div(ng-hide="validation.correctCardNumber") invalid card number
+												div(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
+												div(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
 										.col-md-9
 											.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
-												input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder='Credit Card Number')
+												input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
 										.col-md-3
 											.form-group(ng-class="validation.correctCvv ? '' : 'has-error' ")
-												input.form-control(ng-model='data.cvv', ng-blur="validateCvv()")
+												input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
 									.row
-										div(ng-hide="validation.correctExpiry") invalid expiry
+										div(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
 										.col-md-5
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
 												label #{translate("month")}
 												select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
-													option(value="01") 01 January
-													option(value="02") 02 February
-													option(value="03") 03 March
-													option(value="04") 04 April
-													option(value="05") 05 May
-													option(value="06") 06 June
-													option(value="07") 07 July
-													option(value="08") 08 August
-													option(value="09") 09 September
-													option(value="10") 10 October
-													option(value="11") 11 November
-													option(value="12") 12 December
+													option(value="01") 01 #{translate("january")}
+													option(value="02") 02 #{translate("february")}
+													option(value="03") 03 #{translate("march")}
+													option(value="04") 04 #{translate("april")}
+													option(value="05") 05 #{translate("may")}
+													option(value="06") 06 #{translate("june")}
+													option(value="07") 07 #{translate("july")}
+													option(value="08") 08 #{translate("august")}
+													option(value="09") 09 #{translate("september")}
+													option(value="10") 10 #{translate("october")}
+													option(value="11") 11 #{translate("november")}
+													option(value="12") 12 #{translate("december")}
 										.col-md-5
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
 												label #{translate("year")}
@@ -132,7 +133,7 @@ block content
 										mixin countries_options()
 												
 								.form-group
-									label #{translate("Coupon")}
+									label #{translate("coupon")}
 									input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon")
 
 								.form-group
@@ -198,7 +199,7 @@ block content
 
 
 mixin countries_options()
-	option(value='-') Select Country
+	option(value='-') #{translate("country")}
 	option(value='-') --------------
 	option(value='AF') Afghanistan
 	option(value='AL') Albania
