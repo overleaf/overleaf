@@ -113,9 +113,10 @@ port = settings.internal.filestore.port or 3009
 host = settings.internal.filestore.host or "localhost"
 
 beginShutdown = () ->
-	appIsOk = false
-	server.close()
-	logger.log "server will stop accepting connections"
+	if appIsOk
+		appIsOk = false
+		server.close()
+		logger.log "server will stop accepting connections"
 
 server.on "close", () ->
 	logger.log "closed all connections"
