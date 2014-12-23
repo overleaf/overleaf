@@ -6,7 +6,7 @@ block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{currency}'
 		window.plan_code = '#{plan_code}'
-		window.recurlyCreds = { apiKey : "sc-GVdZOe7akgWbZRIFPllOx9", apiUrl:""}
+		window.recurlyCreds = { apiKey : "sc-GVdZOe7akgWbZRIFPllOx9"}
 
 
 block content
@@ -64,7 +64,7 @@ block content
 											.form-group
 												div(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
 												div(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
-										.col-md-9
+										.col-md-7
 											.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
 												input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
 										.col-md-3
@@ -72,25 +72,23 @@ block content
 												input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
 									.row
 										div(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
-										.col-md-5
+										.col-md-2
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-												label #{translate("month")}
 												select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
-													option(value="01") 01 #{translate("january")}
-													option(value="02") 02 #{translate("february")}
-													option(value="03") 03 #{translate("march")}
-													option(value="04") 04 #{translate("april")}
-													option(value="05") 05 #{translate("may")}
-													option(value="06") 06 #{translate("june")}
-													option(value="07") 07 #{translate("july")}
-													option(value="08") 08 #{translate("august")}
-													option(value="09") 09 #{translate("september")}
-													option(value="10") 10 #{translate("october")}
-													option(value="11") 11 #{translate("november")}
-													option(value="12") 12 #{translate("december")}
-										.col-md-5
+													option(value="01") 01
+													option(value="02") 02
+													option(value="03") 03
+													option(value="04") 04
+													option(value="05") 05
+													option(value="06") 06
+													option(value="07") 07
+													option(value="08") 08
+													option(value="09") 09
+													option(value="10") 10
+													option(value="11") 11
+													option(value="12") 12
+										.col-md-3
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-												label #{translate("year")}
 												select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
 													option(value="2015") 2015
 													option(value="2016") 2016
