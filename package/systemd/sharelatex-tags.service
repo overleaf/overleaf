@@ -1,0 +1,16 @@
+[Unit]
+Description=ShareLatex tags service
+After=syslog.target network.target auditd.service redis.service
+
+[Service]
+User=sharelatex
+Group=sharelatex
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sharelatex-tags
+SyslogFacility=daemon
+Environment=SHARELATEX_CONFIG="/etc/sharelatex/settings.coffee" NODE_ENV=production PATH="/usr/local/texlive/2014/bin/x86_64-linux:${PATH}"
+ExecStart=/usr/bin/node /var/www/sharelatex/tags/app.js
+
+[Install]
+WantedBy=multi-user.target
