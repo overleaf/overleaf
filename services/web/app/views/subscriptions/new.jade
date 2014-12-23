@@ -37,7 +37,6 @@ block content
 							hr
 
 							form
-
 								.row
 									.col-md-9
 										h2 {{planName}}
@@ -54,6 +53,9 @@ block content
 												input(type="radio",value="credit_card", ng-model="paymentMethod")
 											label.radio-inline Paypal
 												input(type="radio", value="paypal", ng-model="paymentMethod")
+
+								.alert.alert-warning.small(ng-show="genericError")
+									strong {{genericError}}
 
 								.div(ng-hide="paymentMethod == 'paypal'")
 									.row
@@ -105,11 +107,11 @@ block content
 									.col-md-6
 										.form-group
 											label #{translate("first_name")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name")
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required)
 									.col-md-6
 										.form-group
 											label #{translate("last_name")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name")
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required)
 								.form-group
 									label #{translate("address")}
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1")
@@ -126,7 +128,7 @@ block content
 
 								.form-group
 									label #{translate("country")}
-									select.form-control(data-recurly="country", ng-model="data.country")
+									select.form-control(data-recurly="country", ng-model="data.country", required)
 										mixin countries_options()
 												
 								.form-group

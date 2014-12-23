@@ -71,20 +71,20 @@ define [
 				$scope.usePaypal = false
 
 		completeSubscription = (err, recurly_token_id) ->
-				if err
-					$scope.error = err.message
-				else
-					postData =
-						_csrf: window.csrfToken
-						recurly_token_id:recurly_token_id.id
-						subscriptionDetails:
-							currencyCode:"USD"
-							plan_code:"student"
-					$http.post("/user/subscription/create", postData)
-					.success ->
-						window.location.href = "/user/subscription/thank-you"
-					.error ()->
-						console.log "something went wong"
+			if err?
+				$scope.genericError = err.message
+			else
+				postData =
+					_csrf: window.csrfToken
+					recurly_token_id:recurly_token_id.id
+					subscriptionDetails:
+						currencyCode:"USD"
+						plan_code:"student"
+				$http.post("/user/subscription/create", postData)
+				.success (data, status, headers)->
+					window.location.href = "/user/subscription/thank-you"
+				.error (data, status, headers)->
+					$scope.genericError = "Something went wrong processing the request"
 
 		$scope.submit = ->
 			if $scope.paymentMethod == 'paypal'
