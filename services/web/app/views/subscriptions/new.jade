@@ -6,7 +6,7 @@ block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{currency}'
 		window.plan_code = '#{plan_code}'
-		window.recurlyCreds = { apiKey : "sc-GVdZOe7akgWbZRIFPllOx9"}
+		window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
 
 
 block content

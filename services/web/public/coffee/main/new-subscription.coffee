@@ -11,7 +11,6 @@ define [
 		$scope.switchToStudent = ()->
 			window.location = "/user/subscription/new?planCode=student&currency=#{$scope.currencyCode}"
 
-		__api_key = recurlyCreds.apiKey
 
 		$scope.paymentMethod = "credit_card"
 
@@ -33,7 +32,7 @@ define [
 			correctExpiry: true
 			correctCvv:true
 
-		recurly.configure __api_key
+		recurly.configure window.recurlyApiKey
 
 		pricing = recurly.Pricing()
 		window.pricing = pricing
