@@ -106,14 +106,18 @@ app.get "/health_check", (req, res)->
 app.get '*', (req, res)->
 	res.send 404
 
-serverDomain = domain.create()
-serverDomain.run ->
-	server = require('http').createServer(app)
-	port = settings.internal.filestore.port or 3009
-	host = settings.internal.filestore.host or "localhost"
-	server.listen port, host, ->
-		logger.log("filestore store listening on #{host}:#{port}")
+server = require('http').createServer(app)
+port = settings.internal.filestore.port or 3009
+host = settings.internal.filestore.host or "localhost"
 
-serverDomain.on "error", (err)->
-	logger.log err:err, "top level uncaught exception"
+beginShutdown = () ->
+	appIsOk = false
+	server.close()
+	logger.log "server will stop accepting connections"
 
+server.on "close", () ->
+	logger.log "closed all connections"
+	process.exit 1
+
+server.listen port, host, ->
+	logger.log("filestore store listening on #{host}:#{port}")
