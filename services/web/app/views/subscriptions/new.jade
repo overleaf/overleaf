@@ -33,9 +33,9 @@ block content
 											ng-click="changeCurrency(currency)",
 										) {{currency}} ({{value['symbol']}})
 							h1 #{translate("new_subscription")}
-							hr
 
-							form
+							form(ng-show="planName")
+								hr
 								.row
 									.col-md-9
 										h2 {{planName}}
