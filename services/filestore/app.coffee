@@ -37,26 +37,28 @@ app.use (req, res, next) ->
 	requestDomain.add req
 	requestDomain.add res
 	requestDomain.on "error", (err)->
-		# request a shutdown to prevent memory leaks
-		appIsOk = false
-		setTimeout(->
+		try
+			appIsOk = false
+			# request a shutdown to prevent memory leaks
+			beginShutdown()
 			if !res.headerSent
-				res.send(500)
-		, 3000)
-		logger = require('logger-sharelatex')
-		req =
-			body:req.body
-			headers:req.headers
-			url:req.url
-			key: req.key
-			statusCode: req.statusCode
-		err =
-			message: err.message
-			stack: err.stack
-			name: err.name
-			type: err.type
-			arguments: err.arguments
-		logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
+				res.send(500, "uncaught exception")
+			logger = require('logger-sharelatex')
+			req =
+				body:req.body
+				headers:req.headers
+				url:req.url
+				key: req.key
+				statusCode: req.statusCode
+			err =
+				message: err.message
+				stack: err.stack
+				name: err.name
+				type: err.type
+				arguments: err.arguments
+			logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
+		catch exception
+			logger.err err: exception, "exception in request domain handler"
 	requestDomain.run next
 
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
