@@ -9,7 +9,7 @@ StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=sharelatex-document-updater
 SyslogFacility=daemon
-Environment=SHARELATEX_CONFIG="/etc/sharelatex/settings.coffee" NODE_ENV=production PATH="/usr/local/texlive/2014/bin/x86_64-linux:${PATH}"
+EnvironmentFile=/etc/sharelatex/sharelatex
 ExecStart=/usr/bin/node /var/www/sharelatex/document-updater/app.js
 
 [Install]
