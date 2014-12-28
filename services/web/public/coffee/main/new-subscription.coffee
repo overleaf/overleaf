@@ -15,10 +15,10 @@ define [
 		$scope.paymentMethod = "credit_card"
 
 		$scope.data =
-			number: ""
+			number: undefined
 			month: undefined
 			year: undefined
-			cvv: ""
+			cvv: undefined
 			first_name: ""
 			last_name: ""
 			postal_code: ""
@@ -57,14 +57,16 @@ define [
 			pricing.currency(newCurrency).done()
 
 		$scope.validateCardNumber = ->
-			$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
+			if $scope.data.number?
+				$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
 
 		$scope.validateExpiry = ->
 			if $scope.data.month? and $scope.data.year?
 				$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
 
 		$scope.validateCvv = ->
-			$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
+			if $scope.data.cvv?
+				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		$scope.changePaymentMethod = (paymentMethod)->
 			if paymentMethod == "paypal"
