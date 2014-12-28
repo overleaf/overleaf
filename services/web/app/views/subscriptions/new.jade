@@ -52,12 +52,12 @@ block content
 													.row
 														.col-md-6
 															label.radio-inline
-																img(src="/recurly/images/credit_cards/visa_mastercard.png")
 																input(type="radio",value="credit_card", ng-model="paymentMethod")
-														.col-md-4
+															img(src="/recurly/images/credit_cards/visa_mastercard.png")
+														.col-md-6
 															label.radio-inline
-																img(src="/recurly/images/paypal_logo.png")
 																input(type="radio", value="paypal", ng-model="paymentMethod")
+															img(src="/recurly/images/paypal_large.png")
 
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
