@@ -126,13 +126,13 @@ block content
 												.form-group
 													input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2")
 										.row
-											.col-md-8
+											.col-md-7
 												.form-group
 													input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
-											.col-md-4
+											.col-md-5
 													input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
 										.row
-											.col-md-8
+											.col-md-7
 												.form-group
 													select.form-control(data-recurly="country", ng-model="data.country", required)
 														mixin countries_options()
