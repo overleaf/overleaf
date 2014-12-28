@@ -16,8 +16,8 @@ define [
 
 		$scope.data =
 			number: ""
-			month: ""
-			year: ""
+			month: undefined
+			year: undefined
 			cvv: ""
 			first_name: ""
 			last_name: ""
@@ -60,7 +60,8 @@ define [
 			$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
 
 		$scope.validateExpiry = ->
-			$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
+			if $scope.data.month? and $scope.data.year?
+				$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
 
 		$scope.validateCvv = ->
 			$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
