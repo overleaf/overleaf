@@ -20,31 +20,28 @@ block content
 				.col-md-6.col-md-push-3
 					.card.card-highlighted
 						.page-header
-							span.dropdown.changePlanButton.pull-right(ng-cloak)
-								a.btn.btn-default.dropdown-toggle(
-									href="#",
-									data-toggle="dropdown"
-								)
-									| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
-									span.caret
-								ul.dropdown-menu(role="menu")
-									li(ng-repeat="(currency, value) in plans", dropdown-toggle)
-										a(
-											ng-click="changeCurrency(currency)",
-										) {{currency}} ({{value['symbol']}})
-							h1 #{translate("new_subscription")}
-
+							.row
+								.col-md-9
+									h2 {{planName}}
+									div !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+									div #{translate("every")} {{billingCycleType}}
+								.col-md-3
+									div.dropdown.changePlanButton.pull-right(ng-cloak)
+										a.btn.btn-default.dropdown-toggle(
+											href="#",
+											data-toggle="dropdown"
+										)
+											| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
+											span.caret
+										ul.dropdown-menu(role="menu")
+											li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+												a(
+													ng-click="changeCurrency(currency)",
+												) {{currency}} ({{value['symbol']}})
+									div .&nbsp;
+									h2.pull-right {{price}}
 							form(ng-show="planName")
-								hr
-								.row
-									.col-md-9
-										h2 {{planName}}
-										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
-
-
-									.col-md-3
-										h2.pull-right {{price}}
-										span.pull-right #{translate("every")} {{billingCycleType}}
+								
 								hr
 
 								.row
@@ -70,7 +67,7 @@ block content
 											.form-group
 												div(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
 												div(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
-										.col-md-7
+										.col-md-5
 											.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
 												input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
 										.col-md-3
@@ -111,31 +108,36 @@ block content
 													option(value="2025") 2025
 													option(value="2026") 2026
 								.row
-									.col-md-6
+									.col-md-4
 										.form-group
 											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
-									.col-md-6
+									.col-md-4
 										.form-group
 											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
 								hr
-								.form-group
-									label #{translate("billing_address")}
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1")
-								.form-group
-									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2")
 								.row
 									.col-md-8
+										.form-group
+											label #{translate("billing_address")}
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1")
+										.form-group
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2")
+								.row
+									.col-md-4
 										.form-group
 											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
 									.col-md-4
 											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
-
-								.form-group
-									select.form-control(data-recurly="country", ng-model="data.country", required)
-										mixin countries_options()
-								if showCouponField == 'true'
-									.form-group
-										input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
+								.row
+									.col-md-8
+										.form-group
+											select.form-control(data-recurly="country", ng-model="data.country", required)
+												mixin countries_options()
+								.row
+									.col-md-8
+										if showCouponField == 'true'
+											.form-group
+												input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 
 								.form-group
 									button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 						
@@ -200,7 +202,7 @@ block content
 
 
 mixin countries_options()
-	option(value='-', disabled, selected) #{translate("country")}
+	option(value='', disabled, selected) #{translate("country")}
 	option(value='-') --------------
 	option(value='AF') Afghanistan
 	option(value='AL') Albania
