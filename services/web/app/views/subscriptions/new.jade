@@ -39,7 +39,7 @@ block content
 								.row
 									.col-md-9
 										h2 {{planName}}
-										span !{translate("first_few_days_free", {trialLen:'{{trialLen}}'})}
+										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 
 
 									.col-md-3
@@ -50,10 +50,16 @@ block content
 								.row
 									.col-md-12
 										.form-group
-											label.radio-inline #{translate("credit_card")}
-												input(type="radio",value="credit_card", ng-model="paymentMethod")
-											label.radio-inline Paypal
-												input(type="radio", value="paypal", ng-model="paymentMethod")
+											.row
+												.col-md-3
+													label.radio-inline
+														img(src="/recurly/images/credit_cards/mastercard.png")
+														img(src="/recurly/images/credit_cards/visa.png")
+														input(type="radio",value="credit_card", ng-model="paymentMethod")
+												.col-md-4
+													label.radio-inline
+														img(src="/recurly/images/paypal_logo.png")
+														input(type="radio", value="paypal", ng-model="paymentMethod")
 
 								.alert.alert-warning.small(ng-show="genericError")
 									strong {{genericError}}
@@ -74,7 +80,8 @@ block content
 										div(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
 										.col-md-2
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-												select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+												select(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+													option(value="", disabled, selected) Month
 													option(value="01") 01
 													option(value="02") 02
 													option(value="03") 03
@@ -89,7 +96,8 @@ block content
 													option(value="12") 12
 										.col-md-3
 											.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-												select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+												select(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+													option(value="", disabled, selected) Year
 													option(value="2015") 2015
 													option(value="2016") 2016
 													option(value="2017") 2017
@@ -105,37 +113,32 @@ block content
 								.row
 									.col-md-6
 										.form-group
-											label #{translate("first_name")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required)
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
 									.col-md-6
 										.form-group
-											label #{translate("last_name")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required)
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
+								hr
 								.form-group
-									label #{translate("address")}
+									label #{translate("billing_address")}
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1")
 								.form-group
 									input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2")
 								.row
 									.col-md-8
 										.form-group
-											label #{translate("city")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city")
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
 									.col-md-4
-											label #{translate("zip_post_code")}
-											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code")
+											input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
 
 								.form-group
-									label #{translate("country")}
 									select.form-control(data-recurly="country", ng-model="data.country", required)
 										mixin countries_options()
-												
 								if showCouponField == 'true'
 									.form-group
 										input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 
 								.form-group
-									button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("submit")} 						
+									button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 						
 
 
 
@@ -197,7 +200,7 @@ block content
 
 
 mixin countries_options()
-	option(value='-') #{translate("country")}
+	option(value='-', disabled, selected) #{translate("country")}
 	option(value='-') --------------
 	option(value='AF') Afghanistan
 	option(value='AL') Albania
