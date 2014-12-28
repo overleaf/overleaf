@@ -61,6 +61,7 @@ module.exports = SubscriptionController =
 								recurlyConfig: JSON.stringify
 									currency: currency
 									subdomain: Settings.apis.recurly.subdomain
+								showCouponField:req.query.scf
 								subscriptionFormOptions: JSON.stringify
 									acceptedCards: ['discover', 'mastercard', 'visa']
 									target      : "#subscribeForm"

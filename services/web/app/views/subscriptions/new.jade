@@ -130,9 +130,9 @@ block content
 									select.form-control(data-recurly="country", ng-model="data.country", required)
 										mixin countries_options()
 												
-								.form-group
-									label #{translate("coupon")}
-									input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon")
+								if showCouponField == 'true'
+									.form-group
+										input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 
 								.form-group
 									button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("submit")} 						
