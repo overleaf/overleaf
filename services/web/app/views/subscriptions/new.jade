@@ -52,17 +52,17 @@ block content
 													.row
 														.col-md-6
 															label.radio-inline
-																input(type="radio",value="credit_card", ng-model="paymentMethod")
-															img(src="/recurly/images/credit_cards/visa_mastercard.png")
+																input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod")
+																img(src="/recurly/images/credit_cards/visa_mastercard.png")
 														.col-md-6
 															label.radio-inline
-																input(type="radio", value="paypal", ng-model="paymentMethod")
-															img(src="/recurly/images/paypal_large.png")
+																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
+																img(src="/recurly/images/paypal_large.png")
 
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
-										.div(ng-hide="paymentMethod == 'paypal'")
+										span(ng-hide="paymentMethod == 'paypal'")
 											.row
 												.col-md-12
 													.form-group
