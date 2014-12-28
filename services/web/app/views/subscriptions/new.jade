@@ -135,7 +135,7 @@ block content
 									input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon")
 
 								.form-group
-									button.btn.btn-success(ng-click="submit()") #{translate("submit")} 						
+									button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("submit")} 						
 
 
 

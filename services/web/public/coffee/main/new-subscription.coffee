@@ -15,22 +15,24 @@ define [
 		$scope.paymentMethod = "credit_card"
 
 		$scope.data =
-			number: "4111111111111111"
-			month: "02"
-			year: "2015"
-			cvv: "111"
-			first_name: "h"
-			last_name: "o"
-			postal_code: "se153tt"
-			address1 : "7 somewhere"
-			address2 : "7 somewhere"
-			city:"london"
-			country:"GB"
+			number: ""
+			month: ""
+			year: ""
+			cvv: ""
+			first_name: ""
+			last_name: ""
+			postal_code: ""
+			address1 : ""
+			address2 : ""
+			city:""
+			country:""
 
 		$scope.validation =
 			correctCardNumber : true
 			correctExpiry: true
 			correctCvv:true
+
+		$scope.processing = false
 
 		recurly.configure window.recurlyApiKey
 
@@ -77,15 +79,17 @@ define [
 					_csrf: window.csrfToken
 					recurly_token_id:recurly_token_id.id
 					subscriptionDetails:
-						currencyCode:"USD"
-						plan_code:"student"
+						currencyCode:pricing.items.currency
+						plan_code:pricing.items.plan.code
 				$http.post("/user/subscription/create", postData)
 				.success (data, status, headers)->
 					window.location.href = "/user/subscription/thank-you"
 				.error (data, status, headers)->
+					$scope.processing = false
 					$scope.genericError = "Something went wrong processing the request"
 
 		$scope.submit = ->
+			$scope.processing = true
 			if $scope.paymentMethod == 'paypal'
 				opts = { description: $scope.planName }
 				recurly.paypal opts, completeSubscription
