@@ -76,7 +76,8 @@ block content
 													.form-group(ng-class="validation.correctCvv ? '' : 'has-error' ")
 														input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
 											.row
-												div(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
+												.col-md-12
+													div(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
 												.col-md-2
 													.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
 														select(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
@@ -142,7 +143,8 @@ block content
 														input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 
 										.form-group
-											button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 						
+											button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
+										.alert.alert-info.small This is a secure 128-bit SSL encrypted payment. Your safe.					
 
 
 
