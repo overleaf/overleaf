@@ -49,5 +49,5 @@ describe "UserDeleter", ->
 
 		it "should unsubscribe the user", (done)->
 			@UserDeleter.deleteUser @user._id, (err)=>
-				@SubscriptionHandler.cancelSubscription.calledWith(@user._id).should.equal true
+				@SubscriptionHandler.cancelSubscription.calledWith(@user).should.equal true
 				done()

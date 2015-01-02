@@ -21,7 +21,7 @@ module.exports =
 				(cb)->
 					ProjectDeleter.deleteUsersProjects user._id, cb
 				(cb)->
-					SubscriptionHandler.cancelSubscription user._id, cb
+					SubscriptionHandler.cancelSubscription user, cb
 				(cb)->
 					user.remove cb
 			], (err)->
