@@ -61,14 +61,14 @@ app.use (req, res, next) ->
 			logger.err err: exception, "exception in request domain handler"
 	requestDomain.run next
 
-app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
-app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
-
 app.use (req, res, next) ->
 	if not appIsOk
 		# when shutting down, close any HTTP keep-alive connections
 		res.set 'Connection', 'close'
 	next()
+
+app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
+app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
 
 app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.copyFile
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
