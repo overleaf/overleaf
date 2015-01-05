@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.util;
 
+import uk.ac.ic.wlgitbridge.application.SSLConfig;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -10,6 +12,8 @@ public class Util {
 
     private static String SERVICE_NAME;
     private static String HOSTNAME;
+    private static SSLConfig SSL_CONFIG;
+    private static int PORT;
 
     public static String entries(int entries) {
         if (entries == 1) {
@@ -71,6 +75,22 @@ public class Util {
 
     public static String getHostname() {
         return HOSTNAME;
+    }
+
+    public static SSLConfig getSSLConfig() {
+        return SSL_CONFIG;
+    }
+
+    public static void setSSL(SSLConfig ssl) {
+        SSL_CONFIG = ssl;
+    }
+
+    public static int getPort() {
+        return PORT;
+    }
+
+    public static void setPort(int port) {
+        PORT = port;
     }
 
 }

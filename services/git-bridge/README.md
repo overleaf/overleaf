@@ -29,11 +29,14 @@ The configuration file is in `.json` format. There is an example at `bin/config.
     {
         "port" (int): the port number,
         "rootGitDirectory" (string): the directory in which to store git repos and the db/atts,
-        "apiKey" (string): currently does nothing,
         "apiBaseUrl" (string): base url for the snapshot api,
         "username" (string, optional): username for http basic auth,
         "password" (string, optional): password for http basic auth,
-        "serviceName" (string): current name of writeLaTeX in case it ever changes ;)
+        "serviceName" (string): current name of writeLaTeX in case it ever changes,
+        "hostname": (string): the public hostname of the server, for postback,
+        "ssl": { (object): ssl configuration
+            "enabled": (boolean): decides on http or https for the postback url
+        }
     }
 
 You have to restart the server for configuration changes to take effect.

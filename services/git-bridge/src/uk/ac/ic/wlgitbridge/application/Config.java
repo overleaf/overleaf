@@ -22,6 +22,7 @@ public class Config implements JSONSource {
     private String apiBaseURL;
     private String serviceName;
     private String hostname;
+    private SSLConfig ssl;
 
     public Config(String configFilePath) throws InvalidConfigFileException, IOException {
         try {
@@ -45,6 +46,7 @@ public class Config implements JSONSource {
         this.apiBaseURL = apiBaseURL;
         serviceName = getElement(configObject, "serviceName").getAsString();
         hostname = getOptionalString(configObject, "hostname");
+        ssl = new SSLConfig(getElement(configObject, "ssl").getAsJsonObject());
     }
 
     public int getPort() {
@@ -89,6 +91,10 @@ public class Config implements JSONSource {
 
     public String getHostname() {
         return hostname;
+    }
+
+    public SSLConfig getSSL() {
+        return ssl;
     }
 
 }

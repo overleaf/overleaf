@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLProject;
@@ -24,7 +25,12 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, String postbackKey, CandidateSnapshotCallback callback) {
         previousVersionID = project.getLatestSnapshotID();
         projectName = project.getName();
-        projectURL = "http://" + hostname + "/" + projectName;
+        String protocol = "http";
+        if (Util.getSSLConfig().isEnabled()) {
+            protocol += "s";
+        }
+        projectURL = protocol + "://" + hostname + ":" + Util.getPort() + "/" + projectName;
+
         this.directoryNode = directoryNode;
         this.postbackKey = postbackKey;
         this.callback = callback;
