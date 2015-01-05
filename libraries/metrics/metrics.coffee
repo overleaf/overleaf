@@ -6,9 +6,14 @@ hostname = require('os').hostname()
 
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 
+destructors = []
+
 module.exports =
 	initialize: (_name) ->
 		name = _name
+
+	registerDestructor: (func) ->
+		destructors.push func
 
 	set : (key, value, sampleRate = 1)->
 		statsd.set buildKey(key), value, sampleRate
@@ -35,3 +40,7 @@ module.exports =
 	http: require "./http"
 	open_sockets: require "./open_sockets"
 
+	close: () ->
+		for func in destructors
+			func()
+		statsd.close()
