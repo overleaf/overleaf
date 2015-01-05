@@ -7,6 +7,7 @@ import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,7 +26,11 @@ public class WLReceivePackFactory implements ReceivePackFactory<HttpServletReque
     @Override
     public ReceivePack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
         ReceivePack receivePack = new ReceivePack(repository);
-        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource, httpServletRequest.getLocalName()));
+        String hostname = Util.getHostname();
+        if (hostname == null) {
+            hostname = httpServletRequest.getLocalName();
+        }
+        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource, hostname));
         return receivePack;
     }
 

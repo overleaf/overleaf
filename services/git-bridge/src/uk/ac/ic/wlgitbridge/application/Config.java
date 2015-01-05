@@ -17,11 +17,11 @@ public class Config implements JSONSource {
 
     private int port;
     private String rootGitDirectory;
-    private String apiKey;
     private String username;
     private String password;
     private String apiBaseURL;
     private String serviceName;
+    private String hostname;
 
     public Config(String configFilePath) throws InvalidConfigFileException, IOException {
         try {
@@ -36,7 +36,6 @@ public class Config implements JSONSource {
         JsonObject configObject = json.getAsJsonObject();
         port = getElement(configObject, "port").getAsInt();
         rootGitDirectory = getElement(configObject, "rootGitDirectory").getAsString();
-        apiKey = getElement(configObject, "apiKey").getAsString();
         username = getOptionalString(configObject, "username");
         password = getOptionalString(configObject, "password");
         String apiBaseURL = getElement(configObject, "apiBaseUrl").getAsString();
@@ -45,6 +44,7 @@ public class Config implements JSONSource {
         }
         this.apiBaseURL = apiBaseURL;
         serviceName = getElement(configObject, "serviceName").getAsString();
+        hostname = getOptionalString(configObject, "hostname");
     }
 
     public int getPort() {
@@ -53,10 +53,6 @@ public class Config implements JSONSource {
 
     public String getRootGitDirectory() {
         return rootGitDirectory;
-    }
-
-    public String getAPIKey() {
-        return apiKey;
     }
 
     public String getUsername() {
@@ -89,6 +85,10 @@ public class Config implements JSONSource {
 
     public String getServiceName() {
         return serviceName;
+    }
+
+    public String getHostname() {
+        return hostname;
     }
 
 }

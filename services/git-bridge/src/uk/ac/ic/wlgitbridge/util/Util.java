@@ -9,6 +9,7 @@ import java.io.IOException;
 public class Util {
 
     private static String SERVICE_NAME;
+    private static String HOSTNAME;
 
     public static String entries(int entries) {
         if (entries == 1) {
@@ -62,6 +63,14 @@ public class Util {
 
     public static String getServiceName() {
         return SERVICE_NAME;
+    }
+
+    public static void setHostname(String hostname) {
+        HOSTNAME = hostname;
+    }
+
+    public static String getHostname() {
+        return HOSTNAME;
     }
 
 }

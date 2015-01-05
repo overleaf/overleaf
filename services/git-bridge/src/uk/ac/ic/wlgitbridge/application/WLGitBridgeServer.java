@@ -38,10 +38,9 @@ public class WLGitBridgeServer {
      * Constructs an instance of the server.
      * @param port the port number to listen on
      * @param rootGitDirectoryPath the root directory path containing the git repositories
-     * @param apiKey
      * @throws ServletException if the servlet throws an exception
      */
-    private WLGitBridgeServer(final int port, String rootGitDirectoryPath, String apiKey) throws ServletException, InvalidRootDirectoryPathException {
+    private WLGitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
         this.port = port;
         this.rootGitDirectoryPath = rootGitDirectoryPath;
         Log.setLog(new NullLogger());
@@ -50,11 +49,12 @@ public class WLGitBridgeServer {
     }
 
     public WLGitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
-        this(config.getPort(), config.getRootGitDirectory(), config.getAPIKey());
+        this(config.getPort(), config.getRootGitDirectory());
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
         writeLatexHostname = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(writeLatexHostname);
         Util.setServiceName(config.getServiceName());
+        Util.setHostname(config.getHostname());
     }
 
     /**
@@ -64,7 +64,8 @@ public class WLGitBridgeServer {
         try {
             jettyServer.start();
             System.out.println();
-            System.out.println("WriteLatex-Git Bridge server started");
+            System.out.println(Util.getServiceName() + "-Git Bridge server started");
+            System.out.println("Hostname: " + Util.getHostname());
             System.out.println("Listening on port: " + port);
             System.out.println("Bridged to: " + writeLatexHostname);
             System.out.println("Root git directory path: " + rootGitDirectoryPath);
