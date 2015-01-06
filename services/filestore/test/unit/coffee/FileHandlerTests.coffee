@@ -69,6 +69,7 @@ describe "FileHandler", ->
 		beforeEach ->
 			@keyBuilder.getConvertedFolderKey.returns(@stubbedConvetedKey)
 			@PersistorManager.deleteFile.callsArgWith(2)
+			@PersistorManager.deleteDirectory.callsArgWith(2)
 
 		it "should tell the filestore manager to delete the file", (done)->
 			@handler.deleteFile @bucket, @key, =>
@@ -77,7 +78,7 @@ describe "FileHandler", ->
 
 		it "should tell the filestore manager to delete the cached foler", (done)->
 			@handler.deleteFile @bucket, @key, =>
-				@PersistorManager.deleteFile.calledWith(@bucket, @stubbedConvetedKey).should.equal true
+				@PersistorManager.deleteDirectory.calledWith(@bucket, @stubbedConvetedKey).should.equal true
 				done()
 
 	describe "getFile", ->

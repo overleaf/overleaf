@@ -2,6 +2,11 @@ module.exports = (grunt) ->
 
 	# Project configuration.
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
+
 		coffee:
 			server: 
 				expand: true,
@@ -73,9 +78,11 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-clean'
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks 'grunt-mocha-test'
+	grunt.loadNpmTasks 'grunt-forever'
 
 	grunt.registerTask "test:unit", ["coffee", "mochaTest:unit"]
 	grunt.registerTask "test:acceptence", ["coffee", "mochaTest:acceptence"]
+	grunt.registerTask "test:acceptance", ["test:acceptence"]
 
 	grunt.registerTask "ci", "test:unit"
 	grunt.registerTask 'default', ['coffee', 'concurrent']

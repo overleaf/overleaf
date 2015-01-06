@@ -6,6 +6,7 @@ expect = chai.expect
 modulePath = "../../../app/js/FSPersistorManager.js"
 SandboxedModule = require('sandboxed-module')
 fs = require("fs")
+response = require("response")
 
 describe "FSPersistorManagerTests", ->
 
@@ -17,6 +18,7 @@ describe "FSPersistorManagerTests", ->
       unlink:sinon.stub()
       rmdir:sinon.stub()
       exists:sinon.stub()
+    @Rimraf = sinon.stub()
     @LocalFileWriter =
       writeStream: sinon.stub()
     @requires =
@@ -25,6 +27,8 @@ describe "FSPersistorManagerTests", ->
       "logger-sharelatex":
         log:->
         err:->
+      "response":response
+      "rimraf":@Rimraf
     @location = "/tmp"
     @name1 = "530f2407e7ef165704000007/530f838b46d9a9e859000008"
     @name1Filtered ="530f2407e7ef165704000007_530f838b46d9a9e859000008"
@@ -70,8 +74,8 @@ describe "FSPersistorManagerTests", ->
         on:->
       )
       @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
-        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
-        done()
+      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
+      done()
 
   describe "copyFile", ->
     beforeEach ->
@@ -115,11 +119,11 @@ describe "FSPersistorManagerTests", ->
 
   describe "deleteDirectory", ->
     beforeEach ->
-      @Fs.rmdir.callsArgWith(1,@error)
+      @Rimraf.callsArgWith(1,@error)
 
-    it "Should call rmdir with correct options", (done) ->
+    it "Should call rmdir(rimraf) with correct options", (done) ->
       @FSPersistorManager.deleteDirectory @location, @name1, (err) =>
-        @Fs.rmdir.calledWith("#{@location}/#{@name1}").should.equal.true
+        @Rimraf.calledWith("#{@location}/#{@name1}").should.equal.true
         done()
 
     it "Should propogate the error", (done) ->

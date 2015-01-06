@@ -21,6 +21,8 @@
     "node-uuid": "~1.4.1",
     "pngcrush": "0.0.3",
     "request": "2.14.0",
+    "response": "0.14.0",
+    "rimraf": "2.2.8",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master",
     "stream-buffers": "~0.2.5",
     "underscore": "~1.5.2"
@@ -35,6 +37,7 @@
     "grunt-contrib-watch": "0.5.3",
     "grunt-nodemon": "0.2.1",
     "grunt-contrib-clean": "0.5.0",
-    "grunt-concurrent": "0.4.2"
+    "grunt-concurrent": "0.4.2",
+    "grunt-forever": "~0.4.4"
   }
 }

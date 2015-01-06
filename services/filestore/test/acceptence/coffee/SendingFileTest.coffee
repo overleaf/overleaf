@@ -70,14 +70,17 @@ describe "Filestore", ->
 			newProjectID = "acceptence_tests_copyied_project"
 			newFileId = Math.random()
 			newFileUrl = "#{@filestoreUrl}/project/#{newProjectID}/file/#{newFileId}"
-			opts = 
+			opts =
+				method: 'put'
 				uri: newFileUrl
 				json:
 					source:
 						project_id:"acceptence_tests"
 						file_id: @file_id
-			request.put opts, (err)=>
+			request opts, (err, response, body)=>
+				response.statusCode.should.equal 200
 				request.del @fileUrl, (err, response, body)=>
+					response.statusCode.should.equal 204
 					request.get newFileUrl, (err, response, body)=>
 						body.should.equal @constantFileContent
 						done()

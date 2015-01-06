@@ -1,6 +1,8 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
+rimraf = require("rimraf")
+response = require ("response")
 
 filterName = (key) ->
   return key.replace /\//g, "_"
@@ -31,8 +33,12 @@ module.exports =
     sourceStream = fs.createReadStream "#{location}/#{filteredName}"
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
-      callback err
-    callback null,sourceStream
+      if err.code = 'ENOENT'
+        callback null, response().html('NoSuchKey: file not found\n')
+      else
+        callback err
+    sourceStream.on 'readable', () ->
+      callback null, sourceStream
 
 
   copyFile: (location, fromName, toName, callback = (err)->)->
@@ -47,20 +53,25 @@ module.exports =
     targetStream.on 'error', (err) ->
       logger.err err:err, location:location, key:filteredToName, "Error writing to file"
       callback err
+    targetStream.on 'finish', () ->
+      callback null
     sourceStream.pipe targetStream
 
   deleteFile: (location, name, callback)->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "delete file"
     fs.unlink "#{location}/#{filteredName}", (err) ->
-      logger.err err:err, location:location, name:filteredName, "Error on delete."
-      callback err
+      if err?
+        logger.err err:err, location:location, name:filteredName, "Error on delete."
+        callback err
+      else
+        callback()
 
   deleteDirectory: (location, name, callback = (err)->)->
-    filteredName = filterName name
-    fs.rmdir "#{location}/#{filteredName}", (err) ->
-      logger.err err:err, location:location, name:filteredName, "Error on rmdir."
-      if err and err.code != 'ENOENT' 
+    filteredName = filterName name.replace(/\/$/,'')
+    rimraf "#{location}/#{filteredName}", (err) ->
+      if err?
+        logger.err err:err, location:location, name:filteredName, "Error on rimraf rmdir."
         callback err
       else
         callback()
