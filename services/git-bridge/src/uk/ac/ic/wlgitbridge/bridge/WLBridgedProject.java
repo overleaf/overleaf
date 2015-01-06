@@ -8,6 +8,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,6 +54,8 @@ public class WLBridgedProject {
                 git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
                             .setMessage(contents.getCommitMessage())
                             .call();
+                System.out.println(repository.getDirectory());
+                WLFileStore.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
             }
         } catch (GitAPIException e) {
             throw new ServiceNotEnabledException();

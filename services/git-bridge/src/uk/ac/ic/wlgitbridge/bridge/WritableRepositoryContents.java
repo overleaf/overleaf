@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -11,6 +12,8 @@ import java.util.Date;
 public interface WritableRepositoryContents {
 
     public void write() throws IOException, FailedConnectionException;
+
+    public File getDirectory();
 
     public String getUserName();
     public String getUserEmail();
