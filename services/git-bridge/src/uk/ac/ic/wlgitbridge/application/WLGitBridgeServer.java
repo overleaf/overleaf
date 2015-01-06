@@ -68,7 +68,7 @@ public class WLGitBridgeServer {
             System.out.println(Util.getServiceName() + "-Git Bridge server started");
             System.out.println("Listening on port: " + port);
             System.out.println("Bridged to: " + writeLatexHostname);
-            System.out.println("Postback URL: " + Util.getPostbackURL());
+            System.out.println("Postback base URL: " + Util.getPostbackURL());
             System.out.println("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
             e.printStackTrace();

@@ -32,7 +32,7 @@ The configuration file is in `.json` format. There is an example at `bin/config.
         "apiBaseUrl" (string): base url for the snapshot api,
         "username" (string, optional): username for http basic auth,
         "password" (string, optional): password for http basic auth,
-        "postbackUrl" (string): the postback url,
+        "postbackBaseUrl" (string): the postback url,
         "serviceName" (string): current name of writeLaTeX in case it ever changes
     }
 

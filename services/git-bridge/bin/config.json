@@ -4,6 +4,6 @@
 	"apiBaseUrl": "https://radiant-wind-3058.herokuapp.com/api/v0",
 	"username": "staging",
 	"password": "6kUfbv0R",
-	"postbackUrl": "http://git.overleaf.com",
+	"postbackBaseUrl": "http://git.overleaf.com",
 	"serviceName": "Overleaf"
 }

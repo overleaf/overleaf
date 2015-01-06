@@ -44,7 +44,7 @@ public class Config implements JSONSource {
         }
         this.apiBaseURL = apiBaseURL;
         serviceName = getElement(configObject, "serviceName").getAsString();
-        postbackURL = getElement(configObject, "postbackUrl").getAsString();
+        postbackURL = getElement(configObject, "postbackBaseUrl").getAsString();
         if (!postbackURL.endsWith("/")) {
             postbackURL += "/";
         }
