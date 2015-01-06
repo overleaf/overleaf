@@ -3,9 +3,12 @@ seconds = 1000
 
 module.exports = OpenSocketsMonitor =
 	monitor: (logger) ->
-		setInterval () ->
+		interval = setInterval () ->
 			OpenSocketsMonitor.gaugeOpenSockets()
 		, 5 * seconds
+		Metrics = require "./metrics"
+		Metrics.registerDestructor () ->
+			clearInterval(interval)
 
 	gaugeOpenSockets: () ->
 		Metrics = require "./metrics"
