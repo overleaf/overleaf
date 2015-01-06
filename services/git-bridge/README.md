@@ -32,11 +32,8 @@ The configuration file is in `.json` format. There is an example at `bin/config.
         "apiBaseUrl" (string): base url for the snapshot api,
         "username" (string, optional): username for http basic auth,
         "password" (string, optional): password for http basic auth,
-        "serviceName" (string): current name of writeLaTeX in case it ever changes,
-        "hostname": (string): the public hostname of the server, for postback,
-        "ssl": { (object): ssl configuration
-            "enabled": (boolean): decides on http or https for the postback url
-        }
+        "postbackUrl" (string): the postback url,
+        "serviceName" (string): current name of writeLaTeX in case it ever changes
     }
 
 You have to restart the server for configuration changes to take effect.

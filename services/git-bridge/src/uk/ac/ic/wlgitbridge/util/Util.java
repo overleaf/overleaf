@@ -14,6 +14,7 @@ public class Util {
     private static String HOSTNAME;
     private static SSLConfig SSL_CONFIG;
     private static int PORT;
+    private static String POSTBACK_URL;
 
     public static String entries(int entries) {
         if (entries == 1) {
@@ -69,22 +70,6 @@ public class Util {
         return SERVICE_NAME;
     }
 
-    public static void setHostname(String hostname) {
-        HOSTNAME = hostname;
-    }
-
-    public static String getHostname() {
-        return HOSTNAME;
-    }
-
-    public static SSLConfig getSSLConfig() {
-        return SSL_CONFIG;
-    }
-
-    public static void setSSL(SSLConfig ssl) {
-        SSL_CONFIG = ssl;
-    }
-
     public static int getPort() {
         return PORT;
     }
@@ -93,4 +78,11 @@ public class Util {
         PORT = port;
     }
 
+    public static void setPostbackURL(String postbackURL) {
+        POSTBACK_URL = postbackURL;
+    }
+
+    public static String getPostbackURL() {
+        return POSTBACK_URL;
+    }
 }

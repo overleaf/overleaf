@@ -20,9 +20,8 @@ public class Config implements JSONSource {
     private String username;
     private String password;
     private String apiBaseURL;
+    private String postbackURL;
     private String serviceName;
-    private String hostname;
-    private SSLConfig ssl;
 
     public Config(String configFilePath) throws InvalidConfigFileException, IOException {
         try {
@@ -45,8 +44,10 @@ public class Config implements JSONSource {
         }
         this.apiBaseURL = apiBaseURL;
         serviceName = getElement(configObject, "serviceName").getAsString();
-        hostname = getOptionalString(configObject, "hostname");
-        ssl = new SSLConfig(getElement(configObject, "ssl").getAsJsonObject());
+        postbackURL = getElement(configObject, "postbackUrl").getAsString();
+        if (!postbackURL.endsWith("/")) {
+            postbackURL += "/";
+        }
     }
 
     public int getPort() {
@@ -89,12 +90,8 @@ public class Config implements JSONSource {
         return serviceName;
     }
 
-    public String getHostname() {
-        return hostname;
-    }
-
-    public SSLConfig getSSL() {
-        return ssl;
+    public String getPostbackURL() {
+        return postbackURL;
     }
 
 }

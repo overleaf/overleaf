@@ -25,11 +25,7 @@ public class WLDirectoryNodeSnapshot implements CandidateSnapshot {
     public WLDirectoryNodeSnapshot(WLProject project, WLDirectoryNode directoryNode, String hostname, String postbackKey, CandidateSnapshotCallback callback) {
         previousVersionID = project.getLatestSnapshotID();
         projectName = project.getName();
-        String protocol = "http";
-        if (Util.getSSLConfig().isEnabled()) {
-            protocol += "s";
-        }
-        projectURL = protocol + "://" + hostname + ":" + Util.getPort() + "/" + projectName;
+        projectURL = Util.getPostbackURL() + projectName;
 
         this.directoryNode = directoryNode;
         this.postbackKey = postbackKey;

@@ -54,8 +54,7 @@ public class WLGitBridgeServer {
         writeLatexHostname = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(writeLatexHostname);
         Util.setServiceName(config.getServiceName());
-        Util.setHostname(config.getHostname());
-        Util.setSSL(config.getSSL());
+        Util.setPostbackURL(config.getPostbackURL());
         Util.setPort(config.getPort());
     }
 
@@ -67,10 +66,9 @@ public class WLGitBridgeServer {
             jettyServer.start();
             System.out.println();
             System.out.println(Util.getServiceName() + "-Git Bridge server started");
-            System.out.println("Hostname: " + Util.getHostname());
             System.out.println("Listening on port: " + port);
-            System.out.println("SSL enabled: " + Util.getSSLConfig().isEnabled());
             System.out.println("Bridged to: " + writeLatexHostname);
+            System.out.println("Postback URL: " + Util.getPostbackURL());
             System.out.println("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
             e.printStackTrace();

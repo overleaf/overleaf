@@ -26,7 +26,7 @@ public class WLReceivePackFactory implements ReceivePackFactory<HttpServletReque
     @Override
     public ReceivePack create(HttpServletRequest httpServletRequest, Repository repository) throws ServiceNotEnabledException, ServiceNotAuthorizedException {
         ReceivePack receivePack = new ReceivePack(repository);
-        String hostname = Util.getHostname();
+        String hostname = Util.getPostbackURL();
         if (hostname == null) {
             hostname = httpServletRequest.getLocalName();
         }
