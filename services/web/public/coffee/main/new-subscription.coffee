@@ -15,10 +15,10 @@ define [
 		$scope.paymentMethod = "credit_card"
 
 		$scope.data =
-			number: undefined
-			month: undefined
-			year: undefined
-			cvv: undefined
+			number: ""
+			month: ""
+			year: ""
+			cvv: ""
 			first_name: ""
 			last_name: ""
 			postal_code: ""
@@ -26,6 +26,7 @@ define [
 			address2 : ""
 			city:""
 			country:window.countryCode
+
 
 		$scope.validation =
 			correctCardNumber : true
@@ -55,16 +56,16 @@ define [
 			$scope.currencyCode = newCurrency
 			pricing.currency(newCurrency).done()
 
-		$scope.validateCardNumber = ->
-			if $scope.data.number?
+		$scope.validateCardNumber = validateCardNumber = ->
+			if $scope.data.number?.length != 0
 				$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
 
-		$scope.validateExpiry = ->
-			if $scope.data.month? and $scope.data.year?
+		$scope.validateExpiry = validateExpiry = ->
+			if $scope.data.month?.length != 0 and $scope.data.year?.length != 0
 				$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
 
-		$scope.validateCvv = ->
-			if $scope.data.cvv?
+		$scope.validateCvv = validateCvv = ->
+			if $scope.data.cvv?.length != 0
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		$scope.updateCountry = ->
@@ -77,8 +78,10 @@ define [
 				$scope.usePaypal = false
 
 		completeSubscription = (err, recurly_token_id) ->
+			$scope.validation.errorFields = {}
 			if err?
 				$scope.genericError = err.message
+				_.each err.fields, (field)-> $scope.validation.errorFields[field] = true
 			else
 				postData =
 					_csrf: window.csrfToken

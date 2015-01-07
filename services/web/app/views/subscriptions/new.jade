@@ -73,17 +73,18 @@ block content
 													div.alert.alert-warning.small(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
 										.row
 											.col-md-6
-												.form-group(ng-class="validation.correctCardNumber ? '' : 'has-error' ")
+												.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
 													input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
 											.col-md-3
-												.form-group(ng-class="validation.correctCvv ? '' : 'has-error' ")
+												.form-group(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
 													input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
 										.row
 											.col-md-12
 												div.alert.alert-warning.small(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
-											.col-md-2
-												.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-													select(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+										.row
+											.col-md-3
+												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.month ? 'has-error' : ''")
+													select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
 														option(value="", disabled, selected) Month
 														option(value="01") 01
 														option(value="02") 02
@@ -98,8 +99,8 @@ block content
 														option(value="11") 11
 														option(value="12") 12
 											.col-md-3
-												.form-group(ng-class="validation.correctExpiry ? '' : 'has-error' ")
-													select(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
+													select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
 														option(value="", disabled, selected) Year
 														option(value="2015") 2015
 														option(value="2016") 2016
@@ -115,10 +116,10 @@ block content
 														option(value="2026") 2026
 									.row
 										.col-md-6
-											.form-group
+											.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
 										.col-md-6
-											.form-group
+											.form-group(ng-class="validation.errorFields.last_name ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
 									hr
 									.row
@@ -137,7 +138,7 @@ block content
 									.row
 										.col-md-7
 											.form-group
-												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()",required)
+												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
 													mixin countries_options()
 									.row
 										.col-md-8
