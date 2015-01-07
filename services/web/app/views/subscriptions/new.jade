@@ -145,17 +145,22 @@ block content
 												.form-group
 													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
 
-									.form-group
-										button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
 
 									.row
-										.col-md-12
-											span.pull-right
-												div Subtotal - {{price.currency.symbol}}{{price.next.subtotal}}
-												div Tax - {{price.currency.symbol}}{{price.next.tax}}
+										.col-md-6
+											.form-group
+												button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
+									
+										.col-md-3.pricingBreakdown
+												div Subtotal
+												div Tax
 												div
-													strong Total - {{price.currency.symbol}}{{price.next.total}}
-
+													strong Total
+										.col-md-3
+												div {{price.currency.symbol}}{{price.next.subtotal}}
+												div {{price.currency.symbol}}{{price.next.tax}}
+												div
+													strong {{price.currency.symbol}}{{price.next.total}}
 
 
 				.col-md-3.col-md-pull-4
