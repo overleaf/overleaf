@@ -2,6 +2,7 @@ define [
 	"main/project-list/index"
 	"main/user-details"
 	"main/account-settings"
+	"main/account-upgrade"
 	"main/templates"
 	"main/plans"
 	"main/group-members"
