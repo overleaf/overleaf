@@ -125,7 +125,7 @@ beginShutdown = () ->
 		logger.log "server will stop accepting connections"
 
 server.listen port, host, ->
-	logger.log("filestore store listening on #{host}:#{port}")
+	logger.log("filestore listening on #{host}:#{port}")
 
 process.on 'SIGTERM', () ->
 	logger.log("filestore got SIGTERM, shutting down gracefully")
