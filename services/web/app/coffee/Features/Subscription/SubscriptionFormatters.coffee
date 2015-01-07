@@ -6,7 +6,14 @@ currenySymbols =
 	EUR: "€"	
 	USD: "$"
 	GBP: "£"
-
+	SEK: "kr"
+	CAD: "$"
+	NOK: "kr"
+	DKK: "kr"
+	AUD: "$"
+	NZD: "$"
+	CHF: "Fr"
+	SGD: "$"
 
 
 module.exports =
