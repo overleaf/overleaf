@@ -103,8 +103,6 @@ app.get "/health_check", (req, res)->
 			else
 				res.send(503)
 
-
-
 app.get '*', (req, res)->
 	res.send 404
 
@@ -115,12 +113,16 @@ host = settings.internal.filestore.host or "localhost"
 beginShutdown = () ->
 	if appIsOk
 		appIsOk = false
-		server.close()
+		# hard-terminate this process if graceful shutdown fails
+		killTimer = setTimeout () ->
+			process.exit 1
+		, 120*1000
+		killTimer.unref?() # prevent timer from keeping process alive
+		server.close () ->
+			logger.log "closed all connections"
+			Metrics.close()
+			process.disconnect?()
 		logger.log "server will stop accepting connections"
-
-server.on "close", () ->
-	logger.log "closed all connections"
-	process.exit 1
 
 server.listen port, host, ->
 	logger.log("filestore store listening on #{host}:#{port}")
