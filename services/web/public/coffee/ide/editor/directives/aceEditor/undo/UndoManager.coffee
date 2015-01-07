@@ -230,6 +230,8 @@ define [
 				}
 
 		_aceDeltaToSimpleDelta: (aceDelta, docLines) ->
+			if !aceDelta.range?
+				Raven?.captureException(new Error("Missing range in aceDelta"), { delta: aceDelta })
 			start = aceDelta.range.start
 			linesBefore = docLines.slice(0, start.row)
 			position =
@@ -258,7 +260,7 @@ define [
 						remove: aceDelta.lines.join("\n") + "\n"
 					}
 				else
-					throw "Unknown Ace action: #{aceDelta.action}"
+					throw new Error("Unknown Ace action: #{aceDelta.action}")
 
 		_simplePositionToAcePosition: (position, docLines) ->
 			column = 0
