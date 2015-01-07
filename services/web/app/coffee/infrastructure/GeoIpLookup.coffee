@@ -48,4 +48,4 @@ module.exports = GeoIpLookup =
 			countryCode = ipDetails?.country_code?.toUpperCase()
 			currencyCode = currencyMappings[countryCode] || "USD"
 			logger.log ip:ip, currencyCode:currencyCode, ipDetails:ipDetails, "got currencyCode for ip"
-			callback(err, currencyCode)
+			callback(err, currencyCode, countryCode)

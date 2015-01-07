@@ -25,7 +25,7 @@ define [
 			address1 : ""
 			address2 : ""
 			city:""
-			country:""
+			country:window.countryCode
 
 		$scope.validation =
 			correctCardNumber : true
@@ -39,12 +39,11 @@ define [
 		pricing = recurly.Pricing()
 		window.pricing = pricing
 
-		pricing.plan(window.plan_code, { quantity: 1 }).currency($scope.currencyCode).done()
-
+		pricing.plan(window.plan_code, { quantity: 1 }).address({country: $scope.data.country}).tax({tax_code: 'digital', vat_number: ''}).currency($scope.currencyCode).done()
 
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
-			$scope.price = pricing.price.currency.symbol+pricing.price.next.total
+			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial.length
 			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
 			$scope.$apply()
@@ -67,6 +66,9 @@ define [
 		$scope.validateCvv = ->
 			if $scope.data.cvv?
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
+
+		$scope.updateCountry = ->
+			pricing.address({country:$scope.data.country}).done()
 
 		$scope.changePaymentMethod = (paymentMethod)->
 			if paymentMethod == "paypal"

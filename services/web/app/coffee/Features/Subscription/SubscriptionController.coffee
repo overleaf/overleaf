@@ -41,7 +41,7 @@ module.exports = SubscriptionController =
 					res.redirect "/user/subscription"
 				else
 					currency = req.query.currency?.toUpperCase()
-					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency, countryCode)->
 						return next(err) if err?
 						if recomendedCurrency? and !currency?
 							currency = recomendedCurrency
@@ -56,6 +56,7 @@ module.exports = SubscriptionController =
 								title      : "subscribe"
 								plan_code: req.query.planCode
 								currency: currency
+								countryCode:countryCode
 								plan:plan
 								showStudentPlan: req.query.ssp
 								recurlyConfig: JSON.stringify
