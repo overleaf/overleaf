@@ -1,9 +1,9 @@
 {
 	"port": 80,
 	"rootGitDirectory": "/var/wlgb/git",
-	"apiBaseUrl": "https://radiant-wind-3058.herokuapp.com/api/v0",
-	"username": "staging",
-	"password": "6kUfbv0R",
-	"postbackBaseUrl": "http://git.overleaf.com",
+	"apiBaseUrl": "https://www.overleaf.com/api/v0",
+	"username": "REDACTED",
+	"password": "REDACTED",
+	"postbackBaseUrl": "http://your-server-name-for-postbacks",
 	"serviceName": "Overleaf"
 }
