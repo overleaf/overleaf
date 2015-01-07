@@ -49,6 +49,16 @@ module.exports = RecurlyWrapper =
 
 			callback null, signature
 	
+
+	getSubscriptions: (accountId, callback)->
+		@apiRequest({
+			url: "accounts/#{accountId}/subscriptions"
+		}, (error, response, body) =>
+			return callback(error) if error?
+			@_parseXml body, callback
+		)
+
+
 	getSubscription: (subscriptionId, options, callback) ->
 		callback = options unless callback?
 		options ||= {}
@@ -79,6 +89,16 @@ module.exports = RecurlyWrapper =
 					callback null, recurlySubscription
 		)
 
+	getAccounts: (callback)->
+		@apiRequest({
+			url: "accounts"
+			qs:
+				per_page:2000
+		}, (error, response, body) =>
+			return callback(error) if error?
+			@_parseXml body, callback
+		)
+
 	getAccount: (accountId, callback) ->
 		@apiRequest({
 			url: "accounts/#{accountId}"
@@ -86,7 +106,16 @@ module.exports = RecurlyWrapper =
 			return callback(error) if error?
 			@_parseAccountXml body, callback
 		)
-	
+
+	getBillingInfo: (accountId, callback)->
+		@apiRequest({
+			url: "accounts/#{accountId}/billing_info"
+		}, (error, response, body) =>
+			return callback(error) if error?
+			@_parseXml body, callback
+		)
+
+
 	updateSubscription: (subscriptionId, options, callback) ->
 		logger.log subscriptionId:subscriptionId, options:options, "telling recurly to update subscription"
 		requestBody = """
@@ -102,6 +131,37 @@ module.exports = RecurlyWrapper =
 		}, (error, response, responseBody) =>
 			return callback(error) if error?
 			@_parseSubscriptionXml responseBody, callback
+		)
+
+	createFixedAmmountCoupon: (coupon_code, name, currencyCode, discount_in_cents, callback)->
+		requestBody = """
+			<coupon>
+				<coupon_code>#{coupon_code}</coupon_code>
+				<name>#{name}</name>
+				<discount_type>dollars</discount_type>
+				<discount_in_cents>
+					<#{currencyCode}>#{discount_in_cents}</#{currencyCode}>
+				</discount_in_cents>
+			</coupon>
+		"""
+		logger.log coupon_code:coupon_code, requestBody:requestBody, "creating coupon"
+		@apiRequest({
+			url    : "coupons"
+			method : "post"
+			body   : requestBody
+		}, (error, response, responseBody) =>
+			if error?
+				logger.err err:error, coupon_code:coupon_code, "error creating coupon"
+			callback(error)
+		)
+
+
+	lookupCoupon: (coupon_code, callback)->
+		@apiRequest({
+			url: "coupons/#{coupon_code}"
+		}, (error, response, body) =>
+			return callback(error) if error?
+			@_parseXml body, callback
 		)
 
 	cancelSubscription: (subscriptionId, callback) ->
