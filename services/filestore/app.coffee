@@ -37,27 +37,35 @@ app.use (req, res, next) ->
 	requestDomain.add req
 	requestDomain.add res
 	requestDomain.on "error", (err)->
-		# request a shutdown to prevent memory leaks
-		appIsOk = false
-		setTimeout(->
+		try
+			appIsOk = false
+			# request a shutdown to prevent memory leaks
+			beginShutdown()
 			if !res.headerSent
-				res.send(500)
-		, 3000)
-		logger = require('logger-sharelatex')
-		req =
-			body:req.body
-			headers:req.headers
-			url:req.url
-			key: req.key
-			statusCode: req.statusCode
-		err =
-			message: err.message
-			stack: err.stack
-			name: err.name
-			type: err.type
-			arguments: err.arguments
-		logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
+				res.send(500, "uncaught exception")
+			logger = require('logger-sharelatex')
+			req =
+				body:req.body
+				headers:req.headers
+				url:req.url
+				key: req.key
+				statusCode: req.statusCode
+			err =
+				message: err.message
+				stack: err.stack
+				name: err.name
+				type: err.type
+				arguments: err.arguments
+			logger.err err:err, req:req, res:res, "uncaught exception thrown on request"
+		catch exception
+			logger.err err: exception, "exception in request domain handler"
 	requestDomain.run next
+
+app.use (req, res, next) ->
+	if not appIsOk
+		# when shutting down, close any HTTP keep-alive connections
+		res.set 'Connection', 'close'
+	next()
 
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
@@ -95,19 +103,30 @@ app.get "/health_check", (req, res)->
 			else
 				res.send(503)
 
-
-
 app.get '*', (req, res)->
 	res.send 404
 
-serverDomain = domain.create()
-serverDomain.run ->
-	server = require('http').createServer(app)
-	port = settings.internal.filestore.port or 3009
-	host = settings.internal.filestore.host or "localhost"
-	server.listen port, host, ->
-		logger.log("filestore store listening on #{host}:#{port}")
+server = require('http').createServer(app)
+port = settings.internal.filestore.port or 3009
+host = settings.internal.filestore.host or "localhost"
 
-serverDomain.on "error", (err)->
-	logger.log err:err, "top level uncaught exception"
+beginShutdown = () ->
+	if appIsOk
+		appIsOk = false
+		# hard-terminate this process if graceful shutdown fails
+		killTimer = setTimeout () ->
+			process.exit 1
+		, 120*1000
+		killTimer.unref?() # prevent timer from keeping process alive
+		server.close () ->
+			logger.log "closed all connections"
+			Metrics.close()
+			process.disconnect?()
+		logger.log "server will stop accepting connections"
 
+server.listen port, host, ->
+	logger.log("filestore listening on #{host}:#{port}")
+
+process.on 'SIGTERM', () ->
+	logger.log("filestore got SIGTERM, shutting down gracefully")
+	beginShutdown()

@@ -19,7 +19,7 @@ module.exports = (grunt) ->
 			app_server: 
 				expand: true,
 				flatten: false,
-				src: ['app.coffee'],
+				src: ['app.coffee', 'cluster.coffee'],
 				dest: './',
 				ext: '.js'
 
@@ -41,7 +41,7 @@ module.exports = (grunt) ->
 
 		watch:
 			server_coffee:
-				files: ['app/*.coffee','app/**/*.coffee', 'test/unit/coffee/**/*.coffee', 'test/unit/coffee/*.coffee', "app.coffee"]
+				files: ['app/*.coffee','app/**/*.coffee', 'test/unit/coffee/**/*.coffee', 'test/unit/coffee/*.coffee', "app.coffee", "cluster.coffee"]
 				tasks: ["clean", 'coffee', 'mochaTest']
 
 		clean: ["app/js", "test/unit/js", "app.js"]

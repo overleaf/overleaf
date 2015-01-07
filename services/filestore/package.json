@@ -20,6 +20,7 @@
     "node-transloadit": "0.0.4",
     "node-uuid": "~1.4.1",
     "pngcrush": "0.0.3",
+    "recluster": "^0.3.7",
     "request": "2.14.0",
     "response": "0.14.0",
     "rimraf": "2.2.8",
