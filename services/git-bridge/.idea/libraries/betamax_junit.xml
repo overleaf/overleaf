@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="betamax-junit">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/betamax-junit.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

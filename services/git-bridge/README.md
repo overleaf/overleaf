@@ -3,21 +3,21 @@ writelatex-git-bridge
 
 Required
 --------
-  * `ant` (for building)
+  * `maven` (for building)
   * `jdk-7` (for compiling and running)
 
 Installation
 ------------
 ### Ubuntu ###
-Run `install.sh` to get dependencies, build, test, package, and make it a service.
+Run `sudo install.sh` to get dependencies, build, test, package, and make it a service.
 
-Use `service wlgb start` and `service wlgb stop` to start and stop the server.
+Use `sudo service wlgb start` and `sudo service wlgb stop` to start and stop the server.
 
 The configuration file will be at `/etc/wlgb/config.json`.
 
-Run `uninstall.sh` to undo what `install.sh` did.
+Run `sudo uninstall.sh` to undo what `sudo install.sh` did.
 ### Manually ###
-Run `ant all` to build, test, and package it into a jar at `bin/writelatex-git-bridge.jar`.
+Run `mvn package` to build, test, and package it into a jar at `target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar`.
 
 Use `java -jar <path_to_jar> <path_to_config_file>` to run the server.
 

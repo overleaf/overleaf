@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.xerial:sqlite-jdbc:3.8.7">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.8.7/sqlite-jdbc-3.8.7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.8.7/sqlite-jdbc-3.8.7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/xerial/sqlite-jdbc/3.8.7/sqlite-jdbc-3.8.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
