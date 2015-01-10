@@ -76,8 +76,9 @@ public abstract class Request<T extends Result> {
 
             @Override
             public T onCompleted(Response response) throws Exception {
-                System.out.println("Response -> " + url);
-                return parseResponse(new Gson().fromJson(response.getResponseBody(), JsonElement.class));
+                String body = response.getResponseBody();
+                System.out.println(response.getStatusText() + " (" + body.length() + " data bytes) -> " + url);
+                return parseResponse(new Gson().fromJson(body, JsonElement.class));
             }
 
             @Override
