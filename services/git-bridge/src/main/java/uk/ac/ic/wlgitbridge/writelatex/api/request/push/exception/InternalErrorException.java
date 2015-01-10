@@ -1,0 +1,30 @@
+package uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception;
+
+import com.google.gson.JsonElement;
+import uk.ac.ic.wlgitbridge.util.Util;
+
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Created by Winston on 09/01/15.
+ */
+public class InternalErrorException extends SnapshotPostException {
+
+    @Override
+    public String getMessage() {
+        return "internal error";
+    }
+
+    @Override
+    public List<String> getDescriptionLines() {
+        return Arrays.asList("There as an internal error with the Git server.",
+                             "Please contact " + Util.getServiceName() + ".");
+    }
+
+    @Override
+    public void fromJSON(JsonElement json) {
+
+    }
+
+}

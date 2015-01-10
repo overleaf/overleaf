@@ -25,25 +25,24 @@ public class AttsResourceHandler extends ResourceHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        HttpURI uri = baseRequest.getUri();
-        System.out.println(baseRequest.getMethod() + " " + uri);
-        MultiMap<String> multimap = new MultiMap<String>();
-        uri.decodeQueryTo(multimap);
-        String[] pathSections = uri.getPath().split("/");
-        String key = multimap.getString("key");
-        if (key == null || pathSections.length < 2) {
-            throw new ServletException();
+        String method = baseRequest.getMethod();
+        if (method.equals("GET")) {
+            HttpURI uri = baseRequest.getUri();
+            System.out.println(method + " " + uri);
+            MultiMap<String> multimap = new MultiMap<String>();
+            uri.decodeQueryTo(multimap);
+            String[] pathSections = uri.getPath().split("/");
+            String key = multimap.getString("key");
+            if (key == null || pathSections.length < 2) {
+                throw new ServletException();
+            }
+            try {
+                writeLatexDataSource.checkPostbackKey(pathSections[1], key);
+            } catch (InvalidPostbackKeyException e) {
+                throw new ServletException();
+            }
+            super.handle(target, baseRequest, request, response);
         }
-        try {
-            writeLatexDataSource.checkPostbackKey(pathSections[1], key);
-        } catch (InvalidPostbackKeyException e) {
-            throw new ServletException();
-        }
-
-        if (false) {
-            throw new ServletException();
-        }
-        super.handle(target, baseRequest, request, response);
     }
 
 }

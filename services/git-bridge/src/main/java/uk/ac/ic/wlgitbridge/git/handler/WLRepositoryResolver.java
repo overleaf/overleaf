@@ -32,14 +32,20 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         try {
             return repositorySource.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
         } catch (RepositoryNotFoundException e) {
+            e.printStackTrace();
             throw e;
+            /*
+        } catch (ServiceNotAuthorizedException e) {
+            cannot occur
         } catch (ServiceNotEnabledException e) {
+            cannot occur
+            */
+        } catch (ServiceMayNotContinueException e) { /* Such as FailedConnectionException */
             e.printStackTrace();
             throw e;
-        } catch (Throwable e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
-            System.out.println("An exception occurred");
-            throw new ServiceNotEnabledException();
+            throw new ServiceMayNotContinueException(e);
         }
     }
 

@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
 
 import java.util.LinkedList;
@@ -22,6 +23,26 @@ public class SnapshotData implements JSONSource {
         srcs = new LinkedList<SnapshotFile>();
         atts = new LinkedList<SnapshotAttachment>();
         fromJSON(json);
+    }
+
+    public SnapshotData(List<SnapshotFile> srcs, List<SnapshotAttachment> atts) {
+        this.srcs = srcs;
+        this.atts = atts;
+    }
+
+    public JsonElement toJson() {
+        JsonObject jsonThis = new JsonObject();
+        JsonArray jsonSrcs = new JsonArray();
+        for (SnapshotFile src : srcs) {
+            jsonSrcs.add(src.toJson());
+        }
+        jsonThis.add("srcs", jsonSrcs);
+        JsonArray jsonAtts = new JsonArray();
+        for (SnapshotAttachment att : atts) {
+            jsonAtts.add(att.toJson());
+        }
+        jsonThis.add("atts", jsonAtts);
+        return jsonThis;
     }
 
     @Override

@@ -32,7 +32,7 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
     /* baseURL ends with / */
     public static void setBaseURL(String baseURL) {
-        BASE_URL = baseURL + "/docs/";
+        BASE_URL = baseURL + "docs/";
     }
 
 }

@@ -17,6 +17,11 @@ public class SnapshotPushRequestResult extends Result {
         super(request, json);
     }
 
+    @Override
+    public JsonElement toJson() {
+        return null;
+    }
+
     public boolean wasSuccessful() {
         return success;
     }

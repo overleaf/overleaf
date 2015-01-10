@@ -13,8 +13,12 @@ public class SnapshotInfo {
     private String createdAt;
 
     public SnapshotInfo(int versionID, String createdAt, String name, String email) {
-        this.versionId = versionID;
-        comment = "Update on " + Util.getServiceName() + ".";
+        this(versionID, "Update on " + Util.getServiceName() + ".", name, email, createdAt);
+    }
+
+    public SnapshotInfo(int versionID, String comment, String email, String name, String createdAt) {
+        versionId = versionID;
+        this.comment = comment;
         user = new WLUser(name, email);
         this.createdAt = createdAt;
     }

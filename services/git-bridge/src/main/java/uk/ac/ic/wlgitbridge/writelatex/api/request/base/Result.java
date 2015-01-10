@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 public abstract class Result implements JSONSource {
 
     private JsonElement json;
-    private final Request request;
+    private Request request;
 
     public Result(Request request, JsonElement json) {
         this.request = request;
@@ -16,12 +16,20 @@ public abstract class Result implements JSONSource {
         fromJSON(json);
     }
 
+    protected Result() {
+    }
+
     public Request getRequest() {
         return request;
     }
 
+    public abstract JsonElement toJson();
+
     @Override
     public String toString() {
+        if (json == null) {
+            return "result";
+        }
         return json.toString();
     }
 

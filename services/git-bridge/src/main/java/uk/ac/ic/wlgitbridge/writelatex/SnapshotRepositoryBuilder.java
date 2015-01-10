@@ -3,11 +3,11 @@ package uk.ac.ic.wlgitbridge.writelatex;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InternalErrorException;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +24,9 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
     }
 
     @Override
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceNotEnabledException {
-        try {
-            if (!writeLatexDataSource.repositoryExists(name)) {
-                throw new RepositoryNotFoundException(name);
-            }
-        } catch (FailedConnectionException e) {
-            throw new ServiceNotEnabledException();
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceMayNotContinueException {
+        if (!writeLatexDataSource.repositoryExists(name)) {
+            throw new RepositoryNotFoundException(name);
         }
         File repositoryDirectory = new File(rootDirectory, name);
 
@@ -38,11 +34,8 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
         try {
             repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
             new WLBridgedProject(repository, name, writeLatexDataSource).buildRepository();
-        } catch (FailedConnectionException e) {
-            e.printStackTrace();
-            throw new ServiceNotEnabledException();
         } catch (IOException e) {
-            throw new ServiceNotEnabledException();
+            throw new ServiceMayNotContinueException(new InternalErrorException().getDescriptionLines().get(0));
         }
         return repository;
     }

@@ -23,9 +23,13 @@ public class PostbackManager {
     }
 
     public int getVersionID(String projectName) throws SnapshotPostException {
-        int versionID = postbackContentsTable.get(projectName).waitForPostback();
-        postbackContentsTable.remove(projectName);
-        return versionID;
+        try {
+            return postbackContentsTable.get(projectName).waitForPostback();
+        } catch (SnapshotPostException e) {
+            throw e;
+        } finally {
+            postbackContentsTable.remove(projectName);
+        }
     }
 
     public void postVersionIDForProject(String projectName, int versionID, String postbackKey) throws UnexpectedPostbackException {

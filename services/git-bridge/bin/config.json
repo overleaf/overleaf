@@ -1,9 +1,9 @@
 {
 	"port": 80,
 	"rootGitDirectory": "/var/wlgb/git",
-	"apiBaseUrl": "https://www.overleaf.com/api/v0",
+	"apiBaseUrl": "http://127.0.0.1:60000/api/v0",
 	"username": "REDACTED",
 	"password": "REDACTED",
-	"postbackBaseUrl": "http://your-server-name-for-postbacks",
+	"postbackBaseUrl": "http://127.0.0.1",
 	"serviceName": "Overleaf"
 }

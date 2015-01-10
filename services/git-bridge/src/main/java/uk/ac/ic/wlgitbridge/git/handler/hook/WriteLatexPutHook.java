@@ -10,9 +10,10 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -36,24 +37,26 @@ public class WriteLatexPutHook implements PreReceiveHook {
             try {
                 handleReceiveCommand(receivePack.getRepository(), receiveCommand);
             } catch (IOException e) {
-                receivePack.sendError("IOException");
-                receiveCommand.setResult(Result.REJECTED_OTHER_REASON, "I/O Exception");
-            } catch (FailedConnectionException e) {
-                receivePack.sendError("failed connection");
-                receiveCommand.setResult(Result.REJECTED_OTHER_REASON, "failed connection");
+                receivePack.sendError(e.getMessage());
+                receiveCommand.setResult(Result.REJECTED_OTHER_REASON, e.getMessage());
             } catch (OutOfDateException e) {
                 receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
             } catch (SnapshotPostException e) {
-                String message = e.getMessage();
-                receivePack.sendError(message);
-                for (String line : e.getDescriptionLines()) {
-                    receivePack.sendMessage("hint: " + line);
-                }
-                receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
+                handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
                 t.printStackTrace();
+                handleSnapshotPostException(receivePack, receiveCommand, new InternalErrorException());
             }
         }
+    }
+
+    private void handleSnapshotPostException(ReceivePack receivePack, ReceiveCommand receiveCommand, SnapshotPostException e) {
+        String message = e.getMessage();
+        receivePack.sendError(message);
+        for (String line : e.getDescriptionLines()) {
+            receivePack.sendMessage("hint: " + line);
+        }
+        receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
     }
 
     private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {

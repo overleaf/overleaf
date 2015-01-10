@@ -69,7 +69,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException {
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException {
         mainProjectLock.lockForProject(projectName);
         try {
             System.out.println("Pushing project: " + projectName);
@@ -86,8 +86,6 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         } catch (SnapshotPostException e) {
             throw e;
         } catch (IOException e) {
-            throw e;
-        } catch (FailedConnectionException e) {
             throw e;
         } finally {
             mainProjectLock.unlockForProject(projectName);

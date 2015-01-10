@@ -5,8 +5,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
+import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
@@ -29,7 +28,7 @@ public class WLBridgedProject {
         this.writeLatexDataSource = writeLatexDataSource;
     }
 
-    public void buildRepository() throws RepositoryNotFoundException, ServiceNotEnabledException, FailedConnectionException {
+    public void buildRepository() throws RepositoryNotFoundException, ServiceMayNotContinueException {
         writeLatexDataSource.lockForProject(name);
         if (repository.getObjectDatabase().exists()) {
             updateRepositoryFromSnapshots(repository);
@@ -39,7 +38,7 @@ public class WLBridgedProject {
         writeLatexDataSource.unlockForProject(name);
     }
 
-    private void updateRepositoryFromSnapshots(Repository repository) throws ServiceNotEnabledException, RepositoryNotFoundException, FailedConnectionException {
+    private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
         List<WritableRepositoryContents> writableRepositories;
         try {
             writableRepositories = writeLatexDataSource.getWritableRepositories(name);
@@ -54,24 +53,23 @@ public class WLBridgedProject {
                 git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
                             .setMessage(contents.getCommitMessage())
                             .call();
-                System.out.println(repository.getDirectory());
                 WLFileStore.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
             }
         } catch (GitAPIException e) {
-            throw new ServiceNotEnabledException();
+            throw new ServiceMayNotContinueException(e);
         } catch (IOException e) {
-            throw new ServiceNotEnabledException();
+            throw new ServiceMayNotContinueException(e);
         }
     }
 
-    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceNotEnabledException, FailedConnectionException {
+    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
         if (!writeLatexDataSource.repositoryExists(name)) {
             throw new RepositoryNotFoundException(name);
         }
         try {
             repository.create();
         } catch (IOException e) {
-            throw new ServiceNotEnabledException();
+            throw new ServiceMayNotContinueException(e);
         }
         updateRepositoryFromSnapshots(repository);
     }

@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
@@ -24,22 +26,45 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        if (request.getMethod().equals("POST") && request.getPathInfo().endsWith("postback")) {
-            String contents = Util.getContentsOfReader(request.getReader());
-            String[] parts = request.getRequestURI().split("/");
-            if (parts.length < 4) {
-                throw new ServletException();
+
+        try {
+            if (request.getMethod().equals("POST") && target.endsWith("postback")) {
+                response.setContentType("application/json");
+                String contents = Util.getContentsOfReader(request.getReader());
+                String[] parts = request.getRequestURI().split("/");
+                if (parts.length < 4) {
+                    System.out.println("Invalid postback url");
+                    throw new ServletException();
+                }
+                String projectName = parts[1];
+                String postbackKey = parts[2];
+                System.out.println("Postback received for project: " + projectName);
+                SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
+                JsonObject body = new JsonObject();
+
+                try {
+                    postbackContents.processPostback();
+                } catch (UnexpectedPostbackException e) {
+                    response.setStatus(HttpServletResponse.SC_CONFLICT);
+                    body.add("code", new JsonPrimitive("unexpectedPostback"));
+                    response.getWriter().println(body);
+                    baseRequest.setHandled(true);
+                    return;
+                }
+                response.setStatus(HttpServletResponse.SC_OK);
+                body.add("code", new JsonPrimitive("success"));
+                response.getWriter().println(body);
+                baseRequest.setHandled(true);
             }
-            String projectName = parts[1];
-            String postbackKey = parts[2];
-            System.out.println("Postback received for project: " + projectName);
-            SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
-            try {
-                postbackContents.processPostback();
-            } catch (UnexpectedPostbackException e) {
-                throw new ServletException();
-            }
-            baseRequest.setHandled(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (ServletException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            throw e;
         }
     }
 
