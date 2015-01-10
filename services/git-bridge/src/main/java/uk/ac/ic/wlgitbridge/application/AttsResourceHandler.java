@@ -29,7 +29,7 @@ public class AttsResourceHandler extends ResourceHandler {
         String method = baseRequest.getMethod();
         if (method.equals("GET")) {
             HttpURI uri = baseRequest.getUri();
-            Util.sout(method + " " + uri);
+            Util.sout(method + " <- " + uri);
             MultiMap<String> multimap = new MultiMap<String>();
             uri.decodeQueryTo(multimap);
             String[] pathSections = uri.getPath().split("/");

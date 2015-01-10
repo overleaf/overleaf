@@ -37,7 +37,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                Util.sout(baseRequest.getMethod() + " " + baseRequest.getUri());
+                Util.sout(baseRequest.getMethod() + " <- " + baseRequest.getUri());
                 SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
