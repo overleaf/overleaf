@@ -9,13 +9,7 @@ public class SnapshotGetSavedVersRequestTest {
 
     @Test
     public void nothingToTest() {
-//        SnapshotGetSavedVersRequest request = new SnapshotGetSavedVersRequest("1826rqgsdb");
-//        request.request();
-//        try {
-//            System.out.println(request.getResult());
-//        } catch (Throwable throwable) {
-//            throwable.printStackTrace();
-//        }
+
     }
 
 }

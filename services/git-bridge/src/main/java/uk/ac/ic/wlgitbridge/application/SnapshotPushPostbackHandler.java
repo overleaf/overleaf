@@ -33,12 +33,11 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
                 String contents = Util.getContentsOfReader(request.getReader());
                 String[] parts = request.getRequestURI().split("/");
                 if (parts.length < 4) {
-                    System.out.println("Invalid postback url");
                     throw new ServletException();
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                System.out.println("Postback received for project: " + projectName);
+                Util.sout(baseRequest.getMethod() + " " + baseRequest.getUri());
                 SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
@@ -57,13 +56,13 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
                 baseRequest.setHandled(true);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw e;
         } catch (ServletException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw e;
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw e;
         }
     }

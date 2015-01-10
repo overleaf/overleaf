@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
@@ -44,7 +45,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
             } catch (SnapshotPostException e) {
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
-                t.printStackTrace();
+                Util.printStackTrace(t);
                 handleSnapshotPostException(receivePack, receiveCommand, new InternalErrorException());
             }
         }

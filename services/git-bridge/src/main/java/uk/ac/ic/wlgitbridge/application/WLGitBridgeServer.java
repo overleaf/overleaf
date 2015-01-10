@@ -64,16 +64,16 @@ public class WLGitBridgeServer {
     public void start() {
         try {
             jettyServer.start();
-            System.out.println();
-            System.out.println(Util.getServiceName() + "-Git Bridge server started");
-            System.out.println("Listening on port: " + port);
-            System.out.println("Bridged to: " + writeLatexHostname);
-            System.out.println("Postback base URL: " + Util.getPostbackURL());
-            System.out.println("Root git directory path: " + rootGitDirectoryPath);
+            Util.sout();
+            Util.sout(Util.getServiceName() + "-Git Bridge server started");
+            Util.sout("Listening on port: " + port);
+            Util.sout("Bridged to: " + writeLatexHostname);
+            Util.sout("Postback base URL: " + Util.getPostbackURL());
+            Util.sout("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         }
     }
 
@@ -81,7 +81,7 @@ public class WLGitBridgeServer {
         try {
             jettyServer.stop();
         } catch (Exception e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         }
     }
 

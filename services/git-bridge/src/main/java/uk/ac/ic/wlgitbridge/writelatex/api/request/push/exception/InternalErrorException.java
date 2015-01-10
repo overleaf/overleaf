@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Winston on 09/01/15.
  */
-public class InternalErrorException extends SnapshotPostException {
+public class InternalErrorException extends SevereSnapshotPostException {
 
     @Override
     public String getMessage() {

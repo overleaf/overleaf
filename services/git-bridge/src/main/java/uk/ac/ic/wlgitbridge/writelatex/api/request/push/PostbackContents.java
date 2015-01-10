@@ -39,7 +39,6 @@ public class PostbackContents {
                         throw new PostbackTimeoutException();
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
                     throw new InternalErrorException();
                 }
             }

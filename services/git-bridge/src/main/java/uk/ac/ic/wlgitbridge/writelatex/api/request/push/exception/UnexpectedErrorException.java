@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Winston on 16/11/14.
  */
-public class UnexpectedErrorException extends SnapshotPostException {
+public class UnexpectedErrorException extends SevereSnapshotPostException {
 
     private static final String[] DESCRIPTION_LINES = {
             "There was an internal error with the " + Util.getServiceName() + " server.",

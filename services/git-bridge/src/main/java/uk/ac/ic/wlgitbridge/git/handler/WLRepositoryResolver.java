@@ -32,7 +32,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         try {
             return repositorySource.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
         } catch (RepositoryNotFoundException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw e;
             /*
         } catch (ServiceNotAuthorizedException e) {
@@ -41,10 +41,10 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
             cannot occur
             */
         } catch (ServiceMayNotContinueException e) { /* Such as FailedConnectionException */
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw e;
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
             throw new ServiceMayNotContinueException(e);
         }
     }

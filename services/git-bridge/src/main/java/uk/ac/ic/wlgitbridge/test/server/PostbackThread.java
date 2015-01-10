@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.test.server;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.ning.http.client.AsyncHttpClient;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -28,11 +29,11 @@ public class PostbackThread extends Thread {
         try {
             new AsyncHttpClient().preparePost(url).setBody(postback).execute().get().getResponseBody();
         } catch (IOException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         }
     }
 

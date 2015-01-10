@@ -7,6 +7,7 @@ import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClient.BoundRequestBuilder;
 import com.ning.http.client.Realm;
 import com.ning.http.client.Response;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 
 import java.util.concurrent.ExecutionException;
@@ -62,12 +63,12 @@ public abstract class Request<T extends Result> {
     }
 
     private void performGetRequest() {
-        System.out.println("GET -> " + url);
+        Util.sout("GET -> " + url);
         request(new AsyncHttpClient().prepareGet(url));
     }
 
     private void performPostRequest() {
-        System.out.println("POST -> " + url);
+        Util.sout("POST -> " + url);
         request(new AsyncHttpClient().preparePost(url).setBody(getPostBody()).setHeader("Content-Type", "application/json"));
     }
 
@@ -77,13 +78,13 @@ public abstract class Request<T extends Result> {
             @Override
             public T onCompleted(Response response) throws Exception {
                 String body = response.getResponseBody();
-                System.out.println(response.getStatusText() + " (" + body.length() + " data bytes) -> " + url);
+                Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + body.length() + "B) -> " + url);
                 return parseResponse(new Gson().fromJson(body, JsonElement.class));
             }
 
             @Override
             public void onThrowable(Throwable t) {
-                t.printStackTrace();
+                Util.printStackTrace(t);
                 error = true;
             }
 

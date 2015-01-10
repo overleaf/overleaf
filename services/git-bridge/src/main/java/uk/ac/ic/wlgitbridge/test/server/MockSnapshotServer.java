@@ -4,6 +4,7 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import uk.ac.ic.wlgitbridge.test.response.SnapshotResponseBuilder;
 import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIState;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 /**
  * Created by Winston on 09/01/15.
@@ -24,10 +25,9 @@ public class MockSnapshotServer {
         try {
             server.start();
         } catch (Exception e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         }
         port = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
-        System.out.println(port);
     }
 
     public void setState(SnapshotAPIState state) {

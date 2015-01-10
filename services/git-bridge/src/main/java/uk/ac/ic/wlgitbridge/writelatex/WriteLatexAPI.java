@@ -4,16 +4,14 @@ import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequestResult;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.*;
 import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
 
 import java.io.IOException;
@@ -63,7 +61,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
 
     @Override
     public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException {
-        System.out.println("Fetching project: " + projectName);
+        Util.sout("Fetching project: " + projectName);
         List<WritableRepositoryContents> writableRepositoryContents = dataModel.updateProjectWithName(projectName);
         return writableRepositoryContents;
     }
@@ -72,7 +70,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException {
         mainProjectLock.lockForProject(projectName);
         try {
-            System.out.println("Pushing project: " + projectName);
+            Util.sout("Pushing project: " + projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
             CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname, postbackKey);
             SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
@@ -83,6 +81,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
             } else {
                 throw new OutOfDateException();
             }
+        } catch (SevereSnapshotPostException e) {
+            e.printStackTrace();
+            throw e;
         } catch (SnapshotPostException e) {
             throw e;
         } catch (IOException e) {

@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.application;
 import uk.ac.ic.wlgitbridge.application.exception.InvalidConfigFileException;
 import uk.ac.ic.wlgitbridge.application.exception.InvalidProgramArgumentsException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -35,16 +36,16 @@ public class WLGitBridgeApplication {
             printUsage();
             System.exit(EXIT_CODE_FAILED);
         } catch (InvalidConfigFileException e) {
-            System.out.println("The property for " + e.getMissingMember() + " is invalid. Check your config file.");
+            System.err.println("The property for " + e.getMissingMember() + " is invalid. Check your config file.");
             System.exit(EXIT_CODE_FAILED);
         } catch (IOException e) {
-            System.out.println("Invalid config file. Check the file path.");
+            System.err.println("Invalid config file. Check the file path.");
             System.exit(EXIT_CODE_FAILED);
         }
         try {
             server = new WLGitBridgeServer(config);
         } catch (ServletException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         } catch (InvalidRootDirectoryPathException e) {
             System.out.println("Invalid root git directory path. Check your config file.");
             System.exit(EXIT_CODE_FAILED);

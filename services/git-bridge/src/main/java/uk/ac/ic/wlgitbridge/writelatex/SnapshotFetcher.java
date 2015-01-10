@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocResult;
@@ -38,7 +39,7 @@ public class SnapshotFetcher implements PersistentStoreSource {
         for (Snapshot snapshot : newSnapshots) {
             persistentStore.addSnapshot(projectName, snapshot.getVersionID());
         }
-        System.out.println("Fetched snapshots: " + newSnapshots);
+        Util.sout("Fetched snapshots: " + newSnapshots);
         return newSnapshots;
     }
 

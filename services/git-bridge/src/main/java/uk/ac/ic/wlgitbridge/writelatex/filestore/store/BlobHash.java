@@ -16,7 +16,6 @@ public class BlobHash {
         try {
             md = MessageDigest.getInstance("SHA-256");
             hash = md.digest(blob);
-            System.out.println(Arrays.toString(hash));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

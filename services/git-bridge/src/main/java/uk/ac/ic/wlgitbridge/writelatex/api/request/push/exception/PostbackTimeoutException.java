@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Winston on 09/01/15.
  */
-public class PostbackTimeoutException extends SnapshotPostException {
+public class PostbackTimeoutException extends SevereSnapshotPostException {
 
     @Override
     public String getMessage() {

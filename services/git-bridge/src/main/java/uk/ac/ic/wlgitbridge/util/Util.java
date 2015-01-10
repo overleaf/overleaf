@@ -4,6 +4,10 @@ import uk.ac.ic.wlgitbridge.application.SSLConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by Winston on 19/11/14.
@@ -15,6 +19,7 @@ public class Util {
     private static SSLConfig SSL_CONFIG;
     private static int PORT;
     private static String POSTBACK_URL;
+    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
     public static String entries(int entries) {
         if (entries == 1) {
@@ -85,4 +90,41 @@ public class Util {
     public static String getPostbackURL() {
         return POSTBACK_URL;
     }
+
+    private static void println(PrintStream ps, String ln) {
+        ps.println(getStringBuilder().append(ln));
+    }
+
+    public static void sout(String ln) {
+        println(System.out, ln);
+    }
+
+    public static void serr(String ln) {
+        println(System.err, ln);
+    }
+
+    private static StringBuilder getStringBuilder() {
+        StringBuilder sb = new StringBuilder("[");
+        sb.append(dateFormat.format(new Date()));
+        sb.append("] ");
+        return sb;
+    }
+
+    public static void sout() {
+        sout("");
+    }
+
+    public static void serr() {
+        serr("");
+    }
+
+    public static void serr(Object obj) {
+        serr(obj.toString());
+    }
+
+    public static void printStackTrace(Throwable t) {
+        serr();
+        t.printStackTrace();
+    }
+
 }

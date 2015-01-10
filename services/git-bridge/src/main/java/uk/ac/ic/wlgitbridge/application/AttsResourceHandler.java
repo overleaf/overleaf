@@ -4,6 +4,7 @@ import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.MultiMap;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 
@@ -28,7 +29,7 @@ public class AttsResourceHandler extends ResourceHandler {
         String method = baseRequest.getMethod();
         if (method.equals("GET")) {
             HttpURI uri = baseRequest.getUri();
-            System.out.println(method + " " + uri);
+            Util.sout(method + " " + uri);
             MultiMap<String> multimap = new MultiMap<String>();
             uri.decodeQueryTo(multimap);
             String[] pathSections = uri.getPath().split("/");

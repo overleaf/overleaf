@@ -5,6 +5,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.test.exception.InvalidAPICallException;
 import uk.ac.ic.wlgitbridge.test.response.SnapshotResponse;
 import uk.ac.ic.wlgitbridge.test.response.SnapshotResponseBuilder;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -30,9 +31,9 @@ public class MockSnapshotRequestHandler extends AbstractHandler {
             response.getWriter().println(snapshotResponse.respond());
             new PostbackThread(baseRequest.getReader(), snapshotResponse.postback()).startIfNotNull();
         } catch (InvalidAPICallException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         } catch (RuntimeException e) {
-            e.printStackTrace();
+            Util.printStackTrace(e);
         }
         baseRequest.setHandled(true);
     }
