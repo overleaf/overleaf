@@ -62,10 +62,12 @@ public abstract class Request<T extends Result> {
     }
 
     private void performGetRequest() {
+        System.out.println("GET -> " + url);
         request(new AsyncHttpClient().prepareGet(url));
     }
 
     private void performPostRequest() {
+        System.out.println("POST -> " + url);
         request(new AsyncHttpClient().preparePost(url).setBody(getPostBody()).setHeader("Content-Type", "application/json"));
     }
 
@@ -74,7 +76,7 @@ public abstract class Request<T extends Result> {
 
             @Override
             public T onCompleted(Response response) throws Exception {
-                System.out.println("Response: " + response.getResponseBody());
+                System.out.println("Response -> " + url);
                 return parseResponse(new Gson().fromJson(response.getResponseBody(), JsonElement.class));
             }
 
