@@ -9,13 +9,15 @@ Required
 Installation
 ------------
 ### Ubuntu ###
-Run `sudo ./install.sh` to get dependencies, build, test, package, and make it a service.
+Run `./install` to get dependencies, build, test, package, and make it a service.
 
 Use `sudo service wlgb start` and `sudo service wlgb stop` to start and stop the server.
 
 The configuration file will be at `/etc/wlgb/config.json`.
 
-Run `sudo ./uninstall.sh` to undo what `sudo ./install.sh` did.
+Run `./reinstall` to test, package and install the current version if `./install` has already been run.
+
+Run `./uninstall` to undo what `./install` did.
 ### Manually ###
 Run `mvn package` to build, test, and package it into a jar at `target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar`.
 
