@@ -25,6 +25,9 @@
         <module name="writelatex-git-bridge" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="writelatex-git-bridge" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 
