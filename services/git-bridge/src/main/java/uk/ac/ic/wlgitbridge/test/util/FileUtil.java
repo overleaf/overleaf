@@ -1,5 +1,11 @@
 package uk.ac.ic.wlgitbridge.test.util;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +18,20 @@ import java.util.Set;
  * Created by Winston on 11/01/15.
  */
 public class FileUtil {
+
+    public static boolean currentCommitsAreEqual(Path dir1, Path dir2) {
+        try {
+            RevCommit commit1 = new Git(new FileRepositoryBuilder().setWorkTree(dir1.toFile().getAbsoluteFile()).build()).log().call().iterator().next();
+            RevCommit commit2 = new Git(new FileRepositoryBuilder().setWorkTree(dir2.toFile().getAbsoluteFile()).build()).log().call().iterator().next();
+            return commit1.equals(commit2);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (NoHeadException e) {
+            return false;
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static boolean gitDirectoriesAreEqual(Path dir1, Path dir2) {
         Set<String> dir1Contents = getAllFilesRecursivelyInDirectoryApartFrom(dir1, dir1.resolve(".git"));
@@ -34,13 +54,19 @@ public class FileUtil {
         try {
             byte[] firstContents = Files.readAllBytes(first);
             byte[] secondContents = Files.readAllBytes(second);
-            return Arrays.equals(firstContents, secondContents);
+            boolean equals = Arrays.equals(firstContents, secondContents);
+            if (!equals) {
+                System.out.println("Not equal: (" + first + ", " + second + ")");
+                System.out.println(first + ": " + new String(firstContents));
+                System.out.println(second + ": " + new String(secondContents));
+            }
+            return equals;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    static Set<String> getAllFilesRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+    public static Set<String> getAllFilesRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
         if (!dir.toFile().isDirectory()) {
             throw new IllegalArgumentException("need a directory");
         }

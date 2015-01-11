@@ -25,17 +25,19 @@ public class MockSnapshotRequestHandler extends AbstractHandler {
 
     @Override
     public void handle(String target, final Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-
+        boolean handled;
         try {
             final SnapshotResponse snapshotResponse = responseBuilder.buildWithTarget(target, baseRequest.getMethod());
             response.getWriter().println(snapshotResponse.respond());
             new PostbackThread(baseRequest.getReader(), snapshotResponse.postback()).startIfNotNull();
+            handled = true;
         } catch (InvalidAPICallException e) {
-            Util.printStackTrace(e);
+            handled = false;
         } catch (RuntimeException e) {
             Util.printStackTrace(e);
+            handled = true;
         }
-        baseRequest.setHandled(true);
+        baseRequest.setHandled(handled);
     }
 
 }

@@ -2,9 +2,13 @@ package uk.ac.ic.wlgitbridge.test.server;
 
 import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 import uk.ac.ic.wlgitbridge.test.response.SnapshotResponseBuilder;
 import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIState;
 import uk.ac.ic.wlgitbridge.util.Util;
+
+import java.io.File;
 
 /**
  * Created by Winston on 09/01/15.
@@ -15,10 +19,23 @@ public class MockSnapshotServer {
     private final SnapshotResponseBuilder responseBuilder;
     private int port;
 
-    public MockSnapshotServer() {
+    public MockSnapshotServer(File resourceBase) {
         server = new Server(60000);
         responseBuilder = new SnapshotResponseBuilder();
-        server.setHandler(new MockSnapshotRequestHandler(responseBuilder));
+        server.setHandler(getHandlerForResourceBase(resourceBase));
+    }
+
+    private HandlerCollection getHandlerForResourceBase(File resourceBase) {
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.addHandler(new MockSnapshotRequestHandler(responseBuilder));
+        handlers.addHandler(resourceHandlerWithBase(resourceBase));
+        return handlers;
+    }
+
+    private ResourceHandler resourceHandlerWithBase(File resourceBase) {
+        ResourceHandler resourceHandler = new ResourceHandler();
+        resourceHandler.setResourceBase(resourceBase.getAbsolutePath());
+        return resourceHandler;
     }
 
     public void start() {
