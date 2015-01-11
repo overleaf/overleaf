@@ -27,7 +27,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Winston on 11/01/15.
  */
-public class IntegrationTest {
+public class WLGitBridgeIT {
 
     private MockSnapshotServer server;
     private Map<String, Map<String, SnapshotAPIState>> states =
@@ -42,7 +42,7 @@ public class IntegrationTest {
 
     @Before
     public void startMockSnapshotAPIServer() throws URISyntaxException {
-        server = new MockSnapshotServer(Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/IntegrationTest/").toURI()).toFile());
+        server = new MockSnapshotServer(Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/WLGitBridgeIT/").toURI()).toFile());
         server.start();
     }
 
@@ -83,14 +83,14 @@ public class IntegrationTest {
 
     private Path getResource(String path) {
         try {
-            return Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/IntegrationTest" + path).toURI());
+            return Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/WLGitBridgeIT" + path).toURI());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
 
     private InputStream getResourceAsStream(String path) {
-        return getClass().getResourceAsStream("/uk/ac/ic/wlgitbridge/IntegrationTest" + path);
+        return getClass().getResourceAsStream("/uk/ac/ic/wlgitbridge/WLGitBridgeIT" + path);
     }
 
 }
