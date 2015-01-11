@@ -56,9 +56,9 @@ public class FileUtil {
             byte[] secondContents = Files.readAllBytes(second);
             boolean equals = Arrays.equals(firstContents, secondContents);
             if (!equals) {
-                System.out.println("Not equal: (" + first + ", " + second + ")");
-                System.out.println(first + ": " + new String(firstContents));
-                System.out.println(second + ": " + new String(secondContents));
+//                System.out.println("Not equal: (" + first + ", " + second + ")");
+//                System.out.println(first + ": " + new String(firstContents));
+//                System.out.println(second + ": " + new String(secondContents));
             }
             return equals;
         } catch (IOException e) {
