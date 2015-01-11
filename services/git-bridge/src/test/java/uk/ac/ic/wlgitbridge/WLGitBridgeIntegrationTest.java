@@ -32,6 +32,10 @@ public class WLGitBridgeIntegrationTest {
                 put("canCloneMultipleRepositories", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneMultipleRepositories/state/state.json")).build());
                 }});
+                put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
+                    put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -82,6 +86,26 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), testproj1.toPath()));
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2.toPath()));
+    }
+
+    @Test
+    public void canPullAModifiedTexFile() throws IOException, GitAPIException {
+        MockSnapshotServer server = new MockSnapshotServer(3859, getResource("/canPullAModifiedTexFile").toFile());
+        server.start();
+        server.setState(states.get("canPullAModifiedTexFile").get("base"));
+        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+                makeConfigFile(33859, 3859)
+        });
+        wlgb.run();
+        folder.create();
+        File git = folder.newFolder();
+        Git.cloneRepository()
+                .setURI("http://127.0.0.1:33859/testproj.git")
+                .setDirectory(git)
+                .call()
+                .close();
+        wlgb.stop();
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/testproj"), git.toPath()));
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
