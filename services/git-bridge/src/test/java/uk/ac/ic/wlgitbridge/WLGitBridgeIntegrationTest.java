@@ -39,7 +39,7 @@ public class WLGitBridgeIntegrationTest {
 
     @Before
     public void startMockSnapshotAPIServer() throws URISyntaxException {
-        server = new MockSnapshotServer(Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest/").toURI()).toFile());
+        server = new MockSnapshotServer(getResource("/").toFile());
         server.start();
     }
 
