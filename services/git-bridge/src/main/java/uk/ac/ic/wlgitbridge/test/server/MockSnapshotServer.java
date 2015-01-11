@@ -19,8 +19,8 @@ public class MockSnapshotServer {
     private final SnapshotResponseBuilder responseBuilder;
     private int port;
 
-    public MockSnapshotServer(File resourceBase) {
-        server = new Server(60000);
+    public MockSnapshotServer(int port, File resourceBase) {
+        server = new Server(port);
         responseBuilder = new SnapshotResponseBuilder();
         server.setHandler(getHandlerForResourceBase(resourceBase));
     }

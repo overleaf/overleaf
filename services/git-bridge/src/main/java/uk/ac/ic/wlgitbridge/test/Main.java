@@ -11,7 +11,7 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) {
-        MockSnapshotServer server = new MockSnapshotServer(new File("/Users/Roxy/Code/java/writelatex-git-bridge"));
+        MockSnapshotServer server = new MockSnapshotServer(60000, new File("/Users/Roxy/Code/java/writelatex-git-bridge"));
         server.setState(new SnapshotAPIState());
         server.start();
     }

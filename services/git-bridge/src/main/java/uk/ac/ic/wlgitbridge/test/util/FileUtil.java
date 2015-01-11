@@ -36,7 +36,13 @@ public class FileUtil {
     public static boolean gitDirectoriesAreEqual(Path dir1, Path dir2) {
         Set<String> dir1Contents = getAllFilesRecursivelyInDirectoryApartFrom(dir1, dir1.resolve(".git"));
         Set<String> dir2Contents = getAllFilesRecursivelyInDirectoryApartFrom(dir2, dir2.resolve(".git"));
-        return dir1Contents.equals(dir2Contents) && directoryContentsEqual(dir1Contents, dir1, dir2);
+        boolean filesEqual = dir1Contents.equals(dir2Contents);
+        if (!filesEqual) {
+            System.out.println("Not equal: (" + dir1Contents + ", " + dir2Contents + ")");
+            System.out.println(dir1 + ": " + dir1Contents);
+            System.out.println(dir2 + ": " + dir2Contents);
+        }
+        return filesEqual && directoryContentsEqual(dir1Contents, dir1, dir2);
     }
 
     static boolean directoryContentsEqual(Set<String> dirContents, Path dir1, Path dir2) {
