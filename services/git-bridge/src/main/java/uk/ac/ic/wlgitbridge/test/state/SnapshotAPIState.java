@@ -24,7 +24,21 @@ public class SnapshotAPIState {
     private Map<String, SnapshotPushResult> push;
     private Map<String, SnapshotPostbackRequest> postback;
 
+    public SnapshotAPIState(Map<String, SnapshotGetDocResult> getDoc,
+                            Map<String, SnapshotGetSavedVersResult> getSavedVers,
+                            Map<String, Map<Integer, SnapshotGetForVersionResult>> getForVers,
+                            Map<String, SnapshotPushResult> push,
+                            Map<String, SnapshotPostbackRequest> postback) {
+
+        this.getDoc = getDoc;
+        this.getSavedVers = getSavedVers;
+        this.getForVers = getForVers;
+        this.push = push;
+        this.postback = postback;
+    }
+
     public SnapshotAPIState() {
+
         getDoc = new HashMap<String, SnapshotGetDocResult>();
         getDoc.put("1826rqgsdb", new SnapshotGetDocResult(243, "2014-11-30T18:40:58Z", "jdleesmiller+1@gmail.com", "John+1"));
 
