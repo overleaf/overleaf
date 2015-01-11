@@ -99,13 +99,16 @@ public class WLGitBridgeIntegrationTest {
         wlgb.run();
         folder.create();
         File git = folder.newFolder();
-        Git.cloneRepository()
+        Git base = Git.cloneRepository()
                 .setURI("http://127.0.0.1:33859/testproj.git")
                 .setDirectory(git)
-                .call()
-                .close();
-        wlgb.stop();
+                .call();
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/testproj"), git.toPath()));
+        server.setState(states.get("canPullAModifiedTexFile").get("withModifiedTexFile"));
+        base.pull().call();
+        base.close();
+        wlgb.stop();
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/testproj"), git.toPath()));
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
