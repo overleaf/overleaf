@@ -8,7 +8,7 @@ installDeps() {
 }
 
 command -v mvn >/dev/null 2>&1 && command -v /usr/lib/jvm/java-7-openjdk-amd64/bin/javac >/dev/null 2>&1 || installDeps
-sudo mvn package &&\
+mvn package &&\
 sudo cp ./target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar /usr/local/sbin/writelatex-git-bridge.jar &&\
 sudo cp ./bin/wlgb /etc/init.d/ &&\
 sudo mkdir -p /var/log/wlgb &&\
