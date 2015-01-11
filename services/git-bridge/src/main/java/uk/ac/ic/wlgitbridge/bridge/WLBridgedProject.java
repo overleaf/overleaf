@@ -49,6 +49,9 @@ public class WLBridgedProject {
             for (WritableRepositoryContents contents : writableRepositories) {
                 contents.write();
                 Git git = new Git(repository);
+                for (String missing : git.status().call().getMissing()) {
+                    git.rm().setCached(true).addFilepattern(missing).call();
+                }
                 git.add().addFilepattern(".").call();
                 git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
                             .setMessage(contents.getCommitMessage())

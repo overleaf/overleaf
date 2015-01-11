@@ -58,6 +58,7 @@ public class WLFileStore implements PersistentStoreSource {
                 if (file.isDirectory()) {
                     deleteInDirectory(file);
                 }
+                System.out.println("deleting: " + file.getAbsolutePath());
                 file.delete();
             }
         }

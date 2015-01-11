@@ -36,6 +36,10 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
                     put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
                 }});
+                put("canPullADeletedTexFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/base/state.json")).build());
+                    put("withDeletedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/withDeletedTexFile/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -109,6 +113,29 @@ public class WLGitBridgeIntegrationTest {
         base.close();
         wlgb.stop();
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/testproj"), git.toPath()));
+    }
+
+    @Test
+    public void canPullADeletedTexFile() throws IOException, GitAPIException {
+        MockSnapshotServer server = new MockSnapshotServer(3860, getResource("/canPullADeletedTexFile").toFile());
+        server.start();
+        server.setState(states.get("canPullADeletedTexFile").get("base"));
+        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+                makeConfigFile(33860, 3860)
+        });
+        wlgb.run();
+        folder.create();
+        File git = folder.newFolder();
+        Git base = Git.cloneRepository()
+                .setURI("http://127.0.0.1:33860/testproj.git")
+                .setDirectory(git)
+                .call();
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/base/testproj"), git.toPath()));
+        server.setState(states.get("canPullADeletedTexFile").get("withDeletedTexFile"));
+        base.pull().call();
+        base.close();
+        wlgb.stop();
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/withDeletedTexFile/testproj"), git.toPath()));
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {

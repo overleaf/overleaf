@@ -34,8 +34,8 @@ public class FileUtil {
     }
 
     public static boolean gitDirectoriesAreEqual(Path dir1, Path dir2) {
-        Set<String> dir1Contents = getAllFilesRecursivelyInDirectoryApartFrom(dir1, dir1.resolve(".git"));
-        Set<String> dir2Contents = getAllFilesRecursivelyInDirectoryApartFrom(dir2, dir2.resolve(".git"));
+        Set<String> dir1Contents = getAllRecursivelyInDirectoryApartFrom(dir1, dir1.resolve(".git"));
+        Set<String> dir2Contents = getAllRecursivelyInDirectoryApartFrom(dir2, dir2.resolve(".git"));
         boolean filesEqual = dir1Contents.equals(dir2Contents);
         if (!filesEqual) {
             System.out.println("Not equal: (" + dir1Contents + ", " + dir2Contents + ")");
@@ -72,20 +72,31 @@ public class FileUtil {
         }
     }
 
-    public static Set<String> getAllFilesRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+    public static Set<String> getAllRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+        return getAllRecursivelyInDirectoryApartFrom(dir, excluded, true);
+    }
+
+    public static Set<String> getOnlyFilesRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+        return getAllRecursivelyInDirectoryApartFrom(dir, excluded, false);
+    }
+
+    private static Set<String> getAllRecursivelyInDirectoryApartFrom(Path dir, Path excluded, boolean directories) {
         if (!dir.toFile().isDirectory()) {
             throw new IllegalArgumentException("need a directory");
         }
-        return getAllFilesRecursively(dir, dir, excluded);
+        return getAllFilesRecursively(dir, dir, excluded, directories);
     }
 
-    static Set<String> getAllFilesRecursively(Path baseDir, Path dir, Path excluded) {
+    static Set<String> getAllFilesRecursively(Path baseDir, Path dir, Path excluded, boolean directories) {
         Set<String> files = new HashSet<String>();
         for (File file : dir.toFile().listFiles()) {
             if (!file.equals(excluded.toFile())) {
-                files.add(baseDir.relativize(file.toPath()).toString());
-                if (file.isDirectory()) {
-                    files.addAll(getAllFilesRecursively(baseDir, file.toPath(), excluded));
+                boolean isDirectory = file.isDirectory();
+                if (directories || !isDirectory) {
+                    files.add(baseDir.relativize(file.toPath()).toString());
+                }
+                if (isDirectory) {
+                    files.addAll(getAllFilesRecursively(baseDir, file.toPath(), excluded, directories));
                 }
             }
         }
