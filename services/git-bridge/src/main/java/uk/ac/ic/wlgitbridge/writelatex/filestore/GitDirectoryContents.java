@@ -36,7 +36,6 @@ public class GitDirectoryContents implements WritableRepositoryContents {
     public void write() throws IOException, FailedConnectionException {
         WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git");
         for (FileNode fileNode : fileNodes) {
-            System.out.println("Writing: " + fileNode.getFilePath());
             fileNode.writeToDisk(gitDirectory);
         }
     }
