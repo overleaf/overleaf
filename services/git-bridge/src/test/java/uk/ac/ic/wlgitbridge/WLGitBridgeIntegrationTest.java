@@ -12,10 +12,7 @@ import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIState;
 import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIStateBuilder;
 import uk.ac.ic.wlgitbridge.test.util.FileUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,15 +79,15 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private Path getResource(String path) {
-        try {
-            return Paths.get(getClass().getResource("/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path).toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
+        return Paths.get("src/test/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
     }
 
     private InputStream getResourceAsStream(String path) {
-        return getClass().getResourceAsStream("/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
+        try {
+            return new FileInputStream(getResource(path).toFile());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

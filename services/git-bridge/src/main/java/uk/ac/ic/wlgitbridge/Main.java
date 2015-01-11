@@ -2,6 +2,8 @@ package uk.ac.ic.wlgitbridge;
 
 import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
 
+import java.nio.file.Paths;
+
 /**
  * Created by Winston on 01/11/14.
  */
