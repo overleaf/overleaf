@@ -18,8 +18,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Winston on 11/01/15.
@@ -58,7 +57,7 @@ public class WLGitBridgeIntegrationTest {
            .call()
            .close();
         wlgb.stop();
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/git"), git.toPath()));
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/repo"), git.toPath()));
     }
 
     private String makeConfigFile() throws IOException {
