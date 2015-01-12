@@ -35,6 +35,8 @@ define [
 					$scope.$apply()
 				progressCallback: (progress) ->
 					$scope.$emit 'progress', progress
+				errorCallback: (error) ->
+					$scope.$emit 'pdf:error', error
 			})
 
 			# we will have all the main information needed to start display
