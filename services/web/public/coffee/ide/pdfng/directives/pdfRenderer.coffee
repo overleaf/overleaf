@@ -7,6 +7,8 @@ define [
 
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
+			PAGE_LOAD_TIMEOUT: 30*1000
+			PAGE_RENDER_TIMEOUT: 30*1000
 
 			constructor: (@url, @options) ->
 				PDFJS.disableFontFace = true  # avoids repaints, uses worker more
@@ -131,13 +133,14 @@ define [
 
 				timedOut = false
 				timer = $timeout () =>
+					Raven.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
 					# console.log 'page load timed out', pagenum
 					timedOut = true
 					@spinner.stop(element.canvas)
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
 					this.errorCallback?('timeout')
-				, 30*1000
+				, @PAGE_LOAD_TIMEOUT
 
 				@pageLoad[pagenum] = @getPage(pagenum)
 
@@ -221,11 +224,12 @@ define [
 
 				timedOut = false
 
-				timer = $timeout () ->
+				timer = $timeout () =>
+					Raven.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms')
 					# console.log 'page render timed out', pagenum
 					timedOut = true
 					result.cancel()
-				, 30*1000
+				, @PAGE_RENDER_TIMEOUT
 
 				result.then () ->
 					# console.log 'page rendered', pagenum
