@@ -92,6 +92,8 @@ define [
 				# console.log 'position is', position.page, position.offset
 				# console.log 'setting current page', position.page
 				pagenum = position.page
+				if pagenum > $scope.numPages - 1
+					pagenum = $scope.numPages - 1
 				$scope.pages[pagenum].current = true
 				$scope.pages[pagenum].position = position
 
