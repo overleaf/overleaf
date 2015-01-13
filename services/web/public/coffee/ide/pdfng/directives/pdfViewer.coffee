@@ -36,6 +36,7 @@ define [
 				progressCallback: (progress) ->
 					$scope.$emit 'progress', progress
 				errorCallback: (error) ->
+					Raven.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
 			})
 
