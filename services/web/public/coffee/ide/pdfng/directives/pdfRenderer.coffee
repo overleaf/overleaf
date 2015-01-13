@@ -7,8 +7,8 @@ define [
 
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
-			PAGE_LOAD_TIMEOUT: 30*1000
-			PAGE_RENDER_TIMEOUT: 30*1000
+			PAGE_LOAD_TIMEOUT: 60*1000
+			PAGE_RENDER_TIMEOUT: 60*1000
 
 			constructor: (@url, @options) ->
 				PDFJS.disableFontFace = true  # avoids repaints, uses worker more
