@@ -91,8 +91,8 @@ define [
 						#				flashControls()
 				
 				scope.$on "loaded", () ->
-					# console.log "LOADED"
 					scope.loading = false
+					delete scope.progress
 
 				#scope.$watch "highlights", (areas) ->
 					# console.log 'got HIGHLIGHTS in pdfJS', areas
