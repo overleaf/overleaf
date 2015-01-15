@@ -26,6 +26,8 @@ ShareLaTeX should run on OS X and Linux. You need:
 * A local instance of [Redis](http://redis.io/topics/quickstart) (version 2.6.12 or later) and [MongoDB](http://docs.mongodb.org/manual/installation/) running on their standard ports.
 * [TeXLive](https://www.tug.org/texlive/) 2013 or later with the `latexmk` program installed.
 
+ShareLaTeX needs a minimum of 2gb of memory, it is likely to be more than that though depending on usage.
+
 Other repositories
 ------------------
 
