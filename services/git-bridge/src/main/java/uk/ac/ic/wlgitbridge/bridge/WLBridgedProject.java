@@ -37,6 +37,7 @@ public class WLBridgedProject {
                 buildRepositoryFromScratch(repository);
             }
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new ServiceMayNotContinueException(e);
         } finally {
             writeLatexDataSource.unlockForProject(name);
