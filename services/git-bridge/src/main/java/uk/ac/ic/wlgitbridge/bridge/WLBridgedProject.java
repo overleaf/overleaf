@@ -30,12 +30,17 @@ public class WLBridgedProject {
 
     public void buildRepository() throws RepositoryNotFoundException, ServiceMayNotContinueException {
         writeLatexDataSource.lockForProject(name);
-        if (repository.getObjectDatabase().exists()) {
-            updateRepositoryFromSnapshots(repository);
-        } else {
-            buildRepositoryFromScratch(repository);
+        try {
+            if (repository.getObjectDatabase().exists()) {
+                updateRepositoryFromSnapshots(repository);
+            } else {
+                buildRepositoryFromScratch(repository);
+            }
+        } catch (RuntimeException e) {
+            throw new ServiceMayNotContinueException(e);
+        } finally {
+            writeLatexDataSource.unlockForProject(name);
         }
-        writeLatexDataSource.unlockForProject(name);
     }
 
     private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {

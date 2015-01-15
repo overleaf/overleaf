@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.test.state;
 import uk.ac.ic.wlgitbridge.test.response.push.data.SnapshotPushResult;
 import uk.ac.ic.wlgitbridge.test.response.push.data.SnapshotPushResultSuccess;
 import uk.ac.ic.wlgitbridge.test.response.push.postback.SnapshotPostbackRequest;
+import uk.ac.ic.wlgitbridge.test.response.push.postback.SnapshotPostbackRequestInvalidProject;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.SnapshotGetDocResult;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
@@ -104,9 +105,9 @@ public class SnapshotAPIState {
         }};
 
         postback = new HashMap<String, SnapshotPostbackRequest>() {{
-//            put("1826rqgsdb", new SnapshotPostbackRequestInvalidFiles(Arrays.<InvalidFileError>asList(new InvalidFileErrorDefault("file1.fff"), new InvalidFileErrorDisallowed("file2.fff"), new InvalidFileErrorUnclean("unclean", "clean"))));
+//            put("1826rqgsdb", new SnapshotPostbackRequestInvalidFiles(Arrays.<InvalidFileError>asList(new InvalidFileErrorDefault("file1.invalid"), new InvalidFileErrorDisallowed("file2.exe"), new InvalidFileErrorUnclean("hello world.png", "hello_world.png"))));
 //            put("1826rqgsdb", new SnapshotPostbackRequestOutOfDate());
-//            put("1826rqgsdb", new SnapshotPostbackRequestInvalidProject(Arrays.asList("line1", "line2")));
+            put("1826rqgsdb", new SnapshotPostbackRequestInvalidProject(Arrays.asList("Your project is missing main.tex.", "Please name your main latex file main.tex.")));
 //            put("1826rqgsdb", new SnapshotPostbackRequestError());
         }};
     }
