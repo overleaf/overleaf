@@ -307,26 +307,57 @@ define [
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)
 
+        // shim layer with setTimeout fallback
+        requestAnimationFrame = do () ->
+          window.requestAnimationFrame  ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame    ||
+          (callback) -> window.setTimeout(callback, 1000 / 60)
+
+        rafActive = null
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
+					scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
 						updateContainer()
 						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					scope.scrolled = true
-					if scope.scrollHandlerTimeout
-						$timeout.cancel(scope.scrollHandlerTimeout)
-					scope.scrollHandlerTimeout = $timeout scrollHandler, 100
+					# scope.scrolled = true
+					# if scope.scrollHandlerTimeout
+					#	$timeout.cancel(scope.scrollHandlerTimeout)
+					# scope.scrollHandlerTimeout = $timeout scrollHandler, 100
+					if not rafActive?
+						rafActive = requestAnimationFrame(scrollCheck)
+
+				prev = null
+				scope.scrollPosition = element.scrollTop()
+				scrollCheck = (timestamp) ->
+					prev = timestamp if not prev?
+					dt = timestamp - prev
+					if (dt > 100)
+						scope.lastScrollPosition = scope.scrollPosition if not scope.lastScrollPosition?
+						dy = scope.scrollPosition - scope.lastScrollPosition
+						scope.lastScrollPosition = scope.scrollPosition
+						console.log 'handle scroll dy', dy if dy != 0
+						scope.scrolled = true if dy != 0
+						if scope.scrolled && dy == 0
+							scrollHandler()
+							scope.scrolled = false
+							rafActive = null
+							return
+					requestAnimationFrame(scrollCheck)
+
+				requestAnimationFrame(scrollCheck)
 
 				scrollHandler = () ->
-					scope.scrollHandlerTimeout = null
 					updateContainer()
 					scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
 					scope.$apply()
+					# scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
