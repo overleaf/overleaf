@@ -11,7 +11,7 @@ define [
 			PAGE_RENDER_TIMEOUT: 60*1000
 
 			constructor: (@url, @options) ->
-				PDFJS.disableFontFace = true  # avoids repaints, uses worker more
+				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
 				# PDFJS.disableAutoFetch = true # enable this to prevent loading whole file
 				# PDFJS.disableStream
 				# PDFJS.disableRange
