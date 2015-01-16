@@ -25,7 +25,7 @@ define [
 			# $scope.pages = []
 
 			$scope.document.destroy() if $scope.document?
-
+			$scope.loadCount = $scope.loadCount? ? $scope.loadCount + 1 : 1
 			# TODO need a proper url manipulation library to add to query string
 			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
 				scale: 1,
@@ -35,6 +35,9 @@ define [
 					$scope.$apply()
 				progressCallback: (progress) ->
 					$scope.$emit 'progress', progress
+				errorCallback: (error) ->
+					Raven.captureMessage?('pdfng error ' + error)
+					$scope.$emit 'pdf:error', error
 			})
 
 			# we will have all the main information needed to start display
@@ -90,6 +93,8 @@ define [
 				# console.log 'position is', position.page, position.offset
 				# console.log 'setting current page', position.page
 				pagenum = position.page
+				if pagenum > $scope.numPages - 1
+					pagenum = $scope.numPages - 1
 				$scope.pages[pagenum].current = true
 				$scope.pages[pagenum].position = position
 
@@ -291,6 +296,16 @@ define [
 					]
 					#scope.$apply()
 
+				scope.$on 'pdf:error', (event, error) ->
+					return if error == 'cancelled'
+					# check if too many retries or file is missing
+					if scope.loadCount > 3 || error.match(/^Missing PDF/i)
+						scope.$emit 'pdf:error:display'
+						return
+					ctrl.load()
+					# trigger a redraw
+					scope.scale = angular.copy (scope.scale)
+
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
 					if scope.adjustingScroll
@@ -315,6 +330,7 @@ define [
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
 					return unless newVal?
+					scope.loadCount = 0; # new pdf, so reset load count
 					ctrl.load()
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)

@@ -10,6 +10,9 @@ define [
 			$scope.recompile(isAutoCompile: true)
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
+		$scope.$on "pdf:error:display", () ->
+			$scope.pdf.error = true
+
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
 			if options.isAutoCompile
