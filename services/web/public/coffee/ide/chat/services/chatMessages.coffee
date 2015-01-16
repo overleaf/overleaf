@@ -51,7 +51,7 @@ define [
 					if messages.length < MESSAGE_LIMIT
 						chat.state.atEnd = true
 					if !messages.reverse?
-						Raven?.captureException(new Error("messages has no reverse property"), { messages: messages })
+						Raven?.captureException(new Error("messages has no reverse property #{JSON.stringify(messages)}"))
 					messages.reverse()
 					prependMessages(messages)
 					chat.state.nextBeforeTimestamp = chat.state.messages[0]?.timestamp
