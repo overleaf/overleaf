@@ -21,10 +21,14 @@ define [
 				@navigateFn = @options.navigateFn
 				@spinner = new pdfSpinner
 				@resetState()
+				@document.then (pdfDocument) =>
+					pdfDocument.getDownloadInfo().then () =>
+						@options.loadedCallback()
 				@errorCallback = @options.errorCallback
 				@pdfjs.catch (exception) =>
 					# console.log 'ERROR in get document', exception
 					@errorCallback(exception)
+
 			resetState: () ->
 				@complete = []
 				@timeout = []
