@@ -56,18 +56,22 @@ define [
 				# parent with scope.pages[i].element
 				scope.page.element = element
 
-				if (!scope.page.sized && scope.defaultPageSize)
-					updatePageSize scope.defaultPageSize
+				if !scope.page.sized
+					if scope.defaultPageSize?
+						updatePageSize scope.defaultPageSize
+					else
+						# shouldn't get here - the default page size should now
+						# always be set before redraw is called
+						handler = scope.$watch 'defaultPageSize', (defaultPageSize) ->
+							return unless defaultPageSize?
+							updatePageSize defaultPageSize
+							handler()
 
 				if scope.page.current
 						# console.log 'we must scroll to this page', scope.page.pageNum, 'at position', scope.page.position
 						renderPage()
 						# this is the current page, we want to scroll it into view
 						ctrl.setPdfPosition(scope.page, scope.page.position)
-
-				scope.$watch 'defaultPageSize', (defaultPageSize) ->
-					return unless defaultPageSize?
-					updatePageSize defaultPageSize
 
 				watchHandle = scope.$watch 'containerSize', (containerSize, oldVal) ->
 					return unless containerSize?
