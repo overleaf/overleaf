@@ -24,6 +24,7 @@ define [
 			postal_code: ""
 			address1 : ""
 			address2 : ""
+			state:""
 			city:""
 			country:window.countryCode
 
