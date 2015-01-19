@@ -10,9 +10,11 @@ DropboxHandler = require("../Dropbox/DropboxHandler")
 
 module.exports =
 
-	createSubscription: (user, recurlySubscriptionId, callback)->
+	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
 		self = @
-		RecurlyWrapper.getSubscription recurlySubscriptionId, {recurlyJsResult: true}, (error, recurlySubscription) ->
+		clientTokenId = ""
+		RecurlyWrapper.createSubscription user, subscriptionDetails, recurly_token_id, (error, recurlySubscription)->
+			console.log recurlySubscription
 			return callback(error) if error?
 			SubscriptionUpdater.syncSubscription recurlySubscription, user._id, (error) ->
 				return callback(error) if error?

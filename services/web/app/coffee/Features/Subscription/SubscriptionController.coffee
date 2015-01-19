@@ -41,7 +41,7 @@ module.exports = SubscriptionController =
 					res.redirect "/user/subscription"
 				else
 					currency = req.query.currency?.toUpperCase()
-					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+					GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency, countryCode)->
 						return next(err) if err?
 						if recomendedCurrency? and !currency?
 							currency = recomendedCurrency
@@ -56,11 +56,13 @@ module.exports = SubscriptionController =
 								title      : "subscribe"
 								plan_code: req.query.planCode
 								currency: currency
+								countryCode:countryCode
 								plan:plan
 								showStudentPlan: req.query.ssp
 								recurlyConfig: JSON.stringify
 									currency: currency
 									subdomain: Settings.apis.recurly.subdomain
+								showCouponField:req.query.scf
 								subscriptionFormOptions: JSON.stringify
 									acceptedCards: ['discover', 'mastercard', 'visa']
 									target      : "#subscribeForm"
@@ -132,12 +134,14 @@ module.exports = SubscriptionController =
 	createSubscription: (req, res, next)->
 		SecurityManager.getCurrentUser req, (error, user) ->
 			return callback(error) if error?
-			subscriptionId = req.body.recurly_token
-			logger.log subscription_id: subscriptionId, user_id:user._id, "creating subscription"
-			SubscriptionHandler.createSubscription user, subscriptionId, (err)->
+			recurly_token_id = req.body.recurly_token_id
+			subscriptionDetails = req.body.subscriptionDetails
+			logger.log recurly_token_id: recurly_token_id, user_id:user._id, subscriptionDetails:subscriptionDetails, "creating subscription"
+			SubscriptionHandler.createSubscription user, subscriptionDetails, recurly_token_id, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong creating subscription"
-				res.redirect "/user/subscription/thank-you"
+					return res.send 500
+				res.send 201
 
 	successful_subscription: (req, res)->
 		SecurityManager.getCurrentUser req, (error, user) =>

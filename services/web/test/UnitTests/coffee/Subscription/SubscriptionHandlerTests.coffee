@@ -42,6 +42,7 @@ describe "Subscription Handler sanboxed", ->
 			cancelSubscription: sinon.stub().callsArgWith(1)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
 			redeemCoupon:sinon.stub().callsArgWith(2)
+			createSubscription: sinon.stub().callsArgWith(3, null, @activeRecurlySubscription)
 
 		@DropboxHandler =
 			unlinkAccount:sinon.stub().callsArgWith(1)
@@ -71,10 +72,14 @@ describe "Subscription Handler sanboxed", ->
 
 	describe "createSubscription", ->
 		beforeEach (done) ->
-			@SubscriptionHandler.createSubscription(@user, @activeRecurlySubscription.uuid, done)
+			@subscriptionDetails = 
+				cvv:"123"
+				number:"12345"
+			@recurly_token_id = "45555666"
+			@SubscriptionHandler.createSubscription(@user, @subscriptionDetails, @recurly_token_id, done)
 
-		it "should get the subscription", (done)->
-			@RecurlyWrapper.getSubscription.calledWith(@activeRecurlySubscription.uuid, {recurlyJsResult: true}).should.equal true
+		it "should create the subscription with the wrapper", (done)->
+			@RecurlyWrapper.createSubscription.calledWith(@user, @subscriptionDetails, @recurly_token_id).should.equal true
 			done()
 
 		it "should sync the subscription to the user", (done)->

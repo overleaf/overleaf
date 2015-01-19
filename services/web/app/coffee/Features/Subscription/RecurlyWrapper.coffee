@@ -8,6 +8,31 @@ logger = require("logger-sharelatex")
 module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
+	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
+		requestBody = """
+		          <subscription>
+		            <plan_code>#{subscriptionDetails.plan_code}</plan_code>
+		            <currency>#{subscriptionDetails.currencyCode}</currency>
+		            <account>
+		            	<account_code>#{user._id}</account_code>
+		            	<email>#{user.email}</email>
+		            	<first_name>#{user.first_name}</first_name>
+		            	<last_name>#{user.last_name}</last_name>
+		            	<billing_info>
+		            		<token_id>#{recurly_token_id}</token_id>
+		            	</billing_info>
+		            </account>
+		          </subscription>
+		          """
+		@apiRequest({
+			url    : "subscriptions"
+			method : "POST"
+			body   : requestBody
+		}, (error, response, responseBody) =>
+			return callback(error) if error?
+			@_parseSubscriptionXml responseBody, callback
+		)		
+
 	apiRequest : (options, callback) ->
 		options.url = @apiUrl + "/" + options.url
 		options.headers =
@@ -16,7 +41,7 @@ module.exports = RecurlyWrapper =
 			"Content-Type"  : "application/xml; charset=utf-8"
 		request options, (error, response, body) ->
 			unless error? or response.statusCode == 200 or response.statusCode == 201 or response.statusCode == 204
-				logger.err err:error, options:options, "error returned from recurly"
+				logger.err err:error, body:body, options:options, statusCode:response?.statusCode, "error returned from recurly"
 				error = "Recurly API returned with status code: #{response.statusCode}"
 			callback(error, response, body)
 

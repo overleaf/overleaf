@@ -1,39 +1,170 @@
 extends ../layout
 block scripts
+
+	script(src="https://js.recurly.com/v3/recurly.js")
+
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{currency}'
+		window.countryCode = '#{countryCode}'
 		window.plan_code = '#{plan_code}'
+		window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
 
 
 block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-	script(src=jsPath+'libs/recurly.min.js')
+
 
 	.content.content-alt
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
-				.col-md-6.col-md-push-3
+				.col-md-5.col-md-push-4
 					.card.card-highlighted
 						.page-header
-							span.dropdown.changePlanButton.pull-right(ng-cloak)
-								a.btn.btn-default.dropdown-toggle(
-									href="#",
-									data-toggle="dropdown"
-								)
-									| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
-									span.caret
-								ul.dropdown-menu(role="menu")
-									li(ng-repeat="(currency, value) in plans", dropdown-toggle)
-										a(
-											ng-click="changeCurrency(currency)",
-										) {{currency}} ({{value['symbol']}})
-							h1 #{translate("new_subscription")}
-						
-						#subscribeForm(style="min-height: 700px;") #{translate("loading_billing_form")}...
-						
-				
-				.col-md-3.col-md-pull-6
+							.row
+								.col-md-9
+									h2 {{planName}}
+									div !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+									div #{translate("every")} {{billingCycleType}}
+								.col-md-3
+									div.dropdown.changePlanButton.pull-right(ng-cloak)
+										a.btn.btn-default.dropdown-toggle(
+											href="#",
+											data-toggle="dropdown"
+										)
+											| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
+											span.caret
+										ul.dropdown-menu(role="menu")
+											li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+												a(
+													ng-click="changeCurrency(currency)",
+												) {{currency}} ({{value['symbol']}})
+									h2.pull-right.totalPrice {{price.currency.symbol}}{{price.next.total}}
+						.row
+							.col-md-12
+								form(ng-show="planName")
+									
+
+									.row
+										.col-md-12
+											.form-group
+												.row
+													.col-md-6
+														label.radio-inline
+															input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod")
+															i.fa.fa-cc-mastercard.fa-3x
+															span &nbsp;
+															i.fa.fa-cc-visa.fa-3x
+													.col-md-6
+														label.radio-inline
+															input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
+															i.fa.fa-cc-paypal.fa-3x
+
+
+
+									.alert.alert-warning.small(ng-show="genericError")
+										strong {{genericError}}
+
+									span(ng-hide="paymentMethod == 'paypal'")
+										.row
+											.col-md-12
+												.form-group
+													div.alert.alert-warning.small(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
+													div.alert.alert-warning.small(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
+										.row
+											.col-md-6
+												.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
+													input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
+											.col-md-3
+												.form-group(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
+													input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
+										.row
+											.col-md-12
+												div.alert.alert-warning.small(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
+										.row
+											.col-md-3
+												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.month ? 'has-error' : ''")
+													select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+														option(value="", disabled, selected) Month
+														option(value="01") 01
+														option(value="02") 02
+														option(value="03") 03
+														option(value="04") 04
+														option(value="05") 05
+														option(value="06") 06
+														option(value="07") 07
+														option(value="08") 08
+														option(value="09") 09
+														option(value="10") 10
+														option(value="11") 11
+														option(value="12") 12
+											.col-md-3
+												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
+													select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+														option(value="", disabled, selected) Year
+														option(value="2015") 2015
+														option(value="2016") 2016
+														option(value="2017") 2017
+														option(value="2018") 2018
+														option(value="2019") 2019
+														option(value="2020") 2020
+														option(value="2021") 2021
+														option(value="2022") 2022
+														option(value="2023") 2023
+														option(value="2024") 2024
+														option(value="2025") 2025
+														option(value="2026") 2026
+									.row
+										.col-md-6
+											.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
+										.col-md-6
+											.form-group(ng-class="validation.errorFields.last_name ? 'has-error' : ''")
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
+									hr
+									.row
+										.col-md-12
+											.form-group
+												label #{translate("billing_address")}
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
+											.form-group
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
+									.row
+										.col-md-7
+											.form-group
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
+										.col-md-5
+												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
+									.row
+										.col-md-7
+											.form-group
+												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
+													mixin countries_options()
+									.row
+										.col-md-8
+											if showCouponField == 'true'
+												.form-group
+													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
+
+
+									.row
+										.col-md-6
+											.form-group
+												button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
+									
+										.col-md-3.pricingBreakdown
+												div Subtotal
+												div Tax
+												div
+													strong Total
+										.col-md-3
+												div {{price.currency.symbol}}{{price.next.subtotal}}
+												div {{price.currency.symbol}}{{price.next.tax}}
+												div
+													strong {{price.currency.symbol}}{{price.next.total}}
+
+
+				.col-md-3.col-md-pull-4
 					if showStudentPlan == 'true'
 						a.btn-primary.btn.plansPageStudentLink(
 							href,
@@ -77,16 +208,263 @@ block content
 
 
 	script(type="text/javascript").
-		Recurly.config(!{recurlyConfig})
-		var recurlySubscriptionFormConfig = !{subscriptionFormOptions}
-		recurlySubscriptionFormConfig.successHandler = function(){
-			ga('send', 'event', 'subscription-funnel', 'subscribed')
-		}
-
-		Recurly.buildSubscriptionForm(recurlySubscriptionFormConfig);
-
 		window.ab = [
 			{step:1, bucket:"red", testName:"button_color"},
 			{step:1, bucket:"blue", testName:"button_color"}
 		]
 
+
+mixin countries_options()
+	option(value='', disabled, selected) #{translate("country")}
+	option(value='-') --------------
+	option(value='AF') Afghanistan
+	option(value='AL') Albania
+	option(value='DZ') Algeria
+	option(value='AS') American Samoa
+	option(value='AD') Andorra
+	option(value='AO') Angola
+	option(value='AI') Anguilla
+	option(value='AQ') Antarctica
+	option(value='AG') Antigua and Barbuda
+	option(value='AR') Argentina
+	option(value='AM') Armenia
+	option(value='AW') Aruba
+	option(value='AC') Ascension Island
+	option(value='AU') Australia
+	option(value='AT') Austria
+	option(value='AZ') Azerbaijan
+	option(value='BS') Bahamas
+	option(value='BH') Bahrain
+	option(value='BD') Bangladesh
+	option(value='BB') Barbados
+	option(value='BE') Belgium
+	option(value='BZ') Belize
+	option(value='BJ') Benin
+	option(value='BM') Bermuda
+	option(value='BT') Bhutan
+	option(value='BO') Bolivia
+	option(value='BA') Bosnia and Herzegovina
+	option(value='BW') Botswana
+	option(value='BV') Bouvet Island
+	option(value='BR') Brazil
+	option(value='BQ') British Antarctic Territory
+	option(value='IO') British Indian Ocean Territory
+	option(value='VG') British Virgin Islands
+	option(value='BN') Brunei
+	option(value='BG') Bulgaria
+	option(value='BF') Burkina Faso
+	option(value='BI') Burundi
+	option(value='KH') Cambodia
+	option(value='CM') Cameroon
+	option(value='CA') Canada
+	option(value='IC') Canary Islands
+	option(value='CT') Canton and Enderbury Islands
+	option(value='CV') Cape Verde
+	option(value='KY') Cayman Islands
+	option(value='CF') Central African Republic
+	option(value='EA') Ceuta and Melilla
+	option(value='TD') Chad
+	option(value='CL') Chile
+	option(value='CN') China
+	option(value='CX') Christmas Island
+	option(value='CP') Clipperton Island
+	option(value='CC') Cocos [Keeling] Islands
+	option(value='CO') Colombia
+	option(value='KM') Comoros
+	option(value='CD') Congo [DRC]
+	option(value='CK') Cook Islands
+	option(value='CR') Costa Rica
+	option(value='HR') Croatia
+	option(value='CU') Cuba
+	option(value='CY') Cyprus
+	option(value='CZ') Czech Republic
+	option(value='DK') Denmark
+	option(value='DG') Diego Garcia
+	option(value='DJ') Djibouti
+	option(value='DM') Dominica
+	option(value='DO') Dominican Republic
+	option(value='NQ') Dronning Maud Land
+	option(value='TL') East Timor
+	option(value='EC') Ecuador
+	option(value='EG') Egypt
+	option(value='SV') El Salvador
+	option(value='EE') Estonia
+	option(value='ET') Ethiopia
+	option(value='FK') Falkland Islands [Islas Malvinas]
+	option(value='FO') Faroe Islands
+	option(value='FJ') Fiji
+	option(value='FI') Finland
+	option(value='FR') France
+	option(value='GF') French Guiana
+	option(value='PF') French Polynesia
+	option(value='TF') French Southern Territories
+	option(value='FQ') French Southern and Antarctic Territories
+	option(value='GA') Gabon
+	option(value='GM') Gambia
+	option(value='GE') Georgia
+	option(value='DE') Germany
+	option(value='GH') Ghana
+	option(value='GI') Gibraltar
+	option(value='GR') Greece
+	option(value='GL') Greenland
+	option(value='GD') Grenada
+	option(value='GP') Guadeloupe
+	option(value='GU') Guam
+	option(value='GT') Guatemala
+	option(value='GG') Guernsey
+	option(value='GW') Guinea-Bissau
+	option(value='GY') Guyana
+	option(value='HT') Haiti
+	option(value='HM') Heard Island and McDonald Islands
+	option(value='HN') Honduras
+	option(value='HK') Hong Kong
+	option(value='HU') Hungary
+	option(value='IS') Iceland
+	option(value='IN') India
+	option(value='ID') Indonesia
+	option(value='IE') Ireland
+	option(value='IM') Isle of Man
+	option(value='IL') Israel
+	option(value='IT') Italy
+	option(value='JM') Jamaica
+	option(value='JP') Japan
+	option(value='JE') Jersey
+	option(value='JT') Johnston Island
+	option(value='JO') Jordan
+	option(value='KZ') Kazakhstan
+	option(value='KE') Kenya
+	option(value='KI') Kiribati
+	option(value='KW') Kuwait
+	option(value='KG') Kyrgyzstan
+	option(value='LA') Laos
+	option(value='LV') Latvia
+	option(value='LS') Lesotho
+	option(value='LY') Libya
+	option(value='LI') Liechtenstein
+	option(value='LT') Lithuania
+	option(value='LU') Luxembourg
+	option(value='MO') Macau
+	option(value='MK') Macedonia [FYROM]
+	option(value='MG') Madagascar
+	option(value='MW') Malawi
+	option(value='MY') Malaysia
+	option(value='MV') Maldives
+	option(value='ML') Mali
+	option(value='MT') Malta
+	option(value='MH') Marshall Islands
+	option(value='MQ') Martinique
+	option(value='MR') Mauritania
+	option(value='MU') Mauritius
+	option(value='YT') Mayotte
+	option(value='FX') Metropolitan France
+	option(value='MX') Mexico
+	option(value='FM') Micronesia
+	option(value='MI') Midway Islands
+	option(value='MD') Moldova
+	option(value='MC') Monaco
+	option(value='MN') Mongolia
+	option(value='ME') Montenegro
+	option(value='MS') Montserrat
+	option(value='MA') Morocco
+	option(value='MZ') Mozambique
+	option(value='NA') Namibia
+	option(value='NR') Nauru
+	option(value='NP') Nepal
+	option(value='NL') Netherlands
+	option(value='AN') Netherlands Antilles
+	option(value='NT') Neutral Zone
+	option(value='NC') New Caledonia
+	option(value='NZ') New Zealand
+	option(value='NI') Nicaragua
+	option(value='NE') Niger
+	option(value='NG') Nigeria
+	option(value='NU') Niue
+	option(value='NF') Norfolk Island
+	option(value='VD') North Vietnam
+	option(value='MP') Northern Mariana Islands
+	option(value='NO') Norway
+	option(value='OM') Oman
+	option(value='QO') Outlying Oceania
+	option(value='PC') Pacific Islands Trust Territory
+	option(value='PK') Pakistan
+	option(value='PW') Palau
+	option(value='PS') Palestinian Territories
+	option(value='PA') Panama
+	option(value='PZ') Panama Canal Zone
+	option(value='PY') Paraguay
+	option(value='YD') People&apos;s Democratic Republic of Yemen
+	option(value='PE') Peru
+	option(value='PH') Philippines
+	option(value='PN') Pitcairn Islands
+	option(value='PL') Poland
+	option(value='PT') Portugal
+	option(value='PR') Puerto Rico
+	option(value='QA') Qatar
+	option(value='RO') Romania
+	option(value='RU') Russia
+	option(value='RW') Rwanda
+	option(value='RE') R&eacute;union
+	option(value='BL') Saint Barth&eacute;lemy
+	option(value='SH') Saint Helena
+	option(value='KN') Saint Kitts and Nevis
+	option(value='LC') Saint Lucia
+	option(value='MF') Saint Martin
+	option(value='PM') Saint Pierre and Miquelon
+	option(value='VC') Saint Vincent and the Grenadines
+	option(value='WS') Samoa
+	option(value='SM') San Marino
+	option(value='SA') Saudi Arabia
+	option(value='SN') Senegal
+	option(value='RS') Serbia
+	option(value='CS') Serbia and Montenegro
+	option(value='SC') Seychelles
+	option(value='SL') Sierra Leone
+	option(value='SG') Singapore
+	option(value='SK') Slovakia
+	option(value='SI') Slovenia
+	option(value='SB') Solomon Islands
+	option(value='ZA') South Africa
+	option(value='GS') South Georgia and the South Sandwich Islands
+	option(value='KR') South Korea
+	option(value='ES') Spain
+	option(value='LK') Sri Lanka
+	option(value='SR') Suriname
+	option(value='SJ') Svalbard and Jan Mayen
+	option(value='SZ') Swaziland
+	option(value='SE') Sweden
+	option(value='CH') Switzerland
+	option(value='ST') S&atilde;o Tom&eacute; and Pr&iacute;ncipe
+	option(value='TW') Taiwan
+	option(value='TJ') Tajikistan
+	option(value='TZ') Tanzania
+	option(value='TH') Thailand
+	option(value='TG') Togo
+	option(value='TK') Tokelau
+	option(value='TO') Tonga
+	option(value='TT') Trinidad and Tobago
+	option(value='TA') Tristan da Cunha
+	option(value='TN') Tunisia
+	option(value='TR') Turkey
+	option(value='TM') Turkmenistan
+	option(value='TC') Turks and Caicos Islands
+	option(value='TV') Tuvalu
+	option(value='UM') U.S. Minor Outlying Islands
+	option(value='PU') U.S. Miscellaneous Pacific Islands
+	option(value='VI') U.S. Virgin Islands
+	option(value='UG') Uganda
+	option(value='UA') Ukraine
+	option(value='AE') United Arab Emirates
+	option(value='GB') United Kingdom
+	option(value='US') United States
+	option(value='UY') Uruguay
+	option(value='UZ') Uzbekistan
+	option(value='VU') Vanuatu
+	option(value='VA') Vatican City
+	option(value='VE') Venezuela
+	option(value='VN') Vietnam
+	option(value='WK') Wake Island
+	option(value='WF') Wallis and Futuna
+	option(value='EH') Western Sahara
+	option(value='YE') Yemen
+	option(value='ZM') Zambia
+	option(value='AX') &angst;land Islands
