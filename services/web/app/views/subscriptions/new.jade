@@ -148,20 +148,20 @@ block content
 
 
 									.row
-										.col-md-6
+										.col-md-7
 											.form-group
 												button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
 									
 										.col-md-3.pricingBreakdown
-												div Subtotal
-												div Tax
-												div
-													strong Total
-										.col-md-3
-												div {{price.currency.symbol}}{{price.next.subtotal}}
-												div {{price.currency.symbol}}{{price.next.tax}}
-												div
-													strong {{price.currency.symbol}}{{price.next.total}}
+											div Subtotal
+											div Tax
+											div
+												strong Total
+										.col-md-2
+											div.pull-right {{price.currency.symbol}}{{price.next.subtotal}}
+											div.pull-right {{price.currency.symbol}}{{price.next.tax}}
+											div.pull-right
+												strong {{price.currency.symbol}}{{price.next.total}}
 
 
 				.col-md-3.col-md-pull-4
