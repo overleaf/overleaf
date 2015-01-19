@@ -4,6 +4,7 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 ErrorController = require "../Errors/ErrorController"
 StaticPageHelpers = require("./StaticPageHelpers")
+sanitize = require('sanitizer')
 
 module.exports = UniversityController = 
 
@@ -20,7 +21,7 @@ module.exports = UniversityController =
 			data = data.trim()
 			try
 				data = JSON.parse(data)
-				data.content = data.content.replace(/__ref__/g, req.query.ref)
+				data.content = data.content.replace(/__ref__/g, sanitize.escape(req.query.ref))
 			catch err
 				logger.err err:err, data:data, "error parsing data from data"
 			res.render "university/university_holder", data

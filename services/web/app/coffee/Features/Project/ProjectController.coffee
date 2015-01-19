@@ -5,7 +5,6 @@ projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
 editorController = require("../Editor/EditorController")
 metrics = require('../../infrastructure/Metrics')
-sanitize = require('sanitizer')
 Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
