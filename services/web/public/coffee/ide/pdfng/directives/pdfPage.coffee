@@ -99,7 +99,7 @@ define [
 					highlights: highlightsElement
 				})
 
-				scope.$watch 'highlights', (highlights, oldVal) ->
+				scope.$on 'pdf:highlights', (event, highlights) ->
 					return unless highlights?
 					return unless highlights.length > 0
 					if scope.timeoutHandler

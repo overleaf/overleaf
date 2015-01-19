@@ -452,6 +452,8 @@ define [
 
 					return if !highlights.length
 
+					scope.$broadcast 'pdf:highlights', areas
+
 					first = highlights[0]
 
 					pageNum = scope.pages[first.page].pageNum
