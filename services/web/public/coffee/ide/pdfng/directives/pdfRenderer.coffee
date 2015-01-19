@@ -131,7 +131,9 @@ define [
 				@jobs = @jobs + 1
 
 				element.canvas.addClass('pdfng-loading')
-				@spinner.add(element.canvas)
+				spinTimer = $timeout () =>
+					@spinner.add(element.canvas)
+				, 100
 
 				completeRef = @complete
 				renderTaskRef = @renderTask
@@ -142,6 +144,7 @@ define [
 					Raven.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
 					# console.log 'page load timed out', pagenum
 					timedOut = true
+					$timeout.cancel(spinTimer)
 					@spinner.stop(element.canvas)
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
@@ -153,6 +156,7 @@ define [
 				@pageLoad[pagenum].then (pageObject) =>
 					# console.log 'in page load success', pagenum
 					$timeout.cancel(timer)
+					$timeout.cancel(spinTimer)
 					@renderTask[pagenum] = @doRender element, pagenum, pageObject
 					@renderTask[pagenum].then () =>
 						# complete
@@ -166,6 +170,7 @@ define [
 				.catch (error) ->
 					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
 					$timeout.cancel(timer)
+					$timeout.cancel(spinTimer)
 					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
