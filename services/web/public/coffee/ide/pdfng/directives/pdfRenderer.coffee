@@ -107,6 +107,15 @@ define [
 				@jobs = @jobs - 1
 				@triggerRenderQueue(0)
 
+			renderPages: (pages) ->
+				return if @shuttingDown
+				@renderQueue = for page in pages
+					{
+						'element': page.elementChildren
+						'pagenum': page.pageNum
+					}
+				@triggerRenderQueue()
+
 			renderPage: (element, pagenum) ->
 				return if @shuttingDown
 				current = {

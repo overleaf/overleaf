@@ -245,6 +245,33 @@ define [
 						element.offset().top
 					]
 
+				getVisiblePages = () ->
+					top = element.offset().top
+					bottom = top + element.innerHeight();
+					isVisible = (pageElement) ->
+						pageTop = pageElement.offset().top
+						pageBottom = pageTop + pageElement.innerHeight()
+						return pageTop < bottom and pageBottom > top
+					return (page for page in scope.pages when isVisible(page.element))
+
+				getExtraPages = (visiblePages) ->
+					extra = []
+					firstVisiblePage = visiblePages[0].pageNum
+					firstVisiblePageIdx = firstVisiblePage - 1
+					len = visiblePages.length
+					lastVisiblePage = visiblePages[len-1].pageNum
+					lastVisiblePageIdx = lastVisiblePage - 1
+					# first page after
+					if lastVisiblePageIdx + 1 < len
+						extra.push scope.pages[lastVisiblePageIdx + 1]
+					# page before
+					if firstVisiblePageIdx > 0
+						extra.push scope.pages[firstVisiblePageIdx - 1]
+					# second page after
+					if lastVisiblePageIdx + 2 < len
+						extra.push scope.pages[lastVisiblePageIdx + 2]
+					return visiblePages.concat extra
+
 				doRescale = (scale) ->
 					# console.log 'doRescale', scale
 					origposition = angular.copy scope.position
@@ -307,14 +334,6 @@ define [
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)
 
-        // shim layer with setTimeout fallback
-        requestAnimationFrame = do () ->
-          window.requestAnimationFrame  ||
-          window.webkitRequestAnimationFrame ||
-          window.mozRequestAnimationFrame    ||
-          (callback) -> window.setTimeout(callback, 1000 / 60)
-
-        rafActive = null
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
 					scope.scrollPosition = element.scrollTop()
@@ -323,41 +342,21 @@ define [
 						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					# scope.scrolled = true
-					# if scope.scrollHandlerTimeout
-					#	$timeout.cancel(scope.scrollHandlerTimeout)
-					# scope.scrollHandlerTimeout = $timeout scrollHandler, 100
-					if not rafActive?
-						rafActive = requestAnimationFrame(scrollCheck)
-
-				prev = null
-				scope.scrollPosition = element.scrollTop()
-				scrollCheck = (timestamp) ->
-					prev = timestamp if not prev?
-					dt = timestamp - prev
-					if (dt > 100)
-						scope.lastScrollPosition = scope.scrollPosition if not scope.lastScrollPosition?
-						dy = scope.scrollPosition - scope.lastScrollPosition
-						scope.lastScrollPosition = scope.scrollPosition
-						console.log 'handle scroll dy', dy if dy != 0
-						scope.scrolled = true if dy != 0
-						if scope.scrolled && dy == 0
-							scrollHandler()
-							scope.scrolled = false
-							rafActive = null
-							return
-					requestAnimationFrame(scrollCheck)
-
-				requestAnimationFrame(scrollCheck)
+					scope.scrolled = true
+					if scope.scrollHandlerTimeout
+						$timeout.cancel(scope.scrollHandlerTimeout)
+					scope.scrollHandlerTimeout = $timeout scrollHandler, 25
 
 				scrollHandler = () ->
-					updateContainer()
+					visiblePages = getVisiblePages()
+					pages = getExtraPages visiblePages
+					scope.document.renderPages(pages)
 					scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
 					scope.$apply()
-					# scope.scrollHandlerTimeout = null
+					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
