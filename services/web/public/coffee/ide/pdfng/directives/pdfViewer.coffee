@@ -359,8 +359,8 @@ define [
 						return
 					#scope.scrolled = true
 					if scope.scrollHandlerTimeout
-						$timeout.cancel(scope.scrollHandlerTimeout)
-					scope.scrollHandlerTimeout = $timeout scrollHandler, 25
+						clearTimeout(scope.scrollHandlerTimeout)
+					scope.scrollHandlerTimeout = setTimeout scrollHandler, 25
 
 				scrollHandler = () ->
 					renderVisiblePages()
