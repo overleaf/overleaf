@@ -110,6 +110,15 @@ define [
 					}
 				@triggerRenderQueue()
 
+			renderPage: (page) ->
+				return if @shuttingDown
+				current =		{
+					'element': page.elementChildren
+					'pagenum': page.pageNum
+				}
+				@renderQueue.push current
+				@processRenderQueue()
+
 			processRenderQueue: () ->
 				return if @shuttingDown
 				return if @jobs > 0

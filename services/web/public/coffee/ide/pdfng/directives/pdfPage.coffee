@@ -55,7 +55,8 @@ define [
 				if scope.page.current
 						# console.log 'we must scroll to this page', scope.page.pageNum, 'at position', scope.page.position
 						# this is the current page, we want to scroll it into view
-						# FIXME: do we need to ensure render fires before moving to this position???
+						# and render it immediately
+						scope.document.renderPage scope.page
 						ctrl.setPdfPosition(scope.page, scope.page.position)
 
 				element.on 'dblclick', (e) ->
