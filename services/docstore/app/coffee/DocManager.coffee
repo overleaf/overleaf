@@ -2,6 +2,7 @@ MongoManager = require "./MongoManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
 _ = require "underscore"
+async = require "async"
 
 module.exports = DocManager =
 	getDoc: (project_id, doc_id, options, callback = (error, doc, mongoPath) ->) ->
@@ -51,7 +52,13 @@ module.exports = DocManager =
 					newDocLines: lines
 					rev: doc.rev
 				}, "updating doc lines"
-				MongoManager.updateDoc project_id, mongoPath, lines, (error) ->
+				async.series [
+					(cb)->
+						# project collection is still primary so that needs to be successful first
+						MongoManager.updateDoc project_id, mongoPath, lines, cb
+					(cb)->
+						MongoManager.upsertIntoDocCollection project_id, doc_id, lines, doc.rev, cb
+				], (error)->
 					return callback(error) if error?
 					callback null, true, doc.rev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
@@ -59,9 +66,10 @@ module.exports = DocManager =
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
-			MongoManager.insertDoc project_id, doc_id, { lines: doc.lines, deleted: true }, (error) ->
-				return callback(error) if error?
-				callback()
+			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, doc.rev, (error) ->
+				MongoManager.markDocAsDeleted doc_id, (error) ->
+					return callback(error) if error?
+					callback()
 
 	findAllDocsInProject: (project, callback = (error, docs) ->) ->
 		callback null, @_findAllDocsInFolder project.rootFolder[0]
