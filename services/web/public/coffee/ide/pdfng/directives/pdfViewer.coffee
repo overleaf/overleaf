@@ -40,6 +40,8 @@ define [
 				errorCallback: (error) ->
 					Raven.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
+				pageSizeChangeCallback: (pageNum, deltaH) ->
+					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
 			})
 
 			# we will have all the main information needed to start display
@@ -335,6 +337,16 @@ define [
 					ctrl.load()
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)
+
+				scope.$on 'pdf:page:size-change', (event, pageNum, delta) ->
+					#console.log 'page size change event', pageNum, delta
+					origposition = angular.copy scope.position
+					#console.log 'orig position', JSON.stringify(origposition)
+					if pageNum - 1 < origposition.page && delta != 0
+						currentScrollTop =  element.scrollTop()
+						console.log 'adjusting scroll from', currentScrollTop, 'by', delta
+						scope.adjustingScroll = true
+						element.scrollTop(currentScrollTop + delta)
 
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll

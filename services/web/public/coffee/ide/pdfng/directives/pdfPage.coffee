@@ -38,6 +38,7 @@ define [
 					text: textElement
 					annotations: annotationsElement
 					highlights: highlightsElement
+					container: element
 				}
 
 				if !scope.page.sized

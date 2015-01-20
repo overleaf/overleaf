@@ -25,6 +25,7 @@ define [
 					pdfDocument.getDownloadInfo().then () =>
 						@options.loadedCallback()
 				@errorCallback = @options.errorCallback
+				@pageSizeChangeCallback = @options.pageSizeChangeCallback
 				@pdfjs.catch (exception) =>
 					# console.log 'ERROR in get document', exception
 					@errorCallback(exception)
@@ -216,8 +217,14 @@ define [
 				canvas.height(newHeight + 'px')
 				canvas.width(newWidth + 'px')
 
-				element.canvas.height(newHeight)
-				element.canvas.width(newWidth)
+				oldHeight = element.canvas.height()
+				oldWidth = element.canvas.width()
+				if newHeight != oldHeight  or  newWidth != oldWidth
+					element.canvas.height(newHeight + 'px')
+					element.canvas.width(newWidth + 'px')
+					element.container.height(newHeight + 'px')
+					element.container.width(newWidth + 'px')
+					@pageSizeChangeCallback?(pagenum, newHeight - oldHeight)
 
 				if pixelRatio != 1
 					ctx.scale(pixelRatio, pixelRatio)
