@@ -364,11 +364,11 @@ define [
 
 				scrollHandler = () ->
 					renderVisiblePages()
-					scope.$apply()
+					#scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
-					scope.$apply()
+					#scope.$apply()
 					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
