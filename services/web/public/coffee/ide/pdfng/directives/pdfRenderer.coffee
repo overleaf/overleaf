@@ -90,13 +90,6 @@ define [
 			setScale: (@scale) ->
 				@resetState()
 
-			pause: (element, pagenum) ->
-				return if @complete[pagenum]
-				return if @shuttingDown
-				@renderQueue = @renderQueue.filter (q) ->
-					q.pagenum != pagenum
-				@spinner.stop(element.canvas)
-
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
 				$timeout () =>
 					@processRenderQueue()
@@ -115,15 +108,6 @@ define [
 						'element': page.elementChildren
 						'pagenum': page.pageNum
 					}
-				@triggerRenderQueue()
-
-			renderPage: (element, pagenum) ->
-				return if @shuttingDown
-				current = {
-					'element': element
-					'pagenum': pagenum
-				}
-				@renderQueue.push(current)
 				@triggerRenderQueue()
 
 			processRenderQueue: () ->
