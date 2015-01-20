@@ -283,7 +283,7 @@ define [
 						ctrl.setScale(scale, h, w).then () ->
 							spinner.remove(element)
 							ctrl.redraw(origposition)
-							$timeout renderVisiblePages, 0
+							setTimeout renderVisiblePages, 0
 
 				checkElementReady = () ->
 					# if element is zero-sized keep checking until it is ready
