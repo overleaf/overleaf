@@ -50,7 +50,7 @@ module.exports = HttpController =
 			res.send 400 # Bad Request
 			return
 
-		logger.log project_id: project_id, doc_id: doc_id, "updating doc"
+		logger.log project_id: project_id, doc_id: doc_id, "got http request to update doc"
 		DocManager.updateDoc project_id, doc_id, lines, (error, modified, rev) ->
 			return next(error) if error?
 			res.json {
