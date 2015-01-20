@@ -245,8 +245,8 @@ define [
 					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
-					top = element[0].offsetTop
-					bottom = top + element[0].clientHeight
+					top = element[0].scrollTop;
+					bottom = top + element[0].clientHeight;
 					isVisible = (pageElement) ->
 						pageTop = pageElement.offsetTop
 						pageBottom = pageTop + pageElement.clientHeight
