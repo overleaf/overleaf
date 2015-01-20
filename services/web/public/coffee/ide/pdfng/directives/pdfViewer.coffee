@@ -245,15 +245,15 @@ define [
 					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
-					top = element.offset().top
-					bottom = top + element.innerHeight();
+					top = element[0].offsetTop
+					bottom = top + element[0].clientHeight
 					isVisible = (pageElement) ->
-						pageTop = pageElement.offset().top
-						pageBottom = pageTop + pageElement.innerHeight()
+						pageTop = pageElement.offsetTop
+						pageBottom = pageTop + pageElement.clientHeight
 						return pageTop < bottom and pageBottom > top
 					visiblePages = []
 					for page in scope.pages
-						page.visible = visible = isVisible(page.element)
+						page.visible = visible = isVisible(page.element[0])
 						visiblePages.push page if visible
 					return visiblePages
 
