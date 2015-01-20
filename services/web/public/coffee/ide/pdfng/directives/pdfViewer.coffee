@@ -144,18 +144,18 @@ define [
 			# find first visible page
 			visible = $scope.pages.some (page, i) ->
 				[topPageIdx, topPage] = [i, page] if page.visible
-			if visible
+			if visible && topPage.element?
 				# console.log 'found it', topPageIdx
 			else
 				# console.log 'CANNOT FIND TOP PAGE'
 				return
 
 			# console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
-			top = topPage.elemTop
-			bottom = topPage.elemBottom
-			viewportTop = 0
-			viewportHeight = $element.height()
-			topVisible = (top >= viewportTop && top < viewportTop + viewportHeight)
+			top = topPage.element.offset().top
+			bottom = top + topPage.element.innerHeight()
+			viewportTop = $element.offset().top
+			viewportBottom = viewportTop + $element.height()
+			topVisible = (top >= viewportTop && top < viewportBottom)
 			someContentVisible = (top < viewportTop && bottom > viewportTop)
 			# console.log 'in PdfListView', top, topVisible, someContentVisible, viewportTop
 			if topVisible
@@ -237,13 +237,10 @@ define [
 				layoutReady.promise.then () ->
 					# console.log 'layoutReady was resolved'
 
-				# TODO can we combine this with scope.parentSize, need to finalize boxes
-				updateContainer = () ->
-					scope.containerSize = [
-						element.innerWidth()
-						element.innerHeight()
-						element.offset().top
-					]
+				renderVisiblePages = () ->
+					visiblePages = getVisiblePages()
+					pages = getExtraPages visiblePages
+					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
 					top = element.offset().top
@@ -252,7 +249,11 @@ define [
 						pageTop = pageElement.offset().top
 						pageBottom = pageTop + pageElement.innerHeight()
 						return pageTop < bottom and pageBottom > top
-					return (page for page in scope.pages when isVisible(page.element))
+					visiblePages = []
+					for page in scope.pages
+						page.visible = visible = isVisible(page.element)
+						visiblePages.push page if visible
+					return visiblePages
 
 				getExtraPages = (visiblePages) ->
 					extra = []
@@ -282,6 +283,7 @@ define [
 						ctrl.setScale(scale, h, w).then () ->
 							spinner.remove(element)
 							ctrl.redraw(origposition)
+							$timeout renderVisiblePages, 0
 
 				checkElementReady = () ->
 					# if element is zero-sized keep checking until it is ready
@@ -297,7 +299,7 @@ define [
 				scope.$on 'layout-ready', () ->
 					# console.log 'GOT LAYOUT READY EVENT'
 					# console.log 'calling refresh'
-					updateContainer()
+					# updateContainer()
 					spinner.add(element)
 					layoutReady.resolve 'layout is ready'
 					scope.parentSize = [
@@ -336,21 +338,20 @@ define [
 
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
-					scope.scrollPosition = element.scrollTop()
+					#scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
-						updateContainer()
+						renderVisiblePages()
+						# updateContainer()
 						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					scope.scrolled = true
+					#scope.scrolled = true
 					if scope.scrollHandlerTimeout
 						$timeout.cancel(scope.scrollHandlerTimeout)
 					scope.scrollHandlerTimeout = $timeout scrollHandler, 25
 
 				scrollHandler = () ->
-					visiblePages = getVisiblePages()
-					pages = getExtraPages visiblePages
-					scope.document.renderPages(pages)
+					renderVisiblePages()
 					scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
