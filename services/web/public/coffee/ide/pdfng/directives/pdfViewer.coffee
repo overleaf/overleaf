@@ -247,14 +247,12 @@ define [
 				getVisiblePages = () ->
 					top = element[0].scrollTop;
 					bottom = top + element[0].clientHeight;
-					isVisible = (pageElement) ->
+					visiblePages = scope.pages.filter (page) ->
+						pageElement = page.element[0]
 						pageTop = pageElement.offsetTop
 						pageBottom = pageTop + pageElement.clientHeight
-						return pageTop < bottom and pageBottom > top
-					visiblePages = []
-					for page in scope.pages
-						page.visible = visible = isVisible(page.element[0])
-						visiblePages.push page if visible
+						page.visible = pageTop < bottom and pageBottom > top
+						return page.visible
 					return visiblePages
 
 				getExtraPages = (visiblePages) ->
