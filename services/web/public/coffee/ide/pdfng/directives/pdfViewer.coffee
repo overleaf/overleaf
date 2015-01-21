@@ -40,6 +40,8 @@ define [
 				errorCallback: (error) ->
 					Raven.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
+				pageSizeChangeCallback: (pageNum, deltaH) ->
+					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
 			})
 
 			# we will have all the main information needed to start display
@@ -144,18 +146,18 @@ define [
 			# find first visible page
 			visible = $scope.pages.some (page, i) ->
 				[topPageIdx, topPage] = [i, page] if page.visible
-			if visible
+			if visible && topPage.element?
 				# console.log 'found it', topPageIdx
 			else
 				# console.log 'CANNOT FIND TOP PAGE'
 				return
 
 			# console.log 'top page is', topPage.pageNum, topPage.elemTop, topPage.elemBottom, topPage
-			top = topPage.elemTop
-			bottom = topPage.elemBottom
-			viewportTop = 0
-			viewportHeight = $element.height()
-			topVisible = (top >= viewportTop && top < viewportTop + viewportHeight)
+			top = topPage.element.offset().top
+			bottom = top + topPage.element.innerHeight()
+			viewportTop = $element.offset().top
+			viewportBottom = viewportTop + $element.height()
+			topVisible = (top >= viewportTop && top < viewportBottom)
 			someContentVisible = (top < viewportTop && bottom > viewportTop)
 			# console.log 'in PdfListView', top, topVisible, someContentVisible, viewportTop
 			if topVisible
@@ -237,13 +239,39 @@ define [
 				layoutReady.promise.then () ->
 					# console.log 'layoutReady was resolved'
 
-				# TODO can we combine this with scope.parentSize, need to finalize boxes
-				updateContainer = () ->
-					scope.containerSize = [
-						element.innerWidth()
-						element.innerHeight()
-						element.offset().top
-					]
+				renderVisiblePages = () ->
+					pages = getVisiblePages()
+					# pages = getExtraPages visiblePages
+					scope.document.renderPages(pages)
+
+				getVisiblePages = () ->
+					top = element[0].scrollTop;
+					bottom = top + element[0].clientHeight;
+					visiblePages = scope.pages.filter (page) ->
+						pageElement = page.element[0]
+						pageTop = pageElement.offsetTop
+						pageBottom = pageTop + pageElement.clientHeight
+						page.visible = pageTop < bottom and pageBottom > top
+						return page.visible
+					return visiblePages
+
+				getExtraPages = (visiblePages) ->
+					extra = []
+					firstVisiblePage = visiblePages[0].pageNum
+					firstVisiblePageIdx = firstVisiblePage - 1
+					len = visiblePages.length
+					lastVisiblePage = visiblePages[len-1].pageNum
+					lastVisiblePageIdx = lastVisiblePage - 1
+					# first page after
+					if lastVisiblePageIdx + 1 < scope.pages.length
+						extra.push scope.pages[lastVisiblePageIdx + 1]
+					# page before
+					if firstVisiblePageIdx > 0
+						extra.push scope.pages[firstVisiblePageIdx - 1]
+					# second page after
+					if lastVisiblePageIdx + 2 < scope.pages.length
+						extra.push scope.pages[lastVisiblePageIdx + 2]
+					return visiblePages.concat extra
 
 				doRescale = (scale) ->
 					# console.log 'doRescale', scale
@@ -255,6 +283,7 @@ define [
 						ctrl.setScale(scale, h, w).then () ->
 							spinner.remove(element)
 							ctrl.redraw(origposition)
+							setTimeout renderVisiblePages, 0
 
 				checkElementReady = () ->
 					# if element is zero-sized keep checking until it is ready
@@ -270,7 +299,7 @@ define [
 				scope.$on 'layout-ready', () ->
 					# console.log 'GOT LAYOUT READY EVENT'
 					# console.log 'calling refresh'
-					updateContainer()
+					# updateContainer()
 					spinner.add(element)
 					layoutReady.resolve 'layout is ready'
 					scope.parentSize = [
@@ -307,26 +336,38 @@ define [
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)
 
+				scope.$on 'pdf:page:size-change', (event, pageNum, delta) ->
+					#console.log 'page size change event', pageNum, delta
+					origposition = angular.copy scope.position
+					#console.log 'orig position', JSON.stringify(origposition)
+					if pageNum - 1 < origposition.page && delta != 0
+						currentScrollTop =  element.scrollTop()
+						#console.log 'adjusting scroll from', currentScrollTop, 'by', delta
+						scope.adjustingScroll = true
+						element.scrollTop(currentScrollTop + delta)
+
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
+					#scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
-						updateContainer()
+						renderVisiblePages()
+						# updateContainer()
 						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					scope.scrolled = true
+					#scope.scrolled = true
 					if scope.scrollHandlerTimeout
-						$timeout.cancel(scope.scrollHandlerTimeout)
-					scope.scrollHandlerTimeout = $timeout scrollHandler, 100
+						clearTimeout(scope.scrollHandlerTimeout)
+					scope.scrollHandlerTimeout = setTimeout scrollHandler, 25
 
 				scrollHandler = () ->
-					scope.scrollHandlerTimeout = null
-					updateContainer()
-					scope.$apply()
+					renderVisiblePages()
+					#scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
-					scope.$apply()
+					#scope.$apply()
+					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
@@ -420,6 +461,8 @@ define [
 					#console.log 'highlights', highlights
 
 					return if !highlights.length
+
+					scope.$broadcast 'pdf:highlights', areas
 
 					first = highlights[0]
 
