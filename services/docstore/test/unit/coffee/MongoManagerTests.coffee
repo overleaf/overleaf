@@ -3,6 +3,7 @@ sinon = require('sinon')
 require('chai').should()
 modulePath = require('path').join __dirname, '../../../app/js/MongoManager'
 ObjectId = require("mongojs").ObjectId
+assert = require("chai").assert
 
 describe "MongoManager", ->
 	beforeEach ->
@@ -13,6 +14,7 @@ describe "MongoManager", ->
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
+		@stubbedErr = new Error("hello world")
 
 	describe "findProject", ->
 		beforeEach ->
@@ -68,20 +70,41 @@ describe "MongoManager", ->
 		it "should call the callback with the project", ->
 			@callback.called.should.equal true
 
-	describe "insertDoc", ->
+
+	describe "upsertIntoDocCollection", ->
 		beforeEach ->
-			@lines = ["mock-lines"]
-			@db.docs.insert = sinon.stub().callsArg(1)
-			@MongoManager.insertDoc @project_id, @doc_id, lines: @lines, @callback
+			@db.docs.update = sinon.stub().callsArgWith(3, @stubbedErr)
+			@oldRev = 77
 
-		it "should insert the attributes with the given doc and project id", ->
-			@db.docs.insert
-				.calledWith({
-					_id: ObjectId(@doc_id)
-					project_id: ObjectId(@project_id)
-					lines: @lines
-				})
-				.should.equal true
+		it "should upsert the document", (done)->	
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, @oldRev, (err)=>
+				args = @db.docs.update.args[0]
+				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
+				assert.equal args[1]["$set"]["lines"], @lines
+				assert.equal args[1]["$set"]["rev"], 78
+				assert.deepEqual args[1]["$set"]["project_id"], ObjectId(@project_id)
+				done()
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+		it "should return the error", (done)->
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, @oldRev, (err)=>
+				err.should.equal @stubbedErr
+				done()
+
+	describe "markDocAsDeleted", ->
+		beforeEach ->
+			@db.docs.update = sinon.stub().callsArgWith(2, @stubbedErr)
+			@oldRev = 77
+
+		it "should process the update", (done)->	
+			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+				args = @db.docs.update.args[0]
+				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
+				assert.equal args[1]["$set"]["deleted"], true
+				done()
+
+		it "should return the error", (done)->
+			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+				err.should.equal @stubbedErr
+				done()
+
+	

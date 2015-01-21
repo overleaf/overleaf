@@ -138,8 +138,10 @@ describe "DocManager", ->
 		describe "when the doc exists", ->
 			beforeEach ->
 				@lines = ["mock", "doc", "lines"]
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, lines: @lines)
-				@MongoManager.insertDoc = sinon.stub().callsArg(3)
+				@rev = 77
+				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, {lines: @lines, rev:@rev})
+				@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(4)
+				@MongoManager.markDocAsDeleted = sinon.stub().callsArg(1)
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
 			it "should get the doc", ->
@@ -147,12 +149,14 @@ describe "DocManager", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
-			it "insert the doc as a deleted doc", ->
-				@MongoManager.insertDoc
-					.calledWith(@project_id, @doc_id, {
-						lines: @lines
-						deleted: true
-					})
+			it "should update the doc lines", ->
+				@MongoManager.upsertIntoDocCollection
+					.calledWith(@project_id, @doc_id, @lines, @rev)
+					.should.equal true
+
+			it "should mark doc as deleted", ->
+				@MongoManager.markDocAsDeleted
+					.calledWith(@doc_id)
 					.should.equal true
 
 			it "should return the callback", ->
@@ -161,11 +165,11 @@ describe "DocManager", ->
 		describe "when the doc does not exist", ->
 			beforeEach -> 
 				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, null)
-				@MongoManager.insertDoc = sinon.stub().callsArg(3)
+				@MongoManager.upsertIntoDocCollection = sinon.stub()
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
 			it "should not try to insert a deleted doc", ->
-				@MongoManager.insertDoc.called.should.equal false
+				@MongoManager.upsertIntoDocCollection.called.should.equal false
 
 			it "should return a NotFoundError", ->
 				@callback
@@ -180,6 +184,7 @@ describe "DocManager", ->
 			@mongoPath = "mock.mongo.path"
 
 			@MongoManager.updateDoc = sinon.stub().callsArg(3)
+			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(4)
 
 		describe "when the doc lines have changed", ->
 			beforeEach ->
@@ -195,6 +200,11 @@ describe "DocManager", ->
 				@MongoManager.updateDoc
 					.calledWith(@project_id, @mongoPath, @newDocLines)
 					.should.equal true
+
+			it "should upsert the document to the doc collection", ->
+				@MongoManager.upsertIntoDocCollection
+					.calledWith(@project_id, @doc_id, @newDocLines, @rev)
+					.should.equal true				
 
 			it "should log out the old and new doc lines", ->
 				@logger.log
@@ -218,6 +228,7 @@ describe "DocManager", ->
 
 			it "should not update the doc", ->
 				@MongoManager.updateDoc.called.should.equal false
+				@MongoManager.upsertIntoDocCollection.called.should.equal false
 
 			it "should return the callback with the existing rev", ->
 				@callback.calledWith(null, false, @rev).should.equal true
@@ -229,6 +240,7 @@ describe "DocManager", ->
 
 			it "should not try to update the doc", ->
 				@MongoManager.updateDoc.called.should.equal false
+				@MongoManager.upsertIntoDocCollection.called.should.equal false
 
 			it "should return a NotFoundError", ->
 				@callback

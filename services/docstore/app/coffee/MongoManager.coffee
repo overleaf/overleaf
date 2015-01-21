@@ -18,7 +18,18 @@ module.exports = MongoManager =
 
 		db.projects.update _id: ObjectId(project_id), update, callback
 
-	insertDoc: (project_id, doc_id, attributes, callback = (error) ->) ->
-		attributes._id = ObjectId(doc_id)
-		attributes.project_id = ObjectId(project_id)
-		db.docs.insert attributes, callback
+	upsertIntoDocCollection: (project_id, doc_id, lines, oldRev, callback)->
+		update =
+			$set:{}
+		update.$set["lines"] = lines
+		update.$set["project_id"] = ObjectId(project_id)
+		update.$set["rev"] = oldRev + 1
+		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
+
+
+	markDocAsDeleted: (doc_id, callback)->
+		update =
+			$set: {}
+		update.$set["deleted"] = true
+		db.docs.update _id: ObjectId(doc_id), update, (err)->
+			callback(err)
