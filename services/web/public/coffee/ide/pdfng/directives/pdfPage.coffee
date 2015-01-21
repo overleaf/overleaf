@@ -29,58 +29,35 @@ define [
 					canvasElement.width(w)
 					scope.page.sized = true
 
-				isVisible = (containerSize) ->
-					elemTop = element.offset().top - containerSize[2]
-					elemBottom = elemTop + element.innerHeight()
-					visible = (elemTop < containerSize[1] and elemBottom > 0)
-					scope.page.visible = visible
-					scope.page.elemTop = elemTop
-					scope.page.elemBottom = elemBottom
-					return visible
-
-				renderPage = () ->
-					scope.document.renderPage {
-						canvas: canvasElement,
-						text: textElement
-						annotations: annotationsElement
-						highlights: highlightsElement
-					}, scope.page.pageNum
-
-				pausePage = () ->
-					scope.document.pause {
-						canvas: canvasElement,
-						text: textElement
-					}, scope.page.pageNum
-
 				# keep track of our page element, so we can access it in the
-				# parent with scope.pages[i].element
+				# parent with scope.pages[i].element, and the contained
+				# elements for each part
 				scope.page.element = element
+				scope.page.elementChildren = {
+					canvas: canvasElement,
+					text: textElement
+					annotations: annotationsElement
+					highlights: highlightsElement
+					container: element
+				}
 
-				if (!scope.page.sized && scope.defaultPageSize)
-					updatePageSize scope.defaultPageSize
+				if !scope.page.sized
+					if scope.defaultPageSize?
+						updatePageSize scope.defaultPageSize
+					else
+						# shouldn't get here - the default page size should now
+						# always be set before redraw is called
+						handler = scope.$watch 'defaultPageSize', (defaultPageSize) ->
+							return unless defaultPageSize?
+							updatePageSize defaultPageSize
+							handler()
 
 				if scope.page.current
 						# console.log 'we must scroll to this page', scope.page.pageNum, 'at position', scope.page.position
-						renderPage()
 						# this is the current page, we want to scroll it into view
+						# and render it immediately
+						scope.document.renderPage scope.page
 						ctrl.setPdfPosition(scope.page, scope.page.position)
-
-				scope.$watch 'defaultPageSize', (defaultPageSize) ->
-					return unless defaultPageSize?
-					updatePageSize defaultPageSize
-
-				watchHandle = scope.$watch 'containerSize', (containerSize, oldVal) ->
-					return unless containerSize?
-					return unless scope.page.sized
-					oldVisible = scope.page.visible
-					newVisible = isVisible containerSize
-					scope.page.visible = newVisible
-					if newVisible && !oldVisible
-						renderPage()
-						# TODO deregister this listener after the page is rendered
-						#watchHandle()
-					else if !newVisible && oldVisible
-						pausePage()
 
 				element.on 'dblclick', (e) ->
 					offset = $(element).find('.pdf-canvas').offset()
@@ -99,7 +76,7 @@ define [
 					highlights: highlightsElement
 				})
 
-				scope.$watch 'highlights', (highlights, oldVal) ->
+				scope.$on 'pdf:highlights', (event, highlights) ->
 					return unless highlights?
 					return unless highlights.length > 0
 					if scope.timeoutHandler
