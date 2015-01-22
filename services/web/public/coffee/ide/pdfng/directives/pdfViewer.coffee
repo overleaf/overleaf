@@ -307,7 +307,7 @@ define [
 						element.innerWidth()
 					]
 					scope.$emit 'flash-controls'
-					#scope.$apply()
+					scope.$apply()
 
 				scope.$on 'layout:main:resize', () ->
 					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
@@ -324,7 +324,7 @@ define [
 						element.innerHeight(),
 						element.innerWidth()
 					]
-					#scope.$apply()
+					scope.$apply()
 
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
