@@ -31,12 +31,9 @@ module.exports = DocstoreClient =
 	deleteProject: (project_id, callback = (error, res, body) ->) ->
 		db.projects.remove _id: project_id, callback
 
-	getDoc: (project_id, doc_id, options, callback = (error, res, body) ->) ->
-		if typeof(options) == "function"
-			callback = options
-			options = { include_deleted: false }
+	getDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
 		request.get {
-			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}?include_deleted=#{options.include_deleted}"
+			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
 			json: true
 		}, callback
 

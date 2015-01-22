@@ -34,19 +34,13 @@ describe "Getting a doc", ->
 
 	describe "when the doc is a deleted doc", ->
 		beforeEach (done) ->
-			@deleted_doc_id = ObjectId() 
+			@deleted_doc_id = ObjectId()
 			DocstoreClient.createDeletedDoc @project_id, @deleted_doc_id, @lines, done
 
-		describe "with include_deleted=true", ->
-			it "should return the doc", (done) ->
-				DocstoreClient.getDoc @project_id, @deleted_doc_id, include_deleted: true, (error, res, doc) =>
-					doc.lines.should.deep.equal @lines
-					doc.deleted.should.equal true
-					done()
+		it "should return the doc", (done) ->
+			DocstoreClient.getDoc @project_id, @deleted_doc_id, (error, res, doc) =>
+				doc.lines.should.deep.equal @lines
+				doc.deleted.should.equal true
+				done()
 
-		describe "without include_deleted=true", ->
-			it "should return 404", (done) ->
-				DocstoreClient.getDoc @project_id, @deleted_doc_id, (error, res, doc) =>
-					res.statusCode.should.equal 404
-					done()
-
+	
