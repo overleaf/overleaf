@@ -274,57 +274,54 @@ define [
 					return visiblePages.concat extra
 
 				doRescale = (scale) ->
-					# console.log 'doRescale', scale
+					console.log 'doRescale', scale
+					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
-					layoutReady.promise.then () ->
-						[h, w] = [element.innerHeight(), element.width()]
-						# console.log 'in promise', h, w
+					layoutReady.promise.then (parentSize) ->
+						[h, w] = parentSize
+						console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
+							console.log 'in setscale then', scale, h, w
 							spinner.remove(element)
-							ctrl.redraw(origposition)
-							setTimeout renderVisiblePages, 0
+							scope.$evalAsync () ->
+								ctrl.redraw(origposition)
+								$timeout renderVisiblePages
 
-				checkElementReady = () ->
+				scope.$on 'layout:pdf:view', (e, args) ->
+					console.log 'pdf view change', element, e, args
+					layoutReady = $q.defer()
+
+				elementTimer = null
+				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
+					console.log 'checking element ready', element.height(), element.width()
 					if element.height() == 0 or element.width() == 0
-						$timeout () ->
-							checkElementReady()
-						, 250
+						return if elementTimer?
+						elementTimer = setTimeout () ->
+							elementTimer = null
+							updateLayout()
+						, 1000
 					else
-						scope.$broadcast 'layout-ready' if !scope.parentSize?
+						scope.parentSize = [
+							element.innerHeight(),
+							element.innerWidth()
+						]
+						console.log 'resolving layoutReady with', scope.parentSize
+						$timeout () ->
+							spinner.add(element)
+							layoutReady.resolve scope.parentSize
+							scope.$emit 'flash-controls'
 
-				checkElementReady()
-
-				scope.$on 'layout-ready', () ->
-					# console.log 'GOT LAYOUT READY EVENT'
-					# console.log 'calling refresh'
-					# updateContainer()
-					spinner.add(element)
-					layoutReady.resolve 'layout is ready'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$emit 'flash-controls'
-					scope.$apply()
+				updateLayout()
 
 				scope.$on 'layout:main:resize', () ->
-					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$apply()
-
+					console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
+					updateLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
-					# console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$apply()
+					console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
+					updateLayout()
 
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
@@ -351,22 +348,17 @@ define [
 					#scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
 						renderVisiblePages()
-						# updateContainer()
-						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					#scope.scrolled = true
 					if scope.scrollHandlerTimeout
 						clearTimeout(scope.scrollHandlerTimeout)
 					scope.scrollHandlerTimeout = setTimeout scrollHandler, 25
 
 				scrollHandler = () ->
 					renderVisiblePages()
-					#scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
-					#scope.$apply()
 					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
@@ -402,8 +394,9 @@ define [
 					# if newVal == oldVal
 					# 	console.log 'returning because old and new are the same'
 					# 	return
-					return unless oldVal?
+					# return unless oldVal?
 					# console.log 'XXX calling setScale in parentSize watcher'
+					return unless newVal?
 					doRescale scope.scale
 				, true)
 
@@ -477,9 +470,8 @@ define [
 						}
 						ctrl.setPdfPosition(scope.pages[first.page], position)
 
-				scope.$watch '$destroy', () ->
-					#console.log 'handle pdfng directive destroy'
-
-
+				scope.$on '$destroy', () ->
+					console.log 'handle pdfng directive destroy'
+					clearTimeout elementTimer if elementTimer?
 		}
 	]
