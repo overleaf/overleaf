@@ -320,6 +320,8 @@ define [
 					updateLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
+					# FIXME we get this event twice
+					# also we need to start a new layout when we get it
 					console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
 					updateLayout()
 
