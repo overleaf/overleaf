@@ -81,7 +81,6 @@ define [
 						# console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
-						scope.$broadcast 'layout-ready'
 						# pdfListView
 						#		.loadPdf(url, onProgress)
 						#		.then () ->
