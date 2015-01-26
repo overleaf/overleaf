@@ -91,6 +91,8 @@ define [
 						#				flashControls()
 				
 				scope.$on "loaded", () ->
+					scope.progress = 100
+					scope.$apply()
 					$timeout () ->
 						scope.loading = false
 						delete scope.progress
