@@ -309,7 +309,6 @@ define [
 								scope.loadSuccess = true
 						.catch (error) ->
 							scope.$emit 'pdf:error', error
-							return $q.reject(error)
 
 				elementTimer = null
 				spinnerTimer = null
@@ -373,9 +372,11 @@ define [
 						scope.$emit 'pdf:error:display'
 						return
 					if scope.loadSuccess
-						ctrl.load()
-						# trigger a redraw
-						scope.scale = angular.copy (scope.scale)
+						ctrl.load().then () ->
+							# trigger a redraw
+							scope.scale = angular.copy (scope.scale)
+						.catch (error) ->
+							scope.$emit 'pdf:error:display'
 					else
 						scope.$emit 'pdf:error:display'
 						return
@@ -413,9 +414,11 @@ define [
 					return unless newVal?
 					scope.loadCount = 0; # new pdf, so reset load count
 					scope.loadSuccess = false
-					ctrl.load()
-					# trigger a redraw
-					scope.scale = angular.copy (scope.scale)
+					ctrl.load().then () ->
+						# trigger a redraw
+						scope.scale = angular.copy (scope.scale)
+					.catch (error) ->
+						scope.$emit 'pdf:error', error
 
 				scope.$watch 'scale', (newVal, oldVal) ->
 					# no need to set scale when initialising, done in pdfSrc
