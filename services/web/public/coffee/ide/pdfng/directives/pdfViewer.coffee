@@ -25,7 +25,7 @@ define [
 			# $scope.pages = []
 
 			$scope.document.destroy() if $scope.document?
-			$scope.loadCount = $scope.loadCount? ? $scope.loadCount + 1 : 1
+			$scope.loadCount = if $scope.loadCount? then $scope.loadCount + 1 else 1
 			# TODO need a proper url manipulation library to add to query string
 			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
 				scale: 1,
