@@ -58,6 +58,8 @@ define [
 					]
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
+				.catch (error) ->
+					$scope.$emit 'pdf:error', 'loading initial document parameters'
 
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->
@@ -359,7 +361,7 @@ define [
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
 					# check if too many retries or file is missing
-					if scope.loadCount > 3 || error.match(/^Missing PDF/i)
+					if scope.loadCount > 3 || error.match(/^Missing PDF/i) || error.match(/^loading/i)
 						scope.$emit 'pdf:error:display'
 						return
 					ctrl.load()
