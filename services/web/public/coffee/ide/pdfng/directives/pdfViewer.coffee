@@ -38,7 +38,7 @@ define [
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
 				errorCallback: (error) ->
-					Raven.captureMessage?('pdfng error ' + error)
+					Raven?.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
 				pageSizeChangeCallback: (pageNum, deltaH) ->
 					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
