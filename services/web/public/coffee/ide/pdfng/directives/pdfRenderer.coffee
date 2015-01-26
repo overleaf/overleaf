@@ -49,11 +49,11 @@ define [
 
 			getPdfViewport: (pageNum, scale) ->
 				scale ?= @scale
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPage(pageNum).then (page) ->
 						viewport = page.getViewport scale
-					, (error) ->
-						console.log 'ERROR', error
+					, (error) =>
+						@errorCallback?(error)
 
 			getDestinations: () ->
 				@document.then (pdfDocument) ->
@@ -68,8 +68,8 @@ define [
 					pdfDocument.getDestinations()
 				return @destinations.then (all) ->
 					all[dest]
-				, (error) ->
-					console.log 'ERROR', error
+				, (error) =>
+					@errorCallback?(error)
 				# When we upgrade we can switch to using the following direct
 				# code.
 				# @document.then (pdfDocument) ->
@@ -78,11 +78,11 @@ define [
 				# 	console.log 'ERROR', error
 
 			getPageIndex: (ref) ->
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPageIndex(ref).then (idx) ->
 						idx
-					, (error) ->
-						console.log 'ERROR', error
+					, (error) =>
+						@errorCallback?(error)
 
 			getScale: () ->
 				@scale
@@ -152,7 +152,7 @@ define [
 					@spinner.stop(element.canvas)
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
-					this.errorCallback?('timeout')
+					@errorCallback?('timeout')
 				, @PAGE_LOAD_TIMEOUT
 
 				@pageLoad[pagenum] = @getPage(pagenum)
@@ -259,11 +259,11 @@ define [
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
 					, (error) ->
-						console.log 'ERROR', error
+						self.errorCallback?(error)
 					page.getAnnotations().then (annotations) ->
 						annotationsLayer.setAnnotations annotations
 					, (error) ->
-						console.log 'ERROR', error
+						self.errorCallback?(error)
 				.catch (error) ->
 					# console.log 'page render failed', pagenum, error
 					$timeout.cancel(timer)
