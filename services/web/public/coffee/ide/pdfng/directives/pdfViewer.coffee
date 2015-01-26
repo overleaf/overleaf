@@ -275,24 +275,24 @@ define [
 
 				rescaleTimer = null
 				queueRescale = (scale) ->
-					console.log 'call to queueRescale'
+					# console.log 'call to queueRescale'
 					return if rescaleTimer? or layoutTimer? or elementTimer?
-					console.log 'adding to rescale queue'
+					# console.log 'adding to rescale queue'
 					rescaleTimer = setTimeout () ->
 						doRescale scale
 						rescaleTimer = null
 					, 0
 
 				doRescale = (scale) ->
-					console.log 'doRescale', scale
+					# console.log 'doRescale', scale
 					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
 					layoutReady.promise.then (parentSize) ->
 						[h, w] = parentSize
-						console.log 'in promise', h, w
+						# console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
-							console.log 'in setscale then', scale, h, w
+							# console.log 'in setscale then', scale, h, w
 							scope.$evalAsync () ->
 								if spinnerTimer
 									clearTimeout spinnerTimer
@@ -305,7 +305,7 @@ define [
 				spinnerTimer = null
 				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
-					console.log 'checking element ready', element.height(), element.width()
+					# console.log 'checking element ready', element.height(), element.width()
 					if element.height() == 0 or element.width() == 0
 						return if elementTimer?
 						elementTimer = setTimeout () ->
@@ -317,7 +317,7 @@ define [
 							element.innerHeight(),
 							element.innerWidth()
 						]
-						console.log 'resolving layoutReady with', scope.parentSize
+						# console.log 'resolving layoutReady with', scope.parentSize
 						$timeout () ->
 							if not spinnerTimer?
 								spinnerTimer = setTimeout () ->
@@ -329,31 +329,31 @@ define [
 
 				layoutTimer = null
 				queueLayout = () ->
-					console.log 'call to queue layout'
+					# console.log 'call to queue layout'
 					return if layoutTimer?
-					console.log 'added to queue layoyt'
+					# console.log 'added to queue layoyt'
 					layoutReady = $q.defer()
 					layoutTimer = setTimeout () ->
-						console.log 'calling update layout'
+						# console.log 'calling update layout'
 						updateLayout()
-						console.log 'setting layout timer to null'
+						# console.log 'setting layout timer to null'
 						layoutTimer = null
 					, 0
 
 				queueLayout()
 
-				scope.$on 'layout:pdf:view', (e, args) ->
-					console.log 'pdf view change', element, e, args
-					queueLayout()
+				#scope.$on 'layout:pdf:view', (e, args) ->
+				#	console.log 'pdf view change', element, e, args
+				#	queueLayout()
 
 				scope.$on 'layout:main:resize', () ->
-					console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
+					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
 					queueLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
 					# FIXME we get this event twice
 					# also we need to start a new layout when we get it
-					console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
+					# console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
 					queueLayout()
 
 				scope.$on 'pdf:error', (event, error) ->
@@ -504,7 +504,7 @@ define [
 						ctrl.setPdfPosition(scope.pages[first.page], position)
 
 				scope.$on '$destroy', () ->
-					console.log 'handle pdfng directive destroy'
+					# console.log 'handle pdfng directive destroy'
 					clearTimeout elementTimer if elementTimer?
 					clearTimeout layoutTimer if layoutTimer?
 					clearTimeout rescaleTimer if rescaleTimer?
