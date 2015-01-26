@@ -94,6 +94,7 @@ define [
 					$timeout () ->
 						scope.loading = false
 						delete scope.progress
+					, 250
 
 				#scope.$watch "highlights", (areas) ->
 					# console.log 'got HIGHLIGHTS in pdfJS', areas
