@@ -11,6 +11,7 @@ define [
 				messages: []
 				loading: false
 				atEnd: false
+				errored:false
 				nextBeforeTimestamp: null
 				newMessage: null
 		}
@@ -38,11 +39,10 @@ define [
 			
 		chat.loadMoreMessages = () ->
 			return if chat.state.atEnd
-			
+			return if chat.state.errored
 			url = MESSAGES_URL + "?limit=#{MESSAGE_LIMIT}"
 			if chat.state.nextBeforeTimestamp?
 				url += "&before=#{chat.state.nextBeforeTimestamp}"
-			
 			chat.state.loading = true
 			return $http
 				.get(url)
@@ -52,9 +52,13 @@ define [
 						chat.state.atEnd = true
 					if !messages.reverse?
 						Raven?.captureException(new Error("messages has no reverse property #{JSON.stringify(messages)}"))
-					messages.reverse()
-					prependMessages(messages)
-					chat.state.nextBeforeTimestamp = chat.state.messages[0]?.timestamp
+					if typeof messages.reverse isnt 'function'
+						Raven?.captureException(new Error("messages.reverse not a function #{typeof(messages.reverse)} #{JSON.stringify(messages)}"))
+						chat.state.errored = true
+					else
+						messages.reverse()
+						prependMessages(messages)
+						chat.state.nextBeforeTimestamp = chat.state.messages[0]?.timestamp
 		
 		TIMESTAMP_GROUP_SIZE = 5 * 60 * 1000 # 5 minutes
 		

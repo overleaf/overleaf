@@ -4,7 +4,7 @@ aside.chat(
 )
 	.messages(
 		infinite-scroll="loadMoreMessages()"
-		infinite-scroll-disabled="chat.loading || chat.atEnd"
+		infinite-scroll-disabled="chat.loading || chat.atEnd || chat.errored"
 		infinite-scroll-initialize="ui.chatOpen"
 		infinite-scroll-upwards="true"
 		update-scroll-bottom-on="updateScrollPosition"
