@@ -273,6 +273,16 @@ define [
 						extra.push scope.pages[lastVisiblePageIdx + 2]
 					return visiblePages.concat extra
 
+				rescaleTimer = null
+				queueRescale = (scale) ->
+					console.log 'call to queueRescale'
+					return if rescaleTimer? or layoutTimer? or elementTimer?
+					console.log 'adding to rescale queue'
+					rescaleTimer = setTimeout () ->
+						doRescale scale
+						rescaleTimer = null
+					, 0
+
 				doRescale = (scale) ->
 					console.log 'doRescale', scale
 					return unless scale?
@@ -283,16 +293,16 @@ define [
 						console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
 							console.log 'in setscale then', scale, h, w
-							spinner.remove(element)
 							scope.$evalAsync () ->
+								if spinnerTimer
+									clearTimeout spinnerTimer
+								else
+									spinner.remove(element)
 								ctrl.redraw(origposition)
 								$timeout renderVisiblePages
 
-				scope.$on 'layout:pdf:view', (e, args) ->
-					console.log 'pdf view change', element, e, args
-					layoutReady = $q.defer()
-
 				elementTimer = null
+				spinnerTimer = null
 				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
 					console.log 'checking element ready', element.height(), element.width()
@@ -309,21 +319,42 @@ define [
 						]
 						console.log 'resolving layoutReady with', scope.parentSize
 						$timeout () ->
-							spinner.add(element)
+							if not spinnerTimer?
+								spinnerTimer = setTimeout () ->
+									spinner.add(element)
+									spinnerTimer = null
+								, 100
 							layoutReady.resolve scope.parentSize
 							scope.$emit 'flash-controls'
 
-				updateLayout()
+				layoutTimer = null
+				queueLayout = () ->
+					console.log 'call to queue layout'
+					return if layoutTimer?
+					console.log 'added to queue layoyt'
+					layoutReady = $q.defer()
+					layoutTimer = setTimeout () ->
+						console.log 'calling update layout'
+						updateLayout()
+						console.log 'setting layout timer to null'
+						layoutTimer = null
+					, 0
+
+				queueLayout()
+
+				scope.$on 'layout:pdf:view', (e, args) ->
+					console.log 'pdf view change', element, e, args
+					queueLayout()
 
 				scope.$on 'layout:main:resize', () ->
 					console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
-					updateLayout()
+					queueLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
 					# FIXME we get this event twice
 					# also we need to start a new layout when we get it
 					console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
-					updateLayout()
+					queueLayout()
 
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
@@ -375,12 +406,12 @@ define [
 					# no need to set scale when initialising, done in pdfSrc
 					return if newVal == oldVal
 					# console.log 'XXX calling Setscale in scale watch'
-					doRescale newVal
+					queueRescale newVal
 
 				scope.$watch 'forceScale', (newVal, oldVal) ->
 					# console.log 'got change in numscale watcher', newVal, oldVal
 					return unless newVal?
-					doRescale newVal
+					queueRescale newVal
 
 #				scope.$watch 'position', (newVal, oldVal) ->
 #					console.log 'got change in position watcher', newVal, oldVal
@@ -389,7 +420,7 @@ define [
 					# console.log 'forceCheck', newVal, oldVal
 					return unless newVal?
 					scope.adjustingScroll = true  # temporarily disable scroll
-					doRescale scope.scale
+					queueRescale scope.scale
 
 				scope.$watch('parentSize', (newVal, oldVal) ->
 					# console.log 'XXX in parentSize watch', newVal, oldVal
@@ -399,7 +430,7 @@ define [
 					# return unless oldVal?
 					# console.log 'XXX calling setScale in parentSize watcher'
 					return unless newVal?
-					doRescale scope.scale
+					queueRescale scope.scale
 				, true)
 
 				# scope.$watch 'elementWidth', (newVal, oldVal) ->
@@ -475,5 +506,8 @@ define [
 				scope.$on '$destroy', () ->
 					console.log 'handle pdfng directive destroy'
 					clearTimeout elementTimer if elementTimer?
+					clearTimeout layoutTimer if layoutTimer?
+					clearTimeout rescaleTimer if rescaleTimer?
+					clearTimeout spinnerTimer if spinnerTimer?
 		}
 	]
