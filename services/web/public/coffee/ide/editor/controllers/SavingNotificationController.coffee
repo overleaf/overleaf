@@ -27,6 +27,8 @@ define [
 							doc: ide.fileTreeManager.findEntityById(doc_id)
 						}
 
+			# for performance, only update the display if the old or new
+			# statuses have any unsaved files
 			if _.size(newStatus) or _.size(oldStatus)
 				$scope.docSavingStatus = newStatus
 				$scope.$apply()
