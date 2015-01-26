@@ -59,7 +59,8 @@ define [
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
 				.catch (error) ->
-					$scope.$emit 'pdf:error', 'loading initial document parameters'
+					$scope.$emit 'pdf:error', error
+					return $q.reject(error)
 
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->
@@ -87,6 +88,9 @@ define [
 					numScale * $scope.pdfPageSize[1]
 				]
 				# console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
+			.catch (error) ->
+				$scope.$emit 'pdf:error', error
+				return $q.reject(error)
 
 		@redraw = (position) ->
 			# console.log 'in redraw'
@@ -302,6 +306,10 @@ define [
 									spinner.remove(element)
 								ctrl.redraw(origposition)
 								$timeout renderVisiblePages
+								scope.loadSuccess = true
+						.catch (error) ->
+							scope.$emit 'pdf:error', error
+							return $q.reject(error)
 
 				elementTimer = null
 				spinnerTimer = null
@@ -364,9 +372,13 @@ define [
 					if scope.loadCount > 3 || error.match(/^Missing PDF/i) || error.match(/^loading/i)
 						scope.$emit 'pdf:error:display'
 						return
-					ctrl.load()
-					# trigger a redraw
-					scope.scale = angular.copy (scope.scale)
+					if scope.loadSuccess
+						ctrl.load()
+						# trigger a redraw
+						scope.scale = angular.copy (scope.scale)
+					else
+						scope.$emit 'pdf:error:display'
+						return
 
 				scope.$on 'pdf:page:size-change', (event, pageNum, delta) ->
 					#console.log 'page size change event', pageNum, delta
@@ -400,6 +412,7 @@ define [
 					# console.log 'loading pdf', newVal, oldVal
 					return unless newVal?
 					scope.loadCount = 0; # new pdf, so reset load count
+					scope.loadSuccess = false
 					ctrl.load()
 					# trigger a redraw
 					scope.scale = angular.copy (scope.scale)
