@@ -23,6 +23,7 @@ module.exports =
 			user.first_name = ""
 		user.last_name = ""
 
+		user.featureSwitches?.pdfng = true
 
 		user.save (err)->
 			callback(err, user)

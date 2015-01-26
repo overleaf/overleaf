@@ -25,6 +25,7 @@ define [
 					pdfDocument.getDownloadInfo().then () =>
 						@options.loadedCallback()
 				@errorCallback = @options.errorCallback
+				@pageSizeChangeCallback = @options.pageSizeChangeCallback
 				@pdfjs.catch (exception) =>
 					# console.log 'ERROR in get document', exception
 					@errorCallback(exception)
@@ -89,13 +90,6 @@ define [
 			setScale: (@scale) ->
 				@resetState()
 
-			pause: (element, pagenum) ->
-				return if @complete[pagenum]
-				return if @shuttingDown
-				@renderQueue = @renderQueue.filter (q) ->
-					q.pagenum != pagenum
-				@spinner.stop(element.canvas)
-
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
 				$timeout () =>
 					@processRenderQueue()
@@ -107,14 +101,23 @@ define [
 				@jobs = @jobs - 1
 				@triggerRenderQueue(0)
 
-			renderPage: (element, pagenum) ->
+			renderPages: (pages) ->
 				return if @shuttingDown
-				current = {
-					'element': element
-					'pagenum': pagenum
-				}
-				@renderQueue.push(current)
+				@renderQueue = for page in pages
+					{
+						'element': page.elementChildren
+						'pagenum': page.pageNum
+					}
 				@triggerRenderQueue()
+
+			renderPage: (page) ->
+				return if @shuttingDown
+				current =		{
+					'element': page.elementChildren
+					'pagenum': page.pageNum
+				}
+				@renderQueue.push current
+				@processRenderQueue()
 
 			processRenderQueue: () ->
 				return if @shuttingDown
@@ -131,7 +134,9 @@ define [
 				@jobs = @jobs + 1
 
 				element.canvas.addClass('pdfng-loading')
-				@spinner.add(element.canvas)
+				spinTimer = $timeout () =>
+					@spinner.add(element.canvas)
+				, 100
 
 				completeRef = @complete
 				renderTaskRef = @renderTask
@@ -142,6 +147,7 @@ define [
 					Raven.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
 					# console.log 'page load timed out', pagenum
 					timedOut = true
+					$timeout.cancel(spinTimer)
 					@spinner.stop(element.canvas)
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
@@ -153,6 +159,7 @@ define [
 				@pageLoad[pagenum].then (pageObject) =>
 					# console.log 'in page load success', pagenum
 					$timeout.cancel(timer)
+					$timeout.cancel(spinTimer)
 					@renderTask[pagenum] = @doRender element, pagenum, pageObject
 					@renderTask[pagenum].then () =>
 						# complete
@@ -166,6 +173,7 @@ define [
 				.catch (error) ->
 					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
 					$timeout.cancel(timer)
+					$timeout.cancel(spinTimer)
 					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
@@ -202,8 +210,14 @@ define [
 				canvas.height(newHeight + 'px')
 				canvas.width(newWidth + 'px')
 
-				element.canvas.height(newHeight)
-				element.canvas.width(newWidth)
+				oldHeight = element.canvas.height()
+				oldWidth = element.canvas.width()
+				if newHeight != oldHeight  or  newWidth != oldWidth
+					element.canvas.height(newHeight + 'px')
+					element.canvas.width(newWidth + 'px')
+					element.container.height(newHeight + 'px')
+					element.container.width(newWidth + 'px')
+					@pageSizeChangeCallback?(pagenum, newHeight - oldHeight)
 
 				if pixelRatio != 1
 					ctx.scale(pixelRatio, pixelRatio)
