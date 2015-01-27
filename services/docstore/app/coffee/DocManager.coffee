@@ -49,10 +49,9 @@ module.exports = DocManager =
 				}, "updating doc lines"
 				async.series [
 					(cb)->
-						# project collection is still primary so that needs to be successful first
-						MongoManager.updateDoc project_id, mongoPath, lines, cb
-					(cb)->
 						MongoManager.upsertIntoDocCollection project_id, doc_id, lines, doc.rev, cb
+					(cb)->
+						MongoManager.updateDoc project_id, mongoPath, lines, cb
 				], (error)->
 					return callback(error) if error?
 					callback null, true, doc.rev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
