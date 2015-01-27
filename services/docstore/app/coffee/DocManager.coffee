@@ -5,24 +5,19 @@ _ = require "underscore"
 async = require "async"
 
 module.exports = DocManager =
-	getDoc: (project_id, doc_id, options, callback = (error, doc, mongoPath) ->) ->
-		if typeof(options) == "function"
-			callback = options
-			options.include_deleted = false
+	getDoc: (project_id, doc_id, callback = (error, doc, mongoPath) ->) ->
 
-		MongoManager.findProject project_id, (error, project) ->
-			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
-			DocManager.findDocInProject project, doc_id, (error, doc, mongoPath) ->
+		MongoManager.findDoc doc_id, (err, docFromDocCollection)->
+			return callback(err) if err?
+			MongoManager.findProject project_id, (error, project) ->
 				return callback(error) if error?
-				if doc?
-					return callback null, doc, mongoPath
-				else
-					if options.include_deleted
-						MongoManager.findDoc doc_id, (error, doc) ->
-							return callback(error) if error?
-							return callback new Errors.NotFoundError("No such doc: #{project_id}") if !doc?
-							return callback null, doc
+				return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
+				DocManager.findDocInProject project, doc_id, (error, doc, mongoPath) ->
+					return callback(error) if error?
+					if docFromDocCollection?
+						return callback null, docFromDocCollection, mongoPath
+					else if doc?
+						return callback null, doc, mongoPath
 					else
 						return callback new Errors.NotFoundError("No such doc: #{project_id}")
 
@@ -37,7 +32,7 @@ module.exports = DocManager =
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc, mongoPath) ->
 			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc? or !mongoPath?
+			return callback new Errors.NotFoundError("No such project/doc to update: #{project_id}/#{doc_id}") if !doc? or !mongoPath?
 
 			if _.isEqual(doc.lines, lines)
 				logger.log {
@@ -65,7 +60,7 @@ module.exports = DocManager =
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
 			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project/doc: #{project_id}/#{doc_id}") if !doc?
+			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
 			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, doc.rev, (error) ->
 				return callback(error) if error?
 				MongoManager.markDocAsDeleted doc_id, (error) ->
