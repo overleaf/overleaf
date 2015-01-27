@@ -11,22 +11,25 @@ describe "Getting all docs", ->
 		@project_id = ObjectId()
 		@docs = [{
 			_id: ObjectId()
-			lines: ["one"]
+			lines: ["one", "two", "three"]
 			rev: 2
 		}, {
 			_id: ObjectId()
-			lines: ["two"]
+			lines: ["aaa", "bbb", "ccc"]
 			rev: 4
 		}, {
 			_id: ObjectId()
-			lines: ["three"]
+			lines: ["111", "222", "333"]
 			rev: 6
 		}]
 		DocstoreClient.createProject @project_id, (error) =>
 			throw error if error?
 			jobs = for doc in @docs
 				do (doc) =>
-					(callback) => DocstoreClient.createDoc @project_id, doc._id, doc.lines, callback
+					(callback) => 
+						DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
+							doc.lines[0] = doc.lines[0]+" added"
+							DocstoreClient.updateDoc @project_id, doc._id, doc.lines, callback
 			async.series jobs, done 
 
 	afterEach (done) ->
@@ -39,4 +42,5 @@ describe "Getting all docs", ->
 			for doc, i in docs
 				doc.lines.should.deep.equal @docs[i].lines
 			done()
+
 
