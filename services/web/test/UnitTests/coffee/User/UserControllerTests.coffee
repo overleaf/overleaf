@@ -35,6 +35,8 @@ describe "UserController", ->
 			setUserPassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
+		@SubscriptionDomainAllocator = 
+			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
@@ -47,6 +49,7 @@ describe "UserController", ->
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
+			"../Subscription/SubscriptionDomainAllocator":@SubscriptionDomainAllocator
 			"logger-sharelatex": {log:->}
 
 
@@ -212,6 +215,12 @@ describe "UserController", ->
 				done()
 			@UserController.register @req, @res			
 			
+		it "should auto allocate the subscription for that domain", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = (opts)=>
+				@SubscriptionDomainAllocator.autoAllocate.calledWith(@user).should.equal true
+				done()
+			@UserController.register @req, @res		
 
 
 	describe "changePassword", ->
