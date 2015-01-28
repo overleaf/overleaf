@@ -171,18 +171,22 @@ module.exports = (grunt) ->
 				return callback(error) if error?
 				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall service, (error) ->
+					Helpers.rebuildNpmModules service, (error) ->
 						return callback(error) if error?
-						callback()
+						Helpers.runGruntInstall service, (error) ->
+							return callback(error) if error?
+							callback()
 
 		updateService: (service, callback = (error) ->) ->
 			Helpers.updateGitRepo service, (error) ->
 				return callback(error) if error?
 				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall service, (error) ->
+					Helpers.rebuildNpmModules service, (error) ->
 						return callback(error) if error?
-						callback()
+						Helpers.runGruntInstall service, (error) ->
+							return callback(error) if error?
+							callback()
 
 		cloneGitRepo: (service, callback = (error) ->) ->
 			repo_src = service.repo
@@ -225,13 +229,21 @@ module.exports = (grunt) ->
 							proc = spawn "git", ["push", "--tags"], cwd: dir, stdio: "inherit"
 							proc.on "close", () ->
 								callback()
-								
+
 		installNpmModules: (service, callback = (error) ->) ->
 			dir = service.name
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
-				
+
+		# work around for https://github.com/npm/npm/issues/5400
+		# where binary modules are not built due to bug in npm
+		rebuildNpmModules: (service, callback = (error) ->) ->
+			dir = service.name
+			proc = spawn "npm", ["rebuild"], stdio: "inherit", cwd: dir
+			proc.on "close", () ->
+				callback()
+
 		createDataDirs: (callback = (error) ->) ->
 			DIRS = [
 				"tmp/dumpFolder"

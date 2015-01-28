@@ -26,6 +26,8 @@ ShareLaTeX should run on OS X and Linux. You need:
 * A local instance of [Redis](http://redis.io/topics/quickstart) (version 2.6.12 or later) and [MongoDB](http://docs.mongodb.org/manual/installation/) running on their standard ports.
 * [TeXLive](https://www.tug.org/texlive/) 2013 or later with the `latexmk` program installed.
 
+ShareLaTeX needs a minimum of 2gb of memory, it is likely to be more than that though depending on usage.
+
 Other repositories
 ------------------
 
@@ -78,6 +80,10 @@ The backend API for managing project tags (folders).
 
 An API for running server-side spelling checking on ShareLaTeX documents.
 
+Dropbox
+-------
+
+Please note that certain features like Dropbox integration are not functional in the open source code base yet, despite appearing in the user interface. We're working on this, sorry!
 
 Contributing
 ------------
