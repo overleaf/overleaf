@@ -55,6 +55,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-concurrent'
+	grunt.loadNpmTasks "grunt-contrib-coffee"
+
 
 	execute = {}
 	for service in SERVICES
@@ -70,6 +72,18 @@ module.exports = (grunt) ->
 				options:
 					limit: SERVICES.length
 					logConcurrentOutput: true
+		coffee:
+			migrate: 
+				expand: true,
+				flatten: false,
+				cwd: './',
+				src: ['./migrations/*.coffee'],
+				dest: './',
+				ext: '.js'
+				options:
+					bare:true
+
+
 
 		availabletasks:
 			tasks:
@@ -146,6 +160,10 @@ module.exports = (grunt) ->
 		Helpers.buildDeb @async()
 	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
 		Helpers.buildUpstartScripts()
+
+
+	grunt.registerTask 'migrate', 'run migrations', ['coffee:migrate']
+
 
 	Helpers =
 		installService: (service, callback = (error) ->) ->
