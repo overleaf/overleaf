@@ -8,7 +8,7 @@ async = require("async")
 exec = require("child_process").exec
 
 finished_projects_path = "/tmp/finished-projects"
-
+all_projects_path = "/tmp/all-projects"
 
 printProgress = ->
 	exec "wc #{finished_projects_path}", (error, results) ->
@@ -18,15 +18,32 @@ printProgress = ->
 checkIfFileHasBeenProccessed = (project_id, callback)->
 	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
 		hasBeenProcessed = _.include(results, project_id)
-		console.log hasBeenProcessed, project_id
+		#console.log hasBeenProcessed, project_id
 		callback(null, hasBeenProcessed)
 
-getProjectIds = (callback)->
+loadProjectIds = (callback)->
+	fs.readFile all_projects_path, "utf-8", (err, data)->
+		console.log data.length
+		ids = data.split("\n")
+		console.log ids.length
+		callback err, ids
+
+getAndWriteProjectids = (callback)->
 	console.log "finding all project id's - #{new Date().toString()}"
-	db.projects.find {}, {_id:1}, (err,ids)->
+	db.projects.find {}, {_id:1}, (err, ids)->
 		console.log "total found projects in mongo #{ids.length} - #{new Date().toString()}"
-		ids = _.map ids, (id)-> return id._id.toString()
-		callback(err, ids)
+		ids = _.pluck ids, '_id'
+		ids = _.filter ids, (id)-> id?
+		fileData = ids.join("\n")
+		fs.writeFile all_projects_path, fileData, ->
+			callback(err, ids)
+
+getProjectIds = (callback)->
+	exists = fs.existsSync all_projects_path
+	if exists 
+		loadProjectIds callback
+	else
+		getAndWriteProjectids callback
 
 markProjectAsProcessed = (project_id, callback)->
 	fs.appendFile finished_projects_path, "#{project_id}\n", callback
@@ -34,7 +51,9 @@ markProjectAsProcessed = (project_id, callback)->
 getAllDocs = (project_id, callback = (error, docs) ->) ->
 	db.projects.findOne _id:ObjectId(project_id), (error, project) ->
 		return callback(error) if error?
-		return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
+		if !project?
+			console.error("No such project: #{project_id}")
+			return callback("no such project #{project_id}")
 		findAllDocsInProject project, (error, docs) ->
 			return callback(error) if error?
 			return callback null, docs
@@ -78,9 +97,9 @@ saveDocsIntoMongo = (project_id, docs, callback)->
 
 
 processNext = (project_id, callback)->
-	#console.log("starting to process #{project_id} - #{new Date().toString()}")
 	checkIfFileHasBeenProccessed project_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
+			console.log "#{project_id} already procssed, skipping"
 			return callback()
 		getAllDocs project_id, (err, docs)->
 			if err?
