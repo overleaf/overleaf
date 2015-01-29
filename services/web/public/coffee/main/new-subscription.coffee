@@ -81,6 +81,7 @@ define [
 		completeSubscription = (err, recurly_token_id) ->
 			$scope.validation.errorFields = {}
 			if err?
+				$scope.processing = false
 				$scope.genericError = err.message
 				_.each err.fields, (field)-> $scope.validation.errorFields[field] = true
 			else
