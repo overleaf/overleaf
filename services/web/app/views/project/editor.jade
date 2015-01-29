@@ -103,6 +103,11 @@ block content
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
 				}
+			},
+			config:{
+				moment:{
+					noGlobal: true
+				}
 			}
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + 'ace/ace.js')}"
