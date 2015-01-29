@@ -3,44 +3,33 @@ fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
 db = mongojs('sharelatex', ['projects', 'docs'])
-_ = require("underscore")
+_ = require("lodash")
 async = require("async")
+exec = require("child_process").exec
 
-local_db_path = "/tmp/process-db"
-
-Datastore = require('nedb')
-processDb = new Datastore({ filename: local_db_path})
+finished_projects_path = "/tmp/finished-projects"
 
 
 printProgress = ->
-	processDb.count {processed:false}, (err, todo)->
-		processDb.count {}, (err, total)->
-			console.log "#{todo}/#{total} processed"
-			setTimeout printProgress, 1000
+	exec "wc #{finished_projects_path}", (error, results) ->
+		#console.log results
+		setTimeout printProgress, 1000 * 30
 
+checkIfFileHasBeenProccessed = (project_id, callback)->
+	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
+		hasBeenProcessed = _.include(results, project_id)
+		console.log hasBeenProcessed, project_id
+		callback(null, hasBeenProcessed)
 
-writeProjectIdsToDisk = (callback)->
+getProjectIds = (callback)->
+	console.log "finding all project id's - #{new Date().toString()}"
 	db.projects.find {}, {_id:1}, (err,ids)->
-		console.log "total found projects in mongo #{ids.length}"
+		console.log "total found projects in mongo #{ids.length} - #{new Date().toString()}"
 		ids = _.map ids, (id)-> return id._id.toString()
-		jobs = _.map ids, (id)->
-			return (cb)->
-				processDb.findOne {project_id:id}, (err, doc)->
-					if doc?
-						return cb()
-					processDb.insert {project_id:id, processed:false}, cb
-		async.series jobs, (err)->
-			processDb.count {processed:false}, (err, count)->
-				console.log "projects to process: #{count}"
-				callback()
-
-getNextProjectToProccess = (callback)->
-	processDb.findOne {processed:false}, (err, doc)->
-		callback err, doc.project_id
+		callback(err, ids)
 
 markProjectAsProcessed = (project_id, callback)->
-	processDb.update project_id:project_id, {$set:{processed:true}}, {}, callback
-
+	fs.appendFile finished_projects_path, "#{project_id}\n", callback
 
 getAllDocs = (project_id, callback = (error, docs) ->) ->
 	db.projects.findOne _id:ObjectId(project_id), (error, project) ->
@@ -88,21 +77,33 @@ saveDocsIntoMongo = (project_id, docs, callback)->
 	async.series jobs, callback
 
 
-processNext = ->
-	processDb.count {processed:false}, (err, total)->
-		if total == 0
-			console.log "DONE"
-			process.exit()
-		else
-			getNextProjectToProccess (err, project_id)->
-				getAllDocs project_id, (err, docs)->
-					saveDocsIntoMongo project_id, docs, ->
-						markProjectAsProcessed project_id, ->
-							processNext()
+processNext = (project_id, callback)->
+	#console.log("starting to process #{project_id} - #{new Date().toString()}")
+	checkIfFileHasBeenProccessed project_id, (err, hasBeenProcessed)->
+		if hasBeenProcessed
+			return callback()
+		getAllDocs project_id, (err, docs)->
+			if err?
+				console.error err, project_id, "could not get all docs"
+				return callback()
+			saveDocsIntoMongo project_id, docs, ->
+				if err?
+					console.error err, project_id, "could not save docs into mongo"
+					return callback()
+				markProjectAsProcessed project_id, ->
+					callback()
 
-processDb.loadDatabase ->
-	writeProjectIdsToDisk ->
-		processNext()
+getProjectIds (err, ids)->
+	printProgress()
+	jobs = _.map ids, (id)->
+		return (cb)->
+			processNext(id, cb)
+	async.series jobs, (err)->
+		if err?
+			console.error err, "at end of jobs"
+		else
+			console.log "finished"
+		process.exit()
 	
 exports.up = (next)->
 
