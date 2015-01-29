@@ -22,11 +22,9 @@ block content
 					.card.card-highlighted
 						.page-header
 							.row
-								.col-md-9
+								.col-xs-9
 									h2 {{planName}}
-									div !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
-									div #{translate("every")} {{billingCycleType}}
-								.col-md-3
+								.col-xs-3
 									div.dropdown.changePlanButton.pull-right(ng-cloak)
 										a.btn.btn-default.dropdown-toggle(
 											href="#",
@@ -39,7 +37,13 @@ block content
 												a(
 													ng-click="changeCurrency(currency)",
 												) {{currency}} ({{value['symbol']}})
-									h2.pull-right.totalPrice {{price.currency.symbol}}{{price.next.total}}
+							hr.thin
+							.row
+								.col-md-12.text-center
+									div(ng-if="trialLength") !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+									div(ng-if="price")
+										strong {{price.currency.symbol}}{{price.next.total}}
+										span  #{translate("every")} {{billingCycleType}}
 						.row
 							.col-md-12
 								form(ng-show="planName")
@@ -150,16 +154,16 @@ block content
 
 
 									.row
-										.col-md-7
+										.col-xs-7
 											.form-group
 												button.btn.btn-success(ng-click="submit()", ng-disabled="processing") #{translate("upgrade_now")} 
 									
-										.col-md-3.pricingBreakdown
+										.col-xs-3.pricingBreakdown
 											div Subtotal
 											div Tax
 											div
 												strong Total
-										.col-md-2
+										.col-xs-2
 											div.pull-right {{price.currency.symbol}}{{price.next.subtotal}}
 											div.pull-right {{price.currency.symbol}}{{price.next.tax}}
 											div.pull-right

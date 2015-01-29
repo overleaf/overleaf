@@ -46,7 +46,7 @@ define [
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
-			$scope.trialLength = pricing.items.plan.trial.length
+			$scope.trialLength = pricing.items.plan.trial?.length
 			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
 			$scope.$apply()
 
