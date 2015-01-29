@@ -3,6 +3,8 @@ define [
 	"mathjax"
 ], (App) ->
 	mathjaxConfig =
+		messageStyle: "none"
+		imageFont:null
 		"HTML-CSS": { availableFonts: ["TeX"] },
 		TeX:
 			equationNumbers: { autoNumber: "AMS" },
