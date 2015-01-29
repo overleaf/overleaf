@@ -40,13 +40,33 @@ define [
 						options.west = state.west
 						options.east = state.east
 
+					repositionControls = () ->
+						state = element.layout().readState()
+						if state.east?
+							controls = element.find("> .ui-layout-resizer-controls")
+							if state.east.initClosed
+								controls.hide()
+							else
+								controls.show()
+								controls.css({
+									position: "absolute"
+									right: state.east.size
+									"z-index": 10
+								})
+
+					resetOpenStates = () ->
+						state = element.layout().readState()
+						if attrs.openEast? and state.east?
+							openEast = $parse(attrs.openEast)
+							openEast.assign(scope, !state.east.initClosed)
+
 					# Someone moved the resizer
 					onInternalResize = () ->
 						state = element.layout().readState()
 						scope.$broadcast "layout:#{name}:resize", state
 						repositionControls()
 						resetOpenStates()
-
+						
 					oldWidth = element.width()
 					# Something resized our parent element
 					onExternalResize = () ->
@@ -70,25 +90,7 @@ define [
 					$(window).unload () ->
 						$.localStorage("layout.#{name}", element.layout().readState())
 
-					repositionControls = () ->
-						state = element.layout().readState()
-						if state.east?
-							controls = element.find("> .ui-layout-resizer-controls")
-							if state.east.initClosed
-								controls.hide()
-							else
-								controls.show()
-								controls.css({
-									position: "absolute"
-									right: state.east.size
-									"z-index": 10
-								})
 
-					resetOpenStates = () ->
-						state = element.layout().readState()
-						if attrs.openEast? and state.east?
-							openEast = $parse(attrs.openEast)
-							openEast.assign(scope, !state.east.initClosed)
 
 					if attrs.openEast?
 						scope.$watch attrs.openEast, (value, oldValue) ->
