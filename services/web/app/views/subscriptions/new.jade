@@ -128,22 +128,22 @@ block content
 									hr
 									.row
 										.col-md-12
-											.form-group
+											.form-group(ng-class="validation.errorFields.address1 ? 'has-error' : ''")
 												label #{translate("billing_address")}
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
-											.form-group
+											.form-group(ng-class="validation.errorFields.address2 ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
-											.form-group
+											.form-group(ng-class="validation.errorFields.state ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', ng-model="data.state", placeholder="#{translate('state')}")
 									.row
 										.col-md-7
-											.form-group
+											.form-group(ng-class="validation.errorFields.city ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
-										.col-md-5
+										.col-md-5(ng-class="validation.errorFields.postal_code ? 'has-error' : ''")
 												input.form-control(type='text', value='', maxlength='255', tabindex='1', onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
 									.row
 										.col-md-7
-											.form-group
+											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
 												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
 													mixin countries_options()
 									.row

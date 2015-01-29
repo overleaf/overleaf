@@ -81,9 +81,10 @@ define [
 		completeSubscription = (err, recurly_token_id) ->
 			$scope.validation.errorFields = {}
 			if err?
-				$scope.processing = false
-				$scope.genericError = err.message
-				_.each err.fields, (field)-> $scope.validation.errorFields[field] = true
+				$scope.$apply () ->
+					$scope.processing = false
+					$scope.genericError = err.message
+					_.each err.fields, (field)-> $scope.validation.errorFields[field] = true
 			else
 				postData =
 					_csrf: window.csrfToken
@@ -92,10 +93,10 @@ define [
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
 				$http.post("/user/subscription/create", postData)
-				.success (data, status, headers)->
-					window.location.href = "/user/subscription/thank-you"
-				.error (data, status, headers)->
-					$scope.processing = false
+					.success (data, status, headers)->
+						window.location.href = "/user/subscription/thank-you"
+					.error (data, status, headers)->
+						$scope.processing = false
 					$scope.genericError = "Something went wrong processing the request"
 
 		$scope.submit = ->
