@@ -19,7 +19,6 @@
     "express": "3.3.4",
     "fairy": "0.0.2",
     "jade": "~1.3.1",
-    "lodash": "3.0.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "lynx": "0.1.1",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
@@ -41,6 +40,7 @@
     "socket.io": "0.9.16",
     "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
     "underscore": "1.6.0",
+    "underscore.string": "^3.0.2",
     "xml2js": "0.2.0"
   },
   "devDependencies": {

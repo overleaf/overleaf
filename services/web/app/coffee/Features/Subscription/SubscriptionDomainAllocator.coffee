@@ -1,7 +1,8 @@
 async = require("async")
-_ = require("lodash")
+_ = require("underscore")
 settings = require("settings-sharelatex")
 SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
+_s = require("underscore.string")
 
 module.exports = SubscriptionDomainAllocator =
 
@@ -16,7 +17,7 @@ module.exports = SubscriptionDomainAllocator =
 	_findDomainLicence: (email)->
 		licence = _.find settings.domainLicences, (licence)->
 			_.find licence.domains, (domain)->
-				_.includes email, domain
+				_s.endsWith email, domain
 
 		return licence
 
