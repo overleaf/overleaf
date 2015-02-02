@@ -88,7 +88,7 @@ block content
 		window.anonymous = #{anonymous};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML",
+				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
 				"moment": "libs/moment-2.7.0"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
@@ -102,6 +102,11 @@ block content
 				},
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
+				}
+			},
+			config:{
+				moment:{
+					noGlobal: true
 				}
 			}
 		};

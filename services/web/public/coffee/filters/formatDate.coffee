@@ -1,7 +1,8 @@
 define [
 	"base"
-], (App) ->
-	moment.lang "en", calendar:
+	"libs/moment-2.9.0"
+], (App, moment) ->
+	moment.locale "en", calendar:
 		lastDay : '[Yesterday]'
 		sameDay : '[Today]'
 		nextDay : '[Tomorrow]'
