@@ -8,7 +8,7 @@ block scripts
 		window.countryCode = '#{countryCode}'
 		window.plan_code = '#{plan_code}'
 		window.recurlyApiKey = "!{settings.apis.recurly.publicKey}"
-
+		window.couponCode = "#{couponCode}"
 
 block content
 	- locals.supressDefaultJs = true
@@ -148,10 +148,9 @@ block content
 													mixin countries_options()
 									.row
 										.col-md-8
-											if showCouponField == 'true'
+											if (showCouponField)
 												.form-group
 													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
-
 
 									.row
 										.col-xs-7

@@ -27,6 +27,7 @@ define [
 			state:""
 			city:""
 			country:window.countryCode
+			coupon: window.couponCode
 
 
 		$scope.validation =
@@ -41,7 +42,13 @@ define [
 		pricing = recurly.Pricing()
 		window.pricing = pricing
 
-		pricing.plan(window.plan_code, { quantity: 1 }).address({country: $scope.data.country}).tax({tax_code: 'digital', vat_number: ''}).currency($scope.currencyCode).done()
+		initialPricing = pricing
+			.plan(window.plan_code, { quantity: 1 })
+			.address({country: $scope.data.country})
+			.tax({tax_code: 'digital', vat_number: ''})
+			.currency($scope.currencyCode)
+			.coupon($scope.data.coupon)
+			.done()
 
 		pricing.on "change", =>
 			$scope.planName = pricing.items.plan.name
