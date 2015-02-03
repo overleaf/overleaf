@@ -1,0 +1,27 @@
+[Unit]
+Description=ShareLaTeX A web-based collaborative LaTeX editor
+Documentation=https://github.com/sharelatex/sharelatex/wiki
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+
+# Specify user/group to execute as (sharelatex is the default)
+User=sharelatex
+Group=sharelatex
+
+# Specify the user configurable environment file
+EnvironmentFile=/etc/sharelatex/sharelatex.env
+
+# Specify path of installed instance of share latex (leave trailing /%i)
+WorkingDirectory=/var/www/sharelatex/%i
+
+# Start ShareLaTeX service: i.e. web, chat etc.. and stores output
+# files in different log files. Comment out this line and uncomment
+# the next if you prefer to use the systemd logger
+ExecStart=/etc/sharelatex/start_module.sh %i
+#ExecStart=/bin/node app.js
+
+[Install]
+WantedBy=multi-user.target
