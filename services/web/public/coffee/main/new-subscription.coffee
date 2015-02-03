@@ -99,7 +99,7 @@ define [
 						window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false
-					$scope.genericError = "Something went wrong processing the request"
+						$scope.genericError = "Something went wrong processing the request"
 
 		$scope.submit = ->
 			$scope.processing = true
