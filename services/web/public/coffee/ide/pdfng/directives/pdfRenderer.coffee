@@ -49,11 +49,11 @@ define [
 
 			getPdfViewport: (pageNum, scale) ->
 				scale ?= @scale
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPage(pageNum).then (page) ->
 						viewport = page.getViewport scale
-					, (error) ->
-						console.log 'ERROR', error
+					, (error) =>
+						@errorCallback?(error)
 
 			getDestinations: () ->
 				@document.then (pdfDocument) ->
@@ -68,8 +68,8 @@ define [
 					pdfDocument.getDestinations()
 				return @destinations.then (all) ->
 					all[dest]
-				, (error) ->
-					console.log 'ERROR', error
+				, (error) =>
+					@errorCallback?(error)
 				# When we upgrade we can switch to using the following direct
 				# code.
 				# @document.then (pdfDocument) ->
@@ -78,11 +78,11 @@ define [
 				# 	console.log 'ERROR', error
 
 			getPageIndex: (ref) ->
-				@document.then (pdfDocument) ->
+				@document.then (pdfDocument) =>
 					pdfDocument.getPageIndex(ref).then (idx) ->
 						idx
-					, (error) ->
-						console.log 'ERROR', error
+					, (error) =>
+						@errorCallback?(error)
 
 			getScale: () ->
 				@scale
@@ -91,7 +91,8 @@ define [
 				@resetState()
 
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
-				$timeout () =>
+				@queueTimer = setTimeout () =>
+					@queueTimer = null
 					@processRenderQueue()
 				, interval
 
@@ -134,7 +135,7 @@ define [
 				@jobs = @jobs + 1
 
 				element.canvas.addClass('pdfng-loading')
-				spinTimer = $timeout () =>
+				spinTimer = setTimeout () =>
 					@spinner.add(element.canvas)
 				, 100
 
@@ -144,14 +145,14 @@ define [
 
 				timedOut = false
 				timer = $timeout () =>
-					Raven.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
+					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
 					# console.log 'page load timed out', pagenum
 					timedOut = true
-					$timeout.cancel(spinTimer)
+					clearTimeout(spinTimer)
 					@spinner.stop(element.canvas)
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
-					this.errorCallback?('timeout')
+					@errorCallback?('timeout')
 				, @PAGE_LOAD_TIMEOUT
 
 				@pageLoad[pagenum] = @getPage(pagenum)
@@ -159,7 +160,7 @@ define [
 				@pageLoad[pagenum].then (pageObject) =>
 					# console.log 'in page load success', pagenum
 					$timeout.cancel(timer)
-					$timeout.cancel(spinTimer)
+					clearTimeout(spinTimer)
 					@renderTask[pagenum] = @doRender element, pagenum, pageObject
 					@renderTask[pagenum].then () =>
 						# complete
@@ -173,7 +174,7 @@ define [
 				.catch (error) ->
 					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
 					$timeout.cancel(timer)
-					$timeout.cancel(spinTimer)
+					clearTimeout(spinTimer)
 					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
@@ -245,7 +246,7 @@ define [
 				timedOut = false
 
 				timer = $timeout () =>
-					Raven.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms')
+					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms')
 					# console.log 'page render timed out', pagenum
 					timedOut = true
 					result.cancel()
@@ -258,11 +259,11 @@ define [
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
 					, (error) ->
-						console.log 'ERROR', error
+						self.errorCallback?(error)
 					page.getAnnotations().then (annotations) ->
 						annotationsLayer.setAnnotations annotations
 					, (error) ->
-						console.log 'ERROR', error
+						self.errorCallback?(error)
 				.catch (error) ->
 					# console.log 'page render failed', pagenum, error
 					$timeout.cancel(timer)
@@ -278,6 +279,7 @@ define [
 			destroy: () ->
 				# console.log 'in pdf renderer destroy', @renderQueue
 				@shuttingDown = true
+				clearTimeout @queueTimer if @queueTimer?
 				@renderQueue = []
 				for task in @renderTask
 					task.cancel() if task?

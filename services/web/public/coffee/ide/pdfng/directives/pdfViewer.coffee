@@ -25,7 +25,7 @@ define [
 			# $scope.pages = []
 
 			$scope.document.destroy() if $scope.document?
-			$scope.loadCount = $scope.loadCount? ? $scope.loadCount + 1 : 1
+			$scope.loadCount = if $scope.loadCount? then $scope.loadCount + 1 else 1
 			# TODO need a proper url manipulation library to add to query string
 			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
 				scale: 1,
@@ -38,7 +38,7 @@ define [
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
 				errorCallback: (error) ->
-					Raven.captureMessage?('pdfng error ' + error)
+					Raven?.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
 				pageSizeChangeCallback: (pageNum, deltaH) ->
 					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
@@ -58,6 +58,9 @@ define [
 					]
 					# console.log 'resolved q.all, page size is', result
 					$scope.numPages = result.numPages
+				.catch (error) ->
+					$scope.$emit 'pdf:error', error
+					return $q.reject(error)
 
 		@setScale = (scale, containerHeight, containerWidth) ->
 			$scope.loaded.then () ->
@@ -85,6 +88,9 @@ define [
 					numScale * $scope.pdfPageSize[1]
 				]
 				# console.log 'in setScale result', $scope.scale.scale, $scope.defaultPageSize
+			.catch (error) ->
+				$scope.$emit 'pdf:error', error
+				return $q.reject(error)
 
 		@redraw = (position) ->
 			# console.log 'in redraw'
@@ -273,68 +279,107 @@ define [
 						extra.push scope.pages[lastVisiblePageIdx + 2]
 					return visiblePages.concat extra
 
+				rescaleTimer = null
+				queueRescale = (scale) ->
+					# console.log 'call to queueRescale'
+					return if rescaleTimer? or layoutTimer? or elementTimer?
+					# console.log 'adding to rescale queue'
+					rescaleTimer = setTimeout () ->
+						doRescale scale
+						rescaleTimer = null
+					, 0
+
 				doRescale = (scale) ->
 					# console.log 'doRescale', scale
+					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
-					layoutReady.promise.then () ->
-						[h, w] = [element.innerHeight(), element.width()]
+					layoutReady.promise.then (parentSize) ->
+						[h, w] = parentSize
 						# console.log 'in promise', h, w
 						ctrl.setScale(scale, h, w).then () ->
-							spinner.remove(element)
-							ctrl.redraw(origposition)
-							setTimeout renderVisiblePages, 0
+							# console.log 'in setscale then', scale, h, w
+							scope.$evalAsync () ->
+								if spinnerTimer
+									clearTimeout spinnerTimer
+								else
+									spinner.remove(element)
+								ctrl.redraw(origposition)
+								$timeout renderVisiblePages
+								scope.loadSuccess = true
+						.catch (error) ->
+							scope.$emit 'pdf:error', error
 
-				checkElementReady = () ->
+				elementTimer = null
+				spinnerTimer = null
+				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
+					# console.log 'checking element ready', element.height(), element.width()
 					if element.height() == 0 or element.width() == 0
-						$timeout () ->
-							checkElementReady()
-						, 250
+						return if elementTimer?
+						elementTimer = setTimeout () ->
+							elementTimer = null
+							updateLayout()
+						, 1000
 					else
-						scope.$broadcast 'layout-ready' if !scope.parentSize?
+						scope.parentSize = [
+							element.innerHeight(),
+							element.innerWidth()
+						]
+						# console.log 'resolving layoutReady with', scope.parentSize
+						$timeout () ->
+							if not spinnerTimer?
+								spinnerTimer = setTimeout () ->
+									spinner.add(element)
+									spinnerTimer = null
+								, 100
+							layoutReady.resolve scope.parentSize
+							scope.$emit 'flash-controls'
 
-				checkElementReady()
+				layoutTimer = null
+				queueLayout = () ->
+					# console.log 'call to queue layout'
+					return if layoutTimer?
+					# console.log 'added to queue layoyt'
+					layoutReady = $q.defer()
+					layoutTimer = setTimeout () ->
+						# console.log 'calling update layout'
+						updateLayout()
+						# console.log 'setting layout timer to null'
+						layoutTimer = null
+					, 0
 
-				scope.$on 'layout-ready', () ->
-					# console.log 'GOT LAYOUT READY EVENT'
-					# console.log 'calling refresh'
-					# updateContainer()
-					spinner.add(element)
-					layoutReady.resolve 'layout is ready'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$emit 'flash-controls'
-					#scope.$apply()
+				queueLayout()
+
+				#scope.$on 'layout:pdf:view', (e, args) ->
+				#	console.log 'pdf view change', element, e, args
+				#	queueLayout()
 
 				scope.$on 'layout:main:resize', () ->
 					# console.log 'GOT LAYOUT-MAIN-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					scope.$apply()
-
+					queueLayout()
 
 				scope.$on 'layout:pdf:resize', () ->
+					# FIXME we get this event twice
+					# also we need to start a new layout when we get it
 					# console.log 'GOT LAYOUT-PDF-RESIZE EVENT'
-					scope.parentSize = [
-						element.innerHeight(),
-						element.innerWidth()
-					]
-					#scope.$apply()
+					queueLayout()
 
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
 					# check if too many retries or file is missing
-					if scope.loadCount > 3 || error.match(/^Missing PDF/i)
+					if scope.loadCount > 3 || error.match(/^Missing PDF/i) || error.match(/^loading/i)
 						scope.$emit 'pdf:error:display'
 						return
-					ctrl.load()
-					# trigger a redraw
-					scope.scale = angular.copy (scope.scale)
+					if scope.loadSuccess
+						ctrl.load().then () ->
+							# trigger a redraw
+							scope.scale = angular.copy (scope.scale)
+						.catch (error) ->
+							scope.$emit 'pdf:error:display'
+					else
+						scope.$emit 'pdf:error:display'
+						return
 
 				scope.$on 'pdf:page:size-change', (event, pageNum, delta) ->
 					#console.log 'page size change event', pageNum, delta
@@ -351,42 +396,40 @@ define [
 					#scope.scrollPosition = element.scrollTop()
 					if scope.adjustingScroll
 						renderVisiblePages()
-						# updateContainer()
-						scope.$apply()
 						scope.adjustingScroll = false
 						return
-					#scope.scrolled = true
 					if scope.scrollHandlerTimeout
 						clearTimeout(scope.scrollHandlerTimeout)
 					scope.scrollHandlerTimeout = setTimeout scrollHandler, 25
 
 				scrollHandler = () ->
 					renderVisiblePages()
-					#scope.$apply()
 					newPosition = ctrl.getPdfPosition()
 					if newPosition?
 						scope.position = newPosition
-					#scope.$apply()
 					scope.scrollHandlerTimeout = null
 
 				scope.$watch 'pdfSrc', (newVal, oldVal) ->
 					# console.log 'loading pdf', newVal, oldVal
 					return unless newVal?
 					scope.loadCount = 0; # new pdf, so reset load count
-					ctrl.load()
-					# trigger a redraw
-					scope.scale = angular.copy (scope.scale)
+					scope.loadSuccess = false
+					ctrl.load().then () ->
+						# trigger a redraw
+						scope.scale = angular.copy (scope.scale)
+					.catch (error) ->
+						scope.$emit 'pdf:error', error
 
 				scope.$watch 'scale', (newVal, oldVal) ->
 					# no need to set scale when initialising, done in pdfSrc
 					return if newVal == oldVal
 					# console.log 'XXX calling Setscale in scale watch'
-					doRescale newVal
+					queueRescale newVal
 
 				scope.$watch 'forceScale', (newVal, oldVal) ->
 					# console.log 'got change in numscale watcher', newVal, oldVal
 					return unless newVal?
-					doRescale newVal
+					queueRescale newVal
 
 #				scope.$watch 'position', (newVal, oldVal) ->
 #					console.log 'got change in position watcher', newVal, oldVal
@@ -395,16 +438,17 @@ define [
 					# console.log 'forceCheck', newVal, oldVal
 					return unless newVal?
 					scope.adjustingScroll = true  # temporarily disable scroll
-					doRescale scope.scale
+					queueRescale scope.scale
 
 				scope.$watch('parentSize', (newVal, oldVal) ->
 					# console.log 'XXX in parentSize watch', newVal, oldVal
 					# if newVal == oldVal
 					# 	console.log 'returning because old and new are the same'
 					# 	return
-					return unless oldVal?
+					# return unless oldVal?
 					# console.log 'XXX calling setScale in parentSize watcher'
-					doRescale scope.scale
+					return unless newVal?
+					queueRescale scope.scale
 				, true)
 
 				# scope.$watch 'elementWidth', (newVal, oldVal) ->
@@ -477,9 +521,11 @@ define [
 						}
 						ctrl.setPdfPosition(scope.pages[first.page], position)
 
-				scope.$watch '$destroy', () ->
-					#console.log 'handle pdfng directive destroy'
-
-
+				scope.$on '$destroy', () ->
+					# console.log 'handle pdfng directive destroy'
+					clearTimeout elementTimer if elementTimer?
+					clearTimeout layoutTimer if layoutTimer?
+					clearTimeout rescaleTimer if rescaleTimer?
+					clearTimeout spinnerTimer if spinnerTimer?
 		}
 	]

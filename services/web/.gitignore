@@ -50,6 +50,7 @@ public/js/history/versiondetail.js
 public/js/*
 !public/js/ace/*
 !public/js/libs/
+public/js/libs/sharejs.js
 public/js/editor.js
 public/js/home.js
 public/js/forms.js

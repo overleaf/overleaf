@@ -86,8 +86,11 @@ define [
 				return false
 
 		closeContextMenu: (e) ->
-			@$scope.$apply () =>
-				@$scope.spellingMenu.open = false
+			# this is triggered on scroll, so for performance only apply
+			# setting when it changes
+			if @$scope?.spellingMenu?.open != false
+				@$scope.$apply () =>
+					@$scope.spellingMenu.open = false
 
 		replaceWord: (highlight, text) ->
 			@editor.getSession().replace(new Range(
