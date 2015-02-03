@@ -5,11 +5,14 @@ module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
+		include_deleted = req.query?.include_deleted == "true"
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
 			return next(error) if error?
 			logger.log doc: doc, "got doc"
 			if !doc?
+				res.send 404
+			else if doc.deleted && !include_deleted
 				res.send 404
 			else
 				res.json HttpController._buildDocView(doc)

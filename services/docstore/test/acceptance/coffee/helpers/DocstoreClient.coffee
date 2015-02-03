@@ -31,10 +31,11 @@ module.exports = DocstoreClient =
 	deleteProject: (project_id, callback = (error, res, body) ->) ->
 		db.projects.remove _id: project_id, callback
 
-	getDoc: (project_id, doc_id, callback = (error, res, body) ->) ->
+	getDoc: (project_id, doc_id, qs, callback = (error, res, body) ->) ->
 		request.get {
 			url: "http://localhost:3016/project/#{project_id}/doc/#{doc_id}"
 			json: true
+			qs:qs
 		}, callback
 
 	getAllDocs: (project_id, callback = (error, res, body) ->) ->

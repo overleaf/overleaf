@@ -6,7 +6,6 @@ async = require "async"
 
 module.exports = DocManager =
 	getDoc: (project_id, doc_id, callback = (error, doc, mongoPath) ->) ->
-
 		MongoManager.findDoc doc_id, (err, docFromDocCollection)->
 			return callback(err) if err?
 			MongoManager.findProject project_id, (error, project) ->

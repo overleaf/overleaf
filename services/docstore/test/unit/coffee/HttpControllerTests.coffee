@@ -13,7 +13,7 @@ describe "HttpController", ->
 			"./DocManager": @DocManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 		@res = { send: sinon.stub(), json: sinon.stub(), setHeader:sinon.stub() }
-		@req = {}
+		@req = { query:{}}
 		@next = sinon.stub()
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
@@ -23,16 +23,22 @@ describe "HttpController", ->
 			version: 42
 			rev: 5
 		}
+		@deletedDoc = {
+			deleted:true
+			_id: @doc_id
+			lines: ["mock", "lines", " here", "", "", " spaces "]
+			version: 42
+			rev: 5
+		}
 
 	describe "getDoc", ->
-		beforeEach ->
-			@req.params =
-				project_id: @project_id
-				doc_id: @doc_id
-			@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
 
 		describe "without deleted docs", ->
 			beforeEach ->
+				@req.params =
+					project_id: @project_id
+					doc_id: @doc_id
+				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
 				@HttpController.getDoc @req, @res, @next
 
 			it "should get the document (including deleted)", ->
@@ -50,13 +56,31 @@ describe "HttpController", ->
 					})
 					.should.equal true
 
-		describe "with deleted docs", ->
+		describe "which is deleted", ->
 			beforeEach ->
-				@HttpController.getDoc @req, @res, @next
+				@req.params =
+					project_id: @project_id
+					doc_id: @doc_id
+				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @deletedDoc)
 
-			it "should get the document (without deleted)", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
+			it "should get the doc from the doc manager", ->
+				@HttpController.getDoc @req, @res, @next
+				@DocManager.getDoc.calledWith(@project_id, @doc_id).should.equal true
+
+			it "should return 404 if the query string delete is not set ", ->
+				@HttpController.getDoc @req, @res, @next
+				@res.send.calledWith(404).should.equal true
+
+			it "should return the doc as JSON if include_deleted is set to true", ->
+				@req.query.include_deleted = "true"
+				@HttpController.getDoc @req, @res, @next
+				@res.json
+					.calledWith({
+						_id: @doc_id
+						lines: @doc.lines
+						rev: @doc.rev
+						deleted: true
+					})
 					.should.equal true
 
 	describe "getRawDoc", ->

@@ -29,7 +29,7 @@ describe "Applying updates to a doc", ->
 			@body.modified.should.equal true
 
 		it "should update the doc in the API", (done) ->
-			DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 				doc.lines.should.deep.equal @newLines
 				done()
 
@@ -42,7 +42,7 @@ describe "Applying updates to a doc", ->
 			@body.modified.should.equal false
 
 		it "should not update the doc in the API", (done) ->
-			DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 				doc.lines.should.deep.equal @originalLines
 				done()
 
@@ -74,7 +74,7 @@ describe "Applying updates to a doc", ->
 				@res.statusCode.should.equal 400
 
 			it "should not update the doc in the API", (done) ->
-				DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 					doc.lines.should.deep.equal @originalLines
 					done()
 
@@ -87,7 +87,7 @@ describe "Applying updates to a doc", ->
 				@res.statusCode.should.equal 400
 
 			it "should not update the doc in the API", (done) ->
-				DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 					doc.lines.should.deep.equal @originalLines
 					done()
 
@@ -102,7 +102,7 @@ describe "Applying updates to a doc", ->
 			@body.modified.should.equal true
 
 		it "should update the doc in the API", (done) ->
-			DocstoreClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 				doc.lines.should.deep.equal @largeLines
 				done()
 
