@@ -15,6 +15,13 @@ define [
 				if (@$scope.ui.view != "track-changes" and entity.type == "doc")
 					@openDoc(entity)
 
+			@$scope.$on "entity:deleted", (event, entity) =>
+				if @$scope.editor.open_doc_id == entity.id
+					return if !@$scope.project.rootDoc_id
+					doc = @ide.fileTreeManager.findEntityById(@$scope.project.rootDoc_id)
+					return if !doc?
+					@openDoc(doc)
+
 			initialized = false
 			@$scope.$on "file-tree:initialized", () =>
 				if !initialized

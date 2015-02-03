@@ -320,6 +320,8 @@ define [
 				entity.deleted = true
 				@$scope.deletedDocs.push entity
 
+			@$scope.$emit "entity:deleted", entity
+
 		_moveEntityInScope: (entity, parent_folder) ->
 			return if entity in parent_folder.children
 			@_deleteEntityFromScope(entity, moveToDeleted: false)
