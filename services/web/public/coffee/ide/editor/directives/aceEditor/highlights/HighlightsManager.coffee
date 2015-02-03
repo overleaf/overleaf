@@ -106,8 +106,11 @@ define [
 					labelToShow = label
 
 			if !labelToShow?
-				@$scope.$apply () =>
-					@$scope.annotationLabel.show = false
+				# this is the most common path, triggered on mousemove, so
+				# for performance only apply setting when it changes
+				if @$scope?.annotationLabel?.show != false
+					@$scope.$apply () =>
+						@$scope.annotationLabel.show = false
 			else
 				$ace = $(@editor.renderer.container).find(".ace_scroller")
 				# Move the label into the Ace content area so that offsets and positions are easy to calculate.
