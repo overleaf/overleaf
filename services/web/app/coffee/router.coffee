@@ -38,6 +38,7 @@ ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersCont
 DropboxRouter = require "./Features/Dropbox/DropboxRouter"
 dropboxHandler = require "./Features/Dropbox/DropboxHandler"
 Modules = require "./infrastructure/Modules"
+RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -91,7 +92,12 @@ module.exports = class Router
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
-		app.get  '/Project/:Project_id', SecurityManager.requestCanAccessProject, ProjectController.loadEditor
+		app.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
+			endpointName: "open-project"
+			params: ["Project_id"]
+			maxRequests: 10
+			timeInterval: 60
+		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 
 		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
