@@ -62,7 +62,8 @@ block content
 									p !{translate("your_subscription_has_expired")}	
 										a(href="/user/subscription/plans") !{translate("create_new_subscription")}
 								default
-									p !{translate("problem_with_subscription_contact_us")}
+									-if(groups.length == 0)
+										p !{translate("problem_with_subscription_contact_us")}
 
 							-if(subscription.groupPlan)
 								a(href="/subscription/group").btn.btn-success !{translate("manage_group")}
