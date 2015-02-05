@@ -16,15 +16,3 @@ module.exports = EditorRealTimeController =
 	emitToAll: (message, payload...) ->
 		@emitToRoom "all", message, payload...
 
-	listenForEditorEvents: () ->
-		@rclientSub.subscribe "editor-events"
-		@rclientSub.on "message", @_processEditorEvent.bind(@)
-
-	_processEditorEvent: (channel, message) ->
-		io = require('../../infrastructure/Server').io
-		message = JSON.parse(message)
-		if message.room_id == "all"
-			io.sockets.emit(message.message, message.payload...)
-		else
-			io.sockets.in(message.room_id).emit(message.message, message.payload...)
-		

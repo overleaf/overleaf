@@ -6,17 +6,13 @@ ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 ProjectDeleter = require("../Project/ProjectDeleter")
-ProjectGetter = require('../Project/ProjectGetter')
-UserGetter = require('../User/UserGetter')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 LimitationsManager = require("../Subscription/LimitationsManager")
-AuthorizationManager = require("../Security/AuthorizationManager")
 EditorRealTimeController = require("./EditorRealTimeController")
 TrackChangesManager = require("../TrackChanges/TrackChangesManager")
 Settings = require('settings-sharelatex')
 async = require('async')
-ConnectedUsersManager = require("../ConnectedUsers/ConnectedUsersManager")
 LockManager = require("../../infrastructure/LockManager")
 _ = require('underscore')
 redis = require("redis-sharelatex")
@@ -24,144 +20,6 @@ rclientPub = redis.createClient(Settings.redis.web)
 rclientSub = redis.createClient(Settings.redis.web)
 
 module.exports = EditorController =
-	protocolVersion: 2
-
-	reportError: (client, clientError, callback = () ->) ->
-		client.get "project_id", (error, project_id) ->
-			client.get "user_id", (error, user_id) ->
-				logger.error err: clientError, project_id: project_id, user_id: user_id, "client error"
-				callback()
-
-	joinProject: (client, user, project_id, callback) ->
-		logger.log user_id:user._id, project_id:project_id, "user joining project"
-		Metrics.inc "editor.join-project"
-		EditorController.buildJoinProjectView project_id, user._id, (error, project, privilegeLevel, protocolVersion) ->
-			return callback(error) if error?
-			if !privilegeLevel
-				callback new Error("Not authorized")
-			else
-				client.join(project_id)
-				client.set("project_id", project_id)
-				client.set("owner_id", project.owner._id)
-				client.set("user_id", user._id)
-				client.set("first_name", user.first_name)
-				client.set("last_name", user.last_name)
-				client.set("email", user.email)
-				client.set("connected_time", new Date())
-				client.set("signup_date", user.signUpDate)
-				client.set("login_count", user.loginCount)
-				AuthorizationManager.setPrivilegeLevelOnClient client, privilegeLevel
-				
-				callback null, project, privilegeLevel, EditorController.protocolVersion
-
-				# can be done after the connection has happened
-				ConnectedUsersManager.updateUserPosition project_id, client.id, user, null, ->
-				
-				# Only show the 'renamed or deleted' message once
-				if project.deletedByExternalDataSource
-					ProjectDeleter.unmarkAsDeletedByExternalSource project_id
-							
-	buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
-		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
-			return callback(error) if error?
-			return callback(new Error("not found")) if !project?
-			ProjectGetter.populateProjectWithUsers project, (error, project) ->
-				return callback(error) if error?
-				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
-					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject project, user, (error, canAccess, privilegeLevel) ->
-						return callback(error) if error?
-						if !canAccess
-							callback null, null, false
-						else
-							callback(null,
-								ProjectEditorHandler.buildProjectModelView(project),
-								privilegeLevel
-							)
-
-	leaveProject: (client, user) ->
-		self = @
-		client.get "project_id", (error, project_id) ->
-			return if error? or !project_id?
-			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientDisconnected", client.id)
-			ConnectedUsersManager.markUserAsDisconnected project_id, client.id, ->
-			logger.log user_id:user._id, project_id:project_id, "user leaving project"
-			self.flushProjectIfEmpty(project_id)
-
-	joinDoc: (client, project_id, doc_id, fromVersion, callback = (error, docLines, version) ->) ->
-		# fromVersion is optional
-		if typeof fromVersion == "function"
-			callback = fromVersion
-			fromVersion = -1
-
-		client.get "user_id", (error, user_id) ->
-			logger.log user_id: user_id, project_id: project_id, doc_id: doc_id, "user joining doc"
-		Metrics.inc "editor.join-doc"
-		client.join doc_id
-		DocumentUpdaterHandler.getDocument project_id, doc_id, fromVersion, (err, docLines, version, ops)->
-			# Encode any binary bits of data so it can go via WebSockets
-			# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
-			if docLines?
-				docLines = for line in docLines
-					if line.text?
-						try
-							line.text = unescape(encodeURIComponent(line.text))
-						catch err
-							logger.err err:err, project_id:project_id, doc_id:doc_id, fromVersion:fromVersion, line:line, "error encoding line.text uri component"
-					else
-						try
-							line = unescape(encodeURIComponent(line))
-						catch err
-							logger.err err:err, project_id:project_id, doc_id:doc_id, fromVersion:fromVersion, line:line, "error encoding line uri component"
-					line
-			callback(err, docLines, version, ops)
-
-	leaveDoc: (client, project_id, doc_id, callback = (error) ->) ->
-		client.get "user_id", (error, user_id) ->
-			logger.log user_id: user_id, project_id: project_id, doc_id: doc_id, "user leaving doc"
-		Metrics.inc "editor.leave-doc"
-		client.leave doc_id
-		callback()
-
-	flushProjectIfEmpty: (project_id, callback = ->)->
-		setTimeout (->
-			io = require('../../infrastructure/Server').io
-			peopleStillInProject = io.sockets.clients(project_id).length
-			logger.log project_id: project_id, connectedCount: peopleStillInProject, "flushing if empty"
-			if peopleStillInProject == 0
-				DocumentUpdaterHandler.flushProjectToMongoAndDelete(project_id)
-				TrackChangesManager.flushProject(project_id)
-			callback()
-			), 500
-		
-	updateClientPosition: (client, cursorData, callback = (error) ->) ->
-		async.parallel {
-			project_id: (cb)-> client.get "project_id", cb
-			first_name: (cb)-> client.get "first_name", cb
-			last_name: (cb)-> client.get "last_name", cb
-			email: (cb)-> client.get "email", cb
-			user_id: (cb)-> client.get "user_id", cb
-		}, (err, results)->
-			{first_name, last_name, user_id, email, project_id} = results
-			cursorData.id = client.id
-			cursorData.user_id = user_id if user_id?
-			cursorData.email = email if email?
-			if first_name? and last_name?
-				cursorData.name = first_name + " " + last_name
-				ConnectedUsersManager.updateUserPosition(project_id, client.id, {
-					first_name: first_name,
-					last_name:  last_name,
-					email:      email,
-					user_id:    user_id
-				}, {
-					row: cursorData.row,
-					column: cursorData.column,
-					doc_id: cursorData.doc_id
-				}, ->)
-			else
-				cursorData.name = "Anonymous"
-			EditorRealTimeController.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
-
 	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
 		email = email.toLowerCase()
 		LimitationsManager.isCollaboratorLimitReached project_id, (error, limit_reached) =>

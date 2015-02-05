@@ -75,7 +75,7 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(src='/socket.io/socket.io.js')
+	script(src='#{settings.websocketsUrl}/socket.io/socket.io.js')
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.

@@ -7,7 +7,6 @@ SecurityManager = require('./managers/SecurityManager')
 AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
 EditorRouter = require("./Features/Editor/EditorRouter")
-EditorUpdatesController = require("./Features/Editor/EditorUpdatesController")
 Settings = require('settings-sharelatex')
 TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
 SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
@@ -34,7 +33,6 @@ StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
-ConnectedUsersController = require("./Features/ConnectedUsers/ConnectedUsersController")
 DropboxRouter = require "./Features/Dropbox/DropboxRouter"
 dropboxHandler = require "./Features/Dropbox/DropboxHandler"
 Modules = require "./infrastructure/Modules"
@@ -50,7 +48,7 @@ httpAuth = require('express').basicAuth (user, pass)->
 	return isValid
 
 module.exports = class Router
-	constructor: (app, io, socketSessions)->
+	constructor: (app)->
 		app.use(app.router)
 		
 		app.get  '/login', UserPagesController.loginPage
@@ -125,8 +123,6 @@ module.exports = class Router
 		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-
-		app.get  '/project/:Project_id/connected_users', SecurityManager.requestCanAccessProject, ConnectedUsersController.getConnectedUsers
 
 		app.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
 		app.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
@@ -226,65 +222,3 @@ module.exports = class Router
 			res.send(204)
 
 		app.get '*', ErrorController.notFound
-
-		socketSessions.on 'connection', (err, client, session)->
-			metrics.inc('socket-io.connection')
-			# This is not ideal - we should come up with a better way of handling
-			# anonymous users, but various logging lines rely on user._id
-			if !session or !session.user?
-				user = {_id: "anonymous-user"}
-			else
-				user = session.user
-
-			client.on 'joinProject', (data, callback) ->
-				EditorController.joinProject(client, user, data.project_id, callback)
-
-			client.on 'disconnect', () ->
-				metrics.inc ('socket-io.disconnect')
-				EditorController.leaveProject client, user
-
-			client.on 'applyOtUpdate', (doc_id, update) ->
-				AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-					EditorUpdatesController.applyOtUpdate(client, project_id, doc_id, update)
-
-			client.on 'clientTracking.updatePosition', (cursorData) ->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					EditorController.updateClientPosition(client, cursorData)
-
-			client.on 'leaveDoc', (doc_id, callback)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					EditorController.leaveDoc(client, project_id, doc_id, callback)
-
-			client.on 'joinDoc', (args...)->
-				AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-					EditorController.joinDoc(client, project_id, args...)
-
-			# The remaining can be done via HTTP
-			client.on 'addUserToProject', (email, newPrivalageLevel, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.addUserToProject project_id, email, newPrivalageLevel, callback
-
-			client.on 'removeUserFromProject', (user_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					EditorController.removeUserFromProject(project_id, user_id, callback)
-
-			client.on 'getUserDropboxLinkStatus', (owner_id, callback)->
-				AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-					dropboxHandler.getUserRegistrationStatus owner_id, callback
-
-			# client.on 'publishProjectAsTemplate', (user_id, callback)->
-			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-			# 		TemplatesController.publishProject user_id, project_id, callback
-			# 
-			# client.on 'unPublishProjectAsTemplate', (user_id, callback)->
-			# 	AuthorizationManager.ensureClientCanAdminProject client, (error, project_id) =>
-			# 		TemplatesController.unPublishProject user_id, project_id, callback
-			# 
-			# client.on 'updateProjectDescription', (description, callback)->
-			# 	AuthorizationManager.ensureClientCanEditProject client, (error, project_id) =>
-			# 		EditorController.updateProjectDescription project_id, description, callback
-			# 
-			# client.on "getPublishedDetails", (user_id, callback)->
-			# 	AuthorizationManager.ensureClientCanViewProject client, (error, project_id) =>
-			# 		TemplatesController.getTemplateDetails user_id, project_id, callback
-

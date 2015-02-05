@@ -18,10 +18,6 @@ describe "EditorController", ->
 		@doc_id = "test-doc-id"
 		@source = "dropbox"
 
-		@projectModelView = 
-			_id: @project_id
-			owner:{_id:"something"}
-
 		@user =
 			_id: @user_id = "user-id"
 			projects: {}
@@ -37,12 +33,10 @@ describe "EditorController", ->
 			setSpellCheckLanguage: sinon.spy()
 		@ProjectEntityHandler = 
 			flushProjectToThirdPartyDataStore:sinon.stub()
-		@ProjectEditorHandler =
-			buildProjectModelView : sinon.stub().returns(@projectModelView)
+		@ProjectEditorHandler = {}
 		@Project =
 			findPopulatedById: sinon.stub().callsArgWith(1, null, @project)
 		@LimitationsManager = {}
-		@AuthorizationManager = {}
 		@client = new MockClient()
 
 		@settings = 
@@ -57,9 +51,6 @@ describe "EditorController", ->
 			addUserToProject: sinon.stub().callsArgWith(3)
 		@ProjectDeleter =
 			deleteProject: sinon.stub()
-		@ConnectedUsersManager =
-			markUserAsDisconnected:sinon.stub()
-			updateUserPosition:sinon.stub()
 		@LockManager =
 			getLock : sinon.stub()
 			releaseLock : sinon.stub()
@@ -70,307 +61,20 @@ describe "EditorController", ->
 			'../Project/ProjectOptionsHandler' : @ProjectOptionsHandler
 			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler
 			'../Project/ProjectDeleter' : @ProjectDeleter
-			'../Project/ProjectGetter' : @ProjectGetter = {}
-			'../User/UserGetter': @UserGetter = {}
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
 			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler
 			'../Subscription/LimitationsManager' : @LimitationsManager
-			'../Security/AuthorizationManager' : @AuthorizationManager
 			'../../models/Project' : Project: @Project
 			"settings-sharelatex":@settings
 			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker
 			'./EditorRealTimeController':@EditorRealTimeController = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
-			"../ConnectedUsers/ConnectedUsersManager":@ConnectedUsersManager
 			"../../infrastructure/LockManager":@LockManager
 			'redis-sharelatex':createClient:-> auth:->
 			"logger-sharelatex": @logger =
 				log: sinon.stub()
 				err: sinon.stub()
-
-	describe "joinProject", ->
-		beforeEach ->
-			sinon.spy(@client, "set")
-			sinon.spy(@client, "get")
-			@AuthorizationManager.setPrivilegeLevelOnClient = sinon.stub()
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
-			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
-
-		describe "when authorized", ->
-			beforeEach ->
-				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectModelView, "owner")
-				@EditorController.joinProject(@client, @user, @project_id, @callback)
-
-			it "should set the privilege level on the client", ->
-				@AuthorizationManager.setPrivilegeLevelOnClient
-					.calledWith(@client, "owner")
-					.should.equal.true
-
-			it "should add the client to the project channel", ->
-				@client.join.calledWith(@project_id).should.equal true
-
-			it "should set the project_id of the client", ->
-				@client.set.calledWith("project_id", @project_id).should.equal true
-
-			it "should mark the user as connected with the ConnectedUsersManager", ->
-				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, @user, null).should.equal true
-
-			it "should return the project model view, privilege level and protocol version", ->
-				@callback.calledWith(null, @projectModelView, "owner", @EditorController.protocolVersion).should.equal true
-		
-		describe "when not authorized", ->
-			beforeEach ->
-				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, null, false)
-				@EditorController.joinProject(@client, @user, @project_id, @callback)
-
-			it "should not set the privilege level on the client", ->
-				@AuthorizationManager.setPrivilegeLevelOnClient
-					.called.should.equal false
-
-			it "should not add the client to the project channel", ->
-				@client.join.called.should.equal false
-
-			it "should not set the project_id of the client", ->
-				@client.set.called.should.equal false
-
-			it "should return an error", ->
-				@callback.calledWith(sinon.match.truthy).should.equal true
-				
-		describe "when the project is marked as deleted", ->
-			beforeEach ->
-				@projectModelView.deletedByExternalDataSource = true
-				@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectModelView, "owner")
-				@EditorController.joinProject(@client, @user, @project_id, @callback)	
-			
-			it "should remove the flag to send a user a message about the project being deleted", ->
-				@ProjectDeleter.unmarkAsDeletedByExternalSource
-					.calledWith(@project_id)
-					.should.equal true
-				
-	describe "buildJoinProjectView", ->
-		beforeEach ->
-			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
-			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
-				
-		describe "when authorized", ->
-			beforeEach ->
-				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, true, "owner")
-				@EditorController.buildJoinProjectView(@project_id, @user_id, @callback)
-				
-			it "should find the project without doc lines", ->
-				@ProjectGetter.getProjectWithoutDocLines
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should populate the user references in the project", ->
-				@ProjectGetter.populateProjectWithUsers
-					.calledWith(@project)
-					.should.equal true
-			
-			it "should look up the user", ->
-				@UserGetter.getUser
-					.calledWith(@user_id, { isAdmin: true })
-					.should.equal true
-					
-			it "should check the privilege level", ->
-				@AuthorizationManager.getPrivilegeLevelForProject
-					.calledWith(@project, @user)
-					.should.equal true
-
-			it "should return the project model view, privilege level and protocol version", ->
-				@callback.calledWith(null, @projectModelView, "owner").should.equal true
-				
-		describe "when not authorized", ->
-			beforeEach ->
-				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, false, null)
-				@EditorController.buildJoinProjectView(@project_id, @user_id, @callback)
-				
-			it "should return false in the callback", ->
-				@callback.calledWith(null, null, false).should.equal true
-
-
-	describe "leaveProject", ->
-		beforeEach ->
-			sinon.stub(@client, "set")
-			sinon.stub(@client, "get").callsArgWith(1, null, @project_id)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@EditorController.flushProjectIfEmpty = sinon.stub()
-			@EditorController.leaveProject @client, @user
-			@ConnectedUsersManager.markUserAsDisconnected.callsArgWith(2)
-
-		it "should call the flush project if empty function", ->
-			@EditorController.flushProjectIfEmpty
-				.calledWith(@project_id)
-				.should.equal true
-
-		it "should emit a clientDisconnect to the project room", ->
-			@EditorRealTimeController.emitToRoom
-				.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
-				.should.equal true
-
-		it "should mark the user as connected with the ConnectedUsersManager", ->
-			@ConnectedUsersManager.markUserAsDisconnected.calledWith(@project_id, @client.id).should.equal true
-
-
-	describe "joinDoc", ->
-		beforeEach ->
-			@client.join = sinon.stub()
-			@client.set("user_id", @user_id)
-			@fromVersion = 40
-			@docLines = ["foo", "bar"]
-			@ops = ["mock-op-1", "mock-op-2"]
-			@version = 42
-			@DocumentUpdaterHandler.getDocument = sinon.stub().callsArgWith(3, null, @docLines, @version, @ops)
-
-		describe "with a fromVersion", ->
-			beforeEach ->
-				@EditorController.joinDoc @client, @project_id, @doc_id, @fromVersion, @callback
-
-			it "should add the client to the socket.io room for the doc", ->
-				@client.join.calledWith(@doc_id).should.equal true
-
-			it "should get the document", ->
-				@DocumentUpdaterHandler.getDocument
-					.calledWith(@project_id, @doc_id, @fromVersion)
-					.should.equal true
-
-			it "should return the doclines and version and ops", ->
-				@callback.calledWith(null, @docLines, @version, @ops).should.equal true
-
-			it "should increment the join-doc metric", ->
-				@Metrics.inc.calledWith("editor.join-doc").should.equal true
-
-			it "should log out the request", ->
-				@logger.log
-					.calledWith(user_id: @user_id, project_id: @project_id, doc_id: @doc_id, "user joining doc")
-					.should.equal true
-
-		describe "without a fromVersion", ->
-			beforeEach ->
-				@EditorController.joinDoc @client, @project_id, @doc_id, @callback
-
-			it "should get the document with fromVersion=-1", ->
-				@DocumentUpdaterHandler.getDocument
-					.calledWith(@project_id, @doc_id, -1)
-					.should.equal true
-
-			it "should return the doclines and version and ops", ->
-				@callback.calledWith(null, @docLines, @version, @ops).should.equal true
-
-	describe "leaveDoc", ->
-		beforeEach ->
-			@client.leave = sinon.stub()
-			@client.set("user_id", @user_id)
-			@EditorController.leaveDoc @client, @project_id, @doc_id, @callback
-
-		it "should remove the client from the socket.io room for the doc", ->
-			@client.leave.calledWith(@doc_id).should.equal true
-
-		it "should increment the leave-doc metric", ->
-			@Metrics.inc.calledWith("editor.leave-doc").should.equal true
-
-		it "should log out the request", ->
-			@logger.log
-				.calledWith(user_id: @user_id, project_id: @project_id, doc_id: @doc_id, "user leaving doc")
-
-				.should.equal true
-
-	describe "flushProjectIfEmpty", ->
-		beforeEach ->	
-			@DocumentUpdaterHandler.flushProjectToMongoAndDelete = sinon.stub()
-			@TrackChangesManager.flushProject = sinon.stub()
-
-		describe "when a project has no more users", ->
-			it "should do the flush after the config set timeout to ensure that a reconect didn't just happen", (done)->
-				@rooms[@project_id] = []
-				@EditorController.flushProjectIfEmpty @project_id, =>
-					@DocumentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal(true)
-					@TrackChangesManager.flushProject.calledWith(@project_id).should.equal true
-					done()
-
-		describe "when a project still has connected users", ->
-			it "should not flush the project", (done)->
-				@rooms[@project_id] = ["socket-id-1", "socket-id-2"]
-				@EditorController.flushProjectIfEmpty @project_id, =>
-					@DocumentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal(false)
-					@TrackChangesManager.flushProject.calledWith(@project_id).should.equal false
-					done()
-
-	describe "updateClientPosition", ->
-		beforeEach ->
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ConnectedUsersManager.updateUserPosition.callsArgWith(4)
-			@update = {
-				doc_id: @doc_id = "doc-id-123"
-				row: @row = 42
-				column: @column = 37
-			}
-
-
-		describe "with a logged in user", ->
-			beforeEach ->
-				@clientParams = {
-					project_id: @project_id
-					first_name: @first_name = "Douglas"
-					last_name: @last_name = "Adams"
-					email: @email = "joe@example.com"
-					user_id: @user_id = "user-id-123"
-				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
-				@EditorController.updateClientPosition @client, @update
-
-				@populatedCursorData = 
-					doc_id: @doc_id,
-					id: @client.id
-					name: "#{@first_name} #{@last_name}"
-					row: @row
-					column: @column
-					email: @email
-					user_id: @user_id
-
-			it "should send the update to the project room with the user's name", ->
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
-
-			it "should send the  cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
-					user_id: @user_id,
-					email: @email,
-					first_name: @first_name,
-					last_name: @last_name
-				}, {
-					row: @row
-					column: @column
-					doc_id: @doc_id
-				}).should.equal true
-				done()
-
-		describe "with an anonymous user", ->
-			beforeEach ->
-				@clientParams = {
-					project_id: @project_id
-				}
-				@client.get = (param, callback) => callback null, @clientParams[param]
-				@EditorController.updateClientPosition @client, @update
-
-			it "should send the update to the project room with an anonymous name", ->
-				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "clientTracking.clientUpdated", {
-						doc_id: @doc_id,
-						id: @client.id
-						name: "Anonymous"
-						row: @row
-						column: @column
-					})
-					.should.equal true
-				
-			it "should not send cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.called.should.equal false
-				done()
 
 	describe "addUserToProject", ->
 		beforeEach ->

@@ -5,11 +5,8 @@ logger = require 'logger-sharelatex'
 metrics = require('./Metrics')
 crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
-socketIoConfig = require('./SocketIoConfig')
 Router = require('../router')
 metrics.inc("startup")
-SessionSockets = require('session.socket.io')
-
 
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
@@ -119,13 +116,8 @@ app.get "/profile", (req, res) ->
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-io = require('socket.io').listen(server)
-
-sessionSockets = new SessionSockets(io, sessionStore, cookieParser, cookieKey)
-router = new Router(app, io, sessionSockets)
-socketIoConfig.configure(io)
+router = new Router(app)
 
 module.exports =
-	io: io
 	app: app
 	server: server

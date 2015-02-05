@@ -3,6 +3,10 @@ ProjectDeleter = require "../Project/ProjectDeleter"
 logger = require "logger-sharelatex"
 EditorRealTimeController = require "./EditorRealTimeController"
 EditorController = require "./EditorController"
+ProjectGetter = require('../Project/ProjectGetter')
+UserGetter = require('../User/UserGetter')
+AuthorizationManager = require("../Security/AuthorizationManager")
+ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
 
 module.exports = EditorHttpController =
@@ -11,7 +15,7 @@ module.exports = EditorHttpController =
 		user_id = req.query.user_id
 		logger.log {user_id, project_id}, "join project request"
 		Metrics.inc "editor.join-project"
-		EditorController.buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
+		EditorHttpController._buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
 			return next(error) if error?
 			res.json {
 				project: project
@@ -20,6 +24,24 @@ module.exports = EditorHttpController =
 			# Only show the 'renamed or deleted' message once
 			if project?.deletedByExternalDataSource
 				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
+
+	_buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
+		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
+			return callback(error) if error?
+			return callback(new Error("not found")) if !project?
+			ProjectGetter.populateProjectWithUsers project, (error, project) ->
+				return callback(error) if error?
+				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
+					return callback(error) if error?
+					AuthorizationManager.getPrivilegeLevelForProject project, user, (error, canAccess, privilegeLevel) ->
+						return callback(error) if error?
+						if !canAccess
+							callback null, null, false
+						else
+							callback(null,
+								ProjectEditorHandler.buildProjectModelView(project),
+								privilegeLevel
+							)
 
 	restoreDoc: (req, res, next) ->
 		project_id = req.params.Project_id

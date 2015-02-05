@@ -6,9 +6,7 @@ logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSeria
 metrics = require("metrics-sharelatex")
 metrics.initialize("web")
 Server = require("./app/js/infrastructure/Server")
-BackgroundTasks = require("./app/js/infrastructure/BackgroundTasks")
 Errors = require "./app/js/errors"
-
 
 argv = require("optimist")
 	.options("user", {alias : "u", description : "Run the server with permissions of the specified user"})
@@ -31,8 +29,6 @@ if Settings.catchErrors
 	process.removeAllListeners "uncaughtException"
 	process.on "uncaughtException", (error) ->
 		logger.error err: error, "uncaughtException"
-
-BackgroundTasks.run()
 
 port = Settings.port or Settings.internal?.web?.port or 3000
 host = Settings.internal.web.host or "localhost"

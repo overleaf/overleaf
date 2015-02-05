@@ -8,6 +8,10 @@ describe "EditorHttpController", ->
 		@EditorHttpController = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectEntityHandler' : @ProjectEntityHandler = {}
 			'../Project/ProjectDeleter' : @ProjectDeleter = {}
+			'../Project/ProjectGetter' : @ProjectGetter = {}
+			'../User/UserGetter' : @UserGetter = {}
+			"../Security/AuthorizationManager": @AuthorizationManager = {}
+			'../Project/ProjectEditorHandler': @ProjectEditorHandler = {}
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./EditorController": @EditorController = {}
@@ -21,6 +25,7 @@ describe "EditorHttpController", ->
 		@res =
 			send: sinon.stub()
 			json: sinon.stub()
+		@callback = sinon.stub()
 			
 	describe "joinProject", ->
 		beforeEach ->
@@ -31,7 +36,7 @@ describe "EditorHttpController", ->
 			@projectView = {
 				_id: @project_id
 			}
-			@EditorController.buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectView, "owner")
+			@EditorHttpController._buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectView, "owner")
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			
 		describe "successfully", ->
@@ -39,7 +44,7 @@ describe "EditorHttpController", ->
 				@EditorHttpController.joinProject @req, @res
 				
 			it "should get the project view", ->
-				@EditorController.buildJoinProjectView
+				@EditorHttpController._buildJoinProjectView
 					.calledWith(@project_id, @user_id)
 					.should.equal true
 					
@@ -70,6 +75,61 @@ describe "EditorHttpController", ->
 				@ProjectDeleter.unmarkAsDeletedByExternalSource 
 					.calledWith(@project_id)
 					.should.equal true
+
+	describe "_buildJoinProjectView", ->
+		beforeEach ->
+			@project =
+				_id: @project_id
+				owner_ref:{_id:"something"}
+			@user =
+				_id: @user_id = "user-id"
+				projects: {}
+			@projectModelView = 
+				_id: @project_id
+				owner:{_id:"something"}
+				view: true
+			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
+			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
+			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+				
+		describe "when authorized", ->
+			beforeEach ->
+				@AuthorizationManager.getPrivilegeLevelForProject =
+					sinon.stub().callsArgWith(2, null, true, "owner")
+				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
+				
+			it "should find the project without doc lines", ->
+				@ProjectGetter.getProjectWithoutDocLines
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should populate the user references in the project", ->
+				@ProjectGetter.populateProjectWithUsers
+					.calledWith(@project)
+					.should.equal true
+			
+			it "should look up the user", ->
+				@UserGetter.getUser
+					.calledWith(@user_id, { isAdmin: true })
+					.should.equal true
+					
+			it "should check the privilege level", ->
+				@AuthorizationManager.getPrivilegeLevelForProject
+					.calledWith(@project, @user)
+					.should.equal true
+
+			it "should return the project model view, privilege level and protocol version", ->
+				@callback.calledWith(null, @projectModelView, "owner").should.equal true
+				
+		describe "when not authorized", ->
+			beforeEach ->
+				@AuthorizationManager.getPrivilegeLevelForProject =
+					sinon.stub().callsArgWith(2, null, false, null)
+				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
+				
+			it "should return false in the callback", ->
+				@callback.calledWith(null, null, false).should.equal true
 
 	describe "restoreDoc", ->
 		beforeEach ->
