@@ -32,5 +32,8 @@ module.exports = Modules =
 			compiler = jade.compile(partial, doctype: "html")
 			html += compiler(locals)
 		return html
+
+	moduleIncludesAvailable: (view) ->
+		return (Modules.viewIncludes[view] or []).length > 0
 		
 Modules.loadModules()

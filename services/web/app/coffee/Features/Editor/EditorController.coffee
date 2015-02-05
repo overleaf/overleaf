@@ -151,9 +151,6 @@ module.exports = EditorController =
 				return {_id:doc._id, path:path.substring(1)}
 			callback(null, docList)
 
-	forceResyncOfDropbox: (project_id, callback)->
-		ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, callback
-
 	notifyUsersProjectHasBeenDeletedOrRenamed: (project_id, callback)->
 		EditorRealTimeController.emitToRoom(project_id, 'projectRenamedOrDeletedByExternalSource')
 		callback()

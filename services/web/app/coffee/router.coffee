@@ -33,8 +33,6 @@ StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
-DropboxRouter = require "./Features/Dropbox/DropboxRouter"
-dropboxHandler = require "./Features/Dropbox/DropboxHandler"
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 
@@ -66,7 +64,6 @@ module.exports = class Router
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
 		TemplatesRouter.apply(app)
-		DropboxRouter.apply(app)
 		
 		Modules.applyRouter(app)
 
@@ -189,16 +186,6 @@ module.exports = class Router
 				sendRes 500, "Compiler timed out"
 			), 10000
 			req.session.destroy()
-
-		app.get '/test', (req, res) ->
-			res.render "tests",
-				privilegeLevel: "owner"
-				project:
-					name: "test"
-				date: Date.now()
-				layout: false
-				userCanSeeDropbox: true
-				languages: []
 
 		app.get "/ip", (req, res, next) ->
 			res.send({

@@ -66,6 +66,7 @@ describe "Subscription Handler sanboxed", ->
 			'./LimitationsManager':@LimitationsManager
 			"../Email/EmailHandler":@EmailHandler
 			"../Dropbox/DropboxHandler":@DropboxHandler
+			"../../infrastructure/Events": @Events = {emit: sinon.stub()}
 
 		@SubscriptionHandler.syncSubscriptionToUser = sinon.stub().callsArgWith(2)
 
@@ -160,10 +161,8 @@ describe "Subscription Handler sanboxed", ->
 				@RecurlyWrapper.cancelSubscription.called.should.equal true
 				@RecurlyWrapper.cancelSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
 
-
-			it "should unlink dropbox", ->
-				@DropboxHandler.unlinkAccount.called.should.equal true
-				@DropboxHandler.unlinkAccount.calledWith(@user._id).should.equal true
+			it "should trigger the cancel subscription event", ->
+				@Events.emit.calledWith("cancelSubscription", @user._id).should.equal true
 
 	describe "reactiveRecurlySubscription", ->
 		describe "with a user without a subscription", ->
