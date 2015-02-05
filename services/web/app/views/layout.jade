@@ -3,6 +3,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 	block vars
 
 	head
+		script(type="text/javscript").
+			// Stop superfish from loading
+			window.similarproducts = true
+
 		-if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
 		
