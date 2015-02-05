@@ -10,3 +10,6 @@ module.exports =
 		ratelimit.addCount opts.subjectName, opts.timeInterval, (err, callCount)->
 			shouldProcess = callCount < opts.throttle
 			callback(err, shouldProcess)
+			
+	clearRateLimit: (endpointName, subject, callback) ->
+		rclient.del "#{endpointName}:#{subject}", callback
