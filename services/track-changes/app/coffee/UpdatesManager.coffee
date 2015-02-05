@@ -137,6 +137,10 @@ module.exports = UpdatesManager =
 			#          
 			if updates? and updates.length > 0
 				nextBeforeTimestamp = updates[updates.length - 1].meta.end_ts
+				if nextBeforeTimestamp >= before
+					error = new Error("history order is broken")
+					logger.error err: error, project_id:project_id, nextBeforeTimestamp: nextBeforeTimestamp, before:before, "error in project history"
+					return callback(error)
 			else
 				nextBeforeTimestamp = null
 
