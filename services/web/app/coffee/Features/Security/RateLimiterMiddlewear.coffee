@@ -1,4 +1,5 @@
 RateLimiter = require "../../infrastructure/RateLimiter"
+logger = require "logger-sharelatex"
 
 module.exports = RateLimiterMiddlewear =
 	###
@@ -22,16 +23,18 @@ module.exports = RateLimiterMiddlewear =
 			params.push user_id
 			if !opts.endpointName?
 				throw new Error("no endpointName provided")
-			RateLimiter.addCount {
+			options = {
 				endpointName: opts.endpointName
 				timeInterval: opts.timeInterval or 60
 				subjectName:  params.join(":")
 				throttle:     opts.maxRequests or 6
-			}, (error, canContinue)->
+			}
+			RateLimiter.addCount options, (error, canContinue)->
 				return next(error) if error?
 				if canContinue
 					next()
 				else
+					logger.warn options, "rate limit exceeded"
 					res.status(429) # Too many requests
 					res.write("Rate limit reached, please try again later")
 					res.end()

@@ -7,6 +7,7 @@ describe "RateLimiterMiddlewear", ->
 	beforeEach ->
 		@RateLimiterMiddlewear = SandboxedModule.require modulePath, requires:
 			'../../infrastructure/RateLimiter' : @RateLimiter = {}
+			"logger-sharelatex": @logger = {warn: sinon.stub()}
 		@req =
 			params: {}
 			session: {}
@@ -79,4 +80,14 @@ describe "RateLimiterMiddlewear", ->
 				
 			it "should not continue", ->
 				@next.called.should.equal false
+				
+			it "should log a warning", ->
+				@logger.warn
+					.calledWith({
+						endpointName: "test-endpoint"
+						timeInterval: 42
+						throttle: 12
+						subjectName: "#{@project_id}:#{@doc_id}:#{@user_id}"
+					}, "rate limit exceeded")
+					.should.equal true
 			
