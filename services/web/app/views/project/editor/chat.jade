@@ -31,7 +31,9 @@ aside.chat(
 					span.avatar
 						img(ng-src="{{message.user.gravatar_url}}?d=mm&s=50")
 					div.message-wrapper
-						.name(ng-if="message.user.id != user.id") {{ message.user.first_name }}
+						.name(ng-if="message.user.id != user.id")
+							span(ng-if="message.user.first_name") {{ message.user.first_name }}
+							span(ng-if="!message.user.first_name") {{ message.user.email }}
 						.message(
 							ng-style="{\
 								'border-color': 'hsl({{ hue(message.user) }}, 70%, 70%)',\
