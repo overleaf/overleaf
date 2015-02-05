@@ -3,7 +3,10 @@ nav.navbar.navbar-default
 		.navbar-header
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
-			a(href='/').navbar-brand
+			if nav.title
+				a(href='/').navbar-title #{nav.title}
+			else
+				a(href='/').navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
 			

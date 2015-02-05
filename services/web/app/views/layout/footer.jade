@@ -3,7 +3,7 @@
 footer.site-footer
 	.container
 		.row
-			ul.col-md-10
+			ul.col-md-9
 				
 				if Object.keys(settings.i18n.subdomainLang).length > 1
 					li.dropdown.dropup.subdued
@@ -32,7 +32,7 @@ footer.site-footer
 						else
 							| !{translate(item.text)}
 
-			ul.col-md-2.text-right
+			ul.col-md-3.text-right
 
 				each item in nav.right_footer
 					li
@@ -41,18 +41,3 @@ footer.site-footer
 						else
 							| !{item.text}
 
-
-
-
-				//- li
-				//- 	a(href="http://www.twitter.com/sharelatex")
-				//- 		i.fa.fa-twitter-square
-				//- li
-				//- 	a(href="http://www.facebook.com/pages/ShareLaTeX/301671376556660")
-				//- 		i.fa.fa-facebook-square
-				//- li
-				//- 	a(href="https://plus.google.com/115074691861228882827", rel="publisher")
-				//- 		i.fa.fa-google-plus-square
-				//- li
-				//- 	a(href="https://github.com/sharelatex/sharelatex")
-				//- 		i.fa.fa-github-square

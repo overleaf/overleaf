@@ -264,12 +264,14 @@ module.exports =
 	# 	projectId: ""
 
 	nav:
+		title: "ShareLaTeX Community Edition"
+		
 		left_footer: [{
 			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2014"
 		}]
 
 		right_footer: [{
-			text: "<i class='fa fa-github-square'></i> Contribute on Github"
+			text: "<i class='fa fa-github-square'></i> Fork on Github!"
 			url: "https://github.com/sharelatex/sharelatex"
 		}]
 
