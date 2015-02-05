@@ -331,7 +331,7 @@ describe 'WebsocketController', ->
 
 			it "should send the  cursor data to the connected user manager", (done)->
 				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
-					user_id: @user_id,
+					_id: @user_id,
 					email: @email,
 					first_name: @first_name,
 					last_name: @last_name

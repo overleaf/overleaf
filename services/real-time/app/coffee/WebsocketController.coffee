@@ -127,7 +127,7 @@ module.exports = WebsocketController =
 						first_name: first_name,
 						last_name:  last_name,
 						email:      email,
-						user_id:    user_id
+						_id:        user_id
 					}, {
 						row:    cursorData.row,
 						column: cursorData.column,
