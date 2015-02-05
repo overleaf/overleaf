@@ -42,9 +42,14 @@ define [
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
-							response.message =
-								text: data.message?.text or data.message or "Something went wrong talking to the server :(. Please try again."
-								type: 'error'
+							if status == 403 # Forbidden
+								response.message =
+									text: "Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies."
+									type: "error"
+							else
+								response.message =
+									text: data.message?.text or data.message or "Something went wrong talking to the server :(. Please try again."
+									type: 'error'
 							ga('send', 'event', formName, 'failure', data.message)
 		}
 
