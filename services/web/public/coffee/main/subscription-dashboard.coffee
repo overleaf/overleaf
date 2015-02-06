@@ -42,7 +42,7 @@ define [
 			if $scope.prices[planCode]?
 				return
 			pricing = recurly.Pricing()
-			pricing.plan(planCode, { quantity: 1 }).done (price)->
+			pricing.plan(planCode, { quantity: 1 }).currency(MultiCurrencyPricing.currencyCode).done (price)->
 				totalPriceExTax = parseFloat(price.next.total)
 				$scope.$evalAsync () ->
 					$scope.prices[planCode] = $scope.currencySymbol + (totalPriceExTax + (totalPriceExTax * taxRate))
