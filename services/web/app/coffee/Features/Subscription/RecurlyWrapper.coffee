@@ -130,6 +130,7 @@ module.exports = RecurlyWrapper =
 						logger.err err:err, "could not get accoutns"
 						callback(err)
 					allAccounts = allAccounts.concat(data.accounts)
+					logger.log "got another #{data.accounts.length}, total now #{allAccounts.length}"
 					cursor = response.headers.link?.match(/cursor=([0-9]+)&/)?[1]
 					if cursor?
 						getPageOfAccounts(cursor)
@@ -188,7 +189,7 @@ module.exports = RecurlyWrapper =
 				<applies_to_all_plans>false</applies_to_all_plans>
 			</coupon>
 		"""
-		# logger.log coupon_code:coupon_code, requestBody:requestBody, "creating coupon"
+		logger.log coupon_code:coupon_code, requestBody:requestBody, "creating coupon"
 		@apiRequest({
 			url    : "coupons"
 			method : "post"
@@ -247,8 +248,6 @@ module.exports = RecurlyWrapper =
 
 
 	_parseSubscriptionXml: (xml, callback) ->
-		console.log xml, "_parseAccountXml"
-
 		@_parseXml xml, (error, data) ->
 			return callback(error) if error?
 			if data? and data.subscription?

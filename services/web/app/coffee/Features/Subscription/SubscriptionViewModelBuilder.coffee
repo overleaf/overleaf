@@ -25,6 +25,7 @@ module.exports =
 							price: SubscriptionFormatters.formatPrice (recurlySubscription?.unit_amount_in_cents + tax), recurlySubscription?.currency
 							planCode: subscription.planCode
 							currency:recurlySubscription?.currency
+							taxRate:parseFloat(recurlySubscription?.tax_rate?._)
 							groupPlan: subscription.groupPlan
 						}, memberSubscriptions
 				else
