@@ -69,37 +69,47 @@ module.exports = MongoManager =
 			extraQuery[param] = {'$lt' : rangeQuery['$gte']}
 		else if rangeQuery?['$gt']
 			extraQuery[param] = {'$lte' : rangeQuery['$gt']}
+		else
+			delete extraQuery[param]
 
 		filterFn = (item) ->
-			#console.log 'filter', item, rangeQuery
 			return false if rangeQuery?['$gte']? && item[param] < rangeQuery['$gte']
 			return false if rangeQuery?['$lte']? && item[param] > rangeQuery['$lte']
 			return false if rangeQuery?['$lt']? && item[param] >= rangeQuery['$lt']
 			return false if rangeQuery?['$gt']? && item[param] <= rangeQuery['$gt']
-			#console.log 'accepted'
 			return true
 
-		# need to support limit here
-			
-		cursor.toArray (err, updates) ->
-			console.log 'query=', query, 'UPDATES=', updates
-			all = MongoManager._unpackResults(updates).filter(filterFn)
-			if all.length == 0 
+		needMore = false
+		cursor.toArray (err, result) ->
+			unpackedSet = MongoManager._unpackResults(result)
+			updates = unpackedSet.filter(filterFn)
+			updates = updates.slice(0, limit) if limit?
+			last = if unpackedSet.length then unpackedSet[unpackedSet.length-1] else null
+			if limit? && updates.length == limit
+				needMore = false
+			else if extraQuery[param]? && last? && filterFn(last)
+				needMore = true
+			else if extraQuery[param]? && updates.length == 0
+				needMore = true
+			if needMore
 				# need an extra result set
-				console.log 'extraQuery', extraQuery
 				extra = db.docHistory
 					.find(extraQuery)
 					.sort(sort)
 					.limit(1)
-				extra.toArray (err, updates2) ->
-					all2 = MongoManager._unpackResults(updates2).filter(filterFn)
-					console.log 'got extra', all2
-					callback err, all2
+				extra.toArray (err, result2) ->
+					if err?
+						return callback err, updates
+					else
+						extraSet = MongoManager._unpackResults(result2).filter(filterFn)
+						updates = updates.concat extraSet
+						updates = updates.slice(0, limit) if limit?
+						callback err, updates
 				return
 			if err?
-				callback err, updates
+				callback err, result
 			else
-				callback err, all
+				callback err, updates
 
 	_unpackResults: (updates) ->
 		result = []
@@ -121,7 +131,7 @@ module.exports = MongoManager =
 			item.project_id = project_id
 			item
 		return result.reverse()
-		
+
 	getDocUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
 			doc_id: ObjectId(doc_id.toString())
