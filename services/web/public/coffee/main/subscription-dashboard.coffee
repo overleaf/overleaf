@@ -2,7 +2,10 @@ define [
 	"base"
 ], (App)->
 	SUBSCRIPTION_URL = "/user/subscription/update"
-	recurly.configure window.recurlyApiKey
+
+	setupReturly = _.once ->
+		recurly?.configure window.recurlyApiKey
+
 
 	App.controller "CurrenyDropdownController", ($scope, MultiCurrencyPricing, $q)->
 
@@ -14,7 +17,7 @@ define [
 
 
 	App.controller "ChangePlanFormController", ($scope, $modal, MultiCurrencyPricing)->
-
+		setupReturly()
 		
 		taxRate = window.taxRate
 
@@ -41,7 +44,9 @@ define [
 			pricing = recurly.Pricing()
 			pricing.plan(planCode, { quantity: 1 }).done (price)->
 				totalPriceExTax = parseFloat(price.next.total)
-				$scope.prices[planCode] = $scope.currencySymbol + (totalPriceExTax + (totalPriceExTax * taxRate))
+				$scope.$evalAsync () ->
+					$scope.prices[planCode] = $scope.currencySymbol + (totalPriceExTax + (totalPriceExTax * taxRate))
+
 			price = ""
 
 
