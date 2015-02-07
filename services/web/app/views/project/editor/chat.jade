@@ -44,7 +44,8 @@ aside.chat(
 							p(
 								mathjax,
 								ng-repeat="content in message.contents track by $index"
-							) {{ content }}
+							)
+								span(ng-bind-html="linkify(content)")
 
 	.new-message
 		textarea(
