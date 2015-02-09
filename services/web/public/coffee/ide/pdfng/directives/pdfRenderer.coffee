@@ -145,7 +145,7 @@ define [
 
 				timedOut = false
 				timer = $timeout () =>
-					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
+					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
 					# console.log 'page load timed out', pagenum
 					timedOut = true
 					clearTimeout(spinTimer)
@@ -246,7 +246,7 @@ define [
 				timedOut = false
 
 				timer = $timeout () =>
-					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms')
+					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
 					# console.log 'page render timed out', pagenum
 					timedOut = true
 					result.cancel()
