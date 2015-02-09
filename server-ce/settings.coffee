@@ -21,7 +21,7 @@ module.exports =
 	# 
 	# The following works out of the box with Mongo's default settings:
 	mongo:
-		url : process.env["SHARELATEX_MONGO_URL"] or 'mongodb://127.0.0.1/sharelatex'
+		url : process.env["SHARELATEX_MONGO_URL"] or 'mongodb://dockerhost/sharelatex'
 
 	# Redis is used in ShareLaTeX for high volume queries, like real-time
 	# editing, and session management.
@@ -29,7 +29,7 @@ module.exports =
 	# The following config will work with Redis's default settings:
 	redis:
 		web: redisConfig =
-			host: process.env["SHARELATEX_REDIS_HOST"] or "localhost"
+			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
 		fairy: redisConfig
@@ -92,7 +92,7 @@ module.exports =
 
 	# Where your instance of ShareLaTeX can be found publicly. This is used
 	# when emails are sent out and in generated links:
-	siteUrl: siteUrl = process.env["SHARELATEX_SITE_URL"] or 'http://localhost:3000'
+	siteUrl: siteUrl = process.env["SHARELATEX_SITE_URL"] or 'http://localhost'
 	
 	# The websocket layer of ShareLaTeX runs as separate service.
 	# When running locally or in development, you can point the client to this
