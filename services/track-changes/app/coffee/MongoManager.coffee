@@ -84,16 +84,15 @@ module.exports = MongoManager =
 	#  are those of the first entry in the pack D1 (this makes it
 	#  possible to treat packs and single updates in the same way).
 
-	_findResults: (param, query, limit, callback) ->
-		# param - the field used to select and sort ops within a range,
-		# either 'v' or 'meta.end_ts'
+
+	_findDocResults: (query, limit, callback) ->
 		# query - the mongo query selector, includes both the doc_id/project_id and
-		# the range on v or meta.end_ts
+		# the range on v
 		# limit - the mongo limit, we need to apply it after unpacking any
 		# packs
 
 		sort = {}
-		sort[param] = -1;
+		sort['v'] = -1;
 		cursor = db.docHistory
 			.find( query )
 			.sort( sort )
@@ -102,15 +101,15 @@ module.exports = MongoManager =
 			cursor.limit(limit)
 
 		# take the part of the query which selects the range over the parameter
-		rangeQuery = query[param]
+		rangeQuery = query['v']
 
 		# helper function to check if an item from a pack is inside the
 		# desired range
 		filterFn = (item) ->
-			return false if rangeQuery?['$gte']? && item[param] < rangeQuery['$gte']
-			return false if rangeQuery?['$lte']? && item[param] > rangeQuery['$lte']
-			return false if rangeQuery?['$lt']? && item[param] >= rangeQuery['$lt']
-			return false if rangeQuery?['$gt']? && item[param] <= rangeQuery['$gt']
+			return false if rangeQuery?['$gte']? && item['v'] < rangeQuery['$gte']
+			return false if rangeQuery?['$lte']? && item['v'] > rangeQuery['$lte']
+			return false if rangeQuery?['$lt']? && item['v'] >= rangeQuery['$lt']
+			return false if rangeQuery?['$gt']? && item['v'] <= rangeQuery['$gt']
 			return true
 
 		# create a query which can be used to select the entries BEFORE
@@ -122,25 +121,25 @@ module.exports = MongoManager =
 		# $gt and $gte (i.e. we need to find packs which start before our
 		# range but end in it)
 		if rangeQuery?['$gte']?
-			extraQuery[param] = {'$lt' : rangeQuery['$gte']}
+			extraQuery['v'] = {'$lt' : rangeQuery['$gte']}
 		else if rangeQuery?['$gt']
-			extraQuery[param] = {'$lte' : rangeQuery['$gt']}
+			extraQuery['v'] = {'$lte' : rangeQuery['$gt']}
 		else
-			delete extraQuery[param]
+			delete extraQuery['v']
 
 		needMore = false  # keep track of whether we need to load more data
 		updates = [] # used to accumulate the set of results
 		cursor.toArray (err, result) ->
 			unpackedSet = MongoManager._unpackResults(result)
-			MongoManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
+			updates = MongoManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			# check if we need to retrieve more data, because there is a
 			# pack that crosses into our range
 			last = if unpackedSet.length then unpackedSet[unpackedSet.length-1] else null
 			if limit? && updates.length == limit
 				needMore = false
-			else if extraQuery[param]? && last? && filterFn(last)
+			else if extraQuery['v']? && last? && filterFn(last)
 				needMore = true
-			else if extraQuery[param]? && updates.length == 0
+			else if extraQuery['v']? && updates.length == 0
 				needMore = true
 			if needMore
 				# we do need an extra result set
@@ -153,13 +152,94 @@ module.exports = MongoManager =
 						return callback err, updates
 					else
 						extraSet = MongoManager._unpackResults(result2)
-						MongoManager._filterAndLimit(updates, extraSet, filterFn, limit)
+						updates = MongoManager._filterAndLimit(updates, extraSet, filterFn, limit)
 						callback err, updates
 				return
 			if err?
 				callback err, result
 			else
 				callback err, updates
+
+	_findProjectResults: (query, limit, callback) ->
+		# query - the mongo query selector, includes both the doc_id/project_id and
+		# the range on v or meta.end_ts
+		# limit - the mongo limit, we need to apply it after unpacking any
+		# packs
+
+		sort = {}
+		sort['meta.end_ts'] = -1;
+		cursor = db.docHistory
+			.find( query, {"op":false, "pack.op": false} ) # no need to return the op only need version info
+			.sort( sort )
+		# if we have packs, we will trim the results more later after expanding them
+		if limit?
+			cursor.limit(limit)
+
+		# take the part of the query which selects the range over the parameter
+		before = query['meta.end_ts']?['$lt']  # may be null
+
+		updates = [] # used to accumulate the set of results
+		extraQuery = _.clone(query)
+
+		cursor.toArray (err, result) ->
+			if err?
+				return callback err, result
+			if result.length == 0 && not before?  # no results and no time range specified
+				return callback err, result
+
+			unpackedSet = MongoManager._unpackResults(result)
+			if limit?
+				unpackedSet = unpackedSet.slice(0, limit)
+			# find the end time of the last result, we will take all the
+			# results up to this, and then all the changes at that time
+			# (without imposing a limit)
+			cutoff = if unpackedSet.length then unpackedSet[unpackedSet.length-1].meta.end_ts else before
+			console.log 'before is', before
+			console.log 'cutoff is', cutoff
+			console.log 'limit  is', limit
+
+			filterFn = (item) ->
+				ts = item?.meta?.end_ts
+				return false if before? && ts >= before
+				return false if cutoff? && ts < cutoff
+				return true
+
+			updates = MongoManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
+			console.log 'initial updates are', updates
+			# now find any extra entries which are exactly at the last time (cutoff)
+			# or in packs that overlap it
+			extraQuery['meta.end_ts'] = {"$gte": +cutoff}
+			extraQuery['meta.start_ts'] = {"$lte": +cutoff}
+			# we don't specify a limit here, as there could be any number of
+			# docs at that timestamp
+			#
+			# NB. need to catch items in original query and followup query for duplicates
+			console.log 'extraQuery is', extraQuery
+			extra = db.docHistory
+				.find(extraQuery, {"op": false, "pack.op": false})
+				.sort(sort)
+			extra.toArray (err, result2) ->
+				console.log 'got extra result', err, result
+				if err?
+					return callback err, updates
+				else
+					extraSet = MongoManager._unpackResults(result2)
+					# note: final argument is null, no limit applied because we
+					# need all the updates at the final time to avoid breaking
+					# the changeset into parts
+					updates = MongoManager._filterAndLimit(updates, extraSet, filterFn, null)
+					# remove duplicates
+					seen = {}
+					updates = updates.filter (item) ->
+						key = item.doc_id + ' ' + item.v
+						console.log 'key is', key
+						if seen[key]
+							return false
+						else
+							seen[key] = true
+					console.log 'extra updates are', updates
+					callback err, updates
+
 
 	_unpackResults: (updates) ->
 		#	iterate over the updates, if there's a pack, expand it into ops and
@@ -183,12 +263,12 @@ module.exports = MongoManager =
 			item
 		return result.reverse()
 
-	_filterAndLimit: (results, extra, filterFn, limit)
+	_filterAndLimit: (results, extra, filterFn, limit) ->
 		# update results with extra docs, after filtering and limiting
 		filtered = extra.filter(filterFn)
 		newResults = results.concat filtered
 		newResults.slice(0, limit) if limit?
-		results = newResults
+		return newResults
 
 	getDocUpdates:(doc_id, options = {}, callback = (error, updates) ->) ->
 		query = 
@@ -200,7 +280,7 @@ module.exports = MongoManager =
 			query["v"] ||= {}
 			query["v"]["$lte"] = options.to
 			
-		MongoManager._findResults('v', query, options.limit, callback)	
+		MongoManager._findDocResults(query, options.limit, callback)	
 
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		query = 
@@ -209,7 +289,7 @@ module.exports = MongoManager =
 		if options.before?
 			query["meta.end_ts"] = { $lt: options.before }
 
-		MongoManager._findResults('meta.end_ts', query, options.limit, callback)	
+		MongoManager._findProjectResults(query, options.limit, callback)	
 
 	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
 		db.docHistory.update {
