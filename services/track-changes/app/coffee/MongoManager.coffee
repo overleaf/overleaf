@@ -11,6 +11,7 @@ module.exports = MongoManager =
 			.limit(1)
 			.toArray (error, compressedUpdates) ->
 				return callback(error) if error?
+				return callback null, null if compressedUpdates[0]?.pack? # cannot pop from a pack
 				return callback null, compressedUpdates[0] or null
 
 	# only used in this module
