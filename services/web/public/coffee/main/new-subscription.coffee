@@ -54,7 +54,7 @@ define [
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial?.length
-			$scope.billingCycleType = if pricing.items.plan.period.interval == "months" then "month" else "year"
+			$scope.monthlyBilling = pricing.items.plan.period.length == 1
 			$scope.$apply()
 
 		$scope.applyCoupon = ->

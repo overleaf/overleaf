@@ -42,8 +42,9 @@ block content
 								.col-md-12.text-center
 									div(ng-if="trialLength") !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 									div(ng-if="price")
-										strong {{price.currency.symbol}}{{price.next.total}}
-										span  #{translate("every")} {{billingCycleType}}
+										strong {{price.currency.symbol}}{{price.next.total}} 
+										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
+										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
 						.row
 							.col-md-12
 								form(ng-show="planName")
