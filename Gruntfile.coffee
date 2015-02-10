@@ -7,6 +7,8 @@ semver = require "semver"
 knox = require "knox"
 crypto = require "crypto"
 async = require "async"
+settings = require("settings-sharelatex")
+
 
 SERVICES = [{
 	name: "web"
@@ -56,6 +58,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks "grunt-contrib-coffee"
+	grunt.loadNpmTasks "grunt-shell"
 
 
 	execute = {}
@@ -83,7 +86,9 @@ module.exports = (grunt) ->
 				options:
 					bare:true
 
-
+		shell:
+			migrate:
+				command: "./node_modules/east/bin/east migrate --adapter east-mongo --url #{settings.mongo.url}"
 
 		availabletasks:
 			tasks:
@@ -162,7 +167,7 @@ module.exports = (grunt) ->
 		Helpers.buildUpstartScripts()
 
 
-	grunt.registerTask 'migrate', 'run migrations', ['coffee:migrate']
+	grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
 
 
 	Helpers =
