@@ -23,6 +23,6 @@ script
     LATEX_PATH=/usr/local/texlive/2014/bin/x86_64-linux
 
     echo $$ > /var/run/sharelatex-$SERVICE.pid
-    chdir /var/www/sharelatex/$SERVICE
+    cd /var/www/sharelatex/$SERVICE
     exec sudo -u $USER -g $GROUP env SHARELATEX_CONFIG=$SHARELATEX_CONFIG NODE_ENV=production PATH=$PATH:$LATEX_PATH $NODE app.js >> /var/log/sharelatex/$SERVICE.log 2>&1
 end script

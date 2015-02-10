@@ -13,6 +13,10 @@ SERVICES = [{
 	repo: "https://github.com/sharelatex/web-sharelatex.git"
 	version: "v0.1.0"
 }, {
+	name: "real-time"
+	repo: "https://github.com/sharelatex/real-time-sharelatex.git"
+	version: "master"
+}, {
 	name: "document-updater"
 	repo: "https://github.com/sharelatex/document-updater-sharelatex.git"
 	version: "v0.1.0"

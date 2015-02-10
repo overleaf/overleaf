@@ -3,6 +3,8 @@ ShareLaTeX
 
 [ShareLaTeX](https://www.sharelatex.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at http://www.sharelatex.com, but you can also run your own local version, and contribute to the development of ShareLaTeX.
 
+*[If you want help installing and maintaining ShareLaTeX at your university or workplace, we offer an officially supported version called ShareLaTeX Server Pro. It also comes with extra security and admin features. Click here to find out more!](https://www.sharelatex.com/university/onsite.html)*
+
 Installation
 ------------
 
@@ -13,7 +15,6 @@ We have detailed installation instructions in our wiki:
 
 **If you have any problems, have a look at our page of [Frequent Problems and Questions](https://github.com/sharelatex/sharelatex/wiki/FAQ).**
 
-*[Please help us make ShareLaTeX as easy to install as possible by answering our quick survey about your system and needs](https://sharelatex.typeform.com/to/PLNits)*
 
 Dependencies
 ------------
