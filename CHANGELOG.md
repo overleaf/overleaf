@@ -7,4 +7,5 @@ v0.1.2
 * Updated PDF viewer that loads page-by-page for much quicker loading times on large documents.
 * Links are clickable in chat messages.
 * Mathjax libraries are now served locally.
+* Optimisation of Angular digest loop in editor should reduce CPU usage in certain cases.
 * Numerous small bug fixes.
