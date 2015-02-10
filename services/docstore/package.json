@@ -1,6 +1,6 @@
 {
   "name": "docstore-sharelatex",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A CRUD API for handling text documents in projects",
   "author": "ShareLaTeX <team@sharelatex>",
   "repository": {
