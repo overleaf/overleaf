@@ -55,6 +55,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-concurrent'
+	grunt.loadNpmTasks "grunt-contrib-coffee"
+
 
 	execute = {}
 	for service in SERVICES
@@ -70,6 +72,18 @@ module.exports = (grunt) ->
 				options:
 					limit: SERVICES.length
 					logConcurrentOutput: true
+		coffee:
+			migrate: 
+				expand: true,
+				flatten: false,
+				cwd: './',
+				src: ['./migrations/*.coffee'],
+				dest: './',
+				ext: '.js'
+				options:
+					bare:true
+
+
 
 		availabletasks:
 			tasks:
@@ -147,24 +161,32 @@ module.exports = (grunt) ->
 	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
 		Helpers.buildUpstartScripts()
 
+
+	grunt.registerTask 'migrate', 'run migrations', ['coffee:migrate']
+
+
 	Helpers =
 		installService: (service, callback = (error) ->) ->
 			Helpers.cloneGitRepo service, (error) ->
 				return callback(error) if error?
 				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall service, (error) ->
+					Helpers.rebuildNpmModules service, (error) ->
 						return callback(error) if error?
-						callback()
+						Helpers.runGruntInstall service, (error) ->
+							return callback(error) if error?
+							callback()
 
 		updateService: (service, callback = (error) ->) ->
 			Helpers.updateGitRepo service, (error) ->
 				return callback(error) if error?
 				Helpers.installNpmModules service, (error) ->
 					return callback(error) if error?
-					Helpers.runGruntInstall service, (error) ->
+					Helpers.rebuildNpmModules service, (error) ->
 						return callback(error) if error?
-						callback()
+						Helpers.runGruntInstall service, (error) ->
+							return callback(error) if error?
+							callback()
 
 		cloneGitRepo: (service, callback = (error) ->) ->
 			repo_src = service.repo
@@ -207,13 +229,21 @@ module.exports = (grunt) ->
 							proc = spawn "git", ["push", "--tags"], cwd: dir, stdio: "inherit"
 							proc.on "close", () ->
 								callback()
-								
+
 		installNpmModules: (service, callback = (error) ->) ->
 			dir = service.name
 			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
-				
+
+		# work around for https://github.com/npm/npm/issues/5400
+		# where binary modules are not built due to bug in npm
+		rebuildNpmModules: (service, callback = (error) ->) ->
+			dir = service.name
+			proc = spawn "npm", ["rebuild"], stdio: "inherit", cwd: dir
+			proc.on "close", () ->
+				callback()
+
 		createDataDirs: (callback = (error) ->) ->
 			DIRS = [
 				"tmp/dumpFolder"

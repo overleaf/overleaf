@@ -4,8 +4,11 @@
   "description": "An online collaborative LaTeX editor",
   "dependencies": {
     "async": "^0.9.0",
+    "lodash": "^3.0.0",
+    "mongojs": "^0.18.1",
     "rimraf": "~2.2.6",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git"
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git",
+    "underscore": "^1.7.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
@@ -14,6 +17,7 @@
     "grunt-execute": "~0.1.5",
     "grunt-available-tasks": "~0.4.1",
     "grunt-concurrent": "~0.4.3",
+    "grunt-contrib-coffee": "~0.10.1",
     "semver": "~2.2.1",
     "knox": "~0.8.9"
   }
