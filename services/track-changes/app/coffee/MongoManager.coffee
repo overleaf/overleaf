@@ -353,6 +353,8 @@ module.exports = MongoManager =
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, { background: true }
 		# For finding all updates that affect a project (getProjectUpdates meta.end_ts < before
 		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, { background: true }
+		# For finding all packs that affect a project (use a sparse index so only packs are included)
+		db.docHistory.ensureIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}	, { background: true, sparse: true }
 		# For finding updates that don't yet have a project_id and need it inserting
 		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, { background: true }
 		# For finding project meta-data
