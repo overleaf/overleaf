@@ -1,8 +1,8 @@
 FROM phusion/baseimage:0.9.16
 
+# Install Node.js and Grunt
 RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
 RUN apt-get install -y build-essential nodejs
-
 RUN npm install -g grunt-cli
 
 # Set up sharelatex user and home directory
@@ -12,8 +12,9 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 	mkdir -p /var/log/sharelatex; \
 	chown sharelatex:sharelatex /var/log/sharelatex;
 
+# Install ShareLaTeX
 RUN apt-get install -y git python
-RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
+RUN git clone -b release https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
 
 # zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
 RUN apt-get install -y zlib1g-dev
@@ -25,7 +26,8 @@ RUN cd /var/www/sharelatex; \
 # Minify js assets
 RUN cd /var/www/sharelatex/web; \
 	grunt compile:minify;
-	
+
+# Install Nginx as a reverse proxy
 RUN apt-get install -y nginx;
 RUN rm /etc/nginx/sites-enabled/default
 ADD nginx/nginx.conf /etc/nginx/nginx.conf
@@ -33,7 +35,8 @@ ADD nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
 RUN mkdir /etc/service/nginx
 ADD runit/nginx.sh /etc/service/nginx/run
-		
+
+# Set up ShareLaTeX services to run automatically on boot
 RUN mkdir /etc/service/chat-sharelatex; \
 	mkdir /etc/service/clsi-sharelatex; \
 	mkdir /etc/service/docstore-sharelatex; \
@@ -56,10 +59,11 @@ ADD runit/tags-sharelatex.sh             /etc/service/tags-sharelatex/run
 ADD runit/track-changes-sharelatex.sh    /etc/service/track-changes-sharelatex/run
 ADD runit/web-sharelatex.sh              /etc/service/web-sharelatex/run
 
+# Install ShareLaTeX settings file
 RUN mkdir /etc/sharelatex
 ADD settings.coffee /etc/sharelatex/settings.coffee
 
-# TexLive
+# Install TexLive
 RUN apt-get install -y wget
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
 	mkdir /install-tl-unx; \
@@ -73,7 +77,7 @@ RUN rm -r /install-tl-unx; \
 ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2014/bin/x86_64-linux/
 RUN tlmgr install latexmk
 
-# Aspell
+# Install Aspell
 RUN apt-get install -y aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-nr aspell-ns aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-ta aspell-te aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu 
 
 # phusion/baseimage init script
