@@ -168,8 +168,10 @@ module.exports = MongoManager =
 
 		sort = {}
 		sort['meta.end_ts'] = -1;
+
+		projection = {"op":false, "pack.op": false}
 		cursor = db.docHistory
-			.find( query, {"op":false, "pack.op": false} ) # no need to return the op only need version info
+			.find( query, projection ) # no need to return the op only need version info
 			.sort( sort )
 		# if we have packs, we will trim the results more later after expanding them
 		if limit?
@@ -179,7 +181,6 @@ module.exports = MongoManager =
 		before = query['meta.end_ts']?['$lt']  # may be null
 
 		updates = [] # used to accumulate the set of results
-		extraQuery = _.clone(query)
 
 		cursor.toArray (err, result) ->
 			if err?
@@ -192,54 +193,84 @@ module.exports = MongoManager =
 				unpackedSet = unpackedSet.slice(0, limit)
 			# find the end time of the last result, we will take all the
 			# results up to this, and then all the changes at that time
-			# (without imposing a limit)
-			cutoff = if unpackedSet.length then unpackedSet[unpackedSet.length-1].meta.end_ts else before
+			# (without imposing a limit) and any overlapping packs
+			cutoff = if unpackedSet.length then unpackedSet[unpackedSet.length-1].meta.end_ts else null
 			console.log 'before is', before
 			console.log 'cutoff is', cutoff
 			console.log 'limit  is', limit
 
 			filterFn = (item) ->
 				ts = item?.meta?.end_ts
+				console.log 'checking', ts, before, cutoff
 				return false if before? && ts >= before
 				return false if cutoff? && ts < cutoff
 				return true
 
 			updates = MongoManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			console.log 'initial updates are', updates
-			# now find any extra entries which are exactly at the last time (cutoff)
-			# or in packs that overlap it
-			extraQuery['meta.end_ts'] = {"$gte": +cutoff}
-			extraQuery['meta.start_ts'] = {"$lte": +cutoff}
-			# we don't specify a limit here, as there could be any number of
-			# docs at that timestamp
-			#
-			# NB. need to catch items in original query and followup query for duplicates
-			console.log 'extraQuery is', extraQuery
-			extra = db.docHistory
-				.find(extraQuery, {"op": false, "pack.op": false})
+
+			# get all elements on the lower bound (cutoff)
+			tailQuery = _.clone(query)
+			tailQuery['meta.end_ts'] = cutoff
+			tail = db.docHistory
+				.find(tailQuery, projection)
 				.sort(sort)
-			extra.toArray (err, result2) ->
-				console.log 'got extra result', err, result
+
+			console.log 'tailQuery is', tailQuery
+
+			# now find any packs that overlap with the time window
+			overlapQuery = _.clone(query)
+			if before? && cutoff?
+				overlapQuery['meta.end_ts'] = {"$gte": before}
+				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+			else if before? && not cutoff?
+				overlapQuery['meta.end_ts'] = {"$gte": before}
+				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+			else if not before? && cutoff?
+				overlapQuery['meta.end_ts'] = {"$gte": cutoff}
+				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+			else if not before? && not cutoff?
+				overlapQuery['meta.end_ts'] = {"$gte": 0 }
+				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+			overlap = db.docHistory
+				.find(overlapQuery, projection)
+				.sort(sort)
+
+			console.log 'overlapQuery is', overlapQuery
+
+			# we don't specify a limit here, as there could be any number of overlaps
+			# NB. need to catch items in original query and followup query for duplicates
+
+			applyAndUpdate = (result) ->
+				extraSet = MongoManager._unpackResults(result)
+				# note: final argument is null, no limit applied because we
+				# need all the updates at the final time to avoid breaking
+				# the changeset into parts
+				updates = MongoManager._filterAndLimit(updates, extraSet, filterFn, null)
+				console.log 'extra updates after filterandlimit', updates
+				# remove duplicates
+				seen = {}
+				updates = updates.filter (item) ->
+					key = item.doc_id + ' ' + item.v
+					console.log 'key is', key
+					if seen[key]
+						return false
+					else
+						seen[key] = true
+						return true
+				console.log 'extra updates are', updates
+
+			tail.toArray (err, result2) ->
 				if err?
 					return callback err, updates
 				else
-					extraSet = MongoManager._unpackResults(result2)
-					# note: final argument is null, no limit applied because we
-					# need all the updates at the final time to avoid breaking
-					# the changeset into parts
-					updates = MongoManager._filterAndLimit(updates, extraSet, filterFn, null)
-					# remove duplicates
-					seen = {}
-					updates = updates.filter (item) ->
-						key = item.doc_id + ' ' + item.v
-						console.log 'key is', key
-						if seen[key]
-							return false
+					applyAndUpdate result2
+					overlap.toArray (err, result3) ->
+						if err?
+							return callback err, updates
 						else
-							seen[key] = true
-					console.log 'extra updates are', updates
-					callback err, updates
-
+							applyAndUpdate result3
+							callback err, updates
 
 	_unpackResults: (updates) ->
 		#	iterate over the updates, if there's a pack, expand it into ops and
