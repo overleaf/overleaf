@@ -4,13 +4,13 @@ ShareLaTeX Docker Image
 **Please read this entire file before installing ShareLaTeX via Docker. It's only
 short but contains some important information.**
 
-The recommended way to install and run ShareLaTeX Community Edition is via Docker:
+The recommended way to install and run ShareLaTeX Community Edition is via [Docker](https://www.docker.com/):
 
 ```
-$ docker run -d -v sharelatex:/var/lib/sharelatex --name=sharelatex sharelatex/sharelatex
+$ docker run -d -v ~/sharelatex_data:/var/lib/sharelatex -p 80 --name=sharelatex sharelatex/sharelatex
 ```
 
-This will download the ShareLaTeX image and start it running in the background.
+This will download the ShareLaTeX image and start it running in the background on port 80. You should be able to access it at http://localhost/.
 
 To stop ShareLaTeX:
 
@@ -32,8 +32,8 @@ docker rm sharelatex
 
 ### Storing Data
 
-The `-v sharelatex:/var/lib/sharelatex` option in the `run` command tells 
-Docker to make the host directory `sharelatex` available inside the container for 
+The `-v ~/sharelatex_data:/var/lib/sharelatex` option in the `run` command tells 
+Docker to make the host directory `~/sharelatex_data` available inside the container for 
 ShareLaTeX to store data files in. This means that you can back up and access these
 files manually outside of the ShareLaTeX container. If you would like to store ShareLaTeX data
 in a different location, such as `/home/james/my_data`, just change this parameter:
@@ -41,6 +41,7 @@ in a different location, such as `/home/james/my_data`, just change this paramet
 ```
 $ docker run -d \
   -v /home/james/my_data:/var/lib/sharelatex \
+  -p 80 \
   --name=sharelatex \
   sharelatex/sharelatex
 ```
@@ -69,7 +70,8 @@ want to access services on the host machine then you should use `dockerhost`.* F
 
 ```
 $ docker run -d \
-  -v sharelatex:/var/lib/sharelatex \
+  -v ~/sharelatex_data:/var/lib/sharelatex \
+  -p 80 \
   --name=sharelatex \
   --env SHARELATEX_MONGO_URL=mongodb://dockerhost/sharelatex \
   sharelatex/sharelatex
@@ -91,15 +93,15 @@ listen on port 5000:
 
 ```
 $ docker run -d \
-  -v sharelatex:/var/lib/sharelatex \
-  --name=sharelatex \
+  -v ~/sharelatex_data:/var/lib/sharelatex \
   -p 5000:80 \
+  --name=sharelatex \
   --env SHARELATEX_SITE_URL=http://localhost:5000 \
   sharelatex/sharelatex
 ```
 
-(Note that you also have to update the `SHARELATEX_SITE_URL` parameter so that
-it knows where it is publicly available.)
+**(Note that you also have to update the `SHARELATEX_SITE_URL` parameter so that
+ShareLaTeX knows where to refer to scripts and links that need loading.)**
 
 ### LaTeX environment
 
@@ -119,11 +121,11 @@ You can pass configuration options to ShareLaTeX as environment variables:
 
 ```
 $ docker run -d \
-	-v /sharelatex-data:/var/lib/sharelatex \
-	--net=host \
-	--name=sharelatex \
-	--env SHARELATEX_MONGO_URL=mongodb://my.mongo.host/sharelatex \
-	sharelatex/sharelatex
+  -v ~/sharelatex_data:/var/lib/sharelatex \
+  -p 80 \
+  --name=sharelatex \
+  --env SHARELATEX_MONGO_URL=mongodb://my.mongo.host/sharelatex \
+  sharelatex/sharelatex
 ```
 
 The available configuration parameters are:
@@ -152,5 +154,5 @@ $ docker rm sharelatex
 Start a new container with the updated version of ShareLaTeX (to upgrade to version 1.4.0 for example):
 
 ```
-$ docker run -d -v sharelatex:/var/lib/sharelatex --name=sharelatex sharelatex/sharelatex:1.4.0
+$ docker run -d -v ~/sharelatex_data:/var/lib/sharelatex --name=sharelatex sharelatex/sharelatex:1.4.0
 ```
