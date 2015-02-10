@@ -14,7 +14,6 @@ UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
-TemplatesRouter = require('./Features/Templates/TemplatesRouter')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
@@ -63,7 +62,6 @@ module.exports = class Router
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
-		TemplatesRouter.apply(app)
 		
 		Modules.applyRouter(app)
 
