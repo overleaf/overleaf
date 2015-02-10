@@ -1,6 +1,6 @@
 {
   "name": "history-sharelatex",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "An API for saving and compressing individual document updates into a browsable history",
   "repository": {
     "type": "git", 
