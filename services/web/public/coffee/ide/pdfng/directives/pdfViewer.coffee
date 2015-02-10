@@ -38,7 +38,7 @@ define [
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
 				errorCallback: (error) ->
-					Raven?.captureMessage?('pdfng error ' + error)
+					Raven?.captureMessage?('pdfng error ' + error + ' (1% sample)') if Math.random() < 0.01
 					$scope.$emit 'pdf:error', error
 				pageSizeChangeCallback: (pageNum, deltaH) ->
 					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH

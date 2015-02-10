@@ -41,21 +41,12 @@ aside#left-menu.full-size(
 				)
 					i.fa.fa-fw.fa-copy
 					| &nbsp;&nbsp; #{translate("copy_project")}
-			li(ng-controller="TemplatesController", ng-show="permissions.admin")
-				a(ng-click="openPublishTemplateModal()")
-					i.fa.fa-external-link.fa-fw 
-					| &nbsp;&nbsp; #{translate("publish_as_template")}
+			!{moduleIncludes("editorLeftMenu:actions", locals)}
 
-	div(ng-show="!anonymous")
-		h4() #{translate("sync")}
-		span(ng-controller="DropboxController")
-			ul.list-unstyled.nav()
-				li
-					a(ng-click="openDropboxModal()")
-						i.fa.fa-dropbox.fa-fw
-						| &nbsp;&nbsp; Dropbox
-					
-	!{moduleIncludes("editorLeftMenu", locals)}
+	if (moduleIncludesAvailable("editorLeftMenu:sync"))
+		div(ng-show="!anonymous")
+			h4() #{translate("sync")}
+			!{moduleIncludes("editorLeftMenu:sync", locals)}
 
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")

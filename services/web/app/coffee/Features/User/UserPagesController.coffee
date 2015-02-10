@@ -1,5 +1,4 @@
 UserLocator = require("./UserLocator")
-dropboxHandler = require('../Dropbox/DropboxHandler')
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
 fs = require('fs')
@@ -27,14 +26,12 @@ module.exports =
 			title: 'login',
 			redir: req.query.redir
 
-	settingsPage : (req, res)->
+	settingsPage : (req, res, next)->
 		logger.log user: req.session.user, "loading settings page"
 		UserLocator.findById req.session.user._id, (err, user)->
-			dropboxHandler.getUserRegistrationStatus user._id, (err, status)->
-				userIsRegisteredWithDropbox = !err? and status.registered
-				res.render 'user/settings',
-					title:'account_settings'
-					userIsRegisteredWithDropbox: userIsRegisteredWithDropbox
-					user: user,
-					languages: Settings.languages,
-					accountSettingsTabActive: true
+			return next(err) if err?
+			res.render 'user/settings',
+				title:'account_settings'
+				user: user,
+				languages: Settings.languages,
+				accountSettingsTabActive: true

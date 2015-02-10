@@ -512,13 +512,6 @@ describe "EditorController", ->
 				returnedDocs[1].path.should.equal "doc2.tex"	
 				done()
 
-	describe "forceResyncOfDropbox", ->
-		it 'should tell the project entity handler to flush to tpds', (done)->
-			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArgWith(1)
-			@EditorController.forceResyncOfDropbox @project_id, (err)=>
-				@ProjectEntityHandler.flushProjectToThirdPartyDataStore.calledWith(@project_id).should.equal true
-				done()
-
 	describe "notifyUsersProjectHasBeenDeletedOrRenamed", ->
 		it 'should emmit a message to all users in a project', (done)->
 			@EditorRealTimeController.emitToRoom = sinon.stub()
