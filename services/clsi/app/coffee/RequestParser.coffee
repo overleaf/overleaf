@@ -27,10 +27,12 @@ module.exports = RequestParser =
 			response.timeout = response.timeout * 1000 # milliseconds
 
 			response.resources = (@_parseResource(resource) for resource in (compile.resources or []))
-			response.rootResourcePath = @_parseAttribute "rootResourcePath",
+
+			rootResourcePath = @_parseAttribute "rootResourcePath",
 				compile.rootResourcePath
 				default: "main.tex"
 				type: "string"
+			response.rootResourcePath = RequestParser._sanitizePath(rootResourcePath)
 		catch error
 			return callback error
 
@@ -72,3 +74,5 @@ module.exports = RequestParser =
 			throw "Default not implemented"
 		return attribute
 
+	_sanitizePath: (path) ->
+		path.replace(/[^a-zA-Z0-9_\-;.,\/ ]/g, "")

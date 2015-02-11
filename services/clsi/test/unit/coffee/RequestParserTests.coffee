@@ -204,6 +204,13 @@ describe "RequestParser", ->
 			@callback.calledWith("rootResourcePath attribute should be a string")
 				.should.equal true
 
-
+	describe "with a root resource path that needs escaping", ->
+		beforeEach ->
+			@validRequest.compile.rootResourcePath = "`rm -rf foo`.tex"
+			@RequestParser.parse @validRequest, @callback
+			@data = @callback.args[0][1]
+			
+		it "should return the escaped resource", ->
+			@data.rootResourcePath.should.equal "rm -rf foo.tex"
 		
 
