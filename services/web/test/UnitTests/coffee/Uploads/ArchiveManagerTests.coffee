@@ -57,3 +57,16 @@ describe "ArchiveManager", ->
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
 
+		describe "with an error on the process", ->
+			beforeEach (done) ->
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@process.emit "error", new Error("Something went wrong")
+
+			it "should return the callback with an error", ->
+				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
+
+			it "should log out the error", ->
+				@logger.error.called.should.equal true
+
