@@ -30,6 +30,39 @@ If you want to permanently remove ShareLaTeX from your docker containers:
 docker rm sharelatex
 ```
 
+### Mongo and Redis
+
+ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later), and
+[Redis](http://redis.io/) (must be version 2.6.12 or later).
+These should be running on the host system.
+
+By default the ShareLaTeX Docker container looks for these running on the host
+machine at port 27017 (for Mongo) and port 6379 (for Redis). These are the defaults
+ports for both databases so you shouldn't need to change them.
+
+Note that Docker containers each come with their own network stack, and Mongo and Redis
+often listen by default on `127.0.0.1` which is not accessible on the host
+from inside the Docker container. Instead, you should configure Mongo and Redis to
+also listen on `172.17.42.1` (or whatever ip iddress the docker0 interface has on your
+host). This can be done in `/etc/mongod.conf` and `/etc/redis/redis.conf`.
+
+If you want to point ShareLaTeX at a database in a different location, you can
+configure the container with environment variables. See the **Configuration Options**
+section below.
+
+*Note that `localhost` in the container refers only to the container, so if you
+want to access services on the host machine then you should use `dockerhost`.
+`dockerhost` refers to the the `172.17.42.1` ip address mentioned above.* For example:
+
+```
+$ docker run -d \
+  -v ~/sharelatex_data:/var/lib/sharelatex \
+  -p 80 \
+  --name=sharelatex \
+  --env SHARELATEX_MONGO_URL=mongodb://dockerhost/sharelatex \
+  sharelatex/sharelatex
+```
+
 ### Storing Data
 
 The `-v ~/sharelatex_data:/var/lib/sharelatex` option in the `run` command tells 
@@ -50,32 +83,6 @@ Do not change the second part of this parameter (after the :).
 
 This is only where ShareLaTeX stores on-disk data.
 Other data is also stored in Mongo and Redis.
-
-### Mongo and Redis
-
-ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later), and
-[Redis](http://redis.io/) (must be version 2.6.12 or later).
-These should be running on the host system.
-
-By default the ShareLaTeX Docker container looks for these running on the host
-machine at port 27017 (for Mongo) and port 6379 (for Redis). These are the defaults
-ports for both databases so you shouldn't need to change them.
-
-If you want to point ShareLaTeX at a database in a different location, you can
-configure the container with environment variables. See the **Configuration Options**
-section below.
-
-*Note that `localhost` in the container refers only to the container, so if you
-want to access services on the host machine then you should use `dockerhost`.* For example:
-
-```
-$ docker run -d \
-  -v ~/sharelatex_data:/var/lib/sharelatex \
-  -p 80 \
-  --name=sharelatex \
-  --env SHARELATEX_MONGO_URL=mongodb://dockerhost/sharelatex \
-  sharelatex/sharelatex
-```
 
 ### Backups
 
