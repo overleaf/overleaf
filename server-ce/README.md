@@ -7,7 +7,11 @@ short but contains some important information.**
 The recommended way to install and run ShareLaTeX Community Edition is via [Docker](https://www.docker.com/):
 
 ```
-$ docker run -d -v ~/sharelatex_data:/var/lib/sharelatex -p 80 --name=sharelatex sharelatex/sharelatex
+$ docker run -d \
+  -v ~/sharelatex_data:/var/lib/sharelatex \
+  -p 5000:80 \
+  --name=sharelatex \
+  sharelatex/sharelatex
 ```
 
 This will download the ShareLaTeX image and start it running in the background on port 80. You should be able to access it at http://localhost/.
@@ -71,7 +75,7 @@ want to access services on the host machine then you should use `dockerhost`.
 ```
 $ docker run -d \
   -v ~/sharelatex_data:/var/lib/sharelatex \
-  -p 80 \
+  -p 5000:80 \
   --name=sharelatex \
   --env SHARELATEX_MONGO_URL=mongodb://dockerhost/sharelatex \
   sharelatex/sharelatex
@@ -143,7 +147,7 @@ You can pass configuration options to ShareLaTeX as environment variables:
 ```
 $ docker run -d \
   -v ~/sharelatex_data:/var/lib/sharelatex \
-  -p 80 \
+  -p 5000:80 \
   --name=sharelatex \
   --env SHARELATEX_MONGO_URL=mongodb://my.mongo.host/sharelatex \
   sharelatex/sharelatex
