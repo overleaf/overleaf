@@ -15,6 +15,11 @@ We have detailed installation instructions in our wiki:
 
 **If you have any problems, have a look at our page of [Frequent Problems and Questions](https://github.com/sharelatex/sharelatex/wiki/FAQ).**
 
+Upgrading
+---------
+
+If you are upgrading from a previous version of ShareLaTeX, please see the [Release Notes section on the Wiki] (https://github.com/sharelatex/sharelatex/wiki/Home) for all of the versions between your current version and the version you are upgrading to.
+
 
 Dependencies
 ------------
