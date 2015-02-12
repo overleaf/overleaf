@@ -52,7 +52,6 @@ exports.themes = themeData.map(function(data) {
 });
 
 });
-;
                 (function() {
                     ace.require(["ace/ext/themelist"], function() {});
                 })();

@@ -4,7 +4,7 @@ exports.isDark = true;
 exports.cssClass = "ace-idle-fingers";
 exports.cssText = ".ace-idle-fingers .ace_gutter {\
 background: #3b3b3b;\
-color: #fff\
+color: rgb(153,153,153)\
 }\
 .ace-idle-fingers .ace_print-margin {\
 width: 1px;\

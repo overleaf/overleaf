@@ -17,6 +17,35 @@ var RustHighlightRules = function() {
                 next: 'pop' },
               { include: '#rust_escaped_character' },
               { defaultToken: 'string.quoted.single.source.rust' } ] },
+         {
+            stateName: "bracketedComment",
+            onMatch : function(value, currentState, stack){
+                stack.unshift(this.next, value.length - 1, currentState);
+                return "string.quoted.raw.source.rust";
+            },
+            regex : /r#*"/,
+            next  : [
+                {
+                    onMatch : function(value, currentState, stack) {
+                        var token = "string.quoted.raw.source.rust";
+                        if (value.length >= stack[1]) {
+                            if (value.length > stack[1])
+                                token = "invalid";
+                            stack.shift();
+                            stack.shift();
+                            this.next = stack.shift();
+                        } else {
+                            this.next = "";
+                        }
+                        return token;
+                    },
+                    regex : /"#*/,
+                    next  : "start"
+                }, {
+                    defaultToken : "string.quoted.raw.source.rust"
+                }
+            ]
+         },
          { token: 'string.quoted.double.source.rust',
            regex: '"',
            push: 
@@ -64,10 +93,14 @@ var RustHighlightRules = function() {
                 regex: '$',
                 next: 'pop' },
               { defaultToken: 'comment.line.double-dash.source.rust' } ] },
-         { token: 'comment.block.source.rust',
+         { token: 'comment.start.block.source.rust',
            regex: '/\\*',
+           stateName: 'comment',
            push: 
-            [ { token: 'comment.block.source.rust',
+            [ { token: 'comment.start.block.source.rust',
+                regex: '/\\*',
+                push: 'comment' },
+              { token: 'comment.end.block.source.rust',
                 regex: '\\*/',
                 next: 'pop' },
               { defaultToken: 'comment.block.source.rust' } ] } ],
@@ -110,12 +143,35 @@ var FoldMode = exports.FoldMode = function(commentRegex) {
 oop.inherits(FoldMode, BaseFoldMode);
 
 (function() {
-
+    
     this.foldingStartMarker = /(\{|\[)[^\}\]]*$|^\s*(\/\*)/;
     this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
+    this.singleLineBlockCommentRe= /^\s*(\/\*).*\*\/\s*$/;
+    this.tripleStarBlockCommentRe = /^\s*(\/\*\*\*).*\*\/\s*$/;
+    this.startRegionRe = /^\s*(\/\*|\/\/)#region\b/;
+    this._getFoldWidgetBase = this.getFoldWidget;
+    this.getFoldWidget = function(session, foldStyle, row) {
+        var line = session.getLine(row);
+    
+        if (this.singleLineBlockCommentRe.test(line)) {
+            if (!this.startRegionRe.test(line) && !this.tripleStarBlockCommentRe.test(line))
+                return "";
+        }
+    
+        var fw = this._getFoldWidgetBase(session, foldStyle, row);
+    
+        if (!fw && this.startRegionRe.test(line))
+            return "start"; // lineCommentRegionStart
+    
+        return fw;
+    };
 
     this.getFoldWidgetRange = function(session, foldStyle, row, forceMultiline) {
         var line = session.getLine(row);
+        
+        if (this.startRegionRe.test(line))
+            return this.getCommentRegionBlock(session, line, row);
+        
         var match = line.match(this.foldingStartMarker);
         if (match) {
             var i = match.index;
@@ -180,6 +236,29 @@ oop.inherits(FoldMode, BaseFoldMode);
         
         return new Range(startRow, startColumn, endRow, session.getLine(endRow).length);
     };
+    
+    this.getCommentRegionBlock = function(session, line, row) {
+        var startColumn = line.search(/\s*$/);
+        var maxRow = session.getLength();
+        var startRow = row;
+        
+        var re = /^\s*(?:\/\*|\/\/)#(end)?region\b/;
+        var depth = 1;
+        while (++row < maxRow) {
+            line = session.getLine(row);
+            var m = re.exec(line);
+            if (!m) continue;
+            if (m[1]) depth--;
+            else depth++;
+
+            if (!depth) break;
+        }
+
+        var endRow = row;
+        if (endRow > startRow) {
+            return new Range(startRow, startColumn, endRow, line.length);
+        }
+    };
 
 }).call(FoldMode.prototype);
 
@@ -200,7 +279,7 @@ var Mode = function() {
 oop.inherits(Mode, TextMode);
 
 (function() {
-    this.lineCommentStart = "/\\*";
+    this.lineCommentStart = "//";
     this.blockComment = {start: "/*", end: "*/"};
     this.$id = "ace/mode/rust";
 }).call(Mode.prototype);

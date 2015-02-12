@@ -454,6 +454,10 @@ var SnippetManager = function() {
         var snippetMap = this.snippetMap;
         var snippetNameMap = this.snippetNameMap;
         var self = this;
+        
+        if (!snippets) 
+            snippets = [];
+        
         function wrapRegexp(src) {
             if (src && !/^\^?\(.*\)\$?$|^\\b$/.test(src))
                 src = "(?:" + src + ")";
@@ -506,7 +510,7 @@ var SnippetManager = function() {
             s.endTriggerRe = new RegExp(s.endTrigger, "", true);
         }
 
-        if (snippets.content)
+        if (snippets && snippets.content)
             addSnippet(snippets);
         else if (Array.isArray(snippets))
             snippets.forEach(addSnippet);
@@ -897,21 +901,13 @@ var Editor = require("./editor").Editor;
 
 });
 
-ace.define("ace/ext/emmet",["require","exports","module","ace/keyboard/hash_handler","ace/editor","ace/snippets","ace/range","resources","resources","range","tabStops","resources","utils","actions","ace/config"], function(require, exports, module) {
+ace.define("ace/ext/emmet",["require","exports","module","ace/keyboard/hash_handler","ace/editor","ace/snippets","ace/range","resources","resources","range","tabStops","resources","utils","actions","ace/config","ace/config"], function(require, exports, module) {
 "use strict";
 var HashHandler = require("ace/keyboard/hash_handler").HashHandler;
 var Editor = require("ace/editor").Editor;
 var snippetManager = require("ace/snippets").snippetManager;
 var Range = require("ace/range").Range;
-var emmet;
-
-Editor.prototype.indexToPosition = function(index) {
-    return this.session.doc.indexToPosition(index);
-};
-
-Editor.prototype.positionToIndex = function(pos) {
-    return this.session.doc.positionToIndex(pos);
-};
+var emmet, emmetPath;
 function AceEmmetEditor() {}
 
 AceEmmetEditor.prototype = {
@@ -926,21 +922,24 @@ AceEmmetEditor.prototype = {
     },
     getSelectionRange: function() {
         var range = this.ace.getSelectionRange();
+        var doc = this.ace.session.doc;
         return {
-            start: this.ace.positionToIndex(range.start),
-            end: this.ace.positionToIndex(range.end)
+            start: doc.positionToIndex(range.start),
+            end: doc.positionToIndex(range.end)
         };
     },
     createSelection: function(start, end) {
+        var doc = this.ace.session.doc;
         this.ace.selection.setRange({
-            start: this.ace.indexToPosition(start),
-            end: this.ace.indexToPosition(end)
+            start: doc.indexToPosition(start),
+            end: doc.indexToPosition(end)
         });
     },
     getCurrentLineRange: function() {
-        var row = this.ace.getCursorPosition().row;
-        var lineLength = this.ace.session.getLine(row).length;
-        var index = this.ace.positionToIndex({row: row, column: 0});
+        var ace = this.ace;
+        var row = ace.getCursorPosition().row;
+        var lineLength = ace.session.getLine(row).length;
+        var index = ace.session.doc.positionToIndex({row: row, column: 0});
         return {
             start: index,
             end: index + lineLength
@@ -948,10 +947,10 @@ AceEmmetEditor.prototype = {
     },
     getCaretPos: function(){
         var pos = this.ace.getCursorPosition();
-        return this.ace.positionToIndex(pos);
+        return this.ace.session.doc.positionToIndex(pos);
     },
     setCaretPos: function(index){
-        var pos = this.ace.indexToPosition(index);
+        var pos = this.ace.session.doc.indexToPosition(index);
         this.ace.selection.moveToPosition(pos);
     },
     getCurrentLine: function() {
@@ -965,13 +964,14 @@ AceEmmetEditor.prototype = {
             start = 0;        
         
         var editor = this.ace;
-        var range = Range.fromPoints(editor.indexToPosition(start), editor.indexToPosition(end));
+        var doc = editor.session.doc;
+        var range = Range.fromPoints(doc.indexToPosition(start), doc.indexToPosition(end));
         editor.session.remove(range);
         
         range.end = range.start;
         
         value = this.$updateTabstops(value);
-        snippetManager.insertSnippet(editor, value)
+        snippetManager.insertSnippet(editor, value);
     },
     getContent: function(){
         return this.ace.getValue();
@@ -1045,7 +1045,7 @@ AceEmmetEditor.prototype = {
                     lastZero = range.create(data.start, result);
                 }
 
-                return result
+                return result;
             },
             escape: function(ch) {
                 if (ch == '$') return '\\$';
@@ -1096,28 +1096,33 @@ var keymap = {
 var editorProxy = new AceEmmetEditor();
 exports.commands = new HashHandler();
 exports.runEmmetCommand = function(editor) {
-    editorProxy.setupContext(editor);
-    if (editorProxy.getSyntax() == "php")
-        return false;
-    var actions = emmet.require("actions");
-
-    if (this.action == "expand_abbreviation_with_tab") {
-        if (!editor.selection.isEmpty())
-            return false;
-    }
-    
-    if (this.action == "wrap_with_abbreviation") {
-        return setTimeout(function() {
-            actions.run("wrap_with_abbreviation", editorProxy);
-        }, 0);
-    }
-    
     try {
+        editorProxy.setupContext(editor);
+        if (editorProxy.getSyntax() == "php")
+            return false;
+        var actions = emmet.require("actions");
+    
+        if (this.action == "expand_abbreviation_with_tab") {
+            if (!editor.selection.isEmpty())
+                return false;
+        }
+        
+        if (this.action == "wrap_with_abbreviation") {
+            return setTimeout(function() {
+                actions.run("wrap_with_abbreviation", editorProxy);
+            }, 0);
+        }
+        
+        var pos = editor.selection.lead;
+        var token = editor.session.getTokenAt(pos.row, pos.column);
+        if (token && /\btag\b/.test(token.type))
+            return false;
+        
         var result = actions.run(this.action, editorProxy);
     } catch(e) {
         editor._signal("changeStatus", typeof e == "string" ? e : e.message);
         console.log(e);
-        result = false
+        result = false;
     }
     return result;
 };
@@ -1132,20 +1137,34 @@ for (var command in keymap) {
     });
 }
 
+exports.updateCommands = function(editor, enabled) {
+    if (enabled) {
+        editor.keyBinding.addKeyboardHandler(exports.commands);
+    } else {
+        editor.keyBinding.removeKeyboardHandler(exports.commands);
+    }
+};
+
+exports.isSupportedMode = function(modeId) {
+    return modeId && /css|less|scss|sass|stylus|html|php|twig|ejs/.test(modeId);
+};
+
 var onChangeMode = function(e, target) {
     var editor = target;
     if (!editor)
         return;
-    var modeId = editor.session.$modeId;
-    var enabled = modeId && /css|less|scss|sass|stylus|html|php/.test(modeId);
+    var enabled = exports.isSupportedMode(editor.session.$modeId);
     if (e.enableEmmet === false)
         enabled = false;
-    if (enabled)
-        editor.keyBinding.addKeyboardHandler(exports.commands);
-    else
-        editor.keyBinding.removeKeyboardHandler(exports.commands);
+    if (enabled) {
+        if (typeof emmetPath == "string") {
+            require("ace/config").loadModule(emmetPath, function() {
+                emmetPath = null;
+            });
+        }
+    }
+    exports.updateCommands(editor, enabled);
 };
-
 
 exports.AceEmmetEditor = AceEmmetEditor;
 require("ace/config").defineOptions(Editor.prototype, "editor", {
@@ -1158,10 +1177,13 @@ require("ace/config").defineOptions(Editor.prototype, "editor", {
     }
 });
 
-
-exports.setCore = function(e) {emmet = e;};
+exports.setCore = function(e) {
+    if (typeof e == "string")
+       emmetPath = e;
+    else
+       emmet = e;
+};
 });
-;
                 (function() {
                     ace.require(["ace/ext/emmet"], function() {});
                 })();

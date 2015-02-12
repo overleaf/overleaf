@@ -208,12 +208,13 @@ oop.inherits(XmlHighlightRules, TextHighlightRules);
 exports.XmlHighlightRules = XmlHighlightRules;
 });
 
-ace.define("ace/mode/behaviour/xml",["require","exports","module","ace/lib/oop","ace/mode/behaviour","ace/token_iterator"], function(require, exports, module) {
+ace.define("ace/mode/behaviour/xml",["require","exports","module","ace/lib/oop","ace/mode/behaviour","ace/token_iterator","ace/lib/lang"], function(require, exports, module) {
 "use strict";
 
 var oop = require("../../lib/oop");
 var Behaviour = require("../behaviour").Behaviour;
 var TokenIterator = require("../../token_iterator").TokenIterator;
+var lang = require("../../lib/lang");
 
 function is(token, type) {
     return token.type.lastIndexOf(type + ".xml") > -1;
@@ -311,29 +312,56 @@ var XmlBehaviour = function () {
                  return;
 
             return {
-               text: '>' + '</' + element + '>',
+               text: ">" + "</" + element + ">",
                selection: [1, 1]
             };
         }
     });
 
-    this.add('autoindent', 'insertion', function (state, action, editor, session, text) {
+    this.add("autoindent", "insertion", function (state, action, editor, session, text) {
         if (text == "\n") {
             var cursor = editor.getCursorPosition();
             var line = session.getLine(cursor.row);
-            var rightChars = line.substring(cursor.column, cursor.column + 2);
-            if (rightChars == '</') {
-                var next_indent = this.$getIndent(line);
-                var indent = next_indent + session.getTabString();
+            var iterator = new TokenIterator(session, cursor.row, cursor.column);
+            var token = iterator.getCurrentToken();
 
-                return {
-                    text: '\n' + indent + '\n' + next_indent,
-                    selection: [1, indent.length, 1, indent.length]
-                };
+            if (token && token.type.indexOf("tag-close") !== -1) {
+                while (token && token.type.indexOf("tag-name") === -1) {
+                    token = iterator.stepBackward();
+                }
+
+                if (!token) {
+                    return;
+                }
+
+                var tag = token.value;
+                var row = iterator.getCurrentTokenRow();
+                token = iterator.stepBackward();
+                if (!token || token.type.indexOf("end-tag") !== -1) {
+                    return;
+                }
+
+                if (this.voidElements && !this.voidElements[tag]) {
+                    var nextToken = session.getTokenAt(cursor.row, cursor.column+1);
+                    var line = session.getLine(row);
+                    var nextIndent = this.$getIndent(line);
+                    var indent = nextIndent + session.getTabString();
+
+                    if (nextToken && nextToken.value === "</") {
+                        return {
+                            text: "\n" + indent + "\n" + nextIndent,
+                            selection: [1, indent.length, 1, indent.length]
+                        };
+                    } else {
+                        return {
+                            text: "\n" + indent
+                        };
+                    }
+                }
             }
         }
     });
-    
+
 };
 
 oop.inherits(XmlBehaviour, Behaviour);
@@ -352,7 +380,11 @@ var TokenIterator = require("../../token_iterator").TokenIterator;
 
 var FoldMode = exports.FoldMode = function(voidElements, optionalEndTags) {
     BaseFoldMode.call(this);
-    this.voidElements = oop.mixin(voidElements || {}, optionalEndTags || {});
+    this.voidElements = voidElements || {};
+    this.optionalEndTags = oop.mixin({}, this.voidElements);
+    if (optionalEndTags)
+        oop.mixin(this.optionalEndTags, optionalEndTags);
+    
 };
 oop.inherits(FoldMode, BaseFoldMode);
 
@@ -493,10 +525,7 @@ function is(token, type) {
             if (!tag || top.tagName == tag.tagName) {
                 return stack.pop();
             }
-            else if (this.voidElements.hasOwnProperty(tag.tagName)) {
-                return;
-            }
-            else if (this.voidElements.hasOwnProperty(top.tagName)) {
+            else if (this.optionalEndTags.hasOwnProperty(top.tagName)) {
                 stack.pop();
                 continue;
             } else {

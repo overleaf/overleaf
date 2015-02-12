@@ -4,7 +4,7 @@ exports.isDark = true;
 exports.cssClass = "ace-cobalt";
 exports.cssText = ".ace-cobalt .ace_gutter {\
 background: #011e3a;\
-color: #fff\
+color: rgb(128,145,160)\
 }\
 .ace-cobalt .ace_print-margin {\
 width: 1px;\

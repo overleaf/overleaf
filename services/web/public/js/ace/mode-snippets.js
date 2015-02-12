@@ -189,6 +189,7 @@ oop.inherits(Mode, TextMode);
 
 (function() {
     this.$indentWithTabs = true;
+    this.lineCommentStart = "#";
     this.$id = "ace/mode/snippets";
 }).call(Mode.prototype);
 exports.Mode = Mode;

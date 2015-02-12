@@ -315,6 +315,28 @@ exports.iSearchCommands = [{
     exec: function(iSearch) { iSearch.$editor.execCommand('recenterTopBottom'); },
     readOnly: true,
     isIncrementalSearchCommand: true
+}, {
+    name: 'selectAllMatches',
+    bindKey: 'Ctrl-space',
+    exec: function(iSearch) {
+        var ed = iSearch.$editor,
+            hl = ed.session.$isearchHighlight,
+            ranges = hl && hl.cache ? hl.cache
+                .reduce(function(ranges, ea) {
+                    return ranges.concat(ea ? ea : []); }, []) : [];
+        iSearch.deactivate(false);
+        ranges.forEach(ed.selection.addRange.bind(ed.selection));
+    },
+    readOnly: true,
+    isIncrementalSearchCommand: true
+}, {
+    name: 'searchAsRegExp',
+    bindKey: 'Alt-r',
+    exec: function(iSearch) {
+        iSearch.convertNeedleToRegExp();
+    },
+    readOnly: true,
+    isIncrementalSearchCommand: true
 }];
 
 function IncrementalSearchKeyboardHandler(iSearch) {
@@ -377,6 +399,30 @@ function IncrementalSearch() {
 }
 
 oop.inherits(IncrementalSearch, Search);
+
+function isRegExp(obj) {
+    return obj instanceof RegExp;
+}
+
+function regExpToObject(re) {
+    var string = String(re),
+        start = string.indexOf('/'),
+        flagStart = string.lastIndexOf('/');
+    return {
+        expression: string.slice(start+1, flagStart),
+        flags: string.slice(flagStart+1)
+    }
+}
+
+function stringToRegExp(string, flags) {
+    try {
+        return new RegExp(string, flags);
+    } catch (e) { return string; }
+}
+
+function objectToRegExp(obj) {
+    return stringToRegExp(obj.expression, obj.flags);
+}
 
 ;(function() {
 
@@ -444,10 +490,12 @@ oop.inherits(IncrementalSearch, Search);
         };
         options.start = this.$currentPos;
         var session = this.$editor.session,
-            found = this.find(session);
+            found = this.find(session),
+            shouldSelect = this.$editor.emacsMark ?
+                !!this.$editor.emacsMark() : !this.$editor.selection.isEmpty();
         if (found) {
             if (options.backwards) found = Range.fromPoints(found.end, found.start);
-            this.$editor.moveCursorToPosition(found.end);
+            this.$editor.selection.setRange(Range.fromPoints(shouldSelect ? this.$startPos : found.end, found.end));
             if (moveToNext) this.$currentPos = found.end;
             this.highlight(options.re)
         }
@@ -459,13 +507,21 @@ oop.inherits(IncrementalSearch, Search);
 
     this.addString = function(s) {
         return this.highlightAndFindWithNeedle(false, function(needle) {
-            return needle + s;
+            if (!isRegExp(needle))
+              return needle + s;
+            var reObj = regExpToObject(needle);
+            reObj.expression += s;
+            return objectToRegExp(reObj);
         });
     }
 
     this.removeChar = function(c) {
         return this.highlightAndFindWithNeedle(false, function(needle) {
-            return needle.length > 0 ? needle.substring(0, needle.length-1) : needle;
+            if (!isRegExp(needle))
+              return needle.substring(0, needle.length-1);
+            var reObj = regExpToObject(needle);
+            reObj.expression = reObj.expression.substring(0, reObj.expression.length-1);
+            return objectToRegExp(reObj);
         });
     }
 
@@ -486,6 +542,18 @@ oop.inherits(IncrementalSearch, Search);
 
     this.onPaste = function(text) {
         this.addString(text);
+    }
+
+    this.convertNeedleToRegExp = function() {
+        return this.highlightAndFindWithNeedle(false, function(needle) {
+            return isRegExp(needle) ? needle : stringToRegExp(needle, 'ig');
+        });
+    }
+
+    this.convertNeedleToString = function() {
+        return this.highlightAndFindWithNeedle(false, function(needle) {
+            return isRegExp(needle) ? regExpToObject(needle).expression : needle;
+        });
     }
 
     this.statusMessage = function(found) {
@@ -590,7 +658,7 @@ exports.handler.attach = function(editor) {
         initialized = true;
         dom.importCssString('\
             .emacs-mode .ace_cursor{\
-                border: 2px rgba(50,250,50,0.8) solid!important;\
+                border: 1px rgba(50,250,50,0.8) solid!important;\
                 -moz-box-sizing: border-box!important;\
                 -webkit-box-sizing: border-box!important;\
                 box-sizing: border-box!important;\
@@ -648,6 +716,22 @@ exports.handler.attach = function(editor) {
         return this.session.$emacsMark || this.session.$emacsMarkRing.slice(-1)[0];
     };
 
+    editor.emacsMarkForSelection = function(replacement) {
+        var sel = this.selection,
+            multiRangeLength = this.multiSelect ?
+                this.multiSelect.getAllRanges().length : 1,
+            selIndex = sel.index || 0,
+            markRing = this.session.$emacsMarkRing,
+            markIndex = markRing.length - (multiRangeLength - selIndex),
+            lastMark = markRing[markIndex] || sel.anchor;
+        if (replacement) {
+            markRing.splice(markIndex, 1,
+                "row" in replacement && "column" in replacement ?
+                    replacement : undefined);
+        }
+        return lastMark;
+    }
+
     editor.on("click", $resetMarkMode);
     editor.on("changeSession", $kbSessionChange);
     editor.renderer.screenToTextCoordinates = screenToTextBlockCoordinates;
@@ -669,6 +753,7 @@ exports.handler.detach = function(editor) {
     editor.commands.removeCommands(commands);
     editor.removeEventListener('copy', this.onCopy);
     editor.removeEventListener('paste', this.onPaste);
+    editor.$emacsModeHandler = null;
 };
 
 var $kbSessionChange = function(e) {
@@ -710,7 +795,7 @@ exports.handler.onCopy = function(e, editor) {
     if (editor.$handlesEmacsOnCopy) return;
     editor.$handlesEmacsOnCopy = true;
     exports.handler.commands.killRingSave.exec(editor);
-    delete editor.$handlesEmacsOnCopy;
+    editor.$handlesEmacsOnCopy = false;
 };
 
 exports.handler.onPaste = function(e, editor) {
@@ -718,6 +803,8 @@ exports.handler.onPaste = function(e, editor) {
 };
 
 exports.handler.bindKey = function(key, command) {
+    if (typeof key == "object")
+        key = key[this.platform];
     if (!key)
         return;
 
@@ -735,10 +822,20 @@ exports.handler.bindKey = function(key, command) {
     }, this);
 };
 
+exports.handler.getStatusText = function(editor, data) {
+  var str = "";
+  if (data.count)
+    str += data.count;
+  if (data.keyChain)
+    str += " " + data.keyChain
+  return str;
+};
+
 exports.handler.handleKeyboard = function(data, hashId, key, keyCode) {
     if (keyCode === -1) return undefined;
 
     var editor = data.editor;
+    editor._signal("changeStatus");
     if (hashId == -1) {
         editor.pushEmacsMark();
         if (data.count) {
@@ -748,20 +845,15 @@ exports.handler.handleKeyboard = function(data, hashId, key, keyCode) {
         }
     }
 
-    if (key == "\x00") return undefined;
-
     var modifier = eMods[hashId];
-    if (modifier == "c-" || data.universalArgument) {
-        var prevCount = String(data.count || 0);
+    if (modifier == "c-" || data.count) {
         var count = parseInt(key[key.length - 1]);
         if (typeof count === 'number' && !isNaN(count)) {
-            data.count = parseInt(prevCount + count);
+            data.count = Math.max(data.count, 0) || 0;
+            data.count = 10 * data.count + count;
             return {command: "null"};
-        } else if (data.universalArgument) {
-            data.count = 4;
         }
     }
-    data.universalArgument = false;
     if (modifier) key = modifier + key;
     if (data.keyChain) key = data.keyChain += " " + key;
     var command = this.commandKeyBinding[key];
@@ -770,7 +862,7 @@ exports.handler.handleKeyboard = function(data, hashId, key, keyCode) {
     if (command === "null") return {command: "null"};
 
     if (command === "universalArgument") {
-        data.universalArgument = true;
+        data.count = -4;
         return {command: "null"};
     }
     var args;
@@ -793,9 +885,12 @@ exports.handler.handleKeyboard = function(data, hashId, key, keyCode) {
         if (!command) return undefined;
     }
 
-    if (!command.readonly && !command.isYank)
+    if (!command.readOnly && !command.isYank)
         data.lastCommand = null;
 
+    if (!command.readOnly && editor.emacsMark())
+        editor.setEmacsMark(null)
+        
     if (data.count) {
         var count = data.count;
         data.count = 0;
@@ -806,7 +901,8 @@ exports.handler.handleKeyboard = function(data, hashId, key, keyCode) {
                     exec: function(editor, args) {
                         for (var i = 0; i < count; i++)
                             command.exec(editor, args);
-                    }
+                    },
+                    multiSelectAction: command.multiSelectAction
                 }
             };
         } else {
@@ -870,7 +966,7 @@ exports.emacsKeys = {
     "M-y": "yankRotate",
     "C-g": "keyboardQuit",
 
-    "C-w": "killRegion",
+    "C-w|C-S-W": "killRegion",
     "M-w": "killRingSave",
     "C-Space": "setMark",
     "C-x C-x": "exchangePointAndMark",
@@ -912,55 +1008,58 @@ exports.handler.addCommands({
     },
     setMark:  {
         exec: function(editor, args) {
+
             if (args && args.count) {
-                var mark = editor.popEmacsMark();
-                mark && editor.selection.moveCursorToPosition(mark);
+                if (editor.inMultiSelectMode) editor.forEachSelection(moveToMark);
+                else moveToMark();
+                moveToMark();
                 return;
             }
 
             var mark = editor.emacsMark(),
-                transientMarkModeActive = true;
-            if (transientMarkModeActive && (mark || !editor.selection.isEmpty())) {
-                editor.pushEmacsMark();
-                editor.clearSelection();
+                ranges = editor.selection.getAllRanges(),
+                rangePositions = ranges.map(function(r) { return {row: r.start.row, column: r.start.column}; }),
+                transientMarkModeActive = true,
+                hasNoSelection = ranges.every(function(range) { return range.isEmpty(); });
+            if (transientMarkModeActive && (mark || !hasNoSelection)) {
+                if (editor.inMultiSelectMode) editor.forEachSelection({exec: editor.clearSelection.bind(editor)})
+                else editor.clearSelection();
+                if (mark) editor.pushEmacsMark(null);
                 return;
             }
 
-            if (mark) {
-                var cp = editor.getCursorPosition();
-                if (editor.selection.isEmpty() &&
-                    mark.row == cp.row && mark.column == cp.column) {
-                    editor.pushEmacsMark();
-                    return;
-                }
+            if (!mark) {
+                rangePositions.forEach(function(pos) { editor.pushEmacsMark(pos); });
+                editor.setEmacsMark(rangePositions[rangePositions.length-1]);
+                return;
             }
-            mark = editor.getCursorPosition();
-            editor.setEmacsMark(mark);
-            editor.selection.setSelectionAnchor(mark.row, mark.column);
+
+            function moveToMark() {
+                var mark = editor.popEmacsMark();
+                mark && editor.moveCursorToPosition(mark);
+            }
+
         },
-        readonly: true,
-        handlesCount: true,
-        multiSelectAction: "forEach"
+        readOnly: true,
+        handlesCount: true
     },
     exchangePointAndMark: {
-        exec: function(editor, args) {
+        exec: function exchangePointAndMark$exec(editor, args) {
             var sel = editor.selection;
-            if (args.count) {
-                var pos = editor.getCursorPosition();
+            if (!args.count && !sel.isEmpty()) { // just invert selection
+                sel.setSelectionRange(sel.getRange(), !sel.isBackwards());
+                return;
+            }
+
+            if (args.count) { // replace mark and point
+                var pos = {row: sel.lead.row, column: sel.lead.column};
                 sel.clearSelection();
-                sel.moveCursorToPosition(editor.popEmacsMark());
-                editor.pushEmacsMark(pos);
-                return;
+                sel.moveCursorToPosition(editor.emacsMarkForSelection(pos));
+            } else { // create selection to last mark
+                sel.selectToPosition(editor.emacsMarkForSelection());
             }
-            var lastMark = editor.getLastEmacsMark();
-            var range = sel.getRange();
-            if (range.isEmpty()) {
-                sel.selectToPosition(lastMark);
-                return;
-            }
-            sel.setSelectionRange(range, !sel.isBackwards());
         },
-        readonly: true,
+        readOnly: true,
         handlesCount: true,
         multiSelectAction: "forEach"
     },
@@ -1006,6 +1105,7 @@ exports.handler.addCommands({
         if (editor.keyBinding.$data.lastCommand != "yank")
             return;
         editor.undo();
+        editor.session.$emacsMarkRing.pop(); // also undo recording mark
         editor.onPaste(exports.killRing.rotate());
         editor.keyBinding.$data.lastCommand = "yank";
     },
@@ -1014,24 +1114,36 @@ exports.handler.addCommands({
             exports.killRing.add(editor.getCopyText());
             editor.commands.byName.cut.exec(editor);
         },
-        readonly: true,
+        readOnly: true,
         multiSelectAction: "forEach"
     },
     killRingSave: {
         exec: function(editor) {
+
+            editor.$handlesEmacsOnCopy = true;
+            var marks = editor.session.$emacsMarkRing.slice(),
+                deselectedMarks = [];
             exports.killRing.add(editor.getCopyText());
+
             setTimeout(function() {
-                var sel = editor.selection,
-                    range = sel.getRange();
-                editor.pushEmacsMark(sel.isBackwards() ? range.end : range.start);
-                sel.clearSelection();
+                function deselect() {
+                    var sel = editor.selection, range = sel.getRange(),
+                        pos = sel.isBackwards() ? range.end : range.start;
+                    deselectedMarks.push({row: pos.row, column: pos.column});
+                    sel.clearSelection();
+                }
+                editor.$handlesEmacsOnCopy = false;
+                if (editor.inMultiSelectMode) editor.forEachSelection({exec: deselect});
+                else deselect();
+                editor.session.$emacsMarkRing = marks.concat(deselectedMarks.reverse());
             }, 0);
         },
-        readonly: true
+        readOnly: true
     },
     keyboardQuit: function(editor) {
         editor.selection.clearSelection();
         editor.setEmacsMark(null);
+        editor.keyBinding.$data.count = null;
     },
     focusCommandLine: function(editor, arg) {
         if (editor.showCommandLine)

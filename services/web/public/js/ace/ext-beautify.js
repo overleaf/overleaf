@@ -328,7 +328,6 @@ exports.commands = [{
 }]
 
 });
-;
                 (function() {
                     ace.require(["ace/ext/beautify"], function() {});
                 })();

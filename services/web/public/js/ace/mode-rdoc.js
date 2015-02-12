@@ -4,11 +4,24 @@ ace.define("ace/mode/latex_highlight_rules",["require","exports","module","ace/l
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-var LatexHighlightRules = function() {   
+var LatexHighlightRules = function() {  
+
     this.$rules = {
         "start" : [{
-            token : "keyword",
-            regex : "\\\\(?:[^a-zA-Z]|[a-zA-Z]+)"
+            token : "comment",
+            regex : "%.*$"
+        }, {
+            token : ["keyword", "lparen", "variable.parameter", "rparen", "lparen", "storage.type", "rparen"],
+            regex : "(\\\\(?:documentclass|usepackage|input))(?:(\\[)([^\\]]*)(\\]))?({)([^}]*)(})"
+        }, {
+            token : ["keyword","lparen", "variable.parameter", "rparen"],
+            regex : "(\\\\(?:label|v?ref|cite(?:[^{]*)))(?:({)([^}]*)(}))?"
+        }, {
+            token : ["storage.type", "lparen", "variable.parameter", "rparen"],
+            regex : "(\\\\(?:begin|end))({)(\\w*)(})"
+        }, {
+            token : "storage.type",
+            regex : "\\\\[a-zA-Z]+"
         }, {
             token : "lparen",
             regex : "[[({]"
@@ -16,15 +29,33 @@ var LatexHighlightRules = function() {
             token : "rparen",
             regex : "[\\])}]"
         }, {
-            token : "string",
-            regex : "\\$(?:(?:\\\\.)|(?:[^\\$\\\\]))*?\\$"
+            token : "constant.character.escape",
+            regex : "\\\\[^a-zA-Z]?"
         }, {
+            token : "string",
+            regex : "\\${1,2}",
+            next  : "equation"
+        }],
+        "equation" : [{
             token : "comment",
             regex : "%.*$"
+        }, {
+            token : "string",
+            regex : "\\${1,2}",
+            next  : "start"
+        }, {
+            token : "constant.character.escape",
+            regex : "\\\\(?:[^a-zA-Z]|[a-zA-Z]+)"
+        }, {
+            token : "error", 
+            regex : "^\\s*$", 
+            next : "start" 
+        }, {
+            defaultToken : "string"
         }]
+
     };
 };
-
 oop.inherits(LatexHighlightRules, TextHighlightRules);
 
 exports.LatexHighlightRules = LatexHighlightRules;

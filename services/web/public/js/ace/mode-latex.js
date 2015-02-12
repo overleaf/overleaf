@@ -12,7 +12,7 @@ var LatexHighlightRules = function() {
             regex : "%.*$"
         }, {
             token : ["keyword", "lparen", "variable.parameter", "rparen", "lparen", "storage.type", "rparen"],
-            regex : "(\\\\(?:documentclass|usepackage))(?:(\\[)([^\\]]*)(\\]))?({)([^}]*)(})"
+            regex : "(\\\\(?:documentclass|usepackage|input))(?:(\\[)([^\\]]*)(\\]))?({)([^}]*)(})"
         }, {
             token : ["keyword","lparen", "variable.parameter", "rparen"],
             regex : "(\\\\(?:label|v?ref|cite(?:[^{]*)))(?:({)([^}]*)(}))?"

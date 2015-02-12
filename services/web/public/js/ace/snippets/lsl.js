@@ -132,6 +132,16 @@ snippet email\n\
 	{\n\
 		$0\n\
 	}\n\
+snippet experience_permissions\n\
+	experience_permissions(${1:key agent_id})\n\
+	{\n\
+		$0\n\
+	}\n\
+snippet experience_permissions_denied\n\
+	experience_permissions_denied(${1:key agent_id}, ${2:integer reason})\n\
+	{\n\
+		$0\n\
+	}\n\
 snippet for\n\
 	for (${1:start}; ${3:condition}; ${3:step})\n\
 	{\n\
@@ -189,6 +199,8 @@ snippet llAddToLandPassList\n\
 	llAddToLandPassList(${1:key agent}, ${2:float hours});\n\
 snippet llAdjustSoundVolume\n\
 	llAdjustSoundVolume(${1:float volume});\n\
+snippet llAgentInExperience\n\
+	llAgentInExperience(${1:key agent})\n\
 snippet llAllowInventoryDrop\n\
 	llAllowInventoryDrop(${1:integer add});\n\
 snippet llAngleBetween\n\
@@ -241,12 +253,18 @@ snippet llCos\n\
 	llCos(${1:float theta})\n\
 snippet llCreateCharacter\n\
 	llCreateCharacter(${1:list options});\n\
+snippet llCreateKeyValue\n\
+	llCreateKeyValue(${1:string k})\n\
 snippet llCreateLink\n\
 	llCreateLink(${1:key target}, ${2:integer parent});\n\
 snippet llCSV2List\n\
 	llCSV2List(${1:string src})\n\
+snippet llDataSizeKeyValue\n\
+	llDataSizeKeyValue()\n\
 snippet llDeleteCharacter\n\
 	llDeleteCharacter();\n\
+snippet llDeleteKeyValue\n\
+	llDeleteKeyValue(${1:string k})\n\
 snippet llDeleteSubList\n\
 	llDeleteSubList(${1:list src}, ${2:integer start}, ${3:integer end})\n\
 snippet llDeleteSubString\n\
@@ -361,6 +379,10 @@ snippet llGetEnergy\n\
 	llGetEnergy()\n\
 snippet llGetEnv\n\
 	llGetEnv(${1:string name})\n\
+snippet llGetExperienceDetails\n\
+	llGetExperienceDetails(${1:key experience_id})\n\
+snippet llGetExperienceErrorMessage\n\
+	llGetExperienceErrorMessage(${1:integer error})\n\
 snippet llGetForce\n\
 	llGetForce()\n\
 snippet llGetFreeMemory\n\
@@ -573,6 +595,10 @@ snippet llJsonValueType\n\
 	llJsonValueType(${1:string json}, ${2:list specifiers})\n\
 snippet llKey2Name\n\
 	llKey2Name(${1:key id})\n\
+snippet llKeyCountKeyValue\n\
+	llKeyCountKeyValue()\n\
+snippet llKeysKeyValue\n\
+	llKeysKeyValue(${1:integer first}, ${2:integer count})\n\
 snippet llLinkParticleSystem\n\
 	llLinkParticleSystem(${1:integer link}, ${2:list rules});\n\
 snippet llLinkSitTarget\n\
@@ -683,6 +709,8 @@ snippet llPursue\n\
 	llPursue(${1:key target}, ${2:list options});\n\
 snippet llPushObject\n\
 	llPushObject(${1:key target}, ${2:vector impulse}, ${3:vector ang_impulse}, ${4:integer local});\n\
+snippet llReadKeyValue\n\
+	llReadKeyValue(${1:string k})\n\
 snippet llRegionSay\n\
 	llRegionSay(${1:integer channel}, ${2:string msg});\n\
 snippet llRegionSayTo\n\
@@ -707,6 +735,8 @@ snippet llRequestAgentData\n\
 	llRequestAgentData(${1:key id}, ${2:integer data})\n\
 snippet llRequestDisplayName\n\
 	llRequestDisplayName(${1:key id})\n\
+snippet llRequestExperiencePermissions\n\
+	llRequestExperiencePermissions(${1:key agent}, ${2:string name})\n\
 snippet llRequestInventoryData\n\
 	llRequestInventoryData(${1:string name})\n\
 snippet llRequestPermissions\n\
@@ -955,6 +985,8 @@ snippet llUnSit\n\
 	llUnSit(${1:key id});\n\
 snippet llUpdateCharacter\n\
 	llUpdateCharacter(${1:list options})\n\
+snippet llUpdateKeyValue\n\
+	llUpdateKeyValue(${1:string k}, ${2:string v}, ${3:integer checked}, ${4:string ov})\n\
 snippet llVecDist\n\
 	llVecDist(${1:vector vec_a}, ${2:vector vec_b})\n\
 snippet llVecMag\n\
