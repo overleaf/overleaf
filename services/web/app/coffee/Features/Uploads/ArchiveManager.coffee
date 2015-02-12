@@ -3,7 +3,11 @@ logger  = require "logger-sharelatex"
 metrics = require "../../infrastructure/Metrics"
 
 module.exports = ArchiveManager =
-	extractZipArchive: (source, destination, callback = (err) ->) ->
+	extractZipArchive: (source, destination, _callback = (err) ->) ->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		timer = new metrics.Timer("unzipDirectory")
 		logger.log source: source, destination: destination, "unzipping file"
 
@@ -17,6 +21,12 @@ module.exports = ArchiveManager =
 		unzip.stderr.on "data", (chunk) ->
 			error ||= ""
 			error += chunk
+
+		unzip.on "error", (err) ->
+			logger.error {err, source, destination}, "unzip failed"
+			if err.code == "ENOENT"
+				logger.error "unzip command not found. Please check the unzip command is installed"
+			callback(err)
 
 		unzip.on "exit", () ->
 			timer.done()
