@@ -48,6 +48,7 @@ define [
 						@$originalApply(fn);
 
 				editor = ace.edit(element.find(".ace-editor-body")[0])
+				editor.$blockScrolling = Infinity
 				window.editors ||= []
 				window.editors.push editor
 
