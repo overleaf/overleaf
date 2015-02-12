@@ -97,6 +97,7 @@ module.exports = SubscriptionController =
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
 							recomendedCurrency: subscription?.currency
+							taxRate:subscription?.taxRate
 							plans: plans
 							subscription: subscription
 							groups: groups
