@@ -38,7 +38,7 @@ define [
 	BinaryFilesManager
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -103,5 +103,7 @@ define [
 				$scope.darkTheme = true
 			else
 				$scope.darkTheme = false
+
+		ide.localStorage = localStorage
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

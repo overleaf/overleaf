@@ -24,7 +24,7 @@ define [
 	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)
 	$("body").append(style)
 
-	App.directive "pdfjs", ["$timeout", ($timeout) ->
+	App.directive "pdfjs", ["$timeout", "localStorage", ($timeout, localStorage) ->
 		return {
 			scope: {
 				"pdfSrc": "="
@@ -53,22 +53,22 @@ define [
 					return if initializedPosition
 					initializedPosition = true
 
-					if (scale = $.localStorage("pdf.scale"))?
+					if (scale = localStorage("pdf.scale"))?
 						pdfListView.setScaleMode(scale.scaleMode, scale.scale)
 					else
 						pdfListView.setToFitWidth()
 
-					if (position = $.localStorage("pdf.position.#{attrs.key}"))
+					if (position = localStorage("pdf.position.#{attrs.key}"))
 						pdfListView.setPdfPosition(position)
 
 					scope.position = pdfListView.getPdfPosition(true)
 
 					$(window).unload () =>
-						$.localStorage "pdf.scale", {
+						localStorage "pdf.scale", {
 							scaleMode: pdfListView.getScaleMode()
 							scale: pdfListView.getScale()
 						}
-						$.localStorage "pdf.position.#{attrs.key}", pdfListView.getPdfPosition()
+						localStorage "pdf.position.#{attrs.key}", pdfListView.getPdfPosition()
 
 				flashControls = () ->
 					scope.flashControls = true

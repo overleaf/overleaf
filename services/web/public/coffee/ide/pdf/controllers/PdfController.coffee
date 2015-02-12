@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/latex-log-parser"
 ], (App, LogParser) ->
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		autoCompile = true
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -170,14 +170,14 @@ define [
 		$scope.switchToFlatLayout = () ->
 			$scope.ui.pdfLayout = 'flat'
 			$scope.ui.view = 'pdf'
-			$.localStorage "pdf.layout", "flat"
+			ide.localStorage "pdf.layout", "flat"
 			
 		$scope.switchToSideBySideLayout = () ->
 			$scope.ui.pdfLayout = 'sideBySide'
 			$scope.ui.view = 'editor'
-			$.localStorage "pdf.layout", "split"
+			localStorage "pdf.layout", "split"
 			
-		if pdfLayout = $.localStorage("pdf.layout")
+		if pdfLayout = localStorage("pdf.layout")
 			$scope.switchToSideBySideLayout() if pdfLayout == "split"
 			$scope.switchToFlatLayout() if pdfLayout == "flat"
 		else

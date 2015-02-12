@@ -1,6 +1,6 @@
 define [], () ->
 	class CursorPositionManager
-		constructor: (@$scope, @editor, @element) ->
+		constructor: (@$scope, @editor, @element, @localStorage) ->
 
 			onChangeCursor = (e) =>
 				@emitCursorUpdateEvent(e)
@@ -31,15 +31,15 @@ define [], () ->
 
 		storeScrollTopPosition: (session) ->
 			if @doc_id?
-				docPosition = $.localStorage("doc.position.#{@doc_id}") || {}
+				docPosition = @localStorage("doc.position.#{@doc_id}") || {}
 				docPosition.scrollTop = session.getScrollTop()
-				$.localStorage("doc.position.#{@doc_id}", docPosition)
+				@localStorage("doc.position.#{@doc_id}", docPosition)
 
 		storeCursorPosition: (session) ->
 			if @doc_id?
-				docPosition = $.localStorage("doc.position.#{@doc_id}") || {}
+				docPosition = @localStorage("doc.position.#{@doc_id}") || {}
 				docPosition.cursorPosition = session.selection.getCursor()
-				$.localStorage("doc.position.#{@doc_id}", docPosition)
+				@localStorage("doc.position.#{@doc_id}", docPosition)
 			
 		emitCursorUpdateEvent: () ->
 			cursor = @editor.getCursorPosition()
@@ -47,7 +47,7 @@ define [], () ->
 
 		gotoStoredPosition: () ->
 			return if !@doc_id?
-			pos = $.localStorage("doc.position.#{@doc_id}") || {}
+			pos = @localStorage("doc.position.#{@doc_id}") || {}
 			@ignoreCursorPositionChanges = true
 			@editor.moveCursorToPosition(pos.cursorPosition or {row: 0, column: 0})
 			@editor.getSession().setScrollTop(pos.scrollTop or 0)

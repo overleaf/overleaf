@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/jquery-layout"
 ], (App) ->
-	App.directive "layout", ["$parse", ($parse) ->
+	App.directive "layout", ["$parse", "ide", ($parse, ide) ->
 		return {
 			compile: () ->
 				pre: (scope, element, attrs) ->
@@ -36,7 +36,7 @@ define [
 							initClosed: scope.$eval(attrs.initClosedWest)
 
 					# Restore previously recorded state
-					if (state = $.localStorage("layout.#{name}"))?
+					if (state = ide.localStorage("layout.#{name}"))?
 						options.west = state.west
 						options.east = state.east
 
@@ -88,7 +88,7 @@ define [
 
 					# Save state when exiting
 					$(window).unload () ->
-						$.localStorage("layout.#{name}", element.layout().readState())
+						ide.localStorage("layout.#{name}", element.layout().readState())
 
 
 

@@ -18,7 +18,7 @@ define [
 	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)
 	$("body").append(style)
 
-	App.directive "pdfng", ["$timeout", ($timeout) ->
+	App.directive "pdfng", ["$timeout", "localStorage", ($timeout, localStorage) ->
 		return {
 			scope: {
 					"pdfSrc": "="
@@ -44,23 +44,23 @@ define [
 					return if initializedPosition
 					initializedPosition = true
 
-					if (scale = $.localStorage("pdf.scale"))?
+					if (scale = localStorage("pdf.scale"))?
 						scope.scale = { scaleMode: scale.scaleMode, scale: +scale.scale}
 					else
 						scope.scale = { scaleMode: 'scale_mode_fit_width' }
 
-					if (position = $.localStorage("pdf.position.#{attrs.key}"))
+					if (position = localStorage("pdf.position.#{attrs.key}"))
 						scope.position = { page: +position.page, offset: { "top": +position.offset.top, "left": +position.offset.left } }
 
 					#scope.position = pdfListView.getPdfPosition(true)
 
 					scope.$on "$destroy", () =>
-						$.localStorage "pdf.scale", scope.scale
-						$.localStorage "pdf.position.#{attrs.key}", scope.position
+						localStorage "pdf.scale", scope.scale
+						localStorage "pdf.position.#{attrs.key}", scope.position
 
 					$(window).unload () =>
-						$.localStorage "pdf.scale", scope.scale
-						$.localStorage "pdf.position.#{attrs.key}", scope.position
+						localStorage "pdf.scale", scope.scale
+						localStorage "pdf.position.#{attrs.key}", scope.position
 
 				flashControls = () ->
 					scope.$evalAsync () ->
