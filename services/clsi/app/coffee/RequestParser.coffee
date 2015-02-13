@@ -76,4 +76,4 @@ module.exports = RequestParser =
 
 	_sanitizePath: (path) ->
 		# See http://php.net/manual/en/function.escapeshellcmd.php
-		path.replace(/[\#\&\;\`\|\*\?\~\<\>\^\(\)\[\]\{\}\$\\\,\x0A\xFF]/g, "")
+		path.replace(/[\#\&\;\`\|\*\?\~\<\>\^\(\)\[\]\{\}\$\\\x0A\xFF\x00]/g, "")
