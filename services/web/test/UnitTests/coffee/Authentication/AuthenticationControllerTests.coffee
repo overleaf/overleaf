@@ -40,7 +40,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
-			@AuthenticationController._establishUserSession = sinon.stub().callsArg(2)
+			@AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
 			@req.body =
 				email: @email
 				password: @password
@@ -68,9 +68,12 @@ describe "AuthenticationController", ->
 					.should.equal true
 
 			it "should establish the user's session", ->
-				@AuthenticationController._establishUserSession
+				@AuthenticationController.establishUserSession
 					.calledWith(@req, @user)
 					.should.equal true
+					
+			it "should set res.session.justLoggedIn", ->
+				@req.session.justLoggedIn.should.equal true
 
 			it "should redirect the user to the specified location", ->
 				expect(@res.body).to.deep.equal redir: @redir
@@ -103,7 +106,7 @@ describe "AuthenticationController", ->
 					# 	type: 'error'
 
 			it "should not establish a session", ->
-				@AuthenticationController._establishUserSession.called.should.equal false
+				@AuthenticationController.establishUserSession.called.should.equal false
 
 			it "should record a failed login", ->
 				@AuthenticationController._recordFailedLogin.called.should.equal true
@@ -272,48 +275,42 @@ describe "AuthenticationController", ->
 					.calledWith(@req, {allow_auth_token: true})
 					.should.equal true
 
+	describe "_redirectToLoginOrRegisterPage", ->
+		beforeEach ->
+			@middleware = @AuthenticationController.requireLogin(@options = { load_from_db: false })
+			@req.session = {}
+			@AuthenticationController._redirectToRegisterPage = sinon.stub()
+			@AuthenticationController._redirectToLoginPage = sinon.stub()
+			@req.query = {}
 
-
-		describe "_redirectToLoginOrRegisterPage", ->
-
-			beforeEach ->
-				@middleware = @AuthenticationController.requireLogin(@options = { load_from_db: false })
-				@req.session = {}
-				@AuthenticationController._redirectToRegisterPage = sinon.stub()
-				@AuthenticationController._redirectToLoginPage = sinon.stub()
+		describe "they have come directly to the url", ->
+			beforeEach -> 
 				@req.query = {}
+				@middleware(@req, @res, @next)
 
-			describe "they have come directly to the url", ->
-				beforeEach -> 
-					@req.query = {}
-					@middleware(@req, @res, @next)
+			it "should redirect to the login page", ->
+				@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal false
+				@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal true
 
-				it "should redirect to the login page", ->
-					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal false
-					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal true
+		describe "they have come via a templates link", ->
 
-			describe "they have come via a templates link", ->
+			beforeEach -> 
+				@req.query.zipUrl = "something"
+				@middleware(@req, @res, @next)
 
-				beforeEach -> 
-					@req.query.zipUrl = "something"
-					@middleware(@req, @res, @next)
+			it "should redirect to the register page", ->
+				@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
+				@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
 
-				it "should redirect to the register page", ->
-					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
-					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
+		describe "they have been invited to a project", ->
+			
+			beforeEach -> 
+				@req.query.project_name = "something"
+				@middleware(@req, @res, @next)
 
-			describe "they have been invited to a project", ->
-				
-				beforeEach -> 
-					@req.query.project_name = "something"
-					@middleware(@req, @res, @next)
-
-				it "should redirect to the register page", ->
-					@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
-					@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
-
-
-
+			it "should redirect to the register page", ->
+				@AuthenticationController._redirectToRegisterPage.calledWith(@req, @res).should.equal true
+				@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
 
 	describe "_redirectToRegisterPage", ->
 		beforeEach ->
@@ -371,11 +368,13 @@ describe "AuthenticationController", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "_establishUserSession", ->
+	describe "establishUserSession", ->
 		beforeEach ->
 			@req.session =
 				save: sinon.stub().callsArg(0)
-			@AuthenticationController._establishUserSession @req, @user, @callback
+			@req.sessionStore =
+				generate: sinon.stub()
+			@AuthenticationController.establishUserSession @req, @user, @callback
 
 		it "should set the session user to a basic version of the user", ->
 			@req.session.user._id.should.equal @user._id
@@ -384,6 +383,9 @@ describe "AuthenticationController", ->
 			@req.session.user.last_name.should.equal @user.last_name
 			@req.session.user.referal_id.should.equal @user.referal_id
 			@req.session.user.isAdmin.should.equal @user.isAdmin
+			
+		it "should regenerate the session to protect against session fixation", ->
+			@req.sessionStore.generate.calledWith(@req).should.equal true
 
 		it "should return the callback", ->
 			@callback.called.should.equal true
