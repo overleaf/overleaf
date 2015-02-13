@@ -89,17 +89,18 @@ module.exports =
 				next(err)
 			else
 				metrics.inc "user.register.success"
-				req.session.user = user
-				req.session.justRegistered = true
 				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
 				SubscriptionDomainAllocator.autoAllocate(user)
-				res.send
-					redir:redir
-					id:user._id.toString()
-					first_name: user.first_name
-					last_name: user.last_name
-					email: user.email
-					created: Date.now()
+				AuthenticationController.establishUserSession req, user, (error) ->
+					return callback(error) if error?
+					req.session.justRegistered = true
+					res.send
+						redir:redir
+						id:user._id.toString()
+						first_name: user.first_name
+						last_name: user.last_name
+						email: user.email
+						created: Date.now()
 
 
 	changePassword : (req, res, next = (error) ->)->
