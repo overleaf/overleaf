@@ -26,7 +26,9 @@ define [
 					if (listShorterThanContainer() or atEndOfListView()) and not scope.$eval(attrs.infiniteScrollDisabled)
 						promise = scope.$eval(attrs.infiniteScroll)
 						promise.then () ->
-							loadUntilFull()
+							setTimeout () ->
+								loadUntilFull()
+							, 0
 
 				element.on "scroll", (event) ->
 					loadUntilFull()
