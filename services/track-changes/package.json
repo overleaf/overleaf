@@ -9,7 +9,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "express": "3.3.5",
-    "mongojs": "~0.9.11",
+    "mongojs": "^0.18.1",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
