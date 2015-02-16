@@ -15,7 +15,7 @@ define [
 			
 		$scope.$on "chat:newMessage", (e, message) ->
 			if message?
-				if message.user.id != ide.$scope.user.id
+				if message?.user?.id != ide.$scope.user.id
 					if !$scope.ui.chatOpen
 						$scope.unreadMessages += 1
 					flashTitle()

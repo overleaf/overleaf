@@ -18,7 +18,7 @@ define [
 		
 		justSent = false	
 		ide.socket.on "new-chat-message", (message) =>
-			if message.user.id == ide.$scope.user.id and justSent
+			if message?.user?.id == ide.$scope.user.id and justSent
 				# Nothing to do
 			else
 				ide.$scope.$apply () ->
@@ -65,7 +65,7 @@ define [
 		prependMessage = (message) ->
 			firstMessage = chat.state.messages[0]
 			shouldGroup = firstMessage? and
-				firstMessage.user.id == message.user.id and
+				firstMessage.user.id == message?.user?.id and
 				firstMessage.timestamp - message.timestamp < TIMESTAMP_GROUP_SIZE
 			if shouldGroup
 				firstMessage.timestamp = message.timestamp
@@ -86,7 +86,7 @@ define [
 			
 			lastMessage = chat.state.messages[chat.state.messages.length - 1]
 			shouldGroup = lastMessage? and
-				lastMessage.user.id == message.user.id and
+				lastMessage.user.id == message?.user?.id and
 				message.timestamp - lastMessage.timestamp < TIMESTAMP_GROUP_SIZE
 			if shouldGroup
 				lastMessage.timestamp = message.timestamp
