@@ -163,12 +163,26 @@ describe "MongoManager", ->
 
 	describe "getDocUpdates", ->
 		beforeEach ->
-			@updates = ["mock-update"]
+			@results = [
+				{foo: "mock-update", v: 56},
+				{foo: "mock-update", v: 55},
+				{foo: "mock-update", v: 42},
+				{foo: "mock-update", v: 41}
+			]
+			@updates_between = [
+				{foo: "mock-update", v: 55},
+				{foo: "mock-update", v: 42}
+			]
+			@updates_after = [
+				{foo: "mock-update", v: 56},
+				{foo: "mock-update", v: 55},
+				{foo: "mock-update", v: 42}
+			]
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
 			@db.docHistory.sort = sinon.stub().returns @db.docHistory
 			@db.docHistory.limit = sinon.stub().returns @db.docHistory
-			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
+			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
 
 			@from = 42
 			@to   = 55
@@ -190,12 +204,12 @@ describe "MongoManager", ->
 					.calledWith("v": -1)
 					.should.equal true
 
-			it "should not limit the results", ->
-				@db.docHistory.limit
-					.called.should.equal false
+			#it "should not limit the results", ->
+			#	@db.docHistory.limit
+			#		.called.should.equal false
 
-			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+			it "should call the call back with the results", ->
+				@callback.calledWith(null, @updates_between).should.equal true
 
 		describe "without a to version", ->
 			beforeEach ->
@@ -210,7 +224,7 @@ describe "MongoManager", ->
 					.should.equal true
 
 			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+				@callback.calledWith(null, @updates_after).should.equal true
 
 		describe "with a limit", ->
 			beforeEach ->
@@ -224,14 +238,22 @@ describe "MongoManager", ->
 
 	describe "getDocUpdates", ->
 		beforeEach ->
-			@updates = ["mock-update"]
+			@results = [
+				{foo: "mock-update", v: 56, meta: {end_ts: 110}},
+				{foo: "mock-update", v: 55, meta: {end_ts: 100}},
+				{foo: "mock-update", v: 42, meta:{end_ts: 90}}
+			]
+			@updates = [
+				{foo: "mock-update", v: 55, meta: {end_ts: 100}},
+				{foo: "mock-update", v: 42, meta:{end_ts: 90}}
+			]
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
 			@db.docHistory.sort = sinon.stub().returns @db.docHistory
 			@db.docHistory.limit = sinon.stub().returns @db.docHistory
-			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @updates)
+			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
 
-			@before = Date.now()
+			@before = 101
 
 		describe "with a before timestamp", ->
 			beforeEach ->
@@ -269,7 +291,7 @@ describe "MongoManager", ->
 					.should.equal true
 
 			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+				@callback.calledWith(null, @results).should.equal true
 
 		describe "with a limit", ->
 			beforeEach ->
