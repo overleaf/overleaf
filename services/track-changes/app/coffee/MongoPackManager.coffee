@@ -154,6 +154,9 @@ module.exports = MongoPackManager =
 				return false if cutoff? && ts < cutoff
 				return true
 
+			timeOrder = (a, b) ->
+				b.meta.end_ts - a.meta.end_ts
+
 			updates = MongoPackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			#console.log 'initial updates are', updates
 
@@ -210,15 +213,15 @@ module.exports = MongoPackManager =
 
 			tail.toArray (err, result2) ->
 				if err?
-					return callback err, updates
+					return callback err, updates.sort timeOrder
 				else
 					applyAndUpdate result2
 					overlap.toArray (err, result3) ->
 						if err?
-							return callback err, updates
+							return callback err, updates.sort timeOrder
 						else
 							applyAndUpdate result3
-							callback err, updates
+							callback err, updates.sort timeOrder
 
 	_unpackResults: (updates) ->
 		#	iterate over the updates, if there's a pack, expand it into ops and
