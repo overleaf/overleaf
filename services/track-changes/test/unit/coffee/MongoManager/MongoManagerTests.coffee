@@ -249,14 +249,41 @@ describe "MongoManager", ->
 	describe "getDocUpdates", ->
 		beforeEach ->
 			@results = [
-				{foo: "mock-update", v: 56, meta: {end_ts: 110}},
-				{foo: "mock-update", v: 55, meta: {end_ts: 100}},
-				{foo: "mock-update", v: 42, meta:{end_ts: 90}}
+				{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+				{pack: [
+					{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+					{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+					{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1}	]
+					, v: 52, meta: {end_ts: 100}, doc_id: 300, project_id: 1},
+				{pack: [
+					{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+					{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
+					{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1}	]
+					, v: 52, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+				{foo: "mock-update", v: 42, meta:{end_ts: 90}, doc_id: 100, project_id: 1}
 			]
-			@updates = [
-				{foo: "mock-update", v: 55, meta: {end_ts: 100}},
-				{foo: "mock-update", v: 42, meta:{end_ts: 90}}
+			@updates_before = [
+				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
+				{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1},
 			]
+			@updates_all = [
+				{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+				{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
+				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
+				{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
+				{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1}
+			]
+
+
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
 			@db.docHistory.sort = sinon.stub().returns @db.docHistory
@@ -287,7 +314,7 @@ describe "MongoManager", ->
 					.called.should.equal false
 
 			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates).should.equal true
+				@callback.calledWith(null, @updates_before).should.equal true
 
 		describe "without a before timestamp", ->
 			beforeEach ->
@@ -301,7 +328,7 @@ describe "MongoManager", ->
 					.should.equal true
 
 			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @results).should.equal true
+				@callback.calledWith(null, @updates_all).should.equal true
 
 		describe "with a limit", ->
 			beforeEach ->
