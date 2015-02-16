@@ -158,7 +158,12 @@ module.exports = MongoPackManager =
 				return true
 
 			timeOrder = (a, b) ->
-				b.meta.end_ts - a.meta.end_ts
+				(b.meta.end_ts - a.meta.end_ts) || documentOrder(a, b)
+
+			documentOrder = (a, b) ->
+				x = a.doc_id.valueOf()
+				y = b.doc_id.valueOf()
+				if x > y then 1 else if x < y then -1 else 0
 
 			updates = MongoPackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			#console.log 'initial updates are', updates
