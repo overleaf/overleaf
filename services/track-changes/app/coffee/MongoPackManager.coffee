@@ -202,18 +202,6 @@ module.exports = MongoPackManager =
 				# the changeset into parts
 				updates = MongoPackManager._filterAndLimit(updates, extraSet, filterFn, null)
 				#console.log 'extra updates after filterandlimit', updates
-				# remove duplicates
-				seen = {}
-				updates = updates.filter (item) ->
-					key = item.doc_id + ' ' + item.v
-					#console.log 'key is', key
-					if seen[key]
-						return false
-					else
-						seen[key] = true
-						return true
-				#console.log 'extra updates are', updates
-
 			tail.toArray (err, result2) ->
 				if err?
 					return callback err, updates.sort timeOrder
@@ -252,5 +240,15 @@ module.exports = MongoPackManager =
 		# update results with extra docs, after filtering and limiting
 		filtered = extra.filter(filterFn)
 		newResults = results.concat filtered
+		# remove duplicates
+		seen = {}
+		newResults = newResults.filter (item) ->
+			key = item.doc_id + ' ' + item.v
+			#console.log 'key is', key
+			if seen[key]
+				return false
+			else
+				seen[key] = true
+			return true
 		newResults.slice(0, limit) if limit?
 		return newResults
