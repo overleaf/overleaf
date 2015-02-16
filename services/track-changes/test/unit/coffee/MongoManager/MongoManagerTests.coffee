@@ -164,19 +164,29 @@ describe "MongoManager", ->
 	describe "getDocUpdates", ->
 		beforeEach ->
 			@results = [
-				{foo: "mock-update", v: 56},
-				{foo: "mock-update", v: 55},
-				{foo: "mock-update", v: 42},
-				{foo: "mock-update", v: 41}
+				{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+				{pack: [ {foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+					{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+					{foo: "mock-update", v: 52, doc_id: 100, project_id: 1} ]
+					, v: 52, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 41, doc_id: 100, project_id: 1}
 			]
 			@updates_between = [
-				{foo: "mock-update", v: 55},
-				{foo: "mock-update", v: 42}
+				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
 			]
 			@updates_after = [
-				{foo: "mock-update", v: 56},
-				{foo: "mock-update", v: 55},
-				{foo: "mock-update", v: 42}
+				{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
+				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
 			]
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
