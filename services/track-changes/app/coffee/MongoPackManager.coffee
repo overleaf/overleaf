@@ -60,6 +60,9 @@ module.exports = MongoPackManager =
 			return false if rangeQuery?['$gt']? && item['v'] <= rangeQuery['$gt']
 			return true
 
+		versionOrder = (a, b) ->
+			b.v - a.v
+
 		# create a query which can be used to select the entries BEFORE
 		# the range because we sometimes need to find extra ones (when the
 		# boundary falls in the middle of a pack)
@@ -97,16 +100,16 @@ module.exports = MongoPackManager =
 					.limit(1)
 				extra.toArray (err, result2) ->
 					if err?
-						return callback err, updates
+						return callback err, updates.sort versionOrder
 					else
 						extraSet = MongoPackManager._unpackResults(result2)
 						updates = MongoPackManager._filterAndLimit(updates, extraSet, filterFn, limit)
-						callback err, updates
+						callback err, updates.sort versionOrder
 				return
 			if err?
 				callback err, result
 			else
-				callback err, updates
+				callback err, updates.sort versionOrder
 
 	findProjectResults: (collection, query, limit, callback) ->
 		# query - the mongo query selector, includes both the doc_id/project_id and
