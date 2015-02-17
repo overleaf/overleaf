@@ -1,10 +1,8 @@
 {db, ObjectId} = require "./mongojs"
 PackManager = require "./PackManager"
 async = require "async"
-_ = require "underscore"
 
 module.exports = MongoManager =
-	# only used in this module
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		db.docHistory
 			.find(doc_id: ObjectId(doc_id.toString()))
@@ -15,11 +13,9 @@ module.exports = MongoManager =
 				return callback null, null if compressedUpdates[0]?.pack? # cannot pop from a pack
 				return callback null, compressedUpdates[0] or null
 
-	# only used in this module
 	deleteCompressedUpdate: (id, callback = (error) ->) ->
 		db.docHistory.remove({ _id: ObjectId(id.toString()) }, callback)
 
-	# used in UpdatesManager
 	popLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 			return callback(error) if error?
@@ -30,7 +26,6 @@ module.exports = MongoManager =
 			else
 				callback null, null
 
-	# used in UpdatesManager
 	insertCompressedUpdates: (project_id, doc_id, updates, permanent, callback = (error) ->) ->
 		jobs = []
 		for update in updates
@@ -65,7 +60,7 @@ module.exports = MongoManager =
 			query["v"] ||= {}
 			query["v"]["$lte"] = options.to
 			
-		PackManager.findDocResults(db.docHistory, query, options.limit, callback)	
+		PackManager.findDocResults(db.docHistory, query, options.limit, callback)
 
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		query = 
@@ -74,7 +69,7 @@ module.exports = MongoManager =
 		if options.before?
 			query["meta.end_ts"] = { $lt: options.before }
 
-		PackManager.findProjectResults(db.docHistory, query, options.limit, callback)	
+		PackManager.findProjectResults(db.docHistory, query, options.limit, callback)
 
 	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
 		db.docHistory.update {
@@ -103,12 +98,12 @@ module.exports = MongoManager =
 		}, callback
 
 	ensureIndices: () ->
-		# For finding all updates that go into a diff for a doc  (getLastCompressedUpdate, getDocUpdates v > from && v < to)
+		# For finding all updates that go into a diff for a doc
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, { background: true }
-		# For finding all updates that affect a project (getProjectUpdates meta.end_ts < before
+		# For finding all updates that affect a project
 		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, { background: true }
 		# For finding all packs that affect a project (use a sparse index so only packs are included)
-		db.docHistory.ensureIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}	, { background: true, sparse: true }
+		db.docHistory.ensureIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}, { background: true, sparse: true }
 		# For finding updates that don't yet have a project_id and need it inserting
 		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, { background: true }
 		# For finding project meta-data
