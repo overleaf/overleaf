@@ -6,7 +6,6 @@ Metrics = require('../../infrastructure/Metrics')
 logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
-uid = require "uid"
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
