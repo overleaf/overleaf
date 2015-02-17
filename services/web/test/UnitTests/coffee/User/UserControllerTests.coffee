@@ -29,7 +29,8 @@ describe "UserController", ->
 			unsubscribe: sinon.stub().callsArgWith(1)
 		@UserRegistrationHandler =
 			registerNewUser: sinon.stub()
-		@AuthenticationController = {}
+		@AuthenticationController =
+			establishUserSession: sinon.stub().callsArg(2)
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
@@ -181,7 +182,9 @@ describe "UserController", ->
 		it "should put the user on the session and mark them as justRegistered", (done)->
 			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
 			@res.send = =>
-				assert.deepEqual @user, @req.session.user
+				@AuthenticationController.establishUserSession
+					.calledWith(@req, @user)
+					.should.equal true
 				assert.equal @req.session.justRegistered, true
 				done()
 			@UserController.register @req, @res
