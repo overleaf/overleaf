@@ -21,17 +21,20 @@ module.exports = PackManager =
 	#   {
 	#     "doc_id" : 549dae9e0a2a615c0c7f0c98,
 	#     "project_id" : 549dae9c0a2a615c0c7f0c8c,
-	#     "pack" : [ D1, D2, D3, ....],
+	#     "pack" : [ U1, U2, U3, ...., UN],
 	#     "meta" : {	"user_id" : 52933..., "start_ts" : 1422310693931,	"end_ts" : 1422310693931 },
 	#     "v" : 17082
 	#   }
 	#
-	#  where D1, D2, D3, .... are single updates stripped of their
+	#  where U1, U2, U3, .... are single updates stripped of their
 	#  doc_id and project_id fields (which are the same for all the
-	#  updates in the pack).  The meta and v fields of the pack itself
-	#  are those of the first entry in the pack D1 (this makes it
-	#  possible to treat packs and single updates in the same way).
-
+	#  updates in the pack).
+	#
+	#  The pack itself has v and meta fields, this makes it possible to
+	#  treat packs and single updates in the same way.
+	#
+	#  The v field of the pack itself is from the first entry U1
+	#  The meta.end_ts field of the pack itself is from the last entry UN.
 
 	findDocResults: (collection, query, limit, callback) ->
 		# query - the mongo query selector, includes both the doc_id/project_id and
@@ -113,7 +116,7 @@ module.exports = PackManager =
 
 	findProjectResults: (collection, query, limit, callback) ->
 		# query - the mongo query selector, includes both the doc_id/project_id and
-		# the range on v or meta.end_ts
+		# the range on meta.end_ts
 		# limit - the mongo limit, we need to apply it after unpacking any
 		# packs
 
@@ -146,13 +149,9 @@ module.exports = PackManager =
 			# results up to this, and then all the changes at that time
 			# (without imposing a limit) and any overlapping packs
 			cutoff = if unpackedSet.length then unpackedSet[unpackedSet.length-1].meta.end_ts else null
-			#console.log 'before is', before
-			#console.log 'cutoff is', cutoff
-			#console.log 'limit  is', limit
 
 			filterFn = (item) ->
 				ts = item?.meta?.end_ts
-				#console.log 'checking', ts, before, cutoff
 				return false if before? && ts >= before
 				return false if cutoff? && ts < cutoff
 				return true
@@ -166,7 +165,6 @@ module.exports = PackManager =
 				if x > y then 1 else if x < y then -1 else 0
 
 			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
-			#console.log 'initial updates are', updates
 
 			# get all elements on the lower bound (cutoff)
 			tailQuery = _.clone(query)
@@ -174,8 +172,6 @@ module.exports = PackManager =
 			tail = collection
 				.find(tailQuery, projection)
 				.sort(sort)
-
-			#console.log 'tailQuery is', tailQuery
 
 			# now find any packs that overlap with the time window
 			overlapQuery = _.clone(query)
@@ -195,8 +191,6 @@ module.exports = PackManager =
 				.find(overlapQuery, projection)
 				.sort(sort)
 
-			#console.log 'overlapQuery is', overlapQuery
-
 			# we don't specify a limit here, as there could be any number of overlaps
 			# NB. need to catch items in original query and followup query for duplicates
 
@@ -206,7 +200,6 @@ module.exports = PackManager =
 				# need all the updates at the final time to avoid breaking
 				# the changeset into parts
 				updates = PackManager._filterAndLimit(updates, extraSet, filterFn, null)
-				#console.log 'extra updates after filterandlimit', updates
 			tail.toArray (err, result2) ->
 				if err?
 					return callback err, updates.sort timeOrder
@@ -249,7 +242,6 @@ module.exports = PackManager =
 		seen = {}
 		newResults = newResults.filter (item) ->
 			key = item.doc_id + ' ' + item.v
-			#console.log 'key is', key
 			if seen[key]
 				return false
 			else
