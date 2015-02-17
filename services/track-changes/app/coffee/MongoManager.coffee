@@ -1,5 +1,5 @@
 {db, ObjectId} = require "./mongojs"
-MongoPackManager = require "./MongoPackManager"
+PackManager = require "./PackManager"
 async = require "async"
 _ = require "underscore"
 
@@ -65,7 +65,7 @@ module.exports = MongoManager =
 			query["v"] ||= {}
 			query["v"]["$lte"] = options.to
 			
-		MongoPackManager.findDocResults(db.docHistory, query, options.limit, callback)	
+		PackManager.findDocResults(db.docHistory, query, options.limit, callback)	
 
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		query = 
@@ -74,7 +74,7 @@ module.exports = MongoManager =
 		if options.before?
 			query["meta.end_ts"] = { $lt: options.before }
 
-		MongoPackManager.findProjectResults(db.docHistory, query, options.limit, callback)	
+		PackManager.findProjectResults(db.docHistory, query, options.limit, callback)	
 
 	backportProjectId: (project_id, doc_id, callback = (error) ->) ->
 		db.docHistory.update {

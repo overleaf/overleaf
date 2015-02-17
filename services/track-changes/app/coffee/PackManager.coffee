@@ -1,7 +1,7 @@
 async = require "async"
 _ = require "underscore"
 
-module.exports = MongoPackManager =
+module.exports = PackManager =
 	# The following functions implement methods like a mongo find, but
 	# expands any documents containing a 'pack' field into multiple
 	# values
@@ -81,8 +81,8 @@ module.exports = MongoPackManager =
 		needMore = false  # keep track of whether we need to load more data
 		updates = [] # used to accumulate the set of results
 		cursor.toArray (err, result) ->
-			unpackedSet = MongoPackManager._unpackResults(result)
-			updates = MongoPackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
+			unpackedSet = PackManager._unpackResults(result)
+			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			# check if we need to retrieve more data, because there is a
 			# pack that crosses into our range
 			last = if unpackedSet.length then unpackedSet[unpackedSet.length-1] else null
@@ -102,8 +102,8 @@ module.exports = MongoPackManager =
 					if err?
 						return callback err, updates.sort versionOrder
 					else
-						extraSet = MongoPackManager._unpackResults(result2)
-						updates = MongoPackManager._filterAndLimit(updates, extraSet, filterFn, limit)
+						extraSet = PackManager._unpackResults(result2)
+						updates = PackManager._filterAndLimit(updates, extraSet, filterFn, limit)
 						callback err, updates.sort versionOrder
 				return
 			if err?
@@ -139,7 +139,7 @@ module.exports = MongoPackManager =
 			if result.length == 0 && not before?  # no results and no time range specified
 				return callback err, result
 
-			unpackedSet = MongoPackManager._unpackResults(result)
+			unpackedSet = PackManager._unpackResults(result)
 			if limit?
 				unpackedSet = unpackedSet.slice(0, limit)
 			# find the end time of the last result, we will take all the
@@ -165,7 +165,7 @@ module.exports = MongoPackManager =
 				y = b.doc_id.valueOf()
 				if x > y then 1 else if x < y then -1 else 0
 
-			updates = MongoPackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
+			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
 			#console.log 'initial updates are', updates
 
 			# get all elements on the lower bound (cutoff)
@@ -201,11 +201,11 @@ module.exports = MongoPackManager =
 			# NB. need to catch items in original query and followup query for duplicates
 
 			applyAndUpdate = (result) ->
-				extraSet = MongoPackManager._unpackResults(result)
+				extraSet = PackManager._unpackResults(result)
 				# note: final argument is null, no limit applied because we
 				# need all the updates at the final time to avoid breaking
 				# the changeset into parts
-				updates = MongoPackManager._filterAndLimit(updates, extraSet, filterFn, null)
+				updates = PackManager._filterAndLimit(updates, extraSet, filterFn, null)
 				#console.log 'extra updates after filterandlimit', updates
 			tail.toArray (err, result2) ->
 				if err?
@@ -225,7 +225,7 @@ module.exports = MongoPackManager =
 		result = []
 		updates.forEach (item) ->
 			if item.pack?
-				all = MongoPackManager._explodePackToOps item
+				all = PackManager._explodePackToOps item
 				result = result.concat all
 			else
 				result.push item
