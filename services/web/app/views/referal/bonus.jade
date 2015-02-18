@@ -143,8 +143,9 @@ block content
 			function callback(response) {
 				// document.getElementById('msg').innerHTML = "Post ID: " + response['post_id'];
 			}
-
-			FB.ui(obj, callback);
+			if (typeof FB !== "undefined" && FB !== null) {
+				FB.ui(obj, callback);
+			}
 		}
 
 	script(type="text/javascript").
