@@ -162,13 +162,8 @@ define [
 			return if !path?
 			return path.split("/").slice(0, -1).join("/")
 
-		# forEachFolder: (callback) ->
-		# 	@forEachEntity (entity) ->
-		# 		if entity.type == "folder"
-		# 			callback(entity)
-
 		loadRootFolder: () ->
-			@$scope.rootFolder = @_parseFolder(@$scope.project.rootFolder[0])
+			@$scope.rootFolder = @_parseFolder(@$scope?.project?.rootFolder[0])
 
 		_parseFolder: (rawFolder) ->
 			folder = {
