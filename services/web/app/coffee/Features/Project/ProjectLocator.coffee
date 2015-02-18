@@ -92,6 +92,8 @@ module.exports =
 
 
 		Project.getProject project_or_id, "", (err, project)->
+			if err? or !project?
+				return callback("project could not be found for finding a element #{project_or_id}")
 			if needlePath == '' || needlePath == '/'
 				return callback(null, project.rootFolder[0])
 
