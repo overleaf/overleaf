@@ -30,7 +30,7 @@ define [
 		$scope.loadMoreMessages = ->
 			chatMessages.loadMoreMessages()
 			
-		$scope.linkify = (message)->
+		$scope.linkify = (message = "")->
 			return autolinker.link(message)
 
 			
