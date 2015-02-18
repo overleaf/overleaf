@@ -306,6 +306,7 @@ define [
 			return (child_path.slice(0, parent_path.length) == parent_path)
 
 		_deleteEntityFromScope: (entity, options = { moveToDeleted: true }) ->
+			return if !entity?
 			parent_folder = null
 			@forEachEntity (possible_entity, folder) ->
 				if possible_entity == entity
