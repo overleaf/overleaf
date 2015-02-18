@@ -70,16 +70,17 @@ define [
 
 					$scope.pdf.logEntryAnnotations = {}
 					for entry in logEntries.all
-						entry.file = normalizeFilePath(entry.file)
+						if entry.file?
+							entry.file = normalizeFilePath(entry.file)
 
-						entity = ide.fileTreeManager.findEntityByPath(entry.file)
-						if entity?
-							$scope.pdf.logEntryAnnotations[entity.id] ||= []
-							$scope.pdf.logEntryAnnotations[entity.id].push {
-								row: entry.line - 1
-								type: if entry.level == "error" then "error" else "warning"
-								text: entry.message
-							}
+							entity = ide.fileTreeManager.findEntityByPath(entry.file)
+							if entity?
+								$scope.pdf.logEntryAnnotations[entity.id] ||= []
+								$scope.pdf.logEntryAnnotations[entity.id].push {
+									row: entry.line - 1
+									type: if entry.level == "error" then "error" else "warning"
+									text: entry.message
+								}
 
 				.error () ->
 					$scope.pdf.logEntries = []
