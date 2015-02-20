@@ -22,18 +22,13 @@ describe "Getting all docs", ->
 			lines: ["111", "222", "333"]
 			rev: 6
 		}]
-		DocstoreClient.createProject @project_id, (error) =>
-			throw error if error?
-			jobs = for doc in @docs
-				do (doc) =>
-					(callback) => 
-						DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
-							doc.lines[0] = doc.lines[0]+" added"
-							DocstoreClient.updateDoc @project_id, doc._id, doc.lines, callback
-			async.series jobs, done 
-
-	afterEach (done) ->
-		DocstoreClient.deleteProject @project_id, done
+		jobs = for doc in @docs
+			do (doc) =>
+				(callback) => 
+					DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
+						doc.lines[0] = doc.lines[0]+" added"
+						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, callback
+		async.series jobs, done 
 
 	it "should return all the docs", (done) ->
 		DocstoreClient.getAllDocs @project_id, (error, res, docs) =>

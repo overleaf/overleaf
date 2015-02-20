@@ -11,14 +11,9 @@ describe "Deleting a doc", ->
 		@doc_id = ObjectId()
 		@lines = ["original", "lines"]
 		@version = 42
-		DocstoreClient.createProject @project_id, (error) =>
+		DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
 			throw error if error?
-			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
-				throw error if error?
-				done()
-
-	afterEach (done) ->
-		DocstoreClient.deleteProject @project_id, done
+			done()
 
 	describe "when the doc exists", ->
 		beforeEach (done) ->

@@ -9,28 +9,12 @@ describe "MongoManager", ->
 	beforeEach ->
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs":
-				db: @db = { projects: {}, docs: {} }
+				db: @db = { docs: {} }
 				ObjectId: ObjectId
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
 		@stubbedErr = new Error("hello world")
-
-	describe "findProject", ->
-		beforeEach ->
-			@project = { name: "mock-project" }
-			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
-			@MongoManager.findProject @project_id, @callback
-
-		it "should find the project", ->
-			@db.projects.find
-				.calledWith({
-					_id: ObjectId(@project_id)
-				}, {})
-				.should.equal true
-
-		it "should call the callback with the project", ->
-			@callback.calledWith(null, @project).should.equal true
 
 	describe "findDoc", ->
 		beforeEach ->
@@ -48,28 +32,24 @@ describe "MongoManager", ->
 		it "should call the callback with the doc", ->
 			@callback.calledWith(null, @doc).should.equal true
 
-	describe "updateDoc", ->
+	describe "getProjectsDocs", ->
 		beforeEach ->
-			@lines = ["mock-lines"]
-			@docPath = "rootFolder.0.folders.1.docs.0"
-			@db.projects.update = sinon.stub().callsArg(2)
-			@MongoManager.updateDoc @project_id, @docPath, @lines, @callback
+			@doc1 = { name: "mock-doc1" }
+			@doc2 = { name: "mock-doc2" }
+			@doc3 = { name: "mock-doc3" }
+			@doc4 = { name: "mock-doc4" }
+			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc, @doc3, @doc4])
+			@MongoManager.getProjectsDocs @project_id, @callback
 
-		it "should update the doc lines and increment the TPDS rev", ->
-			@db.projects.update
+		it "should find the docs via the project_id", ->
+			@db.docs.find
 				.calledWith({
-					_id: ObjectId(@project_id)
-				}, {
-					$set:
-						"rootFolder.0.folders.1.docs.0.lines": @lines
-					$inc:
-						"rootFolder.0.folders.1.docs.0.rev": 1
-				})
+					project_id: ObjectId(@project_id)
+				}, {})
 				.should.equal true
 
-		it "should call the callback with the project", ->
-			@callback.called.should.equal true
-
+		it "should call the callback with the docs", ->
+			@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
 
 	describe "upsertIntoDocCollection", ->
 		beforeEach ->

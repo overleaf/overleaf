@@ -5,57 +5,50 @@ _ = require "underscore"
 async = require "async"
 
 module.exports = DocManager =
-	getDoc: (project_id, doc_id, callback = (error, doc, mongoPath) ->) ->
-		MongoManager.findDoc doc_id, (err, docFromDocCollection)->
-			return callback(err) if err?
-			MongoManager.findProject project_id, (error, project) ->
-				return callback(error) if error?
-				return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
-				DocManager.findDocInProject project, doc_id, (error, doc, mongoPath) ->
-					return callback(error) if error?
-					if docFromDocCollection?
-						return callback null, docFromDocCollection, mongoPath
-					else if doc?
-						if doc?.lines?.length > 0
-							logger.warn project_id:project_id, doc_id:doc_id, "doc just used from project collection, why?"
-						return callback null, doc, mongoPath
-					else
-						return callback new Errors.NotFoundError("No such doc: #{project_id}")
+
+	getDoc: (project_id, doc_id, callback = (error, doc) ->) ->
+		MongoManager.findDoc doc_id, (err, doc)->
+			if err?
+				return callback(err)
+			else if !doc?
+				return callback new Errors.NotFoundError("No such doc: #{doc_id} in project #{project_id}")
+			callback null, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
-		MongoManager.findProject project_id, (error, project) ->
-			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project: #{project_id}") if !project?
-			DocManager.findAllDocsInProject project, (error, docs) ->
-				return callback(error) if error?
-				return callback null, docs
+		MongoManager.getProjectsDocs project_id, (error, docs) ->
+			if err?
+				return callback(error)
+			else if !docs?
+				return callback new Errors.NotFoundError("No docs for project #{project_id}")
+			else
+				return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
-		DocManager.getDoc project_id, doc_id, (error, doc, mongoPath) ->
-			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project/doc to update: #{project_id}/#{doc_id}") if !doc? or !mongoPath?
+		DocManager.getDoc project_id, doc_id, (error, doc) ->
 
-			if _.isEqual(doc.lines, lines)
-				logger.log {
-					project_id: project_id, doc_id: doc_id, rev: doc.rev
-				}, "doc lines have not changed"
-				return callback null, false, doc.rev
-			else
-				logger.log {
-					project_id: project_id
-					doc_id: doc_id,
-					oldDocLines: doc.lines
-					newDocLines: lines
-					rev: doc.rev
-				}, "updating doc lines"
-				async.series [
-					(cb)->
-						MongoManager.upsertIntoDocCollection project_id, doc_id, lines, doc.rev, cb
-					(cb)->
-						MongoManager.updateDoc project_id, mongoPath, lines, cb
-				], (error)->
-					return callback(error) if error?
-					callback null, true, doc.rev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
+			isNewDoc = error?.name == new Errors.NotFoundError().name
+
+			if !isNewDoc and error?
+				logger.err project_id: project_id, doc_id: doc_id, err:error, "error getting document for update"
+				return callback(error)
+			else if !isNewDoc and !doc?
+				logger.err project_id: project_id, doc_id: doc_id, "existing document to update could not be found"
+				return callback new Errors.NotFoundError("No such project/doc to update: #{project_id}/#{doc_id}")
+			else if _.isEqual(doc?.lines, lines)
+				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
+				return callback null, false, doc?.rev
+
+			oldRev = doc?.rev || 0
+			logger.log {
+				project_id: project_id
+				doc_id: doc_id,
+				oldDocLines: doc?.lines
+				newDocLines: lines
+				rev: oldRev
+			}, "updating doc lines"
+			MongoManager.upsertIntoDocCollection project_id, doc_id, lines, oldRev, (error)->
+				return callback(callback) if error?
+				callback null, true,  oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
@@ -66,34 +59,4 @@ module.exports = DocManager =
 				MongoManager.markDocAsDeleted doc_id, (error) ->
 					return callback(error) if error?
 					callback()
-
-	findAllDocsInProject: (project, callback = (error, docs) ->) ->
-		callback null, @_findAllDocsInFolder project.rootFolder[0]
-
-	findDocInProject: (project, doc_id, callback = (error, doc, mongoPath) ->) ->
-		result = @_findDocInFolder project.rootFolder[0], doc_id, "rootFolder.0"
-		if result?
-			callback null, result.doc, result.mongoPath
-		else
-			callback null, null, null
-
-	_findDocInFolder: (folder = {}, doc_id, currentPath) ->
-		for doc, i in folder.docs or []
-			if doc?._id? and doc._id.toString() == doc_id.toString()
-				return {
-					doc: doc
-					mongoPath: "#{currentPath}.docs.#{i}"
-				}
-
-		for childFolder, i in folder.folders or []
-			result = @_findDocInFolder childFolder, doc_id, "#{currentPath}.folders.#{i}"
-			return result if result?
-
-		return null
-
-	_findAllDocsInFolder: (folder = {}) ->
-		docs = folder.docs or []
-		for childFolder in folder.folders or []
-			docs = docs.concat @_findAllDocsInFolder childFolder
-		return docs
 
