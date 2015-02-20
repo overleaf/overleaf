@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -17,7 +18,9 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Created by Winston on 11/01/15.
@@ -39,6 +42,9 @@ public class WLGitBridgeIntegrationTest {
                 put("canPullADeletedTexFile", new HashMap<String, SnapshotAPIState>() {{
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/base/state.json")).build());
                     put("withDeletedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/withDeletedTexFile/state.json")).build());
+                }});
+                put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
                 }});
             }};
 
@@ -136,6 +142,32 @@ public class WLGitBridgeIntegrationTest {
         base.close();
         wlgb.stop();
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/withDeletedTexFile/testproj"), git.toPath()));
+    }
+
+    @Test
+    public void cannotCloneAProtectedProject() throws IOException, GitAPIException {
+        MockSnapshotServer server = new MockSnapshotServer(3861, getResource("/cannotCloneAProtectedProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
+        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+                makeConfigFile(33861, 3861)
+        });
+        wlgb.run();
+        folder.create();
+        File git = folder.newFolder();
+        try {
+            Git.cloneRepository()
+                    .setURI("http://127.0.0.1:33861/protected.git")
+                    .setDirectory(git)
+                    .call()
+                    .close();
+        } catch (TransportException e) {
+            assertEquals("http://127.0.0.1:33861/protected.git: Your project is protected, and can't be cloned (yet).", e.getMessage());
+            return;
+        } finally {
+            wlgb.stop();
+        }
+        fail();
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {

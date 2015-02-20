@@ -41,7 +41,6 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
             cannot occur
             */
         } catch (ServiceMayNotContinueException e) { /* Such as FailedConnectionException */
-            Util.printStackTrace(e);
             throw e;
         } catch (RuntimeException e) {
             Util.printStackTrace(e);

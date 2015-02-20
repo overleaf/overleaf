@@ -41,7 +41,7 @@ public class SnapshotAPIState {
     public SnapshotAPIState() {
 
         getDoc = new HashMap<String, SnapshotGetDocResult>();
-        getDoc.put("1826rqgsdb", new SnapshotGetDocResult(243, "2014-11-30T18:40:58Z", "jdleesmiller+1@gmail.com", "John+1"));
+        getDoc.put("1826rqgsdb", new SnapshotGetDocResult(null, 243, "2014-11-30T18:40:58Z", "jdleesmiller+1@gmail.com", "John+1"));
 
         getSavedVers = new HashMap<String, SnapshotGetSavedVersResult>();
         List<SnapshotInfo> savedVers = new LinkedList<SnapshotInfo>();

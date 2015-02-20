@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
@@ -43,7 +44,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public boolean repositoryExists(String projectName) throws FailedConnectionException {
+    public boolean repositoryExists(String projectName) throws ServiceMayNotContinueException {
         lockForProject(projectName);
         SnapshotGetDocRequest snapshotGetDocRequest = new SnapshotGetDocRequest(projectName);
         snapshotGetDocRequest.request();
@@ -53,6 +54,8 @@ public class WriteLatexAPI implements WriteLatexDataSource {
             return false;
         } catch (FailedConnectionException e) {
             throw e;
+        } catch (SnapshotPostException e) {
+            throw new ServiceMayNotContinueException(e.getMessage());
         } finally {
             unlockForProject(projectName);
         }

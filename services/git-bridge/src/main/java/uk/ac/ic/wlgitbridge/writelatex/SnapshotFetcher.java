@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForV
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotGetForVersionResult;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotGetSavedVersRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreSource;
@@ -93,7 +94,12 @@ public class SnapshotFetcher implements PersistentStoreSource {
 
     private int putLatestDoc(SnapshotGetDocRequest getDoc, Set<Integer> fetchedIDs, Map<Integer, SnapshotInfo> fetchedSnapshotInfos) throws FailedConnectionException, InvalidProjectException {
         SnapshotGetDocResult result = getDoc.getResult();
-        int latestVersionID = result.getVersionID();
+        int latestVersionID = 0;
+        try {
+            latestVersionID = result.getVersionID();
+        } catch (SnapshotPostException e) {
+            throw new RuntimeException(e);
+        }
         putFetchedResult(new SnapshotInfo(latestVersionID, result.getCreatedAt(), result.getName(), result.getEmail()), fetchedIDs, fetchedSnapshotInfos);
         return latestVersionID;
     }

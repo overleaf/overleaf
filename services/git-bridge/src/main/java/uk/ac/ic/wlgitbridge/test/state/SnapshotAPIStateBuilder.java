@@ -59,7 +59,8 @@ public class SnapshotAPIStateBuilder {
 
     private void addGetDocForProject(String projectName, JsonObject jsonGetDoc) {
         getDoc.put(projectName,
-                   new SnapshotGetDocResult(jsonGetDoc.get("versionID").getAsInt(),
+                   new SnapshotGetDocResult(jsonGetDoc.get("error"),
+                                            jsonGetDoc.get("versionID").getAsInt(),
                                             jsonGetDoc.get("createdAt").getAsString(),
                                             jsonGetDoc.get("email").getAsString(),
                                             jsonGetDoc.get("name").getAsString()));
