@@ -2,6 +2,7 @@ Settings = require "settings-sharelatex"
 fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
+console.log Settings.mongo.url
 db = mongojs(Settings.mongo.url, ['projects', 'docs'])
 _ = require("lodash")
 async = require("async")
@@ -9,16 +10,16 @@ exec = require("child_process").exec
 
 finished_projects_path = "/tmp/finished-projects"
 all_projects_path = "/tmp/all-projects"
+project_too_large_path = "/tmp/large_projects"
+
 
 printProgress = ->
 	exec "wc #{finished_projects_path}", (error, results) ->
-		#console.log results
 		setTimeout printProgress, 1000 * 30
 
 checkIfFileHasBeenProccessed = (project_id, callback)->
 	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
 		hasBeenProcessed = _.include(results, project_id)
-		#console.log hasBeenProcessed, project_id
 		callback(error, hasBeenProcessed)
 
 loadProjectIds = (callback)->
@@ -38,9 +39,14 @@ getAndWriteProjectids = (callback)->
 		fs.writeFile all_projects_path, fileData, ->
 			callback(err, ids)
 
+markProjectAsToLargeAndFinished = (project_id, callback)->
+	console.log "#{project_id} too large"
+	markProjectAsProcessed project_id, (err)->
+		fs.appendFile project_too_large_path, "#{project_id}\n", callback
+
 getProjectIds = (callback)->
 	exists = fs.existsSync all_projects_path
-	if exists 
+	if exists
 		loadProjectIds callback
 	else
 		getAndWriteProjectids callback
@@ -52,7 +58,11 @@ getAllDocs = (project_id, callback = (error, docs) ->) ->
 	db.projects.findOne _id:ObjectId(project_id), (error, project) ->
 		return callback(error) if error?
 		if !project?
-			return callback("no such project #{project_id}")
+			console.log "no such project #{project_id}"
+			return callback()
+		size = require("../node_modules/mongojs/node_modules/mongodb/node_modules/bson/").BSONPure.BSON.calculateObjectSize(project)
+		if size > 12000000 #12mb
+			return markProjectAsToLargeAndFinished project_id, callback
 		findAllDocsInProject project, (error, docs) ->
 			return callback(error) if error?
 			return callback null, docs
@@ -84,27 +94,26 @@ insertDocIntoDocCollection = (project_id, doc_id, lines, oldRev, callback)->
 	if !project_id?
 		return callback("no project id")
 	if !doc_id?
-		return callback("no doc id. project=#{project_id}")
+		return callback()
 	if !lines?
-		return callback("no lines")
+		lines = [""]
 	update = {}
 	update["_id"] = ObjectId(doc_id.toString())
 	update["lines"] = lines
 	update["project_id"] = ObjectId(project_id)
 	update["rev"] = oldRev || 0
-	# console.log update
 	db.docs.insert update, callback
 
 saveDocsIntoMongo = (project_id, docs, callback)->
 	jobs = _.map docs, (doc)->
 		(cb)->
 			if !doc?
-				console.error "null doc in project #{project_id}"
+				console.error "null doc in project #{project_id}" #just skip it, not a big deal
 				return cb()
 			insertDocIntoDocCollection project_id, doc._id, doc.lines, doc.rev, (err)->
 				if err?.code == 11000 #duplicate key, doc already in there so its not a problem.
 					err = undefined
-				if err? 
+				if err?
 					console.log "error inserting doc into doc collection", err
 				cb(err)
 
@@ -130,11 +139,11 @@ processNext = (project_id, callback)->
 					markProjectAsProcessed project_id, (err)->
 						setTimeout(
 							-> callback(err)
-						,100)
+						,500)
 
 
-	
-exports.migrate = (client, done)->
+
+exports.migrate = (client, done = ->)->
 	getProjectIds (err, ids)->
 		printProgress()
 		jobs = _.map ids, (id)->
