@@ -167,7 +167,7 @@ module.exports = (grunt) ->
 		Helpers.buildUpstartScripts()
 
 
-	grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
+	#grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
 
 
 	Helpers =
