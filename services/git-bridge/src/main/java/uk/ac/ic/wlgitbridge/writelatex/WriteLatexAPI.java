@@ -31,6 +31,7 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         this.dataModel = dataModel;
         postbackManager = new PostbackManager();
         mainProjectLock = new ProjectLock();
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook(mainProjectLock));
     }
 
     @Override
