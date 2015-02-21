@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 
 import java.io.IOException;
@@ -47,11 +48,7 @@ public class WLBridgedProject {
     private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
         List<WritableRepositoryContents> writableRepositories;
         try {
-            writableRepositories = writeLatexDataSource.getWritableRepositories(name);
-        } catch (InvalidProjectException e) {
-            throw new RepositoryNotFoundException(name);
-        }
-        try {
+            writableRepositories = writeLatexDataSource.getWritableRepositories(name, repository);
             for (WritableRepositoryContents contents : writableRepositories) {
                 contents.write();
                 Git git = new Git(repository);
@@ -60,10 +57,14 @@ public class WLBridgedProject {
                 }
                 git.add().addFilepattern(".").call();
                 git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
-                            .setMessage(contents.getCommitMessage())
-                            .call();
+                        .setMessage(contents.getCommitMessage())
+                        .call();
                 WLFileStore.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
             }
+        } catch (InvalidProjectException e) {
+            throw new RepositoryNotFoundException(name);
+        } catch (SnapshotPostException e) {
+            throw new RepositoryNotFoundException(name);
         } catch (GitAPIException e) {
             throw new ServiceMayNotContinueException(e);
         } catch (IOException e) {

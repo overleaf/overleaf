@@ -7,22 +7,29 @@ import java.util.Map.Entry;
 /**
  * Created by Winston on 16/11/14.
  */
-public class RepositoryFile implements RawFile {
+public class RepositoryFile extends RawFile {
 
-    private final Entry<String, byte[]> fileContents;
+    private final String path;
+    private final byte[] contents;
 
     public RepositoryFile(Entry<String, byte[]> fileContents) {
-        this.fileContents = fileContents;
+        path = fileContents.getKey();
+        contents = fileContents.getValue();
+    }
+
+    public RepositoryFile(String path, byte[] contents) {
+        this.path = path;
+        this.contents = contents;
     }
 
     @Override
     public String getPath() {
-        return fileContents.getKey();
+        return path;
     }
 
     @Override
     public byte[] getContents() {
-        return fileContents.getValue();
+        return contents;
     }
 
 }

@@ -23,6 +23,14 @@ public class RepositoryObjectTreeWalker {
         this.repository = repository;
     }
 
+    public RepositoryObjectTreeWalker(Repository repository) throws IOException {
+        this(repository, 0);
+    }
+
+    public RepositoryObjectTreeWalker(Repository repository, int fromHead) throws IOException {
+        this(repository, repository.resolve("HEAD~" + fromHead));
+    }
+
     public RawDirectoryContents getDirectoryContents() throws IOException {
         return new FileDirectoryContents(walkGitObjectTree());
     }

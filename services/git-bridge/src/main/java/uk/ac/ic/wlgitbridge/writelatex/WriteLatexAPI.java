@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
@@ -13,7 +14,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequest;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.SnapshotPushRequestResult;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.*;
-import uk.ac.ic.wlgitbridge.writelatex.model.WLDataModel;
+import uk.ac.ic.wlgitbridge.writelatex.model.DataStore;
 
 import java.io.IOException;
 import java.util.List;
@@ -23,11 +24,11 @@ import java.util.List;
  */
 public class WriteLatexAPI implements WriteLatexDataSource {
 
-    private final WLDataModel dataModel;
+    private final DataStore dataModel;
     private final PostbackManager postbackManager;
     private final ProjectLock mainProjectLock;
 
-    public WriteLatexAPI(WLDataModel dataModel) {
+    public WriteLatexAPI(DataStore dataModel) {
         this.dataModel = dataModel;
         postbackManager = new PostbackManager();
         mainProjectLock = new ProjectLock();
@@ -64,9 +65,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public List<WritableRepositoryContents> getWritableRepositories(String projectName) throws FailedConnectionException, InvalidProjectException {
+    public List<WritableRepositoryContents> getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException {
         Util.sout("Fetching project: " + projectName);
-        List<WritableRepositoryContents> writableRepositoryContents = dataModel.updateProjectWithName(projectName);
+        List<WritableRepositoryContents> writableRepositoryContents = dataModel.updateProjectWithName(projectName, repository);
         return writableRepositoryContents;
     }
 

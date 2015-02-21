@@ -2,7 +2,6 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore.node;
 
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.blob.Blob;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreUpdater;
 
 import java.io.File;
@@ -41,7 +40,8 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
     }
 
     public byte[] getContents() throws FailedConnectionException {
-        return getBlob().getContents();
+//        return getBlob().getContents();
+        return null;
     }
 
     public void writeToDisk(File directory) throws FailedConnectionException, IOException {
@@ -61,17 +61,16 @@ public abstract class FileNode implements PersistentStoreUpdater<String> {
         return changed || previous == null || !equals(previous);
     }
 
-    public abstract void indexWith(FileNodeIndexer indexer);
-    protected abstract Blob getBlob();
+//    protected abstract Blob getBlob();
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof FileNode)) {
-            return false;
-        }
-        FileNode that = (FileNode) obj;
-        return filePath.equals(that.filePath) && getBlob().equals(that.getBlob());
-    }
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (!(obj instanceof FileNode)) {
+//            return false;
+//        }
+//        FileNode that = (FileNode) obj;
+//        return filePath.equals(that.filePath) && getBlob().equals(that.getBlob());
+//    }
 
     @Override
     public String toString() {

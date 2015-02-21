@@ -5,7 +5,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotInfo {
+public class SnapshotInfo implements Comparable<SnapshotInfo> {
 
     private int versionId;
     private String comment;
@@ -39,4 +39,17 @@ public class SnapshotInfo {
         return createdAt;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SnapshotInfo)) {
+            return false;
+        }
+        SnapshotInfo that = (SnapshotInfo) obj;
+        return versionId == that.versionId;
+    }
+
+    @Override
+    public int compareTo(SnapshotInfo o) {
+        return Integer.compare(versionId, o.versionId);
+    }
 }

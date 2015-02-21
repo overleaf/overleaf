@@ -1,8 +1,7 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
+import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
@@ -16,15 +15,15 @@ import java.util.List;
  */
 public class GitDirectoryContents implements WritableRepositoryContents {
 
-    private final List<FileNode> fileNodes;
+    private final List<RawFile> files;
     private final File gitDirectory;
     private final String userName;
     private final String userEmail;
     private final String commitMessage;
     private final Date when;
 
-    public GitDirectoryContents(List<FileNode> fileNodes, File rootGitDirectory, String projectName, Snapshot snapshot) {
-        this.fileNodes = fileNodes;
+    public GitDirectoryContents(List<RawFile> files, File rootGitDirectory, String projectName, Snapshot snapshot) {
+        this.files = files;
         gitDirectory = new File(rootGitDirectory, projectName);
         userName = snapshot.getUserName();
         userEmail = snapshot.getUserEmail();
@@ -33,9 +32,9 @@ public class GitDirectoryContents implements WritableRepositoryContents {
     }
 
     @Override
-    public void write() throws IOException, FailedConnectionException {
+    public void write() throws IOException {
         WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git");
-        for (FileNode fileNode : fileNodes) {
+        for (RawFile fileNode : files) {
             fileNode.writeToDisk(gitDirectory);
         }
     }

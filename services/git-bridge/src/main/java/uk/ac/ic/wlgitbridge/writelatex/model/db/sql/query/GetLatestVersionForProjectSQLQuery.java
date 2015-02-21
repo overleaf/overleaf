@@ -12,7 +12,7 @@ import java.sql.SQLException;
 public class GetLatestVersionForProjectSQLQuery implements SQLQuery<Integer> {
 
     private static final String GET_VERSION_IDS_FOR_PROJECT_NAME =
-            "SELECT `version_id` FROM `projects` WHERE `project_name` = ?";
+            "SELECT `version_id` FROM `projects` WHERE `name` = ?";
 
     private final String projectName;
 
