@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.writelatex.model;
 import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.bridge.*;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
+import uk.ac.ic.wlgitbridge.writelatex.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
@@ -55,20 +56,18 @@ public class DataStore implements CandidateSnapshotCallback {
         return commits;
     }
 
-    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectoryContents directoryContents, String hostname, String postbackKey) throws SnapshotPostException, IOException, FailedConnectionException {
-//        return new WLDirectoryNodeSnapshot(getProjectWithName(projectName),
-//                                           fileStore.createNextDirectoryNodeInProjectFromContents(getProjectWithName(projectName),
-//                                                                                                  directoryContents),
-//                                           hostname,
-//                                           postbackKey,
-//                                           this);
-        return null;
+    public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents) throws SnapshotPostException, IOException, FailedConnectionException {
+        CandidateSnapshot candidateSnapshot = new CandidateSnapshot(projectName,
+                persistentStore.getLatestVersionForProject(projectName),
+                directoryContents,
+                oldDirectoryContents);
+        candidateSnapshot.writeServletFiles(rootGitDirectory);
+        return candidateSnapshot;
     }
 
     @Override
     public void approveSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
-//        getProjectWithName(candidateSnapshot.getProjectName()).putLatestSnapshot(versionID);
-//        fileStore.approveCandidateSnapshot(candidateSnapshot);
+        persistentStore.setLatestVersionForProject(candidateSnapshot.getProjectName(), versionID);
     }
 
     private File initRootGitDirectory(String rootGitDirectoryPath) {

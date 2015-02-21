@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Created by Winston on 16/11/14.
  */
-public interface RawDirectoryContents {
+public interface RawDirectory {
 
-    public Map<String, byte[]> getFileContentsTable();
+    public Map<String, RawFile> getFileTable();
 }

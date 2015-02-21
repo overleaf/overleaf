@@ -32,7 +32,7 @@ public class ResourceFetcher {
             path = newPath;
             contents = fetch(projectName, url, path);
         } else {
-            contents = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileContentsTable().get(path);
+            contents = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path).getContents();
         }
         return new RepositoryFile(path, contents);
     }

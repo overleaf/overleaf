@@ -5,7 +5,7 @@ import org.eclipse.jgit.transport.PreReceiveHook;
 import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceiveCommand.Result;
 import org.eclipse.jgit.transport.ReceivePack;
-import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
+import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
@@ -66,6 +66,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
         writeLatexDataSource.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
                 getPushedDirectoryContents(repository,
                         receiveCommand),
+                getOldDirectoryContents(repository),
                 hostname);
     }
 
@@ -81,10 +82,14 @@ public class WriteLatexPutHook implements PreReceiveHook {
         }
     }
 
-    private RawDirectoryContents getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException {
+    private RawDirectory getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException {
         return new RepositoryObjectTreeWalker(repository,
                                               receiveCommand.getNewId())
                .getDirectoryContents();
+    }
+
+    private RawDirectory getOldDirectoryContents(Repository repository) throws IOException {
+        return new RepositoryObjectTreeWalker(repository).getDirectoryContents();
     }
 
 }

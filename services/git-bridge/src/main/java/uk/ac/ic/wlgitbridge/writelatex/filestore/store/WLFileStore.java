@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.store;
 
-import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.bridge.bullshit;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 
 import java.io.File;
@@ -73,7 +73,7 @@ public class WLFileStore /*implements PersistentStoreSource*/ {
 //        return getDirectoryNodeForProjectName(project.getName()).createFromRawDirectoryContents(directoryContents, attDirectory);
 //    }
 
-    public void approveCandidateSnapshot(CandidateSnapshot candidateSnapshot) {
+    public void approveCandidateSnapshot(bullshit candidateSnapshot) {
         WLDirectoryNode directoryNode = candidateSnapshot.getDirectoryNode();
         fileStore.put(candidateSnapshot.getProjectName(), directoryNode);
 //        directoryNode.updatePersistentStore(persistentStore, null);

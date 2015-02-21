@@ -6,7 +6,7 @@ import uk.ac.ic.wlgitbridge.writelatex.filestore.node.WLDirectoryNode;
 /**
  * Created by Winston on 16/11/14.
  */
-public interface CandidateSnapshot {
+public interface bullshit {
 
     public JsonElement getJsonRepresentation();
     public int getPreviousVersionID();

@@ -4,7 +4,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
+import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
+import uk.ac.ic.wlgitbridge.bridge.RawFile;
+import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,11 +33,14 @@ public class RepositoryObjectTreeWalker {
         this(repository, repository.resolve("HEAD~" + fromHead));
     }
 
-    public RawDirectoryContents getDirectoryContents() throws IOException {
-        return new FileDirectoryContents(walkGitObjectTree());
+    public RawDirectory getDirectoryContents() throws IOException {
+        return new FileDirectory(walkGitObjectTree());
     }
 
     private TreeWalk initTreeWalk(Repository repository, ObjectId objectId) throws IOException {
+        if (objectId == null) {
+            return null;
+        }
         RevWalk walk = new RevWalk(repository);
         TreeWalk treeWalk = new TreeWalk(repository);
         treeWalk.addTree(walk.parseCommit(objectId).getTree());
@@ -43,10 +48,14 @@ public class RepositoryObjectTreeWalker {
         return treeWalk;
     }
 
-    private Map<String, byte[]> walkGitObjectTree() throws IOException {
-        Map<String, byte[]> fileContentsTable = new HashMap<String, byte[]>();
+    private Map<String, RawFile> walkGitObjectTree() throws IOException {
+        Map<String, RawFile> fileContentsTable = new HashMap<String, RawFile>();
+        if (treeWalk == null) {
+            return fileContentsTable;
+        }
         while (treeWalk.next()) {
-            fileContentsTable.put(treeWalk.getPathString(), repository.open(treeWalk.getObjectId(0)).getBytes());
+            String path = treeWalk.getPathString();
+            fileContentsTable.put(path, new RepositoryFile(path, repository.open(treeWalk.getObjectId(0)).getBytes()));
         }
         return fileContentsTable;
     }

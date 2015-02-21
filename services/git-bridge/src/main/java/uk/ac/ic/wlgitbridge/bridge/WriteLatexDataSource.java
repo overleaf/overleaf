@@ -3,7 +3,6 @@ package uk.ac.ic.wlgitbridge.bridge;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
@@ -23,7 +22,7 @@ public interface WriteLatexDataSource {
     /* Called by request thread. */
     public boolean repositoryExists(String projectName) throws ServiceMayNotContinueException;
     public List<WritableRepositoryContents> getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException;
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException;
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException, FailedConnectionException;
 
     void checkPostbackKey(String projectName, String postbackKey) throws InvalidPostbackKeyException;
 

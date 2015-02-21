@@ -2,8 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
-import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshot;
-import uk.ac.ic.wlgitbridge.bridge.RawDirectoryContents;
+import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.util.Util;
@@ -72,17 +71,17 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectoryContents directoryContents, String hostname) throws SnapshotPostException, IOException {
+    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException {
         mainProjectLock.lockForProject(projectName);
         try {
             Util.sout("Pushing project: " + projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
-            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, hostname, postbackKey);
-            SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate);
+            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
+            SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate, postbackKey);
             snapshotPushRequest.request();
             SnapshotPushRequestResult result = snapshotPushRequest.getResult();
             if (result.wasSuccessful()) {
-                candidate.approveWithVersionID(postbackManager.getVersionID(projectName));
+                dataModel.approveSnapshot(postbackManager.getVersionID(projectName), candidate);
             } else {
                 throw new OutOfDateException();
             }
