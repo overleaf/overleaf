@@ -47,11 +47,11 @@ public class BlobNode extends FileNode {
 
     @Override
     public void updatePersistentStore(PersistentStoreAPI persistentStore, String projectName) {
-        try {
-            persistentStore.addFileNodeBlob(projectName, getFilePath(), isChanged(), getBlob().getContents());
-        } catch (FailedConnectionException e) {
-            throw new RuntimeException(e);
-        }
+//        try {
+//            persistentStore.addFileNodeBlob(projectName, getFilePath(), isChanged(), getBlob().getContents());
+//        } catch (FailedConnectionException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private void writeChanged(File projectAttDirectory) throws FailedConnectionException, IOException {

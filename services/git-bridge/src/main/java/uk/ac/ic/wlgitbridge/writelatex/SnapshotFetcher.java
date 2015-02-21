@@ -38,7 +38,7 @@ public class SnapshotFetcher implements PersistentStoreSource {
         SortedSet<Snapshot> newSnapshots = new TreeSet<Snapshot>();
         while (getNew(newSnapshots));
         for (Snapshot snapshot : newSnapshots) {
-            persistentStore.addSnapshot(projectName, snapshot.getVersionID());
+//            persistentStore.addSnapshot(projectName, snapshot.getVersionID());
         }
         Util.sout("Fetched snapshots: " + newSnapshots);
         return newSnapshots;
@@ -58,10 +58,10 @@ public class SnapshotFetcher implements PersistentStoreSource {
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
         this.persistentStore = persistentStore;
-        for (Integer savedVersionID : persistentStore.getVersionIDsForProjectName(projectName)) {
-            snapshots.put(savedVersionID, new Snapshot(savedVersionID));
-            versions.add(savedVersionID);
-        }
+//        for (Integer savedVersionID : persistentStore.getVersionIDsForProjectName(projectName)) {
+//            snapshots.put(savedVersionID, new Snapshot(savedVersionID));
+//            versions.add(savedVersionID);
+//        }
     }
 
     private boolean getNew(SortedSet<Snapshot> newSnapshots) throws FailedConnectionException, InvalidProjectException {

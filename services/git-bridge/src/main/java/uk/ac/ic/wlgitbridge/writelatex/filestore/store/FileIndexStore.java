@@ -1,6 +1,5 @@
 package uk.ac.ic.wlgitbridge.writelatex.filestore.store;
 
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.AttachmentNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.BlobNode;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.node.FileNode;
@@ -50,7 +49,7 @@ public class FileIndexStore implements FileNodeIndexer, PersistentStoreSource, P
 
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
-        urlMappings = persistentStore.getURLIndexTableForProjectName(projectName);
+//        urlMappings = persistentStore.getURLIndexTableForProjectName(projectName);
     }
 
     public boolean hasAttachmentWithURL(String url) {
@@ -63,13 +62,13 @@ public class FileIndexStore implements FileNodeIndexer, PersistentStoreSource, P
 
     @Override
     public void updatePersistentStore(PersistentStoreAPI persistentStore, String projectName) {
-        persistentStore.deleteURLIndexesForProjectName(projectName);
+//        persistentStore.deleteURLIndexesForProjectName(projectName);
         for (Entry<String, FileNode> urlMapping : urlMappings.entrySet()) {
-            try {
-                persistentStore.addURLIndex(projectName, urlMapping.getKey(), urlMapping.getValue().getContents());
-            } catch (FailedConnectionException e) {
-                throw new RuntimeException(e);
-            }
+//            try {
+//                persistentStore.addURLIndex(projectName, urlMapping.getKey(), urlMapping.getValue().getContents());
+//            } catch (FailedConnectionException e) {
+//                throw new RuntimeException(e);
+//            }
         }
     }
 

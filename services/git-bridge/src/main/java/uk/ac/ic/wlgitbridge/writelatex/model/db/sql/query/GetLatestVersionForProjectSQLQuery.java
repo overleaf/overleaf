@@ -5,30 +5,28 @@ import uk.ac.ic.wlgitbridge.writelatex.model.db.sql.SQLQuery;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by Winston on 20/11/14.
  */
-public class GetVersionIDsForProjectNameSQLQuery implements SQLQuery<List<Integer>> {
+public class GetLatestVersionForProjectSQLQuery implements SQLQuery<Integer> {
 
     private static final String GET_VERSION_IDS_FOR_PROJECT_NAME =
-            "SELECT `version_id` FROM `snapshots` WHERE `project_name` = ?";
+            "SELECT `version_id` FROM `projects` WHERE `project_name` = ?";
 
     private final String projectName;
 
-    public GetVersionIDsForProjectNameSQLQuery(String projectName) {
+    public GetLatestVersionForProjectSQLQuery(String projectName) {
         this.projectName = projectName;
     }
 
     @Override
-    public List<Integer> processResultSet(ResultSet resultSet) throws SQLException {
-        List<Integer> versionIDs = new LinkedList<Integer>();
+    public Integer processResultSet(ResultSet resultSet) throws SQLException {
+        int versionID = 0;
         while (resultSet.next()) {
-            versionIDs.add(resultSet.getInt("version_id"));
+            versionID = resultSet.getInt("version_id");
         }
-        return versionIDs;
+        return versionID;
     }
 
     @Override

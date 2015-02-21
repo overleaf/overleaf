@@ -61,7 +61,7 @@ public class WLProject implements PersistentStoreSource {
         snapshots.put(versionID, new Snapshot(versionID));
         snapshotFetcher.putLatestVersion(versionID);
         latestSnapshotID = versionID;
-        persistentStore.addSnapshot(name, versionID);
+//        persistentStore.addSnapshot(name, versionID);
     }
 
     @Override

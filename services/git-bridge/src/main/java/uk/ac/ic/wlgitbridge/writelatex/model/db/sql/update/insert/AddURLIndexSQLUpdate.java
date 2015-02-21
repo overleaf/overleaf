@@ -11,16 +11,16 @@ import java.sql.SQLException;
 public class AddURLIndexSQLUpdate implements SQLUpdate {
 
     private static final String ADD_URL_INDEX =
-            "INSERT INTO `url_index_store` (`project_name`, `url`, `blob`) VALUES (?, ?, ?);\n";
+            "INSERT INTO `url_index_store` (`project_name`, `url`, `path`) VALUES (?, ?, ?);\n";
 
     private final String projectName;
     private final String url;
-    private final byte[] blob;
+    private final String path;
 
-    public AddURLIndexSQLUpdate(String projectName, String url, byte[] blob) {
+    public AddURLIndexSQLUpdate(String projectName, String url, String path) {
         this.projectName = projectName;
         this.url = url;
-        this.blob = blob;
+        this.path = path;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class AddURLIndexSQLUpdate implements SQLUpdate {
     public void addParametersToStatement(PreparedStatement statement) throws SQLException {
         statement.setString(1, projectName);
         statement.setString(2, url);
-        statement.setBytes(3, blob);
+        statement.setString(3, path);
     }
 
 }

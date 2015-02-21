@@ -5,6 +5,6 @@ package uk.ac.ic.wlgitbridge.writelatex.model.db;
  */
 public interface PersistentStoreSource {
 
-    public void initFromPersistentStore(PersistentStoreAPI persistentStore);
+    public void initFromPersistentStore(PersistentStore persistentStore);
 
 }

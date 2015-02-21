@@ -32,7 +32,7 @@ public class WLProjectStore implements PersistentStoreSource {
         } else {
             project = new WLProject(name, persistentStore);
             projects.put(name, project);
-            persistentStore.addProject(name);
+//            persistentStore.addProject(name);
         }
         return project;
     }
@@ -44,9 +44,9 @@ public class WLProjectStore implements PersistentStoreSource {
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
         this.persistentStore = persistentStore;
-        for (String projectName : persistentStore.getProjectNames()) {
-            projects.put(projectName, new WLProject(projectName, persistentStore));
-        }
+//        for (String projectName : persistentStore.getProjectNames()) {
+//            projects.put(projectName, new WLProject(projectName, persistentStore));
+//        }
     }
 
 }

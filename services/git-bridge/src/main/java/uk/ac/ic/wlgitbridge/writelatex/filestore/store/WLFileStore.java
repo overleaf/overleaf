@@ -42,9 +42,9 @@ public class WLFileStore implements PersistentStoreSource {
     @Override
     public void initFromPersistentStore(PersistentStoreAPI persistentStore) {
         this.persistentStore = persistentStore;
-        for (String projectName : persistentStore.getProjectNames()) {
-            fileStore.put(projectName, new WLDirectoryNode(projectName, attDirectory, rootGitDirectory, persistentStore));
-        }
+//        for (String projectName : persistentStore.getProjectNames()) {
+//            fileStore.put(projectName, new WLDirectoryNode(projectName, attDirectory, rootGitDirectory, persistentStore));
+//        }
     }
 
     public static void deleteInDirectory(File directory) {

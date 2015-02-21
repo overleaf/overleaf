@@ -57,7 +57,7 @@ public class ExternalBlob extends Blob {
 
     @Override
     public void updatePersistentStore(PersistentStoreAPI persistentStore, AttachmentNode node) {
-        persistentStore.addFileNodeExternal(node.getProjectName(), node.getFilePath(), node.isChanged(), node.getURL());
+//        persistentStore.addFileNodeExternal(node.getProjectName(), node.getFilePath(), node.isChanged(), node.getURL());
     }
 
 }

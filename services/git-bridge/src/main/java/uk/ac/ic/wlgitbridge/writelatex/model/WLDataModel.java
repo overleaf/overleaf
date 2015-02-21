@@ -11,7 +11,7 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProje
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStoreAPI;
-import uk.ac.ic.wlgitbridge.writelatex.model.db.WLGBPersistentStore;
+import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,10 +28,10 @@ public class WLDataModel implements CandidateSnapshotCallback {
 
     public WLDataModel(String rootGitDirectoryPath) {
         File rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
-        persistentStore = new WLGBPersistentStore(rootGitDirectory);
-        projectStore = persistentStore.loadProjectStore();
+        persistentStore = new PersistentStore(rootGitDirectory);
+        projectStore = null;//persistentStore.loadProjectStore();
         Util.sout("Loaded projects: " + projectStore.getProjectNames().size() + ".");
-        fileStore = persistentStore.loadFileStore();
+        fileStore = null;//persistentStore.loadFileStore();
         Util.sout("Loaded file store and index tables.");
         List<String> excludedFromDeletion = projectStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");

@@ -21,7 +21,7 @@ public class ByteBlob extends Blob {
 
     @Override
     public void updatePersistentStore(PersistentStoreAPI persistentStore, AttachmentNode node) {
-        persistentStore.addFileNodeBlob(node.getProjectName(), node.getFilePath(), node.isChanged(), contents);
+//        persistentStore.addFileNodeBlob(node.getProjectName(), node.getFilePath(), node.isChanged(), contents);
     }
 
 }

@@ -8,22 +8,22 @@ import java.sql.SQLException;
 /**
  * Created by Winston on 20/11/14.
  */
-public class AddSnapshotSQLUpdate implements SQLUpdate {
+public class SetProjectSQLUpdate implements SQLUpdate {
 
-    private static final String ADD_SNAPSHOT =
-            "INSERT INTO `snapshots` (`project_name`, `version_id`) VALUES (?, ?);\n";
+    private static final String SET_PROJECT =
+            "INSERT OR REPLACE INTO `projects`(`name`, `version_id`) VALUES (?, ?);\n";
 
     private final String projectName;
     private final int versionID;
 
-    public AddSnapshotSQLUpdate(String projectName, int versionID) {
+    public SetProjectSQLUpdate(String projectName, int versionID) {
         this.projectName = projectName;
         this.versionID = versionID;
     }
 
     @Override
     public String getSQL() {
-        return ADD_SNAPSHOT;
+        return SET_PROJECT;
     }
 
     @Override
