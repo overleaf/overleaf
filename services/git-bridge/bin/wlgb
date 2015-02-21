@@ -75,7 +75,7 @@ do_stop()
 {
 	if [ -f "$PIDFILE" ]; then
 		echo "Stopping Writelatex-Git Bridge..."
-		start-stop-daemon --stop --quiet --retry=TERM/60/KILL/5 --pidfile $PIDFILE --name $NAME
+		start-stop-daemon --stop --quiet --retry=TERM/60/KILL/5 --pidfile $PIDFILE
 		# Many daemons don't delete their pidfiles when they exit.
 		rm -f $PIDFILE
 		echo "WriteLatex-Git Bridge stopped."
