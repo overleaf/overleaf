@@ -20,6 +20,7 @@ public class ShutdownHook extends Thread implements LockAllWaiter {
         projectLock.lockAll();
         Util.sout("No projects to wait for.");
         Util.sout("Bye");
+        Util.sout();
     }
 
     @Override

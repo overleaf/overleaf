@@ -38,7 +38,7 @@ public class DataStore implements CandidateSnapshotCallback {
         persistentStore = new PersistentStore(rootGitDirectory);
         List<String> excludedFromDeletion = persistentStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");
-        Util.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[]{}));
+        Util.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[] {}));
 
         snapshotFetcher = new SnapshotFetcher();
         resourceFetcher = new ResourceFetcher(persistentStore);

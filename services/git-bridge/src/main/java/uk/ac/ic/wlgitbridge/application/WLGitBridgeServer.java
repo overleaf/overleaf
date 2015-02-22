@@ -64,7 +64,6 @@ public class WLGitBridgeServer {
     public void start() {
         try {
             jettyServer.start();
-            Util.sout();
             Util.sout(Util.getServiceName() + "-Git Bridge server started");
             Util.sout("Listening on port: " + port);
             Util.sout("Bridged to: " + writeLatexHostname);
