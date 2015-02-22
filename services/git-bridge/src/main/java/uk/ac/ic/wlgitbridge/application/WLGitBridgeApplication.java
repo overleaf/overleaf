@@ -26,7 +26,7 @@ public class WLGitBridgeApplication {
 
     /**
      * Constructs an instance of the WriteLatex-Git Bridge application.
-     * @param args args from main, which should be in the format [port, root_git_directory_path]
+     * @param args args from main, which should be in the format [config_file]
      */
     public WLGitBridgeApplication(String[] args) {
         try {

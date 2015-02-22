@@ -6,8 +6,8 @@ import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.WLRepositoryResolver;
 import uk.ac.ic.wlgitbridge.git.handler.WLUploadPackFactory;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositoryBuilder;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 
 import javax.servlet.ServletException;
 
@@ -16,9 +16,9 @@ import javax.servlet.ServletException;
  */
 public class WLGitServlet extends GitServlet {
 
-    public WLGitServlet(ServletContextHandler servletContextHandler, WriteLatexDataSource writeLatexDataSource, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
-        setRepositoryResolver(new WLRepositoryResolver(rootGitDirectoryPath, new SnapshotRepositoryBuilder(writeLatexDataSource)));
-        setReceivePackFactory(new WLReceivePackFactory(writeLatexDataSource));
+    public WLGitServlet(ServletContextHandler servletContextHandler, BridgeAPI bridgeAPI, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+        setRepositoryResolver(new WLRepositoryResolver(rootGitDirectoryPath, new SnapshotRepositoryBuilder(bridgeAPI)));
+        setReceivePackFactory(new WLReceivePackFactory(bridgeAPI));
         setUploadPackFactory(new WLUploadPackFactory());
         init(new WLGitServletConfig(servletContextHandler));
     }

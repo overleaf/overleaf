@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import uk.ac.ic.wlgitbridge.application.exception.InvalidConfigFileException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
+import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 
 import java.io.FileReader;
 import java.io.IOException;

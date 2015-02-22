@@ -1,7 +1,5 @@
 package uk.ac.ic.wlgitbridge.util;
 
-import uk.ac.ic.wlgitbridge.application.SSLConfig;
-
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,7 +15,6 @@ public class Util {
 
     private static String SERVICE_NAME;
     private static String HOSTNAME;
-    private static SSLConfig SSL_CONFIG;
     private static int PORT;
     private static String POSTBACK_URL;
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");

@@ -3,11 +3,11 @@ package uk.ac.ic.wlgitbridge.application;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.base.JSONSource;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostExceptionBuilder;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostExceptionBuilder;
 
 /**
  * Created by Winston on 17/11/14.
@@ -16,7 +16,7 @@ public class SnapshotPushPostbackContents implements JSONSource {
 
     private static final String CODE_SUCCESS = "upToDate";
 
-    private final WriteLatexDataSource writeLatexDataSource;
+    private final BridgeAPI bridgeAPI;
     private final String projectName;
     private final String postbackKey;
 
@@ -25,8 +25,8 @@ public class SnapshotPushPostbackContents implements JSONSource {
     private int versionID;
     private SnapshotPostException exception;
 
-    public SnapshotPushPostbackContents(WriteLatexDataSource writeLatexDataSource, String projectName, String postbackKey, String contents) {
-        this.writeLatexDataSource = writeLatexDataSource;
+    public SnapshotPushPostbackContents(BridgeAPI bridgeAPI, String projectName, String postbackKey, String contents) {
+        this.bridgeAPI = bridgeAPI;
         this.projectName = projectName;
         this.postbackKey = postbackKey;
         snapshotPostExceptionBuilder = new SnapshotPostExceptionBuilder();
@@ -42,9 +42,9 @@ public class SnapshotPushPostbackContents implements JSONSource {
 
     public void processPostback() throws UnexpectedPostbackException {
         if (exception == null) {
-            writeLatexDataSource.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
+            bridgeAPI.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
         } else {
-            writeLatexDataSource.postbackReceivedWithException(projectName, postbackKey, exception);
+            bridgeAPI.postbackReceivedWithException(projectName, postbackKey, exception);
         }
     }
 

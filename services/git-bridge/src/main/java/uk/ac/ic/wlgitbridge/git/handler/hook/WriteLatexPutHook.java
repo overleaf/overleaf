@@ -5,16 +5,16 @@ import org.eclipse.jgit.transport.PreReceiveHook;
 import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceiveCommand.Result;
 import org.eclipse.jgit.transport.ReceivePack;
-import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
+import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.OutOfDateException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InternalErrorException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.OutOfDateException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -24,11 +24,11 @@ import java.util.Collection;
  */
 public class WriteLatexPutHook implements PreReceiveHook {
 
-    private final WriteLatexDataSource writeLatexDataSource;
+    private final BridgeAPI bridgeAPI;
     private final String hostname;
 
-    public WriteLatexPutHook(WriteLatexDataSource writeLatexDataSource, String hostname) {
-        this.writeLatexDataSource = writeLatexDataSource;
+    public WriteLatexPutHook(BridgeAPI bridgeAPI, String hostname) {
+        this.bridgeAPI = bridgeAPI;
         this.hostname = hostname;
     }
 
@@ -63,7 +63,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
     private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {
         checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
-        writeLatexDataSource.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
+        bridgeAPI.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
                 getPushedDirectoryContents(repository,
                         receiveCommand),
                 getOldDirectoryContents(repository),

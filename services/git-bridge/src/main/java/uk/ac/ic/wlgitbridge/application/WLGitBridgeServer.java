@@ -8,13 +8,12 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.base.SnapshotAPIRequest;
-import uk.ac.ic.wlgitbridge.writelatex.model.DataStore;
+import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
+import uk.ac.ic.wlgitbridge.data.model.DataStore;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -86,7 +85,7 @@ public class WLGitBridgeServer {
 
     private void configureJettyServer() throws ServletException, InvalidRootDirectoryPathException {
         HandlerCollection handlers = new HandlerCollection();
-        WriteLatexAPI writeLatexDataSource = new WriteLatexAPI(new DataStore(rootGitDirectoryPath));
+        BridgeAPI writeLatexDataSource = new BridgeAPI(new DataStore(rootGitDirectoryPath));
         handlers.setHandlers(new Handler[] {
                 initResourceHandler(writeLatexDataSource),
                 new SnapshotPushPostbackHandler(writeLatexDataSource),
@@ -95,18 +94,18 @@ public class WLGitBridgeServer {
         jettyServer.setHandler(handlers);
     }
 
-    private Handler initGitHandler(WriteLatexDataSource writeLatexDataSource) throws ServletException, InvalidRootDirectoryPathException {
+    private Handler initGitHandler(BridgeAPI bridgeAPI) throws ServletException, InvalidRootDirectoryPathException {
         final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, writeLatexDataSource, rootGitDirectoryPath)),
+                        new WLGitServlet(servletContextHandler, bridgeAPI, rootGitDirectoryPath)),
                 "/*"
         );
         return servletContextHandler;
     }
 
-    private Handler initResourceHandler(WriteLatexAPI writeLatexDataSource) {
+    private Handler initResourceHandler(BridgeAPI writeLatexDataSource) {
         ResourceHandler resourceHandler = new AttsResourceHandler(writeLatexDataSource);
         resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;

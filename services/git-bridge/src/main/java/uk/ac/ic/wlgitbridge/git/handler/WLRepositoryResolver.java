@@ -6,10 +6,9 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
+import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotRepositoryBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
@@ -20,17 +19,17 @@ import java.io.File;
 public class WLRepositoryResolver implements RepositoryResolver<HttpServletRequest> {
 
     private File rootGitDirectory;
-    private RepositorySource repositorySource;
+    private SnapshotRepositoryBuilder snapshotRepositoryBuilder;
 
     public WLRepositoryResolver(String rootGitDirectoryPath, SnapshotRepositoryBuilder repositorySource) throws InvalidRootDirectoryPathException {
-        this.repositorySource = repositorySource;
+        this.snapshotRepositoryBuilder = repositorySource;
         initRootGitDirectory(rootGitDirectoryPath);
     }
 
     @Override
     public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
         try {
-            return repositorySource.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
+            return snapshotRepositoryBuilder.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
         } catch (RepositoryNotFoundException e) {
             Util.printStackTrace(e);
             throw e;

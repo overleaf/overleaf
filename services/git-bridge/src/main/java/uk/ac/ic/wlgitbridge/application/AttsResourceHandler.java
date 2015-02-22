@@ -5,8 +5,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.MultiMap;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.WriteLatexAPI;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InvalidPostbackKeyException;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.InvalidPostbackKeyException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,9 +18,9 @@ import java.io.IOException;
  */
 public class AttsResourceHandler extends ResourceHandler {
 
-    private final WriteLatexAPI writeLatexDataSource;
+    private final BridgeAPI writeLatexDataSource;
 
-    public AttsResourceHandler(WriteLatexAPI writeLatexDataSource) {
+    public AttsResourceHandler(BridgeAPI writeLatexDataSource) {
         this.writeLatexDataSource = writeLatexDataSource;
     }
 

@@ -5,10 +5,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
-import uk.ac.ic.wlgitbridge.test.server.MockSnapshotServer;
-import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIState;
-import uk.ac.ic.wlgitbridge.test.state.SnapshotAPIStateBuilder;
-import uk.ac.ic.wlgitbridge.test.util.FileUtil;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.server.MockSnapshotServer;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIStateBuilder;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.util.FileUtil;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.*;
@@ -151,7 +151,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private Path getResource(String path) {
-        return Paths.get("src/test/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
+        return Paths.get("src/servermock/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
     }
 
     private InputStream getResourceAsStream(String path) {

@@ -4,9 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,10 +18,10 @@ import java.io.IOException;
  */
 public class SnapshotPushPostbackHandler extends AbstractHandler {
 
-    private final WriteLatexDataSource writeLatexDataSource;
+    private final BridgeAPI bridgeAPI;
 
-    public SnapshotPushPostbackHandler(WriteLatexDataSource writeLatexDataSource) {
-        this.writeLatexDataSource = writeLatexDataSource;
+    public SnapshotPushPostbackHandler(BridgeAPI bridgeAPI) {
+        this.bridgeAPI = bridgeAPI;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
                 String projectName = parts[1];
                 String postbackKey = parts[2];
                 Util.sout(baseRequest.getMethod() + " <- " + baseRequest.getUri());
-                SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(writeLatexDataSource, projectName, postbackKey, contents);
+                SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(bridgeAPI, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
                 try {

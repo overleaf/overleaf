@@ -5,7 +5,7 @@ import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.util.Util;
 
@@ -17,10 +17,10 @@ import javax.servlet.http.HttpServletRequest;
 /* */
 public class WLReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
 
-    private final WriteLatexDataSource writeLatexDataSource;
+    private final BridgeAPI bridgeAPI;
 
-    public WLReceivePackFactory(WriteLatexDataSource writeLatexDataSource) {
-        this.writeLatexDataSource = writeLatexDataSource;
+    public WLReceivePackFactory(BridgeAPI bridgeAPI) {
+        this.bridgeAPI = bridgeAPI;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class WLReceivePackFactory implements ReceivePackFactory<HttpServletReque
         if (hostname == null) {
             hostname = httpServletRequest.getLocalName();
         }
-        receivePack.setPreReceiveHook(new WriteLatexPutHook(writeLatexDataSource, hostname));
+        receivePack.setPreReceiveHook(new WriteLatexPutHook(bridgeAPI, hostname));
         return receivePack;
     }
 

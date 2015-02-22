@@ -4,9 +4,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
-import uk.ac.ic.wlgitbridge.bridge.RawFile;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
+import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class RepositoryObjectTreeWalker {
     }
 
     public RawDirectory getDirectoryContents() throws IOException {
-        return new FileDirectory(walkGitObjectTree());
+        return new RawDirectory(walkGitObjectTree());
     }
 
     private TreeWalk initTreeWalk(Repository repository, ObjectId objectId) throws IOException {

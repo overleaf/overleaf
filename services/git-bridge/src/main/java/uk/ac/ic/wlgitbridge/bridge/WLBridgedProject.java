@@ -1,18 +1,13 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
-import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Created by Winston on 05/11/14.
@@ -21,16 +16,16 @@ public class WLBridgedProject {
 
     private final Repository repository;
     private final String name;
-    private final WriteLatexDataSource writeLatexDataSource;
+    private final BridgeAPI bridgeAPI;
 
-    public WLBridgedProject(Repository repository, String name, WriteLatexDataSource writeLatexDataSource) {
+    public WLBridgedProject(Repository repository, String name, BridgeAPI bridgeAPI) {
         this.repository = repository;
         this.name = name;
-        this.writeLatexDataSource = writeLatexDataSource;
+        this.bridgeAPI = bridgeAPI;
     }
 
     public void buildRepository() throws RepositoryNotFoundException, ServiceMayNotContinueException {
-        writeLatexDataSource.lockForProject(name);
+        bridgeAPI.lockForProject(name);
         try {
             if (repository.getObjectDatabase().exists()) {
                 updateRepositoryFromSnapshots(repository);
@@ -41,13 +36,13 @@ public class WLBridgedProject {
             e.printStackTrace();
             throw new ServiceMayNotContinueException(e);
         } finally {
-            writeLatexDataSource.unlockForProject(name);
+            bridgeAPI.unlockForProject(name);
         }
     }
 
     private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
         try {
-            writeLatexDataSource.getWritableRepositories(name, repository);
+            bridgeAPI.getWritableRepositories(name, repository);
         } catch (InvalidProjectException e) {
             throw new RepositoryNotFoundException(name);
         } catch (SnapshotPostException e) {
@@ -60,7 +55,7 @@ public class WLBridgedProject {
     }
 
     private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
-        if (!writeLatexDataSource.repositoryExists(name)) {
+        if (!bridgeAPI.repositoryExists(name)) {
             throw new RepositoryNotFoundException(name);
         }
         try {

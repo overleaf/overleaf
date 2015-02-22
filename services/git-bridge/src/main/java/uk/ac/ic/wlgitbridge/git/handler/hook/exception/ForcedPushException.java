@@ -2,7 +2,7 @@ package uk.ac.ic.wlgitbridge.git.handler.hook.exception;
 
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.util.Util;
-import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.util.Arrays;
 import java.util.List;
