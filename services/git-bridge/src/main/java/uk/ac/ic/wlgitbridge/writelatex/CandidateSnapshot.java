@@ -55,6 +55,7 @@ public class CandidateSnapshot {
         jsonObject.addProperty("latestVerId", currentVersion);
         jsonObject.add("files", getFilesAsJson(projectURL, postbackKey));
         jsonObject.addProperty("postbackUrl", projectURL + "/" + postbackKey + "/postback");
+        System.out.println(jsonObject);
         return jsonObject;
     }
 

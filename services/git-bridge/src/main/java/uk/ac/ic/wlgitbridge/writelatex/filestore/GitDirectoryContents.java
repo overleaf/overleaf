@@ -2,7 +2,7 @@ package uk.ac.ic.wlgitbridge.writelatex.filestore;
 
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.model.Snapshot;
 
 import java.io.File;
@@ -33,7 +33,7 @@ public class GitDirectoryContents implements WritableRepositoryContents {
 
     @Override
     public void write() throws IOException {
-        WLFileStore.deleteInDirectoryApartFrom(gitDirectory, ".git");
+        Util.deleteInDirectoryApartFrom(gitDirectory, ".git");
         for (RawFile fileNode : files) {
             fileNode.writeToDisk(gitDirectory);
         }

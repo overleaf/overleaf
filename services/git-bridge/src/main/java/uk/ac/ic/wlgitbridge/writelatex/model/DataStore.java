@@ -1,14 +1,17 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import org.eclipse.jgit.lib.Repository;
-import uk.ac.ic.wlgitbridge.bridge.*;
-import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
+import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
+import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
+import uk.ac.ic.wlgitbridge.bridge.RawFile;
+import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.GitDirectoryContents;
-import uk.ac.ic.wlgitbridge.writelatex.filestore.store.WLFileStore;
 import uk.ac.ic.wlgitbridge.writelatex.model.db.PersistentStore;
 
 import java.io.File;
@@ -31,7 +34,7 @@ public class DataStore implements CandidateSnapshotCallback {
         persistentStore = new PersistentStore(rootGitDirectory);
         List<String> excludedFromDeletion = persistentStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");
-        WLFileStore.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[] {}));
+        Util.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[]{}));
 
         snapshotFetcher = new SnapshotFetcher();
         resourceFetcher = new ResourceFetcher(persistentStore);
