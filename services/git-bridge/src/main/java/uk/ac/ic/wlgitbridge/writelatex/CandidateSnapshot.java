@@ -67,7 +67,7 @@ public class CandidateSnapshot {
 
     public void deleteServletFiles() throws IOException {
         if (attsDirectory != null) {
-            Util.deleteInDirectory(attsDirectory);
+            Util.deleteDirectory(attsDirectory);
         }
     }
 

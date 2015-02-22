@@ -131,6 +131,11 @@ public class Util {
         t.printStackTrace();
     }
 
+    public static void deleteDirectory(File directory) {
+        deleteInDirectory(directory);
+        directory.delete();
+    }
+
     public static void deleteInDirectory(File directory) {
         deleteInDirectoryApartFrom(directory);
     }
