@@ -12,7 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by Winston on 17/11/14.
  */
-public class PostbackContents {
+public class PostbackPromise {
 
     private final String postbackKey;
     private final ReentrantLock lock;
@@ -22,7 +22,7 @@ public class PostbackContents {
     private int versionID;
     private SnapshotPostException exception;
 
-    public PostbackContents(String postbackKey) {
+    public PostbackPromise(String postbackKey) {
         this.postbackKey = postbackKey;
         lock = new ReentrantLock();
         cond = lock.newCondition();

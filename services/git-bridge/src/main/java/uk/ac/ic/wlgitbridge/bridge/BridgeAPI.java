@@ -9,11 +9,11 @@ import uk.ac.ic.wlgitbridge.data.ShutdownHook;
 import uk.ac.ic.wlgitbridge.data.model.DataStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.SnapshotGetDocRequest;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
-import uk.ac.ic.wlgitbridge.snapshot.push.SnapshotPushRequest;
-import uk.ac.ic.wlgitbridge.snapshot.push.SnapshotPushRequestResult;
+import uk.ac.ic.wlgitbridge.snapshot.push.PushRequest;
+import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Util;
 
@@ -24,12 +24,12 @@ import java.io.IOException;
  */
 public class BridgeAPI {
 
-    private final DataStore dataModel;
+    private final DataStore dataStore;
     private final PostbackManager postbackManager;
     private final ProjectLock mainProjectLock;
 
-    public BridgeAPI(DataStore dataModel) {
-        this.dataModel = dataModel;
+    public BridgeAPI(String rootGitDirectoryPath) {
+        dataStore = new DataStore(rootGitDirectoryPath);
         postbackManager = new PostbackManager();
         mainProjectLock = new ProjectLock();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(mainProjectLock));
@@ -45,10 +45,10 @@ public class BridgeAPI {
 
     public boolean repositoryExists(String projectName) throws ServiceMayNotContinueException {
         lockForProject(projectName);
-        SnapshotGetDocRequest snapshotGetDocRequest = new SnapshotGetDocRequest(projectName);
-        snapshotGetDocRequest.request();
+        GetDocRequest getDocRequest = new GetDocRequest(projectName);
+        getDocRequest.request();
         try {
-            snapshotGetDocRequest.getResult().getVersionID();
+            getDocRequest.getResult().getVersionID();
         } catch (InvalidProjectException e) {
             return false;
         } catch (FailedConnectionException e) {
@@ -63,7 +63,7 @@ public class BridgeAPI {
 
     public void getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
         Util.sout("Fetching project: " + projectName);
-        dataModel.updateProjectWithName(projectName, repository);
+        dataStore.updateProjectWithName(projectName, repository);
     }
 
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException {
@@ -72,12 +72,12 @@ public class BridgeAPI {
         try {
             Util.sout("Pushing project: " + projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
-            candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
-            SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate, postbackKey);
-            snapshotPushRequest.request();
-            SnapshotPushRequestResult result = snapshotPushRequest.getResult();
+            candidate = dataStore.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
+            PushRequest pushRequest = new PushRequest(candidate, postbackKey);
+            pushRequest.request();
+            PushResult result = pushRequest.getResult();
             if (result.wasSuccessful()) {
-                dataModel.approveSnapshot(postbackManager.getVersionID(projectName), candidate);
+                dataStore.approveSnapshot(postbackManager.getVersionID(projectName), candidate);
             } else {
                 throw new OutOfDateException();
             }

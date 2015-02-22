@@ -1,12 +1,12 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
-import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,11 +16,11 @@ import java.io.IOException;
 /**
  * Created by Winston on 16/11/14.
  */
-public class SnapshotPushPostbackHandler extends AbstractHandler {
+public class PostbackHandler extends AbstractHandler {
 
     private final BridgeAPI bridgeAPI;
 
-    public SnapshotPushPostbackHandler(BridgeAPI bridgeAPI) {
+    public PostbackHandler(BridgeAPI bridgeAPI) {
         this.bridgeAPI = bridgeAPI;
     }
 
@@ -38,7 +38,7 @@ public class SnapshotPushPostbackHandler extends AbstractHandler {
                 String projectName = parts[1];
                 String postbackKey = parts[2];
                 Util.sout(baseRequest.getMethod() + " <- " + baseRequest.getUri());
-                SnapshotPushPostbackContents postbackContents = new SnapshotPushPostbackContents(bridgeAPI, projectName, postbackKey, contents);
+                PostbackContents postbackContents = new PostbackContents(bridgeAPI, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
                 try {

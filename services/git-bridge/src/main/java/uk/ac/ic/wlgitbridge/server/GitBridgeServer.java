@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.server;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
@@ -7,13 +7,13 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
+import uk.ac.ic.wlgitbridge.application.Config;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
-import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
-import uk.ac.ic.wlgitbridge.data.model.DataStore;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.ServletException;
 import java.io.File;
@@ -26,12 +26,15 @@ import java.net.BindException;
 /**
  * Class for the actual server.
  */
-public class WLGitBridgeServer {
+public class GitBridgeServer {
+
+    private final BridgeAPI bridgeAPI;
 
     private final Server jettyServer;
+
     private final int port;
     private String rootGitDirectoryPath;
-    private String writeLatexHostname;
+    private String apiBaseURL;
 
     /**
      * Constructs an instance of the server.
@@ -39,19 +42,20 @@ public class WLGitBridgeServer {
      * @param rootGitDirectoryPath the root directory path containing the git repositories
      * @throws ServletException if the servlet throws an exception
      */
-    private WLGitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+    private GitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+        Log.setLog(new NullLogger());
         this.port = port;
         this.rootGitDirectoryPath = rootGitDirectoryPath;
-        Log.setLog(new NullLogger());
+        bridgeAPI = new BridgeAPI(rootGitDirectoryPath);
         jettyServer = new Server(port);
         configureJettyServer();
     }
 
-    public WLGitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
+    public GitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
         this(config.getPort(), config.getRootGitDirectory());
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
-        writeLatexHostname = config.getAPIBaseURL();
-        SnapshotAPIRequest.setBaseURL(writeLatexHostname);
+        apiBaseURL = config.getAPIBaseURL();
+        SnapshotAPIRequest.setBaseURL(apiBaseURL);
         Util.setServiceName(config.getServiceName());
         Util.setPostbackURL(config.getPostbackURL());
         Util.setPort(config.getPort());
@@ -65,7 +69,7 @@ public class WLGitBridgeServer {
             jettyServer.start();
             Util.sout(Util.getServiceName() + "-Git Bridge server started");
             Util.sout("Listening on port: " + port);
-            Util.sout("Bridged to: " + writeLatexHostname);
+            Util.sout("Bridged to: " + apiBaseURL);
             Util.sout("Postback base URL: " + Util.getPostbackURL());
             Util.sout("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
@@ -85,16 +89,15 @@ public class WLGitBridgeServer {
 
     private void configureJettyServer() throws ServletException, InvalidRootDirectoryPathException {
         HandlerCollection handlers = new HandlerCollection();
-        BridgeAPI writeLatexDataSource = new BridgeAPI(new DataStore(rootGitDirectoryPath));
         handlers.setHandlers(new Handler[] {
-                initResourceHandler(writeLatexDataSource),
-                new SnapshotPushPostbackHandler(writeLatexDataSource),
-                initGitHandler(writeLatexDataSource)
+                initResourceHandler(),
+                new PostbackHandler(bridgeAPI),
+                initGitHandler()
         });
         jettyServer.setHandler(handlers);
     }
 
-    private Handler initGitHandler(BridgeAPI bridgeAPI) throws ServletException, InvalidRootDirectoryPathException {
+    private Handler initGitHandler() throws ServletException, InvalidRootDirectoryPathException {
         final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
@@ -105,8 +108,8 @@ public class WLGitBridgeServer {
         return servletContextHandler;
     }
 
-    private Handler initResourceHandler(BridgeAPI writeLatexDataSource) {
-        ResourceHandler resourceHandler = new AttsResourceHandler(writeLatexDataSource);
+    private Handler initResourceHandler() {
+        ResourceHandler resourceHandler = new FileServlet(bridgeAPI);
         resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;
     }

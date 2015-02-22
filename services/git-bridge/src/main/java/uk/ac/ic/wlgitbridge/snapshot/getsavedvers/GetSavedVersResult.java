@@ -14,15 +14,15 @@ import java.util.List;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetSavedVersResult extends Result {
+public class GetSavedVersResult extends Result {
 
     private List<SnapshotInfo> savedVers;
 
-    public SnapshotGetSavedVersResult(Request request, JsonElement json) throws FailedConnectionException {
+    public GetSavedVersResult(Request request, JsonElement json) throws FailedConnectionException {
         super(request, json);
     }
 
-    public SnapshotGetSavedVersResult(List<SnapshotInfo> savedVers) {
+    public GetSavedVersResult(List<SnapshotInfo> savedVers) {
         this.savedVers = savedVers;
     }
 

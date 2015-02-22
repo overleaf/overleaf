@@ -1,14 +1,14 @@
 package uk.ac.ic.wlgitbridge.data.model;
 
 import org.joda.time.DateTime;
-import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.WLUser;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Winston on 03/11/14.
@@ -34,17 +34,6 @@ public class Snapshot implements Comparable<Snapshot> {
 
         srcs = data.getSrcs();
         atts = data.getAtts();
-    }
-
-    public Snapshot(int versionID) {
-        this.versionID = versionID;
-        comment = "Most recent update";
-        userName = "Anonymous";
-        userEmail = "anonymous@" + Util.getServiceName() + ".com";
-        createdAt = new Date();
-
-        srcs = new LinkedList<SnapshotFile>();
-        atts = new LinkedList<SnapshotAttachment>();
     }
 
     public int getVersionID() {

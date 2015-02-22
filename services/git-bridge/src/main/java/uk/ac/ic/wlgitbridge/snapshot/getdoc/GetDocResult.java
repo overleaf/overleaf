@@ -12,7 +12,7 @@ import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.ProtectedProjectException;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetDocResult extends Result {
+public class GetDocResult extends Result {
 
     private int error;
     private int versionID;
@@ -22,11 +22,11 @@ public class SnapshotGetDocResult extends Result {
 
     private SnapshotPostException exception;
 
-    public SnapshotGetDocResult(Request request, JsonElement json) throws FailedConnectionException {
+    public GetDocResult(Request request, JsonElement json) throws FailedConnectionException {
         super(request, json);
     }
 
-    public SnapshotGetDocResult(JsonElement error, int versionID, String createdAt, String email, String name) {
+    public GetDocResult(JsonElement error, int versionID, String createdAt, String email, String name) {
         if (error == null) {
             this.error = -1;
         } else {

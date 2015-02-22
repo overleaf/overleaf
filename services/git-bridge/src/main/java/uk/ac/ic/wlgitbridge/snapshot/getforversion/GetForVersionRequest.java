@@ -8,13 +8,13 @@ import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetForVersionRequest extends SnapshotAPIRequest<SnapshotGetForVersionResult> {
+public class GetForVersionRequest extends SnapshotAPIRequest<GetForVersionResult> {
 
     public static final String API_CALL = "/snapshots";
 
     private int versionID;
 
-    public SnapshotGetForVersionRequest(String projectName, int versionID) {
+    public GetForVersionRequest(String projectName, int versionID) {
         super(projectName, API_CALL + "/" + versionID);
         this.versionID = versionID;
     }
@@ -25,8 +25,8 @@ public class SnapshotGetForVersionRequest extends SnapshotAPIRequest<SnapshotGet
     }
 
     @Override
-    protected SnapshotGetForVersionResult parseResponse(JsonElement json) throws FailedConnectionException {
-        return new SnapshotGetForVersionResult(this, json);
+    protected GetForVersionResult parseResponse(JsonElement json) throws FailedConnectionException {
+        return new GetForVersionResult(this, json);
     }
 
     public int getVersionID() {

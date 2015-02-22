@@ -4,7 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
+import uk.ac.ic.wlgitbridge.application.GitBridgeApp;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.server.MockSnapshotServer;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIStateBuilder;
@@ -52,7 +52,7 @@ public class WLGitBridgeIntegrationTest {
         MockSnapshotServer server = new MockSnapshotServer(3857, getResource("/canCloneARepository").toFile());
         server.start();
         server.setState(states.get("canCloneARepository").get("state"));
-        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
                 makeConfigFile(33857, 3857)
         });
         wlgb.run();
@@ -70,7 +70,7 @@ public class WLGitBridgeIntegrationTest {
         MockSnapshotServer server = new MockSnapshotServer(3858, getResource("/canCloneMultipleRepositories").toFile());
         server.start();
         server.setState(states.get("canCloneMultipleRepositories").get("state"));
-        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
                 makeConfigFile(33858, 3858)
         });
         wlgb.run();
@@ -93,7 +93,7 @@ public class WLGitBridgeIntegrationTest {
         MockSnapshotServer server = new MockSnapshotServer(3860, getResource("/canPullADeletedTexFile").toFile());
         server.start();
         server.setState(states.get("canPullADeletedTexFile").get("base"));
-        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
                 makeConfigFile(33860, 3860)
         });
         wlgb.run();
@@ -120,7 +120,7 @@ public class WLGitBridgeIntegrationTest {
         MockSnapshotServer server = new MockSnapshotServer(3861, getResource("/cannotCloneAProtectedProject").toFile());
         server.start();
         server.setState(states.get("cannotCloneAProtectedProject").get("state"));
-        WLGitBridgeApplication wlgb = new WLGitBridgeApplication(new String[] {
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
                 makeConfigFile(33861, 3861)
         });
         wlgb.run();
@@ -151,7 +151,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private Path getResource(String path) {
-        return Paths.get("src/servermock/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
+        return Paths.get("src/test/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
     }
 
     private InputStream getResourceAsStream(String path) {

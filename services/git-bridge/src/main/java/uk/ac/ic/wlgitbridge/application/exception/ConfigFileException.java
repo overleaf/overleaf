@@ -3,12 +3,11 @@ package uk.ac.ic.wlgitbridge.application.exception;
 /**
  * Created by Winston on 05/12/14.
  */
-public class InvalidConfigFileException extends Exception {
+public class ConfigFileException extends Exception {
 
     private final String missingMember;
 
-    public InvalidConfigFileException(String missingMember) {
-
+    public ConfigFileException(String missingMember) {
         this.missingMember = missingMember;
     }
 

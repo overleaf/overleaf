@@ -1,16 +1,16 @@
 package uk.ac.ic.wlgitbridge.snapshot.servermock.response.getdoc;
 
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponse;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.SnapshotGetDocResult;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
 
 /**
  * Created by Winston on 09/01/15.
  */
 public class SnapshotGetDocResponse extends SnapshotResponse {
 
-    private final SnapshotGetDocResult state;
+    private final GetDocResult state;
 
-    public SnapshotGetDocResponse(SnapshotGetDocResult state) {
+    public SnapshotGetDocResponse(GetDocResult state) {
         this.state = state;
     }
 

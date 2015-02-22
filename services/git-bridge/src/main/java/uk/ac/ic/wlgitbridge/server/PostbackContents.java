@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -12,7 +12,7 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostExceptionBuilder
 /**
  * Created by Winston on 17/11/14.
  */
-public class SnapshotPushPostbackContents implements JSONSource {
+public class PostbackContents implements JSONSource {
 
     private static final String CODE_SUCCESS = "upToDate";
 
@@ -25,7 +25,7 @@ public class SnapshotPushPostbackContents implements JSONSource {
     private int versionID;
     private SnapshotPostException exception;
 
-    public SnapshotPushPostbackContents(BridgeAPI bridgeAPI, String projectName, String postbackKey, String contents) {
+    public PostbackContents(BridgeAPI bridgeAPI, String projectName, String postbackKey, String contents) {
         this.bridgeAPI = bridgeAPI;
         this.projectName = projectName;
         this.postbackKey = postbackKey;

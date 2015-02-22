@@ -9,14 +9,14 @@ import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 /**
  * Created by Winston on 16/11/14.
  */
-public class SnapshotPushRequest extends SnapshotAPIRequest<SnapshotPushRequestResult> {
+public class PushRequest extends SnapshotAPIRequest<PushResult> {
 
     private static final String API_CALL = "/snapshots";
 
     private final CandidateSnapshot candidateSnapshot;
     private final String postbackKey;
 
-    public SnapshotPushRequest(CandidateSnapshot candidateSnapshot, String postbackKey) {
+    public PushRequest(CandidateSnapshot candidateSnapshot, String postbackKey) {
         super(candidateSnapshot.getProjectName(), API_CALL);
         this.candidateSnapshot = candidateSnapshot;
         this.postbackKey = postbackKey;
@@ -33,8 +33,8 @@ public class SnapshotPushRequest extends SnapshotAPIRequest<SnapshotPushRequestR
     }
 
     @Override
-    protected SnapshotPushRequestResult parseResponse(JsonElement json) throws FailedConnectionException {
-        return new SnapshotPushRequestResult(this, json);
+    protected PushResult parseResponse(JsonElement json) throws FailedConnectionException {
+        return new PushResult(this, json);
     }
 
 }

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import uk.ac.ic.wlgitbridge.application.exception.InvalidConfigFileException;
+import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 
 import java.io.FileReader;
@@ -23,7 +23,7 @@ public class Config implements JSONSource {
     private String postbackURL;
     private String serviceName;
 
-    public Config(String configFilePath) throws InvalidConfigFileException, IOException {
+    public Config(String configFilePath) throws ConfigFileException, IOException {
         try {
             fromJSON(new Gson().fromJson(new FileReader(configFilePath), JsonElement.class));
         } catch (JsonParseException e) {
@@ -73,7 +73,7 @@ public class Config implements JSONSource {
     private JsonElement getElement(JsonObject configObject, String name) {
         JsonElement element = configObject.get(name);
         if (element == null) {
-            throw new RuntimeException(new InvalidConfigFileException(name));
+            throw new RuntimeException(new ConfigFileException(name));
         }
         return element;
     }

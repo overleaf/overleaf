@@ -6,6 +6,7 @@ import com.ning.http.client.Response;
 import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
@@ -20,14 +21,14 @@ import java.util.concurrent.ExecutionException;
  */
 public class ResourceFetcher {
 
-    private final URLIndexStore urlIndexStore;
+    private final PersistentStore persistentStore;
 
-    public ResourceFetcher(URLIndexStore urlIndexStore) {
-        this.urlIndexStore = urlIndexStore;
+    public ResourceFetcher(PersistentStore persistentStore) {
+        this.persistentStore = persistentStore;
     }
 
     public RawFile get(String projectName, String url, String newPath, Repository repository) throws IOException {
-        String path = urlIndexStore.getPathForURLInProject(projectName, url);
+        String path = persistentStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {
             path = newPath;
@@ -70,7 +71,7 @@ public class ResourceFetcher {
             Util.printStackTrace(e);
             throw new FailedConnectionException();
         }
-        urlIndexStore.addURLIndexForProject(projectName, url, path);
+        persistentStore.addURLIndexForProject(projectName, url, path);
         return contents;
     }
 

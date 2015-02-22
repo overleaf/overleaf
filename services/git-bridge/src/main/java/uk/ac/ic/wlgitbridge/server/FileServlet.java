@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.server;
 
 import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.server.Request;
@@ -16,11 +16,11 @@ import java.io.IOException;
 /**
  * Created by Winston on 04/12/14.
  */
-public class AttsResourceHandler extends ResourceHandler {
+public class FileServlet extends ResourceHandler {
 
     private final BridgeAPI writeLatexDataSource;
 
-    public AttsResourceHandler(BridgeAPI writeLatexDataSource) {
+    public FileServlet(BridgeAPI writeLatexDataSource) {
         this.writeLatexDataSource = writeLatexDataSource;
     }
 

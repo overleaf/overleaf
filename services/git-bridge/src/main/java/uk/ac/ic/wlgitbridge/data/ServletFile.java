@@ -8,12 +8,10 @@ import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 public class ServletFile extends RawFile {
 
     private final RawFile file;
-    private final RawFile oldFile;
     private final boolean changed;
 
     public ServletFile(RawFile file, RawFile oldFile) {
         this.file = file;
-        this.oldFile = oldFile;
         changed = !equals(oldFile);
     }
 

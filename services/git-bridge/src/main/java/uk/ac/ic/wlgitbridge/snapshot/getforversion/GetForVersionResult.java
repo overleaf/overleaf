@@ -7,15 +7,15 @@ import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetForVersionResult extends Result {
+public class GetForVersionResult extends Result {
 
     private SnapshotData snapshotData;
 
-    public SnapshotGetForVersionResult(Request request, JsonElement json) {
+    public GetForVersionResult(Request request, JsonElement json) {
         super(request, json);
     }
 
-    public SnapshotGetForVersionResult(SnapshotData snapshotData) {
+    public GetForVersionResult(SnapshotData snapshotData) {
         this.snapshotData = snapshotData;
     }
 

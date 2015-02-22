@@ -9,11 +9,11 @@ import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 /**
  * Created by Winston on 16/11/14.
  */
-public class SnapshotPushRequestResult extends Result {
+public class PushResult extends Result {
 
     private boolean success;
 
-    public SnapshotPushRequestResult(Request request, JsonElement json) throws FailedConnectionException {
+    public PushResult(Request request, JsonElement json) throws FailedConnectionException {
         super(request, json);
     }
 

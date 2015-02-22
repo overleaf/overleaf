@@ -8,11 +8,11 @@ import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetSavedVersRequest extends SnapshotAPIRequest<SnapshotGetSavedVersResult> {
+public class GetSavedVersRequest extends SnapshotAPIRequest<GetSavedVersResult> {
 
     public static final String API_CALL = "/saved_vers";
 
-    public SnapshotGetSavedVersRequest(String projectName) {
+    public GetSavedVersRequest(String projectName) {
         super(projectName, API_CALL);
     }
 
@@ -22,8 +22,8 @@ public class SnapshotGetSavedVersRequest extends SnapshotAPIRequest<SnapshotGetS
     }
 
     @Override
-    protected SnapshotGetSavedVersResult parseResponse(JsonElement json) throws FailedConnectionException {
-        return new SnapshotGetSavedVersResult(this, json);
+    protected GetSavedVersResult parseResponse(JsonElement json) throws FailedConnectionException {
+        return new GetSavedVersResult(this, json);
     }
 
 }

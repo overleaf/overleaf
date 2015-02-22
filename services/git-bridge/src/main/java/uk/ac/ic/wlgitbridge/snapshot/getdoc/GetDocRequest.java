@@ -8,11 +8,11 @@ import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 /**
  * Created by Winston on 06/11/14.
  */
-public class SnapshotGetDocRequest extends SnapshotAPIRequest<SnapshotGetDocResult> {
+public class GetDocRequest extends SnapshotAPIRequest<GetDocResult> {
 
     public static final String API_CALL = "";
 
-    public SnapshotGetDocRequest(String projectName) {
+    public GetDocRequest(String projectName) {
         super(projectName, API_CALL);
     }
 
@@ -22,8 +22,8 @@ public class SnapshotGetDocRequest extends SnapshotAPIRequest<SnapshotGetDocResu
     }
 
     @Override
-    protected SnapshotGetDocResult parseResponse(JsonElement json) throws FailedConnectionException {
-        return new SnapshotGetDocResult(this, json);
+    protected GetDocResult parseResponse(JsonElement json) throws FailedConnectionException {
+        return new GetDocResult(this, json);
     }
 
 }

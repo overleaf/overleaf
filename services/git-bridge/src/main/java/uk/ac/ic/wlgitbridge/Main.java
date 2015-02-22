@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge;
 
-import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
+import uk.ac.ic.wlgitbridge.application.GitBridgeApp;
 
 /**
  * Created by Winston on 01/11/14.
@@ -8,7 +8,7 @@ import uk.ac.ic.wlgitbridge.application.WLGitBridgeApplication;
 public class Main {
 
     public static void main(String[] args) {
-        new WLGitBridgeApplication(args).run();
+        new GitBridgeApp(args).run();
     }
 
 }

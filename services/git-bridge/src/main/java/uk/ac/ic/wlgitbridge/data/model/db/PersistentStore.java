@@ -1,6 +1,5 @@
 package uk.ac.ic.wlgitbridge.data.model.db;
 
-import uk.ac.ic.wlgitbridge.data.model.URLIndexStore;
 import uk.ac.ic.wlgitbridge.data.model.db.sql.SQLiteWLDatabase;
 
 import java.io.File;
@@ -10,7 +9,7 @@ import java.util.List;
 /**
  * Created by Winston on 19/11/14.
  */
-public class PersistentStore implements URLIndexStore {
+public class PersistentStore {
 
     private final SQLiteWLDatabase database;
 
@@ -47,7 +46,6 @@ public class PersistentStore implements URLIndexStore {
         }
     }
 
-    @Override
     public void addURLIndexForProject(String projectName, String url, String path) {
         try {
             database.addURLIndex(projectName, url, path);
@@ -63,8 +61,6 @@ public class PersistentStore implements URLIndexStore {
             throw new RuntimeException(e);
         }
     }
-
-    @Override
     public String getPathForURLInProject(String projectName, String url) {
         try {
             return database.getPathForURLInProject(projectName, url);

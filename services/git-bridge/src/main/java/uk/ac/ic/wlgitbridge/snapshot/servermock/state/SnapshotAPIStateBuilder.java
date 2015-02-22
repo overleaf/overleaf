@@ -9,12 +9,12 @@ import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.data.SnapshotPushR
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.data.SnapshotPushResultSuccess;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.postback.*;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.postback.invalidfile.InvalidFileError;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.SnapshotGetDocResult;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotFile;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotGetForVersionResult;
-import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotGetSavedVersResult;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.GetForVersionResult;
+import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.GetSavedVersResult;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotInfo;
 
 import java.io.InputStream;
@@ -31,9 +31,9 @@ public class SnapshotAPIStateBuilder {
 
     private final JsonArray projects;
 
-    private Map<String, SnapshotGetDocResult> getDoc = new HashMap<String, SnapshotGetDocResult>();
-    private Map<String, SnapshotGetSavedVersResult> getSavedVers = new HashMap<String, SnapshotGetSavedVersResult>();
-    private Map<String, Map<Integer, SnapshotGetForVersionResult>> getForVers = new HashMap<String, Map<Integer, SnapshotGetForVersionResult>>();
+    private Map<String, GetDocResult> getDoc = new HashMap<String, GetDocResult>();
+    private Map<String, GetSavedVersResult> getSavedVers = new HashMap<String, GetSavedVersResult>();
+    private Map<String, Map<Integer, GetForVersionResult>> getForVers = new HashMap<String, Map<Integer, GetForVersionResult>>();
     private Map<String, SnapshotPushResult> push = new HashMap<String, SnapshotPushResult>();
     private Map<String, SnapshotPostbackRequest> postback = new HashMap<String, SnapshotPostbackRequest>();
 
@@ -59,7 +59,7 @@ public class SnapshotAPIStateBuilder {
 
     private void addGetDocForProject(String projectName, JsonObject jsonGetDoc) {
         getDoc.put(projectName,
-                   new SnapshotGetDocResult(jsonGetDoc.get("error"),
+                   new GetDocResult(jsonGetDoc.get("error"),
                                             jsonGetDoc.get("versionID").getAsInt(),
                                             jsonGetDoc.get("createdAt").getAsString(),
                                             jsonGetDoc.get("email").getAsString(),
@@ -71,7 +71,7 @@ public class SnapshotAPIStateBuilder {
         for (JsonElement ver : jsonGetSavedVers) {
             savedVers.add(getSnapshotInfo(ver.getAsJsonObject()));
         }
-        getSavedVers.put(projectName, new SnapshotGetSavedVersResult(savedVers));
+        getSavedVers.put(projectName, new GetSavedVersResult(savedVers));
     }
 
     private SnapshotInfo getSnapshotInfo(JsonObject jsonSnapshotInfo) {
@@ -83,11 +83,11 @@ public class SnapshotAPIStateBuilder {
     }
 
     private void addGetForVersForProject(String projectName, JsonArray jsonGetForVers) {
-        Map<Integer, SnapshotGetForVersionResult> forVers = new HashMap<Integer, SnapshotGetForVersionResult>();
+        Map<Integer, GetForVersionResult> forVers = new HashMap<Integer, GetForVersionResult>();
         for (JsonElement forVer : jsonGetForVers) {
             JsonObject forVerObj = forVer.getAsJsonObject();
             forVers.put(forVerObj.get("versionID").getAsInt(),
-                        new SnapshotGetForVersionResult(new SnapshotData(getSrcs(forVerObj.get("srcs").getAsJsonArray()),
+                        new GetForVersionResult(new SnapshotData(getSrcs(forVerObj.get("srcs").getAsJsonArray()),
                                                                          getAtts(forVerObj.get("atts").getAsJsonArray()))));
         }
         getForVers.put(projectName, forVers);

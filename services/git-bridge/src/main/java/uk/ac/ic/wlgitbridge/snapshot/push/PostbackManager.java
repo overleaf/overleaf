@@ -15,11 +15,11 @@ import java.util.Map;
 public class PostbackManager {
 
     private final SecureRandom random;
-    private final Map<String, PostbackContents> postbackContentsTable;
+    private final Map<String, PostbackPromise> postbackContentsTable;
 
     public PostbackManager() {
         random = new SecureRandom();
-        postbackContentsTable = new HashMap<String, PostbackContents>();
+        postbackContentsTable = new HashMap<String, PostbackPromise>();
     }
 
     public int getVersionID(String projectName) throws SnapshotPostException {
@@ -40,8 +40,8 @@ public class PostbackManager {
         getPostbackForProject(projectName).receivedException(exception, postbackKey);
     }
 
-    private PostbackContents getPostbackForProject(String projectName) throws UnexpectedPostbackException {
-        PostbackContents contents = postbackContentsTable.remove(projectName);
+    private PostbackPromise getPostbackForProject(String projectName) throws UnexpectedPostbackException {
+        PostbackPromise contents = postbackContentsTable.remove(projectName);
         if (contents == null) {
             throw new UnexpectedPostbackException();
         }
@@ -50,7 +50,7 @@ public class PostbackManager {
 
     public String makeKeyForProject(String projectName) {
         String key = System.currentTimeMillis() + randomString();
-        PostbackContents contents = new PostbackContents(key);
+        PostbackPromise contents = new PostbackPromise(key);
         postbackContentsTable.put(projectName, contents);
         return key;
     }
