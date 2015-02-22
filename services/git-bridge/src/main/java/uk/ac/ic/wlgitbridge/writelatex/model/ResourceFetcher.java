@@ -7,6 +7,7 @@ import com.ning.http.client.Response;
 import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 
@@ -57,8 +58,10 @@ public class ResourceFetcher {
 
             }).get();
         } catch (InterruptedException e) {
+            Util.printStackTrace(e);
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
+            Util.printStackTrace(e);
             throw new FailedConnectionException();
         }
         urlIndexStore.addURLIndexForProject(projectName, url, path);

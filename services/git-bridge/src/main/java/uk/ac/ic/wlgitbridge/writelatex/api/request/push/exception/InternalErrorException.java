@@ -18,7 +18,7 @@ public class InternalErrorException extends SevereSnapshotPostException {
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList("There as an internal error with the Git server.",
+        return Arrays.asList("There was an internal error with the Git server.",
                              "Please contact " + Util.getServiceName() + ".");
     }
 

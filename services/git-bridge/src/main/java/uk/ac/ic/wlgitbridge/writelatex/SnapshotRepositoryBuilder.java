@@ -7,6 +7,7 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.RepositorySource;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
+import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.InternalErrorException;
 
 import java.io.File;
@@ -35,6 +36,7 @@ public class SnapshotRepositoryBuilder implements RepositorySource {
             repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
             new WLBridgedProject(repository, name, writeLatexDataSource).buildRepository();
         } catch (IOException e) {
+            Util.printStackTrace(e);
             throw new ServiceMayNotContinueException(new InternalErrorException().getDescriptionLines().get(0));
         }
         return repository;
