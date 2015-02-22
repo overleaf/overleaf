@@ -56,8 +56,9 @@ public class ResourceFetcher {
 
                 @Override
                 public byte[] onCompleted(Response response) throws Exception {
-                    Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + response.getResponseBody().length() + "B) -> " + url);
-                    return bytes.toByteArray();
+                    byte[] data = bytes.toByteArray();
+                    Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + data.length + "B) -> " + url);
+                    return data;
                 }
 
             }).get();
