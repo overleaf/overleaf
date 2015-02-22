@@ -1,10 +1,12 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.bridge.CandidateSnapshotCallback;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
-import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.writelatex.SnapshotFetcher;
@@ -18,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by Winston on 06/11/14.
@@ -40,26 +43,36 @@ public class DataStore implements CandidateSnapshotCallback {
         resourceFetcher = new ResourceFetcher(persistentStore);
     }
 
-    public List<WritableRepositoryContents> updateProjectWithName(String name, Repository repository) throws IOException, SnapshotPostException {
+    public void updateProjectWithName(String name, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
         LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(name, persistentStore.getLatestVersionForProject(name));
         if (!snapshots.isEmpty()) {
             persistentStore.setLatestVersionForProject(name, snapshots.getLast().getVersionID());
         }
-        List<WritableRepositoryContents> commits = makeCommitsFromSnapshots(name, repository, snapshots);
-        return commits;
+        makeCommitsFromSnapshots(name, repository, snapshots);
     }
 
-    private List<WritableRepositoryContents> makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException {
-        List<WritableRepositoryContents> commits = new LinkedList<WritableRepositoryContents>();
+    private void makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException, GitAPIException {
         for (Snapshot snapshot : snapshots) {
             List<RawFile> files = new LinkedList<RawFile>();
             files.addAll(snapshot.getSrcs());
             for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
                 files.add(resourceFetcher.get(name, snapshotAttachment.getUrl(), snapshotAttachment.getPath(), repository));
             }
-            commits.add(new GitDirectoryContents(files, rootGitDirectory, name, snapshot));
+            commit(new GitDirectoryContents(files, rootGitDirectory, name, snapshot), repository);
         }
-        return commits;
+    }
+
+    private void commit(GitDirectoryContents contents, Repository repository) throws IOException, GitAPIException {
+        contents.write();
+        Git git = new Git(repository);
+        for (String missing : git.status().call().getMissing()) {
+            git.rm().setCached(true).addFilepattern(missing).call();
+        }
+        git.add().addFilepattern(".").call();
+        git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
+                .setMessage(contents.getCommitMessage())
+                .call();
+        Util.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
     }
 
     public CandidateSnapshot createCandidateSnapshotFromProjectWithContents(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents) throws SnapshotPostException, IOException, FailedConnectionException {

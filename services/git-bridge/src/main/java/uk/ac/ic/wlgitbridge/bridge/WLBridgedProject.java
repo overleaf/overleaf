@@ -46,21 +46,8 @@ public class WLBridgedProject {
     }
 
     private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
-        List<WritableRepositoryContents> writableRepositories;
         try {
-            writableRepositories = writeLatexDataSource.getWritableRepositories(name, repository);
-            for (WritableRepositoryContents contents : writableRepositories) {
-                contents.write();
-                Git git = new Git(repository);
-                for (String missing : git.status().call().getMissing()) {
-                    git.rm().setCached(true).addFilepattern(missing).call();
-                }
-                git.add().addFilepattern(".").call();
-                git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
-                        .setMessage(contents.getCommitMessage())
-                        .call();
-                Util.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
-            }
+            writeLatexDataSource.getWritableRepositories(name, repository);
         } catch (InvalidProjectException e) {
             throw new RepositoryNotFoundException(name);
         } catch (SnapshotPostException e) {

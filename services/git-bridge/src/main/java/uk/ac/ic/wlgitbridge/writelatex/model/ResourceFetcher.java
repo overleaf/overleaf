@@ -33,13 +33,16 @@ public class ResourceFetcher {
             path = newPath;
             contents = fetch(projectName, url, path);
         } else {
+            Util.sout("Found (" + projectName + "): " + url);
+            Util.sout("At (" + projectName + "): " + path);
             contents = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path).getContents();
         }
         return new RepositoryFile(path, contents);
     }
 
-    private byte[] fetch(String projectName, String url, String path) throws FailedConnectionException {
+    private byte[] fetch(String projectName, final String url, String path) throws FailedConnectionException {
         byte[] contents;
+        Util.sout("GET -> " + url);
         try {
             contents = new AsyncHttpClient().prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
 
@@ -53,6 +56,7 @@ public class ResourceFetcher {
 
                 @Override
                 public byte[] onCompleted(Response response) throws Exception {
+                    Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + response.getResponseBody().length() + "B) -> " + url);
                     return bytes.toByteArray();
                 }
 

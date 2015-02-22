@@ -1,9 +1,9 @@
 package uk.ac.ic.wlgitbridge.writelatex;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.RawDirectory;
-import uk.ac.ic.wlgitbridge.bridge.WritableRepositoryContents;
 import uk.ac.ic.wlgitbridge.bridge.WriteLatexDataSource;
 import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
@@ -16,7 +16,6 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.push.exception.*;
 import uk.ac.ic.wlgitbridge.writelatex.model.DataStore;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by Winston on 16/11/14.
@@ -64,10 +63,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     }
 
     @Override
-    public List<WritableRepositoryContents> getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException {
+    public void getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
         Util.sout("Fetching project: " + projectName);
-        List<WritableRepositoryContents> writableRepositoryContents = dataModel.updateProjectWithName(projectName, repository);
-        return writableRepositoryContents;
+        dataModel.updateProjectWithName(projectName, repository);
     }
 
     @Override
