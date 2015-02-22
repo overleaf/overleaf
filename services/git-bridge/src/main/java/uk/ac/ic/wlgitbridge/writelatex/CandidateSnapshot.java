@@ -22,11 +22,13 @@ public class CandidateSnapshot {
     private final String projectName;
     private final int currentVersion;
     private final List<ServletFile> files;
+    private final List<String> deleted;
 
     public CandidateSnapshot(String projectName, int currentVersion, RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
         this.projectName = projectName;
         this.currentVersion = currentVersion;
         files = diff(directoryContents, oldDirectoryContents);
+        deleted = deleted(directoryContents, oldDirectoryContents);
     }
 
     private List<ServletFile> diff(RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
@@ -38,6 +40,19 @@ public class CandidateSnapshot {
             files.add(new ServletFile(file, oldFileTable.get(file.getPath())));
         }
         return files;
+    }
+
+    private List<String> deleted(RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
+        List<String> deleted = new LinkedList<String>();
+        Map<String, RawFile> fileTable = directoryContents.getFileTable();
+        for (Entry<String, RawFile> entry : oldDirectoryContents.getFileTable().entrySet()) {
+            String path = entry.getKey();
+            RawFile newFile = fileTable.get(path);
+            if (newFile == null) {
+                deleted.add(path);
+            }
+        }
+        return deleted;
     }
 
     public void writeServletFiles(File rootGitDirectory) throws IOException {
@@ -80,26 +95,8 @@ public class CandidateSnapshot {
         return projectName;
     }
 
-//    @Override
-//    public int getPreviousVersionID() {
-//        return previousVersionID;
-//    }
-//
-//    @Override
-//    public String getProjectURL() {
-//        return projectURL;
-//    }
-//
-//    @Override
-//    public void approveWithVersionID(int versionID) {
-//        callback.approveSnapshot(versionID, this);
-//    }
-//
-
-//
-//    @Override
-//    public WLDirectoryNode getDirectoryNode() {
-//        return directoryNode;
-//    }
+    public List<String> getDeleted() {
+        return deleted;
+    }
 
 }

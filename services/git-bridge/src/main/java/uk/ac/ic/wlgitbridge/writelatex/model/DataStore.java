@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 /**
@@ -58,20 +59,22 @@ public class DataStore implements CandidateSnapshotCallback {
             for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
                 files.add(resourceFetcher.get(name, snapshotAttachment.getUrl(), snapshotAttachment.getPath(), repository));
             }
-            commit(new GitDirectoryContents(files, rootGitDirectory, name, snapshot), repository);
+            commit(name, new GitDirectoryContents(files, rootGitDirectory, name, snapshot), repository);
         }
     }
 
-    private void commit(GitDirectoryContents contents, Repository repository) throws IOException, GitAPIException {
+    private void commit(String name, GitDirectoryContents contents, Repository repository) throws IOException, GitAPIException {
         contents.write();
         Git git = new Git(repository);
-        for (String missing : git.status().call().getMissing()) {
+        Set<String> missingFiles = git.status().call().getMissing();
+        for (String missing : missingFiles) {
             git.rm().setCached(true).addFilepattern(missing).call();
         }
         git.add().addFilepattern(".").call();
         git.commit().setAuthor(new PersonIdent(contents.getUserName(), contents.getUserEmail(), contents.getWhen(), TimeZone.getDefault()))
                 .setMessage(contents.getCommitMessage())
                 .call();
+        persistentStore.deleteFilesForProject(name, missingFiles.toArray(new String[missingFiles.size()]));
         Util.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
     }
 
@@ -86,7 +89,9 @@ public class DataStore implements CandidateSnapshotCallback {
 
     @Override
     public void approveSnapshot(int versionID, CandidateSnapshot candidateSnapshot) {
+        List<String> deleted = candidateSnapshot.getDeleted();
         persistentStore.setLatestVersionForProject(candidateSnapshot.getProjectName(), versionID);
+        persistentStore.deleteFilesForProject(candidateSnapshot.getProjectName(), deleted.toArray(new String[deleted.size()]));
     }
 
     private File initRootGitDirectory(String rootGitDirectoryPath) {
