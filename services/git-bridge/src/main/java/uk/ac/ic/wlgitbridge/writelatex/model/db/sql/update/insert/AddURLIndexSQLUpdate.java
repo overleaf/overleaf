@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class AddURLIndexSQLUpdate implements SQLUpdate {
 
     private static final String ADD_URL_INDEX =
-            "INSERT INTO `url_index_store` (`project_name`, `url`, `path`) VALUES (?, ?, ?);\n";
+            "INSERT OR REPLACE INTO `url_index_store` (`project_name`, `url`, `path`) VALUES (?, ?, ?);\n";
 
     private final String projectName;
     private final String url;
