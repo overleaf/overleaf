@@ -11,7 +11,7 @@ describe "DocManager", ->
 	beforeEach ->
 		@DocManager = SandboxedModule.require modulePath, requires:
 			"./MongoManager": @MongoManager = {}
-			"logger-sharelatex": @logger = {log: sinon.stub()}
+			"logger-sharelatex": @logger = {log: sinon.stub(), warn:->}
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
 		@callback = sinon.stub()

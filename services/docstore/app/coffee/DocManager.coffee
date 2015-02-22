@@ -16,6 +16,7 @@ module.exports = DocManager =
 					if docFromDocCollection?
 						return callback null, docFromDocCollection, mongoPath
 					else if doc?
+						logger.warn project_id:project_id, doc_id:doc_id, "doc just used from project collection, why?"
 						return callback null, doc, mongoPath
 					else
 						return callback new Errors.NotFoundError("No such doc: #{project_id}")
