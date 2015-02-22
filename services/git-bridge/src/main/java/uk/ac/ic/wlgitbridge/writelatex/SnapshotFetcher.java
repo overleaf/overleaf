@@ -17,10 +17,10 @@ import java.util.*;
  */
 public class SnapshotFetcher {
 
-    public List<Snapshot> getSnapshotsForProjectAfterVersion(String projectName, int version) throws FailedConnectionException, SnapshotPostException {
+    public LinkedList<Snapshot> getSnapshotsForProjectAfterVersion(String projectName, int version) throws FailedConnectionException, SnapshotPostException {
         List<SnapshotInfo> snapshotInfos = getSnapshotInfosAfterVersion(projectName, version);
         List<SnapshotData> snapshotDatas = getMatchingSnapshotData(projectName, snapshotInfos);
-        List<Snapshot> snapshots = combine(snapshotInfos, snapshotDatas);
+        LinkedList<Snapshot> snapshots = combine(snapshotInfos, snapshotDatas);
         return snapshots;
     }
 
@@ -63,8 +63,8 @@ public class SnapshotFetcher {
         return requests;
     }
 
-    private List<Snapshot> combine(List<SnapshotInfo> snapshotInfos, List<SnapshotData> snapshotDatas) {
-        List<Snapshot> snapshots = new LinkedList<Snapshot>();
+    private LinkedList<Snapshot> combine(List<SnapshotInfo> snapshotInfos, List<SnapshotData> snapshotDatas) {
+        LinkedList<Snapshot> snapshots = new LinkedList<Snapshot>();
         Iterator<SnapshotInfo> infos = snapshotInfos.iterator();
         Iterator<SnapshotData> datas = snapshotDatas.iterator();
         while (infos.hasNext()) {

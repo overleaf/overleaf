@@ -38,7 +38,10 @@ public class DataStore implements CandidateSnapshotCallback {
     }
 
     public List<WritableRepositoryContents> updateProjectWithName(String name, Repository repository) throws IOException, SnapshotPostException {
-        List<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(name, persistentStore.getLatestVersionForProject(name));
+        LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(name, persistentStore.getLatestVersionForProject(name));
+        if (!snapshots.isEmpty()) {
+            persistentStore.setLatestVersionForProject(name, snapshots.getLast().getVersionID());
+        }
         List<WritableRepositoryContents> commits = makeCommitsFromSnapshots(name, repository, snapshots);
         return commits;
     }
