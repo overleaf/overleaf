@@ -23,6 +23,7 @@ public class CandidateSnapshot {
     private final int currentVersion;
     private final List<ServletFile> files;
     private final List<String> deleted;
+    private File attsDirectory;
 
     public CandidateSnapshot(String projectName, int currentVersion, RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
         this.projectName = projectName;
@@ -56,11 +57,17 @@ public class CandidateSnapshot {
     }
 
     public void writeServletFiles(File rootGitDirectory) throws IOException {
-        File directory = new File(rootGitDirectory, ".wlgb/atts/" + projectName);
+        attsDirectory = new File(rootGitDirectory, ".wlgb/atts/" + projectName);
         for (ServletFile file : files) {
             if (file.isChanged()) {
-                file.writeToDisk(directory);
+                file.writeToDisk(attsDirectory);
             }
+        }
+    }
+
+    public void deleteServletFiles() throws IOException {
+        if (attsDirectory != null) {
+            Util.deleteInDirectory(attsDirectory);
         }
     }
 

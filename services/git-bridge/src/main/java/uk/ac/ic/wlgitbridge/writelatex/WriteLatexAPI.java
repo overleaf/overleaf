@@ -71,10 +71,11 @@ public class WriteLatexAPI implements WriteLatexDataSource {
     @Override
     public void putDirectoryContentsToProjectWithName(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException {
         mainProjectLock.lockForProject(projectName);
+        CandidateSnapshot candidate = null;
         try {
             Util.sout("Pushing project: " + projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
-            CandidateSnapshot candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
+            candidate = dataModel.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
             SnapshotPushRequest snapshotPushRequest = new SnapshotPushRequest(candidate, postbackKey);
             snapshotPushRequest.request();
             SnapshotPushRequestResult result = snapshotPushRequest.getResult();
@@ -91,6 +92,9 @@ public class WriteLatexAPI implements WriteLatexDataSource {
         } catch (IOException e) {
             throw e;
         } finally {
+            if (candidate != null) {
+                candidate.deleteServletFiles();
+            }
             mainProjectLock.unlockForProject(projectName);
         }
     }
