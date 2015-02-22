@@ -13,7 +13,7 @@ public class SnapshotInfo implements Comparable<SnapshotInfo> {
     private String createdAt;
 
     public SnapshotInfo(int versionID, String createdAt, String name, String email) {
-        this(versionID, "Update on " + Util.getServiceName() + ".", name, email, createdAt);
+        this(versionID, "Update on " + Util.getServiceName() + ".", email, name, createdAt);
     }
 
     public SnapshotInfo(int versionID, String comment, String email, String name, String createdAt) {
