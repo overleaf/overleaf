@@ -51,9 +51,9 @@ define [
 					if messages.length < MESSAGE_LIMIT
 						chat.state.atEnd = true
 					if !messages.reverse?
-						Raven?.captureException(new Error("messages has no reverse property #{JSON.stringify(messages)}"))
+						Raven?.captureException(new Error("messages has no reverse property #{typeof(messages)}"))
 					if typeof messages.reverse isnt 'function'
-						Raven?.captureException(new Error("messages.reverse not a function #{typeof(messages.reverse)} #{JSON.stringify(messages)}"))
+						Raven?.captureException(new Error("messages.reverse not a function #{typeof(messages.reverse)} #{typeof(messages)}"))
 						chat.state.errored = true
 					else
 						messages.reverse()
