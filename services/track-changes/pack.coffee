@@ -1,19 +1,27 @@
-mongojs = require "mongojs"
-async = require "async"
-db = mongojs.connect("localhost/sharelatex", ["docHistory"])
+Settings = require "settings-sharelatex"
+fs = require("fs")
+mongojs = require("mongojs")
+ObjectId = mongojs.ObjectId
+db = mongojs(Settings.mongo.url, ['docHistory'])
+async = require("async")
 BSON=db.bson.BSON
 util = require 'util'
 _ = require 'underscore'
+
+lineReader = require "line-reader"
+
 MAX_SIZE = 1024*1024
 MAX_COUNT = 1024
 MIN_COUNT = 100
 KEEP_OPS = 100
 
 insertPack = (packObj, callback) ->
+	if shutdownRequested
+		return callback('shutdown')
 	bulk = db.docHistory.initializeOrderedBulkOp();
 	expect_nInserted = 1
 	expect_nRemoved = packObj.pack.length
-	console.log 'inserting', expect_nInserted, 'pack, will remove', expect_nRemoved, 'ops'
+	util.log "insert #{expect_nInserted} pack, remove #{expect_nRemoved} ops"
 	bulk.insert packObj
 	packObj.pack.forEach (op) ->
 		bulk.find({_id:op._id}).removeOne()
@@ -24,7 +32,7 @@ insertPack = (packObj, callback) ->
 		callback(err, result)
 
 packDocHistory = (doc_id, callback) ->
-	console.log 'packing doc_id', doc_id
+	util.log "starting pack operation for #{doc_id}"
 	db.docHistory.find({doc_id:mongojs.ObjectId(doc_id),pack:{$exists:false}}).sort {v:1}, (err, docs) ->
 		packs = []
 		top = null
@@ -50,21 +58,56 @@ packDocHistory = (doc_id, callback) ->
 				packs.push top
 			else
 				# keep the op
-				console.log 'keeping large op unchanged'
+				util.log 'keeping large op unchanged (#{sz} bytes)'
 
 		# only store packs with a sufficient number of ops, discard others
 		packs = packs.filter (packObj) ->
 			packObj.pack.length > MIN_COUNT
 
-		console.log 'docs', origDocs, 'packs', packs.length
-		async.each packs, insertPack, (err, result) ->
-			if err?
-				console.log 'err', err
-			console.log 'done writing packs'
-			callback err, result
+		util.log "docs #{origDocs} packs #{packs.length}"
+		if packs.length
+			async.each packs, insertPack, (err, result) ->
+				if err?
+					console.log doc_id, err
+				else
+					util.log "done writing packs"
+				callback err, result
+		else
+			util.log "no packs to write"
+			callback null, null
 
-async.each process.argv.slice(2),	(doc_id, callback) ->
-		packDocHistory(doc_id, callback)
-	, (err, results) ->
-		console.log 'closing db'
-		db.close()
+readFile = (file, callback) ->
+	ids = []
+	lineReader.eachLine file, (line) ->
+		result = line.match(/[0-9a-f]{24}/)
+		if result?
+			ids.push result[0]
+	.then () ->
+		callback(null, ids)
+
+todoFile = process.argv[2]
+doneFile = process.argv[3]
+fs.appendFileSync doneFile, '# starting pack run at ' + new Date() + '\n'
+
+shutdownRequested = false
+process.on  'SIGINT', () ->
+	util.log "Gracefully shutting down from SIGINT"
+	shutdownRequested = true
+
+readFile todoFile, (err, todo) ->
+	readFile doneFile, (err, done) ->
+		pending = _.difference todo, done
+		async.eachSeries pending,	(doc_id, callback) ->
+			packDocHistory doc_id, (err, result) ->
+				if err?
+					return callback(err)
+				else
+					fs.appendFileSync doneFile, doc_id + '\n'
+				if shutdownRequested
+					return callback('shutdown')
+				callback(err, result)
+		, (err, results) ->
+			if err?
+				console.log 'error:', err
+			util.log 'closing db'
+			db.close()
