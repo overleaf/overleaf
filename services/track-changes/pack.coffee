@@ -66,7 +66,7 @@ packDocHistory = (doc_id, callback) ->
 
 		util.log "docs #{origDocs} packs #{packs.length}"
 		if packs.length
-			async.each packs, insertPack, (err, result) ->
+			async.eachSeries packs, insertPack, (err, result) ->
 				if err?
 					console.log doc_id, err
 				else
