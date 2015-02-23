@@ -105,7 +105,9 @@ readFile todoFile, (err, todo) ->
 					fs.appendFileSync doneFile, doc_id + '\n'
 				if shutdownRequested
 					return callback('shutdown')
-				callback(err, result)
+				setTimeout () ->
+					callback(err, result)
+				, 1000
 		, (err, results) ->
 			if err?
 				console.log 'error:', err
