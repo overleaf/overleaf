@@ -29,7 +29,9 @@ insertPack = (packObj, callback) ->
 		if err? or result.nInserted != expect_nInserted or result.nRemoved != expect_nRemoved
 			console.log err, result
 			console.log 'nInserted', result.nInserted, 'nRemoved', result.nRemoved
-		callback(err, result)
+		setTimeout () ->
+			callback(err, result)
+		, 2000
 
 packDocHistory = (doc_id, callback) ->
 	util.log "starting pack operation for #{doc_id}"
