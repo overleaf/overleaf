@@ -21,7 +21,7 @@
 				href,
 				ng-click="openUploadProjectModal()"
 			) #{translate("upload_project")}
-		!{moduleIncludes("newProjectMenu", locals)}
+		!= moduleIncludes("newProjectMenu", locals)
 		if (templates)
 			li.divider
 			li.dropdown-header #{translate("templates")}

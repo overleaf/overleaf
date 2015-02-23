@@ -41,12 +41,12 @@ aside#left-menu.full-size(
 				)
 					i.fa.fa-fw.fa-copy
 					| &nbsp;&nbsp; #{translate("copy_project")}
-			!{moduleIncludes("editorLeftMenu:actions", locals)}
+			!= moduleIncludes("editorLeftMenu:actions", locals)
 
 	if (moduleIncludesAvailable("editorLeftMenu:sync"))
 		div(ng-show="!anonymous")
 			h4() #{translate("sync")}
-			!{moduleIncludes("editorLeftMenu:sync", locals)}
+			!= moduleIncludes("editorLeftMenu:sync", locals)
 
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
