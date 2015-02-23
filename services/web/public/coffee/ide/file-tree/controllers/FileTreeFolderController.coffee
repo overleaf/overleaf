@@ -17,7 +17,7 @@ define [
 			# We need this here as well as in FileTreeController
 			# since the file-entity diretive creates a new scope
 			# that doesn't inherit from previous scopes.
-			return '0' if entity.type == "folder"
+			return '0' if entity?.type == "folder"
 			return '1'
 
 		$scope.openNewDocModal = () ->
