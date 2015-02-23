@@ -51,6 +51,9 @@ define [
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
+
+			if !response.outputFiles?
+				return
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
 					# Turn 'output.blg' into 'blg file'.
