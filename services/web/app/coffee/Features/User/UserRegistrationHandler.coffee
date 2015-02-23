@@ -53,7 +53,9 @@ module.exports =
 				async.series [
 					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
 					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
-					(cb)-> NewsLetterManager.subscribe user, cb
+					(cb)->
+						NewsLetterManager.subscribe user, ->
+						cb() #this can be slow, just fire it off
 					(cb)-> 
 						emailOpts =
 							first_name:user.first_name
