@@ -25,9 +25,7 @@ public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
     public String getSQL() {
         StringBuilder sb = new StringBuilder(DELETE_URL_INDEXES_FOR_PROJECT_NAME);
         for (int i = 0; i < paths.length; i++) {
-            sb.append('\'');
-            sb.append(paths[i]);
-            sb.append('\'');
+            sb.append("?");
             if (i < paths.length - 1) {
                 sb.append(", ");
             }
@@ -39,6 +37,9 @@ public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
     @Override
     public void addParametersToStatement(PreparedStatement statement) throws SQLException {
         statement.setString(1, projectName);
+        for (int i = 0; i < paths.length; i++) {
+            statement.setString(i + 2, paths[i]);
+        }
     }
 
 }
