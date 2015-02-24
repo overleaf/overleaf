@@ -5,12 +5,16 @@ Path = require "path"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 
+OutputFileOptimiser = require "./OutputFileOptimiser"
+
 module.exports = OutputCacheManager =
 	CACHE_DIR: '.cache/clsi'
 
 	saveOutputFiles: (outputFiles, target, callback) ->
 		# make a target/build_id directory and
 		# copy all the output files into it
+		# 
+		# TODO: use Path module
 		buildId = 'build-' + Date.now()
 		relDir = OutputCacheManager.CACHE_DIR + '/' + buildId
 		newDir = target + '/' + relDir
@@ -31,7 +35,8 @@ module.exports = OutputCacheManager =
 						else if stats.isFile()
 							#console.log 'isFile: copying'
 							fse.copy src, dst, (err) ->
-								cb(err, newFile)
+								OutputFileOptimiser.optimiseFile src, dst, (err, result) ->
+									cb(err, newFile)
 						else
 							# other filetype - shouldn't happen
 							cb(new Error("output file is not a file"), file)
