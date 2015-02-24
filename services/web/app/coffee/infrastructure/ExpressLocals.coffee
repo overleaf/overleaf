@@ -113,6 +113,11 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
+		res.locals.externalAuthenticationSystemUsed = ->
+			Settings.ldap?
+		next()
+
+	app.use (req, res, next)->
 		if req.session.user?
 			res.locals.user =
 				email: req.session.user.email

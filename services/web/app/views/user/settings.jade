@@ -19,19 +19,20 @@ block content
 										h3  #{translate("update_account_info")}
 										form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
 											input(type="hidden", name="_csrf", value=csrfToken)
-											.form-group
-												label(for='email')  #{translate("email")}
-												input.form-control(
-													type='email',
-													name='email',
-													placeholder="email@example.com"
-													required,
-													ng-model="email",
-													ng-init="email = #{JSON.stringify(user.email)}",
-													ng-model-options="{ updateOn: 'blur' }"
-												)
-												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
-													|  #{translate("must_be_email_address")}
+											if !externalAuthenticationSystemUsed()
+												.form-group
+													label(for='email')  #{translate("email")}
+													input.form-control(
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-init="email = #{JSON.stringify(user.email)}",
+														ng-model-options="{ updateOn: 'blur' }"
+													)
+													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+														|  #{translate("must_be_email_address")}
 											.form-group
 												label(for='firstName').control-label #{translate("first_name")}
 												input.form-control(
@@ -51,75 +52,77 @@ block content
 													type='submit',
 													ng-disabled="settingsForm.$invalid"
 												)  #{translate("update")}
-
-									.col-md-5.col-md-offset-1
-										h3  #{translate("change_password")}
-										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
-											input(type="hidden", name="_csrf", value=csrfToken)
-											.form-group
-												label(for='currentPassword') #{translate("current_password")}
-												input.form-control(
-													type='password',
-													name='currentPassword',
-													placeholder='*********',
-													ng-model="currentPassword",
-													required
-												)
-												span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
-													| #{translate("required")}
-											.form-group
-												label(for='newPassword1') #{translate("new_password")}
-												input.form-control(
-													id='newPassword1',
-													type='password',
-													name='newPassword1',
-													placeholder='*********',
-													ng-model="newPassword1",
-													required
-												)
-												span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
-													| #{translate("required")}
-											.form-group
-												label(for='newPassword2') #{translate("confirm_new_password")}
-												input.form-control(
-													type='password',
-													name='newPassword2',
-													placeholder='*********',
-													ng-model="newPassword2",
-													equals="newPassword1"
-												)
-												span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-													| #{translate("doesnt_match")}
-											.actions
-												button.btn.btn-primary(
-													type='submit',
-													ng-disabled="changePasswordForm.$invalid"
-												) #{translate("change")}
+									if !externalAuthenticationSystemUsed()
+										.col-md-5.col-md-offset-1
+											h3  #{translate("change_password")}
+											form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
+												input(type="hidden", name="_csrf", value=csrfToken)
+												.form-group
+													label(for='currentPassword') #{translate("current_password")}
+													input.form-control(
+														type='password',
+														name='currentPassword',
+														placeholder='*********',
+														ng-model="currentPassword",
+														required
+													)
+													span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
+														| #{translate("required")}
+												.form-group
+													label(for='newPassword1') #{translate("new_password")}
+													input.form-control(
+														id='newPassword1',
+														type='password',
+														name='newPassword1',
+														placeholder='*********',
+														ng-model="newPassword1",
+														required
+													)
+													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
+														| #{translate("required")}
+												.form-group
+													label(for='newPassword2') #{translate("confirm_new_password")}
+													input.form-control(
+														type='password',
+														name='newPassword2',
+														placeholder='*********',
+														ng-model="newPassword2",
+														equals="newPassword1"
+													)
+													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+														| #{translate("doesnt_match")}
+												.actions
+													button.btn.btn-primary(
+														type='submit',
+														ng-disabled="changePasswordForm.$invalid"
+													) #{translate("change")}
 
 							| !{moduleIncludes("userSettings", locals)}
 
 							hr
 
-							p.small
-								| #{translate("newsletter_info_and_unsubscribe")} 
-								a(
-									href,
-									ng-click="unsubscribe()",
-									ng-show="subscribed && !unsubscribing"
-								) #{translate("unsubscribe")}
-								span(
-									ng-show="unsubscribing"
-								)
-									i.fa.fa-spin.fa-refresh
-									| #{translate("unsubscribing")}
-								span.text-success(
-									ng-show="!subscribed"
-								)
-									i.fa.fa-check
-									| #{translate("unsubscribed")}
+							if !externalAuthenticationSystemUsed()
 
-							p #{translate("need_to_leave")} 
-								a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
+								p.small
+									| #{translate("newsletter_info_and_unsubscribe")} 
+									a(
+										href,
+										ng-click="unsubscribe()",
+										ng-show="subscribed && !unsubscribing"
+									) #{translate("unsubscribe")}
+									span(
+										ng-show="unsubscribing"
+									)
+										i.fa.fa-spin.fa-refresh
+										| #{translate("unsubscribing")}
+									span.text-success(
+										ng-show="!subscribed"
+									)
+										i.fa.fa-check
+										| #{translate("unsubscribed")}
+				
+									p #{translate("need_to_leave")} 
+										a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
 
 
 	script(type='text/ng-template', id='deleteAccountModalTemplate')
