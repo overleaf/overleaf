@@ -18,6 +18,8 @@ import java.util.concurrent.Future;
  */
 public abstract class Request<T extends Result> {
 
+    public static final AsyncHttpClient httpClient = new AsyncHttpClient();
+
     private final String url;
 
     private Future<T> future;
@@ -64,12 +66,12 @@ public abstract class Request<T extends Result> {
 
     private void performGetRequest() {
         Util.sout("GET -> " + url);
-        request(new AsyncHttpClient().prepareGet(url));
+        request(httpClient.prepareGet(url));
     }
 
     private void performPostRequest() {
         Util.sout("POST -> " + url);
-        request(new AsyncHttpClient().preparePost(url).setBody(getPostBody()).setHeader("Content-Type", "application/json"));
+        request(httpClient.preparePost(url).setBody(getPostBody()).setHeader("Content-Type", "application/json"));
     }
 
     private void request(BoundRequestBuilder boundRequestBuilder) {

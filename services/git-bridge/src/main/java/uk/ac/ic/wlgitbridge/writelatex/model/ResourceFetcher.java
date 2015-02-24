@@ -1,13 +1,13 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
 import com.ning.http.client.AsyncCompletionHandler;
-import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.HttpResponseBodyPart;
 import com.ning.http.client.Response;
 import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.bridge.RawFile;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.writelatex.api.request.base.Request;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.writelatex.filestore.RepositoryFile;
 
@@ -44,7 +44,7 @@ public class ResourceFetcher {
         byte[] contents;
         Util.sout("GET -> " + url);
         try {
-            contents = new AsyncHttpClient().prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
+            contents = Request.httpClient.prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
 
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
@@ -57,6 +57,7 @@ public class ResourceFetcher {
                 @Override
                 public byte[] onCompleted(Response response) throws Exception {
                     byte[] data = bytes.toByteArray();
+                    bytes.close();
                     Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + data.length + "B) -> " + url);
                     return data;
                 }
