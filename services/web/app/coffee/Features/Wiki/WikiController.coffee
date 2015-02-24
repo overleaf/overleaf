@@ -3,37 +3,47 @@ settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 ErrorController = require "../Errors/ErrorController"
 _ = require("underscore")
+AuthenticationController = require("../Authentication/AuthenticationController")
 
 other_lngs = ["es"]
 
 module.exports = WikiController = 
-	getPage: (req, res, next) ->
-		
-		page = req.url.replace(/^\/learn/, "").replace(/^\//, "")
-		if page == ""
-			page = "Main_Page"
 
-		logger.log page: page, "getting page from wiki"
-		if _.include(other_lngs, req.lng)
-			lngPage = "#{page}_#{req.lng}"
+
+	_checkIfLoginIsNeeded: (req, res, next)->
+		if settings.apis.wiki.requireLogin
+			AuthenticationController.requireLogin()(req, res, next)
 		else
-			lngPage = page
+			next()
 
-		WikiController._getPageContent "Contents", (error, contents) ->
-			return next(error) if error?
-			WikiController._getPageContent lngPage, (error, pageData) ->
+	getPage: (req, res, next) ->
+		WikiController._checkIfLoginIsNeeded req, res, ->
+			
+			page = req.url.replace(/^\/learn/, "").replace(/^\//, "")
+			if page == ""
+				page = "Main_Page"
+
+			logger.log page: page, "getting page from wiki"
+			if _.include(other_lngs, req.lng)
+				lngPage = "#{page}_#{req.lng}"
+			else
+				lngPage = page
+
+			WikiController._getPageContent "Contents", (error, contents) ->
 				return next(error) if error?
-				if pageData.content?.length > 280
-					if _.include(other_lngs, req.lng)
-						pageData.title = pageData.title.slice(0, pageData.title.length - (req.lng.length+1) )
-					WikiController._renderPage(pageData, contents, res)
-				else
-					WikiController._getPageContent page, (error, pageData) ->
-						return next(error) if error?
+				WikiController._getPageContent lngPage, (error, pageData) ->
+					return next(error) if error?
+					if pageData.content?.length > 280
+						if _.include(other_lngs, req.lng)
+							pageData.title = pageData.title.slice(0, pageData.title.length - (req.lng.length+1) )
 						WikiController._renderPage(pageData, contents, res)
+					else
+						WikiController._getPageContent page, (error, pageData) ->
+							return next(error) if error?
+							WikiController._renderPage(pageData, contents, res)
 
 
-				
+					
 
 	_getPageContent: (page, callback = (error, data = { content: "", title: "" }) ->) ->
 		request {
