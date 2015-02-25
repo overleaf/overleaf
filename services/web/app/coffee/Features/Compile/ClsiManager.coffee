@@ -54,6 +54,7 @@ module.exports = ClsiManager =
 			outputFiles.push
 				path: url.parse(file.url).path.replace("/project/#{project_id}/output/", "")
 				type: file.type
+				build: file.build
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
