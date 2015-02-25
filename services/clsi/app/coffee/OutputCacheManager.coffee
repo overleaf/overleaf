@@ -15,7 +15,7 @@ module.exports = OutputCacheManager =
 		# copy all the output files into it
 		# 
 		# TODO: use Path module
-		buildId = 'build-' + Date.now()
+		buildId = Date.now()
 		relDir = OutputCacheManager.CACHE_DIR + '/' + buildId
 		newDir = target + '/' + relDir
 		OutputCacheManager.expireOutputFiles target
@@ -25,9 +25,8 @@ module.exports = OutputCacheManager =
 			else
 				async.mapSeries outputFiles, (file, cb) ->
 					newFile = _.clone(file)
-					newFile.path = relDir + '/' + file.path
 					src = target + '/' + file.path
-					dst = target + '/' + newFile.path
+					dst = target + '/' + relDir + '/' + file.path
 					#console.log 'src', src, 'dst', dst
 					fs.stat src, (err, stats) ->
 						if err?
@@ -36,6 +35,8 @@ module.exports = OutputCacheManager =
 							#console.log 'isFile: copying'
 							fse.copy src, dst, (err) ->
 								OutputFileOptimiser.optimiseFile src, dst, (err, result) ->
+									console.log 'setting buildId on', newFile, 'to', buildId
+									newFile.build = buildId
 									cb(err, newFile)
 						else
 							# other filetype - shouldn't happen

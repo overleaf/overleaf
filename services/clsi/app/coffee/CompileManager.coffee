@@ -33,7 +33,7 @@ module.exports = CompileManager =
 
 				OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
 					return callback(error) if error?
-					OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) -> 
+					OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 						callback null, newOutputFiles
 	
 	clearProject: (project_id, _callback = (error) ->) ->

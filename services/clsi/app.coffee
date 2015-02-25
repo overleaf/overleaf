@@ -36,7 +36,24 @@ app.delete "/project/:project_id", CompileController.clearCache
 app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
 app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
 
-staticServer = express.static Settings.path.compilesDir, setHeaders: (res, path, stat) ->
+url = require "url"
+
+staticForbidSymLinks = (root, options) ->
+	expressStatic = express.static root, options
+	basePath = Path.resolve(root)
+	return (req, res, next) ->
+		path = url.parse(req.url).pathname
+		requestedFsPath = Path.normalize("#{basePath}/#{path}")
+		fs.realpath requestedFsPath, (err, realFsPath)->
+			if err?
+				return res.send(500)
+			else if requestedFsPath != realFsPath
+				logger.warn requestedFsPath:requestedFsPath, realFsPath:realFsPath, path: req.params[0], project_id: req.params.project_id, "trying to access a different file (symlink), aborting"
+				return res.send(404)
+			else
+				expressStatic(req, res, next)
+
+staticServer = staticForbidSymLinks Settings.path.compilesDir, setHeaders: (res, path, stat) ->
 	if Path.basename(path) == "output.pdf"
 		res.set("Content-Type", "application/pdf")
 		# Calculate an etag in the same way as nginx
@@ -51,7 +68,10 @@ staticServer = express.static Settings.path.compilesDir, setHeaders: (res, path,
 		res.set("Content-Type", "text/plain")
 
 app.get "/project/:project_id/output/*", require("./app/js/SymlinkCheckerMiddlewear"), (req, res, next) ->
-	req.url = "/#{req.params.project_id}/#{req.params[0]}"
+	if req.query?.build? && req.query.build.match(/^[0-9]+$/)
+		req.url = "/#{req.params.project_id}/.cache/clsi/#{req.query.build}/#{req.params[0]}"
+	else
+		req.url = "/#{req.params.project_id}/#{req.params[0]}"
 	staticServer(req, res, next)
 
 app.get "/status", (req, res, next) ->

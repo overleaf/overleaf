@@ -35,6 +35,7 @@ module.exports = CompileController =
 							outputFiles: outputFiles.map (file) ->
 								url: "#{Settings.apis.clsi.url}/project/#{request.project_id}/output/#{file.path}"
 								type: file.type
+								build: file.build
 					}
 		
 	clearCache: (req, res, next = (error) ->) ->
