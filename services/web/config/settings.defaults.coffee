@@ -337,13 +337,13 @@ module.exports =
 
 
 	
-	ldap:
-		host: 'ldap://ldap.forumsys.com'
-		dnObj: 'uid'
-		dnSuffix: 'dc=example,dc=com'
-		failMessage: 'LDAP User Fail'
-		fieldName: 'LDAP User'
-		placeholder: 'LDAP User ID'
-		emailAtt: 'mail'
+	# ldap:
+	# 	host: 'ldap://ldap.forumsys.com'
+	# 	dnObj: 'uid'
+	# 	dnSuffix: 'dc=example,dc=com'
+	# 	failMessage: 'LDAP User Fail'
+	# 	fieldName: 'LDAP User'
+	# 	placeholder: 'LDAP User ID'
+	# 	emailAtt: 'mail'
 
 
