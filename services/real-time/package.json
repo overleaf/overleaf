@@ -1,6 +1,6 @@
 {
   "name": "real-time-sharelatex",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "The socket.io layer of ShareLaTeX for real-time editor interactions",
   "author": "ShareLaTeX <team@sharelatex.com>",
   "repository": {
