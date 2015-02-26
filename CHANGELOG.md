@@ -1,3 +1,13 @@
+v0.1.3
+------
+
+* Fix bug with large files being corrupted when downloaded.
+* Update Ace editor to lastest release.
+* Lots of added null checks in the front-end javascript.
+* Don't crash if 'unzip' program isn't present.
+* Allow track-changes history to be packed into compressed 'packs'. This must be done manually for now.
+* Escape any shell special characters in the CLSI root path.
+
 v0.1.2
 ------
 
