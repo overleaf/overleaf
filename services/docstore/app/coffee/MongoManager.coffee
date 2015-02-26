@@ -12,9 +12,10 @@ module.exports = MongoManager =
 	upsertIntoDocCollection: (project_id, doc_id, lines, oldRev, callback)->
 		update =
 			$set:{}
+			$inc:{}
 		update.$set["lines"] = lines
 		update.$set["project_id"] = ObjectId(project_id)
-		update.$set["rev"] = oldRev + 1
+		update.$inc["rev"] = 1 #on new docs being created this will set the rev to 1
 		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
 
 

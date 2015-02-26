@@ -61,7 +61,7 @@ describe "MongoManager", ->
 				args = @db.docs.update.args[0]
 				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
 				assert.equal args[1]["$set"]["lines"], @lines
-				assert.equal args[1]["$set"]["rev"], 78
+				assert.equal args[1]["$inc"]["rev"], 1
 				assert.deepEqual args[1]["$set"]["project_id"], ObjectId(@project_id)
 				done()
 
