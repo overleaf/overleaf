@@ -14,3 +14,8 @@ module.exports =
 			url: "http://localhost:3000"
 			user: "sharelatex"
 			pass: "password"
+	redis:
+		web:
+			host: "localhost"
+			port: 6379
+			pass: ""
