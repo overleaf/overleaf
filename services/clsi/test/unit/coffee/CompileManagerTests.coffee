@@ -12,6 +12,7 @@ describe "CompileManager", ->
 			"./LatexRunner": @LatexRunner = {}
 			"./ResourceWriter": @ResourceWriter = {}
 			"./OutputFileFinder": @OutputFileFinder = {}
+			"./OutputCacheManager": @OutputCacheManager = {}
 			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"child_process": @child_process = {}
@@ -26,6 +27,15 @@ describe "CompileManager", ->
 				path: "output.pdf"
 				type: "pdf"
 			}]
+			@build_files = [{
+				path: "output.log"
+				type: "log"
+				build: 1234
+			}, {
+				path: "output.pdf"
+				type: "pdf"
+				build: 1234
+			}]
 			@request =
 				resources: @resources = "mock-resources"
 				rootResourcePath: @rootResourcePath = "main.tex"
@@ -37,6 +47,7 @@ describe "CompileManager", ->
 			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArg(3)
 			@LatexRunner.runLatex = sinon.stub().callsArg(2)
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
+			@OutputCacheManager.saveOutputFiles = sinon.stub().callsArgWith(2, null, @build_files)
 			@CompileManager.doCompile @request, @callback
 
 		it "should write the resources to disk", ->
@@ -60,7 +71,8 @@ describe "CompileManager", ->
 				.should.equal true
 
 		it "should return the output files", ->
-			@callback.calledWith(null, @output_files).should.equal true
+			console.log 'output_files', @build_files
+			@callback.calledWith(null, @build_files).should.equal true
 
 	describe "clearProject", ->
 		describe "succesfully", ->

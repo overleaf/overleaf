@@ -36,9 +36,11 @@ describe "CompileController", ->
 			@output_files = [{
 				path: "output.pdf"
 				type: "pdf"
+				build: 1234
 			}, {
 				path: "output.log"
 				type: "log"
+				build: 1234
 			}]
 			@RequestParser.parse = sinon.stub().callsArgWith(1, null, @request)
 			@ProjectPersistenceManager.markProjectAsJustAccessed = sinon.stub().callsArg(1)
@@ -73,6 +75,7 @@ describe "CompileController", ->
 							outputFiles: @output_files.map (file) =>
 								url: "#{@Settings.apis.clsi.url}/project/#{@project_id}/output/#{file.path}"
 								type: file.type
+								build: file.build
 					)
 					.should.equal true
 			
