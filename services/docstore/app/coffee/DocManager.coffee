@@ -24,31 +24,26 @@ module.exports = DocManager =
 				return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
-		DocManager.getDoc project_id, doc_id, (error, doc) ->
-
-			isNewDoc = error?.name == new Errors.NotFoundError().name
-
-			if !isNewDoc and error?
-				logger.err project_id: project_id, doc_id: doc_id, err:error, "error getting document for update"
-				return callback(error)
-			else if !isNewDoc and !doc?
-				logger.err project_id: project_id, doc_id: doc_id, "existing document to update could not be found"
-				return callback new Errors.NotFoundError("No such project/doc to update: #{project_id}/#{doc_id}")
-			else if _.isEqual(doc?.lines, lines)
+		MongoManager.findDoc doc_id, (err, doc)->
+			if err?
+				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
+				return callback(err)
+			
+			if _.isEqual(doc?.lines, lines)
 				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
 				return callback null, false, doc?.rev
-
-			oldRev = doc?.rev || 0
-			logger.log {
-				project_id: project_id
-				doc_id: doc_id,
-				oldDocLines: doc?.lines
-				newDocLines: lines
-				rev: oldRev
-			}, "updating doc lines"
-			MongoManager.upsertIntoDocCollection project_id, doc_id, lines, oldRev, (error)->
-				return callback(callback) if error?
-				callback null, true,  oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
+			else
+				oldRev = doc?.rev || 0
+				logger.log {
+					project_id: project_id
+					doc_id: doc_id,
+					oldDocLines: doc?.lines
+					newDocLines: lines
+					rev: oldRev
+				}, "updating doc lines"
+				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, oldRev, (error)->
+					return callback(callback) if error?
+					callback null, true,  oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc) ->

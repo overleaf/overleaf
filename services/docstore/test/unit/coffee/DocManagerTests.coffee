@@ -142,17 +142,17 @@ describe "DocManager", ->
 			@newDocLines = ["new", "doc", "lines"]
 			@doc = { _id: @doc_id, lines: @oldDocLines, rev: @rev = 5 }
 
-			@MongoManager.updateDoc = sinon.stub().callsArg(3)
 			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(4)
+			@MongoManager.findDoc = sinon.stub()
 
 		describe "when the doc lines have changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 
 			it "should get the existing doc", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
+				@MongoManager.findDoc
+					.calledWith(@doc_id)
 					.should.equal true
 
 			it "should upsert the document to the doc collection", ->
@@ -179,7 +179,7 @@ describe "DocManager", ->
 
 			beforeEach ->
 				@error =  new Error("doc could not be found")
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, @error, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, @error, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 			
 			it "should not upsert the document to the doc collection", ->
@@ -190,7 +190,7 @@ describe "DocManager", ->
 
 		describe "when the doc lines have not changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines.slice(), @callback
 
 			it "should not update the doc", ->
@@ -201,8 +201,7 @@ describe "DocManager", ->
 
 		describe "when the doc does not exist", ->
 			beforeEach ->
-				NotFoundError =  Errors.NotFoundError("doc could not be found")
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, NotFoundError, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 			
 			it "should upsert the document to the doc collection", ->
