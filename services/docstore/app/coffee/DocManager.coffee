@@ -28,8 +28,11 @@ module.exports = DocManager =
 			if err?
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
-			
-			if _.isEqual(doc?.lines, lines)
+
+			isNewDoc = lines.length == 0
+			linesAreSame =  _.isEqual(doc?.lines, lines)
+
+			if linesAreSame and !isNewDoc
 				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
 				return callback null, false, doc?.rev
 			else

@@ -199,6 +199,20 @@ describe "DocManager", ->
 			it "should return the callback with the existing rev", ->
 				@callback.calledWith(null, false, @rev).should.equal true
 
+
+		describe "when the doc lines are an empty array", ->
+			beforeEach ->
+
+				@doc.lines = []
+				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
+				@DocManager.updateDoc @project_id, @doc_id, @doc.lines, @callback
+
+			it "should upsert the document to the doc collection", ->
+				@MongoManager.upsertIntoDocCollection
+					.calledWith(@project_id, @doc_id,  @doc.lines)
+					.should.equal true	
+
+
 		describe "when the doc does not exist", ->
 			beforeEach ->
 				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, null, null)
