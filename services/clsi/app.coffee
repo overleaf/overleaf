@@ -12,6 +12,7 @@ Metrics.initialize("clsi")
 Metrics.open_sockets.monitor(logger)
 
 ProjectPersistenceManager = require "./app/js/ProjectPersistenceManager"
+OutputCacheManager = require "./app/js/OutputCacheManager"
 
 require("./app/js/db").sync()
 
@@ -68,8 +69,8 @@ staticServer = staticForbidSymLinks Settings.path.compilesDir, setHeaders: (res,
 		res.set("Content-Type", "text/plain")
 
 app.get "/project/:project_id/output/*", require("./app/js/SymlinkCheckerMiddlewear"), (req, res, next) ->
-	if req.query?.build? && req.query.build.match(/^[0-9]+$/)
-		req.url = "/#{req.params.project_id}/.cache/clsi/#{req.query.build}/#{req.params[0]}"
+	if req.query?.build? && req.query.build.match(OutputCacheManager.BUILD_REGEX)
+		req.url = "/#{req.params.project_id}/" + OutputCacheManager.path(req.query.build) + "/#{req.params[0]}"
 	else
 		req.url = "/#{req.params.project_id}/#{req.params[0]}"
 	staticServer(req, res, next)
