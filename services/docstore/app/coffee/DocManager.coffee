@@ -41,7 +41,7 @@ module.exports = DocManager =
 					newDocLines: lines
 					rev: oldRev
 				}, "updating doc lines"
-				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, oldRev, (error)->
+				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, (error)->
 					return callback(callback) if error?
 					callback null, true,  oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
@@ -49,7 +49,7 @@ module.exports = DocManager =
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
-			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, doc.rev, (error) ->
+			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, (error) ->
 				return callback(error) if error?
 				MongoManager.markDocAsDeleted doc_id, (error) ->
 					return callback(error) if error?

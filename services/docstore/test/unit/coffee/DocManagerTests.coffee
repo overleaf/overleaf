@@ -100,7 +100,7 @@ describe "DocManager", ->
 				@lines = ["mock", "doc", "lines"]
 				@rev = 77
 				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, {lines: @lines, rev:@rev})
-				@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(4)
+				@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
 				@MongoManager.markDocAsDeleted = sinon.stub().callsArg(1)
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
@@ -111,7 +111,7 @@ describe "DocManager", ->
 
 			it "should update the doc lines", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @lines, @rev)
+					.calledWith(@project_id, @doc_id, @lines)
 					.should.equal true
 
 			it "should mark doc as deleted", ->
@@ -142,7 +142,7 @@ describe "DocManager", ->
 			@newDocLines = ["new", "doc", "lines"]
 			@doc = { _id: @doc_id, lines: @oldDocLines, rev: @rev = 5 }
 
-			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(4)
+			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
 			@MongoManager.findDoc = sinon.stub()
 
 		describe "when the doc lines have changed", ->
@@ -157,7 +157,7 @@ describe "DocManager", ->
 
 			it "should upsert the document to the doc collection", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @newDocLines, @rev)
+					.calledWith(@project_id, @doc_id, @newDocLines)
 					.should.equal true				
 
 			it "should log out the old and new doc lines", ->

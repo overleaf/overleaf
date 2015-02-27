@@ -9,7 +9,7 @@ module.exports = MongoManager =
 	getProjectsDocs: (project_id, callback)->
 		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
 
-	upsertIntoDocCollection: (project_id, doc_id, lines, oldRev, callback)->
+	upsertIntoDocCollection: (project_id, doc_id, lines, callback)->
 		update =
 			$set:{}
 			$inc:{}
