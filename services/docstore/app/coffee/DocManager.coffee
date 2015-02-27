@@ -34,7 +34,9 @@ module.exports = DocManager =
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to update: #{project_id}/#{doc_id}") if !doc? or !mongoPath?
 
-			if _.isEqual(doc.lines, lines)
+			isNewDoc = lines.length == 0
+			linesAreSame =  _.isEqual(doc.lines, lines)
+			if linesAreSame and !isNewDoc
 				logger.log {
 					project_id: project_id, doc_id: doc_id, rev: doc.rev
 				}, "doc lines have not changed"
