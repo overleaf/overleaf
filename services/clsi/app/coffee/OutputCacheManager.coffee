@@ -13,9 +13,13 @@ module.exports = OutputCacheManager =
 	CACHE_LIMIT: 32  # maximum of 32 cache directories
 	CACHE_AGE: 60*60*1000 # up to one hour old
 
-	path: (buildId) ->
+	path: (buildId, file) ->
 		# used by static server, given build id return '.cache/clsi/buildId'
-		return Path.join(OutputCacheManager.CACHE_SUBDIR, buildId)
+		if buildId.match OutputCacheManager.BUILD_REGEX
+			return Path.join(OutputCacheManager.CACHE_SUBDIR, buildId, file)
+		else
+			# for invalid build id, return top level
+			return file
 
 	saveOutputFiles: (outputFiles, compileDir, callback = (error) ->) ->
 		# make a compileDir/CACHE_SUBDIR/build_id directory and
