@@ -10,6 +10,7 @@ module.exports =
 			json:
 				words:["helllo"]
 				language: "en"
+			timeout: 1000 * 20
 		request.post opts, (err, response, body)->
 			console.log body?.misspellings[0]?.suggestions.length
 			numberOfSuggestions = body?.misspellings[0]?.suggestions?.length
