@@ -6,7 +6,7 @@ module.exports =
 
 	healthCheck: (req, res)->
 		opts =
-			url: "http://localhost:#{settings.internal.spelling.port}/user/#{settings.healthCheckUserId}/check"
+			url: "http://localhost:3005/user/#{settings.healthCheckUserId}/check"
 			json:
 				words:["helllo"]
 				language: "en"
