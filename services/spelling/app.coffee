@@ -7,6 +7,8 @@ Path = require("path")
 metrics = require("metrics-sharelatex")
 metrics.initialize("tpds")
 metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
+HealthCheckController = require("./app/js/HealthCheckController")
+
 
 server = restify.createServer
 	name: "spelling-sharelatex",
@@ -19,6 +21,9 @@ server.post "/user/:user_id/check", SpellingAPIController.check
 server.post "/user/:user_id/learn", SpellingAPIController.learn
 server.get "/status", (req, res)->
 	res.send(status:'spelling api is up')
+
+server.get "/health_check", HealthCheckController.healthCheck
+
 
 host = Settings.internal?.spelling?.host || "localhost"
 port = Settings.internal?.spelling?.port || 3005

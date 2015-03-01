@@ -8,16 +8,17 @@
   },
   "version": "0.1.0",
   "dependencies": {
-    "express": "3.1.0",
     "async": "0.1.22",
-    "restify": "2.5.1",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "express": "3.1.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
-    "node-statsd": "0.0.3",
-    "underscore": "1.4.4",
     "mongojs": "0.9.11",
-    "redis": "~0.8.4"
+    "node-statsd": "0.0.3",
+    "redis": "~0.8.4",
+    "request": "^2.53.0",
+    "restify": "2.5.1",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "underscore": "1.4.4"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",

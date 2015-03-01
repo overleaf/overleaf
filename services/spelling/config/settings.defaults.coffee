@@ -12,3 +12,5 @@ module.exports = Settings =
 	mongo:
 		url : 'mongodb://127.0.0.1/sharelatex'
 
+
+	healthCheckUserId: "53c64d2fd68c8d000010bb5f"
