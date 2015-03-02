@@ -44,9 +44,10 @@ class ASpellRunner
 			if new Date() - start > ASpell.ASPELL_TIMEOUT
 				@close(true)
 			else if i < words.length
-				word = words[i]
-				@sendWord(word)
-				i++
+				# batch up the words to check for efficiency
+				batch = words.slice(i, i + ASpell.ASPELL_BATCH_SIZE)
+				@sendWords(batch)
+				i += ASpell.ASPELL_BATCH_SIZE
 				setTimeout tick, 0
 			else
 				@close()
@@ -80,6 +81,13 @@ class ASpellRunner
 	sendWord: (word) ->
 		@sendCommand("^" + word)
 
+	sendWords: (words) ->
+		# Aspell accepts multiple words to check on the same line
+		# ^word1 word2 word3 ...
+		# See aspell.info, writing programs to use Aspell Through A Pipe
+		@sendCommand("^" + words.join(" "))
+
+
 	sendCommand: (command) ->
 		@aspell.stdin.write(command + "\n")
 
@@ -96,5 +104,4 @@ module.exports = ASpell =
 			callback("process killed")
 		setTimeout forceClose, @ASPELL_TIMEOUT
 	ASPELL_TIMEOUT : 4000
-
-
+	ASPELL_BATCH_SIZE : 100
