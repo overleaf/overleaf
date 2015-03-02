@@ -237,11 +237,10 @@ describe "CompileController", ->
 					@req.query = {build: 1234}
 					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-				it "should proxy to the standard url with the build parameter", ()->
+				it "should proxy to the standard url without the build parameter", ()->
 					@request
 						.calledWith(
 							method: @req.method
-							qs: {build: 1234}
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
 						)
@@ -296,6 +295,26 @@ describe "CompileController", ->
 						)
 						.should.equal true
 
+			describe "user with build parameter via query string", ->
+				beforeEach ->
+					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "standard"})
+					@req.query = {build: 1234, pdfng: true}
+					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
+
+				it "should proxy to the standard url with the build parameter", ()->
+					@request
+						.calledWith(
+							method: @req.method
+							qs: {build: 1234}
+							url: "#{@settings.apis.clsi.url}#{@url}",
+							timeout: 60 * 1000
+							headers: {
+								'Range': '123-456'
+								'If-Range': 'abcdef'
+								'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
+							}
+						)
+						.should.equal true
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
