@@ -27,11 +27,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
 		
 		-if (typeof(meta) == "undefined")
-			meta(itemprop="description", content="An online LaTeX editor that's easy to use. No installation, real-time collaboration, version control, hundreds of LaTeX templates, and more.")
+			meta(itemprop="description", name="description", content="An online LaTeX editor that's easy to use. No installation, real-time collaboration, version control, hundreds of LaTeX templates, and more.")
 		-else
-			meta(itemprop="description", content=meta)
+			meta(itemprop="description", name="description" , content=meta)
 		
-		meta(itemprop="image", content="https://www.sharelatex.com/favicon.ico")
+		meta(itemprop="image", name="image", content="https://www.sharelatex.com/favicon.ico")
 
 		- if (typeof(gaToken) != "undefined")
 			script(type='text/javascript').
@@ -98,7 +98,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 						// Other plugins
 						/127\.0\.0\.1:4001\/isrunning/i,  // Cacaoweb
 						/webappstoolbarba\.texthelp\.com\//i,
-						/metrics\.itunes\.apple\.com\.edgesuite\.net\//i
+						/metrics\.itunes\.apple\.com\.edgesuite\.net\//i,
+						/a\.disquscdn\.com/i,
+						/platform\.twitter\.com/i,
+						/pstatic\.datafastguru\.info/i
 					],
 					shouldSendCallback: function(data) {
 						// only send a fraction of errors

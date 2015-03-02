@@ -71,9 +71,9 @@ module.exports = CompileManager =
 			return callback(null, true)
 		opts = 
 			endpointName:"auto_compile"
-			timeInterval:15
+			timeInterval:20
 			subjectName:"everyone"
-			throttle: 15
+			throttle: 25
 		rateLimiter.addCount opts, (err, canCompile)->
 			if err?
 				canCompile = false

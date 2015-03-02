@@ -6,7 +6,7 @@ modulePath = "../../../../app/js/Features/Project/ProjectLocator"
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 Errors = require "../../../../app/js/errors"
-
+expect = require("chai").expect
 Project = class Project
 
 project = _id : "1234566", rootFolder:[]
@@ -221,6 +221,7 @@ describe 'project model', ->
 				assert.equal element, undefined
 				done()
 
+
 		describe "where duplicate folder exists", ->
 
 			beforeEach ->
@@ -266,7 +267,23 @@ describe 'project model', ->
 					element.name.should.equal "other.tex"
 					done()
 
-			
+
+		describe "with a null project", ->
+			beforeEach ->
+				@project =
+					rootFolder:[
+						folders: []
+						fileRefs: []
+						docs: [{name:"main.tex"}, null, {name:"other.tex"}]
+					]
+				Project.getProject = sinon.stub()
+				Project.getProject.callsArgWith(2, null)
+
+			it "should not crash with a null", (done)->
+				callback = sinon.stub()
+				@locator.findElementByPath project._id, "/other.tex", (err, element)->
+					expect(err).to.exist
+					done()			
 
 
 	describe 'finding a project by user_id and project name', ()->

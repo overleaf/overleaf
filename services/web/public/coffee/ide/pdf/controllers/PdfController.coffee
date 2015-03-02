@@ -60,6 +60,9 @@ define [
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
+
+			if !response.outputFiles?
+				return
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
 					# Turn 'output.blg' into 'blg file'.
@@ -80,16 +83,17 @@ define [
 
 					$scope.pdf.logEntryAnnotations = {}
 					for entry in logEntries.all
-						entry.file = normalizeFilePath(entry.file)
+						if entry.file?
+							entry.file = normalizeFilePath(entry.file)
 
-						entity = ide.fileTreeManager.findEntityByPath(entry.file)
-						if entity?
-							$scope.pdf.logEntryAnnotations[entity.id] ||= []
-							$scope.pdf.logEntryAnnotations[entity.id].push {
-								row: entry.line - 1
-								type: if entry.level == "error" then "error" else "warning"
-								text: entry.message
-							}
+							entity = ide.fileTreeManager.findEntityByPath(entry.file)
+							if entity?
+								$scope.pdf.logEntryAnnotations[entity.id] ||= []
+								$scope.pdf.logEntryAnnotations[entity.id].push {
+									row: entry.line - 1
+									type: if entry.level == "error" then "error" else "warning"
+									text: entry.message
+								}
 
 				.error () ->
 					$scope.pdf.logEntries = []

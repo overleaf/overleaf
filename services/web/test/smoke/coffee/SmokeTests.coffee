@@ -10,6 +10,18 @@ cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
 buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
 logger = require "logger-sharelatex"
 
+# Change cookie to be non secure so curl will send it
+convertCookieFile = (callback) ->
+	fs = require("fs")
+	fs.readFile cookeFilePath, "utf8", (err, data) ->
+		return callback(err) if err
+		firstTrue = data.indexOf("TRUE")
+		secondTrue = data.indexOf("TRUE", firstTrue+4)
+		result = data.slice(0, secondTrue)+"FALSE"+data.slice(secondTrue+4)
+		fs.writeFile cookeFilePath, result, "utf8", (err) ->
+			return callback(err) if err
+			callback()
+
 describe "Opening", ->
 
 	before (done) ->
@@ -26,20 +38,14 @@ describe "Opening", ->
 						return done("smoke test: does not have csrf token")
 					csrf = csrfMatches[1]
 
-					# Change cookie to be non secure so curl will send it
-					fs = require("fs")
-					fs.readFile cookeFilePath, "utf8", (err, data) ->
-						return done(err) if err
-						firstTrue = data.indexOf("TRUE")
-						secondTrue = data.indexOf("TRUE", firstTrue+4)
-						result = data.slice(0, secondTrue)+"FALSE"+data.slice(secondTrue+4)
-						fs.writeFile cookeFilePath, result, "utf8", (err) ->
-							return done(err) if err
-
-							command = """
-								curl -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
-							"""
-							child.exec command, done
+					convertCookieFile (err) ->
+						return done(err) if err?
+						command = """
+							curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
+						"""
+						child.exec command, (err) ->
+							return done(err) if err?
+							convertCookieFile done
 
 	after (done)-> 
 		command =  """

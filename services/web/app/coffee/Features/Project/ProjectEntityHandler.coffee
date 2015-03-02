@@ -48,12 +48,13 @@ module.exports = ProjectEntityHandler =
 				for folderPath, folder of folders
 					for doc in folder.docs
 						content = docContents[doc._id.toString()]
-						docs[path.join(folderPath, doc.name)] = {
-							_id:   doc._id
-							name:  doc.name
-							lines: content.lines
-							rev:   content.rev
-						}
+						if content?
+							docs[path.join(folderPath, doc.name)] = {
+								_id:   doc._id
+								name:  doc.name
+								lines: content.lines
+								rev:   content.rev
+							}
 				logger.log count:_.keys(docs).length, project_id:project_id, "returning docs for project"
 				callback null, docs
 

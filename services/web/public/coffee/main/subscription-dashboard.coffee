@@ -45,7 +45,10 @@ define [
 			pricing.plan(planCode, { quantity: 1 }).currency(MultiCurrencyPricing.currencyCode).done (price)->
 				totalPriceExTax = parseFloat(price.next.total)
 				$scope.$evalAsync () ->
-					$scope.prices[planCode] = $scope.currencySymbol + (totalPriceExTax + (totalPriceExTax * taxRate))
+					taxAmmount = totalPriceExTax * taxRate
+					if isNaN(taxAmmount)
+						taxAmmount = 0
+					$scope.prices[planCode] = $scope.currencySymbol + (totalPriceExTax + taxAmmount)
 
 			price = ""
 

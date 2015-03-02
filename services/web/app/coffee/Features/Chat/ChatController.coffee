@@ -24,5 +24,5 @@ module.exports =
 			if err?
 				logger.err err:err, query:query, "problem getting messages from chat api"
 				return res.send 500
-			logger.log messages:messages, "sending messages to client"
+			logger.log length:messages?.length, "sending messages to client"
 			res.send messages
