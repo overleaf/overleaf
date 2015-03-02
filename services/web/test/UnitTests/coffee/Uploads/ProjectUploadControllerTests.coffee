@@ -18,7 +18,7 @@ describe "ProjectUploadController", ->
 		@ProjectUploadController = SandboxedModule.require modulePath, requires:
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
-			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub()}
+			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
 			"../../infrastructure/Metrics": @metrics
 			"fs" : @fs = {}
 		
@@ -170,3 +170,12 @@ describe "ProjectUploadController", ->
 					.calledWith(sinon.match.any, "error uploading file")
 					.should.equal true
 
+		describe "with a bad request", ->
+
+			beforeEach ->
+				@req.files.qqfile.name = ""
+				@ProjectUploadController.uploadFile @req, @res
+
+			it "should return a a non success response", ->
+				expect(@res.body).to.deep.equal
+					success: false

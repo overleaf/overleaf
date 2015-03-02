@@ -55,9 +55,12 @@ define [
 				, 200
 
 			$scope.create = () ->
+				name = $scope.inputs.name
+				if !name? or name.length == 0
+					return
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createDoc($scope.inputs.name, parent_folder)
+					.createDoc(name, parent_folder)
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -80,9 +83,13 @@ define [
 				, 200
 
 			$scope.create = () ->
+				name = $scope.inputs.name
+				if !name? or name.length == 0
+					return
+				$scope.state.inflight = true
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createFolder($scope.inputs.name, parent_folder)
+					.createFolder(name, parent_folder)
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()

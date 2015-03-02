@@ -169,17 +169,28 @@ describe "EditorHttpController", ->
 				name: @name = "doc-name"
 				parent_folder_id: @parent_folder_id
 			@EditorController.addDoc = sinon.stub().callsArgWith(5, null, @doc)
-			@EditorHttpController.addDoc @req, @res
 
-		it "should call EditorController.addDoc", ->
-			@EditorController.addDoc
-				.calledWith(@project_id, @parent_folder_id, @name, [], "editor")
-				.should.equal true
+		describe "successfully", ->
+			beforeEach ->
+				@EditorHttpController.addDoc @req, @res
 
-		it "should send the doc back as JSON", ->
-			@res.json
-				.calledWith(@doc)
-				.should.equal true
+			it "should call EditorController.addDoc", ->
+				@EditorController.addDoc
+					.calledWith(@project_id, @parent_folder_id, @name, [], "editor")
+					.should.equal true
+
+			it "should send the doc back as JSON", ->
+				@res.json
+					.calledWith(@doc)
+					.should.equal true
+
+		describe "unsuccesfully", ->
+			beforeEach ->
+				@req.body.name = ""
+				@EditorHttpController.addDoc @req, @res
+
+			it "should send back a bad request status code", ->
+				@res.send.calledWith(400).should.equal true
 
 	describe "addFolder", ->
 		beforeEach ->
@@ -190,17 +201,30 @@ describe "EditorHttpController", ->
 				name: @name = "folder-name"
 				parent_folder_id: @parent_folder_id
 			@EditorController.addFolder = sinon.stub().callsArgWith(4, null, @folder)
-			@EditorHttpController.addFolder @req, @res
 
-		it "should call EditorController.addFolder", ->
-			@EditorController.addFolder
-				.calledWith(@project_id, @parent_folder_id, @name, "editor")
-				.should.equal true
+		describe "successfully", ->
+			beforeEach ->
+				@EditorHttpController.addFolder @req, @res
 
-		it "should send the folder back as JSON", ->
-			@res.json
-				.calledWith(@folder)
-				.should.equal true
+			it "should call EditorController.addFolder", ->
+				@EditorController.addFolder
+					.calledWith(@project_id, @parent_folder_id, @name, "editor")
+					.should.equal true
+
+			it "should send the folder back as JSON", ->
+				@res.json
+					.calledWith(@folder)
+					.should.equal true
+
+		describe "unsuccesfully", ->
+
+			beforeEach ->
+				@req.body.name = ""
+				@EditorHttpController.addFolder @req, @res
+
+			it "should send back a bad request status code", ->
+				@res.send.calledWith(400).should.equal true
+
 
 	describe "renameEntity", ->
 		beforeEach ->
@@ -234,6 +258,22 @@ describe "EditorHttpController", ->
 
 		it "should send back a bad request status code", ->
 			@res.send.calledWith(400).should.equal true
+
+	describe "rename entity with 0 length name", ->
+
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				entity_id: @entity_id = "entity-id-123"
+				entity_type: @entity_type = "entity-type"
+			@req.body =
+				name: @name = ""
+			@EditorController.renameEntity = sinon.stub().callsArg(4)
+			@EditorHttpController.renameEntity @req, @res
+
+		it "should send back a bad request status code", ->
+			@res.send.calledWith(400).should.equal true
+
 
 	describe "moveEntity", ->
 		beforeEach ->
