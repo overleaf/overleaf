@@ -36,9 +36,11 @@ describe "ClsiManager", ->
 						outputFiles: [{
 							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.pdf"
 							type: "pdf"
+							build: 1234
 						},{
 							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.log"
 							type: "log"
+							build: 1234
 						}]
 				})
 				@ClsiManager.sendRequest @project_id, {compileGroup:"standard"}, @callback
@@ -57,9 +59,11 @@ describe "ClsiManager", ->
 				outputFiles = [{
 					path: "output.pdf"
 					type: "pdf"
+					build: 1234
 				},{
 					path: "output.log"
 					type: "log"
+					build: 1234
 				}]
 				@callback.calledWith(null, @status, outputFiles).should.equal true
 

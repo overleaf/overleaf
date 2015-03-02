@@ -41,13 +41,22 @@ define [
 				$scope.pdf.failure = true
 				fetchLogs()
 			else if response.status == "success"
+				# define the base url
+				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
+				# add a query string parameter for the compile group
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
-					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}" +
-						"&compileGroup=#{$scope.pdf.compileGroup}"
-				else
-					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
-				fetchLogs()
+					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
+				# make a cache to look up files by name
+				fileByPath = {}
+				for file in response.outputFiles
+					fileByPath[file.path] = file
+				# if the pdf file has a build number, pass it to the clsi
+				if fileByPath['output.pdf']?.build?
+					build = fileByPath['output.pdf'].build
+					$scope.pdf.url = $scope.pdf.url + "&build=#{build}"
+
+				fetchLogs(fileByPath['output.log'])
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
@@ -63,8 +72,9 @@ define [
 						file.name = file.path
 					$scope.pdf.outputFiles.push file
 
-		fetchLogs = () ->
-			$http.get "/project/#{$scope.project_id}/output/output.log"
+		fetchLogs = (outputFile) ->
+			qs = if outputFile?.build? then "?build=#{outputFile.build}" else ""
+			$http.get "/project/#{$scope.project_id}/output/output.log" + qs
 				.success (log) ->
 					$scope.pdf.rawLog = log
 					logEntries = LogParser.parse(log, ignoreDuplicates: true)
