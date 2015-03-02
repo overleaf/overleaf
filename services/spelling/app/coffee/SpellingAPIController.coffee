@@ -1,7 +1,7 @@
 SpellingAPIManager = require './SpellingAPIManager'
 restify = require 'restify'
 logger = require 'logger-sharelatex'
-metrics = require('./Metrics')
+metrics = require('metrics-sharelatex')
 
 module.exports = SpellingAPIController =
 	check: (req, res, next) ->
