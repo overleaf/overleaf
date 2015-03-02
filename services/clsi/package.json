@@ -21,7 +21,9 @@
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v1.0.0",
     "sqlite3": "~2.2.0",
     "express": "^4.2.0",
-    "body-parser": "^1.2.0"
+    "body-parser": "^1.2.0",
+    "fs-extra": "^0.16.3",
+    "underscore": "^1.8.2"
   },
   "devDependencies": {
     "mocha": "1.10.0",

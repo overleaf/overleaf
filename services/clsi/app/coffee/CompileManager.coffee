@@ -1,6 +1,7 @@
 ResourceWriter = require "./ResourceWriter"
 LatexRunner = require "./LatexRunner"
 OutputFileFinder = require "./OutputFileFinder"
+OutputCacheManager = require "./OutputCacheManager"
 Settings = require("settings-sharelatex")
 Path = require "path"
 logger = require "logger-sharelatex"
@@ -32,7 +33,8 @@ module.exports = CompileManager =
 
 				OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
 					return callback(error) if error?
-					callback null, outputFiles
+					OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
+						callback null, newOutputFiles
 	
 	clearProject: (project_id, _callback = (error) ->) ->
 		callback = (error) ->
