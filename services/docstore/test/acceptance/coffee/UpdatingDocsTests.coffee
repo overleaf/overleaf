@@ -11,14 +11,9 @@ describe "Applying updates to a doc", ->
 		@doc_id = ObjectId()
 		@originalLines = ["original", "lines"]
 		@newLines = ["new", "lines"]
-		DocstoreClient.createProject @project_id, (error) =>
+		DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
 			throw error if error?
-			DocstoreClient.createDoc @project_id, @doc_id, @lines, (error) =>
-				throw error if error?
-				done()
-
-	afterEach (done) ->
-		DocstoreClient.deleteProject @project_id, done
+			done()
 
 	describe "when the content has changed", ->
 		beforeEach (done) ->
@@ -27,6 +22,9 @@ describe "Applying updates to a doc", ->
 
 		it "should return modified = true", ->
 			@body.modified.should.equal true
+
+		it "should return the rev", ->
+			@body.rev.should.equal 2
 
 		it "should update the doc in the API", (done) ->
 			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
@@ -48,21 +46,17 @@ describe "Applying updates to a doc", ->
 
 	describe "when the doc does not exist", ->
 		beforeEach (done) ->
-			missing_doc_id = ObjectId()
-			DocstoreClient.updateDoc @project_id, missing_doc_id, @originalLines, (error, @res, @body) =>
+			@missing_doc_id = ObjectId()
+			DocstoreClient.updateDoc @project_id, @missing_doc_id, @originalLines, (error, @res, @body) =>
 				done()
 
-		it "should return a 404", ->
-			@res.statusCode.should.equal 404
+		it "should create the doc", ->
+			@body.rev.should.equal 1
 
-	describe "when the project does not exist", ->
-		beforeEach (done) ->
-			missing_project_id = ObjectId()
-			DocstoreClient.updateDoc missing_project_id, @doc_id, @originalLines, (error, @res, @body) =>
+		it "should be retreivable", (done)->
+			DocstoreClient.getDoc @project_id, @missing_doc_id, {}, (error, res, doc) =>
+				doc.lines.should.deep.equal @originalLines
 				done()
-
-		it "should return a 404", ->
-			@res.statusCode.should.equal 404
 
 	describe "when malformed doc lines are provided", ->
 		describe "when the lines are not an array", ->

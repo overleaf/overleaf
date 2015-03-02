@@ -2,23 +2,9 @@ request = require("request").defaults(jar: false)
 {db, ObjectId} = require("../../../../app/js/mongojs")
 
 module.exports = DocstoreClient =
-	createProject: (project_id, callback = (error) ->) ->
-		db.projects.insert {
-			_id: project_id
-			rootFolder: [{ docs: [] }]
-		}, callback
 
 	createDoc: (project_id, doc_id, lines, callback = (error) ->) ->
-		db.projects.update {
-			_id: project_id
-		}, {
-			$push: {
-				"rootFolder.0.docs": {
-					_id: doc_id
-					lines: lines
-				}
-			}
-		}, callback
+		db.docs.save({_id: doc_id, project_id:project_id, lines: lines, rev:1}, callback)
 
 	createDeletedDoc: (project_id, doc_id, lines, callback = (error) ->) ->
 		db.docs.insert {
@@ -27,9 +13,6 @@ module.exports = DocstoreClient =
 			lines: lines
 			deleted: true
 		}, callback
-
-	deleteProject: (project_id, callback = (error, res, body) ->) ->
-		db.projects.remove _id: project_id, callback
 
 	getDoc: (project_id, doc_id, qs, callback = (error, res, body) ->) ->
 		request.get {
