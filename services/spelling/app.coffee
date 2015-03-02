@@ -5,7 +5,7 @@ SpellingAPIController = require './app/js/SpellingAPIController'
 restify = require 'restify'
 Path = require("path")
 metrics = require("metrics-sharelatex")
-metrics.initialize("tpds")
+metrics.initialize("spelling")
 metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 HealthCheckController = require("./app/js/HealthCheckController")
 
