@@ -24,6 +24,14 @@ server.get "/status", (req, res)->
 
 server.get "/health_check", HealthCheckController.healthCheck
 
+profiler = require "v8-profiler"
+server.get "/profile", (req, res) ->
+	time = parseInt(req.query.time || "1000")
+	profiler.startProfiling("test")
+	setTimeout () ->
+		profile = profiler.stopProfiling("test")
+		res.json(profile)
+	, time
 
 host = Settings.internal?.spelling?.host || "localhost"
 port = Settings.internal?.spelling?.port || 3005

@@ -18,7 +18,8 @@
     "request": "^2.53.0",
     "restify": "2.5.1",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-    "underscore": "1.4.4"
+    "underscore": "1.4.4",
+    "v8-profiler": "^5.2.4"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",
