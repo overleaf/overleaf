@@ -83,6 +83,7 @@ module.exports = OutputCacheManager =
 		# look in compileDir for build dirs and delete if > N or age of mod time > T
 		fs.readdir cacheRoot, (err, results) ->
 			if err?
+				return callback(null) if err.code == 'ENOENT'	# cache directory is empty
 				logger.error err: err, project_id: cacheRoot, "error clearing cache"
 				return callback(err)
 
