@@ -165,8 +165,7 @@ define [
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
 
 		$scope.openOutputFile = (file) ->
-			qs = if file.build? then "?build=#{file.build}" else ""
-			window.open("/project/#{$scope.project_id}/output/#{file.path}#{qs}")
+			window.open("/project/#{$scope.project_id}/output/#{file.path}")
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
