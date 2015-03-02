@@ -10,7 +10,7 @@ OutputFileOptimiser = require "./OutputFileOptimiser"
 module.exports = OutputCacheManager =
 	CACHE_SUBDIR: '.cache/clsi'
 	BUILD_REGEX: /^[0-9a-f]+$/  # build id is Date.now() converted to hex
-	CACHE_LIMIT: 32  # maximum of 32 cache directories
+	CACHE_LIMIT: 2  # maximum number of cache directories
 	CACHE_AGE: 60*60*1000 # up to one hour old
 
 	path: (buildId, file) ->
