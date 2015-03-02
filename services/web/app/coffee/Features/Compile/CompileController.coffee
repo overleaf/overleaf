@@ -88,7 +88,7 @@ module.exports = CompileController =
 		# the base request
 		options = { url: url, method: req.method,	timeout: oneMinute }
 		# if we have a build parameter, pass it through to the clsi
-		if req.query?.build?
+		if req.query?.pdfng && req.query?.build? # only for new pdf viewer
 			options.qs = {}
 			options.qs.build = req.query.build
 		# if we are byte serving pdfs, pass through If-* and Range headers
