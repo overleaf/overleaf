@@ -253,7 +253,8 @@ define [
 				getVisiblePages = () ->
 					top = element[0].scrollTop;
 					bottom = top + element[0].clientHeight;
-					visiblePages = scope.pages.filter (page) ->
+					visiblePages = _.filter scope.pages, (page) ->
+						return false if not page.element?
 						pageElement = page.element[0]
 						pageTop = pageElement.offsetTop
 						pageBottom = pageTop + pageElement.clientHeight
