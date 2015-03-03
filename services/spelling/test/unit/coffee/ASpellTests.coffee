@@ -1,10 +1,12 @@
 sinon = require 'sinon'
 chai = require 'chai'
 should = chai.should()
+SandboxedModule = require('sandboxed-module')
+assert = require("chai").assert
 
 describe "ASpell", ->
 	beforeEach ->
-		@ASpell = require("../../../app/js/ASpell")
+		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:{}
 
 	describe "a correctly spelled word", ->
 		beforeEach (done) ->
@@ -44,11 +46,11 @@ describe "ASpell", ->
 
 		it "should return a blank array", ->
 			@result.length.should.equal 1
-			@result[0].suggestions.should.deep.equal []
+			assert.deepEqual @result[0].suggestions, []
 
 	describe "when the request times out", ->
 		beforeEach (done) ->
-			words = ("abcdefg" for i in [0..1000000])
+			words = ("abcdefg" for i in [0..1000])
 			@ASpell.ASPELL_TIMEOUT = 100
 			@start = new Date()
 			@ASpell.checkWords "en", words, (error, @result) => done()
