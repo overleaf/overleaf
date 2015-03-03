@@ -107,6 +107,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 						// only send a fraction of errors
 						var sampleRate = 1.00;
 						return (Math.random() <= sampleRate);
+					},
+					dataCallback: function(data) {
+						// remove circular references from object
+						var cache = [];
+						var s = JSON.stringify(data, function(k, v) { if (typeof v === 'object' && v !== null) { if (cache.indexOf(v) !== -1) return "[circular]"; cache.push(v); }; return v; });
+						return JSON.parse(s);
 					}
 					// we highly recommend restricting exceptions to a domain in order to filter out clutter
 					// whitelistUrls: ['example.com/scripts/']
