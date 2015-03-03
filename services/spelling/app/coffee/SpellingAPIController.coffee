@@ -17,7 +17,7 @@ module.exports = SpellingAPIController =
 		logger.log token: req?.params?.user_id, word: req?.body?.word, "learning word"
 		SpellingAPIManager.learnWord req.params.user_id, req.body, (error, result) ->
 			return next(error) if error?
-			res.send(200)
+			res.sendStatus(200)
 			next()
 
 
