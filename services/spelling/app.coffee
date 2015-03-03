@@ -13,7 +13,7 @@ HealthCheckController = require("./app/js/HealthCheckController")
 
 
 
-server.use bodyParser.json()
+server.use bodyParser.json(limit: "2mb")
 server.use metrics.http.monitor(logger)
 
 server.post "/user/:user_id/check", SpellingAPIController.check
