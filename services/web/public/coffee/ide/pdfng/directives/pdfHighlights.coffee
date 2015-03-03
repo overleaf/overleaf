@@ -24,6 +24,6 @@ define [
 
 			clearHighlights: () ->
 				for h in @highlightElements
-					h?.remove()
+					h?.parentNode.removeChild(h)
 				@highlightElements = []
 	]
