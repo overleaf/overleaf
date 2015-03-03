@@ -1,8 +1,18 @@
 metrics = require "metrics-sharelatex"
 logger = require "logger-sharelatex"
+settings = require "settings-sharelatex"
 WebsocketController = require "./WebsocketController"
 HttpController = require "./HttpController"
+HttpApiController = require "./HttpApiController"
 Utils = require "./Utils"
+bodyParser = require "body-parser"
+
+basicAuth = require('basic-auth-connect')
+httpAuth = basicAuth (user, pass)->
+	isValid = user == settings.internal.realTime.user and pass == settings.internal.realTime.pass
+	if !isValid
+		logger.err user:user, pass:pass, "invalid login details"
+	return isValid
 
 module.exports = Router =
 	_handleError: (callback = ((error) ->), error, client, method, extraAttrs = {}) ->
@@ -19,6 +29,8 @@ module.exports = Router =
 		app.set("io", io)
 		app.get "/clients", HttpController.getConnectedClients
 		app.get "/clients/:client_id", HttpController.getConnectedClient
+
+		app.post "/project/:project_id/message/:message", httpAuth, bodyParser.json(limit: "5mb"), HttpApiController.sendMessage
 		
 		session.on 'connection', (error, client, session) ->
 			if error?

@@ -12,6 +12,7 @@ module.exports = WebsocketLoadBalancer =
 		if !room_id?
 			logger.warn {message, payload}, "no room_id provided, ignoring emitToRoom"
 			return
+		logger.log {room_id, message, payload}, "emitting to room"
 		@rclientPub.publish "editor-events", JSON.stringify
 			room_id: room_id
 			message: message

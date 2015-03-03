@@ -9,6 +9,8 @@ module.exports =
 		realTime:
 			port: 3026
 			host: "localhost"
+			user: "sharelatex"
+			pass: "password"
 			
 	apis:
 		web:
