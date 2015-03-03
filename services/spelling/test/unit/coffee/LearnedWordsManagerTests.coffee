@@ -3,7 +3,8 @@ chai = require 'chai'
 expect = chai.expect
 SandboxedModule = require('sandboxed-module')
 modulePath = require('path').join __dirname, '../../../app/js/LearnedWordsManager'
-
+assert = require("chai").assert
+should = require("chai").should()
 describe "LearnedWordsManager", ->
 	beforeEach ->
 		@token = "a6b3cd919ge"
@@ -11,8 +12,13 @@ describe "LearnedWordsManager", ->
 		@db =
 			spellingPreferences:
 				update: sinon.stub().callsArg(3)
+		@cache = 
+			get:sinon.stub()
+			set:sinon.stub()
+			del:sinon.stub()
 		@LearnedWordsManager = SandboxedModule.require modulePath, requires:
 			"./DB" : @db
+			"./MongoCache":@cache
 
 	describe "learnWord", ->
 		beforeEach ->
@@ -49,28 +55,27 @@ describe "LearnedWordsManager", ->
 		it "should return the word list in the callback", ->
 			expect(@callback.calledWith null, @wordList).to.equal true
 
-	###
+	
 	describe "caching the result", ->
 		it 'should use the cache first if it is primed', (done)->
 			@wordList = ["apples", "bananas", "pears"]
-			@cache.get.callsArgWith(1, null, learnedWords: @wordList)
+			@cache.get.returns(@wordList)
 			@db.spellingPreferences.findOne = sinon.stub()
 			@LearnedWordsManager.getLearnedWords @token, (err, spellings)=>
-				@db.spellingPreferences.find.called.should.equal false
-				@wordList.should.equal spellings
+				@db.spellingPreferences.findOne.called.should.equal false
+				assert.deepEqual @wordList, spellings
 				done()
 
 		it 'should set the cache after hitting the db', (done)->
 			@wordList = ["apples", "bananas", "pears"]
-			@cache.get.callsArgWith(1)
 			@db.spellingPreferences.findOne = sinon.stub().callsArgWith(1, null, learnedWords: @wordList)
 			@LearnedWordsManager.getLearnedWords @token, (err, spellings)=>
-				@cache.set.calledWith(@token, learnedWords:@wordList).should.equal true
+				@cache.set.calledWith(@token, @wordList).should.equal true
 				done()
 
 		it 'should break cache when update is called', (done)->
 			@word = "instanton"
 			@LearnedWordsManager.learnWord @token, @word, =>
-				@cache.break.calledWith(@token).should.equal true
+				@cache.del.calledWith(@token).should.equal true
 				done()
-	###
+	

@@ -1,18 +1,11 @@
 db = require("./DB")
-LRU = require("lru-cache")
-cacheOpts = 
-	max: 5000
-	maxAge: 1000 * 60 * 60
-
-cache = LRU(cacheOpts)
+mongoCache = require("./MongoCache")
 logger = require 'logger-sharelatex'
 metrics = require('metrics-sharelatex')
 
-
-
 module.exports = LearnedWordsManager =
 	learnWord: (user_token, word, callback = (error)->) ->
-		cache.del(user_token)
+		mongoCache.del(user_token)
 		db.spellingPreferences.update {
 			token: user_token
 		}, {
@@ -22,19 +15,19 @@ module.exports = LearnedWordsManager =
 		}, callback
 
 	getLearnedWords: (user_token, callback = (error, words)->) ->
-		cachedWords = cache.get(user_token)
-		if cachedWords
-			logger.info user_token:user_token, "cache hit"
-			metrics.inc "cache-hit", 0.1
-			return callback(null, cachedWords)
+		mongoCachedWords = mongoCache.get(user_token)
+		if mongoCachedWords?
+			logger.info user_token:user_token, "mongoCache hit"
+			metrics.inc "mongoCache-hit", 0.1
+			return callback(null, mongoCachedWords)
 
-		metrics.inc "cache-miss", 0.1
-		logger.info user_token:user_token, "cache miss"
+		metrics.inc "mongoCache-miss", 0.1
+		logger.info user_token:user_token, "mongoCache miss"
 		
 		db.spellingPreferences.findOne token: user_token, (error, preferences) ->
 			return callback error if error?
 			words = preferences?.learnedWords || []
-			cache.set(user_token, words)
+			mongoCache.set(user_token, words)
 			callback null, words
 
 		
