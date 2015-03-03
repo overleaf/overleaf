@@ -16,7 +16,7 @@ module.exports =
 			numberOfSuggestions = body?.misspellings[0]?.suggestions?.length
 			if numberOfSuggestions > 10
 				logger.log "health check passed"
-				res.send 200
+				res.sendStatus 200
 			else
 				logger.err body:body, numberOfSuggestions:numberOfSuggestions, "health check failed"
-				res.send 500
+				res.sendStatus 500
