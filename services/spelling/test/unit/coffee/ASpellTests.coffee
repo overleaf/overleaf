@@ -51,10 +51,11 @@ describe "ASpell", ->
 	describe "when the request times out", ->
 		beforeEach (done) ->
 			words = ("abcdefg" for i in [0..1000])
-			@ASpell.ASPELL_TIMEOUT = 100
-			@start = new Date()
+			@ASpell.ASPELL_TIMEOUT = 1
+			@start = Date.now()
 			@ASpell.checkWords "en", words, (error, @result) => done()
 
 		it "should return in reasonable time", (done) ->
+			delta = Date.now()-@start
+			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 10)
 			done()
-
