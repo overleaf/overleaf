@@ -13,8 +13,12 @@ class ASpellRunner
 			suggestions = @getSuggestions(output)
 			results = []
 			for word, i in words
-				if suggestions[word]?
-					cache.set(language + ':' + word, suggestions[word])
+				key = language + ':' + word
+				cached = cache.get(key)
+				if cached?
+					results.push index: i, suggestions: cached
+				else if suggestions[word]?
+					cache.set(key, suggestions[word])
 					results.push index: i, suggestions: suggestions[word]
 			callback null, results
 
@@ -51,13 +55,13 @@ class ASpellRunner
 
 		newWord = {}
 		for word in words
-			newWord[word] = true if !newWord[word] && !cache.get(language + ':' + word)?
+			newWord[word] = true if !newWord[word] && !cache.has(language + ':' + word)
 		words = Object.keys(newWord)
 
 		if words.length
 			WorkerPool.check(language, words, ASpell.ASPELL_TIMEOUT, callback)
 		else
-			callback null, []
+			callback null, ""
 
 module.exports = ASpell =
 	# The description of how to call aspell from another program can be found here:
@@ -69,4 +73,3 @@ module.exports = ASpell =
 	ASPELL_TIMEOUT : 4000
 
 WorkerPool = new ASpellWorkerPool()
-	
