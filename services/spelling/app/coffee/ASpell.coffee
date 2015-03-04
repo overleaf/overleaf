@@ -1,17 +1,20 @@
-child_process = require("child_process")
 async = require "async"
 _ = require "underscore"
+ASpellWorkerPool = require "./ASpellWorkerPool"
+LRU = require "lru-cache"
 
+cache = LRU(10000)
 
 class ASpellRunner
 	checkWords: (language, words, callback = (error, result) ->) ->
 		@runAspellOnWords language, words, (error, output) =>
 			return callback(error) if error?
-			output = @removeAspellHeader(output)
+			#output = @removeAspellHeader(output)
 			suggestions = @getSuggestions(output)
 			results = []
 			for word, i in words
 				if suggestions[word]?
+					cache.set(language + ':' + word, suggestions[word])
 					results.push index: i, suggestions: suggestions[word]
 			callback null, results
 
@@ -31,65 +34,30 @@ class ASpellRunner
 					word = parts[1]
 					suggestions[word] = []
 		return suggestions
-	
-	removeAspellHeader: (output) -> output.slice(1)
+
+	#removeAspellHeader: (output) -> output.slice(1)
 
 	runAspellOnWords: (language, words, callback = (error, output) ->) ->
-		@open(language)
-		@captureOutput(callback)
-		@setTerseMode()
-		start = new Date()
-		i = 0
-		do tick = () =>
-			if new Date() - start > ASpell.ASPELL_TIMEOUT
-				@close(true)
-			else if i < words.length
-				# batch up the words to check for efficiency
-				batch = words.slice(i, i + ASpell.ASPELL_BATCH_SIZE)
-				@sendWords(batch)
-				i += ASpell.ASPELL_BATCH_SIZE
-				setTimeout tick, 0
-			else
-				@close()
+		# send words to aspell, get back string output for those words
+		# find a free pipe for the language (or start one)
+		# send the words down the pipe
+		# send an END marker that will generate a "*" line in the output
+		# when the output pipe receives the "*" return the data sofar and reset the pipe to be available
+		#
+		# @open(language)
+		# @captureOutput(callback)
+		# @setTerseMode()
+		# start = new Date()
 
-	captureOutput: (callback = (error, output) ->) ->
-		output = ""
-		error = ""
-		@aspell.stdout.on "data", (chunk) ->
-			output = output + chunk
-		@aspell.stderr.on "data", (chunk) =>
-			error = error + chunk
-		@aspell.stdout.on "end", () ->
-			if error == ""
-				callback null, output
-			else
-				callback new Error(error), output
+		newWord = {}
+		for word in words
+			newWord[word] = true if !newWord[word] && !cache.get(language + ':' + word)?
+		words = Object.keys(newWord)
 
-	open: (language) ->
-		@finished = false
-		@aspell = child_process.spawn("aspell", ["pipe", "-t", "--encoding=utf-8", "-d", language])
-
-	close: (force) ->
-		@finished = true
-		@aspell.stdin.end()
-		if force && !@aspell.exitCode?
-			@aspell.kill("SIGKILL")
-
-	setTerseMode: () ->
-		@sendCommand("!")
-
-	sendWord: (word) ->
-		@sendCommand("^" + word)
-
-	sendWords: (words) ->
-		# Aspell accepts multiple words to check on the same line
-		# ^word1 word2 word3 ...
-		# See aspell.info, writing programs to use Aspell Through A Pipe
-		@sendCommand("^" + words.join(" "))
-
-
-	sendCommand: (command) ->
-		@aspell.stdin.write(command + "\n")
+		if words.length
+			WorkerPool.check(language, words, ASpell.ASPELL_TIMEOUT, callback)
+		else
+			callback null, []
 
 module.exports = ASpell =
 	# The description of how to call aspell from another program can be found here:
@@ -98,10 +66,7 @@ module.exports = ASpell =
 		runner = new ASpellRunner()
 		callback = _.once callback
 		runner.checkWords language, words, callback
-
-		forceClose = ->
-			runner.close(true)
-			callback("process killed")
-		setTimeout forceClose, @ASPELL_TIMEOUT
 	ASPELL_TIMEOUT : 4000
-	ASPELL_BATCH_SIZE : 100
+
+WorkerPool = new ASpellWorkerPool()
+	
