@@ -101,6 +101,7 @@ define [
 					subscriptionDetails:
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
+						coupon_code:pricing.items?.coupon?.code || ""
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						window.location.href = "/user/subscription/thank-you"

@@ -13,6 +13,7 @@ module.exports = RecurlyWrapper =
 		          <subscription>
 		            <plan_code>#{subscriptionDetails.plan_code}</plan_code>
 		            <currency>#{subscriptionDetails.currencyCode}</currency>
+		            <coupon_code>#{subscriptionDetails.coupon_code}</coupon_code>
 		            <account>
 		            	<account_code>#{user._id}</account_code>
 		            	<email>#{user.email}</email>
