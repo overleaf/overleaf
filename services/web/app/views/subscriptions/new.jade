@@ -152,7 +152,11 @@ block content
 											if (showCouponField)
 												.form-group
 													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
-
+									.row
+										.col-md-8
+											if (showVatField)
+												.form-group
+													input.form-control(type='text', ng-blur="applyVatNumber()", ng-model="data.vat_number", placeholder="#{translate('vat_number')}")
 									.row
 										.col-xs-7
 											.form-group

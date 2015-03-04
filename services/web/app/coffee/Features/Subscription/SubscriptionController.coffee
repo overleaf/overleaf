@@ -63,6 +63,7 @@ module.exports = SubscriptionController =
 									currency: currency
 									subdomain: Settings.apis.recurly.subdomain
 								showCouponField: req.query.scf
+								showVatField: req.query.svf
 								couponCode:      req.query.cc or ""
 								subscriptionFormOptions: JSON.stringify
 									acceptedCards: ['discover', 'mastercard', 'visa']
