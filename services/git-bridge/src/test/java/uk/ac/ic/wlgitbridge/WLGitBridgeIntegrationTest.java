@@ -27,6 +27,8 @@ import static org.junit.Assert.fail;
  */
 public class WLGitBridgeIntegrationTest {
 
+    private Runtime runtime = Runtime.getRuntime();
+
     private Map<String, Map<String, SnapshotAPIState>> states =
             new HashMap<String, Map<String, SnapshotAPIState>>() {{
                 put("canCloneARepository", new HashMap<String, SnapshotAPIState>() {{
@@ -48,7 +50,7 @@ public class WLGitBridgeIntegrationTest {
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
-    public void canCloneARepository() throws IOException, GitAPIException {
+    public void canCloneARepository() throws IOException, GitAPIException, InterruptedException {
         MockSnapshotServer server = new MockSnapshotServer(3857, getResource("/canCloneARepository").toFile());
         server.start();
         server.setState(states.get("canCloneARepository").get("state"));
@@ -56,19 +58,16 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(33857, 3857)
         });
         wlgb.run();
-        folder.create();
-        File git = folder.newFolder();
-        Git.cloneRepository()
-           .setURI("http://127.0.0.1:33857/testproj.git")
-           .setDirectory(git)
-           .call()
-           .close();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33857/testproj.git", null, dir);
+        int exitCode = git.waitFor();
         wlgb.stop();
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/testproj"), git.toPath()));
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneARepository/state/testproj"), new File(dir, "testproj").toPath()));
     }
 
     @Test
-    public void canCloneMultipleRepositories() throws IOException, GitAPIException {
+    public void canCloneMultipleRepositories() throws IOException, GitAPIException, InterruptedException {
         MockSnapshotServer server = new MockSnapshotServer(3858, getResource("/canCloneMultipleRepositories").toFile());
         server.start();
         server.setState(states.get("canCloneMultipleRepositories").get("state"));
@@ -76,22 +75,16 @@ public class WLGitBridgeIntegrationTest {
                 makeConfigFile(33858, 3858)
         });
         wlgb.run();
-        folder.create();
-        File testproj1 = folder.newFolder();
-        Git.cloneRepository()
-                .setURI("http://127.0.0.1:33858/testproj1.git")
-                .setDirectory(testproj1)
-                .call()
-                .close();
-        File testproj2 = folder.newFolder();
-        Git.cloneRepository()
-                .setURI("http://127.0.0.1:33858/testproj2.git")
-                .setDirectory(testproj2)
-                .call()
-                .close();
+        File dir = folder.newFolder();
+        Process git1 = runtime.exec("git clone http://127.0.0.1:33858/testproj1.git", null, dir);
+        int exitCode1 = git1.waitFor();
+        Process git2 = runtime.exec("git clone http://127.0.0.1:33858/testproj2.git", null, dir);
+        int exitCode2 = git2.waitFor();
         wlgb.stop();
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), testproj1.toPath()));
-        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2.toPath()));
+        assertEquals(0, exitCode1);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), new File(dir, "testproj1").toPath()));
+        assertEquals(0, exitCode2);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), new File(dir, "testproj2").toPath()));
     }
 
     @Test
