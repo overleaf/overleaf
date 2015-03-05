@@ -2,10 +2,7 @@ package uk.ac.ic.wlgitbridge.util;
 
 import uk.ac.ic.wlgitbridge.application.SSLConfig;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -150,6 +147,19 @@ public class Util {
                 file.delete();
             }
         }
+    }
+
+    public static String fromStream(InputStream in) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        StringBuilder out = new StringBuilder();
+        String newLine = System.getProperty("line.separator");
+        String line;
+        while ((line = reader.readLine()) != null) {
+            out.append(line);
+            out.append(newLine);
+        }
+        return out.toString();
     }
 
 }
