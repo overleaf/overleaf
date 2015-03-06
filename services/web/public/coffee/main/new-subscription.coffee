@@ -60,6 +60,10 @@ define [
 		$scope.applyCoupon = ->
 			pricing.coupon($scope.data.coupon).done()
 
+		$scope.applyVatNumber = ->
+			pricing.tax({tax_code: 'digital', vat_number: $scope.data.vat_number}).done()
+
+
 		$scope.changeCurrency = (newCurrency)->
 			$scope.currencyCode = newCurrency
 			pricing.currency(newCurrency).done()
@@ -101,6 +105,7 @@ define [
 					subscriptionDetails:
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
+						coupon_code:pricing.items?.coupon?.code || ""
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						window.location.href = "/user/subscription/thank-you"

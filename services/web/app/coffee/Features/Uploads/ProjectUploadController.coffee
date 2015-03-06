@@ -30,6 +30,9 @@ module.exports = ProjectUploadController =
 		{name, path} = req.files.qqfile
 		project_id   = req.params.Project_id
 		folder_id    = req.query.folder_id
+		if !name? or name.length == 0 or name.length > 150
+			logger.err project_id:project_id, name:name, "bad name when trying to upload file"
+			return res.send success: false
 		FileSystemImportManager.addEntity project_id, folder_id, name, path, true, (error, entity) ->
 			fs.unlink path, ->
 			timer.done()

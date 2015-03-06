@@ -59,11 +59,16 @@ module.exports = EditorHttpController =
 				doc_id: doc._id
 			}
 
+	_nameIsAcceptableLength: (name)->
+		return name? and name.length < 150 and name.length != 0
+
 
 	addDoc: (req, res, next) ->
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
+		if !EditorHttpController._nameIsAcceptableLength(name)
+			return res.send 400
 		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", (error, doc) ->
 			return next(error) if error?
 			res.json doc
@@ -72,6 +77,8 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
+		if !EditorHttpController._nameIsAcceptableLength(name)
+			return res.send 400
 		EditorController.addFolder project_id, parent_folder_id, name, "editor", (error, doc) ->
 			return next(error) if error?
 			res.json doc
@@ -81,7 +88,7 @@ module.exports = EditorHttpController =
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
 		name = req.body.name
-		if name.length > 150
+		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.send 400
 		EditorController.renameEntity project_id, entity_id, entity_type, name, (error) ->
 			return next(error) if error?

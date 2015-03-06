@@ -14,7 +14,11 @@ define [
 
 		$scope.finishRenaming = () ->
 			delete $scope.entity.renaming
-			ide.fileTreeManager.renameEntity($scope.entity, $scope.inputs.name)
+			name = $scope.inputs.name
+			if !name? or name.length == 0
+				$scope.inputs.name = $scope.entity.name
+				return
+			ide.fileTreeManager.renameEntity($scope.entity, name)
 
 		$scope.$on "rename:selected", () ->
 			$scope.startRenaming() if $scope.entity.selected

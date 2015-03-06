@@ -6,8 +6,6 @@ ObjectId = Schema.ObjectId
 
 DocSchema = new Schema
 	name          :     {type:String, default:'new doc'}
-	lines         :     [{}]
-	rev 			  :	  {type:Number, default:0}
 
 
 mongoose.model 'Doc', DocSchema
