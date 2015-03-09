@@ -262,6 +262,8 @@ module.exports =
 	# 	user: ""
 	# 	password: ""
 	# 	projectId: ""
+	
+	appName: "ShareLaTeX (Community Edition)"
 
 	nav:
 		title: "ShareLaTeX Community Edition"

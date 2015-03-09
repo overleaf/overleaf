@@ -56,7 +56,9 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next)->
-		res.locals.translate = req.i18n.translate
+		res.locals.translate = (key, vars = {}) ->
+			vars.appName = Settings.appName
+			req.i18n.translate(key, vars)
 		res.locals.currentUrl = req.originalUrl
 		next()
 
