@@ -1,6 +1,14 @@
 define [], () ->
 	class ConnectionManager
 		constructor: (@ide, @$scope) ->
+			if !io?
+				console.error "Socket.io javascript not loaded. Please check that the real-time service is running and accessible."
+				@ide.socket =
+					on: () ->
+				$scope.$apply () =>
+					@$scope.state.error = "Could not connect to websocket server :("
+				return
+			
 			@connected = false
 
 			@$scope.connection = 

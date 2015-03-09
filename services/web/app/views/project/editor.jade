@@ -13,6 +13,7 @@ block content
 				h3 #{translate("loading")}...
 				.progress
 					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
+				p.text-center.text-danger(ng-if="state.error").ng-cloak {{ state.error }}
 
 		.global-alerts(ng-cloak)
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
@@ -74,7 +75,7 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(src='#{settings.websocketsUrl}/socket.io/socket.io.js')
+	script(src='/socket.io/socket.io.js')
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.

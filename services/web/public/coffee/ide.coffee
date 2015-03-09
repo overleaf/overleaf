@@ -51,6 +51,7 @@ define [
 		$scope.state = {
 			loading: true
 			load_progress: 40
+			error: null
 		}
 		$scope.ui = {
 			leftMenuShown: false
