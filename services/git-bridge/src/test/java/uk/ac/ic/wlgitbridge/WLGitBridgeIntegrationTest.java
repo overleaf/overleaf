@@ -35,6 +35,9 @@ public class WLGitBridgeIntegrationTest {
                 put("canCloneMultipleRepositories", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneMultipleRepositories/state/state.json")).build());
                 }});
+                put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
+                }});
                 put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
                     put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
@@ -59,8 +62,8 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullDeletedNestedFiles/base/state.json")).build());
                     put("withDeletedNestedFiles", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullDeletedNestedFiles/withDeletedNestedFiles/state.json")).build());
                 }});
-                put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
-                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
+                put("canPushFilesSuccessfully", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canPushFilesSuccessfully/state/state.json")).build());
                 }});
             }};
 
@@ -106,6 +109,28 @@ public class WLGitBridgeIntegrationTest {
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), testproj1Dir.toPath()));
         assertEquals(0, exitCode2);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2Dir.toPath()));
+    }
+
+
+    private static final String EXPECTED_OUT_PROTECTED =
+            "Cloning into 'protected'...\n" +
+                    "fatal: remote error: Your project is protected, and can't be cloned (yet).\n";
+    @Test
+    public void cannotCloneAProtectedProject() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3861, getResource("/cannotCloneAProtectedProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33861, 3861)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33861/protected.git", null, dir);
+        String output = Util.fromStream(git.getErrorStream());
+        int exitCode = git.waitFor();
+        assertEquals(128, exitCode);
+        assertEquals(EXPECTED_OUT_PROTECTED, output);
+        wlgb.stop();
     }
 
     @Test
@@ -246,26 +271,28 @@ public class WLGitBridgeIntegrationTest {
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/withDeletedNestedFiles/testproj"), testprojDir.toPath()));
     }
 
-
-    private static final String EXPECTED_OUT_PROTECTED =
-            "Cloning into 'protected'...\n" +
-            "fatal: remote error: Your project is protected, and can't be cloned (yet).\n";
     @Test
-    public void cannotCloneAProtectedProject() throws IOException, GitAPIException, InterruptedException {
-        MockSnapshotServer server = new MockSnapshotServer(3861, getResource("/cannotCloneAProtectedProject").toFile());
+    public void canPushFilesSuccessfully() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3866, getResource("/canPushFilesSuccessfully").toFile());
         server.start();
-        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
+        server.setState(states.get("canPushFilesSuccessfully").get("state"));
         GitBridgeApp wlgb = new GitBridgeApp(new String[] {
-                makeConfigFile(33861, 3861)
+                makeConfigFile(33866, 3866)
         });
         wlgb.run();
         File dir = folder.newFolder();
-        Process git = runtime.exec("git clone http://127.0.0.1:33861/protected.git", null, dir);
-        String output = Util.fromStream(git.getErrorStream());
+        Process git = runtime.exec("git clone http://127.0.0.1:33866/testproj.git", null, dir);
         int exitCode = git.waitFor();
-        assertEquals(128, exitCode);
-        assertEquals(EXPECTED_OUT_PROTECTED, output);
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPushFilesSuccessfully/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
         wlgb.stop();
+        assertEquals(0, pushExitCode);
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
