@@ -152,17 +152,23 @@ public class Util {
         }
     }
 
-    public static String fromStream(InputStream in) throws IOException
-    {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+    public static String fromStream(InputStream stream, int skip) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         StringBuilder out = new StringBuilder();
         String newLine = System.getProperty("line.separator");
         String line;
+        for (int i = 0; i < skip; i++) {
+            reader.readLine();
+        }
         while ((line = reader.readLine()) != null) {
             out.append(line);
             out.append(newLine);
         }
         return out.toString();
+    }
+
+    public static String fromStream(InputStream stream) throws IOException {
+        return fromStream(stream, 0);
     }
 
 }
