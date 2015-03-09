@@ -43,6 +43,6 @@
     <orderEntry type="library" name="Maven: org.eclipse.jgit:org.eclipse.jgit.http.server:3.6.0.201412230720-r" level="project" />
     <orderEntry type="library" name="Maven: org.xerial:sqlite-jdbc:3.8.7" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-nop:1.7.9" level="project" />
+    <orderEntry type="library" name="Maven: joda-time:joda-time:2.7" level="project" />
   </component>
 </module>
-

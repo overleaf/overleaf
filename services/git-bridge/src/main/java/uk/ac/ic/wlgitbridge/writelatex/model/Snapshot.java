@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.writelatex.model;
 
+import org.joda.time.DateTime;
 import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotData;
@@ -7,8 +8,6 @@ import uk.ac.ic.wlgitbridge.writelatex.api.request.getforversion.SnapshotFile;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.writelatex.api.request.getsavedvers.WLUser;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -31,16 +30,7 @@ public class Snapshot implements Comparable<Snapshot> {
         WLUser user = info.getUser();
         userName = user.getName();
         userEmail = user.getEmail();
-        TimeZone tz = TimeZone.getDefault();
-        Calendar cal = Calendar.getInstance(tz);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        sdf.setCalendar(cal);
-        try {
-            cal.setTime(sdf.parse(info.getCreatedAt()));
-        } catch (ParseException e2) {
-            throw new RuntimeException(e2);
-        }
-        createdAt = cal.getTime();
+        createdAt = new DateTime(info.getCreatedAt()).toDate();
 
         srcs = data.getSrcs();
         atts = data.getAtts();
