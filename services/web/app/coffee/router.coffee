@@ -34,6 +34,7 @@ BlogController = require("./Features/Blog/BlogController")
 WikiController = require("./Features/Wiki/WikiController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
+RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -62,6 +63,7 @@ module.exports = class Router
 		UploadsRouter.apply(app)
 		PasswordResetRouter.apply(app)
 		StaticPagesRouter.apply(app)
+		RealTimeProxyRouter.apply(app)
 		
 		Modules.applyRouter(app)
 
