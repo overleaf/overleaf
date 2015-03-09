@@ -51,6 +51,10 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
                     put("withDeletedBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/withDeletedBinaryFile/state.json")).build());
                 }});
+                put("canPullAModifiedNestedFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
+                    put("withModifiedNestedFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/withModifiedNestedFile/state.json")).build());
+                }});
                 put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
                 }});
@@ -185,11 +189,34 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(0, exitCodeBase);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/base/testproj"), testprojDir.toPath()));
         server.setState(states.get("canPullADeletedBinaryFile").get("withDeletedBinaryFile"));
-        Process gitWithModifiedBinaryFile = runtime.exec("git pull", null, testprojDir);
-        int exitCodeWithModifiedBinaryFile = gitWithModifiedBinaryFile.waitFor();
+        Process gitWithDeletedBinaryFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithDeletedBinaryFile = gitWithDeletedBinaryFile.waitFor();
         wlgb.stop();
-        assertEquals(0, exitCodeWithModifiedBinaryFile);
+        assertEquals(0, exitCodeWithDeletedBinaryFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/withDeletedBinaryFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canPullAModifiedNestedFile() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3864, getResource("/canPullAModifiedNestedFile").toFile());
+        server.start();
+        server.setState(states.get("canPullAModifiedNestedFile").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33864, 3864)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:33864/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullAModifiedNestedFile").get("withModifiedNestedFile"));
+        Process gitWithModifiedNestedFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithModifiedNestedFile = gitWithModifiedNestedFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithModifiedNestedFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/withModifiedNestedFile/testproj"), testprojDir.toPath()));
     }
 
 
