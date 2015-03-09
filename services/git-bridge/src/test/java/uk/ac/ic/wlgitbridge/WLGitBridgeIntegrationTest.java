@@ -35,6 +35,10 @@ public class WLGitBridgeIntegrationTest {
                 put("canCloneMultipleRepositories", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneMultipleRepositories/state/state.json")).build());
                 }});
+                put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
+                    put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
+                }});
                 put("canPullADeletedTexFile", new HashMap<String, SnapshotAPIState>() {{
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/base/state.json")).build());
                     put("withDeletedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/withDeletedTexFile/state.json")).build());
@@ -86,6 +90,29 @@ public class WLGitBridgeIntegrationTest {
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj1"), testproj1Dir.toPath()));
         assertEquals(0, exitCode2);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2Dir.toPath()));
+    }
+
+    @Test
+    public void canPullAModifiedTexFile() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3859, getResource("/canPullAModifiedTexFile").toFile());
+        server.start();
+        server.setState(states.get("canPullAModifiedTexFile").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33859, 3859)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:33859/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullAModifiedTexFile").get("withModifiedTexFile"));
+        Process gitWithDeletedTexFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithDeletedTexFile = gitWithDeletedTexFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithDeletedTexFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/testproj"), testprojDir.toPath()));
     }
 
     @Test
