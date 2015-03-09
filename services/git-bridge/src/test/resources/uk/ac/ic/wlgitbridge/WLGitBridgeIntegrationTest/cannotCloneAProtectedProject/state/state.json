@@ -4,7 +4,7 @@
 		"getDoc": {
             "error": 403,
             "versionID": 1,
-            "createdAt": "2014-11-30T18:40:58Z",
+            "createdAt": "2014-11-30T18:40:58.123Z",
             "email": "jdleesmiller+1@gmail.com",
             "name": "John+1"
 		},
@@ -14,7 +14,7 @@
         		"comment": "added more info on doc GET and error details",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-30T18:47:01Z"
+        		"createdAt": "2014-11-30T18:47:01.456Z"
         	}
 		],
 		"getForVers": [
@@ -42,7 +42,7 @@
 		"project": "invalidFiles",
 		"getDoc": {
 			"versionID": 1,
-			"createdAt": "2014-11-30T18:40:58Z",
+			"createdAt": "2014-11-30T18:40:58.123Z",
 			"email": "jdleesmiller+1@gmail.com",
 			"name": "John+1"
 		},
@@ -52,7 +52,7 @@
         		"comment": "added more info on doc GET and error details",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-30T18:47:01Z"
+        		"createdAt": "2014-11-30T18:47:01.456Z"
         	}
 		],
 		"getForVers": [
@@ -95,7 +95,7 @@
 		"project": "invalidProject",
 		"getDoc": {
 			"versionID": 1,
-			"createdAt": "2014-11-30T18:40:58Z",
+			"createdAt": "2014-11-30T18:40:58.123Z",
 			"email": "jdleesmiller+1@gmail.com",
 			"name": "John+1"
 		},
@@ -136,7 +136,7 @@
 		"project": "error",
 		"getDoc": {
 			"versionID": 1,
-			"createdAt": "2014-11-30T18:40:58Z",
+			"createdAt": "2014-11-30T18:40:58.123Z",
 			"email": "jdleesmiller+1@gmail.com",
 			"name": "John+1"
 		},
@@ -146,7 +146,7 @@
         		"comment": "added more info on doc GET and error details",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-30T18:47:01Z"
+        		"createdAt": "2014-11-30T18:47:01.456Z"
         	}
 		],
 		"getForVers": [

@@ -85,7 +85,7 @@ public class SnapshotGetDocResult extends Result {
                 email = userObject.get("email").getAsString();
             } else {
                 name = "Anonymous";
-                email = "anonymous@writelatex.com";
+                email = "anonymous@overleaf.com";
             }
         }
     }

@@ -3,7 +3,7 @@
 		"project": "1826rqgsdb",
 		"getDoc": {
 			"versionID": 243,
-			"createdAt": "2014-11-30T18:40:58Z",
+			"createdAt": "2014-11-30T18:40:58.123Z",
 			"email": "jdleesmiller+1@gmail.com",
 			"name": "John+1"
 		},
@@ -13,49 +13,49 @@
         		"comment": "added more info on doc GET and error details",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-30T18:47:01Z"
+        		"createdAt": "2014-11-30T18:47:01.456Z"
         	},
         	{
         		"versionID": 185,
         		"comment": "with more details on POST request",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-11T17:18:40Z"
+        		"createdAt": "2014-11-11T17:18:40.789Z"
         	},
         	{
         		"versionID": 175,
         		"comment": "with updated PUT/POST request",
         		"email": "jdleesmiller+1@gmail.com",
         		"name": "John+1",
-        		"createdAt": "2014-11-09T23:09:13Z"
+        		"createdAt": "2014-11-09T23:09:13.123Z"
         	},
         	{
         		"versionID": 146,
         		"comment": "added PUT format",
         		"email": "jdleesmiller@gmail.com",
         		"name": "John Lees-Miller",
-        		"createdAt": "2014-11-07T15:11:35Z"
+        		"createdAt": "2014-11-07T15:11:35.456Z"
         	},
         	{
         		"versionID": 74,
         		"comment": "with example output",
         		"email": "jdleesmiller@gmail.com",
         		"name": "John Lees-Miller",
-        		"createdAt": "2014-11-05T18:09:41Z"
+        		"createdAt": "2014-11-05T18:09:41.789Z"
         	},
         	{
         		"versionID": 39,
         		"comment": "with more files",
         		"email": "jdleesmiller@gmail.com",
         		"name": "John Lees-Miller",
-        		"createdAt": "2014-11-05T18:02:19Z"
+        		"createdAt": "2014-11-05T18:02:19.123Z"
         	},
         	{
         		"versionID": 24,
         		"comment": "first draft",
         		"email": "jdleesmiller@gmail.com",
         		"name": "John Lees-Miller",
-        		"createdAt": "2014-11-05T17:56:58Z"
+        		"createdAt": "2014-11-05T17:56:58.456Z"
         	}
 		],
 		"getForVers": [

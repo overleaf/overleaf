@@ -33,12 +33,12 @@ public class Snapshot implements Comparable<Snapshot> {
         userEmail = user.getEmail();
         TimeZone tz = TimeZone.getDefault();
         Calendar cal = Calendar.getInstance(tz);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setCalendar(cal);
         try {
             cal.setTime(sdf.parse(info.getCreatedAt()));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        } catch (ParseException e2) {
+            throw new RuntimeException(e2);
         }
         createdAt = cal.getTime();
 
