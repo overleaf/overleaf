@@ -7,8 +7,8 @@ module.exports = SpellingAPIController =
 		metrics.inc "spelling-check", 0.1
 		logger.log token: req?.params?.user_id, word_count: req?.body?.words?.length, "running check"
 		SpellingAPIManager.runRequest req.params.user_id, req.body, (error, result) ->
-			if err?
-				logger.err err:err, user_id:req?.params?.user_id, word_count: req?.body?.words?.length, "error processing spelling request"
+			if error?
+				logger.err err:error, user_id:req?.params?.user_id, word_count: req?.body?.words?.length, "error processing spelling request"
 				return res.send(500)
 			res.send(result)
 
