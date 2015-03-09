@@ -129,22 +129,28 @@ public class Util {
     }
 
     public static void deleteDirectory(File directory) {
-        deleteInDirectory(directory);
-        directory.delete();
+        if (directory != null) {
+            deleteInDirectory(directory);
+            directory.delete();
+        }
     }
 
     public static void deleteInDirectory(File directory) {
-        deleteInDirectoryApartFrom(directory);
+        if (directory != null) {
+            deleteInDirectoryApartFrom(directory);
+        }
     }
 
     public static void deleteInDirectoryApartFrom(File directory, String... apartFrom) {
-        Set<String> excluded = new HashSet<String>(Arrays.asList(apartFrom));
-        for (File file : directory.listFiles()) {
-            if (!excluded.contains(file.getName())) {
-                if (file.isDirectory()) {
-                    deleteInDirectory(file);
+        if (directory != null) {
+            Set<String> excluded = new HashSet<String>(Arrays.asList(apartFrom));
+            for (File file : directory.listFiles()) {
+                if (!excluded.contains(file.getName())) {
+                    if (file.isDirectory()) {
+                        deleteInDirectory(file);
+                    }
+                    file.delete();
                 }
-                file.delete();
             }
         }
     }
