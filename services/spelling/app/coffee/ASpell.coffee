@@ -2,6 +2,7 @@ async = require "async"
 _ = require "underscore"
 ASpellWorkerPool = require "./ASpellWorkerPool"
 LRU = require "lru-cache"
+logger = require 'logger-sharelatex'
 
 cache = LRU(10000)
 
@@ -12,14 +13,25 @@ class ASpellRunner
 			#output = @removeAspellHeader(output)
 			suggestions = @getSuggestions(output)
 			results = []
+			hits = 0
 			for word, i in words
 				key = language + ':' + word
 				cached = cache.get(key)
 				if cached?
-					results.push index: i, suggestions: cached
-				else if suggestions[word]?
-					cache.set(key, suggestions[word])
-					results.push index: i, suggestions: suggestions[word]
+					hits++
+					if	cached == true
+						# valid word, no need to do anything
+						continue
+					else
+						results.push index: i, suggestions: cached
+				else
+					if suggestions[word]?
+						cache.set(key, suggestions[word])
+						results.push index: i, suggestions: suggestions[word]
+					else
+						# a valid word, but uncached
+						cache.set(key, true)
+			logger.log hits: hits, total: words.length, hitrate: hits/words.length, "cache hit rate"
 			callback null, results
 
 	getSuggestions: (output) ->
