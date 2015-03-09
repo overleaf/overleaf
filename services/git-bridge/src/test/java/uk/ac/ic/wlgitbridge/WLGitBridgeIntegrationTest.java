@@ -47,6 +47,10 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedBinaryFile/base/state.json")).build());
                     put("withModifiedBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedBinaryFile/withModifiedBinaryFile/state.json")).build());
                 }});
+                put("canPullADeletedBinaryFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
+                    put("withDeletedBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/withDeletedBinaryFile/state.json")).build());
+                }});
                 put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
                 }});
@@ -163,6 +167,29 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, exitCodeWithModifiedBinaryFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/withModifiedBinaryFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canPullADeletedBinaryFile() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3863, getResource("/canPullADeletedBinaryFile").toFile());
+        server.start();
+        server.setState(states.get("canPullADeletedBinaryFile").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33863, 3863)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:33863/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullADeletedBinaryFile").get("withDeletedBinaryFile"));
+        Process gitWithModifiedBinaryFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithModifiedBinaryFile = gitWithModifiedBinaryFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithModifiedBinaryFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/withDeletedBinaryFile/testproj"), testprojDir.toPath()));
     }
 
 
