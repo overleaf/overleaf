@@ -43,6 +43,10 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/base/state.json")).build());
                     put("withDeletedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedTexFile/withDeletedTexFile/state.json")).build());
                 }});
+                put("canPullAModifiedBinaryFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedBinaryFile/base/state.json")).build());
+                    put("withModifiedBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedBinaryFile/withModifiedBinaryFile/state.json")).build());
+                }});
                 put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
                 }});
@@ -108,10 +112,10 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(0, exitCodeBase);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/base/testproj"), testprojDir.toPath()));
         server.setState(states.get("canPullAModifiedTexFile").get("withModifiedTexFile"));
-        Process gitWithDeletedTexFile = runtime.exec("git pull", null, testprojDir);
-        int exitCodeWithDeletedTexFile = gitWithDeletedTexFile.waitFor();
+        Process gitWithModifiedTexFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithModifiedTexFile = gitWithModifiedTexFile.waitFor();
         wlgb.stop();
-        assertEquals(0, exitCodeWithDeletedTexFile);
+        assertEquals(0, exitCodeWithModifiedTexFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedTexFile/withModifiedTexFile/testproj"), testprojDir.toPath()));
     }
 
@@ -136,6 +140,29 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, exitCodeWithDeletedTexFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedTexFile/withDeletedTexFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canPullAModifiedBinaryFile() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3862, getResource("/canPullAModifiedBinaryFile").toFile());
+        server.start();
+        server.setState(states.get("canPullAModifiedBinaryFile").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33862, 3862)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:33862/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullAModifiedBinaryFile").get("withModifiedBinaryFile"));
+        Process gitWithModifiedBinaryFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithModifiedBinaryFile = gitWithModifiedBinaryFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithModifiedBinaryFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedBinaryFile/withModifiedBinaryFile/testproj"), testprojDir.toPath()));
     }
 
 
