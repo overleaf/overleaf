@@ -55,6 +55,10 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
                     put("withModifiedNestedFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/withModifiedNestedFile/state.json")).build());
                 }});
+                put("canPullDeletedNestedFiles", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullDeletedNestedFiles/base/state.json")).build());
+                    put("withDeletedNestedFiles", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullDeletedNestedFiles/withDeletedNestedFiles/state.json")).build());
+                }});
                 put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
                 }});
@@ -217,6 +221,29 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, exitCodeWithModifiedNestedFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullAModifiedNestedFile/withModifiedNestedFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canPullDeletedNestedFiles() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3865, getResource("/canPullDeletedNestedFiles").toFile());
+        server.start();
+        server.setState(states.get("canPullDeletedNestedFiles").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33865, 3865)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:33865/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullDeletedNestedFiles").get("withDeletedNestedFiles"));
+        Process gitWithDeletedBinaryFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithDeletedBinaryFile = gitWithDeletedBinaryFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithDeletedBinaryFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullDeletedNestedFiles/withDeletedNestedFiles/testproj"), testprojDir.toPath()));
     }
 
 

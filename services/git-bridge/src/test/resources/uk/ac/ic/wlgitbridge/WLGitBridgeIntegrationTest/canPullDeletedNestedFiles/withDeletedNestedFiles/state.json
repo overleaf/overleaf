@@ -1,0 +1,80 @@
+[
+	{
+		"project": "testproj",
+		"getDoc": {
+			"versionID": 2,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "jdleesmiller+1@gmail.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [
+        	{
+        		"versionID": 2,
+        		"comment": "i deleted nested stuff",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:48:01.123Z"
+        	},
+        	{
+        		"versionID": 1,
+        		"comment": "added more info on doc GET and error details",
+        		"email": "jdleesmiller+1@gmail.com",
+        		"name": "John+1",
+        		"createdAt": "2014-11-30T18:47:01.456Z"
+        	}
+		],
+		"getForVers": [
+			{
+				"versionID": 2,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                      "content": "This text is from another file.",
+                      "path": "test.tex"
+                    }
+	            ],
+	            "atts": [
+	            	{
+	            		"url": "http://127.0.0.1:3865/withDeletedNestedFiles/testproj/overleaf-white-410.png",
+	            		"path": "overleaf-white-410.png"
+	            	}
+	            ]
+	        },
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    },
+                    {
+                    	"content": "This text is from another file.",
+                    	"path": "test.tex"
+                    },
+                    {
+                      "content": "nest1",
+                      "path": "nest1/nest1.tex"
+                    },
+                    {
+                      "content": "nest2",
+                      "path": "nest1/nest2/nest2.tex"
+                    }
+	            ],
+	            "atts": [
+	            	{
+	            		"url": "http://127.0.0.1:3865/base/testproj/overleaf-white-410.png",
+	            		"path": "overleaf-white-410.png"
+	            	}
+	            ]
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "success",
+			"versionID": 2
+		}
+	}
+]
