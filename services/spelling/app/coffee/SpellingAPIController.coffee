@@ -9,7 +9,7 @@ module.exports = SpellingAPIController =
 		SpellingAPIManager.runRequest req.params.user_id, req.body, (error, result) ->
 			if error?
 				logger.err err:error, user_id:req?.params?.user_id, word_count: req?.body?.words?.length, "error processing spelling request"
-				return res.send(500)
+				return res.sendStatus(500)
 			res.send(result)
 
 	learn: (req, res, next) ->
