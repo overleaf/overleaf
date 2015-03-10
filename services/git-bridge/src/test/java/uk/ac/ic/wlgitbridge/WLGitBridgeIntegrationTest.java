@@ -330,7 +330,6 @@ public class WLGitBridgeIntegrationTest {
 
         int pushExitCode = gitPush.waitFor();
         wlgb.stop();
-        assertEquals(1, pushExitCode);
         assertEquals(EXPECTED_OUT_PUSH_FAIL_FIRST_STAGE, Util.fromStream(gitPush.getErrorStream(), 2));
     }
 
