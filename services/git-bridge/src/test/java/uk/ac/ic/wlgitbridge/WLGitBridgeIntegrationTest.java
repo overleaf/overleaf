@@ -79,6 +79,9 @@ public class WLGitBridgeIntegrationTest {
                 put("pushFailsOnInvalidProject", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnInvalidProject/state/state.json")).build());
                 }});
+                put("pushFailsOnUnexpectedError", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnUnexpectedError/state/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -454,6 +457,44 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(1, pushExitCode);
         List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
         assertEquals(EXPECTED_OUT_PUSH_INVALID_PROJECT, actual);
+    }
+
+
+    private static final List<String> EXPECTED_OUT_PUSH_UNEXPECTED_ERROR =
+            Arrays.asList(
+                    "remote: error: Overleaf error",
+                    "remote: hint: There was an internal error with the Overleaf server.",
+                    "remote: hint: Please contact Overleaf.",
+                    "To http://127.0.0.1:33871/testproj.git",
+                    "! [remote rejected] master -> master (Overleaf error)",
+                    "error: failed to push some refs to 'http://127.0.0.1:33871/testproj.git'"
+            );
+
+    /* this one prints a stack trace */
+    @Test
+    public void pushFailsOnUnexpectedError() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3871, getResource("/pushFailsOnUnexpectedError").toFile());
+        server.start();
+        server.setState(states.get("pushFailsOnUnexpectedError").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33871, 3871)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33871/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnUnexpectedError/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(1, pushExitCode);
+        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_UNEXPECTED_ERROR, actual);
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {

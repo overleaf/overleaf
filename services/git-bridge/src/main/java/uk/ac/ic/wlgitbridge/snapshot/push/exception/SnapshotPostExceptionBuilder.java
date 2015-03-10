@@ -18,7 +18,7 @@ public class SnapshotPostExceptionBuilder {
         } else if (errorCode.equals(CODE_ERROR_INVALID_FILES)) {
             return new InvalidFilesException(json);
         } else if (errorCode.equals(CODE_ERROR_INVALID_PROJECT)) {
-            return new uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException(json);
+            return new InvalidProjectException(json);
         } else if (errorCode.equals(CODE_ERROR_UNKNOWN)) {
             return new UnexpectedErrorException(json);
         } else {
