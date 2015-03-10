@@ -326,6 +326,7 @@ public class WLGitBridgeIntegrationTest {
         File testprojDir = new File(dir, "testproj");
         assertEquals(0, exitCode);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnFirstStageOutOfDate/state/testproj"), testprojDir.toPath()));
+        runtime.exec("git config push.default simple", null, testprojDir);
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         runtime.exec("git add -A", null, testprojDir).waitFor();
         runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
@@ -360,6 +361,7 @@ public class WLGitBridgeIntegrationTest {
         File testprojDir = new File(dir, "testproj");
         assertEquals(0, exitCode);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnSecondStageOutOfDate/state/testproj"), testprojDir.toPath()));
+        runtime.exec("git config push.default simple", null, testprojDir);
         runtime.exec("touch push.tex", null, testprojDir).waitFor();
         runtime.exec("git add -A", null, testprojDir).waitFor();
         runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
