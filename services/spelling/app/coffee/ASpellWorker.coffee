@@ -1,44 +1,49 @@
 child_process = require("child_process")
+logger = require 'logger-sharelatex'
 
 BATCH_SIZE = 100
 
 class ASpellWorker
 	constructor: (language) ->
 		@language = language
+		@count = 0
 		@pipe = child_process.spawn("aspell", ["pipe", "-t", "--encoding=utf-8", "-d", language])
+		logger.log process: @pipe.pid, lang: @language, "starting new aspell worker"
 		@pipe.on 'exit', () =>
 			@state = 'killed'
+			logger.log process: @pipe.pid, lang: @language, "aspell worker has exited"
 		@pipe.on 'error', (err) =>
+			@state = 'error'
 			@callback err, []
 		@pipe.stdin.on 'error', (err) =>
+			@state = 'error'
 			@callback err, []
 
 		output = ""
 		@pipe.stdout.on "data", (chunk) =>
-			# TODO: strip aspell header
 			output = output + chunk
+			# We receive a single "*" from Aspell as the end of data marker
 			if chunk.toString().match(/^\*$/m)
 				@callback(null, output.slice())
+				@state = 'ready'
 				output = ""
 				error = ""
-				@state = 'ready'
 
 		error = ""
 		@pipe.stderr.on "data", (chunk) =>
 			error = error + chunk
 
 		@pipe.stdout.on "end", () =>
-			# process has ended, remove it from the active list
-			if error == ""
-				@callback(null, output.slice())
-			else
-				@callback new Error(error), output.slice()
+			# process has ended
+			@state = "end"
 
 	isReady: () ->
 		return @state == 'ready'
 
 	check: (words, callback) ->
-		@state = 'ready'
+		# we will now send data to aspell, and be ready again when we
+		# receive the end of data marker
+		@state = 'busy'
 		@callback = callback
 		@setTerseMode()
 		@write(words)
@@ -53,12 +58,14 @@ class ASpellWorker
 			i += BATCH_SIZE
 
 	flush: () ->
-		# send an end of data marker
-		@sendCommand("%")   # take the aspell pipe out of terse mode so we can look for a '*'
-		@sendCommand("end") # this is a valid word so it will generate a '*'
-		@sendCommand("!")   # go back into terse mode
+		# get aspell to send an end of data marker "*" when ready
+		@sendCommand("%")		# take the aspell pipe out of terse mode so we can look for a '*'
+		@sendCommand("end") # send a valid word ("end") so it will generate a '*'
+		@sendCommand("!")		# go back into terse mode
 
-	shutdown: () ->
+	shutdown: (reason) ->
+		logger.log process: @pipe.pid, reason: reason, 'shutting down'
+		@state = "closing"
 		@pipe.stdin.end()
 
 	setTerseMode: () ->
@@ -72,6 +79,7 @@ class ASpellWorker
 		# ^word1 word2 word3 ...
 		# See aspell.info, writing programs to use Aspell Through A Pipe
 		@sendCommand("^" + words.join(" "))
+		@count++
 
 	sendCommand: (command) ->
 		@pipe.stdin.write(command + "\n")
