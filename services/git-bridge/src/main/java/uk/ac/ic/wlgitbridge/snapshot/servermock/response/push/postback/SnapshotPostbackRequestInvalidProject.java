@@ -1,9 +1,11 @@
 package uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.postback;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +18,13 @@ public class SnapshotPostbackRequestInvalidProject extends SnapshotPostbackReque
     public SnapshotPostbackRequestInvalidProject(List<String> errors) {
         super("invalidProject");
         this.errors = errors;
+    }
+
+    public SnapshotPostbackRequestInvalidProject(JsonArray errors) {
+        this(new ArrayList<String>());
+        for (JsonElement error : errors) {
+            this.errors.add(error.getAsString());
+        }
     }
 
     @Override

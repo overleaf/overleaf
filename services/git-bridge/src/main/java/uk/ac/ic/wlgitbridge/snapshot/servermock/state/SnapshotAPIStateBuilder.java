@@ -140,7 +140,7 @@ public class SnapshotAPIStateBuilder {
         } else if (type.equals("invalidFiles")) {
             p = new SnapshotPostbackRequestInvalidFiles(jsonPostback.get("errors").getAsJsonArray());
         } else if (type.equals("invalidProject")) {
-            p = new SnapshotPostbackRequestInvalidProject(new LinkedList<String>());
+            p = new SnapshotPostbackRequestInvalidProject(jsonPostback.get("errors").getAsJsonArray());
         } else if (type.equals("error")) {
             p = new SnapshotPostbackRequestError();
         } else {

@@ -76,6 +76,9 @@ public class WLGitBridgeIntegrationTest {
                 put("pushFailsOnInvalidFiles", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnInvalidFiles/state/state.json")).build());
                 }});
+                put("pushFailsOnInvalidProject", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnInvalidProject/state/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -414,6 +417,43 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(1, pushExitCode);
         List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
         assertEquals(EXPECTED_OUT_PUSH_INVALID_FILES, actual);
+    }
+
+
+    private static final List<String> EXPECTED_OUT_PUSH_INVALID_PROJECT =
+            Arrays.asList(
+                    "remote: error: invalid project",
+                    "remote: hint: project: no main file",
+                    "remote: hint: The project would have no (editable) main .tex file.",
+                    "To http://127.0.0.1:33870/testproj.git",
+                    "! [remote rejected] master -> master (invalid project)",
+                    "error: failed to push some refs to 'http://127.0.0.1:33870/testproj.git'"
+            );
+
+    @Test
+    public void pushFailsOnInvalidProject() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3870, getResource("/pushFailsOnInvalidProject").toFile());
+        server.start();
+        server.setState(states.get("pushFailsOnInvalidProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33870, 3870)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33870/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidProject/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(1, pushExitCode);
+        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_INVALID_PROJECT, actual);
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
