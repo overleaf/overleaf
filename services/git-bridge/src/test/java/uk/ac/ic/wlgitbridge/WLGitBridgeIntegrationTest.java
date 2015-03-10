@@ -68,6 +68,9 @@ public class WLGitBridgeIntegrationTest {
                 put("pushFailsOnFirstStageOutOfDate", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnFirstStageOutOfDate/state/state.json")).build());
                 }});
+                put("pushFailsOnSecondStageOutOfDate", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnSecondStageOutOfDate/state/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -299,7 +302,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
 
-    private static final String EXPECTED_OUT_PUSH_FAIL_FIRST_STAGE =
+    private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST =
             "To http://127.0.0.1:33867/testproj.git\n" +
             " ! [rejected]        master -> master (non-fast-forward)\n" +
             "error: failed to push some refs to 'http://127.0.0.1:33867/testproj.git'\n" +
@@ -327,10 +330,43 @@ public class WLGitBridgeIntegrationTest {
         runtime.exec("git add -A", null, testprojDir).waitFor();
         runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
         Process gitPush = runtime.exec("git push", null, testprojDir);
-
-        int pushExitCode = gitPush.waitFor();
+        gitPush.waitFor();
         wlgb.stop();
-        assertEquals(EXPECTED_OUT_PUSH_FAIL_FIRST_STAGE, Util.fromStream(gitPush.getErrorStream(), 2));
+        assertEquals(EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST, Util.fromStream(gitPush.getErrorStream(), 2));
+    }
+
+
+    private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND =
+            "To http://127.0.0.1:33868/testproj.git\n" +
+                    " ! [rejected]        master -> master (non-fast-forward)\n" +
+                    "error: failed to push some refs to 'http://127.0.0.1:33868/testproj.git'\n" +
+                    "hint: Updates were rejected because the tip of your current branch is behind\n" +
+                    "hint: its remote counterpart. Integrate the remote changes (e.g.\n" +
+                    "hint: 'git pull ...') before pushing again.\n" +
+                    "hint: See the 'Note about fast-forwards' in 'git push --help' for details.\n";
+
+    @Test
+    public void pushFailsOnSecondStageOutOfDate() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3868, getResource("/pushFailsOnSecondStageOutOfDate").toFile());
+        server.start();
+        server.setState(states.get("pushFailsOnSecondStageOutOfDate").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33868, 3868)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33868/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnSecondStageOutOfDate/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND, Util.fromStream(gitPush.getErrorStream(), 2));
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
