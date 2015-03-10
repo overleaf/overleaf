@@ -4,18 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.GetForVersionResult;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotFile;
+import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.GetSavedVersResult;
+import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotInfo;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.data.SnapshotPushResult;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.data.SnapshotPushResultOutOfDate;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.data.SnapshotPushResultSuccess;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.postback.*;
-import uk.ac.ic.wlgitbridge.snapshot.servermock.response.push.postback.invalidfile.InvalidFileError;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotFile;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.GetForVersionResult;
-import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.GetSavedVersResult;
-import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotInfo;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -139,7 +138,7 @@ public class SnapshotAPIStateBuilder {
         } else if (type.equals("outOfDate")) {
             p = new SnapshotPostbackRequestOutOfDate();
         } else if (type.equals("invalidFiles")) {
-            p = new SnapshotPostbackRequestInvalidFiles(new LinkedList<InvalidFileError>());
+            p = new SnapshotPostbackRequestInvalidFiles(jsonPostback.get("errors").getAsJsonArray());
         } else if (type.equals("invalidProject")) {
             p = new SnapshotPostbackRequestInvalidProject(new LinkedList<String>());
         } else if (type.equals("error")) {

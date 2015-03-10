@@ -14,7 +14,9 @@ import uk.ac.ic.wlgitbridge.util.Util;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -70,6 +72,9 @@ public class WLGitBridgeIntegrationTest {
                 }});
                 put("pushFailsOnSecondStageOutOfDate", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnSecondStageOutOfDate/state/state.json")).build());
+                }});
+                put("pushFailsOnInvalidFiles", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnInvalidFiles/state/state.json")).build());
                 }});
             }};
 
@@ -371,6 +376,46 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND, Util.fromStream(gitPush.getErrorStream(), 2));
     }
 
+
+    private static final List<String> EXPECTED_OUT_PUSH_INVALID_FILES =
+            Arrays.asList(
+                    "remote: error: invalid files",
+                    "remote: hint: You have 4 invalid files in your Overleaf project:",
+                    "remote: hint: file1.invalid (error)",
+                    "remote: hint: file2.exe (invalid file extension)",
+                    "remote: hint: hello world.png (rename to: hello_world.png)",
+                    "remote: hint: an image.jpg (rename to: an_image.jpg)",
+                    "To http://127.0.0.1:33869/testproj.git",
+                    "! [remote rejected] master -> master (invalid files)",
+                    "error: failed to push some refs to 'http://127.0.0.1:33869/testproj.git'"
+            );
+
+    @Test
+    public void pushFailsOnInvalidFiles() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3869, getResource("/pushFailsOnInvalidFiles").toFile());
+        server.start();
+        server.setState(states.get("pushFailsOnInvalidFiles").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33869, 3869)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33869/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushFailsOnInvalidFiles/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(1, pushExitCode);
+        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_INVALID_FILES, actual);
+    }
+
     private String makeConfigFile(int port, int apiPort) throws IOException {
         File wlgb = folder.newFolder();
         File config = folder.newFile();
@@ -398,6 +443,10 @@ public class WLGitBridgeIntegrationTest {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static String withoutWhitespace(String s) {
+        return s.replaceAll("\\s","");
     }
 
 }

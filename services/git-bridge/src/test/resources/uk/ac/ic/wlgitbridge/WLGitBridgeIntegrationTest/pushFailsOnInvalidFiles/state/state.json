@@ -31,15 +31,35 @@
 	            ],
 	            "atts": [
 	            	{
-	            		"url": "http://127.0.0.1:3868/state/testproj/min_mean_wait_evm_7_eps_150dpi.png",
+	            		"url": "http://127.0.0.1:3869/state/testproj/min_mean_wait_evm_7_eps_150dpi.png",
 	            		"path": "min_mean_wait_evm_7_eps_150dpi.png"
 	            	}
 	            ]
 	        }
 		],
-		"push": "outOfDate",
+		"push": "success",
 		"postback": {
-			"type": "outOfDate"
+			"type": "invalidFiles",
+            "errors": [
+                {
+                    "file": "file1.invalid",
+                    "state": "error"
+                },
+                {
+                    "file": "file2.exe",
+                    "state": "disallowed"
+                },
+                {
+                    "file": "hello world.png",
+                    "state": "unclean_name",
+                    "cleanFile": "hello_world.png"
+                },
+                {
+                    "file": "an image.jpg",
+                    "state": "unclean_name",
+                    "cleanFile": "an_image.jpg"
+                }
+            ]
 		}
 	}
 ]

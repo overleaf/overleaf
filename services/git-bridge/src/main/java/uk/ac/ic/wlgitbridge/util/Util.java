@@ -3,10 +3,7 @@ package uk.ac.ic.wlgitbridge.util;
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Winston on 19/11/14.
@@ -150,6 +147,25 @@ public class Util {
                 }
             }
         }
+    }
+
+    public static List<String> linesFromStream(InputStream stream, int skip, String trimSuffix) throws IOException {
+        List<String> lines = new ArrayList<String>();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String line;
+        for (int i = 0; i < skip; i++) {
+            reader.readLine();
+        }
+        while ((line = reader.readLine()) != null) {
+            String trim = line.trim();
+            trim = trim.replaceAll("\\p{C}", "");
+            int endIndex = trim.lastIndexOf(trimSuffix);
+            if (endIndex >= 0) {
+                trim = trim.substring(0, endIndex);
+            }
+            lines.add(trim);
+        }
+        return lines;
     }
 
     public static String fromStream(InputStream stream, int skip) throws IOException {

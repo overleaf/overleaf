@@ -22,4 +22,18 @@ public abstract class InvalidFileError {
 
     protected abstract String getState();
 
+    public static InvalidFileError buildFromJsonError(JsonObject error) {
+        String state = error.get("state").getAsString();
+        String file = error.get("file").getAsString();
+        if (state.equals("error")) {
+            return new InvalidFileErrorDefault(file);
+        } else if (state.equals("disallowed")) {
+            return new InvalidFileErrorDisallowed(file);
+        } else if (state.equals("unclean_name")) {
+            return new InvalidFileErrorUnclean(file, error.get("cleanFile").getAsString());
+        } else {
+            throw new IllegalArgumentException("bad invalid file state: " + state);
+        }
+    }
+
 }
