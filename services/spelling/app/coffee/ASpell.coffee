@@ -35,7 +35,7 @@ class ASpellRunner
 
 			# update the cache after processing all words, to avoid cache
 			# changing while we use it
-			for k, v in addToCache
+			for k, v of addToCache
 				cache.set(k, v)
 
 			logger.log hits: hits, total: words.length, hitrate: hits/words.length, "cache hit rate"
