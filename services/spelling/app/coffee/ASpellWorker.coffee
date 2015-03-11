@@ -45,6 +45,7 @@ class ASpellWorker
 		# receive the end of data marker
 		@state = 'busy'
 		@callback = callback
+		@setEndOfStreamMarker()
 		@setTerseMode()
 		@write(words)
 		@flush()
@@ -60,13 +61,18 @@ class ASpellWorker
 	flush: () ->
 		# get aspell to send an end of data marker "*" when ready
 		@sendCommand("%")		# take the aspell pipe out of terse mode so we can look for a '*'
-		@sendCommand("end") # send a valid word ("end") so it will generate a '*'
+		@sendCommand("^ENDOFSTREAMMARKER") # send our marker which will generate a '*'
 		@sendCommand("!")		# go back into terse mode
 
 	shutdown: (reason) ->
 		logger.log process: @pipe.pid, reason: reason, 'shutting down'
 		@state = "closing"
 		@pipe.stdin.end()
+
+	setEndOfStreamMarker: () ->
+		return if @setup
+		@sendCommand("@ENDOFSTREAMMARKER") # make this string a valid word
+		@setup = true
 
 	setTerseMode: () ->
 		@sendCommand("!")
