@@ -16,7 +16,7 @@ class ASpellWorkerPool
 			return null
 		worker = new ASpellWorker(language, @options)
 		worker.pipe.on 'exit', () =>
-			@cleanup
+			@cleanup()
 		@PROCESS_POOL.push(worker)
 		return worker
 
