@@ -11,9 +11,10 @@ class ASpellRunner
 		@runAspellOnWords language, words, (error, output) =>
 			return callback(error) if error?
 			#output = @removeAspellHeader(output)
-			suggestions = @getSuggestions(output)
+			suggestions = @getSuggestions(language, output)
 			results = []
 			hits = 0
+			addToCache = {}
 			for word, i in words
 				key = language + ':' + word
 				cached = cache.get(key)
@@ -25,16 +26,22 @@ class ASpellRunner
 					else
 						results.push index: i, suggestions: cached
 				else
-					if suggestions[word]?
-						cache.set(key, suggestions[word])
-						results.push index: i, suggestions: suggestions[word]
+					if suggestions[key]?
+						addToCache[key] = suggestions[key]
+						results.push index: i, suggestions: suggestions[key]
 					else
 						# a valid word, but uncached
-						cache.set(key, true)
+						addToCache[key] = true
+
+			# update the cache after processing all words, to avoid cache
+			# changing while we use it
+			for k, v in addToCache
+				cache.set(k, v)
+
 			logger.log hits: hits, total: words.length, hitrate: hits/words.length, "cache hit rate"
 			callback null, results
 
-	getSuggestions: (output) ->
+	getSuggestions: (language, output) ->
 		lines = output.split("\n")
 		suggestions = {}
 		for line in lines
@@ -43,12 +50,12 @@ class ASpellRunner
 				if parts.length > 1
 					word = parts[1]
 					suggestionsString = line.slice(line.indexOf(":") + 2)
-					suggestions[word] = suggestionsString.split(", ")
+					suggestions[language + ":" + word] = suggestionsString.split(", ")
 			else if line[0] == "#" # No suggestions
 				parts = line.split(" ")
 				if parts.length > 1
 					word = parts[1]
-					suggestions[word] = []
+					suggestions[language + ":" + word] = []
 		return suggestions
 
 	#removeAspellHeader: (output) -> output.slice(1)
