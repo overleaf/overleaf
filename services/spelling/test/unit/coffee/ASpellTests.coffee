@@ -57,5 +57,5 @@ describe "ASpell", ->
 
 		it "should return in reasonable time", (done) ->
 			delta = Date.now()-@start
-			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 10)
+			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 100)
 			done()
