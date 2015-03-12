@@ -11,7 +11,6 @@ class ASpellWorkerPool
 
 	constructor: (@options) ->
 		@PROCESS_POOL = []
-		@timeout = 1000
 
 	create: (language) ->
 		if @PROCESS_POOL.length >= @MAX_WORKERS
