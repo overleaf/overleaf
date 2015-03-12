@@ -17,6 +17,7 @@ class ASpellWorkerPool
 			return null
 		worker = new ASpellWorker(language, @options)
 		worker.pipe.on 'exit', () =>
+			logger.log process: worker.pipe.pid, lang: language, "removing aspell worker from pool"
 			@cleanup()
 		@PROCESS_POOL.push(worker)
 		metrics.gauge 'aspellWorkerPool-size', @PROCESS_POOL.length
