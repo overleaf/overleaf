@@ -76,6 +76,11 @@ class ASpellWorker
 		@state = "closing"
 		@pipe.stdin.end()
 
+	kill: (reason) ->
+		logger.log process: @pipe.pid, reason: reason, 'killing'
+		return if @state == 'killed'
+		@pipe.kill('SIGKILL')
+
 	setEndOfStreamMarker: () ->
 		return if @setup
 		@sendCommand("@ENDOFSTREAMMARKER") # make this string a valid word

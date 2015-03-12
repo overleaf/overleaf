@@ -6,6 +6,8 @@ metrics = require('metrics-sharelatex')
 class ASpellWorkerPool
 	MAX_REQUESTS: 100*1024
 	MAX_WORKERS: 32
+	MAX_IDLE_TIME: 1000
+	MAX_REQUEST_TIME: 60*1000
 
 	constructor: (@options) ->
 		@PROCESS_POOL = []
@@ -17,6 +19,12 @@ class ASpellWorkerPool
 			return null
 		worker = new ASpellWorker(language, @options)
 		worker.pipe.on 'exit', () =>
+			if worker.killTimer?
+				clearTimeout worker.killTimer
+				worker.killTimer = null
+			if worker.idleTimer?
+				clearTimeout worker.idleTimer
+				worker.idleTimer = null
 			logger.log process: worker.pipe.pid, lang: language, "removing aspell worker from pool"
 			@cleanup()
 		@PROCESS_POOL.push(worker)
@@ -47,12 +55,14 @@ class ASpellWorkerPool
 			clearTimeout worker.idleTimer
 			worker.idleTimer = null
 
-		killTimer = setTimeout () ->
-			worker.pipe.kill('SIGKILL')
-		, timeout || 1000
+		worker.killTimer = setTimeout () ->
+			worker.kill()
+		, timeout || @MAX_REQUEST_TIME
 
 		worker.check words, (err, output) =>
-			clearTimeout killTimer
+			if worker.killTimer?
+				clearTimeout worker.killTimer
+				worker.killTimer = null
 			callback(err, output)
 			return if err? # process has shut down
 			if worker.count > @MAX_REQUESTS
@@ -62,6 +72,6 @@ class ASpellWorkerPool
 				worker.idleTimer = setTimeout () ->
 					worker.shutdown("idle worker")
 					worker.idleTimer = null
-				, 1000
+				, @MAX_IDLE_TIME
 
 module.exports = ASpellWorkerPool
