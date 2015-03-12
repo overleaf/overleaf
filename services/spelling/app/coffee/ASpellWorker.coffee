@@ -27,7 +27,7 @@ class ASpellWorker
 				@callback err, []
 
 		output = ""
-		endMarker = new RegExp("^(#{language}|Error)$", "m")
+		endMarker = new RegExp("^[a-z][a-z]", "m")
 		@pipe.stdout.on "data", (chunk) =>
 			output = output + chunk
 			# We receive the language code from Aspell as the end of data marker
