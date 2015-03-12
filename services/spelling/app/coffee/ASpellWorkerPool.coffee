@@ -56,7 +56,7 @@ class ASpellWorkerPool
 			worker.idleTimer = null
 
 		worker.killTimer = setTimeout () ->
-			worker.kill()
+			worker.kill("spell check timed out")
 		, timeout || @MAX_REQUEST_TIME
 
 		worker.check words, (err, output) =>
