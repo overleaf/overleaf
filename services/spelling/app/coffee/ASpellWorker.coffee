@@ -16,12 +16,12 @@ class ASpellWorker
 			logger.log process: @pipe.pid, lang: @language, "aspell worker has exited"
 			metrics.inc "aspellWorker-exit-" + @language
 		@pipe.on 'error', (err) =>
-			@state = 'error'
+			@state = 'error' unless @state == 'killed'
 			logger.log process: @pipe.pid, error: err, stdout: output, stderr: error, lang: @language, "aspell worker error"
 			if @callback?
 				@callback err, []
 		@pipe.stdin.on 'error', (err) =>
-			@state = 'error'
+			@state = 'error' unless @state == 'killed'
 			logger.log process: @pipe.pid, error: err, stdout: output, stderr: error, lang: @language, "aspell worker error on stdin"
 			if @callback?
 				@callback err, []
