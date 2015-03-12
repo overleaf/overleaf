@@ -1,5 +1,6 @@
 child_process = require("child_process")
 logger = require 'logger-sharelatex'
+metrics = require('metrics-sharelatex')
 
 BATCH_SIZE = 100
 
@@ -9,9 +10,11 @@ class ASpellWorker
 		@count = 0
 		@pipe = child_process.spawn("aspell", ["pipe", "-t", "--encoding=utf-8", "-d", language])
 		logger.log process: @pipe.pid, lang: @language, "starting new aspell worker"
+		metrics.inc "aspellWorker-start-" + @language
 		@pipe.on 'exit', () =>
 			@state = 'killed'
 			logger.log process: @pipe.pid, lang: @language, "aspell worker has exited"
+			metrics.inc "aspellWorker-exit-" + @language
 		@pipe.on 'error', (err) =>
 			@state = 'error'
 			@callback err, []

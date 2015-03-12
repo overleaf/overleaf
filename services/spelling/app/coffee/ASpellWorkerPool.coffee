@@ -1,6 +1,7 @@
 ASpellWorker = require "./ASpellWorker"
 _ = require "underscore"
 logger = require 'logger-sharelatex'
+metrics = require('metrics-sharelatex')
 
 class ASpellWorkerPool
 	MAX_REQUESTS: 100*1024
@@ -18,12 +19,14 @@ class ASpellWorkerPool
 		worker.pipe.on 'exit', () =>
 			@cleanup()
 		@PROCESS_POOL.push(worker)
+		metrics.gauge 'aspellWorkerPool-size', @PROCESS_POOL.length
 		return worker
 
 	cleanup: () ->
 		active = @PROCESS_POOL.filter (worker) ->
 			worker.state != 'killed'
 		@PROCESS_POOL = active
+		metrics.gauge 'aspellWorkerPool-size', @PROCESS_POOL.length
 
 	check: (language, words, timeout, callback) ->
 		# look for an existing process in the pool
