@@ -54,10 +54,11 @@ class ASpellWorkerPool
 		worker.check words, (err, output) =>
 			clearTimeout killTimer
 			callback(err, output)
-			# queue a shutdown if worker is not used
+			return if err? # process has shut down
 			if worker.count > @MAX_REQUESTS
 				worker.shutdown("reached limit of " + @MAX_REQUESTS + " requests")
 			else
+				# queue a shutdown if worker is idle
 				worker.idleTimer = setTimeout () ->
 					worker.shutdown("idle worker")
 					worker.idleTimer = null
