@@ -9,6 +9,7 @@ child_process = require('child_process')
 # group, then we can kill everything in that process group.
 
 module.exports = (command, options, callback = (err, stdout, stderr) ->) ->
+	# options are {timeout:  number-of-milliseconds, killSignal: signal-name}
 	[cmd, args...] = command.split(' ')
 
 	child = child_process.spawn cmd, args, {detached:true}
@@ -22,6 +23,7 @@ module.exports = (command, options, callback = (err, stdout, stderr) ->) ->
 	if options.timeout?
 		killTimer = setTimeout () ->
 			try
+				# use negative process id to kill process group
 				process.kill -child.pid, options.killSignal || "SIGTERM"
 			catch error
 				logger.log process: child.pid, kill_error: error, "error killing process"

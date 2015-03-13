@@ -1,7 +1,7 @@
 _ = require("underscore")
 metrics = require("metrics-sharelatex")
 logger = require("logger-sharelatex")
-safe_exec = require('./SafeExec')
+safe_exec = require("./SafeExec")
 approvedFormats = ["png"]
 
 fourtySeconds = 40 * 1000
