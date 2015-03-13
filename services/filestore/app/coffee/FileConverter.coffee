@@ -7,7 +7,7 @@ approvedFormats = ["png"]
 fourtySeconds = 40 * 1000
 
 childProcessOpts =
-	killSignal: "SIGKILL"
+	killSignal: "SIGTERM"
 	timeout: fourtySeconds
 
 
