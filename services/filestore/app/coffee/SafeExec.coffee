@@ -27,8 +27,9 @@ module.exports = (command, options, callback = (err, stdout, stderr) ->) ->
 				logger.log process: child.pid, kill_error: error, "error killing process"
 		, options.timeout
 
-	child.on 'exit', (code, signal) ->
-		cleanup signal
+	child.on 'close', (code, signal) ->
+		err = if code then new Error("exit status #{code}") else signal
+		cleanup err
 
 	child.on 'error', (err) ->
 		cleanup err
