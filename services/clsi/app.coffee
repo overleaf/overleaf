@@ -86,6 +86,15 @@ app.get "/health_check", (req, res)->
 	res.contentType(resCacher?.setContentType)
 	res.send resCacher?.code, resCacher?.body
 
+profiler = require "v8-profiler"
+app.get "/profile", (req, res) ->
+	time = parseInt(req.query.time || "1000")
+	profiler.startProfiling("test")
+	setTimeout () ->
+		profile = profiler.stopProfiling("test")
+		res.json(profile)
+	, time
+
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
 	res.send error?.statusCode || 500

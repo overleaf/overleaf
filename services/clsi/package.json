@@ -23,7 +23,8 @@
     "express": "^4.2.0",
     "body-parser": "^1.2.0",
     "fs-extra": "^0.16.3",
-    "underscore": "^1.8.2"
+    "underscore": "^1.8.2",
+    "v8-profiler": "^5.2.4"
   },
   "devDependencies": {
     "mocha": "1.10.0",
