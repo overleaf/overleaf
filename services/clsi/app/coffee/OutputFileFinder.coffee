@@ -17,20 +17,12 @@ module.exports = OutputFileFinder =
 			jobs = []
 			outputFiles = []
 			for file in allFiles
-				do (file) ->
-					jobs.push (callback) ->
-						if incomingResources[file]
-							return callback()
-						else
-							outputFiles.push {
-								path: file
-								type: file.match(/\.([^\.]+)$/)?[1]
-							}
-							callback()
-
-			async.series jobs, (error) ->
-				return callback(error) if error?
-				callback null, outputFiles
+				if !incomingResources[file]
+					outputFiles.push {
+						path: file
+						type: file.match(/\.([^\.]+)$/)?[1]
+					}
+			callback null, outputFiles
 
 	_getAllFiles: (directory, _callback = (error, fileList) ->) ->
 		callback = (error, fileList) ->
