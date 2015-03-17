@@ -60,6 +60,8 @@
     "grunt-available-tasks": "0.4.1",
     "grunt-contrib-requirejs": "0.4.1",
     "grunt-execute": "0.1.5",
+    "grunt-git-rev-parse": "^0.1.4",
+    "grunt-sed": "^0.1.1",
     "bunyan": "0.22.1",
     "grunt-bunyan": "0.5.0"
   }

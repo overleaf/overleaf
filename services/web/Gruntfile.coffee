@@ -9,6 +9,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-requirejs'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-sed'
+	grunt.loadNpmTasks 'grunt-git-rev-parse'
 	
 	config =
 		execute:
@@ -123,6 +125,20 @@ module.exports = (grunt) ->
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
 
+		"git-rev-parse":
+			version:
+				options:
+					prop: 'commit'
+
+		sed:
+			version:
+				path: "app/views/sentry.jade"
+				pattern: '@@COMMIT@@',
+				replacement: '<%= commit %>',
+			release:
+				path: "app/views/sentry.jade"
+				pattern: "@@RELEASE@@"
+				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
 		availabletasks:
 			tasks:
@@ -273,3 +289,4 @@ module.exports = (grunt) ->
 	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'default', 'run'
 
+	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
