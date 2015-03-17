@@ -7,7 +7,7 @@ define [
 	"main/plans"
 	"main/group-members"
 	"main/scribtex-popup"
-	"main/event-tracking"
+	"main/event"
 	"main/bonus"
 	"main/system-messages"
 	"main/translations"
