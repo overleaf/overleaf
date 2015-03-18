@@ -173,9 +173,9 @@ describe "UserController", ->
 				done()
 			@UserController.register @req, @res
 
-		it "should try and log the user in if there is an EmailAlreadyRegisterd error", (done)->
+		it "should try and log the user in if there is an EmailAlreadyRegistered error", (done)->
 
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, "EmailAlreadyRegisterd")
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, new Error("EmailAlreadyRegistered"))
 			@AuthenticationController.login = (req, res)=>
 				assert.deepEqual req, @req
 				assert.deepEqual res, @res

@@ -87,7 +87,7 @@ describe "UserRegistrationHandler", ->
 			it "should return email registered in the error if there is a non holdingAccount there", (done)->
 				@User.findOne.callsArgWith(1, null, {holdingAccount:false})
 				@handler.registerNewUser @passingRequest, (err)=>
-					err.should.equal "EmailAlreadyRegisterd"
+					err.should.deep.equal new Error("EmailAlreadyRegistered")
 					done()
 
 		describe "validRequest", ->
