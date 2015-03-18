@@ -4,7 +4,6 @@ UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
 async = require("async")
-EmailHandler = require("../Email/EmailHandler")
 logger = require("logger-sharelatex")
 
 module.exports =
@@ -56,11 +55,6 @@ module.exports =
 					(cb)->
 						NewsLetterManager.subscribe user, ->
 						cb() #this can be slow, just fire it off
-					(cb)-> 
-						emailOpts =
-							first_name:user.first_name
-							to: user.email
-						EmailHandler.sendEmail "welcome", emailOpts, cb
 				], (err)->
 					logger.log user: user, "registered"
 					callback(err, user)

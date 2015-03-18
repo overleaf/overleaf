@@ -40,6 +40,8 @@ describe "UserController", ->
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
+		@EmailHandler =
+			sendEmail:sinon.stub().callsArgWith(2)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -51,6 +53,7 @@ describe "UserController", ->
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainAllocator":@SubscriptionDomainAllocator
+			"../Email/EmailHandler": @EmailHandler
 			"logger-sharelatex": {log:->}
 
 
@@ -223,7 +226,14 @@ describe "UserController", ->
 			@res.send = (opts)=>
 				@SubscriptionDomainAllocator.autoAllocate.calledWith(@user).should.equal true
 				done()
-			@UserController.register @req, @res		
+			@UserController.register @req, @res
+
+		it "should send a welcome email", (done)->
+			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+			@res.send = (opts)=>
+				@EmailHandler.sendEmail.calledWith("welcome").should.equal true
+				done()
+			@UserController.register @req, @res	
 
 
 	describe "changePassword", ->

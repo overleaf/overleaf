@@ -11,6 +11,7 @@ AuthenticationManager = require("../Authentication/AuthenticationManager")
 ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
+EmailHandler = require("../Email/EmailHandler")
 
 module.exports =
 
@@ -91,6 +92,12 @@ module.exports =
 				metrics.inc "user.register.success"
 				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
 				SubscriptionDomainAllocator.autoAllocate(user)
+
+				EmailHandler.sendEmail "welcome", {
+					first_name:user.first_name
+					to: user.email
+				}, () ->
+
 				AuthenticationController.establishUserSession req, user, (error) ->
 					return callback(error) if error?
 					req.session.justRegistered = true
