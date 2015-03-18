@@ -7,8 +7,7 @@
 	script(type="text/javascript").
 		if (typeof(Raven) != "undefined" && Raven.config) {
 			Raven.config("#{sentryPublicDSN}", {
-			release: '@@RELEASE@@',
-			tags: { 'commit': '@@COMMIT@@' },
+			tags: { 'commit': '@@COMMIT@@', 'build': '@@RELEASE@@' },
 			// Ignore list based off: https://gist.github.com/1878283
 			ignoreErrors: [
 				'DealPly',
