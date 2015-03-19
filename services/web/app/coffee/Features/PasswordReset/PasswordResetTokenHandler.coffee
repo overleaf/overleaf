@@ -10,12 +10,17 @@ buildKey = (token)-> return "password_token:#{token}"
 
 module.exports =
 
-	getNewToken: (user_id, callback)->
+	getNewToken: (user_id, options = {}, callback)->
+		# options is optional
+		if typeof options == "function"
+			callback = options
+			options = {}
+		expiresIn = options.expiresIn or ONE_HOUR_IN_S
 		logger.log user_id:user_id, "generating token for password reset"
 		token = crypto.randomBytes(32).toString("hex")
 		multi = rclient.multi()
 		multi.set buildKey(token), user_id
-		multi.expire buildKey(token), ONE_HOUR_IN_S
+		multi.expire buildKey(token), expiresIn
 		multi.exec (err)->
 			callback(err, token)
 

@@ -39,10 +39,13 @@ module.exports = AdminController =
 
 		SystemMessageManager.getMessagesFromDB (error, systemMessages) ->
 			return next(error) if error?
-			res.render 'admin',
+			res.render 'admin/index',
 				title: 'System Admin'
 				openSockets: openSockets
 				systemMessages: systemMessages
+	
+	registerNewUser: (req, res, next) ->
+		res.render 'admin/register'
 
 	dissconectAllUsers: (req, res)=>
 		logger.warn "disconecting everyone"

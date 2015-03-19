@@ -48,6 +48,12 @@ describe "PasswordResetTokenHandler", ->
 				err.should.exist
 				done()
 
+		it "should allow the expiry time to be overridden", (done) ->
+			@redisMulti.exec.callsArgWith(0) 
+			@ttl = 42
+			@PasswordResetTokenHandler.getNewToken @user_id, {expiresIn: @ttl}, (err, token) =>
+				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", @ttl).should.equal true
+				done()
 
 	describe "getUserIdFromTokenAndExpire", ->
 

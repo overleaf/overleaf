@@ -18,20 +18,6 @@ describe "Email Templator ", ->
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 
-	describe "welcomeEmail", ->
-
-		beforeEach ->
-			@opts =
-				to:"bob@bob.com"
-				first_name:"bob"
-			@email = @EmailBuilder.buildEmail("welcome", @opts)
-
-		it "should insert the first_name into the template", ->
-			@email.html.indexOf(@opts.first_name).should.not.equal -1
-
-		it "should not have undefined in it", ->
-			@email.html.indexOf("undefined").should.equal -1
-
 	describe "projectSharedWithYou", ->
 		beforeEach ->
 			@opts =

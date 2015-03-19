@@ -1,0 +1,40 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-12
+					.card(ng-controller="RegisterUsersController")
+						.page-header
+							h1 Register New Users
+						form.form
+							.row
+								.col-md-4.col-xs-8
+									input.form-control(
+									name="email",
+									type="text",
+									placeholder="jane@example.com, joe@example.com",
+									ng-model="inputs.emails",
+									on-enter="registerUsers()"
+								)
+								.col-md-8.col-xs-4
+									button.btn.btn-primary(ng-click="registerUsers()") #{translate("register")}
+									
+						.row-spaced(ng-show="error").ng-cloak.text-danger
+							p Sorry, an error occured
+						
+						.row-spaced(ng-show="users.length > 0").ng-cloak.text-success
+							p We've sent out welcome emails to the registered users.
+							p You can also manually send them URLs below to allow them to reset their password and log in for the first time.
+							p (Password reset tokens will expire after one week and the user will need registering again).
+
+						hr(ng-show="users.length > 0").ng-cloak
+						table(ng-show="users.length > 0").table.table-striped.ng-cloak
+							tr
+								th #{translate("email")}
+								th Set Password Url
+							tr(ng-repeat="user in users")
+								td {{ user.email }}
+								td(style="word-break: break-all;") {{ user.setNewPasswordUrl }}
+							

@@ -45,7 +45,7 @@ module.exports =
 			if err?
 				return callback err
 			if user?.holdingAccount == false
-				return callback(new Error("EmailAlreadyRegistered"))
+				return callback(new Error("EmailAlreadyRegistered"), user)
 			self._createNewUserIfRequired user, userDetails, (err, user)->
 				if err?
 					return callback(err)

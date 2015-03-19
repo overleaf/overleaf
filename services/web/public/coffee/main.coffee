@@ -14,6 +14,7 @@ define [
 	"main/subscription-dashboard"
 	"main/new-subscription"
 	"main/annual-upgrade"
+	"main/register-users"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
