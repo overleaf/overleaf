@@ -13,7 +13,7 @@ describe "Email Templator ", ->
 
 	beforeEach ->
 
-		@settings = {}
+		@settings = appName: "testApp"
 		@EmailBuilder = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
