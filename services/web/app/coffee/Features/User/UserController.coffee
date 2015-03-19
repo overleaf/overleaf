@@ -97,7 +97,6 @@ module.exports =
 			if err?.message == "EmailAlreadyRegistered"
 				logger.log {email}, "user already exists, resending welcome email"
 
-			# TODO: Make a long term token.
 			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
 			PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
 				return next(err) if err?

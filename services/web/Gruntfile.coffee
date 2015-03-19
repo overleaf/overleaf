@@ -290,3 +290,37 @@ module.exports = (grunt) ->
 	grunt.registerTask 'default', 'run'
 
 	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
+	
+	grunt.registerTask 'create-admin-user', "Create a user with the given email address and make them an admin. Update in place if the user already exists", () ->
+		done = @async()
+		email = grunt.option("email")
+		if !email?
+			console.error "Usage: grunt create-admin-user --email joe@example.com"
+			process.exit(1)
+
+		settings = require "settings-sharelatex"
+		UserRegistrationHandler = require "./app/js/Features/User/UserRegistrationHandler"
+		PasswordResetTokenHandler = require "./app/js/Features/PasswordReset/PasswordResetTokenHandler"
+		UserRegistrationHandler.registerNewUser {
+			email: email
+			password: require("crypto").randomBytes(32).toString("hex")
+		}, (error, user) ->
+			if error? and error?.message != "EmailAlreadyRegistered"
+				throw error
+			user.isAdmin = true
+			user.save (error) ->
+				throw error if error?
+				ONE_WEEK = 7 * 24 * 60 * 60 # seconds
+				PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
+					return next(err) if err?
+					
+					console.log ""
+					console.log """
+						Successfully created #{email} as an admin user.
+						
+						Please visit the following URL to set a password for #{email} and log in:
+						
+							#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}
+						
+					"""
+					done()
