@@ -89,6 +89,7 @@ templates.projectSharedWithYou =
 """
 
 module.exports =
+	templates: templates
 
 	buildEmail: (templateName, opts)->
 		template = templates[templateName]
