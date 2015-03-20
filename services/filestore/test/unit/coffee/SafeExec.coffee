@@ -25,7 +25,7 @@ describe "SafeExec", ->
 				done()
 
 		it "should execute a command with non-zero exit status", (done) ->
-			@safe_exec "/bin/false", @options, (err, stdout, stderr) =>
+			@safe_exec "/usr/bin/env false", @options, (err, stdout, stderr) =>
 				stdout.should.equal ""
 				stderr.should.equal ""
 				err.message.should.equal "exit status 1"
