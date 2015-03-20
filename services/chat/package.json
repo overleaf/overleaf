@@ -1,6 +1,6 @@
 {
   "name": "chat-sharelatex",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "The backend API that powers ShareLaTeX chat",
   "repository": {
     "type": "git",
