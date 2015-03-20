@@ -26,7 +26,7 @@ Dependencies
 
 ShareLaTeX should run on OS X and Linux. You need:
 
-* [Node.js](http://nodejs.org/) 0.10 or greater. We recommend that you use [nvm](https://github.com/creationix/nvm) to install it.
+* [Node.js](http://nodejs.org/) 0.10.x. We recommend that you use [nvm](https://github.com/creationix/nvm) to install it.
 * The [grunt](http://gruntjs.com/) command line tools (Run `npm install -g grunt-cli` to install them)
 * A local instance of [Redis](http://redis.io/topics/quickstart) (version 2.6.12 or later) and [MongoDB](http://docs.mongodb.org/manual/installation/) running on their standard ports.
 * [TeXLive](https://www.tug.org/texlive/) 2013 or later with the `latexmk` program installed.
