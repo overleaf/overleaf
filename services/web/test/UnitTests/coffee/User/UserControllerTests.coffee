@@ -40,6 +40,12 @@ describe "UserController", ->
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
+		@EmailHandler =
+			sendEmail:sinon.stub().callsArgWith(2)
+		@PasswordResetTokenHandler =
+			getNewToken: sinon.stub()
+		@settings =
+			siteUrl: "sharelatex.example.com"
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -51,6 +57,10 @@ describe "UserController", ->
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainAllocator":@SubscriptionDomainAllocator
+			"../Email/EmailHandler": @EmailHandler
+			"../PasswordReset/PasswordResetTokenHandler": @PasswordResetTokenHandler
+			"crypto": @crypto = {}
+			"settings-sharelatex": @settings
 			"logger-sharelatex": {log:->}
 
 
@@ -60,7 +70,9 @@ describe "UserController", ->
 				user :
 					_id : @user_id
 			body:{}
-		@res = {}
+		@res =
+			send: sinon.stub()
+			json: sinon.stub()
 		@next = sinon.stub()
 	describe "deleteUser", ->
 
@@ -162,69 +174,52 @@ describe "UserController", ->
 
 
 	describe "register", ->
-
-		it "should ask the UserRegistrationHandler to register user", (done)->
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@res.send = =>
-				@UserRegistrationHandler.registerNewUser.calledWith(@req.body).should.equal true
-				done()
-			@UserController.register @req, @res
-
-		it "should try and log the user in if there is an EmailAlreadyRegisterd error", (done)->
-
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, "EmailAlreadyRegisterd")
-			@AuthenticationController.login = (req, res)=>
-				assert.deepEqual req, @req
-				assert.deepEqual res, @res
-				done()
-			@UserController.register @req, @res
-
-		it "should put the user on the session and mark them as justRegistered", (done)->
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@res.send = =>
-				@AuthenticationController.establishUserSession
-					.calledWith(@req, @user)
-					.should.equal true
-				assert.equal @req.session.justRegistered, true
-				done()
-			@UserController.register @req, @res
-
-		it "should redirect to project page", (done)->
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@res.send = (opts)=>
-				opts.redir.should.equal "/project"
-				done()
-			@UserController.register @req, @res			
-
-
-		it "should redirect passed redir if it exists", (done)->
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@req.body.redir = "/somewhere"
-			@res.send = (opts)=>
-				opts.redir.should.equal "/somewhere"
-				done()
-			@UserController.register @req, @res
-
-		it "should allocate the referals", (done)->
-			@req.session =
-				referal_id : "23123"
-				referal_source : "email"
-				referal_medium : "bob"
-				
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@req.body.redir = "/somewhere"
-			@res.send = (opts)=>
-				@ReferalAllocator.allocate.calledWith(@req.session.referal_id, @user._id, @req.session.referal_source, @req.session.referal_medium).should.equal true
-				done()
-			@UserController.register @req, @res			
+		beforeEach ->
+			@req.body.email = @user.email = "email@example.com"
+			@crypto.randomBytes = sinon.stub().returns({toString: () => @password = "mock-password"})
+			@PasswordResetTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
+		
+		describe "with a new user", ->
+			beforeEach ->
+				@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
+				@UserController.register @req, @res
 			
-		it "should auto allocate the subscription for that domain", (done)->
-			@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-			@res.send = (opts)=>
-				@SubscriptionDomainAllocator.autoAllocate.calledWith(@user).should.equal true
-				done()
-			@UserController.register @req, @res		
+			it "should ask the UserRegistrationHandler to register user", ->
+				@UserRegistrationHandler.registerNewUser
+					.calledWith({
+						email: @req.body.email
+						password: @password
+					}).should.equal true
+					
+			it "should generate a new password reset token", ->
+				@PasswordResetTokenHandler.getNewToken
+					.calledWith(@user_id, expiresIn: 7 * 24 * 60 * 60)
+					.should.equal true
 
+			it "should send a registered email", ->
+				@EmailHandler.sendEmail
+					.calledWith("registered", {
+						to: @user.email
+						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
+					})
+					.should.equal true
+			
+			it "should return the user", ->
+				@res.json
+					.calledWith({
+						email: @user.email
+						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
+					})
+					.should.equal true
+
+		describe "with a user that already exists", ->
+			beforeEach ->
+				@UserRegistrationHandler.registerNewUser.callsArgWith(1, new Error("EmailAlreadyRegistered"), @user)
+				@UserController.register @req, @res
+				
+			it "should still generate a new password token and email", ->
+				@PasswordResetTokenHandler.getNewToken.called.should.equal true
+				@EmailHandler.sendEmail.called.should.equal true
 
 	describe "changePassword", ->
 

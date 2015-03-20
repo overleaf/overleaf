@@ -6,11 +6,13 @@ UserRegistrationHandler = require("./UserRegistrationHandler")
 logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
-AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
-ReferalAllocator = require("../Referal/ReferalAllocator")
 UserUpdater = require("./UserUpdater")
 SubscriptionDomainAllocator = require("../Subscription/SubscriptionDomainAllocator")
+EmailHandler = require("../Email/EmailHandler")
+PasswordResetTokenHandler = require "../PasswordReset/PasswordResetTokenHandler"
+settings = require "settings-sharelatex"
+crypto = require "crypto"
 
 module.exports =
 
@@ -80,28 +82,36 @@ module.exports =
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
-		logger.log email: req.body.email, "attempted register"
-		redir = Url.parse(req.body.redir or "/project").path
-		UserRegistrationHandler.registerNewUser req.body, (err, user)->
-			if err == "EmailAlreadyRegisterd"
-				return AuthenticationController.login req, res
-			else if err?
-				next(err)
-			else
-				metrics.inc "user.register.success"
-				ReferalAllocator.allocate req.session.referal_id, user._id, req.session.referal_source, req.session.referal_medium
-				SubscriptionDomainAllocator.autoAllocate(user)
-				AuthenticationController.establishUserSession req, user, (error) ->
-					return callback(error) if error?
-					req.session.justRegistered = true
-					res.send
-						redir:redir
-						id:user._id.toString()
-						first_name: user.first_name
-						last_name: user.last_name
-						email: user.email
-						created: Date.now()
+		email = req.body.email
+		if !email? or email == ""
+			res.send 422 # Unprocessable Entity
+			return
+		logger.log {email}, "registering new user"
+		UserRegistrationHandler.registerNewUser {
+			email: email
+			password: crypto.randomBytes(32).toString("hex")
+		}, (err, user)->
+			if err? and err?.message != "EmailAlreadyRegistered"
+				return next(err)
+			
+			if err?.message == "EmailAlreadyRegistered"
+				logger.log {email}, "user already exists, resending welcome email"
 
+			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
+			PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
+				return next(err) if err?
+				
+				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}"
+
+				EmailHandler.sendEmail "registered", {
+					to: user.email
+					setNewPasswordUrl: setNewPasswordUrl
+				}, () ->
+					
+				res.json {
+					email: user.email
+					setNewPasswordUrl: setNewPasswordUrl
+				}
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"

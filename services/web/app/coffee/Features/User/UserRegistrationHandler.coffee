@@ -4,7 +4,6 @@ UserCreator = require("./UserCreator")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
 async = require("async")
-EmailHandler = require("../Email/EmailHandler")
 logger = require("logger-sharelatex")
 
 module.exports =
@@ -40,13 +39,13 @@ module.exports =
 		self = @
 		requestIsValid = @_registrationRequestIsValid userDetails
 		if !requestIsValid
-			return callback("request is not valid")
+			return callback(new Error("request is not valid"))
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
 		User.findOne email:userDetails.email, (err, user)->
 			if err?
 				return callback err
 			if user?.holdingAccount == false
-				return callback("EmailAlreadyRegisterd")
+				return callback(new Error("EmailAlreadyRegistered"), user)
 			self._createNewUserIfRequired user, userDetails, (err, user)->
 				if err?
 					return callback(err)
@@ -56,11 +55,6 @@ module.exports =
 					(cb)->
 						NewsLetterManager.subscribe user, ->
 						cb() #this can be slow, just fire it off
-					(cb)-> 
-						emailOpts =
-							first_name:user.first_name
-							to: user.email
-						EmailHandler.sendEmail "welcome", emailOpts, cb
 				], (err)->
 					logger.log user: user, "registered"
 					callback(err, user)

@@ -20,14 +20,12 @@ describe "UserRegistrationHandler", ->
 			setUserPassword: sinon.stub().callsArgWith(2)
 		@NewsLetterManager =
 			subscribe: sinon.stub().callsArgWith(1)
-		@EmailHandler =
-			sendEmail:sinon.stub().callsArgWith(2)
 		@handler = SandboxedModule.require modulePath, requires:
 			"../../models/User": {User:@User}
 			"./UserCreator": @UserCreator
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"../Newsletter/NewsletterManager":@NewsLetterManager
-			"../Email/EmailHandler": @EmailHandler
+			"logger-sharelatex": @logger = { log: sinon.stub() }
 
 		@passingRequest = {email:"something@email.com", password:"123"}
 
@@ -87,9 +85,10 @@ describe "UserRegistrationHandler", ->
 					done()
 
 			it "should return email registered in the error if there is a non holdingAccount there", (done)->
-				@User.findOne.callsArgWith(1, null, {holdingAccount:false})
-				@handler.registerNewUser @passingRequest, (err)=>
-					err.should.equal "EmailAlreadyRegisterd"
+				@User.findOne.callsArgWith(1, null, @user = {holdingAccount:false})
+				@handler.registerNewUser @passingRequest, (err, user)=>
+					err.should.deep.equal new Error("EmailAlreadyRegistered")
+					user.should.deep.equal @user
 					done()
 
 		describe "validRequest", ->
@@ -123,11 +122,6 @@ describe "UserRegistrationHandler", ->
 			it "should add the user to the news letter manager", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
 					@NewsLetterManager.subscribe.calledWith(@user).should.equal true
-					done()
-
-			it "should send a welcome email", (done)->
-				@handler.registerNewUser @passingRequest, (err)=>
-					@EmailHandler.sendEmail.calledWith("welcome").should.equal true
 					done()
 
 

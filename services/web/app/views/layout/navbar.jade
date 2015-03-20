@@ -9,8 +9,17 @@ nav.navbar.navbar-default
 				a(href='/').navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
-			
+
 			ul.nav.navbar-nav.navbar-right
+				if (session && session.user && session.user.isAdmin)
+					li.dropdown(class="subdued")
+						a.dropdown-toggle(href)
+							| Admin
+							b.caret
+						ul.dropdown-menu
+							li
+								a(href="/admin/register") Register New Users
+
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown

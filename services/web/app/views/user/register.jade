@@ -16,43 +16,11 @@ block content
 							a(href="/login")  #{translate("login_here")}
 
 			.row
-				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+				.col-md-8.col-md-offset-2.col-lg-6.col-lg-offset-3
 					.card
 						.page-header
 							h1 #{translate("register")}
-						form(async-form="register", name="registerForm", action="/register", method="POST", ng-cloak)
-							input(name='_csrf', type='hidden', value=csrfToken)
-							input(name='redir', type='hidden', value=redir)
-							form-messages(for="registerForm")
-							.form-group
-								label(for='email') #{translate("email")}
-								input.form-control(
-									type='email',
-									name='email',
-									placeholder="email@example.com"
-									required,
-									ng-model="email",
-									ng-init="email = #{JSON.stringify(new_email)}",
-									ng-model-options="{ updateOn: 'blur' }",
-									focus="true"
-								)
-								span.small.text-primary(ng-show="registerForm.email.$invalid && registerForm.email.$dirty")
-									| #{translate("must_be_email_address")}
-							.form-group
-								label(for='password') #{translate("password")}
-								input.form-control(
-									type='password',
-									name='password',
-									placeholder="********",
-									required,
-									ng-model="password"
-								)
-								span.small.text-primary(ng-show="registerForm.password.$invalid && registerForm.password.$dirty")
-									| #{translate("required")}
-							.actions
-								button.btn-primary.btn(
-									type='submit'
-									ng-disabled="registerForm.inflight"
-								)
-									span(ng-show="!registerForm.inflight") #{translate("register")}
-									span(ng-show="registerForm.inflight") #{translate("registering")}...
+						p
+							| Please contact 
+							strong #{settings.adminEmail} 
+							| to create an account.

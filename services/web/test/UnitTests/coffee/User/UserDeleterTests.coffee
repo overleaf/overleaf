@@ -28,6 +28,7 @@ describe "UserDeleter", ->
 			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
+			"logger-sharelatex": @logger = { log: sinon.stub() }
 
 	describe "deleteUser", ->
 
