@@ -1,3 +1,13 @@
+v0.1.4
+------
+
+* Move to a private registration scheme where users must be added by an admin.
+* Proxy websockets connection through web to real-time service so no websocketsUrl parameter is needed.
+* Use worker aspell processes in spelling to prevent excessing forking.
+* Properly clean up after long running ImageMagick conversions in the filestore.
+* Allow a configurable app name and email contact address.
+* Switch to new PDF viewer with partial page loading for immediate preview of visible page.
+
 v0.1.3
 ------
 
