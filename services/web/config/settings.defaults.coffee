@@ -105,14 +105,6 @@ module.exports =
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
-		
-	# The websocket layer of ShareLaTeX runs as separate service.
-	# When running locally or in development, you can point the client to this
-	# service directly. If you are running behind a reverse proxy (Nginx, etc)
-	# then websocketsUrl should be the same as siteUrl, with your reverse
-	# proxy responible for sending websocket traffic to the websocket service
-	# rather than connecting directly.
-	websocketsUrl: "http://localhost:3026"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.

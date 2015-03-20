@@ -22,7 +22,7 @@ define [], () ->
 			@$scope.$on "editor:change", () =>
 				@lastUpdated = new Date()
 
-			@ide.socket = io.connect window.websocketsUrl,
+			@ide.socket = io.connect null,
 				reconnect: false
 				"force new connection": true
 
