@@ -24,3 +24,4 @@ service sharelatex-docstore restart
 service sharelatex-chat restart
 service sharelatex-tags restart
 service sharelatex-spelling restart
+service sharelatex-real-time restart
