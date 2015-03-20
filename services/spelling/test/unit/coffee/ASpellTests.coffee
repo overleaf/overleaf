@@ -55,6 +55,9 @@ describe "ASpell", ->
 			@start = Date.now()
 			@ASpell.checkWords "en", words, (error, @result) => done()
 
+		# Note that this test fails on OS X, due to differing pipe behaviour
+		# on killing the child process. It can be tested successfully on Travis
+		# or the CI server.
 		it "should return in reasonable time", (done) ->
 			delta = Date.now()-@start
 			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 100)
