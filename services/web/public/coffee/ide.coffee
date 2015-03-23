@@ -24,7 +24,7 @@ define [
 	"directives/stopPropagation"
 	"directives/rightClick"
 	"filters/formatDate"
-	"main/event-tracking"
+	"main/event"
 	"main/account-upgrade"
 ], (
 	App
