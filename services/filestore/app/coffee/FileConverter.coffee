@@ -1,13 +1,13 @@
 _ = require("underscore")
 metrics = require("metrics-sharelatex")
 logger = require("logger-sharelatex")
-exec = require('child_process').exec
+safe_exec = require("./SafeExec")
 approvedFormats = ["png"]
 
 fourtySeconds = 40 * 1000
 
 childProcessOpts =
-	killSignal: "SIGKILL"
+	killSignal: "SIGTERM"
 	timeout: fourtySeconds
 
 
@@ -23,8 +23,7 @@ module.exports =
 			return callback err
 		width = "600x"
 		args = "nice convert -define pdf:fit-page=#{width} -flatten -density 300 #{sourcePath} #{destPath}"
-		console.log args
-		exec args, childProcessOpts, (err, stdout, stderr)->
+		safe_exec args, childProcessOpts, (err, stdout, stderr)->
 			timer.done()
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, destPath:destPath,  "something went wrong converting file"
@@ -38,7 +37,7 @@ module.exports =
 		sourcePath = "#{sourcePath}[0]"
 		width = "260x"
 		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
-		exec args, childProcessOpts, (err, stdout, stderr)->
+		safe_exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
 			else
@@ -51,7 +50,7 @@ module.exports =
 		sourcePath = "#{sourcePath}[0]"
 		width = "548x"
 		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
-		exec args, childProcessOpts, (err, stdout, stderr)->
+		safe_exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, destPath:destPath, "something went wrong converting file to preview"
 			else

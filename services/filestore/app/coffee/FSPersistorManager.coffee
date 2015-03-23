@@ -27,7 +27,10 @@ module.exports =
         return callback err
       @sendFile location, target, fsPath, callback
 
-  getFileStream: (location, name, callback = (err, res)->)->
+  getFileStream: (location, name, _callback = (err, res)->) ->
+    callback = (args...) ->
+      _callback(args...)
+      _callback = () ->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
     sourceStream = fs.createReadStream "#{location}/#{filteredName}"
@@ -38,6 +41,8 @@ module.exports =
       else
         callback err
     sourceStream.on 'readable', () ->
+      # This can be called multiple times, but the callback wrapper
+      # ensures the callback is only called once
       callback null, sourceStream
 
 
