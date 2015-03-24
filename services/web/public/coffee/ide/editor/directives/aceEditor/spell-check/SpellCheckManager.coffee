@@ -171,7 +171,7 @@ define [
 			positions = []
 			for line, row in lines
 				if !linesToProcess? or linesToProcess[row]
-					wordRegex = /\\?['a-zA-Z\u00C0-\u00FF]+/g
+					wordRegex = /\\?['a-zA-Z\u00C0-\u017F]+/g
 					while (result = wordRegex.exec(line))
 						word = result[0]
 						if word[0] == "'"
