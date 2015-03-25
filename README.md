@@ -158,12 +158,28 @@ The available configuration parameters are:
 * `SHARELATEX_SITE_URL`: Where your instance of ShareLaTeX is publically available.
 This is used in public links, and when connecting over websockets, so much be
 configured correctly!
+* `SHARELATEX_ADMIN_EMAIL`: The email address where users can reach the person who runs the site.
+* `SHARELATEX_APP_NAME`: The name to display when talking about the running app. Defaults to 'ShareLaTex (Community Edition)'.
 * `SHARELATEX_MONGO_URL`: The URL of the Mongo database to use
 * `SHARELATEX_REDIS_HOST`: The host name of the Redis instance to use
 * `SHARELATEX_REDIS_PORT`: The port of the Redis instance to use
 * `SHARELATEX_REDIS_PASS`: The password to use when connecting to Redis (if applicable)
 * `SHARELATEX_SECURE_COOKIE`: Set this to something non-zero to use a secure cookie.
   Only use this if your ShareLaTeX instance is running behind a reverse proxy with SSL configured.
+
+### Creating and Managing users
+
+Uun the following command to create your first user and make them an admin:
+
+```
+$ docker exec sharelatex /bin/bash -c "cd /var/www/sharelatex/web; grunt create-admin-user --email joe@example.com"
+```
+
+This will create a user with the given email address if they don't already exist, and make them an admin user. You will be given a URL to visit where you can set the password for this user and log in for the first time.
+
+**Creating normal users**
+
+Once you are logged in as an admin user, you can visit `/admin/register` on your ShareLaTeX instance and create a new users. If you have an email backend configured in your settings file, the new users will be sent an email with a URL to set their password. If not, you will have to distribute the password reset URLs manually. These are shown when you create a user.
 
 ### Upgrading from older versions
 
