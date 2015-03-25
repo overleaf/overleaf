@@ -93,14 +93,13 @@ module.exports =
 	# Where your instance of ShareLaTeX can be found publicly. This is used
 	# when emails are sent out and in generated links:
 	siteUrl: siteUrl = process.env["SHARELATEX_SITE_URL"] or 'http://localhost'
-	
-	# The websocket layer of ShareLaTeX runs as separate service.
-	# When running locally or in development, you can point the client to this
-	# service directly. If you are running behind a reverse proxy (Nginx, etc)
-	# then websocketsUrl should be the same as siteUrl, with your reverse
-	# proxy responible for sending websocket traffic to the websocket service
-	# rather than connecting directly.
-	websocketsUrl: siteUrl
+
+	# The name this is used to describe your ShareLaTeX Installation
+	appName: process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX (Community Edition)"
+
+	# The email address which users will be directed to as the main point of
+	# contact for this installation of ShareLaTeX.
+	adminEmail: process.env["SHARELATEX_ADMIN_EMAIL"] or "placeholder@example.com"
 	
 	# If provided, a sessionSecret is used to sign cookies so that they cannot be
 	# spoofed. This is recommended.
