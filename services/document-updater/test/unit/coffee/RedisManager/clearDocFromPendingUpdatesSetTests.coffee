@@ -11,7 +11,7 @@ describe "RedisManager.clearDocFromPendingUpdatesSet", ->
 		@callback = sinon.stub()
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex" : createClient: () =>
-				@rclient = auth:->
+				@rclient ?= auth:-> # only assign one rclient
 			"logger-sharelatex": {}
 
 		@rclient.srem = sinon.stub().callsArg(2)

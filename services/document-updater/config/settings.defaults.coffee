@@ -20,6 +20,9 @@ module.exports =
 			port:"6379"
 			host:"localhost"
 			password:""
+		zip:
+			minSize: 8*1024
+			writesEnabled: true
 
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'
