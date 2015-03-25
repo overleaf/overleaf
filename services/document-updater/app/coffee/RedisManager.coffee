@@ -32,7 +32,6 @@ module.exports = RedisManager =
 	removeDocFromMemory : (project_id, doc_id, callback)->
 		logger.log project_id:project_id, doc_id:doc_id, "removing doc from redis"
 		multi = rclient.multi()
-		multi.get keys.docLines(doc_id:doc_id)
 		multi.del keys.docLines(doc_id:doc_id)
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
@@ -43,8 +42,7 @@ module.exports = RedisManager =
 				logger.err project_id:project_id, doc_id:doc_id, err:err, "error removing doc from redis"
 				callback(err, null)
 			else
-				docLines = replys[0]
-				logger.log project_id:project_id, doc_id:doc_id, docLines:docLines, "removed doc from redis"
+				logger.log project_id:project_id, doc_id:doc_id, "removed doc from redis"
 				callback()
 
 	getDoc : (doc_id, callback = (error, lines, version) ->)->
