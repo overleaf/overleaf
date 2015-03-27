@@ -21,8 +21,8 @@ module.exports =
 			host:"localhost"
 			password:""
 		zip:
-			minSize: 8*1024
-			writesEnabled: true
+			minSize: 10*1024
+			writesEnabled: false
 
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'

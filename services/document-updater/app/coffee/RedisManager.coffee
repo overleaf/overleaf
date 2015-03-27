@@ -18,7 +18,7 @@ minutes = 60 # seconds for Redis expire
 module.exports = RedisManager =
 	putDocInMemory : (project_id, doc_id, docLines, version, callback)->
 		timer = new metrics.Timer("redis.put-doc")
-		logger.log project_id:project_id, doc_id:doc_id, docLines:docLines, version: version, "putting doc in redis"
+		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
 		multi = rclient.multi()
 		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
