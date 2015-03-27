@@ -4,7 +4,7 @@ metrics = require('./Metrics')
 zlib = require('zlib')
 
 ZIP_WRITES_ENABLED = Settings.redis.zip?.writesEnabled?
-ZIP_MINSIZE = Settings.redis.zip?.minsize || 64*1024
+ZIP_MINSIZE = Settings.redis.zip?.minSize || 64*1024
 
 module.exports = ZipManager =
 	uncompressIfNeeded: (doc_id, result, callback) ->
