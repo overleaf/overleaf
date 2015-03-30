@@ -12,6 +12,7 @@ describe "ZipManager with RedisManager", ->
 		rclient = null
 		beforeEach (done) ->
 			@ZipManager = SandboxedModule.require zipModulePath,	requires:
+				"logger-sharelatex": log:->
 				'settings-sharelatex': redis:
 					web:
 						host: 'none'
@@ -60,6 +61,7 @@ describe "ZipManager with RedisManager", ->
 		rclient = null
 		beforeEach (done) ->
 			@ZipManager = SandboxedModule.require zipModulePath,	requires:
+				"logger-sharelatex": log:->
 				'settings-sharelatex': redis:
 					web:
 						host: 'none'
@@ -109,6 +111,7 @@ describe "ZipManager with RedisManager", ->
 		rclient = null
 		beforeEach (done) ->
 			@ZipManager = SandboxedModule.require zipModulePath,	requires:
+				"logger-sharelatex": log:->
 				'settings-sharelatex': redis:
 					web:
 						host: 'none'
