@@ -3,7 +3,7 @@ logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 zlib = require('zlib')
 
-ZIP_WRITES_ENABLED = Settings.redis.zip?.writesEnabled?
+ZIP_WRITES_ENABLED = Settings.redis.zip?.writesEnabled
 ZIP_MINSIZE = Settings.redis.zip?.minSize || 64*1024
 
 module.exports = ZipManager =
