@@ -24,13 +24,9 @@ describe "ZipManager with RedisManager", ->
 				"redis-sharelatex" : createClient: () =>
 					rclient ?=
 						auth:-> # only assign one rclient
-						multi: () =>
-							console.log 'returning rclient', rclient
-							rclient
+						multi: () => rclient
 						set: (key, value) => rclient.store[key] = value
-						get: (key) =>
-							console.log 'GET', key
-							rclient.results.push rclient.store[key]
+						get: (key) =>	rclient.results.push rclient.store[key]
 						incr: (key) => rclient.store[key]++
 						exec: (callback) =>
 							callback.apply(null, [null, rclient.results])
