@@ -3,6 +3,31 @@ logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 zlib = require('zlib')
 
+# Compress and uncompress data sent to Redis using the node 'zlib'
+# module, to reduce load on Redis.
+#
+# Measurements show that most of the load on Redis comes from a very
+# large documents. We can shift some of that CPU load from redis to
+# the docupdaters (which are scalable) by compressing the data in the
+# docupdater first.
+#
+# To avoid overloading the docupdater clients we impose a minimum size
+# on data we will compress, so we only catch the large ones.
+#
+# The optimimum size for the cutoff is about 10K, below this we do
+# more work but don't really gain any extra reduction in Redis CPU
+#
+# |--------------------+-----------+--------------------------|
+# | Compression cutoff | Redis CPU | Extra doc updater CPU(*) |
+# |--------------------+-----------+--------------------------|
+# | N/A                |      100% |                       0% |
+# | 100k               |       80% |                      10% |
+# | 10k                |       50% |                      30% |
+# |--------------------+-----------+--------------------------|
+#
+# (*) percentage of a single core, because node zlib runs in multiple
+# threads.
+
 ZIP_WRITES_ENABLED = Settings.redis.zip?.writesEnabled
 ZIP_MINSIZE = Settings.redis.zip?.minSize || 64*1024
 
@@ -18,7 +43,7 @@ module.exports = ZipManager =
 		# now uncompress the text (result[0]) if needed
 		buf = result?[0]
 
-		# Check if we have a GZIP file
+		# Check if we have a GZIP file (magic numbers in header)
 		if buf? and buf[0] == 0x1F and buf[1] == 0x8B
 			zlib.gunzip buf, (err, newbuf) ->
 				if err?
