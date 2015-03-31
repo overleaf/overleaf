@@ -60,7 +60,8 @@ module.exports = ZipManager =
 			callback(null, result)
 
 	compressIfNeeded: (doc_id, text, callback) ->
-		if ZIP_WRITES_ENABLED && ZIP_MINSIZE > 0 and text.length > ZIP_MINSIZE
+		if ZIP_WRITES_ENABLED and ZIP_MINSIZE > 1024 and text.length > ZIP_MINSIZE
+			# N.B. skip files of 1k or less, because gzip increases the size
 			zlib.gzip text, (err, buf) ->
 				if err?
 					logger.err doc_id:doc_id, err:err, "error compressing doc"
