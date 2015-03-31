@@ -87,11 +87,10 @@ module.exports = (grunt) ->
 					paths:
 						"moment": "libs/moment-2.9.0"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
+						"libs/pdf": "libs/pdfjs-1.0.1040/pdf"
 					shim:
-						"libs/pdfListView/PdfListView":
-							deps: ["libs/pdf"]
 						"libs/pdf":
-							deps: ["libs/compatibility"]
+							deps: ["libs/pdfjs-1.0.1040/compatibility"]
 
 					skipDirOptimize: true
 					modules: [

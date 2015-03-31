@@ -89,15 +89,13 @@ block content
 			"paths" : {
 				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
 				"moment": "libs/moment-2.7.0",
-				"libs/pdf": "libs/pdfjs-1.0.712/pdf",
-				"libs/compatibility":  "libs/pdfjs-1.0.712/compatibility"
-
+				"libs/pdf": "libs/pdfjs-1.0.1040/pdf"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
 				"libs/pdf": {
-					deps: ["libs/compatibility"]
+					deps: ["libs/pdfjs-1.0.1040/compatibility"]
 				},
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
@@ -116,7 +114,7 @@ block content
 
 	- locals.suppressDefaultJs = true
 
-	- var pdfPath = 'libs/pdfjs-1.0.712/pdf.worker.js'
+	- var pdfPath = 'libs/pdfjs-1.0.1040/pdf.worker.js'
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
 	- var pdfJsWorkerPath = jsPath+pdfPath+'?fingerprint='+fingerprintedPath
 	script(type='text/javascript').
