@@ -19,6 +19,11 @@
   white-space: pre;
   cursor: text;
   pointer-events: auto;
+  -webkit-transform-origin: 0% 0%;
+  -moz-transform-origin: 0% 0%;
+  -o-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
 }
 .plv-text-layer > div::selection {
   background:rgba(0,0,255,0.3);

@@ -142,13 +142,17 @@ define [
 					if width > 0
 						textLayerFrag.appendChild textDiv
 
-						# Dataset values come of type string.
-						textScale = textDiv.dataset.canvasWidth / width
+						if textDiv.dataset.canvasWidth?
+							# Dataset values come of type string.
+							textScale = textDiv.dataset.canvasWidth / width;
+							transform = 'scaleX(' + textScale + ')'
+						else
+							transform = ''
 						rotation = textDiv.dataset.angle
-						transform = 'scale(' + textScale + ', 1)'
-						transform = 'rotate(' + rotation + 'deg) ' + transform	if rotation
-						CustomStyle.setProp 'transform', textDiv, transform
-						CustomStyle.setProp 'transformOrigin', textDiv, '0% 0%'
+						if rotation
+							transform = 'rotate(' + rotation + 'deg) ' + transform
+						if transform
+							CustomStyle.setProp 'transform', textDiv, transform
 					i++
 				@textLayerDiv.appendChild textLayerFrag
 				return
@@ -195,11 +199,15 @@ define [
 
 				# Storing into dataset will convert number into string.
 				textDiv.dataset.angle = angle * (180 / Math.PI)	if angle isnt 0
-				if style.vertical
-					textDiv.dataset.canvasWidth = geom.height * @viewport.scale
-				else
-					textDiv.dataset.canvasWidth = geom.width * @viewport.scale
-				return
+				# We don't bother scaling single-char text divs, because it has very
+				# little effect on text highlighting. This makes scrolling on docs with
+				# lots of such divs a lot faster.
+				if textDiv.textContent.length > 1
+					if style.vertical
+						textDiv.dataset.canvasWidth = geom.height * @viewport.scale
+					else
+						textDiv.dataset.canvasWidth = geom.width * @viewport.scale
+					return
 
 			setTextContent: (textContent) ->
 				@textContent = textContent
