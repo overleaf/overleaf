@@ -176,25 +176,3 @@ module.exports = RedisManager =
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
-
-
-getDocumentsProjectId = (doc_id, callback)->
-	rclient.get keys.projectKey({doc_id:doc_id}), (err, project_id)->
-		callback err, {doc_id:doc_id, project_id:project_id}
-
-getAllProjectDocsIds = (project_id, callback)->
-	rclient.SMEMBERS keys.docsInProject(project_id:project_id), (err, doc_ids)->
-		if callback?
-			callback(err, doc_ids)
-
-getDocumentsAndExpire = (doc_ids, callback)->
-	multi = rclient.multi()
-	oneDay = 86400
-	doc_ids.forEach (doc_id)->
-		#		rclient.expire keys.docLines(doc_id:doc_id), oneDay, ->
-	doc_ids.forEach (doc_id)->
-		multi.get keys.docLines(doc_id:doc_id)
-	multi.exec (err, docsLines)->
-		callback err, docsLines
-	
-
