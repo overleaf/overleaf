@@ -8,7 +8,7 @@ describe "RedisManager.pushDocOp", ->
 	beforeEach ->
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex": createClient: () =>
-				@rclient =
+				@rclient ?=
 					auth: () ->
 					multi: () => @rclient
 			"logger-sharelatex": @logger = {log: sinon.stub()}

@@ -6,6 +6,11 @@ _ = require('underscore')
 keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
+ZipManager = require('./ZipManager')
+
+redisOptions = _.clone(Settings.redis.web)
+redisOptions.return_buffers = true
+rclientBuffer = redis.createClient(redisOptions)
 
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
@@ -13,7 +18,7 @@ minutes = 60 # seconds for Redis expire
 module.exports = RedisManager =
 	putDocInMemory : (project_id, doc_id, docLines, version, callback)->
 		timer = new metrics.Timer("redis.put-doc")
-		logger.log project_id:project_id, doc_id:doc_id, docLines:docLines, version: version, "putting doc in redis"
+		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
 		multi = rclient.multi()
 		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
@@ -27,7 +32,6 @@ module.exports = RedisManager =
 	removeDocFromMemory : (project_id, doc_id, callback)->
 		logger.log project_id:project_id, doc_id:doc_id, "removing doc from redis"
 		multi = rclient.multi()
-		multi.get keys.docLines(doc_id:doc_id)
 		multi.del keys.docLines(doc_id:doc_id)
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
@@ -38,25 +42,26 @@ module.exports = RedisManager =
 				logger.err project_id:project_id, doc_id:doc_id, err:err, "error removing doc from redis"
 				callback(err, null)
 			else
-				docLines = replys[0]
-				logger.log project_id:project_id, doc_id:doc_id, docLines:docLines, "removed doc from redis"
+				logger.log project_id:project_id, doc_id:doc_id, "removed doc from redis"
 				callback()
 
 	getDoc : (doc_id, callback = (error, lines, version) ->)->
 		timer = new metrics.Timer("redis.get-doc")
-		multi = rclient.multi()
+		# use Buffer when retrieving data as it may be gzipped
+		multi = rclientBuffer.multi()
 		linesKey = keys.docLines(doc_id:doc_id)
 		multi.get linesKey
 		multi.get keys.docVersion(doc_id:doc_id)
 		multi.exec (error, result)->
 			timer.done()
 			return callback(error) if error?
-			try
-				docLines = JSON.parse result[0]
-			catch e
-				return callback(e)
-			version = parseInt(result[1] or 0, 10)
-			callback null, docLines, version
+			ZipManager.uncompressIfNeeded doc_id, result, (error, result) ->
+				try
+					docLines = JSON.parse result[0]
+				catch e
+					return callback(e)
+				version = parseInt(result[1] or 0, 10)
+				callback null, docLines, version
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -70,11 +75,12 @@ module.exports = RedisManager =
 			callback null, len
 
 	setDocument : (doc_id, docLines, version, callback = (error) ->)->
-		multi = rclient.multi()
-		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
-		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.incr keys.now("docsets")
-		multi.exec (error, replys) -> callback(error)
+		ZipManager.compressIfNeeded doc_id, JSON.stringify(docLines), (err, result) ->
+			multi = rclient.multi()
+			multi.set keys.docLines(doc_id:doc_id), result
+			multi.set keys.docVersion(doc_id:doc_id), version
+			multi.incr keys.now("docsets")
+			multi.exec (error, replys) -> callback(error)
 
 	getPendingUpdatesForDoc : (doc_id, callback)->
 		multi = rclient.multi()
@@ -170,25 +176,3 @@ module.exports = RedisManager =
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
-
-
-getDocumentsProjectId = (doc_id, callback)->
-	rclient.get keys.projectKey({doc_id:doc_id}), (err, project_id)->
-		callback err, {doc_id:doc_id, project_id:project_id}
-
-getAllProjectDocsIds = (project_id, callback)->
-	rclient.SMEMBERS keys.docsInProject(project_id:project_id), (err, doc_ids)->
-		if callback?
-			callback(err, doc_ids)
-
-getDocumentsAndExpire = (doc_ids, callback)->
-	multi = rclient.multi()
-	oneDay = 86400
-	doc_ids.forEach (doc_id)->
-		#		rclient.expire keys.docLines(doc_id:doc_id), oneDay, ->
-	doc_ids.forEach (doc_id)->
-		multi.get keys.docLines(doc_id:doc_id)
-	multi.exec (err, docsLines)->
-		callback err, docsLines
-	
-
