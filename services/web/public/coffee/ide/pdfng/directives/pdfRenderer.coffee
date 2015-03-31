@@ -60,22 +60,10 @@ define [
 					pdfDocument.getDestinations()
 
 			getDestination: (dest) ->
-				# There is a direct method for this in pdf.js but it is not
-				# available in pdf.js-1.0.712. Use the following workaround of
-				# getting all the destinations and returning only the one we
-				# want.
-				@destinations = @document.then (pdfDocument) ->
-					pdfDocument.getDestinations()
-				return @destinations.then (all) ->
-					all[dest]
+				@document.then (pdfDocument) ->
+					pdfDocument.getDestination(dest)
 				, (error) =>
 					@errorCallback?(error)
-				# When we upgrade we can switch to using the following direct
-				# code.
-				# @document.then (pdfDocument) ->
-				# 	pdfDocument.getDestination(dest)
-				# , (error) ->
-				# 	console.log 'ERROR', error
 
 			getPageIndex: (ref) ->
 				@document.then (pdfDocument) =>
