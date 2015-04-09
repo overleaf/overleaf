@@ -24,8 +24,8 @@ module.exports =
 		next()
 		
 	templateFileKey: (req, res, next)->
-		{template_id, format, version} = req.params
-		req.key = "#{template_id}/v/#{version}/#{format}"
+		{template_id, format, version, sub_type} = req.params
+		req.key = "#{template_id}/v/#{version}/#{format}/#{sub_type}"
 		req.bucket = settings.filestore.stores.template_files
 		req.version = version
 		opts = req.query

@@ -74,6 +74,7 @@ app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileContro
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
+app.get  "/template/:template_id/v/:version/:format/:sub_type", keyBuilder.templateFileKey, fileController.getFile
 app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
 
 app.get "/heapdump", (req, res)->
