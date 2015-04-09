@@ -104,6 +104,9 @@ module.exports =
 			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.list prefix:key, (err, data)->
+			if err?
+				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in aws"
+				return callback(err)
 			keys = _.map data.Contents, (entry)->
 				return entry.Key
 			s3Client.deleteMultiple keys, callback
