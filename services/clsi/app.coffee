@@ -95,6 +95,10 @@ app.get "/profile", (req, res) ->
 		res.json(profile)
 	, time
 
+app.get "/heapdump", (req, res)->
+	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.clsi.heapsnapshot', (err, filename)->
+		res.send filename
+
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
 	res.send error?.statusCode || 500
