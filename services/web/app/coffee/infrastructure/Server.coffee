@@ -48,7 +48,6 @@ app.configure () ->
 	app.set 'view engine', 'jade'
 	Modules.loadViewIncludes app
 	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
-	app.use express.bodyParser(uploadDir: __dirname + "/../../../data/uploads")
 	app.use translations.expressMiddlewear
 	app.use translations.setLangBasedOnDomainMiddlewear
 	app.use cookieParser
