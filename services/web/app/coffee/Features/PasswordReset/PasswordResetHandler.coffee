@@ -11,7 +11,7 @@ module.exports =
 	generateAndEmailResetToken:(email, callback = (error, exists) ->)->
 		UserGetter.getUser email:email, (err, user)->
 			if err then return callback(err)
-			if !user?
+			if !user? or user.holdingAccount
 				logger.err email:email, "user could not be found for password reset"
 				return callback(null, false)
 			PasswordResetTokenHandler.getNewToken user._id, (err, token)->

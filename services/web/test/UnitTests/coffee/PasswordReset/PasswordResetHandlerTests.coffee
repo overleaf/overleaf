@@ -60,6 +60,13 @@ describe "PasswordResetHandler", ->
 				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
 				done()
 
+		it "should return exists = false for a holdingAccount", (done) ->
+			@user.holdingAccount = true
+			@UserGetter.getUser.callsArgWith(1, null, @user)
+			@PasswordResetTokenHandler.getNewToken.callsArgWith(1)
+			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
+				exists.should.equal false
+				done()
 
 	describe "setNewUserPassword", ->
 
