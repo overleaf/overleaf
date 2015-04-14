@@ -229,6 +229,9 @@ module.exports =
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
 	behindProxy: false
+	
+	# Cookie max age (in milliseconds). Set to false for a browser session.
+	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
 
 	# Internal configs
 	# ----------------

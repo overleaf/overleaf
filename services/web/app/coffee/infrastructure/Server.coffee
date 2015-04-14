@@ -34,9 +34,6 @@ else
 
 app = express()
 
-cookieKey = Settings.cookieName
-cookieSessionLength = 5 * oneDayInMilliseconds
-
 csrf = express.csrf()
 ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
@@ -59,10 +56,10 @@ app.configure () ->
 		proxy: Settings.behindProxy
 		cookie:
 			domain: Settings.cookieDomain
-			maxAge: cookieSessionLength
+			maxAge: Settings.cookieSessionLength
 			secure: Settings.secureCookie
 		store: sessionStore
-		key: cookieKey
+		key: Settings.cookieName
 	
 	# Measure expiry from last request, not last login
 	app.use (req, res, next) ->
