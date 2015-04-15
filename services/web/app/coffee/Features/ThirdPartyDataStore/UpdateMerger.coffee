@@ -19,11 +19,16 @@ module.exports =
 			if element?
 				elementId = element._id
 			self.p.writeStreamToDisk project_id, elementId, updateRequest, (err, fsPath)->
+				callback = _.wrap callback, (cb, arg) ->
+					fs.unlink fsPath, (err) ->
+						if err?
+							logger.err project_id:project_id, fsPath:fsPath, "error deleting file"
+						cb(arg)
 				return callback(err) if err?
 				FileTypeManager.isBinary path, fsPath, (err, isFile)->
 					return callback(err) if err?
 					if isFile
-						self.p.processFile project_id, elementId, fsPath, path, source, callback #TODO clean up the stream written to disk here
+						self.p.processFile project_id, elementId, fsPath, path, source, callback
 					else
 						self.p.processDoc project_id, elementId, fsPath, path, source, callback
 
