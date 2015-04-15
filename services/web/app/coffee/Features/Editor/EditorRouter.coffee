@@ -1,8 +1,9 @@
 EditorHttpController = require('./EditorHttpController')
 SecurityManager = require('../../managers/SecurityManager')
+AuthenticationController = require "../Authentication/AuthenticationController"
 
 module.exports =
-	apply: (app, httpAuth) ->
+	apply: (app) ->
 		app.post   '/project/:Project_id/doc', SecurityManager.requestCanModifyProject, EditorHttpController.addDoc
 		app.post   '/project/:Project_id/folder', SecurityManager.requestCanModifyProject, EditorHttpController.addFolder
 
@@ -18,5 +19,5 @@ module.exports =
 		# Called by the real-time API to load up the current project state.
 		# This is a post request because it's more than just a getting of data. We take actions
 		# whenever a user joins a project, like updating the deleted status.
-		app.post   '/project/:Project_id/join', httpAuth, EditorHttpController.joinProject
+		app.post   '/project/:Project_id/join', AuthenticationController.httpAuth, EditorHttpController.joinProject
 		app.ignoreCsrf('post', '/project/:Project_id/join')

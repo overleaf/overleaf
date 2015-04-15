@@ -232,6 +232,10 @@ module.exports =
 	
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
+	
+	# Should we allow access to any page without logging in? This includes
+	# public projects, /learn, /templates, about pages, etc.
+	allowPublicAccess: false
 
 	# Internal configs
 	# ----------------
