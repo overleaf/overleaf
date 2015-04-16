@@ -3,6 +3,9 @@ define [
 	"ide/online-users/controllers/OnlineUsersController"
 ], () ->
 	class OnlineUsersManager
+
+		cursorUpdateInterval:500
+
 		constructor: (@ide, @$scope) ->
 			@$scope.onlineUsers = {}
 			@$scope.onlineUserCursorHighlights = {}
@@ -70,7 +73,14 @@ define [
 					hue: @getHueForUserId(client.user_id)
 				}
 
-		UPDATE_INTERVAL: 500
+			if @$scope.onlineUsersArray.length > 0
+				delete @cursorUpdateTimeout
+				@cursorUpdateInterval = 500
+			else
+				delete @cursorUpdateTimeout
+				@cursorUpdateInterval = 60 * 1000 * 5
+
+
 		sendCursorPositionUpdate: (position) ->
 			if !@cursorUpdateTimeout?
 				@cursorUpdateTimeout = setTimeout ()=>
@@ -83,7 +93,7 @@ define [
 					}
 
 					delete @cursorUpdateTimeout
-				, @UPDATE_INTERVAL
+				, @cursorUpdateInterval
 
 		OWN_HUE: 200 # We will always appear as this color to ourselves
 		ANONYMOUS_HUE: 100
