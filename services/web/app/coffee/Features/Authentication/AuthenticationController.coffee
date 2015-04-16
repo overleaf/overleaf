@@ -6,6 +6,7 @@ Metrics = require('../../infrastructure/Metrics')
 logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
+Settings = require "settings-sharelatex"
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
@@ -84,6 +85,26 @@ module.exports = AuthenticationController =
 
 		return doRequest
 
+	_globalLoginWhitelist: []
+	addEndpointToLoginWhitelist: (endpoint) ->
+		AuthenticationController._globalLoginWhitelist.push endpoint
+
+	requireGlobalLogin: (req, res, next) ->
+		if req.url in AuthenticationController._globalLoginWhitelist
+			return next()
+
+		if req.headers['authorization']?
+			return AuthenticationController.httpAuth(req, res, next)
+		else if req.session.user?
+			return next()
+		else
+			return res.redirect "/login"
+
+	httpAuth: require('express').basicAuth (user, pass)->
+		isValid = Settings.httpAuthUsers[user] == pass
+		if !isValid
+			logger.err user:user, pass:pass, "invalid login details"
+		return isValid
 
 	_redirectToLoginOrRegisterPage: (req, res)->
 		if req.query.zipUrl? or req.query.project_name?

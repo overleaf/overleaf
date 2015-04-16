@@ -39,25 +39,25 @@ RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
-httpAuth = require('express').basicAuth (user, pass)->
-	isValid = Settings.httpAuthUsers[user] == pass
-	if !isValid
-		logger.err user:user, pass:pass, "invalid login details"
-	return isValid
-
 module.exports = class Router
 	constructor: (app)->
+		if !Settings.allowPublicAccess
+			app.all '*', AuthenticationController.requireGlobalLogin
+
 		app.use(app.router)
 		
 		app.get  '/login', UserPagesController.loginPage
+		AuthenticationController.addEndpointToLoginWhitelist '/login'
+
 		app.post '/login', AuthenticationController.login
 		app.get  '/logout', UserController.logout
 		app.get  '/restricted', SecurityManager.restricted
 
 		# Left as a placeholder for implementing a public register page
 		app.get  '/register', UserPagesController.registerPage
+		AuthenticationController.addEndpointToLoginWhitelist '/register'
 
-		EditorRouter.apply(app, httpAuth)
+		EditorRouter.apply(app)
 		CollaboratorsRouter.apply(app)
 		SubscriptionRouter.apply(app)
 		UploadsRouter.apply(app)
@@ -82,7 +82,7 @@ module.exports = class Router
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
-		app.get  '/user/:user_id/personal_info', httpAuth, UserInfoController.getPersonalInfo
+		app.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
 		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
@@ -127,23 +127,23 @@ module.exports = class Router
 		app.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		app.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
 
-		app.get  '/project/:project_id/details', httpAuth, ProjectApiController.getProjectDetails
+		app.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
-		app.get '/internal/project/:Project_id/zip', httpAuth, ProjectDownloadsController.downloadProject
-		app.get '/internal/project/:project_id/compile/pdf', httpAuth, CompileController.compileAndDownloadPdf
+		app.get '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
+		app.get '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
 
 
-		app.get  '/project/:Project_id/doc/:doc_id', httpAuth, DocumentController.getDocument
-		app.post '/project/:Project_id/doc/:doc_id', httpAuth, DocumentController.setDocument
+		app.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
+		app.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
 		app.ignoreCsrf('post', '/project/:Project_id/doc/:doc_id')
 
-		app.post '/user/:user_id/update/*', httpAuth, TpdsController.mergeUpdate
-		app.del  '/user/:user_id/update/*', httpAuth, TpdsController.deleteUpdate
+		app.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
+		app.del  '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
 		
-		app.post '/project/:project_id/contents/*', httpAuth, TpdsController.updateProjectContents
-		app.del  '/project/:project_id/contents/*', httpAuth, TpdsController.deleteProjectContents
+		app.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
+		app.del  '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 		app.ignoreCsrf('post', '/project/:project_id/contents/*')
 		app.ignoreCsrf('delete', '/project/:project_id/contents/*')
 

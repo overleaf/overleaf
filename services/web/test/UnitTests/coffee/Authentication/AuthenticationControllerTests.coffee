@@ -19,6 +19,7 @@ describe "AuthenticationController", ->
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"settings-sharelatex": {}
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -274,6 +275,46 @@ describe "AuthenticationController", ->
 				@AuthenticationController.getLoggedInUser
 					.calledWith(@req, {allow_auth_token: true})
 					.should.equal true
+
+	describe "requireGlobalLogin", ->
+		beforeEach ->
+			@req.headers = {}
+			@AuthenticationController.httpAuth = sinon.stub()
+		
+		describe "with white listed url", ->
+			beforeEach ->
+				@AuthenticationController.addEndpointToLoginWhitelist "/login"
+				@req.url = "/login"
+				@AuthenticationController.requireGlobalLogin @req, @res, @next
+			
+			it "should call next() directly", ->
+				@next.called.should.equal true
+			
+		describe "with http auth", ->
+			beforeEach ->
+				@req.headers["authorization"] = "Mock Basic Auth"
+				@AuthenticationController.requireGlobalLogin @req, @res, @next
+
+			it "should pass the request onto httpAuth", ->
+				@AuthenticationController.httpAuth
+					.calledWith(@req, @res, @next)
+					.should.equal true
+			
+		describe "with a user session", ->
+			beforeEach ->
+				@req.session =
+					user: {"mock": "user"}
+				@AuthenticationController.requireGlobalLogin @req, @res, @next
+			
+			it "should call next() directly", ->
+				@next.called.should.equal true
+			
+		describe "with no login credentials", ->
+			beforeEach ->
+				@AuthenticationController.requireGlobalLogin @req, @res, @next
+				
+			it "should redirect to the /login page", ->
+				@res.redirectedTo.should.equal "/login"
 
 	describe "_redirectToLoginOrRegisterPage", ->
 		beforeEach ->
