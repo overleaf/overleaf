@@ -8,22 +8,19 @@ _ = require("lodash")
 async = require("async")
 exec = require("child_process").exec
 
-finished_projects_path = "/home/sharelatex/finished-projects"
-all_projects_path = "/home/sharelatex/all-projects"
-unmigrated_docs_path = "/home/sharelatex/unmigrated"
+finished_projects_path = "./finished-projects"
+all_projects_path = "./all-projects"
+unmigrated_docs_path = "./unmigrated"
 
-processedFiles = fs.readFileSync finished_projects_path
 
 printProgress = ->
 	exec "wc #{finished_projects_path}", (error, results) ->
 		setTimeout printProgress, 1000 * 30
 
 checkIfFileHasBeenProccessed = (project_id, callback)->
-	hasBeenProcessed = _.include processedFiles, project
-	callback null, hasBeenProcessed
-	# exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
-	# 	hasBeenProcessed = _.include(results, project_id)
-	# 	callback(error, hasBeenProcessed)
+	exec "grep #{project_id} #{finished_projects_path}", (error, results) ->
+		hasBeenProcessed = _.include(results, project_id)
+		callback(error, hasBeenProcessed)
 
 loadProjectIds = (callback)->
 	console.log "loading project ids from #{all_projects_path}"
@@ -191,4 +188,3 @@ exports.migrate = (client, done = ->)->
 exports.rollback = (next)->
 	next()
 
-exports.migrate()
