@@ -29,7 +29,7 @@ block content
 				strong #{translate("reconnecting")}...
 
 			.div(ng-controller="SavingNotificationController")
-				.alert.alert-warning.small( ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 3") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
+				.alert.alert-warning.small( ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
 
 		include ./editor/left-menu
 

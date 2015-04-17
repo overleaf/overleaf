@@ -247,6 +247,9 @@ class Doc
   # Only one op can be in-flight at a time, so if an op is already on its way then
   # this method does nothing.
   flush: =>
+    delete @flushTimeout
+    #console.log "CALLED FLUSH"
+
     return unless @connection.state == 'ok' and @inflightOp == null and @pendingOp != null
 
     # Rotate null -> pending -> inflight
@@ -256,6 +259,7 @@ class Doc
     @pendingOp = null
     @pendingCallbacks = []
 
+    #console.log "SENDING OP TO SERVER", @inflightOp, @version
     @connection.send {doc:@name, op:@inflightOp, v:@version}
 
   # Submit an op to the server. The op maybe held for a little while before being sent, as only one
@@ -277,7 +281,11 @@ class Doc
 
     # A timeout is used so if the user sends multiple ops at the same time, they'll be composed
     # & sent together.
-    setTimeout @flush, 0
+    if !@flushTimeout?
+        @flushTimeout = setTimeout @flush, @_flushDelay || 0
+  
+  setFlushDelay: (delay) =>
+      @_flushDelay = delay
   
   shout: (msg) =>
     # Meta ops don't have to queue, they can go direct. Good/bad idea?

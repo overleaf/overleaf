@@ -14,6 +14,10 @@ define [
 				return true if doc.hasBufferedOps()
 			return false
 
+		@flushAll: () ->
+			for doc_id, doc of @openDocs
+				doc.flush()
+
 		constructor: (@ide, @doc_id) ->
 			@connected = @ide.socket.socket.connected
 			@joined = false
@@ -108,6 +112,9 @@ define [
 				callback()
 			else
 				@_leaveDoc(callback)
+
+		flush: () ->
+			@doc?.flushPendingOps()
 
 		pollSavedStatus: () ->
 			# returns false if doc has ops waiting to be acknowledged or
