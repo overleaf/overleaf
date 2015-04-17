@@ -2,7 +2,7 @@ define [
 	"utils/EventEmitter"
 	"libs/sharejs"
 ], (EventEmitter, ShareJs) ->
-	SINGLE_USER_FLUSH_DELAY = 5000 #ms
+	SINGLE_USER_FLUSH_DELAY = 1000 #ms
 
 	class ShareJsDoc extends EventEmitter
 		constructor: (@doc_id, docLines, version, @socket) ->
