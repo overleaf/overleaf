@@ -82,13 +82,15 @@ define [
 
 
 		sendCursorPositionUpdate: (position) ->
+			if position?
+				@$scope.currentPosition = position  # keep track of the latest position
 			if !@cursorUpdateTimeout?
 				@cursorUpdateTimeout = setTimeout ()=>
 					doc_id   = @$scope.editor.open_doc_id
-
+					# always send the latest position to other clients
 					@ide.socket.emit "clientTracking.updatePosition", {
-						row: position.row
-						column: position.column
+						row: @$scope.currentPosition?.row
+						column: @$scope.currentPosition?.column
 						doc_id: doc_id
 					}
 
