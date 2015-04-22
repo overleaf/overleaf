@@ -1,8 +1,7 @@
 define [
 	"base"
-	"libs/autolinker"
 	"ide/chat/services/chatMessages"
-], (App, autolinker) ->
+], (App) ->
 	App.controller "ChatController", ($scope, chatMessages, ide, $location) ->
 		$scope.chat = chatMessages.state
 		
@@ -30,7 +29,5 @@ define [
 		$scope.loadMoreMessages = ->
 			chatMessages.loadMoreMessages()
 			
-		$scope.linkify = (message = "")->
-			return autolinker.link(message)
 
 			

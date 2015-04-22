@@ -97,5 +97,5 @@ define [
 					timestamp: message.timestamp
 					contents: [message.content]
 				})
-					
+
 		return chat
