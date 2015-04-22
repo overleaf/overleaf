@@ -125,8 +125,7 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'compile', ['clean',  'copy', 'coffee', 'less', 'jade', 'requirejs']
 	grunt.registerTask 'install', ['compile']
-	grunt.registerTask 'run', ['compile', 'bunyan', 'execute']
+	grunt.registerTask 'default', ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'compileAndCompress', ['compile', 'uglify']
-	grunt.registerTask 'default', ['compile', 'concurrent']
 	grunt.registerTask 'test:unit', ['compile', 'mochaTest:unit']
 
