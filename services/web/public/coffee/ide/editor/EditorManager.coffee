@@ -28,6 +28,9 @@ define [
 					initialized = true
 					@autoOpenDoc()
 
+			@$scope.$on "flush-changes", () =>
+				Document.flushAll()
+
 		autoOpenDoc: () ->
 			open_doc_id = 
 				@ide.localStorage("doc.open_id.#{@$scope.project_id}") or

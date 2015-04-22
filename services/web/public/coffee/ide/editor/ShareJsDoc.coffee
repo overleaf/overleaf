@@ -2,6 +2,8 @@ define [
 	"utils/EventEmitter"
 	"libs/sharejs"
 ], (EventEmitter, ShareJs) ->
+	SINGLE_USER_FLUSH_DELAY = 1000 #ms
+
 	class ShareJsDoc extends EventEmitter
 		constructor: (@doc_id, docLines, version, @socket) ->
 			# Dencode any binary bits of data
@@ -33,11 +35,15 @@ define [
 
 			@_doc = new ShareJs.Doc @connection, @doc_id,
 				type: @type
+			@_doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
 			@_doc.on "change", () =>
 				@trigger "change"
 			@_doc.on "acknowledge", () =>
 				@trigger "acknowledge"
 			@_doc.on "remoteop", () =>
+				# As soon as we're working with a collaborator, start sending
+				# ops as quickly as possible for low latency.
+				@_doc.setFlushDelay(0)
 				@trigger "remoteop"
 
 			@_bindToDocChanges(@_doc)

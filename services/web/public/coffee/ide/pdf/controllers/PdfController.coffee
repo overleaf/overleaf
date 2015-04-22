@@ -123,6 +123,8 @@ define [
 			return if $scope.pdf.compiling
 			$scope.pdf.compiling = true
 			
+			ide.$scope.$broadcast("flush-changes")
+
 			if !options.isAutoCompile
 				compileCount++
 				if compileCount == 1
