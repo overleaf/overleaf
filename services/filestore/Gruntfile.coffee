@@ -52,7 +52,10 @@ module.exports = (grunt) ->
 				options:
 					ext:"*.coffee"
 
-
+		execute:
+			app:
+				src: "app.js"
+				
 		concurrent:
 			dev:
 				tasks: ['nodemon', 'watch']
@@ -79,13 +82,15 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks 'grunt-mocha-test'
 	grunt.loadNpmTasks 'grunt-forever'
+	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-execute'
 
 	grunt.registerTask "test:unit", ["coffee", "mochaTest:unit"]
 	grunt.registerTask "test:acceptence", ["coffee", "mochaTest:acceptence"]
 	grunt.registerTask "test:acceptance", ["test:acceptence"]
 
 	grunt.registerTask "ci", "test:unit"
-	grunt.registerTask 'default', ['coffee', 'concurrent']
+	grunt.registerTask 'default', ['coffee', 'bunyan','execute']
 
 	grunt.registerTask "compile", "coffee"
 	grunt.registerTask "install", "compile"
