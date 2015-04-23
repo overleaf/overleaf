@@ -11,7 +11,8 @@ describe 'UpdateMerger :', ->
 		@updateReciver = {}
 		@projectLocator = {}
 		@projectEntityHandler = {}
-		@fs = {}
+		@fs = 
+			unlink:sinon.stub().callsArgWith(1)
 		@FileTypeManager = {}
 		@updateMerger = SandboxedModule.require modulePath, requires:
 			'../Editor/EditorController': @editorController
@@ -50,6 +51,7 @@ describe 'UpdateMerger :', ->
 			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @fsPath, filePath, @source).should.equal true
+				@fs.unlink.calledWith(@fsPath).should.equal true
 				done()
 
 		it 'should process update as file when it is not a doc', (done)->
@@ -62,6 +64,7 @@ describe 'UpdateMerger :', ->
 			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
 				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source).should.equal true
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
+				@fs.unlink.calledWith(@fsPath).should.equal true
 				done()
 
 
