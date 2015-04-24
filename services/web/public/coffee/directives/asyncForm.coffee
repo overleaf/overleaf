@@ -1,5 +1,6 @@
 define [
 	"base"
+	"libs/passfield"
 ], (App) ->
 	App.directive "asyncForm", ($http) ->
 		return {
@@ -71,3 +72,41 @@ define [
 			}
 
 		}
+
+
+	App.directive 'complexPassword', ->
+		require: ['^asyncForm', 'ngModel']
+
+		link: (scope, element, attrs, controllers) ->
+
+			passwordStrengthOptions = {
+				pattern: "aA$3",
+				allowEmpty: false,
+				allowAnyChars: false,
+				isMasked: true,
+				showToggle: false,
+				showGenerate: false,
+				checkMode:PassField.CheckModes.STRICT,
+				length: { min: 8, max: 50 },
+				showTip:false,
+				showWarn:false
+			}
+
+			passwordStrengthOptions.chars = {
+				digits: "1234567890",
+				letters: "abcdefghijklmnopqrstuvwxyz",
+				letters_up: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+				symbols: "@#$%^&*()-_=+[]{};:<>/?!£€"
+			}
+			
+			passField = new PassField.Field("passwordFeild", passwordStrengthOptions);
+			console.log controllers
+			controllers.$parsers.unshift (viewValue)->
+				console.log scope.parent, scope.password, attrs.email, viewValue	
+				scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
+				console.log scope.complexPasswordErrorMessage
+				isValid = passField.validatePass()
+				controllers.$setValidity('complexPassword', isValid)
+				return viewValue
+
+				
