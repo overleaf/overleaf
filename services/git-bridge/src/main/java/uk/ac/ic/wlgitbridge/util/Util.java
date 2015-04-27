@@ -138,12 +138,15 @@ public class Util {
     public static void deleteInDirectoryApartFrom(File directory, String... apartFrom) {
         if (directory != null) {
             Set<String> excluded = new HashSet<String>(Arrays.asList(apartFrom));
-            for (File file : directory.listFiles()) {
-                if (!excluded.contains(file.getName())) {
-                    if (file.isDirectory()) {
-                        deleteInDirectory(file);
+            File [] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (!excluded.contains(file.getName())) {
+                        if (file.isDirectory()) {
+                            deleteInDirectory(file);
+                        }
+                        file.delete();
                     }
-                    file.delete();
                 }
             }
         }

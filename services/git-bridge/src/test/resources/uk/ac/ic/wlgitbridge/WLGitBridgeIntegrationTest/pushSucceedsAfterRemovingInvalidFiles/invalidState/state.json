@@ -1,0 +1,34 @@
+[
+	{
+		"project": "testproj",
+		"getDoc": {
+			"versionID": 1,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "test@example.com",
+			"name": "Test User"
+		},
+		"getSavedVers": [],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    }
+	            ],
+	            "atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "invalidFiles",
+            "errors": [
+                {
+                    "file": "file1.exe",
+                    "state": "disallowed"
+                }
+            ]
+		}
+	}
+]
