@@ -4,6 +4,11 @@ define [
 ], (App) ->
 	App.directive "asyncForm", ($http) ->
 		return {
+			controller: ['$scope', ($scope) ->
+				@getEmail = () ->
+					return $scope.email
+				return this
+			]
 			link: (scope, element, attrs) ->
 				formName = attrs.asyncForm
 
@@ -77,7 +82,7 @@ define [
 	App.directive 'complexPassword', ->
 		require: ['^asyncForm', 'ngModel']
 
-		link: (scope, element, attrs, controllers) ->
+		link: (scope, element, attrs, ctrl) ->
 
 			passwordStrengthOptions = {
 				pattern: "aA$3",
@@ -100,13 +105,40 @@ define [
 			}
 			
 			passField = new PassField.Field("passwordFeild", passwordStrengthOptions);
-			console.log controllers
-			controllers.$parsers.unshift (viewValue)->
-				console.log scope.parent, scope.password, attrs.email, viewValue	
-				scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
-				console.log scope.complexPasswordErrorMessage
+			console.log "controllers", ctrl, "scope", scope
+
+			[asyncFormCtrl, ngModelCtrl] = ctrl
+
+			# ngModelCtrl.$validators.password = (modelValue, viewValue) ->
+			# 	console.log 'model', modelValue, 'view', viewValue, "email", asyncFormCtrl.getEmail()
+			# 	complexPasswordErrorMessage = passField.getPassValidationMessage()
+			# 	console.log complexPasswordErrorMessage
+			# 	isValid = passField.validatePass()
+			# 	return isValid
+
+			ngModelCtrl.$parsers.unshift (modelValue, viewValue) ->
+				console.log 'model', modelValue, 'view', viewValue, "email", asyncFormCtrl.getEmail()
+				complexPasswordErrorMessage = passField.getPassValidationMessage()
+				console.log complexPasswordErrorMessage
 				isValid = passField.validatePass()
-				controllers.$setValidity('complexPassword', isValid)
-				return viewValue
+				return isValid
+
+
+			
+
+			# ctrl.addCheck "email", "password", (email, password) ->
+			# 	console.log "email", email, "password", password
+			# 	complexPasswordErrorMessage = passField.getPassValidationMessage()
+			# 	console.log complexPasswordErrorMessage
+			# 	isValid = passField.validatePass()
+			# 	return isValid
+
+			# controllers[0].$parsers.unshift (viewValue)->
+			# 	console.log scope.parent, scope.password, attrs.email, viewValue	
+			# 	scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
+			# 	console.log scope.complexPasswordErrorMessage
+			# 	isValid = passField.validatePass()
+			# 	controllers.$setValidity('complexPassword', isValid)
+			# 	return viewValue
 
 				
