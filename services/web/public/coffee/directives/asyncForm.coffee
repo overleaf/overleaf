@@ -101,44 +101,24 @@ define [
 				digits: "1234567890",
 				letters: "abcdefghijklmnopqrstuvwxyz",
 				letters_up: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-				symbols: "@#$%^&*()-_=+[]{};:<>/?!£€"
+				symbols: "@#$%^&*()-_=+[]{};:<>/?!£€.,"
 			}
 			
+			PassField.Config.blackList = []
+
 			passField = new PassField.Field("passwordFeild", passwordStrengthOptions);
-			console.log "controllers", ctrl, "scope", scope
 
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
-			# ngModelCtrl.$validators.password = (modelValue, viewValue) ->
-			# 	console.log 'model', modelValue, 'view', viewValue, "email", asyncFormCtrl.getEmail()
-			# 	complexPasswordErrorMessage = passField.getPassValidationMessage()
-			# 	console.log complexPasswordErrorMessage
-			# 	isValid = passField.validatePass()
-			# 	return isValid
-
-			ngModelCtrl.$parsers.unshift (modelValue, viewValue) ->
-				console.log 'model', modelValue, 'view', viewValue, "email", asyncFormCtrl.getEmail()
-				complexPasswordErrorMessage = passField.getPassValidationMessage()
-				console.log complexPasswordErrorMessage
+			ngModelCtrl.$parsers.unshift (modelValue) ->
 				isValid = passField.validatePass()
-				return isValid
-
-
-			
-
-			# ctrl.addCheck "email", "password", (email, password) ->
-			# 	console.log "email", email, "password", password
-			# 	complexPasswordErrorMessage = passField.getPassValidationMessage()
-			# 	console.log complexPasswordErrorMessage
-			# 	isValid = passField.validatePass()
-			# 	return isValid
-
-			# controllers[0].$parsers.unshift (viewValue)->
-			# 	console.log scope.parent, scope.password, attrs.email, viewValue	
-			# 	scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
-			# 	console.log scope.complexPasswordErrorMessage
-			# 	isValid = passField.validatePass()
-			# 	controllers.$setValidity('complexPassword', isValid)
-			# 	return viewValue
-
-				
+				if !isValid
+					scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
+				else
+					email = asyncFormCtrl.getEmail()
+					startOfEmail = email.split("@")?[0]
+					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
+						isValid = false
+						scope.complexPasswordErrorMessage = "Password can not contain email address"
+				ngModelCtrl.$setValidity('complexPassword', isValid)
+				return modelValue
