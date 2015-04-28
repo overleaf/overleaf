@@ -71,15 +71,15 @@ block content
 												.form-group
 													label(for='newPassword1') #{translate("new_password")}
 													input.form-control(
-														id='newPassword1',
+														id='passwordField',
 														type='password',
 														name='newPassword1',
 														placeholder='*********',
 														ng-model="newPassword1",
-														required
+														required,
+														complex-password
 													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$invalid && changePasswordForm.newPassword1.$dirty")
-														| #{translate("required")}
+													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.currentPassword.$dirty", ng-bind-html="complexPasswordErrorMessage") 
 												.form-group
 													label(for='newPassword2') #{translate("confirm_new_password")}
 													input.form-control(
@@ -87,7 +87,7 @@ block content
 														name='newPassword2',
 														placeholder='*********',
 														ng-model="newPassword2",
-														equals="newPassword1"
+														equals="passwordField"
 													)
 													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
 														| #{translate("doesnt_match")}
@@ -148,4 +148,7 @@ block content
 			)
 				span(ng-hide="state.inflight") #{translate("delete")}
 				span(ng-show="state.inflight") #{translate("deleting")}...
+	
+	script(type='text/javascript').
+		window.passwordStrengthOptions = !{JSON.stringify(settings.passwordStrengthOptions || {})}
 
