@@ -165,6 +165,17 @@ module.exports =
 		{name: "French", code: "fr"}
 	]
 
+
+	# Password Settings
+	# -----------
+	# These restrict the passwords users can use when registering
+	# opts are from http://antelle.github.io/passfield
+	passwordStrengthOptions:
+		pattern: "aA$3"
+		length:
+			min: 8
+			max: 50
+
 	# Email support
 	# -------------
 	#

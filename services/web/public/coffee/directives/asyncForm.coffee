@@ -84,29 +84,30 @@ define [
 
 		link: (scope, element, attrs, ctrl) ->
 
-			passwordStrengthOptions = {
-				pattern: "aA$3",
-				allowEmpty: false,
-				allowAnyChars: false,
-				isMasked: true,
-				showToggle: false,
-				showGenerate: false,
-				checkMode:PassField.CheckModes.STRICT,
-				length: { min: 8, max: 50 },
-				showTip:false,
-				showWarn:false
-			}
-
-			passwordStrengthOptions.chars = {
-				digits: "1234567890",
-				letters: "abcdefghijklmnopqrstuvwxyz",
-				letters_up: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-				symbols: "@#$%^&*()-_=+[]{};:<>/?!£€.,"
-			}
-			
 			PassField.Config.blackList = []
+			defaultPasswordOpts =
+				pattern: ""
+				length:
+					min: 1
+					max: 50
+				allowEmpty: false
+				allowAnyChars: false
+				isMasked: true
+				showToggle: false
+				showGenerate: false
+				showTip:false
+				showWarn:false
+				checkMode : PassField.CheckModes.STRICT
+				chars:
+					digits: "1234567890"
+					letters: "abcdefghijklmnopqrstuvwxyz"
+					letters_up: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+					symbols: "@#$%^&*()-_=+[]{};:<>/?!£€.,"
 
-			passField = new PassField.Field("passwordFeild", passwordStrengthOptions);
+			opts = _.defaults(window.passwordStrengthOptions || {}, defaultPasswordOpts)
+			if opts.length.min == 1
+				opts.acceptRate = 0 #this allows basically anything to be a valid password
+			passField = new PassField.Field("passwordFeild", opts);
 
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
@@ -116,7 +117,7 @@ define [
 					scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
 				else
 					email = asyncFormCtrl.getEmail()
-					startOfEmail = email.split("@")?[0]
+					startOfEmail = email?.split("@")?[0]
 					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
 						isValid = false
 						scope.complexPasswordErrorMessage = "Password can not contain email address"
