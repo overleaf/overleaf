@@ -107,7 +107,7 @@ define [
 			opts = _.defaults(window.passwordStrengthOptions || {}, defaultPasswordOpts)
 			if opts.length.min == 1
 				opts.acceptRate = 0 #this allows basically anything to be a valid password
-			passField = new PassField.Field("passwordFeild", opts);
+			passField = new PassField.Field("passwordField", opts);
 
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
@@ -115,7 +115,7 @@ define [
 				isValid = passField.validatePass()
 				if !isValid
 					scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
-				else
+				else if asyncFormCtrl.getEmail()?
 					email = asyncFormCtrl.getEmail()
 					startOfEmail = email?.split("@")?[0]
 					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
