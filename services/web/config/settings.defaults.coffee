@@ -170,11 +170,11 @@ module.exports =
 	# -----------
 	# These restrict the passwords users can use when registering
 	# opts are from http://antelle.github.io/passfield
-	passwordStrengthOptions:
-		pattern: "aA$3"
-		length:
-			min: 8
-			max: 50
+	# passwordStrengthOptions:
+	# 	pattern: "aA$3"
+	# 	length:
+	# 		min: 8
+	# 		max: 50
 
 	# Email support
 	# -------------
