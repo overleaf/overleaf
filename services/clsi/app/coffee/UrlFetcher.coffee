@@ -30,6 +30,16 @@ module.exports = UrlFetcher =
 			if res.statusCode >= 200 and res.statusCode < 300
 				urlStream.pipe(fileStream)
 			else
+				logger.error statusCode: res.statusCode, url:url, filePath: filePath, "unexpected status code downloading url to cache"
+				# https://nodejs.org/api/http.html#http_class_http_clientrequest
+				# If you add a 'response' event handler, then you must consume
+				# the data from the response object, either by calling
+				# response.read() whenever there is a 'readable' event, or by
+				# adding a 'data' handler, or by calling the .resume()
+				# method. Until the data is consumed, the 'end' event will not
+				# fire. Also, until the data is read it will consume memory
+				# that can eventually lead to a 'process out of memory' error.
+				urlStream.on 'data', () -> # discard the data
 				callbackOnce(new Error("URL returned non-success status code: #{res.statusCode} #{url}"))
 
 		urlStream.on "error", (error) ->
