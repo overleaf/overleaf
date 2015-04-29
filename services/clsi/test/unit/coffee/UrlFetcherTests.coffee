@@ -11,6 +11,7 @@ describe "UrlFetcher", ->
 		@UrlFetcher = SandboxedModule.require modulePath, requires:
 			request: defaults: @defaults = sinon.stub().returns(@request = {})
 			fs: @fs = {}
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 
 	it "should turn off the cookie jar in request", ->
 		@defaults.calledWith(jar: false)
@@ -21,7 +22,8 @@ describe "UrlFetcher", ->
 			@path = "/path/to/file/on/disk"
 			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
 			@urlStream.pipe = sinon.stub()
-			@fs.createWriteStream = sinon.stub().returns(@fileStream = "write-stream-stub")
+			@fs.createWriteStream = sinon.stub().returns(@fileStream = { on: () -> })
+			@fs.unlink = (file, callback) -> callback()
 			@UrlFetcher.pipeUrlToFile(@url, @path, @callback)
 
 		it "should request the URL", ->
