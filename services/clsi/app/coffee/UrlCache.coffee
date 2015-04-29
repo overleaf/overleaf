@@ -62,6 +62,8 @@ module.exports = UrlCache =
 
 	_copyFile: (from, to, _callback = (error) ->) ->
 		callbackOnce = (error) ->
+			if error?
+				logger.error err: error, from:from, to:to, "error copying file from cache"
 			_callback(error)
 			_callback = () ->
 		writeStream = fs.createWriteStream(to)
