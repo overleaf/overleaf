@@ -10,7 +10,12 @@ module.exports = UrlCache =
 	downloadUrlToFile: (project_id, url, destPath, lastModified, callback = (error) ->) ->
 		UrlCache._ensureUrlIsInCache project_id, url, lastModified, (error, pathToCachedUrl) =>
 			return callback(error) if error?
-			UrlCache._copyFile(pathToCachedUrl, destPath, callback)
+			UrlCache._copyFile pathToCachedUrl, destPath, (error) ->
+				if error?
+					UrlCache._clearUrlDetails project_id, url, () ->
+						callback(error)
+				else
+					callback(error)
 
 	clearProject: (project_id, callback = (error) ->) ->
 		UrlCache._findAllUrlsInProject project_id, (error, urls) ->
