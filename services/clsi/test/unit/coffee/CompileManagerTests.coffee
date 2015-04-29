@@ -71,7 +71,6 @@ describe "CompileManager", ->
 				.should.equal true
 
 		it "should return the output files", ->
-			console.log 'output_files', @build_files
 			@callback.calledWith(null, @build_files).should.equal true
 
 	describe "clearProject", ->
