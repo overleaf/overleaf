@@ -8,4 +8,4 @@ host = settings.internal?.chat?.host or "localhost"
 
 Server.server.listen port, host, (error) ->
 	throw error if error?
-	logger.log "chat-sharelatex listening on #{host}:#{port}"
+	logger.info "Chat starting up, listening on #{host}:#{port}"
