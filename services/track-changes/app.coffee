@@ -36,5 +36,5 @@ app.listen port, host, (error) ->
 	if error?
 		logger.error err: error, "could not start track-changes server"
 	else
-		logger.log "track changes api listening on http://#{host}:#{port}"
+		logger.info "trackchanges starting up, listening on #{host}:#{port}"
 
