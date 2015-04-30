@@ -284,12 +284,22 @@ describe "AuthenticationController", ->
 		describe "with white listed url", ->
 			beforeEach ->
 				@AuthenticationController.addEndpointToLoginWhitelist "/login"
-				@req.url = "/login"
+				@req._parsedUrl.pathname = "/login"
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 			
 			it "should call next() directly", ->
 				@next.called.should.equal true
+
+		describe "with white listed url and a query string", ->
+			beforeEach ->
+				@AuthenticationController.addEndpointToLoginWhitelist "/login"
+				@req._parsedUrl.pathname = "/login"
+				@req.url = "/login?query=something"
+				@AuthenticationController.requireGlobalLogin @req, @res, @next
 			
+			it "should call next() directly", ->
+				@next.called.should.equal true		
+
 		describe "with http auth", ->
 			beforeEach ->
 				@req.headers["authorization"] = "Mock Basic Auth"

@@ -5,6 +5,7 @@ class MockRequest
 
 	params: {}
 	query: {}
+	_parsedUrl:{}
 	i18n:
 		translate:->
 

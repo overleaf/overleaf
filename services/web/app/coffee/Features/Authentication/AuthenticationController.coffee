@@ -90,7 +90,7 @@ module.exports = AuthenticationController =
 		AuthenticationController._globalLoginWhitelist.push endpoint
 
 	requireGlobalLogin: (req, res, next) ->
-		if req.url in AuthenticationController._globalLoginWhitelist
+		if req._parsedUrl.pathname in AuthenticationController._globalLoginWhitelist
 			return next()
 
 		if req.headers['authorization']?
@@ -98,6 +98,7 @@ module.exports = AuthenticationController =
 		else if req.session.user?
 			return next()
 		else
+			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
 			return res.redirect "/login"
 
 	httpAuth: require('express').basicAuth (user, pass)->
