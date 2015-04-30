@@ -36,4 +36,4 @@ host = Settings.internal?.spelling?.host || "localhost"
 port = Settings.internal?.spelling?.port || 3005
 server.listen port, host, (error) ->
 	throw error if error?
-	logger.log "spelling-sharelatex listening at #{host}:#{port}"
+	logger.info "spelling starting up, listening on #{host}:#{port}"
