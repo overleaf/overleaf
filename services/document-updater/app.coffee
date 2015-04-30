@@ -83,8 +83,9 @@ shutdownCleanly = (signal) ->
 		, 10000
 
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
-app.listen port, "localhost", ->
-	logger.log("documentupdater-sharelatex server listening on port #{port}")
+host = Settings.internal.documentupdater.host or "localhost"
+app.listen port, host, ->
+	logger.info "Document-updater starting up, listening on #{host}:#{port}"
 
 for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 	process.on signal, shutdownCleanly(signal)
