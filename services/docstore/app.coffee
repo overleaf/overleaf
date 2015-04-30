@@ -35,4 +35,4 @@ port = Settings.internal.docstore.port
 host = Settings.internal.docstore.host
 app.listen port, host, (error) ->
 	throw error if error?
-	logger.log("docstore listening on #{host}:#{port}")
+	logger.info "Docstore starting up, listening on #{host}:#{port}"
