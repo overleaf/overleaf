@@ -113,10 +113,10 @@ define [
 
 			ngModelCtrl.$parsers.unshift (modelValue) ->
 				isValid = passField.validatePass()
+				email = asyncFormCtrl.getEmail() || window.usersEmail
 				if !isValid
 					scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
-				else if asyncFormCtrl.getEmail()?
-					email = asyncFormCtrl.getEmail()
+				else if (email? and email != "")
 					startOfEmail = email?.split("@")?[0]
 					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
 						isValid = false

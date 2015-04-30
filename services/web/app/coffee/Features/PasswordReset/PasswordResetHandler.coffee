@@ -18,7 +18,7 @@ module.exports =
 				if err then return callback(err)
 				emailOptions =
 					to : email
-					setNewPasswordUrl : "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}"
+					setNewPasswordUrl : "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
 				EmailHandler.sendEmail "passwordResetRequested", emailOptions, (error) ->
 					return callback(error) if error?
 					callback null, true

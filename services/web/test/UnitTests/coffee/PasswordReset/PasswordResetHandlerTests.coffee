@@ -57,7 +57,7 @@ describe "PasswordResetHandler", ->
 				exists.should.equal true
 				args = @EmailHandler.sendEmail.args[0]
 				args[0].should.equal "passwordResetRequested"
-				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
+				args[1].setNewPasswordUrl.should.equal "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
 				done()
 
 		it "should return exists = false for a holdingAccount", (done) ->

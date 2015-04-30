@@ -200,7 +200,7 @@ describe "UserController", ->
 				@EmailHandler.sendEmail
 					.calledWith("registered", {
 						to: @user.email
-						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
+						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
 					})
 					.should.equal true
 			
@@ -208,7 +208,7 @@ describe "UserController", ->
 				@res.json
 					.calledWith({
 						email: @user.email
-						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}"
+						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
 					})
 					.should.equal true
 

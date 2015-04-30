@@ -101,7 +101,7 @@ module.exports =
 			PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
 				return next(err) if err?
 				
-				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}"
+				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
 
 				EmailHandler.sendEmail "registered", {
 					to: user.email

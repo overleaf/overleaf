@@ -98,6 +98,11 @@ module.exports = (app)->
 		res.locals.csrfToken = req.session._csrf
 		next()
 
+	app.use (req, res, next) ->
+		res.locals.getReqQueryParam = (field)->
+			return req.query?[field]
+		next()
+
 	app.use (req, res, next)-> 
 		res.locals.fingerprint = (path) ->
 			if fingerprints[path]?

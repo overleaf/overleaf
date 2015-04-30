@@ -5,6 +5,7 @@ logger = require "logger-sharelatex"
 module.exports =
 
 	renderRequestResetForm: (req, res)->
+		logger.log "rendering request reset form"
 		res.render "user/passwordReset", 
 			title:"reset_password"
 
