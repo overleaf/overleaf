@@ -1,11 +1,14 @@
 Sequelize = require("sequelize")
 Settings = require("settings-sharelatex")
+_ = require("underscore")
+
+options = _.extend {logging:false}, Settings.mysql.clsi
 
 sequelize = new Sequelize(
 	Settings.mysql.clsi.database,
 	Settings.mysql.clsi.username,
 	Settings.mysql.clsi.password,
-	Settings.mysql.clsi
+	options
 )
 
 module.exports =
