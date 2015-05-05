@@ -1,5 +1,5 @@
 chai = require("chai")
-chai.should()
+chai.should() unless Object.prototype.should?
 expect = chai.expect
 request = require "request"
 Settings = require "settings-sharelatex"
