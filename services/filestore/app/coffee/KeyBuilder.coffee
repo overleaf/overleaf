@@ -23,6 +23,15 @@ module.exports =
 		req.bucket = settings.filestore.stores.user_files
 		next()
 		
+	publicFileKey: (req, res, next)->
+		{project_id, public_file_id} = req.params
+		if not settings.filestore.stores.public_files?
+			res.status(501).send("public files not available")
+		else
+			req.key = "#{project_id}/#{public_file_id}"
+			req.bucket = settings.filestore.stores.public_files
+			next()
+
 	templateFileKey: (req, res, next)->
 		{template_id, format, version, sub_type} = req.params
 		req.key = "#{template_id}/v/#{version}/#{format}"

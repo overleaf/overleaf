@@ -77,6 +77,14 @@ app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey
 app.get  "/template/:template_id/v/:version/:format/:sub_type", keyBuilder.templateFileKey, fileController.getFile
 app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
 
+
+app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
+app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
+
+app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.copyFile
+app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
+
+
 app.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->
 		res.send filename
