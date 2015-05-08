@@ -14,7 +14,6 @@ module.exports =
 		fsPath = @_getPath(key)
 		logger.log fsPath:fsPath, "writing file locally"
 		writeStream = fs.createWriteStream(fsPath)
-		stream.pipe writeStream
 		writeStream.on "finish", ->
 			timer.done()
 			logger.log fsPath:fsPath, "finished writing file locally"
@@ -25,6 +24,7 @@ module.exports =
 		stream.on "error", (err)->
 			logger.log err:err, fsPath:fsPath, "problem writing file locally, with read stream"
 			callback err
+		stream.pipe writeStream
 
 	deleteFile: (fsPath, callback)->
 		logger.log fsPath:fsPath, "removing local temp file"
