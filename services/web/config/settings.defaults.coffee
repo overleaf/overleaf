@@ -362,5 +362,13 @@ module.exports =
 	# 	fieldName: 'LDAP User'
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
+	
+	#templateLinks: [{
+	#	name : "CV projects",
+	#	url : "/templates/cv"
+	#},{
+	#	name : "all projects",
+	#	url: "/templates/all"
+	#}]
 
 
