@@ -20,6 +20,7 @@ describe "StaticServerForbidSymlinks", ->
 			"logger-sharelatex": 
 				log:->
 				warn:->
+				error:->
 			"fs":@fs
 
 		@dummyStatic = (rootDir, options) ->
@@ -62,6 +63,70 @@ describe "StaticServerForbidSymlinks", ->
 	describe "with a symlink file", ->
 		beforeEach ->
 			@fs.realpath = sinon.stub().callsArgWith(1, null, "/etc/#{@req.params.project_id}/output.pdf")
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+
+	describe "with a relative file", ->
+		beforeEach ->
+			@req.url = "/12345/../67890/output.pdf"
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+
+	describe "with a unnormalized file containing .", ->
+		beforeEach ->
+			@req.url = "/12345/foo/./output.pdf"
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+
+	describe "with a file containing an empty path", ->
+		beforeEach ->
+			@req.url = "/12345/foo//output.pdf"
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+	describe "with a non-project file", ->
+		beforeEach ->
+			@req.url = "/.foo/output.pdf"
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+	describe "with a file outside the compiledir", ->
+		beforeEach ->
+			@req.url = "/../bar/output.pdf"
+
+		it "should send a 404", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 404
+				done()
+			@StaticServerForbidSymlinks @req, @res
+
+
+	describe "with a file with no leading /", ->
+		beforeEach ->
+			@req.url = "./../bar/output.pdf"
 
 		it "should send a 404", (done)->
 			@res.sendStatus = (resCode)->

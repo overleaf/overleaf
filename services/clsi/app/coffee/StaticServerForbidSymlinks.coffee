@@ -9,7 +9,24 @@ module.exports = ForbidSymlinks = (staticFn, root, options) ->
 	basePath = Path.resolve(root)
 	return (req, res, next) ->
 		path = url.parse(req.url)?.pathname
-		requestedFsPath = Path.normalize("#{basePath}/#{path}")
+		# check that the path is of the form /project_id/path/to/file
+		if result = path.match(/^\/?(\w+)\/(.*)/)
+			project_id = result[1]
+			file = result[2]
+		else
+			logger.warn path: path, "unrecognized file request"
+			return res.sendStatus(404)
+		# check that the file does not use a relative path
+		for dir in file.split('/')
+			if dir == '..'
+				logger.warn path: path, "attempt to use a relative path"
+				return res.sendStatus(404)
+		# check that the requested path is normalized
+		requestedFsPath = "#{basePath}/#{project_id}/#{file}"
+		if requestedFsPath != Path.normalize(requestedFsPath)
+				logger.error path: requestedFsPath, "requestedFsPath is not normalized"
+				return res.sendStatus(404)
+		# check that the requested path is not a symlink
 		fs.realpath requestedFsPath, (err, realFsPath)->
 			if err?
 				logger.warn err:err, requestedFsPath:requestedFsPath, realFsPath:realFsPath, path: req.params[0], project_id: req.params.project_id, "error checking file access"
