@@ -28,7 +28,7 @@ module.exports = CompileController =
 								status = "success"
 
 					timer.done()
-					res.send (code or 200), {
+					res.status(code or 200).send {
 						compile:
 							status: status
 							error:  error?.message or error
@@ -41,7 +41,7 @@ module.exports = CompileController =
 	clearCache: (req, res, next = (error) ->) ->
 		ProjectPersistenceManager.clearProject req.params.project_id, (error) ->
 			return next(error) if error?
-			res.send 204 # No content
+			res.sendStatus(204) # No content
 
 	syncFromCode: (req, res, next = (error) ->) ->
 		file   = req.query.file
