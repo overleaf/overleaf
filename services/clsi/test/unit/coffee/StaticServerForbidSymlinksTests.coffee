@@ -134,6 +134,17 @@ describe "StaticServerForbidSymlinks", ->
 				done()
 			@StaticServerForbidSymlinks @req, @res
 
+	describe "with a github style path", ->
+		beforeEach ->
+			@req.url = "/henryoswald-latex_example/output/output.log"
+			@fs.realpath = sinon.stub().callsArgWith(1, null, "#{@settings.path.compilesDir}/henryoswald-latex_example/output/output.log")
+
+		it "should call next", (done)->
+			@res.sendStatus = (resCode)->
+				resCode.should.equal 200
+				done()
+			@StaticServerForbidSymlinks @req, @res, done
+
 	describe "with an error from fs.realpath", ->
 
 		beforeEach ->

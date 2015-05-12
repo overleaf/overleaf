@@ -9,8 +9,8 @@ module.exports = ForbidSymlinks = (staticFn, root, options) ->
 	basePath = Path.resolve(root)
 	return (req, res, next) ->
 		path = url.parse(req.url)?.pathname
-		# check that the path is of the form /project_id/path/to/file
-		if result = path.match(/^\/?(\w+)\/(.*)/)
+		# check that the path is of the form /project_id_or_name/path/to/file.log
+		if result = path.match(/^\/?([a-zA-Z0-9_-]+)\/(.*)/)
 			project_id = result[1]
 			file = result[2]
 		else
