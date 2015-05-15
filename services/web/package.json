@@ -12,7 +12,7 @@
   "dependencies": {
     "archiver": "0.9.0",
     "async": "0.6.2",
-    "bcrypt": "0.7.5",
+    "bcrypt": "0.8.3",
     "bufferedstream": "1.6.0",
     "connect-redis": "1.4.5",
     "dateformat": "1.0.4-1.2.3",
