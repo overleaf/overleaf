@@ -75,8 +75,9 @@ module.exports = UrlCache =
 		readStream = fs.createReadStream(from)
 		writeStream.on "error", callbackOnce
 		readStream.on "error", callbackOnce
-		writeStream.on "close", () -> callbackOnce()
-		readStream.pipe(writeStream)
+		writeStream.on "close", callbackOnce
+		writeStream.on "open", () ->
+			readStream.pipe(writeStream)
 
 	_clearUrlFromCache: (project_id, url, callback = (error) ->) ->
 		UrlCache._clearUrlDetails project_id, url, (error) ->
