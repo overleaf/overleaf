@@ -82,6 +82,10 @@ public class WLGitBridgeIntegrationTest {
                 put("pushFailsOnUnexpectedError", new HashMap<String, SnapshotAPIState>() {{
                     put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushFailsOnUnexpectedError/state/state.json")).build());
                 }});
+                put("pushSucceedsAfterRemovingInvalidFiles", new HashMap<String, SnapshotAPIState>() {{
+                    put("invalidState", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSucceedsAfterRemovingInvalidFiles/invalidState/state.json")).build());
+                    put("validState", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSucceedsAfterRemovingInvalidFiles/validState/state.json")).build());
+                }});
             }};
 
     @Rule
@@ -495,6 +499,53 @@ public class WLGitBridgeIntegrationTest {
         assertEquals(1, pushExitCode);
         List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
         assertEquals(EXPECTED_OUT_PUSH_UNEXPECTED_ERROR, actual);
+    }
+
+    private static final List<String> EXPECTED_OUT_PUSH_INVALID_EXE_FILE =
+        Arrays.asList(
+                "remote: error: invalid files",
+                "remote: hint: You have 1 invalid files in your Overleaf project:",
+                "remote: hint: file1.exe (invalid file extension)",
+                "To http://127.0.0.1:33872/testproj.git",
+                "! [remote rejected] master -> master (invalid files)",
+                "error: failed to push some refs to 'http://127.0.0.1:33872/testproj.git'"
+        );
+
+    @Test
+    public void pushSucceedsAfterRemovingInvalidFiles() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3872, getResource("/pushSucceedsAfterRemovingInvalidFiles").toFile());
+        server.start();
+        server.setState(states.get("pushSucceedsAfterRemovingInvalidFiles").get("invalidState"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33872, 3872)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:33872/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+
+        // try to push invalid file; it should fail
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/invalidState/testproj"), testprojDir.toPath()));
+        assertEquals(0, runtime.exec("touch file1.exe", null, testprojDir).waitFor());
+        assertEquals(0, runtime.exec("git add -A", null, testprojDir).waitFor());
+        assertEquals(0, runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor());
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        assertEquals(1, pushExitCode);
+        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 0, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_INVALID_EXE_FILE, actual);
+
+        // remove invalid file and push again; it should succeed this time
+        assertEquals(0, runtime.exec("git rm file1.exe", null, testprojDir).waitFor());
+        assertEquals(0, runtime.exec("git commit -m remove_invalid_file", null, testprojDir).waitFor());
+        server.setState(states.get("pushSucceedsAfterRemovingInvalidFiles").get("validState"));
+        gitPush = runtime.exec("git push", null, testprojDir);
+        pushExitCode = gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(0, pushExitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/validState/testproj"), testprojDir.toPath()));
     }
 
     private String makeConfigFile(int port, int apiPort) throws IOException {
