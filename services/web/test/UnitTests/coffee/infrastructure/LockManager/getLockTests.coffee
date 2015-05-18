@@ -36,9 +36,11 @@ describe 'LockManager - getting the lock', ->
 	describe "when the lock is initially set", ->
 		beforeEach (done) ->
 			startTime = Date.now()
+			tries = 0
 			@LockManager.LOCK_TEST_INTERVAL = 5
 			@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) ->
-				if Date.now() - startTime < 20
+				if (Date.now() - startTime < 20) or (tries < 2)
+					tries = tries + 1
 					callback null, false
 				else
 					callback null, true

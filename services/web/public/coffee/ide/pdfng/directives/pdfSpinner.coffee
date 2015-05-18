@@ -17,9 +17,9 @@ define [
 				element.append(spinner)
 
 			stop: (element) ->
-				element.find('.fa-spin').removeClass('fa-spin')
+				element.find('.fa-spinner').removeClass('fa-spin')
 
 			remove: (element) ->
-				element.find('.fa-spin').remove()
+				element.find('.fa-spinner').remove()
 
 		]

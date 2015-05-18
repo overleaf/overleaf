@@ -22,7 +22,8 @@ define [
 				@closeContextMenu()
 
 			@editor.on "changeSession", (e) =>
-				@runSpellCheckSoon(200)
+				if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
+					@runSpellCheckSoon(200)
 
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
