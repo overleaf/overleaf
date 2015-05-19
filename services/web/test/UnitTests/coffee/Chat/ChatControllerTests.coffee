@@ -33,7 +33,8 @@ describe "ChatController", ->
 					_id:@user_id
 			body:
 				content:@messageContent
-		@res = {}
+		@res =
+			set:sinon.stub()
 
 	describe "sendMessage", ->
 
@@ -69,6 +70,7 @@ describe "ChatController", ->
 			messages = [{content:"hello"}]
 			@ChatHandler.getMessages.callsArgWith(2, null, messages)
 			@res.send = (sentMessages)=>
+				@res.set.calledWith('Content-Type', 'application/json').should.equal true
 				sentMessages.should.deep.equal messages
 				done()
 			@ChatController.getMessages @req, @res

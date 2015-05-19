@@ -25,4 +25,5 @@ module.exports =
 				logger.err err:err, query:query, "problem getting messages from chat api"
 				return res.send 500
 			logger.log length:messages?.length, "sending messages to client"
+			res.set 'Content-Type', 'application/json'
 			res.send messages
