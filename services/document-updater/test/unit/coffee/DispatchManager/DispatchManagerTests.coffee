@@ -63,11 +63,13 @@ describe "DispatchManager", ->
 				
 			
 				@worker.run()
-				
-				setTimeout () =>
-					@worker._waitForUpdateThenDispatchWorker.callCount.should.equal 3
-					done()
-				, 100
-					
-			
-	
+
+				checkStatus = () =>
+					if not @settings.shuttingDown # retry until shutdown
+						setTimeout checkStatus, 100
+						return
+					else
+						@worker._waitForUpdateThenDispatchWorker.callCount.should.equal 3
+						done()
+
+				checkStatus()
