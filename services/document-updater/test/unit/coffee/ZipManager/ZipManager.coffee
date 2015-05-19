@@ -4,6 +4,7 @@ should = chai.should()
 zipModulePath = "../../../../app/js/ZipManager"
 redisModulePath = "../../../../app/js/RedisManager"
 SandboxedModule = require('sandboxed-module')
+zlib = require('zlib')
 
 MIN_SIZE = 9999
 
@@ -57,6 +58,16 @@ describe "ZipManager with RedisManager", ->
 				@docLines.should.eql lines
 				done()
 
+	describe "calling node zlib.gzip directly", ->
+		it "should compress the string 'hello world' within the timeout", (done) ->
+			zlib.gzip "hello world", done
+
+		it "should compress a 10k string within the timeout", (done) ->
+			text = ""
+			while text.length < 10*1024
+				text = text + "helloworld"
+			zlib.gzip text, done
+
 	describe "for a large document (with compression enabled)", ->
 		rclient = null
 		beforeEach (done) ->
@@ -90,6 +101,7 @@ describe "ZipManager with RedisManager", ->
 			@docLines = []
 			while @docLines.join('').length <= MIN_SIZE
 				@docLines.push "this is a long line in a long document"
+			console.log "length of doclines", @docLines.join('').length
 			@callback = sinon.stub()
 			@RedisManager.setDocument @doc_id, @docLines, @version, () =>
 				@callback()
