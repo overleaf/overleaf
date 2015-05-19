@@ -108,13 +108,10 @@ describe "RecurlyWrapper", ->
 		Settings.defaultPlanCode =
 			collaborators: 0
 			versioning: false
-		tk.freeze(Date.now())
-	
-	afterEach -> 
-		tk.reset()
-	
+
 	describe "sign", ->
 		before (done) ->
+			tk.freeze Date.now() # freeze the time for these tests
 			RecurlyWrapper.sign({
 				subscription :
 					plan_code : "gold"
@@ -123,6 +120,9 @@ describe "RecurlyWrapper", ->
 				@signature = signature
 				done()
 			)
+
+		after ->
+			tk.reset()
 
 		it "should be signed correctly", ->
 			signed = @signature.split("|")[0]
