@@ -6,7 +6,10 @@ assert = require("chai").assert
 
 describe "ASpell", ->
 	beforeEach ->
-		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:{}
+		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:
+			"logger-sharelatex":
+				log:->
+				err:->
 
 	describe "a correctly spelled word", ->
 		beforeEach (done) ->
