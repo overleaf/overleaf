@@ -63,4 +63,4 @@ describe "ASpell", ->
 		# or the CI server.
 		it "should return in reasonable time", () ->
 			delta = Date.now()-@start
-			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 100)
+			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 1000)
