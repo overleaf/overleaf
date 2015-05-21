@@ -8,11 +8,11 @@ module.exports = ProjectPersistenceManager =
 	EXPIRY_TIMEOUT: oneDay = 24 * 60 * 60 * 1000 #ms
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
-		db.Project.findOrCreate(project_id: project_id)
-			.success(
-				(project) ->
+		db.Project.findOrCreate(where: {project_id: project_id})
+			.spread(
+				(project, created) ->
 					project.updateAttributes(lastAccessed: new Date())
-						.success(() -> callback())
+						.then(() -> callback())
 						.error callback
 			)
 			.error callback
@@ -41,14 +41,12 @@ module.exports = ProjectPersistenceManager =
 					callback()
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
-		db.Project.destroy(project_id: project_id)
-			.success(() -> callback())
+		db.Project.destroy(where: {project_id: project_id})
+			.then(() -> callback())
 			.error callback
 
 	_findExpiredProjectIds: (callback = (error, project_ids) ->) ->
 		db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
-			.success(
-				(projects) ->
-					callback null, projects.map((project) -> project.project_id)
-			)
-			.error callback
+			.then((projects) ->
+				callback null, projects.map((project) -> project.project_id)
+			).error callback
