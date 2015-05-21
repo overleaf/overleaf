@@ -84,7 +84,7 @@ if Settings.smokeTest
 
 app.get "/health_check", (req, res)->
 	res.contentType(resCacher?.setContentType)
-	res.send resCacher?.code, resCacher?.body
+	res.status(resCacher?.code).send(resCacher?.body)
 
 profiler = require "v8-profiler"
 app.get "/profile", (req, res) ->
@@ -101,7 +101,7 @@ app.get "/heapdump", (req, res)->
 
 app.use (error, req, res, next) ->
 	logger.error err: error, "server error"
-	res.send error?.statusCode || 500
+	res.sendStatus(error?.statusCode || 500)
 
 app.listen port = (Settings.internal?.clsi?.port or 3013), host = (Settings.internal?.clsi?.host or "localhost"), (error) ->
 	logger.info "CLSI starting up, listening on #{host}:#{port}"

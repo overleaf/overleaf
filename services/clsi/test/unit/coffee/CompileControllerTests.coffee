@@ -44,6 +44,7 @@ describe "CompileController", ->
 			}]
 			@RequestParser.parse = sinon.stub().callsArgWith(1, null, @request)
 			@ProjectPersistenceManager.markProjectAsJustAccessed = sinon.stub().callsArg(1)
+			@res.status = sinon.stub().returnsThis()
 			@res.send = sinon.stub()
 
 		describe "successfully", ->
@@ -67,8 +68,9 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should return the JSON response", ->
+				@res.status.calledWith(200).should.equal true
 				@res.send
-					.calledWith(200,
+					.calledWith(
 						compile:
 							status: "success"
 							error: null
@@ -85,8 +87,9 @@ describe "CompileController", ->
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the error", ->
+				@res.status.calledWith(500).should.equal true
 				@res.send
-					.calledWith(500,
+					.calledWith(
 						compile:
 							status: "error"
 							error:  @message
@@ -102,8 +105,9 @@ describe "CompileController", ->
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the timeout status", ->
+				@res.status.calledWith(200).should.equal true
 				@res.send
-					.calledWith(200,
+					.calledWith(
 						compile:
 							status: "timedout"
 							error: @message
@@ -117,8 +121,9 @@ describe "CompileController", ->
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the failure status", ->
+				@res.status.calledWith(200).should.equal true
 				@res.send
-					.calledWith(200,
+					.calledWith(
 						compile:
 							error: null
 							status: "failure"
