@@ -20,8 +20,9 @@ module.exports = UrlFetcher =
 
 		logger.log url:url, filePath: filePath, "started downloading url to cache"
 		urlStream = request.get({url: url, timeout: oneMinute})
-		urlStream.pause()
+		urlStream.pause() # stop data flowing until we are ready
 
+		# attach handlers before setting up pipes
 		urlStream.on "error", (error) ->
 			logger.error err: error, url:url, filePath: filePath, "error downloading url"
 			callbackOnce(error or new Error("Something went wrong downloading the URL #{url}"))
@@ -33,6 +34,7 @@ module.exports = UrlFetcher =
 			if res.statusCode >= 200 and res.statusCode < 300
 				fileStream = fs.createWriteStream(filePath)
 
+				# attach handlers before setting up pipes
 				fileStream.on 'error', (error) ->
 					logger.error err: error, url:url, filePath: filePath, "error writing file into cache"
 					fs.unlink filePath, (err) ->
@@ -48,7 +50,7 @@ module.exports = UrlFetcher =
 					logger.log url:url, filePath: filePath, "piping into filestream"
 
 				urlStream.pipe(fileStream)
-				urlStream.resume()
+				urlStream.resume() # now we are ready to handle the data
 			else
 				logger.error statusCode: res.statusCode, url:url, filePath: filePath, "unexpected status code downloading url to cache"
 				# https://nodejs.org/api/http.html#http_class_http_clientrequest
