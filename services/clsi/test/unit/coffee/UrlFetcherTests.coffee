@@ -22,25 +22,29 @@ describe "UrlFetcher", ->
 			@path = "/path/to/file/on/disk"
 			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
 			@urlStream.pipe = sinon.stub()
-			@fs.createWriteStream = sinon.stub().returns(@fileStream = { on: () -> })
+			@urlStream.pause = sinon.stub()
+			@urlStream.resume = sinon.stub()
+			@fs.createWriteStream = sinon.stub().returns(@fileStream = new EventEmitter)
 			@fs.unlink = (file, callback) -> callback()
 			@UrlFetcher.pipeUrlToFile(@url, @path, @callback)
 
 		it "should request the URL", ->
 			@request.get
-				.calledWith(@url)
+				.calledWith(sinon.match {"url": @url})
 				.should.equal true
 
-		it "should open the file for writing", ->
-			@fs.createWriteStream
-				.calledWith(@path)
-				.should.equal true
 
 		describe "successfully", ->
 			beforeEach ->
 				@res = statusCode: 200
 				@urlStream.emit "response", @res
 				@urlStream.emit "end"
+				@fileStream.emit "finish"
+
+			it "should open the file for writing", ->
+				@fs.createWriteStream
+					.calledWith(@path)
+					.should.equal true
 
 			it "should pipe the URL to the file", ->
 				@urlStream.pipe
