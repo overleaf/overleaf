@@ -263,10 +263,14 @@ module.exports = PackManager =
 		docs = docs.slice(0,-KEEP_OPS)
 
 		docs.forEach (d,i) ->
+			# skip existing packs
 			if d.pack?
-				# util.log "skipping existing pack of #{d.pack.length}"
-				top = null if top? # flush the current pack
-				return # and try next
+				top = null
+				return
+			# skip temporary ops (we could pack these into temporary packs in future)
+			if d.expiresAt?
+				top = null
+				return
 			sz = BSON.calculateObjectSize(d)
 			if top?	&& top.pack.length < MAX_COUNT && top.sz + sz < MAX_SIZE
 				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
@@ -308,6 +312,7 @@ module.exports = PackManager =
 					prev = v
 					v = p.v
 					error('bad version', v, 'in', p) if v <= prev
+					#error('expired op', p, 'in pack') if p.expiresAt?
 			else
 				prev = v
 				v = d.v
