@@ -45,7 +45,10 @@ getDocHistory = (doc_id, callback) ->
 		util.log "checking history for #{doc_id}"
 		PackManager.checkHistory docs, (err) ->
 			return callback(err) if err?
-			callback err, docs
+			callback(err, docs)
+			#PackManager.deleteExpiredPackOps docs, (err) ->
+			#	return callback(err) if err?
+			#	callback err, docs
 
 safeInsert = (packObj, callback) ->
 	if shutdownRequested

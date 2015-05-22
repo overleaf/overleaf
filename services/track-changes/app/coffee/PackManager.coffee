@@ -339,3 +339,34 @@ module.exports = PackManager =
 				), result)
 			else
 				callback(err, result)
+
+	deleteExpiredPackOps: (docs, callback) ->
+		now = Date.now()
+		toRemove = []
+		toUpdate = []
+		docs.forEach (d,i) ->
+			if d.pack?
+				newPack = d.pack.filter (op) ->
+					if op.expiresAt? then op.expiresAt > now else true
+				if newPack.length == 0
+					toRemove.push d
+				else if newPack.length < d.pack.length
+					# adjust the pack properties
+					d.pack = newPack
+					first = d.pack[0]
+					last = d.pack[d.pack.length - 1]
+					d.v_end = last.v
+					d.meta.start_ts = first.meta.start_ts
+					d.meta.end_ts = last.meta.end_ts
+					toUpdate.push d
+		if toRemove.length or toUpdate.length
+			bulk = db.docHistory.initializeOrderedBulkOp()
+			toRemove.forEach (pack) ->
+				console.log "would remove", pack
+				#bulk.find({_id:pack._id}).removeOne()
+			toUpdate.forEach (pack) ->
+				console.log "would update", pack
+				#bulk.find({_id:pack._id}).updateOne(pack);
+			bulk.execute callback
+		else
+			callback()
