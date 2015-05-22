@@ -2,6 +2,11 @@ SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
 
+settings = require("settings-sharelatex")
+PasswordResetTokenHandler = require("../PasswordReset/PasswordResetTokenHandler")
+EmailHandler = require("../Email/EmailHandler")
+SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
+
 module.exports =
 
 	addUserToGroup: (req, res)->
@@ -32,3 +37,38 @@ module.exports =
 					title: 'group_admin'
 					users: users
 					subscription: subscription
+
+	renderGroupInvitePage: (req, res)->
+		subscription_id = req.params.subscription_id
+		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+
+		res.render "subscriptions/group/invite",
+			title: "Group Invitation"
+			subscription_id:subscription_id
+			licenceName:licence.name
+
+	beginJoinGroup: (req, res)->
+		subscription_id = req.params.subscription_id
+		user_id = req.session.user._id
+		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		if !licence?
+			res.send 500
+		PasswordResetTokenHandler.getNewToken subscription_id, (err, token)->
+			opts =
+				to : req.session.user.email
+				group_name: licence.name
+				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete_join?token=#{token}"
+			EmailHandler.sendEmail "completeJoinGroupAccount", opts, ->
+				res.send 200
+
+	completeJoin: (req, res)->
+		subscription_id = req.params.subscription_id
+		PasswordResetTokenHandler.getUserIdFromTokenAndExpire req.query.token, (err, token_subscription_id)->
+			console.log token_subscription_id
+			if subscription_id != token_subscription_id
+				return res.send 403
+			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
+				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, req.user.email, (err, user)->
+					res.send "joined"
+
+

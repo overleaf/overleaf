@@ -15,6 +15,7 @@ define [
 	"main/new-subscription"
 	"main/annual-upgrade"
 	"main/register-users"
+	"main/subscription/group-subscription-invite-controller"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
