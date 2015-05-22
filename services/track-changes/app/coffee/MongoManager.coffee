@@ -29,12 +29,19 @@ module.exports = MongoManager =
 			else
 				callback null, null
 
-	insertCompressedUpdates: (project_id, doc_id, updates, permanent, callback = (error) ->) ->
+	insertCompressedUpdates: (project_id, doc_id, updates, temporary, callback = (error) ->) ->
 		jobs = []
 		for update in updates
 			do (update) ->
-				jobs.push (callback) -> MongoManager.insertCompressedUpdate project_id, doc_id, update, permanent, callback
-		async.series jobs, callback
+				jobs.push (callback) -> MongoManager.insertCompressedUpdate project_id, doc_id, update, temporary, callback
+		async.series jobs, (err, results) ->
+			if not temporary
+				# keep track of updates to be packed
+				db.docHistoryStats.update {doc_id:ObjectId(doc_id)}, {$inc:{updates:updates.length}}, {upsert:true}, () ->
+					callback(err,results)
+			else
+				callback(err,results)
+
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
 		update = {
@@ -113,3 +120,6 @@ module.exports = MongoManager =
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }, { background: true }
 		# TTL index for auto deleting week old temporary ops
 		db.docHistory.ensureIndex { expiresAt: 1 }, { expireAfterSeconds: 0, background: true }
+		# For finding documents which need packing
+		db.docHistoryStats.ensureIndex { doc_id: 1 }, { background: true }
+		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }

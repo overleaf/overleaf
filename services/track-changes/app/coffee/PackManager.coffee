@@ -1,5 +1,7 @@
 async = require "async"
 _ = require "underscore"
+{db, ObjectId} = require "./mongojs"
+BSON=db.bson.BSON
 
 module.exports = PackManager =
 	# The following functions implement methods like a mongo find, but
@@ -249,3 +251,122 @@ module.exports = PackManager =
 			return true
 		newResults.slice(0, limit) if limit?
 		return newResults
+
+	convertDocsToPacks: (docs, callback) ->
+		MAX_SIZE = 1024*1024 # make these configurable parameters
+		MAX_COUNT = 1024
+		MIN_COUNT = 100
+		KEEP_OPS = 100
+		packs = []
+		top = null
+		# keep the last KEEP_OPS as individual ops
+		docs = docs.slice(0,-KEEP_OPS)
+
+		docs.forEach (d,i) ->
+			# skip existing packs
+			if d.pack?
+				top = null
+				return
+			# skip temporary ops (we could pack these into temporary packs in future)
+			if d.expiresAt?
+				top = null
+				return
+			sz = BSON.calculateObjectSize(d)
+			if top?	&& top.pack.length < MAX_COUNT && top.sz + sz < MAX_SIZE
+				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
+				top.sz += sz
+				top.v_end = d.v
+				top.meta.end_ts = d.meta.end_ts
+				return
+			else if sz < MAX_SIZE
+				# create a new pack
+				top = _.clone(d)
+				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
+				top.meta = { start_ts: d.meta.start_ts, end_ts: d.meta.end_ts }
+				top.sz = sz
+				delete top.op
+				delete top._id
+				packs.push top
+			else
+				# keep the op
+				# util.log "keeping large op unchanged (#{sz} bytes)"
+
+		# only store packs with a sufficient number of ops, discard others
+		packs = packs.filter (packObj) ->
+			packObj.pack.length > MIN_COUNT
+		callback(null, packs)
+
+	checkHistory: (docs, callback) ->
+		errors = []
+		prev = null
+		error = (args...) ->
+			errors.push args
+		docs.forEach (d,i) ->
+			if d.pack?
+				n = d.pack.length
+				last = d.pack[n-1]
+				error('bad pack v_end', d) if d.v_end != last.v
+				error('bad pack start_ts', d) if d.meta.start_ts != d.pack[0].meta.start_ts
+				error('bad pack end_ts', d) if d.meta.end_ts != last.meta.end_ts
+				d.pack.forEach (p, i) ->
+					prev = v
+					v = p.v
+					error('bad version', v, 'in', p) if v <= prev
+					#error('expired op', p, 'in pack') if p.expiresAt?
+			else
+				prev = v
+				v = d.v
+				error('bad version', v, 'in', d) if v <= prev
+		if errors.length
+			callback(errors)
+		else
+			callback()
+
+	insertPack: (packObj, callback) ->
+		bulk = db.docHistory.initializeOrderedBulkOp()
+		expect_nInserted = 1
+		expect_nRemoved = packObj.pack.length
+		bulk.insert packObj
+		packObj.pack.forEach (op) ->
+			bulk.find({_id:op._id}).removeOne()
+		bulk.execute (err, result) ->
+			if err?
+				callback(err, result)
+			else if result.nInserted != expect_nInserted or result.nRemoved != expect_nRemoved
+				callback(new Error(
+					msg: 'unexpected result'
+					expected: {expect_nInserted, expect_nRemoved}
+				), result)
+			else
+				callback(err, result)
+
+	deleteExpiredPackOps: (docs, callback) ->
+		now = Date.now()
+		toRemove = []
+		toUpdate = []
+		docs.forEach (d,i) ->
+			if d.pack?
+				newPack = d.pack.filter (op) ->
+					if op.expiresAt? then op.expiresAt > now else true
+				if newPack.length == 0
+					toRemove.push d
+				else if newPack.length < d.pack.length
+					# adjust the pack properties
+					d.pack = newPack
+					first = d.pack[0]
+					last = d.pack[d.pack.length - 1]
+					d.v_end = last.v
+					d.meta.start_ts = first.meta.start_ts
+					d.meta.end_ts = last.meta.end_ts
+					toUpdate.push d
+		if toRemove.length or toUpdate.length
+			bulk = db.docHistory.initializeOrderedBulkOp()
+			toRemove.forEach (pack) ->
+				console.log "would remove", pack
+				#bulk.find({_id:pack._id}).removeOne()
+			toUpdate.forEach (pack) ->
+				console.log "would update", pack
+				#bulk.find({_id:pack._id}).updateOne(pack);
+			bulk.execute callback
+		else
+			callback()
