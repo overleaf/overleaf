@@ -15,7 +15,16 @@ module.exports = HealthCheckController =
 			mocha = new Mocha(reporter: Reporter(res), timeout: 10000)
 			mocha.addFile("test/smoke/js/SmokeTests.js")
 			mocha.run () ->
+				# TODO: combine this with the smoke-test-sharelatex module
+				# we need to clean up all references to the smokeTest module
+				# so it can be garbage collected.  The only reference should
+				# be in its parent, when it is loaded by mocha.addFile.
 				path = require.resolve(__dirname + "/../../../../test/smoke/js/SmokeTests.js")
+				smokeTestModule = require.cache[path]
+				parent = smokeTestModule.parent
+				while (idx = parent.children.indexOf(smokeTestModule)) != -1
+					parent.children.splice(idx, 1)
+				# remove the smokeTest from the module cache
 				delete require.cache[path]
 
 	checkRedis: (req, res, next)->
