@@ -299,7 +299,7 @@ module.exports = (grunt) ->
 
 		settings = require "settings-sharelatex"
 		UserRegistrationHandler = require "./app/js/Features/User/UserRegistrationHandler"
-		PasswordResetTokenHandler = require "./app/js/Features/PasswordReset/PasswordResetTokenHandler"
+		OneTimeTokenHandler = require "./app/js/Features/Security/OneTimeTokenHandler"
 		UserRegistrationHandler.registerNewUser {
 			email: email
 			password: require("crypto").randomBytes(32).toString("hex")
@@ -310,7 +310,7 @@ module.exports = (grunt) ->
 			user.save (error) ->
 				throw error if error?
 				ONE_WEEK = 7 * 24 * 60 * 60 # seconds
-				PasswordResetTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
+				OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
 					return next(err) if err?
 					
 					console.log ""

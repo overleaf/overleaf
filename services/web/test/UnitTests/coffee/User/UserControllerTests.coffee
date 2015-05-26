@@ -42,7 +42,7 @@ describe "UserController", ->
 			changeEmailAddress:sinon.stub()
 		@EmailHandler =
 			sendEmail:sinon.stub().callsArgWith(2)
-		@PasswordResetTokenHandler =
+		@OneTimeTokenHandler =
 			getNewToken: sinon.stub()
 		@settings =
 			siteUrl: "sharelatex.example.com"
@@ -58,7 +58,7 @@ describe "UserController", ->
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainAllocator":@SubscriptionDomainAllocator
 			"../Email/EmailHandler": @EmailHandler
-			"../PasswordReset/PasswordResetTokenHandler": @PasswordResetTokenHandler
+			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
 			"crypto": @crypto = {}
 			"settings-sharelatex": @settings
 			"logger-sharelatex": {log:->}
@@ -177,7 +177,7 @@ describe "UserController", ->
 		beforeEach ->
 			@req.body.email = @user.email = "email@example.com"
 			@crypto.randomBytes = sinon.stub().returns({toString: () => @password = "mock-password"})
-			@PasswordResetTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
+			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
 		
 		describe "with a new user", ->
 			beforeEach ->
@@ -192,7 +192,7 @@ describe "UserController", ->
 					}).should.equal true
 					
 			it "should generate a new password reset token", ->
-				@PasswordResetTokenHandler.getNewToken
+				@OneTimeTokenHandler.getNewToken
 					.calledWith(@user_id, expiresIn: 7 * 24 * 60 * 60)
 					.should.equal true
 
@@ -218,7 +218,7 @@ describe "UserController", ->
 				@UserController.register @req, @res
 				
 			it "should still generate a new password token and email", ->
-				@PasswordResetTokenHandler.getNewToken.called.should.equal true
+				@OneTimeTokenHandler.getNewToken.called.should.equal true
 				@EmailHandler.sendEmail.called.should.equal true
 
 	describe "changePassword", ->

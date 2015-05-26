@@ -3,7 +3,7 @@ logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
 
 settings = require("settings-sharelatex")
-PasswordResetTokenHandler = require("../PasswordReset/PasswordResetTokenHandler")
+OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
 
@@ -53,7 +53,7 @@ module.exports =
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
 		if !licence?
 			res.send 500
-		PasswordResetTokenHandler.getNewToken subscription_id, (err, token)->
+		OneTimeTokenHandler.getNewToken subscription_id, (err, token)->
 			opts =
 				to : req.session.user.email
 				group_name: licence.name
@@ -63,9 +63,9 @@ module.exports =
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
-		PasswordResetTokenHandler.getUserIdFromTokenAndExpire req.query.token, (err, token_subscription_id)->
+		OneTimeTokenHandler.getValueFromTokenAndExpire req.query.token, (err, token_subscription_id)->
 			console.log token_subscription_id
-			if subscription_id != token_subscription_id
+			if err?  or subscription_id != token_subscription_id
 				return res.send 403
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
 				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, req.user.email, (err, user)->
