@@ -8,7 +8,9 @@
   },
   "dependencies": {
     "async": "~0.2.10",
+    "cli": "^0.6.6",
     "express": "3.3.5",
+    "line-reader": "^0.2.4",
     "mongojs": "^0.18.1",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
