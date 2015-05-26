@@ -37,7 +37,10 @@ module.exports = MongoManager =
 		async.series jobs, (err, results) ->
 			if not temporary
 				# keep track of updates to be packed
-				db.docHistoryStats.update {doc_id:ObjectId(doc_id)}, {$inc:{updates:updates.length}}, {upsert:true}, () ->
+				db.docHistoryStats.update {doc_id:ObjectId(doc_id)}, {
+					$inc:{update_count:updates.length},
+					$currentDate:{last_update:true}
+				}, {upsert:true}, () ->
 					callback(err,results)
 			else
 				callback(err,results)
