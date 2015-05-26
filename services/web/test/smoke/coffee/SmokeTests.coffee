@@ -2,7 +2,7 @@ child   = require "child_process"
 fs = require "fs"
 assert = require("assert")
 chai = require("chai")
-chai.should()
+chai.should() unless Object.prototype.should?
 expect = chai.expect
 Settings = require "settings-sharelatex"
 port = Settings.internal?.web?.port or Settings.port or 3000
