@@ -25,8 +25,9 @@ module.exports =
 		app.del '/subscription/group/user/:user_id', AuthenticationController.requireLogin(), SubscriptionGroupController.removeUserFromGroup
 
 		app.get '/user/subscription/:subscription_id/group/invited', AuthenticationController.requireLogin(), SubscriptionGroupController.renderGroupInvitePage
-		app.post '/user/subscription/:subscription_id/group/begin_join', AuthenticationController.requireLogin(), SubscriptionGroupController.beginJoinGroup
-		app.get '/user/subscription/:subscription_id/group/complete_join', AuthenticationController.requireLogin(), SubscriptionGroupController.completeJoin
+		app.post '/user/subscription/:subscription_id/group/begin-join', AuthenticationController.requireLogin(), SubscriptionGroupController.beginJoinGroup
+		app.get '/user/subscription/:subscription_id/group/complete-join', AuthenticationController.requireLogin(), SubscriptionGroupController.completeJoin
+		app.get '/user/subscription/:subscription_id/group/successful-join', AuthenticationController.requireLogin(), SubscriptionGroupController.renderSuccessfulJoinPage
 
 		#recurly callback
 		app.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback

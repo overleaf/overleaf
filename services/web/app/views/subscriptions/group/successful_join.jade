@@ -1,0 +1,19 @@
+extends ../../layout
+
+block scripts
+	script(type='text/javascript').
+		window.subscription_id = '#{subscription_id}'
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2(ng-cloak)
+					.card
+						.page-header
+							h1 You have joined #{licenceName}
+						span(ng-show="!requestSent")
+							div You have claimed your premium account provided by #{licenceName}.
+
+							a.btn.btn-success(href="/project") Done 
+

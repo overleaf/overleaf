@@ -57,7 +57,7 @@ module.exports =
 			opts =
 				to : req.session.user.email
 				group_name: licence.name
-				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete_join?token=#{token}"
+				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
 			EmailHandler.sendEmail "completeJoinGroupAccount", opts, ->
 				res.send 200
 
@@ -69,6 +69,12 @@ module.exports =
 				return res.send 403
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
 				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, req.user.email, (err, user)->
-					res.send "joined"
+					res.redir "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/successful-join"
 
+	renderSuccessfulJoinPage: (req, res)->
+		subscription_id = req.params.subscription_id
+		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		res.render "subscriptions/group/successful_join",
+			title: "Sucessfully joined group"
+			licenceName:licence.name	
 

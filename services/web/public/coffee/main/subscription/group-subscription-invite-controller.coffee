@@ -7,7 +7,7 @@ define [
 
 		$scope.joinGroup = ->
 			console.log "joingin group"
-			request = $http.post "/user/subscription/#{subscription_id}/group/begin_join", {_csrf:window.csrfToken}
+			request = $http.post "/user/subscription/#{subscription_id}/group/begin-join", {_csrf:window.csrfToken}
 			request.success (data, status)->
 				$scope.requestSent = true
 			request.error (data, status)->
