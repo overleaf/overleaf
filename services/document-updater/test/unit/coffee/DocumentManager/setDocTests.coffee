@@ -8,6 +8,7 @@ describe "DocumentManager - setDoc", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./TrackChangesManager": @TrackChangesManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
 			"./DiffCodec": @DiffCodec = {}
 			"./DocOpsManager":{}

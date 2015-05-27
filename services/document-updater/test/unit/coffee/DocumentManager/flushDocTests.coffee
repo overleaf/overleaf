@@ -8,6 +8,7 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./TrackChangesManager": @TrackChangesManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
 			"./DocOpsManager": @DocOpsManager = {}
 			"logger-sharelatex": @logger = {log: sinon.stub()}
@@ -23,6 +24,7 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 	describe "when the doc is in Redis", ->
 		beforeEach ->
 			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, @lines, @version)
+			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
 			@PersistenceManager.setDoc = sinon.stub().callsArgWith(4)
 			@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
