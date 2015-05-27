@@ -5,7 +5,7 @@ SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
 UserLocator = require("../User/UserLocator")
 LimitationsManager = require("./LimitationsManager")
-
+logger = require("logger-sharelatex")
 
 module.exports = 
 
@@ -36,6 +36,15 @@ module.exports =
 						cb()
 			async.series jobs, (err)->
 				callback(err, users)
+
+	isUserPartOfGroup: (user_id, subscription_id, callback=(err, partOfGroup)->)->
+		SubscriptionLocator.getSubscriptionByMemberIdAndId user_id, subscription_id, (err, subscription)->
+			if subscription?
+				partOfGroup = true
+			else
+				partOfGroup = false
+			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
+			callback(err, partOfGroup)
 
 
 buildUserViewModel = (user)->

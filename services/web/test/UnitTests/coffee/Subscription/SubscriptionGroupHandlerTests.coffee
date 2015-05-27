@@ -10,10 +10,12 @@ describe "Subscription Group Handler", ->
 	beforeEach ->
 		@adminUser_id = "12321"
 		@newEmail = "bob@smith.com"
-		@user = {_id:"3121321", email:@newEmail}
+		@user_id = "3121321"
+		@user = {_id:@user_id, email:@newEmail}
 
 		@SubscriptionLocator = 
 			getUsersSubscription: sinon.stub()
+			getSubscriptionByMemberIdAndId: sinon.stub()
 
 		@UserCreator = 
 			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
@@ -99,4 +101,21 @@ describe "Subscription Group Handler", ->
 				assert.deepEqual users[1], {_id:@subscription.member_ids[1]}
 				assert.deepEqual users[2], {_id:@subscription.member_ids[2]}
 				done()
+
+	describe "isUserPartOfGroup", ->
+		beforeEach ->
+			@subscription_id = "123ed13123"
+
+		it "should return true when user is part of subscription", (done)->
+			@SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(2, null, {_id:@subscription_id})
+			@Handler.isUserPartOfGroup @user_id, @subscription_id, (err, partOfGroup)->
+				partOfGroup.should.equal true
+				done()
+
+		it "should return false when no subscription is found", (done)->
+			@SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(2, null)
+			@Handler.isUserPartOfGroup @user_id, @subscription_id, (err, partOfGroup)->
+				partOfGroup.should.equal false
+				done()
+
 

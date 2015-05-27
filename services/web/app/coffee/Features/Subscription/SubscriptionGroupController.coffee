@@ -41,15 +41,16 @@ module.exports =
 
 	renderGroupInvitePage: (req, res)->
 		subscription_id = req.params.subscription_id
+		user_id = req.session.user._id
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
-		SubscriptionGroupHandler.getPopulatedListOfMembers licence.adminUser_id, (err, users)->
-			userInSubscription = _.find users, (user)-> user._id == req.session.user._id
-			if userInSubscription?
+		SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.subscription_id, (err, partOfGroup)->
+			if partOfGroup
 				return res.redirect("/user/subscription/custom_account")
-			res.render "subscriptions/group/invite",
-				title: "Group Invitation"
-				subscription_id:subscription_id
-				licenceName:licence.name
+			else
+				res.render "subscriptions/group/invite",
+					title: "Group Invitation"
+					subscription_id:subscription_id
+					licenceName:licence.name
 
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id

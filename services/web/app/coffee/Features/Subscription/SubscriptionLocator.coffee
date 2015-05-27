@@ -18,3 +18,6 @@ module.exports =
 
 	getSubscription: (subscription_id, callback)->
 		Subscription.findOne _id:subscription_id, callback
+
+	getSubscriptionByMemberIdAndId: (user_id, subscription_id, callback)->
+		Subscription.findOne member_ids: user_id, _id:subscription_id, callback
