@@ -11,10 +11,11 @@ block content
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card
 						.page-header.row.text-centered
-							h1 You have joined #{licenceName}
+							h1 #{translate("you_have_joined", {groupName:licenceName})}
 						div(ng-show="!requestSent").row.text-centered
+							.span-md-12 #{translate("claim_premium_account", {groupName:licenceName})}
+								div 
 							.span-md-12
-								div You have claimed your premium account provided by #{licenceName}.
-							.span-md-12
-								a.btn.btn-success(href="/project") Done 
+								a.btn.btn-success(href="/project") #{translate("Done")} 
+
 
