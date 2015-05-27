@@ -6,6 +6,7 @@ settings = require("settings-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
+_ = require("underscore")
 
 module.exports =
 
@@ -41,11 +42,14 @@ module.exports =
 	renderGroupInvitePage: (req, res)->
 		subscription_id = req.params.subscription_id
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
-
-		res.render "subscriptions/group/invite",
-			title: "Group Invitation"
-			subscription_id:subscription_id
-			licenceName:licence.name
+		SubscriptionGroupHandler.getPopulatedListOfMembers licence.adminUser_id, (err, users)->
+			userInSubscription = _.find users, (user)-> user._id == req.session.user._id
+			if userInSubscription?
+				return res.redirect("/user/subscription/custom_account")
+			res.render "subscriptions/group/invite",
+				title: "Group Invitation"
+				subscription_id:subscription_id
+				licenceName:licence.name
 
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id
@@ -69,7 +73,7 @@ module.exports =
 				return res.send 403
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
 				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, req.user.email, (err, user)->
-					res.redir "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/successful-join"
+					res.redirect "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/successful-join"
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id

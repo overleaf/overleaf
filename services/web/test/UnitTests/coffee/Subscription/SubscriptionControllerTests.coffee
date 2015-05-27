@@ -233,10 +233,6 @@ describe "SubscriptionController sanboxed", ->
 				it "should render the dashboard", ->
 					@res.renderedTemplate.should.equal "subscriptions/dashboard"
 				
-
-
-
-
 		describe "with a user with a paid subscription", ->
 			beforeEach (done) ->
 				@res.callback = done
