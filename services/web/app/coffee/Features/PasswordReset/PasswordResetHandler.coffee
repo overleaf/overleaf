@@ -1,7 +1,7 @@
 settings = require("settings-sharelatex")
 async = require("async")
 UserGetter = require("../User/UserGetter")
-OneTimeTokenHandler = require("./OneTimeTokenHandler")
+OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 logger = require("logger-sharelatex")
