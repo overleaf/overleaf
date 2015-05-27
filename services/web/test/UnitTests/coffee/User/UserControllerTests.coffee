@@ -36,7 +36,7 @@ describe "UserController", ->
 			setUserPassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
-		@SubscriptionDomainAllocator = 
+		@SubscriptionDomainHandler = 
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
@@ -56,7 +56,7 @@ describe "UserController", ->
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
-			"../Subscription/SubscriptionDomainAllocator":@SubscriptionDomainAllocator
+			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../Email/EmailHandler": @EmailHandler
 			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
 			"crypto": @crypto = {}

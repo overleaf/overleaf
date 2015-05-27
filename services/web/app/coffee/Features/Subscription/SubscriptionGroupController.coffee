@@ -5,7 +5,7 @@ SubscriptionLocator = require("./SubscriptionLocator")
 ErrorsController = require("../Errors/ErrorController")
 settings = require("settings-sharelatex")
 
-SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
+SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 _ = require("underscore")
 
 module.exports =
@@ -42,7 +42,7 @@ module.exports =
 	renderGroupInvitePage: (req, res)->
 		subscription_id = req.params.subscription_id
 		user_id = req.session.user._id
-		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
 		if !licence?
 			return ErrorsController.notFound(req, res)
 		SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.subscription_id, (err, partOfGroup)->
@@ -57,7 +57,7 @@ module.exports =
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id
 		user_id = req.session.user._id
-		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
 		if !licence?
 			return ErrorsController.notFound(req, res)
 		SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, req.session.user.email, (err)->
@@ -68,7 +68,7 @@ module.exports =
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
-		if !SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)?
+		if !SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)?
 			return ErrorsController.notFound(req, res)
 		SubscriptionGroupHandler.processGroupVerification req.session.user.email, subscription_id, req.query.token, (err)->
 			if err?
@@ -78,8 +78,8 @@ module.exports =
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id
-		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
-		if !SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)?
+		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
+		if !SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)?
 			return ErrorsController.notFound(req, res)
 		res.render "subscriptions/group/successful_join",
 			title: "Sucessfully joined group"

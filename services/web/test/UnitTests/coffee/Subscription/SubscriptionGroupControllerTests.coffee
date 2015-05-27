@@ -19,7 +19,7 @@ describe "Subscription Group Controller", ->
 
 		@SubscriptionLocator = getUsersSubscription: sinon.stub().callsArgWith(1, null, @subscription)
 
-		@SubscriptionDomainAllocator = 
+		@SubscriptionDomainHandler = 
 			findDomainLicenceBySubscriptionId:sinon.stub()
 
 		@OneTimeTokenHandler =
@@ -33,7 +33,7 @@ describe "Subscription Group Controller", ->
 			"./SubscriptionGroupHandler":@GroupHandler
 			"logger-sharelatex": log:->
 			"./SubscriptionLocator": @SubscriptionLocator
-			"./SubscriptionDomainAllocator":@SubscriptionDomainAllocator
+			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../Errors/ErrorController":@ErrorsController
 
 		@adminUserId = "123jlkj"
@@ -90,7 +90,7 @@ describe "Subscription Group Controller", ->
 	describe "renderGroupInvitePage", ->
 		describe "with a valid licence", ->
 			beforeEach ->
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns({subscription_id:@subscription_id, adminUser_id:@adminUserId})
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns({subscription_id:@subscription_id, adminUser_id:@adminUserId})
 
 			it "should render subscriptions/group/invite if not part of group", (done)->
 				@GroupHandler.isUserPartOfGroup.callsArgWith(2, null, false)
@@ -110,7 +110,7 @@ describe "Subscription Group Controller", ->
 
 		describe "without a valid licence", ->
 			beforeEach ->
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns(undefined)
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns(undefined)
 
 			it "should send a 500", (done)->
 				@Controller.renderGroupInvitePage @req, {}
@@ -123,7 +123,7 @@ describe "Subscription Group Controller", ->
 		describe "with a valid licence", ->
 			beforeEach ->
 				@licenceName = "get amazing licence"
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns({name:@licenceName})
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns({name:@licenceName})
 				@GroupHandler.sendVerificationEmail.callsArgWith(3)
 
 			it "should ask the SubscriptionGroupHandler to send the verification email", (done)->
@@ -136,7 +136,7 @@ describe "Subscription Group Controller", ->
 
 		describe "without a valid licence", ->
 			beforeEach ->
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns(undefined)
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns(undefined)
 
 			it "should send a 500", (done)->
 				@Controller.beginJoinGroup @req, {}
@@ -148,7 +148,7 @@ describe "Subscription Group Controller", ->
 		describe "with a valid licence", ->
 			beforeEach ->
 				@GroupHandler.processGroupVerification.callsArgWith(3)
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns({name:@licenceName})
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns({name:@licenceName})
 
 			it "should redirect to the success page upon processGroupVerification", (done)->
 				@req.query.token = @token
@@ -161,7 +161,7 @@ describe "Subscription Group Controller", ->
 
 		describe "without a valid licence", ->
 			beforeEach ->
-				@SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId.returns(undefined)
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns(undefined)
 
 			it "should send a 500", (done)->
 				@Controller.completeJoin @req, {}

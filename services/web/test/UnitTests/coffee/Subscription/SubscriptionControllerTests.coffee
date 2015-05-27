@@ -58,7 +58,7 @@ describe "SubscriptionController sanboxed", ->
 			gaExperiments:{}
 		@GeoIpLookup =
 			getCurrencyCode:sinon.stub()
-		@SubscriptionDomainAllocator = 
+		@SubscriptionDomainHandler = 
 			getDomainLicencePage:sinon.stub()	
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
@@ -70,7 +70,7 @@ describe "SubscriptionController sanboxed", ->
 			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex": log:->
 			"settings-sharelatex": @settings
-			"./SubscriptionDomainAllocator":@SubscriptionDomainAllocator
+			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 
 
 		@res = new MockResponse()
@@ -211,7 +211,7 @@ describe "SubscriptionController sanboxed", ->
 		describe "with a potential domain licence", ->
 			beforeEach () ->
 				@groupUrl = "/go/over-here"
-				@SubscriptionDomainAllocator.getDomainLicencePage.returns(@groupUrl)
+				@SubscriptionDomainHandler.getDomainLicencePage.returns(@groupUrl)
 
 			describe "without an existing subscription", ->
 				beforeEach (done)->

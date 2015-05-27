@@ -8,7 +8,7 @@ RecurlyWrapper = require './RecurlyWrapper'
 Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
-SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
+SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 
 module.exports = SubscriptionController =
 
@@ -84,7 +84,7 @@ module.exports = SubscriptionController =
 		SecurityManager.getCurrentUser req, (error, user) =>
 			return next(error) if error?
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
-				groupLicenceInviteUrl = SubscriptionDomainAllocator.getDomainLicencePage(user)
+				groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
 				if subscription?.customAccount
 					logger.log user: user, "redirecting to plans"
 					res.redirect "/user/subscription/custom_account"
