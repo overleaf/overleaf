@@ -58,7 +58,8 @@ describe "SubscriptionController sanboxed", ->
 			gaExperiments:{}
 		@GeoIpLookup =
 			getCurrencyCode:sinon.stub()
-
+		@SubscriptionDomainAllocator = 
+			getDomainLicencePage:sinon.stub()	
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../../managers/SecurityManager': @SecurityManager
 			'./SubscriptionHandler': @SubscriptionHandler
@@ -69,6 +70,7 @@ describe "SubscriptionController sanboxed", ->
 			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex": log:->
 			"settings-sharelatex": @settings
+			"./SubscriptionDomainAllocator":@SubscriptionDomainAllocator
 
 
 		@res = new MockResponse()
@@ -205,6 +207,35 @@ describe "SubscriptionController sanboxed", ->
 			it "should redirect to the plans page", ->
 				@res.redirected.should.equal true
 				@res.redirectedTo.should.equal "/user/subscription/plans"
+
+		describe "with a potential domain licence", ->
+			beforeEach () ->
+				@groupUrl = "/go/over-here"
+				@SubscriptionDomainAllocator.getDomainLicencePage.returns(@groupUrl)
+
+			describe "without an existing subscription", ->
+				beforeEach (done)->
+					@res.callback = done
+					@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+					@SubscriptionController.userSubscriptionPage @req, @res
+
+				it "should redirect to the group invite url", ->
+					@res.redirected.should.equal true
+					@res.redirectedTo.should.equal @groupUrl
+
+			describe "with an existing subscription", ->
+				beforeEach (done)->
+					@res.callback = done
+					@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+					@SubscriptionController.userSubscriptionPage @req, @res
+
+
+				it "should render the dashboard", ->
+					@res.renderedTemplate.should.equal "subscriptions/dashboard"
+				
+
+
+
 
 		describe "with a user with a paid subscription", ->
 			beforeEach (done) ->
