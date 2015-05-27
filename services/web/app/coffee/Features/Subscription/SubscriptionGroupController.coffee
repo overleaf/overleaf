@@ -2,9 +2,9 @@ SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
 
+ErrorsController = require("../Errors/ErrorController")
 settings = require("settings-sharelatex")
-OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
-EmailHandler = require("../Email/EmailHandler")
+
 SubscriptionDomainAllocator = require("./SubscriptionDomainAllocator")
 _ = require("underscore")
 
@@ -43,6 +43,8 @@ module.exports =
 		subscription_id = req.params.subscription_id
 		user_id = req.session.user._id
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		if !licence?
+			return ErrorsController.notFound(req, res)
 		SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.subscription_id, (err, partOfGroup)->
 			if partOfGroup
 				return res.redirect("/user/subscription/custom_account")
@@ -57,28 +59,28 @@ module.exports =
 		user_id = req.session.user._id
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
 		if !licence?
-			res.send 500
-		OneTimeTokenHandler.getNewToken subscription_id, (err, token)->
-			opts =
-				to : req.session.user.email
-				group_name: licence.name
-				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
-			EmailHandler.sendEmail "completeJoinGroupAccount", opts, ->
+			return ErrorsController.notFound(req, res)
+		SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, req.session.user.email, (err)->
+			if err?
+				res.send 500
+			else
 				res.send 200
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
-		OneTimeTokenHandler.getValueFromTokenAndExpire req.query.token, (err, token_subscription_id)->
-			console.log token_subscription_id
-			if err?  or subscription_id != token_subscription_id
-				return res.send 403
-			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, req.user.email, (err, user)->
-					res.redirect "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/successful-join"
+		if !SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)?
+			return ErrorsController.notFound(req, res)
+		SubscriptionGroupHandler.processGroupVerification req.session.user.email, subscription_id, req.query.token, (err)->
+			if err?
+				res.send 500
+			else
+				res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id
 		licence = SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)
+		if !SubscriptionDomainAllocator.findDomainLicenceBySubscriptionId(subscription_id)?
+			return ErrorsController.notFound(req, res)
 		res.render "subscriptions/group/successful_join",
 			title: "Sucessfully joined group"
 			licenceName:licence.name	

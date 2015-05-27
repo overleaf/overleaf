@@ -23,7 +23,7 @@ describe "PasswordResetHandler", ->
 			setUserPassword:sinon.stub()
 		@PasswordResetHandler = SandboxedModule.require modulePath, requires:
 			"../User/UserGetter": @UserGetter
-			"./OneTimeTokenHandler": @OneTimeTokenHandler
+			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
 			"../Email/EmailHandler":@EmailHandler
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"settings-sharelatex": @settings

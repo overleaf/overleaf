@@ -6,8 +6,11 @@ SubscriptionLocator = require("./SubscriptionLocator")
 UserLocator = require("../User/UserLocator")
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
+OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
+EmailHandler = require("../Email/EmailHandler")
+settings = require("settings-sharelatex")
 
-module.exports = 
+module.exports = SubscriptionGroupHandler =
 
 	addUserToGroup: (adminUser_id, newEmail, callback)->
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
@@ -45,6 +48,23 @@ module.exports =
 				partOfGroup = false
 			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
 			callback(err, partOfGroup)
+
+
+	sendVerificationEmail: (subscription_id, licenceName, email, callback)->
+		OneTimeTokenHandler.getNewToken subscription_id, (err, token)->
+			opts =
+				to : email
+				group_name: licenceName
+				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
+			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
+
+	processGroupVerification: (userEmail, subscription_id, token, callback)->
+		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
+			if err?  or subscription_id != token_subscription_id
+				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
+				return callback("token not found")
+			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
+				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, userEmail, callback
 
 
 buildUserViewModel = (user)->
