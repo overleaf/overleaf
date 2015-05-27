@@ -6,9 +6,10 @@ define [
 		$scope.requestSent = false
 
 		$scope.joinGroup = ->
-			console.log "joingin group"
+			$scope.requestSent = true
 			request = $http.post "/user/subscription/#{subscription_id}/group/begin-join", {_csrf:window.csrfToken}
 			request.success (data, status)->
-				$scope.requestSent = true
+				if status != 200 # assume request worked
+					$scope.requestSent = false
 			request.error (data, status)->
 				console.log "the request failed"

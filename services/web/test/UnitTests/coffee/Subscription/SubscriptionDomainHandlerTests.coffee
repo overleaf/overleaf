@@ -23,8 +23,6 @@ describe "SubscriptionDomainHandler", ->
 			"logger-sharelatex": log:->
 			"./SubscriptionGroupHandler": @SubscriptionGroupHandler
 
-
-
 	describe "_findDomainLicence", ->
 
 		it "should find the domain", (done)->

@@ -10,10 +10,11 @@ block content
 			.row
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card
-						.page-header
+						.page-header.row.text-centered
 							h1 You have joined #{licenceName}
-						span(ng-show="!requestSent")
-							div You have claimed your premium account provided by #{licenceName}.
-
-							a.btn.btn-success(href="/project") Done 
+						div(ng-show="!requestSent").row.text-centered
+							.span-md-12
+								div You have claimed your premium account provided by #{licenceName}.
+							.span-md-12
+								a.btn.btn-success(href="/project") Done 
 

@@ -11,15 +11,18 @@ block content
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card(ng-controller="GroupSubscriptionInviteController")
 						.page-header
-							h1 You are invited to Join #{licenceName}
-						span(ng-show="!requestSent")
-							div You can claim a free premium account provided by #{licenceName} by verifying your email
+							h1.text-centered You are invited to Join #{licenceName}
+						div(ng-show="!requestSent").row.text-centered
 
-							a.btn.btn-default(href="/project") Skip 
-							&nbsp;
-							a.btn.btn.btn-primary(ng-click="joinGroup()") Verify email and join Group
+							.col-md-12 You can claim a free premium account provided by #{licenceName} by verifying your email
+							.col-md-12 &nbsp;
+							.col-md-12
+								span.pull-right
+									a.btn.btn-default(href="/project") Skip 
+									&nbsp;
+									a.btn.btn.btn-primary(ng-click="joinGroup()") Verify email and join Group
 
-						span(ng-show="requestSent")
-							div Check your email to complete joinging the group
-
-							a.btn(href="/project") Continue to projects
+						span(ng-show="requestSent").row.text-centered
+							.col-md-8 Check your email to complete joinging the group
+							.col-md-4.pull-right
+								a.btn.btn.btn-primary(href="/project") Continue to projects
