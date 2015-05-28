@@ -23,7 +23,7 @@ module.exports =
 		app.get '/subscription/group',  AuthenticationController.requireLogin(), SubscriptionGroupController.renderSubscriptionGroupAdminPage
 		app.post '/subscription/group/user', AuthenticationController.requireLogin(),  SubscriptionGroupController.addUserToGroup
 		app.del '/subscription/group/user/:user_id', AuthenticationController.requireLogin(), SubscriptionGroupController.removeUserFromGroup
-
+		app.get '/subscription/group/export',  AuthenticationController.requireLogin(), SubscriptionGroupController.exportGroupCsv
 
 		#recurly callback
 		app.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback

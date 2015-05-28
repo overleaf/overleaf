@@ -32,3 +32,20 @@ module.exports =
 					title: 'group_admin'
 					users: users
 					subscription: subscription
+
+	exportGroupCsv: (req, res)->
+		user_id = req.session.user._id
+		logger.log user_id: user_id, "exporting group csv"
+		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
+			if !subscription.groupPlan
+				return res.redirect("/")
+			SubscriptionGroupHandler.getPopulatedListOfMembers user_id, (err, users)->
+				groupCsv = ""
+				for user in users
+					groupCsv += user.email + "\n"
+				res.header(
+					"Content-Disposition",
+					"attachment; filename=Group.csv"
+				)
+				res.contentType('text/csv')
+				res.send(groupCsv)
