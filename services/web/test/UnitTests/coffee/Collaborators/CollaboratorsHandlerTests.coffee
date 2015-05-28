@@ -31,19 +31,6 @@ describe "CollaboratorsHandler", ->
 		@project_id = "123l2j13lkj"
 		@user_id = "132kj1lk2j"
 
-	describe "changeUsersPrivilegeLevel", ->
-
-
-		it "should call removeUserFromProject then addUserToProject", (done)->
-			@CollaboratorHandler.removeUserFromProject = sinon.stub().callsArgWith(2)
-			@CollaboratorHandler.addUserToProject = sinon.stub().callsArgWith(3)
-			newPrivalageLevel = "readAndWrite"
-			@CollaboratorHandler.changeUsersPrivilegeLevel @project_id, @user_id, newPrivalageLevel, =>
-				@CollaboratorHandler.removeUserFromProject.calledWith(@project_id, @user_id).should.equal true
-				@CollaboratorHandler.addUserToProject.calledWith(@project_id, @user_id, newPrivalageLevel)
-				done()
-
-
 	describe "removeUserFromProject", ->
 
 		beforeEach ->
