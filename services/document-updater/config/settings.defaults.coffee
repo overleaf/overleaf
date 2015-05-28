@@ -13,7 +13,7 @@ module.exports =
 			user: "sharelatex"
 			pass: "password"
 		trackchanges:
-			url: "http://localhost:3014"
+			url: "http://localhost:3015"
 
 	redis:
 		web:
