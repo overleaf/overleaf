@@ -12,9 +12,9 @@ describe "PasswordResetHandler", ->
 
 		@settings = 
 			siteUrl: "www.sharelatex.com"
-		@PasswordResetTokenHandler =
+		@OneTimeTokenHandler =
 			getNewToken:sinon.stub()
-			getUserIdFromTokenAndExpire:sinon.stub()
+			getValueFromTokenAndExpire:sinon.stub()
 		@UserGetter =
 			getUser:sinon.stub()
 		@EmailHandler = 
@@ -23,7 +23,7 @@ describe "PasswordResetHandler", ->
 			setUserPassword:sinon.stub()
 		@PasswordResetHandler = SandboxedModule.require modulePath, requires:
 			"../User/UserGetter": @UserGetter
-			"./PasswordResetTokenHandler": @PasswordResetTokenHandler
+			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
 			"../Email/EmailHandler":@EmailHandler
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"settings-sharelatex": @settings
@@ -41,7 +41,7 @@ describe "PasswordResetHandler", ->
 
 		it "should check the user exists", (done)->
 			@UserGetter.getUser.callsArgWith(1)
-			@PasswordResetTokenHandler.getNewToken.callsArgWith(1)
+			@OneTimeTokenHandler.getNewToken.callsArgWith(1)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				exists.should.equal false
 				done()
@@ -50,7 +50,7 @@ describe "PasswordResetHandler", ->
 		it "should send the email with the token", (done)->
 
 			@UserGetter.getUser.callsArgWith(1, null, @user)
-			@PasswordResetTokenHandler.getNewToken.callsArgWith(1, null, @token)
+			@OneTimeTokenHandler.getNewToken.callsArgWith(1, null, @token)
 			@EmailHandler.sendEmail.callsArgWith(2)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				@EmailHandler.sendEmail.called.should.equal true
@@ -63,7 +63,7 @@ describe "PasswordResetHandler", ->
 		it "should return exists = false for a holdingAccount", (done) ->
 			@user.holdingAccount = true
 			@UserGetter.getUser.callsArgWith(1, null, @user)
-			@PasswordResetTokenHandler.getNewToken.callsArgWith(1)
+			@OneTimeTokenHandler.getNewToken.callsArgWith(1)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				exists.should.equal false
 				done()
@@ -71,14 +71,14 @@ describe "PasswordResetHandler", ->
 	describe "setNewUserPassword", ->
 
 		it "should return false if no user id can be found", (done)->
-			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire.callsArgWith(1)
+			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1)
 			@PasswordResetHandler.setNewUserPassword @token, @password, (err, found) =>
 				found.should.equal false
 				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()		
 
 		it "should set the user password", (done)->
-			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire.callsArgWith(1, null, @user_id)
+			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @user_id)
 			@AuthenticationManager.setUserPassword.callsArgWith(2)
 			@PasswordResetHandler.setNewUserPassword @token, @password, (err, found) =>
 				found.should.equal true

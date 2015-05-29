@@ -349,6 +349,10 @@ module.exports =
 	
 	reloadModuleViewsOnEachRequest: true
 
+	domainLicences: [
+		
+	]
+
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
 	# ----------
 

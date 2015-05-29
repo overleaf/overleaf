@@ -1,0 +1,25 @@
+extends ../../layout
+
+block scripts
+	script(type='text/javascript').
+		window.subscription_id = '#{subscription_id}'
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2(ng-cloak)
+					.card
+						.page-header.row.text-centered
+							h1 #{translate("you_have_joined", {groupName:licenceName})}
+						div(ng-show="!requestSent").row.text-centered
+							.row
+								.span-md-12 #{translate("claim_premium_account", {groupName:licenceName})}
+									div 
+							.row
+								.col-md-12 &nbsp;
+							.row
+								.span-md-12
+									a.btn.btn-success(href="/project") #{translate("Done")} 
+
+

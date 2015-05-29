@@ -1,7 +1,7 @@
 settings = require("settings-sharelatex")
 async = require("async")
 UserGetter = require("../User/UserGetter")
-PasswordResetTokenHandler = require("./PasswordResetTokenHandler")
+OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 logger = require("logger-sharelatex")
@@ -14,7 +14,7 @@ module.exports =
 			if !user? or user.holdingAccount
 				logger.err email:email, "user could not be found for password reset"
 				return callback(null, false)
-			PasswordResetTokenHandler.getNewToken user._id, (err, token)->
+			OneTimeTokenHandler.getNewToken user._id, (err, token)->
 				if err then return callback(err)
 				emailOptions =
 					to : email
@@ -24,7 +24,7 @@ module.exports =
 					callback null, true
 
 	setNewUserPassword: (token, password, callback = (error, found) ->)->
-		PasswordResetTokenHandler.getUserIdFromTokenAndExpire token, (err, user_id)->
+		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
 				return callback null, false

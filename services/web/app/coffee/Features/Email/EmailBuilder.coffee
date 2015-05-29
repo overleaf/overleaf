@@ -88,6 +88,28 @@ templates.projectSharedWithYou =
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
+
+templates.completeJoinGroupAccount = 
+	subject: _.template "Verify Email to join <%= group_name %> group"
+	layout: NotificationEmailLayout
+	type:"notification"
+	compiledTemplate: _.template """
+<p>Hi, please verify your email to join the <%= group_name %> and get your free premium account</p>
+<center>
+	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
+		<div style="padding-right:10px;padding-left:10px">
+			<a href="<%= completeJoinUrl %>" style="text-decoration:none" target="_blank">
+				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
+		  			Verify now
+				</span>
+			</a>
+		</div>
+	</div>
+</center>
+<p> Thank you</p>
+<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
+"""
+
 module.exports =
 	templates: templates
 

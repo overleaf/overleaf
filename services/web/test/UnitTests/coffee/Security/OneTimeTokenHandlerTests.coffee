@@ -3,13 +3,13 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
 sinon = require('sinon')
-modulePath = path.join __dirname, "../../../../app/js/Features/PasswordReset/PasswordResetTokenHandler"
+modulePath = path.join __dirname, "../../../../app/js/Features/Security/OneTimeTokenHandler"
 expect = require("chai").expect
 
-describe "PasswordResetTokenHandler", ->
+describe "OneTimeTokenHandler", ->
 
 	beforeEach ->
-		@user_id = "user id here"
+		@value = "user id here"
 		@stubbedToken = require("crypto").randomBytes(32)
 
 		@settings = 
@@ -22,7 +22,7 @@ describe "PasswordResetTokenHandler", ->
 			expire:sinon.stub()
 			exec:sinon.stub()
 		self = @
-		@PasswordResetTokenHandler = SandboxedModule.require modulePath, requires:
+		@OneTimeTokenHandler = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex" :
 				createClient: =>
 					auth:->
@@ -37,30 +37,30 @@ describe "PasswordResetTokenHandler", ->
 
 		it "should set a new token into redis with a ttl", (done)->
 			@redisMulti.exec.callsArgWith(0) 
-			@PasswordResetTokenHandler.getNewToken @user_id, (err, token) =>
-				@redisMulti.set.calledWith("password_token:#{@stubbedToken.toString("hex")}", @user_id).should.equal true
+			@OneTimeTokenHandler.getNewToken @value, (err, token) =>
+				@redisMulti.set.calledWith("password_token:#{@stubbedToken.toString("hex")}", @value).should.equal true
 				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", 60 * 60).should.equal true
 				done()
 
 		it "should return if there was an error", (done)->
 			@redisMulti.exec.callsArgWith(0, "error")
-			@PasswordResetTokenHandler.getNewToken @user_id, (err, token)=>
+			@OneTimeTokenHandler.getNewToken @value, (err, token)=>
 				err.should.exist
 				done()
 
 		it "should allow the expiry time to be overridden", (done) ->
 			@redisMulti.exec.callsArgWith(0) 
 			@ttl = 42
-			@PasswordResetTokenHandler.getNewToken @user_id, {expiresIn: @ttl}, (err, token) =>
+			@OneTimeTokenHandler.getNewToken @value, {expiresIn: @ttl}, (err, token) =>
 				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", @ttl).should.equal true
 				done()
 
-	describe "getUserIdFromTokenAndExpire", ->
+	describe "getValueFromTokenAndExpire", ->
 
 		it "should get and delete the token", (done)->
-			@redisMulti.exec.callsArgWith(0, null, [@user_id]) 
-			@PasswordResetTokenHandler.getUserIdFromTokenAndExpire @stubbedToken, (err, user_id)=>
-				user_id.should.equal @user_id
+			@redisMulti.exec.callsArgWith(0, null, [@value]) 
+			@OneTimeTokenHandler.getValueFromTokenAndExpire @stubbedToken, (err, value)=>
+				value.should.equal @value
 				@redisMulti.get.calledWith("password_token:#{@stubbedToken}").should.equal true
 				@redisMulti.del.calledWith("password_token:#{@stubbedToken}").should.equal true
 				done()

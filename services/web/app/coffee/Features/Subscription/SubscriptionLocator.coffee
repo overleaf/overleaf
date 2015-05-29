@@ -15,3 +15,9 @@ module.exports =
 	getMemberSubscriptions: (user_id, callback) ->
 		logger.log user_id: user_id, "getting users group subscriptions"
 		Subscription.find(member_ids: user_id).populate("admin_id").exec callback
+
+	getSubscription: (subscription_id, callback)->
+		Subscription.findOne _id:subscription_id, callback
+
+	getSubscriptionByMemberIdAndId: (user_id, subscription_id, callback)->
+		Subscription.findOne member_ids: user_id, _id:subscription_id, callback

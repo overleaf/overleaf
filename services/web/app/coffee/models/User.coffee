@@ -53,7 +53,6 @@ UserSchema = new Schema
 					# has this set to true, despite never having had a free trial
 					hadFreeTrial: {type: Boolean, default: false}
 
-
 UserSchema.statics.getAllIds = (callback)->
 	this.find {}, ["first_name"], callback
 
