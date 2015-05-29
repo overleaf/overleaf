@@ -73,8 +73,10 @@ block content
 												ng-model="inputs.emails",
 												on-enter="addMembers()"
 											)
-										.col-xs-6
+										.col-xs-4
 											button.btn.btn-primary(ng-click="addMembers()") #{translate("add")}
+										.col-xs-2
+											a(href="/subscription/group/export") Export CSV
 
 	script(type="text/javascript").
 		window.users = !{JSON.stringify(users)};

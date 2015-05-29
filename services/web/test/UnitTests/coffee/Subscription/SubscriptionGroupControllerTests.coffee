@@ -3,12 +3,12 @@ should = require('chai').should()
 sinon = require 'sinon'
 assert = require("chai").assert
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionGroupController"
-
+MockResponse = require "../helpers/MockResponse"
 
 describe "Subscription Group Controller", ->
 
 	beforeEach ->
-		@user = {_id:"!@312431"}
+		@user = {_id:"!@312431",email:"user@email.com"}
 		@subscription = {}
 		@GroupHandler = 
 			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
@@ -16,7 +16,7 @@ describe "Subscription Group Controller", ->
 			isUserPartOfGroup: sinon.stub()
 			sendVerificationEmail:sinon.stub()
 			processGroupVerification:sinon.stub()
-
+			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
 		@SubscriptionLocator = getUsersSubscription: sinon.stub().callsArgWith(1, null, @subscription)
 
 		@SubscriptionDomainHandler = 
@@ -78,14 +78,13 @@ describe "Subscription Group Controller", ->
 
 	describe "renderSubscriptionGroupAdminPage", ->	
 		it "should redirect you if you don't have a group account", (done)->
-			@subscription.group = false
+			@subscription.groupPlan = false
 
 			res =
 				redirect : (path)=>
 					path.should.equal("/")
 					done()
 			@Controller.renderSubscriptionGroupAdminPage @req, res
-
 
 	describe "renderGroupInvitePage", ->
 		describe "with a valid licence", ->
@@ -167,3 +166,29 @@ describe "Subscription Group Controller", ->
 				@Controller.completeJoin @req, {}
 				@ErrorsController.notFound.called.should.equal true
 				done()
+	describe "exportGroupCsv", ->	
+
+		beforeEach ->
+			@subscription.groupPlan = true
+			@res = new MockResponse()
+			@res.contentType = sinon.stub()
+			@res.header = sinon.stub()
+			@res.send = sinon.stub()
+			@Controller.exportGroupCsv @req, @res
+
+		it "should set the correct content type on the request", ->
+			@res.contentType
+				.calledWith("text/csv")
+				.should.equal true
+
+		it "should name the exported csv file", ->
+			@res.header
+				.calledWith(
+					"Content-Disposition",
+					"attachment; filename=Group.csv")
+				.should.equal true
+
+		it "should export the correct csv", ->
+			@res.send
+				.calledWith("user@email.com\n")
+				.should.equal true
