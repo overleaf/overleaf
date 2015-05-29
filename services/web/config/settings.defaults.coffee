@@ -350,7 +350,7 @@ module.exports =
 	reloadModuleViewsOnEachRequest: true
 
 	domainLicences: [
-		{"domains":["gmail.com"], "adminUser_id":"555208e6ce4812e7d2319daa", "subscription_id":"555c6d1eb844bfb3964e0629", "name":"HENRYS AMAZING LICENCE", verifyEmail:true}
+		
 	]
 
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
