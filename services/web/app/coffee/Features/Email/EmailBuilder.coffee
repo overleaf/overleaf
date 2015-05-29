@@ -27,7 +27,7 @@ templates.canceledSubscription =
 	compiledTemplate: _.template '''
 <p>Hi <%= first_name %>,</p>
 
-<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment? Feedback from our users is the only way we can improve ShareLaTeX.</p>
+<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment via <a href="https://sharelatex.typeform.com/to/F7OzIY">this survey</a>?</p>
 
 <p>Thank you in advance.</p>
 
