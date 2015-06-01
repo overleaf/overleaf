@@ -3,6 +3,10 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 async = require "async"
+settings = require("settings-sharelatex")
+request = require("request")
+crypto = require("crypto")
+thirtySeconds = 30 * 1000
 
 module.exports = DocManager =
 
@@ -58,3 +62,34 @@ module.exports = DocManager =
 					return callback(error) if error?
 					callback()
 
+	archiveAllDocs: (project_id, callback = (error, docs) ->) ->
+		MongoManager.getProjectsDocs project_id, (error, docs) ->
+			if err?
+				return callback(error)
+			else if !docs?
+				return callback new Errors.NotFoundError("No docs for project #{project_id}")
+
+			jobs = for doc in docs
+				do (doc) =>
+					(cb) => 
+						logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
+						options = buildS3Options(doc.lines, project_id+"/"+doc._id)
+						request.put options, (err, res)->
+							if err? || res.statusCode != 200
+								logger.err err:err, res:res, "something went wrong archiving file in aws"
+							cb(err)
+
+			async.series jobs, callback
+
+buildS3Options = (content, key)->
+	return {
+			aws:
+				key: settings.filestore.s3.key
+				secret: settings.filestore.s3.secret
+				bucket: settings.filestore.stores.user_files
+			timeout: thirtySeconds
+			json: content
+			#headers:
+			#	'content-md5': crypto.createHash("md5").update(content).digest("hex")
+			uri:"https://#{settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
+	}
