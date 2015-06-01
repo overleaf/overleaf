@@ -34,3 +34,13 @@ describe "Archiving all docs", ->
 		DocstoreClient.archiveAllDoc @project_id, (error, res) =>
 			res.statusCode.should.equal 204
 			done()
+
+	it "should unarchive all the docs", (done) ->
+		DocstoreClient.archiveAllDoc @project_id, (error, res) =>
+			DocstoreClient.getAllDocs @project_id, (error, res, docs) =>
+				throw error if error?
+				docs.length.should.equal @docs.length
+				for doc, i in docs
+					doc.lines.should.deep.equal @docs[i].lines
+				done()
+

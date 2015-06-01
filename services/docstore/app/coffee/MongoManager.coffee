@@ -13,9 +13,11 @@ module.exports = MongoManager =
 		update =
 			$set:{}
 			$inc:{}
+			$unset:{}
 		update.$set["lines"] = lines
 		update.$set["project_id"] = ObjectId(project_id)
 		update.$inc["rev"] = 1 #on new docs being created this will set the rev to 1
+		update.$unset["inS3"] = true
 		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
 
 
@@ -24,4 +26,13 @@ module.exports = MongoManager =
 			$set: {}
 		update.$set["deleted"] = true
 		db.docs.update _id: ObjectId(doc_id), update, (err)->
+			callback(err)
+
+	markDocAsArchived: (doc_id, callback)->
+		update =
+			$set: {}
+			$unset: {}
+		update.$set["inS3"] = true
+		update.$unset["lines"] = true
+		db.docs.update _id: doc_id, update, (err)->
 			callback(err)
