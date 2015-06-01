@@ -78,3 +78,10 @@ module.exports = HttpController =
 
 	_buildRawDocView: (doc)->
 		return (doc?.lines or []).join("\n")
+
+	archiveAllDocs: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "archiving all docs"
+		DocManager.archiveAllDocs project_id, (error) ->
+			return next(error) if error?
+			res.send 204
