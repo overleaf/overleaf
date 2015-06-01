@@ -51,7 +51,8 @@ module.exports = SubscriptionGroupHandler =
 
 
 	sendVerificationEmail: (subscription_id, licenceName, email, callback)->
-		OneTimeTokenHandler.getNewToken subscription_id, (err, token)->
+		ONE_DAY_IN_S = 1000 * 60 * 60 * 24
+		OneTimeTokenHandler.getNewToken subscription_id, {expiresIn:ONE_DAY_IN_S}, (err, token)->
 			opts =
 				to : email
 				group_name: licenceName
