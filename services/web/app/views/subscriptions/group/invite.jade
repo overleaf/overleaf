@@ -8,6 +8,10 @@ block content
 	.content.content-alt
 		.container
 			.row
+				.col-md-8.col-md-offset-2
+					-if (query.expired)
+						.alert.alert-warning #{translate("email_link_expired")}
+			.row
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card(ng-controller="GroupSubscriptionInviteController")
 						.page-header

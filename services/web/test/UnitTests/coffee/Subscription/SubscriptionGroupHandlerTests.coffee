@@ -5,7 +5,7 @@ assert = require("chai").assert
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionGroupHandler"
 
 
-describe "Subscription Group Handler", ->
+describe "SubscriptionGroupHandler", ->
 
 	beforeEach ->
 		@adminUser_id = "12321"
@@ -143,7 +143,7 @@ describe "Subscription Group Handler", ->
 			@subscription_id = "123ed13123"
 			@licenceName = "great licnece"
 			@email = "bob@smith.com"
-			@OneTimeTokenHandler.getNewToken.callsArgWith(1, null, @token)
+			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token)
 			@EmailHandler.sendEmail.callsArgWith(2)
 
 		it "should put a one time token into the email", (done)->
@@ -159,16 +159,20 @@ describe "Subscription Group Handler", ->
 			@token = "31dDAd2Da"
 			@subscription_id = "31DSd1123D"
 			@admin_id = "eDSda1ew"
-			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @subscription_id)
 			@SubscriptionLocator.getSubscription.callsArgWith(1, null, {admin_id:@admin_id})
 			@Handler.addUserToGroup = sinon.stub().callsArgWith(2)
 
 		it "should addUserToGroup", (done)->
+			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @subscription_id)
 			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
 				@Handler.addUserToGroup.calledWith(@admin_id, @email).should.equal true
 				done()
 
-
+		it "should return token_not_found error if it couldn't get the token", (done)->
+			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1)
+			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
+				err.should.equal "token_not_found"
+				done()
 
 
 

@@ -61,9 +61,10 @@ module.exports = SubscriptionGroupHandler =
 
 	processGroupVerification: (userEmail, subscription_id, token, callback)->
 		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
+			
 			if err?  or subscription_id != token_subscription_id
 				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
-				return callback("token not found")
+				return callback("token_not_found")
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
 				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, userEmail, callback
 

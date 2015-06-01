@@ -5,7 +5,7 @@ assert = require("chai").assert
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionGroupController"
 MockResponse = require "../helpers/MockResponse"
 
-describe "Subscription Group Controller", ->
+describe "SubscriptionGroupController", ->
 
 	beforeEach ->
 		@user = {_id:"!@312431",email:"user@email.com"}
@@ -159,13 +159,24 @@ describe "Subscription Group Controller", ->
 				@Controller.completeJoin @req, res
 
 		describe "without a valid licence", ->
-			beforeEach ->
-				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns(undefined)
 
 			it "should send a 500", (done)->
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns(undefined)
 				@Controller.completeJoin @req, {}
 				@ErrorsController.notFound.called.should.equal true
 				done()
+
+			it "should redirect to the invited page with querystring if token was not found", (done)->
+				@SubscriptionDomainHandler.findDomainLicenceBySubscriptionId.returns({name:@licenceName})
+				@req.query.token = @token
+				@GroupHandler.processGroupVerification.callsArgWith(3, "token_not_found")
+				res =
+					redirect : (location)=>
+						location.should.equal "/user/subscription/#{@subscription_id}/group/invited?expired=true"
+						done()
+				@Controller.completeJoin @req, res
+
+
 	describe "exportGroupCsv", ->	
 
 		beforeEach ->

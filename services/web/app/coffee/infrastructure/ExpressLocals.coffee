@@ -156,6 +156,10 @@ module.exports = (app)->
 			next()
 
 	app.use (req, res, next)->
+		res.locals.query = req.query
+		next()
+
+	app.use (req, res, next)->
 		subdomain = _.find Settings.i18n.subdomainLang, (subdomain)->
 			subdomain.lngCode == req.showUserOtherLng and !subdomain.hide
 		res.locals.recomendSubdomain = subdomain
