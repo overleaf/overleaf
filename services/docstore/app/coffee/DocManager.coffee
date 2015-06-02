@@ -70,18 +70,17 @@ module.exports = DocManager =
 			else if !docs?
 				return callback new Errors.NotFoundError("No docs for project #{project_id}")
 
-			jobs = for doc in docs
-				do (doc) =>
-					(cb) => 
-						logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
-						options = buildS3Options(doc.lines, project_id+"/"+doc._id)
-						request.put options, (err, res)->
-							if err? || res.statusCode != 200
-								logger.err err:err, res:res, "something went wrong archiving doc in aws"
-								cb(err)
-							MongoManager.markDocAsArchived doc._id, (error) ->
-								return cb(error) if error?
-								cb()
+			jobs = _.map docs, (doc) ->
+				(cb)->
+					logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
+					options = buildS3Options(doc.lines, project_id+"/"+doc._id)
+					request.put options, (err, res)->
+						if err? || res.statusCode != 200
+							logger.err err:err, res:res, "something went wrong archiving doc in aws"
+							cb(err)
+						MongoManager.markDocAsArchived doc._id, (error) ->
+							return cb(error) if error?
+							cb()
 
 			async.series jobs, callback
 
@@ -92,21 +91,20 @@ module.exports = DocManager =
 			else if !docs?
 				return callback new Errors.NotFoundError("No docs for project #{project_id}")
 
-			jobs = for doc in docs
-				do (doc) =>
+			jobs = _.map docs, (doc) ->
+				(cb)->
 					if !doc.inS3?
-						(cb) => cb()
+						return cb()
 					else
-						(cb) => 
-							logger.log project_id: project_id, doc_id: doc._id, "getting doc from s3"
-							options = buildS3Options(true, project_id+"/"+doc._id)
-							request.get options, (err, res, lines)->
-								if err? || res.statusCode != 200
-									logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
-									cb(err)
-								MongoManager.upsertIntoDocCollection project_id, doc._id.toString(), lines, (error) ->
-									return cb(error) if error?
-									cb()
+						logger.log project_id: project_id, doc_id: doc._id, "getting doc from s3"
+						options = buildS3Options(true, project_id+"/"+doc._id)
+						request.get options, (err, res, lines)->
+							if err? || res.statusCode != 200
+								logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
+								cb(err)
+							MongoManager.upsertIntoDocCollection project_id, doc._id.toString(), lines, (error) ->
+								return cb(error) if error?
+								cb()
 
 			async.series jobs, callback
 
