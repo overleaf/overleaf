@@ -35,8 +35,8 @@ module.exports = DocManager =
 					return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
-		DocManager.getDoc doc_id, (err, doc)->
-			if err? and !(error instanceof Errors.NotFoundError)
+		DocManager.getDoc project_id, doc_id, (err, doc)->
+			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
 
@@ -104,17 +104,17 @@ module.exports = DocManager =
 					if !doc.inS3?
 						return cb()
 					else
-						unarchiveDoc project_id, doc_id, cb
+						DocManager.unarchiveDoc project_id, doc._id, cb
 			async.series jobs, callback
 
 	unarchiveDoc: (project_id, doc_id, callback)->
-		logger.log project_id: project_id, doc_id: doc._id, "getting doc from s3"
-		options = buildS3Options(true, project_id+"/"+doc._id)
+		logger.log project_id: project_id, doc_id: doc_id, "getting doc from s3"
+		options = buildS3Options(true, project_id+"/"+doc_id)
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
 				callback(err)
-			MongoManager.upsertIntoDocCollection project_id, doc._id.toString(), lines, (error) ->
+			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (error) ->
 				return callback(error) if error?
 				callback()
 
