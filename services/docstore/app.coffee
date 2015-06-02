@@ -20,7 +20,9 @@ app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
 app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: "2mb"), HttpController.updateDoc
 app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
-app.get  '/project/:project_id/archive', HttpController.archiveAllDocs
+
+if Settings.filestore.backend == "s3"
+	app.get  '/project/:project_id/archive', HttpController.archiveAllDocs
 
 app.get '/status', (req, res)->
 	res.send('docstore is alive')

@@ -7,6 +7,7 @@ settings = require("settings-sharelatex")
 request = require("request")
 crypto = require("crypto")
 thirtySeconds = 30 * 1000
+DocArchive = require "./DocArchive"
 
 module.exports = DocManager =
 
@@ -17,7 +18,7 @@ module.exports = DocManager =
 			else if !doc?
 				return callback new Errors.NotFoundError("No such doc: #{doc_id} in project #{project_id}")
 			else if doc?.inS3
-				DocManager.unarchiveDoc project_id, doc_id, (err)->
+				DocArchive.unarchiveDoc project_id, doc_id, (err)->
 					if err?
 						return callback(err)
 					MongoManager.findDoc doc_id, callback
@@ -25,7 +26,7 @@ module.exports = DocManager =
 				callback err, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
-		DocManager.unArchiveAllDocs project_id, (error) ->
+		DocArchive.unArchiveAllDocs project_id, (error) ->
 			MongoManager.getProjectsDocs project_id, (error, docs) ->
 				if err?
 					return callback(error)
@@ -68,65 +69,3 @@ module.exports = DocManager =
 				MongoManager.markDocAsDeleted doc_id, (error) ->
 					return callback(error) if error?
 					callback()
-
-
-	#DOC ARCHIVER
-	archiveAllDocs: (project_id, callback = (error, docs) ->) ->
-		MongoManager.getProjectsDocs project_id, (error, docs) ->
-			if err?
-				return callback(error)
-			else if !docs?
-				return callback new Errors.NotFoundError("No docs for project #{project_id}")
-			jobs = _.map docs, (doc) ->
-				(cb)-> DocManager.archiveDoc project_id, doc, cb
-			async.series jobs, callback
-
-
-	archiveDoc: (project_id, doc, callback)->
-		logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
-		options = buildS3Options(doc.lines, project_id+"/"+doc._id)
-		request.put options, (err, res)->
-			if err? || res.statusCode != 200
-				logger.err err:err, res:res, "something went wrong archiving doc in aws"
-				callback(err)
-			MongoManager.markDocAsArchived doc._id, doc.rev, (error) ->
-				return callback(error) if error?
-				callback()
-
-	unArchiveAllDocs: (project_id, callback = (error) ->) ->
-		MongoManager.getProjectsDocs project_id, (error, docs) ->
-			if err?
-				return callback(error)
-			else if !docs?
-				return callback new Errors.NotFoundError("No docs for project #{project_id}")
-			jobs = _.map docs, (doc) ->
-				(cb)->
-					if !doc.inS3?
-						return cb()
-					else
-						DocManager.unarchiveDoc project_id, doc._id, cb
-			async.series jobs, callback
-
-	unarchiveDoc: (project_id, doc_id, callback)->
-		logger.log project_id: project_id, doc_id: doc_id, "getting doc from s3"
-		options = buildS3Options(true, project_id+"/"+doc_id)
-		request.get options, (err, res, lines)->
-			if err? || res.statusCode != 200
-				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
-				callback(err)
-			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (error) ->
-				return callback(error) if error?
-				callback()
-
-buildS3Options = (content, key)->
-	return {
-			aws:
-				key: settings.filestore.s3.key
-				secret: settings.filestore.s3.secret
-				bucket: settings.filestore.stores.user_files
-			timeout: thirtySeconds
-			json: content
-			#headers:
-			#	'content-md5': crypto.createHash("md5").update(content).digest("hex")
-			uri:"https://#{settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
-	}

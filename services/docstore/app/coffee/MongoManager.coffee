@@ -9,6 +9,12 @@ module.exports = MongoManager =
 	getProjectsDocs: (project_id, callback)->
 		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
 
+	getArchivedProjectDocs: (project_id, callback)->
+		query =
+			project_id: ObjectId(project_id.toString())
+			inS3: true
+		db.docs.find query, {}, callback
+
 	upsertIntoDocCollection: (project_id, doc_id, lines, callback)->
 		update =
 			$set:{}
@@ -34,6 +40,8 @@ module.exports = MongoManager =
 			$unset: {}
 		update.$set["inS3"] = true
 		update.$unset["lines"] = true
-		# to ensure that the lines have not changed during the archive process we search via the rev
-		db.docs.update _id: doc_id, update, (err)->
+		query =
+			_id: doc_id
+			rev: rev
+		db.docs.update query, update, (err)->
 			callback(err)
