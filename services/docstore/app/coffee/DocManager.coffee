@@ -7,7 +7,7 @@ settings = require("settings-sharelatex")
 request = require("request")
 crypto = require("crypto")
 thirtySeconds = 30 * 1000
-DocArchive = require "./DocArchive"
+DocArchive = require "./DocArchiveManager"
 
 module.exports = DocManager =
 

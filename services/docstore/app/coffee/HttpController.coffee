@@ -1,6 +1,6 @@
 DocManager = require "./DocManager"
 logger = require "logger-sharelatex"
-DocArchive = require "./DocArchive"
+DocArchive = require "./DocArchiveManager"
 
 module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
