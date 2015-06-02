@@ -28,14 +28,12 @@ module.exports = MongoManager =
 		db.docs.update _id: ObjectId(doc_id), update, (err)->
 			callback(err)
 
-	markDocAsArchived: (doc_id, callback)->
+	markDocAsArchived: (doc_id, rev, callback)->
 		update =
 			$set: {}
 			$unset: {}
 		update.$set["inS3"] = true
 		update.$unset["lines"] = true
-		# to ensure that the lines have not changed during the archive process
-		# what if we passed the lines through into the query {_id: doc_id, lines:lines}
-		# or more performant would be todo the rev {_id:doc_id, rev:rev}
+		# to ensure that the lines have not changed during the archive process we search via the rev
 		db.docs.update _id: doc_id, update, (err)->
 			callback(err)

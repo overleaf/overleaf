@@ -89,7 +89,7 @@ module.exports = DocManager =
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong archiving doc in aws"
 				callback(err)
-			MongoManager.markDocAsArchived doc._id, (error) ->
+			MongoManager.markDocAsArchived doc._id, doc.rev, (error) ->
 				return callback(error) if error?
 				callback()
 
