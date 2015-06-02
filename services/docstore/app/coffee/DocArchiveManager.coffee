@@ -27,7 +27,7 @@ module.exports = DocArchive =
 		request.put options, (err, res)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong archiving doc in aws"
-				return callback(err)
+				return callback new Errors.NotFoundError("Error in S3 request")
 			MongoManager.markDocAsArchived doc._id, doc.rev, (error) ->
 				return callback(error) if error?
 				callback()
@@ -52,7 +52,7 @@ module.exports = DocArchive =
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
-				return callback(err)
+				return callback new Errors.NotFoundError("Error in S3 request")
 			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (error) ->
 				return callback(error) if error?
 				callback()

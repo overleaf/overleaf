@@ -37,46 +37,58 @@ if Settings.filestore?.backend == "s3"
 		afterEach (done) ->
 			db.docs.remove({project_id: @project_id}, done)
 
-		describe "Archiving all docs", ->
-			beforeEach (done) ->
+		if !Settings.filestore?.fail
 
-				DocstoreClient.archiveAllDoc @project_id, (error, @res) =>
-					done()
+			describe "Archiving all docs", ->
+				beforeEach (done) ->
 
-			it "should archive all the docs", (done) ->
-				@res.statusCode.should.equal 204
-				done()
-
-			it "should set inS3 and unset lines in each doc", (done) ->
-
-				jobs = for archiveDoc in @docs
-					do (archiveDoc) =>
-						(callback) => 
-							db.docs.findOne _id: archiveDoc._id, (error, doc) =>
-								should.not.exist doc.lines
-								doc.inS3.should.equal true
-								callback()
-				async.series jobs, done
-
-			it "should be able get the same docs back", (done) ->
-
-				jobs = for archiveDoc in @docs
-					do (archiveDoc) =>
-						(callback) => 
-							DocstoreClient.getS3Doc @project_id, archiveDoc._id, (error, res, doc) =>
-								doc.toString().should.equal archiveDoc.lines.toString()
-								callback()
-				async.series jobs, done
-
-
-		describe "Unarchiving all docs", ->
-
-			it "should unarchive all the docs", (done) ->
-				DocstoreClient.archiveAllDoc @project_id, (error, res) =>
-					DocstoreClient.getAllDocs @project_id, (error, res, docs) =>
-						throw error if error?
-						docs.length.should.equal @docs.length
-						for doc, i in docs
-							doc.lines.should.deep.equal @docs[i].lines
+					DocstoreClient.archiveAllDoc @project_id, (error, @res) =>
 						done()
 
+				it "should archive all the docs", (done) ->
+					@res.statusCode.should.equal 204
+					done()
+
+				it "should set inS3 and unset lines in each doc", (done) ->
+
+					jobs = for archiveDoc in @docs
+						do (archiveDoc) =>
+							(callback) => 
+								db.docs.findOne _id: archiveDoc._id, (error, doc) =>
+									should.not.exist doc.lines
+									doc.inS3.should.equal true
+									callback()
+					async.series jobs, done
+
+				it "should be able get the same docs back", (done) ->
+
+					jobs = for archiveDoc in @docs
+						do (archiveDoc) =>
+							(callback) => 
+								DocstoreClient.getS3Doc @project_id, archiveDoc._id, (error, res, doc) =>
+									doc.toString().should.equal archiveDoc.lines.toString()
+									callback()
+					async.series jobs, done
+
+
+			describe "Unarchiving all docs", ->
+
+				it "should unarchive all the docs", (done) ->
+					DocstoreClient.archiveAllDoc @project_id, (error, res) =>
+						DocstoreClient.getAllDocs @project_id, (error, res, docs) =>
+							throw error if error?
+							docs.length.should.equal @docs.length
+							for doc, i in docs
+								doc.lines.should.deep.equal @docs[i].lines
+							done()
+
+		# set fail to true and also run the docstore service with a denied config
+		if Settings.filestore?.fail
+
+			describe "Test S3 fail request", ->
+
+				it "should return a 404", (done) ->
+
+					DocstoreClient.archiveAllDoc @project_id, (error, res) =>
+						res.statusCode.should.equal 404
+						done()
