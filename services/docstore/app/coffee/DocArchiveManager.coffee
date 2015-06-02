@@ -12,7 +12,7 @@ module.exports = DocArchive =
 
 	archiveAllDocs: (project_id, callback = (error, docs) ->) ->
 		MongoManager.getProjectsDocs project_id, (error, docs) ->
-			if err?
+			if error?
 				return callback(error)
 			else if !docs?
 				return callback new Errors.NotFoundError("No docs for project #{project_id}")
@@ -27,14 +27,14 @@ module.exports = DocArchive =
 		request.put options, (err, res)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong archiving doc in aws"
-				callback(err)
+				return callback(err)
 			MongoManager.markDocAsArchived doc._id, doc.rev, (error) ->
 				return callback(error) if error?
 				callback()
 
 	unArchiveAllDocs: (project_id, callback = (error) ->) ->
 		MongoManager.getArchivedProjectDocs project_id, (error, docs) ->
-			if err?
+			if error?
 				return callback(error)
 			else if !docs?
 				return callback new Errors.NotFoundError("No docs for project #{project_id}")
@@ -52,7 +52,7 @@ module.exports = DocArchive =
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
-				callback(err)
+				return callback(err)
 			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (error) ->
 				return callback(error) if error?
 				callback()
