@@ -23,7 +23,7 @@ module.exports = DocArchive =
 
 	archiveDoc: (project_id, doc, callback)->
 		logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
-		options = buildS3Options(doc.lines, project_id+"/"+doc._id)
+		options = DocArchive.buildS3Options(doc.lines, project_id+"/"+doc._id)
 		request.put options, (err, res)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong archiving doc in aws"
@@ -48,7 +48,7 @@ module.exports = DocArchive =
 
 	unarchiveDoc: (project_id, doc_id, callback)->
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc from s3"
-		options = buildS3Options(true, project_id+"/"+doc_id)
+		options = DocArchive.buildS3Options(true, project_id+"/"+doc_id)
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
@@ -57,15 +57,15 @@ module.exports = DocArchive =
 				return callback(error) if error?
 				callback()
 
-buildS3Options = (content, key)->
-	return {
-			aws:
-				key: settings.filestore.s3.key
-				secret: settings.filestore.s3.secret
-				bucket: settings.filestore.stores.user_files
-			timeout: thirtySeconds
-			json: content
-			#headers:
-			#	'content-md5': crypto.createHash("md5").update(content).digest("hex")
-			uri:"https://#{settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
-	}
+	buildS3Options: (content, key)->
+		return {
+				aws:
+					key: settings.filestore.s3.key
+					secret: settings.filestore.s3.secret
+					bucket: settings.filestore.stores.user_files
+				timeout: thirtySeconds
+				json: content
+				#headers:
+				#	'content-md5': crypto.createHash("md5").update(content).digest("hex")
+				uri:"https://#{settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
+		}

@@ -11,6 +11,7 @@ describe "HttpController", ->
 	beforeEach ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"./DocManager": @DocManager = {}
+			"./DocArchiveManager": @DocArchiveManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 		@res = { send: sinon.stub(), json: sinon.stub(), setHeader:sinon.stub() }
 		@req = { query:{}}
@@ -241,6 +242,23 @@ describe "HttpController", ->
 		it "should delete the document", ->
 			@DocManager.deleteDoc
 				.calledWith(@project_id, @doc_id)
+				.should.equal true
+
+		it "should return a 204 (No Content)", ->
+			@res.send
+				.calledWith(204)
+				.should.equal true
+
+	describe "archiveAllDocs", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id
+			@DocArchiveManager.archiveAllDocs = sinon.stub().callsArg(1)
+			@HttpController.archiveAllDocs @req, @res, @next
+
+		it "should archive the project", ->
+			@DocArchiveManager.archiveAllDocs
+				.calledWith(@project_id)
 				.should.equal true
 
 		it "should return a 204 (No Content)", ->
