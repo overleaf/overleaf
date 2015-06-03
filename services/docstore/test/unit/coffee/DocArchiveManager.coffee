@@ -25,6 +25,7 @@ describe "DocArchiveManager", ->
 		@request = 
 			put: {}
 			get: {}
+			del: {}
 
 		@docs = [{
 			_id: ObjectId()
@@ -98,7 +99,8 @@ describe "DocArchiveManager", ->
 	describe "unarchiveDoc", ->
 
 		it "should use correct options", (done)->
-			@request.get = sinon.stub().callsArgWith(1,  null, statusCode:200, @docs[0].lines)
+			@request.get = sinon.stub().callsArgWith(1, null, statusCode:200, @docs[0].lines)
+			@request.del = sinon.stub().callsArgWith(1, null, statusCode:204, {})
 			@requires["request"] = @request
 			@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
 

@@ -60,7 +60,12 @@ module.exports = DocArchive =
 				return callback new Errors.NotFoundError("Error in S3 request")
 			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (error) ->
 				return callback(error) if error?
-				callback()
+				logger.log project_id: project_id, doc_id: doc_id, "deleting doc from s3"
+				request.del options, (err, res, body)->
+					if err? || res.statusCode != 204
+						logger.err err:err, res:res, "something went wrong deleting doc from aws"
+						return callback new Errors.NotFoundError("Error in S3 request")
+					callback()
 
 	buildS3Options: (content, key)->
 		return {
