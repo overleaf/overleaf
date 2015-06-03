@@ -339,7 +339,11 @@ module.exports = PackManager =
 					expected: {expect_nInserted, expect_nRemoved}
 				), result)
 			else
-				callback(err, result)
+				db.docHistoryStats.update {doc_id:packObj.doc_id}, {
+					$inc:{update_count:-expect_nRemoved},
+					$currentDate:{last_packed:true}
+				}, {upsert:true}, () ->
+					callback(err, result)
 
 	deleteExpiredPackOps: (docs, callback) ->
 		now = Date.now()
