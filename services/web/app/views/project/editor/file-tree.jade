@@ -3,14 +3,14 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 		a(
 			href,
 			ng-click="openNewDocModal()",
-			tooltip-html-unsafe="#{translate('new_file').replace(' ', '<br>')}",
+			tooltip-html="'#{translate('new_file').replace(' ', '<br>')}'",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file
 		a(
 			href,
 			ng-click="openNewFolderModal()",
-			tooltip-html-unsafe="#{translate('new_folder').replace(' ', '<br>')}",
+			tooltip-html="'#{translate('new_folder').replace(' ', '<br>')}'",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-folder
@@ -127,10 +127,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					)
 
 				span.dropdown(
+					dropdown,
 					ng-show="entity.selected",
 					ng-if="permissions.write"
 				)
-					a.dropdown-toggle(href)
+					a.dropdown-toggle(href, dropdown-toggle)
 						i.fa.fa-chevron-down
 
 					ul.dropdown-menu.dropdown-menu-right
@@ -210,10 +211,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						)
 
 					span.dropdown(
+						dropdown,
 						ng-if="permissions.write"
 						ng-show="entity.selected"
 					)
-						a.dropdown-toggle(href)
+						a.dropdown-toggle(href, dropdown-toggle)
 							i.fa.fa-chevron-down
 
 						ul.dropdown-menu.dropdown-menu-right

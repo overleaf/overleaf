@@ -25,10 +25,11 @@ block content
 								.col-xs-9
 									h2 {{planName}}
 								.col-xs-3
-									div.dropdown.changePlanButton.pull-right(ng-cloak)
+									div.dropdown.changePlanButton.pull-right(ng-cloak, dropdown)
 										a.btn.btn-default.dropdown-toggle(
 											href="#",
-											data-toggle="dropdown"
+											data-toggle="dropdown",
+											dropdown-toggle
 										)
 											| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
 											span.caret

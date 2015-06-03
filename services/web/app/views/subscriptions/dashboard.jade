@@ -83,10 +83,11 @@ block content
 
 							div(ng-show="changePlan", ng-cloak)#changePlanSection
 								h2.col-md-7 !{translate("change_plan")}
-								span.dropdown.col-md-1.changePlanButton(ng-controller="CurrenyDropdownController", style="display:none")
+								span.dropdown.col-md-1.changePlanButton(ng-controller="CurrenyDropdownController", style="display:none", dropdown)
 									a.btn.btn-primary.dropdown-toggle(
 										href="#",
-										data-toggle="dropdown"
+										data-toggle="dropdown",
+										dropdown-toggle
 									)
 										| {{currencyCode}} ({{plans[currencyCode]['symbol']}})
 									ul.dropdown-menu(role="menu")

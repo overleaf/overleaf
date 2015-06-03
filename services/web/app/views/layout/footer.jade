@@ -6,9 +6,10 @@ footer.site-footer
 			ul.col-md-9
 				
 				if Object.keys(settings.i18n.subdomainLang).length > 1
-					li.dropdown.dropup.subdued
+					li.dropdown.dropup.subdued(dropdown)
 						a.dropdown-toggle(
 							href="#",
+							dropdown-toggle,
 							data-toggle="dropdown",
 							aria-haspopup="true",
 							aria-expanded="false",

@@ -12,8 +12,8 @@ nav.navbar.navbar-default
 
 			ul.nav.navbar-nav.navbar-right
 				if (session && session.user && session.user.isAdmin)
-					li.dropdown(class="subdued")
-						a.dropdown-toggle(href)
+					li.dropdown(class="subdued", dropdown)
+						a.dropdown-toggle(href, dropdown-toggle)
 							| Admin
 							b.caret
 						ul.dropdown-menu
@@ -23,8 +23,8 @@ nav.navbar.navbar-default
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown
-							li.dropdown(class=item.class)
-								a.dropdown-toggle(href)
+							li.dropdown(class=item.class, dropdown)
+								a.dropdown-toggle(href, dropdown-toggle)
 									| !{translate(item.text)}
 									b.caret
 								ul.dropdown-menu

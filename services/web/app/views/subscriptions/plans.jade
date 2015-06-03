@@ -34,10 +34,11 @@ block content
 									ng-click="switchToStudent()"
 								) #{translate("half_price_student")} 
 					.col-md-2.text-right
-						.dropdown.currency-dropdown
+						.dropdown.currency-dropdown(dropdown)
 							a.btn.btn-default.dropdown-toggle#currenyDropdown(
 								href="#",
-								data-toggle="dropdown"
+								data-toggle="dropdown",
+								dropdown-toggle
 							)
 								| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
 								span.caret
