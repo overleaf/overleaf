@@ -25,9 +25,14 @@ module.exports = DocArchive =
 		logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
 		options = DocArchive.buildS3Options(doc.lines, project_id+"/"+doc._id)
 		request.put options, (err, res)->
+			md5lines = crypto.createHash("md5").update(JSON.stringify(doc.lines)).digest("hex")
+			md5response = res.headers.etag.toString().replace(/\"/g, '')
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, "something went wrong archiving doc in aws"
 				return callback new Errors.NotFoundError("Error in S3 request")
+			if md5lines != md5response
+				logger.err responseMD5:md5response, linesMD5:md5lines, "error in response md5 from s3"
+				return callback new Errors.NotFoundError("Error in S3 md5 response")
 			MongoManager.markDocAsArchived doc._id, doc.rev, (error) ->
 				return callback(error) if error?
 				callback()
@@ -66,6 +71,6 @@ module.exports = DocArchive =
 				timeout: thirtySeconds
 				json: content
 				#headers:
-				#	'content-md5': crypto.createHash("md5").update(content).digest("hex")
+				#	'content-md5': crypto.createHash("md5").update(JSON.stringify(content)).digest("hex")
 				uri:"https://#{settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
 		}
