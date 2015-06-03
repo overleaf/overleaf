@@ -7,6 +7,7 @@ modulePath = "../../../app/js/DocArchiveManager.js"
 SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongojs").ObjectId
 Errors = require "../../../app/js/Errors"
+crypto = require("crypto")
 
 describe "DocArchiveManager", ->
 
@@ -58,12 +59,12 @@ describe "DocArchiveManager", ->
 
 		@error = "my errror"
 		@project_id = ObjectId().toString()
-		@stubbedError = new Errors.NotFoundError("blew up")
+		@stubbedError = new Errors.NotFoundError("Error in S3 request")
 
 	describe "archiveDoc", ->
 
 		it "should use correct options", (done)->
-			@request.put = sinon.stub().callsArgWith(1,  null, statusCode:200)
+			@request.put = sinon.stub().callsArgWith(1,  null, {statusCode:200,headers:{etag:""}})
 			@requires["request"] = @request
 			@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
 
@@ -75,13 +76,23 @@ describe "DocArchiveManager", ->
 				opts.uri.should.equal "https://#{@settings.filestore.stores.user_files}.s3.amazonaws.com/#{@project_id}/#{@docs[0]._id}"
 				done()
 
-		it "should return the error", (done)->
-			@request.put = sinon.stub().callsArgWith(1, @error, {})
+		it "should return no md5 error", (done)->
+			@md5 = crypto.createHash("md5").update(JSON.stringify(@docs[0].lines)).digest("hex")
+			@request.put = sinon.stub().callsArgWith(1,  null, {statusCode:200,headers:{etag:@md5}})
 			@requires["request"] = @request
 			@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
 
 			@DocArchiveManager.archiveDoc @project_id, @docs[0], (err)=>
-				err.should.equal @error
+				should.not.exist err
+				done()
+
+		it "should return the error", (done)->
+			@request.put = sinon.stub().callsArgWith(1, @stubbedError, {statusCode:400,headers:{etag:""}})
+			@requires["request"] = @request
+			@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
+
+			@DocArchiveManager.archiveDoc @project_id, @docs[0], (err)=>
+				should.exist err
 				done()
 
 	describe "unarchiveDoc", ->
@@ -100,12 +111,12 @@ describe "DocArchiveManager", ->
 				done()
 
 		it "should return the error", (done)->
-			@request.get = sinon.stub().callsArgWith(1, @error, {}, {})
+			@request.get = sinon.stub().callsArgWith(1, @stubbedError, {}, {})
 			@requires["request"] = @request
 			@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
 
 			@DocArchiveManager.unarchiveDoc @project_id, @docs[0], (err)=>
-				err.should.equal @error
+				should.exist err
 				done()
 
 	describe "archiveAllDocs", ->
