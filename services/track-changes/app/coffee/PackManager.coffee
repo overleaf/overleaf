@@ -252,15 +252,16 @@ module.exports = PackManager =
 		newResults.slice(0, limit) if limit?
 		return newResults
 
+	MAX_SIZE:  1024*1024 # make these configurable parameters
+	MAX_COUNT: 1024
+	MIN_COUNT: 100
+	KEEP_OPS:  100
+
 	convertDocsToPacks: (docs, callback) ->
-		MAX_SIZE = 1024*1024 # make these configurable parameters
-		MAX_COUNT = 1024
-		MIN_COUNT = 100
-		KEEP_OPS = 100
 		packs = []
 		top = null
 		# keep the last KEEP_OPS as individual ops
-		docs = docs.slice(0,-KEEP_OPS)
+		docs = docs.slice(0,-PackManager.KEEP_OPS)
 
 		docs.forEach (d,i) ->
 			# skip existing packs
@@ -272,13 +273,13 @@ module.exports = PackManager =
 				top = null
 				return
 			sz = BSON.calculateObjectSize(d)
-			if top?	&& top.pack.length < MAX_COUNT && top.sz + sz < MAX_SIZE
+			if top?	&& top.pack.length < PackManager.MAX_COUNT && top.sz + sz < PackManager.MAX_SIZE
 				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
 				top.sz += sz
 				top.v_end = d.v
 				top.meta.end_ts = d.meta.end_ts
 				return
-			else if sz < MAX_SIZE
+			else if sz < PackManager.MAX_SIZE
 				# create a new pack
 				top = _.clone(d)
 				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
@@ -293,7 +294,7 @@ module.exports = PackManager =
 
 		# only store packs with a sufficient number of ops, discard others
 		packs = packs.filter (packObj) ->
-			packObj.pack.length > MIN_COUNT
+			packObj.pack.length > PackManager.MIN_COUNT
 		callback(null, packs)
 
 	checkHistory: (docs, callback) ->
