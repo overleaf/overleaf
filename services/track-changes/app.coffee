@@ -23,6 +23,8 @@ app.post "/project/:project_id/flush", HttpController.flushProject
 
 app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpController.restore
 
+app.post "/doc/:doc_id/pack", HttpController.packDoc
+
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 

@@ -1,5 +1,6 @@
 UpdatesManager = require "./UpdatesManager"
 DiffManager = require "./DiffManager"
+PackManager = require "./PackManager"
 RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 
@@ -16,6 +17,13 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "compressing project history"
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	packDoc: (req, res, next = (error) ->) ->
+		doc_id = req.params.doc_id
+		logger.log doc_id: doc_id, "packing doc history"
+		PackManager.packDocHistory doc_id, (error) ->
 			return next(error) if error?
 			res.send 204
 
