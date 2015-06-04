@@ -7,6 +7,8 @@ Metrics = require "metrics-sharelatex"
 Metrics.initialize("track-changes")
 Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 
+child_process = require "child_process"
+
 HttpController = require "./app/js/HttpController"
 express = require "express"
 app = express()
@@ -22,6 +24,21 @@ app.get "/project/:project_id/updates", HttpController.getUpdates
 app.post "/project/:project_id/flush", HttpController.flushProject
 
 app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpController.restore
+
+app.post "/doc/:doc_id/pack", HttpController.packDoc
+
+packWorker = null # use a single packing worker
+
+app.post "/pack", (req, res, next) ->
+	if packWorker?
+		res.send "pack already running"
+	else
+		logger.log "running pack"
+		packWorker = child_process.fork(__dirname + '/app/js/PackWorker.js')
+		packWorker.on 'exit', (code, signal) ->
+			logger.log {code, signal}, "history auto pack exited"
+			packWorker = null
+		res.send "pack started"
 
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"

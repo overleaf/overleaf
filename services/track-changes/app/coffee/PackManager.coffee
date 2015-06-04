@@ -2,6 +2,8 @@ async = require "async"
 _ = require "underscore"
 {db, ObjectId} = require "./mongojs"
 BSON=db.bson.BSON
+logger = require "logger-sharelatex"
+LockManager = require "./LockManager"
 
 module.exports = PackManager =
 	# The following functions implement methods like a mongo find, but
@@ -325,25 +327,100 @@ module.exports = PackManager =
 
 	insertPack: (packObj, callback) ->
 		bulk = db.docHistory.initializeOrderedBulkOp()
+		doc_id = packObj.doc_id
 		expect_nInserted = 1
 		expect_nRemoved = packObj.pack.length
+		logger.log {doc_id: doc_id}, "adding pack, removing #{expect_nRemoved} ops"
 		bulk.insert packObj
 		packObj.pack.forEach (op) ->
 			bulk.find({_id:op._id}).removeOne()
 		bulk.execute (err, result) ->
 			if err?
+				logger.error {doc_id: doc_id}, "error adding pack"
 				callback(err, result)
 			else if result.nInserted != expect_nInserted or result.nRemoved != expect_nRemoved
+				logger.error {doc_id: doc_id, result}, "unexpected result adding pack"
 				callback(new Error(
 					msg: 'unexpected result'
 					expected: {expect_nInserted, expect_nRemoved}
 				), result)
 			else
-				db.docHistoryStats.update {doc_id:packObj.doc_id}, {
+				db.docHistoryStats.update {doc_id:doc_id}, {
 					$inc:{update_count:-expect_nRemoved},
 					$currentDate:{last_packed:true}
 				}, {upsert:true}, () ->
 					callback(err, result)
+
+	# retrieve document ops/packs and check them
+	getDocHistory: (doc_id, callback) ->
+		db.docHistory.find({doc_id:ObjectId(doc_id)}).sort {v:1}, (err, docs) ->
+			return callback(err) if err?
+			# for safety, do a consistency check of the history
+			logger.log {doc_id}, "checking history for document"
+			PackManager.checkHistory docs, (err) ->
+				return callback(err) if err?
+				callback(err, docs)
+				#PackManager.deleteExpiredPackOps docs, (err) ->
+				#	return callback(err) if err?
+				#	callback err, docs
+
+	packDocHistory: (doc_id, options, callback) ->
+		if typeof callback == "undefined" and typeof options == 'function'
+			callback = options
+			options = {}
+		LockManager.runWithLock(
+			"HistoryLock:#{doc_id}",
+			(releaseLock) ->
+				PackManager._packDocHistory(doc_id, options, releaseLock)
+			,	callback
+		)
+
+	_packDocHistory: (doc_id, options, callback) ->
+		logger.log {doc_id},"starting pack operation for document history"
+
+		PackManager.getDocHistory doc_id, (err, docs) ->
+			return callback(err) if err?
+			origDocs = 0
+			origPacks = 0
+			for d in docs
+				if d.pack? then	origPacks++	else origDocs++
+			PackManager.convertDocsToPacks docs, (err, packs) ->
+				return callback(err) if err?
+				total = 0
+				for p in packs
+					total = total + p.pack.length
+				logger.log {doc_id, origDocs, origPacks, newPacks: packs.length, totalOps: total}, "document stats"
+				if packs.length
+					if options['dry-run']
+						logger.log {doc_id}, 'dry-run, skipping write packs'
+						return callback()
+					PackManager.savePacks packs, (err) ->
+						return callback(err) if err?
+						# check the history again
+						PackManager.getDocHistory doc_id, callback
+				else
+					logger.log {doc_id}, "no packs to write"
+					# keep a record that we checked this one to avoid rechecking it
+					db.docHistoryStats.update {doc_id:doc_id}, {
+						$currentDate:{last_checked:true}
+					}, {upsert:true}, () ->
+						callback null, null
+
+	DB_WRITE_DELAY: 2000
+
+	savePacks: (packs, callback) ->
+		async.eachSeries packs, PackManager.safeInsert, (err, result) ->
+			if err?
+				logger.log {err, result}, "error writing packs"
+				callback err, result
+			else
+				callback()
+
+	safeInsert: (packObj, callback) ->
+		PackManager.insertPack packObj, (err, result) ->
+			setTimeout () ->
+				callback(err,result)
+			, PackManager.DB_WRITE_DELAY
 
 	deleteExpiredPackOps: (docs, callback) ->
 		now = Date.now()
