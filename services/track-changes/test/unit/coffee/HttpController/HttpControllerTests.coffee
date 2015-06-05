@@ -12,6 +12,7 @@ describe "HttpController", ->
 			"./UpdatesManager": @UpdatesManager = {}
 			"./DiffManager": @DiffManager = {}
 			"./RestoreManager": @RestoreManager = {}
+			"./PackManager": @PackManager = {}
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@next = sinon.stub()

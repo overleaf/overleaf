@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/MongoManager.js"
+packModulePath = "../../../../app/js/PackManager.js"
 SandboxedModule = require('sandboxed-module')
 {ObjectId} = require("mongojs")
 tk = require "timekeeper"
@@ -12,6 +13,8 @@ describe "MongoManager", ->
 		tk.freeze(new Date())
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
+			"./PackManager" : SandboxedModule.require packModulePath, requires:
+				"./LockManager" : {}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
