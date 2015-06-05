@@ -10,9 +10,23 @@ PackManager = require "./PackManager"
 # this worker script is forked by the main process to look for
 # document histories which can be packed
 
-DOCUMENT_PACK_DELAY = 1000
+LIMIT = Number(process.argv[2]) || 1000
+DOCUMENT_PACK_DELAY = Number(process.argv[3]) || 1000
+TIMEOUT = Number(process.argv[4]) || 30*60*1000
 
-logger.log 'checking for updates'
+shutDownRequested = false
+setTimeout () ->
+	logger.log "pack timed out, requesting shutdown"
+	# start the shutdown on the next pack
+	shutDownRequested = true
+	# do a hard shutdown after a further 5 minutes
+	setTimeout () ->
+		logger.error "HARD TIMEOUT in pack worker"
+		process.exit()
+	, 5*60*1000
+, TIMEOUT
+
+logger.log "checking for updates, limit=#{LIMIT}, delay=#{DOCUMENT_PACK_DELAY}, timeout=#{TIMEOUT}"
 
 finish = () ->
 	logger.log 'closing db'
@@ -26,6 +40,9 @@ processUpdates = (pending) ->
 			if err?
 				logger.error {err, result}, "error in pack worker"
 				return callback(err)
+			if shutDownRequested
+				logger.error "shutting down pack worker"
+				return callback(new Error("shutdown"))
 			setTimeout () ->
 				callback(err, result)
 			, DOCUMENT_PACK_DELAY
@@ -41,7 +58,7 @@ db.docHistoryStats.find({
 	update_count: {$gt : PackManager.MIN_COUNT}
 }).sort({
 	update_count:-1
-}).limit 1000, (err, results) ->
+}).limit LIMIT, (err, results) ->
 	if err?
 		logger.log {err}, 'error checking for updates'
 		finish()
