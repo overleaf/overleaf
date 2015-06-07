@@ -1,6 +1,7 @@
 child_process = require("child_process")
 logger = require 'logger-sharelatex'
 metrics = require('metrics-sharelatex')
+_ = require "underscore"
 
 BATCH_SIZE = 100
 
@@ -15,16 +16,24 @@ class ASpellWorker
 			@state = 'killed'
 			logger.log process: @pipe.pid, lang: @language, "aspell worker has exited"
 			metrics.inc "aspellWorker-exit-" + @language
+		@pipe.on 'close', () =>
+			@state = 'closed' unless @state == 'killed'
+			if @callback?
+				logger.err process: @pipe.pid, lang: @language, "aspell worker closed output streams with uncalled callback"
+				@callback new Error("aspell worker closed output streams with uncalled callback"), []
+				@callback = null
 		@pipe.on 'error', (err) =>
 			@state = 'error' unless @state == 'killed'
 			logger.log process: @pipe.pid, error: err, stdout: output.slice(-1024), stderr: error.slice(-1024), lang: @language, "aspell worker error"
 			if @callback?
 				@callback err, []
+				@callback = null
 		@pipe.stdin.on 'error', (err) =>
 			@state = 'error' unless @state == 'killed'
 			logger.log process: @pipe.pid, error: err, stdout: output.slice(-1024), stderr: error.slice(-1024), lang: @language, "aspell worker error on stdin"
 			if @callback?
 				@callback err, []
+				@callback = null
 
 		output = ""
 		endMarker = new RegExp("^[a-z][a-z]", "m")
@@ -33,6 +42,7 @@ class ASpellWorker
 			# We receive the language code from Aspell as the end of data marker
 			if chunk.toString().match(endMarker)
 				@callback(null, output.slice())
+				@callback = null # only allow one callback in use
 				@state = 'ready'
 				output = ""
 				error = ""
@@ -52,7 +62,10 @@ class ASpellWorker
 		# we will now send data to aspell, and be ready again when we
 		# receive the end of data marker
 		@state = 'busy'
-		@callback = callback
+		if @callback? # only allow one callback in use
+			logger.err process: @pipe.pid, lang: @language, "CALLBACK ALREADY IN USE"
+			return @callback new Error("Aspell callback already in use - SHOULD NOT HAPPEN")
+		@callback = _.once callback # extra defence against double callback
 		@setTerseMode()
 		@write(words)
 		@flush()

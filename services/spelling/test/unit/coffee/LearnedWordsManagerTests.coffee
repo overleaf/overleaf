@@ -19,6 +19,10 @@ describe "LearnedWordsManager", ->
 		@LearnedWordsManager = SandboxedModule.require modulePath, requires:
 			"./DB" : @db
 			"./MongoCache":@cache
+			"logger-sharelatex":
+				log:->
+				err:->
+				info:->
 
 	describe "learnWord", ->
 		beforeEach ->

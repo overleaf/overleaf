@@ -1,5 +1,4 @@
 async = require "async"
-_ = require "underscore"
 ASpellWorkerPool = require "./ASpellWorkerPool"
 LRU = require "lru-cache"
 logger = require 'logger-sharelatex'
@@ -87,7 +86,6 @@ module.exports = ASpell =
 	# http://aspell.net/man-html/Through-A-Pipe.html
 	checkWords: (language, words, callback = (error, result) ->) ->
 		runner = new ASpellRunner()
-		callback = _.once callback
 		runner.checkWords language, words, callback
 	ASPELL_TIMEOUT : 4000
 

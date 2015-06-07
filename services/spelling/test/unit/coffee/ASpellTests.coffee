@@ -6,7 +6,10 @@ assert = require("chai").assert
 
 describe "ASpell", ->
 	beforeEach ->
-		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:{}
+		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:
+			"logger-sharelatex":
+				log:->
+				err:->
 
 	describe "a correctly spelled word", ->
 		beforeEach (done) ->
@@ -58,7 +61,6 @@ describe "ASpell", ->
 		# Note that this test fails on OS X, due to differing pipe behaviour
 		# on killing the child process. It can be tested successfully on Travis
 		# or the CI server.
-		it "should return in reasonable time", (done) ->
+		it "should return in reasonable time", () ->
 			delta = Date.now()-@start
-			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 100)
-			done()
+			delta.should.be.below(@ASpell.ASPELL_TIMEOUT + 1000)

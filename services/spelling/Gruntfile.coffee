@@ -31,6 +31,8 @@ module.exports = (grunt) ->
 			unit:
 				options:
 					reporter: grunt.option('reporter') or 'spec'
+					grep: grunt.option("grep")
+					timeout: grunt.option("timeout")
 				src: ["test/unit/js/**/*.js"]
 
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
