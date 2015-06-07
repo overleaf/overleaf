@@ -15,7 +15,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "lru-cache": "^2.5.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
-    "mongojs": "0.9.11",
+    "mongojs": "0.18.2",
     "node-statsd": "0.0.3",
     "redis": "~0.8.4",
     "request": "^2.53.0",
