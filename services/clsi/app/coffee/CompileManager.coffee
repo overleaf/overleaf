@@ -108,3 +108,51 @@ module.exports = CompileManager =
 					column: parseInt(column, 10)
 				}
 		return results
+
+	_parseWordcountFromOutput: (output) ->
+		results = {
+			encode: ""
+			textWords: 0
+			headWords: 0
+			outside: 0
+			headers: 0
+			elements: 0
+			mathInline: 0
+			mathDisplay: 0
+		}
+		for line in output.split("\n")
+			[data, info] = line.split(":")
+			if data.indexOf("Encoding") > -1
+				results['encode'] = info.trim()
+			if data.indexOf("in text") > -1
+				results['textWords'] = parseInt(info, 10)
+			if data.indexOf("in head") > -1
+				results['headWords'] = parseInt(info, 10)
+			if data.indexOf("outside") > -1
+				results['outside'] = parseInt(info, 10)
+			if data.indexOf("of head") > -1
+				results['headers'] = parseInt(info, 10)
+			if data.indexOf("float") > -1
+				results['elements'] = parseInt(info, 10)
+			if data.indexOf("inlines") > -1
+				results['mathInline'] = parseInt(info, 10)
+			if data.indexOf("displayed") > -1
+				results['mathDisplay'] = parseInt(info, 10)
+
+		return results
+
+	wordcount: (project_id, file_name, callback = (error, pdfPositions) ->) ->
+		base_dir = Settings.path.synctexBaseDir(project_id)
+		file_path = base_dir + "/" + file_name
+		logger.log project_id: project_id, file_name: file_name, "try wordcount"
+		CompileManager._runWordcount [file_path], (error, stdout) ->
+			return callback(error) if error?
+			logger.log project_id: project_id, file_name: file_name, stdout: stdout, "wordcount output"
+			callback null, CompileManager._parseWordcountFromOutput(stdout)
+
+	_runWordcount: (args, callback = (error, stdout) ->) ->
+		bin_path = Path.resolve("texcount")
+		seconds = 1000
+		child_process.execFile "texcount", args, timeout: 10 * seconds, (error, stdout, stderr) ->
+			return callback(error) if error?
+			callback(null, stdout)

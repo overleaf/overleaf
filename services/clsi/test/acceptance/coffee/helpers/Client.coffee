@@ -90,3 +90,12 @@ module.exports = Client =
 
 			@compile project_id, req, callback
 
+	wordcount: (project_id, file, callback = (error, pdfPositions) ->) ->
+		request.get {
+			url: "#{@host}/project/#{project_id}/wordcount"
+			qs: {
+				file: file
+			}
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback null, JSON.parse(body)
