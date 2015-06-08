@@ -12,7 +12,7 @@
     "body-parser": "^1.12.0",
     "coffee-script": "^1.9.1",
     "express": "^4.12.1",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "lru-cache": "^2.5.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "mongojs": "0.18.2",
