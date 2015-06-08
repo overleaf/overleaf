@@ -189,3 +189,27 @@ describe "CompileController", ->
 				)
 				.should.equal true
 
+	describe "wordcount", ->
+		beforeEach ->
+			@file = "main.tex"
+			@project_id = "mock-project-id"
+			@req.params =
+				project_id: @project_id
+			@req.query =
+				file: @file
+			@res.send = sinon.stub()
+
+			@CompileManager.wordcount = sinon.stub().callsArgWith(2, null, @texcount = ["mock-texcount"])
+			@CompileController.wordcount @req, @res, @next
+
+		it "should return the word count of a file", ->
+			@CompileManager.wordcount
+				.calledWith(@project_id, @file)
+				.should.equal true
+
+		it "should return the texcount info", ->
+			@res.send
+				.calledWith(JSON.stringify
+					texcount: @texcount
+				)
+				.should.equal true

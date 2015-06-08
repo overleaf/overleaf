@@ -144,14 +144,12 @@ module.exports = CompileManager =
 	wordcount: (project_id, file_name, callback = (error, pdfPositions) ->) ->
 		base_dir = Settings.path.synctexBaseDir(project_id)
 		file_path = base_dir + "/" + file_name
-		logger.log project_id: project_id, file_name: file_name, "try wordcount"
 		CompileManager._runWordcount [file_path], (error, stdout) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, file_name: file_name, stdout: stdout, "wordcount output"
 			callback null, CompileManager._parseWordcountFromOutput(stdout)
 
 	_runWordcount: (args, callback = (error, stdout) ->) ->
-		bin_path = Path.resolve("texcount")
 		seconds = 1000
 		child_process.execFile "texcount", args, timeout: 10 * seconds, (error, stdout, stderr) ->
 			return callback(error) if error?

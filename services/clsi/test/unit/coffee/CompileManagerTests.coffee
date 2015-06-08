@@ -172,3 +172,32 @@ describe "CompileManager", ->
 						column: @column
 					}])
 					.should.equal true
+
+	describe "wordcount", ->
+		beforeEach ->
+			@file_name = "main.tex"
+			@child_process.execFile = sinon.stub()
+			@child_process.execFile.callsArgWith(3, null, @stdout = "Encoding: ascii\nWords in text: 2", "")
+			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}"
+			@CompileManager.wordcount @project_id, @file_name, @callback
+
+		it "should execute the texcount binary", ->
+			file_path = "#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}"
+			@child_process.execFile
+				.calledWith("texcount", [file_path], timeout: 10000)
+				.should.equal true
+
+		it "should call the callback with the parsed output", ->
+			@callback
+				.calledWith(null, {
+					encode: "ascii"
+					textWords: 2
+					headWords: 0
+					outside: 0
+					headers: 0
+					elements: 0
+					mathInline: 0
+					mathDisplay: 0
+				})
+				.should.equal true
+
