@@ -13,11 +13,11 @@
     "request": "2.21.0",
     "socket.io": "0.9.14",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "grunt-requirejs": "~0.4.0",
     "grunt-mocha-test": "~0.8.0",
-    "mongojs": "0.9.11",
+    "mongojs": "0.18.2",
     "redis": "~0.10.1",
     "coffee-script": "~1.7.1",
     "timekeeper": "0.0.4"
