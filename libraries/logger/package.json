@@ -9,6 +9,6 @@
   "version": "1.0.0",
   "dependencies": {
     "coffee-script": "1.4.0",
-    "bunyan": "0.16.x"
+    "bunyan": "1.3.6"
   }
 }
