@@ -26,7 +26,7 @@
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
-    "mongojs": "0.10.1",
+    "mongojs": "0.18.2",
     "mongoose": "3.8.28",
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.1",
