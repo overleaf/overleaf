@@ -54,7 +54,7 @@ module.exports = UpdateManager =
 			UpdateManager.applyUpdates project_id, doc_id, updates, callback
 
 	applyUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
-		for update in updates
+		for update in updates or []
 			UpdateManager._sanitizeUpdate update
 		ShareJsUpdateManager.applyUpdates project_id, doc_id, updates, (error, updatedDocLines, version) ->
 			return callback(error) if error?
