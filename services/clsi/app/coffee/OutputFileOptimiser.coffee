@@ -9,7 +9,7 @@ module.exports = OutputFileOptimiser =
 	optimiseFile: (src, dst, callback = (error) ->) ->
 		# check output file (src) and see if we can optimise it, storing
 		# the result in the build directory (dst)
-		if src.match(/\.pdf$/)
+		if src.match(/\/output\.pdf$/)
 			OutputFileOptimiser.optimisePDF src, dst, callback
 		else
 			callback (null)
