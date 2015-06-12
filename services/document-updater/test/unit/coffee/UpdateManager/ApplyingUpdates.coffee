@@ -180,19 +180,39 @@ describe "UpdateManager", ->
 				
 	describe "applyUpdates", ->
 		beforeEach ->
-			@updates = [{p: 1, t: "foo"}]
+			@updates = [{op: [{p: 42, i: "foo"}]}]
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
 			@ShareJsUpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version)
 			@RedisManager.setDocument = sinon.stub().callsArg(3)
-			@UpdateManager.applyUpdates @project_id, @doc_id, @updates, @callback
+		
+		describe "normally", ->
+			beforeEach ->
+				@UpdateManager.applyUpdates @project_id, @doc_id, @updates, @callback
+			
+			it "should apply the updates via ShareJS", ->
+				@ShareJsUpdateManager.applyUpdates
+					.calledWith(@project_id, @doc_id, @updates)
+					.should.equal true
 
-		it "should save the document", ->
-			@RedisManager.setDocument
-				.calledWith(@doc_id, @updatedDocLines, @version)
-				.should.equal true
+			it "should save the document", ->
+				@RedisManager.setDocument
+					.calledWith(@doc_id, @updatedDocLines, @version)
+					.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+			it "should call the callback", ->
+				@callback.called.should.equal true
 
+		describe "with UTF-16 surrogate pairs in the update", ->
+			beforeEach ->
+				@updates = [{op: [{p: 42, i: "\uD835\uDC00"}]}]
+				@UpdateManager.applyUpdates @project_id, @doc_id, @updates, @callback
+
+			it "should apply the update but with surrogate pairs removed", ->
+				@ShareJsUpdateManager.applyUpdates
+					.calledWith(@project_id, @doc_id, @updates)
+					.should.equal true
+				
+				# \uFFFD is 'replacement character'
+				@updates[0].op[0].i.should.equal "\uFFFD\uFFFD"
 

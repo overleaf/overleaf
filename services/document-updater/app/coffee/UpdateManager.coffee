@@ -54,6 +54,8 @@ module.exports = UpdateManager =
 			UpdateManager.applyUpdates project_id, doc_id, updates, callback
 
 	applyUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
+		for update in updates
+			UpdateManager._sanitizeUpdate update
 		ShareJsUpdateManager.applyUpdates project_id, doc_id, updates, (error, updatedDocLines, version) ->
 			return callback(error) if error?
 			logger.log doc_id: doc_id, version: version, "updating doc via sharejs"
@@ -75,5 +77,22 @@ module.exports = UpdateManager =
 	_handleErrorInsideLock: (doc_id, original_error, callback = (error) ->) ->
 		LockManager.releaseLock doc_id, (lock_error) ->
 			callback(original_error)
+	
+	_sanitizeUpdate: (update) ->
+		# In Javascript, characters are 16-bits wide. It does not understand surrogates as characters.
+		# 
+		# From Wikipedia (http://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane):
+		# "The High Surrogates (U+D800–U+DBFF) and Low Surrogate (U+DC00–U+DFFF) codes are reserved
+		# for encoding non-BMP characters in UTF-16 by using a pair of 16-bit codes: one High Surrogate
+		# and one Low Surrogate. A single surrogate code point will never be assigned a character.""
+		# 
+		# The main offender seems to be \uD835 as a stand alone character, which would be the first
+		# 16-bit character of a blackboard bold character (http://www.fileformat.info/info/unicode/char/1d400/index.htm).
+		# Something must be going on client side that is screwing up the encoding and splitting the
+		# two 16-bit characters so that \uD835 is standalone.
+		for op in update.op or []
+			if op.i?
+				# Replace high and low surrogate characters with 'replacement character' (\uFFFD)
+				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD")
+		return update
 
-			
