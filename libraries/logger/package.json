@@ -3,12 +3,13 @@
   "homepage": "www.sharelatex.com",
   "description": "A centralised logging system for ShareLaTeX",
   "repository": {
-      "type": "git",
-      "url": "http://github.com/sharelatex/logger-sharelatex.git"
+    "type": "git",
+    "url": "http://github.com/sharelatex/logger-sharelatex.git"
   },
   "version": "1.0.0",
   "dependencies": {
+    "bunyan": "1.3.6",
     "coffee-script": "1.4.0",
-    "bunyan": "1.3.6"
+    "raven": "^0.8.0"
   }
 }
