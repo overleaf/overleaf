@@ -13,6 +13,7 @@ streamBuffers = require("stream-buffers")
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("filestore")
 Metrics.open_sockets.monitor(logger)
+Metrics.event_loop?.monitor(logger)
 
 app.configure ->
 	app.use express.bodyParser()
