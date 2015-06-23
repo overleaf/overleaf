@@ -26,10 +26,13 @@ module.exports = TpdsUpdateSender =
 				method:method
 				job:job
 			method:"post"
+			timeout: (5 * 1000)
 		request opts, (err)->
 			if err?
+				logger.err err:err, "error queuing something in the tpdsworker"
 				callback(err)
 			else
+				logger.log group:group, "successfully queued up job for tpdsworker"
 				callback()
 
 	_addEntity: (options, callback = (err)->)->
