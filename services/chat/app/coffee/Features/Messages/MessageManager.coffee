@@ -34,6 +34,8 @@ module.exports = MessageManager =
 
 		for message in messages
 			do (message) ->
+				if !message?
+					return
 				jobs.push (callback) ->
 					getUserDetails message.user_id.toString(), (error, user) ->
 						return callback(error) if error?
