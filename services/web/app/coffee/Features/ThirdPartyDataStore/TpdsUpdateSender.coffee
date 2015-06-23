@@ -20,13 +20,12 @@ module.exports = TpdsUpdateSender =
 
 	_enqueue: (group, method, job, callback)->
 		opts = 
-			uri:"http://localhost:3030/enqueue/web_to_tpds_http_requests"
+			uri:"#{settings.apis.tpdsworker.url}/enqueue/web_to_tpds_http_requests"
 			json :
 				group:group
 				method:method
 				job:job
 			method:"post"
-
 		request opts, (err)->
 			if err?
 				callback(err)
