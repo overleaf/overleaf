@@ -5,20 +5,14 @@ define [
 		return {
 			controller: ["$scope", ($scope) ->
 				# Selecting or deselecting all should apply to all projects
-				selectAll = () ->
+				@selectAll = () ->
 					$scope.$broadcast "select-all:select"
 
-				deselectAll = () ->
+				@deselectAll = () ->
 					$scope.$broadcast "select-all:deselect"
 
-				clearSelectAllState = () ->
+				@clearSelectAllState = () ->
 					$scope.$broadcast "select-all:clear"
-
-				return {
-					clearSelectAllState: clearSelectAllState
-					selectAll: selectAll
-					deselectAll: deselectAll
-				}
 			]
 			link: (scope, element, attrs) ->
 
