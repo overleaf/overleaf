@@ -39,7 +39,7 @@ for path in [
 		logger.log filePath:filePath, "file does not exist for fingerprints"
 	
 
-module.exports = (app)->
+module.exports = (app, webRouter, apiRouter)->
 	app.use (req, res, next)->
 		res.locals.session = req.session
 		next()
@@ -94,8 +94,8 @@ module.exports = (app)->
 			return ""
 		next()
 
-	app.use (req, res, next) ->
-		res.locals.csrfToken = req.csrfToken()
+	webRouter.use (req, res, next) ->
+		res.locals.csrfToken = req?.csrfToken()
 		next()
 
 	app.use (req, res, next) ->

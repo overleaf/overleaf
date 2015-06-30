@@ -10,8 +10,8 @@ wsProxy = httpProxy.createProxyServer({
 })
 
 module.exports =
-	apply: (app) ->
-		app.all /\/socket\.io\/.*/, (req, res, next) ->
+	apply: (webRouter, apiRouter) ->
+		webRouter.all /\/socket\.io\/.*/, (req, res, next) ->
 			proxy.web req, res, next
 			
 		setTimeout () ->

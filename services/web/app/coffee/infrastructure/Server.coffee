@@ -44,19 +44,31 @@ else
 
 app = express()
 
-ignoreCsrfRoutes = []
-app.ignoreCsrf = (method, route) ->
-	ignoreCsrfRoutes.push new express.Route(method, route)
-
+webRouter = express.Router()
+apiRouter = express.Router()
 
 if Settings.behindProxy
 	app.enable('trust proxy')
-app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
+
+webRouter.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 app.set 'views', __dirname + '/../../views'
 app.set 'view engine', 'jade'
 Modules.loadViewIncludes app
-app.use cookieParser(Settings.security.sessionSecret)
-app.use session
+
+
+
+app.use bodyParser.urlencoded({ extended: true })
+app.use bodyParser.json()
+app.use multer(dest: Settings.path.uploadFolder)
+app.use methodOverride()
+
+app.use metrics.http.monitor(logger)
+app.use RedirectManager
+app.use OldAssetProxy
+
+
+webRouter.use cookieParser(Settings.security.sessionSecret)
+webRouter.use session
 	resave: false
 	secret:Settings.security.sessionSecret
 	proxy: Settings.behindProxy
@@ -66,36 +78,23 @@ app.use session
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
-
-app.use bodyParser.urlencoded({ extended: true })
-app.use bodyParser.json()
-app.use multer(dest: Settings.path.uploadFolder)
-app.use translations.expressMiddlewear
-app.use translations.setLangBasedOnDomainMiddlewear
+webRouter.use csrfProtection
+webRouter.use translations.expressMiddlewear
+webRouter.use translations.setLangBasedOnDomainMiddlewear
 
 # Measure expiry from last request, not last login
-app.use (req, res, next) ->
+webRouter.use (req, res, next) ->
 	req.session.touch()
 	next()
 
-app.use (req, res, next) ->
-	for route in ignoreCsrfRoutes
-		if route.method == req.method?.toLowerCase() and route.match(req.path)
-			return next()
-	csrfProtection(req, res, next)
-	
-app.use ReferalConnect.use
-app.use methodOverride()
-
-expressLocals(app)
+webRouter.use ReferalConnect.use
+expressLocals(app, webRouter, apiRouter)
 
 if app.get('env') == 'production'
 	logger.info "Production Enviroment"
 	app.enable('view cache')
 
-app.use metrics.http.monitor(logger)
-app.use RedirectManager
-app.use OldAssetProxy
+
 
 app.use (req, res, next)->
 	metrics.inc "http-request"
@@ -109,12 +108,11 @@ app.use (req, res, next) ->
 	else
 		next()
 
-app.get "/status", (req, res)->
+apiRouter.get "/status", (req, res)->
 	res.send("web sharelatex is alive")
-	req.session.destroy()
 	
 profiler = require "v8-profiler"
-app.get "/profile", (req, res) ->
+apiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
 	profiler.startProfiling("test")
 	setTimeout () ->
@@ -125,7 +123,12 @@ app.get "/profile", (req, res) ->
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-router = new Router(app)
+# process api routes first, if nothing matched fall though and use
+# web middlewear + routes
+app.use(apiRouter)
+app.use(webRouter)
+
+router = new Router(webRouter, apiRouter)
 
 module.exports =
 	app: app

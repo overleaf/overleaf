@@ -3,18 +3,18 @@ UniversityController = require("./UniversityController")
 
 
 module.exports =
-	apply: (app) ->
-		app.get  '/', HomeController.index
-		app.get  '/home', HomeController.home
+	apply: (webRouter, apiRouter) ->
+		webRouter.get  '/', HomeController.index
+		webRouter.get  '/home', HomeController.home
 
-		app.get '/tos', HomeController.externalPage("tos", "Terms of Service")
-		app.get '/about', HomeController.externalPage("about", "About Us")
-		app.get '/security', HomeController.externalPage("security", "Security")
-		app.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
-		app.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
-		app.get '/style', HomeController.externalPage("style_guide", "Style Guide")
+		webRouter.get '/tos', HomeController.externalPage("tos", "Terms of Service")
+		webRouter.get '/about', HomeController.externalPage("about", "About Us")
+		webRouter.get '/security', HomeController.externalPage("security", "Security")
+		webRouter.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
+		webRouter.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
+		webRouter.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 
-		app.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
+		webRouter.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
 
-		app.get '/university', UniversityController.getIndexPage
-		app.get '/university/*', UniversityController.getPage
+		webRouter.get '/university', UniversityController.getIndexPage
+		webRouter.get '/university/*', UniversityController.getPage
