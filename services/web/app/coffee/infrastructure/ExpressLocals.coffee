@@ -95,7 +95,7 @@ module.exports = (app)->
 		next()
 
 	app.use (req, res, next) ->
-		res.locals.csrfToken = req.session._csrf
+		res.locals.csrfToken = req.csrfToken()
 		next()
 
 	app.use (req, res, next) ->

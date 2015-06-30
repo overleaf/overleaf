@@ -7,14 +7,22 @@ crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
-
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
 
-RedisStore = require('connect-redis')(express)
+session = require("express-session")
+RedisStore = require('connect-redis')(session)
+bodyParser = require('body-parser')
+multer  = require('multer')
+methodOverride = require('method-override')
+csrf = require('csurf')
+csrfProtection = csrf()
+cookieParser = require('cookie-parser')
+
 sessionStore = new RedisStore(client:rclient)
 
-cookieParser = express.cookieParser(Settings.security.sessionSecret)
+Mongoose = require("./Mongoose")
+
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
@@ -36,49 +44,52 @@ else
 
 app = express()
 
-csrf = express.csrf()
 ignoreCsrfRoutes = []
 app.ignoreCsrf = (method, route) ->
 	ignoreCsrfRoutes.push new express.Route(method, route)
 
 
-app.configure () ->
-	if Settings.behindProxy
-		app.enable('trust proxy')
-	app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
-	app.set 'views', __dirname + '/../../views'
-	app.set 'view engine', 'jade'
-	Modules.loadViewIncludes app
-	app.use express.bodyParser(uploadDir: Settings.path.uploadFolder)
-	app.use translations.expressMiddlewear
-	app.use translations.setLangBasedOnDomainMiddlewear
-	app.use cookieParser
-	app.use express.session
-		proxy: Settings.behindProxy
-		cookie:
-			domain: Settings.cookieDomain
-			maxAge: Settings.cookieSessionLength
-			secure: Settings.secureCookie
-		store: sessionStore
-		key: Settings.cookieName
-	
-	# Measure expiry from last request, not last login
-	app.use (req, res, next) ->
-		req.session.touch()
-		next()
-	
-	app.use (req, res, next) ->
-		for route in ignoreCsrfRoutes
-			if route.method == req.method?.toLowerCase() and route.match(req.path)
-				return next()
-		csrf(req, res, next)
+if Settings.behindProxy
+	app.enable('trust proxy')
+app.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
+app.set 'views', __dirname + '/../../views'
+app.set 'view engine', 'jade'
+Modules.loadViewIncludes app
+app.use cookieParser(Settings.security.sessionSecret)
+app.use session
+	resave: false
+	secret:Settings.security.sessionSecret
+	proxy: Settings.behindProxy
+	cookie:
+		domain: Settings.cookieDomain
+		maxAge: Settings.cookieSessionLength
+		secure: Settings.secureCookie
+	store: sessionStore
+	key: Settings.cookieName
 
-	app.use ReferalConnect.use
-	app.use express.methodOverride()
+app.use bodyParser.urlencoded({ extended: true })
+app.use bodyParser.json()
+app.use multer(dest: Settings.path.uploadFolder)
+app.use translations.expressMiddlewear
+app.use translations.setLangBasedOnDomainMiddlewear
+
+# Measure expiry from last request, not last login
+app.use (req, res, next) ->
+	req.session.touch()
+	next()
+
+app.use (req, res, next) ->
+	for route in ignoreCsrfRoutes
+		if route.method == req.method?.toLowerCase() and route.match(req.path)
+			return next()
+	csrfProtection(req, res, next)
+	
+app.use ReferalConnect.use
+app.use methodOverride()
 
 expressLocals(app)
 
-app.configure 'production', ->
+if app.get('env') == 'production'
 	logger.info "Production Enviroment"
 	app.enable('view cache')
 

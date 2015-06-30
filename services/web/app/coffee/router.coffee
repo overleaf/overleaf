@@ -44,7 +44,6 @@ module.exports = class Router
 		if !Settings.allowPublicAccess
 			app.all '*', AuthenticationController.requireGlobalLogin
 
-		app.use(app.router)
 		
 		app.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
@@ -77,8 +76,8 @@ module.exports = class Router
 		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
-		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
+		app.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
+		app.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
 		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
 		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
@@ -107,11 +106,11 @@ module.exports = class Router
 				req.params = params
 				next()
 			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
-		app.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
+		app.delete "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
 		app.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
 		app.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
 
-		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
+		app.delete '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
 		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
 
@@ -138,12 +137,12 @@ module.exports = class Router
 		app.ignoreCsrf('post', '/project/:Project_id/doc/:doc_id')
 
 		app.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
-		app.del  '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
+		app.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 		app.ignoreCsrf('post', '/user/:user_id/update/*')
 		app.ignoreCsrf('delete', '/user/:user_id/update/*')
 		
 		app.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
-		app.del  '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
+		app.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 		app.ignoreCsrf('post', '/project/:project_id/contents/*')
 		app.ignoreCsrf('delete', '/project/:project_id/contents/*')
 
