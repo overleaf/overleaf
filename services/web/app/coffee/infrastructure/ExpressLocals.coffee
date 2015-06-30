@@ -40,37 +40,37 @@ for path in [
 	
 
 module.exports = (app, webRouter, apiRouter)->
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.session = req.session
 		next()
 
-	app.use (req, res, next)-> 
+	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
 		next()
 
-	app.use (req, res, next)-> 
+	webRouter.use (req, res, next)-> 
 		res.locals.settings = Settings
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.translate = (key, vars = {}) ->
 			vars.appName = Settings.appName
 			req.i18n.translate(key, vars)
 		res.locals.currentUrl = req.originalUrl
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.getSiteHost = ->
 			Settings.siteUrl.substring(Settings.siteUrl.indexOf("//")+2)
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.formatProjectPublicAccessLevel = (privilegeLevel)->
 			formatedPrivileges = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
 			return formatedPrivileges[privilegeLevel] || "Private"
 		next()
 
-	app.use (req, res, next)-> 
+	webRouter.use (req, res, next)-> 
 		res.locals.buildReferalUrl = (referal_medium) ->
 			url = Settings.siteUrl
 			if req.session? and req.session.user? and req.session.user.referal_id?
@@ -98,12 +98,12 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.csrfToken = req?.csrfToken()
 		next()
 
-	app.use (req, res, next) ->
+	webRouter.use (req, res, next) ->
 		res.locals.getReqQueryParam = (field)->
 			return req.query?[field]
 		next()
 
-	app.use (req, res, next)-> 
+	webRouter.use (req, res, next)-> 
 		res.locals.fingerprint = (path) ->
 			if fingerprints[path]?
 				return fingerprints[path]
@@ -112,16 +112,16 @@ module.exports = (app, webRouter, apiRouter)->
 				return ""
 		next()
 
-	app.use (req, res, next)-> 
+	webRouter.use (req, res, next)-> 
 		res.locals.formatPrice = SubscriptionFormatters.formatPrice
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.externalAuthenticationSystemUsed = ->
 			Settings.ldap?
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		if req.session.user?
 			res.locals.user =
 				email: req.session.user.email
@@ -139,34 +139,34 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.sentryPublicDSN = Settings.sentry?.publicDSN
 		next()
 
-	app.use (req, res, next) ->
+	webRouter.use (req, res, next) ->
 		if req.query? and req.query.scribtex_path?
 			res.locals.lookingForScribtex = true
 			res.locals.scribtexPath = req.query.scribtex_path
 		next()
 
-	app.use (req, res, next) ->
+	webRouter.use (req, res, next) ->
 		res.locals.nav = Settings.nav
 		res.locals.templates = Settings.templateLinks
 		next()
 		
-	app.use (req, res, next) ->
+	webRouter.use (req, res, next) ->
 		SystemMessageManager.getMessages (error, messages = []) ->
 			res.locals.systemMessages = messages
 			next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		res.locals.query = req.query
 		next()
 
-	app.use (req, res, next)->
+	webRouter.use (req, res, next)->
 		subdomain = _.find Settings.i18n.subdomainLang, (subdomain)->
 			subdomain.lngCode == req.showUserOtherLng and !subdomain.hide
 		res.locals.recomendSubdomain = subdomain
 		res.locals.currentLngCode = req.lng
 		next()
 
-	app.use (req, res, next) ->
+	webRouter.use (req, res, next) ->
 		if Settings.reloadModuleViewsOnEachRequest
 			Modules.loadViewIncludes()
 		res.locals.moduleIncludes = Modules.moduleIncludes
