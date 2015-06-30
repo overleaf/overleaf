@@ -21,7 +21,6 @@ module.exports =
 			else
 				logger.log user_id:user_id, filePath:filePath, projectName:projectName, "telling tpds update has been processed"
 				res.send 200
-			req.session.destroy()
 
 
 	deleteUpdate: (req, res)->
@@ -36,7 +35,6 @@ module.exports =
 			else
 				logger.log user_id:user_id, filePath:filePath, projectName:projectName, "telling tpds delete has been processed"
 				res.send 200
-			req.session.destroy()
 	
 	# updateProjectContents and deleteProjectContents are used by GitHub. The project_id is known so we 
 	# can skip right ahead to creating/updating/deleting the file. These methods will not ignore noisy
@@ -50,7 +48,6 @@ module.exports =
 		UpdateMerger.mergeUpdate project_id, path, req, source, (error) ->
 			return next(error) if error?
 			res.send(200)
-			req.session.destroy()
 			
 	deleteProjectContents: (req, res, next = (error) ->) ->
 		{project_id} = req.params
@@ -60,7 +57,6 @@ module.exports =
 		UpdateMerger.deleteUpdate project_id, path, source, (error) ->
 			return next(error) if error?
 			res.send(200)
-			req.session.destroy()
 
 	parseParams: parseParams = (req)->
 		path = req.params[0]

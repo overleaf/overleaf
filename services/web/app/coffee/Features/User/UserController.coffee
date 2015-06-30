@@ -20,7 +20,7 @@ module.exports =
 		user_id = req.session.user._id
 		UserDeleter.deleteUser user_id, (err)->
 			if !err?
-				req.session.destroy()
+				req.session?.destroy()
 			res.send(200)
 
 	unsubscribe: (req, res)->

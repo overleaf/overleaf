@@ -4,7 +4,6 @@ EditorController = require "../Editor/EditorController"
 
 module.exports = CollaboratorsController =
 	getCollaborators: (req, res, next = (error) ->) ->
-		req.session.destroy()
 		ProjectGetter.getProject req.params.Project_id, { owner_ref: true, collaberator_refs: true, readOnly_refs: true}, (error, project) ->
 			return next(error) if error?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->

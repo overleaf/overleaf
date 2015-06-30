@@ -98,8 +98,6 @@ describe 'TpdsController', ->
 		it "should return a success", ->
 			@res.send.calledWith(200).should.equal true
 
-		it "should clear the session", ->
-			@req.session.destroy.called.should.equal true
 			
 	describe 'deleteProjectContents', ->
 		beforeEach ->
@@ -124,7 +122,4 @@ describe 'TpdsController', ->
 				
 		it "should return a success", ->
 			@res.send.calledWith(200).should.equal true
-
-		it "should clear the session", ->
-			@req.session.destroy.called.should.equal true
 

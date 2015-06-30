@@ -40,10 +40,3 @@ describe 'Project api controller', ->
 				resCode.should.equal 500
 				done()
 			@controller.getProjectDetails @req, @res
-
-		it "should destroy the session", (done)->
-			@ProjectDetailsHandler.getDetails.callsArgWith(1, null, @projDetails)
-			@res.json = (data)=>
-				@req.session.destroy.called.should.equal true
-				done()
-			@controller.getProjectDetails @req, @res
