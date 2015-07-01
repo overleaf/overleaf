@@ -154,6 +154,7 @@ module.exports = AuthenticationController =
 		# Regenerate the session to get a new sessionID (cookie value) to
 		# protect against session fixation attacks
 		oldSession = req.session
+		req.session.destroy()
 		req.sessionStore.generate(req)
 		for key, value of oldSession
 			req.session[key] = value
