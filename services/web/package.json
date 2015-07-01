@@ -12,11 +12,8 @@
   "dependencies": {
     "archiver": "0.9.0",
     "async": "0.6.2",
-<<<<<<< HEAD
-=======
     "base64-stream": "^0.1.2",
     "basic-auth-connect": "^1.0.0",
->>>>>>> 90b15d3... v1 of express4 conversion
     "bcrypt": "0.8.3",
     "body-parser": "^1.13.1",
     "bufferedstream": "1.6.0",
@@ -31,22 +28,14 @@
     "ldapjs": "^0.7.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "lynx": "0.1.1",
-<<<<<<< HEAD
-=======
     "marked": "^0.3.3",
     "method-override": "^2.3.3",
->>>>>>> 90b15d3... v1 of express4 conversion
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.1.0",
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
     "mongojs": "0.18.2",
     "mongoose": "3.8.28",
-<<<<<<< HEAD
-=======
-    "mongoose-auto-increment": "3.0.2",
     "multer": "^0.1.8",
-    "mysql": "^2.7.0",
->>>>>>> 90b15d3... v1 of express4 conversion
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.1",
     "optimist": "0.6.1",

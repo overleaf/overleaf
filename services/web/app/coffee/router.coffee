@@ -64,7 +64,6 @@ module.exports = class Router
 		PasswordResetRouter.apply(webRouter, apiRouter)
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
-		AnalyticsRouter.apply(webRouter, apiRouter)
 		
 		Modules.applyRouter(webRouter, apiRouter)
 
