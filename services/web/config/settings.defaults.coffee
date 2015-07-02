@@ -68,8 +68,6 @@ module.exports =
 		thirdPartyDataStore:
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
-		tpdsworker:
-			url: "http://localhost:3030"
 		tags:
 			url :"http://localhost:3012"
 		spelling:

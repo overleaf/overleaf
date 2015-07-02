@@ -15,10 +15,15 @@ buildPath = (user_id, project_name, filePath)->
 
 
 
+tpdsworkerEnabled = -> settings.apis.tpdsworker?.url?
+if !tpdsworkerEnabled()
+	logger.log "tpdsworker is not enabled, request will not be sent to it"
 
 module.exports = TpdsUpdateSender =
 
 	_enqueue: (group, method, job, callback)->
+		if !tpdsworkerEnabled()
+			return callback()
 		opts = 
 			uri:"#{settings.apis.tpdsworker.url}/enqueue/web_to_tpds_http_requests"
 			json :

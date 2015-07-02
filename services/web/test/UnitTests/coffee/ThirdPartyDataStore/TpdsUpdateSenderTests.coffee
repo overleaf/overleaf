@@ -23,20 +23,44 @@ describe 'TpdsUpdateSender', ->
 		project = {owner_ref:user_id,readOnly_refs:[read_only_ref_1], collaberator_refs:[collaberator_ref_1]}
 		@Project = findById:sinon.stub().callsArgWith(2, null, project)
 		@docstoreUrl = "docstore.sharelatex.env"
+		@request = sinon.stub().returns(pipe:->)
+		@settings = 
+			siteUrl:siteUrl
+			httpAuthSiteUrl:httpAuthSiteUrl,
+			apis: 
+				thirdPartyDataStore: {url: thirdPartyDataStoreApiUrl}
+				filestore:
+					url: filestoreUrl
+				docstore:
+					pubUrl: @docstoreUrl
 		@updateSender = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": 
-				siteUrl:siteUrl
-				httpAuthSiteUrl:httpAuthSiteUrl,
-				apis: 
-					thirdPartyDataStore: {url: thirdPartyDataStoreApiUrl}
-					filestore:
-						url: filestoreUrl
-					docstore:
-						pubUrl: @docstoreUrl
-
+			"settings-sharelatex": @settings
 			"logger-sharelatex":{log:->}
 			'../../models/Project': Project:@Project
-			'request':->{pipe:->}
+			'request':@request
+
+	describe "_enqueue", ->
+
+		it "should not call request if there is no tpdsworker url", (done)->
+			@updateSender._enqueue null, null, null, (err)=>
+				@request.called.should.equal false
+				done()
+
+		it "should post the message to the tpdsworker", (done)->
+			@settings.apis.tpdsworker = url:"www.tpdsworker.env"
+			group = "myproject"
+			method = "somemethod"
+			job = "do something"
+			@request.callsArgWith(1)
+			@updateSender._enqueue group, method, job, (err)=>
+				args = @request.args[0][0]
+				args.json.group.should.equal group
+				args.json.job.should.equal job
+				args.json.method.should.equal method
+				args.uri.should.equal "www.tpdsworker.env/enqueue/web_to_tpds_http_requests"
+				done()
+
+
 
 	describe 'sending updates', ->
 
