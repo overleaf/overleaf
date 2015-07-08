@@ -50,12 +50,12 @@ module.exports = AdminController =
 	dissconectAllUsers: (req, res)=>
 		logger.warn "disconecting everyone"
 		EditorRealTimeController.emitToAll 'forceDisconnect', "Sorry, we are performing a quick update to the editor and need to close it down. Please refresh the page to continue."
-		res.send(200)
+		res.sendStatus(200)
 
 	closeEditor : (req, res)->
 		logger.warn "closing editor"
 		Settings.editorIsOpen = req.body.isOpen
-		res.send(200)
+		res.sendStatus(200)
 
 	writeAllToMongo : (req, res)->
 		logger.log "writing all docs to mongo"
@@ -74,19 +74,19 @@ module.exports = AdminController =
 
 	flushProjectToTpds: (req, res)->
 		projectEntityHandler.flushProjectToThirdPartyDataStore req.body.project_id, (err)->
-			res.send 200
+			res.sendStatus 200
 
 	pollDropboxForUser: (req, res)->
 		user_id = req.body.user_id
 		TpdsUpdateSender.pollDropboxForUser user_id, () ->
-			res.send 200
+			res.sendStatus 200
 			
 	createMessage: (req, res, next) ->
 		SystemMessageManager.createMessage req.body.content, (error) ->
 			return next(error) if error?
-			res.send 200
+			res.sendStatus 200
 			
 	clearMessages: (req, res, next) ->
 		SystemMessageManager.clearMessages (error) ->
 			return next(error) if error?
-			res.send 200
+			res.sendStatus 200

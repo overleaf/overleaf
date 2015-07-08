@@ -11,4 +11,4 @@ module.exports = SpellingController =
 		getReq.pipe(res)
 		getReq.on "error", (error) ->
 			logger.error err: error, "Spelling API error"
-			res.send 500
+			res.sendStatus 500

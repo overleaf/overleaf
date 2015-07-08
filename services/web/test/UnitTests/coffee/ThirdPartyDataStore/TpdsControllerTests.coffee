@@ -28,7 +28,7 @@ describe 'TpdsController', ->
 				headers:
 					"x-sl-update-source": @source = "dropbox"
 			@TpdsUpdateHandler.newUpdate = sinon.stub().callsArg(5)
-			res =  send: => 
+			res =  sendStatus: => 
 				@TpdsUpdateHandler.newUpdate.calledWith(@user_id, "projectName","/here.txt", req, @source).should.equal true
 				done()
 			@TpdsController.mergeUpdate req, res
@@ -43,7 +43,7 @@ describe 'TpdsController', ->
 				headers:
 					"x-sl-update-source": @source = "dropbox"
 			@TpdsUpdateHandler.deleteUpdate = sinon.stub().callsArg(4)
-			res = send: => 
+			res = sendStatus: => 
 				@TpdsUpdateHandler.deleteUpdate.calledWith(@user_id, "projectName", "/here.txt", @source).should.equal true
 				done()
 			@TpdsController.deleteUpdate req, res
@@ -86,7 +86,7 @@ describe 'TpdsController', ->
 				headers:
 					"x-sl-update-source": @source = "github"
 			@res =
-				send: sinon.stub()
+				sendStatus: sinon.stub()
 			
 			@TpdsController.updateProjectContents @req, @res
 			
@@ -96,7 +96,7 @@ describe 'TpdsController', ->
 				.should.equal true
 				
 		it "should return a success", ->
-			@res.send.calledWith(200).should.equal true
+			@res.sendStatus.calledWith(200).should.equal true
 
 			
 	describe 'deleteProjectContents', ->
@@ -111,7 +111,7 @@ describe 'TpdsController', ->
 				headers:
 					"x-sl-update-source": @source = "github"
 			@res =
-				send: sinon.stub()
+				sendStatus: sinon.stub()
 			
 			@TpdsController.deleteProjectContents @req, @res
 			
@@ -121,5 +121,5 @@ describe 'TpdsController', ->
 				.should.equal true
 				
 		it "should return a success", ->
-			@res.send.calledWith(200).should.equal true
+			@res.sendStatus.calledWith(200).should.equal true
 

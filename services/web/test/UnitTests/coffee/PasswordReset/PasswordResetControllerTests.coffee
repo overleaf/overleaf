@@ -51,7 +51,7 @@ describe "PasswordResetController", ->
 		it "should tell the handler to process that email", (done)->
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.trim()).should.equal true
 				done()
@@ -78,7 +78,7 @@ describe "PasswordResetController", ->
 			@req.body.email = @email
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.toLowerCase()).should.equal true
 				done()
@@ -88,7 +88,7 @@ describe "PasswordResetController", ->
 
 		it "should tell the user handler to reset the password", (done)->
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.setNewUserPassword.calledWith(@token, @password).should.equal true
 				done()
@@ -104,7 +104,7 @@ describe "PasswordResetController", ->
 		it "should return 400 (Bad Request) if there is no password", (done)->
 			@req.body.password = ""
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 400
 				@PasswordResetHandler.setNewUserPassword.called.should.equal false
 				done()
@@ -113,7 +113,7 @@ describe "PasswordResetController", ->
 		it "should return 400 (Bad Request) if there is no passwordResetToken", (done)->
 			@req.body.passwordResetToken = ""
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 400
 				@PasswordResetHandler.setNewUserPassword.called.should.equal false
 				done()

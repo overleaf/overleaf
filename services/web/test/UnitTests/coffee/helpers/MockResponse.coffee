@@ -22,6 +22,19 @@ class MockResponse
 		@redirectedTo = url
 		@callback() if @callback?
 	
+	sendStatus: (status) ->
+		if arguments.length < 2
+			if typeof status != "number"
+				body = status
+				status = 200
+		@statusCode = status
+		@returned = true
+		if 200 <= status < 300
+			@success = true
+		else
+			@success = false
+		@callback() if @callback?
+
 	send: (status, body) ->
 		if arguments.length < 2
 			if typeof status != "number"

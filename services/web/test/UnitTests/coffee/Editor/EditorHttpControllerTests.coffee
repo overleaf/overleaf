@@ -24,6 +24,7 @@ describe "EditorHttpController", ->
 		@req = {}
 		@res =
 			send: sinon.stub()
+			sendStatus: sinon.stub()
 			json: sinon.stub()
 		@callback = sinon.stub()
 			
@@ -190,7 +191,7 @@ describe "EditorHttpController", ->
 				@EditorHttpController.addDoc @req, @res
 
 			it "should send back a bad request status code", ->
-				@res.send.calledWith(400).should.equal true
+				@res.sendStatus.calledWith(400).should.equal true
 
 	describe "addFolder", ->
 		beforeEach ->
@@ -223,7 +224,7 @@ describe "EditorHttpController", ->
 				@EditorHttpController.addFolder @req, @res
 
 			it "should send back a bad request status code", ->
-				@res.send.calledWith(400).should.equal true
+				@res.sendStatus.calledWith(400).should.equal true
 
 
 	describe "renameEntity", ->
@@ -243,7 +244,7 @@ describe "EditorHttpController", ->
 				.should.equal true
 
 		it "should send back a success response", ->
-			@res.send.calledWith(204).should.equal true
+			@res.sendStatus.calledWith(204).should.equal true
 
 	describe "renameEntity with long name", ->
 		beforeEach ->
@@ -257,7 +258,7 @@ describe "EditorHttpController", ->
 			@EditorHttpController.renameEntity @req, @res
 
 		it "should send back a bad request status code", ->
-			@res.send.calledWith(400).should.equal true
+			@res.sendStatus.calledWith(400).should.equal true
 
 	describe "rename entity with 0 length name", ->
 
@@ -272,7 +273,7 @@ describe "EditorHttpController", ->
 			@EditorHttpController.renameEntity @req, @res
 
 		it "should send back a bad request status code", ->
-			@res.send.calledWith(400).should.equal true
+			@res.sendStatus.calledWith(400).should.equal true
 
 
 	describe "moveEntity", ->
@@ -292,7 +293,7 @@ describe "EditorHttpController", ->
 				.should.equal true
 
 		it "should send back a success response", ->
-			@res.send.calledWith(204).should.equal true
+			@res.sendStatus.calledWith(204).should.equal true
 
 	describe "deleteEntity", ->
 		beforeEach ->
@@ -309,4 +310,4 @@ describe "EditorHttpController", ->
 				.should.equal true
 
 		it "should send back a success response", ->
-			@res.send.calledWith(204).should.equal true
+			@res.sendStatus.calledWith(204).should.equal true

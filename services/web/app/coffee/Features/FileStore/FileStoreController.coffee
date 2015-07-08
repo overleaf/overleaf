@@ -12,10 +12,10 @@ module.exports =
 		ProjectLocator.findElement {project_id: project_id, element_id: file_id, type: "file"}, (err, file)->
 			if err?
 				logger.err err:err, project_id: project_id, file_id: file_id, queryString:queryString, "error finding element for downloading file"
-				return res.send 500
+				return res.sendStatus 500
 			FileStoreHandler.getFileStream project_id, file_id, queryString, (err, stream)->
 				if err?
 					logger.err err:err, project_id: project_id, file_id: file_id, queryString:queryString, "error getting file stream for downloading file"
-					return res.send 500
+					return res.sendStatus 500
 				res.setHeader("Content-Disposition", "attachment; filename=#{file.name}")
 				stream.pipe res

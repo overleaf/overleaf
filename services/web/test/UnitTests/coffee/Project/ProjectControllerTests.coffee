@@ -78,7 +78,7 @@ describe "ProjectController", ->
 			@EditorController.renameProject = sinon.stub().callsArg(2)
 			@req.body =
 				name: @name = "New name"
-			@res.send = (code) =>
+			@res.sendStatus = (code) =>
 				@EditorController.renameProject
 					.calledWith(@project_id, @name)
 					.should.equal true
@@ -90,7 +90,7 @@ describe "ProjectController", ->
 			@EditorController.setCompiler = sinon.stub().callsArg(2)
 			@req.body =
 				compiler: @compiler = "pdflatex"
-			@res.send = (code) =>
+			@res.sendStatus = (code) =>
 				@EditorController.setCompiler
 					.calledWith(@project_id, @compiler)
 					.should.equal true
@@ -102,7 +102,7 @@ describe "ProjectController", ->
 			@EditorController.setSpellCheckLanguage = sinon.stub().callsArg(2)
 			@req.body =
 				spellCheckLanguage: @languageCode = "fr"
-			@res.send = (code) =>
+			@res.sendStatus = (code) =>
 				@EditorController.setSpellCheckLanguage
 					.calledWith(@project_id, @languageCode)
 					.should.equal true
@@ -114,7 +114,7 @@ describe "ProjectController", ->
 			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
 			@req.body =
 				publicAccessLevel: @publicAccessLevel = "readonly"
-			@res.send = (code) =>
+			@res.sendStatus = (code) =>
 				@EditorController.setPublicAccessLevel
 					.calledWith(@project_id, @publicAccessLevel)
 					.should.equal true
@@ -126,7 +126,7 @@ describe "ProjectController", ->
 			@EditorController.setRootDoc = sinon.stub().callsArg(2)
 			@req.body =
 				rootDocId: @rootDocId = "root-doc-id"
-			@res.send = (code) =>
+			@res.sendStatus = (code) =>
 				@EditorController.setRootDoc
 					.calledWith(@project_id, @rootDocId)
 					.should.equal true
@@ -136,7 +136,7 @@ describe "ProjectController", ->
 
 	describe "deleteProject", ->
 		it "should tell the project deleter to archive when forever=false", (done)->
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@ProjectDeleter.archiveProject.calledWith(@project_id).should.equal true
 				code.should.equal 200
 				done()
@@ -144,7 +144,7 @@ describe "ProjectController", ->
 
 		it "should tell the project deleter to delete when forever=true", (done)->
 			@req.query = forever: "true"
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
 				code.should.equal 200
 				done()
@@ -152,7 +152,7 @@ describe "ProjectController", ->
 
 	describe "restoreProject", ->
 		it "should tell the project deleter", (done)->
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@ProjectDeleter.restoreProject.calledWith(@project_id).should.equal true
 				code.should.equal 200
 				done()
@@ -244,7 +244,7 @@ describe "ProjectController", ->
 
 		it "should call the editor controller", (done)->
 			@EditorController.renameProject.callsArgWith(2)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@EditorController.renameProject.calledWith(@project_id, @newProjectName).should.equal true
 				done()
@@ -252,7 +252,7 @@ describe "ProjectController", ->
 
 		it "should send a 500 if there is a problem", (done)->
 			@EditorController.renameProject.callsArgWith(2, "problem")
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 500
 				@EditorController.renameProject.calledWith(@project_id, @newProjectName).should.equal true
 				done()
@@ -260,7 +260,7 @@ describe "ProjectController", ->
 
 		it "should return an error if the name is over 150 chars", (done)->
 			@req.body.newProjectName = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 400
 				done()
 			@ProjectController.renameProject @req, @res
@@ -317,7 +317,7 @@ describe "ProjectController", ->
 
 		it "should not render the page if the project can not be accessed", (done)->
 			@SecurityManager.userCanAccessProject = sinon.stub().callsArgWith 2, false
-			@res.send = (resCode, opts)=>
+			@res.sendStatus = (resCode, opts)=>
 				resCode.should.equal 401
 				done()
 			@ProjectController.loadEditor @req, @res

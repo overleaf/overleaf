@@ -26,7 +26,7 @@ module.exports =
 				logger.err err:error, doc_id:doc_id, project_id:project_id, "error finding element for getDocument"
 				return next(error)
 			logger.log doc_id:doc_id, project_id:project_id, "finished receiving set document request from api (docupdater)"
-			res.send 200
+			res.sendStatus 200
 
 		
 		

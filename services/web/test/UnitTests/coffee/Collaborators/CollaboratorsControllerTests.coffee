@@ -91,7 +91,7 @@ describe "CollaboratorsController", ->
 			@req.params =
 				Project_id: @project_id = "project-id-123"
 				user_id: @user_id = "user-id-123"
-			@res.send = sinon.stub()
+			@res.sendStatus = sinon.stub()
 			@EditorController.removeUserFromProject = sinon.stub().callsArg(2)
 			@CollaboratorsController.removeUserFromProject @req, @res
 			
@@ -101,7 +101,7 @@ describe "CollaboratorsController", ->
 				.should.equal true
 				
 		it "should send the back a success response", ->
-			@res.send.calledWith(204).should.equal true
+			@res.sendStatus.calledWith(204).should.equal true
 
 
 	describe "_formatCollaborators", ->

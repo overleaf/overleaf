@@ -36,7 +36,7 @@ describe 'Project api controller', ->
 
 		it "should send a 500 if there is an error", (done)->
 			@ProjectDetailsHandler.getDetails.callsArgWith(1, "error")
-			@res.send = (resCode)=>
+			@res.sendStatus = (resCode)=>
 				resCode.should.equal 500
 				done()
 			@controller.getProjectDetails @req, @res

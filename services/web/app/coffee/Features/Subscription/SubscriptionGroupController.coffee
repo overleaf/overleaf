@@ -62,9 +62,9 @@ module.exports =
 			return ErrorsController.notFound(req, res)
 		SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, req.session.user.email, (err)->
 			if err?
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
@@ -74,7 +74,7 @@ module.exports =
 			if err? and err == "token_not_found"
 				res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
 			else if err?
-				res.send 500
+				res.sendStatus 500
 			else
 				res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
 

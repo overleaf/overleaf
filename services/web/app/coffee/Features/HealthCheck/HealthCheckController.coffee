@@ -32,9 +32,9 @@ module.exports = HealthCheckController =
 
 	checkRedis: (req, res, next)->
 		if redisCheck.isAlive()
-			res.send 200
+			res.sendStatus 200
 		else
-			res.send 500
+			res.sendStatus 500
 		
 Reporter = (res) ->
 	(runner) ->

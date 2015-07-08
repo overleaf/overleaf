@@ -44,7 +44,7 @@ module.exports = ProjectController =
 
 		async.series jobs, (error) ->
 			return next(error) if error?
-			res.send(204)
+			res.sendStatus(204)
 
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
@@ -58,18 +58,18 @@ module.exports = ProjectController =
 
 		doDelete project_id, (err)->
 			if err?
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	restoreProject: (req, res) ->
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, "received request to restore project"
 		projectDeleter.restoreProject project_id, (err)->
 			if err?
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	cloneProject: (req, res, next)->
 		metrics.inc "cloned-project"
@@ -99,7 +99,7 @@ module.exports = ProjectController =
 		], (err, project)->
 			if err?
 				logger.error err: err, project: project, user: user, name: projectName, templateType: template, "error creating project"
-				res.send 500
+				res.sendStatus 500
 			else
 				logger.log project: project, user: user, name: projectName, templateType: template, "created project"
 				res.send {project_id:project._id}
@@ -109,13 +109,13 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		newName = req.body.newProjectName
 		if newName.length > 150
-			return res.send 400
+			return res.sendStatus 400
 		editorController.renameProject project_id, newName, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, newName:newName, "problem renaming project"
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
@@ -196,7 +196,7 @@ module.exports = ProjectController =
 
 			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
 				if !canAccess
-					return res.send 401
+					return res.sendStatus 401
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
