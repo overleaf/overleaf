@@ -57,8 +57,8 @@ Modules.loadViewIncludes app
 
 
 
-app.use bodyParser.urlencoded({ extended: true })
-app.use bodyParser.json()
+app.use bodyParser.urlencoded({ extended: true, limit: "2mb"})
+app.use bodyParser.json({limit: "2mb"})
 app.use multer(dest: Settings.path.uploadFolder)
 app.use methodOverride()
 
