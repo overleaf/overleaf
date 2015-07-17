@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FileTreeController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
+	App.controller "FileTreeController", ["$scope", "$modal", "ide", "$rootScope", ($scope, $modal, ide, $rootScope) ->
 		$scope.openNewDocModal = () ->
 			$modal.open(
 				templateUrl: "newDocModalTemplate"
