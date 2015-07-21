@@ -21,6 +21,7 @@ module.exports =
 			# Must contain full path, e.g. "/var/lib/sharelatex/data".
 			# This path must exist, not be tmpfs and be writable to by the user sharelatex is run as.
 			user_files: Path.resolve(__dirname + "/../user_files")
+			public_files: Path.resolve(__dirname + "/../public_files")
 			template_files: Path.resolve(__dirname + "/../template_files")
 		# if you are using S3, then fill in your S3 details below
 		# s3:

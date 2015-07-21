@@ -39,7 +39,7 @@ module.exports =
 		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
 		safe_exec args, childProcessOpts, (err, stdout, stderr)->
 			if err?
-				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to preview"
+				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to thumbnail"
 			else
 				logger.log  sourcePath:sourcePath, destPath:destPath, "finished thumbnailing file"
 			callback(err, destPath)	

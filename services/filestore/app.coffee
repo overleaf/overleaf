@@ -13,6 +13,7 @@ streamBuffers = require("stream-buffers")
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("filestore")
 Metrics.open_sockets.monitor(logger)
+Metrics.event_loop?.monitor(logger)
 
 app.configure ->
 	app.use express.bodyParser()
@@ -74,7 +75,16 @@ app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileContro
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
+app.get  "/template/:template_id/v/:version/:format/:sub_type", keyBuilder.templateFileKey, fileController.getFile
 app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.insertFile
+
+
+app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
+app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
+
+app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.copyFile
+app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
+
 
 app.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->
@@ -125,7 +135,7 @@ beginShutdown = () ->
 		logger.log "server will stop accepting connections"
 
 server.listen port, host, ->
-	logger.log("filestore listening on #{host}:#{port}")
+	logger.info "Filestore starting up, listening on #{host}:#{port}"
 
 process.on 'SIGTERM', () ->
 	logger.log("filestore got SIGTERM, shutting down gracefully")
