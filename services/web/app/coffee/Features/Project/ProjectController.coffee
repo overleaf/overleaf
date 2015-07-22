@@ -182,7 +182,9 @@ module.exports = ProjectController =
 				if user_id == 'openUser'
 					cb null, defaultSettingsForAnonymousUser(user_id)
 				else
-					User.findById user_id, cb
+					User.findById user_id, (err, user)->
+						logger.log project_id:project_id, user_id:user_id, "got user"
+						cb err, user
 			subscription: (cb)->
 				if user_id == 'openUser'
 					return cb()
