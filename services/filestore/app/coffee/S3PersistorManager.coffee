@@ -16,8 +16,8 @@ thirtySeconds = 30 * 1000
 buildDefaultOptions = (bucketName, method, key)->
 	return {
 			aws:
-				key: settings.filestore.s3?.key
-				secret: settings.filestore.s3?.secret
+				key: settings.filestore.s3.key
+				secret: settings.filestore.s3.secret
 				bucket: bucketName
 			method: method
 			timeout: thirtySeconds
@@ -28,10 +28,10 @@ module.exports =
 
 	sendFile: (bucketName, key, fsPath, callback)->
 		s3Client = knox.createClient
-			key: settings.filestore.s3?.key
-			secret: settings.filestore.s3?.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
-		putEventEmitter = s3Client.putFile fsPath, key, (err, res)->
+		putEventEmiter = s3Client.putFile fsPath, key, (err, res)->
 			if err?
 				logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath,"something went wrong uploading file to s3"
 				return callback(err)
@@ -44,8 +44,8 @@ module.exports =
 			LocalFileWriter.deleteFile fsPath, (err)->
 				logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
 				callback(err)
-		putEventEmitter.on "error", (err)->
-			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error received uploading file to s3"
+		putEventEmiter.on "error", (err)->
+			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
 
 	sendStream: (bucketName, key, readStream, callback)->
@@ -62,8 +62,8 @@ module.exports =
 		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
-			key: settings.filestore.s3?.key
-			secret: settings.filestore.s3?.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Stream = s3Client.get(key)
 		s3Stream.end()
@@ -76,12 +76,12 @@ module.exports =
 	copyFile: (bucketName, sourceKey, destKey, callback)->
 		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "copying file in s3"
 		s3Client = knox.createClient
-			key: settings.filestore.s3?.key
-			secret: settings.filestore.s3?.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.copyFile sourceKey, destKey, (err)->
 			if err?
-				logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in s3"
+				logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
 			callback(err)
 
 	deleteFile: (bucketName, key, callback)->
@@ -89,7 +89,7 @@ module.exports =
 		options = buildDefaultOptions(bucketName, "delete", key)
 		request options, (err, res)->
 			if err?
-				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong deleting file in s3"
+				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong deleting file in aws"
 			callback(err)
 
 	deleteDirectory: (bucketName, key, _callback)->
@@ -100,12 +100,12 @@ module.exports =
 
 		logger.log key: key, bucketName: bucketName, "deleting directory"
 		s3Client = knox.createClient
-			key: settings.filestore.s3?.key
-			secret: settings.filestore.s3?.secret
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
 			bucket: bucketName
 		s3Client.list prefix:key, (err, data)->
 			if err?
-				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in s3"
+				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in aws"
 				return callback(err)
 			keys = _.map data.Contents, (entry)->
 				return entry.Key
@@ -116,13 +116,13 @@ module.exports =
 		options = buildDefaultOptions(bucketName, "head", key)
 		request options, (err, res)->
 			if err?
-				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong checking file in s3"
+				logger.err err:err, res:res, bucketName:bucketName, key:key, "something went wrong checking file in aws"
 				return callback(err)
 			if !res?
 				logger.err err:err, res:res, bucketName:bucketName, key:key, "no response object returned when checking if file exists"
 				err = new Error("no response from s3 #{bucketName} #{key}")
 				return callback(err)
 			exists = res.statusCode == 200
-			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exists in s3"
+			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
 
