@@ -193,10 +193,12 @@ module.exports = ProjectController =
 			if err?
 				logger.err err:err, "error getting details for project page"
 				return next err
-			logger.log project_id:project_id, "got db results for loading editor"
 			project = results.project
 			user = results.user
 			subscription = results.subscription
+
+			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
+			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
 				if !canAccess
