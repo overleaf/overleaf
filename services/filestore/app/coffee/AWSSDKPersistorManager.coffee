@@ -1,0 +1,74 @@
+logger = require "logger-sharelatex"
+aws = require "aws-sdk"
+_ = require "underscore"
+fs = require "fs"
+
+s3 = aws.S3()
+
+module.exports =
+  sendFile: (bucketName, key, fsPath, callback)->
+    logger.log bucketName:bucketName, key, "send file data to s3"
+    stream = fs.createReadStream fsPath
+    s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
+      if err?
+        logger.err err: err, Bucket: bucketName, Key: key, "error sending file data to s3"
+      callback err
+
+  sendStream: (bucketName, key, stream, callback)->
+    logger.log bucketName:bucketName, key, "send file stream to s3"
+    s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
+      if err?
+        logger.err err: err, Bucket: bucketName, Key: key, "error sending file stream to s3"
+      callback err
+
+  getFileStream: (bucketName, key, callback = (err, res)->)->
+    logger.log bucketName:bucketName, key, "get file stream from s3"
+    callback = _.once callback
+    stream = s3.getObject(Bucket:bucketName, Key: key).createReadStream()
+    stream.on 'response', (res) ->
+      callback null, res
+    stream.on 'error', (err) ->
+      logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
+      callback err
+
+  copyFile: (bucketName, sourceKey, destKey, callback)->
+    logger.log bucketName:bucketName, sourceKey:sourceKey, destKey: destKey, "copying file in s3"
+    source = bucketName + '/' + sourceKey
+    s3.copyObject {Bucket: bucketName, Key: destKey, CopySource: source}, (err) ->
+      if err?
+        logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in s3"
+      callback err
+
+  deleteFile: (bucketName, key, callback)->
+    logger.log bucketName:bucketName, key:key, "delete file in s3"
+    s3.deleteObject {Bucket: bucketName, Key: key}, (err) ->
+      if err?
+        logger.err err:err, bucketName:bucketName, key:key, "something went wrong deleting file in s3"
+      callback err
+
+  deleteDirectory: (bucketName, key, callback)->
+    logger.log bucketName:bucketName, key:key, "delete directory in s3"
+    s3.listObjects {Bucket: bucketName, prefix: key}, (err, data) ->
+      if err?
+        logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in s3"
+        return callback err
+      keys = _.map data.Contents, (entry)->
+        Key: entry.Key
+      s3.deleteMultiple
+        Bucket: bucketName
+        Delete:
+          Objects: keys
+          Quiet: true
+      , (err) ->
+          if err?
+            logger.err err:err, bucketName:bucketName, key:key, "something went wrong deleting directory in s3"
+          callback err
+
+  checkIfFileExists:(bucketName, key, callback)->
+    logger.log bucketName:bucketName, key:key, "check file existence in s3"
+    s3.headObject {Bucket: bucketName, Key: key}, (err, data) ->
+      if err?
+        logger.err err:err, bucketName:bucketName, key:key, "something went wrong checking head in s3"
+        return callback err
+      callback null, data.ETag?
+

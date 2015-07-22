@@ -7,6 +7,8 @@ settings.filestore.backend ||= "s3"
 
 logger.log backend:settings.filestore.backend, "Loading backend"
 module.exports = switch settings.filestore.backend
+	when "aws-sdk"
+		require "./AWSSDKPersistorManager"
 	when "s3"
 		require("./S3PersistorManager")
 	when "fs"
