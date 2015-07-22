@@ -173,6 +173,7 @@ module.exports = ProjectController =
 			user_id = 'openUser'
 		
 		project_id = req.params.Project_id
+		logger.log project_id:project_id, "loading editor"
 	
 		async.parallel {
 			project: (cb)->
@@ -190,6 +191,7 @@ module.exports = ProjectController =
 			if err?
 				logger.err err:err, "error getting details for project page"
 				return next err
+			logger.log project_id:project_id, "got db results for loading editor"
 			project = results.project
 			user = results.user
 			subscription = results.subscription
@@ -200,7 +202,7 @@ module.exports = ProjectController =
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
-
+				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
 					title:  project.name
 					priority_title: true

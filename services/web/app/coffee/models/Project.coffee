@@ -42,6 +42,7 @@ ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 		this.findById project_or_id, fields, callback
 
 ProjectSchema.statics.findPopulatedById = (project_id, callback)->
+	logger.log project_id:project_id, "findPopulatedById"
 	this.find(_id: project_id )
 			.populate('collaberator_refs')
 			.populate('readOnly_refs')
@@ -54,6 +55,7 @@ ProjectSchema.statics.findPopulatedById = (project_id, callback)->
 					logger.err project_id:project_id, "something went wrong looking for project findPopulatedById, no project could be found"
 					callback "not found"
 				else
+					logger.log project_id:project_id, "finished findPopulatedById"
 					callback(null, projects[0])
 
 ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)->
