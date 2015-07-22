@@ -8,3 +8,4 @@
 package 'git'
 package 'vim'
 package 'build-essential'
+package 'aspell'
