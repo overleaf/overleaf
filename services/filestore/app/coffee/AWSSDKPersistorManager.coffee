@@ -3,20 +3,20 @@ aws = require "aws-sdk"
 _ = require "underscore"
 fs = require "fs"
 
-s3 = aws.S3()
+s3 = new aws.S3()
 
 module.exports =
   sendFile: (bucketName, key, fsPath, callback)->
     logger.log bucketName:bucketName, key:key, "send file data to s3"
     stream = fs.createReadStream fsPath
-    s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
+    s3.upload Bucket: bucketName, Key: key, Body: stream, (err, data) ->
       if err?
         logger.err err: err, Bucket: bucketName, Key: key, "error sending file data to s3"
       callback err
 
   sendStream: (bucketName, key, stream, callback)->
     logger.log bucketName:bucketName, key:key, "send file stream to s3"
-    s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
+    s3.upload Bucket: bucketName, Key: key, Body: stream, (err, data) ->
       if err?
         logger.err err: err, Bucket: bucketName, Key: key, "error sending file stream to s3"
       callback err
