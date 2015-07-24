@@ -7,7 +7,7 @@ s3 = aws.S3()
 
 module.exports =
   sendFile: (bucketName, key, fsPath, callback)->
-    logger.log bucketName:bucketName, key, "send file data to s3"
+    logger.log bucketName:bucketName, key:key, "send file data to s3"
     stream = fs.createReadStream fsPath
     s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
       if err?
@@ -15,18 +15,19 @@ module.exports =
       callback err
 
   sendStream: (bucketName, key, stream, callback)->
-    logger.log bucketName:bucketName, key, "send file stream to s3"
+    logger.log bucketName:bucketName, key:key, "send file stream to s3"
     s3.putObject Bucket: bucketName, Key: key, Body: stream, (err, data) ->
       if err?
         logger.err err: err, Bucket: bucketName, Key: key, "error sending file stream to s3"
       callback err
 
   getFileStream: (bucketName, key, callback = (err, res)->)->
-    logger.log bucketName:bucketName, key, "get file stream from s3"
+    logger.log bucketName:bucketName, key:key, "get file stream from s3"
     callback = _.once callback
-    stream = s3.getObject(Bucket:bucketName, Key: key).createReadStream()
-    stream.on 'response', (res) ->
-      callback null, res
+    request = s3.getObject(Bucket:bucketName, Key: key)
+    stream = request.createReadStream()
+    stream.on 'readable', () ->
+      callback null, stream
     stream.on 'error', (err) ->
       logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
       callback err
@@ -48,20 +49,23 @@ module.exports =
 
   deleteDirectory: (bucketName, key, callback)->
     logger.log bucketName:bucketName, key:key, "delete directory in s3"
-    s3.listObjects {Bucket: bucketName, prefix: key}, (err, data) ->
+    s3.listObjects {Bucket: bucketName, Prefix: key}, (err, data) ->
       if err?
         logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in s3"
         return callback err
+      if data.Contents.length == 0
+        logger.log bucketName:bucketName, key:key, "the directory is empty"
+        return callback()
       keys = _.map data.Contents, (entry)->
         Key: entry.Key
-      s3.deleteMultiple
+      s3.deleteObjects
         Bucket: bucketName
         Delete:
           Objects: keys
           Quiet: true
       , (err) ->
           if err?
-            logger.err err:err, bucketName:bucketName, key:key, "something went wrong deleting directory in s3"
+            logger.err err:err, bucketName:bucketName, key:keys, "something went wrong deleting directory in s3"
           callback err
 
   checkIfFileExists:(bucketName, key, callback)->

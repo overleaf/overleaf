@@ -10,16 +10,16 @@ ImageOptimiser = require("./ImageOptimiser")
 module.exports =
 
 	insertFile: (bucket, key, stream, callback)->
-		convetedKey = KeyBuilder.getConvertedFolderKey(key)
-		PersistorManager.deleteDirectory bucket, convetedKey, (error) ->
+		convertedKey = KeyBuilder.getConvertedFolderKey key
+		PersistorManager.deleteDirectory bucket, convertedKey, (error) ->
 			return callback(error) if error?
 			PersistorManager.sendStream bucket, key, stream, callback
 
 	deleteFile: (bucket, key, callback)->
-		convetedKey = KeyBuilder.getConvertedFolderKey(key)
+		convertedKey = KeyBuilder.getConvertedFolderKey key
 		async.parallel [
 			(done)-> PersistorManager.deleteFile bucket, key, done
-			(done)-> PersistorManager.deleteDirectory bucket, convetedKey, done
+			(done)-> PersistorManager.deleteDirectory bucket, convertedKey, done
 		], callback
 
 	getFile: (bucket, key, opts = {}, callback)->
@@ -36,14 +36,14 @@ module.exports =
 			callback err, fileStream
 
 	_getConvertedFile: (bucket, key, opts, callback)->
-		convetedKey = KeyBuilder.addCachingToKey(key, opts)
-		PersistorManager.checkIfFileExists bucket, convetedKey, (err, exists)=>
+		convertedKey = KeyBuilder.addCachingToKey key, opts
+		PersistorManager.checkIfFileExists bucket, convertedKey, (err, exists)=>
 			if exists
-				PersistorManager.getFileStream bucket, convetedKey, callback
+				PersistorManager.getFileStream bucket, convertedKey, callback
 			else
-				@_getConvertedFileAndCache bucket, key, convetedKey, opts, callback
+				@_getConvertedFileAndCache bucket, key, convertedKey, opts, callback
 
-	_getConvertedFileAndCache: (bucket, key, convetedKey, opts, callback)->
+	_getConvertedFileAndCache: (bucket, key, convertedKey, opts, callback)->
 		self = @
 		convertedFsPath = ""
 		async.series [
@@ -54,27 +54,27 @@ module.exports =
 			(cb)->
 				ImageOptimiser.compressPng convertedFsPath, cb
 			(cb)->
-				PersistorManager.sendFile bucket, convetedKey, convertedFsPath, cb
+				PersistorManager.sendFile bucket, convertedKey, convertedFsPath, cb
 		], (err)->
 			if err?
 				return callback(err)
-			PersistorManager.getFileStream bucket, convetedKey, callback
+			PersistorManager.getFileStream bucket, convertedKey, callback
 
-	_convertFile: (bucket, origonalKey, opts, callback)->
-		@_writeS3FileToDisk bucket, origonalKey, (err, origonalFsPath)->
+	_convertFile: (bucket, originalKey, opts, callback)->
+		@_writeS3FileToDisk bucket, originalKey, (err, originalFsPath)->
 			done = (err, destPath)->
 				if err?
-					logger.err err:err, bucket:bucket, origonalKey:origonalKey, opts:opts, "error converting file"
+					logger.err err:err, bucket:bucket, originalKey:originalKey, opts:opts, "error converting file"
 					return callback(err)
-				LocalFileWriter.deleteFile origonalFsPath, ->
+				LocalFileWriter.deleteFile originalFsPath, ->
 				callback(err, destPath)
 
 			if opts.format?
-				FileConverter.convert origonalFsPath, opts.format, done
+				FileConverter.convert originalFsPath, opts.format, done
 			else if opts.style == "thumbnail"
-				FileConverter.thumbnail origonalFsPath, done
+				FileConverter.thumbnail originalFsPath, done
 			else if opts.style == "preview"
-				FileConverter.preview origonalFsPath, done
+				FileConverter.preview originalFsPath, done
 			else
 				throw new Error("should have specified opts to convert file with #{JSON.stringify(opts)}")
 
