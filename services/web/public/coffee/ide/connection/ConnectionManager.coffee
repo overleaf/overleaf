@@ -39,6 +39,13 @@ define [], () ->
 					@joinProject()
 				, 100)
 
+			@ide.socket.on "connect_failed", () =>
+				@connected = false
+				$scope.$apply () =>
+					@$scope.state.error = "Unable to connect, please view the <a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a> to fix the issue."
+
+
+
 			@ide.socket.on 'disconnect', () =>
 				@connected = false
 				@ide.pushEvent("disconnected")
