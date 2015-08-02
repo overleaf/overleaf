@@ -34,7 +34,7 @@
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
     "mongojs": "0.18.2",
-    "mongoose": "3.8.28",
+    "mongoose": "4.1.0",
     "multer": "^0.1.8",
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.1",
