@@ -34,7 +34,7 @@ block content
 											| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
 											span.caret
 										ul.dropdown-menu(role="menu")
-											li(ng-repeat="(currency, value) in plans", dropdown-toggle)
+											li(ng-repeat="(currency, value) in plans")
 												a(
 													ng-click="changeCurrency(currency)",
 												) {{currency}} ({{value['symbol']}})
