@@ -38,7 +38,7 @@ public class ResourceFetcher {
             Util.sout("At (" + projectName + "): " + path);
             contents = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path).getContents();
         }
-        return new RepositoryFile(path, contents);
+        return new RepositoryFile(newPath, contents);
     }
 
     private byte[] fetch(String projectName, final String url, String path) throws FailedConnectionException {
