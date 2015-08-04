@@ -85,6 +85,17 @@ app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey
 app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
+app.get "/gc", (req, res)->
+	if global.gc?
+		memory_before = process.memoryUsage()
+		global.gc()
+		memory_after = process.memoryUsage()
+		delta = {}
+		for k of memory_after
+			delta[k] = memory_after[k] - memory_before[k]
+		res.send { memory_before, memory_after, delta }
+	else
+		res.send(501) # need --expose-gc, send "not implemented"
 
 app.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->
