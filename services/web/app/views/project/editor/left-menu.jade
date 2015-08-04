@@ -48,6 +48,11 @@ aside#left-menu.full-size(
 			h4() #{translate("sync")}
 			!= moduleIncludes("editorLeftMenu:sync", locals)
 
+	span(ng-show="!anonymous")
+		h4 #{translate("services")}
+		!= moduleIncludes("editorLeftMenu:editing_services", locals)
+
+
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
 		.containter-fluid
