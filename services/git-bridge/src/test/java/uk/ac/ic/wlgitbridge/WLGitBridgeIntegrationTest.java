@@ -56,8 +56,12 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
                     put("withDeletedBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/withDeletedBinaryFile/state.json")).build());
                 }});
+                put("canPullADuplicateBinaryFile", new HashMap<String, SnapshotAPIState>() {{
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADuplicateBinaryFile/base/state.json")).build());
+                    put("withDuplicateBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/state.json")).build());
+                }});
                 put("canPullAModifiedNestedFile", new HashMap<String, SnapshotAPIState>() {{
-                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADeletedBinaryFile/base/state.json")).build());
+                    put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/base/state.json")).build());
                     put("withModifiedNestedFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/withModifiedNestedFile/state.json")).build());
                 }});
                 put("canPullDeletedNestedFiles", new HashMap<String, SnapshotAPIState>() {{
@@ -244,6 +248,29 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, exitCodeWithDeletedBinaryFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADeletedBinaryFile/withDeletedBinaryFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canPullADuplicateBinaryFile() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(4001, getResource("/canPullADuplicateBinaryFile").toFile());
+        server.start();
+        server.setState(states.get("canPullADuplicateBinaryFile").get("base"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(44001, 4001)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process gitBase = runtime.exec("git clone http://127.0.0.1:44001/testproj.git", null, dir);
+        int exitCodeBase = gitBase.waitFor();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCodeBase);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/base/testproj"), testprojDir.toPath()));
+        server.setState(states.get("canPullADuplicateBinaryFile").get("withDuplicateBinaryFile"));
+        Process gitWithDeletedBinaryFile = runtime.exec("git pull", null, testprojDir);
+        int exitCodeWithDeletedBinaryFile = gitWithDeletedBinaryFile.waitFor();
+        wlgb.stop();
+        assertEquals(0, exitCodeWithDeletedBinaryFile);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/testproj"), testprojDir.toPath()));
     }
 
     @Test
