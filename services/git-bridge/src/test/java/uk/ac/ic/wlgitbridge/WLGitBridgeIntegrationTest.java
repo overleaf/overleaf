@@ -60,6 +60,9 @@ public class WLGitBridgeIntegrationTest {
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADuplicateBinaryFile/base/state.json")).build());
                     put("withDuplicateBinaryFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/state.json")).build());
                 }});
+                put("canCloneDuplicateBinaryFiles", new HashMap<String, SnapshotAPIState>() {{
+                    put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneDuplicateBinaryFiles/state/state.json")).build());
+                }});
                 put("canPullAModifiedNestedFile", new HashMap<String, SnapshotAPIState>() {{
                     put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/base/state.json")).build());
                     put("withModifiedNestedFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedNestedFile/withModifiedNestedFile/state.json")).build());
@@ -271,6 +274,24 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, exitCodeWithDeletedBinaryFile);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPullADuplicateBinaryFile/withDuplicateBinaryFile/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canCloneDuplicateBinaryFiles() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(4002, getResource("/canCloneDuplicateBinaryFiles").toFile());
+        server.start();
+        server.setState(states.get("canCloneDuplicateBinaryFiles").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(44002, 4002)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        Process git = runtime.exec("git clone http://127.0.0.1:44002/testproj.git", null, dir);
+        int exitCode = git.waitFor();
+        wlgb.stop();
+        File testprojDir = new File(dir, "testproj");
+        assertEquals(0, exitCode);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneDuplicateBinaryFiles/state/testproj"), testprojDir.toPath()));
     }
 
     @Test

@@ -14,6 +14,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,16 +28,22 @@ public class ResourceFetcher {
         this.persistentStore = persistentStore;
     }
 
-    public RawFile get(String projectName, String url, String newPath, Repository repository) throws IOException {
+    public RawFile get(String projectName, String url, String newPath, Repository repository, Map<String, byte[]> fetchedUrls) throws IOException {
         String path = persistentStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {
             path = newPath;
             contents = fetch(projectName, url, path);
+            fetchedUrls.put(url, contents);
         } else {
             Util.sout("Found (" + projectName + "): " + url);
             Util.sout("At (" + projectName + "): " + path);
-            contents = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path).getContents();
+            RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
+            if (rawFile != null) {
+                contents = rawFile.getContents();
+            } else {
+                contents = fetchedUrls.get(url);
+            }
         }
         return new RepositoryFile(newPath, contents);
     }

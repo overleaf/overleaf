@@ -4,12 +4,12 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
-import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
-import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
+import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -17,10 +17,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created by Winston on 06/11/14.
@@ -55,8 +52,9 @@ public class DataStore {
         for (Snapshot snapshot : snapshots) {
             List<RawFile> files = new LinkedList<RawFile>();
             files.addAll(snapshot.getSrcs());
+            Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
             for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
-                files.add(resourceFetcher.get(name, snapshotAttachment.getUrl(), snapshotAttachment.getPath(), repository));
+                files.add(resourceFetcher.get(name, snapshotAttachment.getUrl(), snapshotAttachment.getPath(), repository, fetchedUrls));
             }
             commit(name, new GitDirectoryContents(files, rootGitDirectory, name, snapshot), repository);
         }
