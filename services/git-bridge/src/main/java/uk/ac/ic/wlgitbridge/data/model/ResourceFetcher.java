@@ -38,11 +38,13 @@ public class ResourceFetcher {
         } else {
             Util.sout("Found (" + projectName + "): " + url);
             Util.sout("At (" + projectName + "): " + path);
-            RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
-            if (rawFile != null) {
+            contents = fetchedUrls.get(url);
+            if (contents == null) {
+                RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
+                if (rawFile == null) {
+                    throw new IllegalStateException("file was not in the current commit, or the git tree, yet path was not null");
+                }
                 contents = rawFile.getContents();
-            } else {
-                contents = fetchedUrls.get(url);
             }
         }
         return new RepositoryFile(newPath, contents);
