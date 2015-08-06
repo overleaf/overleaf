@@ -19,3 +19,11 @@ module.exports =
 			host: "localhost"
 			port: 6379
 			pass: ""
+
+	#filestore:
+	#	backend: "s3"
+	#	stores:
+	#		user_files: "sharelatex-dev"
+	#	s3:
+	#		key: ""
+	#		secret: ""
