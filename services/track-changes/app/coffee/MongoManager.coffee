@@ -126,3 +126,9 @@ module.exports = MongoManager =
 		# For finding documents which need packing
 		db.docHistoryStats.ensureIndex { doc_id: 1 }, { background: true }
 		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }
+
+	getProjectsDocs: (project_id, callback)->
+		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
+
+	getDocChanges: (doc_id, callback)->
+		db.docHistory.find doc_id: ObjectId(doc_id.toString()), {}, callback
