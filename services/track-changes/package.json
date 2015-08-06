@@ -18,7 +18,9 @@
     "request": "~2.33.0",
     "redis-sharelatex": "~0.0.4",
     "redis": "~0.10.1",
-    "underscore": "~1.7.0"
+    "underscore": "~1.7.0",
+    "mongo-uri": "^0.1.2",
+    "s3-upload-stream": "^1.0.7"
   },
   "devDependencies": {
     "chai": "~1.9.0",
