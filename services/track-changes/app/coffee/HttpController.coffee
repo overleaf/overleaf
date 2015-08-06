@@ -70,7 +70,14 @@ module.exports = HttpController =
 
 	archiveProject: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
-		logger.log project_id: project_id, "archiving all track changes"
+		logger.log project_id: project_id, "archiving all track changes to s3"
 		DocArchiveManager.archiveAllDocsChanges project_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	unArchiveProject: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "unarchiving all track changes from s3"
+		DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
 			return next(error) if error?
 			res.send 204

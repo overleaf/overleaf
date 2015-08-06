@@ -22,6 +22,25 @@ module.exports = DocArchiveManager =
 
 
 	archiveDocChanges: (project_id, doc_id, callback)->
-		MongoAWS.archiveDocHistory project_id, doc_id, (error) ->
-			logger.log doc_id:doc_id, error: error, "mongoexport"
+		MongoManager.getDocChangesCount doc_id, (error, count) ->
+			if count == 0
+				callback()
+			else
+				MongoAWS.archiveDocHistory project_id, doc_id, (error) ->
+					logger.log doc_id:doc_id, error: error, "mongoexport"
+					callback()
+
+	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
+		MongoManager.getProjectsDocs project_id, (error, docs) ->
+			if error?
+				return callback(error)
+			else if !docs?
+				return callback new Error("No docs for project #{project_id}")
+			jobs = _.map docs, (doc) ->
+				(cb)-> DocArchiveManager.unArchiveDocChanges project_id, doc._id, cb
+			async.series jobs, callback
+
+	unArchiveDocChanges: (project_id, doc_id, callback)->
+		MongoAWS.unArchiveDocHistory project_id, doc_id, (error) ->
+			logger.log doc_id:doc_id, error: error, "mongoimport"
 			callback()

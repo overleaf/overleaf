@@ -132,3 +132,6 @@ module.exports = MongoManager =
 
 	getDocChanges: (doc_id, callback)->
 		db.docHistory.find doc_id: ObjectId(doc_id.toString()), {}, callback
+
+	getDocChangesCount: (doc_id, callback)->
+		db.docHistory.count doc_id: ObjectId(doc_id.toString()), {}, callback

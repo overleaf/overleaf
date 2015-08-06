@@ -23,13 +23,13 @@ module.exports =
 			port: 6379
 			pass: ""
 
-	#filestore:
-	#	backend: "s3"
-	#	stores:
-	#		user_files: ""
-	#	s3:
-	#		key: ""
-	#		secret: ""
+	filestore:
+		backend: "s3"
+		stores:
+			user_files: ""
+		s3:
+			key: ""
+			secret: ""
 
 	path:
 		dumpFolder:   Path.join(TMP_DIR, "dumpFolder")
