@@ -30,7 +30,7 @@
     "lynx": "0.1.1",
     "marked": "^0.3.3",
     "method-override": "^2.3.3",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#0966b75a646720781c6accdca15832e675d7d3f2",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.2.0",
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
     "mongojs": "0.18.2",
