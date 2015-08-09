@@ -28,7 +28,9 @@ module.exports = DocArchiveManager =
 			else
 				MongoAWS.archiveDocHistory project_id, doc_id, (error) ->
 					logger.log doc_id:doc_id, error: error, "mongoexport"
-					return callback()
+					MongoManager.markDocHistoryAsArchived doc_id, (error) ->
+						return callback(error) if error?
+						callback()
 
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
 		MongoManager.getProjectsDocs project_id, (error, docs) ->
@@ -47,4 +49,6 @@ module.exports = DocArchiveManager =
 			else
 				MongoAWS.unArchiveDocHistory project_id, doc_id, (error) ->
 					logger.log doc_id:doc_id, error: error, "mongoimport"
-					return callback()
+					MongoManager.markDocHistoryAsUnarchived doc_id, (error) ->
+						return callback(error) if error?
+						callback()

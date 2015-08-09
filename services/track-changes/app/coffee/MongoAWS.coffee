@@ -11,11 +11,13 @@ module.exports = MongoAWS =
 	archiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
 		MongoAWS.mongoExportDocHistory doc_id, (error, filepath) ->
 			MongoAWS.s3upStream project_id, doc_id, filepath, callback
+				#delete temp file?
 
 	unArchiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
 		MongoAWS.s3downStream project_id, doc_id, (error, filepath) ->
 			if error == null
 				MongoAWS.mongoImportDocHistory filepath, callback
+					#delete temp file?
 			else
 				callback
 
