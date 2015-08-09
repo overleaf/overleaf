@@ -20,7 +20,7 @@
     "redis": "~0.10.1",
     "underscore": "~1.7.0",
     "mongo-uri": "^0.1.2",
-    "s3-upload-stream": "^1.0.7"
+    "s3-streams": "^0.3.0"
   },
   "devDependencies": {
     "chai": "~1.9.0",

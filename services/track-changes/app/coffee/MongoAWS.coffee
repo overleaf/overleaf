@@ -4,15 +4,16 @@ mongoUri = require "mongo-uri";
 logger = require "logger-sharelatex"
 AWS = require 'aws-sdk'
 fs = require 'fs'
+S3S = require 's3-streams'
 
 module.exports = MongoAWS =
 
 	archiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
 		MongoAWS.mongoExportDocHistory doc_id, (error, filepath) ->
-			MongoAWS.s3upload project_id, doc_id, filepath, callback
+			MongoAWS.s3upStream project_id, doc_id, filepath, callback
 
 	unArchiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
-		MongoAWS.s3download project_id, doc_id, (error, filepath) ->
+		MongoAWS.s3downStream project_id, doc_id, (error, filepath) ->
 			if error == null
 				MongoAWS.mongoImportDocHistory filepath, callback
 			else
@@ -74,33 +75,28 @@ module.exports = MongoAWS =
 			else
 				return callback(new Error("mongodump failed: #{stderr}"),null)
 
-	s3upload: (project_id, doc_id, filepath, callback = (error) ->) ->
+	s3upStream: (project_id, doc_id, filepath, callback = (error) ->) ->
 
 		AWS.config.update {
 			accessKeyId: settings.filestore.s3.key
 			secretAccessKey: settings.filestore.s3.secret
 		}
-
-		s3Stream = require('s3-upload-stream')(new AWS.S3());
-
-		upload = s3Stream.upload {
-		  "Bucket": settings.filestore.stores.user_files,
-		  "Key": project_id+"/changes-"+doc_id
+		 
+		upload = S3S.WriteStream new AWS.S3(), {
+			"Bucket": settings.filestore.stores.user_files,
+			"Key": project_id+"/changes-"+doc_id
 		}
 
-		read = fs.createReadStream filepath
+		fs.createReadStream(filepath)
+			.on 'open', (obj) ->
+				return 1
+			.pipe(upload)
+			.on 'finish', () ->
+				return callback(null)
+			.on 'error', (err) ->
+				return callback(err)
 
-		#Handle errors.
-		upload.on 'error', callback
-
-		#Handle upload completion.
-		upload.on 'uploaded', (details) ->
-			return callback(null)
-
-		#Pipe the incoming filestream and up to S3.
-		read.pipe(upload);
-
-	s3download: (project_id, doc_id, callback = (error, filepath) ->) ->
+	s3downStream: (project_id, doc_id, callback = (error, filepath) ->) ->
 
 		filepath = settings.path.dumpFolder + '/' + doc_id + '.jsonDown' 
 
@@ -108,17 +104,17 @@ module.exports = MongoAWS =
 			accessKeyId: settings.filestore.s3.key
 			secretAccessKey: settings.filestore.s3.secret
 		}
-
-		params = {
+		 
+		download = S3S.ReadStream new AWS.S3(), {
 			"Bucket": settings.filestore.stores.user_files,
 			"Key": project_id+"/changes-"+doc_id
 		}
 
-		s3 = new AWS.S3()
-
-		s3.getObject params, (err, data) ->
-			if !err && data.ContentLength > 0
-				fs.writeFile filepath, data.Body, (err) ->
-					return callback(null,filepath)
-			else
-				return callback(new Error("s3download failed: #{err}"),null)
+		download
+			.on 'open', (obj) ->
+				return 1
+			.pipe(fs.createWriteStream(filepath))
+			.on 'finish', () ->
+				return callback(null, filepath)
+			.on 'error', (err) ->
+				return callback(err, null)
