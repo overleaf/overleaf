@@ -6,6 +6,7 @@ WebApiManager = require "./WebApiManager"
 UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
+DocArchiveManager = require "./DocArchiveManager"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -94,7 +95,9 @@ module.exports = UpdatesManager =
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return callback(error) if error?
-			MongoManager.getProjectUpdates project_id, options, callback
+			DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
+				return callback(error,null) if error?
+				MongoManager.getProjectUpdates project_id, options, callback
 
 	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->

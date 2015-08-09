@@ -11,6 +11,8 @@ thirtySeconds = 30 * 1000
 module.exports = DocArchiveManager =
 
 	archiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
+		if settings.filestore?.backend != "s3"
+			return callback(null)
 		MongoManager.getProjectsDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)
@@ -33,6 +35,8 @@ module.exports = DocArchiveManager =
 						callback()
 
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
+		if settings.filestore?.backend != "s3"
+			return callback(null)
 		MongoManager.getProjectsDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)
@@ -43,7 +47,7 @@ module.exports = DocArchiveManager =
 			async.series jobs, callback
 
 	unArchiveDocChanges: (project_id, doc_id, callback)->
-		MongoManager.getDocChangesCount doc_id, (error, count) ->
+		MongoManager.getArchivedDocChanges doc_id, (error, count) ->
 			if count == 0
 				return callback()
 			else

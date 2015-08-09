@@ -47,6 +47,7 @@ module.exports = MongoManager =
 
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
+		inS3 = update.inS3?
 		update = {
 			doc_id: ObjectId(doc_id.toString())
 			project_id: ObjectId(project_id.toString())
@@ -54,6 +55,9 @@ module.exports = MongoManager =
 			meta:   update.meta
 			v:      update.v
 		}
+		if inS3?
+			update.inS3 = true
+		
 		if temporary
 			seconds = 1000
 			minutes = 60 * seconds
@@ -117,7 +121,7 @@ module.exports = MongoManager =
 		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, { background: true }
 		# For finding all packs that affect a project (use a sparse index so only packs are included)
 		db.docHistory.ensureIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}, { background: true, sparse: true }
-		# For finding updates that don't yet have a project_id and need it inserting
+		# For finding updates that dont yet have a project_id and need it inserting
 		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, { background: true }
 		# For finding project meta-data
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }, { background: true }
@@ -132,6 +136,9 @@ module.exports = MongoManager =
 
 	getDocChangesCount: (doc_id, callback)->
 		db.docHistory.count doc_id: ObjectId(doc_id.toString()), {}, callback
+
+	getArchivedDocChanges: (doc_id, callback)->
+		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback
 
 	markDocHistoryAsArchived: (doc_id, callback)->
 		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
