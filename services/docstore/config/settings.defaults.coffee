@@ -10,11 +10,8 @@ module.exports =
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'
 
-	#filestore:
-	#	backend: "s3"
-	#	stores:
-	#		user_files: ""
+	#docstore:
 	#	s3:
 	#		key: ""
 	#		secret: ""
-	#	fail: false
+	#		bucket: "something"
