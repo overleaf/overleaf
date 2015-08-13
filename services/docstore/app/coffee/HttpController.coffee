@@ -86,3 +86,11 @@ module.exports = HttpController =
 		DocArchive.archiveAllDocs project_id, (error) ->
 			return next(error) if error?
 			res.send 204
+
+	unArchiveAllDocs: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "unarchiving all docs"
+		DocArchive.unArchiveAllDocs project_id, (error) ->
+			return next(error) if error?
+			res.send 200
+
