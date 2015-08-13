@@ -11,6 +11,7 @@ describe "DocManager", ->
 	beforeEach ->
 		@DocManager = SandboxedModule.require modulePath, requires:
 			"./MongoManager": @MongoManager = {}
+			"./DocArchiveManager": @DocArchiveManager = {}
 			"logger-sharelatex": @logger = 
 				log: sinon.stub()
 				warn:->
@@ -74,6 +75,7 @@ describe "DocManager", ->
 			beforeEach -> 
 				@docs = [{ _id: @doc_id, lines: ["mock-lines"] }]
 				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@DocManager.getAllDocs @project_id, @callback
 
 			it "should get the project from the database", ->
@@ -87,6 +89,7 @@ describe "DocManager", ->
 		describe "when there are no docs for the project", ->
 			beforeEach -> 
 				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, null)
+				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, null)
 				@DocManager.getAllDocs @project_id, @callback
 
 			it "should return a NotFoundError", ->

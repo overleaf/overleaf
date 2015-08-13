@@ -3,6 +3,11 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 async = require "async"
+settings = require("settings-sharelatex")
+request = require("request")
+crypto = require("crypto")
+thirtySeconds = 30 * 1000
+DocArchive = require "./DocArchiveManager"
 
 module.exports = DocManager =
 
@@ -12,20 +17,28 @@ module.exports = DocManager =
 				return callback(err)
 			else if !doc?
 				return callback new Errors.NotFoundError("No such doc: #{doc_id} in project #{project_id}")
-			callback null, doc
+			else if doc?.inS3
+				DocArchive.unarchiveDoc project_id, doc_id, (err)->
+					if err?
+						logger.err err:err, project_id:project_id, doc_id:doc_id, "error unarchiving doc"
+						return callback(err)
+					MongoManager.findDoc doc_id, callback
+			else
+				callback err, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
-		MongoManager.getProjectsDocs project_id, (error, docs) ->
-			if err?
-				return callback(error)
-			else if !docs?
-				return callback new Errors.NotFoundError("No docs for project #{project_id}")
-			else
-				return callback(null, docs)
+		DocArchive.unArchiveAllDocs project_id, (error) ->
+			MongoManager.getProjectsDocs project_id, (error, docs) ->
+				if err?
+					return callback(error)
+				else if !docs?
+					return callback new Errors.NotFoundError("No docs for project #{project_id}")
+				else
+					return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
-		MongoManager.findDoc doc_id, (err, doc)->
-			if err?
+		DocManager.getDoc project_id, doc_id, (err, doc)->
+			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
 
@@ -57,4 +70,3 @@ module.exports = DocManager =
 				MongoManager.markDocAsDeleted doc_id, (error) ->
 					return callback(error) if error?
 					callback()
-

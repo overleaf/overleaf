@@ -1,5 +1,6 @@
 DocManager = require "./DocManager"
 logger = require "logger-sharelatex"
+DocArchive = require "./DocArchiveManager"
 
 module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
@@ -78,3 +79,10 @@ module.exports = HttpController =
 
 	_buildRawDocView: (doc)->
 		return (doc?.lines or []).join("\n")
+
+	archiveAllDocs: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "archiving all docs"
+		DocArchive.archiveAllDocs project_id, (error) ->
+			return next(error) if error?
+			res.send 204
