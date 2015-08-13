@@ -102,6 +102,44 @@ if Settings.filestore?.backend == "s3"
 								callback()
 				async.series jobs, done
 
+
+
+		describe "archiving massive document", (done)->
+			beforeEach (done)->
+				@timeout 1000 * 30
+				quarterMegInBytes = 250000
+				lines = require("crypto").randomBytes(quarterMegInBytes).toString("hex")
+				console.log @project_id, @docs[1]._id, "helllllo"
+				@docs[1].lines = [lines,lines,lines,lines]
+				DocstoreClient.updateDoc @project_id, @docs[1]._id, @docs[1].lines, =>
+					DocstoreClient.archiveAllDoc @project_id, (error, @res) =>
+						done()
+			
+
+			it "should archive all the docs", (done) ->
+				@res.statusCode.should.equal 204
+				done()
+
+			it "should set inS3 and unset lines in each doc", (done) ->
+				jobs = for archiveDoc in @docs
+					do (archiveDoc) =>
+						(callback) => 
+							db.docs.findOne _id: archiveDoc._id, (error, doc) =>
+								should.not.exist doc.lines
+								doc.inS3.should.equal true
+								callback()
+				async.series jobs, done
+
+			it "should be able get the same docs back", (done) ->
+
+				jobs = for archiveDoc in @docs
+					do (archiveDoc) =>
+						(callback) => 
+							DocstoreClient.getS3Doc @project_id, archiveDoc._id, (error, res, doc) =>
+								doc.toString().should.equal archiveDoc.lines.toString()
+								callback()
+				async.series jobs, done
+
 		describe "Unarchiving all docs", ->
 
 			it "should unarchive all the docs", (done) ->
