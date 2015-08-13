@@ -46,19 +46,26 @@ describe "DocManager", ->
 
 		describe "when the doc is deleted", ->
 			beforeEach -> 
+				@doc = { _id: @doc_id, lines: ["mock-lines"] }
+				@s3doc = { _id: @doc_id, inS3: true }
+				@MongoManager.findDoc = sinon.stub()
+				@MongoManager.findDoc.callsArgWith(1, null, @s3doc)
+				@MongoManager.findDoc.callsArgWith(1, null, @doc)
+				spy = sinon.spy @DocManager.getDoc
+				@DocArchiveManager.unarchiveDoc = sinon.stub().callsArgWith(2)
+				@DocManager.getDoc @project_id, @doc_id, @callback
+
+			it "should call the DocArchive to unarchive the doc", ->
+				@DocArchiveManager.unarchiveDoc.calledWith(@project_id, @doc_id).should.equal true
+
+			it "should return the doc", ->
+				@callback.calledWith(null, @doc).should.equal true
+
+		describe "when the doc is in s3", ->
+			beforeEach -> 
 				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
 
 				@DocManager.getDoc @project_id, @doc_id, @callback
-
-				it "should try to find the doc in the docs collection", ->
-					@MongoManager.findDoc
-						.calledWith(@doc_id)
-						.should.equal true
-
-				it "should return the doc", ->
-					@callback
-						.calledWith(null, @doc)
-						.should.equal true
 
 		describe "when the doc does not exist anywhere", ->
 			beforeEach -> 

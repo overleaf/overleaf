@@ -22,7 +22,7 @@ module.exports = DocManager =
 					if err?
 						logger.err err:err, project_id:project_id, doc_id:doc_id, "error unarchiving doc"
 						return callback(err)
-					MongoManager.findDoc doc_id, callback
+					DocManager.getDoc project_id, doc_id, callback
 			else
 				callback err, doc
 
