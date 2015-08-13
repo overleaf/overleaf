@@ -20,6 +20,7 @@ module.exports = DocManager =
 			else if doc?.inS3
 				DocArchive.unarchiveDoc project_id, doc_id, (err)->
 					if err?
+						logger.err err:err, project_id:project_id, doc_id:doc_id, "error unarchiving doc"
 						return callback(err)
 					MongoManager.findDoc doc_id, callback
 			else

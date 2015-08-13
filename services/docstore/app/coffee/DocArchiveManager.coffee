@@ -35,7 +35,7 @@ module.exports = DocArchive =
 			md5lines = crypto.createHash("md5").update(JSON.stringify(doc.lines)).digest("hex")
 			md5response = res.headers.etag.toString().replace(/\"/g, '')
 			if md5lines != md5response
-				logger.err responseMD5:md5response, linesMD5:md5lines,  project_id:project_id, doc_id: doc._id, "err in response md5 from s3"
+				logger.err responseMD5:md5response, linesMD5:md5lines,  project_id:project_id, doc_id: doc?._id, "err in response md5 from s3"
 				return callback new Error("Error in S3 md5 response")
 			MongoManager.markDocAsArchived doc._id, doc.rev, (err) ->
 				return callback(err) if err?
@@ -61,14 +61,14 @@ module.exports = DocArchive =
 		options = DocArchive.buildS3Options(true, project_id+"/"+doc_id)
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
-				logger.err err:err, res:res, "something went wrong unarchiving doc from aws"
+				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong unarchiving doc from aws"
 				return callback new Errors.NotFoundError("Error in S3 request")
 			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (err) ->
 				return callback(err) if err?
 				logger.log project_id: project_id, doc_id: doc_id, "deleting doc from s3"
 				request.del options, (err, res, body)->
 					if err? || res.statusCode != 204
-						logger.err err:err, res:res, "something went wrong deleting doc from aws"
+						logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong deleting doc from aws"
 						return callback new Errors.NotFoundError("Error in S3 request")
 					callback()
 
@@ -80,7 +80,5 @@ module.exports = DocArchive =
 					bucket: settings.docstore.s3.bucket
 				timeout: thirtySeconds
 				json: content
-				#headers:
-				#	'content-md5': crypto.createHash("md5").update(JSON.stringify(content)).digest("hex")
 				uri:"https://#{settings.docstore.s3.bucket}.s3.amazonaws.com/#{key}"
 		}
