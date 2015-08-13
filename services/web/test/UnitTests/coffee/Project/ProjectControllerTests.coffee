@@ -42,6 +42,10 @@ describe "ProjectController", ->
 			userCanAccessProject:sinon.stub()
 		@EditorController = 
 			renameProject:sinon.stub()
+		@InactiveProjectManager =
+			reactivateProjectIfRequired:sinon.stub()
+		@ProjectUpdateHandler =
+			markOpened: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -57,6 +61,8 @@ describe "ProjectController", ->
 			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
 			"../../managers/SecurityManager":@SecurityManager
+			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
+			"./ProjectUpdateHandler":@ProjectUpdateHandler
 
 		@user = 
 			_id:"!£123213kjljkl"
@@ -282,6 +288,9 @@ describe "ProjectController", ->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
+			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
+			@ProjectUpdateHandler.markOpened.callsArgWith(1)
+
 
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>
@@ -321,3 +330,16 @@ describe "ProjectController", ->
 				resCode.should.equal 401
 				done()
 			@ProjectController.loadEditor @req, @res
+
+		it "should reactivateProjectIfRequired", (done)->
+			@res.render = (pageName, opts)=>
+				@InactiveProjectManager.reactivateProjectIfRequired.calledWith(@project_id).should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should mark project as opened", (done)->
+			@res.render = (pageName, opts)=>
+				@ProjectUpdateHandler.markOpened.calledWith(@project_id).should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+

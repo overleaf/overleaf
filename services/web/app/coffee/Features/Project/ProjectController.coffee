@@ -14,6 +14,8 @@ _ = require("underscore")
 Settings = require("settings-sharelatex")
 SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
+InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
+ProjectUpdateHandler = require("./ProjectUpdateHandler")
 
 module.exports = ProjectController =
 
@@ -189,6 +191,10 @@ module.exports = ProjectController =
 				if user_id == 'openUser'
 					return cb()
 				SubscriptionLocator.getUsersSubscription user_id, cb
+			activate: (cb)->
+				InactiveProjectManager.reactivateProjectIfRequired project_id, cb
+			markOpened: (cb)-> 
+				ProjectUpdateHandler.markOpened project_id, cb
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"

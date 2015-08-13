@@ -67,3 +67,31 @@ module.exports = DocstoreManager =
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "error updating doc in docstore"
 				callback(error)
+
+	archiveProject: (project_id, callback)->
+		url = "#{settings.apis.docstore.url}/project/#{project_id}/archive"
+		logger.log project_id:project_id, "archiving project in docstore"
+		request.post url, (err, res, docs) ->
+			if err?
+				logger.err err:err, project_id:project_id, "error archving project in docstore"
+				return callback(err)
+			if 200 <= res.statusCode < 300
+				callback()	
+			else
+				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
+				logger.err err: error, project_id: project_id, "error archiving project in docstore"
+				return callback(error)
+
+	unarchiveProject: (project_id, callback)->
+		url = "#{settings.apis.docstore.url}/project/#{project_id}/unarchive"
+		logger.log project_id:project_id, "unarchiving project in docstore"
+		request.post url, (err, res, docs) ->
+			if err?
+				logger.err err:err, project_id:project_id, "error unarchiving project in docstore"
+				return callback(err)
+			if 200 <= res.statusCode < 300
+				callback()	
+			else
+				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
+				logger.err err: error, project_id: project_id, "error unarchiving project in docstore"
+				return callback(error)

@@ -17,6 +17,8 @@ DeletedDocSchema = new Schema
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
+	lastOpened		  :   {type:Date}
+	inactive		  :   { type: Boolean }
 	owner_ref         :   {type:ObjectId, ref:'User'}
 	collaberator_refs :   [ type:ObjectId, ref:'User' ]
 	readOnly_refs     :   [ type:ObjectId, ref:'User' ]
