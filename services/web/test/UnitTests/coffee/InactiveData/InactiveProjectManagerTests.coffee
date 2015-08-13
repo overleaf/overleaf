@@ -13,6 +13,7 @@ describe "InactiveProjectManager", ->
 		@settings = {}
 		@DocstoreManager =
 			unarchiveProject:sinon.stub()
+			archiveProject:sinon.stub()
 		@ProjectUpdateHandler = 
 			markAsActive:sinon.stub()
 			markAsInactive:sinon.stub()
@@ -66,20 +67,20 @@ describe "InactiveProjectManager", ->
 		beforeEach ->
 
 		it "should call unarchiveProject and markAsInactive", (done)->
-			@DocstoreManager.unarchiveProject.callsArgWith(1)
+			@DocstoreManager.archiveProject.callsArgWith(1)
 			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
-			@InactiveProjectManager.deactivateProject @project_id, (err)->
-				@DocstoreManager.unarchiveProject.calledWith(@project_id).should.equal true
-				@ProjectUpdateHandler.markAsInactive.callsArgWith(@project_id).should.equal true
+			@InactiveProjectManager.deactivateProject @project_id, (err)=>
+				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
+				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal true
 				done()
 
 		it "should not call markAsInactive if there was a problem unarchiving", (done)->
-			@DocstoreManager.unarchiveProject.callsArgWith(1, "errorrr")
+			@DocstoreManager.archiveProject.callsArgWith(1, "errorrr")
 			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
-			@InactiveProjectManager.deactivateProject @project_id, (err)->
+			@InactiveProjectManager.deactivateProject @project_id, (err)=>
 				err.should.equal "errorrr"
-				@DocstoreManager.unarchiveProject.calledWith(@project_id).should.equal true
-				@ProjectUpdateHandler.markAsInactive.callsArgWith(@project_id).should.equal false
+				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
+				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal false
 				done()
