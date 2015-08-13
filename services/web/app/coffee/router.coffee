@@ -35,6 +35,7 @@ WikiController = require("./Features/Wiki/WikiController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
+InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -134,6 +135,8 @@ module.exports = class Router
 		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
 		apiRouter.get  '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
+
+		apiRouter.get '/internal/deactivateOldProjects', AuthenticationController.httpAuth, InactiveProjectController.deactivateOldProjects
 
 		webRouter.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
