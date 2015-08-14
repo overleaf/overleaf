@@ -8,11 +8,11 @@ oneMegaByte = 1024 * 1024
 
 CpuTimeBucket = 100 # current cpu time allowance in milliseconds
 CpuTimeBucketMax = 100 # maximum amount of cpu time allowed in bucket
-CpuTimeBucketRate = 1 # add this many milliseconds per minute
+CpuTimeBucketRate = 10 # add this many milliseconds per minute
 
 gcInterval = 1 # how many minutes between gc (parameter is dynamically adjusted)
 countSinceLastGc = 0 # how many minutes since last gc
-MemoryChunkSize = 4 * oneMegaByte # how much we need to free to consider gc worth doing
+MemoryChunkSize = 4 # how many megabytes we need to free to consider gc worth doing
 
 readyToGc = () ->
 	# update allowed cpu time
