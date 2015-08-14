@@ -1,5 +1,5 @@
 async = require("async")
-_ = require("lodash")
+_ = require("underscore")
 logger = require("logger-sharelatex")
 DocstoreManager = require("../Docstore/DocstoreManager")
 ProjectGetter = require("../Project/ProjectGetter")
