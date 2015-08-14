@@ -59,9 +59,9 @@ module.exports = MongoAWS =
 			.on 'data', (line) ->
 				if line.length > 2
 					ops.push(JSON.parse(line))
-				if ops.length > MongoAWS.bulkLimit
-					MongoAWS.handleBulk ops, () ->
-						ops.splice(0,ops.length)
+				if ops.length == MongoAWS.bulkLimit
+					MongoAWS.handleBulk ops.slice(0), () ->
+					ops.splice(0,ops.length)
 			.on 'end', () ->
 				MongoAWS.handleBulk ops, callback
 			.on 'error', (err) ->
@@ -80,7 +80,7 @@ module.exports = MongoAWS =
 			if err?
 				logger.error err:err, "error bulking ReadlineStream"
 			else
-				logger.log result:result, "bulked ReadlineStream"
+				logger.log count:ops.length, result:result, "bulked ReadlineStream"
 			cb(err)
 
 
