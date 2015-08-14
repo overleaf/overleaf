@@ -25,11 +25,11 @@ module.exports = InactiveProjectManager =
 					return callback(err)
 				ProjectUpdateHandler.markAsActive project_id, callback
 
-	deactivateOldProjects: (limit, callback)->
-
-		sixMonthsAgo = new Date() - (MILISECONDS_IN_DAY * 1)
+	deactivateOldProjects: (limit = 10, daysOld = 360, callback)->
+		oldProjectDate = new Date() - (MILISECONDS_IN_DAY * daysOld)
+		logger.log oldProjectDate:oldProjectDate, limit:limit, daysOld:daysOld, "starting process of deactivating old projects"
 		Project.find()
-			.where("lastOpened").lt(sixMonthsAgo)
+			.where("lastOpened").lt(oldProjectDate)
 			.where("inactive").ne(true)
 			.select("_id")
 			.limit(limit)
@@ -40,7 +40,10 @@ module.exports = InactiveProjectManager =
 					return (cb)->
 						InactiveProjectManager.deactivateProject project._id, cb
 				logger.log numberOfProjects:projects?.length, "deactivating projects"
-				async.series jobs, callback
+				async.series jobs, (err)->
+					if err?
+						logger.err err:err, "error deactivating projects"
+					callback err, projects
 
 
 	deactivateProject: (project_id, callback)->
