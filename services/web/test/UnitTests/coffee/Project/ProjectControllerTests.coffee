@@ -45,7 +45,7 @@ describe "ProjectController", ->
 		@InactiveProjectManager =
 			reactivateProjectIfRequired:sinon.stub()
 		@ProjectUpdateHandler =
-			markOpened: sinon.stub()
+			markAsOpened: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -289,7 +289,7 @@ describe "ProjectController", ->
 			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
-			@ProjectUpdateHandler.markOpened.callsArgWith(1)
+			@ProjectUpdateHandler.markAsOpened.callsArgWith(1)
 
 
 		it "should render the project/editor page", (done)->
@@ -339,7 +339,7 @@ describe "ProjectController", ->
 
 		it "should mark project as opened", (done)->
 			@res.render = (pageName, opts)=>
-				@ProjectUpdateHandler.markOpened.calledWith(@project_id).should.equal true
+				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
 				done()
 			@ProjectController.loadEditor @req, @res
 

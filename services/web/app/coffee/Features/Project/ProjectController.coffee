@@ -193,8 +193,10 @@ module.exports = ProjectController =
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			activate: (cb)->
 				InactiveProjectManager.reactivateProjectIfRequired project_id, cb
-			markOpened: (cb)-> 
-				ProjectUpdateHandler.markOpened project_id, cb
+			markAsOpened: (cb)-> 
+				#don't need to wait for this to complete
+				ProjectUpdateHandler.markAsOpened project_id, ->
+				cb()
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
