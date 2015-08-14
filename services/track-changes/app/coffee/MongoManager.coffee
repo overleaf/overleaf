@@ -140,13 +140,12 @@ module.exports = MongoManager =
 	getArchivedDocChanges: (doc_id, callback)->
 		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback
 
-	markDocHistoryAsArchived: (doc_id, callback)->
-		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
-			db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
+	markDocHistoryAsArchived: (doc_id, update, callback)->
+		db.docHistory.update { v: update.v }, { $set : { inS3 : true } }, (error)->
+			return callback(error) if error?
+			db.docHistory.remove { doc_id : doc_id, inS3 : { $exists : false }, v: { $lt : update.v }, expiresAt: {$exists : false} }, (error)->
 				return callback(error) if error?
-				db.docHistory.remove { doc_id : doc_id, inS3 : { $exists : false } }, (error)->
-					return callback(error) if error?
-					callback(error)
+				callback(error)
 
 	markDocHistoryAsUnarchived: (doc_id, callback)->
 		db.docHistory.update { doc_id: doc_id }, { $unset : { inS3 : true } }, { multi: true }, (error)->

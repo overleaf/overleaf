@@ -33,7 +33,7 @@ module.exports = MongoAWS =
 		args.push '-c' 
 		args.push 'docHistory'
 		args.push '-q'
-		args.push "{doc_id: ObjectId('#{doc_id}') }"
+		args.push "{doc_id: ObjectId('#{doc_id}') , expiresAt: {$exists : false} }"
 		args.push '-o' 
 		args.push filepath
 
