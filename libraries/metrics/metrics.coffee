@@ -40,6 +40,7 @@ module.exports =
 	http: require "./http"
 	open_sockets: require "./open_sockets"
 	event_loop: require "./event_loop"
+	memory: require "./memory"
 
 	close: () ->
 		for func in destructors
