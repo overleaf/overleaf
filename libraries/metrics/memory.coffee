@@ -73,7 +73,7 @@ module.exports = MemoryMonitor =
 		#Metrics.gauge("memory.cpu-time-bucket", CpuTimeBucket)
 
 		if global.gc? && readyToGc()
-			gcTime = (executeAndTime	global.gc).toFixed(2)
+			gcTime = (executeAndTime global.gc).toFixed(2)
 			memAfterGc = inMegaBytes process.memoryUsage()
 			deltaMem = updateMemoryStats(memBeforeGc, memAfterGc)
 			logger.log {gcTime, memBeforeGc, memAfterGc, deltaMem, gcInterval, CpuTimeBucket}, "global.gc() forced"
