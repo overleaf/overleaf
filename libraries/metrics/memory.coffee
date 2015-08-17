@@ -70,14 +70,14 @@ module.exports = MemoryMonitor =
 		Metrics.gauge("memory.heaptotal", mem.heapTotal)
 		Metrics.gauge("memory.heapused", mem.heapUsed)
 		Metrics.gauge("memory.gc-interval", gcInterval)
-		Metrics.gauge("memory.cpu-time-bucket", CpuTimeBucket)
+		#Metrics.gauge("memory.cpu-time-bucket", CpuTimeBucket)
 
 		if global.gc? && readyToGc()
 			gcTime = (executeAndTime	global.gc).toFixed(2)
 			memAfterGc = inMegaBytes process.memoryUsage()
 			deltaMem = updateMemoryStats(memBeforeGc, memAfterGc)
 			logger.log {gcTime, memBeforeGc, memAfterGc, deltaMem, gcInterval, CpuTimeBucket}, "global.gc() forced"
-			Metrics.timing("memory.gc-time", gcTime)
+			#Metrics.timing("memory.gc-time", gcTime)
 			Metrics.gauge("memory.gc-rss-freed", -deltaMem.rss)
 			Metrics.gauge("memory.gc-heaptotal-freed", -deltaMem.heapTotal)
 			Metrics.gauge("memory.gc-heapused-freed",  -deltaMem.heapUsed)
