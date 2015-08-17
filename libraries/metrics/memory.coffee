@@ -56,12 +56,9 @@ updateMemoryStats = (oldMem, newMem) ->
 
 module.exports = MemoryMonitor =
 	monitor: (logger) ->
-		# use setTimeout add some randomisation of the start time
-		setTimeout () ->
-			interval = setInterval () ->
-				MemoryMonitor.Check(logger)
-			, oneMinute
-		, Math.floor Math.random()*oneMinute
+		interval = setInterval () ->
+			MemoryMonitor.Check(logger)
+		, oneMinute
 		Metrics = require "./metrics"
 		Metrics.registerDestructor () ->
 			clearInterval(interval)
