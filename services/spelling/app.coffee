@@ -9,6 +9,7 @@ bodyParser = require('body-parser')
 metrics = require("metrics-sharelatex")
 metrics.initialize("spelling")
 metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
+metrics.memory.monitor(logger)
 HealthCheckController = require("./app/js/HealthCheckController")
 
 
