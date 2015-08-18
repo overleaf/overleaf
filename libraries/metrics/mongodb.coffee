@@ -23,7 +23,6 @@ module.exports =
 				if (typeof callback == 'undefined')
 					callback = options
 					options = {}
-					callback = () ->
 
 				collection = db_command.collectionName
 				if collection.match(/\$cmd$/)
@@ -52,7 +51,6 @@ module.exports =
 				if (typeof callback == 'undefined')
 					callback = options
 					options = {}
-					callback = () ->
 
 				if ns.match(/\$cmd$/)
 					# Ignore noisy command methods like authenticating, ismaster and ping
