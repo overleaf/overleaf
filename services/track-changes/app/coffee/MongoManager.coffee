@@ -135,7 +135,7 @@ module.exports = MongoManager =
 		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
 
 	getDocChangesCount: (doc_id, callback)->
-		db.docHistory.count doc_id: ObjectId(doc_id.toString()), {}, callback
+		db.docHistory.count { doc_id : doc_id, inS3 : { $exists : false }}, {}, callback
 
 	getArchivedDocChanges: (doc_id, callback)->
 		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback

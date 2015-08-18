@@ -95,9 +95,17 @@ module.exports = UpdatesManager =
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return callback(error) if error?
-			DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
-				return callback(error,null) if error?
-				MongoManager.getProjectUpdates project_id, options, callback
+			MongoManager.getProjectUpdates project_id, options, (error, updates) ->
+				jobs = []
+				for update in updates
+					if update.inS3?
+						do (update) ->
+							jobs.push (callback) -> DocArchiveManager.unArchiveDocChanges update.project_id, update.doc_id, callback
+				if jobs.length?
+					async.series jobs, (err) ->
+						MongoManager.getProjectUpdates project_id, options, callback
+				else
+					callback(error, updates)
 
 	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->
