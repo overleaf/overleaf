@@ -22,6 +22,11 @@ app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
 app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: "2mb"), HttpController.updateDoc
 app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
 
+
+app.post  '/project/:project_id/deactivate', HttpController.archiveAllDocs
+app.post  '/project/:project_id/reactivate', HttpController.unArchiveAllDocs
+
+# can delete these two soon
 app.post  '/project/:project_id/archive', HttpController.archiveAllDocs
 app.post  '/project/:project_id/unarchive', HttpController.unArchiveAllDocs
 

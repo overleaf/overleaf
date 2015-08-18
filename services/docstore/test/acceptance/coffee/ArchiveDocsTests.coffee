@@ -108,7 +108,6 @@ describe "Archiving all docs", ->
 			@timeout 1000 * 30
 			quarterMegInBytes = 250000
 			lines = require("crypto").randomBytes(quarterMegInBytes).toString("hex")
-			console.log @project_id, @docs[1]._id, "helllllo"
 			@docs[1].lines = [lines,lines,lines,lines]
 			DocstoreClient.updateDoc @project_id, @docs[1]._id, @docs[1].lines, =>
 				DocstoreClient.archiveAllDoc @project_id, (error, @res) =>

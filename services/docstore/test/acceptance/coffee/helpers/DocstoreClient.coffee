@@ -42,10 +42,15 @@ module.exports = DocstoreClient =
 		}, callback	
 		
 	archiveAllDoc: (project_id, callback = (error, res, body) ->) ->
-		request.get {
-			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/archive"
+		request.post {
+			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/deactivate"
 		}, callback	
 	
+	unArchiveAllDoc: (project_id, callback = (error, res, body) ->) ->
+		request.post {
+			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/deactivate"
+		}, callback	
+
 	getS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
 		options = DocArchiveManager.buildS3Options(true, project_id+"/"+doc_id)
 		request.get options, callback	
