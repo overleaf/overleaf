@@ -28,7 +28,6 @@ ProjectSchema = new Schema
 	compiler		  :   {type:String, default:'pdflatex'}
 	spellCheckLanguage :   {type:String, default:'en'}
 	deletedByExternalDataSource : {type: Boolean, default: false}
-	useClsi2          :   {type:Boolean, default: true}
 	description : {type:String, default:''}
 	archived          : { type: Boolean }
 	deletedDocs       : [DeletedDocSchema]

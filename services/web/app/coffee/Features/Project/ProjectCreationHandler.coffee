@@ -19,7 +19,6 @@ module.exports =
 		project = new Project
 			 owner_ref  : new ObjectId(owner_id)
 			 name       : projectName
-			 useClsi2   : true
 		project.rootFolder[0] = rootFolder
 		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
 			project.spellCheckLanguage = user.ace.spellCheckLanguage

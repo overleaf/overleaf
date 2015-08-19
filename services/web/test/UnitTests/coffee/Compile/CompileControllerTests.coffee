@@ -98,7 +98,6 @@ describe "CompileController", ->
 
 		describe "when downloading for embedding", ->
 			beforeEach ->
-				@project.useClsi2 = true
 				@CompileController.proxyToClsi = sinon.stub()
 				@CompileController.downloadPdf(@req, @res, @next)
 
