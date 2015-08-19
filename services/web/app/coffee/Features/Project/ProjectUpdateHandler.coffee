@@ -19,14 +19,14 @@ module.exports =
 
 	markAsInactive: (project_id, callback)->
 		conditions = {_id:project_id}
-		update = {inactive:true}
+		update = {active:false}
 		Project.update conditions, update, {}, (err)->
 			if callback?
 				callback()
 
 	markAsActive: (project_id, callback)->
 		conditions = {_id:project_id}
-		update = { $unset: { inactive: true }}
+		update = {active:true}
 		Project.update conditions, update, {}, (err)->
 			if callback?
 				callback()

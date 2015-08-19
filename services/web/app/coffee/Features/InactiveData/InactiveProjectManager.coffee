@@ -10,13 +10,13 @@ MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager =
 
 	reactivateProjectIfRequired: (project_id, callback)->
-		ProjectGetter.getProject project_id, {inactive:true}, (err, project)->
+		ProjectGetter.getProject project_id, {active:true}, (err, project)->
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
-			logger.log project_id:project_id, inactive:project.inactive, "seeing if need to reactivate project"
+			logger.log project_id:project_id, active:project.active, "seeing if need to reactivate project"
 
-			if !project.inactive
+			if project.active
 				return callback()
 
 			DocstoreManager.unarchiveProject project_id, (err)->
@@ -30,7 +30,7 @@ module.exports = InactiveProjectManager =
 		logger.log oldProjectDate:oldProjectDate, limit:limit, daysOld:daysOld, "starting process of deactivating old projects"
 		Project.find()
 			.where("lastOpened").lt(oldProjectDate)
-			.where("inactive").ne(true)
+			.where("active").equals(true)
 			.select("_id")
 			.limit(limit)
 			.exec (err, projects)->

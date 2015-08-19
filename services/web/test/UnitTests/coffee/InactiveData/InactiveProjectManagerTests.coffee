@@ -33,7 +33,7 @@ describe "InactiveProjectManager", ->
 	describe "reactivateProjectIfRequired", ->
 
 		beforeEach ->
-			@project = {inactive:true}
+			@project = {active:false}
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@ProjectUpdateHandler.markAsActive.callsArgWith(1)
 
@@ -53,8 +53,8 @@ describe "InactiveProjectManager", ->
 				done()
 
 
-		it "should not call unarchiveProject if it is not inactive", (done)->
-			delete @project.inactive
+		it "should not call unarchiveProject if it is active", (done)->
+			@project.active = true
 			@DocstoreManager.unarchiveProject.callsArgWith(1)
 			@InactiveProjectManager.reactivateProjectIfRequired @project_id, (err)=>
 				@DocstoreManager.unarchiveProject.calledWith(@project_id).should.equal false

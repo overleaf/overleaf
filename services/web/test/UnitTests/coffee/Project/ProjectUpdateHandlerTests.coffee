@@ -42,7 +42,7 @@ describe 'ProjectUpdateHandler', ->
 			@handler.markAsInactive project_id, (err)=>
 				args = @ProjectModel.update.args[0]
 				args[0]._id.should.equal project_id
-				args[1].inactive.should.equal true
+				args[1].active.should.equal false
 				done()
 
 	describe "markAsActive", ->
@@ -51,7 +51,7 @@ describe 'ProjectUpdateHandler', ->
 			@handler.markAsActive project_id, (err)=>
 				args = @ProjectModel.update.args[0]
 				args[0]._id.should.equal project_id
-				args[1]["$unset"].inactive.should.equal true
+				args[1].active.should.equal true
 				done()
 
 
