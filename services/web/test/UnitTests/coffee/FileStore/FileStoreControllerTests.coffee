@@ -50,7 +50,7 @@ describe "FileStoreController", ->
 				done()
 			@controller.getFile @req, @res
 
-		it "should get the file from the db", (done)->	
+		it "should get the file from the db", (done)->
 			@stream.pipe = (des)=>
 				opts =
 					project_id: @project_id
@@ -65,5 +65,45 @@ describe "FileStoreController", ->
 				@res.setHeader.calledWith("Content-Disposition", "attachment; filename=#{@file.name}").should.equal true
 				done()
 			@controller.getFile @req, @res
-			
 
+		describe "with an HTML file", ->
+
+			beforeEach ->
+				@user_agent = 'A generic browser'
+				@file.name = 'really_bad.html'
+				@req.get = (key) =>
+					if key == 'User-Agent'
+						@user_agent
+
+			describe "from firefox", ->
+
+				beforeEach ->
+					@user_agent = "A Firefox browser"
+
+				it "should not set Content-Type", (done) ->
+					@stream.pipe = (des) =>
+						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal false
+						done()
+					@controller.getFile @req, @res
+
+			describe "from an iPhone", ->
+
+				beforeEach ->
+					@user_agent = "An iPhone browser"
+
+				it "should set Content-Type to 'text/plain'", (done) ->
+					@stream.pipe = (des) =>
+						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
+						done()
+					@controller.getFile @req, @res
+
+			describe "from an iPad", ->
+
+				beforeEach ->
+					@user_agent = "An iPad browser"
+
+				it "should set Content-Type to 'text/plain'", (done) ->
+					@stream.pipe = (des) =>
+						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
+						done()
+					@controller.getFile @req, @res
