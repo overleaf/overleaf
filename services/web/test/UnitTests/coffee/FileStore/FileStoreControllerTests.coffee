@@ -66,44 +66,65 @@ describe "FileStoreController", ->
 				done()
 			@controller.getFile @req, @res
 
-		describe "with an HTML file", ->
-
-			beforeEach ->
-				@user_agent = 'A generic browser'
-				@file.name = 'really_bad.html'
-				@req.get = (key) =>
-					if key == 'User-Agent'
-						@user_agent
-
-			describe "from firefox", ->
+		# Test behaviour around handling html files
+		['.html', '.htm', '.xhtml'].forEach (extension) ->
+			describe "with a '#{extension}' file extension", ->
 
 				beforeEach ->
-					@user_agent = "A Firefox browser"
+					@user_agent = 'A generic browser'
+					@file.name = "bad#{extension}"
+					@req.get = (key) =>
+						if key == 'User-Agent'
+							@user_agent
 
-				it "should not set Content-Type", (done) ->
-					@stream.pipe = (des) =>
-						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal false
-						done()
-					@controller.getFile @req, @res
+				describe "from a non-ios browser", ->
 
-			describe "from an iPhone", ->
+					it "should not set Content-Type", (done) ->
+						@stream.pipe = (des) =>
+							@res.setHeader.calledWith("Content-Type", "text/plain").should.equal false
+							done()
+						@controller.getFile @req, @res
+
+				describe "from an iPhone", ->
+
+					beforeEach ->
+						@user_agent = "An iPhone browser"
+
+					it "should set Content-Type to 'text/plain'", (done) ->
+						@stream.pipe = (des) =>
+							@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
+							done()
+						@controller.getFile @req, @res
+
+				describe "from an iPad", ->
+
+					beforeEach ->
+						@user_agent = "An iPad browser"
+
+					it "should set Content-Type to 'text/plain'", (done) ->
+						@stream.pipe = (des) =>
+							@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
+							done()
+						@controller.getFile @req, @res
+
+		# None of these should trigger the iOS/html logic
+		['x.html-is-rad', 'html.pdf', 'bare'].forEach (filename) ->
+			describe "with filename as '#{filename}'", ->
 
 				beforeEach ->
-					@user_agent = "An iPhone browser"
+					@user_agent = 'A generic browser'
+					@file.name = filename
+					@req.get = (key) =>
+						if key == 'User-Agent'
+							@user_agent
 
-				it "should set Content-Type to 'text/plain'", (done) ->
-					@stream.pipe = (des) =>
-						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
-						done()
-					@controller.getFile @req, @res
+				['iPhone', 'iPad', 'Firefox', 'Chrome'].forEach (browser) ->
+					describe "downloaded from #{browser}", ->
+						beforeEach ->
+							@user_agent = "Some #{browser} thing"
 
-			describe "from an iPad", ->
-
-				beforeEach ->
-					@user_agent = "An iPad browser"
-
-				it "should set Content-Type to 'text/plain'", (done) ->
-					@stream.pipe = (des) =>
-						@res.setHeader.calledWith("Content-Type", "text/plain").should.equal true
-						done()
-					@controller.getFile @req, @res
+						it 'Should not set the Content-type', (done) ->
+							@stream.pipe = (des) =>
+								@res.setHeader.calledWith("Content-Type", "text/plain").should.equal false
+								done()
+							@controller.getFile @req, @res
