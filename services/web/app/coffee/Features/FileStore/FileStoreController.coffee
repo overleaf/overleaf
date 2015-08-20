@@ -8,7 +8,12 @@ is_mobile_safari = (user_agent) ->
 									user_agent.indexOf('iPad') >= 0)
 
 is_html = (file) ->
-	file.name.lastIndexOf('.html') == file.name.length - 5
+	ends_with = (ext) ->
+		file.name? and
+		file.name.length > ext.length and
+		(file.name.lastIndexOf(ext) == file.name.length - ext.length)
+
+	ends_with('.html') or ends_with('.htm') or ends_with('.xhtml')
 
 module.exports =
 
