@@ -108,7 +108,7 @@ describe "FileStoreController", ->
 						@controller.getFile @req, @res
 
 		# None of these should trigger the iOS/html logic
-		['x.html-is-rad', 'html.pdf', 'bare'].forEach (filename) ->
+		['x.html-is-rad', 'html.pdf', '.html-is-good-for-hidden-files', 'somefile'].forEach (filename) ->
 			describe "with filename as '#{filename}'", ->
 
 				beforeEach ->
