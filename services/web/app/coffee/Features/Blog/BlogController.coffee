@@ -22,9 +22,10 @@ module.exports = BlogController =
 
 		logger.log url:url, "proxying request to blog api"
 		request.get blogUrl, (err, r, data)->
-			return next(err) if err?
 			if r?.statusCode == 404
 				return ErrorController.notFound(req, res, next)
+			if err?
+				return res.send 500
 			data = data.trim()
 			try
 				data = JSON.parse(data)

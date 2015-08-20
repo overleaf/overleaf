@@ -18,6 +18,8 @@ module.exports = UniversityController =
 		request.get universityUrl, (err, r, data)->
 			if r?.statusCode == 404
 				return ErrorController.notFound(req, res, next)
+			if err?
+				return res.send 500
 			data = data.trim()
 			try
 				data = JSON.parse(data)
