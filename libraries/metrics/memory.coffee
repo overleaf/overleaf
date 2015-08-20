@@ -72,6 +72,8 @@ module.exports = MemoryMonitor =
 		Metrics.gauge("memory.gc-interval", gcInterval)
 		#Metrics.gauge("memory.cpu-time-bucket", CpuTimeBucket)
 
+		logger.log mem, "process.memoryUsage()"
+
 		if global.gc? && readyToGc()
 			gcTime = (executeAndTime global.gc).toFixed(2)
 			memAfterGc = inMegaBytes process.memoryUsage()
