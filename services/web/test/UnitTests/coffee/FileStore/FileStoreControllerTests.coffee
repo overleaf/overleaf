@@ -21,14 +21,15 @@ describe "FileStoreController", ->
 		@stream = {}
 		@project_id = "2k3j1lk3j21lk3j"
 		@file_id = "12321kklj1lk3jk12"
-		@req = 
+		@req =
 			params:
 				Project_id: @project_id
 				File_id: @file_id
 			query: "query string here"
-		@res = 
+			get: (key) -> undefined
+		@res =
 			setHeader: sinon.stub()
-		@file = 
+		@file =
 			name: "myfile.png"
 
 	describe "getFile", ->
