@@ -37,10 +37,11 @@
 					)
 						i.fa.fa-trash-o
 
-				.btn-group.dropdown(ng-hide="selectedProjects.length < 1")
+				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
 					a.btn.btn-default.dropdown-toggle(
 						href="#",
 						data-toggle="dropdown",
+						dropdown-toggle,
 						tooltip="#{translate('add_to_folders')}",
 						tooltip-append-to-body="true",
 						tooltip-placement="bottom"
