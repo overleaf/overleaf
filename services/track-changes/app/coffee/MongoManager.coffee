@@ -131,9 +131,6 @@ module.exports = MongoManager =
 		db.docHistoryStats.ensureIndex { doc_id: 1 }, { background: true }
 		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }
 
-	getProjectsDocs: (project_id, callback)->
-		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
-
 	getDocChangesCount: (doc_id, callback)->
 		db.docHistory.count { doc_id : doc_id, inS3 : { $exists : false }}, {}, callback
 

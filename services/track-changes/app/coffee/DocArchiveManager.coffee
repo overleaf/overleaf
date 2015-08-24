@@ -1,20 +1,18 @@
 MongoManager = require "./MongoManager"
 MongoAWS = require "./MongoAWS"
 LockManager = require "./LockManager"
+DocstoreHandler = require "./DocstoreHandler"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 async = require "async"
 settings = require("settings-sharelatex")
-request = require("request")
-crypto = require("crypto")
-thirtySeconds = 30 * 1000
 
 module.exports = DocArchiveManager =
 
 	archiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
 		if settings.filestore?.backend != "s3"
 			return callback(null)
-		MongoManager.getProjectsDocs project_id, (error, docs) ->
+		DocstoreHandler.getAllDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)
 			else if !docs?
@@ -46,7 +44,7 @@ module.exports = DocArchiveManager =
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
 		if settings.filestore?.backend != "s3"
 			return callback(null)
-		MongoManager.getProjectsDocs project_id, (error, docs) ->
+		DocstoreHandler.getAllDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)
 			else if !docs?
@@ -65,3 +63,6 @@ module.exports = DocArchiveManager =
 					MongoManager.markDocHistoryAsUnarchived doc_id, (error) ->
 						return callback(error) if error?
 						callback()
+
+	getProjectsDocs: (project_id, callback)->
+		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
