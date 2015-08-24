@@ -63,6 +63,3 @@ module.exports = DocArchiveManager =
 					MongoManager.markDocHistoryAsUnarchived doc_id, (error) ->
 						return callback(error) if error?
 						callback()
-
-	getProjectsDocs: (project_id, callback)->
-		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
