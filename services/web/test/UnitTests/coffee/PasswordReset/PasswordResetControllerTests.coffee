@@ -14,7 +14,7 @@ describe "PasswordResetController", ->
 		@PasswordResetHandler =
 			generateAndEmailResetToken:sinon.stub()
 			setNewUserPassword:sinon.stub()
-		@RateLimiter = 
+		@RateLimiter =
 			addCount: sinon.stub()
 		@PasswordResetController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
@@ -32,6 +32,8 @@ describe "PasswordResetController", ->
 				password:@password
 			i18n:
 				translate:->
+			session: {}
+			query: {}
 
 		@res = {}
 
@@ -86,6 +88,9 @@ describe "PasswordResetController", ->
 
 	describe "setNewUserPassword", ->
 
+		beforeEach ->
+			@req.session.resetToken = @token
+
 		it "should tell the user handler to reset the password", (done)->
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
 			@res.sendStatus = (code)=>
@@ -119,5 +124,45 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 
+		it "should clear the session.resetToken", (done) ->
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
+			@res.sendStatus = (code)=>
+				code.should.equal 200
+				@req.session.should.not.have.property 'resetToken'
+				done()
+			@PasswordResetController.setNewUserPassword @req, @res
 
+	describe "renderSetPasswordForm", ->
 
+		describe "with token in query-string", ->
+			beforeEach ->
+				@req.query.passwordResetToken = @token
+
+			it "should set session.resetToken and redirect", (done) ->
+				@req.session.should.not.have.property 'resetToken'
+				@res.redirect = (path) =>
+					path.should.equal '/user/password/set'
+					@req.session.resetToken.should.equal @token
+					done()
+				@PasswordResetController.renderSetPasswordForm(@req, @res)
+
+		describe "without a token in query-string", ->
+
+			describe "with token in session", ->
+				beforeEach ->
+					@req.session.resetToken = @token
+
+				it "should render the page, passing the reset token", (done) ->
+					@res.render = (template_path, options) =>
+						options.passwordResetToken.should.equal @req.session.resetToken
+						done()
+					@PasswordResetController.renderSetPasswordForm(@req, @res)
+
+			describe "without a token in session", ->
+
+				it "should redirect to the reset request page", (done) ->
+					@res.redirect = (path) =>
+						path.should.equal "/user/password/reset"
+						@req.session.should.not.have.property 'resetToken'
+						done()
+					@PasswordResetController.renderSetPasswordForm(@req, @res)

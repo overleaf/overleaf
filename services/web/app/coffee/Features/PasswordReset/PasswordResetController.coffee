@@ -6,12 +6,12 @@ module.exports =
 
 	renderRequestResetForm: (req, res)->
 		logger.log "rendering request reset form"
-		res.render "user/passwordReset", 
+		res.render "user/passwordReset",
 			title:"reset_password"
 
 	requestReset: (req, res)->
 		email = req.body.email.trim().toLowerCase()
-		opts = 
+		opts =
 			endpointName: "password_reset_rate_limit"
 			timeInterval: 60
 			subjectName: req.ip
@@ -28,14 +28,20 @@ module.exports =
 					res.send 404, {message: req.i18n.translate("cant_find_email")}
 
 	renderSetPasswordForm: (req, res)->
-		res.render "user/setPassword", 
+		if req.query.passwordResetToken?
+			req.session.resetToken = req.query.passwordResetToken
+			return res.redirect('/user/password/set')
+		if !req.session.resetToken?
+			return res.redirect('/user/password/reset')
+		res.render "user/setPassword",
 			title:"set_password"
-			passwordResetToken:req.query.passwordResetToken
+			passwordResetToken: req.session.resetToken
 
 	setNewUserPassword: (req, res)->
 		{passwordResetToken, password} = req.body
 		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0
 			return res.sendStatus 400
+		delete req.session.resetToken
 		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found) ->
 			return next(err) if err?
 			if found
