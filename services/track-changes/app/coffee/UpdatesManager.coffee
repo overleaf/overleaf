@@ -36,7 +36,10 @@ module.exports = UpdatesManager =
 			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
-				callback()
+				if lastCompressedUpdate.inS3?
+					MongoManager.remarkDocHistoryAsArchived doc_id, callback
+				else
+					callback()
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
