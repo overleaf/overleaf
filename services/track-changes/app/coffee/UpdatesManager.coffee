@@ -36,7 +36,7 @@ module.exports = UpdatesManager =
 			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
-				if lastCompressedUpdate.inS3?
+				if lastCompressedUpdate?.inS3?
 					MongoManager.remarkDocHistoryAsArchived doc_id, callback
 				else
 					callback()
