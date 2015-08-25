@@ -48,6 +48,7 @@ module.exports = MongoManager =
 
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
+		inS3 = update.inS3?
 		update = {
 			doc_id: ObjectId(doc_id.toString())
 			project_id: ObjectId(project_id.toString())
@@ -55,6 +56,8 @@ module.exports = MongoManager =
 			meta:   update.meta
 			v:      update.v
 		}
+		if inS3
+			update.inS3 = true
 		
 		if temporary
 			seconds = 1000
@@ -134,13 +137,6 @@ module.exports = MongoManager =
 
 	getArchivedDocChanges: (doc_id, callback)->
 		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback
-
-	remarkDocHistoryAsArchived: (doc_id, callback)->
-		logger.log doc_id: doc_id, "remarkDocHistoryAsArchived"
-		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
-			db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
-				return callback(error) if error?
-				callback(error)
 
 	markDocHistoryAsArchived: (doc_id, update, callback)->
 		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
