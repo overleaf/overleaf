@@ -104,7 +104,7 @@ describe "FileHandler", ->
 
 		beforeEach ->
 			@fileStream = {on:->}
-			@PersistorManager.getFileStream.callsArgWith(2, "err", @fileStream)
+			@PersistorManager.getFileStream.callsArgWith(3, "err", @fileStream)
 
 		it "should get the stream", (done)->
 			@handler.getFile @bucket, @key, null, =>

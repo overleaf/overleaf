@@ -57,8 +57,8 @@ module.exports =
 				logger.err  bucketName:bucketName, key:key, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
 				return callback(err)
 			@sendFile bucketName, key, fsPath, callback
-			
-	getFileStream: (bucketName, key, callback = (err, res)->)->
+
+	getFileStream: (bucketName, key, opts, callback = (err, res)->)->
 		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient

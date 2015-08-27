@@ -30,7 +30,7 @@ module.exports =
 			@_getConvertedFile bucket, key, opts, callback
 
 	_getStandardFile: (bucket, key, opts, callback)->
-		PersistorManager.getFileStream bucket, key, (err, fileStream)->
+		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
 			if err?
 				logger.err  bucket:bucket, key:key, opts:opts, "error getting fileStream"
 			callback err, fileStream

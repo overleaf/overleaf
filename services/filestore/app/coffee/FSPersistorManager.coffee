@@ -27,7 +27,7 @@ module.exports =
         return callback err
       @sendFile location, target, fsPath, callback
 
-  getFileStream: (location, name, _callback = (err, res)->) ->
+  getFileStream: (location, name, opts, _callback = (err, res)->) ->
     callback = (args...) ->
       _callback(args...)
       _callback = () ->
