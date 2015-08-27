@@ -69,13 +69,26 @@ describe "FSPersistorManagerTests", ->
         done()
 
   describe "getFileStream", ->
+    beforeEach ->
+      @opts = {}
+
     it "should use correct file location", (done) ->
-      @Fs.createReadStream.returns(
-        on:->
-      )
-      @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
+      @Fs.createReadStream.returns({on: ->})
+      @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res) =>
       @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
       done()
+
+    describe "with start and end options", ->
+
+      beforeEach ->
+        @opts = {start: 0, end: 8}
+
+      it 'should pass the options to createReadStream', (done) ->
+        @Fs.createReadStream.returns({on: ->})
+        @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
+        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}", @opts).should.equal true
+        done()
+
 
   describe "copyFile", ->
     beforeEach ->

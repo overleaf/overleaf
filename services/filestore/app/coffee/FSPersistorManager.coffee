@@ -33,7 +33,7 @@ module.exports =
       _callback = () ->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
-    sourceStream = fs.createReadStream "#{location}/#{filteredName}"
+    sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
       if err.code = 'ENOENT'
