@@ -3,19 +3,41 @@ settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 FileHandler = require("./FileHandler")
 metrics = require("metrics-sharelatex")
+parseRange = require('range-parser')
+
 oneDayInSeconds = 60 * 60 * 24
+maxSizeInBytes = 1024 * 1024 * 1024 # 1GB
+
+
+get_range = (header) ->
+	parsed = parseRange(maxSizeInBytes, header)
+	range_type = parsed.type
+	range = parsed[0]
+	{start: range.start, end: range.end}
 
 module.exports =
 
 	getFile: (req, res)->
-		metrics.inc "getFile"
 		{key, bucket} = req
 		{format, style} = req.query
+		opts = {
+			key: key,
+			bucket: bucket,
+			format: format,
+			style: style,
+			start: null,
+			end: null
+		}
+		metrics.inc "getFile"
+		if req.headers.range?
+			range = get_range(req.headers.range)
+			opts.start = range.start
+			opts.end = range.end
 		logger.log key:key, bucket:bucket, format:format, style:style, "reciving request to get file"
-		FileHandler.getFile bucket, key, {format:format,style:style}, (err, fileStream)->
+		FileHandler.getFile bucket, key, opts, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
-				if !res.finished and res?.send? 
+				if !res.finished and res?.send?
 					res.send 500
 			else if req.query.cacheWarm
 				logger.log key:key, bucket:bucket, format:format, style:style, "request is only for cache warm so not sending stream"
@@ -38,7 +60,7 @@ module.exports =
 		oldFile_id = req.body.source.file_id
 		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "reciving request to copy file"
 		PersistorManager.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
-			if err? 
+			if err?
 				logger.log err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "something went wrong copying file"
 				res.send 500
 			else
@@ -54,6 +76,3 @@ module.exports =
 				res.send 500
 			else
 				res.send 204
-
-
-

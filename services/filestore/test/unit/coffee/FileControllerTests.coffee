@@ -42,6 +42,7 @@ describe "FileController", ->
 			params:
 				project_id:@project_id
 				file_id:@file_id
+			headers: {}
 		@res =
 			setHeader: ->
 		@fileStream = {}
@@ -69,6 +70,19 @@ describe "FileController", ->
 				code.should.equal 500
 				done()
 			@controller.getFile @req, @res
+
+		describe "with a 'Range' header set", ->
+
+			beforeEach ->
+				@req.headers.range = 'bytes=0-8'
+
+			it "should pass 'start' and 'end' options to FileHandler", (done) ->
+				@FileHandler.getFile.callsArgWith(3, null, @fileStream)
+				@fileStream.pipe = (res)=>
+					expect(@FileHandler.getFile.lastCall.args[2].start).to.equal 0
+					expect(@FileHandler.getFile.lastCall.args[2].end).to.equal 8
+					done()
+				@controller.getFile @req, @res
 
 	describe "insertFile", ->
 
@@ -101,7 +115,7 @@ describe "FileController", ->
 			@res.send = (code)=>
 				code.should.equal 500
 				done()
-			@controller.copyFile @req, @res	
+			@controller.copyFile @req, @res
 
 	describe "delete file", ->
 
