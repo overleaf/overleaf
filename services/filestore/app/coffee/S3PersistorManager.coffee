@@ -58,14 +58,19 @@ module.exports =
 				return callback(err)
 			@sendFile bucketName, key, fsPath, callback
 
+	# opts may be {start: Number, end: Number}
 	getFileStream: (bucketName, key, opts, callback = (err, res)->)->
+		opts = opts || {}
+		headers = {}
+		if opts.start? and opts.end?
+			headers['Range'] = "bytes=#{opts.start}-#{opts.end}"
 		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key
 			secret: settings.filestore.s3.secret
 			bucket: bucketName
-		s3Stream = s3Client.get(key)
+		s3Stream = s3Client.get(key, headers)
 		s3Stream.end()
 		s3Stream.on 'response', (res) ->
 			callback null, res

@@ -42,16 +42,33 @@ describe "S3PersistorManagerTests", ->
 	describe "getFileStream", ->
 		beforeEach ->
 			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
-
+			@opts = {}
 
 		it "should use correct key", (done)->
 			@stubbedKnoxClient.get.returns(
 				on:->
 				end:->
 			)
-			@S3PersistorManager.getFileStream @bucketName, @key, @fsPath, (err)=>
+			@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err)=> # empty callback
 			@stubbedKnoxClient.get.calledWith(@key).should.equal true
 			done()
+
+		describe "with start and end options", ->
+			beforeEach ->
+				@opts =
+					start: 0
+					end: 8
+			it "should pass headers to the knox.Client.get()", (done) ->
+				@stubbedKnoxClient.get.returns(
+					on:->
+					end:->
+				)
+				@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err)=> # empty callback
+				@stubbedKnoxClient.get.calledWith(@key, {'Range': 'bytes=0-8'}).should.equal true
+				done()
+
+
+
 
 	describe "sendFile", ->
 
