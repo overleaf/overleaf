@@ -13,19 +13,20 @@ module.exports = FileController =
 	getFile: (req, res)->
 		{key, bucket} = req
 		{format, style} = req.query
-		opts = {
+		options = {
 			key: key,
 			bucket: bucket,
 			format: format,
 			style: style,
 		}
 		metrics.inc "getFile"
+		logger.log key:key, bucket:bucket, format:format, style: style, "reciving request to get file"
 		if req.headers.range?
 			range = FileController._get_range(req.headers.range)
-			opts.start = range.start
-			opts.end = range.end
-		logger.log key:key, bucket:bucket, format:format, style:style, "reciving request to get file"
-		FileHandler.getFile bucket, key, opts, (err, fileStream)->
+			options.start = range.start
+			options.end = range.end
+			logger.log start: range.start, end: range.end, "getting range of bytes from file"
+		FileHandler.getFile bucket, key, options, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
 				if !res.finished and res?.send?
