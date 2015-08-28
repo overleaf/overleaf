@@ -32,7 +32,7 @@ describe "Filestore", ->
 
 
 	it "should send a 200 for status endpoing", (done)->
-		request "#{@filestoreUrl}/status", (err, response, body)-> 
+		request "#{@filestoreUrl}/status", (err, response, body)->
 			response.statusCode.should.equal 200
 			body.indexOf("filestore").should.not.equal -1
 			body.indexOf("up").should.not.equal -1
@@ -54,6 +54,26 @@ describe "Filestore", ->
 			@timeout(1000 * 10)
 			request.get @fileUrl, (err, response, body)=>
 				body.should.equal @constantFileContent
+				done()
+
+		it "should be able to get back the first 8 bytes of the file", (done) ->
+			@timeout(1000 * 10)
+			options =
+				uri: @fileUrl
+				headers:
+					'Range': 'bytes=0-8'
+			request.get options, (err, response, body)=>
+				body.should.equal 'hello wor'
+				done()
+
+		it "should be able to get back bytes 4 through 10 of the file", (done) ->
+			@timeout(1000 * 10)
+			options =
+				uri: @fileUrl
+				headers:
+					'Range': 'bytes=4-10'
+			request.get options, (err, response, body)=>
+				body.should.equal 'o world'
 				done()
 
 		it "should be able to delete the file", (done)->
@@ -84,6 +104,3 @@ describe "Filestore", ->
 					request.get newFileUrl, (err, response, body)=>
 						body.should.equal @constantFileContent
 						done()
-
-
-
