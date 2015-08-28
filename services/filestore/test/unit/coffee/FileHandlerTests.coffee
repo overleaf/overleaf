@@ -93,6 +93,13 @@ describe "FileHandler", ->
 				@handler._getConvertedFile.called.should.equal false
 				done()
 
+		it "should pass options to _getStandardFile", (done) ->
+			options = {start: 0, end: 8}
+			@handler.getFile @bucket, @key, options, =>
+				expect(@handler._getStandardFile.lastCall.args[2].start).to.equal 0
+				expect(@handler._getStandardFile.lastCall.args[2].end).to.equal 8
+				done()
+
 		it "should call _getConvertedFile if a format is defined", (done)->
 			@handler.getFile @bucket, @key, format:"png", =>
 				@handler._getStandardFile.called.should.equal false
@@ -116,6 +123,13 @@ describe "FileHandler", ->
 				err.should.equal "err"
 				stream.should.equal @fileStream
 				done()
+
+		it "should pass options to PersistorManager", (done) ->
+			@handler.getFile @bucket, @key, {start: 0, end: 8}, =>
+				expect(@PersistorManager.getFileStream.lastCall.args[2].start).to.equal 0
+				expect(@PersistorManager.getFileStream.lastCall.args[2].end).to.equal 8
+				done()
+
 
 	describe "_getConvertedFile", ->
 
@@ -178,7 +192,3 @@ describe "FileHandler", ->
 				@FileConverter.convert.calledWith(@stubbedPath, @format).should.equal true
 				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
-
-
-
-				
