@@ -133,3 +133,22 @@ describe "FileController", ->
 				code.should.equal 500
 				done()
 			@controller.deleteFile @req, @res
+
+	describe "_get_range", ->
+
+		it "should parse a valid Range header", (done) ->
+			result = @controller._get_range('bytes=0-200')
+			expect(result).to.not.equal null
+			expect(result.start).to.equal 0
+			expect(result.end).to.equal 200
+			done()
+
+		it "should return null for an invalid Range header", (done) ->
+			result = @controller._get_range('wat')
+			expect(result).to.equal null
+			done()
+
+		it "should return null for any type other than 'bytes'", (done) ->
+			result = @controller._get_range('carrots=0-200')
+			expect(result).to.equal null
+			done()

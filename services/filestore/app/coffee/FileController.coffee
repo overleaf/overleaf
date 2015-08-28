@@ -8,14 +8,7 @@ parseRange = require('range-parser')
 oneDayInSeconds = 60 * 60 * 24
 maxSizeInBytes = 1024 * 1024 * 1024 # 1GB
 
-
-get_range = (header) ->
-	parsed = parseRange(maxSizeInBytes, header)
-	range_type = parsed.type
-	range = parsed[0]
-	{start: range.start, end: range.end}
-
-module.exports =
+module.exports = FileController =
 
 	getFile: (req, res)->
 		{key, bucket} = req
@@ -25,12 +18,10 @@ module.exports =
 			bucket: bucket,
 			format: format,
 			style: style,
-			start: null,
-			end: null
 		}
 		metrics.inc "getFile"
 		if req.headers.range?
-			range = get_range(req.headers.range)
+			range = FileController._get_range(req.headers.range)
 			opts.start = range.start
 			opts.end = range.end
 		logger.log key:key, bucket:bucket, format:format, style:style, "reciving request to get file"
@@ -76,3 +67,11 @@ module.exports =
 				res.send 500
 			else
 				res.send 204
+
+	_get_range: (header) ->
+		parsed = parseRange(maxSizeInBytes, header)
+		if parsed == -1 or parsed == -2 or parsed.type != 'bytes'
+			null
+		else
+			range = parsed[0]
+			{start: range.start, end: range.end}
