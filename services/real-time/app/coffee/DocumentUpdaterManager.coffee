@@ -7,11 +7,11 @@ rclient = redis.createClient(settings.redis.web)
 
 module.exports = DocumentUpdaterManager =
 	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
-		#timer = new metrics.Timer("get-document")
+		timer = new metrics.Timer("get-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}?fromVersion=#{fromVersion}"
 		logger.log {project_id, doc_id, fromVersion}, "getting doc from document updater"
 		request.get url, (err, res, body) ->
-			#timer.done()
+			timer.done()
 			if err?
 				logger.error {err, url, project_id, doc_id}, "error getting doc from doc updater"
 				return callback(err)
