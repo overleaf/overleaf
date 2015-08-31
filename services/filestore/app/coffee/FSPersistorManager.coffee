@@ -1,12 +1,12 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
+Errors = require('./Errors')
 rimraf = require("rimraf")
-response = require ("response")
 
 filterName = (key) ->
   return key.replace /\//g, "_"
-  
+
 
 module.exports =
   sendFile: ( location, target, source, callback = (err)->) ->
@@ -38,7 +38,7 @@ module.exports =
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
       if err.code = 'ENOENT'
-        callback null, response().html('NoSuchKey: file not found\n')
+        callback new Errors.NotFoundError(err.message), null
       else
         callback err
     sourceStream.on 'readable', () ->

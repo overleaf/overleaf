@@ -50,6 +50,14 @@ describe "Filestore", ->
 			writeStream.on "end", done
 			fs.createReadStream(@localFileReadPath).pipe writeStream
 
+		it "should return 404 for a non-existant id", (done) ->
+			@timeout(1000 * 20)
+			options =
+				uri: @fileUrl + '___this_is_clearly_wrong___'
+			request.get options, (err, response, body) =>
+				response.statusCode.should.equal 404
+				done()
+
 		it "should be able get the file back", (done)->
 			@timeout(1000 * 10)
 			request.get @fileUrl, (err, response, body)=>
@@ -81,7 +89,7 @@ describe "Filestore", ->
 			request.del @fileUrl, (err, response, body)=>
 				response.statusCode.should.equal 204
 				request.get @fileUrl, (err, response, body)=>
-					body.indexOf("NoSuchKey").should.not.equal -1
+					response.statusCode.should.equal 404
 					done()
 
 		it "should be able to copy files", (done)->

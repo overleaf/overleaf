@@ -4,6 +4,7 @@ logger = require("logger-sharelatex")
 FileHandler = require("./FileHandler")
 metrics = require("metrics-sharelatex")
 parseRange = require('range-parser')
+Errors = require('./Errors')
 
 oneDayInSeconds = 60 * 60 * 24
 maxSizeInBytes = 1024 * 1024 * 1024 # 1GB
@@ -29,8 +30,10 @@ module.exports = FileController =
 		FileHandler.getFile bucket, key, options, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
+				if err instanceof Errors.NotFoundError
+					return res.send 404
 				if !res.finished and res?.send?
-					res.send 500
+					return res.send 500
 			else if req.query.cacheWarm
 				logger.log key:key, bucket:bucket, format:format, style:style, "request is only for cache warm so not sending stream"
 				res.send 200
