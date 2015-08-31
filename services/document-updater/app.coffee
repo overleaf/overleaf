@@ -9,6 +9,7 @@ DispatchManager = require('./app/js/DispatchManager')
 Keys = require('./app/js/RedisKeyBuilder')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
+MongoHealthCheck = require('./app/js/MongoHealthCheck')
 
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
@@ -57,6 +58,12 @@ app.get '/status', (req, res)->
 	else
 		res.send('document updater is alive')
 
+app.get '/health_check/mongo', (req, res, next) ->
+	MongoHealthCheck.isAlive (error) ->
+		if error?
+			res.send 500, error.message
+		else
+			res.send 200
 
 redisCheck = require("redis-sharelatex").activeHealthCheckRedis(Settings.redis.web)
 app.get "/health_check/redis", (req, res, next)->
