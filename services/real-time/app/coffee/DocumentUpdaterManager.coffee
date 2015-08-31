@@ -1,17 +1,18 @@
 request = require "request"
 logger = require "logger-sharelatex"
 settings = require "settings-sharelatex"
+metrics = require("metrics-sharelatex")
 
 redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.web)
 
 module.exports = DocumentUpdaterManager =
 	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
-		#timer = new metrics.Timer("get-document")
+		timer = new metrics.Timer("get-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}?fromVersion=#{fromVersion}"
 		logger.log {project_id, doc_id, fromVersion}, "getting doc from document updater"
 		request.get url, (err, res, body) ->
-			#timer.done()
+			timer.done()
 			if err?
 				logger.error {err, url, project_id, doc_id}, "error getting doc from doc updater"
 				return callback(err)
@@ -30,10 +31,10 @@ module.exports = DocumentUpdaterManager =
 
 	flushProjectToMongoAndDelete: (project_id, callback = ()->) ->
 		logger.log project_id:project_id, "deleting project from document updater"
-		#timer = new metrics.Timer("delete.mongo.project")
+		timer = new metrics.Timer("delete.mongo.project")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
 		request.del url, (err, res, body)->
-			#timer.done()
+			timer.done()
 			if err?
 				logger.error {err, project_id}, "error deleting project from document updater"
 				return callback(err)
