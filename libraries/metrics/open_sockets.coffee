@@ -1,6 +1,12 @@
 URL = require "url"
 seconds = 1000
 
+# In Node 0.10 the default is 5, which means only 5 open connections at one.
+# Node 0.12 has a default of Infinity. Make sure we have no limit set,
+# regardless of Node version.
+require("http").globalAgent.maxSockets = Infinity
+require("https").globalAgent.maxSockets = Infinity
+
 module.exports = OpenSocketsMonitor =
 	monitor: (logger) ->
 		interval = setInterval () ->
