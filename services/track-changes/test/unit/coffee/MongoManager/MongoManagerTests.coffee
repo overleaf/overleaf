@@ -398,3 +398,89 @@ describe "MongoManager", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+	describe "getDocChangesCount", ->
+		beforeEach ->
+			@db.docHistory =
+				count: sinon.stub().callsArg(2)
+			@MongoManager.getDocChangesCount @doc_id, @callback
+
+		it "should return if there is any doc changes", ->
+			@db.docHistory.count
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+					inS3 : { $exists : false }
+				}, {
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "getArchivedDocChanges", ->
+		beforeEach ->
+			@db.docHistory =
+				count: sinon.stub().callsArg(2)
+			@MongoManager.getArchivedDocChanges @doc_id, @callback
+
+		it "should return if there is any archived doc changes", ->
+			@db.docHistory.count
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+					inS3 : true
+				}, {
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "markDocHistoryAsArchived", ->
+		beforeEach ->
+			@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
+			@db.docHistory =
+				update: sinon.stub().callsArg(2)
+				remove: sinon.stub().callsArg(1)
+			@MongoManager.markDocHistoryAsArchived @doc_id, @update, @callback
+
+		it "should update last doc change with inS3 flag", ->
+			@db.docHistory.update
+				.calledWith({
+					_id: ObjectId(@update._id)
+				},{
+					$set : { inS3 : true }
+				})
+				.should.equal true
+
+		it "should remove any other doc changes before last update", ->
+			@db.docHistory.remove
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+					inS3 : { $exists : false }
+					v: { $lt : @update.v }
+					expiresAt: {$exists : false}
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "markDocHistoryAsUnarchived", ->
+		beforeEach ->
+			@db.docHistory =
+				update: sinon.stub().callsArg(3)
+			@MongoManager.markDocHistoryAsUnarchived @doc_id, @callback
+
+		it "should remove any doc changes inS3 flag", ->
+			@db.docHistory.update
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+				},{
+					$unset : { inS3 : true }
+				},{
+					multi: true
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
