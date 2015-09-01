@@ -40,7 +40,7 @@ module.exports =
       if err.code == 'ENOENT'
         callback new Errors.NotFoundError(err.message), null
       else
-        callback err
+        callback err, null
     sourceStream.on 'readable', () ->
       # This can be called multiple times, but the callback wrapper
       # ensures the callback is only called once
