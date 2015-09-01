@@ -32,7 +32,7 @@ module.exports = DocArchive =
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, project_id:project_id, doc_id: doc._id, statusCode: res?.statusCode, "something went wrong archiving doc in aws"
 				return callback new Error("Error in S3 request")
-			md5lines = crypto.createHash("md5").update(JSON.stringify(doc.lines)).digest("hex")
+			md5lines = crypto.createHash("md5").update(JSON.stringify(doc.lines), "utf8").digest("hex")
 			md5response = res.headers.etag.toString().replace(/\"/g, '')
 			if md5lines != md5response
 				logger.err responseMD5:md5response, linesMD5:md5lines,  project_id:project_id, doc_id: doc?._id, "err in response md5 from s3"
