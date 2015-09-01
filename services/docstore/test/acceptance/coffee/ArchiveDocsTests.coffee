@@ -22,7 +22,7 @@ describe "Archiving all docs", ->
 			rev: 4
 		}, {
 			_id: ObjectId()
-			lines: ["111", "222", "333"]
+			lines: ["111", "222", "Antônio Sérgio"]
 			rev: 6
 		}]
 		jobs = for doc in @docs
