@@ -54,7 +54,10 @@ module.exports =
 
 	findRootDoc : (opts, callback)->
 		getRootDoc = (project)=>
-			@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, callback
+			if project.rootDoc_id?
+				@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, callback
+			else
+				callback null, null
 		{project, project_id} = opts
 		if project?
 			getRootDoc project

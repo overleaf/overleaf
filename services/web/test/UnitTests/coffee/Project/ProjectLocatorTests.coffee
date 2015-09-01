@@ -159,6 +159,13 @@ describe 'project model', ->
 				assert !err?
 				doc._id.should.equal rootDoc._id
 				done()
+		
+		it 'should return null when the project has no rootDoc', (done) ->
+			project.rootDoc_id = null
+			@locator.findRootDoc project, (err, doc)->
+				assert !err?
+				expect(doc).to.equal null
+				done()
 
 	describe 'findElementByPath', ->
 
