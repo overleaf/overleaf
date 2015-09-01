@@ -35,6 +35,8 @@ describe "S3PersistorManagerTests", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			"./Errors": @Errors =
+				NotFoundError: sinon.stub()
 		@key = "my/key"
 		@bucketName = "my-bucket"
 		@error = "my errror"
@@ -67,8 +69,51 @@ describe "S3PersistorManagerTests", ->
 				@stubbedKnoxClient.get.calledWith(@key, {'Range': 'bytes=0-8'}).should.equal true
 				done()
 
+		describe "error conditions", ->
 
+			beforeEach ->
+				@fakeResponse =
+					statusCode: 500
+				@stubbedKnoxClient.get.returns(
+					on: (key, callback) =>
+						if key == 'response'
+							callback(@fakeResponse)
+					end: ->
+				)
 
+			describe "when the file doesn't exist", ->
+
+				beforeEach ->
+					@fakeResponse =
+						statusCode: 404
+
+				it "should produce a NotFoundError", (done) ->
+					@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err, stream)=> # empty callback
+						expect(stream).to.equal null
+						expect(err).to.not.equal null
+						expect(err instanceof @Errors.NotFoundError).to.equal true
+						done()
+
+				it "should have bucket and key in the Error message", (done) ->
+					@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err, stream)=> # empty callback
+						error_message = @Errors.NotFoundError.lastCall.args[0]
+						expect(error_message).to.not.equal null
+						error_message.should.match(new RegExp(".*#{@bucketName}.*"))
+						error_message.should.match(new RegExp(".*#{@key}.*"))
+						done()
+
+			describe "when the S3 service produces an error", ->
+				beforeEach ->
+					@fakeResponse =
+						statusCode: 500
+
+				it "should produce an error", (done) ->
+					@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err, stream)=> # empty callback
+						expect(stream).to.equal null
+						expect(err).to.not.equal null
+						expect(err instanceof Error).to.equal true
+						@Errors.NotFoundError.called.should.equal false
+						done()
 
 	describe "sendFile", ->
 

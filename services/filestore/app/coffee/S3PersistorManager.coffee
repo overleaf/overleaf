@@ -9,6 +9,7 @@ fs = require("fs")
 knox = require("knox")
 path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
+Errors = require("./Errors")
 _ = require("underscore")
 
 thirtySeconds = 30 * 1000
@@ -73,6 +74,12 @@ module.exports =
 		s3Stream = s3Client.get(key, headers)
 		s3Stream.end()
 		s3Stream.on 'response', (res) ->
+			if res.statusCode == 404
+				logger.log bucketName:bucketName, key:key, "file not found in s3"
+				return callback new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}"), null
+			if res.stausCode != 200
+				logger.log bucketName:bucketName, key:key, "error getting file from s3"
+				return callback new Error("Got non-200 response from S3: #{res.statusCode}"), null
 			callback null, res
 		s3Stream.on 'error', (err) ->
 			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
@@ -130,4 +137,3 @@ module.exports =
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
-
