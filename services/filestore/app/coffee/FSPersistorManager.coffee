@@ -37,7 +37,7 @@ module.exports =
     sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
-      if err.code = 'ENOENT'
+      if err.code == 'ENOENT'
         callback new Errors.NotFoundError(err.message), null
       else
         callback err
