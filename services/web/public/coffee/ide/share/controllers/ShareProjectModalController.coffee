@@ -22,19 +22,34 @@ define [
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
-		$scope.addMember = () ->
+		$scope.addMembers = () ->
 			return if !$scope.inputs.email? or $scope.inputs.email == ""
+
+			emails = $scope.inputs.email.split(/,\s*/)
+			$scope.inputs.email = ""
 			$scope.state.error = null
 			$scope.state.inflight = true
-			projectMembers
-				.addMember($scope.inputs.email, $scope.inputs.privileges)
-				.success (data) ->
+
+			do addNextMember = () ->
+				if emails.length == 0 or !$scope.canAddCollaborators
 					$scope.state.inflight = false
-					$scope.inputs.email = ""
-					$scope.project.members.push data?.user
-				.error () ->
-					$scope.state.inflight = false
-					$scope.state.error = "Sorry, something went wrong :("
+					$scope.$apply()
+					return
+				
+				email = emails.shift()
+				projectMembers
+					.addMember(email, $scope.inputs.privileges)
+					.success (data) ->
+						if data?.user # data.user is false if collaborator limit is hit.
+							$scope.project.members.push data.user
+							setTimeout () ->
+								# Give $scope a chance to update $scope.canAddCollaborators
+								# with new collaborator information.
+								addNextMember()
+							, 0
+					.error () ->
+						$scope.state.inflight = false
+						$scope.state.error = "Sorry, something went wrong :("
 
 
 		$scope.removeMember = (member) ->
