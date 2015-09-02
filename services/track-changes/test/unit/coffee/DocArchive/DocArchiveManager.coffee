@@ -30,9 +30,7 @@ describe "DocArchiveManager", ->
 		@callback = sinon.stub()
 		
 	describe "archiveAllDocsChanges", ->
-
 		it "should archive all project docs change", (done)->
-
 			@DocstoreHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @mongoDocs)
 			@DocArchiveManager.archiveDocChangesWithLock = sinon.stub().callsArgWith(2, null)
 			
@@ -42,3 +40,65 @@ describe "DocArchiveManager", ->
 				@DocArchiveManager.archiveDocChangesWithLock.calledWith(@project_id, @mongoDocs[2]._id).should.equal true
 				should.not.exist err
 				done()
+
+	describe "archiveDocChangesWithLock", ->
+		beforeEach ->
+			@DocArchiveManager.archiveDocChanges = sinon.stub().callsArg(2)
+			@LockManager.runWithLock = sinon.stub().callsArg(2)
+			@DocArchiveManager.archiveDocChangesWithLock @project_id, @doc_id, @callback
+
+		it "should run archiveDocChangesWithLock with the lock", ->
+			@LockManager.runWithLock
+				.calledWith(
+					"HistoryArchiveLock:#{@doc_id}"
+				)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "archiveDocChanges", ->
+		beforeEach ->
+			@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
+			@MongoManager.getDocChangesCount = sinon.stub().callsArg(1)
+			@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
+			@MongoAWS.archiveDocHistory = sinon.stub().callsArg(2)
+			@MongoManager.markDocHistoryAsArchived = sinon.stub().callsArg(2)
+			@DocArchiveManager.archiveDocChanges @project_id, @doc_id, @callback
+
+		it "should run markDocHistoryAsArchived with doc_id and update", ->
+			@MongoManager.markDocHistoryAsArchived
+				.calledWith(
+					@doc_id, @update
+				)
+				.should.equal true
+		it "should call the callback", ->
+			@callback.called.should.equal true
+		
+	describe "unArchiveAllDocsChanges", ->
+		it "should unarchive all project docs change", (done)->
+			@DocstoreHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @mongoDocs)
+			@DocArchiveManager.unArchiveDocChanges = sinon.stub().callsArgWith(2, null)
+			
+			@DocArchiveManager.unArchiveAllDocsChanges @project_id, (err)=>
+				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[0]._id).should.equal true
+				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[1]._id).should.equal true
+				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[2]._id).should.equal true
+				should.not.exist err
+				done()
+
+	describe "unArchiveDocChanges", ->
+		beforeEach ->
+			@MongoManager.getArchivedDocChanges = sinon.stub().callsArg(1)
+			@MongoAWS.unArchiveDocHistory = sinon.stub().callsArg(2)
+			@MongoManager.markDocHistoryAsUnarchived = sinon.stub().callsArg(1)
+			@DocArchiveManager.unArchiveDocChanges @project_id, @doc_id, @callback
+
+		it "should run markDocHistoryAsUnarchived with doc_id", ->
+			@MongoManager.markDocHistoryAsUnarchived
+				.calledWith(
+					@doc_id
+				)
+				.should.equal true
+		it "should call the callback", ->
+			@callback.called.should.equal true
