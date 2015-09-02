@@ -36,7 +36,7 @@ module.exports = DocArchiveManager =
 			else
 				MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 					MongoAWS.archiveDocHistory project_id, doc_id, (error) ->
-						logger.log doc_id:doc_id, error: error, "mongoexport"
+						logger.log doc_id:doc_id, error: error, "export to S3"
 						MongoManager.markDocHistoryAsArchived doc_id, update, (error) ->
 							return callback(error) if error?
 							callback()
@@ -59,7 +59,7 @@ module.exports = DocArchiveManager =
 				return callback()
 			else
 				MongoAWS.unArchiveDocHistory project_id, doc_id, (error) ->
-					logger.log doc_id:doc_id, error: error, "mongoimport"
+					logger.log doc_id:doc_id, error: error, "import from S3"
 					MongoManager.markDocHistoryAsUnarchived doc_id, (error) ->
 						return callback(error) if error?
 						callback()
