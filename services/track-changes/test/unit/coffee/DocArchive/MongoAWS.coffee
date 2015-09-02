@@ -79,7 +79,7 @@ describe "MongoAWS", ->
 
 	describe "handleBulk", ->
 		beforeEach ->
-			@ops = [{
+			@bulkOps = [{
 				_id: ObjectId()
 				doc_id: ObjectId()
 				project_id: ObjectId()
@@ -99,12 +99,12 @@ describe "MongoAWS", ->
 				execute: sinon.stub().callsArgWith(0, null, {})
 			@db.docHistory = {}
 			@db.docHistory.initializeUnorderedBulkOp = sinon.stub().returns @bulk
-			@MongoAWS.handleBulk @ops, @callback
+			@MongoAWS.handleBulk @bulkOps, @callback
 
 		it "should call updateOne for each operation", ->
-			@bulk.find.calledWith({_id:@ops[0]._id}).should.equal true
-			@bulk.find.calledWith({_id:@ops[1]._id}).should.equal true
-			@bulk.find.calledWith({_id:@ops[2]._id}).should.equal true
+			@bulk.find.calledWith({_id:@bulkOps[0]._id}).should.equal true
+			@bulk.find.calledWith({_id:@bulkOps[1]._id}).should.equal true
+			@bulk.find.calledWith({_id:@bulkOps[2]._id}).should.equal true
 
 		it "should call the callback", ->
 			@callback.calledWith(null).should.equal true
