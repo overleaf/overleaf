@@ -48,8 +48,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					.small #{translate("share_with_your_collabs")}
 					.form-group
 						input.form-control(
-							type="email"
-							placeholder="Enter email address..."
+							type="text"
+							placeholder="joe@example.com, sue@example.com, ..."
 							ng-model="inputs.email"
 							focus-on="open"
 						)
@@ -64,7 +64,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							| &nbsp;&nbsp;
 							button.btn.btn-info(
 								type="submit"
-								ng-click="addMember()"
+								ng-click="addMembers()"
 							) #{translate("share")}
 				div.text-center(ng-hide="canAddCollaborators")
 					p #{translate("need_to_upgrade_for_more_collabs")}.

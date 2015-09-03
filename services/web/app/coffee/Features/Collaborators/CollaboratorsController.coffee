@@ -4,7 +4,6 @@ EditorController = require "../Editor/EditorController"
 
 module.exports = CollaboratorsController =
 	getCollaborators: (req, res, next = (error) ->) ->
-		req.session.destroy()
 		ProjectGetter.getProject req.params.Project_id, { owner_ref: true, collaberator_refs: true, readOnly_refs: true}, (error, project) ->
 			return next(error) if error?
 			ProjectGetter.populateProjectWithUsers project, (error, project) ->
@@ -19,7 +18,7 @@ module.exports = CollaboratorsController =
 			return next(new Error("User should be logged in"))
 		CollaboratorsHandler.removeUserFromProject req.params.project_id, user_id, (error) ->
 			return next(error) if error?
-			res.send 204
+			res.sendStatus 204
 			
 	addUserToProject: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -33,7 +32,7 @@ module.exports = CollaboratorsController =
 		user_id    = req.params.user_id
 		EditorController.removeUserFromProject project_id, user_id, (error)->
 			return next(error) if error?
-			res.send 204
+			res.sendStatus 204
 
 	_formatCollaborators: (project, callback = (error, collaborators) ->) ->
 		collaborators = []

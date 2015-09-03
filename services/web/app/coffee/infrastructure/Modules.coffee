@@ -13,9 +13,9 @@ module.exports = Modules =
 				loadedModule.name = moduleName
 				@modules.push loadedModule
 
-	applyRouter: (app) ->
+	applyRouter: (webRouter, apiRouter) ->
 		for module in @modules
-			module.router?.apply(app)
+			module.router?.apply(webRouter, apiRouter)
 			
 	viewIncludes: {}
 	loadViewIncludes: (app) ->

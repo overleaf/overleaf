@@ -13,7 +13,7 @@ describe "DocstoreManager", ->
 				apis:
 					docstore:
 						url: "docstore.sharelatex.com"
-			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
+			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
 
 		@requestDefaults.calledWith(jar: false).should.equal true
 
@@ -179,3 +179,42 @@ describe "DocstoreManager", ->
 						project_id: @project_id
 					}, "error getting all docs from docstore")
 					.should.equal true
+
+
+	describe "archiveProject", ->
+		describe "with a successful response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
+				@DocstoreManager.archiveProject @project_id, @callback
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with a failed response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 500)
+				@DocstoreManager.archiveProject @project_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("docstore api responded with non-success code: 500")).should.equal true
+
+
+
+	describe "unarchiveProject", ->
+		describe "with a successful response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
+				@DocstoreManager.unarchiveProject @project_id, @callback
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with a failed response code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 500)
+				@DocstoreManager.unarchiveProject @project_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("docstore api responded with non-success code: 500")).should.equal true
+
+

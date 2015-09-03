@@ -78,7 +78,7 @@ describe "UserController", ->
 
 		it "should delete the user", (done)->
 
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@UserDeleter.deleteUser.calledWith(@user_id)
 				code.should.equal 200
 				done()
@@ -98,7 +98,7 @@ describe "UserController", ->
 
 		it "should call save", (done)->
 			@req.body = {}
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@user.save.called.should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
@@ -106,7 +106,7 @@ describe "UserController", ->
 		it "should set the first name", (done)->
 			@req.body =
 				first_name: "bobby  "
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@user.first_name.should.equal "bobby"
 				done()
 			@UserController.updateUserSettings @req, @res
@@ -114,7 +114,7 @@ describe "UserController", ->
 		it "should set the role", (done)->
 			@req.body =
 				role: "student"
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@user.role.should.equal "student"
 				done()
 			@UserController.updateUserSettings @req, @res
@@ -122,7 +122,7 @@ describe "UserController", ->
 		it "should set the institution", (done)->
 			@req.body =
 				institution: "MIT"
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@user.institution.should.equal "MIT"
 				done()
 			@UserController.updateUserSettings @req, @res
@@ -130,21 +130,21 @@ describe "UserController", ->
 		it "should set some props on ace", (done)->
 			@req.body =
 				theme: "something"
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				@user.ace.theme.should.equal "something"
 				done()
 			@UserController.updateUserSettings @req, @res
 
 		it "should send an error if the email is 0 len", (done)->
 			@req.body.email = ""
-			@res.send = (code)->
+			@res.sendStatus = (code)->
 				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
 
 		it "should send an error if the email does not contain an @", (done)->
 			@req.body.email = "bob at something dot com"
-			@res.send = (code)->
+			@res.sendStatus = (code)->
 				code.should.equal 400
 				done()
 			@UserController.updateUserSettings @req, @res
@@ -152,7 +152,7 @@ describe "UserController", ->
 		it "should call the user updater with the new email and user _id", (done)->
 			@req.body.email = @newEmail.toUpperCase()
 			@UserUpdater.changeEmailAddress.callsArgWith(2)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal true
 				done()

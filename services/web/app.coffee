@@ -23,9 +23,6 @@ Server.app.use (error, req, res, next) ->
 		res.end()
 
 if Settings.catchErrors
-	# fairy cleans then exits on an uncaughtError, but we don't want
-	# to exit so it doesn't need to do this.
-	require "fairy"
 	process.removeAllListeners "uncaughtException"
 	process.on "uncaughtException", (error) ->
 		logger.error err: error, "uncaughtException"

@@ -57,15 +57,34 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			ng-show="onlineUsersArray.length > 0"
 			ng-controller="OnlineUsersController"
 		)
-			span.online-user(
-				ng-repeat="user in onlineUsersArray",
-				ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
-				popover="{{ user.name }}"
-				popover-placement="bottom"
-				popover-append-to-body="true"
-				popover-trigger="mouseenter"
-				ng-click="gotoUser(user)"
-			) {{ user.name.slice(0,1) }}
+			span(ng-if="onlineUsersArray.length < 4")
+				span.online-user(
+					ng-repeat="user in onlineUsersArray",
+					ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
+					popover="{{ user.name }}"
+					popover-placement="bottom"
+					popover-append-to-body="true"
+					popover-trigger="mouseenter"
+					ng-click="gotoUser(user)"
+				) {{ user.name.slice(0,1) }}
+			
+			span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
+				span.online-user.online-user-multi(
+					dropdown-toggle,
+					tooltip="#{translate('connected_users')}",
+					tooltip-placement="left"
+				)
+					strong {{ onlineUsersArray.length }}
+					i.fa.fa-fw.fa-user
+				ul.dropdown-menu.pull-right
+					li.dropdown-header #{translate('connected_users')}
+					li(ng-repeat="user in onlineUsersArray")
+						a(href, ng-click="gotoUser(user)")
+							span.online-user(
+								ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }"
+							) {{ user.name.slice(0,1) }}
+							| {{ user.name }}
+
 	
 		a.btn.btn-full-height(
 			href,

@@ -285,9 +285,9 @@ describe "SubscriptionController sanboxed", ->
 	describe "createSubscription", ->
 		beforeEach (done)->
 			@res =
-				send:->
+				sendStatus:->
 					done()
-			sinon.spy @res, "send"
+			sinon.spy @res, "sendStatus"
 			@subscriptionDetails =
 				card:"1234"
 				cvv:"123"
@@ -300,7 +300,7 @@ describe "SubscriptionController sanboxed", ->
 			done()
 
 		it "should redurect to the subscription page", (done)->
-			@res.send.calledWith(201).should.equal true
+			@res.sendStatus.calledWith(201).should.equal true
 			done()
 
 
@@ -363,9 +363,9 @@ describe "SubscriptionController sanboxed", ->
 						expired_subscription_notification:
 							subscription:
 								uuid: @activeRecurlySubscription.uuid
-				@res = send:->
+				@res = sendStatus:->
 					done()
-				sinon.spy @res, "send"
+				sinon.spy @res, "sendStatus"
 				@SubscriptionController.recurlyCallback @req, @res
 
 			it "should tell the SubscriptionHandler to process the recurly callback", (done)->
@@ -374,7 +374,7 @@ describe "SubscriptionController sanboxed", ->
 
 
 			it "should send a 200", (done)->
-				@res.send.calledWith(200)
+				@res.sendStatus.calledWith(200)
 				done()
 
 		describe "with a non-actionable request", ->
@@ -385,16 +385,16 @@ describe "SubscriptionController sanboxed", ->
 						new_subscription_notification:
 							subscription:
 								uuid: @activeRecurlySubscription.uuid
-				@res = send:->
+				@res = sendStatus:->
 					done()
-				sinon.spy @res, "send"
+				sinon.spy @res, "sendStatus"
 				@SubscriptionController.recurlyCallback @req, @res
 
 			it "should not call the subscriptionshandler", ->
 				@SubscriptionHandler.recurlyCallback.called.should.equal false
 
 			it "should respond with a 200 status", ->
-				@res.send.calledWith(200)
+				@res.sendStatus.calledWith(200)
 
 
 	describe "renderUpgradeToAnnualPlanPage", ->
@@ -442,7 +442,7 @@ describe "SubscriptionController sanboxed", ->
 			@req.body =
 				planName:"student"
 
-			@res.send = ()=>
+			@res.sendStatus = ()=>
 				@SubscriptionHandler.updateSubscription.calledWith(@user, "student-annual", "STUDENTCODEHERE").should.equal true
 				done()
 
@@ -453,7 +453,7 @@ describe "SubscriptionController sanboxed", ->
 			@req.body =
 				planName:"collaborator"
 
-			@res.send = (url)=>
+			@res.sendStatus = (url)=>
 				@SubscriptionHandler.updateSubscription.calledWith(@user, "collaborator-annual", "COLLABORATORCODEHERE").should.equal true
 				done()
 

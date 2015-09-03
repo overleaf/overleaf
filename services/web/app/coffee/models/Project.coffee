@@ -17,6 +17,8 @@ DeletedDocSchema = new Schema
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
+	lastOpened		  :   {type:Date}
+	active			  :   { type: Boolean,  default: true }
 	owner_ref         :   {type:ObjectId, ref:'User'}
 	collaberator_refs :   [ type:ObjectId, ref:'User' ]
 	readOnly_refs     :   [ type:ObjectId, ref:'User' ]
@@ -26,7 +28,6 @@ ProjectSchema = new Schema
 	compiler		  :   {type:String, default:'pdflatex'}
 	spellCheckLanguage :   {type:String, default:'en'}
 	deletedByExternalDataSource : {type: Boolean, default: false}
-	useClsi2          :   {type:Boolean, default: true}
 	description : {type:String, default:''}
 	archived          : { type: Boolean }
 	deletedDocs       : [DeletedDocSchema]
@@ -42,6 +43,7 @@ ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 		this.findById project_or_id, fields, callback
 
 ProjectSchema.statics.findPopulatedById = (project_id, callback)->
+	logger.log project_id:project_id, "findPopulatedById"
 	this.find(_id: project_id )
 			.populate('collaberator_refs')
 			.populate('readOnly_refs')
@@ -54,6 +56,7 @@ ProjectSchema.statics.findPopulatedById = (project_id, callback)->
 					logger.err project_id:project_id, "something went wrong looking for project findPopulatedById, no project could be found"
 					callback "not found"
 				else
+					logger.log project_id:project_id, "finished findPopulatedById"
 					callback(null, projects[0])
 
 ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)->

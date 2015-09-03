@@ -10,7 +10,9 @@ module.exports =
 		else if user_or_id?
 			user_id = user_or_id
 		logger.log user_id:user_id, "getting users subscription"
-		Subscription.findOne admin_id:user_id, callback
+		Subscription.findOne admin_id:user_id, (err, subscription)->
+			logger.log user_id:user_id, "got users subscription"
+			callback(err, subscription)
 
 	getMemberSubscriptions: (user_id, callback) ->
 		logger.log user_id: user_id, "getting users group subscriptions"

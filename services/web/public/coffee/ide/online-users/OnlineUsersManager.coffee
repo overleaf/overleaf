@@ -56,7 +56,11 @@ define [
 					user.doc = @ide.fileTreeManager.findEntityById(user.doc_id)
 
 				if user.name?.trim().length == 0
-					user.name = user.email
+					user.name = user.email.trim()
+				
+				user.initial = user.name?[0]
+				if !user.initial or user.initial == " "
+					user.initial = "?"
 
 				@$scope.onlineUsersArray.push user
 

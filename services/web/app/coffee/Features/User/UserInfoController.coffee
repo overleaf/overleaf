@@ -9,7 +9,7 @@ module.exports = UserController =
 		# this is funcky as hell, we don't use the current session to get the user
 		# we use the auth token, actually destroying session from the chat api request
 		if req.query?.auth_token?
-			req.session.destroy() 
+			req.session?.destroy() 
 		logger.log user: req.user, "reciving request for getting logged in users personal info"
 		return next(new Error("User is not logged in")) if !req.user?
 		UserGetter.getUser req.user._id, {
@@ -26,7 +26,6 @@ module.exports = UserController =
 			return next(error) if error?
 			return res.send(404) if !user?
 			UserController.sendFormattedPersonalInfo(user, res, next)
-			req.session.destroy()
 
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
 		UserController._formatPersonalInfo user, (error, info) ->

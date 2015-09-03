@@ -1,6 +1,8 @@
+@online-user-color: rgb(0, 170, 255);
+
 .online-users {
 	.online-user {
-		background-color: rgb(0, 170, 255);
+		background-color: @online-user-color;
 		width: 24px;
 		display: inline-block;
 		height: 24px;
@@ -10,5 +12,28 @@
 		text-transform: uppercase;
 		border-radius: 3px;
 		cursor: pointer;
+	}
+	
+	.online-user-multi {
+		width: auto;
+		min-width: 24px;
+		padding-left: 8px;
+		padding-right: 5px;
+	}
+	
+	.dropdown-menu {
+		a {
+			// Override toolbar link styles
+			display: block;
+			padding: 4px 10px 5px;
+			margin: 1px 2px;
+			color: @text-color;
+			&:hover, &:active {
+				color: @text-color;
+				background-color: @gray-lightest;
+				text-shadow: none;
+				.box-shadow(none);
+			}
+		}
 	}
 }

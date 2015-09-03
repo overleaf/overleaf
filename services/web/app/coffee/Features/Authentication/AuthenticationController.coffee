@@ -7,6 +7,8 @@ logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
 Settings = require "settings-sharelatex"
+basicAuth = require('basic-auth-connect')
+
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
@@ -101,7 +103,7 @@ module.exports = AuthenticationController =
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
 			return res.redirect "/login"
 
-	httpAuth: require('express').basicAuth (user, pass)->
+	httpAuth: basicAuth (user, pass)->
 		isValid = Settings.httpAuthUsers[user] == pass
 		if !isValid
 			logger.err user:user, pass:pass, "invalid login details"
@@ -152,6 +154,7 @@ module.exports = AuthenticationController =
 		# Regenerate the session to get a new sessionID (cookie value) to
 		# protect against session fixation attacks
 		oldSession = req.session
+		req.session.destroy()
 		req.sessionStore.generate(req)
 		for key, value of oldSession
 			req.session[key] = value

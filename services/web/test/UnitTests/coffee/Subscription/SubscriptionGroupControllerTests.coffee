@@ -127,7 +127,7 @@ describe "SubscriptionGroupController", ->
 
 			it "should ask the SubscriptionGroupHandler to send the verification email", (done)->
 				res =
-					send : (statusCode)=>
+					sendStatus : (statusCode)=>
 						statusCode.should.equal 200
 						@GroupHandler.sendVerificationEmail.calledWith(@subscription_id, @licenceName, @user_email).should.equal true
 						done()

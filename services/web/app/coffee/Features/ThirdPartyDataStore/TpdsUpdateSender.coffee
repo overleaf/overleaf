@@ -4,6 +4,7 @@ path = require('path')
 Project = require('../../models/Project').Project
 keys = require('../../infrastructure/Keys')
 metrics = require("../../infrastructure/Metrics")
+request = require("request")
 
 buildPath = (user_id, project_name, filePath)->
 	projectPath = path.join(project_name, "/", filePath)
@@ -11,9 +12,33 @@ buildPath = (user_id, project_name, filePath)->
 	fullPath = path.join("/user/", "#{user_id}", "/entity/",projectPath)
 	return fullPath
 
-queue = require('fairy').connect(settings.redis.fairy).queue(keys.queue.web_to_tpds_http_requests)
 
-module.exports =
+
+
+tpdsworkerEnabled = -> settings.apis.tpdsworker?.url?
+if !tpdsworkerEnabled()
+	logger.log "tpdsworker is not enabled, request will not be sent to it"
+
+module.exports = TpdsUpdateSender =
+
+	_enqueue: (group, method, job, callback)->
+		if !tpdsworkerEnabled()
+			return callback()
+		opts = 
+			uri:"#{settings.apis.tpdsworker.url}/enqueue/web_to_tpds_http_requests"
+			json :
+				group:group
+				method:method
+				job:job
+			method:"post"
+			timeout: (5 * 1000)
+		request opts, (err)->
+			if err?
+				logger.err err:err, "error queuing something in the tpdsworker"
+				callback(err)
+			else
+				logger.log group:group, "successfully queued up job for tpdsworker"
+				callback()
 
 	_addEntity: (options, callback = (err)->)->
 		getProjectsUsersIds options.project_id, (err, user_id, allUserIds)->
@@ -27,9 +52,9 @@ module.exports =
 				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}" 
 				title: "addFile"
 				streamOrigin : options.streamOrigin
-			queue.enqueue options.project_id, "pipeStreamFrom", postOptions, ->
+			TpdsUpdateSender._enqueue options.project_id, "pipeStreamFrom", postOptions, (err)->
 				logger.log project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, rev:options.rev, "sending file to third party data store queued up for processing"
-				callback()
+				callback(err)
 	
 	addFile : (options, callback = (err)->)->
 		metrics.inc("tpds.add-file")
@@ -64,7 +89,7 @@ module.exports =
 					user_id : user_id
 					endPath: endPath 
 					startPath: startPath 
-			queue.enqueue options.project_id, "standardHttpRequest", moveOptions, callback
+			TpdsUpdateSender._enqueue options.project_id, "standardHttpRequest", moveOptions, callback
 
 	deleteEntity : (options, callback = (err)->)->
 		metrics.inc("tpds.delete-entity")
@@ -78,7 +103,7 @@ module.exports =
 				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}"
 				title:"deleteEntity"
 				sl_all_user_ids:JSON.stringify(allUserIds)
-			queue.enqueue options.project_id, "standardHttpRequest", deleteOptions, callback
+			TpdsUpdateSender._enqueue options.project_id, "standardHttpRequest", deleteOptions, callback
 			
 	pollDropboxForUser: (user_id, callback = (err) ->) ->
 		metrics.inc("tpds.poll-dropbox")
@@ -88,7 +113,7 @@ module.exports =
 			uri:"#{settings.apis.thirdPartyDataStore.url}/user/poll"
 			json:
 				user_ids: [user_id]
-		queue.enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
+		TpdsUpdateSender._enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
 
 getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
 	Project.findById project_id, "_id owner_ref readOnly_refs collaberator_refs", (err, project)->

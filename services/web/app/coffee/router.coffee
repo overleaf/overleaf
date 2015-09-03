@@ -35,71 +35,72 @@ WikiController = require("./Features/Wiki/WikiController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
+InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
 
 module.exports = class Router
-	constructor: (app)->
+	constructor: (webRouter, apiRouter)->
 		if !Settings.allowPublicAccess
-			app.all '*', AuthenticationController.requireGlobalLogin
+			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-		app.use(app.router)
 		
-		app.get  '/login', UserPagesController.loginPage
+		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
-		app.post '/login', AuthenticationController.login
-		app.get  '/logout', UserController.logout
-		app.get  '/restricted', SecurityManager.restricted
+		webRouter.post '/login', AuthenticationController.login
+		webRouter.get  '/logout', UserController.logout
+		webRouter.get  '/restricted', SecurityManager.restricted
 
 		# Left as a placeholder for implementing a public register page
-		app.get  '/register', UserPagesController.registerPage
+		webRouter.get  '/register', UserPagesController.registerPage
 		AuthenticationController.addEndpointToLoginWhitelist '/register'
 
-		EditorRouter.apply(app)
-		CollaboratorsRouter.apply(app)
-		SubscriptionRouter.apply(app)
-		UploadsRouter.apply(app)
-		PasswordResetRouter.apply(app)
-		StaticPagesRouter.apply(app)
-		RealTimeProxyRouter.apply(app)
-		
-		Modules.applyRouter(app)
 
-		app.get '/blog', BlogController.getIndexPage
-		app.get '/blog/*', BlogController.getPage
+		EditorRouter.apply(webRouter, apiRouter)
+		CollaboratorsRouter.apply(webRouter, apiRouter)
+		SubscriptionRouter.apply(webRouter, apiRouter)
+		UploadsRouter.apply(webRouter, apiRouter)
+		PasswordResetRouter.apply(webRouter, apiRouter)
+		StaticPagesRouter.apply(webRouter, apiRouter)
+		RealTimeProxyRouter.apply(webRouter, apiRouter)
+		
+		Modules.applyRouter(webRouter, apiRouter)
+
 
 		if Settings.enableSubscriptions
-			app.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
+			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
+		
+		webRouter.get '/blog', BlogController.getIndexPage
+		webRouter.get '/blog/*', BlogController.getPage
+		
+		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
+		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
+		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
-		app.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
-		app.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
-		app.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
+		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
+		webRouter.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
-		app.del  '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		app.del  '/user', AuthenticationController.requireLogin(), UserController.deleteUser
+		webRouter.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
+		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
+		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
-		app.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
-		app.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
-		app.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
+		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
+		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
-		app.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
-		app.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
-
-		app.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
+		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
 			endpointName: "open-project"
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
 		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
-		app.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
+		webRouter.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
+		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
 
-		app.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
-
-		app.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
-		app.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
-		app.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
+		webRouter.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
+		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
+		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]
@@ -107,78 +108,86 @@ module.exports = class Router
 				req.params = params
 				next()
 			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
-		app.del "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
-		app.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
-		app.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
+		webRouter.delete "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
+		webRouter.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
+		webRouter.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
 
-		app.del  '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
-		app.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
-		app.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
+		webRouter.delete '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
+		webRouter.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
+		webRouter.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
 
-		app.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
+		webRouter.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
 
-		app.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-		app.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-		app.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
 
-		app.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
-		app.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
+		webRouter.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
+		webRouter.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
-		app.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
-		app.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
+		webRouter.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
+		webRouter.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
 
-		app.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
+		# Deprecated in favour of /internal/project/:project_id but still used by versioning
+		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
-		app.get '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
-		app.get '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
+		# New 'stable' /internal API end points
+		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
+		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
+		apiRouter.get  '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
 
+		apiRouter.post '/internal/deactivateOldProjects', AuthenticationController.httpAuth, InactiveProjectController.deactivateOldProjects
+		apiRouter.post '/internal/project/:project_id/deactivate', AuthenticationController.httpAuth, InactiveProjectController.deactivateProject
 
-		app.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
-		app.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
-		app.ignoreCsrf('post', '/project/:Project_id/doc/:doc_id')
+		webRouter.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"file":       req.params[1]
+				req.params = params
+				next()
+			), AuthenticationController.httpAuth, CompileController.getFileFromClsi
 
-		app.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
-		app.del  '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
-		app.ignoreCsrf('post', '/user/:user_id/update/*')
-		app.ignoreCsrf('delete', '/user/:user_id/update/*')
+		apiRouter.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
+		apiRouter.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
+
+		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
+		apiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 		
-		app.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
-		app.del  '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
-		app.ignoreCsrf('post', '/project/:project_id/contents/*')
-		app.ignoreCsrf('delete', '/project/:project_id/contents/*')
+		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
+		apiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 
-		app.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
-		app.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
+		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
+		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		app.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
-		app.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
+		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
 		
-		app.get  /learn(\/.*)?/, WikiController.getPage
+		webRouter.get  /learn(\/.*)?/, WikiController.getPage
 
 		#Admin Stuff
-		app.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
-		app.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
-		app.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
-		app.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
-		app.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
-		app.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
-		app.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
-		app.post '/admin/pollDropboxForUser', SecurityManager.requestIsAdmin, AdminController.pollDropboxForUser
-		app.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
-		app.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
+		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
+		webRouter.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
+		webRouter.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
+		webRouter.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
+		webRouter.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
+		webRouter.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
+		webRouter.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
+		webRouter.post '/admin/pollDropboxForUser', SecurityManager.requestIsAdmin, AdminController.pollDropboxForUser
+		webRouter.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
+		webRouter.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
 
-		app.get '/perfTest', (req,res)->
+		apiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
-			req.session.destroy()
 
-		app.get '/status', (req,res)->
+		apiRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
-			req.session.destroy()
+		
 
-		app.get '/health_check', HealthCheckController.check
-		app.get '/health_check/redis', HealthCheckController.checkRedis
+		webRouter.get '/health_check', HealthCheckController.check
+		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
-		app.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
+		apiRouter.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->
 				res.writeHead statusCode
 				res.end message
@@ -187,27 +196,26 @@ module.exports = class Router
 			setTimeout (() ->
 				sendRes 500, "Compiler timed out"
 			), 10000
-			req.session.destroy()
 
-		app.get "/ip", (req, res, next) ->
+		apiRouter.get "/ip", (req, res, next) ->
 			res.send({
 				ip: req.ip
 				ips: req.ips
 				headers: req.headers
 			})
 
-		app.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
-		app.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
-		app.get '/oops-mongo', (req, res, next) ->
+		apiRouter.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
+		apiRouter.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
+		apiRouter.get '/oops-mongo', (req, res, next) ->
 			require("./models/Project").Project.findOne {}, () ->
 				throw new Error("Test error")
 
-		app.get '/opps-small', (req, res, next)->
+		apiRouter.get '/opps-small', (req, res, next)->
 			logger.err "test error occured"
 			res.send()
 
-		app.post '/error/client', (req, res, next) ->
+		webRouter.post '/error/client', (req, res, next) ->
 			logger.error err: req.body.error, meta: req.body.meta, "client side error"
-			res.send(204)
+			res.sendStatus(204)
 
-		app.get '*', ErrorController.notFound
+		webRouter.get '*', ErrorController.notFound

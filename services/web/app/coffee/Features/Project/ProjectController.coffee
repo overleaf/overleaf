@@ -14,6 +14,8 @@ _ = require("underscore")
 Settings = require("settings-sharelatex")
 SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
+InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
+ProjectUpdateHandler = require("./ProjectUpdateHandler")
 
 module.exports = ProjectController =
 
@@ -44,7 +46,7 @@ module.exports = ProjectController =
 
 		async.series jobs, (error) ->
 			return next(error) if error?
-			res.send(204)
+			res.sendStatus(204)
 
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
@@ -58,18 +60,18 @@ module.exports = ProjectController =
 
 		doDelete project_id, (err)->
 			if err?
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	restoreProject: (req, res) ->
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, "received request to restore project"
 		projectDeleter.restoreProject project_id, (err)->
 			if err?
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	cloneProject: (req, res, next)->
 		metrics.inc "cloned-project"
@@ -99,7 +101,7 @@ module.exports = ProjectController =
 		], (err, project)->
 			if err?
 				logger.error err: err, project: project, user: user, name: projectName, templateType: template, "error creating project"
-				res.send 500
+				res.sendStatus 500
 			else
 				logger.log project: project, user: user, name: projectName, templateType: template, "created project"
 				res.send {project_id:project._id}
@@ -109,13 +111,13 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		newName = req.body.newProjectName
 		if newName.length > 150
-			return res.send 400
+			return res.sendStatus 400
 		editorController.renameProject project_id, newName, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, newName:newName, "problem renaming project"
-				res.send 500
+				res.sendStatus 500
 			else
-				res.send 200
+				res.sendStatus 200
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
@@ -173,6 +175,7 @@ module.exports = ProjectController =
 			user_id = 'openUser'
 		
 		project_id = req.params.Project_id
+		logger.log project_id:project_id, "loading editor"
 	
 		async.parallel {
 			project: (cb)->
@@ -181,11 +184,19 @@ module.exports = ProjectController =
 				if user_id == 'openUser'
 					cb null, defaultSettingsForAnonymousUser(user_id)
 				else
-					User.findById user_id, cb
+					User.findById user_id, (err, user)->
+						logger.log project_id:project_id, user_id:user_id, "got user"
+						cb err, user
 			subscription: (cb)->
 				if user_id == 'openUser'
 					return cb()
 				SubscriptionLocator.getUsersSubscription user_id, cb
+			activate: (cb)->
+				InactiveProjectManager.reactivateProjectIfRequired project_id, cb
+			markAsOpened: (cb)-> 
+				#don't need to wait for this to complete
+				ProjectUpdateHandler.markAsOpened project_id, ->
+				cb()
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -194,13 +205,16 @@ module.exports = ProjectController =
 			user = results.user
 			subscription = results.subscription
 
+			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
+			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
+
 			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
 				if !canAccess
-					return res.send 401
+					return res.sendStatus 401
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
-
+				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
 					title:  project.name
 					priority_title: true

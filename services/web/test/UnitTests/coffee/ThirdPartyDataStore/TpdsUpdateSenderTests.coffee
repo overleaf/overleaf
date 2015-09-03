@@ -19,32 +19,55 @@ filestoreUrl = "filestore.sharelatex.com"
 
 describe 'TpdsUpdateSender', ->
 	beforeEach ->
-		@requestQueuer = regist:(queue, meth, opts, callback)->
+		@requestQueuer = (queue, meth, opts, callback)->
 		project = {owner_ref:user_id,readOnly_refs:[read_only_ref_1], collaberator_refs:[collaberator_ref_1]}
 		@Project = findById:sinon.stub().callsArgWith(2, null, project)
 		@docstoreUrl = "docstore.sharelatex.env"
+		@request = sinon.stub().returns(pipe:->)
+		@settings = 
+			siteUrl:siteUrl
+			httpAuthSiteUrl:httpAuthSiteUrl,
+			apis: 
+				thirdPartyDataStore: {url: thirdPartyDataStoreApiUrl}
+				filestore:
+					url: filestoreUrl
+				docstore:
+					pubUrl: @docstoreUrl
 		@updateSender = SandboxedModule.require modulePath, requires:
-			'fairy':{connect:=>{queue:=>@requestQueuer}}
-			"settings-sharelatex": 
-				siteUrl:siteUrl
-				httpAuthSiteUrl:httpAuthSiteUrl,
-				apis: 
-					thirdPartyDataStore: {url: thirdPartyDataStoreApiUrl}
-					filestore:
-						url: filestoreUrl
-					docstore:
-						pubUrl: @docstoreUrl
-				redis:fairy:{}
+			"settings-sharelatex": @settings
 			"logger-sharelatex":{log:->}
 			'../../models/Project': Project:@Project
-			'request':->{pipe:->}
+			'request':@request
+
+	describe "_enqueue", ->
+
+		it "should not call request if there is no tpdsworker url", (done)->
+			@updateSender._enqueue null, null, null, (err)=>
+				@request.called.should.equal false
+				done()
+
+		it "should post the message to the tpdsworker", (done)->
+			@settings.apis.tpdsworker = url:"www.tpdsworker.env"
+			group = "myproject"
+			method = "somemethod"
+			job = "do something"
+			@request.callsArgWith(1)
+			@updateSender._enqueue group, method, job, (err)=>
+				args = @request.args[0][0]
+				args.json.group.should.equal group
+				args.json.job.should.equal job
+				args.json.method.should.equal method
+				args.uri.should.equal "www.tpdsworker.env/enqueue/web_to_tpds_http_requests"
+				done()
+
+
 
 	describe 'sending updates', ->
 
-		it 'ques a post the file with user and file id', (done)->
+		it 'queues a post the file with user and file id', (done)->
 			file_id = '4545345'
 			path = '/some/path/here.jpg'
-			@requestQueuer.enqueue = (uid, method, job, callback)->
+			@updateSender._enqueue = (uid, method, job, callback)->
 				uid.should.equal project_id
 				job.method.should.equal "post"
 				job.streamOrigin.should.equal "#{filestoreUrl}/project/#{project_id}/file/#{file_id}"
@@ -59,7 +82,7 @@ describe 'TpdsUpdateSender', ->
 			path = "/some/path/here.tex"
 			lines = ["line1", "line2", "line3"]
 
-			@requestQueuer.enqueue = (uid, method, job, callback)=>
+			@updateSender._enqueue = (uid, method, job, callback)=>
 				uid.should.equal project_id
 				job.method.should.equal "post"
 				expectedUrl = "#{thirdPartyDataStoreApiUrl}/user/#{user_id}/entity/#{encodeURIComponent(project_name)}#{encodeURIComponent(path)}"
@@ -71,7 +94,7 @@ describe 'TpdsUpdateSender', ->
 
 		it 'deleting entity', (done)->
 			path = "/path/here/t.tex"
-			@requestQueuer.enqueue = (uid, method, job, callback)->
+			@updateSender._enqueue = (uid, method, job, callback)->
 				uid.should.equal project_id
 				job.method.should.equal "DELETE"
 				expectedUrl = "#{thirdPartyDataStoreApiUrl}/user/#{user_id}/entity/#{encodeURIComponent(project_name)}#{encodeURIComponent(path)}"
@@ -83,7 +106,7 @@ describe 'TpdsUpdateSender', ->
 		it 'moving entity', (done)->
 			startPath = "staring/here/file.tex"
 			endPath = "ending/here/file.tex"
-			@requestQueuer.enqueue = (uid, method, job, callback)->
+			@updateSender._enqueue = (uid, method, job, callback)->
 				uid.should.equal project_id
 				job.method.should.equal "put"
 				job.uri.should.equal "#{thirdPartyDataStoreApiUrl}/user/#{user_id}/entity"
@@ -96,7 +119,7 @@ describe 'TpdsUpdateSender', ->
 		it 'should be able to rename a project using the move entity func', (done)->
 			oldProjectName = "/oldProjectName/"
 			newProjectName = "/newProjectName/"
-			@requestQueuer.enqueue = (uid, method, job, callback)->
+			@updateSender._enqueue = (uid, method, job, callback)->
 				uid.should.equal project_id
 				job.method.should.equal "put"
 				job.uri.should.equal "#{thirdPartyDataStoreApiUrl}/user/#{user_id}/entity"
@@ -107,9 +130,9 @@ describe 'TpdsUpdateSender', ->
 			@updateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newProjectName}
 			
 		it "pollDropboxForUser", (done) ->
-			@requestQueuer.enqueue = sinon.stub().callsArg(3)
+			@updateSender._enqueue = sinon.stub().callsArg(3)
 			@updateSender.pollDropboxForUser user_id, (error) =>
-				@requestQueuer.enqueue
+				@updateSender._enqueue
 					.calledWith(
 						"poll-dropbox:#{user_id}",
 						"standardHttpRequest",

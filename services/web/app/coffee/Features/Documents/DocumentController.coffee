@@ -15,7 +15,6 @@ module.exports =
 			res.send JSON.stringify {
 				lines: lines
 			}
-			req.session.destroy()
 
 	setDocument: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
@@ -27,8 +26,7 @@ module.exports =
 				logger.err err:error, doc_id:doc_id, project_id:project_id, "error finding element for getDocument"
 				return next(error)
 			logger.log doc_id:doc_id, project_id:project_id, "finished receiving set document request from api (docupdater)"
-			res.send 200
-			req.session.destroy()
+			res.sendStatus 200
 
 		
 		

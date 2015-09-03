@@ -11,7 +11,10 @@ Errors = require "../../../../app/js/errors"
 
 describe "DocumentController", ->
 	beforeEach ->
-		@DocumentController = SandboxedModule.require modulePath, requires:  
+		@DocumentController = SandboxedModule.require modulePath, requires:
+			"logger-sharelatex":
+				log:->
+				err:->
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 		@res = new MockResponse()
 		@req = new MockRequest()

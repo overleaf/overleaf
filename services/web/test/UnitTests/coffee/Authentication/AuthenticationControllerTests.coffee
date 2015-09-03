@@ -423,6 +423,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@req.session =
 				save: sinon.stub().callsArg(0)
+				destroy : sinon.stub()
 			@req.sessionStore =
 				generate: sinon.stub()
 			@AuthenticationController.establishUserSession @req, @user, @callback
@@ -434,6 +435,9 @@ describe "AuthenticationController", ->
 			@req.session.user.last_name.should.equal @user.last_name
 			@req.session.user.referal_id.should.equal @user.referal_id
 			@req.session.user.isAdmin.should.equal @user.isAdmin
+			
+		it "should destroy the session", ->
+			@req.session.destroy.called.should.equal true
 			
 		it "should regenerate the session to protect against session fixation", ->
 			@req.sessionStore.generate.calledWith(@req).should.equal true

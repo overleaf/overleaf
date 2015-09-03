@@ -98,7 +98,6 @@ describe "CompileController", ->
 
 		describe "when downloading for embedding", ->
 			beforeEach ->
-				@project.useClsi2 = true
 				@CompileController.proxyToClsi = sinon.stub()
 				@CompileController.downloadPdf(@req, @res, @next)
 
@@ -321,7 +320,7 @@ describe "CompileController", ->
 			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(1)
 			@req.params =
 				Project_id: @project_id
-			@res.send = sinon.stub()
+			@res.sendStatus = sinon.stub()
 			@CompileController.deleteAuxFiles @req, @res, @next
 
 		it "should proxy to the CLSI", ->
@@ -330,7 +329,7 @@ describe "CompileController", ->
 				.should.equal true
 
 		it "should return a 200", ->
-			@res.send
+			@res.sendStatus
 				.calledWith(200)
 				.should.equal true
 

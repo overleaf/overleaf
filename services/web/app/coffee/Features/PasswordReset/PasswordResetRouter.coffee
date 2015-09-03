@@ -2,13 +2,13 @@ PasswordResetController = require("./PasswordResetController")
 AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports =
-	apply: (app) ->
+	apply: (webRouter, apiRouter) ->
 
-		app.get  '/user/password/reset', PasswordResetController.renderRequestResetForm
-		app.post  '/user/password/reset', PasswordResetController.requestReset
+		webRouter.get  '/user/password/reset', PasswordResetController.renderRequestResetForm
+		webRouter.post  '/user/password/reset', PasswordResetController.requestReset
 		AuthenticationController.addEndpointToLoginWhitelist '/user/password/reset'
 		
-		app.get '/user/password/set', PasswordResetController.renderSetPasswordForm
-		app.post '/user/password/set', PasswordResetController.setNewUserPassword
+		webRouter.get '/user/password/set', PasswordResetController.renderSetPasswordForm
+		webRouter.post '/user/password/set', PasswordResetController.setNewUserPassword
 		AuthenticationController.addEndpointToLoginWhitelist '/user/password/set'
 
