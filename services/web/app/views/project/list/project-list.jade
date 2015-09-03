@@ -71,10 +71,11 @@
 						li
 							a(href="#", ng-click="openNewTagModal()", stop-propagation="click") #{translate("create_new_folder")}
 
-				.btn-group(ng-hide="selectedProjects.length != 1").dropdown
+				.btn-group(ng-hide="selectedProjects.length != 1", dropdown).dropdown
 					a.btn.btn-default.dropdown-toggle(
 						href='#',
-						data-toggle="dropdown"
+						data-toggle="dropdown",
+						dropdown-toggle
 					) #{translate("more")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right(role="menu")
