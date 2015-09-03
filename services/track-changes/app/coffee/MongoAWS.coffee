@@ -72,10 +72,13 @@ module.exports = MongoAWS =
 			op.doc_id = ObjectId(op.doc_id)
 			op.project_id = ObjectId(op.project_id)
 			bulk.find({_id:op._id}).upsert().updateOne(op)
-
-		bulk.execute (err, result) ->
-			if err?
-				logger.error err:err, "error bulking ReadlineStream"
-			else
-				logger.log count:ops.length, result:result, "bulked ReadlineStream"
-			cb(err)
+			
+		if ops.length > 0
+			bulk.execute (err, result) ->
+				if err?
+					logger.error err:err, "error bulking ReadlineStream"
+				else
+					logger.log count:ops.length, result:result, "bulked ReadlineStream"
+				cb(err)
+		else
+			cb()

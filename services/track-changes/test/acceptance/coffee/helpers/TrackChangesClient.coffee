@@ -1,6 +1,7 @@
 request = require "request"
 rclient = require("redis").createClient() # Only works locally for now
 {db, ObjectId} = require "../../../../app/js/mongojs"
+Settings = require "settings-sharelatex"
 
 module.exports = TrackChangesClient =
 	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
@@ -86,3 +87,22 @@ module.exports = TrackChangesClient =
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback(error)
+
+	buildS3Options: (content, key)->
+		return {
+				aws:
+					key: Settings.filestore.s3.key
+					secret: Settings.filestore.s3.secret
+					bucket: Settings.filestore.stores.user_files
+				timeout: 30 * 1000
+				json: content
+				uri:"https://#{Settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
+		}
+
+	getS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
+		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id)
+		request.get options, callback	
+
+	removeS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
+		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id)
+		request.del options, callback	

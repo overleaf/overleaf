@@ -59,17 +59,18 @@ describe "Archiving updates", ->
 				throw error if error?
 				done()
 
-	after: () ->
+	after (done) ->
 		MockWebApi.getUser.restore()
+		db.docHistory.remove {project_id: ObjectId(@project_id)}
+		TrackChangesClient.removeS3Doc @project_id, @doc_id, done
 
 	describe "archiving a doc's updates", ->
 		before (done) ->
-			
 			TrackChangesClient.archiveProject @project_id, (error) ->
 				throw error if error?
 				done()
 
-		it "should remain one doc", (done) ->
+		it "should remain one doc change", (done) ->
 			db.docHistory.count { doc_id: ObjectId(@doc_id) }, (error, count) ->
 				throw error if error?
 				count.should.equal 1
@@ -85,4 +86,27 @@ describe "Archiving updates", ->
 			db.docHistory.findOne { doc_id: ObjectId(@doc_id) }, (error, doc) ->
 				throw error if error?
 				doc.v.should.equal 20
+				done()
+
+		it "should store twenty doc changes in S3", (done) ->
+			TrackChangesClient.getS3Doc @project_id, @doc_id, (error, res, doc) =>
+				doc.length.should.equal 20
+				done()
+
+	describe "unarchiving a doc's updates", ->
+		before (done) ->
+			TrackChangesClient.unarchiveProject @project_id, (error) ->
+				throw error if error?
+				done()
+
+		it "should restore doc changes", (done) ->
+			db.docHistory.count { doc_id: ObjectId(@doc_id) }, (error, count) ->
+				throw error if error?
+				count.should.equal 20
+				done()
+
+		it "should remove doc marked as inS3", (done) ->
+			db.docHistory.count { doc_id: ObjectId(@doc_id), inS3 : true }, (error, count) ->
+				throw error if error?
+				count.should.equal 0
 				done()
