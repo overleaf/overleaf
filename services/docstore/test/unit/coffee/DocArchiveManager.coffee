@@ -155,6 +155,23 @@ describe "DocArchiveManager", ->
 				err.should.equal @error
 				done()
 
+		describe "when most have been already put in s3", ->
+
+			beforeEach ->
+				numberOfDocs = 10 * 1000
+				@mongoDocs = []
+				while --numberOfDocs != 0
+					@mongoDocs.push({inS3:true, _id: ObjectId()})
+
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, @mongoDocs)
+				@DocArchiveManager.archiveDoc = sinon.stub().callsArgWith(2, null)	
+
+			it "should not throw and error", (done)->
+				@DocArchiveManager.archiveAllDocs @project_id, (err)=>
+					err.should.not.exist
+					done()
+
+
 	describe "unArchiveAllDocs", ->
 
 		it "should unarchive all inS3 docs", (done)->
