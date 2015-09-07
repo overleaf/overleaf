@@ -168,7 +168,7 @@ describe "DocArchiveManager", ->
 
 			it "should not throw and error", (done)->
 				@DocArchiveManager.archiveAllDocs @project_id, (err)=>
-					err.should.not.exist
+					should.not.exist err
 					done()
 
 

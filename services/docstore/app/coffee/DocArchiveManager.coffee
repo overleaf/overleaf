@@ -16,12 +16,10 @@ module.exports = DocArchive =
 				return callback(err)
 			else if !docs?
 				return callback new Errors.NotFoundError("No docs for project #{project_id}")
+			docs = _.filter docs, (doc)-> doc.inS3 != true
 			jobs = _.map docs, (doc) ->
-				(cb)-> 
-					if doc.inS3
-						return cb()
-					else
-						DocArchive.archiveDoc project_id, doc, cb
+				(cb)->
+					DocArchive.archiveDoc project_id, doc, cb
 			async.series jobs, callback
 
 
