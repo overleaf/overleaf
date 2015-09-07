@@ -6,21 +6,27 @@ var TextLayer = require("../layer/text").Text;
 var baseStyles = ".ace_static_highlight {\
 font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', 'Droid Sans Mono', monospace;\
 font-size: 12px;\
+white-space: pre-wrap\
 }\
 .ace_static_highlight .ace_gutter {\
-width: 25px !important;\
-float: left;\
+width: 2em;\
 text-align: right;\
 padding: 0 3px 0 0;\
 margin-right: 3px;\
-position: static !important;\
 }\
-.ace_static_highlight .ace_line { clear: both; }\
+.ace_static_highlight.ace_show_gutter .ace_line {\
+padding-left: 2.6em;\
+}\
+.ace_static_highlight .ace_line { position: relative; }\
 .ace_static_highlight .ace_gutter-cell {\
 -moz-user-select: -moz-none;\
 -khtml-user-select: none;\
 -webkit-user-select: none;\
 user-select: none;\
+top: 0;\
+bottom: 0;\
+left: 0;\
+position: absolute;\
 }\
 .ace_static_highlight .ace_gutter-cell:before {\
 content: counter(ace_line, decimal);\
@@ -33,6 +39,10 @@ counter-reset: ace_line;\
 var config = require("../config");
 var dom = require("../lib/dom");
 
+var SimpleTextLayer = function() {
+    this.config = {};
+};
+SimpleTextLayer.prototype = TextLayer.prototype;
 
 var highlight = function(el, opts, callback) {
     var m = el.className.match(/lang-(\w+)/);
@@ -111,12 +121,8 @@ highlight.renderSync = function(input, mode, theme, lineStart, disableGutter) {
     session.setUseWorker(false);
     session.setMode(mode);
 
-    var textLayer = new TextLayer(document.createElement("div"));
+    var textLayer = new SimpleTextLayer();
     textLayer.setSession(session);
-    textLayer.config = {
-        characterWidth: 10,
-        lineHeight: 20
-    };
 
     session.setValue(input);
 
@@ -131,7 +137,8 @@ highlight.renderSync = function(input, mode, theme, lineStart, disableGutter) {
         stringBuilder.push("\n</div>");
     }
     var html = "<div class='" + theme.cssClass + "'>" +
-        "<div class='ace_static_highlight' style='counter-reset:ace_line " + (lineStart - 1) + "'>" +
+        "<div class='ace_static_highlight" + (disableGutter ? "" : " ace_show_gutter") +
+            "' style='counter-reset:ace_line " + (lineStart - 1) + "'>" +
             stringBuilder.join("") +
         "</div>" +
     "</div>";

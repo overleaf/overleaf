@@ -22,7 +22,6 @@ background: #373B41\
 }\
 .ace-tomorrow-night.ace_multiselect .ace_selection.ace_start {\
 box-shadow: 0 0 3px 0px #1D1F21;\
-border-radius: 2px\
 }\
 .ace-tomorrow-night .ace_marker-layer .ace_step {\
 background: rgb(102, 82, 0)\

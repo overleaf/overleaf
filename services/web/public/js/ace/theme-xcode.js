@@ -23,7 +23,6 @@ background: #B5D5FF\
 }\
 .ace-xcode.ace_multiselect .ace_selection.ace_start {\
 box-shadow: 0 0 3px 0px #FFFFFF;\
-border-radius: 2px\
 }\
 .ace-xcode .ace_marker-layer .ace_step {\
 background: rgb(198, 219, 174)\

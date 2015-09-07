@@ -51,11 +51,11 @@ define [
 
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
-			end = change.data.range.end
+			end = change.end
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
 			if end.row == cursorPosition.row and end.column == cursorPosition.column + 1
-				if change.data.action == "insertText"
+				if change.action == "insert"
 					range = new Range(end.row, 0, end.row, end.column)
 					lineUpToCursor = @editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)

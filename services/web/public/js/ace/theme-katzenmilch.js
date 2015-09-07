@@ -27,14 +27,13 @@ background: rgba(100, 5, 208, 0.27)\
 }\
 .ace-katzenmilch.ace_multiselect .ace_selection.ace_start {\
 box-shadow: 0 0 3px 0px #f3f2f3;\
-border-radius: 2px\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_step {\
 background: rgb(198, 219, 174)\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_bracket {\
 margin: -1px 0 0 -1px;\
-border: 1px solid #000000\
+border: 1px solid rgba(0, 0, 0, 0.33);\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_active-line {\
 background: rgb(232, 242, 254)\
@@ -44,6 +43,9 @@ background-color: rgb(232, 242, 254)\
 }\
 .ace-katzenmilch .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(100, 5, 208, 0.27)\
+}\
+.ace-katzenmilch .ace_invisible {\
+color: #BFBFBF\
 }\
 .ace-katzenmilch .ace_fold {\
 background-color: rgba(2, 95, 73, 0.97);\

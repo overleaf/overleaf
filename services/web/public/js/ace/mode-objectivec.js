@@ -66,13 +66,13 @@ var c_cppHighlightRules = function() {
     var storageType = (
         "asm|__asm__|auto|bool|_Bool|char|_Complex|double|enum|float|" +
         "_Imaginary|int|long|short|signed|struct|typedef|union|unsigned|void|" +
-        "class|wchar_t|template"
+        "class|wchar_t|template|char16_t|char32_t"
     );
 
     var storageModifiers = (
         "const|extern|register|restrict|static|volatile|inline|private|" +
         "protected|public|friend|explicit|virtual|export|mutable|typename|" +
-        "constexpr|new|delete"
+        "constexpr|new|delete|alignas|alignof|decltype|noexcept|thread_local"
     );
 
     var keywordOperators = (
@@ -81,7 +81,7 @@ var c_cppHighlightRules = function() {
     );
 
     var builtinConstants = (
-        "NULL|true|false|TRUE|FALSE"
+        "NULL|true|false|TRUE|FALSE|nullptr"
     );
 
     var keywordMapper = this.$keywords = this.createKeywordMapper({
@@ -98,6 +98,10 @@ var c_cppHighlightRules = function() {
     this.$rules = { 
         "start" : [
             {
+                token : "comment",
+                regex : "//$",
+                next : "start"
+            }, {
                 token : "comment",
                 regex : "//",
                 next : "singleLineComment"
@@ -129,11 +133,11 @@ var c_cppHighlightRules = function() {
                 regex : "[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?(L|l|UL|ul|u|U|F|f|ll|LL|ull|ULL)?\\b"
             }, {
                 token : "keyword", // pre-compiler directives
-                regex : "#\\s*(?:include|import|pragma|line|define|undef|if|ifdef|else|elif|ifndef)\\b",
+                regex : "#\\s*(?:include|import|pragma|line|define|undef)\\b",
                 next  : "directive"
             }, {
                 token : "keyword", // special case pre-compiler directive
-                regex : "(?:#\\s*endif)\\b"
+                regex : "#\\s*(?:endif|if|ifdef|else|elif|ifndef)\\b"
             }, {
                 token : "support.function.C99.c",
                 regex : cFunctions
@@ -591,7 +595,7 @@ oop.inherits(FoldMode, BaseFoldMode);
     this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
     this.singleLineBlockCommentRe= /^\s*(\/\*).*\*\/\s*$/;
     this.tripleStarBlockCommentRe = /^\s*(\/\*\*\*).*\*\/\s*$/;
-    this.startRegionRe = /^\s*(\/\*|\/\/)#region\b/;
+    this.startRegionRe = /^\s*(\/\*|\/\/)#?region\b/;
     this._getFoldWidgetBase = this.getFoldWidget;
     this.getFoldWidget = function(session, foldStyle, row) {
         var line = session.getLine(row);
@@ -679,13 +683,12 @@ oop.inherits(FoldMode, BaseFoldMode);
         
         return new Range(startRow, startColumn, endRow, session.getLine(endRow).length);
     };
-    
     this.getCommentRegionBlock = function(session, line, row) {
         var startColumn = line.search(/\s*$/);
         var maxRow = session.getLength();
         var startRow = row;
         
-        var re = /^\s*(?:\/\*|\/\/)#(end)?region\b/;
+        var re = /^\s*(?:\/\*|\/\/|--)#?(end)?region\b/;
         var depth = 1;
         while (++row < maxRow) {
             line = session.getLine(row);

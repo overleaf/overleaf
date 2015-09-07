@@ -12,7 +12,7 @@ var PraatHighlightRules = function() {
         "while|endwhile|" +
         "repeat|until|" +
         "select|plus|minus|" +
-        "assert"
+        "assert|asserterror"
     );
 
     var predefinedVariables = (
@@ -26,17 +26,17 @@ var PraatHighlightRules = function() {
     var directives = (
         "clearinfo|endSendPraat"
     );
-      
+
     var functions = (
-        "writeInfo|writeInfoLine|appendInfo|appendInfoLine|" +
+        "writeInfo|writeInfoLine|appendInfo|appendInfoLine|info\\$|" +
         "writeFile|writeFileLine|appendFile|appendFileLine|" +
         "abs|round|floor|ceiling|min|max|imin|imax|" +
         "sqrt|sin|cos|tan|arcsin|arccos|arctan|arctan2|sinc|sincpi|" +
-        "exp|ln|log10|log2|" +
-        "sinh|cosh|tanh|arcsinh|arccosh|actanh|" +
+        "exp|ln|lnBeta|lnGamma|log10|log2|" +
+        "sinh|cosh|tanh|arcsinh|arccosh|arctanh|" +
         "sigmoid|invSigmoid|erf|erfc|" +
-        "randomUniform|randomInteger|randomGauss|randomPoisson|" +
-        "lnGamma|gaussP|gaussQ|invGaussQ|" +
+        "random(?:Uniform|Integer|Gauss|Poisson|Binomial)|" +
+        "gaussP|gaussQ|invGaussQ|incompleteGammaP|incompleteBeta|" +
         "chiSquareP|chiSquareQ|invChiSquareQ|studentP|studentQ|invStudentQ|" +
         "fisherP|fisherQ|invFisherQ|" +
         "binomialP|binomialQ|invBinomialP|invBinomialQ|" +
@@ -45,12 +45,16 @@ var PraatHighlightRules = function() {
         "hertzToSemitones|semitonesToHerz|" +
         "erb|hertzToErb|erbToHertz|" +
         "phonToDifferenceLimens|differenceLimensToPhon|" +
-        "beta|besselI|besselK|" +
+        "soundPressureToPhon|" +
+        "beta|beta2|besselI|besselK|" +
+        "numberOfColumns|numberOfRows|" +
         "selected|selected\\$|numberOfSelected|variableExists|"+
         "index|rindex|startsWith|endsWith|"+
         "index_regex|rindex_regex|replace_regex\\$|"+
         "length|extractWord\\$|extractLine\\$|extractNumber|" +
         "left\\$|right\\$|mid\\$|replace\\$|" +
+        "date\\$|fixed\\$|percent\\$|" +
+        "zero#|linear#|randomUniform#|randomInteger#|randomGauss#|" +
         "beginPause|endPause|" +
         "demoShow|demoWindowTitle|demoInput|demoWaitForInput|" +
         "demoClicked|demoClickedIn|demoX|demoY|" +
@@ -61,7 +65,8 @@ var PraatHighlightRules = function() {
         "chooseDirectory\\$|createDirectory|fileReadable|deleteFile|" +
         "selectObject|removeObject|plusObject|minusObject|" +
         "runScript|exitScript|" +
-        "beginSendPraat|endSendPraat"
+        "beginSendPraat|endSendPraat|" +
+        "objectsAreIdentical"
     );
 
     var objectTypes = (
@@ -99,7 +104,7 @@ var PraatHighlightRules = function() {
                 regex : /(^\s*)(?:([a-z][a-zA-Z0-9_]*\$?\s+)(=)(\s+))?(stopwatch)/
             }, {
                 token : ["text", "keyword", "text", "string"],
-                regex : /(^\s*)(print(?:line)?|echo|exit|pause|sendpraat|include|execute)(\s+)(.*)/
+                regex : /(^\s*)(print(?:line|tab)?|echo|exit|pause|send(?:praat|socket)|include|execute|system(?:_nocheck)?)(\s+)(.*)/
             }, {
                 token : ["text", "keyword"],
                 regex : "(^\\s*)(" + directives + ")$"
@@ -108,7 +113,7 @@ var PraatHighlightRules = function() {
                 regex : /(\s+)((?:\+|-|\/|\*|<|>)=?|==?|!=|%|\^|\||and|or|not)(\s+)/
             }, {
                 token : ["text", "text", "keyword.operator", "text", "keyword", "text", "keyword"],
-                regex : /(^\s*)(?:([a-z][a-zA-Z0-9_]*\$?\s+)(=)(\s+))?(?:((?:no)?warn|nocheck|noprogress)(\s+))?((?:[A-Z][^.:"]+)(?:$|(?:\.{3}|:)))/
+                regex : /(^\s*)(?:([a-z][a-zA-Z0-9_]*\$?\s+)(=)(\s+))?(?:((?:no)?warn|(?:unix_)?nocheck|noprogress)(\s+))?((?:[A-Z][^.:"]+)(?:$|(?:\.{3}|:)))/
             }, {
                 token : ["text", "keyword", "text", "keyword"],
                 regex : /(^\s*)(?:(demo)?(\s+))((?:[A-Z][^.:"]+)(?:$|(?:\.{3}|:)))/
@@ -292,7 +297,7 @@ oop.inherits(FoldMode, BaseFoldMode);
     this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
     this.singleLineBlockCommentRe= /^\s*(\/\*).*\*\/\s*$/;
     this.tripleStarBlockCommentRe = /^\s*(\/\*\*\*).*\*\/\s*$/;
-    this.startRegionRe = /^\s*(\/\*|\/\/)#region\b/;
+    this.startRegionRe = /^\s*(\/\*|\/\/)#?region\b/;
     this._getFoldWidgetBase = this.getFoldWidget;
     this.getFoldWidget = function(session, foldStyle, row) {
         var line = session.getLine(row);
@@ -380,13 +385,12 @@ oop.inherits(FoldMode, BaseFoldMode);
         
         return new Range(startRow, startColumn, endRow, session.getLine(endRow).length);
     };
-    
     this.getCommentRegionBlock = function(session, line, row) {
         var startColumn = line.search(/\s*$/);
         var maxRow = session.getLength();
         var startRow = row;
         
-        var re = /^\s*(?:\/\*|\/\/)#(end)?region\b/;
+        var re = /^\s*(?:\/\*|\/\/|--)#?(end)?region\b/;
         var depth = 1;
         while (++row < maxRow) {
             line = session.getLine(row);

@@ -50,7 +50,7 @@ snippet apply\n\
 snippet lapply\n\
 	lapply(${1:list}, ${2:function})\n\
 snippet sapply\n\
-	lapply(${1:list}, ${2:function})\n\
+	sapply(${1:list}, ${2:function})\n\
 snippet vapply\n\
 	vapply(${1:list}, ${2:function}, ${3:type})\n\
 snippet mapply\n\

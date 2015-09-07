@@ -5,35 +5,32 @@ Range = ace.require("ace/range").Range
 # Convert an ace delta into an op understood by share.js
 applyToShareJS = (editorDoc, delta, doc) ->
   # Get the start position of the range, in no. of characters
-  getStartOffsetPosition = (range) ->
+  getStartOffsetPosition = (start) ->
     # This is quite inefficient - getLines makes a copy of the entire
     # lines array in the document. It would be nice if we could just
     # access them directly.
-    lines = editorDoc.getLines 0, range.start.row
+    lines = editorDoc.getLines 0, start.row
       
     offset = 0
 
     for line, i in lines
-      offset += if i < range.start.row
+      offset += if i < start.row
         line.length
       else
-        range.start.column
+        start.column
 
     # Add the row number to include newlines.
-    offset + range.start.row
+    offset + start.row
 
-  pos = getStartOffsetPosition(delta.range)
+  pos = getStartOffsetPosition(delta.start)
 
   switch delta.action
-    when 'insertText' then doc.insert pos, delta.text
-    when 'removeText' then doc.del pos, delta.text.length
-    
-    when 'insertLines'
-      text = delta.lines.join('\n') + '\n'
+    when 'insert'
+      text = delta.lines.join('\n')
       doc.insert pos, text
       
-    when 'removeLines'
-      text = delta.lines.join('\n') + '\n'
+    when 'remove'
+      text = delta.lines.join('\n')
       doc.del pos, text.length
 
     else throw new Error "unknown action: #{delta.action}"
@@ -77,7 +74,7 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents) ->
   # Listen for edits in ace
   editorListener = (change) ->
     return if suppress
-    applyToShareJS editorDoc, change.data, doc
+    applyToShareJS editorDoc, change, doc
 
     check()
 

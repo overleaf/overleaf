@@ -85,9 +85,9 @@ define [
 			return null
 
 		applyChange: (change) ->
-			start = change.range.start
-			end = change.range.end
-			if change.action == "insertText"
+			start = change.start
+			end = change.end
+			if change.action == "insert"
 				if start.row != end.row
 					rowsAdded = end.row - start.row
 					@insertRows start.row + 1, rowsAdded
@@ -103,10 +103,7 @@ define [
 						# insertion was inside this highlight
 						@removeHighlight highlight
 
-			else if change.action == "insertLines"
-				@insertRows start.row, change.lines.length
-
-			else if change.action == "removeText"
+			else if change.action == "remove"
 				if start.row == end.row
 					oldHighlights = (@highlights.rows[start.row] || []).slice(0)
 				else
@@ -124,9 +121,6 @@ define [
 						@moveHighlight highlight,
 							row: start.row
 							column: highlight.column - (end.column - start.column)
-
-			else if change.action == "removeLines"
-				@removeRows start.row, change.lines.length
 
 		_doesHighlightOverlapRange: (highlight, start, end) ->
 			highlightIsAllBeforeRange =

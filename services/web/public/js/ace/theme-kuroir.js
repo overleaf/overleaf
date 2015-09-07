@@ -41,6 +41,9 @@ background-color: rgba(203, 220, 47, 0.22);\
 .ace-kuroir .ace_marker-layer .ace_selected-word {\
 border: 1px solid rgba(245, 170, 0, 0.57);\
 }\
+.ace-kuroir .ace_invisible {\
+color: #BFBFBF\
+}\
 .ace-kuroir .ace_fold {\
 border-color: #363636;\
 }\

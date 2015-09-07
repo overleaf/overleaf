@@ -251,6 +251,9 @@ var RubyHighlightRules = function() {
                     return currentState;
                 }
             }, {
+               token : "string.character",
+               regex : "\\B\\?."
+            }, {
                 token : "keyword.operator",
                 regex : "!|\\$|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|\\b(?:in|instanceof|new|delete|typeof|void)"
             }, {

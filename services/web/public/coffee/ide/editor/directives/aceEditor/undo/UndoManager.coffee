@@ -232,35 +232,26 @@ define [
 		_aceDeltaToSimpleDelta: (aceDelta, docLines) ->
 			if !aceDelta.range?
 				Raven?.captureException(new Error("Missing range in aceDelta"), { delta: aceDelta })
-			start = aceDelta.range.start
+			start = aceDelta.start
 			linesBefore = docLines.slice(0, start.row)
 			position =
 				linesBefore.join("").length + # full lines
 				linesBefore.length + # new line characters
 				start.column # partial line
 			switch aceDelta.action
-				when "insertText"
-					return {
+				when "insert"
+					simpleDelta = {
 						position: position
-						insert: aceDelta.text
+						insert: aceDelta.lines.join("\n")
 					}
-				when "insertLines"
-					return {
+				when "remove"
+					simpleDelta = {
 						position: position
-						insert: aceDelta.lines.join("\n") + "\n"
-					}
-				when "removeText"
-					return {
-						position: position
-						remove: aceDelta.text
-					}
-				when "removeLines"
-					return {
-						position: position
-						remove: aceDelta.lines.join("\n") + "\n"
+						remove: aceDelta.lines.join("\n")
 					}
 				else
 					throw new Error("Unknown Ace action: #{aceDelta.action}")
+			return simpleDelta
 
 		_simplePositionToAcePosition: (position, docLines) ->
 			column = 0
@@ -274,74 +265,37 @@ define [
 					break
 			return {row: row, column: column}
 
-		_textToAceActions: (simpleText, row, column, type) ->
-			aceDeltas = []
-			lines = simpleText.split("\n")
-
-			range = (options) -> new Range(options.start.row, options.start.column, options.end.row, options.end.column)
-
-			do stripFirstLine = () ->
-				firstLine = lines.shift()
-				if firstLine.length > 0
-					aceDeltas.push {
-						text: firstLine
-						range: range(
-							start: column: column, row: row
-							end: column: column + firstLine.length, row: row
-						)
-						action: "#{type}Text"
-					}
-					column += firstLine.length
-
-			do stripFirstNewLine = () ->
-				if lines.length > 0
-					aceDeltas.push {
-						text: "\n"
-						range: range(
-							start: column: column, row: row
-							end: column: 0, row: row + 1
-						)
-						action: "#{type}Text"
-					}
-					row += 1
-
-			do stripMiddleFullLines = () ->
-				middleLines = lines.slice(0, -1)
-				if middleLines.length > 0
-					aceDeltas.push {
-						lines: middleLines
-						range: range(
-							start: column: 0, row: row
-							end: column: 0, row: row + middleLines.length
-						)
-						action: "#{type}Lines"
-					}
-					row += middleLines.length
-
-			do stripLastLine = () ->
-				if lines.length > 0
-					lastLine = lines.pop()
-					aceDeltas.push {
-						text: lastLine
-						range: range(
-							start: column: 0, row: row
-							end: column: lastLine.length , row: row
-						)
-						action: "#{type}Text"
-					}
-
-			return aceDeltas
-
-
 		_simpleDeltaToAceDeltas: (simpleDelta, docLines) ->
 			{row, column} = @_simplePositionToAcePosition(simpleDelta.position, docLines)
 
+			lines = (simpleDelta.insert or simpleDelta.remove or "").split("\n")
+			
+			start = {column, row}
+			if lines.length > 1
+				end = {
+					row: row + lines.length - 1,
+					column: lines[lines.length - 1].length
+				}
+			else
+				end = {
+					row,
+					column: column + lines[0].length
+				}
+			
 			if simpleDelta.insert?
-				return @_textToAceActions(simpleDelta.insert, row, column, "insert")
-			if simpleDelta.remove?
-				return @_textToAceActions(simpleDelta.remove, row, column, "remove").reverse()
+				aceDelta = {
+					action: "insert"
+					lines, start, end
+				}
+			else if simpleDelta.remove?
+				aceDelta = {
+					action: "remove"
+					lines, start, end
+				}
 			else
 				throw "Unknown simple delta: #{simpleDelta}"
+
+			return [aceDelta]
 
 		_concatSimpleDeltas: (deltas) ->
 			return [] if deltas.length == 0

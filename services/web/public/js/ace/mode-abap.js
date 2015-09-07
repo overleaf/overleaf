@@ -87,7 +87,7 @@ var AbapHighlightRules = function() {
             {token : "string", regex : "`",     next  : "start"},
             {defaultToken : "string"}
         ]
-    }
+    };
 };
 oop.inherits(AbapHighlightRules, TextHighlightRules);
 
