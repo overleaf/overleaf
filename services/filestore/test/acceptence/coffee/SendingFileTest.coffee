@@ -150,3 +150,22 @@ describe "Filestore", ->
 					expect(response.statusCode).to.equal 200
 					expect(new Buffer(body.substring(0, 8)).toString('hex')).to.equal 'efbfbd504e470d0a1a0a'
 					done()
+
+		describe "warming the cache", ->
+
+			beforeEach ->
+				@fileUrl = @fileUrl + '?style=preview&cacheWarm=true'
+
+			it "should not time out", (done) ->
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response).to.not.equal null
+					done()
+
+			it "should respond with only an 'OK'", (done) ->
+				# note: this test relies of the imagemagick conversion working
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response.statusCode).to.equal 200
+					body.should.equal 'OK'
+					done()
