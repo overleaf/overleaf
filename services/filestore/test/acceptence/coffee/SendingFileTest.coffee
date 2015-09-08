@@ -113,13 +113,40 @@ describe "Filestore", ->
 						body.should.equal @constantFileContent
 						done()
 
+	describe "with a pdf file", ->
+
+		beforeEach (done)->
+			@timeout(1000 * 10)
+			@file_id = Math.random()
+			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{@file_id}"
+			@localFileReadPath = __dirname + '/../../fixtures/test.pdf'
+
+			writeStream = request.post(@fileUrl)
+
+			writeStream.on "end", done
+			fs.createReadStream(@localFileReadPath).pipe writeStream
+
+		it "should be able get the file back", (done)->
+			@timeout(1000 * 10)
+			request.get @fileUrl, (err, response, body)=>
+				expect(body.substring(0, 8)).to.equal '%PDF-1.5'
+				done()
+
 		describe "getting the preview image", ->
 
 			beforeEach ->
-				@fileUrl = @fileUrl + '?style=preview&cacheWarm=true'
+				@fileUrl = @fileUrl + '?style=preview'
 
 			it "should not time out", (done) ->
 				@timeout(1000 * 20)
 				request.get @fileUrl, (err, response, body) =>
 					expect(response).to.not.equal null
+					done()
+
+			it "should respond with image data", (done) ->
+				# note: this test relies of the imagemagick conversion working
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response.statusCode).to.equal 200
+					expect(new Buffer(body.substring(0, 8)).toString('hex')).to.equal 'efbfbd504e470d0a1a0a'
 					done()
