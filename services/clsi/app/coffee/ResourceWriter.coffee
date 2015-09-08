@@ -5,6 +5,7 @@ async = require "async"
 mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
 Metrics = require "./Metrics"
+logger = require "logger-sharelatex"
 
 module.exports = ResourceWriter =
 	syncResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
@@ -55,13 +56,10 @@ module.exports = ResourceWriter =
 			return callback(error) if error?
 			# TODO: Don't overwrite file if it hasn't been modified
 			if resource.url?
-				UrlCache.downloadUrlToFile(
-					project_id,
-					resource.url,
-					path,
-					resource.modified,
-					callback
-				)
+				UrlCache.downloadUrlToFile project_id, resource.url, path, resource.modified, (err)->
+					if err?
+						logger.err err:err, "error downloading file for resources"
+					callback() #try and continue compiling even if http resource can not be downloaded at this time
 			else
 				fs.writeFile path, resource.content, callback
 
