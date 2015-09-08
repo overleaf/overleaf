@@ -112,3 +112,14 @@ describe "Filestore", ->
 					request.get newFileUrl, (err, response, body)=>
 						body.should.equal @constantFileContent
 						done()
+
+		describe "getting the preview image", ->
+
+			beforeEach ->
+				@fileUrl = @fileUrl + '?style=preview&cacheWarm=true'
+
+			it "should not time out", (done) ->
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response).to.not.equal null
+					done()
