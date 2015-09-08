@@ -148,7 +148,7 @@ describe "Filestore", ->
 				@timeout(1000 * 20)
 				request.get @fileUrl, (err, response, body) =>
 					expect(response.statusCode).to.equal 200
-					expect(new Buffer(body.substring(0, 8)).toString('hex')).to.equal 'efbfbd504e470d0a1a0a'
+					expect(body.length).to.be.greaterThan 400
 					done()
 
 		describe "warming the cache", ->
