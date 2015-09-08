@@ -230,8 +230,6 @@ define [
 				}
 
 		_aceDeltaToSimpleDelta: (aceDelta, docLines) ->
-			if !aceDelta.range?
-				Raven?.captureException(new Error("Missing range in aceDelta"), { delta: aceDelta })
 			start = aceDelta.start
 			linesBefore = docLines.slice(0, start.row)
 			position =
