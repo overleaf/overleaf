@@ -10,8 +10,6 @@ settings = require("settings-sharelatex")
 module.exports = DocArchiveManager =
 
 	archiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
-		if settings.filestore?.backend != "s3"
-			return callback(null)
 		DocstoreHandler.getAllDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)
@@ -42,8 +40,6 @@ module.exports = DocArchiveManager =
 							callback()
 
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
-		if settings.filestore?.backend != "s3"
-			return callback(null)
 		DocstoreHandler.getAllDocs project_id, (error, docs) ->
 			if error?
 				return callback(error)

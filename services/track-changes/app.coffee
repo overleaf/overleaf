@@ -27,9 +27,8 @@ app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpContro
 
 app.post "/doc/:doc_id/pack", HttpController.packDoc
 
-if Settings.filestore?.backend == "s3"
-	app.get  '/project/:project_id/archive', HttpController.archiveProject
-	app.get  '/project/:project_id/unarchive', HttpController.unArchiveProject
+app.get  '/project/:project_id/archive', HttpController.archiveProject
+app.get  '/project/:project_id/unarchive', HttpController.unArchiveProject
 
 packWorker = null # use a single packing worker
 
