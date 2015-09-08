@@ -16,6 +16,8 @@ describe "CompileManager", ->
 			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"child_process": @child_process = {}
+			"./CommandRunner": @CommandRunner = {}
+			"fs": @fs = {}
 		@callback = sinon.stub()
 
 	describe "doCompile", ->
@@ -175,16 +177,24 @@ describe "CompileManager", ->
 
 	describe "wordcount", ->
 		beforeEach ->
+			@CommandRunner.run = sinon.stub().callsArg(4)
+			@fs.readFileSync = sinon.stub().returns @stdout = "Encoding: ascii\nWords in text: 2"
+			@callback  = sinon.stub()
+
+			@project_id = "project-id-123"
+			@timeout = 10 * 1000
 			@file_name = "main.tex"
-			@child_process.execFile = sinon.stub()
-			@child_process.execFile.callsArgWith(3, null, @stdout = "Encoding: ascii\nWords in text: 2", "")
-			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}"
+			@Settings.path.compilesDir = "/local/compile/directory"
+
 			@CompileManager.wordcount @project_id, @file_name, @callback
 
-		it "should execute the texcount binary", ->
-			file_path = "#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}"
-			@child_process.execFile
-				.calledWith("texcount", [file_path], timeout: 10000)
+		it "should run the texcount command", ->
+			@directory = "#{@Settings.path.compilesDir}/#{@project_id}"
+			@file_path = "$COMPILE_DIR/#{@file_name}"
+			@command =[ "texcount", @file_path, "-out=" + @file_path + ".wc"]
+			
+			@CommandRunner.run
+				.calledWith(@project_id, @command, @directory, @timeout)
 				.should.equal true
 
 		it "should call the callback with the parsed output", ->
@@ -200,4 +210,3 @@ describe "CompileManager", ->
 					mathDisplay: 0
 				})
 				.should.equal true
-
