@@ -20,12 +20,9 @@ module.exports = DocArchiveManager =
 			async.series jobs, callback
 
 	archiveDocChangesWithLock: (project_id, doc_id, callback = (error) ->) ->
-		LockManager.runWithLock(
-			"HistoryArchiveLock:#{doc_id}",
-			(releaseLock) ->
-				DocArchiveManager.archiveDocChanges project_id, doc_id, releaseLock
-			callback
-		)
+		job = (releaseLock) ->
+			DocArchiveManager.archiveDocChanges project_id, doc_id, releaseLock
+		LockManager.runWithLock("HistoryArchiveLock:#{doc_id}", job, callback)
 
 	archiveDocChanges: (project_id, doc_id, callback)->
 		MongoManager.getDocChangesCount doc_id, (error, count) ->
