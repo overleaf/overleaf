@@ -191,7 +191,7 @@ describe "CompileManager", ->
 		it "should run the texcount command", ->
 			@directory = "#{@Settings.path.compilesDir}/#{@project_id}"
 			@file_path = "$COMPILE_DIR/#{@file_name}"
-			@command =[ "texcount", '-inc', @file_path, "-out=" + @file_path + ".wc"]
+			@command =[ "texcount", "-inc", @file_path, "-out=" + @file_path + ".wc"]
 			
 			@CommandRunner.run
 				.calledWith(@project_id, @command, @directory, @timeout)

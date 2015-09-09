@@ -35,21 +35,3 @@ describe "Syncing", ->
 					code: [ { file: 'main.tex', line: 3, column: -1 } ]
 				)
 				done()
-
-	describe "wordcount file", ->
-		it "should return wordcount info", (done) ->
-			Client.wordcount @project_id, "main.tex", (error, result) ->
-				throw error if error?
-				expect(result).to.deep.equal(
-					texcount: { 
-						encode: "ascii"
-						textWords: 2
-						headWords: 0
-						outside: 0
-						headers: 0
-						elements: 0
-						mathInline: 0
-						mathDisplay: 0
-					}
-				)
-				done()

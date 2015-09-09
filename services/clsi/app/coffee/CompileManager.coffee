@@ -146,10 +146,10 @@ module.exports = CompileManager =
 				results['outside'] = parseInt(info, 10)
 			if data.indexOf("of head") > -1
 				results['headers'] = parseInt(info, 10)
-			if data.indexOf("float") > -1
+			if data.indexOf("Number of floats/tables/figures") > -1
 				results['elements'] = parseInt(info, 10)
-			if data.indexOf("inlines") > -1
+			if data.indexOf("Number of math inlines") > -1
 				results['mathInline'] = parseInt(info, 10)
-			if data.indexOf("displayed") > -1
+			if data.indexOf("Number of math displayed") > -1
 				results['mathDisplay'] = parseInt(info, 10)
 		return results
