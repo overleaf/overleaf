@@ -1,6 +1,6 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
-require('chai').should()
+should = require('chai').should()
 modulePath = require('path').join __dirname, '../../../app/js/ResourceWriter'
 path = require "path"
 
@@ -94,7 +94,7 @@ describe "ResourceWriter", ->
 					path: "main.tex"
 					url: "http://www.example.com/main.tex"
 					modified: Date.now()
-				@UrlCache.downloadUrlToFile = sinon.stub().callsArg(4)
+				@UrlCache.downloadUrlToFile = sinon.stub().callsArgWith(4, "fake error downloading file")
 				@ResourceWriter._writeResourceToDisk(@project_id, @resource, @basePath, @callback)
 
 			it "should ensure the directory exists", ->
@@ -109,6 +109,9 @@ describe "ResourceWriter", ->
 			
 			it "should call the callback", ->
 				@callback.called.should.equal true
+
+			it "should not return an error if the resource writer errored", ->
+				should.not.exist @callback.args[0][0]
 
 		describe "with a content based resource", ->
 			beforeEach ->
