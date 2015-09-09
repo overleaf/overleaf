@@ -68,7 +68,7 @@ module.exports = CompileController =
 			}
 
 	wordcount: (req, res, next = (error) ->) ->
-		file   = req.query.file
+		file   = req.query.file || "main.tex"
 		project_id = req.params.project_id
 
 		CompileManager.wordcount project_id, file, (error, result) ->
