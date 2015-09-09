@@ -66,3 +66,13 @@ module.exports = CompileController =
 			res.send JSON.stringify {
 				code: codePositions
 			}
+
+	wordcount: (req, res, next = (error) ->) ->
+		file   = req.query.file || "main.tex"
+		project_id = req.params.project_id
+
+		CompileManager.wordcount project_id, file, (error, result) ->
+			return next(error) if error?
+			res.send JSON.stringify {
+				texcount: result
+			}

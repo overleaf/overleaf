@@ -16,6 +16,8 @@ describe "CompileManager", ->
 			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"child_process": @child_process = {}
+			"./CommandRunner": @CommandRunner = {}
+			"fs": @fs = {}
 		@callback = sinon.stub()
 
 	describe "doCompile", ->
@@ -172,3 +174,39 @@ describe "CompileManager", ->
 						column: @column
 					}])
 					.should.equal true
+
+	describe "wordcount", ->
+		beforeEach ->
+			@CommandRunner.run = sinon.stub().callsArg(4)
+			@fs.readFileSync = sinon.stub().returns @stdout = "Encoding: ascii\nWords in text: 2"
+			@callback  = sinon.stub()
+
+			@project_id = "project-id-123"
+			@timeout = 10 * 1000
+			@file_name = "main.tex"
+			@Settings.path.compilesDir = "/local/compile/directory"
+
+			@CompileManager.wordcount @project_id, @file_name, @callback
+
+		it "should run the texcount command", ->
+			@directory = "#{@Settings.path.compilesDir}/#{@project_id}"
+			@file_path = "$COMPILE_DIR/#{@file_name}"
+			@command =[ "texcount", "-inc", @file_path, "-out=" + @file_path + ".wc"]
+			
+			@CommandRunner.run
+				.calledWith(@project_id, @command, @directory, @timeout)
+				.should.equal true
+
+		it "should call the callback with the parsed output", ->
+			@callback
+				.calledWith(null, {
+					encode: "ascii"
+					textWords: 2
+					headWords: 0
+					outside: 0
+					headers: 0
+					elements: 0
+					mathInline: 0
+					mathDisplay: 0
+				})
+				.should.equal true

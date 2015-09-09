@@ -37,6 +37,7 @@ app.delete "/project/:project_id", CompileController.clearCache
 
 app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
 app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
+app.get  "/project/:project_id/wordcount", CompileController.wordcount
 
 ForbidSymlinks = require "./app/js/StaticServerForbidSymlinks"
 

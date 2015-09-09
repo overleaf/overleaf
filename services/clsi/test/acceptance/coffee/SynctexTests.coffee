@@ -35,4 +35,3 @@ describe "Syncing", ->
 					code: [ { file: 'main.tex', line: 3, column: -1 } ]
 				)
 				done()
-
