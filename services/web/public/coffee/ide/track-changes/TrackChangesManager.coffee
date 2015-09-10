@@ -187,7 +187,8 @@ define [
 					doc.entity = @ide.fileTreeManager.findEntityById(doc_id, includeDeleted: true)
 
 				for user in update.meta.users or []
-					user.hue = @ide.onlineUsersManager.getHueForUserId(user.id)
+					if user?
+						user.hue = @ide.onlineUsersManager.getHueForUserId(user.id)
 
 				if !previousUpdate? or !moment(previousUpdate.meta.end_ts).isSame(update.meta.end_ts, "day")
 					update.meta.first_in_day = true
