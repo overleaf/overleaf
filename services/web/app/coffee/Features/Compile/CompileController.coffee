@@ -102,3 +102,10 @@ module.exports = CompileController =
 		proxy.pipe(res)
 		proxy.on "error", (error) ->
 			logger.warn err: error, url: url, "CLSI proxy error"
+
+	wordCount: (req, res, next) ->
+		project_id = req.params.Project_id
+		CompileManager.wordCount project_id, (error, body) ->
+			return next(error) if error?
+			res.contentType("application/json")
+			res.send 200, body
