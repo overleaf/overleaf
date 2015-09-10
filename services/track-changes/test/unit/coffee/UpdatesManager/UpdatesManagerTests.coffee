@@ -627,3 +627,64 @@ describe "UpdatesManager", ->
 					start_ts: @now
 					end_ts:   @now + 50
 			}]
+
+		it "should include null user values", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user: @user_1
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user: null
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					users: [@user_1, null]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
+
+		it "should roll several null user values into one", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user: @user_1
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user: null
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user: null
+					start_ts: @now + 2
+					end_ts:   @now + 4
+				v: 4
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					users: [@user_1, null]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
