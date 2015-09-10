@@ -38,6 +38,8 @@ module.exports =
 	_getConvertedFile: (bucket, key, opts, callback)->
 		convetedKey = KeyBuilder.addCachingToKey(key, opts)
 		PersistorManager.checkIfFileExists bucket, convetedKey, (err, exists)=>
+			if err?
+				return callback(err)
 			if exists
 				PersistorManager.getFileStream bucket, convetedKey, opts, callback
 			else
@@ -62,6 +64,8 @@ module.exports =
 
 	_convertFile: (bucket, origonalKey, opts, callback)->
 		@_writeS3FileToDisk bucket, origonalKey, opts, (err, origonalFsPath)->
+			if err?
+				return callback(err)
 			done = (err, destPath)->
 				if err?
 					logger.err err:err, bucket:bucket, origonalKey:origonalKey, opts:opts, "error converting file"
@@ -76,7 +80,7 @@ module.exports =
 			else if opts.style == "preview"
 				FileConverter.preview origonalFsPath, done
 			else
-				throw new Error("should have specified opts to convert file with #{JSON.stringify(opts)}")
+				return callback(new Error("should have specified opts to convert file with #{JSON.stringify(opts)}"))
 
 
 	_writeS3FileToDisk: (bucket, key, opts, callback)->

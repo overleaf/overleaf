@@ -46,6 +46,9 @@ module.exports = FileController =
 		{key, bucket} = req
 		logger.log key:key, bucket:bucket, "reciving request to insert file"
 		FileHandler.insertFile bucket, key, req, (err)->
+			if err?
+				logger.log err: err, key: key, bucket: bucket, "error inserting file"
+				res.send 500
 			res.send 200
 
 	copyFile: (req, res)->
