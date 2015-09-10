@@ -14,6 +14,7 @@ module.exports = WebApiManager =
 			if error?
 				return callback(error)
 			if res.statusCode == 404
+				logger.log url: url, "got 404 from web api"
 				return callback null, null
 			if res.statusCode >= 200 and res.statusCode < 300
 				return callback null, body
