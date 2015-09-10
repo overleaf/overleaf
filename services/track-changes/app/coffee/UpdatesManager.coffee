@@ -188,6 +188,8 @@ module.exports = UpdatesManager =
 		for update in updates
 			earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
 			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				# check if the user in this update is already present in the earliest update,
+				# if not, add them to the users list of the earliest update
 				userExists = false
 				for user in earliestUpdate.meta.users
 					if (!user and !update.meta.user) or (user.id == update.meta.user?.id)
