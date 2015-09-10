@@ -81,4 +81,6 @@ module.exports =
 
 	_writeS3FileToDisk: (bucket, key, opts, callback)->
 		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
+			if err?
+				return callback(err)
 			LocalFileWriter.writeStream fileStream, key, callback
