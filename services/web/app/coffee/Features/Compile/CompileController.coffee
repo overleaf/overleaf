@@ -105,7 +105,8 @@ module.exports = CompileController =
 
 	wordCount: (req, res, next) ->
 		project_id = req.params.Project_id
-		CompileManager.wordCount project_id, (error, body) ->
+		file   = req.query.file || false
+		CompileManager.wordCount project_id, file, (error, body) ->
 			return next(error) if error?
 			res.contentType("application/json")
 			res.send 200, body

@@ -106,15 +106,18 @@ module.exports = ClsiManager =
 								resources: resources
 						}
 
-	wordCount: (project_id, options, callback = (error, response) ->) ->
-		compilerUrl = @_getCompilerUrl(options?.compileGroup)
-		request.get {
-			url:  "#{compilerUrl}/project/#{project_id}/wordcount"
-		}, (error, response, body) ->
-			return callback(error) if error?
-			if 200 <= response.statusCode < 300
-				callback null, body
-			else
-				error = new Error("CLSI returned non-success code: #{response.statusCode}")
-				logger.error err: error, project_id: project_id, "CLSI returned failure code"
-				callback error, body
+	wordCount: (project_id, file, options, callback = (error, response) ->) ->
+		ClsiManager._buildRequest project_id, options, (error, req) ->
+			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
+			filename = file || req.compile.rootResourcePath
+			request.get {
+				url:  "#{compilerUrl}/project/#{project_id}/wordcount?file=#{filename}"
+			}, (error, response, body) ->
+				return callback(error) if error?
+				if 200 <= response.statusCode < 300
+					callback null, body
+				else
+					error = new Error("CLSI returned non-success code: #{response.statusCode}")
+					logger.error err: error, project_id: project_id, "CLSI returned failure code"
+					callback error, body
+
