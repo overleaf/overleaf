@@ -352,3 +352,22 @@ describe "CompileController", ->
 			@CompileController.compileAndDownloadPdf @req, @res
 			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()
+
+	describe "wordCount", ->
+		beforeEach ->
+			@CompileManager.wordCount = sinon.stub().callsArgWith(2, null, {content:"body"})
+			@req.params =
+				Project_id: @project_id
+			@res.send = sinon.stub()
+			@res.contentType = sinon.stub()
+			@CompileController.wordCount @req, @res, @next
+
+		it "should proxy to the CLSI", ->
+			@CompileManager.wordCount
+				.calledWith(@project_id, false)
+				.should.equal true
+
+		it "should return a 200 and body", ->
+			@res.send
+				.calledWith(200, {content:"body"})
+				.should.equal true

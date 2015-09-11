@@ -91,3 +91,7 @@ module.exports = CompileManager =
 			else
 				ProjectRootDocManager.setRootDocAutomatically project_id, callback
 		
+	wordCount: (project_id, file, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.wordCount project_id, file, limits, callback

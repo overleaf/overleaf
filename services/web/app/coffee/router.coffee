@@ -111,6 +111,7 @@ module.exports = class Router
 		webRouter.delete "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
 		webRouter.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
 		webRouter.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
+		webRouter.get "/project/:Project_id/wordcount", SecurityManager.requestCanAccessProject, CompileController.wordCount
 
 		webRouter.delete '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
 		webRouter.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
