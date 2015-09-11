@@ -7,7 +7,7 @@ module.exports = MockWebApi =
 	projects: {}
 
 	getUser: (user_id, callback = (error) ->) ->
-		callback null, @users[user_id]
+		callback null, @users[user_id] or null
 
 	getProject: (project_id, callback = (error, project) ->) ->
 		callback null, @projects[project_id]

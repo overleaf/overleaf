@@ -188,14 +188,15 @@ module.exports = UpdatesManager =
 		for update in updates
 			earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
 			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
-				if update.meta.user?
-					userExists = false
-					for user in earliestUpdate.meta.users
-						if user.id == update.meta.user.id
-							userExists = true
-							break
-					if !userExists
-						earliestUpdate.meta.users.push update.meta.user
+				# check if the user in this update is already present in the earliest update,
+				# if not, add them to the users list of the earliest update
+				userExists = false
+				for user in earliestUpdate.meta.users
+					if (!user and !update.meta.user) or (user?.id == update.meta.user?.id)
+						userExists = true
+						break
+				if !userExists
+					earliestUpdate.meta.users.push update.meta.user
 
 				doc_id = update.doc_id.toString()
 				doc = earliestUpdate.docs[doc_id]
@@ -220,11 +221,7 @@ module.exports = UpdatesManager =
 				newUpdate.docs[update.doc_id.toString()] =
 					fromV: update.v
 					toV: update.v
-
-				if update.meta.user?
-					newUpdate.meta.users.push update.meta.user
-
+				newUpdate.meta.users.push update.meta.user
 				summarizedUpdates.push newUpdate
 
 		return summarizedUpdates
-
