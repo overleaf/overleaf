@@ -259,3 +259,22 @@ describe "CompileManager", ->
 			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
 				canCompile.should.equal false
 				done()
+
+	describe "wordCount", ->
+		beforeEach ->
+			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
+			@ClsiManager.wordCount = sinon.stub().callsArg(3)
+			@CompileManager.wordCount @project_id, false, @callback
+			
+		it "should look up the compile group to use", ->
+			@CompileManager.getProjectCompileLimits
+				.calledWith(@project_id)
+				.should.equal true
+				
+		it "should call wordCount for project", ->
+			@ClsiManager.wordCount
+				.calledWith(@project_id, false, @limits)
+				.should.equal true
+				
+		it "should call the callback", ->
+			@callback.called.should.equal true

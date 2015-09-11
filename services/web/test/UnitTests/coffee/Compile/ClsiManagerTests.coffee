@@ -260,3 +260,30 @@ describe "ClsiManager", ->
 					json: @req
 					jar: false
 				}).should.equal true
+
+	describe "wordCount", ->
+		beforeEach ->
+			@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body = { mock: "foo" })
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, { compile: { rootResourcePath: "rootfile.text" } })
+			@ClsiManager._getCompilerUrl = sinon.stub().returns "compiler.url"
+
+		describe "with root file", ->
+			beforeEach ->
+				@ClsiManager.wordCount @project_id, false, {}, @callback
+
+			it "should call wordCount with root file", ->
+				@request.get
+					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=rootfile.text" })
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+				
+		describe "with param file", ->
+			beforeEach ->
+				@ClsiManager.wordCount @project_id, "main.tex", {}, @callback
+
+			it "should call wordCount with param file", ->
+				@request.get
+					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex" })
+					.should.equal true
