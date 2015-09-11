@@ -192,7 +192,7 @@ module.exports = UpdatesManager =
 				# if not, add them to the users list of the earliest update
 				userExists = false
 				for user in earliestUpdate.meta.users
-					if (!user and !update.meta.user) or (user.id == update.meta.user?.id)
+					if (!user and !update.meta.user) or (user?.id == update.meta.user?.id)
 						userExists = true
 						break
 				if !userExists
