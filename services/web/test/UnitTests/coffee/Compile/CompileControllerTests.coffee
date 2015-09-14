@@ -369,5 +369,5 @@ describe "CompileController", ->
 
 		it "should return a 200 and body", ->
 			@res.send
-				.calledWith(200, {content:"body"})
+				.calledWith({content:"body"})
 				.should.equal true
