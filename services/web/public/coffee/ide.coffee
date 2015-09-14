@@ -13,6 +13,7 @@ define [
 	"ide/chat/index"
 	"ide/clone/index"
 	"ide/hotkeys/index"
+	"ide/wordcount/index"
 	"ide/directives/layout"
 	"ide/services/ide"
 	"__IDE_CLIENTSIDE_INCLUDES__"

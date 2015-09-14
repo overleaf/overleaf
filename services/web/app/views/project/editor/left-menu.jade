@@ -22,7 +22,7 @@ aside#left-menu.full-size(
 				i.fa.fa-file-pdf-o.fa-2x
 				br
 				| PDF
-			div.pdf-disabled(
+			div.link-disabled(
 				ng-if="!pdf.url"
 				tooltip="#{translate('please_compile_pdf_before_download')}"
 				tooltip-placement="bottom"
@@ -41,7 +41,15 @@ aside#left-menu.full-size(
 				)
 					i.fa.fa-fw.fa-copy
 					| &nbsp;&nbsp; #{translate("copy_project")}
+
 			!= moduleIncludes("editorLeftMenu:actions", locals)
+			li(ng-controller="WordCountController")
+				a(href, ng-if="pdf.url" ,ng-click="openWordCountModal()")
+					i.fa.fa-fw.fa-eye
+					span &nbsp;&nbsp; #{translate("word_count")}
+				a.link-disabled(href, ng-if="!pdf.url" , tooltip="#{translate('please_compile_pdf_before_word_count')}")
+					i.fa.fa-fw.fa-eye
+					span.link-disabled &nbsp;&nbsp; #{translate("word_count")}	
 
 	if (moduleIncludesAvailable("editorLeftMenu:sync"))
 		div(ng-show="!anonymous")
@@ -173,3 +181,41 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		)
 			span(ng-hide="state.inflight") #{translate("copy")}
 			span(ng-show="state.inflight") #{translate("copying")}...
+
+script(type='text/ng-template', id='wordCountModalTemplate')
+	.modal-header
+		h3 #{translate("word_count")}
+	.modal-body
+		div(ng-if="status.loading")
+			.loading(ng-show="!status.error && status.loading")
+				i.fa.fa-refresh.fa-spin.fa-fw 
+				span &nbsp; #{translate("loading")}...  
+			div.pdf-disabled(
+				ng-if="!pdf.url"
+				tooltip="#{translate('please_compile_pdf_before_word_count')}"
+				tooltip-placement="bottom"
+			)
+		div(ng-if="!status.loading")
+			.container-fluid
+				.row
+					.col-md-4
+						.pull-right #{translate("total_words")} :
+					.col-md-6 {{data.textWords}}
+				.row 
+					.col-md-4
+						.pull-right #{translate("headers")} :
+					.col-md-6 {{data.headers}}
+				.row 
+					.col-md-4 
+						.pull-right #{translate("math_inline")} :
+					.col-md-6 {{data.mathInline}}
+				.row 
+					.col-md-4 
+						.pull-right #{translate("math_display")} :
+					.col-md-6 {{data.mathDisplay}}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("done")}
+

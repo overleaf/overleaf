@@ -109,4 +109,4 @@ module.exports = CompileController =
 		CompileManager.wordCount project_id, file, (error, body) ->
 			return next(error) if error?
 			res.contentType("application/json")
-			res.send 200, body
+			res.send body
