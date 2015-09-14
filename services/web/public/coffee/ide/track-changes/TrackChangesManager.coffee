@@ -250,5 +250,5 @@ define [
 
 		_updateContainsUserId: (update, user_id) ->
 			for user in update.meta.users
-				return true if user.id == user_id
+				return true if user?.id == user_id
 			return false

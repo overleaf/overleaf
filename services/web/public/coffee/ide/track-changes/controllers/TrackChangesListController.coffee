@@ -103,4 +103,12 @@ define [
 			$scope.trackChanges.hoveringOverListSelectors = false
 			$scope.resetHoverState()
 
+		$scope.displayName = (user) ->
+			full_name = "#{user.first_name} #{user.last_name}"
+			if full_name != " "
+				full_name
+			else if user.email
+				user.email
+			else
+				"Unknown"
 	]
