@@ -76,8 +76,8 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
 								.color-square(ng-if="update_user == null", ng-style="{'background-color': 'hsl(100, 70%, 50%)'}")
-								.name(ng-if="update_user.id != user.id" ng-bind="displayName(update_user)") 
-								.name(ng-if="update_user.id == user.id") You
+								.name(ng-if="update_user && update_user.id != user.id" ng-bind="displayName(update_user)") 
+								.name(ng-if="update_user && update_user.id == user.id") You
 								.name(ng-if="update_user == null") #{translate("anonymous")}
 							div.user(ng-if="update.meta.users.length == 0")
 								.color-square(style="background-color: hsl(100, 100%, 50%)")

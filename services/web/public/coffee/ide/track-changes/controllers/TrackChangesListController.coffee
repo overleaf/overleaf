@@ -105,10 +105,13 @@ define [
 
 		$scope.displayName = (user) ->
 			full_name = "#{user.first_name} #{user.last_name}"
-			if full_name != " "
+			fallback_name = "Unknown"
+			if !user?
+				fallback_name
+			else if full_name != " "
 				full_name
 			else if user.email
 				user.email
 			else
-				"Unknown"
+				fallback_name
 	]
