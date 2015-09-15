@@ -72,6 +72,16 @@ describe "WebApiManager", ->
 					.calledWith(new Error("web returned failure status code: 500"))
 					.should.equal true
 
+		describe "when the user cannot be found", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 404}, "nothing")
+				@WebApiManager.getUserInfo @user_id, @callback
+
+			it "should return a null value", ->
+				@callback
+					.calledWith(null, null)
+					.should.equal true
+
 
 	describe "getProjectDetails", ->
 		describe "successfully", ->

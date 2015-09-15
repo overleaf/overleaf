@@ -47,7 +47,7 @@ processUpdates = (pending) ->
 				callback(err, result)
 			, DOCUMENT_PACK_DELAY
 	, (err, results) ->
-		if err?
+		if err? and err.message != "shutdown"
 			logger.error {err}, 'error in pack worker processUpdates'
 		finish()
 

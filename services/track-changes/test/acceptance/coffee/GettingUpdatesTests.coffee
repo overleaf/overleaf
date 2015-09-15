@@ -15,6 +15,7 @@ describe "Getting updates", ->
 		@now = Date.now()
 		@to = @now
 		@user_id = ObjectId().toString()
+		@deleted_user_id = 'deleted_user'
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
 
@@ -44,6 +45,7 @@ describe "Getting updates", ->
 				meta: { ts: @now - (9 - i) * @hours, user_id: @user_id }
 				v: 2 * i + 2
 			}
+		@updates[0].meta.user_id = @deleted_user_id
 
 		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
 			throw error if error?
@@ -91,7 +93,6 @@ describe "Getting updates", ->
 					users: [@user]
 			}]
 
-
 	describe "getting updates beyond the end of the database", ->
 		before (done) ->
 			TrackChangesClient.getUpdates @project_id, { before: @to - 8 * @hours + 1, min_count: 30 }, (error, body) =>
@@ -115,6 +116,5 @@ describe "Getting updates", ->
 				meta:
 					start_ts: @to - 9 * @hours - 2 * @minutes
 					end_ts: @to - 9 * @hours
-					users: [@user]
+					users: [@user, null]
 			}]
-

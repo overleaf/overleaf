@@ -13,6 +13,9 @@ module.exports = WebApiManager =
 		}, (error, res, body)->
 			if error?
 				return callback(error)
+			if res.statusCode == 404
+				logger.log url: url, "got 404 from web api"
+				return callback null, null
 			if res.statusCode >= 200 and res.statusCode < 300
 				return callback null, body
 			else
@@ -27,6 +30,9 @@ module.exports = WebApiManager =
 				logger.error err: error, user_id: user_id, url: url, "error accessing web"
 				return callback error
 
+			if body == null
+				logger.error user_id: user_id, url: url, "no user found"
+				return callback null, null
 			try
 				user = JSON.parse(body)
 			catch error
