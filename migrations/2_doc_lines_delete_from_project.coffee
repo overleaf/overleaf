@@ -167,7 +167,7 @@ processNext = (project_id, callback)->
 							markProjectAsProcessed project_id, (err)->
 								setTimeout(
 									-> callback(err)
-								,5000)
+								,0)
 
 exports.migrate = (client, done = ->)->
 	getProjectIds (err, ids)->
