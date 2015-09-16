@@ -2,15 +2,14 @@ Settings = require "settings-sharelatex"
 fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
-console.log Settings.mongo.url
 db = mongojs(Settings.mongo.url, ['projects', 'docs'])
 _ = require("lodash")
 async = require("async")
 exec = require("child_process").exec
 
-finished_projects_path = "/tmp/finished-projects"
-all_projects_path = "/tmp/all-projects"
-project_too_large_path = "/tmp/large_projects"
+finished_projects_path = "/tmp/finished-projects-2"
+all_projects_path = "/tmp/all-projects-2"
+unmigrated_docs_path = "/tmp/unmigrated-2"
 
 
 printProgress = ->
@@ -39,10 +38,17 @@ getAndWriteProjectids = (callback)->
 		fs.writeFile all_projects_path, fileData, ->
 			callback(err, ids)
 
-markProjectAsToLargeAndFinished = (project_id, callback)->
-	console.log "#{project_id} too large"
+markDocAsUnmigrated = (project_id, doc_id, callback)->
+	console.log "#{project_id} #{doc_id} unmigrated"
 	markProjectAsProcessed project_id, (err)->
-		fs.appendFile project_too_large_path, "#{project_id}\n", callback
+		fs.appendFile unmigrated_docs_path, "#{project_id} #{doc_id}\n", callback
+
+markUnmigratedDocs = (project_id, docs, callback)->
+	console.log docs.length, project_id, "unmigrated"
+	jobs = _.map docs, (doc)->
+		(cb)->
+			markDocAsUnmigrated project_id, doc._id, cb
+	async.series jobs, callback	
 
 getProjectIds = (callback)->
 	exists = fs.existsSync all_projects_path
@@ -55,20 +61,27 @@ markProjectAsProcessed = (project_id, callback)->
 	fs.appendFile finished_projects_path, "#{project_id}\n", callback
 
 getAllDocs = (project_id, callback = (error, docs) ->) ->
-	db.projects.findOne _id:ObjectId(project_id), (error, project) ->
+	excludes = {}
+	for i in [0..12]
+		excludes["rootFolder#{Array(i).join(".folders")}.docs.lines"] = 0
+	db.projects.findOne _id: ObjectId(project_id.toString()), excludes, (error, project) ->
 		return callback(error) if error?
 		if !project?
 			console.log "no such project #{project_id}"
 			return callback()
-		size = require("../node_modules/mongojs/node_modules/mongodb/node_modules/bson/").BSONPure.BSON.calculateObjectSize(project)
-		if size > 12000000 #12mb
-			return markProjectAsToLargeAndFinished project_id, callback
 		findAllDocsInProject project, (error, docs) ->
 			return callback(error) if error?
-			return callback null, docs
+			return callback null, docs, project
 
 findAllDocsInProject = (project, callback = (error, docs) ->) ->
 	callback null, _findAllDocsInFolder project.rootFolder[0]
+
+findDocInProject = (project, doc_id, callback = (error, doc, mongoPath) ->) ->
+		result = _findDocInFolder project.rootFolder[0], doc_id, "rootFolder.0"
+		if result?
+			callback null, result.doc, result.mongoPath
+		else
+			callback null, null, null
 
 _findDocInFolder = (folder = {}, doc_id, currentPath) ->
 	for doc, i in folder.docs or []
@@ -77,7 +90,6 @@ _findDocInFolder = (folder = {}, doc_id, currentPath) ->
 				doc: doc
 				mongoPath: "#{currentPath}.docs.#{i}"
 			}
-
 	for childFolder, i in folder.folders or []
 		result = _findDocInFolder childFolder, doc_id, "#{currentPath}.folders.#{i}"
 		return result if result?
@@ -90,58 +102,68 @@ _findAllDocsInFolder = (folder = {}) ->
 		docs = docs.concat _findAllDocsInFolder childFolder
 	return docs
 
-insertDocIntoDocCollection = (project_id, doc_id, lines, oldRev, callback)->
-	if !project_id?
-		return callback("no project id")
-	if !doc_id?
-		return callback()
-	if !lines?
-		lines = [""]
-	update = {}
-	update["_id"] = ObjectId(doc_id.toString())
-	update["lines"] = lines
-	update["project_id"] = ObjectId(project_id)
-	update["rev"] = oldRev || 0
-	db.docs.insert update, callback
+isDocInDocCollection = (doc, callback)->
+	if !doc?._id? or doc._id.length == 0
+		return callback(null, true)
+	db.docs.find({_id: ObjectId(doc._id+"")}, {_id: 1}).limit 1, (err, foundDocs)->
+		exists = foundDocs.length > 0
+		callback err, exists
 
-saveDocsIntoMongo = (project_id, docs, callback)->
+getWhichDocsCanBeDeleted = (docs, callback = (err, docsToBeDeleted, unmigratedDocs)->)->
+	docsToBeDeleted = []
+	unmigratedDocs = []
+
+	jobs = _.map docs, (doc)->
+		return (cb)->
+			isDocInDocCollection doc, (err, exists)->
+				if exists
+					docsToBeDeleted.push doc
+				else
+					unmigratedDocs.push doc
+				cb(err)
+	async.series jobs, (err)->
+		callback err, docsToBeDeleted, unmigratedDocs
+
+whipeDocLines = (project_id, mongoPath, callback)->
+	update =
+		$unset: {}
+	update.$unset["#{mongoPath}.lines"] = ""
+	update.$unset["#{mongoPath}.rev"] = ""
+	db.projects.update _id: ObjectId(project_id+''), update, callback
+
+
+removeDocLinesFromProject = (docs, project, callback)->
 	jobs = _.map docs, (doc)->
 		(cb)->
-			if !doc?
-				console.error "null doc in project #{project_id}" #just skip it, not a big deal
-				return cb()
-			insertDocIntoDocCollection project_id, doc._id, doc.lines, doc.rev, (err)->
-				if err?.code == 11000 #duplicate key, doc already in there so its not a problem.
-					err = undefined
-				if err?
-					console.log "error inserting doc into doc collection", err
-				cb(err)
-
-
-	async.series jobs, callback
-
+			findDocInProject project, doc._id, (err, doc, mongoPath)->
+				whipeDocLines project._id, mongoPath, cb
+	async.parallelLimit jobs, 5, callback
 
 processNext = (project_id, callback)->
+	if !project_id? or project_id.length == 0
+		return callback()
 	checkIfFileHasBeenProccessed project_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
 			console.log "#{project_id} already procssed, skipping"
 			return callback()
 		console.log "#{project_id} processing"
-		getAllDocs project_id, (err, docs)->
+		getAllDocs project_id, (err, docs, project)->
 			if err?
 				console.error err, project_id, "could not get all docs"
 				return callback(err)
 			else
-				saveDocsIntoMongo project_id, docs, (err)->
+				getWhichDocsCanBeDeleted docs, (err, docsToBeDeleted, unmigratedDocs)->
 					if err?
 						console.error err, project_id, "could not save docs into mongo"
 						return callback(err)
-					markProjectAsProcessed project_id, (err)->
-						setTimeout(
-							-> callback(err)
-						,500)
-
-
+					markUnmigratedDocs project_id, unmigratedDocs, (err)->
+						removeDocLinesFromProject docsToBeDeleted, project, (err)->
+							if err?
+								return callback(err)
+							markProjectAsProcessed project_id, (err)->
+								setTimeout(
+									-> callback(err)
+								,0)
 
 exports.migrate = (client, done = ->)->
 	getProjectIds (err, ids)->
@@ -159,3 +181,4 @@ exports.migrate = (client, done = ->)->
 
 exports.rollback = (next)->
 	next()
+
