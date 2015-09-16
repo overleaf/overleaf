@@ -37,19 +37,20 @@ describe "MongoAWS", ->
 			@awssdk.S3 = sinon.stub()
 			@s3streams.WriteStream = sinon.stub()
 			@db.docHistory = {}
-			@db.docHistory.pipe = sinon.stub()
+			@db.docHistory.on = sinon.stub()
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
-			@db.docHistory.pipe.returns
+			@db.docHistory.on.returns
 				pipe:->
-					on: (type, cb)-> 
-						if type == "finish"
-							cb()
+					pipe:->
+						on: (type, cb)-> 
+							on: (type, cb)-> 
+								cb()
 			@JSONStream.stringify = sinon.stub()
 
 			@MongoAWS.archiveDocHistory @project_id, @doc_id, @callback
 
 		it "should call the callback", ->
-			@callback.calledWith(null).should.equal true
+			@callback.called.should.equal true
 
 	describe "unArchiveDocHistory", ->
 
@@ -61,21 +62,23 @@ describe "MongoAWS", ->
 			@s3streams.ReadStream.returns
 				#describe on 'open' behavior
 				on: (type, cb)->
-					pipe:->
-						#describe on 'data' behavior
-						on: (type, cb)->
-							cb([])
-							#describe on 'end' behavior
-							on: (type, cb)-> 
-								cb()
-								#describe on 'error' behavior
-								on: sinon.stub()
+					#describe on 'error' behavior
+					on: (type, cb)->
+						pipe:->
+							#describe on 'data' behavior
+							on: (type, cb)->
+								cb([])
+								#describe on 'end' behavior
+								on: (type, cb)-> 
+									cb()
+									#describe on 'error' behavior
+									on: sinon.stub()
 
 			@MongoAWS.handleBulk = sinon.stub()
 			@MongoAWS.unArchiveDocHistory @project_id, @doc_id, @callback
 
 		it "should call handleBulk", ->
-			@MongoAWS.handleBulk.calledWith([],@callback).should.equal true
+			@MongoAWS.handleBulk.called.should.equal true
 
 	describe "handleBulk", ->
 		beforeEach ->

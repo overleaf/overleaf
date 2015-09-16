@@ -78,14 +78,30 @@ describe "DocArchiveManager", ->
 	describe "unArchiveAllDocsChanges", ->
 		it "should unarchive all project docs change", (done)->
 			@DocstoreHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @mongoDocs)
-			@DocArchiveManager.unArchiveDocChanges = sinon.stub().callsArgWith(2, null)
+			@DocArchiveManager.unArchiveDocChangesWithLock = sinon.stub().callsArgWith(2, null)
 			
 			@DocArchiveManager.unArchiveAllDocsChanges @project_id, (err)=>
-				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[0]._id).should.equal true
-				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[1]._id).should.equal true
-				@DocArchiveManager.unArchiveDocChanges.calledWith(@project_id, @mongoDocs[2]._id).should.equal true
+				@DocArchiveManager.unArchiveDocChangesWithLock.calledWith(@project_id, @mongoDocs[0]._id).should.equal true
+				@DocArchiveManager.unArchiveDocChangesWithLock.calledWith(@project_id, @mongoDocs[1]._id).should.equal true
+				@DocArchiveManager.unArchiveDocChangesWithLock.calledWith(@project_id, @mongoDocs[2]._id).should.equal true
 				should.not.exist err
 				done()
+
+	describe "unArchiveDocChangesWithLock", ->
+		beforeEach ->
+			@DocArchiveManager.unArchiveDocChanges = sinon.stub().callsArg(2)
+			@LockManager.runWithLock = sinon.stub().callsArg(2)
+			@DocArchiveManager.unArchiveDocChangesWithLock @project_id, @doc_id, @callback
+
+		it "should run unArchiveDocChangesWithLock with the lock", ->
+			@LockManager.runWithLock
+				.calledWith(
+					"HistoryLock:#{@doc_id}"
+				)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
 
 	describe "unArchiveDocChanges", ->
 		beforeEach ->
