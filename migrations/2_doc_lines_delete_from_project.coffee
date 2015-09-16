@@ -2,15 +2,14 @@ Settings = require "settings-sharelatex"
 fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
-console.log Settings.mongo.url
 db = mongojs(Settings.mongo.url, ['projects', 'docs'])
 _ = require("lodash")
 async = require("async")
 exec = require("child_process").exec
 
-finished_projects_path = "./finished-projects"
-all_projects_path = "./all-projects"
-unmigrated_docs_path = "./unmigrated"
+finished_projects_path = "/tmp/finished-projects-2"
+all_projects_path = "/tmp/all-projects-2"
+unmigrated_docs_path = "/tmp/unmigrated-2"
 
 
 printProgress = ->
@@ -108,7 +107,6 @@ isDocInDocCollection = (doc, callback)->
 		return callback(null, true)
 	db.docs.find({_id: ObjectId(doc._id+"")}, {_id: 1}).limit 1, (err, foundDocs)->
 		exists = foundDocs.length > 0
-		console.log doc._id, "Exits = "+exists
 		callback err, exists
 
 getWhichDocsCanBeDeleted = (docs, callback = (err, docsToBeDeleted, unmigratedDocs)->)->
@@ -131,8 +129,6 @@ whipeDocLines = (project_id, mongoPath, callback)->
 		$unset: {}
 	update.$unset["#{mongoPath}.lines"] = ""
 	update.$unset["#{mongoPath}.rev"] = ""
-	console.log "project id = #{ObjectId(project_id+'')}", update
-	#callback()
 	db.projects.update _id: ObjectId(project_id+''), update, callback
 
 
