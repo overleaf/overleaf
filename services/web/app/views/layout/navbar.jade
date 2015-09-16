@@ -18,7 +18,7 @@ nav.navbar.navbar-default
 							b.caret
 						ul.dropdown-menu
 							li
-								a(href="/admin/register") Register New Users
+								a(href="/admin/user") Manage Users
 
 				each item in nav.header
 					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))

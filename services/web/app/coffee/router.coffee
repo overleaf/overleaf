@@ -168,6 +168,7 @@ module.exports = class Router
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
+		webRouter.get  '/admin/user', SecurityManager.requestIsAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
 		webRouter.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
 		webRouter.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
 		webRouter.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
