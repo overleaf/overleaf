@@ -139,7 +139,7 @@ processNext = (project_id, callback)->
 					markProjectAsProcessed project_id, (err)->
 						setTimeout(
 							-> callback(err)
-						,500)
+						,0)
 
 
 
