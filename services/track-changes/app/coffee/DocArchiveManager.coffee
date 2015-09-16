@@ -52,8 +52,13 @@ module.exports = DocArchiveManager =
 			else if !docs?
 				return callback new Error("No docs for project #{project_id}")
 			jobs = _.map docs, (doc) ->
-				(cb)-> DocArchiveManager.unArchiveDocChanges project_id, doc._id, cb
+				(cb)-> DocArchiveManager.unArchiveDocChangesWithLock project_id, doc._id, cb
 			async.parallelLimit jobs, 4, callback
+
+	unArchiveDocChangesWithLock: (project_id, doc_id, callback = (error) ->) ->
+		job = (releaseLock) ->
+			DocArchiveManager.unArchiveDocChanges project_id, doc_id, releaseLock
+		LockManager.runWithLock("HistoryLock:#{doc_id}", job, callback)
 
 	unArchiveDocChanges: (project_id, doc_id, callback)->
 		MongoManager.getArchivedDocChanges doc_id, (error, count) ->
