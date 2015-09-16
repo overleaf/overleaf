@@ -57,7 +57,9 @@ module.exports = MongoAWS =
 				if line.length > 2
 					ops.push(JSON.parse(line))
 				if ops.length == MongoAWS.bulkLimit
+					download.pause()
 					MongoAWS.handleBulk ops.slice(0), () ->
+						download.resume()
 					ops.splice(0,ops.length)
 			.on 'end', () ->
 				MongoAWS.handleBulk ops, callback
