@@ -31,7 +31,7 @@ describe "Getting updates", ->
 			first_name: "Leo"
 			last_name: "Lion"
 			id: @user_id
-		sinon.spy MockWebApi, "getUser"
+		sinon.spy MockWebApi, "getUserInfo"
 
 		@updates = []
 		for i in [0..9]
@@ -52,7 +52,7 @@ describe "Getting updates", ->
 			done()
 
 	after: () ->
-		MockWebApi.getUser.restore()
+		MockWebApi.getUserInfo.restore()
 
 	describe "getting updates up to the limit", ->
 		before (done) ->
@@ -62,7 +62,7 @@ describe "Getting updates", ->
 				done()
 
 		it "should fetch the user details from the web api", ->
-			MockWebApi.getUser
+			MockWebApi.getUserInfo
 				.calledWith(@user_id)
 				.should.equal true
 

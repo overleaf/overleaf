@@ -27,13 +27,14 @@ describe "Archiving updates", ->
 		MockWebApi.projects[@project_id] =
 			features:
 				versioning: true
+		sinon.spy MockWebApi, "getProjectDetails"
 
 		MockWebApi.users[@user_id] = @user =
 			email: "user@sharelatex.com"
 			first_name: "Leo"
 			last_name: "Lion"
 			id: @user_id
-		sinon.spy MockWebApi, "getUser"
+		sinon.spy MockWebApi, "getUserInfo"
 
 		MockDocStoreApi.docs[@doc_id] = @doc = 
 			_id: @doc_id
@@ -60,7 +61,7 @@ describe "Archiving updates", ->
 				done()
 
 	after (done) ->
-		MockWebApi.getUser.restore()
+		MockWebApi.getUserInfo.restore()
 		db.docHistory.remove {project_id: ObjectId(@project_id)}
 		TrackChangesClient.removeS3Doc @project_id, @doc_id, done
 

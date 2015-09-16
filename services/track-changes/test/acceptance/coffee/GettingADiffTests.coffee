@@ -28,7 +28,7 @@ describe "Getting a diff", ->
 			first_name: "Leo"
 			last_name: "Lion"
 			id: @user_id
-		sinon.spy MockWebApi, "getUser"
+		sinon.spy MockWebApi, "getUserInfo"
 
 		twoMinutes = 2 * 60 * 1000
 
@@ -68,7 +68,7 @@ describe "Getting a diff", ->
 
 	after () ->
 		MockDocUpdaterApi.getDoc.restore()
-		MockWebApi.getUser.restore()
+		MockWebApi.getUserInfo.restore()
 
 	it "should return the diff", ->
 		expect(@diff).to.deep.equal @expected_diff
