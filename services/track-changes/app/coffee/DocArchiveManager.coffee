@@ -47,7 +47,7 @@ module.exports = DocArchiveManager =
 				return callback new Error("No docs for project #{project_id}")
 			jobs = _.map docs, (doc) ->
 				(cb)-> DocArchiveManager.unArchiveDocChanges project_id, doc._id, cb
-			async.series jobs, callback
+			async.parallelLimit jobs, 4, callback
 
 	unArchiveDocChanges: (project_id, doc_id, callback)->
 		MongoManager.getArchivedDocChanges doc_id, (error, count) ->
