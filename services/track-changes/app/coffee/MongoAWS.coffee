@@ -10,7 +10,12 @@ module.exports = MongoAWS =
 
 	bulkLimit: 10
 
-	archiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
+	archiveDocHistory: (project_id, doc_id, _callback = (error) ->) ->
+
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		query = {
 			doc_id: ObjectId(doc_id)
 			expiresAt: {$exists : false}
@@ -27,10 +32,14 @@ module.exports = MongoAWS =
 		}
 
 		db.docHistory.find(query)
+			.on 'error', (err) ->
+				callback(err)
 			.pipe JSONStream.stringify()
-				.pipe upload
-				.on 'finish', () ->
-					return callback(null)
+			.pipe upload
+			.on 'error', (err) ->
+				callback(err)
+			.on 'finish', () ->
+				return callback(null)
 
 	unArchiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
 
