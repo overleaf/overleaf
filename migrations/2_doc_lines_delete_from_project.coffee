@@ -178,10 +178,8 @@ exports.migrate = (client, done = ->)->
 		async.series jobs, (err)->
 			if err?
 				console.error err, "at end of jobs"
-				process.exit()
 			else
 				console.log "finished"
-				process.exit()
 			done(err)
 
 
