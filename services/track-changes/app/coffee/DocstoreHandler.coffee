@@ -12,6 +12,7 @@ module.exports = DocstoreHandler =
 			json: true
 		}, (error, res, docs) ->
 			return callback(error) if error?
+			logger.log {error, res, docs: if docs?.length then docs.map (d) -> d._id else []}, "docstore response"
 			if 200 <= res.statusCode < 300
 				callback(null, docs)
 			else
