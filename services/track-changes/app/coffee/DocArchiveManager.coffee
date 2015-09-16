@@ -28,6 +28,7 @@ module.exports = DocArchiveManager =
 		MongoManager.getDocChangesCount doc_id, (error, count) ->
 			return callback(error) if error?
 			if count == 0
+				logger.log {project_id, doc_id}, "document history is empty, not archiving"
 				return callback()
 			else
 				MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
