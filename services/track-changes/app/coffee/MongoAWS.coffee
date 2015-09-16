@@ -41,7 +41,11 @@ module.exports = MongoAWS =
 			.on 'finish', () ->
 				return callback(null)
 
-	unArchiveDocHistory: (project_id, doc_id, callback = (error) ->) ->
+	unArchiveDocHistory: (project_id, doc_id, _callback = (error) ->) ->
+
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
 
 		AWS.config.update {
 			accessKeyId: settings.filestore.s3.key
@@ -61,6 +65,8 @@ module.exports = MongoAWS =
 		download
 			.on 'open', (obj) ->
 				return 1
+			.on 'error', (err) ->
+				callback(err)
 			.pipe lineStream
 			.on 'data', (line) ->
 				if line.length > 2
