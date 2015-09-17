@@ -21,11 +21,11 @@ describe "MongoAWS", ->
 			"aws-sdk": @awssdk = {}
 			"fs": @fs = {}
 			"s3-streams": @s3streams = {}
-			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
+			"./mongojs" : { db: @db = { bson: { BSON:{} } }, ObjectId: ObjectId }
 			"JSONStream": @JSONStream = {}
 			"readline-stream": @readline = sinon.stub()
 
-		@bulkLimit = @MongoAWS.bulkLimit
+		@db.bson.BSON.calculateObjectSize = sinon.stub().returns true
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
