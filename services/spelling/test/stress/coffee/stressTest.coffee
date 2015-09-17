@@ -80,7 +80,7 @@ q.drain = () ->
 	console.log('all items have been processed');
 
 for i in [0 .. 1000]
-	if Math.random() < 0.1
-		q.push({correct: Math.floor(10000*Math.random()), incorrect: Math.floor(100*Math.random())})
-	else
-		q.push({correct: Math.floor(3*Math.random()) + 1, incorrect: Math.floor(3*Math.random())})
+	q.push({correct: Math.floor(30*Math.random()) + 1, incorrect: Math.floor(3*Math.random())})
+	# if Math.random() < 0.1
+	# else
+	# 	q.push({correct: Math.floor(100*Math.random()) + 1, incorrect: Math.floor(3*Math.random())})
