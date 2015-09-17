@@ -48,7 +48,7 @@
     "session.socket.io": "0.1.4",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "socket.io": "0.9.16",
-    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#v0.2.0",
     "underscore": "1.6.0",
     "underscore.string": "^3.0.2",
     "v8-profiler": "^5.2.3",
