@@ -21,11 +21,10 @@ describe "MongoAWS", ->
 			"aws-sdk": @awssdk = {}
 			"fs": @fs = {}
 			"s3-streams": @s3streams = {}
-			"./mongojs" : { db: @db = { bson: { BSON:{} } }, ObjectId: ObjectId }
+			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 			"JSONStream": @JSONStream = {}
 			"readline-stream": @readline = sinon.stub()
 
-		@db.bson.BSON.calculateObjectSize = sinon.stub().returns true
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
@@ -102,7 +101,7 @@ describe "MongoAWS", ->
 				execute: sinon.stub().callsArgWith(0, null, {})
 			@db.docHistory = {}
 			@db.docHistory.initializeUnorderedBulkOp = sinon.stub().returns @bulk
-			@MongoAWS.handleBulk @bulkOps, @callback
+			@MongoAWS.handleBulk @bulkOps, @bulkOps.length, @callback
 
 		it "should call updateOne for each operation", ->
 			@bulk.find.calledWith({_id:@bulkOps[0]._id}).should.equal true

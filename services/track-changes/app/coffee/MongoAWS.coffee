@@ -5,7 +5,6 @@ S3S = require 's3-streams'
 {db, ObjectId} = require "./mongojs"
 JSONStream = require "JSONStream"
 ReadlineStream = require "readline-stream"
-BSON=db.bson.BSON
 
 module.exports = MongoAWS =
 
@@ -74,19 +73,19 @@ module.exports = MongoAWS =
 			.on 'data', (line) ->
 				if line.length > 2
 					ops.push(JSON.parse(line))
-					sz += BSON.calculateObjectSize(ops[ops.length-1])
+					sz += line.length 
 				if ops.length >= MongoAWS.MAX_COUNT || sz >= MongoAWS.MAX_SIZE
 					download.pause()
-					MongoAWS.handleBulk ops.slice(0), () ->
+					MongoAWS.handleBulk ops.slice(0), sz, () ->
 						download.resume()
 					ops.splice(0,ops.length)
 					sz = 0
 			.on 'end', () ->
-				MongoAWS.handleBulk ops, callback
+				MongoAWS.handleBulk ops, sz, callback
 			.on 'error', (err) ->
 				return callback(err)
 
-	handleBulk: (ops, cb) ->
+	handleBulk: (ops, size, cb) ->
 		bulk = db.docHistory.initializeUnorderedBulkOp();
 
 		for op in ops
@@ -100,7 +99,7 @@ module.exports = MongoAWS =
 				if err?
 					logger.error err:err, "error bulking ReadlineStream"
 				else
-					logger.log count:ops.length, result:result, size: BSON.calculateObjectSize(ops), "bulked ReadlineStream"
+					logger.log count:ops.length, result:result, size: size, "bulked ReadlineStream"
 				cb(err)
 		else
 			cb()
