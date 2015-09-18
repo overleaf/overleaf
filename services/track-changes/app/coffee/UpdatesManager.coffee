@@ -158,7 +158,7 @@ module.exports = UpdatesManager =
 				users[update.meta.user_id] = true
 
 		jobs = []
-		for user_id, _ of users
+		for user_id of users
 			do (user_id) ->
 				jobs.push (callback) ->
 					WebApiManager.getUserInfo user_id, (error, userInfo) ->
