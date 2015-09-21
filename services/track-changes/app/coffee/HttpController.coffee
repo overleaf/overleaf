@@ -3,6 +3,7 @@ DiffManager = require "./DiffManager"
 PackManager = require "./PackManager"
 RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
+DocArchiveManager = require "./DocArchiveManager"
 
 module.exports = HttpController =
 	flushDoc: (req, res, next = (error) ->) ->
@@ -64,5 +65,19 @@ module.exports = HttpController =
 		user_id = req.headers["x-user-id"]
 		version = parseInt(version, 10)
 		RestoreManager.restoreToBeforeVersion project_id, doc_id, version, user_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	archiveProject: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "archiving all track changes to s3"
+		DocArchiveManager.archiveAllDocsChanges project_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	unArchiveProject: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log project_id: project_id, "unarchiving all track changes from s3"
+		DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
 			return next(error) if error?
 			res.send 204

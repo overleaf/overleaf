@@ -1,3 +1,6 @@
+Path = require('path')
+TMP_DIR = Path.resolve(Path.join(__dirname, "../../", "tmp"))
+
 module.exports =
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'
@@ -19,3 +22,14 @@ module.exports =
 			host: "localhost"
 			port: 6379
 			pass: ""
+
+	filestore:
+		backend: "s3"
+		stores:
+			user_files: ""
+		s3:
+			key: ""
+			secret: ""
+
+	path:
+		dumpFolder:   Path.join(TMP_DIR, "dumpFolder")

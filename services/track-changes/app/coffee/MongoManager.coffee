@@ -1,6 +1,7 @@
 {db, ObjectId} = require "./mongojs"
 PackManager = require "./PackManager"
 async = require "async"
+logger = require "logger-sharelatex"
 
 module.exports = MongoManager =
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
@@ -47,6 +48,7 @@ module.exports = MongoManager =
 
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
+		inS3 = update.inS3?
 		update = {
 			doc_id: ObjectId(doc_id.toString())
 			project_id: ObjectId(project_id.toString())
@@ -54,6 +56,9 @@ module.exports = MongoManager =
 			meta:   update.meta
 			v:      update.v
 		}
+		if inS3
+			update.inS3 = true
+		
 		if temporary
 			seconds = 1000
 			minutes = 60 * seconds
@@ -126,3 +131,20 @@ module.exports = MongoManager =
 		# For finding documents which need packing
 		db.docHistoryStats.ensureIndex { doc_id: 1 }, { background: true }
 		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }
+
+	getDocChangesCount: (doc_id, callback)->
+		db.docHistory.count { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }}, {}, callback
+
+	getArchivedDocChanges: (doc_id, callback)->
+		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback
+
+	markDocHistoryAsArchived: (doc_id, update, callback)->
+		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
+			return callback(error) if error?
+			db.docHistory.remove { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }, v: { $lt : update.v }, expiresAt: {$exists : false} }, (error)->
+				return callback(error) if error?
+				callback(error)
+
+	markDocHistoryAsUnarchived: (doc_id, callback)->
+		db.docHistory.update { doc_id: ObjectId(doc_id.toString()) }, { $unset : { inS3 : true } }, { multi: true }, (error)->
+			callback(error)

@@ -6,6 +6,8 @@ WebApiManager = require "./WebApiManager"
 UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
+DocArchiveManager = require "./DocArchiveManager"
+_ = require "underscore"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -32,6 +34,9 @@ module.exports = UpdatesManager =
 					return
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
+			if lastCompressedUpdate?.inS3? and not _.some(compressedUpdates, (update) -> update.inS3)
+				compressedUpdates[compressedUpdates.length-1].inS3 = lastCompressedUpdate.inS3
+
 			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
@@ -94,7 +99,17 @@ module.exports = UpdatesManager =
 	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return callback(error) if error?
-			MongoManager.getProjectUpdates project_id, options, callback
+			MongoManager.getProjectUpdates project_id, options, (error, updates) ->
+				jobs = []
+				for update in updates
+					if update.inS3?
+						do (update) ->
+							jobs.push (callback) -> DocArchiveManager.unArchiveDocChanges update.project_id, update.doc_id, callback
+				if jobs.length?
+					async.series jobs, (err) ->
+						MongoManager.getProjectUpdates project_id, options, callback
+				else
+					callback(error, updates)
 
 	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->
