@@ -14,6 +14,7 @@ describe "UpdatesManager", ->
 			"./LockManager"  : @LockManager = {}
 			"./WebApiManager": @WebApiManager = {}
 			"./UpdateTrimmer": @UpdateTrimmer = {}
+			"./DocArchiveManager": @DocArchiveManager = {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
