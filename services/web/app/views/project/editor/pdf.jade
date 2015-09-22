@@ -159,7 +159,6 @@ div.full-size.pdf(ng-controller="PdfController")
 							a(
 								href="/project/{{project_id}}/output/{{file.path}}"
 								target="_blank"
-								ng-click="openOutputFile(file)"
 							) {{ file.name }}
 			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")
 				span(ng-show="!pdf.showRawLog") #{translate("view_raw_logs")}

@@ -166,9 +166,6 @@ define [
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
 
-		$scope.openOutputFile = (file) ->
-			window.open("/project/#{$scope.project_id}/output/#{file.path}")
-
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
 				templateUrl: "clearCacheModalTemplate"
