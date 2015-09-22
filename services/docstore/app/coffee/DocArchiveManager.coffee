@@ -20,7 +20,7 @@ module.exports = DocArchive =
 			jobs = _.map docs, (doc) ->
 				(cb)->
 					DocArchive.archiveDoc project_id, doc, cb
-			async.series jobs, callback
+			async.parallelLimit jobs, 5, callback
 
 
 	archiveDoc: (project_id, doc, callback)->
@@ -52,7 +52,7 @@ module.exports = DocArchive =
 						return cb()
 					else
 						DocArchive.unarchiveDoc project_id, doc._id, cb
-			async.series jobs, callback
+			async.parallelLimit jobs, 5, callback
 
 	unarchiveDoc: (project_id, doc_id, callback)->
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc from s3"
