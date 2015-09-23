@@ -35,6 +35,9 @@ module.exports = DocArchiveManager =
 			if count == 0
 				logger.log {project_id, doc_id}, "document history is empty, not archiving"
 				return callback()
+			else if count == 1
+				logger.log {project_id, doc_id}, "document history only has one entry, not archiving"
+				return callback()
 			else
 				MongoManager.getArchivedDocChanges doc_id, (error, count) ->
 					return callback(error) if error?
@@ -45,7 +48,7 @@ module.exports = DocArchiveManager =
 						return callback(error) if error?
 						MongoManager.markDocHistoryAsArchiveInProgress doc_id, update, (error) ->
 							return callback(error) if error?
-							MongoAWS.archiveDocHistory project_id, doc_id, (error) ->
+							MongoAWS.archiveDocHistory project_id, doc_id, update, (error) ->
 								if error?
 									MongoManager.clearDocHistoryAsArchiveInProgress doc_id, update, (err) ->
 										return callback(err) if err?

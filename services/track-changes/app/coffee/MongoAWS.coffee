@@ -11,7 +11,7 @@ module.exports = MongoAWS =
 	MAX_SIZE:  1024*1024 # almost max size
 	MAX_COUNT: 1024 # almost max count
 
-	archiveDocHistory: (project_id, doc_id, _callback = (error) ->) ->
+	archiveDocHistory: (project_id, doc_id, update, _callback = (error) ->) ->
 
 		callback = (args...) ->
 			_callback(args...)
@@ -19,6 +19,7 @@ module.exports = MongoAWS =
 
 		query = {
 			doc_id: ObjectId(doc_id)
+			v: {$lt: update.v}
 			expiresAt: {$exists : false}
 		}
 
