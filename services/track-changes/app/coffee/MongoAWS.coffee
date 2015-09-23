@@ -64,20 +64,21 @@ module.exports = MongoAWS =
 		ops = [] 
 		sz = 0
 
-		download
+		inputStream = download
 			.on 'open', (obj) ->
 				return 1
 			.on 'error', (err) ->
 				callback(err)
 			.pipe lineStream
-			.on 'data', (line) ->
+
+		inputStream.on 'data', (line) ->
 				if line.length > 2
 					ops.push(JSON.parse(line))
 					sz += line.length 
 				if ops.length >= MongoAWS.MAX_COUNT || sz >= MongoAWS.MAX_SIZE
-					download.pause()
+					inputStream.pause()
 					MongoAWS.handleBulk ops.slice(0), sz, () ->
-						download.resume()
+						inputStream.resume()
 					ops.splice(0,ops.length)
 					sz = 0
 			.on 'end', () ->
