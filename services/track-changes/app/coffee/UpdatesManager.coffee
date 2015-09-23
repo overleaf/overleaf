@@ -103,7 +103,7 @@ module.exports = UpdatesManager =
 			MongoManager.getProjectUpdates project_id, options, (error, updates) ->
 				jobs = []
 				for update in updates
-					if update.inS3?
+					if update.inS3
 						do (update) ->
 							jobs.push (callback) -> DocArchiveManager.unArchiveDocChanges update.project_id, update.doc_id, callback
 				if jobs.length?

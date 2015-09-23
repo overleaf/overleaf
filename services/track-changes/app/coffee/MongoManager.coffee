@@ -146,6 +146,12 @@ module.exports = MongoManager =
 	getArchivedDocChanges: (doc_id, callback)->
 		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: true }, {}, callback
 
+	markDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
+		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
+
+	clearDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
+		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
+
 	markDocHistoryAsArchived: (doc_id, update, callback)->
 		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
 			return callback(error) if error?
@@ -154,5 +160,6 @@ module.exports = MongoManager =
 				callback(error)
 
 	markDocHistoryAsUnarchived: (doc_id, callback)->
+		# note this removes any inS3 field, regardless of its value (true/false/null)
 		db.docHistory.update { doc_id: ObjectId(doc_id.toString()) }, { $unset : { inS3 : true } }, { multi: true }, (error)->
 			callback(error)
