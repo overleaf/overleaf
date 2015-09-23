@@ -59,7 +59,6 @@ module.exports = MongoManager =
 
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
-		inS3 = update.inS3?
 		update = {
 			doc_id: ObjectId(doc_id.toString())
 			project_id: ObjectId(project_id.toString())
@@ -67,8 +66,6 @@ module.exports = MongoManager =
 			meta:   update.meta
 			v:      update.v
 		}
-		if inS3
-			update.inS3 = true
 		
 		if temporary
 			seconds = 1000
