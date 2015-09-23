@@ -20,13 +20,24 @@ module.exports = MongoManager =
 	deleteCompressedUpdate: (id, callback = (error) ->) ->
 		db.docHistory.remove({ _id: ObjectId(id.toString()) }, callback)
 
-	popLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
+	popLastCompressedUpdate: (doc_id, callback = (error, update, version) ->) ->
+		# under normal use we pass back the last update as
+		# callback(null,update).
+		#
+		# when we have an existing last update but want to force a new one
+		# to start, we pass it back as callback(null,null,version), just
+		# giving the version so we can check consistency.
 		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 			return callback(error) if error?
 			if update?
-				MongoManager.deleteCompressedUpdate update._id, (error) ->
-					return callback(error) if error?
-					callback null, update
+				if update.inS3?
+					# we want to force a new update, but ensure that it is
+					# consistent with the version of the existing one in S3
+					return callback null, null, update.v
+				else
+					MongoManager.deleteCompressedUpdate update._id, (error) ->
+						return callback(error) if error?
+						callback null, update
 			else
 				callback null, null
 

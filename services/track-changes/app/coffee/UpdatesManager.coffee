@@ -7,7 +7,6 @@ UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
 DocArchiveManager = require "./DocArchiveManager"
-_ = require "underscore"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -15,27 +14,29 @@ module.exports = UpdatesManager =
 		if length == 0
 			return callback()
 
-		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate) ->
+		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion = lastCompressedUpdate?.v) ->
+			# lastCompressedUpdate may be null if we are forcing the start
+			# of a new compressed update, in which case we have the
+			# lastVersion to check consistency (defaults to lastCompressedUpdate.v)
 			return callback(error) if error?
 
-			# Ensure that raw updates start where lastCompressedUpdate left off
-			if lastCompressedUpdate?
+			# Ensure that raw updates start where lastVersion left off
+			if lastVersion?
 				rawUpdates = rawUpdates.slice(0)
-				while rawUpdates[0]? and rawUpdates[0].v <= lastCompressedUpdate.v
+				while rawUpdates[0]? and rawUpdates[0].v <= lastVersion
 					rawUpdates.shift()
 
-				if rawUpdates[0]? and rawUpdates[0].v != lastCompressedUpdate.v + 1
-					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastCompressedUpdate.v}")
+				if rawUpdates[0]? and rawUpdates[0].v != lastVersion + 1
+					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastVersion}")
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
-					# Push the update back into Mongo - catching errors at this
+					# Push the update back into Mongo - if it was present - catching errors at this
 					# point is useless, we're already bailing
-					MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], temporary, () ->
-						return callback error
+					if lastCompressedUpdate?
+						MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], temporary, () ->
+							return callback error
 					return
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
-			if lastCompressedUpdate?.inS3? and not _.some(compressedUpdates, (update) -> update.inS3)
-				compressedUpdates[compressedUpdates.length-1].inS3 = lastCompressedUpdate.inS3
 
 			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
 				return callback(error) if error?

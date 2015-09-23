@@ -122,6 +122,39 @@ describe "UpdatesManager", ->
 						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate], @temporary)
 						.should.equal true
 
+		describe "when the raw ops need appending to existing history which is in S3", ->
+			beforeEach ->
+				@lastCompressedUpdate = null
+				@lastVersion = 11
+				@compressedUpdates = { v: 13, op: "compressed-op-12" }
+
+				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null, @lastVersion)
+				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
+				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
+
+			describe "when the raw ops start where the existing history ends", ->
+				beforeEach ->
+					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
+
+				it "should try to pop the last compressed op", ->
+					@MongoManager.popLastCompressedUpdate
+						.calledWith(@doc_id)
+						.should.equal true
+				
+				it "should compress the last compressed op and the raw ops", ->
+					@UpdateCompressor.compressRawUpdates
+						.calledWith(@lastCompressedUpdate, @rawUpdates)
+						.should.equal true
+				
+				it "should save the compressed ops", ->
+					@MongoManager.insertCompressedUpdates
+						.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
+						.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
 	describe "processUncompressedUpdates", ->
 		beforeEach ->
 			@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(4)

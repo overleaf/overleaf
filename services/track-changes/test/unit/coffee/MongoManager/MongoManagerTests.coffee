@@ -104,6 +104,25 @@ describe "MongoManager", ->
 			it "should call the callback with the update", ->
 				@callback.calledWith(null, @update).should.equal true
 
+		describe "when there is a last update in S3", ->
+			beforeEach ->
+				@update = { _id: Object(), v: 12345, inS3: true }
+				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
+				@MongoManager.deleteCompressedUpdate = sinon.stub()
+				@MongoManager.popLastCompressedUpdate @doc_id, @callback
+
+			it "should get the last update", ->
+				@MongoManager.getLastCompressedUpdate
+					.calledWith(@doc_id)
+					.should.equal true
+
+			it "should not try to delete the last update", ->
+				@MongoManager.deleteCompressedUpdate.called.should.equal false
+
+			it "should call the callback with a null update and the correct version", ->
+				@callback.calledWith(null, null, @update.v).should.equal true
+
+
 	describe "insertCompressedUpdate", ->
 		beforeEach ->
 			@update = { op: "op", meta: "meta", v: "v"}
