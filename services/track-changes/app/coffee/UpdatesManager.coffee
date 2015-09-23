@@ -14,10 +14,18 @@ module.exports = UpdatesManager =
 		if length == 0
 			return callback()
 
-		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion = lastCompressedUpdate?.v) ->
-			# lastCompressedUpdate may be null if we are forcing the start
-			# of a new compressed update, in which case we have the
-			# lastVersion to check consistency (defaults to lastCompressedUpdate.v)
+		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
+			# lastCompressedUpdate is the most recent update in Mongo.
+			#
+			# The popLastCompressedUpdate method may pass it back as 'null'
+			# to force the start of a new compressed update, even when there
+			# was a previous compressed update in Mongo.  In this case it
+			# passes back the lastVersion from the update to check
+			# consistency.
+
+			# when lastVersion is not provided, default to lastCompressedUpdate.v
+			lastVersion ?= lastCompressedUpdate?.v
+
 			return callback(error) if error?
 
 			# Ensure that raw updates start where lastVersion left off
