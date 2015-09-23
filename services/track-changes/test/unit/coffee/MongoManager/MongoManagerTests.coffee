@@ -446,7 +446,7 @@ describe "MongoManager", ->
 			@db.docHistory.count
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
-					inS3 : true
+					inS3: {$exists: true}
 				}, {
 				})
 				.should.equal true

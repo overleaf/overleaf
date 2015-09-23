@@ -27,6 +27,7 @@ describe "MongoAWS", ->
 
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
+		@update = { v:123 }
 		@callback = sinon.stub()
 		
 	describe "archiveDocHistory", ->
@@ -46,7 +47,7 @@ describe "MongoAWS", ->
 								cb()
 			@JSONStream.stringify = sinon.stub()
 
-			@MongoAWS.archiveDocHistory @project_id, @doc_id, @callback
+			@MongoAWS.archiveDocHistory @project_id, @doc_id, @update, @callback
 
 		it "should call the callback", ->
 			@callback.called.should.equal true

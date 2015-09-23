@@ -61,8 +61,10 @@ describe "DocArchiveManager", ->
 		beforeEach ->
 			@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
 			@MongoManager.getDocChangesCount = sinon.stub().callsArg(1)
+			@MongoManager.getArchivedDocChanges = sinon.stub().callsArgWith(1, null, 0)
 			@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
-			@MongoAWS.archiveDocHistory = sinon.stub().callsArg(2)
+			@MongoAWS.archiveDocHistory = sinon.stub().callsArg(3)
+			@MongoManager.markDocHistoryAsArchiveInProgress = sinon.stub().callsArg(2)
 			@MongoManager.markDocHistoryAsArchived = sinon.stub().callsArg(2)
 			@DocArchiveManager.archiveDocChanges @project_id, @doc_id, @callback
 
