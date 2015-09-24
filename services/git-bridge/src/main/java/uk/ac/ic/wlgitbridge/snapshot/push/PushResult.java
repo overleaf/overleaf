@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 /**
  * Created by Winston on 16/11/14.
@@ -28,8 +29,16 @@ public class PushResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        JsonObject responseObject = json.getAsJsonObject();
-        String code = responseObject.get("code").getAsString();
+        String code;
+        try {
+            JsonObject responseObject = json.getAsJsonObject();
+            code = responseObject.get("code").getAsString();
+        } catch (Exception e) {
+            Util.serr("Unexpected response from API:");
+            Util.serr(json.toString());
+            Util.serr("End of response");
+            throw e;
+        }
         if (code.equals("accepted")) {
             success = true;
         } else if (code.equals("outOfDate")) {
@@ -38,5 +47,4 @@ public class PushResult extends Result {
             throw new RuntimeException();
         }
     }
-
 }
