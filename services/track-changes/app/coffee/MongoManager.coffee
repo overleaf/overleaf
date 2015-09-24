@@ -150,7 +150,7 @@ module.exports = MongoManager =
 		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
 
 	clearDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
-		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
+		db.docHistory.update { _id: update._id }, { $unset : { inS3 : true } }, callback
 
 	markDocHistoryAsArchived: (doc_id, update, callback)->
 		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
