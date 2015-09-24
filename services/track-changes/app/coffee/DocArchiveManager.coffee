@@ -7,11 +7,6 @@ _ = require "underscore"
 async = require "async"
 settings = require("settings-sharelatex")
 
-# increase lock timeouts because archiving can be slow
-LockManager.LOCK_TEST_INTERVAL = 500 # 500ms between each test of the lock
-LockManager.MAX_LOCK_WAIT_TIME = 30000 # 30s maximum time to spend trying to get the lock
-LockManager.LOCK_TTL = 30 # seconds
-
 module.exports = DocArchiveManager =
 
 	archiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
