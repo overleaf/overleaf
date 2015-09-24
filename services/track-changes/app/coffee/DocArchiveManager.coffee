@@ -41,17 +41,22 @@ module.exports = DocArchiveManager =
 						return callback()
 					MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 						return callback(error) if error?
+						logger.log {doc_id, project_id}, "archiving got last compressed update"
 						MongoManager.markDocHistoryAsArchiveInProgress doc_id, update, (error) ->
 							return callback(error) if error?
+							logger.log {doc_id, project_id}, "marked doc history as archive in progress"
 							MongoAWS.archiveDocHistory project_id, doc_id, update, (error) ->
 								if error?
+									logger.log {doc_id, project_id, error}, "error exporting document to S3"
 									MongoManager.clearDocHistoryAsArchiveInProgress doc_id, update, (err) ->
 										return callback(err) if err?
+										logger.log {doc_id, project_id}, "cleared archive in progress flag"
 										callback(error)
 								else
 									logger.log doc_id:doc_id, project_id:project_id, "exported document to S3"
 									MongoManager.markDocHistoryAsArchived doc_id, update, (error) ->
 										return callback(error) if error?
+										logger.log {doc_id, project_id}, "marked doc history as archived"
 										callback()
 
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
