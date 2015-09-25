@@ -5,6 +5,8 @@ ConsistencyError = (message) ->
 	return error
 ConsistencyError.prototype.__proto__ = Error.prototype
 
+logger = require "logger-sharelatex"
+
 module.exports = DiffGenerator =
 	ConsistencyError: ConsistencyError
 
@@ -15,13 +17,24 @@ module.exports = DiffGenerator =
 
 	rewindOp: (content, op) ->
 		if op.i?
-			textToBeRemoved = content.slice(op.p, op.p + op.i.length)
+			# ShareJS will accept an op where p > content.length when applied,
+			# and it applies as though p == content.length. However, the op is
+			# passed to us with the original p > content.length. Detect if that
+			# is the case with this op, and shift p back appropriately to match
+			# ShareJS if so.
+			p = op.p
+			max_p = content.length - op.i.length
+			if p > max_p
+				logger.warn {max_p, p}, "truncating position to content length"
+				p = max_p
+
+			textToBeRemoved = content.slice(p, p + op.i.length)
 			if op.i != textToBeRemoved
 				throw new ConsistencyError(
 					"Inserted content, '#{op.i}', does not match text to be removed, '#{textToBeRemoved}'"
 				)
 
-			return content.slice(0, op.p) + content.slice(op.p + op.i.length)
+			return content.slice(0, p) + content.slice(p + op.i.length)
 
 		else if op.d?
 			return content.slice(0, op.p) + op.d + content.slice(op.p)

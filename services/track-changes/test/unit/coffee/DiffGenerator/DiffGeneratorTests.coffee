@@ -7,7 +7,8 @@ SandboxedModule = require('sandboxed-module')
 
 describe "DiffGenerator", ->
 	beforeEach ->
-		@DiffGenerator = SandboxedModule.require modulePath
+		@DiffGenerator = SandboxedModule.require modulePath, requires:
+			"logger-sharelatex": { warn: sinon.stub() }
 		@ts = Date.now()
 		@user_id = "mock-user-id"
 		@user_id_2 = "mock-user-id-2"
@@ -34,6 +35,12 @@ describe "DiffGenerator", ->
 				expect( () =>
 					@DiffGenerator.rewindOp content, { p: 6, i: "foo" }
 				).to.throw(@DiffGenerator.ConsistencyError)
+		
+		describe "with an update which is beyond the length of the content", ->
+			it "should undo the insert as if it were at the end of the content", ->
+				content = "foobar"
+				rewoundContent = @DiffGenerator.rewindOp content, { p: 4, i: "bar" }
+				rewoundContent.should.equal "foo"
 
 	describe "rewindUpdate", ->
 		it "should rewind ops in reverse", ->
