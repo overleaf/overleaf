@@ -1,7 +1,6 @@
 {db, ObjectId} = require "./mongojs"
 PackManager = require "./PackManager"
 async = require "async"
-logger = require "logger-sharelatex"
 
 module.exports = MongoManager =
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->

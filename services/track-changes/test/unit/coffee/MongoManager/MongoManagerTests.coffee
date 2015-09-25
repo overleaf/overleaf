@@ -15,6 +15,8 @@ describe "MongoManager", ->
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 			"./PackManager" : SandboxedModule.require packModulePath, requires:
 				"./LockManager" : {}
+				"./mongojs": {db: bson: BSON = sinon.stub(), ObjectId}
+				"logger-sharelatex": {}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
