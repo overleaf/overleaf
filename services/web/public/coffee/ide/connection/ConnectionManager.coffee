@@ -21,6 +21,8 @@ define [], () ->
 
 			@$scope.$on "editor:change", () =>
 				@lastUpdated = new Date()
+				if !@connected
+					@tryReconnect()
 
 			@ide.socket = io.connect null,
 				reconnect: false
