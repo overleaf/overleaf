@@ -24,6 +24,10 @@ define [], () ->
 				if !@connected
 					@tryReconnect()
 
+			@$scope.$on 'cursor:editor:update', () =>
+				if !@connected
+					@tryReconnect()
+
 			@ide.socket = io.connect null,
 				reconnect: false
 				"force new connection": true
