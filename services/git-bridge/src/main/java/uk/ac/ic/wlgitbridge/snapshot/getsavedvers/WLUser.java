@@ -11,12 +11,17 @@ public class WLUser {
     private final String email;
 
     public WLUser() {
-        this("Anonymous", "anonymous@" + Util.getServiceName().toLowerCase() + ".com");
+        this(null, null);
     }
 
     public WLUser(String name, String email) {
-        this.name = name;
-        this.email = email;
+        if (name != null && email != null) {
+            this.name = name;
+            this.email = email;
+        } else {
+            this.name = "Anonymous";
+            this.email = "anonymous@" + Util.getServiceName().toLowerCase() + ".com";
+        }
     }
 
     public String getName() {

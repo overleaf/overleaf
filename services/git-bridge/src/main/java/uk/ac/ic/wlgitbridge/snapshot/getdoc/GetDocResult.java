@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.WLUser;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.ProtectedProjectException;
@@ -17,8 +18,7 @@ public class GetDocResult extends Result {
     private int error;
     private int versionID;
     private String createdAt;
-    private String name;
-    private String email;
+    private WLUser user;
 
     private SnapshotPostException exception;
 
@@ -34,8 +34,7 @@ public class GetDocResult extends Result {
         }
         this.versionID = versionID;
         this.createdAt = createdAt;
-        this.name = name;
-        this.email = email;
+        this.user = new WLUser(name, email);
     }
 
     @Override
@@ -45,8 +44,8 @@ public class GetDocResult extends Result {
             jsonThis.addProperty("latestVerId", versionID);
             jsonThis.addProperty("latestVerAt", createdAt);
             JsonObject latestVerBy = new JsonObject();
-            latestVerBy.addProperty("email", email);
-            latestVerBy.addProperty("name", name);
+            latestVerBy.addProperty("email", getEmail());
+            latestVerBy.addProperty("name", getName());
             jsonThis.add("latestVerBy", latestVerBy);
         } else {
             jsonThis.addProperty("status", error);
@@ -78,15 +77,17 @@ public class GetDocResult extends Result {
         } else {
             versionID = jsonObject.get("latestVerId").getAsInt();
             createdAt = jsonObject.get("latestVerAt").getAsString();
+            String name = null;
+            String email = null;
             JsonElement latestVerBy = jsonObject.get("latestVerBy");
+
             if (latestVerBy.isJsonObject()) {
                 JsonObject userObject = latestVerBy.getAsJsonObject();
                 name = userObject.get("name").getAsString();
                 email = userObject.get("email").getAsString();
-            } else {
-                name = "Anonymous";
-                email = "anonymous@overleaf.com";
             }
+
+            user = new WLUser(name, email);
         }
     }
 
@@ -102,11 +103,11 @@ public class GetDocResult extends Result {
     }
 
     public String getName() {
-        return name;
+        return user.getName();
     }
 
     public String getEmail() {
-        return email;
+        return user.getEmail();
     }
 
 }
