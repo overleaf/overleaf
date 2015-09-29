@@ -19,13 +19,12 @@ define [], () ->
 			@$scope.tryReconnectNow = () =>
 				@tryReconnect()
 
-			@$scope.$on "editor:change", () =>
-				@lastUpdated = new Date()
+			@$scope.$on 'cursor:editor:update', () =>
 				if !@connected
 					@tryReconnect()
 
-			@$scope.$on 'cursor:editor:update', () =>
-				if !@connected
+			document.querySelector('body').addEventListener 'click', (e) =>
+				if !@connected and e.target.id != 'try-reconnect-now-button'
 					@tryReconnect()
 
 			@ide.socket = io.connect null,

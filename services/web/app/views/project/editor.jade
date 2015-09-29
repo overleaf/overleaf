@@ -23,7 +23,7 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
 				strong #{translate("lost_connection")}.
 				| #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
-				a.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
+				a#try-reconnect-now-button.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
 
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong #{translate("reconnecting")}...
