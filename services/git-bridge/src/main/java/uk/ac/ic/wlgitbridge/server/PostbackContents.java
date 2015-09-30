@@ -8,6 +8,7 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostExceptionBuilder;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 /**
  * Created by Winston on 17/11/14.
@@ -36,7 +37,7 @@ public class PostbackContents implements JSONSource {
     @Override
     public void fromJSON(JsonElement json) {
         JsonObject responseObject = json.getAsJsonObject();
-        String code = responseObject.get("code").getAsString();
+        String code = Util.getCodeFromResponse(responseObject);
         setResult(responseObject, code);
     }
 

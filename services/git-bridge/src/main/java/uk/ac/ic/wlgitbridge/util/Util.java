@@ -1,5 +1,8 @@
 package uk.ac.ic.wlgitbridge.util;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -188,6 +191,34 @@ public class Util {
 
     public static String fromStream(InputStream stream) throws IOException {
         return fromStream(stream, 0);
+    }
+
+    public static String getCodeFromResponse(JsonObject json) {
+        String code = "error";
+        JsonElement codeElement = json.get("code");
+
+        if (codeElement == null) {
+            String error = "Unexpected error";
+            serr("Unexpected response from API:");
+            serr(json.toString());
+            serr("End of response");
+            JsonElement statusElement = json.get("status");
+            if (codeElement == null) {
+                code = statusElement.getAsString();
+                if (code.equals("422")) {
+                    error = "Unprocessable entity";
+                } else if (code.equals("404")) {
+                    error = "Not found";
+                } else if (code.equals("403")) {
+                    error = "Forbidden";
+                }
+            }
+            throw new RuntimeException(error);
+        } else {
+            code = codeElement.getAsString();
+        }
+
+        return code;
     }
 
 }
