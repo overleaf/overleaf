@@ -216,7 +216,7 @@ module.exports =
 	#   publicDSN: ""
 	#
 	# src should be either a remote url like
-	#    //cdn.ravenjs.com/1.1.16/jquery,native/raven.min.js
+	#    //cdn.ravenjs.com/1.1.22/jquery,native/raven.min.js
 	# or a local file in the js/libs directory.
 	# The publicDSN is the token for the client-side getSentry service.
 
