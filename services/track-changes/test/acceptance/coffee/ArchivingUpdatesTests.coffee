@@ -89,9 +89,9 @@ describe "Archiving updates", ->
 				doc.v.should.equal 20
 				done()
 
-		it "should store twenty doc changes in S3", (done) ->
+		it "should store nineteen doc changes in S3", (done) ->
 			TrackChangesClient.getS3Doc @project_id, @doc_id, (error, res, doc) =>
-				doc.length.should.equal 20
+				doc.length.should.equal 19
 				done()
 
 	describe "unarchiving a doc's updates", ->
