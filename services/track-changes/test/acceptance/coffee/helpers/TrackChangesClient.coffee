@@ -75,14 +75,14 @@ module.exports = TrackChangesClient =
 			callback null
 
 	archiveProject: (project_id, callback = (error) ->) ->
-		request.get {
+		request.post {
 			url: "http://localhost:3015/project/#{project_id}/archive"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback(error)
 
 	unarchiveProject: (project_id, callback = (error) ->) ->
-		request.get {
+		request.post {
 			url: "http://localhost:3015/project/#{project_id}/unarchive"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
