@@ -203,13 +203,13 @@ public class Util {
             serr(json.toString());
             serr("End of response");
             JsonElement statusElement = json.get("status");
-            if (codeElement == null) {
-                code = statusElement.getAsString();
-                if (code.equals("422")) {
+            if (statusElement != null) {
+                String status = statusElement.getAsString();
+                if (status.equals("422")) {
                     error = "Unprocessable entity";
-                } else if (code.equals("404")) {
+                } else if (status.equals("404")) {
                     error = "Not found";
-                } else if (code.equals("403")) {
+                } else if (status.equals("403")) {
                     error = "Forbidden";
                 }
             }
