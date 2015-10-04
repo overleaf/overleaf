@@ -24,6 +24,7 @@ define [], () ->
 
 			@ide.socket = io.connect null,
 				reconnect: false
+				'connect timeout': 30 * 1000
 				"force new connection": true
 
 			@ide.socket.on "connect", () =>
@@ -42,7 +43,7 @@ define [], () ->
 			@ide.socket.on "connect_failed", () =>
 				@connected = false
 				$scope.$apply () =>
-					@$scope.state.error = "Unable to connect, please view the <a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a> to fix the issue."
+					@$scope.state.error = "Unable to connect, please view the <u><a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a></u> to fix the issue."
 
 
 
