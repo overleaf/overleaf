@@ -45,7 +45,8 @@ describe "Subscription Updater", ->
 		@PlansLocator =
 			findLocalPlanInSettings: sinon.stub().returns({})
 
-
+		@ReferalAllocator = assignBonus:sinon.stub().callsArgWith(1)
+		@ReferalAllocator.cock = true
 		@SubscriptionUpdater = SandboxedModule.require modulePath, requires:
 			'../../models/Subscription': Subscription:@SubscriptionModel
 			'./UserFeaturesUpdater': @UserFeaturesUpdater
@@ -53,13 +54,14 @@ describe "Subscription Updater", ->
 			'./PlansLocator': @PlansLocator
 			"logger-sharelatex": log:->
 			'settings-sharelatex': @Settings
+			"../Referal/ReferalAllocator" : @ReferalAllocator
+
 
 	describe "syncSubscription", ->
 		it "should update the subscription if the user already is admin of one", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@SubscriptionUpdater._updateSubscription = sinon.stub().callsArgWith(2)
 			@SubscriptionUpdater._createNewSubscription = sinon.stub()
-
 			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
 				@SubscriptionUpdater._updateSubscription.called.should.equal true
@@ -109,6 +111,11 @@ describe "Subscription Updater", ->
 			@SubscriptionUpdater._updateSubscription @recurlySubscription, @subscription, (err)=>
 				assert.notEqual @subscription.membersLimit, 5
 				assert.notEqual @subscription.groupPlan, true
+				done()
+
+		it "should call assignBonus", (done)->
+			@SubscriptionUpdater._updateSubscription @recurlySubscription, @subscription, (err)=>
+				@ReferalAllocator.assignBonus.calledWith(@subscription.admin_id).should.equal true
 				done()
 
 	describe "_createNewSubscription", ->

@@ -7,6 +7,7 @@ PlansLocator = require("./PlansLocator")
 Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 ObjectId = require('mongoose').Types.ObjectId	
+ReferalAllocator = require("../Referal/ReferalAllocator")
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
@@ -69,6 +70,7 @@ module.exports =
 			jobs = allIds.map (user_id)->
 				return (cb)->
 					UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, cb
-			async.parallel jobs, callback
+			jobs.push (cb)-> ReferalAllocator.assignBonus subscription.admin_id, cb
+			async.series jobs, callback
 
 
