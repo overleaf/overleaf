@@ -32,7 +32,7 @@ public class SnapshotInfo implements Comparable<SnapshotInfo> {
     }
 
     public WLUser getUser() {
-        return user;
+        return user != null ? user : new WLUser();
     }
 
     public String getCreatedAt() {
