@@ -32,27 +32,15 @@ module.exports = ReferalAllocator =
 
 
 	assignBonus: (user_id, callback = (error) ->) ->
-		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
-			return callback(error) if error?
-			logger.log
-				subscription: subscription,
-				user_id: user_id,
-				"checking user doesn't have a subsciption before assigning bonus"
-			if !subscription? or !subscription.planCode?
-				query = _id: user_id
-				User.findOne query, (error, user) ->
-					return callback(error) if error
-					return callback(new Error("user not found")) if !user?
-					logger.log
-						user_id: user_id,
-						refered_user_count: user.refered_user_count,
-						"assigning bonus"
-					if user.refered_user_count? and user.refered_user_count > 0
-						newFeatures = ReferalAllocator._calculateBonuses(user)
-						User.update query, { $set: features: newFeatures }, callback
+		query = _id: user_id
+		User.findOne query, (error, user) ->
+			return callback(error) if error
+			return callback(new Error("user not found")) if !user?
+			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"
+			if user.refered_user_count? and user.refered_user_count > 0
+				newFeatures = ReferalAllocator._calculateBonuses(user)
+				User.update query, { $set: features: newFeatures }, callback
 
-					else
-						callback()
 			else
 				callback()
 		
