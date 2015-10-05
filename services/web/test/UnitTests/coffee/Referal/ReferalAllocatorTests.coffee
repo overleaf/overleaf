@@ -83,7 +83,12 @@ describe 'Referal allocator', ->
 						collaborators: 3
 						dropbox: false
 						versioning: false
-				@User.findOne = sinon.stub().callsArgWith 1, null, { refered_user_count: @refered_user_count }
+				stubbedUser = { 
+					refered_user_count: @refered_user_count, 
+					features:{collaborators:1, dropbox:false, versioning:false} 
+				}
+
+				@User.findOne = sinon.stub().callsArgWith 1, null,stubbedUser
 				@User.update = sinon.stub().callsArgWith 2, null
 				@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArgWith 1, null, null
 				@ReferalAllocator.assignBonus @user_id, @callback
@@ -114,13 +119,22 @@ describe 'Referal allocator', ->
 		
 		describe "when user does not have a recurlySubscription_id", ->
 			beforeEach ->
-				@refered_user_count = 3
+				@refered_user_count = 4
 				@Settings.bonus_features =
+					"2":
+						collaborators: 2
+						dropbox: false
+						versioning: false
+					"5":
+						collaborators: 5
+						dropbox: true
+						versioning: false
 					"3":
 						collaborators: 3
 						dropbox: false
 						versioning: false
-				@User.findOne = sinon.stub().callsArgWith 1, null, { refered_user_count: @refered_user_count }
+				stubbedUser = { refered_user_count: @refered_user_count, features:{collaborators:1, dropbox:false, versioning:false} }
+				@User.findOne = sinon.stub().callsArgWith 1, null, stubbedUser
 				@User.update = sinon.stub().callsArgWith 2, null
 				@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArgWith 1, null, {}
 				@ReferalAllocator.assignBonus @user_id, @callback
@@ -135,25 +149,56 @@ describe 'Referal allocator', ->
 					.calledWith(_id: @user_id)
 					.should.equal true
 
-			it "should update the user to bonus features", ->
+			it "should update the user to bonus features with the closest level", ->
 				@User.update
 					.calledWith({
 						_id: @user_id
 					}, {
 						$set:
 							features:
-								@Settings.bonus_features[@refered_user_count.toString()]
+								@Settings.bonus_features["3"]
 					})
 					.should.equal true
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-		describe "when the user is not at a bonus level", ->
+		describe "when the user has better features already", ->
+			
 			beforeEach ->
 				@refered_user_count = 3
+				@stubbedUser =
+					refered_user_count:4
+					features:
+						collaborators:3
+						dropbox:false
+						versioning:false
 				@Settings.bonus_features =
 					"4":
+						collaborators: 10
+						dropbox: true
+						versioning: false
+
+				@User.findOne = sinon.stub().callsArgWith 1, null, @stubbedUser
+				@User.update = sinon.stub().callsArgWith 2, null
+				@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArgWith 1, null,null
+
+			it "should not set in in mongo when the feature is better", (done)->
+				@ReferalAllocator.assignBonus @user_id, =>
+					@User.update.calledWith({_id: @user_id }, {$set: features:{dropbox:true, versioning:false, collaborators:10} }).should.equal true
+					done()
+
+			it "should not overright if the user has -1 users", (done)->
+				@stubbedUser.features.collaborators = -1
+				@ReferalAllocator.assignBonus @user_id, =>
+					@User.update.calledWith({_id: @user_id }, {$set: features:{dropbox:true, versioning:false} }).should.equal true
+					done()
+
+		describe "when the user is not at a bonus level", ->
+			beforeEach ->
+				@refered_user_count = 0
+				@Settings.bonus_features =
+					"1":
 						collaborators: 3
 						dropbox: false
 						versioning: false

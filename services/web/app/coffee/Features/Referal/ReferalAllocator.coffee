@@ -1,3 +1,4 @@
+_ = require("underscore")
 logger = require('logger-sharelatex')
 User = require('../../models/User').User
 SubscriptionLocator = require "../Subscription/SubscriptionLocator"
@@ -28,6 +29,8 @@ module.exports = ReferalAllocator =
 			else
 				callback()
 
+
+
 	assignBonus: (user_id, callback = (error) ->) ->
 		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
 			return callback(error) if error?
@@ -43,13 +46,40 @@ module.exports = ReferalAllocator =
 					logger.log
 						user_id: user_id,
 						refered_user_count: user.refered_user_count,
-						bonus_features: Settings.bonus_features[user.refered_user_count],
 						"assigning bonus"
-					if user.refered_user_count? and Settings.bonus_features[user.refered_user_count]?
-						User.update query, { $set: features: Settings.bonus_features[user.refered_user_count] }, callback
+					if user.refered_user_count? and user.refered_user_count > 0
+						newFeatures = ReferalAllocator._calculateBonuses(user)
+						User.update query, { $set: features: newFeatures }, callback
+
 					else
 						callback()
 			else
 				callback()
 		
-		
+	_calculateBonuses : (user)->
+		bonusLevel = ReferalAllocator._getBonusLevel(user)
+
+		newFeatures = {}
+		_.each Settings.bonus_features["#{bonusLevel}"], (bonusLevel, key)->
+			currentLevel = user?.features?[key]
+			if _.isBoolean(currentLevel) and currentLevel == false
+				newFeatures[key] = bonusLevel
+
+			if _.isNumber(currentLevel) 
+				if currentLevel == -1
+					return
+				bonusIsGreaterThanCurrent = currentLevel < bonusLevel
+				if bonusIsGreaterThanCurrent or bonusLevel == -1
+					newFeatures[key] = bonusLevel
+
+		return newFeatures
+
+
+	_getBonusLevel: (user)->
+		highestBonusLevel = 0
+		_.each _.keys(Settings.bonus_features), (level)->
+			levelIsLessThanUser = level <= user.refered_user_count
+			levelIsMoreThanCurrentHighest = level >= highestBonusLevel
+			if levelIsLessThanUser and levelIsMoreThanCurrentHighest
+				highestBonusLevel = level
+		return highestBonusLevel
