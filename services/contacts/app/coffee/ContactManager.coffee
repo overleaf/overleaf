@@ -16,3 +16,15 @@ module.exports = ContactManager =
 		}, update, {
 			upsert: true
 		}, callback)
+	
+	getContacts: (user_id, callback = (error) ->) ->
+		try
+			user_id = ObjectId(user_id.toString())
+		catch error
+			return callback error
+		
+		db.contacts.findOne {
+			user_id: user_id
+		}, (error, user) ->
+			return callback(error) if error?
+			callback null, user?.contacts

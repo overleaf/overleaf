@@ -1,5 +1,7 @@
 ContactManager = require "./ContactManager"
+WebApiManager = require "./WebApiManager"
 logger = require "logger-sharelatex"
+async = require "async"
 
 module.exports = HttpController =
 	addContact: (req, res, next) ->
@@ -18,5 +20,63 @@ module.exports = HttpController =
 				return next(error) if error?
 				res.status(204).end()
 
-	getUserContacts: (req, res, next) ->
-		
+	CONTACT_LIMIT: 50
+	getContacts: (req, res, next) ->
+		{user_id} = req.params
+
+		if req.query?.limit?
+			limit = parseInt(req.query.limit, 10)
+		else
+			limit = HttpController.CONTACT_LIMIT
+		limit = Math.min(limit, HttpController.CONTACT_LIMIT)
+
+		logger.log {user_id}, "getting contacts"
+
+		ContactManager.getContacts user_id, (error, contact_dict) ->
+			return next(error) if error?
+			
+			contacts = []
+			for user_id, data of (contact_dict or {})
+				contacts.push {
+					user_id: user_id
+					n: data.n
+					ts: data.ts
+				}
+
+			HttpController._sortContacts contacts
+			contacts = contacts.slice(0, limit)
+
+			async.mapLimit contacts, 5,
+				(contact, cb) ->
+					WebApiManager.getUserDetails contact.user_id, (error, user) ->
+						return cb(error) if error?
+						cb null, HttpController._formatUser user
+				(error, users) ->
+					return next(error) if error?
+					res.status(200).send({
+						contacts: users
+					})
+	
+	_sortContacts: (contacts) ->
+		contacts.sort (a, b) ->
+			# Sort by decreasing count, descreasing timestamp.
+			# I.e. biggest count, and most recent at front.
+			if a.n > b.n
+				return -1
+			else if a.n < b.n
+				return 1
+			else
+				if a.ts > b.ts
+					return -1
+				else if a.ts < b.ts
+					return 1
+				else
+					return 0
+	
+	_formatUser: (user) ->
+		return {
+			id: user._id
+			email: user.email
+			first_name: user.first_name
+			last_name: user.last_name
+		}

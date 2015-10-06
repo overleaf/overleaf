@@ -35,13 +35,14 @@ describe "ContactManager", ->
 					.calledWith({
 						user_id: ObjectId(@user_id)
 					}, {
-						$set:
+						$inc:
 							"contacts.mock_contact.n": 1
 						$set:
 							"contacts.mock_contact.ts": new Date()
 					}, {
 						upsert: true
 					})
+					.should.equal true
 			
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -52,3 +53,32 @@ describe "ContactManager", ->
 			
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error()).should.equal true
+	
+	describe "getContacts", ->
+		beforeEach ->
+			@user = {
+				contacts: ["mock", "contacts"]
+			}
+			@db.contacts.findOne = sinon.stub().callsArgWith(1, null, @user)
+		
+		describe "with a valid user_id", ->
+			beforeEach ->
+				@ContactManager.getContacts @user_id, @callback
+			
+			it "should find the user's contacts", ->
+				@db.contacts.findOne
+					.calledWith({
+						user_id: ObjectId(@user_id)
+					})
+					.should.equal true
+			
+			it "should call the callback with the contacts", ->
+				@callback.calledWith(null, @user.contacts).should.equal true
+		
+		describe "with an invalid user id", ->
+			beforeEach ->
+				@ContactManager.getContacts "not-valid-object-id", @callback
+			
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error()).should.equal true
+		
