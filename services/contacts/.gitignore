@@ -1,0 +1,6 @@
+node_modules
+app/js/
+test/unit/js
+test/acceptance/js
+app.js
+forever
