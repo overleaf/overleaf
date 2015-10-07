@@ -1,6 +1,11 @@
 request = require('request').defaults(jar: false)
 Settings = require("settings-sharelatex")
 
+# DEPRECATED! This method of getting user details via chat is deprecated
+# in the way we lay out our services.
+# Instead, web should be responsible for collecting the raw data (user_ids) and
+# filling it out with calls to other services. All API calls should create a
+# tree-like structure as much as possible, with web as the root.
 module.exports = WebApiManager =
 	apiRequest: (url, method, options = {}, callback = (error, result) ->) ->
 		if typeof options == "function"
