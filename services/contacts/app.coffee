@@ -16,8 +16,8 @@ app = express()
 
 app.use Metrics.http.monitor(logger)
 
-app.get  '/user/:user_id/contacts', HttpController.getUserContacts
-app.post '/user/:user_id/contacts', bodyParser.json(limit: "2mb"), HttpController.addUserContacts
+app.get  '/user/:user_id/contacts', HttpController.getContacts
+app.post '/user/:user_id/contacts', bodyParser.json(limit: "2mb"), HttpController.addContact
 
 app.get '/status', (req, res)->
 	res.send('contacts is alive')
@@ -33,4 +33,4 @@ port = Settings.internal.contacts.port
 host = Settings.internal.contacts.host
 app.listen port, host, (error) ->
 	throw error if error?
-	logger.info "Docstore starting up, listening on #{host}:#{port}"
+	logger.info "contacts starting up, listening on #{host}:#{port}"
