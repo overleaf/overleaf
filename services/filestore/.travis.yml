@@ -10,12 +10,8 @@ install:
     - npm install
     - grunt install
 
-before_script:
-    - grunt forever:app:start
-
 script:
     - grunt test:unit
-    - grunt test:acceptance
 
 services:
     - redis-server
