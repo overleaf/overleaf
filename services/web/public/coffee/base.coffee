@@ -15,6 +15,7 @@ define [
 		"ipCookie"
 		"ErrorCatcher"
 		"localStorage"
+		"ngTagsInput"
 	])
 
 	return App

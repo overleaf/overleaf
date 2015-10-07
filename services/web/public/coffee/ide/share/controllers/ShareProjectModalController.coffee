@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ["$scope", "$modalInstance", "$timeout", "projectMembers", "$modal", ($scope, $modalInstance, $timeout, projectMembers, $modal) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, $modal, $http) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			email: ""
@@ -22,34 +22,54 @@ define [
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
+		$scope.$watchCollection "inputs.contacts", (value) ->
+			console.log "EMAILS", value
+		
+		$scope.autocompleteContacts = []
+		do loadAutocompleteUsers = () ->
+			$http.get "/user/contacts"
+				.success (data) ->
+					console.log "Got contacts", data
+					$scope.autocompleteContacts = data.contacts or []
+		
+		$scope.filterAutocompleteUsers = ($query) ->
+			return $scope.autocompleteContacts.filter (user) ->
+				for text in [user.name, user.email]
+					if text?.toLowerCase().indexOf($query.toLowerCase()) > -1
+						return true
+				return false
+
 		$scope.addMembers = () ->
-			return if !$scope.inputs.email? or $scope.inputs.email == ""
+			$timeout -> # Give email list a chance to update
+				return if $scope.inputs.contacts.length == 0
 
-			emails = $scope.inputs.email.split(/,\s*/)
-			$scope.inputs.email = ""
-			$scope.state.error = null
-			$scope.state.inflight = true
-
-			do addNextMember = () ->
-				if emails.length == 0 or !$scope.canAddCollaborators
-					$scope.state.inflight = false
-					$scope.$apply()
-					return
+				emails = $scope.inputs.contacts.map (contact) -> contact.email
+				$scope.inputs.contacts = []
+				$scope.state.error = null
+				$scope.state.inflight = true
 				
-				email = emails.shift()
-				projectMembers
-					.addMember(email, $scope.inputs.privileges)
-					.success (data) ->
-						if data?.user # data.user is false if collaborator limit is hit.
-							$scope.project.members.push data.user
-							setTimeout () ->
-								# Give $scope a chance to update $scope.canAddCollaborators
-								# with new collaborator information.
-								addNextMember()
-							, 0
-					.error () ->
+				console.log "Adding emails", emails
+
+				do addNextMember = () ->
+					if emails.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
-						$scope.state.error = "Sorry, something went wrong :("
+						$scope.$apply()
+						return
+					
+					email = emails.shift()
+					projectMembers
+						.addMember(email, $scope.inputs.privileges)
+						.success (data) ->
+							if data?.user # data.user is false if collaborator limit is hit.
+								$scope.project.members.push data.user
+								setTimeout () ->
+									# Give $scope a chance to update $scope.canAddCollaborators
+									# with new collaborator information.
+									addNextMember()
+								, 0
+						.error () ->
+							$scope.state.inflight = false
+							$scope.state.error = "Sorry, something went wrong :("
 
 
 		$scope.removeMember = (member) ->
@@ -85,7 +105,6 @@ define [
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss()
-	]
 
 	App.controller "MakePublicModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
 		$scope.inputs = {

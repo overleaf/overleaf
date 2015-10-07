@@ -10,4 +10,5 @@ define [
 	"libs/angular-sanitize-1.2.17"
 	"libs/angular-cookie"
 	"libs/passfield"
+	"libs/ng-tags-input-3.0.0"
 ], () ->

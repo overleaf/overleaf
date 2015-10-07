@@ -47,12 +47,21 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				form(ng-show="canAddCollaborators")
 					.small #{translate("share_with_your_collabs")}
 					.form-group
-						input.form-control(
-							type="text"
+						tags-input(
+							template="shareTagTemplate"
 							placeholder="joe@example.com, sue@example.com, ..."
-							ng-model="inputs.email"
+							ng-model="inputs.contacts"
 							focus-on="open"
+							display-property="email"
+							key-property="id"
+							add-on-paste="true"
 						)
+							auto-complete(
+								source="filterAutocompleteUsers($query)"
+								template="shareAutocompleteTemplate"
+								display-property="email"
+								min-length="0"
+							)
 					.form-group
 						.pull-right
 							select.privileges.form-control(
@@ -123,3 +132,21 @@ script(type="text/ng-template", id="makePrivateModalTemplate")
 		button.btn.btn-info(
 			ng-click="makePrivate()"
 		) #{translate("make_private")}
+
+script(type="text/ng-template", id="shareTagTemplate")
+	.tag-template
+		span(ng-if="data.type")
+			i.fa.fa-fw(ng-class="{'fa-user': data.type == 'user', 'fa-group': data.type == 'group'}")
+			| 
+		span {{$getDisplayText()}}
+		| 
+		a(href, ng-click="$removeTag()").remove-button
+			i.fa.fa-fw.fa-close
+
+script(type="text/ng-template", id="shareAutocompleteTemplate")
+	.autocomplete-template
+		i.fa(ng-class="{'fa-user': data.type == 'user', 'fa-group': data.type == 'group'}")
+		| 
+		span(ng-bind-html="$highlight(data.email)")
+		div.subdued.small(ng-show="data.name", ng-bind-html="$highlight(data.name)")
+		div.subdued.small(ng-show="data.memberCount") {{ data.memberCount }} members
