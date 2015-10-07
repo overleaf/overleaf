@@ -87,7 +87,7 @@ describe 'Referalallocator', ->
 					features:{collaborators:1, dropbox:false, versioning:false} 
 				}
 
-				@User.findOne = sinon.stub().callsArgWith 1, null,stubbedUser
+				@User.findOne = sinon.stub().callsArgWith 1, null, stubbedUser
 				@User.update = sinon.stub().callsArgWith 2, null
 				@ReferalAllocator.assignBonus @user_id, @callback
 
@@ -110,6 +110,25 @@ describe 'Referalallocator', ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 	
+		describe "when there is nothing to assign", ->
+
+			beforeEach ->
+				@ReferalAllocator._calculateBonuses = sinon.stub().returns({})
+				@stubbedUser =
+					refered_user_count:4
+					features:{collaborators:3, versioning:true, dropbox:false}
+				@Settings.bonus_features =
+					"4":
+						collaborators:3
+						versioning:true
+						dropbox:false
+				@User.findOne = sinon.stub().callsArgWith 1, null, @stubbedUser
+				@User.update = sinon.stub().callsArgWith 2, null
+
+			it "should not call update if there are no bonuses to apply", (done)->
+				@ReferalAllocator.assignBonus @user_id, (err)=>
+					@User.update.called.should.equal false
+					done()
 
 		describe "when the user has better features already", ->
 			
@@ -138,7 +157,7 @@ describe 'Referalallocator', ->
 			it "should not overright if the user has -1 users", (done)->
 				@stubbedUser.features.collaborators = -1
 				@ReferalAllocator.assignBonus @user_id, =>
-					@User.update.calledWith({_id: @user_id }, {$set: features:{dropbox:true, versioning:false} }).should.equal true
+					@User.update.calledWith({_id: @user_id }, {$set: features:{dropbox:true, versioning:false, collaborators:-1} }).should.equal true
 					done()
 
 		describe "when the user is not at a bonus level", ->
