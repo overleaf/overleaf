@@ -9,7 +9,6 @@ describe "HttpController", ->
 	beforeEach ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"./ContactManager": @ContactManager = {}
-			"./WebApiManager": @WebApiManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 		@user_id = "mock-user-id"
 		@contact_id = "mock-contact-id"
@@ -67,15 +66,7 @@ describe "HttpController", ->
 				"user-id-2": { n: 4, ts: new Date(now) }
 				"user-id-3": { n: 2, ts: new Date(now - 1000) }
 			}
-			@user_details = {
-				"user-id-1": { _id: "user-id-1", email: "joe@example.com", first_name: "Joe", last_name: "Example", extra: "foo" }
-				"user-id-2": { _id: "user-id-2", email: "jane@example.com", first_name: "Sarah", last_name: "Example", extra: "foo" }
-				"user-id-3": { _id: "user-id-3", email: "sam@example.com", first_name: "Sam", last_name: "Example", extra: "foo" }
-			}
 			@ContactManager.getContacts = sinon.stub().callsArgWith(1, null, @contacts)
-			@WebApiManager.getUserDetails = (user_id, callback = (error, user) ->) =>
-				callback null, @user_details[user_id]
-			sinon.spy @WebApiManager, "getUserDetails"
 
 		describe "normally", ->
 			beforeEach ->
@@ -86,19 +77,13 @@ describe "HttpController", ->
 					.calledWith(@user_id)
 					.should.equal true
 			
-			it "should look up each contact in web for their details", ->
-				for user_id, data of @contacts
-					@WebApiManager.getUserDetails
-						.calledWith(user_id)
-						.should.equal true
-			
 			it "should return a sorted list of contacts by count and timestamp", ->
 				@res.send
 					.calledWith({
-						contacts: [
-							{ id: "user-id-2", email: "jane@example.com", first_name: "Sarah", last_name: "Example" }
-							{ id: "user-id-1", email: "joe@example.com", first_name: "Joe", last_name: "Example" }
-							{ id: "user-id-3", email: "sam@example.com", first_name: "Sam", last_name: "Example" }
+						contact_ids: [
+							"user-id-2"
+							"user-id-1"
+							"user-id-3"
 						]
 					})
 					.should.equal true
@@ -112,9 +97,9 @@ describe "HttpController", ->
 			it "should return the most commonly used contacts up to the limit", ->
 				@res.send
 					.calledWith({
-						contacts: [
-							{ id: "user-id-2", email: "jane@example.com", first_name: "Sarah", last_name: "Example" }
-							{ id: "user-id-1", email: "joe@example.com", first_name: "Joe", last_name: "Example" }
+						contact_ids: [
+							"user-id-2"
+							"user-id-1"
 						]
 					})
 					.should.equal true
@@ -127,7 +112,7 @@ describe "HttpController", ->
 			it "should return an empty list", ->
 				@res.send
 					.calledWith({
-						contacts: []
+						contact_ids: []
 					})
 					.should.equal true
 		

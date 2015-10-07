@@ -1,7 +1,5 @@
 ContactManager = require "./ContactManager"
-WebApiManager = require "./WebApiManager"
 logger = require "logger-sharelatex"
-async = require "async"
 
 module.exports = HttpController =
 	addContact: (req, res, next) ->
@@ -45,17 +43,11 @@ module.exports = HttpController =
 
 			HttpController._sortContacts contacts
 			contacts = contacts.slice(0, limit)
+			contact_ids = contacts.map (contact) -> contact.user_id
 
-			async.mapLimit contacts, 5,
-				(contact, cb) ->
-					WebApiManager.getUserDetails contact.user_id, (error, user) ->
-						return cb(error) if error?
-						cb null, HttpController._formatUser user
-				(error, users) ->
-					return next(error) if error?
-					res.status(200).send({
-						contacts: users
-					})
+			res.status(200).send({
+				contact_ids: contact_ids
+			})
 	
 	_sortContacts: (contacts) ->
 		contacts.sort (a, b) ->
@@ -72,11 +64,3 @@ module.exports = HttpController =
 					return 1
 				else
 					return 0
-	
-	_formatUser: (user) ->
-		return {
-			id: user._id
-			email: user.email
-			first_name: user.first_name
-			last_name: user.last_name
-		}
