@@ -13,6 +13,3 @@ install:
 script:
     - grunt test:unit
 
-services:
-    - redis-server
-    - mongodb
