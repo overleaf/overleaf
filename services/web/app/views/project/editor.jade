@@ -13,7 +13,9 @@ block content
 				h3 #{translate("loading")}...
 				.progress
 					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
-				p.text-center.text-danger(ng-if="state.error").ng-cloak {{ state.error }}
+				p.text-center.text-danger(ng-if="state.error").ng-cloak 
+					span(ng-bind-html="state.error")
+
 
 		.global-alerts(ng-cloak)
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
