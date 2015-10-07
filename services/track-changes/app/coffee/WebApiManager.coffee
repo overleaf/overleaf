@@ -2,6 +2,11 @@ request = require "request"
 logger = require "logger-sharelatex"
 Settings = require "settings-sharelatex"
 
+# DEPRECATED! This method of getting user details via track-changes is deprecated
+# in the way we lay out our services.
+# Instead, web should be responsible for collecting the raw data (user_ids) and
+# filling it out with calls to other services. All API calls should create a
+# tree-like structure as much as possible, with web as the root.
 module.exports = WebApiManager =
 	sendRequest: (url, callback = (error, body) ->) ->
 		request.get {
