@@ -46,11 +46,12 @@ describe "LockManager", ->
 		describe "when the lock is taken", ->
 			beforeEach ->
 				@rclient.set = sinon.stub().callsArgWith(5, null, null)
+				@LockManager.randomLock = sinon.stub().returns "locked-random-value"
 				@LockManager.tryLock @key, @callback
 
 			it "should check the lock in redis", ->
 				@rclient.set
-					.calledWith(@key, "locked", "EX", @LockManager.LOCK_TTL, "NX")
+					.calledWith(@key, "locked-random-value", "EX", @LockManager.LOCK_TTL, "NX")
 					.should.equal true
 
 			it "should return the callback with false", ->
@@ -137,7 +138,7 @@ describe "LockManager", ->
 					releaseLock()
 				sinon.spy @, "runner"
 				@LockManager.getLock = sinon.stub().callsArg(1)
-				@LockManager.releaseLock = sinon.stub().callsArg(1)
+				@LockManager.releaseLock = sinon.stub().callsArg(2)
 				@LockManager.runWithLock @key, @runner, @callback
 
 			it "should get the lock", ->
@@ -163,7 +164,7 @@ describe "LockManager", ->
 					releaseLock(@error)
 				sinon.spy @, "runner"
 				@LockManager.getLock = sinon.stub().callsArg(1)
-				@LockManager.releaseLock = sinon.stub().callsArg(1)
+				@LockManager.releaseLock = sinon.stub().callsArg(2)
 				@LockManager.runWithLock @key, @runner, @callback
 
 			it "should release the lock", ->

@@ -1,17 +1,34 @@
 Settings = require "settings-sharelatex"
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
+os = require "os"
+crypto = require "crypto"
+
+HOST = os.hostname()
+PID = process.pid
+RND = crypto.randomBytes(4).toString('hex')
+COUNT = 0
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	LOCK_TTL: 300 # seconds (allow 5 minutes for any operation to complete)
 
+	# Use a signed lock value as described in
+	# http://redis.io/topics/distlock#correct-implementation-with-a-single-instance
+	# to prevent accidental unlocking by multiple processes
+	randomLock : () ->
+		time = Date.now()
+		return "locked:host=#{HOST}:pid=#{PID}:random=#{RND}:time=#{time}:count=#{COUNT++}"
+
+	unlockScript: 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
+
 	tryLock : (key, callback = (err, gotLock) ->) ->
-		rclient.set key, "locked", "EX", @LOCK_TTL, "NX", (err, gotLock)->
+		lockValue = LockManager.randomLock()
+		rclient.set key, lockValue, "EX", @LOCK_TTL, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
-				callback err, true
+				callback err, true, lockValue
 			else
 				callback err, false
 
@@ -21,10 +38,10 @@ module.exports = LockManager =
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
 				return callback(new Error("Timeout"))
 
-			LockManager.tryLock key, (error, gotLock) ->
+			LockManager.tryLock key, (error, gotLock, lockValue) ->
 				return callback(error) if error?
 				if gotLock
-					callback(null)
+					callback(null, lockValue)
 				else
 					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
 
@@ -37,14 +54,14 @@ module.exports = LockManager =
 			else
 				callback err, true
 
-	releaseLock: (key, callback) ->
-		rclient.del key, callback
+	releaseLock: (key, lockValue, callback) ->
+		rclient.eval LockManager.unlockScript, 1, key, lockValue, callback
 
 	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
-		LockManager.getLock key, (error) ->
+		LockManager.getLock key, (error, lockValue) ->
 			return callback(error) if error?
 			runner (error1) ->
-				LockManager.releaseLock key, (error2) ->
+				LockManager.releaseLock key, lockValue, (error2) ->
 					error = error1 or error2
 					return callback(error) if error?
 					callback()
