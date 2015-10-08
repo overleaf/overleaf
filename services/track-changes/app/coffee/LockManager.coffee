@@ -5,7 +5,7 @@ rclient = redis.createClient(Settings.redis.web)
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
-	LOCK_TTL: 10 # seconds
+	LOCK_TTL: 300 # seconds (allow 5 minutes for any operation to complete)
 
 	tryLock : (key, callback = (err, gotLock) ->) ->
 		rclient.set key, "locked", "EX", @LOCK_TTL, "NX", (err, gotLock)->
