@@ -19,6 +19,7 @@ describe "CollaboratorsController", ->
 			"../Editor/EditorRealTimeController": @EditorRealTimeController = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
 			'../Project/ProjectEditorHandler' : @ProjectEditorHandler = {}
+			"../Contacts/ContactManager": @ContactManager = {}
 		@res = new MockResponse()
 		@req = new MockRequest()
 
@@ -61,6 +62,8 @@ describe "CollaboratorsController", ->
 			@req.body =
 				email: @email = "Joe@example.com"
 				privileges: @privileges = "readOnly"
+			@req.session =
+				user: _id: @adding_user_id = "adding-user-id"
 			@res.json = sinon.stub()
 			@user_id = "mock-user-id"
 			@raw_user = {
@@ -75,6 +78,7 @@ describe "CollaboratorsController", ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
 			@CollaboratorsEmailHandler.notifyUserOfProjectShare = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ContactManager.addContact = sinon.stub()
 			@callback = sinon.stub()
 
 		describe "when the project can accept more collaborators", ->
@@ -94,6 +98,11 @@ describe "CollaboratorsController", ->
 			it "should send an email to the shared-with user", ->
 				@CollaboratorsEmailHandler.notifyUserOfProjectShare
 					.calledWith(@project_id, @email.toLowerCase())
+					.should.equal true
+			
+			it "should add the user as a contact for the adding user", ->
+				@ContactManager.addContact
+					.calledWith(@adding_user_id, @user_id)
 					.should.equal true
 
 			it "should send the user as the response body", ->

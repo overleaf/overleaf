@@ -5,6 +5,7 @@ ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 EditorRealTimeController = require "../Editor/EditorRealTimeController"
 UserGetter = require "../User/UserGetter"
 LimitationsManager = require "../Subscription/LimitationsManager"
+ContactManager = require "../Contacts/ContactManager"
 mimelib = require("mimelib")
 
 module.exports = CollaboratorsController =
@@ -36,8 +37,13 @@ module.exports = CollaboratorsController =
 					UserGetter.getUser user_id, (error, raw_user) ->
 						return next(error) if error?
 						user = ProjectEditorHandler.buildUserModelView(raw_user, privileges)
+						
+						# These things can all be done in the background
+						adding_user_id = req.session?.user?._id
 						CollaboratorsEmailHandler.notifyUserOfProjectShare project_id, user.email
 						EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
+						ContactManager.addContact adding_user_id, user_id
+
 						return res.json { user: user }
 
 	removeUserFromProject: (req, res, next) ->
