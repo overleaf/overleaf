@@ -29,12 +29,23 @@ define [
 		do loadAutocompleteUsers = () ->
 			$http.get "/user/contacts"
 				.success (data) ->
-					console.log "Got contacts", data
 					$scope.autocompleteContacts = data.contacts or []
-		
+					for contact in $scope.autocompleteContacts
+						if contact.type == "user"
+							if contact.last_name == "" and contact.first_name = contact.email.split("@")[0]
+								# User has not set their proper name so use email as canonical display property
+								contact.name = ""
+								contact.display = contact.email
+							else
+								contact.name = "#{contact.first_name} #{contact.last_name}"
+								contact.display = "#{contact.name} <#{contact.email}>"
+						else
+							# Must be a group
+							contact.display = contact.name
+
 		$scope.filterAutocompleteUsers = ($query) ->
-			return $scope.autocompleteContacts.filter (user) ->
-				for text in [user.name, user.email]
+			return $scope.autocompleteContacts.filter (contact) ->
+				for text in [contact.name, contact.email]
 					if text?.toLowerCase().indexOf($query.toLowerCase()) > -1
 						return true
 				return false
@@ -43,7 +54,9 @@ define [
 			$timeout -> # Give email list a chance to update
 				return if $scope.inputs.contacts.length == 0
 
-				emails = $scope.inputs.contacts.map (contact) -> contact.email
+				console.warn "Ignoring groups for now"
+				emails = $scope.inputs.contacts.filter (contact) -> contact.type == "user"
+				emails = emails.map (contact) -> contact.email
 				$scope.inputs.contacts = []
 				$scope.state.error = null
 				$scope.state.inflight = true

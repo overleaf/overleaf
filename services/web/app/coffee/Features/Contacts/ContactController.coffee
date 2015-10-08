@@ -2,6 +2,7 @@ AuthenticationController = require "../Authentication/AuthenticationController"
 ContactManager = require "./ContactManager"
 UserGetter = require "../User/UserGetter"
 logger = require "logger-sharelatex"
+Modules = require "../../infrastructure/Modules"
 
 module.exports = ContactsController =
 	getContacts: (req, res, next) ->
@@ -24,9 +25,13 @@ module.exports = ContactsController =
 					contacts = contacts.filter (c) -> !c.holdingAccount
 					
 					contacts = contacts.map(ContactsController._formatContact)
-					res.send({
-						contacts: contacts
-					})
+					
+					Modules.hooks.fire "getContacts", user_id, contacts, (error, additional_contacts) ->
+						return next(error) if error?
+						contacts = contacts.concat(additional_contacts...)
+						res.send({
+							contacts: contacts
+						})
 	
 	_formatContact: (contact) ->
 		return  {
@@ -34,4 +39,5 @@ module.exports = ContactsController =
 			email: contact.email
 			first_name: contact.first_name
 			last_name: contact.last_name
+			type: "user"
 		}

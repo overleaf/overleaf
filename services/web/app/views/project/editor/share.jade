@@ -52,7 +52,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							placeholder="joe@example.com, sue@example.com, ..."
 							ng-model="inputs.contacts"
 							focus-on="open"
-							display-property="email"
+							display-property="display"
 							key-property="id"
 							add-on-paste="true"
 						)
@@ -145,8 +145,13 @@ script(type="text/ng-template", id="shareTagTemplate")
 
 script(type="text/ng-template", id="shareAutocompleteTemplate")
 	.autocomplete-template
-		i.fa(ng-class="{'fa-user': data.type == 'user', 'fa-group': data.type == 'group'}")
-		| 
-		span(ng-bind-html="$highlight(data.email)")
-		div.subdued.small(ng-show="data.name", ng-bind-html="$highlight(data.name)")
-		div.subdued.small(ng-show="data.memberCount") {{ data.memberCount }} members
+		div(ng-if="data.type == 'user'")
+			i.fa.fa-user
+			| 
+			span(ng-bind-html="$highlight(data.email)")
+			div.subdued.small(ng-show="data.name", ng-bind-html="$highlight(data.name)")
+		div(ng-if="data.type == 'group'")
+			i.fa.fa-group
+			| 
+			span(ng-bind-html="$highlight(data.name)")
+			div.subdued.small(ng-show="data.member_count") {{ data.memberCount }} members

@@ -13,6 +13,7 @@ describe "ContactController", ->
 			"../User/UserGetter": @UserGetter = {}
 			"./ContactManager": @ContactManager = {}
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
+			"../../infrastructure/Modules": @Modules = { hooks: {} }
 
 		@next = sinon.stub()
 		@req = {}
@@ -32,6 +33,7 @@ describe "ContactController", ->
 			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id)
 			@ContactManager.getContactIds = sinon.stub().callsArgWith(2, null, @contact_ids)
 			@UserGetter.getUsers = sinon.stub().callsArgWith(2, null, @contacts)
+			@Modules.hooks.fire = sinon.stub().callsArg(3)
 			
 			@ContactController.getContacts @req, @res, @next
 			
@@ -50,8 +52,13 @@ describe "ContactController", ->
 				.calledWith(@contact_ids, { email: 1, first_name: 1, last_name: 1, holdingAccount: 1 })
 				.should.equal true
 		
+		it "should fire the getContact module hook", ->
+			@Modules.hooks.fire
+				.calledWith("getContacts", @user_id)
+				.should.equal true
+		
 		it "should return a formatted list of contacts in contact list order, without holding accounts", ->
 			@res.send.args[0][0].contacts.should.deep.equal [
-				{ id: "contact-1", email: "joe@example.com", first_name: "Joe", last_name: "Example" }
-				{ id: "contact-3", email: "jim@example.com", first_name: "Jim", last_name: "Example" }
+				{ id: "contact-1", email: "joe@example.com", first_name: "Joe", last_name: "Example", type: "user" }
+				{ id: "contact-3", email: "jim@example.com", first_name: "Jim", last_name: "Example", type: "user" }
 			]
