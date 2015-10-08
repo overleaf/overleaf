@@ -59,23 +59,25 @@ module.exports = UpdatesManager =
 			return callback(error) if error?
 			MongoManager.backportProjectId project_id, doc_id, (error) ->
 				return callback(error) if error?
-				RedisManager.getOldestRawUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, rawUpdates) ->
+				RedisManager.getOldestDocUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, docUpdates) ->
 					return callback(error) if error?
-					length = rawUpdates.length
-					UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
+					length = docUpdates.length
+					RedisManager.expandDocUpdates docUpdates, (error, rawUpdates) ->
 						return callback(error) if error?
-						logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
-						RedisManager.deleteOldestRawUpdates project_id, doc_id, length, (error) ->
+						UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 							return callback(error) if error?
-							if length == UpdatesManager.REDIS_READ_BATCH_SIZE
-								# There might be more updates
-								logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
-								setTimeout () ->
-									UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
-								, 0
-							else
-								logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
-								callback()
+							logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
+							RedisManager.deleteAppliedDocUpdates project_id, doc_id, docUpdates, (error) ->
+								return callback(error) if error?
+								if length == UpdatesManager.REDIS_READ_BATCH_SIZE
+									# There might be more updates
+									logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
+									setTimeout () ->
+										UpdatesManager.processUncompressedUpdates project_id, doc_id, callback
+									, 0
+								else
+									logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
+									callback()
 
 	processUncompressedUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.runWithLock(
