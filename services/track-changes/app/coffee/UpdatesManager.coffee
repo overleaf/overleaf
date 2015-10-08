@@ -42,7 +42,8 @@ module.exports = UpdatesManager =
 					if lastCompressedUpdate?
 						MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], temporary, () ->
 							return callback error
-					return
+					else
+						return callback error
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
 
