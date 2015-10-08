@@ -53,35 +53,17 @@ describe "MongoManager", ->
 		it "should call the call back with the update", ->
 			@callback.calledWith(null, @update).should.equal true
 
-	describe "deleteCompressedUpdate", ->
-		beforeEach ->
-			@update_id = ObjectId().toString()
-			@db.docHistory = 
-				remove: sinon.stub().callsArg(1)
-			@MongoManager.deleteCompressedUpdate(@update_id, @callback)
 
-		it "should remove the update", ->
-			@db.docHistory.remove
-				.calledWith(_id: ObjectId(@update_id))
-				.should.equal true
-
-		it "should call the callback", ->
-			@callback.called.should.equal true
-
-	describe "popLastCompressedUpdate", ->
+	describe "peekLastCompressedUpdate", ->
 		describe "when there is no last update", ->
 			beforeEach ->
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
-				@MongoManager.deleteCompressedUpdate = sinon.stub()
-				@MongoManager.popLastCompressedUpdate @doc_id, @callback
+				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
 			it "should get the last update", ->
 				@MongoManager.getLastCompressedUpdate
 					.calledWith(@doc_id)
 					.should.equal true
-
-			it "should not try to delete the last update", ->
-				@MongoManager.deleteCompressedUpdate.called.should.equal false
 
 			it "should call the callback with no update", ->
 				@callback.calledWith(null, null).should.equal true
@@ -90,17 +72,11 @@ describe "MongoManager", ->
 			beforeEach ->
 				@update = { _id: Object() }
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
-				@MongoManager.deleteCompressedUpdate = sinon.stub().callsArgWith(1, null)
-				@MongoManager.popLastCompressedUpdate @doc_id, @callback
+				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
 			it "should get the last update", ->
 				@MongoManager.getLastCompressedUpdate
 					.calledWith(@doc_id)
-					.should.equal true
-
-			it "should delete the last update", ->
-				@MongoManager.deleteCompressedUpdate
-					.calledWith(@update._id)
 					.should.equal true
 
 			it "should call the callback with the update", ->
@@ -110,16 +86,12 @@ describe "MongoManager", ->
 			beforeEach ->
 				@update = { _id: Object(), v: 12345, inS3: true }
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
-				@MongoManager.deleteCompressedUpdate = sinon.stub()
-				@MongoManager.popLastCompressedUpdate @doc_id, @callback
+				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
 			it "should get the last update", ->
 				@MongoManager.getLastCompressedUpdate
 					.calledWith(@doc_id)
 					.should.equal true
-
-			it "should not try to delete the last update", ->
-				@MongoManager.deleteCompressedUpdate.called.should.equal false
 
 			it "should call the callback with a null update and the correct version", ->
 				@callback.calledWith(null, null, @update.v).should.equal true

@@ -14,10 +14,10 @@ module.exports = UpdatesManager =
 		if length == 0
 			return callback()
 
-		MongoManager.popLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
+		MongoManager.peekLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
 			# lastCompressedUpdate is the most recent update in Mongo.
 			#
-			# The popLastCompressedUpdate method may pass it back as 'null'
+			# The peekLastCompressedUpdate method may pass it back as 'null'
 			# to force the start of a new compressed update, even when there
 			# was a previous compressed update in Mongo.  In this case it
 			# passes back the lastVersion from the update to check
@@ -37,21 +37,36 @@ module.exports = UpdatesManager =
 				if rawUpdates[0]? and rawUpdates[0].v != lastVersion + 1
 					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastVersion}")
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
-					# Push the update back into Mongo - if it was present - catching errors at this
-					# point is useless, we're already bailing
-					if lastCompressedUpdate?
-						MongoManager.insertCompressedUpdates project_id, doc_id, [lastCompressedUpdate], temporary, () ->
-							return callback error
-					else
-						callback error
-					return
+					return callback error
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
 
-			MongoManager.insertCompressedUpdates project_id, doc_id, compressedUpdates, temporary,(error) ->
+			if not lastCompressedUpdate?
+				# no existing update, insert everything
+				updateToModify = null
+				updatesToInsert = compressedUpdates
+			else
+				# there are existing updates, see what happens when we
+				# compress them together with the new ones
+				[firstUpdate, additionalUpdates...] = compressedUpdates
+
+				if firstUpdate.v == lastCompressedUpdate.v
+					# first update version hasn't changed, skip it and insert remaining updates
+					# this is an optimisation, we could update the existing op with itself
+					updateToModify = null
+					updatesToInsert = additionalUpdates
+				else
+					# first update version did changed, modify it and insert remaining updates
+					updateToModify = firstUpdate
+					updatesToInsert = additionalUpdates
+
+			MongoManager.modifyCompressedUpdate lastCompressedUpdate, updateToModify, (error, result) ->
 				return callback(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
-				callback()
+				logger.log {project_id, doc_id, orig_v: lastCompressedUpdate.v, new_v: result.v}, "applied update in-place"	if result?
+				MongoManager.insertCompressedUpdates project_id, doc_id, updatesToInsert, temporary,(error) ->
+					return callback(error) if error?
+					logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
+					callback()
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
