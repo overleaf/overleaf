@@ -1,48 +1,18 @@
 logger = require('logger-sharelatex')
 Metrics = require('../../infrastructure/Metrics')
 sanitize = require('sanitizer')
-ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 ProjectDeleter = require("../Project/ProjectDeleter")
-CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-LimitationsManager = require("../Subscription/LimitationsManager")
 EditorRealTimeController = require("./EditorRealTimeController")
 TrackChangesManager = require("../TrackChanges/TrackChangesManager")
-Settings = require('settings-sharelatex')
 async = require('async')
 LockManager = require("../../infrastructure/LockManager")
 _ = require('underscore')
-redis = require("redis-sharelatex")
-rclientPub = redis.createClient(Settings.redis.web)
-rclientSub = redis.createClient(Settings.redis.web)
 
 module.exports = EditorController =
-	addUserToProject: (project_id, email, privileges, callback = (error, collaborator_added)->)->
-		email = email.toLowerCase()
-		LimitationsManager.isCollaboratorLimitReached project_id, (error, limit_reached) =>
-			if error?
-				logger.error err:error, "error adding user to to project when checking if collaborator limit has been reached"
-				return callback(new Error("Something went wrong"))
-
-			if limit_reached
-				callback null, false
-			else
-				CollaboratorsHandler.addUserToProject project_id, email, privileges, (err, user)=>
-					return callback(err) if error?
-					# Flush to TPDS to add files to collaborator's Dropbox
-					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, ->
-					EditorRealTimeController.emitToRoom(project_id, 'userAddedToProject', user, privileges)
-					callback null, ProjectEditorHandler.buildUserModelView(user, privileges)
-
-	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
-		CollaboratorsHandler.removeUserFromProject project_id, user_id, (error) =>
-			return callback(error) if error?
-			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
-			callback()
-
 	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
 		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
