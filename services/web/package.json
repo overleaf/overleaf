@@ -55,22 +55,23 @@
     "xml2js": "0.2.0"
   },
   "devDependencies": {
+    "bunyan": "0.22.1",
     "chai": "",
     "chai-spies": "",
-    "sandboxed-module": "0.2.0",
-    "timekeeper": "",
-    "sinon": "",
+    "grunt-available-tasks": "0.4.1",
+    "grunt-bunyan": "0.5.0",
     "grunt-concurrent": "0.4.3",
     "grunt-contrib-clean": "0.5.0",
     "grunt-contrib-coffee": "0.10.0",
     "grunt-contrib-less": "0.9.0",
-    "grunt-mocha-test": "0.9.0",
-    "grunt-available-tasks": "0.4.1",
     "grunt-contrib-requirejs": "0.4.1",
     "grunt-execute": "0.1.5",
+    "grunt-file-append": "0.0.6",
     "grunt-git-rev-parse": "^0.1.4",
+    "grunt-mocha-test": "0.9.0",
     "grunt-sed": "^0.1.1",
-    "bunyan": "0.22.1",
-    "grunt-bunyan": "0.5.0"
+    "sandboxed-module": "0.2.0",
+    "sinon": "",
+    "timekeeper": ""
   }
 }
