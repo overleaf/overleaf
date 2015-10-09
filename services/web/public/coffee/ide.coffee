@@ -48,6 +48,7 @@ define [
 				fn()
 			else
 				this.$originalApply(fn);
+		__cachebuster = "yes"
 
 		$scope.state = {
 			loading: true
