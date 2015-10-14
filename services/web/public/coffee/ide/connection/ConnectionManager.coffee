@@ -17,6 +17,10 @@ define [], () ->
 				@disconnectIfInactive()
 			, ONEHOUR)
 
+			@userIsLeavingPage = false
+			window.addEventListener 'beforeunload', =>
+				@userIsLeavingPage = true
+
 			@connected = false
 			@userIsInactive = false
 			
@@ -121,6 +125,9 @@ define [], () ->
 				countdown = 60 + Math.floor(Math.random() * 120)
 			else
 				countdown = 3 + Math.floor(Math.random() * 7)
+
+			if @userIsLeavingPage #user will have pressed refresh or back etc
+				return
 
 			@$scope.$apply () =>
 				@$scope.connection.reconnecting = false
