@@ -1,5 +1,9 @@
 define [], () ->
+	ONEHOUR = 1000 * 60 * 60
 	class ConnectionManager
+
+		lastUserAction : new Date()
+
 		constructor: (@ide, @$scope) ->
 			if !io?
 				console.error "Socket.io javascript not loaded. Please check that the real-time service is running and accessible."
@@ -8,18 +12,25 @@ define [], () ->
 				$scope.$apply () =>
 					@$scope.state.error = "Could not connect to websocket server :("
 				return
-			
-			@connected = false
 
+			setInterval(() =>
+				@disconnectIfInactive()
+			, ONEHOUR)
+
+			@connected = false
+			@userIsInactive = false
+			
 			@$scope.connection = 
 				reconnecting: false
 				# If we need to force everyone to reload the editor
 				forced_disconnect: false
+				inactive_disconnect: false
 
 			@$scope.tryReconnectNow = () =>
 				@tryReconnect()
 
 			@$scope.$on 'cursor:editor:update', () =>
+				@lastUserAction = new Date()
 				if !@connected
 					@tryReconnect()
 
@@ -38,6 +49,7 @@ define [], () ->
 
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
+					@$scope.connection.inactive_disconnect = false
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
 
@@ -63,7 +75,7 @@ define [], () ->
 					ga('send', 'event', 'editor-interaction', 'disconnect')
 				, 2000)
 
-				if !$scope.connection.forced_disconnect
+				if !$scope.connection.forced_disconnect and !@userIsInactive
 					@startAutoReconnectCountdown()
 
 			@ide.socket.on 'forceDisconnect', (message) =>
@@ -140,4 +152,11 @@ define [], () ->
 			@$scope.connection.reconnecting = true
 			@ide.socket.socket.reconnect()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
+
+		disconnectIfInactive: ()->
+			@userIsInactive = (new Date() - @lastUserAction) > ONEHOUR * 12
+			if @userIsInactive and @connected
+				@disconnect()
+				@$scope.$apply () =>
+					@$scope.connection.inactive_disconnect = true
 

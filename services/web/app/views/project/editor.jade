@@ -30,8 +30,11 @@ block content
 			.alert.alert-warning.small(ng-if="connection.reconnecting")
 				strong #{translate("reconnecting")}...
 
+			.alert.alert-warning.small(ng-if="connection.inactive_disconnect")
+				strong #{translate("editor_disconected_click_to_reconnect")}
+
 			.div(ng-controller="SavingNotificationController")
-				.alert.alert-warning.small( ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
+				.alert.alert-warning.small(ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
 
 		include ./editor/left-menu
 
