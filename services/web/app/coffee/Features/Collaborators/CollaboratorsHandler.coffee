@@ -3,6 +3,9 @@ Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 mimelib = require("mimelib")
 logger = require('logger-sharelatex')
+UserGetter = require "../User/UserGetter"
+ContactManager = require "../Contacts/ContactManager"
+CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 
 module.exports = CollaboratorsHandler =
 	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
@@ -15,18 +18,18 @@ module.exports = CollaboratorsHandler =
 				logger.error err: err, "problem removing user from project collaberators"
 			callback(err)
 	
-	addEmailToProject: (project_id, unparsed_email, privilegeLevel, callback = (error, user) ->) ->
+	addEmailToProject: (project_id, adding_user_id, unparsed_email, privilegeLevel, callback = (error, user) ->) ->
 		emails = mimelib.parseAddresses(unparsed_email)
 		email = emails[0]?.address?.toLowerCase()
 		if !email? or email == ""
 			return callback(new Error("no valid email provided: '#{unparsed_email}'"))
 		UserCreator.getUserOrCreateHoldingAccount email, (error, user) ->
 			return callback(error) if error?
-			CollaboratorsHandler.addUserToProject project_id, user._id, privilegeLevel, (error) ->
+			CollaboratorsHandler.addUserIdToProject project_id, adding_user_id, user._id, privilegeLevel, (error) ->
 				return callback(error) if error?
 				return callback null, user._id
 
-	addUserToProject: (project_id, user_id, privilegeLevel, callback = (error) ->)->
+	addUserIdToProject: (project_id, adding_user_id, user_id, privilegeLevel, callback = (error) ->)->
 		if privilegeLevel == 'readAndWrite'
 			level = {"collaberator_refs":user_id}
 			logger.log {privileges: "readAndWrite", user_id, project_id}, "adding user"
@@ -35,6 +38,14 @@ module.exports = CollaboratorsHandler =
 			logger.log {privileges: "readOnly", user_id, project_id}, "adding user"
 		else
 			return callback(new Error("unknown privilegeLevel: #{privilegeLevel}"))
+
+		# Do these in the background
+		UserGetter.getUser user_id, {email: 1}, (error, user) ->
+			if error?
+				logger.error {err: error, project_id, user_id}, "error getting user while adding to project"
+			CollaboratorsEmailHandler.notifyUserOfProjectShare project_id, user.email
+		ContactManager.addContact adding_user_id, user_id
+
 		Project.update { _id: project_id }, { $push:level }, (error) ->
 			return callback(error) if error?
 			# Flush to TPDS in background to add files to collaborator's Dropbox

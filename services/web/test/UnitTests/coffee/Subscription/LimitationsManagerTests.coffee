@@ -62,7 +62,7 @@ describe "LimitationsManager", ->
 		it "should return the total number of collaborators", ->
 			@callback.calledWith(null, 3).should.equal true
 
-	describe "isCollaboratorLimitReached", ->
+	describe "canAddXCollaborators", ->
 		beforeEach ->
 			sinon.stub @LimitationsManager,
 					   "currentNumberOfCollaboratorsInProject",
@@ -76,7 +76,16 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 1
 				@allowed_number = 2
-				@LimitationsManager.isCollaboratorLimitReached(@project_id, @callback)
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
+
+			it "should return true", ->
+				@callback.calledWith(null, true).should.equal true
+
+		describe "when the project has fewer collaborators than allowed but I want to add more than allowed", ->
+			beforeEach ->
+				@current_number = 1
+				@allowed_number = 2
+				@LimitationsManager.canAddXCollaborators(@project_id, 2, @callback)
 
 			it "should return false", ->
 				@callback.calledWith(null, false).should.equal true
@@ -85,19 +94,19 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 3
 				@allowed_number = 2
-				@LimitationsManager.isCollaboratorLimitReached(@project_id, @callback)
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
-			it "should return true", ->
-				@callback.calledWith(null, true).should.equal true
+			it "should return false", ->
+				@callback.calledWith(null, false).should.equal true
 
 		describe "when the project has infinite collaborators", ->
 			beforeEach ->
 				@current_number = 100
 				@allowed_number = -1
-				@LimitationsManager.isCollaboratorLimitReached(@project_id, @callback)
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
-			it "should return false", ->
-				@callback.calledWith(null, false).should.equal true
+			it "should return true", ->
+				@callback.calledWith(null, true).should.equal true
 
 
 	describe "userHasSubscription", ->

@@ -14,12 +14,10 @@ describe "CollaboratorsController", ->
 		@CollaboratorsController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			"./CollaboratorsHandler": @CollaboratorsHandler = {}
-			"./CollaboratorsEmailHandler": @CollaboratorsEmailHandler = {}
-			"../User/UserGetter": @UserGetter = {}
 			"../Editor/EditorRealTimeController": @EditorRealTimeController = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
 			'../Project/ProjectEditorHandler' : @ProjectEditorHandler = {}
-			"../Contacts/ContactManager": @ContactManager = {}
+			'../User/UserGetter': @UserGetter = {}
 		@res = new MockResponse()
 		@req = new MockRequest()
 
@@ -72,13 +70,11 @@ describe "CollaboratorsController", ->
 			@user_view = {
 				id: @user_id, first_name: "Joe", last_name: "Example", email: "joe@example.com"
 			}
-			@LimitationsManager.isCollaboratorLimitReached = sinon.stub().callsArgWith(1, null, false)
+			@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 			@ProjectEditorHandler.buildUserModelView = sinon.stub().returns(@user_view)
-			@CollaboratorsHandler.addEmailToProject = sinon.stub().callsArgWith(3, null, @user_id)
+			@CollaboratorsHandler.addEmailToProject = sinon.stub().callsArgWith(4, null, @user_id)
 			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
-			@CollaboratorsEmailHandler.notifyUserOfProjectShare = sinon.stub()
 			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ContactManager.addContact = sinon.stub()
 			@callback = sinon.stub()
 
 		describe "when the project can accept more collaborators", ->
@@ -87,22 +83,12 @@ describe "CollaboratorsController", ->
 
 			it "should add the user to the project", ->
 				@CollaboratorsHandler.addEmailToProject
-					.calledWith(@project_id, @email.toLowerCase(), @privileges)
+					.calledWith(@project_id, @adding_user_id, @email.toLowerCase(), @privileges)
 					.should.equal true
 
 			it "should emit a userAddedToProject event", ->
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "userAddedToProject", @user_view, @privileges)
-					.should.equal true
-			
-			it "should send an email to the shared-with user", ->
-				@CollaboratorsEmailHandler.notifyUserOfProjectShare
-					.calledWith(@project_id, @email.toLowerCase())
-					.should.equal true
-			
-			it "should add the user as a contact for the adding user", ->
-				@ContactManager.addContact
-					.calledWith(@adding_user_id, @user_id)
 					.should.equal true
 
 			it "should send the user as the response body", ->
@@ -114,7 +100,7 @@ describe "CollaboratorsController", ->
 
 		describe "when the project cannot accept more collaborators", ->
 			beforeEach ->
-				@LimitationsManager.isCollaboratorLimitReached = sinon.stub().callsArgWith(1, null, true)
+				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, false)
 				@CollaboratorsController.addUserToProject @req, @res, @next
 		
 			it "should not add the user to the project", ->

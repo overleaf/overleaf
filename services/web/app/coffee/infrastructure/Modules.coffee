@@ -47,7 +47,6 @@ module.exports = Modules =
 	hooks:
 		_hooks: {}
 		attach: (name, method) ->
-			console.log "attaching hook", name, method
 			@_hooks[name] ?= []
 			@_hooks[name].push method
 			

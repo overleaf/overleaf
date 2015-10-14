@@ -146,12 +146,12 @@ script(type="text/ng-template", id="shareTagTemplate")
 script(type="text/ng-template", id="shareAutocompleteTemplate")
 	.autocomplete-template
 		div(ng-if="data.type == 'user'")
-			i.fa.fa-user
+			i.fa.fa-fw.fa-user
 			| 
 			span(ng-bind-html="$highlight(data.email)")
 			div.subdued.small(ng-show="data.name", ng-bind-html="$highlight(data.name)")
 		div(ng-if="data.type == 'group'")
-			i.fa.fa-group
+			i.fa.fa-fw.fa-group
 			| 
 			span(ng-bind-html="$highlight(data.name)")
 			div.subdued.small(ng-show="data.member_count") {{ data.memberCount }} members
