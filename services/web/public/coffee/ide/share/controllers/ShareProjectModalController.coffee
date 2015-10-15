@@ -4,7 +4,7 @@ define [
 	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, $modal, $http) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
-			email: ""
+			contacts: []
 		}
 		$scope.state = {
 			error: null
@@ -54,32 +54,40 @@ define [
 			$timeout -> # Give email list a chance to update
 				return if $scope.inputs.contacts.length == 0
 
-				console.warn "Ignoring groups for now"
-				emails = $scope.inputs.contacts.filter (contact) -> contact.type == "user"
-				emails = emails.map (contact) -> contact.email
+				members = $scope.inputs.contacts
 				$scope.inputs.contacts = []
 				$scope.state.error = null
 				$scope.state.inflight = true
 				
-				console.log "Adding emails", emails
+				console.log "Adding members", members
 
 				do addNextMember = () ->
-					if emails.length == 0 or !$scope.canAddCollaborators
+					if members.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
 						$scope.$apply()
 						return
 					
-					email = emails.shift()
-					projectMembers
-						.addMember(email, $scope.inputs.privileges)
+					member = members.shift()
+					if member.type == "user"
+						request = projectMembers.addMember(member.email, $scope.inputs.privileges)
+					else if member.type == "group"
+						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
+					
+					request
 						.success (data) ->
-							if data?.user # data.user is false if collaborator limit is hit.
-								$scope.project.members.push data.user
-								setTimeout () ->
-									# Give $scope a chance to update $scope.canAddCollaborators
-									# with new collaborator information.
-									addNextMember()
-								, 0
+							if data.users?
+								users = data.users
+							else if data.user?
+								users = [data.user]
+							else
+								users = []
+								
+							$scope.project.members.push users...
+							setTimeout () ->
+								# Give $scope a chance to update $scope.canAddCollaborators
+								# with new collaborator information.
+								addNextMember()
+							, 0
 						.error () ->
 							$scope.state.inflight = false
 							$scope.state.error = "Sorry, something went wrong :("
