@@ -2,6 +2,9 @@ define [], () ->
 	ONEHOUR = 1000 * 60 * 60
 	class ConnectionManager
 
+
+		disconnectAfterMs: ONEHOUR * 24
+
 		lastUserAction : new Date()
 
 		constructor: (@ide, @$scope) ->
@@ -161,7 +164,7 @@ define [], () ->
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 
 		disconnectIfInactive: ()->
-			@userIsInactive = (new Date() - @lastUserAction) > ONEHOUR * 12
+			@userIsInactive = (new Date() - @lastUserAction) > @disconnectAfterMs
 			if @userIsInactive and @connected
 				@disconnect()
 				@$scope.$apply () =>
