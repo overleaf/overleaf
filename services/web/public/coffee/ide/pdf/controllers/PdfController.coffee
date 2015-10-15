@@ -196,6 +196,11 @@ define [
 		else
 			$scope.switchToSideBySideLayout()
 
+		$scope.startFreeTrial = (source) ->
+			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
+			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
+			$scope.startedFreeTrial = true
+
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
 		synctex =
 			syncToPdf: (cursorPosition) ->
