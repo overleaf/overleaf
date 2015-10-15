@@ -55,6 +55,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							display-property="display"
 							key-property="id"
 							add-on-paste="true"
+							replace-spaces-with-dashes="false"
 						)
 							auto-complete(
 								source="filterAutocompleteUsers($query)"
@@ -148,10 +149,9 @@ script(type="text/ng-template", id="shareAutocompleteTemplate")
 		div(ng-if="data.type == 'user'")
 			i.fa.fa-fw.fa-user
 			| 
-			span(ng-bind-html="$highlight(data.email)")
-			div.subdued.small(ng-show="data.name", ng-bind-html="$highlight(data.name)")
+			span(ng-bind-html="$highlight(data.display)")
 		div(ng-if="data.type == 'group'")
 			i.fa.fa-fw.fa-group
 			| 
 			span(ng-bind-html="$highlight(data.name)")
-			div.subdued.small(ng-show="data.member_count") {{ data.memberCount }} members
+			span.subdued.small(ng-show="data.member_count")  ({{ data.member_count }} members)

@@ -22,9 +22,6 @@ define [
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
-		$scope.$watchCollection "inputs.contacts", (value) ->
-			console.log "EMAILS", value
-		
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
 			$http.get "/user/contacts"
@@ -34,7 +31,6 @@ define [
 						if contact.type == "user"
 							if contact.last_name == "" and contact.first_name = contact.email.split("@")[0]
 								# User has not set their proper name so use email as canonical display property
-								contact.name = ""
 								contact.display = contact.email
 							else
 								contact.name = "#{contact.first_name} #{contact.last_name}"
@@ -59,8 +55,6 @@ define [
 				$scope.state.error = null
 				$scope.state.inflight = true
 				
-				console.log "Adding members", members
-
 				do addNextMember = () ->
 					if members.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
