@@ -53,9 +53,9 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							ng-model="inputs.contacts"
 							focus-on="open"
 							display-property="display"
-							key-property="id"
 							add-on-paste="true"
 							replace-spaces-with-dashes="false"
+							type="email"
 						)
 							auto-complete(
 								source="filterAutocompleteUsers($query)"
@@ -137,7 +137,7 @@ script(type="text/ng-template", id="makePrivateModalTemplate")
 script(type="text/ng-template", id="shareTagTemplate")
 	.tag-template
 		span(ng-if="data.type")
-			i.fa.fa-fw(ng-class="{'fa-user': data.type == 'user', 'fa-group': data.type == 'group'}")
+			i.fa.fa-fw(ng-class="{'fa-user': data.type != 'group', 'fa-group': data.type == 'group'}")
 			| 
 		span {{$getDisplayText()}}
 		| 
