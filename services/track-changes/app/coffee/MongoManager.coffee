@@ -33,6 +33,9 @@ module.exports = MongoManager =
 					# we want to force a new update, but ensure that it is
 					# consistent with the version of the existing one in S3
 					return callback null, null, update.v
+				else if update.broken
+					# the update is marked as broken so we will force a new op
+					return callback null, null
 				else
 					MongoManager.deleteCompressedUpdate update._id, (error) ->
 						return callback(error) if error?

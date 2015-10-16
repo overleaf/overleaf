@@ -14,7 +14,11 @@ module.exports = DiffManager =
 	getDiff: (project_id, doc_id, fromVersion, toVersion, callback = (error, diff) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, from: fromVersion, to: toVersion, "getting diff"
 		DiffManager.getDocumentBeforeVersion project_id, doc_id, fromVersion, (error, startingContent, updates) ->
-			return callback(error) if error?
+			if error?
+				if error.message == "broken-history"
+					return callback(null, "history unavailable")
+				else
+					return callback(error)
 
 			updatesToApply = []
 			for update in updates.slice().reverse()
@@ -32,6 +36,10 @@ module.exports = DiffManager =
 		logger.log project_id: project_id, doc_id: doc_id, version: version, "getting document before version"
 		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, null, (error, content, version, updates) ->
 			return callback(error) if error?
+
+			# bail out if we hit a broken update
+			for u in updates when u.broken
+				return callback new Error "broken-history"
 
 			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version - 1
