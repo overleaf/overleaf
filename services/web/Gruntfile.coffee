@@ -11,7 +11,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-bunyan'
 	grunt.loadNpmTasks 'grunt-sed'
 	grunt.loadNpmTasks 'grunt-git-rev-parse'
-	
+	grunt.loadNpmTasks 'grunt-file-append'
+
 	config =
 		execute:
 			app:
@@ -128,6 +129,14 @@ module.exports = (grunt) ->
 			version:
 				options:
 					prop: 'commit'
+
+
+		file_append:
+			default_options: files: [ {
+				append: '\n//ide.js is complete - used for automated testing'
+				input: 'public/minjs/ide.js'
+				output: 'public/minjs/ide.js'
+			}]
 
 		sed:
 			version:
@@ -272,7 +281,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
-	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs']
+	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append"]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
 	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests']

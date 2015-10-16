@@ -1,5 +1,12 @@
 define [], () ->
+	ONEHOUR = 1000 * 60 * 60
 	class ConnectionManager
+
+
+		disconnectAfterMs: ONEHOUR * 24
+
+		lastUserAction : new Date()
+
 		constructor: (@ide, @$scope) ->
 			if !io?
 				console.error "Socket.io javascript not loaded. Please check that the real-time service is running and accessible."
@@ -8,18 +15,29 @@ define [], () ->
 				$scope.$apply () =>
 					@$scope.state.error = "Could not connect to websocket server :("
 				return
-			
-			@connected = false
 
+			setInterval(() =>
+				@disconnectIfInactive()
+			, ONEHOUR)
+
+			@userIsLeavingPage = false
+			window.addEventListener 'beforeunload', =>
+				@userIsLeavingPage = true
+
+			@connected = false
+			@userIsInactive = false
+			
 			@$scope.connection = 
 				reconnecting: false
 				# If we need to force everyone to reload the editor
 				forced_disconnect: false
+				inactive_disconnect: false
 
 			@$scope.tryReconnectNow = () =>
 				@tryReconnect()
 
 			@$scope.$on 'cursor:editor:update', () =>
+				@lastUserAction = new Date()
 				if !@connected
 					@tryReconnect()
 
@@ -29,6 +47,7 @@ define [], () ->
 
 			@ide.socket = io.connect null,
 				reconnect: false
+				'connect timeout': 30 * 1000
 				"force new connection": true
 
 			@ide.socket.on "connect", () =>
@@ -37,12 +56,20 @@ define [], () ->
 
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
+					@$scope.connection.inactive_disconnect = false
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
 
 				setTimeout(() =>
 					@joinProject()
 				, 100)
+
+			@ide.socket.on "connect_failed", () =>
+				@connected = false
+				$scope.$apply () =>
+					@$scope.state.error = "Unable to connect, please view the <u><a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a></u> to fix the issue."
+
+
 
 			@ide.socket.on 'disconnect', () =>
 				@connected = false
@@ -55,7 +82,7 @@ define [], () ->
 					ga('send', 'event', 'editor-interaction', 'disconnect')
 				, 2000)
 
-				if !$scope.connection.forced_disconnect
+				if !$scope.connection.forced_disconnect and !@userIsInactive
 					@startAutoReconnectCountdown()
 
 			@ide.socket.on 'forceDisconnect', (message) =>
@@ -102,6 +129,9 @@ define [], () ->
 			else
 				countdown = 3 + Math.floor(Math.random() * 7)
 
+			if @userIsLeavingPage #user will have pressed refresh or back etc
+				return
+
 			@$scope.$apply () =>
 				@$scope.connection.reconnecting = false
 				@$scope.connection.reconnection_countdown = countdown
@@ -132,4 +162,11 @@ define [], () ->
 			@$scope.connection.reconnecting = true
 			@ide.socket.socket.reconnect()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
+
+		disconnectIfInactive: ()->
+			@userIsInactive = (new Date() - @lastUserAction) > @disconnectAfterMs
+			if @userIsInactive and @connected
+				@disconnect()
+				@$scope.$apply () =>
+					@$scope.connection.inactive_disconnect = true
 

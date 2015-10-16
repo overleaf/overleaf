@@ -32,46 +32,35 @@ module.exports = ReferalAllocator =
 
 
 	assignBonus: (user_id, callback = (error) ->) ->
-		SubscriptionLocator.getUsersSubscription user_id, (error, subscription) ->
-			return callback(error) if error?
-			logger.log
-				subscription: subscription,
-				user_id: user_id,
-				"checking user doesn't have a subsciption before assigning bonus"
-			if !subscription? or !subscription.planCode?
-				query = _id: user_id
-				User.findOne query, (error, user) ->
-					return callback(error) if error
-					return callback(new Error("user not found")) if !user?
-					logger.log
-						user_id: user_id,
-						refered_user_count: user.refered_user_count,
-						"assigning bonus"
-					if user.refered_user_count? and user.refered_user_count > 0
-						newFeatures = ReferalAllocator._calculateBonuses(user)
-						User.update query, { $set: features: newFeatures }, callback
-
-					else
-						callback()
+		query = _id: user_id
+		User.findOne query, (error, user) ->
+			return callback(error) if error
+			return callback(new Error("user not found")) if !user?
+			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"
+			if user.refered_user_count? and user.refered_user_count > 0
+				newFeatures = ReferalAllocator._calculateFeatures(user)
+				if _.isEqual newFeatures, user.features
+					return callback()
+				User.update query, { $set: features: newFeatures }, callback
 			else
 				callback()
-		
-	_calculateBonuses : (user)->
-		bonusLevel = ReferalAllocator._getBonusLevel(user)
 
-		newFeatures = {}
+	_calculateFeatures : (user)->
+		bonusLevel = ReferalAllocator._getBonusLevel(user)
+		currentFeatures = _.clone(user.features) #need to clone because we exend with underscore later
+		betterBonusFeatures = {}
 		_.each Settings.bonus_features["#{bonusLevel}"], (bonusLevel, key)->
 			currentLevel = user?.features?[key]
 			if _.isBoolean(currentLevel) and currentLevel == false
-				newFeatures[key] = bonusLevel
+				betterBonusFeatures[key] = bonusLevel
 
-			if _.isNumber(currentLevel) 
+			if _.isNumber(currentLevel)
 				if currentLevel == -1
 					return
 				bonusIsGreaterThanCurrent = currentLevel < bonusLevel
 				if bonusIsGreaterThanCurrent or bonusLevel == -1
-					newFeatures[key] = bonusLevel
-
+					betterBonusFeatures[key] = bonusLevel
+		newFeatures = _.extend(currentFeatures, betterBonusFeatures)
 		return newFeatures
 
 
