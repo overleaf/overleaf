@@ -1,6 +1,8 @@
 DocManager = require "./DocManager"
 logger = require "logger-sharelatex"
 DocArchive = require "./DocArchiveManager"
+HealthChecker = require "./HealthChecker"
+
 
 module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
@@ -93,4 +95,12 @@ module.exports = HttpController =
 		DocArchive.unArchiveAllDocs project_id, (error) ->
 			return next(error) if error?
 			res.send 200
+
+	healthCheck: (req, res)->
+		HealthChecker.check (err)->
+			if err?
+				logger.err err:err, "error performing health check"
+				res.send 500
+			else
+				res.send 200
 

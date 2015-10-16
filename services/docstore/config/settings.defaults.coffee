@@ -10,7 +10,9 @@ module.exports =
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'
 
-	#docstore:
+	docstore:
+		healthCheck:
+			project_id: "5620bece05509b0a7a3cbc61"
 	#	s3:
 	#		key: ""
 	#		secret: ""

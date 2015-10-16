@@ -25,46 +25,7 @@ app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
 app.post  '/project/:project_id/archive', HttpController.archiveAllDocs
 app.post  '/project/:project_id/unarchive', HttpController.unArchiveAllDocs
 
-
-ObjectId = require("mongojs").ObjectId
-request = require("request")
-async = require("async")
-_ = require("underscore")
-crypto = require("crypto")
-
-app.get "/health_check", (req, res)->
-	doc_id = ObjectId()
-	project_id = ObjectId()
-	url = "http://localhost:#{port}/project/#{project_id}/doc/#{doc_id}"
-	lines = ["smoke test - delete me", "#{crypto.randomBytes(32).toString("hex")}"]
-	logger.log lines:lines, url:url, doc_id:doc_id, project_id:project_id, "running health check"
-	jobs = [
-		(cb)->
-			opts = 
-				url:url
-				json: {lines: lines}
-			request.post(opts, cb)
-		(cb)->
-			request.get {url:url, json:true}, (err, res, body)->
-				if res.statusCode != 200
-					cb("status code not 200, its #{res.statusCode}")
-				else if _.isEqual(body.lines, lines) and body._id == doc_id.toString()
-					cb()
-				else
-					cb("lines not equal ")
-		(cb)->
-			request.del url, cb
-	]
-	async.series jobs, (err)->
-		if err?
-			logger.err err:err, "error running health check"
-			res.send 500
-		else
-			res.send()
-
-
-
-
+app.get "/health_check",  HttpController.healthCheck
 
 app.get '/status', (req, res)->
 	res.send('docstore is alive')
