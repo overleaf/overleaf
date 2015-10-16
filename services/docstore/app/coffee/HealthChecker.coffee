@@ -10,11 +10,11 @@ logger = require "logger-sharelatex"
 
 module.exports = 
 	check : (callback)->
-		getOpts = -> {url:url, timeout:3000}
 		doc_id = ObjectId()
 		project_id = ObjectId(settings.docstore.healthCheck.project_id)
 		url = "http://localhost:#{port}/project/#{project_id}/doc/#{doc_id}"
 		lines = ["smoke test - delete me", "#{crypto.randomBytes(32).toString("hex")}"]
+		getOpts = -> {url:url, timeout:3000}
 		logger.log lines:lines, url:url, doc_id:doc_id, project_id:project_id, "running health check"
 		jobs = [
 			(cb)->
