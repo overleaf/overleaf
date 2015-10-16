@@ -10,6 +10,7 @@ logger = require "logger-sharelatex"
 
 module.exports = 
 	check : (callback)->
+		getOpts = -> {url:url, timeout:3000}
 		doc_id = ObjectId()
 		project_id = ObjectId(settings.docstore.healthCheck.project_id)
 		url = "http://localhost:#{port}/project/#{project_id}/doc/#{doc_id}"
@@ -17,19 +18,21 @@ module.exports =
 		logger.log lines:lines, url:url, doc_id:doc_id, project_id:project_id, "running health check"
 		jobs = [
 			(cb)->
-				opts = 
-					url:url
-					json: {lines: lines}
+				opts = getOpts()
+				opts.json = {lines: lines}
 				request.post(opts, cb)
 			(cb)->
-				request.get {url:url, json:true}, (err, res, body)->
+				opts = getOpts()
+				opts.json = true
+				request.get opts, (err, res, body)->
 					if res.statusCode != 200
 						cb("status code not 200, its #{res.statusCode}")
 					else if _.isEqual(body.lines, lines) and body._id == doc_id.toString()
 						cb()
 					else
 						cb("health check lines not equal #{body.lines} != #{lines}")
-			(cb)->
-				request.del url, cb
 		]
-		async.series jobs, callback
+		async.series jobs, (err)->
+			if err?
+				callback(err)
+			request.del getOpts(), callback
