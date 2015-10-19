@@ -1,4 +1,5 @@
 chai = require('chai')
+expect = chai.expect
 chai.should()
 sinon = require("sinon")
 modulePath = "../../../../app/js/Features/TrackChanges/TrackChangesManager"
@@ -15,6 +16,7 @@ describe "TrackChangesManager", ->
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
+		@request.post = sinon.stub()
 
 	describe "flushProject", ->
 		describe "with a successful response code", ->
@@ -46,3 +48,16 @@ describe "TrackChangesManager", ->
 					}, "error flushing project in track-changes api")
 					.should.equal true
 
+	describe "ArchiveProject", ->
+
+		it "should call the post endpoint", (done)->
+			@request.post.callsArgWith(1, null, {})
+			@TrackChangesManager.archiveProject @project_id, (err)=>
+				@request.post.calledWith("#{@settings.apis.trackchanges.url}/project/#{@project_id}/archive")
+				done()
+
+		it "should return an error on a non success", (done)->
+			@request.post.callsArgWith(1, null, {statusCode:500})
+			@TrackChangesManager.archiveProject @project_id, (err)=>
+				expect(err).to.exist
+				done()

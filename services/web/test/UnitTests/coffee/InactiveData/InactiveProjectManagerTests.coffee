@@ -19,6 +19,8 @@ describe "InactiveProjectManager", ->
 			markAsInactive:sinon.stub()
 		@ProjectGetter = 
 			getProject:sinon.stub()
+		@TrackChangesManager =
+			archiveProject:sinon.stub()
 		@InactiveProjectManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -27,7 +29,7 @@ describe "InactiveProjectManager", ->
 			"../Docstore/DocstoreManager":@DocstoreManager
 			"../Project/ProjectUpdateHandler":@ProjectUpdateHandler
 			"../Project/ProjectGetter":@ProjectGetter
-
+			"../TrackChanges/TrackChangesManager":@TrackChangesManager
 		@project_id = "1234"
 
 	describe "reactivateProjectIfRequired", ->
@@ -64,19 +66,35 @@ describe "InactiveProjectManager", ->
 
 	describe "deactivateProject", ->
 
-		beforeEach ->
-
 		it "should call unarchiveProject and markAsInactive", (done)->
 			@DocstoreManager.archiveProject.callsArgWith(1)
+			@TrackChangesManager.archiveProject.callsArgWith(1)
+
 			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
 			@InactiveProjectManager.deactivateProject @project_id, (err)=>
 				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
+				@TrackChangesManager.archiveProject.calledWith(@project_id).should.equal true
 				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal true
 				done()
 
-		it "should not call markAsInactive if there was a problem unarchiving", (done)->
+		it "should not call markAsInactive if there was a problem archiving in docstore", (done)->
 			@DocstoreManager.archiveProject.callsArgWith(1, "errorrr")
+			@TrackChangesManager.archiveProject.callsArgWith(1)
+
+			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
+
+			@InactiveProjectManager.deactivateProject @project_id, (err)=>
+				err.should.equal "errorrr"
+				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
+				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal false
+				done()
+
+
+		it "should not call markAsInactive if there was a problem archiving in track changes", (done)->
+			@DocstoreManager.archiveProject.callsArgWith(1)
+			@TrackChangesManager.archiveProject.callsArgWith(1, "errorrr")
+
 			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
 			@InactiveProjectManager.deactivateProject @project_id, (err)=>
