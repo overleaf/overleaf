@@ -109,7 +109,7 @@ module.exports = ClsiManager =
 	wordCount: (project_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
-			filename = file || req.compile.rootResourcePath
+			filename = file || req?.compile?.rootResourcePath
 			request.get {
 				url:  "#{compilerUrl}/project/#{project_id}/wordcount?file=#{filename}"
 			}, (error, response, body) ->
