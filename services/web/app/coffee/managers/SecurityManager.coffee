@@ -89,7 +89,9 @@ module.exports = SecurityManager =
 
 	requestIsOwner : (req, res, next)->
 		getRequestUserAndProject req, res, {}, (err, user, project)->
-			if userIsOwner user, project || user.isAdmin
+			if !user?
+				return res.redirect('/restricted')
+			else if userIsOwner user, project || user.isAdmin
 				next()
 			else
 				logger.log user_id: user?._id, email: user?.email, "user is not owner of project redirecting to restricted page"
