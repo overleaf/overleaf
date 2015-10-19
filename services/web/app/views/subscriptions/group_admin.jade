@@ -5,7 +5,7 @@ block content
 		.container
 			.row
 				.col-md-10.col-md-offset-1
-					.card(ng-controller="GroupMembersController")
+					.card(ng-controller="SubscriptionGroupMembersController")
 						.page-header
 							.pull-right(ng-cloak)
 								small(ng-show="selectedUsers.length == 0") !{translate("you_have_added_x_of_group_size_y", {addedUsersSize:"<strong>{{ users.length }}</strong>", groupSize:"<strong>{{ groupSize }}</strong>"})}
@@ -35,7 +35,7 @@ block content
 											span.header #{translate("registered")}
 								li.container-fluid(
 									ng-repeat="user in users | orderBy:'email':true",
-									ng-controller="GroupMemberListItemController"
+									ng-controller="SubscriptionGroupMemberListItemController"
 								)
 									.row
 										.col-md-5

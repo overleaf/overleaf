@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "GroupMembersController", ($scope, queuedHttp) ->
+	App.controller "SubscriptionGroupMembersController", ($scope, queuedHttp) ->
 		$scope.users = window.users
 		$scope.groupSize = window.groupSize
 		$scope.selectedUsers = []
@@ -48,7 +48,7 @@ define [
 		$scope.updateSelectedUsers = () ->
 			$scope.selectedUsers = $scope.users.filter (user) -> user.selected
 
-	App.controller "GroupMemberListItemController", ($scope) ->
+	App.controller "SubscriptionGroupMemberListItemController", ($scope) ->
 		$scope.$watch "user.selected", (value) ->
 			if value?
 				$scope.updateSelectedUsers()
