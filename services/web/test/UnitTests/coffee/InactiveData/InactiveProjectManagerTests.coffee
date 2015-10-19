@@ -30,6 +30,7 @@ describe "InactiveProjectManager", ->
 			"../Project/ProjectUpdateHandler":@ProjectUpdateHandler
 			"../Project/ProjectGetter":@ProjectGetter
 			"../TrackChanges/TrackChangesManager":@TrackChangesManager
+			"../../models/Project":{}
 		@project_id = "1234"
 
 	describe "reactivateProjectIfRequired", ->
