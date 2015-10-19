@@ -70,7 +70,7 @@ module.exports =
 			return callback(error) if error?
 			User.findById recurlySubscription.account.account_code, (error, user) ->
 				return callback(error) if error?
-				SubscriptionUpdater.syncSubscription recurlySubscription, user._id, callback
+				SubscriptionUpdater.syncSubscription recurlySubscription, user?._id, callback
 
 
 
