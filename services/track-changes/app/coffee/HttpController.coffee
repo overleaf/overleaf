@@ -4,6 +4,7 @@ PackManager = require "./PackManager"
 RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 DocArchiveManager = require "./DocArchiveManager"
+HealthChecker = require "./HealthChecker"
 
 module.exports = HttpController =
 	flushDoc: (req, res, next = (error) ->) ->
@@ -81,3 +82,11 @@ module.exports = HttpController =
 		DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
 			return next(error) if error?
 			res.send 204
+
+	healthCheck: (req, res)->
+		HealthChecker.check (err)->
+			if err?
+				logger.err err:err, "error performing health check"
+				res.send 500
+			else
+				res.send 200

@@ -47,6 +47,8 @@ app.post "/pack", (req, res, next) ->
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 
+app.get "/health_check",  HttpController.healthCheck
+
 app.use (error, req, res, next) ->
 	logger.error err: error, "an internal error occured"
 	res.send 500
