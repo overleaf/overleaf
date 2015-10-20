@@ -75,7 +75,7 @@ describe "InactiveProjectManager", ->
 
 			@InactiveProjectManager.deactivateProject @project_id, (err)=>
 				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
-				@TrackChangesManager.archiveProject.calledWith(@project_id).should.equal true
+				# @TrackChangesManager.archiveProject.calledWith(@project_id).should.equal true
 				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal true
 				done()
 
@@ -92,14 +92,14 @@ describe "InactiveProjectManager", ->
 				done()
 
 
-		it "should not call markAsInactive if there was a problem archiving in track changes", (done)->
-			@DocstoreManager.archiveProject.callsArgWith(1)
-			@TrackChangesManager.archiveProject.callsArgWith(1, "errorrr")
+		# it "should not call markAsInactive if there was a problem archiving in track changes", (done)->
+		# 	@DocstoreManager.archiveProject.callsArgWith(1)
+		# 	@TrackChangesManager.archiveProject.callsArgWith(1, "errorrr")
 
-			@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
+		# 	@ProjectUpdateHandler.markAsInactive.callsArgWith(1)
 
-			@InactiveProjectManager.deactivateProject @project_id, (err)=>
-				err.should.equal "errorrr"
-				@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
-				@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal false
-				done()
+		# 	@InactiveProjectManager.deactivateProject @project_id, (err)=>
+		# 		err.should.equal "errorrr"
+		# 		@DocstoreManager.archiveProject.calledWith(@project_id).should.equal true
+		# 		@ProjectUpdateHandler.markAsInactive.calledWith(@project_id).should.equal false
+		# 		done()
