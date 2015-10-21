@@ -43,6 +43,41 @@ describe "ProjectGetter", ->
 		it "should call the callback with the project", ->
 			@callback.calledWith(null, @project).should.equal true
 
+	describe "getProjectWithOnlyFolders", ->
+		beforeEach ->
+			@project =
+				_id: @project_id = "0123456789abcd9876543210"
+			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
+			@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
+
+		it "should call find with the project id", ->
+			@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+
+		it "should exclude the docs and files lines", ->
+			excludes =
+				"rootFolder.docs": 0
+				"rootFolder.fileRefs": 0
+				"rootFolder.folder.docs": 0
+				"rootFolder.folder.fileRefs": 0
+				"rootFolder.folder.folder.docs": 0
+				"rootFolder.folder.folder.fileRefs": 0
+				"rootFolder.folder.folder.folder.docs": 0
+				"rootFolder.folder.folder.folder.fileRefs": 0
+				"rootFolder.folder.folder.folder.folder.docs": 0
+				"rootFolder.folder.folder.folder.folder.fileRefs": 0
+				"rootFolder.folder.folder.folder.folder.folder.docs": 0
+				"rootFolder.folder.folder.folder.folder.folder.fileRefs": 0
+				"rootFolder.folder.folder.folder.folder.folder.folder.docs": 0
+				"rootFolder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+				"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs": 0
+				"rootFolder.folder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+			@db.projects.find.calledWith(sinon.match.any, excludes)
+				.should.equal true
+
+		it "should call the callback with the project", ->
+			@callback.calledWith(null, @project).should.equal true
+
+
 	describe "populateProjectWithUsers", ->
 		beforeEach ->
 			@users = []

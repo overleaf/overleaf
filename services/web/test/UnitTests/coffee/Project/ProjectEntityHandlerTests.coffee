@@ -55,6 +55,8 @@ describe 'ProjectEntityHandler', ->
 
 		@ProjectModel.findById = (project_id, callback)=> callback(null, @project)
 		@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, @project)
+		@ProjectGetter = 
+			getProjectWithOnlyFolders : (project_id, callback)=> callback(null, @project)
 		@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:"somehintg"}})
 		@projectUpdater = markAsUpdated:sinon.stub()
 		@ProjectEntityHandler = SandboxedModule.require modulePath, requires:
@@ -69,7 +71,7 @@ describe 'ProjectEntityHandler', ->
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
 			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub()}
 			'./ProjectUpdateHandler': @projectUpdater
-			"./ProjectGetter": @ProjectGetter = {}
+			"./ProjectGetter": @ProjectGetter
 
 
 	describe 'mkdirp', ->
@@ -503,6 +505,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
 
 			@tpdsUpdateSender.addFile = (options)=>
+				console.log @project.name, options.project_name
 				options.project_id.should.equal project_id
 				options.path.should.equal opts.path
 				options.project_name.should.equal @project.name

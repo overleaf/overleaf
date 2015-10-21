@@ -140,7 +140,7 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFile: (project_or_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
-		Project.getProject project_or_id, "", (err, project) ->
+		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project) ->
 			logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)->

@@ -13,6 +13,14 @@ module.exports = ProjectGetter =
 		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
 			callback error, projects[0]
 
+	getProjectWithOnlyFolders: (project_id, callback=(error, project) ->) ->
+		excludes = {}
+		for i in [1..@EXCLUDE_DEPTH]
+			excludes["rootFolder#{Array(i).join(".folder")}.docs"] = 0
+			excludes["rootFolder#{Array(i).join(".folder")}.fileRefs"] = 0
+		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
+			callback error, projects[0]
+
 	getProject: (query, projection, callback = (error, project) ->) ->
 		if typeof query == "string"
 			query = _id: ObjectId(query)
