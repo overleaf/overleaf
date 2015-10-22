@@ -357,15 +357,18 @@ module.exports =
 	# ----------
 
 
-	
-	# ldap:
+	# username = einstein
+	# password = password
+	# ldap :
 	# 	host: 'ldap://ldap.forumsys.com'
-	# 	dnObj: 'uid'
-	# 	dnSuffix: 'dc=example,dc=com'
+	# 	dn: 'uid=:userKey,dc=example,dc=com'
+	# 	baseSearch: 'dc=example,dc=com'
+	# 	filter: "(uid=:userKey)"
 	# 	failMessage: 'LDAP User Fail'
 	# 	fieldName: 'LDAP User'
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
+	# 	anonymous: false
 	
 	#templateLinks: [{
 	#	name : "CV projects",
