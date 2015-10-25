@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.push;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
@@ -16,8 +17,8 @@ public class PushRequest extends SnapshotAPIRequest<PushResult> {
     private final CandidateSnapshot candidateSnapshot;
     private final String postbackKey;
 
-    public PushRequest(CandidateSnapshot candidateSnapshot, String postbackKey) {
-        super(candidateSnapshot.getProjectName(), API_CALL);
+    public PushRequest(Credential oauth2, CandidateSnapshot candidateSnapshot, String postbackKey) {
+        super(candidateSnapshot.getProjectName(), API_CALL, oauth2);
         this.candidateSnapshot = candidateSnapshot;
         this.postbackKey = postbackKey;
     }

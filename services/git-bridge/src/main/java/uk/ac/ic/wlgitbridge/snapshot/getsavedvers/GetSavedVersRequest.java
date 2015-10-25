@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.getsavedvers;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
@@ -12,8 +13,8 @@ public class GetSavedVersRequest extends SnapshotAPIRequest<GetSavedVersResult> 
 
     public static final String API_CALL = "/saved_vers";
 
-    public GetSavedVersRequest(String projectName) {
-        super(projectName, API_CALL);
+    public GetSavedVersRequest(Credential oauth2, String projectName) {
+        super(projectName, API_CALL, oauth2);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.getforversion;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -14,8 +15,8 @@ public class GetForVersionRequest extends SnapshotAPIRequest<GetForVersionResult
 
     private int versionID;
 
-    public GetForVersionRequest(String projectName, int versionID) {
-        super(projectName, API_CALL + "/" + versionID);
+    public GetForVersionRequest(Credential oauth2, String projectName, int versionID) {
+        super(projectName, API_CALL + "/" + versionID, oauth2);
         this.versionID = versionID;
     }
 

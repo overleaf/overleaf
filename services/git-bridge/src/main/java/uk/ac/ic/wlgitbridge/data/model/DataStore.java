@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.data.model;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -10,6 +11,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -40,8 +42,8 @@ public class DataStore {
         resourceFetcher = new ResourceFetcher(persistentStore);
     }
 
-    public void updateProjectWithName(String name, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
-        LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(name, persistentStore.getLatestVersionForProject(name));
+    public void updateProjectWithName(Credential oauth2, String name, Repository repository) throws IOException, SnapshotPostException, GitAPIException, ForbiddenException {
+        LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(oauth2, name, persistentStore.getLatestVersionForProject(name));
         if (!snapshots.isEmpty()) {
             persistentStore.setLatestVersionForProject(name, snapshots.getLast().getVersionID());
         }

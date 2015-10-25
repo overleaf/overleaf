@@ -1,9 +1,11 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
@@ -24,13 +26,13 @@ public class WLBridgedProject {
         this.bridgeAPI = bridgeAPI;
     }
 
-    public void buildRepository() throws RepositoryNotFoundException, ServiceMayNotContinueException {
+    public void buildRepository(Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
         bridgeAPI.lockForProject(name);
         try {
             if (repository.getObjectDatabase().exists()) {
-                updateRepositoryFromSnapshots(repository);
+                updateRepositoryFromSnapshots(oauth2, repository);
             } else {
-                buildRepositoryFromScratch(repository);
+                buildRepositoryFromScratch(oauth2, repository);
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -40,9 +42,9 @@ public class WLBridgedProject {
         }
     }
 
-    private void updateRepositoryFromSnapshots(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
+    private void updateRepositoryFromSnapshots(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
         try {
-            bridgeAPI.getWritableRepositories(name, repository);
+            bridgeAPI.getWritableRepositories(oauth2, name, repository);
         } catch (InvalidProjectException e) {
             throw new RepositoryNotFoundException(name);
         } catch (SnapshotPostException e) {
@@ -54,8 +56,8 @@ public class WLBridgedProject {
         }
     }
 
-    private void buildRepositoryFromScratch(Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException {
-        if (!bridgeAPI.repositoryExists(name)) {
+    private void buildRepositoryFromScratch(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+        if (!bridgeAPI.repositoryExists(oauth2, name)) {
             throw new RepositoryNotFoundException(name);
         }
         try {
@@ -63,7 +65,7 @@ public class WLBridgedProject {
         } catch (IOException e) {
             throw new ServiceMayNotContinueException(e);
         }
-        updateRepositoryFromSnapshots(repository);
+        updateRepositoryFromSnapshots(oauth2, repository);
     }
 
 }

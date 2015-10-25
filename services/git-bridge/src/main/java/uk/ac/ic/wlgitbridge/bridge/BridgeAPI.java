@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
@@ -8,6 +9,7 @@ import uk.ac.ic.wlgitbridge.data.ProjectLock;
 import uk.ac.ic.wlgitbridge.data.ShutdownHook;
 import uk.ac.ic.wlgitbridge.data.model.DataStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
@@ -43,9 +45,9 @@ public class BridgeAPI {
         mainProjectLock.unlockForProject(projectName);
     }
 
-    public boolean repositoryExists(String projectName) throws ServiceMayNotContinueException {
+    public boolean repositoryExists(Credential oauth2, String projectName) throws ServiceMayNotContinueException, ForbiddenException {
         lockForProject(projectName);
-        GetDocRequest getDocRequest = new GetDocRequest(projectName);
+        GetDocRequest getDocRequest = new GetDocRequest(oauth2, projectName);
         getDocRequest.request();
         try {
             getDocRequest.getResult().getVersionID();
@@ -61,19 +63,19 @@ public class BridgeAPI {
         return true;
     }
 
-    public void getWritableRepositories(String projectName, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
+    public void getWritableRepositories(Credential oauth2, String projectName, Repository repository) throws IOException, SnapshotPostException, GitAPIException, ForbiddenException {
         Util.sout("Fetching project: " + projectName);
-        dataStore.updateProjectWithName(projectName, repository);
+        dataStore.updateProjectWithName(oauth2, projectName, repository);
     }
 
-    public void putDirectoryContentsToProjectWithName(String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException {
+    public void putDirectoryContentsToProjectWithName(Credential oauth2, String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException, ForbiddenException {
         mainProjectLock.lockForProject(projectName);
         CandidateSnapshot candidate = null;
         try {
             Util.sout("Pushing project: " + projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
             candidate = dataStore.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
-            PushRequest pushRequest = new PushRequest(candidate, postbackKey);
+            PushRequest pushRequest = new PushRequest(oauth2, candidate, postbackKey);
             pushRequest.request();
             PushResult result = pushRequest.getResult();
             if (result.wasSuccessful()) {

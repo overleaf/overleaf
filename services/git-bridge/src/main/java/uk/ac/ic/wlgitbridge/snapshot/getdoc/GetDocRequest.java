@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.getdoc;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -12,8 +13,8 @@ public class GetDocRequest extends SnapshotAPIRequest<GetDocResult> {
 
     public static final String API_CALL = "";
 
-    public GetDocRequest(String projectName) {
-        super(projectName, API_CALL);
+    public GetDocRequest(Credential oauth2, String projectName) {
+        super(projectName, API_CALL, oauth2);
     }
 
     @Override

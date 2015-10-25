@@ -1,11 +1,13 @@
 package uk.ac.ic.wlgitbridge.data;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 
@@ -23,8 +25,8 @@ public class SnapshotRepositoryBuilder {
         this.bridgeAPI = bridgeAPI;
     }
 
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory) throws RepositoryNotFoundException, ServiceMayNotContinueException {
-        if (!bridgeAPI.repositoryExists(name)) {
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory, Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+        if (!bridgeAPI.repositoryExists(oauth2, name)) {
             throw new RepositoryNotFoundException(name);
         }
         File repositoryDirectory = new File(rootDirectory, name);
@@ -32,7 +34,7 @@ public class SnapshotRepositoryBuilder {
         Repository repository = null;
         try {
             repository = new FileRepositoryBuilder().setWorkTree(repositoryDirectory).build();
-            new WLBridgedProject(repository, name, bridgeAPI).buildRepository();
+            new WLBridgedProject(repository, name, bridgeAPI).buildRepository(oauth2);
         } catch (IOException e) {
             Util.printStackTrace(e);
             throw new ServiceMayNotContinueException(new InternalErrorException().getDescriptionLines().get(0));

@@ -1,13 +1,17 @@
 package uk.ac.ic.wlgitbridge.git.handler;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
+import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
+import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,8 +32,9 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
 
     @Override
     public Repository open(HttpServletRequest httpServletRequest, String name) throws RepositoryNotFoundException, ServiceNotAuthorizedException, ServiceNotEnabledException, ServiceMayNotContinueException {
+        Credential oauth2 = (Credential) httpServletRequest.getAttribute(Oauth2Filter.ATTRIBUTE_KEY);
         try {
-            return snapshotRepositoryBuilder.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory);
+            return snapshotRepositoryBuilder.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory, oauth2);
         } catch (RepositoryNotFoundException e) {
             Util.printStackTrace(e);
             throw e;
@@ -44,6 +49,8 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         } catch (RuntimeException e) {
             Util.printStackTrace(e);
             throw new ServiceMayNotContinueException(e);
+        } catch (ForbiddenException e) {
+            throw new ServiceNotAuthorizedException();
         }
     }
 

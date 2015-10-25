@@ -4,6 +4,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.log.Log;
@@ -15,9 +16,12 @@ import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.util.Util;
 
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.net.BindException;
+import java.util.EnumSet;
 
 /**
  * Created by Winston on 02/11/14.
@@ -36,23 +40,13 @@ public class GitBridgeServer {
     private String rootGitDirectoryPath;
     private String apiBaseURL;
 
-    /**
-     * Constructs an instance of the server.
-     * @param port the port number to listen on
-     * @param rootGitDirectoryPath the root directory path containing the git repositories
-     * @throws ServletException if the servlet throws an exception
-     */
-    private GitBridgeServer(final int port, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+    public GitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
         Log.setLog(new NullLogger());
-        this.port = port;
-        this.rootGitDirectoryPath = rootGitDirectoryPath;
+        this.port = config.getPort();
+        this.rootGitDirectoryPath = config.getRootGitDirectory();
         bridgeAPI = new BridgeAPI(rootGitDirectoryPath);
         jettyServer = new Server(port);
-        configureJettyServer();
-    }
-
-    public GitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
-        this(config.getPort(), config.getRootGitDirectory());
+        configureJettyServer(config);
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
         apiBaseURL = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(apiBaseURL);
@@ -87,18 +81,22 @@ public class GitBridgeServer {
         }
     }
 
-    private void configureJettyServer() throws ServletException, InvalidRootDirectoryPathException {
+    private void configureJettyServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
         HandlerCollection handlers = new HandlerCollection();
         handlers.setHandlers(new Handler[] {
                 initResourceHandler(),
                 new PostbackHandler(bridgeAPI),
-                initGitHandler()
+                initGitHandler(config)
         });
         jettyServer.setHandler(handlers);
     }
 
-    private Handler initGitHandler() throws ServletException, InvalidRootDirectoryPathException {
+    private Handler initGitHandler(Config config) throws ServletException, InvalidRootDirectoryPathException {
         final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        if (config.isUsingOauth2()) {
+            Filter filter = new Oauth2Filter(config.getOauth2());
+            servletContextHandler.addFilter(new FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST));
+        }
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(

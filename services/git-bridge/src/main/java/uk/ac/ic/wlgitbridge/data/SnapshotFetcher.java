@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.data;
 
+import com.google.api.client.auth.oauth2.Credential;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
@@ -17,17 +19,17 @@ import java.util.*;
  */
 public class SnapshotFetcher {
 
-    public LinkedList<Snapshot> getSnapshotsForProjectAfterVersion(String projectName, int version) throws FailedConnectionException, SnapshotPostException {
-        List<SnapshotInfo> snapshotInfos = getSnapshotInfosAfterVersion(projectName, version);
-        List<SnapshotData> snapshotDatas = getMatchingSnapshotData(projectName, snapshotInfos);
+    public LinkedList<Snapshot> getSnapshotsForProjectAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, SnapshotPostException, ForbiddenException {
+        List<SnapshotInfo> snapshotInfos = getSnapshotInfosAfterVersion(oauth2, projectName, version);
+        List<SnapshotData> snapshotDatas = getMatchingSnapshotData(oauth2, projectName, snapshotInfos);
         LinkedList<Snapshot> snapshots = combine(snapshotInfos, snapshotDatas);
         return snapshots;
     }
 
-    private List<SnapshotInfo> getSnapshotInfosAfterVersion(String projectName, int version) throws FailedConnectionException, SnapshotPostException {
+    private List<SnapshotInfo> getSnapshotInfosAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, SnapshotPostException, ForbiddenException {
         SortedSet<SnapshotInfo> versions = new TreeSet<SnapshotInfo>();
-        GetDocRequest getDoc = new GetDocRequest(projectName);
-        GetSavedVersRequest getSavedVers = new GetSavedVersRequest(projectName);
+        GetDocRequest getDoc = new GetDocRequest(oauth2, projectName);
+        GetSavedVersRequest getSavedVers = new GetSavedVersRequest(oauth2, projectName);
         getDoc.request();
         getSavedVers.request();
         GetDocResult latestDoc = getDoc.getResult();
@@ -44,8 +46,8 @@ public class SnapshotFetcher {
         return new LinkedList<SnapshotInfo>(versions);
     }
 
-    private List<SnapshotData> getMatchingSnapshotData(String projectName, List<SnapshotInfo> snapshotInfos) throws FailedConnectionException {
-        List<GetForVersionRequest> firedRequests = fireDataRequests(projectName, snapshotInfos);
+    private List<SnapshotData> getMatchingSnapshotData(Credential oauth2, String projectName, List<SnapshotInfo> snapshotInfos) throws FailedConnectionException, ForbiddenException {
+        List<GetForVersionRequest> firedRequests = fireDataRequests(oauth2, projectName, snapshotInfos);
         List<SnapshotData> snapshotDataList = new LinkedList<SnapshotData>();
         for (GetForVersionRequest fired : firedRequests) {
             snapshotDataList.add(fired.getResult().getSnapshotData());
@@ -53,10 +55,10 @@ public class SnapshotFetcher {
         return snapshotDataList;
     }
 
-    private List<GetForVersionRequest> fireDataRequests(String projectName, List<SnapshotInfo> snapshotInfos) {
+    private List<GetForVersionRequest> fireDataRequests(Credential oauth2, String projectName, List<SnapshotInfo> snapshotInfos) {
         List<GetForVersionRequest> requests = new LinkedList<GetForVersionRequest>();
         for (SnapshotInfo snapshotInfo : snapshotInfos) {
-            GetForVersionRequest request = new GetForVersionRequest(projectName, snapshotInfo.getVersionId());
+            GetForVersionRequest request = new GetForVersionRequest(oauth2, projectName, snapshotInfo.getVersionId());
             requests.add(request);
             request.request();
         }

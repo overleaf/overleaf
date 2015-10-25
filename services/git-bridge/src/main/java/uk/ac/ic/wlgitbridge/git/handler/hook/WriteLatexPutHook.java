@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.git.handler.hook;
 
+import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.PreReceiveHook;
 import org.eclipse.jgit.transport.ReceiveCommand;
@@ -10,6 +11,7 @@ import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.OutOfDateException;
@@ -26,17 +28,19 @@ public class WriteLatexPutHook implements PreReceiveHook {
 
     private final BridgeAPI bridgeAPI;
     private final String hostname;
+    private final Credential oauth2;
 
-    public WriteLatexPutHook(BridgeAPI bridgeAPI, String hostname) {
+    public WriteLatexPutHook(BridgeAPI bridgeAPI, String hostname, Credential oauth2) {
         this.bridgeAPI = bridgeAPI;
         this.hostname = hostname;
+        this.oauth2 = oauth2;
     }
 
     @Override
     public void onPreReceive(ReceivePack receivePack, Collection<ReceiveCommand> receiveCommands) {
         for (ReceiveCommand receiveCommand : receiveCommands) {
             try {
-                handleReceiveCommand(receivePack.getRepository(), receiveCommand);
+                handleReceiveCommand(oauth2, receivePack.getRepository(), receiveCommand);
             } catch (IOException e) {
                 receivePack.sendError(e.getMessage());
                 receiveCommand.setResult(Result.REJECTED_OTHER_REASON, e.getMessage());
@@ -60,14 +64,17 @@ public class WriteLatexPutHook implements PreReceiveHook {
         receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
     }
 
-    private void handleReceiveCommand(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, FailedConnectionException {
+    private void handleReceiveCommand(Credential oauth2, Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException, ForbiddenException {
         checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
-        bridgeAPI.putDirectoryContentsToProjectWithName(repository.getWorkTree().getName(),
+        bridgeAPI.putDirectoryContentsToProjectWithName(
+                oauth2,
+                repository.getWorkTree().getName(),
                 getPushedDirectoryContents(repository,
                         receiveCommand),
                 getOldDirectoryContents(repository),
-                hostname);
+                hostname
+        );
     }
 
     private void checkBranch(ReceiveCommand receiveCommand) throws WrongBranchException {
