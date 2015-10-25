@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.application;
+package uk.ac.ic.wlgitbridge.application.config;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -9,6 +9,7 @@ import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 
 /**
  * Created by Winston on 05/12/14.
@@ -22,13 +23,14 @@ public class Config implements JSONSource {
     private String apiBaseURL;
     private String postbackURL;
     private String serviceName;
+    private Oauth2 oauth2;
 
     public Config(String configFilePath) throws ConfigFileException, IOException {
-        try {
-            fromJSON(new Gson().fromJson(new FileReader(configFilePath), JsonElement.class));
-        } catch (JsonParseException e) {
-            throw new IOException();
-        }
+        this(new FileReader(configFilePath));
+    }
+
+    Config(Reader reader) {
+        fromJSON(new Gson().fromJson(reader, JsonElement.class));
     }
 
     @Override
@@ -48,6 +50,7 @@ public class Config implements JSONSource {
         if (!postbackURL.endsWith("/")) {
             postbackURL += "/";
         }
+        oauth2 = new Gson().fromJson(configObject.get("oauth2"), Oauth2.class);
     }
 
     public int getPort() {
@@ -70,6 +73,25 @@ public class Config implements JSONSource {
         return apiBaseURL;
     }
 
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public String getPostbackURL() {
+        return postbackURL;
+    }
+
+    public boolean isUsingOauth2() {
+        return oauth2 != null;
+    }
+
+    public Oauth2 getOauth2() {
+        if (!isUsingOauth2()) {
+            throw new AssertionError("Getting oauth2 when not using it");
+        }
+        return oauth2;
+    }
+
     private JsonElement getElement(JsonObject configObject, String name) {
         JsonElement element = configObject.get(name);
         if (element == null) {
@@ -84,14 +106,6 @@ public class Config implements JSONSource {
             return "";
         }
         return element.getAsString();
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public String getPostbackURL() {
-        return postbackURL;
     }
 
 }

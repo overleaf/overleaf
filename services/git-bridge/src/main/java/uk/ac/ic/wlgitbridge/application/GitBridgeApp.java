@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
 import uk.ac.ic.wlgitbridge.application.exception.ArgsException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
