@@ -18,7 +18,7 @@ define [
 		"localStorage"
 	]).config (sixpackProvider)->
 		sixpackProvider.setOptions({
-			debug: true
+			debug: false
 			baseUrl: window.sharelatex.sixpackDomain
 		})
 

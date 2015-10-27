@@ -23,7 +23,6 @@
 
     sixpack.Session = function (options) {
         Object.assign(this, sixpack, options);
-        console.log("creating new session", options)
         if (!this.client_id) {
             this.client_id = this.generate_client_id();
         }
@@ -34,7 +33,6 @@
 
     sixpack.Session.prototype = {
         participate: function(experiment_name, alternatives, traffic_fraction, force, callback) {
-            console.log("processing new participate", this.base_url)
             if (typeof traffic_fraction === "function") {
                 callback = traffic_fraction;
                 traffic_fraction = null;
@@ -85,7 +83,6 @@
             if (this.user_agent) {
                 params.user_agent = this.user_agent;
             }
-            console.log(this.base_url, "participate")
             return _request(this.base_url + "/participate", params, this.timeout, function(err, res) {
                 if (err) {
                     res = {status: "failed",
@@ -116,7 +113,6 @@
                 params.kpi = kpi;
             }
             return _request(this.base_url + "/convert", params, this.timeout, function(err, res) {
-                console.log(res)
                 if (err) {
                     res = {status: "failed",
                            error: err,};
@@ -146,7 +142,6 @@
             }
         }
         var url = _request_uri(uri, params);
-        console.log(url)
         if (!on_node) {
             script = document.createElement('script');
             script.type = 'text/javascript';
