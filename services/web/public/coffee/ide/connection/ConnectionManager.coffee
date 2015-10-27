@@ -78,10 +78,6 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
 
-				setTimeout(=>
-					ga('send', 'event', 'editor-interaction', 'disconnect')
-				, 2000)
-
 				if !$scope.connection.forced_disconnect and !@userIsInactive
 					@startAutoReconnectCountdown()
 

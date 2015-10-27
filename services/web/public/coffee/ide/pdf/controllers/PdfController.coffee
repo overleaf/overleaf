@@ -118,19 +118,11 @@ define [
 
 			return path
 
-		compileCount = 0
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 			$scope.pdf.compiling = true
 			
 			ide.$scope.$broadcast("flush-changes")
-
-			if !options.isAutoCompile
-				compileCount++
-				if compileCount == 1
-					event_tracking.send('editor-interaction', 'single-compile')
-				else if compileCount == 3
-					event_tracking.send('editor-interaction', 'multi-compile')
 
 			options.rootDocOverride_id = getRootDocOverride_id()
 

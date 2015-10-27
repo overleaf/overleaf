@@ -117,9 +117,6 @@ block content
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + 'ace/ace.js')}"
 
-	script(type='text/javascript').
-		ga('send', 'event', 'editor-interaction', 'editor-opened')
-
 	- locals.suppressDefaultJs = true
 
 	- var pdfPath = 'libs/pdfjs-1.0.1040/pdf.worker.js'
