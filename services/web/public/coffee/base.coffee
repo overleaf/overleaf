@@ -13,8 +13,13 @@ define [
 		"underscore"
 		"ngSanitize"
 		"ipCookie"
+		"mvdSixpack"
 		"ErrorCatcher"
 		"localStorage"
-	])
+	]).config (sixpackProvider)->
+		sixpackProvider.setOptions({
+			debug: true
+			baseUrl: window.sharelatex.sixpackDomain
+		})
 
 	return App

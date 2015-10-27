@@ -56,7 +56,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script.
 			window.sharelatex = {
 				siteUrl: '#{settings.siteUrl}',
-				jsPath:  '#{jsPath}'
+				jsPath:  '#{jsPath}',
+				sixpackDomain: '#{settings.sixpackDomain}'
 			};
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
 			window.ab = {}
