@@ -74,16 +74,36 @@
 	- if (Math.random() < 0.5)
 		.row-spaced
 			hr
-			.card.card-thin
-				p.text-center.small
-					| <strong>Python</strong> or <strong>R</strong> user?
-				
-				p.text-center.small
-					a(href="https://www.getdatajoy.com/", target="_blank").btn.btn-info.btn-small Try DataJoy
-				
-				p.text-center.small(style="font-size: 0.8em")
-					a(href="https://www.getdatajoy.com/", target="_blank") DataJoy
-					|  is a new online Python and R editor from ShareLaTeX.
+			.card.card-thin(ng-cloak)
+				span(sixpack-switch="datajoy_promo_button")
+					span(sixpack-default)
+						p.text-center.small
+							| <strong>Python</strong> or <strong>R</strong> user?
+							p.text-center.small
+								a(sixpack-convert="datajoy_promo_button", href="https://www.getdatajoy.com/", target="_blank").btn.btn-info.btn-small Try DataJoy
+						p.text-center.small(style="font-size: 0.8em")
+							a(href="https://www.getdatajoy.com/", target="_blank") DataJoy
+							|  is a new online Python and R editor from ShareLaTeX.
+
+					span(sixpack-when="learning")
+						p.text-center.small
+							| Learning <strong>Python</strong>?
+							p.text-center.small
+								a(sixpack-convert="datajoy_promo_button", href="https://www.getdatajoy.com/", target="_blank").btn.btn-info.btn-small Try DataJoy
+						p.text-center.small(style="font-size: 0.8em")
+							a(href="https://www.getdatajoy.com/", target="_blank") DataJoy
+							|  is the easiest editor to use when learning Python.
+							
+
+					span(sixpack-when="try-now")
+						p.text-center.small
+							| <strong>Python</strong> or <strong>R</strong> user?
+							p.text-center.small
+								a(sixpack-convert="datajoy_promo_button", href="https://www.getdatajoy.com/", target="_blank").btn.btn-info.btn-small Try Now
+
+						p.text-center.small(style="font-size: 0.8em")
+							a(href="https://www.getdatajoy.com/", target="_blank") DataJoy 
+							| lets work with Python & R in the browser.
 	- else
 		.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
 			div(ng-controller="UserProfileController")
