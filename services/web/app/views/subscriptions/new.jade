@@ -217,14 +217,6 @@ block content
 	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
 
-
-	script(type="text/javascript").
-		window.ab = [
-			{step:1, bucket:"red", testName:"button_color"},
-			{step:1, bucket:"blue", testName:"button_color"}
-		]
-
-
 mixin countries_options()
 	option(value='', disabled, selected) #{translate("country")}
 	option(value='-') --------------
