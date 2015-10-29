@@ -5,6 +5,7 @@ RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 DocArchiveManager = require "./DocArchiveManager"
 HealthChecker = require "./HealthChecker"
+LockManager = require "./LockManager"
 
 module.exports = HttpController =
 	flushDoc: (req, res, next = (error) ->) ->
@@ -87,6 +88,14 @@ module.exports = HttpController =
 		HealthChecker.check (err)->
 			if err?
 				logger.err err:err, "error performing health check"
+				res.send 500
+			else
+				res.send 200
+
+	checkLock: (req, res)->
+		LockManager.healthCheck (err) ->
+			if err?
+				logger.err err:err, "error performing lock check"
 				res.send 500
 			else
 				res.send 200

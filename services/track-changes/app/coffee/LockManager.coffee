@@ -66,4 +66,7 @@ module.exports = LockManager =
 					return callback(error) if error?
 					callback()
 
-	
+	healthCheck: (callback) ->
+		action = (releaseLock) ->
+			releaseLock()
+		LockManager.runWithLock	"HistoryLock:HealthCheck:host=#{HOST}:pid=#{PID}:random=#{RND}", action, callback
