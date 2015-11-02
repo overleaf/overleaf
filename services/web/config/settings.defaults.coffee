@@ -354,7 +354,7 @@ module.exports =
 	]
 
 	sixpack:
-		domain:"http://45.79.157.156:5000"
+		domain:""
 	# ShareLaTeX Server Pro options (https://www.sharelatex.com/university/onsite.html)
 	# ----------
 
