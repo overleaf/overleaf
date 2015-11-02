@@ -1,25 +1,6 @@
 .row
 	.col-xs-12(ng-cloak)
 
-
-
-		form.project-search.form-horizontal(role="form")
-			.form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
-				input.form-control.col-md-7.col-xs-12(
-					placeholder="#{translate('search_projects')}…",
-					autofocus='autofocus',
-					ng-model="searchText",
-					focus-on='search:clear',
-					ng-keyup="searchProjects()"
-				)
-				i.fa.fa-search.form-control-feedback-left
-				i.fa.fa-times.form-control-feedback(
-					ng-click="clearSearchText()",
-					style="cursor: pointer;",
-					ng-show="searchText.length > 0"
-				)
-			//- i.fa.fa-remove
-
 		.project-tools(ng-cloak)
 			.btn-toolbar(ng-show="filter != 'archived'")
 				.btn-group(ng-hide="selectedProjects.length < 1")
@@ -175,8 +156,47 @@
 					a(href="/templates") #{translate("templates").toLowerCase()}
 					|   #{translate("or")}
 					a(href="/learn")  #{translate("latex_help_guide")}
-					| ,
-					br 
-					|  #{translate("or_create_project_left")}
+
+
+					.row
+						.col-md-offset-4.col-md-4
+							.dropdown(dropdown)
+								a.btn.btn-success.dropdown-toggle(
+									href="#",
+									data-toggle="dropdown",
+									dropdown-toggle
+								)
+									| Create First Project
+								style.
+									.dropdown{text-align:center;}
+									.button, .dropdown-menu{margin:2px auto}
+									.dropdown-menu{width:200px; left:50%; margin-left:-100px;}
+
+								ul.dropdown-menu(role="menu", style="text-align:center;")
+									li
+										a(
+											href,
+											ng-click="openCreateProjectModal()"
+											sixpack-convert="first_sign_up",
+										) #{translate("blank_project")}
+									li
+										a(
+											href,
+											sixpack-convert="first_sign_up",
+											ng-click="openCreateProjectModal('example')"
+										) #{translate("example_project")}
+									li
+										a(
+											href,
+											sixpack-convert="first_sign_up",
+											ng-click="openUploadProjectModal()"
+										) #{translate("upload_project")}
+									!= moduleIncludes("newProjectMenu", locals)
+									if (templates)
+										li.divider
+										li.dropdown-header #{translate("templates")}
+										each item in templates
+											li
+												a.menu-indent(href=item.url, sixpack-convert="first_sign_up") #{translate(item.name)}
 
 							
