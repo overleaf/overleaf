@@ -40,6 +40,7 @@ describe "CollaboratorsHandler", ->
 	describe "addUserToProject", ->
 		beforeEach ->
 			@Project.update = sinon.stub().callsArg(2)
+			@Project.findOne = sinon.stub().callsArgWith(2, null, @project = {})
 			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArg(1)
 			@CollaboratorHandler.addEmailToProject = sinon.stub().callsArgWith(4, null, @user_id)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { _id: @user_id, email: @email })
@@ -55,7 +56,7 @@ describe "CollaboratorsHandler", ->
 					.calledWith({
 						_id: @project_id
 					}, {
-						"$push":{ readOnly_refs: @user_id }
+						"$addToSet":{ readOnly_refs: @user_id }
 					})
 					.should.equal true
 			
@@ -83,7 +84,7 @@ describe "CollaboratorsHandler", ->
 					.calledWith({
 						_id: @project_id
 					}, {
-						"$push":{ collaberator_refs: @user_id }
+						"$addToSet":{ collaberator_refs: @user_id }
 					})
 					.should.equal true
 			
@@ -98,6 +99,14 @@ describe "CollaboratorsHandler", ->
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error()).should.equal true
+		
+		describe "when user already exists as a collaborator", ->
+			beforeEach ->
+				@project.collaberator_refs = [@user_id]
+				@CollaboratorHandler.addUserIdToProject @project_id, @adding_user_id, @user_id, "readAndWrite", @callback
+
+			it "should not add the user again", ->
+				@Project.update.called.should.equal false
 	
 	describe "addEmailToProject", ->
 		beforeEach ->
