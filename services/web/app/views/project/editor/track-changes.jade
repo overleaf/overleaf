@@ -1,16 +1,58 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
-	.upgrade-prompt(ng-show="!project.features.versioning")
-		.message(ng-show="project.owner._id == user.id")
-			p #{translate("need_to_upgrade_for_history")}
-			p(ng-controller="FreeTrialModalController")
-				a.btn(
-					href
-					ng-class="buttonClass"
-					ng-click="startFreeTrial('track-changes')"
-				) #{translate("start_free_trial")}
-				| &nbsp;&nbsp;&nbsp;
-				a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
-			p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+	span(sixpack-switch="track_changes_feature_info")
+		span(sixpack-default)
+			.upgrade-prompt(ng-show="!project.features.versioning")
+				.message(ng-show="project.owner._id == user.id")
+
+					p #{translate("need_to_upgrade_for_history")}
+					p(ng-controller="FreeTrialModalController")
+						a.btn(
+							href
+							ng-class="buttonClass"
+							sixpack-convert="track_changes_feature_info"
+							ng-click="startFreeTrial('track-changes')"
+						) #{translate("start_free_trial")}
+						| &nbsp;&nbsp;&nbsp;
+						a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
+					p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+				
+		.upgrade-prompt(ng-show="!project.features.versioning", sixpack-when="longform")
+			.message(ng-show="project.owner._id == user.id")
+
+				p Upgrade to see your Entire Project History, plus:
+				p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+				h4 
+					i.fa.fa-check &nbsp;
+					| #{translate("unlimited_projects")}
+				
+				h4
+					i.fa.fa-check &nbsp;
+					| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+				
+				h4 
+					i.fa.fa-check &nbsp;
+					| #{translate("full_doc_history")}
+				
+				h4 
+					i.fa.fa-check &nbsp;
+					| #{translate("sync_to_dropbox")}
+
+				h4 
+					i.fa.fa-check &nbsp;
+					| #{translate("sync_to_github")}
+
+				h4  
+					i.fa.fa-check &nbsp;
+					|#{translate("Compile Larger Projects")}
+
+				p(ng-controller="FreeTrialModalController")
+					a.btn.btn-success(
+						href
+						ng-class="buttonClass"
+						sixpack-convert="track_changes_feature_info"
+						ng-click="startFreeTrial('track-changes')"
+					) #{translate("start_free_trial")}
+
 
 		.message(ng-show="project.owner._id != user.id")
 			p #{translate("ask_proj_owner_to_upgrade_for_history")}
