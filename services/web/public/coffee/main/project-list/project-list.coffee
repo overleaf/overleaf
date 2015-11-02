@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, sixpack) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.allSelected = false
@@ -11,8 +11,15 @@ define [
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
 
+
+		sixpack.participate 'first_sign_up', ['default', 'minimial'], (chosenVariation, rawResponse)->
+			$scope.first_sign_up = chosenVariation
+			$timeout () ->
+				recalculateProjectListHeight()
+			, 10
+
 		recalculateProjectListHeight = () ->
-			topOffset = $(".project-list-card").offset().top
+			topOffset = $(".project-list-card")?.offset()?.top
 			bottomOffset = $("footer").outerHeight() + 25
 			sideBarHeight = $("aside").height() - 56
 			# When footer is visible and page doesn't need to scroll we just make it
@@ -28,9 +35,7 @@ define [
 				height = Math.min(sideBarHeight, $window.innerHeight - topOffset - 25)
 			$scope.projectListHeight = height
 		
-		$timeout () ->
-			recalculateProjectListHeight()
-		, 0
+
 		angular.element($window).bind "resize", () ->
 			recalculateProjectListHeight()
 			$scope.$apply()

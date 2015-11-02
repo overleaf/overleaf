@@ -20,18 +20,16 @@ block content
 
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
-			.row
-				span(sixpack-switch="first_sign_up", ng-cloak)
+			.row(ng-cloak)
+				span(ng-if="first_sign_up == 'default' || projects.length > 0")
+					aside.col-md-2.col-xs-3
+						include ./list/side-bar
 
-					span(sixpack-default)
-						aside.col-md-2.col-xs-3
-							include ./list/side-bar
-
-						.col-md-10.col-xs-9
-							include ./list/project-list
-					
-					span(sixpack-when="minimial")
-						.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
-							include ./list/project-list-minimal
+					.col-md-10.col-xs-9
+						include ./list/project-list
+				
+				span(ng-if="first_sign_up == 'minimial' && projects.length == 0")
+					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
+						include ./list/project-list-minimal
 
 		include ./list/modals
