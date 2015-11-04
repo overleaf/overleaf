@@ -72,9 +72,12 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 								option(value="readAndWrite") #{translate("can_edit")}
 								option(value="readOnly") #{translate("read_only")}
 							| &nbsp;&nbsp;
+							//- We have to use mousedown here since click has issues with the
+							//- blur handler in tags-input sometimes changing its height and
+							//- moving this button, preventing the click registering.
 							button.btn.btn-info(
 								type="submit"
-								ng-click="addMembers()"
+								ng-mousedown="addMembers()"
 							) #{translate("share")}
 				div.text-center(ng-hide="canAddCollaborators")
 					p #{translate("need_to_upgrade_for_more_collabs")}.
@@ -86,7 +89,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-footer
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
-			span.text-danger.error(ng-show="state.error") {{ state.error }}
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
 		button.btn.btn-primary(
 			ng-click="done()"
 		) #{translate("done")}

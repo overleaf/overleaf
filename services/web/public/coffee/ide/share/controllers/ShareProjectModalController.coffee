@@ -53,7 +53,7 @@ define [
 				return false
 
 		$scope.addMembers = () ->
-			$timeout -> # Give email list a chance to update
+			addMembers = () ->
 				return if $scope.inputs.contacts.length == 0
 
 				members = $scope.inputs.contacts
@@ -97,8 +97,10 @@ define [
 							, 0
 						.error () ->
 							$scope.state.inflight = false
-							$scope.state.error = "Sorry, something went wrong :("
-
+							$scope.state.error = true
+			
+			
+			$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
 			$scope.state.error = null
