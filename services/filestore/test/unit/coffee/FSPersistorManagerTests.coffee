@@ -29,6 +29,8 @@ describe "FSPersistorManagerTests", ->
         err:->
       "response":response
       "rimraf":@Rimraf
+      "./Errors": @Errors =
+        NotFoundError: sinon.stub()
     @location = "/tmp"
     @name1 = "530f2407e7ef165704000007/530f838b46d9a9e859000008"
     @name1Filtered ="530f2407e7ef165704000007_530f838b46d9a9e859000008"
@@ -69,13 +71,62 @@ describe "FSPersistorManagerTests", ->
         done()
 
   describe "getFileStream", ->
+    beforeEach ->
+      @opts = {}
+
     it "should use correct file location", (done) ->
-      @Fs.createReadStream.returns(
-        on:->
-      )
-      @FSPersistorManager.getFileStream @location, @name1, (err,res)=>
+      @Fs.createReadStream.returns({on: ->})
+      @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res) =>
       @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
       done()
+
+    describe "with start and end options", ->
+
+      beforeEach ->
+        @opts = {start: 0, end: 8}
+
+      it 'should pass the options to createReadStream', (done) ->
+        @Fs.createReadStream.returns({on: ->})
+        @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
+        @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}", @opts).should.equal true
+        done()
+
+    describe "error conditions", ->
+
+      beforeEach ->
+        @fakeCode = 'ENOENT'
+        @Fs.createReadStream.returns(
+          on: (key, callback) =>
+            err = new Error()
+            err.code = @fakeCode
+            callback(err, null)
+        )
+
+      describe "when the file does not exist", ->
+
+        beforeEach ->
+          @fakeCode = 'ENOENT'
+
+        it "should give a NotFoundError", (done) ->
+          @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
+            expect(res).to.equal null
+            expect(err).to.not.equal null
+            expect(err instanceof @Errors.NotFoundError).to.equal true
+            done()
+
+      describe "when some other error happens", ->
+
+        beforeEach ->
+          @fakeCode = 'SOMETHINGHORRIBLE'
+
+        it "should give an Error", (done) ->
+          @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
+            expect(res).to.equal null
+            expect(err).to.not.equal null
+            expect(err instanceof Error).to.equal true
+            done()
+
+
 
   describe "copyFile", ->
     beforeEach ->
@@ -157,5 +208,3 @@ describe "FSPersistorManagerTests", ->
       @FSPersistorManager.checkIfFileExists @location, @name1, (err,exists) =>
         exists.should.be.false
         done()
-
-

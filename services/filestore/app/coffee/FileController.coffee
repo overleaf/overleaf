@@ -3,20 +3,37 @@ settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 FileHandler = require("./FileHandler")
 metrics = require("metrics-sharelatex")
-oneDayInSeconds = 60 * 60 * 24
+parseRange = require('range-parser')
+Errors = require('./Errors')
 
-module.exports =
+oneDayInSeconds = 60 * 60 * 24
+maxSizeInBytes = 1024 * 1024 * 1024 # 1GB
+
+module.exports = FileController =
 
 	getFile: (req, res)->
-		metrics.inc "getFile"
 		{key, bucket} = req
 		{format, style} = req.query
-		logger.log key:key, bucket:bucket, format:format, style:style, "receiving request to get file"
-		FileHandler.getFile bucket, key, {format:format,style:style}, (err, fileStream)->
+		options = {
+			key: key,
+			bucket: bucket,
+			format: format,
+			style: style,
+		}
+		metrics.inc "getFile"
+		logger.log key:key, bucket:bucket, format:format, style: style, "reciving request to get file"
+		if req.headers.range?
+			range = FileController._get_range(req.headers.range)
+			options.start = range.start
+			options.end = range.end
+			logger.log start: range.start, end: range.end, "getting range of bytes from file"
+		FileHandler.getFile bucket, key, options, (err, fileStream)->
 			if err?
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
-				if !res.finished and res?.send? 
-					res.send 500
+				if err instanceof Errors.NotFoundError
+					return res.send 404
+				if !res.finished and res?.send?
+					return res.send 500
 			else if req.query.cacheWarm
 				logger.log key:key, bucket:bucket, format:format, style:style, "request is only for cache warm so not sending stream"
 				res.send 200
@@ -29,6 +46,9 @@ module.exports =
 		{key, bucket} = req
 		logger.log key:key, bucket:bucket, "reciving request to insert file"
 		FileHandler.insertFile bucket, key, req, (err)->
+			if err?
+				logger.log err: err, key: key, bucket: bucket, "error inserting file"
+				res.send 500
 			res.send 200
 
 	copyFile: (req, res)->
@@ -38,7 +58,7 @@ module.exports =
 		oldFile_id = req.body.source.file_id
 		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "reciving request to copy file"
 		PersistorManager.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
-			if err? 
+			if err?
 				logger.log err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "something went wrong copying file"
 				res.send 500
 			else
@@ -55,5 +75,10 @@ module.exports =
 			else
 				res.send 204
 
-
-
+	_get_range: (header) ->
+		parsed = parseRange(maxSizeInBytes, header)
+		if parsed == -1 or parsed == -2 or parsed.type != 'bytes'
+			null
+		else
+			range = parsed[0]
+			{start: range.start, end: range.end}

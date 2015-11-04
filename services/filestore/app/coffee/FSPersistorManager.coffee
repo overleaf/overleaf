@@ -1,12 +1,12 @@
 logger = require("logger-sharelatex")
 fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
+Errors = require('./Errors')
 rimraf = require("rimraf")
-response = require ("response")
 
 filterName = (key) ->
   return key.replace /\//g, "_"
-  
+
 
 module.exports =
   sendFile: ( location, target, source, callback = (err)->) ->
@@ -27,19 +27,20 @@ module.exports =
         return callback err
       @sendFile location, target, fsPath, callback
 
-  getFileStream: (location, name, _callback = (err, res)->) ->
+  # opts may be {start: Number, end: Number}
+  getFileStream: (location, name, opts, _callback = (err, res)->) ->
     callback = (args...) ->
       _callback(args...)
       _callback = () ->
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
-    sourceStream = fs.createReadStream "#{location}/#{filteredName}"
+    sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
-      if err.code = 'ENOENT'
-        callback null, response().html('NoSuchKey: file not found\n')
+      if err.code == 'ENOENT'
+        callback new Errors.NotFoundError(err.message), null
       else
-        callback err
+        callback err, null
     sourceStream.on 'readable', () ->
       # This can be called multiple times, but the callback wrapper
       # ensures the callback is only called once

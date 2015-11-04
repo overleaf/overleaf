@@ -93,6 +93,13 @@ describe "FileHandler", ->
 				@handler._getConvertedFile.called.should.equal false
 				done()
 
+		it "should pass options to _getStandardFile", (done) ->
+			options = {start: 0, end: 8}
+			@handler.getFile @bucket, @key, options, =>
+				expect(@handler._getStandardFile.lastCall.args[2].start).to.equal 0
+				expect(@handler._getStandardFile.lastCall.args[2].end).to.equal 8
+				done()
+
 		it "should call _getConvertedFile if a format is defined", (done)->
 			@handler.getFile @bucket, @key, format:"png", =>
 				@handler._getStandardFile.called.should.equal false
@@ -104,7 +111,7 @@ describe "FileHandler", ->
 
 		beforeEach ->
 			@fileStream = {on:->}
-			@PersistorManager.getFileStream.callsArgWith(2, "err", @fileStream)
+			@PersistorManager.getFileStream.callsArgWith(3, "err", @fileStream)
 
 		it "should get the stream", (done)->
 			@handler.getFile @bucket, @key, null, =>
@@ -117,11 +124,18 @@ describe "FileHandler", ->
 				stream.should.equal @fileStream
 				done()
 
+		it "should pass options to PersistorManager", (done) ->
+			@handler.getFile @bucket, @key, {start: 0, end: 8}, =>
+				expect(@PersistorManager.getFileStream.lastCall.args[2].start).to.equal 0
+				expect(@PersistorManager.getFileStream.lastCall.args[2].end).to.equal 8
+				done()
+
+
 	describe "_getConvertedFile", ->
 
 		it "should getFileStream if it does exists", (done)->
 			@PersistorManager.checkIfFileExists.callsArgWith(2, null, true)
-			@PersistorManager.getFileStream.callsArgWith(2)
+			@PersistorManager.getFileStream.callsArgWith(3)
 			@handler._getConvertedFile @bucket, @key, {}, =>
 				@PersistorManager.getFileStream.calledWith(@bucket).should.equal true
 				done()
@@ -138,7 +152,7 @@ describe "FileHandler", ->
 		it "should _convertFile ", (done)->
 			@stubbedStream = {"something":"here"}
 			@PersistorManager.sendFile = sinon.stub().callsArgWith(3)
-			@PersistorManager.getFileStream = sinon.stub().callsArgWith(2, null, @stubbedStream)
+			@PersistorManager.getFileStream = sinon.stub().callsArgWith(3, null, @stubbedStream)
 			@convetedKey = @key+"converted"
 			@handler._convertFile = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@ImageOptimiser.compressPng = sinon.stub().callsArgWith(1)
@@ -155,7 +169,7 @@ describe "FileHandler", ->
 			@FileConverter.convert.callsArgWith(2, null, @formattedStubbedPath)
 			@FileConverter.thumbnail.callsArgWith(1, null, @formattedStubbedPath)
 			@FileConverter.preview.callsArgWith(1, null, @formattedStubbedPath)
-			@handler._writeS3FileToDisk = sinon.stub().callsArgWith(2, null, @stubbedPath)
+			@handler._writeS3FileToDisk = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@LocalFileWriter.deleteFile.callsArgWith(1)
 
 		it "should call thumbnail on the writer path if style was thumbnail was specified", (done)->
@@ -178,7 +192,3 @@ describe "FileHandler", ->
 				@FileConverter.convert.calledWith(@stubbedPath, @format).should.equal true
 				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
-
-
-
-				

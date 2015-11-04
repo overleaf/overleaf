@@ -9,6 +9,7 @@ fs = require("fs")
 knox = require("knox")
 path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
+Errors = require("./Errors")
 _ = require("underscore")
 
 thirtySeconds = 30 * 1000
@@ -57,17 +58,28 @@ module.exports =
 				logger.err  bucketName:bucketName, key:key, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
 				return callback(err)
 			@sendFile bucketName, key, fsPath, callback
-			
-	getFileStream: (bucketName, key, callback = (err, res)->)->
+
+	# opts may be {start: Number, end: Number}
+	getFileStream: (bucketName, key, opts, callback = (err, res)->)->
+		opts = opts || {}
+		headers = {}
+		if opts.start? and opts.end?
+			headers['Range'] = "bytes=#{opts.start}-#{opts.end}"
 		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key
 			secret: settings.filestore.s3.secret
 			bucket: bucketName
-		s3Stream = s3Client.get(key)
+		s3Stream = s3Client.get(key, headers)
 		s3Stream.end()
 		s3Stream.on 'response', (res) ->
+			if res.statusCode == 404
+				logger.log bucketName:bucketName, key:key, "file not found in s3"
+				return callback new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}"), null
+			if res.statusCode not in [200, 206]
+				logger.log bucketName:bucketName, key:key, "error getting file from s3: #{res.statusCode}"
+				return callback new Error("Got non-200 response from S3: #{res.statusCode}"), null
 			callback null, res
 		s3Stream.on 'error', (err) ->
 			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
@@ -125,4 +137,3 @@ module.exports =
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
-

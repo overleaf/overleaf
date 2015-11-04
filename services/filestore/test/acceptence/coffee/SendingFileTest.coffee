@@ -32,7 +32,7 @@ describe "Filestore", ->
 
 
 	it "should send a 200 for status endpoing", (done)->
-		request "#{@filestoreUrl}/status", (err, response, body)-> 
+		request "#{@filestoreUrl}/status", (err, response, body)->
 			response.statusCode.should.equal 200
 			body.indexOf("filestore").should.not.equal -1
 			body.indexOf("up").should.not.equal -1
@@ -50,10 +50,38 @@ describe "Filestore", ->
 			writeStream.on "end", done
 			fs.createReadStream(@localFileReadPath).pipe writeStream
 
+		it "should return 404 for a non-existant id", (done) ->
+			@timeout(1000 * 20)
+			options =
+				uri: @fileUrl + '___this_is_clearly_wrong___'
+			request.get options, (err, response, body) =>
+				response.statusCode.should.equal 404
+				done()
+
 		it "should be able get the file back", (done)->
 			@timeout(1000 * 10)
 			request.get @fileUrl, (err, response, body)=>
 				body.should.equal @constantFileContent
+				done()
+
+		it "should be able to get back the first 8 bytes of the file", (done) ->
+			@timeout(1000 * 10)
+			options =
+				uri: @fileUrl
+				headers:
+					'Range': 'bytes=0-8'
+			request.get options, (err, response, body)=>
+				body.should.equal 'hello wor'
+				done()
+
+		it "should be able to get back bytes 4 through 10 of the file", (done) ->
+			@timeout(1000 * 10)
+			options =
+				uri: @fileUrl
+				headers:
+					'Range': 'bytes=4-10'
+			request.get options, (err, response, body)=>
+				body.should.equal 'o world'
 				done()
 
 		it "should be able to delete the file", (done)->
@@ -61,7 +89,7 @@ describe "Filestore", ->
 			request.del @fileUrl, (err, response, body)=>
 				response.statusCode.should.equal 204
 				request.get @fileUrl, (err, response, body)=>
-					body.indexOf("NoSuchKey").should.not.equal -1
+					response.statusCode.should.equal 404
 					done()
 
 		it "should be able to copy files", (done)->
@@ -85,5 +113,59 @@ describe "Filestore", ->
 						body.should.equal @constantFileContent
 						done()
 
+	describe "with a pdf file", ->
 
+		beforeEach (done)->
+			@timeout(1000 * 10)
+			@file_id = Math.random()
+			@fileUrl = "#{@filestoreUrl}/project/acceptence_tests/file/#{@file_id}"
+			@localFileReadPath = __dirname + '/../../fixtures/test.pdf'
 
+			writeStream = request.post(@fileUrl)
+
+			writeStream.on "end", done
+			fs.createReadStream(@localFileReadPath).pipe writeStream
+
+		it "should be able get the file back", (done)->
+			@timeout(1000 * 10)
+			request.get @fileUrl, (err, response, body)=>
+				expect(body.substring(0, 8)).to.equal '%PDF-1.5'
+				done()
+
+		describe "getting the preview image", ->
+
+			beforeEach ->
+				@fileUrl = @fileUrl + '?style=preview'
+
+			it "should not time out", (done) ->
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response).to.not.equal null
+					done()
+
+			it "should respond with image data", (done) ->
+				# note: this test relies of the imagemagick conversion working
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response.statusCode).to.equal 200
+					expect(body.length).to.be.greaterThan 400
+					done()
+
+		describe "warming the cache", ->
+
+			beforeEach ->
+				@fileUrl = @fileUrl + '?style=preview&cacheWarm=true'
+
+			it "should not time out", (done) ->
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response).to.not.equal null
+					done()
+
+			it "should respond with only an 'OK'", (done) ->
+				# note: this test relies of the imagemagick conversion working
+				@timeout(1000 * 20)
+				request.get @fileUrl, (err, response, body) =>
+					expect(response.statusCode).to.equal 200
+					body.should.equal 'OK'
+					done()

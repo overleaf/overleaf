@@ -30,7 +30,7 @@ module.exports =
 			@_getConvertedFile bucket, key, opts, callback
 
 	_getStandardFile: (bucket, key, opts, callback)->
-		PersistorManager.getFileStream bucket, key, (err, fileStream)->
+		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
 			if err?
 				logger.err  bucket:bucket, key:key, opts:opts, "error getting fileStream"
 			callback err, fileStream
@@ -38,6 +38,8 @@ module.exports =
 	_getConvertedFile: (bucket, key, opts, callback)->
 		convertedKey = KeyBuilder.addCachingToKey key, opts
 		PersistorManager.checkIfFileExists bucket, convertedKey, (err, exists)=>
+			if err?
+				return callback err
 			if exists
 				PersistorManager.getFileStream bucket, convertedKey, callback
 			else
@@ -58,10 +60,19 @@ module.exports =
 		], (err)->
 			if err?
 				return callback(err)
+<<<<<<< HEAD
 			PersistorManager.getFileStream bucket, convertedKey, callback
 
 	_convertFile: (bucket, originalKey, opts, callback)->
 		@_writeS3FileToDisk bucket, originalKey, (err, originalFsPath)->
+=======
+			PersistorManager.getFileStream bucket, convetedKey, opts, callback
+
+	_convertFile: (bucket, origonalKey, opts, callback)->
+		@_writeS3FileToDisk bucket, origonalKey, opts, (err, origonalFsPath)->
+			if err?
+				return callback(err)
+>>>>>>> sharelatex/master
 			done = (err, destPath)->
 				if err?
 					logger.err err:err, bucket:bucket, originalKey:originalKey, opts:opts, "error converting file"
@@ -76,10 +87,11 @@ module.exports =
 			else if opts.style == "preview"
 				FileConverter.preview originalFsPath, done
 			else
-				throw new Error("should have specified opts to convert file with #{JSON.stringify(opts)}")
+				return callback(new Error("should have specified opts to convert file with #{JSON.stringify(opts)}"))
 
 
-	_writeS3FileToDisk: (bucket, key, callback)->
-		PersistorManager.getFileStream bucket, key, (err, fileStream)->
+	_writeS3FileToDisk: (bucket, key, opts, callback)->
+		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
+			if err?
+				return callback(err)
 			LocalFileWriter.writeStream fileStream, key, callback
-

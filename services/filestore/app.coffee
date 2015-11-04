@@ -14,6 +14,7 @@ Metrics = require "metrics-sharelatex"
 Metrics.initialize("filestore")
 Metrics.open_sockets.monitor(logger)
 Metrics.event_loop?.monitor(logger)
+Metrics.memory.monitor(logger)
 
 app.configure ->
 	app.use express.bodyParser()
@@ -85,7 +86,6 @@ app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey
 app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
-
 app.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->
 		res.send filename
@@ -140,3 +140,10 @@ server.listen port, host, ->
 process.on 'SIGTERM', () ->
 	logger.log("filestore got SIGTERM, shutting down gracefully")
 	beginShutdown()
+
+if global.gc?
+	gcTimer = setInterval () ->
+		global.gc()
+		logger.log process.memoryUsage(), "global.gc"
+	, 3 * oneMinute = 60 * 1000
+	gcTimer.unref()

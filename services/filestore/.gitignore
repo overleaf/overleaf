@@ -55,6 +55,7 @@ public/stylesheets/mainStyle.css
 public/minjs/
 test/unit/js/
 test/acceptence/js
+cluster.js
 
 user_files/*
 template_files/*
