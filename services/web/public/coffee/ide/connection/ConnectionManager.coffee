@@ -23,6 +23,7 @@ define [], () ->
 			@userIsLeavingPage = false
 			window.addEventListener 'beforeunload', =>
 				@userIsLeavingPage = true
+				return # Don't return true or it will show a pop up
 
 			@connected = false
 			@userIsInactive = false
