@@ -16,3 +16,11 @@ module.exports = UserGetter =
 			query = _id: query
 
 		db.users.findOne query, projection, callback
+
+	getUsers: (user_ids, projection, callback = (error, users) ->) ->
+		try
+			user_ids = user_ids.map (u) -> ObjectId(u.toString())
+		catch error
+			return callback error
+		
+		db.users.find { _id: { $in: user_ids} }, projection, callback
