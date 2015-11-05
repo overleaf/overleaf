@@ -146,7 +146,10 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next) ->
-		res.locals.nav = Settings.nav
+		# Clone the nav settings so they can be modified for each request
+		res.locals.nav = {}
+		for key, value of Settings.nav
+			res.locals.nav[key] = _.clone(Settings.nav[key])
 		res.locals.templates = Settings.templateLinks
 		next()
 		
