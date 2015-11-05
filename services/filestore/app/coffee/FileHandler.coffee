@@ -60,19 +60,12 @@ module.exports =
 		], (err)->
 			if err?
 				return callback(err)
-<<<<<<< HEAD
 			PersistorManager.getFileStream bucket, convertedKey, callback
 
 	_convertFile: (bucket, originalKey, opts, callback)->
 		@_writeS3FileToDisk bucket, originalKey, (err, originalFsPath)->
-=======
-			PersistorManager.getFileStream bucket, convetedKey, opts, callback
-
-	_convertFile: (bucket, origonalKey, opts, callback)->
-		@_writeS3FileToDisk bucket, origonalKey, opts, (err, origonalFsPath)->
 			if err?
 				return callback(err)
->>>>>>> sharelatex/master
 			done = (err, destPath)->
 				if err?
 					logger.err err:err, bucket:bucket, originalKey:originalKey, opts:opts, "error converting file"
