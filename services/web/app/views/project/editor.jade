@@ -90,6 +90,7 @@ block content
 		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
 		window.csrfToken = "!{csrfToken}";
 		window.anonymous = #{anonymous};
+		window.maxDocLength = #{maxDocLength};
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
