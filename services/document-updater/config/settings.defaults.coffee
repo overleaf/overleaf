@@ -23,6 +23,8 @@ module.exports =
 		zip:
 			minSize: 10*1024
 			writesEnabled: false
+	
+	max_doc_length: 2 * 1024 * 1024 # 2mb
 
 	mongo:
 		url: 'mongodb://127.0.0.1/sharelatex'

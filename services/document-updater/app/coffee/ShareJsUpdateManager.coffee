@@ -15,7 +15,7 @@ ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
 
 module.exports = ShareJsUpdateManager =
-	getNewShareJsModel: () -> new ShareJsModel(ShareJsDB)
+	getNewShareJsModel: () -> new ShareJsModel(ShareJsDB, maxDocLength: Settings.max_doc_length)
 
 	applyUpdates: (project_id, doc_id, updates, callback = (error, updatedDocLines) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, updates: updates, "applying sharejs updates"

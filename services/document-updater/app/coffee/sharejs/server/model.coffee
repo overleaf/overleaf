@@ -136,6 +136,9 @@ module.exports = Model = (db, options) ->
       catch error
         console.error error.stack
         return callback error.message
+        
+      if options.maxDocLength? and doc.snapshot.length > options.maxDocLength
+        return callback "Update takes doc over max doc size"
 
       # The op data should be at the current version, and the new document data should be at
       # the next version.
