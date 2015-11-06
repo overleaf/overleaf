@@ -19,7 +19,8 @@ app.use Metrics.http.monitor(logger)
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
-app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: "2mb"), HttpController.updateDoc
+# Add 16kb overhead for the JSON encoding
+app.post '/project/:project_id/doc/:doc_id', bodyParser.json(limit: Settings.max_doc_size + 16 * 1024), HttpController.updateDoc
 app.del  '/project/:project_id/doc/:doc_id', HttpController.deleteDoc
 
 app.post  '/project/:project_id/archive', HttpController.archiveAllDocs
