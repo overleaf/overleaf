@@ -18,4 +18,4 @@ module.exports =
 	#		secret: ""
 	#		bucket: "something"
 
-	max_doc_size: 2 * 1024 * 1024 # 2mb
+	max_doc_length: 2 * 1024 * 1024 # 2mb
