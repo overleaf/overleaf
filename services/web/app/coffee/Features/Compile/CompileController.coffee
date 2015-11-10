@@ -41,6 +41,20 @@ module.exports = CompileController =
 		project_id = req.params.Project_id
 		isPdfjsPartialDownload = req.query?.pdfng
 
+
+
+		rateLimit = (callback)->
+			if isPdfjsPartialDownload
+				callback null, true
+	
+			else
+				rateLimitOpts =
+					endpointName: "full-pdf-download"
+					throttle: 30
+					subjectName : req.ip
+					timeInterval : 60 * 5
+				RateLimiter.addCount rateLimitOpts, callback
+
 		Project.findById project_id, {name: 1}, (err, project)->
 			res.contentType("application/pdf")
 			if !!req.query.popupDownload
@@ -50,19 +64,7 @@ module.exports = CompileController =
 				logger.log project_id: project_id, "download pdf to embed in browser"
 				res.header('Content-Disposition', "filename=#{project.getSafeProjectName()}.pdf")
 
-
-			if isPdfjsPartialDownload
-				rateLimitOpts =
-					endpointName: "partial-pdf-download"
-					throttle: 500
-			else
-				rateLimitOpts =
-					endpointName: "full-pdf-download"
-					throttle: 30
-
-			rateLimitOpts.subjectName = req.ip
-			rateLimitOpts.timeInterval = 60 * 5
-			RateLimiter.addCount rateLimitOpts, (err, canContinue)->
+			rateLimit (err, canContinue)->
 				if err?
 					logger.err err:err, "error checking rate limit for pdf download"
 					return res.send 500

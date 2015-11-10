@@ -129,9 +129,6 @@ describe "CompileController", ->
 			it "should proxy the PDF from the CLSI", ->
 				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res, @next).should.equal true
 
-			it "should check the rate limiter", ->
-				@RateLimiter.addCount.args[0][0].throttle.should.equal 500
-
 		describe "when the pdf is not going to be used in pdfjs viewer", ->
 
 			it "should check the rate limiter when pdfng is not set", (done)->
