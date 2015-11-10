@@ -19,15 +19,15 @@ module.exports =
 			return callback(error) if error?
 			callback null, (project.collaberator_refs.length + project.readOnly_refs.length)
 
-	isCollaboratorLimitReached: (project_id, callback = (error, limit_reached)->) ->
+	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
 			return callback(error) if error?
 			@currentNumberOfCollaboratorsInProject project_id, (error, current_number) =>
 				return callback(error) if error?
-				if current_number < allowed_number or allowed_number < 0
-					callback null, false
-				else
+				if current_number + x_collaborators <= allowed_number or allowed_number < 0
 					callback null, true
+				else
+					callback null, false
 
 	userHasSubscriptionOrIsGroupMember: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
 		@userHasSubscription user, (err, hasSubscription, subscription)=>

@@ -243,7 +243,8 @@ module.exports = ProjectController =
 					anonymous: anonymous
 					languages: Settings.languages
 					themes: THEME_LIST
-					timer.done()
+					maxDocLength: Settings.max_doc_length
+				timer.done()
 
 	_buildProjectList: (ownedProjects, sharedProjects, readOnlyProjects)->
 		projects = []

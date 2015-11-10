@@ -11,6 +11,8 @@ define [
 		$scope.onDrop = (events, ui) ->
 			source = $(ui.draggable).scope().entity
 			return if !source?
+			# clear highlight explicitely
+			$('.file-tree-inner .droppable-hover').removeClass('droppable-hover')
 			ide.fileTreeManager.moveEntity(source, $scope.entity)
 
 		$scope.orderByFoldersFirst = (entity) ->

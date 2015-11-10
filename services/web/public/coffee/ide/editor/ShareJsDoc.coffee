@@ -45,6 +45,8 @@ define [
 				# ops as quickly as possible for low latency.
 				@_doc.setFlushDelay(0)
 				@trigger "remoteop"
+			@_doc.on "error", (e) =>
+				@_handleError(e)
 
 			@_bindToDocChanges(@_doc)
 
@@ -98,7 +100,7 @@ define [
 		getInflightOp: () -> @_doc.inflightOp
 		getPendingOp: () -> @_doc.pendingOp
 
-		attachToAce: (ace) -> @_doc.attach_ace(ace)
+		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
 	
 		INFLIGHT_OP_TIMEOUT: 10000

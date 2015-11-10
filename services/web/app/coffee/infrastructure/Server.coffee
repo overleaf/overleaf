@@ -58,7 +58,8 @@ Modules.loadViewIncludes app
 
 
 app.use bodyParser.urlencoded({ extended: true, limit: "2mb"})
-app.use bodyParser.json({limit: "2mb"})
+# Make sure we can process the max doc length plus some overhead for JSON encoding
+app.use bodyParser.json({limit: Settings.max_doc_length + 16 * 1024}) # 16kb overhead
 app.use multer(dest: Settings.path.uploadFolder)
 app.use methodOverride()
 

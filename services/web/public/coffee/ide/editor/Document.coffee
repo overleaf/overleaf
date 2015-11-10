@@ -250,11 +250,9 @@ define [
 					v: version
 
 		_onError: (error, meta = {}) ->
+			meta.doc_id = @doc_id
 			console.error "ShareJS error", error, meta
 			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{@ide.socket.socket.transport.name}" )
-			@ide.socket.disconnect()
-			meta.doc_id = @doc_id
-			@ide.reportError(error, meta)
 			@doc?.clearInflightAndPendingOps()
 			@_cleanUp()
-			@trigger "error", error
+			@trigger "error", error, meta

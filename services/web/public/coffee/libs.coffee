@@ -13,4 +13,5 @@ define [
 	"libs/passfield"
 	"libs/sixpack"
 	"libs/angular-sixpack"
+	"libs/ng-tags-input-3.0.0"
 ], () ->

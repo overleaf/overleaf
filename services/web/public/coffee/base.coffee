@@ -16,6 +16,7 @@ define [
 		"mvdSixpack"
 		"ErrorCatcher"
 		"localStorage"
+		"ngTagsInput"
 	]).config (sixpackProvider)->
 		sixpackProvider.setOptions({
 			debug: false

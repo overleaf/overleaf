@@ -47,12 +47,22 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				form(ng-show="canAddCollaborators")
 					.small #{translate("share_with_your_collabs")}
 					.form-group
-						input.form-control(
-							type="text"
+						tags-input(
+							template="shareTagTemplate"
 							placeholder="joe@example.com, sue@example.com, ..."
-							ng-model="inputs.email"
+							ng-model="inputs.contacts"
 							focus-on="open"
+							display-property="display"
+							add-on-paste="true"
+							replace-spaces-with-dashes="false"
+							type="email"
 						)
+							auto-complete(
+								source="filterAutocompleteUsers($query)"
+								template="shareAutocompleteTemplate"
+								display-property="email"
+								min-length="0"
+							)
 					.form-group
 						.pull-right
 							select.privileges.form-control(
@@ -62,9 +72,12 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 								option(value="readAndWrite") #{translate("can_edit")}
 								option(value="readOnly") #{translate("read_only")}
 							| &nbsp;&nbsp;
+							//- We have to use mousedown here since click has issues with the
+							//- blur handler in tags-input sometimes changing its height and
+							//- moving this button, preventing the click registering.
 							button.btn.btn-info(
 								type="submit"
-								ng-click="addMembers()"
+								ng-mousedown="addMembers()"
 							) #{translate("share")}
 				div.text-center(ng-hide="canAddCollaborators")
 					p #{translate("need_to_upgrade_for_more_collabs")}.
@@ -76,7 +89,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-footer
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
-			span.text-danger.error(ng-show="state.error") {{ state.error }}
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
 		button.btn.btn-primary(
 			ng-click="done()"
 		) #{translate("done")}
@@ -123,3 +136,25 @@ script(type="text/ng-template", id="makePrivateModalTemplate")
 		button.btn.btn-info(
 			ng-click="makePrivate()"
 		) #{translate("make_private")}
+
+script(type="text/ng-template", id="shareTagTemplate")
+	.tag-template
+		span(ng-if="data.type")
+			i.fa.fa-fw(ng-class="{'fa-user': data.type != 'group', 'fa-group': data.type == 'group'}")
+			| 
+		span {{$getDisplayText()}}
+		| 
+		a(href, ng-click="$removeTag()").remove-button
+			i.fa.fa-fw.fa-close
+
+script(type="text/ng-template", id="shareAutocompleteTemplate")
+	.autocomplete-template
+		div(ng-if="data.type == 'user'")
+			i.fa.fa-fw.fa-user
+			| 
+			span(ng-bind-html="$highlight(data.display)")
+		div(ng-if="data.type == 'group'")
+			i.fa.fa-fw.fa-group
+			| 
+			span(ng-bind-html="$highlight(data.name)")
+			span.subdued.small(ng-show="data.member_count")  ({{ data.member_count }} members)

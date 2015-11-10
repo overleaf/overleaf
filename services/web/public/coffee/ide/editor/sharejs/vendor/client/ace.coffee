@@ -40,7 +40,7 @@ applyToShareJS = (editorDoc, delta, doc) ->
 # Attach an ace editor to the document. The editor's contents are replaced
 # with the document's contents unless keepEditorContents is true. (In which case the document's
 # contents are nuked and replaced with the editor's).
-window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents) ->
+window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength) ->
   throw new Error 'Only text documents can be attached to ace' unless @provides['text']
 
   doc = this
@@ -74,6 +74,11 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents) ->
   # Listen for edits in ace
   editorListener = (change) ->
     return if suppress
+    
+    if maxDocLength? and editorDoc.getValue().length > maxDocLength
+        doc.emit "error", new Error("document length is greater than maxDocLength")
+        return
+    
     applyToShareJS editorDoc, change, doc
 
     check()
