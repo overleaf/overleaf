@@ -28,7 +28,7 @@ block content
 					.col-md-10.col-xs-9
 						include ./list/project-list
 				
-				span(ng-show="first_sign_up == 'minimial' && projects.length == 0")
+				span(ng-if="first_sign_up == 'minimial' && projects.length == 0")
 					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
 						include ./list/project-list-minimal
 
