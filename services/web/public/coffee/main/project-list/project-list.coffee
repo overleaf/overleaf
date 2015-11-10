@@ -11,12 +11,14 @@ define [
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
 
-
-		sixpack.participate 'first_sign_up', ['default', 'minimial'], (chosenVariation, rawResponse)->
-			$scope.first_sign_up = chosenVariation
-			$timeout () ->
-				recalculateProjectListHeight()
-			, 10
+		if $scope.projects.length > 0
+			$scope.first_sign_up = "default"
+		else
+			sixpack.participate 'first_sign_up', ['default', 'minimial'], (chosenVariation, rawResponse)->
+				$scope.first_sign_up = chosenVariation
+				$timeout () ->
+					recalculateProjectListHeight()
+				, 10
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top
