@@ -1,6 +1,6 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
-	span(sixpack-switch="track_changes_feature_info")
-		span(sixpack-default)
+	span(ng-controller="TrackChangesPremiumPopup")
+		span(ng-if="versioningPopupType == 'default'")
 			.upgrade-prompt(ng-show="!project.features.versioning")
 				.message(ng-show="project.owner._id == user.id")
 
@@ -16,7 +16,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 						a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
 					p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
 				
-		.upgrade-prompt(ng-show="!project.features.versioning", sixpack-when="longform")
+		.upgrade-prompt(ng-show="!project.features.versioning", ng-if="versioningPopupType == 'longform'")
 			.message(ng-show="project.owner._id == user.id")
 
 				p Upgrade to see your Entire Project History, plus:

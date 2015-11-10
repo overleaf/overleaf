@@ -1,6 +1,16 @@
 define [
 	"base"
 ], (App) ->
+
+	App.controller "TrackChangesPremiumPopup", ($scope, ide, sixpack)->
+		$scope.$watch "ui.view", ->
+			if $scope.ui.view == "track-changes"
+				if $scope.project?.features?.versioning
+					$scope.versioningPopupType = "default"
+				else if $scope.ui.view == "track-changes"
+					sixpack.participate 'track_changes_feature_info', ['default', 'longform'], (chosenVariation, rawResponse)->
+						$scope.versioningPopupType = chosenVariation
+
 	App.controller "TrackChangesListController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hoveringOverListSelectors = false
 
