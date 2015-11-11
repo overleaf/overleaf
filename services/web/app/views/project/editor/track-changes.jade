@@ -16,6 +16,11 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 						a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
 					p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
 				
+				.message(ng-show="project.owner._id != user.id")
+					p #{translate("ask_proj_owner_to_upgrade_for_history")}
+					p
+						a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
+						
 		.upgrade-prompt(ng-show="!project.features.versioning", ng-if="versioningPopupType == 'longform'")
 			.message(ng-show="project.owner._id == user.id")
 
@@ -54,10 +59,10 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					) #{translate("start_free_trial")}
 
 
-		.message(ng-show="project.owner._id != user.id")
-			p #{translate("ask_proj_owner_to_upgrade_for_history")}
-			p
-				a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
+			.message(ng-show="project.owner._id != user.id")
+				p #{translate("ask_proj_owner_to_upgrade_for_history")}
+				p
+					a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
 
 	aside.change-list(
 		ng-controller="TrackChangesListController"
