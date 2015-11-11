@@ -135,7 +135,7 @@ describe "CompileController", ->
 				@req.query = {}
 				@RateLimiter.addCount.callsArgWith(1, null, true)
 				@CompileController.proxyToClsi = (project_id, url)=>
-					@RateLimiter.addCount.args[0][0].throttle.should.equal 30
+					@RateLimiter.addCount.args[0][0].throttle.should.equal 50
 					done()
 				@CompileController.downloadPdf @req, @res
 
@@ -144,7 +144,7 @@ describe "CompileController", ->
 				@req.query = {pdfng:false}
 				@RateLimiter.addCount.callsArgWith(1, null, true)
 				@CompileController.proxyToClsi = (project_id, url)=>
-					@RateLimiter.addCount.args[0][0].throttle.should.equal 30
+					@RateLimiter.addCount.args[0][0].throttle.should.equal 50
 					done()
 				@CompileController.downloadPdf @req, @res
 
