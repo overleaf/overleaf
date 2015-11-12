@@ -2,6 +2,11 @@ settings = require("settings-sharelatex")
 request = require("request")
 logger = require("logger-sharelatex")
 
+
+
+timeout = if process.env.NODE_ENV == "production" then 500 else 5000
+logger.log "using timeout of #{timeout}ms for sixpack server calls"
+
 generate_client_id = ->
 	# from http://stackoverflow.com/questions/105034
 	'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace /[xy]/g, (c) ->
@@ -29,7 +34,7 @@ _request = (uri, params, callback)->
 	opts =
 		uri:_request_uri(uri, params)
 		json:true
-		timeout:1000
+		timeout:timeout
 	request.get opts, (err, res, body)->
 		callback err, body
 
