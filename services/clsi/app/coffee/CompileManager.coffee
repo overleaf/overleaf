@@ -120,7 +120,12 @@ module.exports = CompileManager =
 
 		CommandRunner.run project_id, command, directory, timeout, (error) ->
 			return callback(error) if error?
-			stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
+			try
+				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
+			catch err
+				logger.err err:err, command:command, directory:directory, project_id:project_id, "error reading word count output"
+				return callback(err)
+			console.log "rooooof"
 			callback null, CompileManager._parseWordcountFromOutput(stdout)
 
 	_parseWordcountFromOutput: (output) ->
