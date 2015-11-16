@@ -9,6 +9,7 @@ Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
+require("../../infrastructure/Sixpack")
 
 module.exports = SubscriptionController =
 
