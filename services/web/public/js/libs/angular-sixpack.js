@@ -119,7 +119,11 @@
 					},
 					// Register a 'conversion'. If no testName, will call for all active tests
 					// Takes an optional callback that receives the raw response from sixpack (or undefined on error)
-					convert : function (testName, callback) {
+					convert : function (testName, kpi, callback) {			
+						if (typeof kpi === 'function') {
+							callback = kpi;
+							kpi = null;
+						}
 						var session = _getOrInitSession();
 						if (!testName) {
 							if (_opts.debug) {
@@ -128,7 +132,7 @@
 							for (var i = 0, ii = _tests.length; i < ii; i++) {
 								var test = _tests[i]
 									, results = [];
-								session.convert(test, function (err, res) {
+								session.convert(test, kpi, function (err, res) {
 									results.push(res);
 									if (err && _opts.debug) {
 										$log.warn("[sixpack] Error recording conversion for", test, err);
@@ -149,7 +153,7 @@
 							if (_opts.debug) {
 								$log.info("[sixpack] Recording conversion for", testName);
 							};
-							session.convert(testName, function (err, res) {
+							session.convert(testName, kpi, function (err, res) {
 								if (err && _opts.debug) {
 									$log.warn('[sixpack] Error recording conversion:', err);
 								} else if (_opts.debug) {
