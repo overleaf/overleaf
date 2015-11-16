@@ -96,10 +96,37 @@ div.full-size.pdf(ng-controller="PdfController")
 		.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
 					p
 						strong #{translate("upgrade_for_faster_compiles")}
-					p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
-					p
-						a.btn.btn-info(
+					h5 #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+					h4 Plus:
+					h4 
+						i.fa.fa-check &nbsp;
+						| #{translate("unlimited_projects")}
+					
+					h4
+						i.fa.fa-check &nbsp;
+						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+					
+					h4 
+						i.fa.fa-check &nbsp;
+						| #{translate("full_doc_history")}
+					
+					h4 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_dropbox")}
+
+					h4 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_github")}
+
+					h4  
+						i.fa.fa-check &nbsp;
+						|#{translate("compile_larger_projects")}
+
+					p(ng-controller="FreeTrialModalController")
+						a.btn.btn-success(
 							href
+							ng-class="buttonClass"
+							sixpack-convert="track_changes_feature_info"
 							ng-click="startFreeTrial('compile-timeout')"
 						) #{translate("start_free_trial")}
 

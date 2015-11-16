@@ -24,7 +24,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 		.upgrade-prompt(ng-show="!project.features.versioning", ng-if="versioningPopupType == 'longform'")
 			.message(ng-show="project.owner._id == user.id")
 
-				p Upgrade to see your Entire Project History, plus:
+				p #{translate("upgrade_to_get_feature, plus:", {feature:"Entire Doc History"}}
 				p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
 				h4 
 					i.fa.fa-check &nbsp;
@@ -48,7 +48,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 
 				h4  
 					i.fa.fa-check &nbsp;
-					|#{translate("Compile Larger Projects")}
+					|#{translate("compile_larger_projects")}
 
 				p(ng-controller="FreeTrialModalController")
 					a.btn.btn-success(
