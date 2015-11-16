@@ -63,7 +63,7 @@ module.exports =
 			PersistorManager.getFileStream bucket, convertedKey, callback
 
 	_convertFile: (bucket, originalKey, opts, callback)->
-		@_writeS3FileToDisk bucket, originalKey, (err, originalFsPath)->
+		@_writeS3FileToDisk bucket, originalKey, opts, (err, originalFsPath)->
 			if err?
 				return callback(err)
 			done = (err, destPath)->

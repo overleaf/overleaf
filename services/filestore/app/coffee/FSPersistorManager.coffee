@@ -3,6 +3,7 @@ fs = require("fs")
 LocalFileWriter = require("./LocalFileWriter")
 Errors = require('./Errors')
 rimraf = require("rimraf")
+_ = require "underscore"
 
 filterName = (key) ->
   return key.replace /\//g, "_"
@@ -29,9 +30,7 @@ module.exports =
 
   # opts may be {start: Number, end: Number}
   getFileStream: (location, name, opts, _callback = (err, res)->) ->
-    callback = (args...) ->
-      _callback(args...)
-      _callback = () ->
+    callback = _.once _callback
     filteredName = filterName name
     logger.log location:location, name:filteredName, "getting file"
     sourceStream = fs.createReadStream "#{location}/#{filteredName}", opts
