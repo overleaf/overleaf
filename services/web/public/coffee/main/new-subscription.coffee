@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App)->
 
-	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http)->
+	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 	
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
@@ -108,7 +108,8 @@ define [
 						coupon_code:pricing.items?.coupon?.code || ""
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
-						window.location.href = "/user/subscription/thank-you"
+						sixpack.convert "free-trial-plan", pricing.items.plan.code, ->
+							window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false
 						$scope.genericError = "Something went wrong processing the request"

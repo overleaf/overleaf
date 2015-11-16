@@ -8,7 +8,7 @@ define [
 				if $scope.project?.features?.versioning
 					$scope.versioningPopupType = "default"
 				else if $scope.ui.view == "track-changes"
-					sixpack.participate 'track_changes_discount', ['default', 'discount'], (chosenVariation, rawResponse)->
+					sixpack.participate 'track-changes-discount', ['default', 'discount'], (chosenVariation, rawResponse)->
 						$scope.versioningPopupType = chosenVariation
 
 	App.controller "TrackChangesListController", ["$scope", "ide", ($scope, ide) ->
