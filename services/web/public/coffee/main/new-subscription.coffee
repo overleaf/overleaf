@@ -58,6 +58,10 @@ define [
 			if pricing.items?.coupon?.discount?.type == "percent"
 				basePrice = parseInt(pricing.price.base.plan.unit)
 				$scope.normalPrice = basePrice
+				if pricing.items.coupon.applies_for_months > 0 and pricing.items.coupon?.discount?.rate and pricing.items.coupon?.applies_for_months?
+					$scope.discountMonths =  pricing.items.coupon?.applies_for_months
+					$scope.discountRate =  pricing.items.coupon?.discount?.rate * 100
+
 				if pricing.price?.taxes[0]?.rate?
 					$scope.normalPrice += (basePrice * pricing.price.taxes[0].rate)
 			$scope.$apply()

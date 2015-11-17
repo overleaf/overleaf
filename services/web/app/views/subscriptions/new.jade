@@ -41,7 +41,9 @@ block content
 							hr.thin
 							.row
 								.col-md-12.text-center
-									div(ng-if="trialLength") !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+									div(ng-if="trialLength") 
+										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
+										span(ng-if="discountMonths && discountRate") &nbsp; -  {{discountMonths}} #{translate("month")}s {{discountRate}}% Off
 									div(ng-if="price")
 										strong {{price.currency.symbol}}{{price.next.total}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
