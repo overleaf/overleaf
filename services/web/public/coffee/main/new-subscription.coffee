@@ -117,7 +117,7 @@ define [
 						coupon_code:pricing.items?.coupon?.code || ""
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
-						sixpack.convert "free-trial-plan", pricing.items.plan.code, ->
+						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->
 							window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false

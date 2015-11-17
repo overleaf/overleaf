@@ -56,6 +56,7 @@
 							_session = new sp.Session({client_id:_clientId, base_url:_opts.baseUrl});
 						} else {
 							_session = new sp.Session({client_id:undefined, base_url:_opts.baseUrl});
+							_session = new sp.Session({client_id:_opts.client_id, base_url:_opts.baseUrl});
 							$cookies[_cookiePrefix + 'clientId'] = _clientId = _session.client_id;
 						}
 						if (_opts.debug) {

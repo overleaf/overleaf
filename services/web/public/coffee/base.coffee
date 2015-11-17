@@ -21,6 +21,7 @@ define [
 		sixpackProvider.setOptions({
 			debug: false
 			baseUrl: window.sharelatex.sixpackDomain
+			client_id: window.user_id
 		})
 
 	return App

@@ -61,6 +61,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			};
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
 			window.ab = {}
+			window.user_id = '#{getLoggedInUserId()}'
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
