@@ -366,8 +366,12 @@ module.exports =
 	# ----------
 
 
-	# username = einstein
-	# password = password
+	
+	# LDAP
+	# ----------
+	# Settings below use a working LDAP test server kindly provided by forumsys.com
+	# When testing with forumsys.com use username = einstein and password = password
+	
 	# ldap :
 	# 	host: 'ldap://ldap.forumsys.com'
 	# 	dn: 'uid=:userKey,dc=example,dc=com'
@@ -378,6 +382,7 @@ module.exports =
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
+	
 	
 	#templateLinks: [{
 	#	name : "CV projects",
