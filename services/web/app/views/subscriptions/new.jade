@@ -46,6 +46,8 @@ block content
 										strong {{price.currency.symbol}}{{price.next.total}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
+									div(ng-if="normalPrice")
+										span.small Normally {{price.currency.symbol}}{{normalPrice}}
 						.row
 							.col-md-12
 								form(ng-show="planName")

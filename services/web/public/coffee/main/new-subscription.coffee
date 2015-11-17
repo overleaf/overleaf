@@ -29,7 +29,7 @@ define [
 			country:window.countryCode
 			coupon: window.couponCode
 
-
+ 
 		$scope.validation =
 			correctCardNumber : true
 			correctExpiry: true
@@ -55,6 +55,11 @@ define [
 			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial?.length
 			$scope.monthlyBilling = pricing.items.plan.period.length == 1
+			if pricing.items?.coupon?.discount?.type == "percent"
+				basePrice = parseInt(pricing.price.base.plan.unit)
+				$scope.normalPrice = basePrice
+				if pricing.price?.taxes[0]?.rate?
+					$scope.normalPrice += (basePrice * pricing.price.taxes[0].rate)
 			$scope.$apply()
 
 		$scope.applyCoupon = ->
