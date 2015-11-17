@@ -21,10 +21,15 @@ module.exports =
         logger.err err: err, Bucket: bucketName, Key: key, "error sending file stream to s3"
       callback err
 
-  getFileStream: (bucketName, key, callback = (err, res)->)->
+  getFileStream: (bucketName, key, opts, callback = (err, res)->)->
     logger.log bucketName:bucketName, key:key, "get file stream from s3"
     callback = _.once callback
-    request = s3.getObject(Bucket:bucketName, Key: key)
+    params =
+      Bucket:bucketName
+      Key: key
+    if opts.start? and opts.end?
+      params['Range'] = "bytes=#{opts.start}-#{opts.end}"
+    request = s3.getObject params
     stream = request.createReadStream()
     stream.on 'readable', () ->
       callback null, stream
