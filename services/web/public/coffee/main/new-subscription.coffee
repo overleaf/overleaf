@@ -9,7 +9,7 @@ define [
 		$scope.plans = MultiCurrencyPricing.plans
 
 		$scope.switchToStudent = ()->
-			window.location = "/user/subscription/new?planCode=student_free_trial_7_days&currency=#{$scope.currencyCode}"
+			window.location = "/user/subscription/new?planCode=student_free_trial_7_days&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
 
 
 		$scope.paymentMethod = "credit_card"
