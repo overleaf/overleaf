@@ -166,13 +166,13 @@ block content
 												button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu") #{translate("upgrade_now")} 
 									
 										.col-xs-3.pricingBreakdown
-											div Subtotal
-											div Tax
+											div(ng-if="price.next.subtotal != price.next.total") Subtotal
+											div(ng-if="price.next.tax!='0.00'") Tax
 											div
 												strong Total
 										.col-xs-2
-											div.pull-right {{price.currency.symbol}}{{price.next.subtotal}}
-											div.pull-right {{price.currency.symbol}}{{price.next.tax}}
+											div(ng-if="price.next.subtotal != price.next.total").pull-right {{price.currency.symbol}}{{price.next.subtotal}}
+											div(ng-if="price.next.tax!='0.00'").pull-right {{price.currency.symbol}}{{price.next.tax}}
 											div.pull-right
 												strong {{price.currency.symbol}}{{price.next.total}}
 
