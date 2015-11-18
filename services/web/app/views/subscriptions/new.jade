@@ -165,7 +165,7 @@ block content
 									.row
 										.col-xs-7
 											.form-group
-												button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu") #{translate("upgrade_now")} 
+												button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
 									
 										.col-xs-3.pricingBreakdown
 											div(ng-if="price.next.subtotal != price.next.total") Subtotal
@@ -178,7 +178,7 @@ block content
 											div.pull-right
 												strong {{price.currency.symbol}}{{price.next.total}}
 
-				span(sixpack-switch="payment-left-menu")
+				span(sixpack-switch="payment-left-menu-bottom")
 
 					.col-md-3.col-md-pull-4(sixpack-default)
 						if showStudentPlan == 'true'
@@ -258,45 +258,6 @@ block content
 								hr
 									
 								h2.text-center 30 Day Guarantee
-
-					.col-md-3.col-md-pull-4(sixpack-when="secure")
-						if showStudentPlan == 'true'
-							a.btn-primary.btn.plansPageStudentLink(
-								href,
-								ng-click="switchToStudent()"
-							) #{translate("half_price_student")} 
-
-						.card.card-first
-							.paymentPageFeatures
-								.page-header
-									h3 #{translate("features")}
-								h3 #{translate("unlimited_projects")}
-								p #{translate("create_unlimited_projects")}
-							
-								h3
-									if plan.features.collaborators == -1
-										- var collaboratorCount = 'Unlimited'
-									else
-										- var collaboratorCount = plan.features.collaborators
-									| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
-								p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
-								
-								h3 #{translate("full_doc_history")}
-								p #{translate("see_what_has_been")} 
-									span.added #{translate("added")} 
-									| #{translate("and")} 
-									span.removed #{translate("removed")}. 
-									| #{translate("restore_to_any_older_version")}.
-								
-								h3 #{translate("sync_to_dropbox")}
-								p
-									| #{translate("acces_work_from_anywhere")}. 
-									| #{translate("work_offline_and_sync_with_dropbox")}.
-									
-								hr
-									
-								p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
-
 								hr
 								span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
 								a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")

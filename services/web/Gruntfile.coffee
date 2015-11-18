@@ -305,7 +305,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'default', 'run'
 
 	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
-	
+
 	grunt.registerTask 'create-admin-user', "Create a user with the given email address and make them an admin. Update in place if the user already exists", () ->
 		done = @async()
 		email = grunt.option("email")
