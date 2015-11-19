@@ -28,13 +28,14 @@ define [
 			@connection = {
 				send: (update) =>
 					@_startInflightOpTimeout(update)
+					if window.disconnectOnUpdate? and Math.random() < window.disconnectOnUpdate
+						console.log "Disconnecting on update", update
+						window._ide.socket.socket.disconnect()
 					if window.dropUpdates? and Math.random() < window.dropAcks
 						console.log "Simulating a lost update", update
 						return
 					@socket.emit "applyOtUpdate", @doc_id, update
 				state: "ok"
-				# Unlike ShareJs, our connection.id never changes, even when we disconnect/reconnect.
-				# This gives this client a unique id used for detecting duplicates ops.
 				id:    @socket.socket.sessionid
 			}
 
@@ -95,6 +96,7 @@ define [
 
 		updateConnectionState: (state) ->
 			@connection.state = state
+			@connection.id = @socket.socket.sessionid
 			@_doc.autoOpen = false
 			@_doc._connectionStateChanged(state)
 
@@ -114,7 +116,13 @@ define [
 				# This can be cleared when hard reloading the document in which
 				# case we don't want to keep trying to send it.
 				if @_doc.inflightOp?
-					update.dupIfSource = [@connection.id]
+					# When there is a socket.io disconnect, @_doc.inflightSubmittedIds
+					# is updated with the socket.io client id of the current op in flight
+					# (meta.source of the op).
+					# @connection.id is the client id of the current socket.io session.
+					# So we need both depending on whether the op was submitted before
+					# one or more disconnects, or if it was submitted during the current session.
+					update.dupIfSource = [@connection.id, @_doc.inflightSubmittedIds...]
 					@connection.send(update)
 				# TODO: Trigger op:timeout only when some max retries have been hit
 				# and we need to do a full reload.
