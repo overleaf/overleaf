@@ -382,7 +382,8 @@ module.exports =
 	# 	placeholder: 'LDAP User ID'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
-	
+	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
+	#	adminPW: 'password'
 	
 	#templateLinks: [{
 	#	name : "CV projects",
