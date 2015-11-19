@@ -109,8 +109,9 @@ define [
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
 	
-		INFLIGHT_OP_TIMEOUT: 5000
+		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
 		_startInflightOpTimeout: (update) ->
+			@_startFatalTimeoutTimer(update)
 			timer = setTimeout () =>
 				# Only send the update again if inflightOp is still populated
 				# This can be cleared when hard reloading the document in which
@@ -124,12 +125,25 @@ define [
 					# one or more disconnects, or if it was submitted during the current session.
 					update.dupIfSource = [@connection.id, @_doc.inflightSubmittedIds...]
 					@connection.send(update)
-				# TODO: Trigger op:timeout only when some max retries have been hit
-				# and we need to do a full reload.
-				# @trigger "op:timeout", update
 			, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
+				@_clearFatalTimeoutTimer()
 				clearTimeout timer
+
+		FATAL_OP_TIMEOUT: 30000 # 30 seconds
+		_startFatalTimeoutTimer: (update) ->
+			# If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
+			# gone unrecoverably wrong (the op will have been retried multiple times)
+			return if @_timeoutTimer?
+			@_timeoutTimer = setTimeout () =>
+				@_clearFatalTimeoutTimer()
+				@trigger "op:timeout", update
+			, @FATAL_OP_TIMEOUT
+		
+		_clearFatalTimeoutTimer: () ->
+			return if !@_timeoutTimer?
+			clearTimeout @_timeoutTimer
+			@_timeoutTimer = null
 
 		_handleError: (error, meta = {}) ->
 			@trigger "error", error, meta
