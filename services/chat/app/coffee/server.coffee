@@ -13,16 +13,15 @@ Router = require "./router"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../node_modules/mongojs/node_modules/mongodb"), logger)
 
-app.configure ()->
-	app.use express.bodyParser()
-	app.use metrics.http.monitor(logger)
-	Router.route(app, io)
+app.use express.bodyParser()
+app.use metrics.http.monitor(logger)
+Router.route(app, io)
 
-app.configure 'development', ->
+if (app.get 'env') == 'development'
 	console.log "Development Enviroment"
 	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
 
-app.configure 'production', ->
+if (app.get 'env') == 'production'
 	console.log "Production Enviroment"
 	app.use express.logger()
 	app.use express.errorHandler()
