@@ -1,5 +1,5 @@
 logger = require "logger-sharelatex"
-metrics = require "../../metrics"
+metrics = require "metrics-sharelatex"
 MessageManager = require "./MessageManager"
 MessageFormatter = require "./MessageFormatter"
 RoomManager = require "../Rooms/RoomManager"

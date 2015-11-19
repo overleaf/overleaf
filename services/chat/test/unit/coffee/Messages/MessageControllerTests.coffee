@@ -17,7 +17,7 @@ describe "MessageController", ->
 			"../Sockets/SocketManager": @SocketManager = {}
 			"../Authorization/AuthorizationManager": @AuthorizationManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
-			"../../metrics": @metrics = {inc: sinon.stub()}
+			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
 		@callback = sinon.stub()
 		@client =
 			params:
