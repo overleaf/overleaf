@@ -31,7 +31,7 @@ define [
 					if window.disconnectOnUpdate? and Math.random() < window.disconnectOnUpdate
 						console.log "Disconnecting on update", update
 						window._ide.socket.socket.disconnect()
-					if window.dropUpdates? and Math.random() < window.dropAcks
+					if window.dropUpdates? and Math.random() < window.dropUpdates
 						console.log "Simulating a lost update", update
 						return
 					@socket.emit "applyOtUpdate", @doc_id, update
