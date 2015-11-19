@@ -150,14 +150,10 @@ define [
 				wantToBeJoined: @wantToBeJoined
 				update: update
 
-			if Math.random() < (@ide.disconnectRate or 0)
-				console.log "Simulating disconnect"
-				@ide.connectionManager.disconnect()
-				return
-
-			if Math.random() < (@ide.ignoreRate or 0)
-				console.log "Simulating lost update"
-				return
+			if window.dropAcks? and Math.random() < window.dropAcks
+				if !update.op? # Only drop our own acks, not collaborator updates
+					console.log "Simulating a lost ack", update
+					return
 
 			if update?.doc == @doc_id and @doc?
 				@doc.processUpdateFromServer update

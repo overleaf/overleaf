@@ -28,8 +28,13 @@ define [
 			@connection = {
 				send: (update) =>
 					@_startInflightOpTimeout(update)
+					if window.dropUpdates? and Math.random() < window.dropAcks
+						console.log "Simulating a lost update", update
+						return
 					@socket.emit "applyOtUpdate", @doc_id, update
 				state: "ok"
+				# Unlike ShareJs, our connection.id never changes, even when we disconnect/reconnect.
+				# This gives this client a unique id used for detecting duplicates ops.
 				id:    @socket.socket.sessionid
 			}
 
@@ -90,7 +95,6 @@ define [
 
 		updateConnectionState: (state) ->
 			@connection.state = state
-			@connection.id = @socket.socket.sessionid
 			@_doc.autoOpen = false
 			@_doc._connectionStateChanged(state)
 
@@ -103,13 +107,18 @@ define [
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
 	
-		INFLIGHT_OP_TIMEOUT: 10000
+		INFLIGHT_OP_TIMEOUT: 5000
 		_startInflightOpTimeout: (update) ->
-			meta =
-				v: update.v
-				op_sent_at: new Date()
 			timer = setTimeout () =>
-				@trigger "op:timeout", update
+				# Only send the update again if inflightOp is still populated
+				# This can be cleared when hard reloading the document in which
+				# case we don't want to keep trying to send it.
+				if @_doc.inflightOp?
+					update.dupIfSource = [@connection.id]
+					@connection.send(update)
+				# TODO: Trigger op:timeout only when some max retries have been hit
+				# and we need to do a full reload.
+				# @trigger "op:timeout", update
 			, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
 				clearTimeout timer
