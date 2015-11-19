@@ -32,7 +32,14 @@ module.exports = ShareJsUpdateManager =
 		for update in updates
 			do (update) =>
 				jobs.push (callback) =>
-					model.applyOp doc_key, update, callback
+					model.applyOp doc_key, update, (error) ->
+						if error == "Op already submitted"
+							logger.warn {project_id, doc_id, update}, "op has already been submitted"
+							update.dup = true
+							ShareJsUpdateManager._sendOp(project_id, doc_id, update)
+							callback()
+						else
+							callback(error)
 
 		async.series jobs, (error) =>
 			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied updates"
@@ -49,11 +56,15 @@ module.exports = ShareJsUpdateManager =
 	_listenForOps: (model) ->
 		model.on "applyOp", (doc_key, opData) ->
 			[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-			data = JSON.stringify
-				project_id: project_id
-				doc_id: doc_id
-				op: opData
-			rclient.publish "applied-ops", data
+			ShareJsUpdateManager._sendOp(project_id, doc_id, opData)
+	
+	_sendOp: (project_id, doc_id, opData) ->
+		data =
+			project_id: project_id
+			doc_id: doc_id
+			op: opData
+		data = JSON.stringify data
+		rclient.publish "applied-ops", data
 
 	_sendError: (project_id, doc_id, error) ->
 		data = JSON.stringify
