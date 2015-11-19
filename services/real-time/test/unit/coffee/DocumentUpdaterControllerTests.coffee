@@ -68,23 +68,42 @@ describe "DocumentUpdaterController", ->
 				doc: @doc_id
 			@io.sockets =
 				clients: sinon.stub().returns([@sourceClient, @otherClients...])
-			@EditorUpdatesController._applyUpdateFromDocumentUpdater @io, @doc_id, @update
+		
+		describe "normally", ->
+			beforeEach ->
+				@EditorUpdatesController._applyUpdateFromDocumentUpdater @io, @doc_id, @update
 
-		it "should send a version bump to the source client", ->
-			@sourceClient.emit
-				.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
-				.should.equal true
-
-		it "should get the clients connected to the document", ->
-			@io.sockets.clients
-				.calledWith(@doc_id)
-				.should.equal true
-
-		it "should send the full update to the other clients", ->
-			for client in @otherClients
-				client.emit
-					.calledWith("otUpdateApplied", @update)
+			it "should send a version bump to the source client", ->
+				@sourceClient.emit
+					.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
 					.should.equal true
+
+			it "should get the clients connected to the document", ->
+				@io.sockets.clients
+					.calledWith(@doc_id)
+					.should.equal true
+
+			it "should send the full update to the other clients", ->
+				for client in @otherClients
+					client.emit
+						.calledWith("otUpdateApplied", @update)
+						.should.equal true
+		
+		describe "with a duplicate op", ->
+			beforeEach ->
+				@update.dup = true
+				@EditorUpdatesController._applyUpdateFromDocumentUpdater @io, @doc_id, @update
+			
+			it "should send a version bump to the source client as usual", ->
+				@sourceClient.emit
+					.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
+					.should.equal true
+
+			it "should not send anything to the other clients (they've already had the op)", ->
+				for client in @otherClients
+					client.emit
+						.calledWith("otUpdateApplied")
+						.should.equal false
 
 	describe "_processErrorFromDocumentUpdater", ->
 		beforeEach ->
