@@ -24,8 +24,6 @@ define [
 					if oldStatus[doc_id]?
 						newStatus[doc_id] = oldStatus[doc_id]
 						newStatus[doc_id].unsavedSeconds += 1
-						if newStatus[doc_id].unsavedSeconds == 60
-							reportUnsavedChanges(doc)
 					else
 						newStatus[doc_id] = {
 							unsavedSeconds: 0
@@ -40,12 +38,6 @@ define [
 				$scope.docSavingStatus = newStatus
 				$scope.docSavingStatusCount = newUnsavedCount
 				$scope.$apply()
-
-		reportUnsavedChanges = (doc) ->
-			ide.reportError new Error("unsaved changes"), {
-				inflightOp: doc?.getInflightOp(),
-				pendingOp: doc?.getPendingOp()
-			}
 
 		warnAboutUnsavedChanges = () ->
 			if Document.hasUnsavedChanges()
