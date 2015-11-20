@@ -41,16 +41,15 @@ module.exports =
 			if err?
 				return callback err
 			if exists
-				PersistorManager.getFileStream bucket, convertedKey, callback
+				PersistorManager.getFileStream bucket, convertedKey, null, callback
 			else
 				@_getConvertedFileAndCache bucket, key, convertedKey, opts, callback
 
 	_getConvertedFileAndCache: (bucket, key, convertedKey, opts, callback)->
-		self = @
 		convertedFsPath = ""
 		async.series [
-			(cb)->
-				self._convertFile bucket, key, opts, (err, fileSystemPath)->
+			(cb) =>
+				@_convertFile bucket, key, opts, (err, fileSystemPath) ->
 					convertedFsPath = fileSystemPath
 					cb err
 			(cb)->
@@ -60,7 +59,7 @@ module.exports =
 		], (err)->
 			if err?
 				return callback(err)
-			PersistorManager.getFileStream bucket, convertedKey, callback
+			PersistorManager.getFileStream bucket, convertedKey, opts, callback
 
 	_convertFile: (bucket, originalKey, opts, callback)->
 		@_writeS3FileToDisk bucket, originalKey, opts, (err, originalFsPath)->

@@ -2,6 +2,7 @@ logger = require "logger-sharelatex"
 aws = require "aws-sdk"
 _ = require "underscore"
 fs = require "fs"
+Errors = require("./Errors")
 
 s3 = new aws.S3()
 
@@ -35,6 +36,8 @@ module.exports =
       callback null, stream
     stream.on 'error', (err) ->
       logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
+      if err.code == 'NoSuchKey'
+        return callback new Errors.NotFoundError "File not found in S3: #{bucketName}:#{key}"
       callback err
 
   copyFile: (bucketName, sourceKey, destKey, callback)->
