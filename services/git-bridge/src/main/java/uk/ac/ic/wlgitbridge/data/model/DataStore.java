@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
+import uk.ac.ic.wlgitbridge.data.model.db.SqlitePersistentStore;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -31,7 +32,7 @@ public class DataStore {
 
     public DataStore(String rootGitDirectoryPath) {
         rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
-        persistentStore = new PersistentStore(rootGitDirectory);
+        persistentStore = new SqlitePersistentStore(rootGitDirectory);
         List<String> excludedFromDeletion = persistentStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");
         Util.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[] {}));

@@ -42,9 +42,15 @@ public class ResourceFetcher {
             if (contents == null) {
                 RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
                 if (rawFile == null) {
-                    throw new IllegalStateException("file was not in the current commit, or the git tree, yet path was not null");
+                    Util.sout(
+                        "WARNING: " +
+                        "File " + path + " was not in the current commit, or the git tree, yet path was not null. " +
+                        "File url is: " + url
+                    );
+                    contents = fetch(projectName, url, path);
+                } else {
+                    contents = rawFile.getContents();
                 }
-                contents = rawFile.getContents();
             }
         }
         return new RepositoryFile(newPath, contents);
