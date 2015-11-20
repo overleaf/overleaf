@@ -41,7 +41,7 @@ module.exports =
 			if err?
 				return callback err
 			if exists
-				PersistorManager.getFileStream bucket, convertedKey, null, callback
+				PersistorManager.getFileStream bucket, convertedKey, opts, callback
 			else
 				@_getConvertedFileAndCache bucket, key, convertedKey, opts, callback
 
