@@ -28,6 +28,12 @@ define [
 			@connection = {
 				send: (update) =>
 					@_startInflightOpTimeout(update)
+					if window.disconnectOnUpdate? and Math.random() < window.disconnectOnUpdate
+						console.log "Disconnecting on update", update
+						window._ide.socket.socket.disconnect()
+					if window.dropUpdates? and Math.random() < window.dropUpdates
+						console.log "Simulating a lost update", update
+						return
 					@socket.emit "applyOtUpdate", @doc_id, update
 				state: "ok"
 				id:    @socket.socket.sessionid
@@ -103,16 +109,41 @@ define [
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
 	
-		INFLIGHT_OP_TIMEOUT: 10000
+		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
 		_startInflightOpTimeout: (update) ->
-			meta =
-				v: update.v
-				op_sent_at: new Date()
+			@_startFatalTimeoutTimer(update)
 			timer = setTimeout () =>
-				@trigger "op:timeout", update
+				# Only send the update again if inflightOp is still populated
+				# This can be cleared when hard reloading the document in which
+				# case we don't want to keep trying to send it.
+				if @_doc.inflightOp?
+					# When there is a socket.io disconnect, @_doc.inflightSubmittedIds
+					# is updated with the socket.io client id of the current op in flight
+					# (meta.source of the op).
+					# @connection.id is the client id of the current socket.io session.
+					# So we need both depending on whether the op was submitted before
+					# one or more disconnects, or if it was submitted during the current session.
+					update.dupIfSource = [@connection.id, @_doc.inflightSubmittedIds...]
+					@connection.send(update)
 			, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
+				@_clearFatalTimeoutTimer()
 				clearTimeout timer
+
+		FATAL_OP_TIMEOUT: 30000 # 30 seconds
+		_startFatalTimeoutTimer: (update) ->
+			# If an op doesn't get acked within FATAL_OP_TIMEOUT, something has
+			# gone unrecoverably wrong (the op will have been retried multiple times)
+			return if @_timeoutTimer?
+			@_timeoutTimer = setTimeout () =>
+				@_clearFatalTimeoutTimer()
+				@trigger "op:timeout", update
+			, @FATAL_OP_TIMEOUT
+		
+		_clearFatalTimeoutTimer: () ->
+			return if !@_timeoutTimer?
+			clearTimeout @_timeoutTimer
+			@_timeoutTimer = null
 
 		_handleError: (error, meta = {}) ->
 			@trigger "error", error, meta
