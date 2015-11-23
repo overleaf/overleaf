@@ -8,7 +8,6 @@ metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserUpdater = require("./UserUpdater")
-SubscriptionDomainHandler = require("../Subscription/SubscriptionDomainHandler")
 EmailHandler = require("../Email/EmailHandler")
 OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
 settings = require "settings-sharelatex"
