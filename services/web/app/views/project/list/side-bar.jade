@@ -74,8 +74,9 @@
 			strong #{translate("create_your_first_project")}
 			
 - if (showUserDetailsArea)
-	- if (Math.random() < 0.5)
-		.row-spaced
+	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
+
+		.row-spaced(ng-if="showDatajoy")
 			hr
 			.card.card-thin
 				p.text-center.small
@@ -86,8 +87,7 @@
 					a(href="https://www.getdatajoy.com/", target="_blank") DataJoy
 					|  is a new online Python and R editor from ShareLaTeX.
 
-	- else
-		.row-spaced#userProfileInformation(ng-if="projects.length > 0", ng-cloak)
+		.row-spaced#userProfileInformation(ng-if="hasProjects && !showDatajoy")
 			div(ng-controller="UserProfileController")
 				hr(ng-show="percentComplete < 100")
 				.text-centered.user-profile(ng-show="percentComplete < 100")
@@ -101,12 +101,43 @@
 						ng-click="openUserProfileModal()"
 					) #{translate("complete")}
 
--if (settings.enableSubscriptions && !hasSubscription)
-	.row-spaced(ng-if="projects.length > 0", ng-cloak).text-centered
-		hr
-		p.small #{translate("on_free_sl")}
-		p
-			a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
-		p.small
-			| #{translate("or_unlock_features_bonus")} 
-			a(href="/user/bonus") #{translate("sharing_sl")} .
+
+		.row-spaced(ng-if="hasProjects && userHasSubscription", ng-cloak, sixpack-switch="left-menu-upgrade-reason").text-centered
+			span(sixpack-default).text-centered
+				hr
+				p.small #{translate("on_free_sl")}
+				p
+					a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
+				p.small.text-centered
+					| #{translate("or_unlock_features_bonus")} 
+					a(href="/user/bonus") #{translate("sharing_sl")} .
+
+			span(sixpack-when="dropbox").text-centered
+				hr
+				.card.card-thin
+					p
+						span Get Dropbox Sync
+					p
+						img(src="/img/dropbox/simple_logo.png")
+					p
+						a(href="/user/subscription/plans", sixpack-convert="left-menu-upgrade-reason").btn.btn-primary #{translate("upgrade")}
+					p.small.text-centered
+						| #{translate("or_unlock_features_bonus")} 
+						a(href="/user/bonus") #{translate("sharing_sl")} .
+
+			span(sixpack-when="github").text-centered
+				hr
+				.card.card-thin
+					p
+						span Get Github Sync
+					p
+						img(src="/img/github/octocat.jpg")
+					p
+						a(href="/user/subscription/plans", sixpack-convert="left-menu-upgrade-reason").btn.btn-primary #{translate("upgrade")}
+					p.small.text-centered
+						| #{translate("or_unlock_features_bonus")} 
+						a(href="/user/bonus") #{translate("sharing_sl")} .
+script.
+	window.userHasSubscription = #{settings.enableSubscriptions && !hasSubscription}
+
+
