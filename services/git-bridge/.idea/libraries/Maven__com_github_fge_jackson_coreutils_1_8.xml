@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.fge:jackson-coreutils:1.8">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fge/jackson-coreutils/1.8/jackson-coreutils-1.8.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fge/jackson-coreutils/1.8/jackson-coreutils-1.8-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/fge/jackson-coreutils/1.8/jackson-coreutils-1.8-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
