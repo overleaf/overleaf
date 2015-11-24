@@ -117,8 +117,8 @@ module.exports =
 	siteUrl : siteUrl = 'http://localhost:3000'
 
 	# cookie domain
-	# use full domain for cookies to only be accesabble from that domain,
-	# replace subdomain with dot to have them accessable on all subdomains
+	# use full domain for cookies to only be accessible from that domain,
+	# replace subdomain with dot to have them accessible on all subdomains
 	# cookieDomain: ".sharelatex.dev"
 	cookieName:"sharelatex.sid"
 
