@@ -89,5 +89,4 @@ public class ResourceFetcher {
         persistentStore.addURLIndexForProject(projectName, url, path);
         return contents;
     }
-
 }
