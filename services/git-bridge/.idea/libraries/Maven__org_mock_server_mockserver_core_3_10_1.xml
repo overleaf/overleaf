@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.mock-server:mockserver-core:3.10.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mock-server/mockserver-core/3.10.1/mockserver-core-3.10.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mock-server/mockserver-core/3.10.1/mockserver-core-3.10.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mock-server/mockserver-core/3.10.1/mockserver-core-3.10.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
