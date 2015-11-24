@@ -7,6 +7,9 @@ import static org.mockserver.model.HttpResponse.response;
 
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -33,6 +36,8 @@ public class ResourceFetcherTest {
     public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException {
         final String testProjectName = "123abc";
         final String testUrl = "http://localhost:" + mockServerRule.getHttpPort() + "/123abc";
+        final String oldTestPath = "testPath";
+        final String newTestPath = "missingPath";
 
         mockServerClient.when(
             request()
@@ -45,47 +50,25 @@ public class ResourceFetcherTest {
             .withBody("content")
         );
 
-        final PersistentStore persistentStore = new PersistentStore() {
-            @Override
-            public List<String> getProjectNames() {
-                return null;
-            }
+        final Mockery context = new Mockery();
+        final PersistentStore persistentStore = context.mock(PersistentStore.class);
+        context.checking(new Expectations() {{
+            // It should fetch the file once it finds it is missing.
+            oneOf(persistentStore).getPathForURLInProject(testProjectName, testUrl);
+            will(returnValue(oldTestPath));
 
-            @Override
-            public void setLatestVersionForProject(String project, int versionID) {
-
-            }
-
-            @Override
-            public int getLatestVersionForProject(String project) {
-                return 0;
-            }
-
-            @Override
-            public void addURLIndexForProject(String projectName, String url, String path) {
-
-            }
-
-            @Override
-            public void deleteFilesForProject(String project, String... files) {
-
-            }
-
-            @Override
-            public String getPathForURLInProject(String projectName, String url) {
-                assertEquals(testProjectName, projectName);
-                assertEquals(testUrl, url);
-                return "missingPath";
-            }
-        };
+            // It should update the URL index store once it has fetched; at present, it does not actually change the stored path.
+            oneOf(persistentStore).addURLIndexForProject(testProjectName, testUrl, oldTestPath);
+        }});
 
         ResourceFetcher resourceFetcher = new ResourceFetcher(persistentStore);
         TemporaryFolder repositoryFolder = new TemporaryFolder();
         repositoryFolder.create();
         Repository repository = new FileRepositoryBuilder().setWorkTree(repositoryFolder.getRoot()).build();
         Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
-        resourceFetcher.get(testProjectName, testUrl, "testPath", repository, fetchedUrls);
-                //     public RawFile get(String projectName, String url, String newPath, Repository repository, Map<String, byte[]> fetchedUrls) throws IOException {
+        resourceFetcher.get(testProjectName, testUrl, newTestPath, repository, fetchedUrls);
 
+        // We don't bother caching in this case, at present.
+        assertEquals(0, fetchedUrls.size());
     }
 }
