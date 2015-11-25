@@ -50,9 +50,9 @@ module.exports = CompileController =
 			else
 				rateLimitOpts =
 					endpointName: "full-pdf-download"
-					throttle: 100
+					throttle: 1000
 					subjectName : req.ip
-					timeInterval : 60 * 10
+					timeInterval : 60 * 60
 				RateLimiter.addCount rateLimitOpts, callback
 
 		Project.findById project_id, {name: 1}, (err, project)->
