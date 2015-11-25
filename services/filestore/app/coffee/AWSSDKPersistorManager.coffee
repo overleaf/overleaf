@@ -80,6 +80,7 @@ module.exports =
 		logger.log bucketName:bucketName, key:key, "check file existence in s3"
 		s3.headObject {Bucket: bucketName, Key: key}, (err, data) ->
 			if err?
+				return (callback null, false) if err.code == 'NotFound'
 				logger.err err:err, bucketName:bucketName, key:key, "something went wrong checking head in s3"
 				return callback err
 			callback null, data.ETag?
