@@ -17,7 +17,6 @@ Metrics.event_loop?.monitor(logger)
 Metrics.memory.monitor(logger)
 
 app.configure ->
-	app.use express.bodyParser()
 	app.use Metrics.http.monitor(logger)
 	
 app.configure 'development', ->
@@ -72,7 +71,7 @@ app.use (req, res, next) ->
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
 
-app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.copyFile
+app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, express.bodyParser(), fileController.copyFile
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
@@ -83,7 +82,7 @@ app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey
 app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
 app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
 
-app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.copyFile
+app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, express.bodyParser(), fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
 app.get "/heapdump", (req, res)->
