@@ -49,7 +49,8 @@ module.exports = FileController =
 			if err?
 				logger.log err: err, key: key, bucket: bucket, "error inserting file"
 				res.send 500
-			res.send 200
+			else
+				res.send 200
 
 	copyFile: (req, res)->
 		metrics.inc "copyFile"
