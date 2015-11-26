@@ -59,14 +59,17 @@ module.exports = UpdatesManager =
 			return callback(error) if error?
 			MongoManager.backportProjectId project_id, doc_id, (error) ->
 				return callback(error) if error?
+				# get the updates as strings from redis (so we can delete them after they are applied)
 				RedisManager.getOldestDocUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, docUpdates) ->
 					return callback(error) if error?
 					length = docUpdates.length
+					# parse the redis strings into ShareJs updates
 					RedisManager.expandDocUpdates docUpdates, (error, rawUpdates) ->
 						return callback(error) if error?
 						UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 							return callback(error) if error?
 							logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"
+							# delete the applied updates from redis
 							RedisManager.deleteAppliedDocUpdates project_id, doc_id, docUpdates, (error) ->
 								return callback(error) if error?
 								if length == UpdatesManager.REDIS_READ_BATCH_SIZE
