@@ -16,10 +16,7 @@ module.exports = MongoManager =
 					return callback error, null
 				return callback null, compressedUpdates[0] or null
 
-	deleteCompressedUpdate: (id, callback = (error) ->) ->
-		db.docHistory.remove({ _id: ObjectId(id.toString()) }, callback)
-
-	popLastCompressedUpdate: (doc_id, callback = (error, update, version) ->) ->
+	peekLastCompressedUpdate: (doc_id, callback = (error, update, version) ->) ->
 		# under normal use we pass back the last update as
 		# callback(null,update).
 		#
@@ -37,9 +34,7 @@ module.exports = MongoManager =
 					# the update is marked as broken so we will force a new op
 					return callback null, null
 				else
-					MongoManager.deleteCompressedUpdate update._id, (error) ->
-						return callback(error) if error?
-						callback null, update
+					return callback null, update
 			else
 				callback null, null
 
@@ -59,6 +54,21 @@ module.exports = MongoManager =
 			else
 				callback(err,results)
 
+
+	modifyCompressedUpdate: (lastUpdate, newUpdate, callback = (error) ->) ->
+		return callback() if not newUpdate?
+		db.docHistory.findAndModify
+			query: lastUpdate,
+			update:
+				$set :
+					op: newUpdate.op
+					meta: newUpdate.meta
+					v: newUpdate.v
+			new: true
+		, (err, result, lastErrorObject) ->
+			return callback(error) if error?
+			return new Error("could not modify existing op") if not result?
+			callback(err, result)
 
 	insertCompressedUpdate: (project_id, doc_id, update, temporary, callback = (error) ->) ->
 		update = {

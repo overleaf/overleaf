@@ -24,12 +24,12 @@ describe "UpdatesManager", ->
 	describe "compressAndSaveRawUpdates", ->
 		describe "when there are no raw ops", ->
 			beforeEach ->
-				@MongoManager.popLastCompressedUpdate = sinon.stub()
+				@MongoManager.peekLastCompressedUpdate = sinon.stub()
 				@MongoManager.insertCompressedUpdates = sinon.stub()
 				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, [], @temporary, @callback
 
 			it "should not need to access the database", ->
-				@MongoManager.popLastCompressedUpdate.called.should.equal false
+				@MongoManager.peekLastCompressedUpdate.called.should.equal false
 				@MongoManager.insertCompressedUpdates.called.should.equal false
 
 			it "should call the callback", ->
@@ -38,15 +38,16 @@ describe "UpdatesManager", ->
 		describe "when there is no compressed history to begin with", ->
 			beforeEach ->
 				@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
-				@compressedUpdates = { v: 13, op: "compressed-op-12" }
+				@compressedUpdates = [ { v: 13, op: "compressed-op-12" } ]
 
-				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
+				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
+				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
-			it "should try to pop the last compressed op", ->
-				@MongoManager.popLastCompressedUpdate
+			it "should look at the last compressed op", ->
+				@MongoManager.peekLastCompressedUpdate
 					.calledWith(@doc_id)
 					.should.equal true
 			
@@ -66,9 +67,10 @@ describe "UpdatesManager", ->
 		describe "when the raw ops need appending to existing history", ->
 			beforeEach ->
 				@lastCompressedUpdate = { v: 11, op: "compressed-op-11" }
-				@compressedUpdates = { v: 13, op: "compressed-op-12" }
+				@compressedUpdates = [ { v: 12, op: "compressed-op-11+12" }, { v: 13, op: "compressed-op-12" } ]
 
-				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
+				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
+				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
@@ -77,8 +79,8 @@ describe "UpdatesManager", ->
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
-				it "should try to pop the last compressed op", ->
-					@MongoManager.popLastCompressedUpdate
+				it "should look at the last compressed op", ->
+					@MongoManager.peekLastCompressedUpdate
 						.calledWith(@doc_id)
 						.should.equal true
 				
@@ -86,10 +88,15 @@ describe "UpdatesManager", ->
 					@UpdateCompressor.compressRawUpdates
 						.calledWith(@lastCompressedUpdate, @rawUpdates)
 						.should.equal true
+
+				it "should update the existing op", ->
+					@MongoManager.modifyCompressedUpdate
+						.calledWith(@lastCompressedUpdate, @compressedUpdates[0])
+						.should.equal true
 				
-				it "should save the compressed ops", ->
+				it "should save the new compressed ops", ->
 					@MongoManager.insertCompressedUpdates
-						.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
+						.calledWith(@project_id, @doc_id, @compressedUpdates[1..], @temporary)
 						.should.equal true
 
 				it "should call the callback", ->
@@ -116,19 +123,20 @@ describe "UpdatesManager", ->
 						.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
 						.should.equal true
 
-				it "should put the popped update back into mongo", ->
-					@MongoManager.insertCompressedUpdates.calledOnce.should.equal true
-					@MongoManager.insertCompressedUpdates
-						.calledWith(@project_id, @doc_id, [@lastCompressedUpdate], @temporary)
-						.should.equal true
+				it "should not modify any update in mongo", ->
+					@MongoManager.modifyCompressedUpdate.called.should.equal false
+
+				it "should not insert any update into mongo", ->
+					@MongoManager.insertCompressedUpdates.called.should.equal false
 
 		describe "when the raw ops need appending to existing history which is in S3", ->
 			beforeEach ->
 				@lastCompressedUpdate = null
 				@lastVersion = 11
-				@compressedUpdates = { v: 13, op: "compressed-op-12" }
+				@compressedUpdates = [ { v: 13, op: "compressed-op-12" } ]
 
-				@MongoManager.popLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null, @lastVersion)
+				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null, @lastVersion)
+				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
@@ -137,8 +145,8 @@ describe "UpdatesManager", ->
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
-				it "should try to pop the last compressed op", ->
-					@MongoManager.popLastCompressedUpdate
+				it "should try to look at the last compressed op", ->
+					@MongoManager.peekLastCompressedUpdate
 						.calledWith(@doc_id)
 						.should.equal true
 				
