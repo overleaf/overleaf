@@ -103,7 +103,7 @@ describe "LockManager", ->
 				startTime = Date.now()
 				@LockManager.LOCK_TEST_INTERVAL = 5
 				@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) ->
-					if Date.now() - startTime < 20
+					if Date.now() - startTime < 100
 						callback null, false
 					else
 						callback null, true
