@@ -20,40 +20,54 @@ describe "RedisManager", ->
 		@batchSize = 100
 		@callback = sinon.stub()
 
-	describe "getOldestRawUpdates", ->
+	describe "getOldestDocUpdates", ->
 		beforeEach ->
 			@rawUpdates = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
 			@jsonUpdates = (JSON.stringify(update) for update in @rawUpdates)
 			@rclient.lrange = sinon.stub().callsArgWith(3, null, @jsonUpdates)
-			@RedisManager.getOldestRawUpdates @doc_id, @batchSize, @callback
+			@RedisManager.getOldestDocUpdates @doc_id, @batchSize, @callback
 
 		it "should read the updates from redis", ->
 			@rclient.lrange
 				.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @batchSize - 1)
 				.should.equal true
 
-		it "should call the callback with the parsed ops", ->
-			@callback.calledWith(null, @rawUpdates).should.equal true
+		it "should call the callback with the unparsed ops", ->
+			@callback.calledWith(null, @jsonUpdates).should.equal true
 
-	describe "deleteOldestRawUpdates", ->
-		beforeEach ->
-			@rclient.ltrim = sinon.stub()
-			@rclient.srem = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0)
-			@RedisManager.deleteOldestRawUpdates @project_id, @doc_id, @batchSize, @callback
 
-		it "should delete the updates from redis", ->
-			@rclient.ltrim
-				.calledWith("UncompressedHistoryOps:#{@doc_id}", @batchSize, -1)
-				.should.equal true
+		describe "expandDocUpdates", ->
+			beforeEach ->
+				@RedisManager.expandDocUpdates @jsonUpdates, @callback
 
-		it "should delete the doc from the set of docs with history ops", ->
-			@rclient.srem
-				.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
-				.should.equal true
+			it "should call the callback with the parsed ops", ->
+				@callback.calledWith(null, @rawUpdates).should.equal true
 
-		it "should call the callback ", ->
-			@callback.called.should.equal true
+
+		describe "deleteAppliedDocUpdates", ->
+			beforeEach ->
+				@rclient.lrem = sinon.stub()
+				@rclient.srem = sinon.stub()
+				@rclient.exec = sinon.stub().callsArgWith(0)
+				@RedisManager.deleteAppliedDocUpdates @project_id, @doc_id, @jsonUpdates, @callback
+
+			it "should delete the first update from redis", ->
+				@rclient.lrem
+					.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @jsonUpdates[0])
+					.should.equal true
+
+			it "should delete the second update from redis", ->
+				@rclient.lrem
+					.calledWith("UncompressedHistoryOps:#{@doc_id}", 0, @jsonUpdates[1])
+					.should.equal true
+
+			it "should delete the doc from the set of docs with history ops", ->
+				@rclient.srem
+					.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
+					.should.equal true
+
+			it "should call the callback ", ->
+				@callback.called.should.equal true
 
 	describe "getDocIdsWithHistoryOps", ->
 		beforeEach ->

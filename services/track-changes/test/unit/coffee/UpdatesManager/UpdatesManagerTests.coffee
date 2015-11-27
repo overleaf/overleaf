@@ -166,14 +166,15 @@ describe "UpdatesManager", ->
 	describe "processUncompressedUpdates", ->
 		beforeEach ->
 			@UpdatesManager.compressAndSaveRawUpdates = sinon.stub().callsArgWith(4)
-			@RedisManager.deleteOldestRawUpdates = sinon.stub().callsArg(3)
+			@RedisManager.deleteAppliedDocUpdates = sinon.stub().callsArg(3)
 			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
 			@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, @temporary = "temp mock")
 
 		describe "when there is fewer than one batch to send", ->
 			beforeEach ->
 				@updates = ["mock-update"]
-				@RedisManager.getOldestRawUpdates = sinon.stub().callsArgWith(2, null, @updates)
+				@RedisManager.getOldestDocUpdates = sinon.stub().callsArgWith(2, null, @updates)
+				@RedisManager.expandDocUpdates = sinon.stub().callsArgWith(1, null, @updates)
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
 
 			it "should check if the updates are temporary", ->
@@ -187,7 +188,7 @@ describe "UpdatesManager", ->
 					.should.equal true
 
 			it "should get the oldest updates", ->
-				@RedisManager.getOldestRawUpdates
+				@RedisManager.getOldestDocUpdates
 					.calledWith(@doc_id, @UpdatesManager.REDIS_READ_BATCH_SIZE)
 					.should.equal true
 
@@ -197,8 +198,8 @@ describe "UpdatesManager", ->
 					.should.equal true
 
 			it "should delete the batch of uncompressed updates that was just processed", ->
-				@RedisManager.deleteOldestRawUpdates
-					.calledWith(@project_id, @doc_id, @updates.length)
+				@RedisManager.deleteAppliedDocUpdates
+					.calledWith(@project_id, @doc_id, @updates)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -209,17 +210,20 @@ describe "UpdatesManager", ->
 				@UpdatesManager.REDIS_READ_BATCH_SIZE = 2
 				@updates = ["mock-update-0", "mock-update-1", "mock-update-2", "mock-update-3", "mock-update-4"]
 				@redisArray = @updates.slice()
-				@RedisManager.getOldestRawUpdates = (doc_id, batchSize, callback = (error, updates) ->) =>
+				@RedisManager.getOldestDocUpdates = (doc_id, batchSize, callback = (error, updates) ->) =>
 					updates = @redisArray.slice(0, batchSize)
 					@redisArray = @redisArray.slice(batchSize)
 					callback null, updates
-				sinon.spy @RedisManager, "getOldestRawUpdates"
+				sinon.spy @RedisManager, "getOldestDocUpdates"
+				@RedisManager.expandDocUpdates = (jsonUpdates, callback) =>
+					callback null, jsonUpdates
+				sinon.spy @RedisManager, "expandDocUpdates"
 				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
 					@callback(args...)
 					done()
 
 			it "should get the oldest updates in three batches ", ->
-				@RedisManager.getOldestRawUpdates.callCount.should.equal 3
+				@RedisManager.getOldestDocUpdates.callCount.should.equal 3
 
 			it "should compress and save the updates in batches", ->
 				@UpdatesManager.compressAndSaveRawUpdates
@@ -233,7 +237,7 @@ describe "UpdatesManager", ->
 					.should.equal true
 
 			it "should delete the batches of uncompressed updates", ->
-				@RedisManager.deleteOldestRawUpdates.callCount.should.equal 3
+				@RedisManager.deleteAppliedDocUpdates.callCount.should.equal 3
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
