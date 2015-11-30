@@ -43,10 +43,12 @@ public class DataStore {
 
     public void updateProjectWithName(String name, Repository repository) throws IOException, SnapshotPostException, GitAPIException {
         LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(name, persistentStore.getLatestVersionForProject(name));
+
+        makeCommitsFromSnapshots(name, repository, snapshots);
+
         if (!snapshots.isEmpty()) {
             persistentStore.setLatestVersionForProject(name, snapshots.getLast().getVersionID());
         }
-        makeCommitsFromSnapshots(name, repository, snapshots);
     }
 
     private void makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException, GitAPIException {
