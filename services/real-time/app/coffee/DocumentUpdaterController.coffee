@@ -3,7 +3,7 @@ settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.web)
 
-MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 * 1024 # 1Mb
+MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 
 module.exports = DocumentUpdaterController =
 	# DocumentUpdaterController is responsible for updates that come via Redis
