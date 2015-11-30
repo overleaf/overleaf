@@ -56,7 +56,7 @@ do_start()
 	echo "Starting WriteLatex-Git Bridge..."
         start-stop-daemon --start --quiet --make-pidfile --pidfile $PIDFILE \
                 --exec /usr/bin/env LANG="C.UTF-8" $DAEMON -- \
-                $DAEMON_ARGS >> /var/log/wlgb/out.log 2>> /var/log/err.log &
+                $DAEMON_ARGS >> /var/log/wlgb/out.log 2>> /var/log/wlgb/err.log &
 	echo "WriteLatex-Git Bridge started."
 	echo "Config file at /etc/wlgb/config.json"
 	echo "Log file at /var/log/wlgb/out.log"
