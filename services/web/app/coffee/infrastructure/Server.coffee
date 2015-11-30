@@ -122,6 +122,10 @@ apiRouter.get "/profile", (req, res) ->
 		res.json(profile)
 	, time
 
+app.get "/heapdump", (req, res)->
+	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.clsi.heapsnapshot', (err, filename)->
+		res.send filename
+
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
