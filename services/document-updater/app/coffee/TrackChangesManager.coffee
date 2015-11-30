@@ -5,6 +5,16 @@ RedisManager = require "./RedisManager"
 crypto = require("crypto")
 
 module.exports = TrackChangesManager =
+
+	flushDocChangesIfNeeded: (project_id, doc_id, callback = (error) ->) ->
+		RedisManager.getUncompressedHistoryOpLength doc_id, (error, length) ->
+			return callback(error) if error?
+			if length > 0
+				# only make request to track changes if there are queued ops
+				TrackChangesManager.flushDocChanges project_id, doc_id, callback
+			else
+				callback()
+
 	flushDocChanges: (project_id, doc_id, callback = (error) ->) ->
 		if !settings.apis?.trackchanges?
 			logger.warn doc_id: doc_id, "track changes API is not configured, so not flushing"
