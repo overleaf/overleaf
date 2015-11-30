@@ -3,6 +3,8 @@ settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.web)
 
+MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 * 1024 # 1Mb
+
 module.exports = DocumentUpdaterController =
 	# DocumentUpdaterController is responsible for updates that come via Redis
 	# Pub/Sub from the document updater.
@@ -13,6 +15,8 @@ module.exports = DocumentUpdaterController =
 			DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
 		
 	_processMessageFromDocumentUpdater: (io, channel, message) ->
+		if message.length > MESSAGE_SIZE_LOG_LIMIT
+			logger.log {length: message.length, head: message.slice(0,200)}, "large message from doc updater"
 		message = JSON.parse message
 		if message.op?
 			DocumentUpdaterController._applyUpdateFromDocumentUpdater(io, message.doc_id, message.op)
