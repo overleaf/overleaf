@@ -24,7 +24,7 @@ describe "DocumentUpdater - flushDocIfLoaded", ->
 	describe "when the doc is in Redis", ->
 		beforeEach ->
 			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, @lines, @version)
-			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
+			@TrackChangesManager.flushDocChangesIfNeeded = sinon.stub().callsArg(2)
 			@PersistenceManager.setDoc = sinon.stub().callsArgWith(4)
 			@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
