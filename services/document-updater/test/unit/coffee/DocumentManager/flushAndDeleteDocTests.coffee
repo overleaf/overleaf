@@ -8,7 +8,6 @@ describe "DocumentUpdater - flushAndDeleteDoc", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
-			"./TrackChangesManager": @TrackChangesManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
 			"logger-sharelatex": @logger = {log: sinon.stub()}
 			"./DocOpsManager" :{}

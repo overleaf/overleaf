@@ -4,7 +4,6 @@ DocOpsManager = require "./DocOpsManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
-TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = DocumentManager =
 	getDoc: (project_id, doc_id, _callback = (error, lines, version) ->) ->
@@ -91,9 +90,7 @@ module.exports = DocumentManager =
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
 				PersistenceManager.setDoc project_id, doc_id, lines, version, (error) ->
 					return callback(error) if error?
-					TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
-						return callback(error) if error?
-						callback null
+					callback null
 
 	flushAndDeleteDoc: (project_id, doc_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.flushAndDeleteDoc")
