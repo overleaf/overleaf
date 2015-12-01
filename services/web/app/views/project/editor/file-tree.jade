@@ -356,7 +356,7 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		h3 #{translate("upload_files")}
 		span &nbsp;
 		.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
-		.alert.alert-warning.small(ng-if="rateLimitHit") Too many files uploaded, your uploads have been throttled for short period.
+		.alert.alert-warning.small(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
 
 	.modal-body(
 		fine-upload
