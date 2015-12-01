@@ -17,6 +17,8 @@ describe "DocumentUpdaterController", ->
 			"redis-sharelatex" : 
 				createClient: ()=> 
 					@rclient = {auth:->}
+			"./SafeJsonParse": @SafeJsonParse =
+				parse: (data, cb) => cb null, JSON.parse(data)
 
 	describe "listenForUpdatesFromDocumentUpdater", ->
 		beforeEach ->
@@ -31,6 +33,14 @@ describe "DocumentUpdaterController", ->
 			@rclient.on.calledWith("message").should.equal true
 
 	describe "_processMessageFromDocumentUpdater", ->
+		describe "with bad JSON", ->
+			beforeEach ->
+				@SafeJsonParse.parse = sinon.stub().callsArgWith 1, new Error("oops")
+				@EditorUpdatesController._processMessageFromDocumentUpdater @io, "applied-ops", "blah"
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
 		describe "with update", ->
 			beforeEach ->
 				@message =

@@ -9,7 +9,9 @@ describe "WebsocketLoadBalancer", ->
 			"redis-sharelatex": 
 				createClient: () ->
 					auth:->
-			"logger-sharelatex": { log: sinon.stub(), err: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./SafeJsonParse": @SafeJsonParse =
+				parse: (data, cb) => cb null, JSON.parse(data)
 		@io = {}
 		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
 		@WebsocketLoadBalancer.rclientSub =
@@ -59,6 +61,14 @@ describe "WebsocketLoadBalancer", ->
 				.should.equal true
 
 	describe "_processEditorEvent", ->
+		describe "with bad JSON", ->
+			beforeEach ->
+				@SafeJsonParse.parse = sinon.stub().callsArgWith 1, new Error("oops")
+				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", "blah")
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
 		describe "with a designated room", ->
 			beforeEach ->
 				@io.sockets =

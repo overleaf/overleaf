@@ -1,6 +1,7 @@
 Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
 redis = require("redis-sharelatex")
+SafeJsonParse = require "./SafeJsonParse"
 rclientPub = redis.createClient(Settings.redis.web)
 rclientSub = redis.createClient(Settings.redis.web)
 
@@ -28,9 +29,12 @@ module.exports = WebsocketLoadBalancer =
 			WebsocketLoadBalancer._processEditorEvent io, channel, message
 
 	_processEditorEvent: (io, channel, message) ->
-		message = JSON.parse(message)
-		if message.room_id == "all"
-			io.sockets.emit(message.message, message.payload...)
-		else if message.room_id?
-			io.sockets.in(message.room_id).emit(message.message, message.payload...)
+		SafeJsonParse.parse message, (error, message) ->
+			if error?
+				logger.error {err: error, channel}, "error parsing JSON"
+				return
+			if message.room_id == "all"
+				io.sockets.emit(message.message, message.payload...)
+			else if message.room_id?
+				io.sockets.in(message.room_id).emit(message.message, message.payload...)
 		

@@ -26,3 +26,5 @@ module.exports =
 		sessionSecret: "secret-please-change"
 		
 	cookieName:"sharelatex.sid"
+	
+	max_doc_length: 2 * 1024 * 1024 # 2mb
