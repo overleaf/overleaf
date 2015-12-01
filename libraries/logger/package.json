@@ -8,7 +8,7 @@
   },
   "version": "1.0.0",
   "dependencies": {
-    "bunyan": "1.3.6",
+    "bunyan": "1.5.1",
     "coffee-script": "1.4.0",
     "raven": "^0.8.0"
   }
