@@ -25,7 +25,10 @@ module.exports =
 				opts = getOpts()
 				opts.json = true
 				request.get opts, (err, res, body)->
-					if res.statusCode != 200
+					if err?
+						logger.err err:err, "docstore returned a error in health check get"
+						cb(err)
+					else if res?.statusCode != 200
 						cb("status code not 200, its #{res.statusCode}")
 					else if _.isEqual(body.lines, lines) and body._id == doc_id.toString()
 						cb()
