@@ -91,7 +91,7 @@ module.exports = DocumentManager =
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
 				PersistenceManager.setDoc project_id, doc_id, lines, version, (error) ->
 					return callback(error) if error?
-					TrackChangesManager.flushDocChangesIfNeeded project_id, doc_id,  (error) ->
+					TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
 						return callback(error) if error?
 						callback null
 

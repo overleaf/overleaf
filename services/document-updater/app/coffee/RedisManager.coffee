@@ -171,9 +171,6 @@ module.exports = RedisManager =
 			[length, _] = results
 			callback(error, length)
 
-	getUncompressedHistoryOpLength: (doc_id, callback = (error, length) ->) ->
-		rclient.llen keys.uncompressedHistoryOp(doc_id: doc_id), callback
-
 	getDocOpsLength: (doc_id, callback = (error, length) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), callback
 
