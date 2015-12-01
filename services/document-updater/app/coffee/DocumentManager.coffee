@@ -100,6 +100,11 @@ module.exports = DocumentManager =
 
 		DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
 			return callback(error) if error?
+			# We should flush pending ops to track-changes here but this is
+			# already done in the real-time WebsocketController.leaveProject
+			# method so we leave it there.  Note, if you ever add the flush
+			# in here be sure to do it in the background because it can take
+			# a long time.
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?
 				callback null
