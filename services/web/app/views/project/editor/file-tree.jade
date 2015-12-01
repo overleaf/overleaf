@@ -354,6 +354,9 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-header
 		h3 #{translate("upload_files")}
+		span &nbsp;
+		.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
+
 	.modal-body(
 		fine-upload
 		endpoint="/project/{{ project_id }}/upload"
@@ -365,6 +368,7 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		multiple="true"
 		on-complete-callback="onComplete"
 		on-upload-callback="onUpload"
+		on-validate-batch="onValidateBatch"
 		params="{'folder_id': parent_folder_id}"
 	)
 		span #{translate("upload_files")}

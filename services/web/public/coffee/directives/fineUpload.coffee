@@ -14,6 +14,7 @@ define [
 				allowedExtensions: "="
 				onCompleteCallback: "="
 				onUploadCallback: "="
+				onValidateBatch: "="
 				params: "="
 			}
 			link: (scope, element, attrs) ->
@@ -33,10 +34,11 @@ define [
 
 				onComplete = scope.onCompleteCallback or () ->
 				onUpload   = scope.onUploadCallback or () ->
+				onValidateBatch = scope.onValidateBatch or () ->
 				params     = scope.params or {}
 				params._csrf = window.csrfToken
 
-				new qq.FineUploader
+				q = new qq.FineUploader
 					element: element[0]
 					multiple: multiple
 					disabledCancelForFormUploads: true
@@ -49,6 +51,7 @@ define [
 					callbacks:
 						onComplete: onComplete
 						onUpload:   onUpload
+						onValidateBatch: onValidateBatch
 					text: text
 					template: """
 						<div class="qq-uploader">
@@ -63,4 +66,5 @@ define [
 							<ul class="qq-upload-list"></ul>
 						</div>
 					"""
+				return q
 		}

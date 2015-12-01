@@ -102,17 +102,28 @@ define [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.parent_folder_id = parent_folder?.id
-
+			$scope.tooManyFiles = false
 			uploadCount = 0
 			$scope.onUpload = () ->
 				uploadCount++
 
+			$scope.max_files = 20
 			$scope.onComplete = (error, name, response) ->
 				$timeout (() ->
 					uploadCount--
 					if uploadCount == 0 and response? and response.success
 						$modalInstance.close("done")
 				), 250
+
+			$scope.onValidateBatch = (files)->
+				if files.length > $scope.max_files
+					$timeout (() ->
+						$scope.tooManyFiles = true
+					), 1
+					return false
+				else
+					return true
+
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
