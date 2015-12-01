@@ -15,6 +15,7 @@ define [
 				onCompleteCallback: "="
 				onUploadCallback: "="
 				onValidateBatch: "="
+				onErrorCallback: "="
 				params: "="
 			}
 			link: (scope, element, attrs) ->
@@ -34,6 +35,7 @@ define [
 
 				onComplete = scope.onCompleteCallback or () ->
 				onUpload   = scope.onUploadCallback or () ->
+				onError   = scope.onErrorCallback or () ->
 				onValidateBatch = scope.onValidateBatch or () ->
 				params     = scope.params or {}
 				params._csrf = window.csrfToken
@@ -52,6 +54,7 @@ define [
 						onComplete: onComplete
 						onUpload:   onUpload
 						onValidateBatch: onValidateBatch
+						onError: onError
 					text: text
 					template: """
 						<div class="qq-uploader">

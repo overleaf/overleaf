@@ -103,6 +103,8 @@ define [
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.parent_folder_id = parent_folder?.id
 			$scope.tooManyFiles = false
+			$scope.rateLimitHit = false
+
 			uploadCount = 0
 			$scope.onUpload = () ->
 				uploadCount++
@@ -124,6 +126,9 @@ define [
 				else
 					return true
 
+			$scope.onError = (id, name, reason)->
+				if reason.indexOf("429") != -1
+					$scope.rateLimitHit = true
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
