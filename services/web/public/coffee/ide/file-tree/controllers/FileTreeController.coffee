@@ -99,11 +99,28 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "$window"
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, $window) ->
 			$scope.parent_folder_id = parent_folder?.id
 			$scope.tooManyFiles = false
 			$scope.rateLimitHit = false
+			$scope.secondsToRedirect = 10
+			$scope.notLoggedIn = false
+
+
+			needToLogBackIn = ->
+				$scope.notLoggedIn = true
+				decreseTimeout = ->
+					$timeout (() ->
+						if $scope.secondsToRedirect == 0
+							$window.location.href = "/login?redir=/project/#{ide.project_id}"
+						else
+							decreseTimeout()
+							$scope.secondsToRedirect = $scope.secondsToRedirect - 1
+					), 1000
+
+				decreseTimeout()
+
 
 			uploadCount = 0
 			$scope.onUpload = () ->
@@ -127,8 +144,12 @@ define [
 					return true
 
 			$scope.onError = (id, name, reason)->
+				console.log(id, name, reason)
 				if reason.indexOf("429") != -1
 					$scope.rateLimitHit = true
+				else if reason.indexOf("403") != -1
+					needToLogBackIn()
+
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
