@@ -28,9 +28,11 @@ module.exports =
 					if err?
 						logger.err err:err, "docstore returned a error in health check get"
 						cb(err)
+					else if !res?
+						cb("no response from docstore with get check")
 					else if res?.statusCode != 200
 						cb("status code not 200, its #{res.statusCode}")
-					else if _.isEqual(body.lines, lines) and body._id == doc_id.toString()
+					else if _.isEqual(body?.lines, lines) and body?._id == doc_id.toString()
 						cb()
 					else
 						cb("health check lines not equal #{body.lines} != #{lines}")
