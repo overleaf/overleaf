@@ -5,6 +5,7 @@ logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializ
 logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSerializers").project
 metrics = require("metrics-sharelatex")
 metrics.initialize("web")
+metrics.memory.monitor(logger)
 Server = require("./app/js/infrastructure/Server")
 Errors = require "./app/js/errors"
 
