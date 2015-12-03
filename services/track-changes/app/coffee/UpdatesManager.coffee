@@ -7,6 +7,7 @@ UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
 DocArchiveManager = require "./DocArchiveManager"
+_ = require "underscore"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -50,7 +51,7 @@ module.exports = UpdatesManager =
 				# compress them together with the new ones
 				[firstUpdate, additionalUpdates...] = compressedUpdates
 
-				if firstUpdate.v == lastCompressedUpdate.v
+				if firstUpdate.v == lastCompressedUpdate.v and _.isEqual(firstUpdate, lastCompressedUpdate)
 					# first update version hasn't changed, skip it and insert remaining updates
 					# this is an optimisation, we could update the existing op with itself
 					updateToModify = null

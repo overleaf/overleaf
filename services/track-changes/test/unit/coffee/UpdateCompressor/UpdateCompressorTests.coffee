@@ -304,3 +304,25 @@ describe "UpdateCompressor", ->
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
 					v: 43
 				}]
+
+	describe "compressRawUpdates", ->
+		describe "merging in-place with an array op", ->
+			it "should not change the existing last updates", ->
+				expect(@UpdateCompressor.compressRawUpdates {
+					op: [ {"p":1000,"d":"hello"}, {"p":1000,"i":"HELLO()"} ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, [{
+					op: [{ p: 1006, i: "WORLD" }]
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: [{"p":1000,"d":"hello"}, {"p":1000,"i":"HELLO()"} ]
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				},{
+					op: [{"p":1006,"i":"WORLD"}]
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]

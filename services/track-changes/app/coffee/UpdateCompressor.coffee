@@ -56,6 +56,10 @@ module.exports = UpdateCompressor =
 		return concattedUpdates
 
 	compressRawUpdates: (lastPreviousUpdate, rawUpdates) ->
+		if lastPreviousUpdate?.op?.length > 1
+			# if the last previous update was an array op, don't compress onto it.
+			# The avoids cases where array length changes but version number doesn't
+			return [lastPreviousUpdate].concat UpdateCompressor.compressRawUpdates(null,rawUpdates)
 		if lastPreviousUpdate?
 			rawUpdates = [lastPreviousUpdate].concat(rawUpdates)
 		updates = UpdateCompressor.convertToSingleOpUpdates(rawUpdates)
