@@ -12,6 +12,7 @@ logger.initialize("real-time-sharelatex")
 
 Metrics = require("metrics-sharelatex")
 Metrics.initialize("real-time")
+Metrics.event_loop.monitor(logger)
 
 rclient = redis.createClient(Settings.redis.web)
 
