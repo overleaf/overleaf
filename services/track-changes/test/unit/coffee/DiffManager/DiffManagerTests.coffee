@@ -108,7 +108,11 @@ describe "DiffManager", ->
 		describe "with matching versions", ->
 			beforeEach ->
 				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
-				@DiffGenerator.rewindUpdates = sinon.stub().returns(@rewound_content)
+				@DiffGenerator.rewindUpdates = sinon.spy (content, updates) =>
+					# the rewindUpdates method reverses the 'updates' array
+					updates.reverse()
+					return @rewound_content
+				@rewindUpdatesWithArgs = @DiffGenerator.rewindUpdates.withArgs(@content, @updates.slice().reverse())
 				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 
 			it "should get the latest doc and version with all recent updates", ->
@@ -117,9 +121,7 @@ describe "DiffManager", ->
 					.should.equal true
 
 			it "should rewind the diff", ->
-				@DiffGenerator.rewindUpdates
-					.calledWith(@content, @updates.slice().reverse())
-					.should.equal true
+				sinon.assert.calledOnce(@rewindUpdatesWithArgs)
 
 			it "should call the callback with the rewound document and updates", ->
 				@callback.calledWith(null, @rewound_content, @updates).should.equal true

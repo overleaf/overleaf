@@ -45,9 +45,12 @@ module.exports = DiffManager =
 			if lastUpdate? and lastUpdate.v != version - 1
 				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
 
+			tryUpdates = updates.slice().reverse()
+
 			try
-				startingContent = DiffGenerator.rewindUpdates content, updates.slice().reverse()
+				startingContent = DiffGenerator.rewindUpdates content, tryUpdates
+				# tryUpdates is reversed, and any unapplied ops are marked as broken
 			catch e
 				return callback(e)
-			
-			callback(null, startingContent, updates)
+
+			callback(null, startingContent, tryUpdates)

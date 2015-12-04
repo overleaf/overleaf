@@ -11,8 +11,15 @@ module.exports = DiffGenerator =
 	ConsistencyError: ConsistencyError
 
 	rewindUpdate: (content, update) ->
-		for op in update.op.slice().reverse()
-			content = DiffGenerator.rewindOp content, op
+		for op in update.op by -1
+			try
+				content = DiffGenerator.rewindOp content, op
+			catch e
+				if e instanceof ConsistencyError
+					logger.error {update, op: JSON.stringify(op)}, "marking op as broken"
+					op.broken = true
+				else
+					throw e # rethrow the execption
 		return content
 
 	rewindOp: (content, op) ->
@@ -90,7 +97,7 @@ module.exports = DiffGenerator =
 		return newDiff
 
 	applyUpdateToDiff: (diff, update) ->
-		for op in update.op
+		for op in update.op when op.broken isnt true
 			diff = DiffGenerator.applyOpToDiff diff, op, update.meta
 		return diff
 
