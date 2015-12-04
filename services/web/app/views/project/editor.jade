@@ -76,7 +76,7 @@ block content
 				ng-click="done()"
 			) &times;
 			h3 {{ title }}
-		.modal-body {{ message }}
+		.modal-body(ng-bind-html="message")
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
