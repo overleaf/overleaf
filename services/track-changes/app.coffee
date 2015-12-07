@@ -2,6 +2,9 @@ Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 logger.initialize("track-changes")
 
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn, {release: process.env.BUILD_NUMBER})
+
 Path = require "path"
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("track-changes")
