@@ -126,7 +126,7 @@ define [
 			$scope.onUpload = () ->
 				uploadCount++
 
-			$scope.max_files = 20
+			$scope.max_files = 40
 			$scope.onComplete = (error, name, response) ->
 				$timeout (() ->
 					uploadCount--

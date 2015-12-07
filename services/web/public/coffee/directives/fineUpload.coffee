@@ -32,7 +32,7 @@ define [
 					uploadButton: scope.uploadButtonText or "Upload"
 				dragAreaText = scope.dragAreaText or "drag here"
 				hintText = scope.hintText or ""
-
+				maxConnections = scope.maxConnections or 1
 				onComplete = scope.onCompleteCallback or () ->
 				onUpload   = scope.onUploadCallback or () ->
 				onError   = scope.onErrorCallback or () ->
@@ -45,6 +45,7 @@ define [
 					multiple: multiple
 					disabledCancelForFormUploads: true
 					validation: validation
+					maxConnections: maxConnections
 					request:
 						endpoint: endpoint
 						forceMultipart: true
