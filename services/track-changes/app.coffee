@@ -50,6 +50,9 @@ app.post "/pack", (req, res, next) ->
 app.get "/status", (req, res, next) ->
 	res.send "track-changes is alive"
 
+app.get "/oops", (req, res, next) ->
+	throw new Error("dummy test error")
+
 app.get "/check_lock", HttpController.checkLock
 
 app.get "/health_check",  HttpController.healthCheck
