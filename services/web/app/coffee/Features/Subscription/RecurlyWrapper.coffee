@@ -247,6 +247,18 @@ module.exports = RecurlyWrapper =
 			callback(error)
 		)
 
+	extendTrial: (subscriptionId, daysUntilExpire = 7, callback)->
+		next_renewal_date = new Date()
+		next_renewal_date.setDate(next_renewal_date.getDate() + daysUntilExpire)
+		logger.log subscriptionId:subscriptionId, daysUntilExpire:daysUntilExpire, "Exending Free trial for user"
+		@apiRequest({
+			url    : "/subscriptions/#{subscriptionId}/postpone?next_renewal_date=#{next_renewal_date}&bulk=false"
+			method : "put"
+		}, (error, response, responseBody) =>
+			if error?
+				logger.err err:error,  subscriptionId:subscriptionId, daysUntilExpire:daysUntilExpire,  "error exending trial"
+			callback(error)
+		)
 
 	_parseSubscriptionXml: (xml, callback) ->
 		@_parseXml xml, (error, data) ->

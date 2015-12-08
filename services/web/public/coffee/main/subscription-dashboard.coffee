@@ -76,8 +76,18 @@ define [
 
 
 	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http) ->
+		freeTrialEndDate = new Date(subscription.trial_ends_at)
+
+		sevenDaysTime = new Date()
+		sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)
+
+		freeTrialInFuture = freeTrialEndDate > new Date()
+		freeTrialExpiresUnderSevenDays = freeTrialEndDate < sevenDaysTime
+
 		$scope.view = 'overview'
 		$scope.isMonthlyCollab = subscription?.planCode?.indexOf("collaborator") != -1 and subscription?.planCode?.indexOf("ann") == -1
+		$scope.stillInFreeTrial = freeTrialInFuture and freeTrialExpiresUnderSevenDays
+
 		setupReturly()
 
 		recurly.Pricing().plan('student', { quantity: 1 }).currency(MultiCurrencyPricing.currencyCode).done (price)->
@@ -100,6 +110,31 @@ define [
 				.error ->
 					console.log "something went wrong changing plan"
 
+		$scope.cancelSubscription = ->
+			body = 
+				_csrf : window.csrfToken
+			$scope.inflight = true
+			$http.post("/user/subscription/cancel", body)
+				.success ->
+					location.reload()
+				.error ->
+					console.log "something went wrong changing plan"
+
+
 
 		$scope.switchToCancelationView = ->
 			$scope.view = "cancelation"
+
+
+		$scope.exendTrial = ->
+			body = 
+				_csrf : window.csrfToken
+			$scope.inflight = true
+			$http.put("/user/subscription/extend", body)
+				.success ->
+					location.reload()
+				.error ->
+					console.log "something went wrong changing plan"
+
+
+

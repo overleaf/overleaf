@@ -27,6 +27,7 @@ module.exports =
 							currency:recurlySubscription?.currency
 							taxRate:parseFloat(recurlySubscription?.tax_rate?._)
 							groupPlan: subscription.groupPlan
+							trial_ends_at:recurlySubscription?.trial_ends_at
 						}, memberSubscriptions
 				else
 					callback null, null, memberSubscriptions

@@ -39,7 +39,7 @@ block content
 	.content.content-alt(ng-cloak)
 		.container(ng-controller="UserSubscriptionController")
 			.row
-				.col-md-8.col-md-offset-2 {{view}}
+				.col-md-8.col-md-offset-2
 					.card(ng-if="view == 'overview'")
 						.page-header
 							h1 #{translate("your_subscription")}
@@ -58,8 +58,8 @@ block content
 									p.pull-right
 									p
 										a(href="/user/subscription/billing-details/edit").btn.btn-info #{translate("update_your_billing_details")}
-									p
-										a(href, ng-click="switchToCancelationView()").btn.btn-success !{translate("cancel_your_subscription")}
+										| &nbsp;
+										a(href, ng-click="switchToCancelationView()").btn.btn-primary !{translate("cancel_your_subscription")}
 								when "canceled"
 									p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + subscription.name + "</strong>"})}
 									p !{translate("subscription_canceled_and_terminate_on_x", {terminateDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
@@ -108,14 +108,36 @@ block content
 					.card(ng-if="view == 'cancelation'")		
 						.page-header
 							h1 #{translate("Cancel Subscription")}
-						div(ng-show="isMonthlyCollab")
-							span(ng-controller="ChangePlanFormController") downgrade to student for {{studentPrice}} 
-							button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("change_to_this_plan")}
+						
+						div(ng-show="isMonthlyCollab && stillInFreeTrial", style="text-align: center")
+							p Have another 
+								strong 14 days 
+								| on your Trial!
+							button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it!")}
+							p
+								| &nbsp;
+							p
+								a(href, ng-click="cancelSubscription()", ng-disabled='inflight') No thanks - I still want to Cancel Now
 
-						div(ng-if="!isMonthlyCollab")
-							form(action="/user/subscription/cancel",method="post")
-							input(type="hidden", name="_csrf", value=csrfToken)
-							input(type="submit", value="Cancel your subscription").btn.btn-primary#cancelSubscription
+
+						div(ng-show="isMonthlyCollab && !stillInFreeTrial", style="text-align: center")
+							span(ng-controller="ChangePlanFormController")
+								p Would you be interested in the cheaper 
+									strong {{studentPrice}}  
+									| student plan?
+								button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please!")}
+								p
+									| &nbsp;
+								p
+									a(href, ng-click="cancelSubscription()", ng-disabled='inflight') No thanks - I still want to Cancel Now
+
+						div(ng-show="!isMonthlyCollab && !stillInFreeTrial")
+							p Are you sure you want to cancel?
+							a(href="/project").btn.btn-info I want to stay
+							| &nbsp;
+							a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary Cancel my account
+
+
 	script(type="text/javascript").
 		$('#cancelSubscription').on("click", function() {
 			ga('send', 'event', 'subscription-funnel', 'cancelation')

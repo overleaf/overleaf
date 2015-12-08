@@ -74,5 +74,5 @@ module.exports =
 					return callback("no user found")
 				SubscriptionUpdater.syncSubscription recurlySubscription, user?._id, callback
 
-
-
+	extendTrial: (subscription, daysToExend, callback)->
+		RecurlyWrapper.extendTrial subscription.recurlySubscription_id, daysToExend, callback

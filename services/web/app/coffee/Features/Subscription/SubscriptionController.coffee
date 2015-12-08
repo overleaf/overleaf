@@ -226,6 +226,14 @@ module.exports = SubscriptionController =
 				else
 					res.sendStatus 200
 
+	extendTrial: (req, res)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				SubscriptionHandler.extendTrial subscription, 14, (err)->
+					if err?
+						res.send 500
+					else
+						res.send 200
 
 	recurlyNotificationParser: (req, res, next) ->
 		xml = ""
