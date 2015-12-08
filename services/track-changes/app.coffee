@@ -3,7 +3,7 @@ logger = require "logger-sharelatex"
 logger.initialize("track-changes")
 
 if Settings.sentry?.dsn?
-	logger.initializeErrorReporting(Settings.sentry.dsn, {release: process.env.BUILD_NUMBER})
+	logger.initializeErrorReporting(Settings.sentry.dsn)
 
 Path = require "path"
 Metrics = require "metrics-sharelatex"
