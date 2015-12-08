@@ -354,10 +354,9 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-header
 		h3 #{translate("upload_files")}
-		span &nbsp;
-		.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
-		.alert.alert-warning.small(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
-		.alert.alert-warning.small(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
+		.alert.alert-warning.small.modal-alert(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
+		.alert.alert-warning.small.modal-alert(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
+		.alert.alert-warning.small.modal-alert(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
 
 	.modal-body(
 		fine-upload
