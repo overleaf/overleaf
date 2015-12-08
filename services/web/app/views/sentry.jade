@@ -57,7 +57,7 @@
 			],
 			shouldSendCallback: function(data) {
 				// only send a fraction of errors
-				var sampleRate = 1.00;
+				var sampleRate = 0.05;
 				return (Math.random() <= sampleRate);
 			},
 			dataCallback: function(data) {
