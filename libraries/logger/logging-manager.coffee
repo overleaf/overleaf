@@ -7,9 +7,9 @@ module.exports = Logger =
 			serializers: bunyan.stdSerializers
 		return @
 	
-	initializeErrorReporting: (sentry_dsn) ->
+	initializeErrorReporting: (sentry_dsn, options) ->
 		raven = require "raven"
-		@raven = new raven.Client(sentry_dsn)
+		@raven = new raven.Client(sentry_dsn, options)
 	
 	info : ()->
 		@logger.info.apply(@logger, arguments)
