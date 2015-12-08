@@ -5,7 +5,7 @@ define [
 
 	setupReturly = _.once ->
 		recurly?.configure window.recurlyApiKey
-
+	PRICES = {}
 
 	App.controller "CurrenyDropdownController", ($scope, MultiCurrencyPricing, $q)->
 
@@ -18,7 +18,7 @@ define [
 
 	App.controller "ChangePlanFormController", ($scope, $modal, MultiCurrencyPricing)->
 		setupReturly()
-		
+		console.log("init")
 		taxRate = window.taxRate
 
 		$scope.changePlan = ->
@@ -37,10 +37,11 @@ define [
 
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
-		$scope.prices = {}
+		$scope.prices = PRICES
 		$scope.refreshPrice = (planCode)->
 			if $scope.prices[planCode]?
 				return
+			$scope.prices[planCode] = "..."
 			pricing = recurly.Pricing()
 			pricing.plan(planCode, { quantity: 1 }).currency(MultiCurrencyPricing.currencyCode).done (price)->
 				totalPriceExTax = parseFloat(price.next.total)
@@ -72,3 +73,33 @@ define [
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
+
+
+	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http) ->
+		$scope.view = 'overview'
+		$scope.isMonthlyCollab = subscription?.planCode?.indexOf("collaborator") != -1 and subscription?.planCode?.indexOf("ann") == -1
+		setupReturly()
+
+		recurly.Pricing().plan('student', { quantity: 1 }).currency(MultiCurrencyPricing.currencyCode).done (price)->
+				totalPriceExTax = parseFloat(price.next.total)
+				$scope.$evalAsync () ->
+					taxAmmount = totalPriceExTax * taxRate
+					if isNaN(taxAmmount)
+						taxAmmount = 0
+					$scope.currencySymbol = MultiCurrencyPricing.plans[MultiCurrencyPricing.currencyCode].symbol
+					$scope.studentPrice = $scope.currencySymbol + (totalPriceExTax + taxAmmount)
+
+		$scope.downgradeToStudent = ->
+			body = 
+				plan_code: 'student'
+				_csrf : window.csrfToken
+			$scope.inflight = true
+			$http.post(SUBSCRIPTION_URL, body)
+				.success ->
+					location.reload()
+				.error ->
+					console.log "something went wrong changing plan"
+
+
+		$scope.switchToCancelationView = ->
+			$scope.view = "cancelation"
