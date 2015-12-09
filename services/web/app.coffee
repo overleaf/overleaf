@@ -3,6 +3,9 @@ logger = require 'logger-sharelatex'
 logger.initialize("web-sharelatex")
 logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializers").user
 logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSerializers").project
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 metrics = require("metrics-sharelatex")
 metrics.initialize("web")
 metrics.memory.monitor(logger)
