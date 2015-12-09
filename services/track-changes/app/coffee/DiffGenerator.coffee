@@ -11,7 +11,7 @@ module.exports = DiffGenerator =
 	ConsistencyError: ConsistencyError
 
 	rewindUpdate: (content, update) ->
-		for op, i in update.op by -1
+		for op, i in update.op by -1 when op.broken isnt true
 			try
 				content = DiffGenerator.rewindOp content, op
 			catch e
