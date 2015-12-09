@@ -122,7 +122,7 @@ block content
 
 							div(ng-show="isMonthlyCollab && !stillInFreeTrial", style="text-align: center")
 								span(ng-controller="ChangePlanFormController")
-									#{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+									!{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
 									button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please!")}
 									p
 										| &nbsp;
