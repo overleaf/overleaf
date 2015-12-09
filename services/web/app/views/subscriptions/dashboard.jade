@@ -137,11 +137,10 @@ block content
 								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 
 						span(ng-if="sixpackOpt == 'basic'")
-							div(ng-show="!isMonthlyCollab && !stillInFreeTrial")
-								p #{translate("sure_you_want_to_cancel")}
-								a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
-								| &nbsp;
-								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
+							p #{translate("sure_you_want_to_cancel")}
+							a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+							| &nbsp;
+							a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 
 	script(type="text/javascript").
 		$('#cancelSubscription').on("click", function() {
