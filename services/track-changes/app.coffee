@@ -22,6 +22,8 @@ app.post "/project/:project_id/doc/:doc_id/flush", HttpController.flushDoc
 
 app.get "/project/:project_id/doc/:doc_id/diff", HttpController.getDiff
 
+app.get "/project/:project_id/doc/:doc_id/check", HttpController.checkDoc
+
 app.get "/project/:project_id/updates", HttpController.getUpdates
 
 app.post "/project/:project_id/flush", HttpController.flushProject

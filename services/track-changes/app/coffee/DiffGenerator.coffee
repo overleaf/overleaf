@@ -11,11 +11,13 @@ module.exports = DiffGenerator =
 	ConsistencyError: ConsistencyError
 
 	rewindUpdate: (content, update) ->
-		for op in update.op by -1
+		for op, i in update.op by -1
 			try
 				content = DiffGenerator.rewindOp content, op
 			catch e
-				if e instanceof ConsistencyError
+				if e instanceof ConsistencyError and i = update.op.length - 1
+					# catch known case where the last op in an array has been
+					# merged into a later op
 					logger.error {update, op: JSON.stringify(op)}, "marking op as broken"
 					op.broken = true
 				else

@@ -30,6 +30,21 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send 204
 
+	checkDoc: (req, res, next = (error) ->) ->
+		doc_id = req.params.doc_id
+		project_id = req.params.project_id
+		logger.log project_id: project_id, doc_id: doc_id, "checking doc history"
+		DiffManager.getDocumentBeforeVersion project_id, doc_id, 1, (error, document, rewoundUpdates) ->
+			return next(error) if error?
+			broken = []
+			for update in rewoundUpdates
+				for op in update.op when op.broken is true
+					broken.push op
+			if broken.length > 0
+				res.send broken
+			else
+				res.send 204
+
 	getDiff: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
