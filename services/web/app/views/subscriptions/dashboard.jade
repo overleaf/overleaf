@@ -108,35 +108,39 @@ block content
 					.card(ng-if="view == 'cancelation'")		
 						.page-header
 							h1 #{translate("Cancel Subscription")}
-						
-						div(ng-show="isMonthlyCollab && stillInFreeTrial", style="text-align: center")
-							p Have another 
-								strong 14 days 
-								| on your Trial!
-							button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it!")}
-							p
-								| &nbsp;
-							p
-								a(href, ng-click="cancelSubscription()", ng-disabled='inflight') No thanks - I still want to Cancel Now
 
+						span(ng-if="sixpackOpt == 'downgrade-options'")
 
-						div(ng-show="isMonthlyCollab && !stillInFreeTrial", style="text-align: center")
-							span(ng-controller="ChangePlanFormController")
-								p Would you be interested in the cheaper 
-									strong {{studentPrice}}  
-									| student plan?
-								button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please!")}
+							div(ng-show="isMonthlyCollab && stillInFreeTrial", style="text-align: center")
+								p !{translate("have_more_days_to_try", {days:14})}
+								button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it!")}
 								p
 									| &nbsp;
 								p
-									a(href, ng-click="cancelSubscription()", ng-disabled='inflight') No thanks - I still want to Cancel Now
+									a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
 
-						div(ng-show="!isMonthlyCollab && !stillInFreeTrial")
-							p Are you sure you want to cancel?
-							a(href="/project").btn.btn-info I want to stay
-							| &nbsp;
-							a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary Cancel my account
 
+							div(ng-show="isMonthlyCollab && !stillInFreeTrial", style="text-align: center")
+								span(ng-controller="ChangePlanFormController")
+									#{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+									button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please!")}
+									p
+										| &nbsp;
+									p
+										a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
+
+							div(ng-show="!isMonthlyCollab && !stillInFreeTrial")
+								p #{translate("sure_you_want_to_cancel")}
+								a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+								| &nbsp;
+								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
+
+						span(ng-if="sixpackOpt == 'basic'")
+							div(ng-show="!isMonthlyCollab && !stillInFreeTrial")
+								p #{translate("sure_you_want_to_cancel")}
+								a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
+								| &nbsp;
+								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
 
 	script(type="text/javascript").
 		$('#cancelSubscription').on("click", function() {
@@ -146,7 +150,7 @@ block content
 
 	script(type='text/ng-template', id='confirmChangePlanModalTemplate')
 		.modal-header
-			h3 Change plan?
+			h3 #{translate("change_plan")}
 		.modal-body
 			p !{translate("sure_you_want_to_change_plan", {planName:"<strong>{{plan.name}}</strong>"})}
 		.modal-footer

@@ -75,7 +75,7 @@ define [
 			$modalInstance.dismiss('cancel')
 
 
-	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http) ->
+	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack) ->
 		freeTrialEndDate = new Date(subscription.trial_ends_at)
 
 		sevenDaysTime = new Date()
@@ -116,14 +116,18 @@ define [
 			$scope.inflight = true
 			$http.post("/user/subscription/cancel", body)
 				.success ->
-					location.reload()
+					sixpack.convert 'cancelation-view', ->
+						location.reload()
 				.error ->
 					console.log "something went wrong changing plan"
 
 
 
 		$scope.switchToCancelationView = ->
-			$scope.view = "cancelation"
+			sixpack.participate 'cancelation-view', ['basic', 'downgrade-options'], (view, rawResponse)->
+				$scope.view = "cancelation"
+				$scope.sixpackOpt = view
+
 
 
 		$scope.exendTrial = ->
