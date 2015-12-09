@@ -85,8 +85,15 @@ define [
 		freeTrialExpiresUnderSevenDays = freeTrialEndDate < sevenDaysTime
 
 		$scope.view = 'overview'
-		$scope.isMonthlyCollab = subscription?.planCode?.indexOf("collaborator") != -1 and subscription?.planCode?.indexOf("ann") == -1
-		$scope.stillInFreeTrial = freeTrialInFuture and freeTrialExpiresUnderSevenDays
+		isMonthlyCollab = subscription?.planCode?.indexOf("collaborator") != -1 and subscription?.planCode?.indexOf("ann") == -1
+		stillInFreeTrial = freeTrialInFuture and freeTrialExpiresUnderSevenDays
+
+		if isMonthlyCollab and stillInFreeTrial
+			$scope.showExtendFreeTrial = true
+		else if isMonthlyCollab and !stillInFreeTrial
+			$scope.showDowngradeToStudent = true
+		else
+			$scope.showBasicCancel = true
 
 		setupReturly()
 
