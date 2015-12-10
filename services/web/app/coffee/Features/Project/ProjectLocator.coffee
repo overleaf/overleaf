@@ -122,11 +122,11 @@ module.exports =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		Project.findAllUsersProjects user_id, 'name', (err, projects, collabertions=[])->
+		Project.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
 			projects = projects.concat(collabertions)
 			projectName = projectName.toLowerCase()
-			project = _.find projects, (project)-> 
-				project.name.toLowerCase() == projectName
+			project = _.find projects, (project)->
+				project.name.toLowerCase() == projectName and project.archived != true
 			logger.log user_id:user_id, projectName:projectName, totalProjects:projects.length, project:project, "looking for project by name"
 			callback(null, project)
 

@@ -293,14 +293,23 @@ describe 'project model', ->
 					done()			
 
 
-	describe 'finding a project by user_id and project name', ()->
-		it 'should return the projet from an array case insenstive', (done)->
+	describe 'findUsersProjectByName finding a project by user_id and project name', ()->
+		it 'should return the project from an array case insenstive', (done)->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis"}
 			projects = [{name:"notThis"}, {name:"wellll"}, stubbedProject, {name:"Noooo"}]	
 			Project.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project.should.equal stubbedProject
+				done()
+
+		it 'should return the project which is not archived', (done)->
+			user_id = "123jojoidns"
+			stubbedProject = {name:"findThis", _id:12331321}
+			projects = [{name:"notThis"}, {name:"wellll"}, {name:"findThis",archived:true}, stubbedProject, {name:"findThis",archived:true}, {name:"Noooo"}]	
+			Project.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
+			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
+				project._id.should.equal stubbedProject._id
 				done()
 
 		it 'should search collab projects as well', (done)->
