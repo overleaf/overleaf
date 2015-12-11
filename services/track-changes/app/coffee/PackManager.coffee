@@ -451,3 +451,74 @@ module.exports = PackManager =
 			bulk.execute callback
 		else
 			callback()
+
+	insertCompressedUpdates: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		return callback() if newUpdates.length == 0
+
+		updatesToFlush = []
+		updatesRemaining = newUpdates.slice()
+
+		n = lastUpdate?.n || 0
+		sz = lastUpdate?.sz || 0
+
+		while updatesRemaining.length and n < PackManager.MAX_COUNT and sz < PackManager.MAX_SIZE
+			nextUpdate = updatesRemaining[0]
+			nextUpdateSize = BSON.calculateObjectSize(nextUpdate)
+			if nextUpdateSize + sz > PackManager.MAX_SIZE and n > 0
+				break
+			n++
+			sz += nextUpdateSize
+			updatesToFlush.push updatesRemaining.shift()
+
+		PackManager.flushCompressedUpdates project_id, doc_id, lastUpdate, updatesToFlush, temporary, (error) ->
+			return callback(error) if error?
+			PackManager.insertCompressedUpdates project_id, doc_id, null, updatesRemaining, temporary, callback
+
+	flushCompressedUpdates:	(project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		return callback() if newUpdates.length == 0
+		if lastUpdate?
+			PackManager.appendUpdatesToExistingPack project_id, doc_id, lastUpdate, newUpdates, temporary, callback
+		else
+			PackManager.insertUpdatesIntoNewPack project_id, doc_id, newUpdates, temporary, callback
+
+	insertUpdatesIntoNewPack: (project_id, doc_id, newUpdates, temporary, callback = (error) ->) ->
+		first = newUpdates[0]
+		last = newUpdates[newUpdates.length - 1]
+		n = newUpdates.length
+		sz = BSON.calculateObjectSize(newUpdates)
+		newPack =
+			project_id: ObjectId(project_id.toString())
+			doc_id: ObjectId(doc_id.toString())
+			pack: newUpdates
+			n: n
+			sz: sz
+			meta:
+				start_ts: first.meta.start_ts
+				end_ts: last.meta.end_ts
+			v: first.v
+			v_end: last.v
+		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
+		db.docHistory.insert newPack, callback
+
+	appendUpdatesToExistingPack: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		first = newUpdates[0]
+		last = newUpdates[newUpdates.length - 1]
+		n = newUpdates.length
+		sz = BSON.calculateObjectSize(newUpdates)
+		query =
+			_id: lastUpdate._id
+			project_id: ObjectId(project_id.toString())
+			doc_id: ObjectId(doc_id.toString())
+			pack: {$exists: true}
+		update =
+			$push:
+				"pack": {$each: newUpdates}
+			$inc:
+				"n": n
+				"sz":  sz
+			$set:
+				"meta.end_ts": last.meta.end_ts
+				"v_end": last.v
+		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
+		db.docHistory.findAndModify {query, update}, callback
+

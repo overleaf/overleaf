@@ -1,4 +1,5 @@
 MongoManager = require "./MongoManager"
+PackManager = require "./PackManager"
 RedisManager = require "./RedisManager"
 UpdateCompressor = require "./UpdateCompressor"
 LockManager = require "./LockManager"
@@ -43,34 +44,50 @@ module.exports = UpdatesManager =
 					else
 						return callback error
 
-			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
+			if rawUpdates.length == 0
+				return callback()
 
-			if not lastCompressedUpdate?
-				# no existing update, insert everything
+			if not lastCompressedUpdate? or lastCompressedUpdate.pack? # handle pack append as a special case
+				UpdatesManager._updatePack project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
+			else #use the existing op code
+				UpdatesManager._updateOp project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
+
+	_updatePack: (project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback) ->
+		compressedUpdates = UpdateCompressor.compressRawUpdates null, rawUpdates
+		PackManager.insertCompressedUpdates project_id, doc_id, lastCompressedUpdate, compressedUpdates, temporary, (error, result) ->
+			return callback(error) if error?
+			logger.log {project_id, doc_id, orig_v: lastCompressedUpdate?.v, new_v: result.v}, "inserted updates into pack"	if result?
+			callback()
+
+	_updateOp: (project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback) ->
+		compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
+
+		if not lastCompressedUpdate?
+			# no existing update, insert everything
+			updateToModify = null
+			updatesToInsert = compressedUpdates
+		else
+			# there are existing updates, see what happens when we
+			# compress them together with the new ones
+			[firstUpdate, additionalUpdates...] = compressedUpdates
+
+			if firstUpdate.v == lastCompressedUpdate.v and _.isEqual(firstUpdate, lastCompressedUpdate)
+				# first update version hasn't changed, skip it and insert remaining updates
+				# this is an optimisation, we could update the existing op with itself
 				updateToModify = null
-				updatesToInsert = compressedUpdates
+				updatesToInsert = additionalUpdates
 			else
-				# there are existing updates, see what happens when we
-				# compress them together with the new ones
-				[firstUpdate, additionalUpdates...] = compressedUpdates
+				# first update version did changed, modify it and insert remaining updates
+				updateToModify = firstUpdate
+				updatesToInsert = additionalUpdates
 
-				if firstUpdate.v == lastCompressedUpdate.v and _.isEqual(firstUpdate, lastCompressedUpdate)
-					# first update version hasn't changed, skip it and insert remaining updates
-					# this is an optimisation, we could update the existing op with itself
-					updateToModify = null
-					updatesToInsert = additionalUpdates
-				else
-					# first update version did changed, modify it and insert remaining updates
-					updateToModify = firstUpdate
-					updatesToInsert = additionalUpdates
-
-			MongoManager.modifyCompressedUpdate lastCompressedUpdate, updateToModify, (error, result) ->
+		MongoManager.modifyCompressedUpdate lastCompressedUpdate, updateToModify, (error, result) ->
+			return callback(error) if error?
+			logger.log {project_id, doc_id, orig_v: lastCompressedUpdate.v, new_v: result.v}, "applied update in-place"	if result?
+			MongoManager.insertCompressedUpdates project_id, doc_id, updatesToInsert, temporary,(error) ->
 				return callback(error) if error?
-				logger.log {project_id, doc_id, orig_v: lastCompressedUpdate.v, new_v: result.v}, "applied update in-place"	if result?
-				MongoManager.insertCompressedUpdates project_id, doc_id, updatesToInsert, temporary,(error) ->
-					return callback(error) if error?
-					logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
-					callback()
+				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: rawUpdates.length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
+				callback()
 
 	REDIS_READ_BATCH_SIZE: 100
 	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->

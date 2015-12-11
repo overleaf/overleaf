@@ -10,6 +10,7 @@ describe "UpdatesManager", ->
 		@UpdatesManager = SandboxedModule.require modulePath, requires:
 			"./UpdateCompressor": @UpdateCompressor = {}
 			"./MongoManager" : @MongoManager = {}
+			"./PackManager" : @PackManager = {}
 			"./RedisManager" : @RedisManager = {}
 			"./LockManager"  : @LockManager = {}
 			"./WebApiManager": @WebApiManager = {}
@@ -41,8 +42,7 @@ describe "UpdatesManager", ->
 				@compressedUpdates = [ { v: 13, op: "compressed-op-12" } ]
 
 				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
-				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
+				@PackManager.insertCompressedUpdates = sinon.stub().callsArg(5)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 				@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
@@ -51,15 +51,11 @@ describe "UpdatesManager", ->
 					.calledWith(@doc_id)
 					.should.equal true
 			
-			it "should compress the raw ops", ->
-				@UpdateCompressor.compressRawUpdates
-					.calledWith(null, @rawUpdates)
-					.should.equal true
-			
 			it "should save the compressed ops", ->
-				@MongoManager.insertCompressedUpdates
-					.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
+				@PackManager.insertCompressedUpdates
+					.calledWith(@project_id, @doc_id, null, @compressedUpdates, @temporary)
 					.should.equal true
+
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -136,8 +132,7 @@ describe "UpdatesManager", ->
 				@compressedUpdates = [ { v: 13, op: "compressed-op-12" } ]
 
 				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null, @lastVersion)
-				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
-				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
+				@PackManager.insertCompressedUpdates = sinon.stub().callsArg(5)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
 			describe "when the raw ops start where the existing history ends", ->
@@ -156,8 +151,8 @@ describe "UpdatesManager", ->
 						.should.equal true
 				
 				it "should save the compressed ops", ->
-					@MongoManager.insertCompressedUpdates
-						.calledWith(@project_id, @doc_id, @compressedUpdates, @temporary)
+					@PackManager.insertCompressedUpdates
+						.calledWith(@project_id, @doc_id, null, @compressedUpdates, @temporary)
 						.should.equal true
 
 				it "should call the callback", ->
