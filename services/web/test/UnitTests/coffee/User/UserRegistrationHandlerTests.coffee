@@ -10,7 +10,7 @@ describe "UserRegistrationHandler", ->
 
 	beforeEach ->
 		@user =
-			_id: "31j2lk21kjl"
+			_id: @user_id = "31j2lk21kjl"
 		@User = 
 			findOne:sinon.stub()
 			update: sinon.stub().callsArgWith(2)
@@ -20,12 +20,20 @@ describe "UserRegistrationHandler", ->
 			setUserPassword: sinon.stub().callsArgWith(2)
 		@NewsLetterManager =
 			subscribe: sinon.stub().callsArgWith(1)
+		@EmailHandler =
+			sendEmail:sinon.stub().callsArgWith(2)
+		@OneTimeTokenHandler =
+			getNewToken: sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
 			"../../models/User": {User:@User}
 			"./UserCreator": @UserCreator
 			"../Authentication/AuthenticationManager":@AuthenticationManager
 			"../Newsletter/NewsletterManager":@NewsLetterManager
 			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"crypto": @crypto = {}
+			"../Email/EmailHandler": @EmailHandler
+			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
+			"settings-sharelatex": @settings = {siteUrl: "http://sl.example.com"}
 
 		@passingRequest = {email:"something@email.com", password:"123"}
 
@@ -128,4 +136,50 @@ describe "UserRegistrationHandler", ->
 		it "should call the ReferalAllocator", (done)->
 			done()
 
+	describe "registerNewUserAndSendActivationEmail", ->
+		beforeEach ->
+			@email = "email@example.com"
+			@crypto.randomBytes = sinon.stub().returns({toString: () => @password = "mock-password"})
+			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
+			@handler.registerNewUser = sinon.stub()
+			@callback = sinon.stub()
+		
+		describe "with a new user", ->
+			beforeEach ->
+				@handler.registerNewUser.callsArgWith(1, null, @user)
+				@handler.registerNewUserAndSendActivationEmail @email, @callback
+			
+			it "should ask the UserRegistrationHandler to register user", ->
+				@handler.registerNewUser
+					.calledWith({
+						email: @email
+						password: @password
+					}).should.equal true
+					
+			it "should generate a new password reset token", ->
+				
+				@OneTimeTokenHandler.getNewToken
+					.calledWith(@user_id, expiresIn: 7 * 24 * 60 * 60)
+					.should.equal true
 
+			it "should send a registered email", ->
+				@EmailHandler.sendEmail
+					.calledWith("registered", {
+						to: @user.email
+						setNewPasswordUrl: "#{@settings.siteUrl}/user/activate?token=#{@token}&user_id=#{@user_id}"
+					})
+					.should.equal true
+			
+			it "should return the user", ->
+				@callback
+					.calledWith(null, @user, "#{@settings.siteUrl}/user/activate?token=#{@token}&user_id=#{@user_id}")
+					.should.equal true
+
+		describe "with a user that already exists", ->
+			beforeEach ->
+				@handler.registerNewUser.callsArgWith(1, new Error("EmailAlreadyRegistered"), @user)
+				@handler.registerNewUserAndSendActivationEmail @email, @callback
+				
+			it "should still generate a new password token and email", ->
+				@OneTimeTokenHandler.getNewToken.called.should.equal true
+				@EmailHandler.sendEmail.called.should.equal true
