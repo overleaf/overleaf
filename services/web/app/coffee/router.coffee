@@ -77,6 +77,8 @@ module.exports = class Router
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage
 		
+		webRouter.get '/user/activate', UserPagesController.activateAccountPage
+		
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword

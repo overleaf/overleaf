@@ -12,18 +12,25 @@ describe "UserPagesController", ->
 
 		@settings = {}
 		@user = 
-			_id:"kwjewkl"
+			_id: @user_id = "kwjewkl"
 			features:{}
+			email: "joe@example.com"
 
 		@UserLocator =
 			findById: sinon.stub().callsArgWith(1, null, @user)
+		@UserGetter =
+			getUser: sinon.stub().callsArgWith(2, null, @user)
 		@dropboxStatus = {}
 		@DropboxHandler =
 			getUserRegistrationStatus : sinon.stub().callsArgWith(1, null, @dropboxStatus)
+		@ErrorController =
+			notFound: sinon.stub()
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 			"./UserLocator": @UserLocator
+			"./UserGetter": @UserGetter
+			"../Errors/ErrorController": @ErrorController
 			'../Dropbox/DropboxHandler': @DropboxHandler
 		@req = 
 			query:{}
@@ -104,3 +111,43 @@ describe "UserPagesController", ->
 				opts.user.should.equal @user
 				done()
 			@UserPagesController.settingsPage @req, @res
+	
+	describe "activateAccountPage", ->
+		beforeEach ->
+			@req.query.user_id = @user_id
+			@req.query.token = @token = "mock-token-123"
+		
+		it "should 404 without a user_id", (done) ->
+			delete @req.query.user_id
+			@ErrorController.notFound = () ->
+				done()
+			@UserPagesController.activateAccountPage @req, @res
+		
+		it "should 404 without a token", (done) ->
+			delete @req.query.token
+			@ErrorController.notFound = () ->
+				done()
+			@UserPagesController.activateAccountPage @req, @res
+		
+		it "should 404 without a valid user_id", (done) ->
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
+			@ErrorController.notFound = () ->
+				done()
+			@UserPagesController.activateAccountPage @req, @res
+
+		it "should redirect activated users to login", (done) ->
+			@user.loginCount = 1
+			@res.redirect = (url) =>
+				@UserGetter.getUser.calledWith(@user_id).should.equal true
+				url.should.equal "/login?email=#{encodeURIComponent(@user.email)}"
+				done()
+			@UserPagesController.activateAccountPage @req, @res
+			
+		it "render the activation page if the user has not logged in before", (done) ->
+			@user.loginCount = 0
+			@res.render = (page, opts) =>
+				page.should.equal "user/activate"
+				opts.email.should.equal @user.email
+				opts.token.should.equal @token
+				done()
+			@UserPagesController.activateAccountPage @req, @res

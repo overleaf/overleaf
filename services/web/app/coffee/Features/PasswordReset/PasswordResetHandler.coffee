@@ -23,11 +23,11 @@ module.exports =
 					return callback(error) if error?
 					callback null, true
 
-	setNewUserPassword: (token, password, callback = (error, found) ->)->
+	setNewUserPassword: (token, password, callback = (error, found, user_id) ->)->
 		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
-				return callback null, false
+				return callback null, false, null
 			AuthenticationManager.setUserPassword user_id, password, (err) ->
 				if err then return callback(err)
-				callback null, true
+				callback null, true, user_id

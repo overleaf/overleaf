@@ -20,6 +20,7 @@ block content
 									placeholder='email@example.com',
 									ng-model="email",
 									ng-model-options="{ updateOn: 'blur' }",
+									ng-init="email = #{JSON.stringify(email)}",
 									focus="true"
 								)
 								span.small.text-primary(ng-show="loginForm.email.$invalid && loginForm.email.$dirty")
