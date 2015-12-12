@@ -8,10 +8,7 @@ metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserUpdater = require("./UserUpdater")
-EmailHandler = require("../Email/EmailHandler")
-OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
 settings = require "settings-sharelatex"
-crypto = require "crypto"
 
 module.exports =
 
@@ -85,32 +82,12 @@ module.exports =
 		if !email? or email == ""
 			res.sendStatus 422 # Unprocessable Entity
 			return
-		logger.log {email}, "registering new user"
-		UserRegistrationHandler.registerNewUser {
-			email: email
-			password: crypto.randomBytes(32).toString("hex")
-		}, (err, user)->
-			if err? and err?.message != "EmailAlreadyRegistered"
-				return next(err)
-			
-			if err?.message == "EmailAlreadyRegistered"
-				logger.log {email}, "user already exists, resending welcome email"
-
-			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
-			OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
-				return next(err) if err?
-				
-				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
-
-				EmailHandler.sendEmail "registered", {
-					to: user.email
-					setNewPasswordUrl: setNewPasswordUrl
-				}, () ->
-					
-				res.json {
-					email: user.email
-					setNewPasswordUrl: setNewPasswordUrl
-				}
+		UserRegistrationHandler.registerNewUserAndSendActivationEmail email, (error, user, setNewPasswordUrl) ->
+			return next(error) if error?
+			res.json {
+				email: user.email
+				setNewPasswordUrl: setNewPasswordUrl
+			}
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"

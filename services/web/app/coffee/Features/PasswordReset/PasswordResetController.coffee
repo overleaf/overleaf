@@ -1,5 +1,7 @@
 PasswordResetHandler = require("./PasswordResetHandler")
 RateLimiter = require("../../infrastructure/RateLimiter")
+AuthenticationController = require("../Authentication/AuthenticationController")
+UserGetter = require("../User/UserGetter")
 logger = require "logger-sharelatex"
 
 module.exports =
@@ -37,14 +39,19 @@ module.exports =
 			title:"set_password"
 			passwordResetToken: req.session.resetToken
 
-	setNewUserPassword: (req, res)->
+	setNewUserPassword: (req, res, next)->
 		{passwordResetToken, password} = req.body
 		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0
 			return res.sendStatus 400
 		delete req.session.resetToken
-		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found) ->
+		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found, user_id) ->
 			return next(err) if err?
 			if found
-				res.sendStatus 200
+				if req.body.login_after
+					UserGetter.getUser user_id, {email: 1}, (err, user) ->
+						return next(err) if err?
+						AuthenticationController.doLogin {email:user.email, password: password}, req, res, next
+				else
+					res.sendStatus 200
 			else
-				res.send 404, {message: req.i18n.translate("password_reset_token_expired")}
+				res.sendStatus 404

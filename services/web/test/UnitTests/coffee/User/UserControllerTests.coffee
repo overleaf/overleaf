@@ -40,10 +40,6 @@ describe "UserController", ->
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
-		@EmailHandler =
-			sendEmail:sinon.stub().callsArgWith(2)
-		@OneTimeTokenHandler =
-			getNewToken: sinon.stub()
 		@settings =
 			siteUrl: "sharelatex.example.com"
 		@UserController = SandboxedModule.require modulePath, requires:
@@ -57,9 +53,6 @@ describe "UserController", ->
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
-			"../Email/EmailHandler": @EmailHandler
-			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
-			"crypto": @crypto = {}
 			"settings-sharelatex": @settings
 			"logger-sharelatex": {log:->}
 
@@ -175,51 +168,23 @@ describe "UserController", ->
 
 	describe "register", ->
 		beforeEach ->
-			@req.body.email = @user.email = "email@example.com"
-			@crypto.randomBytes = sinon.stub().returns({toString: () => @password = "mock-password"})
-			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
+			@UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon.stub().callsArgWith(1, null, @user, @url = "mock/url")
+			@req.body.email = @user.email = @email = "email@example.com"
+			@UserController.register @req, @res
 		
-		describe "with a new user", ->
-			beforeEach ->
-				@UserRegistrationHandler.registerNewUser.callsArgWith(1, null, @user)
-				@UserController.register @req, @res
-			
-			it "should ask the UserRegistrationHandler to register user", ->
-				@UserRegistrationHandler.registerNewUser
-					.calledWith({
-						email: @req.body.email
-						password: @password
-					}).should.equal true
-					
-			it "should generate a new password reset token", ->
-				@OneTimeTokenHandler.getNewToken
-					.calledWith(@user_id, expiresIn: 7 * 24 * 60 * 60)
-					.should.equal true
-
-			it "should send a registered email", ->
-				@EmailHandler.sendEmail
-					.calledWith("registered", {
-						to: @user.email
-						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
-					})
-					.should.equal true
-			
-			it "should return the user", ->
-				@res.json
-					.calledWith({
-						email: @user.email
-						setNewPasswordUrl: "#{@settings.siteUrl}/user/password/set?passwordResetToken=#{@token}&email=#{encodeURIComponent(@user.email)}"
-					})
-					.should.equal true
-
-		describe "with a user that already exists", ->
-			beforeEach ->
-				@UserRegistrationHandler.registerNewUser.callsArgWith(1, new Error("EmailAlreadyRegistered"), @user)
-				@UserController.register @req, @res
-				
-			it "should still generate a new password token and email", ->
-				@OneTimeTokenHandler.getNewToken.called.should.equal true
-				@EmailHandler.sendEmail.called.should.equal true
+		it "should register the user and send them an email", ->
+			@UserRegistrationHandler.registerNewUserAndSendActivationEmail
+				.calledWith(@email)
+				.should.equal true
+		
+		it "should return the user and activation url", ->
+			console.log @res.json.args
+			@res.json
+				.calledWith({
+					email: @email,
+					setNewPasswordUrl: @url
+				})
+				.should.equal true
 
 	describe "changePassword", ->
 

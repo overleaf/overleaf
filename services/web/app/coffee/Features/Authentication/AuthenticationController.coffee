@@ -12,9 +12,12 @@ basicAuth = require('basic-auth-connect')
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
-		email = req.body?.email?.toLowerCase()
-		password = req.body?.password
-		redir = Url.parse(req.body?.redir or "/project").path
+		AuthenticationController.doLogin req.body, req, res, next
+	
+	doLogin: (options, req, res, next) ->
+		email = options.email?.toLowerCase()
+		password = options.password
+		redir = Url.parse(options.redir or "/project").path
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 			if !isAllowed
 				logger.log email:email, "too many login requests"
