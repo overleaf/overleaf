@@ -14,7 +14,7 @@ define () ->
 			caption: "\\begin{#{env}}..."
 			snippet: """
 				\\begin{#{env}}
-				$1
+				\t$1
 				\\end{#{env}}
 			"""
 			meta: "env"
@@ -24,8 +24,8 @@ define () ->
 		caption: "\\begin{array}..."
 		snippet: """
 			\\begin{array}{${1:cc}}
-			$2 & $3 \\\\\\\\
-			$4 & $5
+			\t$2 & $3 \\\\\\\\
+			\t$4 & $5
 			\\end{array}
 		"""
 		meta: "env"
@@ -33,10 +33,10 @@ define () ->
 		caption: "\\begin{figure}..."
 		snippet: """
 			\\begin{figure}
-			\\centering
-			\\includegraphics{$1}
-			\\caption{${2:Caption}}
-			\\label{${3:fig:my_label}}
+			\t\\centering
+			\t\\includegraphics{$1}
+			\t\\caption{${2:Caption}}
+			\t\\label{${3:fig:my_label}}
 			\\end{figure}
 		"""
 		meta: "env"
@@ -44,8 +44,8 @@ define () ->
 		caption: "\\begin{tabular}..."
 		snippet: """
 			\\begin{tabular}{${1:c|c}}
-			$2 & $3 \\\\\\\\
-			$4 & $5
+			\t$2 & $3 \\\\\\\\
+			\t$4 & $5
 			\\end{tabular}
 		"""
 		meta: "env"
@@ -53,13 +53,13 @@ define () ->
 		caption: "\\begin{table}..."
 		snippet: """
 			\\begin{table}[$1]
-			\\centering
-			\\begin{tabular}{${2:c|c}}
-			$3 & $4 \\\\\\\\
-			$5 & $6
-			\\end{tabular}
-			\\caption{${7:Caption}}
-			\\label{${8:tab:my_label}}
+			\t\\centering
+			\t\\begin{tabular}{${2:c|c}}
+			\t\t$3 & $4 \\\\\\\\
+			\t\t$5 & $6
+			\t\\end{tabular}
+			\t\\caption{${7:Caption}}
+			\t\\label{${8:tab:my_label}}
 			\\end{table}
 		"""
 		meta: "env"
@@ -67,7 +67,7 @@ define () ->
 		caption: "\\begin{list}..."
 		snippet: """
 			\\begin{list}
-			\\item $1
+			\t\\item $1
 			\\end{list}
 		"""
 		meta: "env"
@@ -75,7 +75,7 @@ define () ->
 		caption: "\\begin{enumerate}..."
 		snippet: """
 			\\begin{enumerate}
-			\\item $1
+			\t\\item $1
 			\\end{enumerate}
 		"""
 		meta: "env"
@@ -83,7 +83,7 @@ define () ->
 		caption: "\\begin{itemize}..."
 		snippet: """
 			\\begin{itemize}
-			\\item $1
+			\t\\item $1
 			\\end{itemize}
 		"""
 		meta: "env"
@@ -91,7 +91,7 @@ define () ->
 		caption: "\\begin{frame}..."
 		snippet: """
 			\\begin{frame}{${1:Frame Title}}
-			$2
+			\t$2
 			\\end{frame}
 		"""
 		meta: "env"
