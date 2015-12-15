@@ -132,9 +132,9 @@ describe 'ProjectDuplicator', ->
 	it 'should copy all the docs', (done)->
 		@duplicator.duplicate @owner, @project_id, "", (err, newProject)=>
 			@DocstoreManager.getAllDocs.calledWith(@project_id).should.equal true
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines).should.equal true
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @doc1.name, @doc1_lines).should.equal true
-			@entityHandler.addDoc.calledWith(@stubbedNewProject, @newFolder._id, @doc2.name, @doc2_lines).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject._id, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject._id, @newFolder._id, @doc1.name, @doc1_lines).should.equal true
+			@entityHandler.addDoc.calledWith(@stubbedNewProject._id, @newFolder._id, @doc2.name, @doc2_lines).should.equal true
 			done()
 
 	it 'should copy all the files', (done)->

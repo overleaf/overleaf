@@ -35,7 +35,7 @@ module.exports =
 									return (callback)->
 										content = docContents[doc._id.toString()]
 										return callback(new Error("doc_id not found: #{doc._id}")) if !content?
-										projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
+										projectEntityHandler.addDoc newProject._id, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
 											if originalRootDoc? and newDoc.name == originalRootDoc.name
 												setRootDoc newDoc._id
 											callback()
