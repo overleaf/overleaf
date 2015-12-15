@@ -40,7 +40,7 @@ module.exports = OutputCacheManager =
 					callback(err)
 				else if not stats.isFile()
 					# other filetype - reject it
-					logger.error err: err, src: src, dst: dst, stat: stats, "nonfile output - refusing to copy to cache"
+					logger.error err: err, src: src, stat: stats, "nonfile output - refusing to copy to cache"
 					callback(new Error("output file is not a file"), file)
 				else
 					# it's a plain file, ok to copy
