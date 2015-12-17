@@ -8,6 +8,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 DocArchiveManager = require "./DocArchiveManager"
 _ = require "underscore"
+Settings = require "settings-sharelatex"
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -38,7 +39,10 @@ module.exports = UpdatesManager =
 				if rawUpdates[0]? and rawUpdates[0].v != lastVersion + 1
 					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastVersion}")
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
-					return callback error
+					if Settings.trackchanges?.continueOnError and rawUpdates[0].v > lastVersion + 1
+						# we have lost some ops - continue to write into the database, we can't recover at this point
+					else
+						return callback error
 
 			compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
 
