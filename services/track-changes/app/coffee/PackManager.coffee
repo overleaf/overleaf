@@ -4,6 +4,8 @@ _ = require "underscore"
 logger = require "logger-sharelatex"
 LockManager = require "./LockManager"
 
+DAYS = 24 * 3600 * 1000 # one day in milliseconds
+
 module.exports = PackManager =
 	# The following functions implement methods like a mongo find, but
 	# expands any documents containing a 'pack' field into multiple
@@ -476,7 +478,7 @@ module.exports = PackManager =
 
 	flushCompressedUpdates:	(project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
 		return callback() if newUpdates.length == 0
-		if lastUpdate?
+		if lastUpdate? and not (temporary and ((Date.now() - lastUpdate.meta?.start_ts) > 1 * DAYS))
 			PackManager.appendUpdatesToExistingPack project_id, doc_id, lastUpdate, newUpdates, temporary, callback
 		else
 			PackManager.insertUpdatesIntoNewPack project_id, doc_id, newUpdates, temporary, callback
@@ -497,6 +499,8 @@ module.exports = PackManager =
 				end_ts: last.meta.end_ts
 			v: first.v
 			v_end: last.v
+		if temporary
+			newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
 		db.docHistory.insert newPack, callback
 
@@ -519,6 +523,8 @@ module.exports = PackManager =
 			$set:
 				"meta.end_ts": last.meta.end_ts
 				"v_end": last.v
+		if lastUpdate.expiresAt and temporary
+			update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
 		db.docHistory.findAndModify {query, update}, callback
 
