@@ -1,7 +1,6 @@
 async = require "async"
 _ = require "underscore"
-{db, ObjectId} = require "./mongojs"
-BSON=db.bson.BSON
+{db, ObjectId, BSON} = require "./mongojs"
 logger = require "logger-sharelatex"
 logger.initialize("track-changes-packworker")
 LockManager = require "./LockManager"
