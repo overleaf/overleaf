@@ -20,7 +20,10 @@ module.exports = Logger =
 		if @raven?
 			error = attributes.err or attributes.error
 			if error?
-				@raven.captureError(error, attributes)
+				tags = {}
+				for key, value of attributes
+					tags[key] = value if key.match(/_id/) and typeof value == 'string'
+				@raven.captureError(error, tags: tags, extra: attributes)
 	err: ()->
 		@logger.error.apply(@logger, arguments)
 	warn: ()->
