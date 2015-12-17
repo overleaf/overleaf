@@ -36,6 +36,7 @@ define [
 			@doc?.detachFromAce()
 			editorDoc = @ace?.getSession().getDocument()
 			editorDoc?.off "change", @_checkConsistency
+			@ide.$scope.$emit 'document:closed', @doc
 
 		_checkConsistency: () ->
 			# We've been seeing a lot of errors when I think there shouldn't be

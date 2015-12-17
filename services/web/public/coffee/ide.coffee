@@ -8,6 +8,7 @@ define [
 	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
+	"ide/references-search/ReferencesSearchManager"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -37,6 +38,7 @@ define [
 	PermissionsManager
 	PdfManager
 	BinaryFilesManager
+	ReferencesSearchManager
 ) ->
 
 	App.controller "IdeController", ($scope, $timeout, ide, localStorage) ->
@@ -80,7 +82,8 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
-		
+		ide.referencesSearchManager = new ReferencesSearchManager(ide, $scope)
+
 		inited = false
 		$scope.$on "project:joined", () ->
 			return if inited

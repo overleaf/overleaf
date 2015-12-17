@@ -21,9 +21,6 @@ module.exports = ReferencesSearchController =
 				logger.err {err, project_id, user_id, doc_id}, "error finding element for downloading file"
 				return res.send 500
 			doc_url = ReferencesSearchController._buildDocUrl project_id, doc_id
-			console.log ">>"
-			console.log doc, doc_url
-			console.log "<<"
 			ReferencesSearchHandler.indexFile user_id, doc_url, (err) ->
 				if err
 					logger.err {err, project_id, user_id, doc_id}, "error indexing references file"
