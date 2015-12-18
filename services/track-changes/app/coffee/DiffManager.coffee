@@ -5,9 +5,11 @@ logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
-		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
+		# retrieve the document before retreiving the updates,
+		# because updates are written to mongo after the document
+		DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 			return callback(error) if error?
-			DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
+			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
 				return callback(error) if error?
 				callback(null, content, version, updates)
 	
@@ -40,6 +42,10 @@ module.exports = DiffManager =
 			# bail out if we hit a broken update
 			for u in updates when u.broken
 				return callback new Error "broken-history"
+
+			# discard any updates which are ahead of this document version
+			while updates[0]?.v >= version
+				updates.shift()
 
 			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version - 1
