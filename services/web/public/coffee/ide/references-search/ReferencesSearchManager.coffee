@@ -3,6 +3,10 @@ define [
 	class ReferencesSearchManager
 		constructor: (@ide, @$scope) ->
 
+			@state =
+				keys: []
+			@$scope.references = @state
+
 			@$scope.$on 'document:closed', (e, doc) =>
 				if doc.doc_id
 				 	entity = @ide.fileTreeManager.findEntityById doc.doc_id
@@ -35,4 +39,5 @@ define [
 				(data) =>
 					console.log ">> got keys"
 					console.log(data)
+					@state.keys = data.keys
 			)
