@@ -8,9 +8,9 @@ fiveMinsInMs = oneMinInMs * 5
 
 module.exports = ReferencesSearchHandler =
 
-	indexFile: (user_id, file_url, callback = (err)->) ->
-		logger.log {user_id, file_url}, "sending index request to references api"
-		url = "#{settings.apis.references.url}/user/#{user_id}"
+	indexFile: (project_id, file_url, callback = (err)->) ->
+		logger.log {project_id, file_url}, "sending index request to references api"
+		url = "#{settings.apis.references.url}/project/#{project_id}"
 		request.post {
 			url: url
 			json:
@@ -22,5 +22,5 @@ module.exports = ReferencesSearchHandler =
 				return callback(null)
 			else
 				err = new Error("references api responded with non-success code: #{res.statusCode}")
-				logger.log {err, user_id, file_url}, "error updating references"
+				logger.log {err, project_id, file_url}, "error updating references"
 				return callback(err)

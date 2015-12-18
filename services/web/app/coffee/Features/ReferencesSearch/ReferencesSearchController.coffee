@@ -9,21 +9,20 @@ module.exports = ReferencesSearchController =
 
 	indexFile: (req, res) ->
 		project_id = req.params.Project_id
-		user_id = req.session.user._id
 		doc_id = req.body.docId
-		logger.log {project_id, user_id, doc_id}, "indexing references"
+		logger.log {project_id, doc_id}, "indexing references"
 
 		if !doc_id
-			logger.log project_id: project_id, user_id: user_id, "no fileUrl supplied"
+			logger.log project_id: project_id, "no fileUrl supplied"
 			return res.send 400
 		ProjectLocator.findElement {project_id: project_id, element_id: doc_id, type: 'doc'}, (err, doc) ->
 			if err?
-				logger.err {err, project_id, user_id, doc_id}, "error finding element for downloading file"
+				logger.err {err, project_id, doc_id}, "error finding doc to index"
 				return res.send 500
 			doc_url = ReferencesSearchController._buildDocUrl project_id, doc_id
-			ReferencesSearchHandler.indexFile user_id, doc_url, (err) ->
+			ReferencesSearchHandler.indexFile project_id, doc_url, (err) ->
 				if err
-					logger.err {err, project_id, user_id, doc_id}, "error indexing references file"
+					logger.err {err, project_id, doc_id}, "error indexing references file"
 					return res.send 500
 
 				res.send 200
