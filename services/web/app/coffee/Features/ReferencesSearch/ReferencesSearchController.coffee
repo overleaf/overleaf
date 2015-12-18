@@ -27,5 +27,14 @@ module.exports = ReferencesSearchController =
 
 				res.send 200
 
+	getKeys: (req, res) ->
+		project_id = req.params.Project_id
+		logger.log {project_id}, "getting project references keys"
+		ReferencesSearchHandler.getKeys project_id, (err, data) ->
+			if err
+				logger.err {err, project_id}, "error getting references keys"
+				return res.send 500
+			return res.json data
+
 	_buildDocUrl: (project_id, doc_id) ->
 		"#{settings.apis.web.url}/project/#{project_id}/doc/#{doc_id}"
