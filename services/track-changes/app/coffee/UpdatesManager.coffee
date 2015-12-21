@@ -41,6 +41,7 @@ module.exports = UpdatesManager =
 					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
 					if Settings.trackchanges?.continueOnError and rawUpdates[0].v > lastVersion + 1
 						# we have lost some ops - continue to write into the database, we can't recover at this point
+						lastCompressedUpdate = null
 					else
 						return callback error
 
