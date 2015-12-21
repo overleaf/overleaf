@@ -5,5 +5,5 @@ db = mongojs(Settings.mongo.url, ["docHistory", "projectHistoryMetaData", "docHi
 module.exports =
 	db: db
 	ObjectId: mongojs.ObjectId
-	BSON: bson
+	BSON: new bson.BSONPure()
 
