@@ -27,6 +27,14 @@ setTimeout () ->
 
 logger.log "checking for updates, limit=#{LIMIT}, delay=#{DOCUMENT_PACK_DELAY}, timeout=#{TIMEOUT}"
 
+# work around for https://github.com/mafintosh/mongojs/issues/224
+db.close =  (callback) ->
+	this._getServer (err, server) ->
+		return callback(err) if err?
+		server = if server.destroy? then server else server.topology
+		server.destroy(true, true)
+		callback()
+
 finish = () ->
 	logger.log 'closing db'
 	db.close () ->
