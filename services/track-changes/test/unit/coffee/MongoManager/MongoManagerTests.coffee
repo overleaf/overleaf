@@ -395,7 +395,7 @@ describe "MongoManager", ->
 	describe "getDocChangesCount", ->
 		beforeEach ->
 			@db.docHistory =
-				count: sinon.stub().callsArg(2)
+				count: sinon.stub().callsArg(1)
 			@MongoManager.getDocChangesCount @doc_id, @callback
 
 		it "should return if there is any doc changes", ->
@@ -403,7 +403,6 @@ describe "MongoManager", ->
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
 					inS3 : { $exists : false }
-				}, {
 				})
 				.should.equal true
 
@@ -413,7 +412,7 @@ describe "MongoManager", ->
 	describe "getArchivedDocChanges", ->
 		beforeEach ->
 			@db.docHistory =
-				count: sinon.stub().callsArg(2)
+				count: sinon.stub().callsArg(1)
 			@MongoManager.getArchivedDocChanges @doc_id, @callback
 
 		it "should return if there is any archived doc changes", ->
@@ -421,7 +420,6 @@ describe "MongoManager", ->
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
 					inS3: {$exists: true}
-				}, {
 				})
 				.should.equal true
 

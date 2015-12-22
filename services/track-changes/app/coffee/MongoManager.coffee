@@ -153,10 +153,10 @@ module.exports = MongoManager =
 		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }
 
 	getDocChangesCount: (doc_id, callback)->
-		db.docHistory.count { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }}, {}, callback
+		db.docHistory.count { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }}, callback
 
 	getArchivedDocChanges: (doc_id, callback)->
-		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: { $exists: true }}, {}, callback
+		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: { $exists: true }}, callback
 
 	markDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
 		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
