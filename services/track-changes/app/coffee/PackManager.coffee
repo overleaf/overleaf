@@ -331,8 +331,8 @@ module.exports = PackManager =
 		expect_nRemoved = packObj.pack.length
 		logger.log {doc_id: doc_id}, "adding pack, removing #{expect_nRemoved} ops"
 		bulk.insert packObj
-		packObj.pack.forEach (op) ->
-			bulk.find({_id:op._id}).removeOne()
+		ids = (op._id for op in packObj.pack)
+		bulk.find({_id:{$in:ids}}).remove()
 		bulk.execute (err, result) ->
 			if err?
 				logger.error {doc_id: doc_id}, "error adding pack"
