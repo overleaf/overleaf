@@ -178,20 +178,25 @@ module.exports = PackManager =
 				.find(tailQuery, projection)
 				.sort(sort)
 
-			# now find any packs that overlap with the time window
+			# now find any packs that overlap with the time window from outside
+			#     cutoff             before
+			#    --|-----wanted-range--|------------------  time=>
+			#                  |-------------|pack(end_ts)
+			#
+			# these were not picked up by the original query because
+			# end_ts>before but the beginning of the pack may be in the time range
 			overlapQuery = _.clone(query)
 			if before? && cutoff?
 				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+				overlapQuery['meta.start_ts'] = {"$lte": before }
 			else if before? && not cutoff?
 				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+				overlapQuery['meta.start_ts'] = {"$lte": before }
 			else if not before? && cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": cutoff}
-				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+				overlapQuery['meta.end_ts'] = {"$gte": cutoff}  # we already have these??
 			else if not before? && not cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": 0 }
-				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+				overlapQuery['meta.end_ts'] = {"$gte": 0 } # shouldn't happen??
+
 			overlap = collection
 				.find(overlapQuery, projection)
 				.sort(sort)
