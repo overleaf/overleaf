@@ -156,7 +156,7 @@ $ docker run -d \
 The available configuration parameters are:
 
 * `SHARELATEX_SITE_URL`: Where your instance of ShareLaTeX is publically available.
-This is used in public links, and when connecting over websockets, so much be
+This is used in public links, and when connecting over websockets, so must be
 configured correctly!
 * `SHARELATEX_ADMIN_EMAIL`: The email address where users can reach the person who runs the site.
 * `SHARELATEX_APP_NAME`: The name to display when talking about the running app. Defaults to 'ShareLaTex (Community Edition)'.
