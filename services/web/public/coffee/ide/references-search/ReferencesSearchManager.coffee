@@ -12,6 +12,9 @@ define [
 						@$scope.$emit 'references:changed', entity
 						@indexReferences doc.doc_id
 
+			@$scope.$on 'project:joined', (e) =>
+				@getReferenceKeys()
+
 		indexReferences: (doc_id) ->
 			$.post(
 				"/project/#{@$scope.project_id}/references",

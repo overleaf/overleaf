@@ -55,7 +55,7 @@ define [
 						console.log result
 						callback null, result
 
-			@editor.completers = [ReferencesCompleter, @suggestionManager, SnippetCompleter]
+			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
 
 		disable: () ->
 			@editor.setOptions({
