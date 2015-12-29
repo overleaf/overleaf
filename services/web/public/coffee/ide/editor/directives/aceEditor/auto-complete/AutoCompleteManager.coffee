@@ -16,7 +16,7 @@ define [
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
 
-			@monkeyPatchAutocomplete()	
+			@monkeyPatchAutocomplete()
 
 			@$scope.$watch "autoComplete", (autocomplete) =>
 				if autocomplete
@@ -37,11 +37,25 @@ define [
 				enableSnippets: true,
 				enableLiveAutocompletion: false
 			})
-			
+
 			SnippetCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					callback null, Snippets
-			@editor.completers = [@suggestionManager, SnippetCompleter]
+
+			references = @$scope.$root._references
+			ReferencesCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) ->
+					if references.keys
+						result = references.keys.map (key) -> {
+							caption: key,
+							snippet: key,
+							meta: "reference",
+							score: 10000
+						}
+						console.log result
+						callback null, result
+
+			@editor.completers = [ReferencesCompleter, @suggestionManager, SnippetCompleter]
 
 		disable: () ->
 			@editor.setOptions({
@@ -83,7 +97,7 @@ define [
 					# since it will be adding in with the autocomplete of \begin{item}...
 					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
 						editor.session.remove(range)
-					
+
 					Autocomplete::_insertMatch.call this, data
 
 				# Overwrite this to set autoInsert = false and set font size

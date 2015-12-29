@@ -3,16 +3,13 @@ define [
 	class ReferencesSearchManager
 		constructor: (@ide, @$scope) ->
 
-			@state =
-				keys: []
-			@$scope.references = @state
+			@$scope.$root._references = @state = keys: []
 
 			@$scope.$on 'document:closed', (e, doc) =>
 				if doc.doc_id
 				 	entity = @ide.fileTreeManager.findEntityById doc.doc_id
 					if entity?.name?.match /.*\.bib$/
 						@$scope.$emit 'references:changed', entity
-						console.log ">> references changed"
 						@indexReferences doc.doc_id
 
 		indexReferences: (doc_id) ->
@@ -37,7 +34,5 @@ define [
 					_csrf: window.csrfToken
 				},
 				(data) =>
-					console.log ">> got keys"
-					console.log(data)
-					@state.keys = data.keys
+					@$scope.$root._references.keys = data.keys
 			)
