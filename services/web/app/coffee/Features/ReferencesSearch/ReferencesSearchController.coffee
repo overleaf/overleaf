@@ -2,8 +2,6 @@ logger = require('logger-sharelatex')
 ReferencesSearchHandler = require('./ReferencesSearchHandler')
 ProjectLocator = require("../Project/ProjectLocator")
 settings = require('settings-sharelatex')
-U = require('underscore')
-
 
 module.exports = ReferencesSearchController =
 
