@@ -49,21 +49,25 @@ define [
 						range = new Range(pos.row, 0, pos.row, pos.column)
 						lineUpToCursor = editor.getSession().getTextRange(range)
 						commandFragment = getLastCommandFragment(lineUpToCursor)
-						console.log commandFragment
 						if commandFragment == '\\cite{'
-							console.log ">> yes"
 							result = references.keys.map (key) -> {
-								caption: key,
-								snippet: key,
+								caption: "\\cite{#{key}",
+								snippet: "\\cite{#{key}",
 								meta: "reference",
 								score: 10000
 							}
-							console.log ">> reference keys #{result.length}"
+							result.push {
+								caption: "\\cite{",
+								snippet: "\\cite{",
+								meta: "reference",
+								score: 11000
+							}
 							callback null, result
 						else
 							callback null, []
 
 			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
+			@editor.completers = [SnippetCompleter, ReferencesCompleter]
 
 		disable: () ->
 			@editor.setOptions({
