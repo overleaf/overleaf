@@ -49,7 +49,8 @@ define [
 						range = new Range(pos.row, 0, pos.row, pos.column)
 						lineUpToCursor = editor.getSession().getTextRange(range)
 						commandFragment = getLastCommandFragment(lineUpToCursor)
-						if commandFragment == '\\cite{'
+						# if commandFragment == '\\cite{'
+						if commandFragment.match(/^~?\\cite{\w*/)
 							result = references.keys.map (key) -> {
 								caption: "\\cite{#{key}",
 								snippet: "\\cite{#{key}",
