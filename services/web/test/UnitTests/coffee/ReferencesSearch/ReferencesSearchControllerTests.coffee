@@ -77,15 +77,37 @@ describe "ReferencesSearchController", ->
 			beforeEach ->
 				@req.body = {docId: 'some_weird_id'}
 				@ProjectLocator.findElement.callsArgWith(1, new Error('not found'), null)
+				@ReferencesSearchHandler.indexFile.callsArgWith(2, null)
 
 			it 'should call ProjectLocator.findElement', (done) ->
 				@res.send = (status) =>
 					@ProjectLocator.findElement.calledOnce.should.equal true
 					arg =
 						project_id: @project_id
-						element_id: @doc_id,
+						element_id: 'some_weird_id',
 						type: 'doc'
 					@ProjectLocator.findElement.calledWith(arg).should.equal true
+					done()
+				@controller.indexFile(@req, @res)
+
+			it 'should produce a 500 response', (done) ->
+				@res.send = (status) =>
+					status.should.equal 500
+					done()
+				@controller.indexFile(@req, @res)
+
+		describe 'when the ReferencesSearchHandler produces an error', ->
+
+			beforeEach ->
+				@req.body = {docId: @doc_id}
+				@ProjectLocator.findElement.callsArgWith(1, null, {})
+				@ReferencesSearchHandler.indexFile.callsArgWith(2, new Error('something went wrong'))
+
+			it 'should call ReferencesSearchHandler.indexFile', (done) ->
+				@res.send = (status) =>
+					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
+					expected_url = "http://some.url/project/2222/doc/3333"
+					@ReferencesSearchHandler.indexFile.calledWith(@project_id, expected_url).should.equal true
 					done()
 				@controller.indexFile(@req, @res)
 
