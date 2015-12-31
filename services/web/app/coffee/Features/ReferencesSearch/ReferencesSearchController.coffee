@@ -13,7 +13,11 @@ module.exports = ReferencesSearchController =
 		if !doc_id
 			logger.log project_id: project_id, "no fileUrl supplied"
 			return res.send 400
-		ProjectLocator.findElement {project_id: project_id, element_id: doc_id, type: 'doc'}, (err, doc) ->
+		ProjectLocator.findElement {
+			project_id: project_id,
+			element_id: doc_id,
+			type: 'doc'
+		}, (err, doc) ->
 			if err?
 				logger.err {err, project_id, doc_id}, "error finding doc to index"
 				return res.send 500

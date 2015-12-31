@@ -57,7 +57,8 @@ describe "ReferencesSearchController", ->
 				@res.send = (status) =>
 					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
 					expected_url = "http://some.url/project/2222/doc/3333"
-					@ReferencesSearchHandler.indexFile.calledWith(@project_id, expected_url).should.equal true
+					@ReferencesSearchHandler.indexFile
+					.calledWith(@project_id, expected_url).should.equal true
 					done()
 				@controller.indexFile(@req, @res)
 
