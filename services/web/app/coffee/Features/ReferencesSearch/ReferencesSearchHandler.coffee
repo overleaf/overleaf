@@ -38,5 +38,5 @@ module.exports = ReferencesSearchHandler =
 				return callback(null, result)
 			else
 				err = new Error("references api responded with non-success code: #{res.statusCode}")
-				logger.log {err, project_id, file_url}, "error getting references keys"
+				logger.log {err, project_id}, "error getting references keys"
 				return callback(err)
