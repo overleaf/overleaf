@@ -19,8 +19,62 @@ describe "ReferencesSearchController", ->
 			'settings-sharelatex': @settings = {
 				apis: {web: {url: 'http://some.url'}}
 			}
-			'../Project/ProjectLocator': @ProjectLocator = {findElement: sinon.stub()}
-			'./ReferencesSearchHandler': @ReferencesSearchHandler = {indexFile: sinon.stub(), getKeys: sinon.stub()}
+			'../Project/ProjectLocator': @ProjectLocator = {
+				findElement: sinon.stub()
+			}
+			'./ReferencesSearchHandler': @ReferencesSearchHandler = {
+				indexFile: sinon.stub()
+				getKeys: sinon.stub()
+			}
+
+	describe 'getKeys', ->
+
+		beforeEach ->
+			@req = new MockRequest()
+			@req.params.Project_id = @project_id
+			@res = new MockResponse()
+			@data =
+				projectId: @project_id,
+				keys: ['one', 'two', 'three']
+			@ReferencesSearchHandler.getKeys.callsArgWith(1, null, @data)
+
+		describe 'when remote service works', ->
+
+			it 'should produce a json response', (done) ->
+				@res.json = (data) =>
+					data.should.not.equal null
+					data.should.deep.equal @data
+					done()
+				@controller.getKeys(@req, @res)
+
+			it 'should call getKeys on ReferencesSearchHandler', (done) ->
+				@res.json = (data) =>
+					@ReferencesSearchHandler.getKeys
+					.calledOnce.should.equal true
+					@ReferencesSearchHandler.getKeys
+					.calledWith(@project_id).should.equal true
+					done()
+				@controller.getKeys(@req, @res)
+
+		describe 'when remote service produces an error', ->
+
+			beforeEach ->
+				@ReferencesSearchHandler.getKeys.callsArgWith(1, new Error('nope'))
+
+			it 'should produce a 500 response', (done) ->
+				@res.send = (status) =>
+					status.should.equal 500
+					done()
+				@controller.getKeys(@req, @res)
+
+			it 'should call getKeys on ReferencesSearchHandler', (done) ->
+				@res.send = (status) =>
+					@ReferencesSearchHandler.getKeys
+					.calledOnce.should.equal true
+					@ReferencesSearchHandler.getKeys
+					.calledWith(@project_id).should.equal true
+					done()
+				@controller.getKeys(@req, @res)
 
 	describe 'indexFile', ->
 
@@ -102,13 +156,15 @@ describe "ReferencesSearchController", ->
 			beforeEach ->
 				@req.body = {docId: @doc_id}
 				@ProjectLocator.findElement.callsArgWith(1, null, {})
-				@ReferencesSearchHandler.indexFile.callsArgWith(2, new Error('something went wrong'))
+				@ReferencesSearchHandler.indexFile
+				.callsArgWith(2, new Error('something went wrong'))
 
 			it 'should call ReferencesSearchHandler.indexFile', (done) ->
 				@res.send = (status) =>
 					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
 					expected_url = "http://some.url/project/2222/doc/3333"
-					@ReferencesSearchHandler.indexFile.calledWith(@project_id, expected_url).should.equal true
+					@ReferencesSearchHandler.indexFile
+					.calledWith(@project_id, expected_url).should.equal true
 					done()
 				@controller.indexFile(@req, @res)
 
