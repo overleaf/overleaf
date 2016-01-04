@@ -124,7 +124,8 @@ define [
 			$http.post("/user/subscription/cancel", body)
 				.success ->
 					sixpack.convert 'cancelation-options-view', ->
-						location.reload()
+						sixpack.convert 'upgrade-success-message', ->
+							location.reload()
 				.error ->
 					console.log "something went wrong changing plan"
 
