@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.snapshot.getdoc;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
@@ -21,6 +22,7 @@ public class GetDocResult extends Result {
     private WLUser user;
 
     private SnapshotPostException exception;
+    private ForbiddenException forbidden;
 
     public GetDocResult(Request request, JsonElement json) throws FailedConnectionException {
         super(request, json);
@@ -66,7 +68,7 @@ public class GetDocResult extends Result {
         if (jsonObject.has("status")) {
             switch (jsonObject.get("status").getAsInt()) {
             case 403:
-                exception = new ProtectedProjectException();
+                forbidden = new ForbiddenException();
                 break;
             case 404:
                 exception = new InvalidProjectException();

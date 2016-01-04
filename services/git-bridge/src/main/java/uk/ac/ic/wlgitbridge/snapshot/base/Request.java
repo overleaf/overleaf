@@ -54,7 +54,8 @@ public abstract class Request<T extends Result> {
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof HttpResponseException && ((HttpResponseException) cause).getStatusCode() == HttpServletResponse.SC_FORBIDDEN) {
+            int statusCode = ((HttpResponseException) cause).getStatusCode();
+            if (cause instanceof HttpResponseException && (statusCode == HttpServletResponse.SC_UNAUTHORIZED || statusCode == HttpServletResponse.SC_FORBIDDEN)) {
                 throw new ForbiddenException();
             } else {
                 throw new FailedConnectionException();

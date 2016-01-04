@@ -27,17 +27,17 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
     @Override
     protected void onBeforeRequest(HttpRequest request) throws IOException {
-        request.setInterceptor(new HttpExecuteInterceptor() {
+        if (oauth2 != null) {
+            request.setInterceptor(new HttpExecuteInterceptor() {
 
-            @Override
-            public void intercept(HttpRequest request) throws IOException {
-                new BasicAuthentication(USERNAME, PASSWORD).intercept(request);
-                if (oauth2 != null) {
+                @Override
+                public void intercept(HttpRequest request) throws IOException {
+                    new BasicAuthentication(USERNAME, PASSWORD).intercept(request);
                     oauth2.intercept(request);
                 }
-            }
 
-        });
+            });
+        }
     }
 
     public static void setBasicAuth(String username, String password) {

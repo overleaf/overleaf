@@ -10,7 +10,10 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
+import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
+import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +43,19 @@ public class Oauth2Filter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
+        String project = Util.removeAllSuffixes(((Request) servletRequest).getRequestURI().split("/")[1], ".git");
+        GetDocRequest doc = new GetDocRequest(project);
+        doc.request();
+        try {
+            doc.getResult();
+        } catch (ForbiddenException e) {
+            getAndInjectCredentials(servletRequest, servletResponse, filterChain);
+            return;
+        }
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
 
+    private void getAndInjectCredentials(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 

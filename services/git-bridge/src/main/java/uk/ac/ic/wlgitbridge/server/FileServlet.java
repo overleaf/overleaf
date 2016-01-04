@@ -40,6 +40,7 @@ public class FileServlet extends ResourceHandler {
             try {
                 writeLatexDataSource.checkPostbackKey(pathSections[1], key);
             } catch (InvalidPostbackKeyException e) {
+                e.printStackTrace();
                 throw new ServletException();
             }
             super.handle(target, baseRequest, request, response);

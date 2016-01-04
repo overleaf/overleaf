@@ -143,28 +143,6 @@ public class WLGitBridgeIntegrationTest {
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneMultipleRepositories/state/testproj2"), testproj2Dir.toPath()));
     }
 
-
-    private static final String EXPECTED_OUT_PROTECTED =
-            "Cloning into 'protected'...\n" +
-                    "fatal: remote error: Your project is protected, and can't be cloned (yet).\n";
-    @Test
-    public void cannotCloneAProtectedProject() throws IOException, GitAPIException, InterruptedException {
-        MockSnapshotServer server = new MockSnapshotServer(3861, getResource("/cannotCloneAProtectedProject").toFile());
-        server.start();
-        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
-        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
-                makeConfigFile(33861, 3861)
-        });
-        wlgb.run();
-        File dir = folder.newFolder();
-        Process git = runtime.exec("git clone http://127.0.0.1:33861/protected.git", null, dir);
-        String output = Util.fromStream(git.getErrorStream());
-        int exitCode = git.waitFor();
-        assertEquals(128, exitCode);
-        assertEquals(EXPECTED_OUT_PROTECTED, output);
-        wlgb.stop();
-    }
-
     @Test
     public void canPullAModifiedTexFile() throws IOException, GitAPIException, InterruptedException {
         MockSnapshotServer server = new MockSnapshotServer(3859, getResource("/canPullAModifiedTexFile").toFile());

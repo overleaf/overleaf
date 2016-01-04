@@ -17,6 +17,10 @@ public class GetDocRequest extends SnapshotAPIRequest<GetDocResult> {
         super(projectName, API_CALL, oauth2);
     }
 
+    public GetDocRequest(String projectName) {
+        this(null, projectName);
+    }
+
     @Override
     protected HTTPMethod httpMethod() {
         return HTTPMethod.GET;
