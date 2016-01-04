@@ -67,6 +67,7 @@ public class GetDocResult extends Result {
         JsonObject jsonObject = json.getAsJsonObject();
         if (jsonObject.has("status")) {
             switch (jsonObject.get("status").getAsInt()) {
+            case 401:
             case 403:
                 forbidden = new ForbiddenException();
                 break;

@@ -12,6 +12,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.data.model.db.SqlitePersistentStore;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -33,7 +34,7 @@ public class DataStore {
 
     public DataStore(String rootGitDirectoryPath) {
         rootGitDirectory = initRootGitDirectory(rootGitDirectoryPath);
-        persistentStore = new PersistentStore(rootGitDirectory);
+        persistentStore = new SqlitePersistentStore(rootGitDirectory);
         List<String> excludedFromDeletion = persistentStore.getProjectNames();
         excludedFromDeletion.add(".wlgb");
         Util.deleteInDirectoryApartFrom(rootGitDirectory, excludedFromDeletion.toArray(new String[] {}));
@@ -44,10 +45,12 @@ public class DataStore {
 
     public void updateProjectWithName(Credential oauth2, String name, Repository repository) throws IOException, SnapshotPostException, GitAPIException, ForbiddenException {
         LinkedList<Snapshot> snapshots = snapshotFetcher.getSnapshotsForProjectAfterVersion(oauth2, name, persistentStore.getLatestVersionForProject(name));
+
+        makeCommitsFromSnapshots(name, repository, snapshots);
+
         if (!snapshots.isEmpty()) {
             persistentStore.setLatestVersionForProject(name, snapshots.getLast().getVersionID());
         }
-        makeCommitsFromSnapshots(name, repository, snapshots);
     }
 
     private void makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException, GitAPIException {
