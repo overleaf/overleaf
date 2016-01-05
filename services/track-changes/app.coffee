@@ -60,7 +60,7 @@ app.get "/check_lock", HttpController.checkLock
 app.get "/health_check",  HttpController.healthCheck
 
 app.use (error, req, res, next) ->
-	logger.error err: error, "an internal error occured"
+	logger.error err: error, req: req, "an internal error occured"
 	res.send 500
 
 port = Settings.internal?.trackchanges?.port or 3015
