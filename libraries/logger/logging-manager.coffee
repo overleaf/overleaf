@@ -19,11 +19,21 @@ module.exports = Logger =
 		@logger.error(attributes, args...)
 		if @raven?
 			error = attributes.err or attributes.error
+			req = attributes.req
 			if error?
 				tags = {}
+				extra = {}
 				for key, value of attributes
 					tags[key] = value if key.match(/_id/) and typeof value == 'string'
-				@raven.captureError(error, tags: tags, extra: attributes)
+					extra[key] = value
+				if req?
+					extra.req =
+						method: req.method
+						url: req.originalUrl
+						query: req.query
+						headers: req.headers
+						ip: req.ip
+				@raven.captureError(error, {tags: tags, extra: extra})
 	err: ()->
 		@logger.error.apply(@logger, arguments)
 	warn: ()->
