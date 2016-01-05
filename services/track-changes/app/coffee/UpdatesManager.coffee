@@ -37,8 +37,10 @@ module.exports = UpdatesManager =
 					rawUpdates.shift()
 
 				if rawUpdates[0]? and rawUpdates[0].v != lastVersion + 1
-					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastVersion}")
-					logger.error err: error, doc_id: doc_id, project_id: project_id, "inconsistent doc versions"
+					ts = lastCompressedUpdate?.meta?.end_ts
+					last_timestamp = if ts? then new Date(ts) else 'unknown time'
+					error = new Error("Tried to apply raw op at version #{rawUpdates[0].v} to last compressed update with version #{lastVersion} from #{last_timestamp}")
+					logger.error err: error, doc_id: doc_id, project_id: project_id, prev_end_ts: ts, "inconsistent doc versions"
 					if Settings.trackchanges?.continueOnError and rawUpdates[0].v > lastVersion + 1
 						# we have lost some ops - continue to write into the database, we can't recover at this point
 						lastCompressedUpdate = null
