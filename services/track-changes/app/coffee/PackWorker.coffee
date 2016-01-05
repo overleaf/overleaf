@@ -1,8 +1,12 @@
+Settings = require "settings-sharelatex"
 async = require "async"
 _ = require "underscore"
 {db, ObjectId, BSON} = require "./mongojs"
 logger = require "logger-sharelatex"
 logger.initialize("track-changes-packworker")
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 LockManager = require "./LockManager"
 PackManager = require "./PackManager"
 
