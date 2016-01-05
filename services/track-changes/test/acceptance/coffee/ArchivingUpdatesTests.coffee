@@ -62,8 +62,8 @@ describe "Archiving updates", ->
 
 	after (done) ->
 		MockWebApi.getUserInfo.restore()
-		db.docHistory.remove {project_id: ObjectId(@project_id)}
-		TrackChangesClient.removeS3Doc @project_id, @doc_id, done
+		db.docHistory.remove {project_id: ObjectId(@project_id)}, () ->
+			TrackChangesClient.removeS3Doc @project_id, @doc_id, done
 
 	describe "archiving a doc's updates", ->
 		before (done) ->
