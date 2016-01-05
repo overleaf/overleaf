@@ -9,7 +9,7 @@ ReadlineStream = require "readline-stream"
 module.exports = MongoAWS =
 
 	MAX_SIZE:  1024*1024 # almost max size
-	MAX_COUNT: 1024 # almost max count
+	MAX_COUNT: 512 # almost max count
 
 	archiveDocHistory: (project_id, doc_id, update, _callback = (error) ->) ->
 
