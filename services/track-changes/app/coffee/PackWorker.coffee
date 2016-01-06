@@ -18,7 +18,7 @@ DOCUMENT_PACK_DELAY = Number(process.argv[3]) || 1000
 TIMEOUT = Number(process.argv[4]) || 30*60*1000
 
 shutDownRequested = false
-setTimeout () ->
+shutDownTimer = setTimeout () ->
 	logger.log "pack timed out, requesting shutdown"
 	# start the shutdown on the next pack
 	shutDownRequested = true
@@ -40,10 +40,22 @@ db.close =  (callback) ->
 		callback()
 
 finish = () ->
+	if shutDownTimer?
+		logger.log 'cancelling timeout'
+		clearTimeout shutDownTimer
 	logger.log 'closing db'
 	db.close () ->
-		logger.log 'exiting from pack worker'
-		process.exit()
+		logger.log 'closing LockManager Redis Connection'
+		LockManager.close () ->
+			logger.log 'ready to exit from pack worker'
+			hardTimeout = setTimeout () ->
+				logger.error 'hard exit from pack worker'
+				process.exit(1)
+			, 5*1000
+			hardTimeout.unref()
+
+process.on 'exit', (code) ->
+	logger.log {code}, 'pack worker exited'
 
 processUpdates = (pending) ->
 	async.eachSeries pending,	(doc_id, callback) ->
