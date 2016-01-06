@@ -70,3 +70,7 @@ module.exports = LockManager =
 		action = (releaseLock) ->
 			releaseLock()
 		LockManager.runWithLock	"HistoryLock:HealthCheck:host=#{HOST}:pid=#{PID}:random=#{RND}", action, callback
+
+	close: (callback) ->
+		rclient.quit()
+		rclient.once 'end', callback
