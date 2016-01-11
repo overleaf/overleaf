@@ -9,6 +9,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "bson": "^0.4.20",
+    "byline": "^4.2.1",
     "cli": "^0.6.6",
     "express": "3.3.5",
     "line-reader": "^0.2.4",
@@ -22,8 +23,7 @@
     "underscore": "~1.7.0",
     "mongo-uri": "^0.1.2",
     "s3-streams": "^0.3.0",
-    "JSONStream": "^1.0.4",
-    "readline-stream": "^1.0.1"
+    "JSONStream": "^1.0.4"
   },
   "devDependencies": {
     "chai": "~1.9.0",

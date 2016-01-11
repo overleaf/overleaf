@@ -4,7 +4,7 @@ AWS = require 'aws-sdk'
 S3S = require 's3-streams'
 {db, ObjectId} = require "./mongojs"
 JSONStream = require "JSONStream"
-ReadlineStream = require "readline-stream"
+ReadlineStream = require "byline"
 
 module.exports = MongoAWS =
 
