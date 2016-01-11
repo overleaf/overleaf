@@ -300,6 +300,7 @@ module.exports = PackManager =
 				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
 				top.meta = { start_ts: d.meta.start_ts, end_ts: d.meta.end_ts }
 				top.sz = sz
+				top.v_end = d.v
 				delete top.op
 				delete top._id
 				packs.push top
