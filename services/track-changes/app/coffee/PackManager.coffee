@@ -268,7 +268,7 @@ module.exports = PackManager =
 		return newResults
 
 	MAX_SIZE:  1024*1024 # make these configurable parameters
-	MAX_COUNT: 1024
+	MAX_COUNT: 512
 
 	convertDocsToPacks: (docs, callback) ->
 		packs = []
