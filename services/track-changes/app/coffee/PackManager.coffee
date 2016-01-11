@@ -269,15 +269,10 @@ module.exports = PackManager =
 
 	MAX_SIZE:  1024*1024 # make these configurable parameters
 	MAX_COUNT: 1024
-	MIN_COUNT: 100
-	KEEP_OPS:  100
 
 	convertDocsToPacks: (docs, callback) ->
 		packs = []
 		top = null
-		# keep the last KEEP_OPS as individual ops
-		docs = docs.slice(0,-PackManager.KEEP_OPS)
-
 		docs.forEach (d,i) ->
 			# skip existing packs
 			if d.pack?
@@ -294,7 +289,7 @@ module.exports = PackManager =
 				top.v_end = d.v
 				top.meta.end_ts = d.meta.end_ts
 				return
-			else if sz < PackManager.MAX_SIZE
+			else
 				# create a new pack
 				top = _.clone(d)
 				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
@@ -304,13 +299,7 @@ module.exports = PackManager =
 				delete top.op
 				delete top._id
 				packs.push top
-			else
-				# keep the op
-				# util.log "keeping large op unchanged (#{sz} bytes)"
 
-		# only store packs with a sufficient number of ops, discard others
-		packs = packs.filter (packObj) ->
-			packObj.pack.length > PackManager.MIN_COUNT
 		callback(null, packs)
 
 	checkHistory: (docs, callback) ->
