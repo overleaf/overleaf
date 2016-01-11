@@ -409,7 +409,7 @@ module.exports = PackManager =
 					}, {upsert:true}, () ->
 						callback null, null
 
-	DB_WRITE_DELAY: 2000
+	DB_WRITE_DELAY: 100
 
 	savePacks: (packs, callback) ->
 		async.eachSeries packs, PackManager.safeInsert, (err, result) ->
