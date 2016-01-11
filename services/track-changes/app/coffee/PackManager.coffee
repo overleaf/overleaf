@@ -88,6 +88,10 @@ module.exports = PackManager =
 
 		needMore = false  # keep track of whether we need to load more data
 		updates = [] # used to accumulate the set of results
+
+		# FIXME: packs are big so we should accumulate the results
+		# incrementally instead of using .toArray() to avoid reading all
+		# of the changes into memory
 		cursor.toArray (err, result) ->
 			unpackedSet = PackManager._unpackResults(result)
 			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
@@ -141,6 +145,9 @@ module.exports = PackManager =
 
 		updates = [] # used to accumulate the set of results
 
+		# FIXME: packs are big so we should accumulate the results
+		# incrementally instead of using .toArray() to avoid reading all
+		# of the changes into memory
 		cursor.toArray (err, result) ->
 			if err?
 				return callback err, result
