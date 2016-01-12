@@ -36,7 +36,9 @@ module.exports = LockManager =
 		startTime = Date.now()
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
-				return callback(new Error("Timeout"))
+				e = new Error("Timeout")
+				e.key = key
+				return callback(e)
 
 			LockManager.tryLock key, (error, gotLock, lockValue) ->
 				return callback(error) if error?

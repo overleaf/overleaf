@@ -129,7 +129,7 @@ describe "LockManager", ->
 					done()
 
 			it "should return the callback with an error", ->
-				@callback.calledWith(new Error("timeout")).should.equal true
+				@callback.calledWith(sinon.match.instanceOf(Error)).should.equal true
 
 	describe "runWithLock", ->
 		describe "with successful run", ->
