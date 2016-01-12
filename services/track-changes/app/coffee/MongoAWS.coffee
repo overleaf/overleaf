@@ -27,7 +27,9 @@ module.exports = MongoAWS =
 			accessKeyId: settings.filestore.s3.key
 			secretAccessKey: settings.filestore.s3.secret
 		}
-		 
+
+		logger.log {project_id, doc_id}, "uploading data to s3"
+
 		upload = S3S.WriteStream new AWS.S3(), {
 			"Bucket": settings.filestore.stores.user_files,
 			"Key": project_id+"/changes-"+doc_id
@@ -53,7 +55,9 @@ module.exports = MongoAWS =
 			accessKeyId: settings.filestore.s3.key
 			secretAccessKey: settings.filestore.s3.secret
 		}
-		 
+
+		logger.log {project_id, doc_id}, "downloading data from s3"
+
 		download = S3S.ReadStream new AWS.S3(), {
 			"Bucket": settings.filestore.stores.user_files,
 			"Key": project_id+"/changes-"+doc_id

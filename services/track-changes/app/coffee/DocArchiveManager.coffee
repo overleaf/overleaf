@@ -78,6 +78,7 @@ module.exports = DocArchiveManager =
 		MongoManager.getArchivedDocChanges doc_id, (error, count) ->
 			return callback(error) if error?
 			if count == 0
+				logger.log {project_id, doc_id}, "no changes marked as in s3, not unarchiving"
 				return callback()
 			else
 				MongoAWS.unArchiveDocHistory project_id, doc_id, (error) ->
