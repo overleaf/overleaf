@@ -74,8 +74,11 @@ module.exports = MongoAWS =
 
 		inputStream.on 'data', (line) ->
 				if line.length > 2
-					ops.push(JSON.parse(line))
-					sz += line.length 
+					try
+						ops.push(JSON.parse(line))
+					catch err
+						return callback(err)
+					sz += line.length
 				if ops.length >= MongoAWS.MAX_COUNT || sz >= MongoAWS.MAX_SIZE
 					inputStream.pause()
 					MongoAWS.handleBulk ops.slice(0), sz, () ->
