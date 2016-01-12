@@ -6,7 +6,7 @@ CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
 
 module.exports = LatexRunner =
 	runLatex: (project_id, options, callback = (error) ->) ->
-		{directory, mainFile, compiler, timeout} = options
+		{directory, mainFile, compiler, timeout, image} = options
 		compiler ||= "pdflatex"
 		timeout  ||= 60000 # milliseconds
 
@@ -27,7 +27,7 @@ module.exports = LatexRunner =
 		else
 			return callback new Error("unknown compiler: #{compiler}")
 
-		CommandRunner.run project_id, command, directory, timeout, callback
+		CommandRunner.run project_id, command, directory, image, timeout, callback
 
 	_latexmkBaseCommand: [ "latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
 

@@ -44,6 +44,7 @@ describe "CompileManager", ->
 				project_id: @project_id = "project-id-123"
 				compiler: @compiler = "pdflatex"
 				timeout: @timeout = 42000
+				imageName: @image = "example.com/image"
 			@Settings.compileDir = "compiles"
 			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}"
 			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArg(3)
@@ -64,6 +65,7 @@ describe "CompileManager", ->
 					mainFile:  @rootResourcePath
 					compiler:  @compiler
 					timeout:   @timeout
+					image:     @image
 				})
 				.should.equal true
 

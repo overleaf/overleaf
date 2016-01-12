@@ -28,6 +28,7 @@ module.exports = CompileManager =
 				mainFile:  request.rootResourcePath
 				compiler:  request.compiler
 				timeout:   request.timeout
+				image:     request.imageName
 			}, (error) ->
 				return callback(error) if error?
 				logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "done compile"

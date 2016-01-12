@@ -21,6 +21,9 @@ module.exports = RequestParser =
 				compile.options.timeout
 				default: RequestParser.MAX_TIMEOUT
 				type: "number"
+			response.imageName = @_parseAttribute "imageName",
+				compile.options.imageName,
+				type: "string"
 
 			if response.timeout > RequestParser.MAX_TIMEOUT
 				response.timeout = RequestParser.MAX_TIMEOUT
@@ -71,7 +74,6 @@ module.exports = RequestParser =
 					throw "#{name} attribute should be a #{options.type}"
 		else
 			return options.default if options.default?
-			throw "Default not implemented"
 		return attribute
 
 	_sanitizePath: (path) ->
