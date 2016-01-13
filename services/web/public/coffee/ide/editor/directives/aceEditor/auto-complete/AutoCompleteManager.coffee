@@ -45,6 +45,8 @@ define [
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
+					if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
+						return callback(null, [])
 					if references.keys
 						range = new Range(pos.row, 0, pos.row, pos.column)
 						lineUpToCursor = editor.getSession().getTextRange(range)

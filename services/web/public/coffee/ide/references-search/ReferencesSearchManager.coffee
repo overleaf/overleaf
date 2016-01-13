@@ -16,6 +16,8 @@ define [
 				@getReferenceKeys()
 
 		indexReferences: (doc_id) ->
+			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
+				return
 			$.post(
 				"/project/#{@$scope.project_id}/references",
 				{
@@ -31,6 +33,8 @@ define [
 			)
 
 		getReferenceKeys: () ->
+			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
+				return
 			$.get(
 				"/project/#{@$scope.project_id}/references/keys",
 				{
