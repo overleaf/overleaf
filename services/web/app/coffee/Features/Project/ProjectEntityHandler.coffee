@@ -111,7 +111,6 @@ module.exports = ProjectEntityHandler =
 		DocstoreManager.getDoc project_id, doc_id, options, callback
 
 	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
-		console.log project_id
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			logger.log project: project._id, folder_id: folder_id, doc_name: docName, "adding doc"
 			return callback(err) if err?

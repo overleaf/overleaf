@@ -291,7 +291,7 @@ module.exports =
 		title: "ShareLaTeX Community Edition"
 		
 		left_footer: [{
-			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2015"
+			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2016"
 		}]
 
 		right_footer: [{
