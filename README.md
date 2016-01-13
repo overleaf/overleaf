@@ -156,7 +156,7 @@ $ docker run -d \
 The available configuration parameters are:
 
 * `SHARELATEX_SITE_URL`: Where your instance of ShareLaTeX is publically available.
-This is used in public links, and when connecting over websockets, so much be
+This is used in public links, and when connecting over websockets, so must be
 configured correctly!
 * `SHARELATEX_ADMIN_EMAIL`: The email address where users can reach the person who runs the site.
 * `SHARELATEX_APP_NAME`: The name to display when talking about the running app. Defaults to 'ShareLaTex (Community Edition)'.
@@ -185,7 +185,17 @@ Once you are logged in as an admin user, you can visit `/admin/register` on your
 
 *Please make sure to back up all Mongo, Redis and on-disk data before upgrading.*
 
-Stop and remove the currently running ShareLaTeX container:
+#### Migrations
+Data stored in Mongodb will be automatically migrated to the latest schemea when upgrading docker releases. **This can make downgrades impossible.** One recommended technique is to test the migration first. This can be done by copying the mongodb database and doing a test run against the copied data.
+
+```
+db.copyDatabase(sharelatex,sharelatex-copy)
+# start the container up pointing at the new db
+--env SHARELATEX_MONGO_URL=mongodb://dockerhost/sharelatex-copy
+```
+
+#### Upgrade process
+To use the new docker container stop and remove the currently running ShareLaTeX container:
 
 ```
 $ docker stop sharelatex
