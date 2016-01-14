@@ -3,7 +3,7 @@ logger = require 'logger-sharelatex'
 logger.initialize("notifications-sharelatex")
 express = require('express')
 app = express()
-controller = require("./app/js/NotificationController")
+controller = require("./app/js/NotificationsController")
 mongojs = require('mongojs')
 db = mongojs(Settings.mongo.url, ['notifications'])
 Path = require("path")
@@ -21,8 +21,8 @@ app.configure ()->
 	app.use express.errorHandler()
 
 app.post '/user/:user_id', controller.addNotification
-app.get '/user/:user_id', controller.getUsersNotifications
-app.del '/user/:user_id/notification_id/:notification_id', controller.removeNotification
+app.get '/user/:user_id', controller.getUserNotifications
+app.del '/user/:user_id/notification/:notification_id', controller.removeNotification
 
 app.get '/status', (req, res)->
 	res.send('notifications sharelatex up')
