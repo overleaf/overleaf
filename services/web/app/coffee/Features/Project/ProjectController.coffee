@@ -221,7 +221,7 @@ module.exports = ProjectController =
 				# TODO: need to search for all docs in project
 				rootDocs = project?.rootFolder?[0]?.docs
 				if rootDocs
-					ReferencesSearchHandler.indexProjectReferences project_id, rootDocs ->  # don't need to wait on this
+					ReferencesSearchHandler.indexProjectReferences project_id, rootDocs, ->  # don't need to wait on this
 
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
