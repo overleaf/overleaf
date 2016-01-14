@@ -1,0 +1,74 @@
+Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+# git has its own built in compression methods
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
+
+node_modules/*
+data/*
+
+app.js
+example.js
+app/js/*
+test/unit/js/*
+test/smoke/js/*
+cookies.txt
+requestQueueWorker.js
+TpdsWorker.js
+BackgroundJobsWorker.js
+UserAndProjectPopulator.coffee
+
+public/js/history/versiondetail.js
+!public/js/libs/
+public/js/*
+!public/js/ace/*
+!public/js/libs/
+public/js/libs/sharejs.js
+public/js/editor.js
+public/js/home.js
+public/js/forms.js
+public/js/gui.js
+public/js/admin.js
+public/js/history/*
+public/stylesheets/style.css
+public/brand/plans.css
+public/minjs/
+
+public/js/main.js
+Gemfile.lock
+
+*.swp
+.DS_Store
+
+app/views/external
+
+/modules/
