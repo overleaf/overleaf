@@ -21,8 +21,7 @@ module.exports = ReferencesSearchController =
 			if err?
 				logger.err {err, project_id, doc_id}, "error finding doc to index"
 				return res.send 500
-			doc_url = ReferencesSearchController._buildDocUrl project_id, doc_id
-			ReferencesSearchHandler.indexFile project_id, doc_url, (err) ->
+			ReferencesSearchHandler.indexFile project_id, doc_id, (err) ->
 				if err
 					logger.err {err, project_id, doc_id}, "error indexing references file"
 					return res.send 500
@@ -37,6 +36,3 @@ module.exports = ReferencesSearchController =
 				logger.err {err, project_id}, "error getting references keys"
 				return res.send 500
 			return res.json data
-
-	_buildDocUrl: (project_id, doc_id) ->
-		"#{settings.apis.web.url}/project/#{project_id}/doc/#{doc_id}"

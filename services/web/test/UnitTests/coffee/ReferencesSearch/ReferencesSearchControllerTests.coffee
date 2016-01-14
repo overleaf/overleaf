@@ -110,9 +110,8 @@ describe "ReferencesSearchController", ->
 			it 'should call ReferencesSearchHandler.indexFile', (done) ->
 				@res.send = (status) =>
 					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
-					expected_url = "http://some.url/project/2222/doc/3333"
 					@ReferencesSearchHandler.indexFile
-					.calledWith(@project_id, expected_url).should.equal true
+					.calledWith(@project_id, @doc_id).should.equal true
 					done()
 				@controller.indexFile(@req, @res)
 
@@ -162,9 +161,8 @@ describe "ReferencesSearchController", ->
 			it 'should call ReferencesSearchHandler.indexFile', (done) ->
 				@res.send = (status) =>
 					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
-					expected_url = "http://some.url/project/2222/doc/3333"
 					@ReferencesSearchHandler.indexFile
-					.calledWith(@project_id, expected_url).should.equal true
+					.calledWith(@project_id, @doc_id).should.equal true
 					done()
 				@controller.indexFile(@req, @res)
 

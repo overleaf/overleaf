@@ -9,14 +9,16 @@ describe 'ReferencesSearchHandler', ->
 
 	beforeEach ->
 		@project_id = '222'
-		@file_url = 'http://example.com/some/file'
+		@file_id = '111111'
 		@handler = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': {
 				log: ->
 				err: ->
 			}
 			'settings-sharelatex': @settings = {
-				apis: {references: {url: 'http://some.url'}}
+				apis:
+					references: {url: 'http://some.url'}
+					web: {url: 'http://some.url'}
 			}
 			'request': @request = {
 				get: sinon.stub()
@@ -30,7 +32,7 @@ describe 'ReferencesSearchHandler', ->
 				@request.post.callsArgWith(1, null, {statusCode: 201}, {})
 
 			it 'should not produce an error', (done) ->
-				@handler.indexFile @project_id, @file_url, (err) =>
+				@handler.indexFile @project_id, @file_id, (err) =>
 					expect(err).to.equal null
 					done()
 
@@ -39,7 +41,7 @@ describe 'ReferencesSearchHandler', ->
 				@request.post.callsArgWith(1, null, {statusCode: 500}, {})
 
 			it 'should produce an error', (done) ->
-				@handler.indexFile @project_id, @file_url, (err) =>
+				@handler.indexFile @project_id, @file_id, (err) =>
 					expect(err).to.not.equal null
 					done()
 

@@ -46,6 +46,8 @@ describe "ProjectController", ->
 			reactivateProjectIfRequired:sinon.stub()
 		@ProjectUpdateHandler =
 			markAsOpened: sinon.stub()
+		@ReferencesSearchHandler =
+			indexProjectReferences: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -63,6 +65,7 @@ describe "ProjectController", ->
 			"../../managers/SecurityManager":@SecurityManager
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
+			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
 
 		@user = 
 			_id:"!£123213kjljkl"

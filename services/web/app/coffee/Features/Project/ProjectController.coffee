@@ -16,6 +16,8 @@ SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
+ReferencesSearchHandler = require("../ReferencesSearch/ReferencesSearchHandler")
+
 
 module.exports = ProjectController =
 
@@ -168,15 +170,15 @@ module.exports = ProjectController =
 			return res.render("general/closed", {title:"updating_site"})
 
 		if req.session.user?
-			user_id = req.session.user._id 
+			user_id = req.session.user._id
 			anonymous = false
 		else
 			anonymous = true
 			user_id = 'openUser'
-		
+
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, "loading editor"
-	
+
 		async.parallel {
 			project: (cb)->
 				Project.findPopulatedById project_id, cb
@@ -193,7 +195,7 @@ module.exports = ProjectController =
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			activate: (cb)->
 				InactiveProjectManager.reactivateProjectIfRequired project_id, cb
-			markAsOpened: (cb)-> 
+			markAsOpened: (cb)->
 				#don't need to wait for this to complete
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
@@ -205,6 +207,7 @@ module.exports = ProjectController =
 			user = results.user
 			subscription = results.subscription
 
+
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
@@ -214,6 +217,12 @@ module.exports = ProjectController =
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
+
+				# TODO: need to search for all docs in project
+				rootDocs = project?.rootFolder?[0]?.docs
+				if rootDocs
+					ReferencesSearchHandler.indexProjectReferences project_id, rootDocs ->  # don't need to wait on this
+
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
 					title:  project.name
@@ -311,4 +320,3 @@ do generateThemeList = () ->
 		if file.slice(-2) == "js" and file.match(/^theme-/)
 			cleanName = file.slice(0,-3).slice(6)
 			THEME_LIST.push cleanName
-
