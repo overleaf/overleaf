@@ -218,10 +218,8 @@ module.exports = ProjectController =
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
-				# TODO: need to search for all docs in project
-				rootDocs = project?.rootFolder?[0]?.docs
-				if rootDocs
-					ReferencesSearchHandler.indexProjectReferences project_id, rootDocs, ->  # don't need to wait on this
+				# HACK: don't do it for now
+				# ReferencesSearchHandler.indexProjectReferences project, ->  # don't need to wait on this
 
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',

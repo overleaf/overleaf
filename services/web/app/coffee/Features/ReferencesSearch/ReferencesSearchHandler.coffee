@@ -3,6 +3,7 @@ request = require("request")
 settings = require("settings-sharelatex")
 ProjectLocator = require("../Project/ProjectLocator")
 U = require('underscore')
+Async = require('async')
 
 oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
@@ -10,13 +11,34 @@ fiveMinsInMs = oneMinInMs * 5
 
 module.exports = ReferencesSearchHandler =
 
-	indexProjectReferences: (project_id, docs, callback = (err) ->) ->
-		logger.log {project_id}, "try indexing references from project"
-		bibDocs = U.filter(docs, (doc) -> doc?.name?.match(/^.*\.bib$/))
-		if bibDocs and bibDocs.length == 1  # presume we'll only get either one or zero bib files
-			doc = bibDocs[0]
-			ReferencesSearchHandler.indexFile project_id, doc._id, (err) ->
+	_findBibDocIds: (project) ->
+		ids = []
+
+		_process = (folder) ->
+			folder.docs.forEach (doc) ->
+				if doc?.name?.match(/^.*\.bib$/)
+					ids.push(doc._id)
+			folder.folders.forEach (folder) ->
+				_process(folder)
+
+		project.rootFolder.forEach (rootFolder) ->
+			_process(rootFolder)
+
+		return ids
+
+	indexProjectReferences: (project, callback = (err) ->) ->
+		logger.log {projectId: project._id}, "try indexing references from project"
+		ids = ReferencesSearchHandler._findBibDocIds(project)
+		logger.log {projectId: project._id, count: ids.length}, "found bib files in project"
+		Async.eachSeries(
+			ids,
+			(docId, next) ->
+				ReferencesSearchHandler.indexFile project._id, docId, (err) ->
+					next(err)
+			, (err) ->
+				logger.log {projectId: project._id, count: ids.length}, "done index bib files in project"
 				callback(err)
+		)
 
 	indexFile: (project_id, file_id, callback = (err)->) ->
 		logger.log {project_id, file_id}, "sending index request to references api"
