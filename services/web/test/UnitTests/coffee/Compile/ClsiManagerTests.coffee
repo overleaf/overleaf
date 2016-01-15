@@ -109,6 +109,7 @@ describe "ClsiManager", ->
 				_id: @project_id
 				compiler: @compiler = "latex"
 				rootDoc_id: "mock-doc-id-1"
+				imageName: @image = "mock-image-name"
 
 			@docs = {
 				"/main.tex": @doc_1 = {
@@ -145,7 +146,7 @@ describe "ClsiManager", ->
 
 			it "should get the project with the required fields", ->
 				@Project.findById
-					.calledWith(@project_id, {compiler:1, rootDoc_id: 1})
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
 					.should.equal true
 
 			it "should get all the docs", ->
@@ -164,6 +165,7 @@ describe "ClsiManager", ->
 						options:
 							compiler: @compiler
 							timeout : 100
+							imageName: @image
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"

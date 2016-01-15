@@ -59,7 +59,7 @@ module.exports = ClsiManager =
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
 	_buildRequest: (project_id, settingsOverride={}, callback = (error, request) ->) ->
-		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
+		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
 
@@ -102,6 +102,7 @@ module.exports = ClsiManager =
 								options:
 									compiler: project.compiler
 									timeout: settingsOverride.timeout
+									imageName: project.imageName
 								rootResourcePath: rootResourcePath
 								resources: resources
 						}

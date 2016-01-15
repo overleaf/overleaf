@@ -2,6 +2,7 @@ spies = require('chai-spies')
 chai = require('chai').use(spies)
 sinon = require("sinon")
 should = chai.should()
+expect = chai.expect
 modulePath = "../../../../app/js/Features/Project/ProjectCreationHandler.js"
 SandboxedModule = require('sandboxed-module')
 Settings = require('settings-sharelatex')
@@ -47,6 +48,7 @@ describe 'ProjectCreationHandler', ->
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
 			'./ProjectEntityHandler':@ProjectEntityHandler
+			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex': {log:->}
 
 	describe 'Creating a Blank project', ->
@@ -69,6 +71,18 @@ describe 'ProjectCreationHandler', ->
 			it "should set the language from the user", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)->
 					project.spellCheckLanguage.should.equal "de"
+					done()
+			
+			it "should set the imageName to currentImageName if set", (done) ->
+				@Settings.currentImageName = "mock-image-name"
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					project.imageName.should.equal @Settings.currentImageName
+					done()
+			
+			it "should not set the imageName if no currentImageName", (done) ->
+				@Settings.currentImageName = null
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					expect(project.imageName).to.not.exist
 					done()
 
 		describe "with an error", ->
