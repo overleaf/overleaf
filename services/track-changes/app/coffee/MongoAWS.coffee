@@ -19,7 +19,7 @@ module.exports = MongoAWS =
 
 		query = {
 			doc_id: ObjectId(doc_id)
-			v: {$lt: update.v}
+			v: {$lte: update.v}
 			expiresAt: {$exists : false}
 		}
 

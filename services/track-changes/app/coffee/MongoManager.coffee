@@ -157,25 +157,23 @@ module.exports = MongoManager =
 		db.docHistoryStats.findOne {doc_id: ObjectId(doc_id.toString()), inS3: {$exists:true}}, {inS3: true, lastVersion: true}, callback
 
 	getDocChangesCount: (doc_id, callback)->
-		db.docHistory.count { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }}, callback
+		db.docHistory.count { doc_id : ObjectId(doc_id.toString())}, callback
 
-	getArchivedDocChanges: (doc_id, callback)->
-		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: { $exists: true }}, callback
-
-	markDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
-		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
+	markDocHistoryAsArchiveInProgress: (doc_id, lastVersion, callback) ->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$set : {inS3: false, lastVersion: lastVersion}}, {upsert:true}, callback
 
 	clearDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
-		db.docHistory.update { _id: update._id }, { $unset : { inS3 : true } }, callback
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$unset : {inS3: true, lastVersion: true}}, callback
 
-	markDocHistoryAsArchived: (doc_id, update, callback)->
-		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
+	markDocHistoryAsArchived: (doc_id, lastVersion, callback)->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$set : {inS3: true}}, {upsert:true}, (error)->
 			return callback(error) if error?
-			db.docHistory.remove { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }, v: { $lt : update.v }, expiresAt: {$exists : false} }, (error)->
+			# clear the archived entries from the docHistory now we have finally succeeded
+			db.docHistory.remove { doc_id : ObjectId(doc_id.toString()), v: {$lte : lastVersion}, expiresAt: {$exists : false} }, (error)->
 				return callback(error) if error?
 				callback(error)
 
 	markDocHistoryAsUnarchived: (doc_id, callback)->
 		# note this removes any inS3 field, regardless of its value (true/false/null)
-		db.docHistory.update { doc_id: ObjectId(doc_id.toString()) }, { $unset : { inS3 : true } }, { multi: true }, (error)->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, { $unset : { inS3: true, lastVersion: true} }, (error)->
 			callback(error)

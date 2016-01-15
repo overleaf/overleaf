@@ -25,39 +25,38 @@ module.exports = DocArchiveManager =
 		LockManager.runWithLock("HistoryLock:#{doc_id}", job, callback)
 
 	archiveDocChanges: (project_id, doc_id, callback)->
+		MongoManager.getArchivedDocStatus doc_id, (error, result) ->
+			return callback(error) if error?
+			if result?.inS3 is true
+				logger.log {project_id, doc_id}, "document history is already archived"
+				return callback()
+			if result?.inS3?
+				logger.log {project_id, doc_id}, "document history archive is already in progress"
+				return callback()
 		MongoManager.getDocChangesCount doc_id, (error, count) ->
 			return callback(error) if error?
 			if count == 0
 				logger.log {project_id, doc_id}, "document history is empty, not archiving"
 				return callback()
-			else if count == 1
-				logger.log {project_id, doc_id}, "document history only has one entry, not archiving"
-				return callback()
-			else
-				MongoManager.getArchivedDocChanges doc_id, (error, count) ->
+			MongoManager.peekLastCompressedUpdate doc_id, (error, update, lastVersion) ->
+				return callback(error) if error?
+				logger.log {doc_id, project_id}, "archiving got last compressed update"
+				MongoManager.markDocHistoryAsArchiveInProgress doc_id, lastVersion, (error) ->
 					return callback(error) if error?
-					if count != 0
-						logger.log {project_id, doc_id}, "document history contains archived entries, not archiving"
-						return callback()
-					MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
-						return callback(error) if error?
-						logger.log {doc_id, project_id}, "archiving got last compressed update"
-						MongoManager.markDocHistoryAsArchiveInProgress doc_id, update, (error) ->
-							return callback(error) if error?
-							logger.log {doc_id, project_id}, "marked doc history as archive in progress"
-							MongoAWS.archiveDocHistory project_id, doc_id, update, (error) ->
-								if error?
-									logger.log {doc_id, project_id, error}, "error exporting document to S3"
-									MongoManager.clearDocHistoryAsArchiveInProgress doc_id, update, (err) ->
-										return callback(err) if err?
-										logger.log {doc_id, project_id}, "cleared archive in progress flag"
-										callback(error)
-								else
-									logger.log doc_id:doc_id, project_id:project_id, "exported document to S3"
-									MongoManager.markDocHistoryAsArchived doc_id, update, (error) ->
-										return callback(error) if error?
-										logger.log {doc_id, project_id}, "marked doc history as archived"
-										callback()
+					logger.log {doc_id, project_id}, "marked doc history as archive in progress"
+					MongoAWS.archiveDocHistory project_id, doc_id, update, (error) ->
+						if error?
+							logger.log {doc_id, project_id, error}, "error exporting document to S3"
+							MongoManager.clearDocHistoryAsArchiveInProgress doc_id, update, (err) ->
+								return callback(err) if err?
+								logger.log {doc_id, project_id}, "cleared archive in progress flag"
+								callback(error)
+						else
+							logger.log doc_id:doc_id, project_id:project_id, "exported document to S3"
+							MongoManager.markDocHistoryAsArchived doc_id, lastVersion, (error) ->
+								return callback(error) if error?
+								logger.log {doc_id, project_id}, "marked doc history as archived"
+								callback()
 
 	unArchiveAllDocsChanges: (project_id, callback = (error, docs) ->) ->
 		DocstoreHandler.getAllDocs project_id, (error, docs) ->
@@ -75,9 +74,9 @@ module.exports = DocArchiveManager =
 		LockManager.runWithLock("HistoryLock:#{doc_id}", job, callback)
 
 	unArchiveDocChanges: (project_id, doc_id, callback)->
-		MongoManager.getArchivedDocChanges doc_id, (error, count) ->
+		MongoManager.getArchivedDocStatus doc_id, (error, result) ->
 			return callback(error) if error?
-			if count == 0
+			if result?.inS3 isnt true
 				logger.log {project_id, doc_id}, "no changes marked as in s3, not unarchiving"
 				return callback()
 			else
