@@ -69,7 +69,7 @@ describe "UpdatesManager", ->
 				@lastCompressedUpdate = { v: 11, op: "compressed-op-11" }
 				@compressedUpdates = [ { v: 12, op: "compressed-op-11+12" }, { v: 13, op: "compressed-op-12" } ]
 
-				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate)
+				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate, @lastCompressedUpdate.v)
 				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)

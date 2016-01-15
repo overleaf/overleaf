@@ -17,17 +17,13 @@ module.exports = UpdatesManager =
 			return callback()
 
 		MongoManager.peekLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
-			# lastCompressedUpdate is the most recent update in Mongo.
+			# lastCompressedUpdate is the most recent update in Mongo, and
+			# lastVersion is its sharejs version number.
 			#
-			# The peekLastCompressedUpdate method may pass it back as 'null'
-			# to force the start of a new compressed update, even when there
-			# was a previous compressed update in Mongo.  In this case it
-			# passes back the lastVersion from the update to check
-			# consistency.
-
-			# when lastVersion is not provided, default to lastCompressedUpdate.v
-			lastVersion ?= lastCompressedUpdate?.v
-
+			# The peekLastCompressedUpdate method may pass the update back
+			# as 'null' (for example if the previous compressed update has
+			# been archived).  In this case it can still pass back the
+			# lastVersion from the update to allow us to check consistency.
 			return callback(error) if error?
 
 			# Ensure that raw updates start where lastVersion left off

@@ -57,6 +57,8 @@ describe "MongoManager", ->
 	describe "peekLastCompressedUpdate", ->
 		describe "when there is no last update", ->
 			beforeEach ->
+				@db.docHistoryStats = {}
+				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, null)
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
@@ -84,8 +86,10 @@ describe "MongoManager", ->
 
 		describe "when there is a last update in S3", ->
 			beforeEach ->
-				@update = { _id: Object(), v: 12345, inS3: true }
-				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
+				@update = { _id: Object(), v: 12345}
+				@db.docHistoryStats = {}
+				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, {inS3:true, lastVersion: @update.v})
+				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
 			it "should get the last update", ->
