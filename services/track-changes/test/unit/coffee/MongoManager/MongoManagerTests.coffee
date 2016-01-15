@@ -57,6 +57,8 @@ describe "MongoManager", ->
 	describe "peekLastCompressedUpdate", ->
 		describe "when there is no last update", ->
 			beforeEach ->
+				@db.docHistoryStats = {}
+				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, null)
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
@@ -84,8 +86,10 @@ describe "MongoManager", ->
 
 		describe "when there is a last update in S3", ->
 			beforeEach ->
-				@update = { _id: Object(), v: 12345, inS3: true }
-				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @update)
+				@update = { _id: Object(), v: 12345}
+				@db.docHistoryStats = {}
+				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, {inS3:true, lastVersion: @update.v})
+				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
 			it "should get the last update", ->
@@ -402,21 +406,20 @@ describe "MongoManager", ->
 			@db.docHistory.count
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
-					inS3 : { $exists : false }
 				})
 				.should.equal true
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "getArchivedDocChanges", ->
+	describe "getArchivedDocStatus", ->
 		beforeEach ->
-			@db.docHistory =
-				count: sinon.stub().callsArg(1)
-			@MongoManager.getArchivedDocChanges @doc_id, @callback
+			@db.docHistoryStats =
+				findOne: sinon.stub().callsArg(2)
+			@MongoManager.getArchivedDocStatus @doc_id, @callback
 
 		it "should return if there is any archived doc changes", ->
-			@db.docHistory.count
+			@db.docHistoryStats.findOne
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
 					inS3: {$exists: true}
@@ -429,15 +432,16 @@ describe "MongoManager", ->
 	describe "markDocHistoryAsArchived", ->
 		beforeEach ->
 			@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
+			@db.docHistoryStats =
+				update: sinon.stub().callsArg(3)
 			@db.docHistory =
-				update: sinon.stub().callsArg(2)
 				remove: sinon.stub().callsArg(1)
-			@MongoManager.markDocHistoryAsArchived @doc_id, @update, @callback
+			@MongoManager.markDocHistoryAsArchived @doc_id, @update.v, @callback
 
-		it "should update last doc change with inS3 flag", ->
-			@db.docHistory.update
+		it "should update doc status with inS3 flag", ->
+			@db.docHistoryStats.update
 				.calledWith({
-					_id: ObjectId(@update._id)
+					doc_id: ObjectId(@doc_id)
 				},{
 					$set : { inS3 : true }
 				})
@@ -447,8 +451,7 @@ describe "MongoManager", ->
 			@db.docHistory.remove
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
-					inS3 : { $exists : false }
-					v: { $lt : @update.v }
+					v: { $lte : @update.v }
 					expiresAt: {$exists : false}
 				})
 				.should.equal true
@@ -458,18 +461,16 @@ describe "MongoManager", ->
 
 	describe "markDocHistoryAsUnarchived", ->
 		beforeEach ->
-			@db.docHistory =
-				update: sinon.stub().callsArg(3)
+			@db.docHistoryStats =
+				update: sinon.stub().callsArg(2)
 			@MongoManager.markDocHistoryAsUnarchived @doc_id, @callback
 
 		it "should remove any doc changes inS3 flag", ->
-			@db.docHistory.update
+			@db.docHistoryStats.update
 				.calledWith({
 					doc_id: ObjectId(@doc_id)
 				},{
-					$unset : { inS3 : true }
-				},{
-					multi: true
+					$unset : { inS3 : true, lastVersion: true }
 				})
 				.should.equal true
 

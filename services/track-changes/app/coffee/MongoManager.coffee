@@ -18,7 +18,7 @@ module.exports = MongoManager =
 
 	peekLastCompressedUpdate: (doc_id, callback = (error, update, version) ->) ->
 		# under normal use we pass back the last update as
-		# callback(null,update).
+		# callback(null,update,version).
 		#
 		# when we have an existing last update but want to force a new one
 		# to start, we pass it back as callback(null,null,version), just
@@ -26,17 +26,18 @@ module.exports = MongoManager =
 		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 			return callback(error) if error?
 			if update?
-				if update.inS3?
-					# we want to force a new update, but ensure that it is
-					# consistent with the version of the existing one in S3
-					return callback null, null, update.v
-				else if update.broken
+				if update.broken
 					# the update is marked as broken so we will force a new op
 					return callback null, null
+				else if update.pack?
+					return callback null, update, update.pack[0]?.v
 				else
-					return callback null, update
+					return callback null, update, update.v
 			else
-				callback null, null
+				MongoManager.getArchivedDocStatus doc_id, (error, status) ->
+					return callback(error) if error?
+					return callback(null, null, status.lastVersion) if status?.inS3? and status?.lastVersion?
+					callback null, null
 
 	insertCompressedUpdates: (project_id, doc_id, updates, temporary, callback = (error) ->) ->
 		jobs = []
@@ -152,26 +153,27 @@ module.exports = MongoManager =
 		db.docHistoryStats.ensureIndex { doc_id: 1 }, { background: true }
 		db.docHistoryStats.ensureIndex { updates: -1, doc_id: 1 }, { background: true }
 
+	getArchivedDocStatus: (doc_id, callback)->
+		db.docHistoryStats.findOne {doc_id: ObjectId(doc_id.toString()), inS3: {$exists:true}}, {inS3: true, lastVersion: true}, callback
+
 	getDocChangesCount: (doc_id, callback)->
-		db.docHistory.count { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }}, callback
+		db.docHistory.count { doc_id : ObjectId(doc_id.toString())}, callback
 
-	getArchivedDocChanges: (doc_id, callback)->
-		db.docHistory.count { doc_id: ObjectId(doc_id.toString()) , inS3: { $exists: true }}, callback
-
-	markDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
-		db.docHistory.update { _id: update._id }, { $set : { inS3 : false } }, callback
+	markDocHistoryAsArchiveInProgress: (doc_id, lastVersion, callback) ->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$set : {inS3: false, lastVersion: lastVersion}}, {upsert:true}, callback
 
 	clearDocHistoryAsArchiveInProgress: (doc_id, update, callback) ->
-		db.docHistory.update { _id: update._id }, { $unset : { inS3 : true } }, callback
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$unset : {inS3: true, lastVersion: true}}, callback
 
-	markDocHistoryAsArchived: (doc_id, update, callback)->
-		db.docHistory.update { _id: update._id }, { $set : { inS3 : true } }, (error)->
+	markDocHistoryAsArchived: (doc_id, lastVersion, callback)->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, {$set : {inS3: true}}, {upsert:true}, (error)->
 			return callback(error) if error?
-			db.docHistory.remove { doc_id : ObjectId(doc_id.toString()), inS3 : { $exists : false }, v: { $lt : update.v }, expiresAt: {$exists : false} }, (error)->
+			# clear the archived entries from the docHistory now we have finally succeeded
+			db.docHistory.remove { doc_id : ObjectId(doc_id.toString()), v: {$lte : lastVersion}, expiresAt: {$exists : false} }, (error)->
 				return callback(error) if error?
 				callback(error)
 
 	markDocHistoryAsUnarchived: (doc_id, callback)->
 		# note this removes any inS3 field, regardless of its value (true/false/null)
-		db.docHistory.update { doc_id: ObjectId(doc_id.toString()) }, { $unset : { inS3 : true } }, { multi: true }, (error)->
+		db.docHistoryStats.update {doc_id: ObjectId(doc_id.toString())}, { $unset : { inS3: true, lastVersion: true} }, (error)->
 			callback(error)

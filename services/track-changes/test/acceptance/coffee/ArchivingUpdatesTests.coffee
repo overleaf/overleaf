@@ -71,27 +71,27 @@ describe "Archiving updates", ->
 				throw error if error?
 				done()
 
-		it "should remain one doc change", (done) ->
+		it "should remain zero doc change", (done) ->
 			db.docHistory.count { doc_id: ObjectId(@doc_id) }, (error, count) ->
 				throw error if error?
-				count.should.equal 1
+				count.should.equal 0
 				done()
 
-		it "should remained doc marked as inS3", (done) ->
-			db.docHistory.findOne { doc_id: ObjectId(@doc_id) }, (error, doc) ->
+		it "should have docHistoryStats marked as inS3", (done) ->
+			db.docHistoryStats.findOne { doc_id: ObjectId(@doc_id) }, (error, doc) ->
 				throw error if error?
 				doc.inS3.should.equal true
 				done()
 
-		it "should remained doc have last version", (done) ->
-			db.docHistory.findOne { doc_id: ObjectId(@doc_id) }, (error, doc) ->
+		it "should have docHistoryStats with the last version", (done) ->
+			db.docHistoryStats.findOne { doc_id: ObjectId(@doc_id) }, (error, doc) ->
 				throw error if error?
-				doc.v.should.equal 20
+				doc.lastVersion.should.equal 20
 				done()
 
-		it "should store nineteen doc changes in S3", (done) ->
+		it "should store twenty doc changes in S3", (done) ->
 			TrackChangesClient.getS3Doc @project_id, @doc_id, (error, res, doc) =>
-				doc.length.should.equal 19
+				doc.length.should.equal 20
 				done()
 
 	describe "unarchiving a doc's updates", ->
@@ -107,7 +107,8 @@ describe "Archiving updates", ->
 				done()
 
 		it "should remove doc marked as inS3", (done) ->
-			db.docHistory.count { doc_id: ObjectId(@doc_id), inS3 : true }, (error, count) ->
+			db.docHistoryStats.findOne {doc_id: ObjectId(@doc_id)}, (error, doc) ->
 				throw error if error?
-				count.should.equal 0
+				doc.should.not.contain.key('inS3')
+				doc.should.not.contain.key('lastVersion')
 				done()
