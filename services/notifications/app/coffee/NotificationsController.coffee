@@ -17,6 +17,6 @@ module.exports =
 				res.send()
 
 	removeNotification: (req, res)->
-		logger.log user_id: req.params.user_id, notification_id: req.params.notification_id, "removing notification"
+		logger.log user_id: req.params.user_id, notification_id: req.params.notification_id, "mark notification as read"
 		Notifications.removeNotification req.params.user_id, req.params.notification_id, (err, notifications)->
 			res.send()
