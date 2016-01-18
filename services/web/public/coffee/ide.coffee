@@ -68,12 +68,13 @@ define [
 
 		$scope.chat = {}
 
-		
+
 		window._ide = ide
 
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
 
+		ide.referencesSearchManager = new ReferencesSearchManager(ide, $scope)
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
@@ -82,7 +83,6 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
-		ide.referencesSearchManager = new ReferencesSearchManager(ide, $scope)
 
 		inited = false
 		$scope.$on "project:joined", () ->

@@ -25,14 +25,13 @@ define [
 					_csrf: window.csrfToken
 				},
 				(data) =>
-					console.log(data)
 					setTimeout(
 						( () -> @getReferenceKeys() ).bind(this),
-						100
+						500
 					)
 			)
 
-		getReferenceKeys: () ->
+		getReferenceKeys: (callback) ->
 			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
 				return
 			$.get(
@@ -42,4 +41,6 @@ define [
 				},
 				(data) =>
 					@$scope.$root._references.keys = data.keys
+					if callback
+						callback(data.keys)
 			)

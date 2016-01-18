@@ -12,6 +12,14 @@ define [
 		else
 			return null
 
+	referenceKeyToAutocompleteEntry = (key) ->
+		return {
+			caption: "\\cite{#{key}",
+			snippet: "\\cite{#{key}",
+			meta: "reference",
+			score: 10000
+		}
+
 	class AutoCompleteManager
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
@@ -47,26 +55,30 @@ define [
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
 						return callback(null, [])
-					if references.keys
-						range = new Range(pos.row, 0, pos.row, pos.column)
-						lineUpToCursor = editor.getSession().getTextRange(range)
-						commandFragment = getLastCommandFragment(lineUpToCursor)
-						if commandFragment and commandFragment.match(/^~?\\cite{\w*/)
-							result = references.keys.map (key) -> {
-								caption: "\\cite{#{key}",
-								snippet: "\\cite{#{key}",
-								meta: "reference",
-								score: 10000
-							}
-							result.push {
-								caption: "\\cite{",
-								snippet: "\\cite{",
-								meta: "reference",
-								score: 11000
-							}
+
+					range = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(range)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment and commandFragment.match(/^~?\\cite{\w*/)
+						result = []
+						result.push {
+							caption: "\\cite{",
+							snippet: "\\cite{",
+							meta: "reference",
+							score: 11000
+						}
+						if references.keys and references.keys.length > 0
+							references.keys.forEach (key) ->
+								result.push(referenceKeyToAutocompleteEntry(key))
 							callback null, result
 						else
-							callback null, []
+							# get keys from the backend
+							referencesSearch = window?._ide?.referencesSearchManager
+							if referencesSearch
+								referencesSearch.getReferenceKeys (keys) =>
+									keys.forEach (key) ->
+										result.push(referenceKeyToAutocompleteEntry(key))
+									callback null, result
 
 			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
 			@editor.completers = [SnippetCompleter, ReferencesCompleter]
