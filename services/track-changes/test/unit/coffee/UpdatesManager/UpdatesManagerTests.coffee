@@ -51,11 +51,10 @@ describe "UpdatesManager", ->
 					.calledWith(@doc_id)
 					.should.equal true
 			
-			it "should save the compressed ops", ->
+			it "should save the compressed ops as a pack", ->
 				@PackManager.insertCompressedUpdates
 					.calledWith(@project_id, @doc_id, null, @compressedUpdates, @temporary)
 					.should.equal true
-
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -93,6 +92,30 @@ describe "UpdatesManager", ->
 				it "should save the new compressed ops", ->
 					@MongoManager.insertCompressedUpdates
 						.calledWith(@project_id, @doc_id, @compressedUpdates[1..], @temporary)
+						.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+			describe "when the raw ops start where the existing history ends and the history is in a pack", ->
+				beforeEach ->
+					@lastCompressedUpdate = {pack: [{ v: 11, op: "compressed-op-11" }], v:11}
+					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
+					@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate, @lastCompressedUpdate.v)
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
+
+				it "should look at the last compressed op", ->
+					@MongoManager.peekLastCompressedUpdate
+						.calledWith(@doc_id)
+						.should.equal true
+
+				it "should defer the compression of raw ops to PackManager", ->
+					@UpdateCompressor.compressRawUpdates
+						.should.not.be.called
+
+				it "should save the new compressed ops into a pack", ->
+					@PackManager.insertCompressedUpdates
+						.calledWith(@project_id, @doc_id, @lastCompressedUpdate, @compressedUpdates, @temporary)
 						.should.equal true
 
 				it "should call the callback", ->
