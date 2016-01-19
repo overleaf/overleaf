@@ -81,7 +81,6 @@ define [
 									callback null, result
 
 			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
-			@editor.completers = [SnippetCompleter, ReferencesCompleter]
 
 		disable: () ->
 			@editor.setOptions({
