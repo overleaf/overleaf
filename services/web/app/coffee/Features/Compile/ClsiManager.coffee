@@ -111,8 +111,11 @@ module.exports = ClsiManager =
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
 			filename = file || req?.compile?.rootResourcePath
+			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
+			if req.compile.options.imageName?
+				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
 			request.get {
-				url:  "#{compilerUrl}/project/#{project_id}/wordcount?file=#{filename}"
+				url: wordcount_url
 			}, (error, response, body) ->
 				return callback(error) if error?
 				if 200 <= response.statusCode < 300

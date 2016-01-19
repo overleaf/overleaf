@@ -266,7 +266,7 @@ describe "ClsiManager", ->
 	describe "wordCount", ->
 		beforeEach ->
 			@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body = { mock: "foo" })
-			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, { compile: { rootResourcePath: "rootfile.text" } })
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @req = { compile: { rootResourcePath: "rootfile.text", options: {} } })
 			@ClsiManager._getCompilerUrl = sinon.stub().returns "compiler.url"
 
 		describe "with root file", ->
@@ -288,4 +288,14 @@ describe "ClsiManager", ->
 			it "should call wordCount with param file", ->
 				@request.get
 					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex" })
+					.should.equal true
+					
+		describe "with image", ->
+			beforeEach ->
+				@req.compile.options.imageName = @image = "example.com/mock/image"
+				@ClsiManager.wordCount @project_id, "main.tex", {}, @callback
+
+			it "should call wordCount with file and image", ->
+				@request.get
+					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex&image=#{encodeURIComponent(@image)}" })
 					.should.equal true
