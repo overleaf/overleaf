@@ -67,6 +67,7 @@ describe "UpdatesManager", ->
 				@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate, @lastCompressedUpdate.v)
 				@MongoManager.modifyCompressedUpdate = sinon.stub().callsArg(2)
 				@MongoManager.insertCompressedUpdates = sinon.stub().callsArg(4)
+				@PackManager.insertCompressedUpdates = sinon.stub().callsArg(5)
 				@UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 
 			describe "when the raw ops start where the existing history ends", ->
@@ -109,7 +110,7 @@ describe "UpdatesManager", ->
 						.calledWith(@doc_id)
 						.should.equal true
 
-				it "should defer the compression of raw ops to PackManager", ->
+				it "should defer the compression of raw ops until they are written in a new pack", ->
 					@UpdateCompressor.compressRawUpdates
 						.should.not.be.called
 
