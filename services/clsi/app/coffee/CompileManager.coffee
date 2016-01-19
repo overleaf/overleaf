@@ -112,14 +112,14 @@ module.exports = CompileManager =
 				}
 		return results
 
-	wordcount: (project_id, file_name, callback = (error, pdfPositions) ->) ->
-		logger.log project_id:project_id, file_name:file_name, "running wordcount"
+	wordcount: (project_id, file_name, image, callback = (error, pdfPositions) ->) ->
+		logger.log project_id:project_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-inc', file_path, "-out=" + file_path + ".wc"]
 		directory = Path.join(Settings.path.compilesDir, project_id)
 		timeout = 10 * 1000
 
-		CommandRunner.run project_id, command, directory, timeout, (error) ->
+		CommandRunner.run project_id, command, directory, image, timeout, (error) ->
 			return callback(error) if error?
 			try
 				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")

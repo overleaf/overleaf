@@ -179,7 +179,7 @@ describe "CompileManager", ->
 
 	describe "wordcount", ->
 		beforeEach ->
-			@CommandRunner.run = sinon.stub().callsArg(4)
+			@CommandRunner.run = sinon.stub().callsArg(5)
 			@fs.readFileSync = sinon.stub().returns @stdout = "Encoding: ascii\nWords in text: 2"
 			@callback  = sinon.stub()
 
@@ -187,8 +187,9 @@ describe "CompileManager", ->
 			@timeout = 10 * 1000
 			@file_name = "main.tex"
 			@Settings.path.compilesDir = "/local/compile/directory"
+			@image = "example.com/image"
 
-			@CompileManager.wordcount @project_id, @file_name, @callback
+			@CompileManager.wordcount @project_id, @file_name, @image, @callback
 
 		it "should run the texcount command", ->
 			@directory = "#{@Settings.path.compilesDir}/#{@project_id}"
@@ -196,7 +197,7 @@ describe "CompileManager", ->
 			@command =[ "texcount", "-inc", @file_path, "-out=" + @file_path + ".wc"]
 			
 			@CommandRunner.run
-				.calledWith(@project_id, @command, @directory, @timeout)
+				.calledWith(@project_id, @command, @directory, @image, @timeout)
 				.should.equal true
 
 		it "should call the callback with the parsed output", ->

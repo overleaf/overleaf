@@ -70,8 +70,10 @@ module.exports = CompileController =
 	wordcount: (req, res, next = (error) ->) ->
 		file   = req.query.file || "main.tex"
 		project_id = req.params.project_id
+		image = req.query.image
+		logger.log {image, file, project_id}, "word count request"
 
-		CompileManager.wordcount project_id, file, (error, result) ->
+		CompileManager.wordcount project_id, file, image, (error, result) ->
 			return next(error) if error?
 			res.send JSON.stringify {
 				texcount: result

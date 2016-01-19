@@ -197,14 +197,15 @@ describe "CompileController", ->
 				project_id: @project_id
 			@req.query =
 				file: @file
+				image: @image = "example.com/image"
 			@res.send = sinon.stub()
 
-			@CompileManager.wordcount = sinon.stub().callsArgWith(2, null, @texcount = ["mock-texcount"])
+			@CompileManager.wordcount = sinon.stub().callsArgWith(3, null, @texcount = ["mock-texcount"])
 			@CompileController.wordcount @req, @res, @next
 
 		it "should return the word count of a file", ->
 			@CompileManager.wordcount
-				.calledWith(@project_id, @file)
+				.calledWith(@project_id, @file, @image)
 				.should.equal true
 
 		it "should return the texcount info", ->
