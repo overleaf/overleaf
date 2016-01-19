@@ -19,6 +19,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.StringTokenizer;
 
@@ -77,7 +78,7 @@ public class Oauth2Filter implements Filter {
                                         .setClientAuthentication(new ClientParametersAuthentication(oauth2.getOauth2ClientID(), oauth2.getOauth2ClientSecret()))
                                         .execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(response, "bad credentials");
+                                unauthorized(response);
                                 return;
                             }
                             final Credential cred = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
@@ -87,7 +88,7 @@ public class Oauth2Filter implements Filter {
 
                             filterChain.doFilter(servletRequest, servletResponse);
                         } else {
-                            unauthorized(response, "Invalid authentication token");
+                            unauthorized(response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -103,13 +104,19 @@ public class Oauth2Filter implements Filter {
     public void destroy() {
     }
 
-    private void unauthorized(HttpServletResponse response, String message) throws IOException {
+    private void unauthorized(ServletResponse servletResponse) throws IOException {
+        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        response.setContentType("text/plain");
         response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
-        response.sendError(401, message);
-    }
+        response.setStatus(401);
 
-    private void unauthorized(HttpServletResponse response) throws IOException {
-        unauthorized(response, "Unauthorized");
+        PrintWriter w = response.getWriter();
+        w.println("Please sign in using your email address and Overleaf password.");
+        w.println();
+        w.println("*Note*: if you sign in to Overleaf using another provider, such ");
+        w.println("as Google or Twitter, you need to set a password on your Overleaf ");
+        w.println("account first. Please see https://www.overleaf.com/blog/195 for ");
+        w.println("more information.");
+        w.close();
     }
-
 }
