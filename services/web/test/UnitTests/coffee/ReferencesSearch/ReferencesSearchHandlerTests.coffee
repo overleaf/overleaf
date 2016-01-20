@@ -71,6 +71,11 @@ describe 'ReferencesSearchHandler', ->
 			it 'should not produce an error', (done) ->
 				@handler.indexFile @project_id, @file_id, (err) =>
 					expect(err).to.equal null
+					@request.post.calledOnce.should.equal true
+					options = @request.post.firstCall.args[0]
+					options.json.fullIndex.should.equal false
+					options.json.referencesUrl.should.not.be.undefined
+					options.url.should.not.be.undefined
 					done()
 
 		describe 'when index operation fails', ->
