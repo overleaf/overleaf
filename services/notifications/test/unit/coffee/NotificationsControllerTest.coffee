@@ -15,6 +15,8 @@ describe 'Notifications controller', ->
 		@controller = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': log:->
 			'./Notifications':@notifications
+			'metrics-sharelatex':
+				inc: sinon.stub()
 
 		@stubbedNotification = [{key:"notification-key", messageOpts:"some info", templateKey:"template-key"}]
 
