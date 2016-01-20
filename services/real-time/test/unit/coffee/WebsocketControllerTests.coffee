@@ -29,7 +29,6 @@ describe 'WebsocketController', ->
 			"./WebApiManager": @WebApiManager = {}
 			"./AuthorizationManager": @AuthorizationManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
-			"./TrackChangesManager": @TrackChangesManager = {}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -120,7 +119,6 @@ describe 'WebsocketController', ->
 	describe "leaveProject", ->
 		beforeEach ->
 			@DocumentUpdaterManager.flushProjectToMongoAndDelete = sinon.stub().callsArg(1)
-			@TrackChangesManager.flushProject = sinon.stub().callsArg(1)
 			@ConnectedUsersManager.markUserAsDisconnected = sinon.stub().callsArg(2)
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@clientsInRoom = []
@@ -154,11 +152,6 @@ describe 'WebsocketController', ->
 					.calledWith(@project_id)
 					.should.equal true
 					
-			it "should flush the changes in the track changes api", ->
-				@TrackChangesManager.flushProject
-					.calledWith(@project_id)
-					.should.equal true
-					
 			it "should increment the leave-project metric", ->
 				@metrics.inc.calledWith("editor.leave-project").should.equal true
 			
@@ -169,10 +162,6 @@ describe 'WebsocketController', ->
 				
 			it "should not flush the project in the document updater", ->
 				@DocumentUpdaterManager.flushProjectToMongoAndDelete
-					.called.should.equal false
-			
-			it "should not flush the changes in the track changes api", ->
-				@TrackChangesManager.flushProject
 					.called.should.equal false
 						
 	describe "joinDoc", ->

@@ -1,15 +1,12 @@
 RealTimeClient = require "./helpers/RealTimeClient"
 MockDocUpdaterServer = require "./helpers/MockDocUpdaterServer"
-MockTrackChangesServer = require "./helpers/MockTrackChangesServer"
 FixturesManager = require "./helpers/FixturesManager"
 
 async = require "async"
 
 describe "leaveProject", ->
 	before (done) ->
-		MockDocUpdaterServer.run (error) ->
-			return done(error) if error?
-			MockTrackChangesServer.run done
+		MockDocUpdaterServer.run done
 		
 	describe "with other clients in the project", ->
 		before (done) ->
@@ -67,11 +64,6 @@ describe "leaveProject", ->
 			MockDocUpdaterServer.deleteProject
 				.calledWith(@project_id)
 				.should.equal false
-		
-		it "should not flush the project in track changes", ->
-			MockTrackChangesServer.flushProject
-				.calledWith(@project_id)
-				.should.equal false
 
 	describe "with no other clients in the project", ->
 		before (done) ->
@@ -106,9 +98,3 @@ describe "leaveProject", ->
 			MockDocUpdaterServer.deleteProject
 				.calledWith(@project_id)
 				.should.equal true
-		
-		it "should flush the project in track changes", ->
-			MockTrackChangesServer.flushProject
-				.calledWith(@project_id)
-				.should.equal true
-		

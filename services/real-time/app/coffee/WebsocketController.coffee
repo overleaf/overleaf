@@ -4,7 +4,6 @@ WebApiManager = require "./WebApiManager"
 AuthorizationManager = require "./AuthorizationManager"
 DocumentUpdaterManager = require "./DocumentUpdaterManager"
 ConnectedUsersManager = require "./ConnectedUsersManager"
-TrackChangesManager = require "./TrackChangesManager"
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
 Utils = require "./Utils"
 
@@ -68,9 +67,6 @@ module.exports = WebsocketController =
 					DocumentUpdaterManager.flushProjectToMongoAndDelete project_id, (err) ->
 						if err?
 							logger.error {err, project_id, user_id, client_id: client.id}, "error flushing to doc updater after leaving project"
-					TrackChangesManager.flushProject project_id, (err) ->
-						if err?
-							logger.error {err, project_id, user_id, client_id: client.id}, "error flushing to track changes after leaving project"
 				callback()
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 			
