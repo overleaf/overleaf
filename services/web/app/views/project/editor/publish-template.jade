@@ -6,46 +6,84 @@ script(type="text/ng-template", id="publishProjectAsTemplateModalTemplate")
 			ng-click="cancel()"
 		) &times;
 		h3 #{translate("publish_as_template")}
-	.modal-body.modal-body-share
-		span(ng-hide="problemTalkingToTemplateApi")
-			form()
-				label(for='Description') #{translate("template_description")}
-				.form-group
-					textarea.form-control(
-					rows=5,
-					name='Description',
-					ng-model="templateDetails.description",
-					value=""
-				)
-			div(ng-show="templateDetails.exists").text-center.templateDetails
-				|  #{translate("project_last_published_at")} 
-				strong {{templateDetails.publishedDate}}. 
-				a(ng-href="{{templateDetails.canonicalUrl}}") #{translate("view_in_template_gallery")}.
+	div(ng-if="project.features.templates")
+		.modal-body.modal-body-share
+			span(ng-hide="problemTalkingToTemplateApi")
+				form()
+					label(for='Description') #{translate("template_description")}
+					.form-group
+						textarea.form-control(
+						rows=5,
+						name='Description',
+						ng-model="templateDetails.description",
+						value=""
+					)
+				div(ng-show="templateDetails.exists").text-center.templateDetails
+					|  #{translate("project_last_published_at")} 
+					strong {{templateDetails.publishedDate}}. 
+					a(ng-href="{{templateDetails.canonicalUrl}}") #{translate("view_in_template_gallery")}.
 
-		span(ng-show="problemTalkingToTemplateApi") #{translate("problem_talking_to_publishing_service")}.
+			span(ng-show="problemTalkingToTemplateApi") #{translate("problem_talking_to_publishing_service")}.
+		
+		.modal-footer(ng-hide="problemTalkingToTemplateApi")
+			button.btn.btn-default(
+				ng-click="cancel()",
+				ng-disabled="state.publishInflight || state.unpublishInflight"
+			)
+				span #{translate("cancel")}
 
+			button.btn.btn-info(
+				ng-click="unpublishTemplate()",
+				ng-disabled="state.publishInflight || state.unpublishInflight"
+				ng-show="templateDetails.exists"
+			) 
+				span(ng-show="!state.unpublishInflight") #{translate("unpublish")}
+				span(ng-show="state.unpublishInflight") #{translate("unpublishing")}...
 
+			button.btn.btn-primary(
+				ng-click="publishTemplate()",
+				ng-disabled="state.publishInflight || state.unpublishInflight"
+			)
+				span(ng-show="!state.publishInflight && !templateDetails.exists") #{translate("publish")}
+				span(ng-show="!state.publishInflight && templateDetails.exists") #{translate("republish")}
+				span(ng-show="state.publishInflight") #{translate("publishing")}...
 
+	div(ng-hide="project.features.templates")
+		.modal-body.modal-body-share
+			p #{translate("upgrade_to_get_feature", {feature:"templates"})}
 
-	.modal-footer(ng-hide="problemTalkingToTemplateApi")
-		button.btn.btn-default(
-			ng-click="cancel()",
-			ng-disabled="state.publishInflight || state.unpublishInflight"
-		)
-			span #{translate("cancel")}
+			ul.list-unstyled
+				li
+					i.fa.fa-check &nbsp;
+					| #{translate("unlimited_projects")}
+				
+				li
+					i.fa.fa-check &nbsp;
+					| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+				
+				li
+					i.fa.fa-check &nbsp;
+					| #{translate("full_doc_history")}
+				
+				li
+					i.fa.fa-check &nbsp;
+					| #{translate("sync_to_dropbox")}
 
-		button.btn.btn-info(
-			ng-click="unpublishTemplate()",
-			ng-disabled="state.publishInflight || state.unpublishInflight"
-			ng-show="templateDetails.exists"
-		) 
-			span(ng-show="!state.unpublishInflight") #{translate("unpublish")}
-			span(ng-show="state.unpublishInflight") #{translate("unpublishing")}...
+				li
+					i.fa.fa-check &nbsp;
+					| #{translate("sync_to_github")}
 
-		button.btn.btn-primary(
-			ng-click="publishTemplate()",
-			ng-disabled="state.publishInflight || state.unpublishInflight"
-		)
-			span(ng-show="!state.publishInflight && !templateDetails.exists") #{translate("publish")}
-			span(ng-show="!state.publishInflight && templateDetails.exists") #{translate("republish")}
-			span(ng-show="state.publishInflight") #{translate("publishing")}...
+				li
+					i.fa.fa-check &nbsp;
+					|#{translate("compile_larger_projects")}
+					
+		.modal-footer(ng-controller="FreeTrialModalController")
+			.text-center
+				a.btn.btn-success(
+					href
+					ng-class="buttonClass"
+					ng-click="startFreeTrial('templates')"
+				) #{translate("start_free_trial")}
+
+				.row-spaced-small.small(ng-show="startedFreeTrial")
+					| #{translate("refresh_page_after_starting_free_trial")}
