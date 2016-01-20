@@ -17,6 +17,7 @@ describe "PersistenceManager.getDocVersionInMongo", ->
 			"./mongojs":
 				db: @db = { docOps: {} }
 				ObjectId: ObjectId
+			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
 
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()

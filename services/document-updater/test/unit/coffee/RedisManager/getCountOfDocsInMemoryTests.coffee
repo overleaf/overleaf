@@ -2,11 +2,11 @@ require('coffee-script')
 assert = require('assert')
 should = require('chai').should()
 path = require('path')
-modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
-keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
+modulePath = path.join __dirname, '../../../../app/js/RedisManager.js'
+keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 SandboxedModule = require('sandboxed-module')
 
-describe 'getting cound of docs from memory', ()->
+describe 'RedisManager.getCountOfDocsInMemory', ()->
 
 	project_id = "12345"
 	doc_id1     = "docid1"
@@ -18,6 +18,7 @@ describe 'getting cound of docs from memory', ()->
 
 	beforeEach (done)->
 		mocks =
+			"./ZipManager": {}
 			"logger-sharelatex": log:->
 			"redis-sharelatex":
 				createClient : ()->

@@ -27,6 +27,7 @@ describe 'Lock Manager - checking the lock', ()->
 					expire: exireStub
 					set: setStub
 					exec: execStub
+		"./Metrics": {inc: () ->}
 	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should check if lock exists but not set or expire', (done)->

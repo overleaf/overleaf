@@ -1,13 +1,13 @@
 require('coffee-script')
 assert = require('assert')
 path = require('path')
-modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
-keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
+modulePath = path.join __dirname, '../../../../app/js/RedisManager.js'
+keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 project_id = 1234
 doc_id     = 5678
 SandboxedModule = require('sandboxed-module')
 
-describe 'putting a doc into memory', ()->
+describe 'RedisManager.putDocInMemory', ()->
 	lines = ["this is one line", "and another line"]
 	version = 42
 
@@ -21,6 +21,7 @@ describe 'putting a doc into memory', ()->
 	potentialSAdds[keys.docsInProject(project_id:project_id)] = doc_id
 
 	mocks =
+		"./ZipManager": {}
 		"logger-sharelatex": log:->
 		"redis-sharelatex":
 			createClient : ()->

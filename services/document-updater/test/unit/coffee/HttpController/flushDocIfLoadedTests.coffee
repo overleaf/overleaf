@@ -5,7 +5,7 @@ modulePath = "../../../../app/js/HttpController.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors.js"
 
-describe "HttpController - flushDocIfLoaded", ->
+describe "HttpController.flushDocIfLoaded", ->
 	beforeEach ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"./DocumentManager": @DocumentManager = {}

@@ -1,7 +1,7 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
-modulePath = "../../../app/js/RedisManager.js"
+modulePath = "../../../../app/js/RedisManager.js"
 SandboxedModule = require('sandboxed-module')
 
 describe 'RedisManager.getDoc', ->
@@ -11,6 +11,7 @@ describe 'RedisManager.getDoc', ->
 		@rclient.multi = () => @rclient
 
 		@RedisManager = SandboxedModule.require modulePath, requires:
+			"logger-sharelatex": {}
 			"redis-sharelatex": @redis =
 				createClient: () => @rclient
 

@@ -16,6 +16,7 @@ describe "ShareJsDB.getOps", ->
 			"./RedisManager": @RedisManager = {}
 			"./DocOpsManager": @DocOpsManager = {}
 			"./DocumentManager":{}
+			"logger-sharelatex": {}
 
 	describe "with start == end", ->
 		beforeEach ->

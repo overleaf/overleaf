@@ -101,7 +101,7 @@ describe "ZipManager with RedisManager", ->
 			@docLines = []
 			while @docLines.join('').length <= MIN_SIZE
 				@docLines.push "this is a long line in a long document"
-			console.log "length of doclines", @docLines.join('').length
+			# console.log "length of doclines", @docLines.join('').length
 			@callback = sinon.stub()
 			@RedisManager.setDocument @doc_id, @docLines, @version, () =>
 				@callback()

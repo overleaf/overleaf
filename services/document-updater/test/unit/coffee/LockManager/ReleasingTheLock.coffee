@@ -18,6 +18,7 @@ describe 'LockManager - releasing the lock', ()->
 			createClient : ()->
 				auth:->
 				del:deleteStub
+		"./Metrics": {inc: () ->}
 	
 	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 

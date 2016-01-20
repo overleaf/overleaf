@@ -4,7 +4,7 @@ should = chai.should()
 modulePath = "../../../../app/js/DocumentManager.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "DocumentUpdater - getDocAndRecentOps", ->
+describe "DocumentUpdater.getDocAndRecentOps", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
@@ -14,6 +14,7 @@ describe "DocumentUpdater - getDocAndRecentOps", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+			"./TrackChangesManager": {}
 
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"

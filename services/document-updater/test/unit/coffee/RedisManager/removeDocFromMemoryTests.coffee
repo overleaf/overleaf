@@ -3,11 +3,11 @@ _ = require("underscore")
 assert = require('assert')
 sinon = require('sinon')
 path = require('path')
-modulePath = path.join __dirname, '../../../app/js/RedisManager.js'
-keys = require(path.join __dirname, '../../../app/js/RedisKeyBuilder.js')
+modulePath = path.join __dirname, '../../../../app/js/RedisManager.js'
+keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 SandboxedModule = require('sandboxed-module')
 
-describe 'removing single doc from memory', ()->
+describe 'RedisManager.removeDocFromMemory', ()->
 
 	project_id = "12345"
 	doc_id1     = "docid1"
@@ -21,6 +21,7 @@ describe 'removing single doc from memory', ()->
 		redisMemory = {}
 
 		mocks =
+			"./ZipManager": {}
 			"logger-sharelatex":
 				error:->
 				log:->

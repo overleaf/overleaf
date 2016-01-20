@@ -8,6 +8,7 @@ describe "RedisManager.getDocsWithPendingUpdates", ->
 	beforeEach ->
 		@callback = sinon.stub()
 		@RedisManager = SandboxedModule.require modulePath, requires:
+			"./ZipManager": {}
 			"redis-sharelatex" : createClient: () =>
 				@rclient ?= auth:->
 			"logger-sharelatex": {}

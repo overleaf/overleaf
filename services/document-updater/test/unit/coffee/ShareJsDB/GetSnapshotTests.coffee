@@ -16,6 +16,7 @@ describe "ShareJsDB.getSnapshot", ->
 			"./DocumentManager": @DocumentManager = {}
 			"./RedisManager": {}
 			"./DocOpsManager": {}
+			"logger-sharelatex": {}
 
 		@version = 42
 

@@ -1,7 +1,7 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
-modulePath = "../../../app/js/ShareJsUpdateManager.js"
+modulePath = "../../../../app/js/ShareJsUpdateManager.js"
 SandboxedModule = require('sandboxed-module')
 
 describe "ShareJsUpdateManager", ->

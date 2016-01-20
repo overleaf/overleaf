@@ -13,6 +13,7 @@ describe "PersistenceManager.setDocInWeb", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@lines = ["one", "two", "three"]

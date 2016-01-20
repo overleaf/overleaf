@@ -13,6 +13,7 @@ describe "RedisManager.clearDocFromPendingUpdatesSet", ->
 			"redis-sharelatex" : createClient: () =>
 				@rclient ?= auth:-> # only assign one rclient
 			"logger-sharelatex": {}
+			"./ZipManager": {}
 
 		@rclient.srem = sinon.stub().callsArg(2)
 		@RedisManager.clearDocFromPendingUpdatesSet(@project_id, @doc_id, @callback)

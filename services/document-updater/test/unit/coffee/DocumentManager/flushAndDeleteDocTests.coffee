@@ -4,7 +4,7 @@ should = chai.should()
 modulePath = "../../../../app/js/DocumentManager.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "DocumentUpdater - flushAndDeleteDoc", ->
+describe "DocumentUpdater.flushAndDeleteDoc", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}

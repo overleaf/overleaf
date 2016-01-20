@@ -2,17 +2,19 @@ assert = require('chai').assert
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
-modulePath = "../../../app/js/RedisManager.js"
+modulePath = "../../../../app/js/RedisManager.js"
 SandboxedModule = require('sandboxed-module')
 
 doc_id = "1234"
 
-describe 'Document Manager - getUpdatesLength ', ->
+describe 'Redis Manager.getUpdatesLength ', ->
 
 	beforeEach ->
 
 		@llenStub = sinon.stub()
 		@redisManager = SandboxedModule.require modulePath, requires:
+			"./ZipManager": {}
+			"logger-sharelatex": {}
 			"redis-sharelatex":
 				createClient:=>
 					auth:->

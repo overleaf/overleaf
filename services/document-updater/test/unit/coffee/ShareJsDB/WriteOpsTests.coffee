@@ -17,6 +17,7 @@ describe "ShareJsDB.writeOps", ->
 			"./RedisManager": @RedisManager = {}
 			"./DocOpsManager": @DocOpsManager = {}
 			"./DocumentManager": {}
+			"logger-sharelatex": @logger = {error: sinon.stub()}
 
 	describe "writing an op", ->
 		beforeEach ->
