@@ -24,8 +24,45 @@ describe 'ReferencesSearchHandler', ->
 				get: sinon.stub()
 				post: sinon.stub()
 			}
+			'../../models/Project': @Project = {
+				Project: {
+					findById: sinon.stub().callsArgWith(2, null, {owner_ref: '111'})
+				}
+			}
+			'../User/UserGetter': @UserGetter = {
+				getUser: sinon.stub().callsArgWith(2, null, {features: {references: false}})
+			}
 
 	describe 'indexFile', ->
+
+		describe 'full index or not', ->
+
+			beforeEach ->
+				@request.post.callsArgWith(1, null, {statusCode: 200}, {})
+
+			describe 'when full index is not required', ->
+
+				beforeEach ->
+					@UserGetter.getUser.callsArgWith(2, null, {features: {references: false}})
+
+				it 'should set fullIndex to true', (done) ->
+					@handler.indexFile @project_id, @file_id, (err) =>
+						@request.post.calledOnce.should.equal true
+						options = @request.post.firstCall.args[0]
+						options.json.fullIndex.should.equal false
+						done()
+
+			describe 'when full index is required', ->
+
+				beforeEach ->
+					@UserGetter.getUser.callsArgWith(2, null, {features: {references: true}})
+
+				it 'should set fullIndex to true', (done) ->
+					@handler.indexFile @project_id, @file_id, (err) =>
+						@request.post.calledOnce.should.equal true
+						options = @request.post.firstCall.args[0]
+						options.json.fullIndex.should.equal true
+						done()
 
 		describe 'when index operation is successful', ->
 			beforeEach ->
