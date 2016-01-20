@@ -47,7 +47,7 @@ module.exports = UpdatesManager =
 			if rawUpdates.length == 0
 				return callback()
 
-			if not lastCompressedUpdate? or lastCompressedUpdate.pack? # handle pack append as a special case
+			if temporary and (not lastCompressedUpdate? or lastCompressedUpdate.pack?) # handle pack append as a special case
 				UpdatesManager._updatePack project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
 			else #use the existing op code
 				UpdatesManager._updateOp project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
