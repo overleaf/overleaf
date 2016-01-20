@@ -4,6 +4,7 @@ DocOpsManager = require "./DocOpsManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
+TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = DocumentManager =
 	getDoc: (project_id, doc_id, _callback = (error, lines, version) ->) ->
@@ -109,11 +110,13 @@ module.exports = DocumentManager =
 
 		DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
 			return callback(error) if error?
-			# We should flush pending ops to track-changes here but this is
-			# already done in the real-time WebsocketController.leaveProject
-			# method so we leave it there.  Note, if you ever add the flush
-			# in here be sure to do it in the background because it can take
-			# a long time.
+			
+			# Flush in the background since it requires and http request
+			# to track changes
+			TrackChangesManager.flushDocChanges project_id, doc_id, (err) ->
+				if err?
+					logger.err {err, project_id, doc_id}, "error flushing to track changes"
+
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?
 				callback null

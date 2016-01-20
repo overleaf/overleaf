@@ -9,6 +9,7 @@ describe "DocumentUpdater - flushAndDeleteDoc", ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
+			"./TrackChangesManager": @TrackChangesManager = {}
 			"logger-sharelatex": @logger = {log: sinon.stub()}
 			"./DocOpsManager" :{}
 			"./Metrics": @Metrics =
@@ -22,6 +23,7 @@ describe "DocumentUpdater - flushAndDeleteDoc", ->
 		beforeEach ->
 			@RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
 			@DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
+			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
 			@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, @callback
 		
 		it "should flush the doc", ->
@@ -39,3 +41,8 @@ describe "DocumentUpdater - flushAndDeleteDoc", ->
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
+		
+		it "should flush to track changes", ->
+			@TrackChangesManager.flushDocChanges
+				.calledWith(@project_id, @doc_id)
+				.should.equal true

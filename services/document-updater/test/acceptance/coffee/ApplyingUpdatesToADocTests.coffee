@@ -365,8 +365,8 @@ describe "Applying updates to a large doc (uses compression)", ->
 		after ->
 			MockTrackChangesApi.flushDoc.restore()
 
-		it "should flush the doc twice", ->
-			MockTrackChangesApi.flushDoc.calledTwice.should.equal true
+		it "should flush the doc", ->
+			MockTrackChangesApi.flushDoc.called.should.equal true
 
 	describe "when there is no version in Mongo", ->
 		before (done) ->

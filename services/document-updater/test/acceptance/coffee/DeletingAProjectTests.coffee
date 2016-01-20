@@ -3,6 +3,7 @@ chai = require("chai")
 chai.should()
 async = require "async"
 
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
@@ -37,6 +38,11 @@ describe "Deleting a project", ->
 				lines: doc.lines
 				version: doc.update.v
 			}
+			
+		sinon.spy MockTrackChangesApi, "flushDoc"
+		
+	after ->
+		MockTrackChangesApi.flushDoc.restore()
 
 	describe "with documents which have been updated", ->
 		before (done) ->
@@ -78,5 +84,9 @@ describe "Deleting a project", ->
 			), () ->
 				MockWebApi.getDocument.restore()
 				done()
+		
+		it "should flush each doc in track changes", ->
+			for doc in @docs
+				MockTrackChangesApi.flushDoc.calledWith(doc.id).should.equal true
 
 

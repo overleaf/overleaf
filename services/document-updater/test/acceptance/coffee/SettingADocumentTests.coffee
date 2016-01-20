@@ -86,7 +86,7 @@ describe "Setting a document", ->
 				throw error if error?
 				DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
 					@statusCode = res.statusCode
-					done()
+					setTimeout done, 200
 		
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -96,8 +96,8 @@ describe "Setting a document", ->
 				.calledWith(@project_id, @doc_id, @newLines)
 				.should.equal true
 		
-		it "should flush track changes"#, ->
-			# MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+		it "should flush track changes", ->
+			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
 		
 		it "should remove the document from redis", (done) ->
 			rclient.get "doclines:#{@doc_id}", (error, lines) =>

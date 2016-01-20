@@ -3,6 +3,7 @@ chai = require("chai")
 chai.should()
 {db, ObjectId} = require "../../../app/js/mongojs"
 
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
@@ -18,6 +19,11 @@ describe "Deleting a document", ->
 			}]
 			v: @version
 		@result = ["one", "one and a half", "two", "three"]
+		
+		sinon.spy MockTrackChangesApi, "flushDoc"
+	
+	after ->
+		MockTrackChangesApi.flushDoc.restore()
 
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
@@ -38,7 +44,7 @@ describe "Deleting a document", ->
 						setTimeout () =>
 							DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
 								@statusCode = res.statusCode
-								done()
+								setTimeout done, 200
 						, 200
 
 		after ->
@@ -70,6 +76,9 @@ describe "Deleting a document", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 				done()
+		
+		it "should flush track changes", ->
+			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
 
 	describe "when the doc is not in the doc updater", ->
 		before (done) ->
@@ -81,7 +90,7 @@ describe "Deleting a document", ->
 			sinon.spy MockWebApi, "getDocument"
 			DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
 				@statusCode = res.statusCode
-				done()
+				setTimeout done, 200
 
 		after ->
 			MockWebApi.setDocumentLines.restore()
@@ -100,6 +109,9 @@ describe "Deleting a document", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 				done()
+		
+		it "should flush track changes", ->
+			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
 
 		
 
