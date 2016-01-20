@@ -360,7 +360,7 @@ describe "Applying updates to a large doc (uses compression)", ->
 				throw error if error?
 				DocUpdaterClient.sendUpdates @project_id, @doc_id, updates, (error) =>
 					throw error if error?
-					setTimeout done, 200
+					setTimeout done, 500
 
 		after ->
 			MockTrackChangesApi.flushDoc.restore()

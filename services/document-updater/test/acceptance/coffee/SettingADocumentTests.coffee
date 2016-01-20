@@ -1,14 +1,16 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+expect = require("chai").expect
 {db, ObjectId} = require "../../../app/js/mongojs"
+rclient = require("redis").createClient()
 
+MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Setting a document", ->
-	before (done) ->
-		[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+	before ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@update =
@@ -23,30 +25,31 @@ describe "Setting a document", ->
 		@source = "dropbox"
 		@user_id = "user-id-123"
 		
-		MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
-		db.docOps.insert {
-			doc_id: ObjectId(@doc_id)
-			version: @version
-		}, (error) =>
-			throw error if error?
-			done()
+		sinon.spy MockTrackChangesApi, "flushDoc"
+		sinon.spy MockWebApi, "setDocumentLines"
+	
+	after ->
+		MockWebApi.setDocumentLines.restore()
+		MockTrackChangesApi.flushDoc.restore()
 				
-
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
-			sinon.spy MockWebApi, "setDocumentLines"
-			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
 				throw error if error?
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 					throw error if error?
-					setTimeout () =>
-						DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
-							@statusCode = res.statusCode
-							done()
-					, 200
-
-		after ->
-			MockWebApi.setDocumentLines.restore()
+					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+						throw error if error?
+						setTimeout () =>
+							DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
+								@statusCode = res.statusCode
+								done()
+						, 200
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
@@ -65,4 +68,39 @@ describe "Setting a document", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.version.should.equal @version + 2
 				done()
+		
+		it "should leave the document in redis", (done) ->
+			rclient.get "doclines:#{@doc_id}", (error, lines) =>
+				throw error if error?
+				expect(JSON.parse(lines)).to.deep.equal @newLines
+				done()
+	
+	describe "when the updated doc does not exist in the doc updater", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
+				throw error if error?
+				DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
+					@statusCode = res.statusCode
+					done()
+		
+		it "should return a 204 status code", ->
+			@statusCode.should.equal 204
 
+		it "should send the updated doc lines to the web api", ->
+			MockWebApi.setDocumentLines
+				.calledWith(@project_id, @doc_id, @newLines)
+				.should.equal true
+		
+		it "should flush track changes"#, ->
+			# MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+		
+		it "should remove the document from redis", (done) ->
+			rclient.get "doclines:#{@doc_id}", (error, lines) =>
+				throw error if error?
+				expect(lines).to.not.exist
+				done()

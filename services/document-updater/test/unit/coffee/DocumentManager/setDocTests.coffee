@@ -29,13 +29,14 @@ describe "DocumentManager - setDoc", ->
 		beforeEach ->
 			@beforeLines = ["before", "lines"]
 			@afterLines = ["after", "lines"]
+			@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, true)
+			@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
+			@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null)
+			@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
+			@DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(2)
 
-		describe "successfully", ->
+		describe "when already loaded", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version)
-				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
-				@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null)
-				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
 				@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, @callback
 
 			it "should get the current doc lines", ->
@@ -76,17 +77,26 @@ describe "DocumentManager - setDoc", ->
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
+		
+		describe "when not already loaded", ->
+			beforeEach ->
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, false)
+				@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, @callback
 
-	describe "without new lines", ->
-		beforeEach ->
-			@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version)
-			@DocumentManager.setDoc @project_id, @doc_id, null, @callback
+			it "should flush and delete the doc from the doc updater", ->
+				@DocumentManager.flushAndDeleteDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
 
-		it "should return teh callback with an error", ->
-			@callback.calledWith(new Error("No lines were passed to setDoc"))
-			
-		it "should not try to get the doc lines", ->
-			@DocumentManager.getDoc.called.should.equal false
+		describe "without new lines", ->
+			beforeEach ->
+				@DocumentManager.setDoc @project_id, @doc_id, null, @source, @user_id, @callback
+
+			it "should return the callback with an error", ->
+				@callback.calledWith(new Error("No lines were passed to setDoc"))
+				
+			it "should not try to get the doc lines", ->
+				@DocumentManager.getDoc.called.should.equal false
 
 		
 

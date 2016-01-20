@@ -12,7 +12,7 @@ module.exports = DocumentManager =
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc doc_id, (error, lines, version) ->
+		RedisManager.getDoc doc_id, (error, lines, version, alreadyLoaded) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc not in redis so getting from persistence API"
@@ -21,9 +21,9 @@ module.exports = DocumentManager =
 					logger.log project_id: project_id, doc_id: doc_id, lines: lines, version: version, "got doc from persistence API"
 					RedisManager.putDocInMemory project_id, doc_id, lines, version, (error) ->
 						return callback(error) if error?
-						callback null, lines, version
+						callback null, lines, version, false
 			else
-				callback null, lines, version
+				callback null, lines, version, true
 
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
@@ -50,7 +50,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, alreadyLoaded) ->
 			return callback(error) if error?
 			
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
@@ -70,9 +70,18 @@ module.exports = DocumentManager =
 						user_id: user_id
 				UpdateManager.applyUpdates project_id, doc_id, [update], (error) ->
 					return callback(error) if error?
-					DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
-						return callback(error) if error?
-						callback null
+					# If the document was loaded already, then someone has it open
+					# in a project, and the usual flushing mechanism will happen.
+					# Otherwise we should remove it immediately since nothing else
+					# is using it.
+					if alreadyLoaded
+						DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
+							return callback(error) if error?
+							callback null
+					else
+						DocumentManager.flushAndDeleteDoc project_id, doc_id, (error) ->
+							return callback(error) if error?
+							callback null
 		
 
 	flushDocIfLoaded: (project_id, doc_id, _callback = (error) ->) ->
