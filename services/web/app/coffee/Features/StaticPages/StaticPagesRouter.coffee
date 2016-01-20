@@ -13,6 +13,7 @@ module.exports =
 		webRouter.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
 		webRouter.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
 		webRouter.get '/style', HomeController.externalPage("style_guide", "Style Guide")
+		webRouter.get '/jobs', HomeController.externalPage("jobs", "Jobs")
 
 		webRouter.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
 
