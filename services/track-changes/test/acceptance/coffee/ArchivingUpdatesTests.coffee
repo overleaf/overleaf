@@ -89,9 +89,10 @@ describe "Archiving updates", ->
 				doc.lastVersion.should.equal 20
 				done()
 
-		it "should store twenty doc changes in S3", (done) ->
+		it "should store twenty doc changes in S3 in one pack", (done) ->
 			TrackChangesClient.getS3Doc @project_id, @doc_id, (error, res, doc) =>
-				doc.length.should.equal 20
+				doc.length.should.equal 1
+				doc[0].pack.length.should.equal 20
 				done()
 
 	describe "unarchiving a doc's updates", ->
@@ -103,7 +104,7 @@ describe "Archiving updates", ->
 		it "should restore doc changes", (done) ->
 			db.docHistory.count { doc_id: ObjectId(@doc_id) }, (error, count) ->
 				throw error if error?
-				count.should.equal 20
+				count.should.equal 1
 				done()
 
 		it "should remove doc marked as inS3", (done) ->

@@ -1,20 +1,17 @@
 {db, ObjectId} = require "./mongojs"
 PackManager = require "./PackManager"
 async = require "async"
+_ = require "underscore"
 
 module.exports = MongoManager =
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
 		db.docHistory
-			.find(doc_id: ObjectId(doc_id.toString()))
+			.find(doc_id: ObjectId(doc_id.toString()), {pack: {$slice:-1}}) # only return the last entry in a pack
 			.sort( v: -1 )
 			.limit(1)
 			.toArray (error, compressedUpdates) ->
 				return callback(error) if error?
-				if compressedUpdates[0]?.pack?
-					# cannot pop from a pack, throw error
-					error = new Error("last compressed update is a pack")
-					return callback error, null
-				return callback null, compressedUpdates[0] or null
+				callback null, compressedUpdates[0] or null
 
 	peekLastCompressedUpdate: (doc_id, callback = (error, update, version) ->) ->
 		# under normal use we pass back the last update as
@@ -54,7 +51,6 @@ module.exports = MongoManager =
 					callback(err,results)
 			else
 				callback(err,results)
-
 
 	modifyCompressedUpdate: (lastUpdate, newUpdate, callback = (error) ->) ->
 		return callback() if not newUpdate?
@@ -140,9 +136,7 @@ module.exports = MongoManager =
 		# For finding all updates that go into a diff for a doc
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, { background: true }
 		# For finding all updates that affect a project
-		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1 }, { background: true }
-		# For finding all packs that affect a project (use a sparse index so only packs are included)
-		db.docHistory.ensureIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}, { background: true, sparse: true }
+		db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1, "meta.start_ts": -1 }, { background: true }
 		# For finding updates that don't yet have a project_id and need it inserting
 		db.docHistory.ensureIndex { doc_id: 1, project_id: 1 }, { background: true }
 		# For finding project meta-data

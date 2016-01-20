@@ -37,7 +37,7 @@ describe "Appending doc ops to the history", ->
 					done()
 
 		it "should insert the compressed op into mongo", ->
-			expect(@updates[0].op).to.deep.equal [{
+			expect(@updates[0].pack[0].op).to.deep.equal [{
 				p: 3, i: "foo"
 			}]
 
@@ -99,13 +99,13 @@ describe "Appending doc ops to the history", ->
 						throw error if error?
 						done()
 
-			it "should combine all the updates into one", ->
-				expect(@updates[0].op).to.deep.equal [{
-					p: 3, i: "foobar"
+			it "should combine all the updates into one pack", ->
+				expect(@updates[0].pack[1].op).to.deep.equal [{
+					p: 6, i: "bar"
 				}]
 
 			it "should insert the correct version number into mongo", ->
-				expect(@updates[0].v).to.equal 8
+				expect(@updates[0].v_end).to.equal 8
 
 
 		describe "when the updates are far apart", ->
@@ -129,11 +129,11 @@ describe "Appending doc ops to the history", ->
 						throw error if error?
 						done()
 
-			it "should keep the updates separate", ->
-				expect(@updates[0].op).to.deep.equal [{
+			it "should combine the updates into one pack", ->
+				expect(@updates[0].pack[0].op).to.deep.equal [{
 					p: 3, i: "foo"
 				}]
-				expect(@updates[1].op).to.deep.equal [{
+				expect(@updates[0].pack[1].op).to.deep.equal [{
 					p: 6, i: "bar"
 				}]
 
@@ -160,10 +160,10 @@ describe "Appending doc ops to the history", ->
 					done()
 
 		it "should concat the compressed op into mongo", ->
-			expect(@updates[0].op).to.deep.equal @expectedOp
+			expect(@updates[0].pack.length).to.deep.equal 3  # batch size is 100
 
 		it "should insert the correct version number into mongo", ->
-			expect(@updates[0].v).to.equal 250
+			expect(@updates[0].v_end).to.equal 250
 
 
 	describe "when there are multiple ops in each update", ->
@@ -188,16 +188,16 @@ describe "Appending doc ops to the history", ->
 					done()
 
 		it "should insert the compressed ops into mongo", ->
-			expect(@updates[0].op).to.deep.equal [{
+			expect(@updates[0].pack[0].op).to.deep.equal [{
 				p: 3, i: "foo"
 			}]
-			expect(@updates[1].op).to.deep.equal [{
+			expect(@updates[0].pack[1].op).to.deep.equal [{
 				p: 6, i: "bar"
 			}]
 
 		it "should insert the correct version numbers into mongo", ->
-			expect(@updates[0].v).to.equal 3
-			expect(@updates[1].v).to.equal 4
+			expect(@updates[0].pack[0].v).to.equal 3
+			expect(@updates[0].pack[1].v).to.equal 4
 
 	describe "when there is a no-op update", ->
 		before (done) ->
@@ -221,17 +221,17 @@ describe "Appending doc ops to the history", ->
 					done()
 
 		it "should insert the compressed no-op into mongo", ->
-			expect(@updates[0].op).to.deep.equal []
+			expect(@updates[0].pack[0].op).to.deep.equal []
 
 
 		it "should insert the compressed next update into mongo", ->
-			expect(@updates[1].op).to.deep.equal [{
+			expect(@updates[0].pack[1].op).to.deep.equal [{
 				p: 3, i: "foo"
 			}]
 
 		it "should insert the correct version numbers into mongo", ->
-			expect(@updates[0].v).to.equal 3
-			expect(@updates[1].v).to.equal 4
+			expect(@updates[0].pack[0].v).to.equal 3
+			expect(@updates[0].pack[1].v).to.equal 4
 
 	describe "when the project has versioning enabled", ->
 		before (done) ->

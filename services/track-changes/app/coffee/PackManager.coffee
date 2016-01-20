@@ -4,6 +4,8 @@ _ = require "underscore"
 logger = require "logger-sharelatex"
 LockManager = require "./LockManager"
 
+DAYS = 24 * 3600 * 1000 # one day in milliseconds
+
 module.exports = PackManager =
 	# The following functions implement methods like a mongo find, but
 	# expands any documents containing a 'pack' field into multiple
@@ -86,6 +88,10 @@ module.exports = PackManager =
 
 		needMore = false  # keep track of whether we need to load more data
 		updates = [] # used to accumulate the set of results
+
+		# FIXME: packs are big so we should accumulate the results
+		# incrementally instead of using .toArray() to avoid reading all
+		# of the changes into memory
 		cursor.toArray (err, result) ->
 			unpackedSet = PackManager._unpackResults(result)
 			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
@@ -139,6 +145,9 @@ module.exports = PackManager =
 
 		updates = [] # used to accumulate the set of results
 
+		# FIXME: packs are big so we should accumulate the results
+		# incrementally instead of using .toArray() to avoid reading all
+		# of the changes into memory
 		cursor.toArray (err, result) ->
 			if err?
 				return callback err, result
@@ -176,20 +185,25 @@ module.exports = PackManager =
 				.find(tailQuery, projection)
 				.sort(sort)
 
-			# now find any packs that overlap with the time window
+			# now find any packs that overlap with the time window from outside
+			#     cutoff             before
+			#    --|-----wanted-range--|------------------  time=>
+			#                  |-------------|pack(end_ts)
+			#
+			# these were not picked up by the original query because
+			# end_ts>before but the beginning of the pack may be in the time range
 			overlapQuery = _.clone(query)
 			if before? && cutoff?
 				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+				overlapQuery['meta.start_ts'] = {"$lte": before }
 			else if before? && not cutoff?
 				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['pack.0.meta.end_ts'] = {"$lte": before }
+				overlapQuery['meta.start_ts'] = {"$lte": before }
 			else if not before? && cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": cutoff}
-				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+				overlapQuery['meta.end_ts'] = {"$gte": cutoff}  # we already have these??
 			else if not before? && not cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": 0 }
-				overlapQuery['pack.0.meta.end_ts'] = {"$gte": 0 }
+				overlapQuery['meta.end_ts'] = {"$gte": 0 } # shouldn't happen??
+
 			overlap = collection
 				.find(overlapQuery, projection)
 				.sort(sort)
@@ -254,16 +268,11 @@ module.exports = PackManager =
 		return newResults
 
 	MAX_SIZE:  1024*1024 # make these configurable parameters
-	MAX_COUNT: 1024
-	MIN_COUNT: 100
-	KEEP_OPS:  100
+	MAX_COUNT: 512
 
 	convertDocsToPacks: (docs, callback) ->
 		packs = []
 		top = null
-		# keep the last KEEP_OPS as individual ops
-		docs = docs.slice(0,-PackManager.KEEP_OPS)
-
 		docs.forEach (d,i) ->
 			# skip existing packs
 			if d.pack?
@@ -280,22 +289,17 @@ module.exports = PackManager =
 				top.v_end = d.v
 				top.meta.end_ts = d.meta.end_ts
 				return
-			else if sz < PackManager.MAX_SIZE
+			else
 				# create a new pack
 				top = _.clone(d)
 				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
 				top.meta = { start_ts: d.meta.start_ts, end_ts: d.meta.end_ts }
 				top.sz = sz
+				top.v_end = d.v
 				delete top.op
 				delete top._id
 				packs.push top
-			else
-				# keep the op
-				# util.log "keeping large op unchanged (#{sz} bytes)"
 
-		# only store packs with a sufficient number of ops, discard others
-		packs = packs.filter (packObj) ->
-			packObj.pack.length > PackManager.MIN_COUNT
 		callback(null, packs)
 
 	checkHistory: (docs, callback) ->
@@ -405,7 +409,7 @@ module.exports = PackManager =
 					}, {upsert:true}, () ->
 						callback null, null
 
-	DB_WRITE_DELAY: 2000
+	DB_WRITE_DELAY: 100
 
 	savePacks: (packs, callback) ->
 		async.eachSeries packs, PackManager.safeInsert, (err, result) ->
@@ -451,3 +455,78 @@ module.exports = PackManager =
 			bulk.execute callback
 		else
 			callback()
+
+	insertCompressedUpdates: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		return callback() if newUpdates.length == 0
+
+		updatesToFlush = []
+		updatesRemaining = newUpdates.slice()
+
+		n = lastUpdate?.n || 0
+		sz = lastUpdate?.sz || 0
+
+		while updatesRemaining.length and n < PackManager.MAX_COUNT and sz < PackManager.MAX_SIZE
+			nextUpdate = updatesRemaining[0]
+			nextUpdateSize = BSON.calculateObjectSize(nextUpdate)
+			if nextUpdateSize + sz > PackManager.MAX_SIZE and n > 0
+				break
+			n++
+			sz += nextUpdateSize
+			updatesToFlush.push updatesRemaining.shift()
+
+		PackManager.flushCompressedUpdates project_id, doc_id, lastUpdate, updatesToFlush, temporary, (error) ->
+			return callback(error) if error?
+			PackManager.insertCompressedUpdates project_id, doc_id, null, updatesRemaining, temporary, callback
+
+	flushCompressedUpdates:	(project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		return callback() if newUpdates.length == 0
+		if lastUpdate? and not (temporary and ((Date.now() - lastUpdate.meta?.start_ts) > 1 * DAYS))
+			PackManager.appendUpdatesToExistingPack project_id, doc_id, lastUpdate, newUpdates, temporary, callback
+		else
+			PackManager.insertUpdatesIntoNewPack project_id, doc_id, newUpdates, temporary, callback
+
+	insertUpdatesIntoNewPack: (project_id, doc_id, newUpdates, temporary, callback = (error) ->) ->
+		first = newUpdates[0]
+		last = newUpdates[newUpdates.length - 1]
+		n = newUpdates.length
+		sz = BSON.calculateObjectSize(newUpdates)
+		newPack =
+			project_id: ObjectId(project_id.toString())
+			doc_id: ObjectId(doc_id.toString())
+			pack: newUpdates
+			n: n
+			sz: sz
+			meta:
+				start_ts: first.meta.start_ts
+				end_ts: last.meta.end_ts
+			v: first.v
+			v_end: last.v
+		if temporary
+			newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
+		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
+		db.docHistory.insert newPack, callback
+
+	appendUpdatesToExistingPack: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
+		first = newUpdates[0]
+		last = newUpdates[newUpdates.length - 1]
+		n = newUpdates.length
+		sz = BSON.calculateObjectSize(newUpdates)
+		query =
+			_id: lastUpdate._id
+			project_id: ObjectId(project_id.toString())
+			doc_id: ObjectId(doc_id.toString())
+			pack: {$exists: true}
+		update =
+			$push:
+				"pack": {$each: newUpdates}
+			$inc:
+				"n": n
+				"sz":  sz
+			$set:
+				"meta.end_ts": last.meta.end_ts
+				"v_end": last.v
+		if lastUpdate.expiresAt and temporary
+			update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
+		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
+		db.docHistory.findAndModify {query, update}, callback
+

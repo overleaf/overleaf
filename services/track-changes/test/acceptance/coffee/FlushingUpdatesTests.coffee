@@ -31,7 +31,7 @@ describe "Flushing updates", ->
 
 		it "should flush the op into mongo", (done) ->
 			TrackChangesClient.getCompressedUpdates @doc_id, (error, updates) ->
-				expect(updates[0].op).to.deep.equal [{
+				expect(updates[0].pack[0].op).to.deep.equal [{
 					p: 3, i: "f"
 				}]
 				done()
