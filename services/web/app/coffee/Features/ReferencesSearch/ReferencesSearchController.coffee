@@ -36,3 +36,14 @@ module.exports = ReferencesSearchController =
 				logger.err {err, project_id}, "error getting references keys"
 				return res.send 500
 			return res.json data
+
+	loadReferencesKeys: (req, res) ->
+		project_id = req.params.Project_id
+		shouldBroadcast = req.body.shouldBroadcast
+		logger.log {project_id}, "loading project references keys"
+		ReferencesSearchHandler.loadReferencesKeys project_id, (err, data) ->
+			if err
+				logger.err {err, project_id}, "error getting references keys"
+				return res.send 500
+			# TODO: optionally broadcast to all connected clients
+			return res.json data

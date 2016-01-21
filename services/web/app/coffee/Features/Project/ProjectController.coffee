@@ -219,7 +219,7 @@ module.exports = ProjectController =
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
 				# HACK: don't do it for now
-				ReferencesSearchHandler.indexProjectReferences project, ->  # don't need to wait on this
+				# ReferencesSearchHandler.indexProjectReferences project, ->  # don't need to wait on this
 
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',

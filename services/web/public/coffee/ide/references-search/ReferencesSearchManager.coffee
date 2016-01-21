@@ -13,7 +13,20 @@ define [
 						@indexReferences doc.doc_id
 
 			@$scope.$on 'project:joined', (e) =>
-				@getReferenceKeys()
+				@loadReferencesKeys()
+
+		loadReferencesKeys: () ->
+			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
+				return
+			$.post(
+				"/project/#{@$scope.project_id}/referenceskeys",
+				{
+					shouldBroadcast: false
+					_csrf: window.csrfToken
+				},
+				(data) =>
+					console.log ">> ", data
+			)
 
 		indexReferences: (doc_id) ->
 			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true

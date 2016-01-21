@@ -28,12 +28,39 @@ module.exports = ReferencesSearchHandler =
 
 		return ids
 
-	_isFullIndex: (projectId, callback = (err, result) ->) ->
-		Project.findById projectId, {owner_ref: 1}, (err, project) ->
+	_isFullIndex: (project, callback = (err, result) ->) ->
+		UserGetter.getUser project.owner_ref, {features: 1}, (err, owner) ->
 			return callback(err) if err
-			UserGetter.getUser project.owner_ref, {features: 1}, (err, owner) ->
-				return callback(err) if err
-				callback(null, owner.features.references == true)
+			callback(null, owner.features.references == true)
+
+	loadReferencesKeys: (projectId, callback=(err, data)->) ->
+		logger.log {projectId}, "load references keys for project"
+		Project.findPopulatedById projectId, (err, project) ->
+			if err
+				return callback(err)
+			ReferencesSearchHandler._isFullIndex project, (err, isFullIndex) ->
+				if err
+					return callback(err)
+				bibDocIds = ReferencesSearchHandler._findBibDocIds(project)
+				bibDocUrls = bibDocIds.map (docId) ->
+					ReferencesSearchHandler._buildDocUrl projectId, docId
+				logger.log {projectId, isFullIndex, bibDocIds}, "sending request to references service"
+				request.post {
+					url: "#{settings.apis.references.url}/project/#{projectId}/loadreferenceskeys"
+					json:
+						docUrls: bibDocUrls
+						fullIndex: isFullIndex
+				}, (err, res, result) ->
+					if err
+						return callback(err)
+					if 200 <= res.statusCode < 300
+						return callback(null)
+					else
+						err = new Error("references api responded with non-success code: #{res.statusCode}")
+						logger.log {err, projectId, fileUrl}, "error updating references"
+						return callback(err)
+
+	## ## ## ##
 
 	indexProjectReferences: (project, callback = (err) ->) ->
 		logger.log {projectId: project._id}, "try indexing references from project"
@@ -62,7 +89,6 @@ module.exports = ReferencesSearchHandler =
 				url: target_url
 				json:
 					referencesUrl: fileUrl
-					fullIndex: isFullIndex == true
 			}, (err, res, result) ->
 				if err
 					return callback(err)
