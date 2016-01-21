@@ -106,6 +106,8 @@ module.exports =
 			url: "http://localhost:3036"
 		sixpack:
 			url: ""
+		notifications:
+			url: "http://localhost:3033" 
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -143,8 +145,6 @@ module.exports =
 		versioning: true
 		compileTimeout: 60
 		compileGroup: "standard"
-		references: true
-		templates: true
 
 	plans: plans = [{
 		planCode: "personal"

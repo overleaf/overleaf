@@ -9,7 +9,8 @@ block content
 	script(type="text/javascript").
 		window.data = {
 			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
-			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')}
+			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')},
+			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')}
 		};
 		window.algolia = {
 			institutions: {
@@ -19,6 +20,7 @@ block content
 		};
 
 	.content.content-alt(ng-controller="ProjectPageController")
+		include ./list/notifications
 		.container
 			.row(ng-cloak)
 				span(ng-show="first_sign_up == 'default' || projects.length > 0")

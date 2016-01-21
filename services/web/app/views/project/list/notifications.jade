@@ -1,0 +1,18 @@
+.notifications(ng-controller="NotificationsController")
+	.row.row-spaced
+		.col-xs-12
+			ul.list-unstyled.notifications-list.structured-list(
+				select-all-list,
+				ng-if="notifications.length > 0",
+				ng-cloak
+			)
+				li.notification_entry.container-fluid(
+					ng-repeat="unreadNotification in notifications",
+				)
+					.row
+						.col-xs-6
+							span {{unreadNotification._id}}
+						.col-xs-2
+							span.owner {{unreadNotification.user_id}}
+						.col-xs-4
+							span.last-modified {{unreadNotification.templateKey}}

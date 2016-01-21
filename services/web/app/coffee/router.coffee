@@ -16,6 +16,7 @@ ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
+NotificationsController = require("./Features/Notifications/NotificationsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
 UserController = require("./Features/User/UserController")
@@ -37,7 +38,6 @@ RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")
-ReferencesSearchController = require('./Features/ReferencesSearch/ReferencesSearchController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -47,7 +47,7 @@ module.exports = class Router
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-
+		
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
@@ -68,18 +68,18 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
-
+		
 		Modules.applyRouter(webRouter, apiRouter)
 
 
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
-
+		
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage
-
+		
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
-
+		
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
@@ -134,6 +134,9 @@ module.exports = class Router
 		webRouter.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
 
+		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
+		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead	
+
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
@@ -159,7 +162,7 @@ module.exports = class Router
 
 		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
 		apiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
-
+		
 		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
 		apiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 
@@ -168,11 +171,8 @@ module.exports = class Router
 
 		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
-
+		
 		webRouter.get  /learn(\/.*)?/, WikiController.getPage
-
-		webRouter.post "/project/:Project_id/references", SecurityManager.requestCanAccessProject, ReferencesSearchController.indexFile
-		webRouter.get "/project/:Project_id/references/keys", SecurityManager.requestCanAccessProject, ReferencesSearchController.getKeys
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
@@ -192,7 +192,7 @@ module.exports = class Router
 
 		apiRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
-
+		
 
 		webRouter.get '/health_check', HealthCheckController.check
 		webRouter.get '/health_check/redis', HealthCheckController.checkRedis

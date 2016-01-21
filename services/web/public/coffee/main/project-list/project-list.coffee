@@ -5,6 +5,7 @@ define [
 	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, sixpack) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
+		$scope.notifications = window.data.notifications
 		$scope.allSelected = false
 		$scope.selectedProjects = []
 		$scope.filter = "all"
