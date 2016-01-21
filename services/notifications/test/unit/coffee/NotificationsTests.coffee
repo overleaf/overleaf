@@ -69,6 +69,6 @@ describe 'creating a user', ->
 					user_id:user_id
 					_id:ObjectId(notification_id)
 				updateOperation = 
-					"$unset": {templateKey:true}
+					"$unset": {templateKey:true, messageOpts:true}
 				@updateStub.calledWith(searchOps, updateOperation).should.equal true
 				done()
