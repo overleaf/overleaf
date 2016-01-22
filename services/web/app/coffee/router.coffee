@@ -38,6 +38,7 @@ RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")
+ReferencesSearchController = require('./Features/ReferencesSearch/ReferencesSearchController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -47,7 +48,7 @@ module.exports = class Router
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
-		
+
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
@@ -68,18 +69,18 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
-		
+
 		Modules.applyRouter(webRouter, apiRouter)
 
 
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
-		
+
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage
-		
+
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
-		
+
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
@@ -162,7 +163,7 @@ module.exports = class Router
 
 		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
 		apiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
-		
+
 		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
 		apiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 
@@ -171,8 +172,11 @@ module.exports = class Router
 
 		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
-		
+
 		webRouter.get  /learn(\/.*)?/, WikiController.getPage
+
+		webRouter.post "/project/:Project_id/references", SecurityManager.requestCanAccessProject, ReferencesSearchController.indexFile
+		webRouter.get "/project/:Project_id/references/keys", SecurityManager.requestCanAccessProject, ReferencesSearchController.getKeys
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
@@ -192,7 +196,7 @@ module.exports = class Router
 
 		apiRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
-		
+
 
 		webRouter.get '/health_check', HealthCheckController.check
 		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
