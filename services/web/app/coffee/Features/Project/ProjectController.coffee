@@ -142,7 +142,9 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
-				notifications = results.notifications
+				notifications = require("underscore").map results.notifications, (notification)-> 
+					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
+					return notification
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->

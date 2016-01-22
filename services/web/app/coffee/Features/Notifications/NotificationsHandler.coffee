@@ -15,7 +15,7 @@ module.exports =
 			if err? or statusCode != 200
 				e = new Error("something went wrong getting notifications, #{err}, #{statusCode}")
 				logger.err err:err
-				callback(e, [])
+				callback(null, [])
 			else
 				if !unreadNotifications?
 					unreadNotifications = []

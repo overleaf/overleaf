@@ -1,18 +1,19 @@
-.notifications(ng-controller="NotificationsController")
-	.row.row-spaced
-		.col-xs-12
-			ul.list-unstyled.notifications-list.structured-list(
-				select-all-list,
-				ng-if="notifications.length > 0",
-				ng-cloak
-			)
-				li.notification_entry.container-fluid(
-					ng-repeat="unreadNotification in notifications",
+span(ng-controller="NotificationsController")
+	aside.col-md-2.col-xs-3
+	.col-md-10.col-xs-9
+		.row
+			.col-xs-12(ng-cloak)
+				ul.list-unstyled.notifications-list(
+					ng-if="notifications.length > 0",
+					ng-cloak
 				)
-					.row
-						.col-xs-6
-							span {{unreadNotification._id}}
-						.col-xs-2
-							span.owner {{unreadNotification.user_id}}
-						.col-xs-4
-							span.last-modified {{unreadNotification.templateKey}}
+					li.notification_entry(
+						ng-repeat="unreadNotification in notifications",
+					)
+						.row(ng-hide="unreadNotification.hide")
+							.col-xs-12
+								.alert.alert-info
+									span {{unreadNotification.html}}
+									button(ng-click="dismiss(unreadNotification)").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}

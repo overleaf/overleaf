@@ -81,6 +81,8 @@ describe "ProjectController", ->
 				user: @user
 			body:
 				projectName: @projectName 
+			i18n:
+				translate:->
 		@res = 
 			locals:
 				jsPath:"js path here"
