@@ -145,6 +145,8 @@ module.exports =
 		versioning: true
 		compileTimeout: 60
 		compileGroup: "standard"
+		references: true
+		templates: true
 
 	plans: plans = [{
 		planCode: "personal"
