@@ -37,13 +37,17 @@ module.exports = ReferencesSearchController =
 				return res.send 500
 			return res.json data
 
-	loadReferencesKeys: (req, res) ->
-		project_id = req.params.Project_id
+	index: (req, res) ->
+		projectId = req.params.Project_id
 		shouldBroadcast = req.body.shouldBroadcast
-		logger.log {project_id}, "loading project references keys"
-		ReferencesSearchHandler.loadReferencesKeys project_id, (err, data) ->
+		docIds = req.body.docIds
+		if (not docIds instanceof Array) and (docIds != "ALL")
+			logger.err {projectId, docIds}, "docIds is not valid, should be either Array or String 'ALL'"
+			return res.send 400
+		logger.log {projectId, docIds}, "index references for project"
+		ReferencesSearchHandler.index projectId, docIds, (err, data) ->
 			if err
-				logger.err {err, project_id}, "error getting references keys"
+				logger.err {err, projectId}, "error indexing references"
 				return res.send 500
 			# TODO: optionally broadcast to all connected clients
 			return res.json data

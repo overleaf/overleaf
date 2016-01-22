@@ -29,35 +29,40 @@ module.exports = ReferencesSearchHandler =
 		return ids
 
 	_isFullIndex: (project, callback = (err, result) ->) ->
-		UserGetter.getUser project.owner_ref, {features: 1}, (err, owner) ->
-			return callback(err) if err
-			callback(null, owner.features.references == true)
+		owner = project.owner_ref
+		callback(null, owner.features.references == true)
 
-	loadReferencesKeys: (projectId, callback=(err, data)->) ->
-		logger.log {projectId}, "load references keys for project"
+	# projectId: String, docIds: List[String]|Null
+	index: (projectId, docIds, callback=(err, data)->) ->
 		Project.findPopulatedById projectId, (err, project) ->
 			if err
+				logger.err {err, projectId}, "error finding project"
 				return callback(err)
+			if docIds == "ALL"
+				logger.log {projectId}, "indexing all bib files in project"
+				docIds = ReferencesSearchHandler._findBibDocIds(project)
 			ReferencesSearchHandler._isFullIndex project, (err, isFullIndex) ->
 				if err
+					logger.err {err, projectId}, "error checking whether to do full index"
 					return callback(err)
-				bibDocIds = ReferencesSearchHandler._findBibDocIds(project)
-				bibDocUrls = bibDocIds.map (docId) ->
+				bibDocUrls = docIds.map (docId) ->
 					ReferencesSearchHandler._buildDocUrl projectId, docId
-				logger.log {projectId, isFullIndex, bibDocIds}, "sending request to references service"
+				logger.log {projectId, isFullIndex, docIds}, "sending request to references service"
 				request.post {
-					url: "#{settings.apis.references.url}/project/#{projectId}/loadreferenceskeys"
+					url: "#{settings.apis.references.url}/project/#{projectId}/index"
 					json:
 						docUrls: bibDocUrls
 						fullIndex: isFullIndex
-				}, (err, res, result) ->
+				}, (err, res, data) ->
 					if err
+						logger.err {err, projectId}, "error communicating with references api"
 						return callback(err)
 					if 200 <= res.statusCode < 300
-						return callback(null)
+						logger.log {projectId}, "got keys from references api"
+						return callback(null, data)
 					else
 						err = new Error("references api responded with non-success code: #{res.statusCode}")
-						logger.log {err, projectId, fileUrl}, "error updating references"
+						logger.log {err, projectId}, "error updating references"
 						return callback(err)
 
 	## ## ## ##

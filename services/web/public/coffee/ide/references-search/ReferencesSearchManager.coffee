@@ -10,41 +10,29 @@ define [
 				 	entity = @ide.fileTreeManager.findEntityById doc.doc_id
 					if entity?.name?.match /.*\.bib$/
 						@$scope.$emit 'references:changed', entity
-						@indexReferences doc.doc_id
+						@indexReferences([doc.doc_id], true)
 
 			@$scope.$on 'project:joined', (e) =>
-				@loadReferencesKeys()
+				@indexReferences("ALL", false)
 
-		loadReferencesKeys: () ->
+		# docIds: List[String]|String('ALL'), shouldBroadcast: Bool
+		indexReferences: (docIds, shouldBroadcast) ->
 			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
 				return
+			opts =
+				docIds: docIds
+				shouldBroadcast: shouldBroadcast
+				_csrf: window.csrfToken
+			console.log ">>", opts
 			$.post(
-				"/project/#{@$scope.project_id}/referenceskeys",
-				{
-					shouldBroadcast: false
-					_csrf: window.csrfToken
-				},
+				"/project/#{@$scope.project_id}/references/index",
+				opts,
 				(data) =>
-					console.log ">> ", data
+					console.log ">> done ", data
+					@$scope.$root._references.keys = data.keys
 			)
 
-		indexReferences: (doc_id) ->
-			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
-				return
-			$.post(
-				"/project/#{@$scope.project_id}/references",
-				{
-					docId: doc_id,
-					_csrf: window.csrfToken
-				},
-				(data) =>
-					setTimeout(
-						( () -> @getReferenceKeys() ).bind(this),
-						500
-					)
-			)
-
-		getReferenceKeys: (callback) ->
+		getReferenceKeys: (callback=(keys)->) ->
 			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
 				return
 			$.get(
