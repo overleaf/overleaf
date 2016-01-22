@@ -2,6 +2,7 @@ logger = require('logger-sharelatex')
 ReferencesSearchHandler = require('./ReferencesSearchHandler')
 ProjectLocator = require("../Project/ProjectLocator")
 settings = require('settings-sharelatex')
+EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
 module.exports = ReferencesSearchController =
 
@@ -49,5 +50,7 @@ module.exports = ReferencesSearchController =
 			if err
 				logger.err {err, projectId}, "error indexing references"
 				return res.send 500
-			# TODO: optionally broadcast to all connected clients
+			if shouldBroadcast
+				logger.log {projectId}, "emitting new references keys to connected clients"
+				EditorRealTimeController.emitToRoom projectId, 'references:keys:updated', data.keys
 			return res.json data

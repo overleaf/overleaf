@@ -3,6 +3,7 @@ define [
 	class ReferencesSearchManager
 		constructor: (@ide, @$scope) ->
 
+			console.log @ide
 			@$scope.$root._references = @state = keys: []
 
 			@$scope.$on 'document:closed', (e, doc) =>
@@ -15,6 +16,17 @@ define [
 			@$scope.$on 'project:joined', (e) =>
 				@indexReferences("ALL", false)
 
+			setTimeout(
+				(self) ->
+					self.ide.socket.on 'references:keys:updated', (keys) ->
+						self._storeReferencesKeys(keys)
+				, 100
+				, this
+			)
+
+		_storeReferencesKeys: (newKeys) ->
+			@$scope.$root._references.keys = newKeys
+
 		# docIds: List[String]|String('ALL'), shouldBroadcast: Bool
 		indexReferences: (docIds, shouldBroadcast) ->
 			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
@@ -23,13 +35,12 @@ define [
 				docIds: docIds
 				shouldBroadcast: shouldBroadcast
 				_csrf: window.csrfToken
-			console.log ">>", opts
 			$.post(
 				"/project/#{@$scope.project_id}/references/index",
 				opts,
 				(data) =>
 					console.log ">> done ", data
-					@$scope.$root._references.keys = data.keys
+					@_storeReferencesKeys(data.keys)
 			)
 
 		getReferenceKeys: (callback=(keys)->) ->
@@ -41,7 +52,7 @@ define [
 					_csrf: window.csrfToken
 				},
 				(data) =>
-					@$scope.$root._references.keys = data.keys
+					@_storeReferencesKeys(data.keys)
 					if callback
 						callback(data.keys)
 			)
