@@ -35,11 +35,11 @@ module.exports = AuthenticationController =
 						return next(error) if error?
 						req.session.justLoggedIn = true
 						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
+						res.json redir: redir
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
-					res.send message:
+					res.json message:
 						text: req.i18n.translate("email_or_password_wrong_try_again"),
 						type: 'error'
 
