@@ -286,6 +286,7 @@ module.exports = PackManager =
 			if top?	&& top.pack.length < PackManager.MAX_COUNT && top.sz + sz < PackManager.MAX_SIZE
 				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
 				top.sz += sz
+				top.n += 1
 				top.v_end = d.v
 				top.meta.end_ts = d.meta.end_ts
 				return
@@ -295,6 +296,7 @@ module.exports = PackManager =
 				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
 				top.meta = { start_ts: d.meta.start_ts, end_ts: d.meta.end_ts }
 				top.sz = sz
+				top.n = 1
 				top.v_end = d.v
 				delete top.op
 				delete top._id
