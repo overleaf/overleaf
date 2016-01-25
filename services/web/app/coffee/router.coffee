@@ -171,8 +171,6 @@ module.exports = class Router
 
 		webRouter.get  /learn(\/.*)?/, WikiController.getPage
 
-		webRouter.post "/project/:Project_id/references", SecurityManager.requestCanAccessProject, ReferencesSearchController.indexFile
-		webRouter.get "/project/:Project_id/references/keys", SecurityManager.requestCanAccessProject, ReferencesSearchController.getKeys
 		webRouter.post "/project/:Project_id/references/index", SecurityManager.requestCanAccessProject, ReferencesSearchController.index
 
 		#Admin Stuff

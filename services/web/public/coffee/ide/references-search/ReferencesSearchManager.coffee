@@ -3,7 +3,6 @@ define [
 	class ReferencesSearchManager
 		constructor: (@ide, @$scope) ->
 
-			console.log @ide
 			@$scope.$root._references = @state = keys: []
 
 			@$scope.$on 'document:closed', (e, doc) =>
