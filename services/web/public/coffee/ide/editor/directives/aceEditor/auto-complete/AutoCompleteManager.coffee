@@ -73,14 +73,6 @@ define [
 							callback null, result
 						else
 							callback null, result
-						# else
-						# 	# get keys from the backend
-						# 	referencesSearch = window?._ide?.referencesSearchManager
-						# 	if referencesSearch
-						# 		referencesSearch.getReferenceKeys (keys) =>
-						# 			keys.forEach (key) ->
-						# 				result.push(referenceKeyToAutocompleteEntry(key))
-						# 			callback null, result
 
 			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
 
