@@ -7,16 +7,18 @@ if Settings.sentry?.dsn?
 
 # log updates as truncated strings
 truncateFn = (updates) ->
-		JSON.stringify updates, (key, value) ->
-			if typeof value == 'string' && (len = value.length) > 80
-				return value.substr(0,32) + "...(message of length #{len} truncated)..." + value.substr(-32)
-			else
-				return value
+		JSON.parse(
+			JSON.stringify updates, (key, value) ->
+				if typeof value == 'string' && (len = value.length) > 80
+					return value.substr(0,32) + "...(message of length #{len} truncated)..." + value.substr(-32)
+				else
+					return value
+		)
 
 TrackChangesLogger.addSerializers {
+	rawUpdate: truncateFn
 	rawUpdates: truncateFn
 	newUpdates: truncateFn
-	rawUpdate: truncateFn
 	lastUpdate: truncateFn
 }
 
