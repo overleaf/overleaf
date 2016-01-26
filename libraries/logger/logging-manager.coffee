@@ -33,6 +33,12 @@ module.exports = Logger =
 						query: req.query
 						headers: req.headers
 						ip: req.ip
+				# recreate error objects that have been converted to a normal object
+				if !(error instanceof Error) and typeof error is "object"
+					newError = new Error(error.message)
+					for own key, value of error
+						newError[key] = value
+					error = newError
 				@raven.captureError(error, {tags: tags, extra: extra})
 	err: ()->
 		@logger.error.apply(@logger, arguments)
