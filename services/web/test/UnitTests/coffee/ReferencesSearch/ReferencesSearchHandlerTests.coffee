@@ -8,8 +8,23 @@ modulePath = "../../../../app/js/Features/ReferencesSearch/ReferencesSearchHandl
 describe 'ReferencesSearchHandler', ->
 
 	beforeEach ->
-		@project_id = '222'
-		@file_id = '111111'
+		@projectId = '222'
+		@fakeProject =
+			_id: @projectId
+			owner_ref: @fakeOwner =
+				_id: 'some_owner'
+				features:
+					references: false
+			rootFolder: [
+				docs: [
+					{name: 'one.bib', _id: 'aaa'},
+					{name: 'two.txt', _id: 'bbb'},
+				]
+				folders: [
+					{docs: [{name: 'three.bib', _id: 'ccc'}], folders: []}
+				]
+			]
+		@docIds = ['aaa', 'ccc']
 		@handler = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': {
 				log: ->
@@ -24,15 +39,147 @@ describe 'ReferencesSearchHandler', ->
 				get: sinon.stub()
 				post: sinon.stub()
 			}
-			'../../models/Project': @Project = {
-				Project: {
-					findById: sinon.stub().callsArgWith(2, null, {owner_ref: '111'})
+			'../../models/Project': {
+				Project: @Project = {
+					findPopulatedById: sinon.stub().callsArgWith(1, null, @fakeProject)
 				}
 			}
-			'../User/UserGetter': @UserGetter = {
-				getUser: sinon.stub().callsArgWith(2, null, {features: {references: false}})
-			}
+		@fakeResponseData =
+			projectId: @projectId
+			keys: ['k1', 'k2']
 
+	describe 'index', ->
+
+		beforeEach ->
+			sinon.stub(@handler, '_findBibDocIds')
+			sinon.stub(@handler, '_isFullIndex').callsArgWith(1, null, true)
+			@request.post.callsArgWith(1, null, {statusCode: 200}, @fakeResponseData)
+			@call = (callback) =>
+				@handler.index @projectId, @docIds, callback
+
+		describe 'with docIds as an array', ->
+
+			beforeEach ->
+				@docIds = ['aaa', 'ccc']
+
+			it 'should not call _findBibDocIds', (done) ->
+				@call (err, data) =>
+					@handler._findBibDocIds.callCount.should.equal 0
+					done()
+
+			it 'should call Project.findPopulatedById', (done) ->
+				@call (err, data) =>
+					@Project.findPopulatedById.callCount.should.equal 1
+					@Project.findPopulatedById.calledWith(@projectId).should.equal true
+					done()
+
+			it 'should make a request to references service', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 1
+					arg = @request.post.firstCall.args[0]
+					expect(arg.json).to.have.all.keys 'docUrls', 'fullIndex'
+					expect(arg.json.docUrls.length).to.equal 2
+					expect(arg.json.fullIndex).to.equal true
+					done()
+
+			it 'should not produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should return data', (done) ->
+				@call (err, data) =>
+					expect(data).to.not.equal null
+					expect(data).to.not.equal undefined
+					expect(data).to.equal @fakeResponseData
+					done()
+
+		describe 'with docIds as "ALL"', ->
+
+			beforeEach ->
+				@docIds = 'ALL'
+				@handler._findBibDocIds.returns(['aaa', 'ccc'])
+
+			it 'should call _findBibDocIds', (done) ->
+				@call (err, data) =>
+					@handler._findBibDocIds.callCount.should.equal 1
+					@handler._findBibDocIds.calledWith(@fakeProject).should.equal true
+					done()
+
+			it 'should not produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should return data', (done) ->
+				@call (err, data) =>
+					expect(data).to.not.equal null
+					expect(data).to.not.equal undefined
+					expect(data).to.equal @fakeResponseData
+					done()
+
+		describe 'when Project.findPopulatedById produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
+		describe 'when _isFullIndex produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
+		describe 'when request produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, null, false)
+				@request.post.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+		describe 'when request responds with error status', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, null, false)
+				@request.post.callsArgWith(1, null, {statusCode: 500}, null)
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
 
 	describe '_findBibDocIds', ->
 
@@ -82,98 +229,3 @@ describe 'ReferencesSearchHandler', ->
 				@call (err, isFullIndex) =>
 					expect(err).to.equal null
 					expect(isFullIndex).to.equal false
-
-
-	describe 'index', ->
-
-
-
-
-
-
-	# describe 'indexFile', ->
-
-	# 	describe 'full index or not', ->
-
-	# 		beforeEach ->
-	# 			@request.post.callsArgWith(1, null, {statusCode: 200}, {})
-
-	# 		describe 'when full index is not required', ->
-
-	# 			beforeEach ->
-	# 				@UserGetter.getUser.callsArgWith(2, null, {features: {references: false}})
-
-	# 			it 'should set fullIndex to true', (done) ->
-	# 				@handler.indexFile @project_id, @file_id, (err) =>
-	# 					@request.post.calledOnce.should.equal true
-	# 					options = @request.post.firstCall.args[0]
-	# 					options.json.fullIndex.should.equal false
-	# 					done()
-
-	# 		describe 'when full index is required', ->
-
-	# 			beforeEach ->
-	# 				@UserGetter.getUser.callsArgWith(2, null, {features: {references: true}})
-
-	# 			it 'should set fullIndex to true', (done) ->
-	# 				@handler.indexFile @project_id, @file_id, (err) =>
-	# 					@request.post.calledOnce.should.equal true
-	# 					options = @request.post.firstCall.args[0]
-	# 					options.json.fullIndex.should.equal true
-	# 					done()
-
-	# 	describe 'when index operation is successful', ->
-	# 		beforeEach ->
-	# 			@request.post.callsArgWith(1, null, {statusCode: 201}, {})
-
-	# 		it 'should not produce an error', (done) ->
-	# 			@handler.indexFile @project_id, @file_id, (err) =>
-	# 				expect(err).to.equal null
-	# 				@request.post.calledOnce.should.equal true
-	# 				options = @request.post.firstCall.args[0]
-	# 				options.json.fullIndex.should.equal false
-	# 				options.json.referencesUrl.should.not.be.undefined
-	# 				options.url.should.not.be.undefined
-	# 				done()
-
-	# 	describe 'when index operation fails', ->
-	# 		beforeEach ->
-	# 			@request.post.callsArgWith(1, null, {statusCode: 500}, {})
-
-	# 		it 'should produce an error', (done) ->
-	# 			@handler.indexFile @project_id, @file_id, (err) =>
-	# 				expect(err).to.not.equal null
-	# 				done()
-
-	# describe 'getKeys', ->
-
-	# 	describe 'when request is successful', ->
-	# 		beforeEach ->
-	# 			@data =
-	# 				projectId: @projectId
-	# 				keys: ['a', 'b', 'c']
-	# 			@request.get.callsArgWith(1, null, {statusCode: 200}, @data)
-
-	# 		it 'should not produce an error', ->
-	# 			@handler.getKeys @project_id, (err, result) =>
-	# 				expect(err).to.equal null
-
-	# 		it 'should produce a result object', ->
-	# 			@handler.getKeys @project_id, (err, result) =>
-	# 				expect(result).to.not.equal null
-	# 				expect(result).to.deep.equal @data
-
-	# 	describe 'when request fails', ->
-	# 		beforeEach ->
-	# 			@data =
-	# 				projectId: @project_Id
-	# 				keys: ['a', 'b', 'c']
-	# 			@request.get.callsArgWith(1, null, {statusCode: 500}, null)
-
-	# 		it 'should produce an error', ->
-	# 			@handler.getKeys @project_id, (err, result) =>
-	# 				expect(err).to.not.equal null
-
-	# 		it 'should not produce a result', ->
-	# 			@handler.getKeys @project_id, (err, result) =>
-	# 				expect(result).to.not.equal null
