@@ -9,165 +9,148 @@ MockResponse = require "../helpers/MockResponse"
 describe "ReferencesSearchController", ->
 
 	beforeEach ->
-		@project_id = '2222'
-		@doc_id = '3333'
+		@projectId = '2222'
 		@controller = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': {
 				log: ->
 				err: ->
-			}
+			},
 			'settings-sharelatex': @settings = {
 				apis: {web: {url: 'http://some.url'}}
-			}
-			'../Project/ProjectLocator': @ProjectLocator = {
-				findElement: sinon.stub()
-			}
+			},
 			'./ReferencesSearchHandler': @ReferencesSearchHandler = {
-				indexFile: sinon.stub()
-				getKeys: sinon.stub()
+				index: sinon.stub()
+			},
+			'../Editor/EditorRealTimeController': @EditorRealTimeController = {
+				emitToRoom: sinon.stub()
 			}
+		@req = new MockRequest()
+		@req.params.Project_id = @projectId
+		@req.body =
+			docIds: @docIds = ['aaa', 'bbb']
+			shouldBroadcast: false
+		@res = new MockResponse()
+		@res.json = sinon.stub()
+		@res.send = sinon.stub()
+		@fakeResponseData =
+			projectId: @projectId,
+			keys: ['one', 'two', 'three']
 
-	describe 'getKeys', ->
+	describe 'index', ->
 
-		beforeEach ->
-			@req = new MockRequest()
-			@req.params.Project_id = @project_id
-			@res = new MockResponse()
-			@data =
-				projectId: @project_id,
-				keys: ['one', 'two', 'three']
-			@ReferencesSearchHandler.getKeys.callsArgWith(1, null, @data)
-
-		describe 'when remote service works', ->
-
-			it 'should produce a json response', (done) ->
-				@res.json = (data) =>
-					data.should.not.equal null
-					data.should.deep.equal @data
-					done()
-				@controller.getKeys(@req, @res)
-
-			it 'should call getKeys on ReferencesSearchHandler', (done) ->
-				@res.json = (data) =>
-					@ReferencesSearchHandler.getKeys
-					.calledOnce.should.equal true
-					@ReferencesSearchHandler.getKeys
-					.calledWith(@project_id).should.equal true
-					done()
-				@controller.getKeys(@req, @res)
-
-		describe 'when remote service produces an error', ->
+		describe 'with docIds as an array and shouldBroadcast as false', ->
 
 			beforeEach ->
-				@ReferencesSearchHandler.getKeys.callsArgWith(1, new Error('nope'))
+				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@call = (callback) =>
+					@controller.index @req, @res
+					callback()
 
-			it 'should produce a 500 response', (done) ->
-				@res.send = (status) =>
-					status.should.equal 500
+			it 'should call ReferencesSearchHandler.index', (done) ->
+				@call () =>
+					@ReferencesSearchHandler.index.callCount.should.equal 1
+					@ReferencesSearchHandler.index.calledWith(@projectId, @docIds).should.equal true
 					done()
-				@controller.getKeys(@req, @res)
 
-			it 'should call getKeys on ReferencesSearchHandler', (done) ->
-				@res.send = (status) =>
-					@ReferencesSearchHandler.getKeys
-					.calledOnce.should.equal true
-					@ReferencesSearchHandler.getKeys
-					.calledWith(@project_id).should.equal true
+			it 'should return data', (done) ->
+				@call () =>
+					@res.json.callCount.should.equal 1
+					@res.json.calledWith(@fakeResponseData).should.equal true
 					done()
-				@controller.getKeys(@req, @res)
 
-	describe 'indexFile', ->
+			it 'should not produce an error', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 0
+					@res.send.calledWith(500).should.equal false
+					@res.send.calledWith(400).should.equal false
+					done()
 
-		beforeEach ->
-			@req = new MockRequest()
-			@req.params.Project_id = @project_id
-			@res = new MockResponse()
-			@ProjectLocator.findElement.callsArgWith(1, null, {})
-			@ReferencesSearchHandler.indexFile.callsArgWith(2, null)
+			it 'should not call EditorRealTimController.emitToRoom', (done) ->
+				@call () =>
+					@EditorRealTimeController.emitToRoom.callCount.should.equal 0
+					done()
 
-		describe 'with a valid doc_id', ->
+			describe 'with docIds set to ALL', ->
+
+				beforeEach ->
+					@req.body.docIds = 'ALL'
+
+				it 'should still pass the "ALL" value to handler', (done) ->
+					@call () =>
+						@ReferencesSearchHandler.index.callCount.should.equal 1
+						@ReferencesSearchHandler.index.calledWith(@projectId, 'ALL').should.equal true
+						done()
+
+				it 'should not produce an error', (done) ->
+					@call () =>
+						@res.send.callCount.should.equal 0
+						@res.send.calledWith(500).should.equal false
+						@res.send.calledWith(400).should.equal false
+						done()
+
+			describe 'when ReferencesSearchHandler.index produces an error', ->
+
+				beforeEach ->
+					@ReferencesSearchHandler.index.callsArgWith(2, new Error('woops'), null)
+
+				it 'should produce an error response', (done) ->
+					@call () =>
+						@res.send.callCount.should.equal 1
+						@res.send.calledWith(500).should.equal true
+						done()
+
+		describe 'when shouldBroadcast is true', ->
 
 			beforeEach ->
-				@req.body = {docId: @doc_id}
+				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@req.body.shouldBroadcast = true
 
-			it 'should produce a 200 response', (done) ->
-				@res.send = (status) =>
-					status.should.equal 200
+			it 'should call EditorRealTimeController.emitToRoom', (done) ->
+				@call () =>
+					@EditorRealTimeController.emitToRoom.callCount.should.equal 1
 					done()
-				@controller.indexFile(@req, @res)
 
-			it 'should call ProjectLocator.findElement', (done) ->
-				@res.send = (status) =>
-					@ProjectLocator.findElement.calledOnce.should.equal true
-					arg =
-						project_id: @project_id
-						element_id: @doc_id,
-						type: 'doc'
-					@ProjectLocator.findElement.calledWith(arg).should.equal true
+			it 'should not produce an error', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 0
+					@res.send.calledWith(500).should.equal false
+					@res.send.calledWith(400).should.equal false
 					done()
-				@controller.indexFile(@req, @res)
 
-			it 'should call ReferencesSearchHandler.indexFile', (done) ->
-				@res.send = (status) =>
-					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
-					@ReferencesSearchHandler.indexFile
-					.calledWith(@project_id, @doc_id).should.equal true
+			it 'should still return data', (done) ->
+				@call () =>
+					@res.json.callCount.should.equal 1
+					@res.json.calledWith(@fakeResponseData).should.equal true
 					done()
-				@controller.indexFile(@req, @res)
 
-		describe 'without a doc_id', ->
+		describe 'with missing docIds', ->
 
 			beforeEach ->
-				@req.body = {bad: true}
+				delete @req.body.docIds
 
-			it 'should produce a 400 response', (done) ->
-				@res.send = (status) =>
-					status.should.equal 400
+			it 'should produce an error response', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 1
+					@res.send.calledWith(400).should.equal true
 					done()
-				@controller.indexFile(@req, @res)
 
-		describe 'when the ProjectLocator cannot find the doc', ->
+			it 'should not call ReferencesSearchHandler.index', (done) ->
+				@call () =>
+					@ReferencesSearchHandler.index.callCount.should.equal 0
+					done()
+
+		describe 'with invalid docIds', ->
 
 			beforeEach ->
-				@req.body = {docId: 'some_weird_id'}
-				@ProjectLocator.findElement.callsArgWith(1, new Error('not found'), null)
-				@ReferencesSearchHandler.indexFile.callsArgWith(2, null)
+				@req.body.docIds = 42
 
-			it 'should call ProjectLocator.findElement', (done) ->
-				@res.send = (status) =>
-					@ProjectLocator.findElement.calledOnce.should.equal true
-					arg =
-						project_id: @project_id
-						element_id: 'some_weird_id',
-						type: 'doc'
-					@ProjectLocator.findElement.calledWith(arg).should.equal true
+			it 'should produce an error response', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 1
+					@res.send.calledWith(400).should.equal true
 					done()
-				@controller.indexFile(@req, @res)
 
-			it 'should produce a 500 response', (done) ->
-				@res.send = (status) =>
-					status.should.equal 500
+			it 'should not call ReferencesSearchHandler.index', (done) ->
+				@call () =>
+					@ReferencesSearchHandler.index.callCount.should.equal 0
 					done()
-				@controller.indexFile(@req, @res)
-
-		describe 'when the ReferencesSearchHandler produces an error', ->
-
-			beforeEach ->
-				@req.body = {docId: @doc_id}
-				@ProjectLocator.findElement.callsArgWith(1, null, {})
-				@ReferencesSearchHandler.indexFile
-				.callsArgWith(2, new Error('something went wrong'))
-
-			it 'should call ReferencesSearchHandler.indexFile', (done) ->
-				@res.send = (status) =>
-					@ReferencesSearchHandler.indexFile.calledOnce.should.equal true
-					@ReferencesSearchHandler.indexFile
-					.calledWith(@project_id, @doc_id).should.equal true
-					done()
-				@controller.indexFile(@req, @res)
-
-			it 'should produce a 500 response', (done) ->
-				@res.send = (status) =>
-					status.should.equal 500
-					done()
-				@controller.indexFile(@req, @res)

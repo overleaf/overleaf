@@ -7,31 +7,89 @@ modulePath = "../../../../app/js/Features/ReferencesSearch/ReferencesSearchHandl
 
 describe 'ReferencesSearchHandler', ->
 
-	# beforeEach ->
-	# 	@project_id = '222'
-	# 	@file_id = '111111'
-	# 	@handler = SandboxedModule.require modulePath, requires:
-	# 		'logger-sharelatex': {
-	# 			log: ->
-	# 			err: ->
-	# 		}
-	# 		'settings-sharelatex': @settings = {
-	# 			apis:
-	# 				references: {url: 'http://some.url'}
-	# 				web: {url: 'http://some.url'}
-	# 		}
-	# 		'request': @request = {
-	# 			get: sinon.stub()
-	# 			post: sinon.stub()
-	# 		}
-	# 		'../../models/Project': @Project = {
-	# 			Project: {
-	# 				findById: sinon.stub().callsArgWith(2, null, {owner_ref: '111'})
-	# 			}
-	# 		}
-	# 		'../User/UserGetter': @UserGetter = {
-	# 			getUser: sinon.stub().callsArgWith(2, null, {features: {references: false}})
-	# 		}
+	beforeEach ->
+		@project_id = '222'
+		@file_id = '111111'
+		@handler = SandboxedModule.require modulePath, requires:
+			'logger-sharelatex': {
+				log: ->
+				err: ->
+			}
+			'settings-sharelatex': @settings = {
+				apis:
+					references: {url: 'http://some.url'}
+					web: {url: 'http://some.url'}
+			}
+			'request': @request = {
+				get: sinon.stub()
+				post: sinon.stub()
+			}
+			'../../models/Project': @Project = {
+				Project: {
+					findById: sinon.stub().callsArgWith(2, null, {owner_ref: '111'})
+				}
+			}
+			'../User/UserGetter': @UserGetter = {
+				getUser: sinon.stub().callsArgWith(2, null, {features: {references: false}})
+			}
+
+
+	describe '_findBibDocIds', ->
+
+		beforeEach ->
+			@fakeProject =
+				rootFolder: [
+					docs: [
+						{name: 'one.bib', _id: 'aaa'},
+						{name: 'two.txt', _id: 'bbb'},
+					]
+					folders: [
+						{docs: [{name: 'three.bib', _id: 'ccc'}], folders: []}
+					]
+				]
+			@expectedIds = ['aaa', 'ccc']
+
+		it 'should select the correct docIds', ->
+			result = @handler._findBibDocIds(@fakeProject)
+			expect(result).to.deep.equal @expectedIds
+
+	describe '_isFullIndex', ->
+
+		beforeEach ->
+			@fakeProject =
+				owner_ref:
+					features:
+						references: false
+			@call = (callback) =>
+				@handler._isFullIndex @fakeProject, callback
+
+		describe 'with references feature on', ->
+
+			beforeEach ->
+				@fakeProject.owner_ref.features.references = true
+
+			it 'should return true', ->
+				@call (err, isFullIndex) =>
+					expect(err).to.equal null
+					expect(isFullIndex).to.equal true
+
+		describe 'with references feature off', ->
+
+			beforeEach ->
+				@fakeProject.owner_ref.features.references = false
+
+			it 'should return false', ->
+				@call (err, isFullIndex) =>
+					expect(err).to.equal null
+					expect(isFullIndex).to.equal false
+
+
+	describe 'index', ->
+
+
+
+
+
 
 	# describe 'indexFile', ->
 
