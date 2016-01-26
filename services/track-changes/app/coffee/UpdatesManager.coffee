@@ -47,6 +47,17 @@ module.exports = UpdatesManager =
 			if rawUpdates.length == 0
 				return callback()
 
+			# some old large ops in redis need to be rejected, they predate
+			# the size limit that now prevents them going through the system
+			REJECT_LARGE_OP_SIZE = 4 * 1024 * 1024
+			for rawUpdate in rawUpdates
+				opSizes = ((op.i?.length || op.d?.length) for op in rawUpdate?.op or [])
+				size = _.max opSizes
+				if size > REJECT_LARGE_OP_SIZE
+					error = new Error("dropped op exceeding maximum allowed size of #{REJECT_LARGE_OP_SIZE}")
+					logger.error err: error, doc_id: doc_id, project_id: project_id, size: size, rawUpdate: rawUpdate, "dropped op - too big"
+					rawUpdate.op = []
+
 			if (not lastCompressedUpdate?) or lastCompressedUpdate.pack? # handle pack append as a special case
 				UpdatesManager._updatePack project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
 			else #use the existing op code

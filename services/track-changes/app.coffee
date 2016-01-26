@@ -16,6 +16,7 @@ truncateFn = (updates) ->
 TrackChangesLogger.addSerializers {
 	rawUpdates: truncateFn
 	newUpdates: truncateFn
+	rawUpdate: truncateFn
 	lastUpdate: truncateFn
 }
 
