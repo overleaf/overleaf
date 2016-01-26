@@ -102,6 +102,7 @@ module.exports = UpdatesManager =
 					# parse the redis strings into ShareJs updates
 					RedisManager.expandDocUpdates docUpdates, (error, rawUpdates) ->
 						return callback(error) if error?
+						logger.log project_id: project_id, doc_id: doc_id, rawUpdates: rawUpdates, "retrieved raw updates from redis"
 						UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 							return callback(error) if error?
 							logger.log project_id: project_id, doc_id: doc_id, "compressed and saved doc updates"

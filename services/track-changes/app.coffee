@@ -1,9 +1,23 @@
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
-logger.initialize("track-changes")
+TrackChangesLogger = logger.initialize("track-changes").logger
 
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
+
+# log updates as truncated strings
+truncateFn = (updates) ->
+		JSON.stringify updates, (key, value) ->
+			if typeof value == 'string' && (len = value.length) > 80
+				return value.substr(0,32) + "...(message of length #{len} truncated)..." + value.substr(-32)
+			else
+				return value
+
+TrackChangesLogger.addSerializers {
+	rawUpdates: truncateFn
+	newUpdates: truncateFn
+	lastUpdate: truncateFn
+}
 
 Path = require "path"
 Metrics = require "metrics-sharelatex"
