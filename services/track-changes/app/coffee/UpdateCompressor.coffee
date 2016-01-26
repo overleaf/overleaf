@@ -133,6 +133,7 @@ module.exports = UpdateCompressor =
 		else if firstOp.i? and secondOp.d? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
 			offset = secondOp.p - firstOp.p
 			insertedText = firstOp.i.slice(offset, offset + secondOp.d.length)
+			# Only trim the insert when the delete is fully contained within in it
 			if insertedText == secondOp.d
 				insert = strRemove(firstOp.i, offset, secondOp.d.length)
 				return [
@@ -146,7 +147,7 @@ module.exports = UpdateCompressor =
 					v: secondUpdate.v
 				]
 			else
-				# This shouldn't be possible!
+				# This will only happen if the delete extends outside the insert
 				return [firstUpdate, secondUpdate]
 
 		else

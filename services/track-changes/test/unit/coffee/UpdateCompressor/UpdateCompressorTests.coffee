@@ -263,6 +263,26 @@ describe "UpdateCompressor", ->
 					v: 43
 				}]
 
+			it "should not combine updates with overlap beyond the end", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, i: "foobar" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, d: "bardle" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 3, i: "foobar" }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, d: "bardle" }
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+
 		describe "noop - insert", ->
 			it "should leave them untouched", ->
 				expect(@UpdateCompressor.compressUpdates [{
