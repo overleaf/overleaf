@@ -9,7 +9,6 @@ define [
 				if doc.doc_id
 				 	entity = @ide.fileTreeManager.findEntityById doc.doc_id
 					if entity?.name?.match /.*\.bib$/
-						@$scope.$emit 'references:changed', entity
 						@indexReferences([doc.doc_id], true)
 
 			@$scope.$on 'project:joined', (e) =>
@@ -18,6 +17,7 @@ define [
 			setTimeout(
 				(self) ->
 					self.ide.socket.on 'references:keys:updated', (keys) ->
+						console.log '>> got keys from socket'
 						self._storeReferencesKeys(keys)
 				, 100
 				, this
