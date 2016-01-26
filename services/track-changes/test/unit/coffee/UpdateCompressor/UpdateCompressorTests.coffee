@@ -10,6 +10,8 @@ describe "UpdateCompressor", ->
 		@UpdateCompressor = SandboxedModule.require modulePath
 		@user_id = "user-id-1"
 		@other_user_id = "user-id-2"
+		@bigstring = ("a" for [0 .. 2*1024*1024]).join("")
+		@mediumstring = ("a" for [0 .. 1024*1024]).join("")
 		@ts1 = Date.now()
 		@ts2 = Date.now() + 1000
 
@@ -140,6 +142,67 @@ describe "UpdateCompressor", ->
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
+
+			it "should not append inserts that are too big (second op)", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, i: "foo" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, i: @bigstring }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 3, i: "foo" }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 6, i: @bigstring }
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+
+			it "should not append inserts that are too big (first op)", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, i: @bigstring }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3 + @bigstring.length, i: "bar" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 3, i: @bigstring }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3 + @bigstring.length, i: "bar" }
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+
+			it "should not append inserts that are too big (first and second op)", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, i: @mediumstring }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3 + @mediumstring.length, i: @mediumstring }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 3, i: @mediumstring }
+					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3 + @mediumstring.length, i: @mediumstring }
+					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+
 
 		describe "delete - delete", ->
 			it "should append one delete to the other", ->

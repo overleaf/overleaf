@@ -80,6 +80,7 @@ module.exports = UpdateCompressor =
 		return compressedUpdates
 
 	MAX_TIME_BETWEEN_UPDATES: oneMinute = 60 * 1000
+	MAX_UPDATE_SIZE: twoMegabytes = 2* 1024 * 1024
 
 	_concatTwoUpdates: (firstUpdate, secondUpdate) ->
 		firstUpdate =
@@ -105,8 +106,12 @@ module.exports = UpdateCompressor =
 
 		firstOp = firstUpdate.op
 		secondOp = secondUpdate.op
+
+		firstSize = firstOp.i?.length or firstOp.d?.length
+		secondSize = secondOp.i?.length or secondOp.d?.length
+
 		# Two inserts
-		if firstOp.i? and secondOp.i? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length)
+		if firstOp.i? and secondOp.i? and firstOp.p <= secondOp.p <= (firstOp.p + firstOp.i.length) and firstSize + secondSize < UpdateCompressor.MAX_UPDATE_SIZE
 			return [
 				meta:
 					start_ts: firstUpdate.meta.start_ts
@@ -118,7 +123,7 @@ module.exports = UpdateCompressor =
 				v: secondUpdate.v
 			]
 		# Two deletes
-		else if firstOp.d? and secondOp.d? and secondOp.p <= firstOp.p <= (secondOp.p + secondOp.d.length)
+		else if firstOp.d? and secondOp.d? and secondOp.p <= firstOp.p <= (secondOp.p + secondOp.d.length) and firstSize + secondSize < UpdateCompressor.MAX_UPDATE_SIZE
 			return [
 				meta:
 					start_ts: firstUpdate.meta.start_ts
