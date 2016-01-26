@@ -24,12 +24,13 @@ define [
 			)
 
 		_storeReferencesKeys: (newKeys) ->
+			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
+				return
+			console.log '>> storing references keys'
 			@$scope.$root._references.keys = newKeys
 
 		# docIds: List[String]|String('ALL'), shouldBroadcast: Bool
 		indexReferences: (docIds, shouldBroadcast) ->
-			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
-				return
 			opts =
 				docIds: docIds
 				shouldBroadcast: shouldBroadcast
@@ -38,20 +39,6 @@ define [
 				"/project/#{@$scope.project_id}/references/index",
 				opts,
 				(data) =>
-					console.log ">> done ", data
+					console.log ">> got keys ", data
 					@_storeReferencesKeys(data.keys)
-			)
-
-		getReferenceKeys: (callback=(keys)->) ->
-			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
-				return
-			$.get(
-				"/project/#{@$scope.project_id}/references/keys",
-				{
-					_csrf: window.csrfToken
-				},
-				(data) =>
-					@_storeReferencesKeys(data.keys)
-					if callback
-						callback(data.keys)
 			)
