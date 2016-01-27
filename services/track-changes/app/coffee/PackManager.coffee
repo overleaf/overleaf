@@ -532,3 +532,7 @@ module.exports = PackManager =
 		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
 		db.docHistory.findAndModify {query, update}, callback
 
+	listDocs: (options, callback) ->
+		db.docHistory.find({"op.p":{$exists:true}}, {doc_id:true}).limit (options.limit||100), (err, docs) ->
+			return callback(err) if err?
+			callback(null, docs)

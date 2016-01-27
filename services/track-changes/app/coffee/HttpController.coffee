@@ -6,6 +6,7 @@ logger = require "logger-sharelatex"
 DocArchiveManager = require "./DocArchiveManager"
 HealthChecker = require "./HealthChecker"
 LockManager = require "./LockManager"
+_ = require "underscore"
 
 module.exports = HttpController =
 	flushDoc: (req, res, next = (error) ->) ->
@@ -22,6 +23,15 @@ module.exports = HttpController =
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return next(error) if error?
 			res.send 204
+
+	listDocs: (req, res, next = (error) ->) ->
+		logger.log "listing packing doc history"
+		limit = +req.query?.limit || 100
+		PackManager.listDocs {limit},  (error, doc_ids) ->
+			return next(error) if error?
+			ids = (doc.doc_id.toString() for doc in doc_ids)
+			output = _.uniq(ids).join("\n") + "\n"
+			res.send output
 
 	packDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
