@@ -4,6 +4,7 @@ async = require("async")
 settings = require("settings-sharelatex")
 port = settings.internal.trackchanges.port
 logger = require "logger-sharelatex"
+LockManager = require "./LockManager"
 
 module.exports =
 	check : (callback)->
@@ -37,3 +38,6 @@ module.exports =
 						cb()
 		]
 		async.series jobs, callback
+
+	checkLock: (callback) ->
+		LockManager.healthCheck callback

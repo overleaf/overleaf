@@ -5,7 +5,6 @@ RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
 DocArchiveManager = require "./DocArchiveManager"
 HealthChecker = require "./HealthChecker"
-LockManager = require "./LockManager"
 _ = require "underscore"
 
 module.exports = HttpController =
@@ -118,7 +117,7 @@ module.exports = HttpController =
 				res.send 200
 
 	checkLock: (req, res)->
-		LockManager.healthCheck (err) ->
+		HealthChecker.checkLock (err) ->
 			if err?
 				logger.err err:err, "error performing lock check"
 				res.send 500
