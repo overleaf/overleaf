@@ -12,7 +12,7 @@ fiveMinsInMs = oneMinInMs * 5
 module.exports = ReferencesSearchHandler =
 
 	_buildDocUrl: (projectId, docId) ->
-		"#{settings.apis.web.url}/project/#{projectId}/doc/#{docId}"
+		"#{settings.apis.docstore.url}/project/#{projectId}/doc/#{docId}/raw"
 
 	_findBibDocIds: (project) ->
 		ids = []
@@ -48,7 +48,7 @@ module.exports = ReferencesSearchHandler =
 					return callback(err)
 				bibDocUrls = docIds.map (docId) ->
 					ReferencesSearchHandler._buildDocUrl projectId, docId
-				logger.log {projectId, isFullIndex, docIds}, "sending request to references service"
+				logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
 				request.post {
 					url: "#{settings.apis.references.url}/project/#{projectId}/index"
 					json:

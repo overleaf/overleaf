@@ -32,8 +32,8 @@ describe 'ReferencesSearchHandler', ->
 			}
 			'settings-sharelatex': @settings = {
 				apis:
-					references: {url: 'http://some.url'}
-					web: {url: 'http://some.url'}
+					references: {url: 'http://some.url/references'}
+					docstore: {url: 'http://some.url/docstore'}
 			}
 			'request': @request = {
 				get: sinon.stub()
