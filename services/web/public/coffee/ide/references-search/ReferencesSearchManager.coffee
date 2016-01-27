@@ -15,14 +15,14 @@ define [
 			#   index all references files
 			#   and don't broadcast to all clients
 			@$scope.$on 'project:joined', (e) =>
-				@indexReferences("ALL", false)
+				@indexAllReferences(false)
 
 			setTimeout(
 				(self) ->
 					self.ide.socket.on 'references:keys:updated', (keys) ->
 						# console.log '>> got keys from socket'
 						self._storeReferencesKeys(keys)
-				, 100
+				, 1000
 				, this
 			)
 
@@ -35,7 +35,6 @@ define [
 			@$scope.$root._references.keys = _.union(oldKeys, newKeys)
 			console.log "end>> #{@$scope.$root._references.keys.length}"
 
-		# docIds: List[String]|String('ALL'), shouldBroadcast: Bool
 		indexReferences: (docIds, shouldBroadcast) ->
 			opts =
 				docIds: docIds
@@ -43,6 +42,18 @@ define [
 				_csrf: window.csrfToken
 			$.post(
 				"/project/#{@$scope.project_id}/references/index",
+				opts,
+				(data) =>
+					# console.log ">> got keys ", data
+					@_storeReferencesKeys(data.keys)
+			)
+
+		indexAllReferences: (shouldBroadcast) ->
+			opts =
+				shouldBroadcast: shouldBroadcast
+				_csrf: window.csrfToken
+			$.post(
+				"/project/#{@$scope.project_id}/references/indexAll",
 				opts,
 				(data) =>
 					# console.log ">> got keys ", data

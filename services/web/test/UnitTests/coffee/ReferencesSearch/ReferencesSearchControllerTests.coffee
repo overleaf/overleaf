@@ -20,6 +20,7 @@ describe "ReferencesSearchController", ->
 			},
 			'./ReferencesSearchHandler': @ReferencesSearchHandler = {
 				index: sinon.stub()
+				indexAll: sinon.stub()
 			},
 			'../Editor/EditorRealTimeController': @EditorRealTimeController = {
 				emitToRoom: sinon.stub()
@@ -35,6 +36,83 @@ describe "ReferencesSearchController", ->
 		@fakeResponseData =
 			projectId: @projectId,
 			keys: ['one', 'two', 'three']
+
+	describe 'indexAll', ->
+
+		beforeEach ->
+			@req.body = {shouldBroadcast: false}
+			@ReferencesSearchHandler.indexAll.callsArgWith(1, null, @fakeResponseData)
+			@call = (callback) =>
+				@controller.indexAll @req, @res
+				callback()
+
+		it 'should not produce an error', (done) ->
+			@call () =>
+				@res.send.callCount.should.equal 0
+				@res.send.calledWith(500).should.equal false
+				@res.send.calledWith(400).should.equal false
+				done()
+
+		it 'should return data', (done) ->
+			@call () =>
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith(@fakeResponseData).should.equal true
+				done()
+
+		it 'should call ReferencesSearchHandler.indexAll', (done) ->
+			@call () =>
+				@ReferencesSearchHandler.indexAll.callCount.should.equal 1
+				@ReferencesSearchHandler.indexAll.calledWith(@projectId).should.equal true
+				done()
+
+		describe 'when shouldBroadcast is true', ->
+
+			beforeEach ->
+				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@req.body.shouldBroadcast = true
+
+			it 'should call EditorRealTimeController.emitToRoom', (done) ->
+				@call () =>
+					@EditorRealTimeController.emitToRoom.callCount.should.equal 1
+					done()
+
+			it 'should not produce an error', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 0
+					@res.send.calledWith(500).should.equal false
+					@res.send.calledWith(400).should.equal false
+					done()
+
+			it 'should still return data', (done) ->
+				@call () =>
+					@res.json.callCount.should.equal 1
+					@res.json.calledWith(@fakeResponseData).should.equal true
+					done()
+
+		describe 'when shouldBroadcast is false', ->
+
+			beforeEach ->
+				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@req.body.shouldBroadcast = false
+
+			it 'should not call EditorRealTimeController.emitToRoom', (done) ->
+				@call () =>
+					@EditorRealTimeController.emitToRoom.callCount.should.equal 0
+					done()
+
+			it 'should not produce an error', (done) ->
+				@call () =>
+					@res.send.callCount.should.equal 0
+					@res.send.calledWith(500).should.equal false
+					@res.send.calledWith(400).should.equal false
+					done()
+
+			it 'should still return data', (done) ->
+				@call () =>
+					@res.json.callCount.should.equal 1
+					@res.json.calledWith(@fakeResponseData).should.equal true
+					done()
+
 
 	describe 'index', ->
 
@@ -69,24 +147,6 @@ describe "ReferencesSearchController", ->
 				@call () =>
 					@EditorRealTimeController.emitToRoom.callCount.should.equal 0
 					done()
-
-			describe 'with docIds set to ALL', ->
-
-				beforeEach ->
-					@req.body.docIds = 'ALL'
-
-				it 'should still pass the "ALL" value to handler', (done) ->
-					@call () =>
-						@ReferencesSearchHandler.index.callCount.should.equal 1
-						@ReferencesSearchHandler.index.calledWith(@projectId, 'ALL').should.equal true
-						done()
-
-				it 'should not produce an error', (done) ->
-					@call () =>
-						@res.send.callCount.should.equal 0
-						@res.send.calledWith(500).should.equal false
-						@res.send.calledWith(400).should.equal false
-						done()
 
 			describe 'when ReferencesSearchHandler.index produces an error', ->
 

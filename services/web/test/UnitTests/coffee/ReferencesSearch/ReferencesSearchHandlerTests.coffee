@@ -76,6 +76,11 @@ describe 'ReferencesSearchHandler', ->
 					@Project.findPopulatedById.calledWith(@projectId).should.equal true
 					done()
 
+			it 'should not call _findBibDocIds', (done) ->
+				@call (err, data) =>
+					@handler._findBibDocIds.callCount.should.equal 0
+					done()
+
 			it 'should call DocumentUpdaterHandler.flushDocToMongo', (done) ->
 				@call (err, data) =>
 					@DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal 2
@@ -90,35 +95,6 @@ describe 'ReferencesSearchHandler', ->
 					expect(arg.json).to.have.all.keys 'docUrls', 'fullIndex'
 					expect(arg.json.docUrls.length).to.equal 2
 					expect(arg.json.fullIndex).to.equal true
-					done()
-
-			it 'should not produce an error', (done) ->
-				@call (err, data) =>
-					expect(err).to.equal null
-					done()
-
-			it 'should return data', (done) ->
-				@call (err, data) =>
-					expect(data).to.not.equal null
-					expect(data).to.not.equal undefined
-					expect(data).to.equal @fakeResponseData
-					done()
-
-		describe 'with docIds as "ALL"', ->
-
-			beforeEach ->
-				@docIds = 'ALL'
-				@handler._findBibDocIds.returns(['aaa', 'ccc'])
-
-			it 'should call _findBibDocIds', (done) ->
-				@call (err, data) =>
-					@handler._findBibDocIds.callCount.should.equal 1
-					@handler._findBibDocIds.calledWith(@fakeProject).should.equal true
-					done()
-
-			it 'should call DocumentUpdaterHandler.flushDocToMongo', (done) ->
-				@call (err, data) =>
-					@DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal 2
 					done()
 
 			it 'should not produce an error', (done) ->
@@ -216,6 +192,48 @@ describe 'ReferencesSearchHandler', ->
 					expect(err).to.be.instanceof Error
 					expect(data).to.equal undefined
 					done()
+
+	describe 'indexAll', ->
+
+		beforeEach ->
+			sinon.stub(@handler, '_findBibDocIds').returns(['aaa', 'ccc'])
+			sinon.stub(@handler, '_isFullIndex').callsArgWith(1, null, true)
+			@request.post.callsArgWith(1, null, {statusCode: 200}, @fakeResponseData)
+			@call = (callback) =>
+				@handler.indexAll @projectId, callback
+
+		it 'should call _findBibDocIds', (done) ->
+			@call (err, data) =>
+				@handler._findBibDocIds.callCount.should.equal 1
+				@handler._findBibDocIds.calledWith(@fakeProject).should.equal true
+				done()
+
+		it 'should call DocumentUpdaterHandler.flushDocToMongo', (done) ->
+			@call (err, data) =>
+				@DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal 2
+				done()
+
+		it 'should make a request to references service', (done) ->
+			@call (err, data) =>
+				@request.post.callCount.should.equal 1
+				arg = @request.post.firstCall.args[0]
+				expect(arg.json).to.have.all.keys 'docUrls', 'fullIndex'
+				expect(arg.json.docUrls.length).to.equal 2
+				expect(arg.json.fullIndex).to.equal true
+				done()
+
+		it 'should not produce an error', (done) ->
+			@call (err, data) =>
+				expect(err).to.equal null
+				done()
+
+		it 'should return data', (done) ->
+			@call (err, data) =>
+				expect(data).to.not.equal null
+				expect(data).to.not.equal undefined
+				expect(data).to.equal @fakeResponseData
+				done()
+
 
 	describe '_findBibDocIds', ->
 
