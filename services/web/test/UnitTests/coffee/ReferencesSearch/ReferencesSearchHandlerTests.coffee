@@ -234,6 +234,60 @@ describe 'ReferencesSearchHandler', ->
 				expect(data).to.equal @fakeResponseData
 				done()
 
+		describe 'when Project.findPopulatedById produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
+		describe 'when _isFullIndex produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
+		describe 'when flushDocToMongo produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, false)
+				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
 
 	describe '_findBibDocIds', ->
 
