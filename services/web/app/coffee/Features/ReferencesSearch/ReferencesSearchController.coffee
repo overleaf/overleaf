@@ -12,7 +12,7 @@ module.exports = ReferencesSearchController =
 		if (!docIds or (!(docIds instanceof Array) and (docIds != 'ALL')))
 			logger.err {projectId, docIds}, "docIds is not valid, should be either Array or String 'ALL'"
 			return res.send 400
-		logger.log {projectId, docIds}, "index references for project"
+		logger.log {projectId, docIds: docIds}, "index references for project"
 		ReferencesSearchHandler.index projectId, docIds, (err, data) ->
 			if err
 				logger.err {err, projectId}, "error indexing references"

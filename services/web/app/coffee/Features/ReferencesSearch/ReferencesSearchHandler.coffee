@@ -2,6 +2,7 @@ logger = require("logger-sharelatex")
 request = require("request")
 settings = require("settings-sharelatex")
 Project = require("../../models/Project").Project
+DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 U = require('underscore')
 Async = require('async')
 
@@ -46,22 +47,32 @@ module.exports = ReferencesSearchHandler =
 				if err
 					logger.err {err, projectId}, "error checking whether to do full index"
 					return callback(err)
-				bibDocUrls = docIds.map (docId) ->
-					ReferencesSearchHandler._buildDocUrl projectId, docId
-				logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
-				request.post {
-					url: "#{settings.apis.references.url}/project/#{projectId}/index"
-					json:
-						docUrls: bibDocUrls
-						fullIndex: isFullIndex
-				}, (err, res, data) ->
-					if err
-						logger.err {err, projectId}, "error communicating with references api"
-						return callback(err)
-					if 200 <= res.statusCode < 300
-						logger.log {projectId}, "got keys from references api"
-						return callback(null, data)
-					else
-						err = new Error("references api responded with non-success code: #{res.statusCode}")
-						logger.log {err, projectId}, "error updating references"
-						return callback(err)
+				# TODO: flush documents to mongo
+				logger.log {projectId, docIds}, 'flushing docs to mongo before calling references service'
+				Async.series(
+					docIds.map((docId) -> (cb) -> DocumentUpdaterHandler.flushDocToMongo(projectId, docId, cb)),
+					(err) ->
+						# continue
+						if err
+							logger.err {err, projectId, docIds}, "error flushing docs to mongo"
+							return callback(err)
+						bibDocUrls = docIds.map (docId) ->
+							ReferencesSearchHandler._buildDocUrl projectId, docId
+						logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
+						request.post {
+							url: "#{settings.apis.references.url}/project/#{projectId}/index"
+							json:
+								docUrls: bibDocUrls
+								fullIndex: isFullIndex
+						}, (err, res, data) ->
+							if err
+								logger.err {err, projectId}, "error communicating with references api"
+								return callback(err)
+							if 200 <= res.statusCode < 300
+								logger.log {projectId}, "got keys from references api"
+								return callback(null, data)
+							else
+								err = new Error("references api responded with non-success code: #{res.statusCode}")
+								logger.log {err, projectId}, "error updating references"
+								return callback(err)
+				)

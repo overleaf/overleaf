@@ -44,6 +44,9 @@ describe 'ReferencesSearchHandler', ->
 					findPopulatedById: sinon.stub().callsArgWith(1, null, @fakeProject)
 				}
 			}
+			'../DocumentUpdater/DocumentUpdaterHandler': @DocumentUpdaterHandler = {
+				flushDocToMongo: sinon.stub().callsArgWith(2, null)
+			}
 		@fakeResponseData =
 			projectId: @projectId
 			keys: ['k1', 'k2']
@@ -71,6 +74,13 @@ describe 'ReferencesSearchHandler', ->
 				@call (err, data) =>
 					@Project.findPopulatedById.callCount.should.equal 1
 					@Project.findPopulatedById.calledWith(@projectId).should.equal true
+					done()
+
+			it 'should call DocumentUpdaterHandler.flushDocToMongo', (done) ->
+				@call (err, data) =>
+					@DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal 2
+					@docIds.forEach (docId) =>
+						@DocumentUpdaterHandler.flushDocToMongo.calledWith(@projectId, docId).should.equal true
 					done()
 
 			it 'should make a request to references service', (done) ->
@@ -104,6 +114,11 @@ describe 'ReferencesSearchHandler', ->
 				@call (err, data) =>
 					@handler._findBibDocIds.callCount.should.equal 1
 					@handler._findBibDocIds.calledWith(@fakeProject).should.equal true
+					done()
+
+			it 'should call DocumentUpdaterHandler.flushDocToMongo', (done) ->
+				@call (err, data) =>
+					@DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal 2
 					done()
 
 			it 'should not produce an error', (done) ->
@@ -153,11 +168,32 @@ describe 'ReferencesSearchHandler', ->
 					@request.post.callCount.should.equal 0
 					done()
 
+		describe 'when flushDocToMongo produces an error', ->
+
+			beforeEach ->
+				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
+				@handler._isFullIndex.callsArgWith(1, false)
+				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, data) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(data).to.equal undefined
+					done()
+
+			it 'should not send request', (done) ->
+				@call (err, data) =>
+					@request.post.callCount.should.equal 0
+					done()
+
+
 		describe 'when request produces an error', ->
 
 			beforeEach ->
 				@Project.findPopulatedById.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, null, false)
+				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, null)
 				@request.post.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
