@@ -230,3 +230,17 @@ describe "PackManager", ->
 
 				it "should call the callback", ->
 					@callback.called.should.equal true
+
+	describe "convertDocsToPacks", ->
+		describe "with several small packs", ->
+			beforeEach ->
+				@ops = [
+					{ op: "op-3", meta: "meta-3", v: 3},
+					{ op: "op-4", meta: "meta-4", v: 4}
+				]
+				@PackManager.convertDocsToPacks @ops, @callback
+#			it "should create a single pack", ->
+#				@callback.
+			it "should call the callback", ->
+				@callback.called.should.equal true
+

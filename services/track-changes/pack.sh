@@ -1,6 +1,8 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # find all the docHistories with unpacked ops and pack them
+
+# need to keep track of docs already done
 
 HOST=${1:-"localhost:3015"}
 T=${2:-10}
