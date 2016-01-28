@@ -8,6 +8,7 @@ _ = require('underscore')
 
 describe 'TagsHandler', ->
 	user_id = "123nd3ijdks"
+	tag_id = "tag-id-123"
 	project_id = "123njdskj9jlk"
 	tagsUrl = "tags.sharelatex.testing"
 	tag = "class101"
@@ -17,6 +18,7 @@ describe 'TagsHandler', ->
 			post: sinon.stub().callsArgWith(1)
 			del: sinon.stub().callsArgWith(1)
 			get: sinon.stub()
+		@callback = sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": apis:{tags:{url:tagsUrl}}
 			"request":@request
@@ -24,20 +26,23 @@ describe 'TagsHandler', ->
 				log:->
 				err:->
 
-	it 'Should post the request to the tags api with the user id in the url', (done)->
-		@handler.addTag user_id, project_id, tag, =>
-			@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000, json:{name:tag}}).should.equal true
-			done()
+	describe "addTag", ->
+		it 'Should post the request to the tags api with the user id in the url', (done)->
+			@handler.addTag user_id, project_id, tag, =>
+				@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000, json:{name:tag}}).should.equal true
+				done()
+	
+	describe "removeProject", ->
+		it 'should send a delete request when a delete has been recived with the body format standardised', (done)->
+			@handler.removeProject user_id, project_id, tag, =>
+				@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000,  json:{name:tag}}).should.equal true
+				done()
 
-	it 'should send a delete request when a delete has been recived with the body format standardised', (done)->
-		@handler.deleteTag user_id, project_id, tag, =>
-			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000,  json:{name:tag}}).should.equal true
-			done()
-
-	it 'should tell the tags api to remove the project_id from all the users tags', (done)->
-		@handler.removeProjectFromAllTags user_id, project_id, =>
-			@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}", timeout:1000}).should.equal true
-			done()
+	describe "removeProjectFromAllTags", ->
+		it 'should tell the tags api to remove the project_id from all the users tags', (done)->
+			@handler.removeProjectFromAllTags user_id, project_id, =>
+				@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}", timeout:1000}).should.equal true
+				done()
 
 	describe "groupTagsByProject", ->
 		it 'should 	group the tags by project_id', (done)->
@@ -99,4 +104,26 @@ describe 'TagsHandler', ->
 			@handler.getAllTags user_id, (err, allTags, projectGroupedTags)=>
 				allTags.length.should.equal 0
 				_.size(projectGroupedTags).should.equal 0
-
+	
+	describe "deleteTag", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.deleteTag user_id, tag_id, @callback
+			
+			it "should send a request to the tag backend", ->
+				@request.del
+					.calledWith("#{tagsUrl}/user/#{user_id}/tag/#{tag_id}")
+					.should.equal true
+			
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+			
+		describe "with error", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.deleteTag user_id, tag_id, @callback
+			
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true
+			

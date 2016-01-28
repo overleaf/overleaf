@@ -102,3 +102,28 @@ define [
 		$scope.onComplete = (error, name, response) ->
 			if response.project_id?
 				window.location = '/project/' + response.project_id
+
+	App.controller 'DeleteTagModalController', ($scope, $modalInstance, $http, tag) ->
+		$scope.tag = tag
+		$scope.state =
+			inflight: false
+			error: false
+		
+		$scope.delete = () ->
+			$scope.state.inflight = true
+			$scope.state.error = false
+			$http({
+				method: "DELETE"
+				url: "/tag/#{tag._id}"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			})
+				.success () ->
+					$scope.state.inflight = false
+					$modalInstance.close()
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = true
+		
+		$scope.cancel = () ->
+			$modalInstance.dismiss('cancel')

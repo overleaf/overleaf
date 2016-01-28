@@ -30,6 +30,32 @@ script(type='text/ng-template', id='newTagModalTemplate')
 			stop-propagation="click"
 		) #{translate("create")}
 
+script(type='text/ng-template', id='deleteTagModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 #{translate("delete_tag")}
+	.modal-body
+		p #{translate("about_to_delete_tag")}
+		ul
+			li
+				strong {{tag.name}}
+	.modal-footer
+		.modal-footer-left
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-danger(
+			ng-click="delete()",
+			ng-disabled="state.inflight"
+		)
+			span(ng-show="state.inflight") #{translate("deleting")}...
+			span(ng-show="!state.inflight") #{translate("delete")}
+
 script(type='text/ng-template', id='renameProjectModalTemplate')
 	.modal-header
 		button.close(

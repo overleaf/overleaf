@@ -8,7 +8,7 @@ module.exports =
 		project_id = req.params.project_id
 		if req.body.deletedTag?
 			tag = req.body.deletedTag
-			TagsHandler.deleteTag user_id, project_id, tag, ->
+			TagsHandler.removeProject user_id, project_id, tag, ->
 				res.send()
 		else
 			tag = req.body.tag
@@ -19,3 +19,11 @@ module.exports =
 	getAllTags: (req, res)->
 		TagsHandler.getAllTags req.session.user._id, (err, allTags)->
 			res.send(allTags)
+	
+	deleteTag: (req, res, next) ->
+		user_id = req.session.user._id
+		tag_id = req.params.tag_id
+		logger.log {user_id, tag_id}, "deleting tag"
+		TagsHandler.deleteTag user_id, tag_id, (error) ->
+			return next(error) if error?
+			res.status(204).end()

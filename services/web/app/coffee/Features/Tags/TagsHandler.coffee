@@ -5,9 +5,20 @@ logger = require("logger-sharelatex")
 
 oneSecond = 1000
 module.exports = 
+	deleteTag: (user_id, tag_id, callback = (error) ->) ->
+		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}"
+		request.del url, (err, res, body) ->
+			if err?
+				logger.err {err, user_id, tag_id}, "error deleting tag from tag api"
+				return callback(err)
+			else if res.statusCode >= 200 and res.statusCode < 300
+				return callback(null)
+			else
+				err = new Error("tags api returned a failure status code: #{res.statusCode}")
+				logger.err {err, user_id, tag_id}, "tags api returned failure status code: #{res.statusCode}"
+				return callback(err)
 
-
-	deleteTag: (user_id, project_id, tag, callback)->
+	removeProject: (user_id, project_id, tag, callback)->
 		uri = buildUri(user_id, project_id)
 		opts =
 			uri:uri

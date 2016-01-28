@@ -133,6 +133,7 @@ module.exports = class Router
 
 		webRouter.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
+		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails

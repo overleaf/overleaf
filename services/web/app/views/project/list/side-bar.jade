@@ -37,22 +37,23 @@
 	ul.list-unstyled.folders-menu(
 		ng-controller="TagListController"
 	)
-		li(ng-class="{active: (filter == 'all')}")
-			a(href, ng-click="filterProjects('all')") #{translate("all_projects")}
-		li(ng-class="{active: (filter == 'owned')}")
-			a(href, ng-click="filterProjects('owned')") #{translate("your_projects")}
-		li(ng-class="{active: (filter == 'shared')}")
-			a(href, ng-click="filterProjects('shared')") #{translate("shared_with_you")}
-		li(ng-class="{active: (filter == 'archived')}")
-			a(href, ng-click="filterProjects('archived')") #{translate("deleted_projects")}
+		li(ng-class="{active: (filter == 'all')}", ng-click="filterProjects('all')")
+			a(href) #{translate("all_projects")}
+		li(ng-class="{active: (filter == 'owned')}", ng-click="filterProjects('owned')")
+			a(href) #{translate("your_projects")}
+		li(ng-class="{active: (filter == 'shared')}", ng-click="filterProjects('shared')")
+			a(href) #{translate("shared_with_you")}
+		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
+			a(href) #{translate("deleted_projects")}
 		li
 			h2 #{translate("folders")}
-		li(
-			ng-repeat="tag in tags | filter:nonEmpty",
+		li.tag(
+			ng-repeat="tag in tags | orderBy:name",
 			ng-class="{active: tag.selected}",
-			ng-cloak
+			ng-cloak,
+			ng-click="selectTag(tag)"
 		)
-			a.tag(href, ng-click="selectTag(tag)")
+			a.tag-name(href)
 				i.icon.fa.fa-fw(
 					ng-class="{\
 						'fa-folder-open-o': tag.selected,\
@@ -61,6 +62,23 @@
 				)
 				span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
+			span.dropdown.tag-menu(dropdown)
+				a.dropdown-toggle(
+					href="#",
+					data-toggle="dropdown",
+					dropdown-toggle,
+					stop-propagation="click"
+				)
+					span.caret
+				ul.dropdown-menu.dropdown-menu-right(
+					role="menu"
+				)
+					li
+						a(href)
+							| #{translate("rename")}
+					li
+						a(href, ng-click="deleteTag(tag)")
+							| #{translate("delete")}
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus

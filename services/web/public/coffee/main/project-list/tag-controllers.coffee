@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "TagListController", ($scope) ->
+	App.controller "TagListController", ($scope, $modal) ->
 		$scope.filterProjects = (filter = "all") ->
 			$scope._clearTags()
 			$scope.setFilter(filter)
@@ -10,17 +10,21 @@ define [
 		$scope._clearTags = () ->
 			for tag in $scope.tags
 				tag.selected = false
-
-		$scope.nonEmpty = (tag) ->
-			# The showWhenEmpty property will be set on any tag which we have
-			# modified during this session. Otherwise, tags which are empty
-			# when loading the page are not shown.
-			tag.project_ids.length > 0 or !!tag.showWhenEmpty
 			
 		$scope.selectTag = (tag) ->
 			$scope._clearTags()
 			tag.selected = true
 			$scope.setFilter("tag")
+		
+		$scope.deleteTag = (tag) ->
+			modalInstance = $modal.open(
+				templateUrl: "deleteTagModalTemplate"
+				controller: "DeleteTagModalController"
+				resolve:
+					tag: () -> tag
+			)
+			modalInstance.result.then () ->
+				$scope.tags = $scope.tags.filter (t) -> t != tag
 
 	App.controller "TagDropdownItemController", ($scope) ->
 		$scope.recalculateProjectsInTag = () ->
