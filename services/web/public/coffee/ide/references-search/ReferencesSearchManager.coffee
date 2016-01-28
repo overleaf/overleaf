@@ -31,9 +31,7 @@ define [
 				return
 			# console.log '>> storing references keys'
 			oldKeys = @$scope.$root._references.keys
-			console.log "#{oldKeys.length} + #{newKeys.length}"
 			@$scope.$root._references.keys = _.union(oldKeys, newKeys)
-			console.log "end>> #{@$scope.$root._references.keys.length}"
 
 		indexReferences: (docIds, shouldBroadcast) ->
 			opts =
