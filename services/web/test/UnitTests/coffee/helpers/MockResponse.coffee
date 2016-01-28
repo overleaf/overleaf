@@ -48,6 +48,20 @@ class MockResponse
 			@success = false
 		@body = body if body
 		@callback() if @callback?
+		
+	json: (status, body) ->
+		if arguments.length < 2
+			if typeof status != "number"
+				body = status
+				status = 200
+		@statusCode = status
+		@returned = true
+		if 200 <= status < 300
+			@success = true
+		else
+			@success = false
+		@body = body if body
+		@callback() if @callback?
 
 	setHeader: (header, value) ->
 		@headers[header] = value
