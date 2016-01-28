@@ -533,6 +533,8 @@ module.exports = PackManager =
 		db.docHistory.findAndModify {query, update}, callback
 
 	listDocs: (options, callback) ->
-		db.docHistory.find({"op.p":{$exists:true}}, {doc_id:true}).limit (options.limit||100), (err, docs) ->
+		query = {"op.p":{$exists:true}}
+		query.doc_id = {$gt: ObjectId(options.doc_id)} if options.doc_id?
+		db.docHistory.find(query, {doc_id:true}).sort({doc_id:1}).limit (options.limit||100), (err, docs) ->
 			return callback(err) if err?
 			callback(null, docs)

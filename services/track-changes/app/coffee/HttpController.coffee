@@ -26,7 +26,8 @@ module.exports = HttpController =
 	listDocs: (req, res, next = (error) ->) ->
 		logger.log "listing packing doc history"
 		limit = +req.query?.limit || 100
-		PackManager.listDocs {limit},  (error, doc_ids) ->
+		doc_id = req.query?.doc_id if req.query?.doc_id?.match(/^[0-9a-f]{24}$/)
+		PackManager.listDocs {limit, doc_id},  (error, doc_ids) ->
 			return next(error) if error?
 			ids = (doc.doc_id.toString() for doc in doc_ids)
 			output = _.uniq(ids).join("\n") + "\n"

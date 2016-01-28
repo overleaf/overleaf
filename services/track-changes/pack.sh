@@ -11,11 +11,12 @@ for n in $(seq 5 -1 1) ; do
     sleep 1
 done
 
-while docs=$(curl "$HOST/doc/list?limit=1000"); do
+while docs=$(curl "$HOST/doc/list?limit=1000&doc_id=$last_doc"); do
     if [ -z "$docs" ] ; then break ; fi
     for d in $docs ; do 
 	echo "packing $d"
 	curl -X POST "$HOST/doc/$d/pack"
 	sleep $T
+	last_doc=$d
     done
 done
