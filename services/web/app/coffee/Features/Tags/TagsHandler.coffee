@@ -5,6 +5,23 @@ logger = require("logger-sharelatex")
 
 oneSecond = 1000
 module.exports = 
+	renameTag: (user_id, tag_id, name, callback = (error) ->) ->
+		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}/rename"
+		request.post {
+			url: url
+			json:
+				name: name
+		}, (err, res, body) ->
+			if err?
+				logger.err {err, user_id, tag_id, name}, "error renaming tag in tag api"
+				return callback(err)
+			else if res.statusCode >= 200 and res.statusCode < 300
+				return callback(null)
+			else
+				err = new Error("tags api returned a failure status code: #{res.statusCode}")
+				logger.err {err, user_id, tag_id, name}, "tags api returned failure status code: #{res.statusCode}"
+				return callback(err)
+
 	deleteTag: (user_id, tag_id, callback = (error) ->) ->
 		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}"
 		request.del url, (err, res, body) ->

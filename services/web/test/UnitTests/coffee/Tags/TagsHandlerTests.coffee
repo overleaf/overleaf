@@ -126,4 +126,29 @@ describe 'TagsHandler', ->
 			
 			it "should call the callback with an Error", ->
 				@callback.calledWith(new Error()).should.equal true
+
+	describe "renameTag", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.renameTag user_id, tag_id, @name = "new-name", @callback
 			
+			it "should send a request to the tag backend", ->
+				@request.post
+					.calledWith({
+						url: "#{tagsUrl}/user/#{user_id}/tag/#{tag_id}/rename"
+						json:
+							name: @name
+					})
+					.should.equal true
+			
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+			
+		describe "with error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.renameTag user_id, tag_id, "name", @callback
+			
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true

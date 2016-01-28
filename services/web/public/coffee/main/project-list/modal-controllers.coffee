@@ -1,23 +1,6 @@
 define [
 	"base"
 ], (App) ->
-
-
-	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
-		$scope.inputs = 
-			newTagName: ""
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.create = () ->
-			$modalInstance.close($scope.inputs.newTagName)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
 	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, projectName) ->
 		$scope.inputs = 
 			projectName: projectName
@@ -102,28 +85,3 @@ define [
 		$scope.onComplete = (error, name, response) ->
 			if response.project_id?
 				window.location = '/project/' + response.project_id
-
-	App.controller 'DeleteTagModalController', ($scope, $modalInstance, $http, tag) ->
-		$scope.tag = tag
-		$scope.state =
-			inflight: false
-			error: false
-		
-		$scope.delete = () ->
-			$scope.state.inflight = true
-			$scope.state.error = false
-			$http({
-				method: "DELETE"
-				url: "/tag/#{tag._id}"
-				headers:
-					"X-CSRF-Token": window.csrfToken
-			})
-				.success () ->
-					$scope.state.inflight = false
-					$modalInstance.close()
-				.error () ->
-					$scope.state.inflight = false
-					$scope.state.error = true
-		
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')

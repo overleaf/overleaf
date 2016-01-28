@@ -27,3 +27,15 @@ module.exports =
 		TagsHandler.deleteTag user_id, tag_id, (error) ->
 			return next(error) if error?
 			res.status(204).end()
+	
+	renameTag: (req, res, next) ->
+		user_id = req.session.user._id
+		tag_id = req.params.tag_id
+		name = req.body?.name
+		if !name?
+			return res.status(400).end()
+		else
+			logger.log {user_id, tag_id, name}, "renaming tag"
+			TagsHandler.renameTag user_id, tag_id, name, (error) ->
+				return next(error) if error?
+				res.status(204).end()

@@ -74,10 +74,10 @@
 					role="menu"
 				)
 					li
-						a(href)
+						a(href, ng-click="renameTag(tag)", stop-propagation="click")
 							| #{translate("rename")}
 					li
-						a(href, ng-click="deleteTag(tag)")
+						a(href, ng-click="deleteTag(tag)", stop-propagation="click")
 							| #{translate("delete")}
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")

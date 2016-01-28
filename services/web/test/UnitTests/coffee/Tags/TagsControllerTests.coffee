@@ -15,6 +15,7 @@ describe 'Tags controller', ->
 			addTag: sinon.stub().callsArgWith(3)
 			removeProject: sinon.stub().callsArgWith(3)
 			deleteTag: sinon.stub().callsArg(2)
+			renameTag: sinon.stub().callsArg(3)
 		@controller = SandboxedModule.require modulePath, requires:
 			"./TagsHandler":@handler
 			'logger-sharelatex':
@@ -68,3 +69,34 @@ describe 'Tags controller', ->
 		it "should return 204 status code", ->
 			@res.status.calledWith(204).should.equal true
 			@res.end.called.should.equal true
+
+	describe "renameTag", ->
+		beforeEach ->
+			@req.params.tag_id = @tag_id = "tag-id-123"
+			@req.session.user._id = @user_id = "user-id-123"
+
+		describe "with a name", ->
+			beforeEach ->
+				@req.body = name: @name = "new-name"
+				@controller.renameTag @req, @res
+				
+			it "should delete the tag in the backend", ->
+				@handler.renameTag
+					.calledWith(@user_id, @tag_id, @name)
+					.should.equal true
+			
+			it "should return 204 status code", ->
+				@res.status.calledWith(204).should.equal true
+				@res.end.called.should.equal true
+		
+		describe "without a name", ->
+			beforeEach ->
+				@controller.renameTag @req, @res
+				
+			it "should not call the backend", ->
+				@handler.renameTag.called.should.equal false
+			
+			it "should return 400 (bad request) status code", ->
+				@res.status.calledWith(400).should.equal true
+				@res.end.called.should.equal true
+	
