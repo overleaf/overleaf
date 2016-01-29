@@ -41,9 +41,9 @@ script(type='text/ng-template', id='deleteTagModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 #{translate("delete_tag")}
+		h3 #{translate("delete_folder")}
 	.modal-body
-		p #{translate("about_to_delete_tag")}
+		p #{translate("about_to_delete_folder")}
 		ul
 			li
 				strong {{tag.name}}
@@ -67,7 +67,7 @@ script(type='text/ng-template', id='renameTagModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 #{translate("rename_tag")}
+		h3 #{translate("rename_folder")}
 	.modal-body
 		form(name="renameTagForm", novalidate)
 			input.form-control(
