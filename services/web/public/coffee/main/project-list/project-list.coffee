@@ -203,12 +203,6 @@ define [
 				}
 
 		$scope.createTag = (name) ->
-			event_tracking.send 'project-list-page-interaction', 'project action', 'createTag'
-			$scope.tags.push tag = {
-				name: name
-				project_ids: []
-				showWhenEmpty: true
-			}
 			return tag
 
 		$scope.openNewTagModal = (e) ->
@@ -218,8 +212,9 @@ define [
 			)
 
 			modalInstance.result.then(
-				(newTagName) ->
-					tag = $scope.createTag(newTagName)
+				(tag) ->
+					console.log "Created tag", tag
+					$scope.tags.push tag
 					$scope.addSelectedProjectsToTag(tag)
 			)
 
@@ -343,6 +338,7 @@ define [
 				$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
 
 			for project in selected_projects
+				project.tags = []
 				if project.accessLevel == "owner"
 					project.archived = true
 					queuedHttp {

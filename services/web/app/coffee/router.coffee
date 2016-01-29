@@ -131,11 +131,12 @@ module.exports = class Router
 		webRouter.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
-		webRouter.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
+		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
+		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag
+		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), TagsController.renameTag
+		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
 		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.addProjectToTag
 		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
-		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
-		webRouter.post '/tag/:tag_id/rename', AuthenticationController.requireLogin(), TagsController.renameTag
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails

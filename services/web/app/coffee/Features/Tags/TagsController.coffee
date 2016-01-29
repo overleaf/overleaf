@@ -2,9 +2,20 @@ TagsHandler = require("./TagsHandler")
 logger = require("logger-sharelatex")
 
 module.exports =
-	getAllTags: (req, res)->
-		TagsHandler.getAllTags req.session.user._id, (err, allTags)->
-			res.send(allTags)
+	getAllTags: (req, res, next)->
+		user_id = req.session.user._id
+		logger.log {user_id}, "getting tags"
+		TagsHandler.getAllTags user_id, (error, allTags)->
+			return next(error) if error?
+			res.json(allTags)
+	
+	createTag: (req, res, next) ->
+		user_id = req.session.user._id
+		name = req.body.name
+		logger.log {user_id, name}, "creating tag"
+		TagsHandler.createTag user_id, name, (error, tag) ->
+			return next(error) if error?
+			res.json(tag)
 	
 	addProjectToTag: (req, res, next) ->
 		user_id = req.session.user._id

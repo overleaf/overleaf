@@ -18,6 +18,8 @@ script(type='text/ng-template', id='newTagModalTemplate')
 				stop-propagation="click"
 			)
 	.modal-footer
+		.modal-footer-left
+			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
 		//- We stop propagation to stop the clicks from closing the
 		//- 'move to folder' menu.
 		button.btn.btn-default(
@@ -25,10 +27,12 @@ script(type='text/ng-template', id='newTagModalTemplate')
 			stop-propagation="click"
 		) #{translate("cancel")}
 		button.btn.btn-primary(
-			ng-disabled="newTagForm.$invalid"
+			ng-disabled="newTagForm.$invalid || state.inflight"
 			ng-click="create()"
 			stop-propagation="click"
-		) #{translate("create")}
+		)
+			span(ng-show="!state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}...
 
 script(type='text/ng-template', id='deleteTagModalTemplate')
 	.modal-header

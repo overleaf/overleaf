@@ -29,10 +29,10 @@ describe 'TagsHandler', ->
 	describe "removeProjectFromAllTags", ->
 		it 'should tell the tags api to remove the project_id from all the users tags', (done)->
 			@handler.removeProjectFromAllTags user_id, project_id, =>
-				@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}", timeout:1000}).should.equal true
+				@request.del.calledWith({url:"#{tagsUrl}/user/#{user_id}/project/#{project_id}", timeout:1000}).should.equal true
 				done()
 
-	describe "groupTagsByProject", ->
+	describe "_groupTagsByProject", ->
 		it 'should 	group the tags by project_id', (done)->
 			rawTags = [
 				{name:"class101", project_ids:["1234", "51db33e31a55afd212000007"]}
@@ -41,35 +41,35 @@ describe 'TagsHandler', ->
 				{name:"different", project_ids:["1234", "e2c39a2f09000100"]}
 			]
 
-			@handler.groupTagsByProject rawTags, (err, tags)->
+			@handler._groupTagsByProject rawTags, (err, tags)->
 				_.size(tags).should.equal 7
 				done()
 
-	describe "requestTags", ->
+	describe "_requestTags", ->
 		it 'should return an err and empty array on error', (done)->
 			@request.get.callsArgWith(1, {something:"wrong"}, {statusCode:200}, [])
-			@handler.requestTags user_id, (err, allTags)=>
+			@handler._requestTags user_id, (err, allTags)=>
 				allTags.length.should.equal 0
 				assert.isDefined err
 				done()
 
 		it 'should return an err and empty array on no body', (done)->
 			@request.get.callsArgWith(1, {something:"wrong"}, {statusCode:200}, undefined)
-			@handler.requestTags user_id, (err, allTags)=>
+			@handler._requestTags user_id, (err, allTags)=>
 				allTags.length.should.equal 0
 				assert.isDefined err
 				done()
 
 		it 'should return an err and empty array on non 200 response', (done)->
 			@request.get.callsArgWith(1, null, {statusCode:201}, [])
-			@handler.requestTags user_id, (err, allTags)=>
+			@handler._requestTags user_id, (err, allTags)=>
 				allTags.length.should.equal 0
 				assert.isDefined err
 				done()
 
 		it 'should return an err and empty array on no body and no response', (done)->
 			@request.get.callsArgWith(1, {something:"wrong"}, undefined, undefined)
-			@handler.requestTags user_id, (err, allTags)=>
+			@handler._requestTags user_id, (err, allTags)=>
 				allTags.length.should.equal 0
 				assert.isDefined err
 				done()
@@ -92,6 +92,24 @@ describe 'TagsHandler', ->
 			@handler.getAllTags user_id, (err, allTags, projectGroupedTags)=>
 				allTags.length.should.equal 0
 				_.size(projectGroupedTags).should.equal 0
+	
+	describe "createTag", ->
+		beforeEach ->
+			@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+			@handler.createTag user_id, @name = "tag_name", @callback
+		
+		it "should send a request to the tag backend", ->
+			@request.post
+				.calledWith({
+					url: "#{tagsUrl}/user/#{user_id}/tag"
+					json:
+						name: @name
+					timeout: 1000
+				})
+				.should.equal true
+		
+		it "should call the callback with no error", ->
+			@callback.calledWith(null).should.equal true
 	
 	describe "deleteTag", ->
 		describe "successfully", ->

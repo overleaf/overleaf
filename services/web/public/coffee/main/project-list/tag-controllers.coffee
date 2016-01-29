@@ -61,9 +61,13 @@ define [
 			$scope.recalculateProjectsInTag()
 		$scope.recalculateProjectsInTag()
 	
-	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
+	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout, $http) ->
 		$scope.inputs = 
 			newTagName: ""
+		
+		$scope.state =
+			inflight: false
+			error: false
 
 		$modalInstance.opened.then () ->
 			$timeout () ->
@@ -71,7 +75,20 @@ define [
 			, 200
 
 		$scope.create = () ->
-			$modalInstance.close($scope.inputs.newTagName)
+			name = $scope.inputs.newTagName
+			$scope.state.inflight = true
+			$scope.state.error = false
+			$http
+				.post "/tag", {
+					_csrf: window.csrfToken,
+					name: name
+				}
+				.success (data, status, headers, config) ->
+					$scope.state.inflight = false
+					$modalInstance.close(data)
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = true
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')

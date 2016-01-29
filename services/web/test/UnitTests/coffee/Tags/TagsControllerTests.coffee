@@ -16,6 +16,7 @@ describe 'TagsController', ->
 			removeProjectFromTag: sinon.stub().callsArgWith(3)
 			deleteTag: sinon.stub().callsArg(2)
 			renameTag: sinon.stub().callsArg(3)
+			createTag: sinon.stub()
 		@controller = SandboxedModule.require modulePath, requires:
 			"./TagsHandler":@handler
 			'logger-sharelatex':
@@ -31,15 +32,31 @@ describe 'TagsController', ->
 		@res = {}
 		@res.status = sinon.stub().returns @res
 		@res.end = sinon.stub()
+		@res.json = sinon.stub()
 
 	describe "getAllTags", ->
 		it 'should ask the handler for all tags', (done)->
 			allTags = [{name:"tag", projects:["123423","423423"]}]
 			@handler.getAllTags = sinon.stub().callsArgWith(1, null, allTags)
-			@controller.getAllTags @req, send:(body)=>
+			@controller.getAllTags @req, json:(body)=>
 				body.should.equal allTags
 				@handler.getAllTags.calledWith(user_id).should.equal true
 				done()
+
+	describe "createTag", ->
+		beforeEach ->
+			@handler.createTag.callsArgWith(2, null, @tag = {"mock": "tag"})
+			@req.session.user._id = @user_id = "user-id-123"
+			@req.body = name: @name = "tag-name"
+			@controller.createTag @req, @res
+			
+		it "should create the tag in the backend", ->
+			@handler.createTag
+				.calledWith(@user_id, @name)
+				.should.equal true
+		
+		it "should return the tag", ->
+			@res.json.calledWith(@tag).should.equal true
 	
 	describe "deleteTag", ->
 		beforeEach ->
