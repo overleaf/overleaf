@@ -169,10 +169,12 @@ define [
 					project.tags.splice(index, 1)
 
 			for project_id in removed_project_ids
-				queuedHttp.post "/project/#{project_id}/tag", {
-					deletedTag: tag.name
-					_csrf: window.csrfToken
-				}
+				queuedHttp({
+					method: "DELETE"
+					url: "/tag/#{tag._id}/project/#{project_id}"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				})
 
 			# If we're filtering by this tag then we need to remove
 			# the projects from view

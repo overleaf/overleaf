@@ -13,7 +13,7 @@ describe 'Tags controller', ->
 	beforeEach ->
 		@handler = 
 			addTag: sinon.stub().callsArgWith(3)
-			removeProject: sinon.stub().callsArgWith(3)
+			removeProjectFromTag: sinon.stub().callsArgWith(3)
 			deleteTag: sinon.stub().callsArg(2)
 			renameTag: sinon.stub().callsArg(3)
 		@controller = SandboxedModule.require modulePath, requires:
@@ -37,13 +37,6 @@ describe 'Tags controller', ->
 			@req.body = {tag:tag}
 			@controller.processTagsUpdate @req, send:=>
 				@handler.addTag.calledWith(user_id, project_id, tag).should.equal true
-				done()
-
-
-		it 'should send a delete request when a delete has been recived with the body format standardised', (done)->
-			@req.body = {deletedTag:tag}
-			@controller.processTagsUpdate @req, send:=>
-				@handler.removeProject.calledWith(user_id, project_id, tag).should.equal true
 				done()
 
 	describe "getAllTags", ->
@@ -99,4 +92,20 @@ describe 'Tags controller', ->
 			it "should return 400 (bad request) status code", ->
 				@res.status.calledWith(400).should.equal true
 				@res.end.called.should.equal true
+	
+	describe "removeProjectFromTag", ->
+		beforeEach ->
+			@req.params.tag_id = @tag_id = "tag-id-123"
+			@req.params.project_id = @project_id = "project-id-123"
+			@req.session.user._id = @user_id = "user-id-123"
+			@controller.removeProjectFromTag @req, @res
+			
+		it "should remove the tag from the project in the backend", ->
+			@handler.removeProjectFromTag
+				.calledWith(@user_id, @tag_id, @project_id)
+				.should.equal true
+		
+		it "should return 204 status code", ->
+			@res.status.calledWith(204).should.equal true
+			@res.end.called.should.equal true
 	

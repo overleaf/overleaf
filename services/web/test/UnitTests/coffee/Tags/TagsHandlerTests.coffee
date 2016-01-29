@@ -7,11 +7,11 @@ _ = require('underscore')
 
 
 describe 'TagsHandler', ->
-	user_id = "123nd3ijdks"
+	user_id = "user-id-123"
 	tag_id = "tag-id-123"
-	project_id = "123njdskj9jlk"
+	project_id = "project-id-123"
 	tagsUrl = "tags.sharelatex.testing"
-	tag = "class101"
+	tag = "tag_name"
 
 	beforeEach ->
 		@request = 
@@ -30,12 +30,6 @@ describe 'TagsHandler', ->
 		it 'Should post the request to the tags api with the user id in the url', (done)->
 			@handler.addTag user_id, project_id, tag, =>
 				@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000, json:{name:tag}}).should.equal true
-				done()
-	
-	describe "removeProject", ->
-		it 'should send a delete request when a delete has been recived with the body format standardised', (done)->
-			@handler.removeProject user_id, project_id, tag, =>
-				@request.del.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000,  json:{name:tag}}).should.equal true
 				done()
 
 	describe "removeProjectFromAllTags", ->
@@ -93,9 +87,9 @@ describe 'TagsHandler', ->
 			@handler.getAllTags user_id, (err, allTags)=>
 				stubbedAllTags.should.deep.equal allTags
 				getOpts =
-					uri: "#{tagsUrl}/user/#{user_id}/tag"
+					url: "#{tagsUrl}/user/#{user_id}/tag"
 					json:true
-					timeout:2000
+					timeout:1000
 				@request.get.calledWith(getOpts).should.equal true
 				done()
 
@@ -113,7 +107,10 @@ describe 'TagsHandler', ->
 			
 			it "should send a request to the tag backend", ->
 				@request.del
-					.calledWith("#{tagsUrl}/user/#{user_id}/tag/#{tag_id}")
+					.calledWith({
+						url: "#{tagsUrl}/user/#{user_id}/tag/#{tag_id}"
+						timeout: 1000
+					})
 					.should.equal true
 			
 			it "should call the callback with no error", ->
@@ -139,6 +136,7 @@ describe 'TagsHandler', ->
 						url: "#{tagsUrl}/user/#{user_id}/tag/#{tag_id}/rename"
 						json:
 							name: @name
+						timeout: 1000
 					})
 					.should.equal true
 			
@@ -149,6 +147,31 @@ describe 'TagsHandler', ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
 				@handler.renameTag user_id, tag_id, "name", @callback
+			
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true
+	
+	describe "removeProjectFromTag", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.removeProjectFromTag user_id, tag_id, project_id, @callback
+			
+			it "should send a request to the tag backend", ->
+				@request.del
+					.calledWith({
+						url: "#{tagsUrl}/user/#{user_id}/tag/#{tag_id}/project/#{project_id}"
+						timeout: 1000
+					})
+					.should.equal true
+			
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+			
+		describe "with error", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.removeProjectFromTag user_id, tag_id, project_id, @callback
 			
 			it "should call the callback with an Error", ->
 				@callback.calledWith(new Error()).should.equal true

@@ -133,6 +133,7 @@ module.exports = class Router
 
 		webRouter.get '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post '/project/:project_id/tag', AuthenticationController.requireLogin(), TagsController.processTagsUpdate
+		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
 		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
 		webRouter.post '/tag/:tag_id/rename', AuthenticationController.requireLogin(), TagsController.renameTag
 
