@@ -278,17 +278,20 @@ module.exports = PackManager =
 			if d.pack?
 				top = null
 				return
-			# skip temporary ops (we could pack these into temporary packs in future)
-			if d.expiresAt?
-				top = null
-				return
 			sz = BSON.calculateObjectSize(d)
-			if top?	&& top.pack.length < PackManager.MAX_COUNT && top.sz + sz < PackManager.MAX_SIZE
+			# decide if this doc can be added to the current pack
+			validLength = top? && (top.pack.length < PackManager.MAX_COUNT)
+			validSize = top? && (top.sz + sz < PackManager.MAX_SIZE)
+			bothPermanent = top? && (top.expiresAt? is false) && (d.expiresAt? is false)
+			bothTemporary = top? && (top.expiresAt? is true) && (d.expiresAt? is true)
+			within1Day = bothTemporary && (d.meta.start_ts - top.meta.start_ts < 24 * 3600 * 1000)
+			if top? && validLength && validSize && (bothPermanent || (bothTemporary && within1Day))
 				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
 				top.sz += sz
 				top.n += 1
 				top.v_end = d.v
 				top.meta.end_ts = d.meta.end_ts
+				top.expiresAt = d.expiresAt if top.expiresAt?
 				return
 			else
 				# create a new pack

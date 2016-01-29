@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+assert = require('chai').assert
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/PackManager.js"
@@ -7,6 +8,7 @@ SandboxedModule = require('sandboxed-module')
 {ObjectId} = require("mongojs")
 bson = require("bson")
 BSON = new bson.BSONPure()
+_ = require("underscore")
 
 tk = require "timekeeper"
 
@@ -232,15 +234,183 @@ describe "PackManager", ->
 					@callback.called.should.equal true
 
 	describe "convertDocsToPacks", ->
-		describe "with several small packs", ->
+		describe "with several small ops", ->
 			beforeEach ->
 				@ops = [
-					{ op: "op-3", meta: "meta-3", v: 3},
-					{ op: "op-4", meta: "meta-4", v: 4}
+					{ _id: "3", op: "op-3", meta: {start_ts: "ts3_s", end_ts: "ts3_e", user_id: "u3"}, v: 3},
+					{ _id: "4", op: "op-4", meta: {start_ts: "ts4_s", end_ts: "ts4_e", user_id: "u4"}, v: 4},
 				]
 				@PackManager.convertDocsToPacks @ops, @callback
-#			it "should create a single pack", ->
-#				@callback.
+
+			it "should create a single pack", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: [
+							{ _id: "3", op: "op-3", meta: {start_ts: "ts3_s", end_ts: "ts3_e", user_id: "u3"}, v: 3},
+							{ _id: "4", op: "op-4", meta: {start_ts: "ts4_s", end_ts: "ts4_e", user_id: "u4"}, v: 4},
+						]
+						v: 3
+						v_end: 4
+						meta: {start_ts: "ts3_s", end_ts: "ts4_e"}
+						n: 2
+						sz: 202
+					}]
+					done()
+
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
+		describe "with many small ops", ->
+			beforeEach ->
+				@ops = ({ _id: "#{n}", op: "op-#{n}", meta: {start_ts: "ts#{n}_s", end_ts: "ts#{n}_e", user_id: "u#{n}"}, v: n} for n in [0...1024])
+				@PackManager.convertDocsToPacks @ops, @callback
+
+			it "should create two packs", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: @ops[0...512]
+						v: 0
+						v_end: 511
+						meta: {start_ts: "ts0_s", end_ts: "ts511_e"}
+						n: 512
+						sz: 56282
+					}, {
+						pack: @ops[512...1024]
+						v: 512
+						v_end: 1023
+						meta: {start_ts: "ts512_s", end_ts: "ts1023_e"}
+						n: 512
+						sz: 56952
+					}]
+					done()
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with many temporary ops", ->
+			beforeEach ->
+				@ops = ({ _id: "#{n}", op: "op-#{n}", meta: {start_ts: n, end_ts: n+1, user_id: "u#{n}"}, v: n, expiresAt: n+24*3600*1000 } for n in [0...1024])
+				@PackManager.convertDocsToPacks @ops, @callback
+
+			it "should create two packs", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: (_.omit(op, "expiresAt") for op in @ops[0...512])
+						v: 0
+						v_end: 511
+						meta: {start_ts: 0 , end_ts: 512}
+						n: 512
+						sz: 55990
+						expiresAt: @ops[511].expiresAt
+					}, {
+						pack: (_.omit(op, "expiresAt") for op in @ops[512...1024])
+						v: 512
+						v_end: 1023
+						meta: {start_ts: 512, end_ts: 1024}
+						n: 512
+						sz: 56392
+						expiresAt: @ops[1023].expiresAt
+					}]
+					done()
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with temporary ops spanning more than 1 day", ->
+			beforeEach ->
+				@ops = ({ _id: "#{n}", op: "op-#{n}", meta: {start_ts: n*3600*1000, end_ts: n*3600*1000+1, user_id: "u#{n}"}, v: n, expiresAt: n+24*3600*1000 } for n in [0...48])
+				@PackManager.convertDocsToPacks @ops, @callback
+
+			it "should create two packs", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: (_.omit(op, "expiresAt") for op in @ops[0...24])
+						v: 0
+						v_end: 23
+						meta: {start_ts: 0 , end_ts: 23*3600*1000+1}
+						n: 24
+						sz: 2538
+						expiresAt: @ops[23].expiresAt
+					}, {
+						pack: (_.omit(op, "expiresAt") for op in @ops[24...48])
+						v: 24
+						v_end: 47
+						meta: {start_ts: 24*3600*1000, end_ts: 47*3600*1000+1}
+						n: 24
+						sz: 2568
+						expiresAt: @ops[47].expiresAt
+					}]
+					done()
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with mixture of temporary and permanent ops", ->
+			beforeEach ->
+				@ops = ({ _id: "#{n}", op: "op-#{n}", meta: {start_ts: n*3600*1000, end_ts: n*3600*1000+1, user_id: "u#{n}"}, v: n, expiresAt: n+24*3600*1000 } for n in [0...48])
+				for n in [10...48]
+					delete @ops[n].expiresAt
+				@PackManager.convertDocsToPacks @ops, @callback
+
+			it "should create two packs", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: (_.omit(op, "expiresAt") for op in @ops[0...10])
+						v: 0
+						v_end: 9
+						meta: {start_ts: 0 , end_ts: 9*3600*1000+1}
+						n: 10
+						sz: 1040
+						expiresAt: @ops[9].expiresAt
+					}, {
+						pack: (_.omit(op, "expiresAt") for op in @ops[10...48])
+						v: 10
+						v_end: 47
+						meta: {start_ts: 10*3600*1000, end_ts: 47*3600*1000+1}
+						n: 38
+						sz: 3496
+					}]
+					done()
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with mixture of temporary and permanent ops and an existing pack", ->
+			beforeEach ->
+				@ops = ({ _id: "#{n}", op: "op-#{n}", meta: {start_ts: n*3600*1000, end_ts: n*3600*1000+1, user_id: "u#{n}"}, v: n, expiresAt: n+24*3600*1000 } for n in [0...48])
+				for n in [10...48]
+					delete @ops[n].expiresAt
+				# convert op 16 into a pack
+				@ops[16].pack = [ @ops[16].op ]
+				delete @ops[16].op
+				@PackManager.convertDocsToPacks @ops, @callback
+
+			it "should create three packs", (done) ->
+				@PackManager.convertDocsToPacks @ops, (err, packs) =>
+					assert.deepEqual packs, [ {
+						pack: (_.omit(op, "expiresAt") for op in @ops[0...10])
+						v: 0
+						v_end: 9
+						meta: {start_ts: 0 , end_ts: 9*3600*1000+1}
+						n: 10
+						sz: 1040
+						expiresAt: @ops[9].expiresAt
+					}, {
+						pack: @ops[10...16]
+						v: 10
+						v_end: 15
+						meta: {start_ts: 10*3600*1000, end_ts: 15*3600*1000+1}
+						n: 6
+						sz: 552
+					}, {
+						pack: @ops[17...48]
+						v: 17
+						v_end: 47
+						meta: {start_ts: 17*3600*1000, end_ts: 47*3600*1000+1}
+						n: 31
+						sz: 2852
+					}]
+					done()
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
