@@ -38,15 +38,10 @@ module.exports = TagsHandler =
 		request.del {url, timeout: TIMEOUT}, (err, res, body) ->
 			TagsHandler._handleResponse res, {url, user_id, tag_id, project_id}, callback
 
-	addTag: (user_id, project_id, tag, callback)->
-		uri = buildUri(user_id, project_id)
-		opts =
-			uri:uri
-			json:
-				name:tag
-			timeout: TIMEOUT
-		logger.log user_id:user_id, project_id:project_id, tag:tag, "send add tag to tags api"
-		request.post opts, callback
+	addProjectToTag: (user_id, tag_id, project_id, callback)->
+		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}/project/#{project_id}"
+		request.post {url, timeout: TIMEOUT}, (err, res, body) ->
+			TagsHandler._handleResponse res, {url, user_id, tag_id, project_id}, callback
 
 	requestTags: (user_id, callback)->
 		opts = 

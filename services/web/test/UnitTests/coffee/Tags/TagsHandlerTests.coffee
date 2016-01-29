@@ -26,12 +26,6 @@ describe 'TagsHandler', ->
 				log:->
 				err:->
 
-	describe "addTag", ->
-		it 'Should post the request to the tags api with the user id in the url', (done)->
-			@handler.addTag user_id, project_id, tag, =>
-				@request.post.calledWith({uri:"#{tagsUrl}/user/#{user_id}/project/#{project_id}/tag", timeout:1000, json:{name:tag}}).should.equal true
-				done()
-
 	describe "removeProjectFromAllTags", ->
 		it 'should tell the tags api to remove the project_id from all the users tags', (done)->
 			@handler.removeProjectFromAllTags user_id, project_id, =>
@@ -172,6 +166,31 @@ describe 'TagsHandler', ->
 			beforeEach ->
 				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
 				@handler.removeProjectFromTag user_id, tag_id, project_id, @callback
+			
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true
+
+	describe "addProjectToTag", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.addProjectToTag user_id, tag_id, project_id, @callback
+			
+			it "should send a request to the tag backend", ->
+				@request.post
+					.calledWith({
+						url: "#{tagsUrl}/user/#{user_id}/tag/#{tag_id}/project/#{project_id}"
+						timeout: 1000
+					})
+					.should.equal true
+			
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+			
+		describe "with error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.addProjectToTag user_id, tag_id, project_id, @callback
 			
 			it "should call the callback with an Error", ->
 				@callback.calledWith(new Error()).should.equal true

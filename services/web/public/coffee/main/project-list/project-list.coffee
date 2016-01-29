@@ -198,8 +198,7 @@ define [
 					project.tags.push tag
 
 			for project_id in added_project_ids
-				queuedHttp.post "/project/#{project_id}/tag", {
-					tag: tag.name
+				queuedHttp.post "/tag/#{tag._id}/project/#{project_id}", {
 					_csrf: window.csrfToken
 				}
 
