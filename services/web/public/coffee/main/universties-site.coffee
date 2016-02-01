@@ -22,3 +22,4 @@ define [
 
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
+				$scope.$apply()
