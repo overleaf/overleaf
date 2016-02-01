@@ -213,7 +213,6 @@ define [
 
 			modalInstance.result.then(
 				(tag) ->
-					console.log "Created tag", tag
 					$scope.tags.push tag
 					$scope.addSelectedProjectsToTag(tag)
 			)
