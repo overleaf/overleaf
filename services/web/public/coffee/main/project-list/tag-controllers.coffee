@@ -24,6 +24,13 @@ define [
 					tag: () -> tag
 			)
 			modalInstance.result.then () ->
+				# Remove tag from projects
+				for project in $scope.projects
+					project.tags ||= []
+					index = project.tags.indexOf tag
+					if index > -1
+						project.tags.splice(index, 1)
+				# Remove tag
 				$scope.tags = $scope.tags.filter (t) -> t != tag
 		
 		$scope.renameTag = (tag) ->
