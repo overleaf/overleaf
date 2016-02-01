@@ -74,6 +74,21 @@ processNext = (doc_id, callback)->
 		PackManager._packDocHistory doc_id, {}, (err) ->
 			markDocAsProcessed doc_id, callback
 
+updateIndexes = (callback) ->
+	async.series [
+		(cb) ->
+			console.log "create index"
+			db.docHistory.ensureIndex { project_id: 1, "meta.end_ts": 1, "meta.start_ts": -1 }, { background: true }, cb
+		(cb) ->
+			console.log "drop index"
+			db.docHistory.dropIndex { project_id: 1, "meta.end_ts": 1 }, cb
+		(cb) ->
+			console.log "drop index"
+			db.docHistory.dropIndex { project_id: 1, "pack.0.meta.end_ts": 1, "meta.end_ts": 1}, cb
+	], (err, results) ->
+		console.log "all done"
+		callback(err)
+
 exports.migrate = (client, done = ->)->
 	getDocIds (err, ids)->
 		interval = setInterval printProgress, 3*1000
