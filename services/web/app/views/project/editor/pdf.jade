@@ -1,16 +1,34 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		a.btn.btn-info(
-			href,
-			ng-disabled="pdf.compiling",
-			ng-click="recompile()"
-		)
-			i.fa.fa-refresh(
-				ng-class="{'fa-spin': pdf.compiling }"
+		.btn-group(dropdown)
+			a.btn.btn-info(
+				href,
+				ng-disabled="pdf.compiling",
+				ng-click="recompile()"
 			)
-			| &nbsp;&nbsp;
-			span(ng-show="!pdf.compiling") #{translate("recompile")}
-			span(ng-show="pdf.compiling") #{translate("compiling")}...
+				i.fa.fa-refresh(
+					ng-class="{'fa-spin': pdf.compiling }"
+				)
+				| &nbsp;&nbsp;
+				span(ng-show="!pdf.compiling") #{translate("recompile")}
+				span(ng-show="pdf.compiling") #{translate("compiling")}...
+			a.btn.btn-info.dropdown-toggle(
+				href,
+				ng-disabled="pdf.compiling",
+				dropdown-toggle
+			)
+				span.caret
+			ul.dropdown-menu.dropdown-menu-right
+				li.dropdown-header #{translate("compile_mode")}
+				li
+					a(href, ng-click="draft = false")
+						i.fa.fa-fw(ng-class="{'fa-check': !draft}")
+						| &nbsp;#{translate("normal")}
+				li
+					a(href, ng-click="draft = true")
+						i.fa.fa-fw(ng-class="{'fa-check': draft}")
+						| &nbsp;#{translate("fast")}&nbsp;
+						span.subdued [draft]
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
