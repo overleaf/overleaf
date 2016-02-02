@@ -16,6 +16,6 @@ module.exports = DraftModeManager =
 	_injectDraftOption: (content) ->
 		content
 			# With existing options (must be first, otherwise both are applied)
-			.replace(/\\documentclass\[/, "\\documentclass[draft,")
+			.replace(/\\documentclass\[/g, "\\documentclass[draft,")
 			# Without existing options
-			.replace(/\\documentclass\{/, "\\documentclass[draft]{")
+			.replace(/\\documentclass\{/g, "\\documentclass[draft]{")
