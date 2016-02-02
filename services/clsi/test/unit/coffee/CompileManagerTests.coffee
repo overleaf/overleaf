@@ -17,6 +17,7 @@ describe "CompileManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"child_process": @child_process = {}
 			"./CommandRunner": @CommandRunner = {}
+			"./DraftModeManager": @DraftModeManager = {}
 			"fs": @fs = {}
 		@callback = sinon.stub()
 
@@ -51,31 +52,48 @@ describe "CompileManager", ->
 			@LatexRunner.runLatex = sinon.stub().callsArg(2)
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
 			@OutputCacheManager.saveOutputFiles = sinon.stub().callsArgWith(2, null, @build_files)
-			@CompileManager.doCompile @request, @callback
+			@DraftModeManager.injectDraftMode = sinon.stub().callsArg(1)
+		
+		describe "normally", ->
+			beforeEach ->
+				@CompileManager.doCompile @request, @callback
 
-		it "should write the resources to disk", ->
-			@ResourceWriter.syncResourcesToDisk
-				.calledWith(@project_id, @resources, @compileDir)
-				.should.equal true
+			it "should write the resources to disk", ->
+				@ResourceWriter.syncResourcesToDisk
+					.calledWith(@project_id, @resources, @compileDir)
+					.should.equal true
 
-		it "should run LaTeX", ->
-			@LatexRunner.runLatex
-				.calledWith(@project_id, {
-					directory: @compileDir
-					mainFile:  @rootResourcePath
-					compiler:  @compiler
-					timeout:   @timeout
-					image:     @image
-				})
-				.should.equal true
+			it "should run LaTeX", ->
+				@LatexRunner.runLatex
+					.calledWith(@project_id, {
+						directory: @compileDir
+						mainFile:  @rootResourcePath
+						compiler:  @compiler
+						timeout:   @timeout
+						image:     @image
+					})
+					.should.equal true
 
-		it "should find the output files", ->
-			@OutputFileFinder.findOutputFiles
-				.calledWith(@resources, @compileDir)
-				.should.equal true
+			it "should find the output files", ->
+				@OutputFileFinder.findOutputFiles
+					.calledWith(@resources, @compileDir)
+					.should.equal true
 
-		it "should return the output files", ->
-			@callback.calledWith(null, @build_files).should.equal true
+			it "should return the output files", ->
+				@callback.calledWith(null, @build_files).should.equal true
+			
+			it "should not inject draft mode by default", ->
+				@DraftModeManager.injectDraftMode.called.should.equal false
+	
+		describe "with draft mode", ->
+			beforeEach ->
+				@request.draft = true
+				@CompileManager.doCompile @request, @callback
+			
+			it "should inject the draft mode header", ->
+				@DraftModeManager.injectDraftMode
+					.calledWith(@compileDir + "/" + @rootResourcePath)
+					.should.equal true
 
 	describe "clearProject", ->
 		describe "succesfully", ->

@@ -24,6 +24,10 @@ module.exports = RequestParser =
 			response.imageName = @_parseAttribute "imageName",
 				compile.options.imageName,
 				type: "string"
+			response.draft = @_parseAttribute "draft",
+				compile.options.draft,
+				default: false,
+				type: "boolean"
 
 			if response.timeout > RequestParser.MAX_TIMEOUT
 				response.timeout = RequestParser.MAX_TIMEOUT

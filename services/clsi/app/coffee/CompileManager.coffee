@@ -8,6 +8,7 @@ logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 child_process = require "child_process"
 CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
+DraftModeManager = require "./DraftModeManager"
 fs = require("fs")
 
 module.exports = CompileManager =
@@ -20,24 +21,32 @@ module.exports = CompileManager =
 			return callback(error) if error?
 			logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "written files to disk"
 			timer.done()
-
-			timer = new Metrics.Timer("run-compile")
-			Metrics.inc("compiles")
-			LatexRunner.runLatex request.project_id, {
-				directory: compileDir
-				mainFile:  request.rootResourcePath
-				compiler:  request.compiler
-				timeout:   request.timeout
-				image:     request.imageName
-			}, (error) ->
+			
+			injectDraftModeIfRequired = (callback) ->
+				if request.draft
+					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
+				else
+					callback()
+			
+			injectDraftModeIfRequired (error) ->
 				return callback(error) if error?
-				logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "done compile"
-				timer.done()
-
-				OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
+				timer = new Metrics.Timer("run-compile")
+				Metrics.inc("compiles")
+				LatexRunner.runLatex request.project_id, {
+					directory: compileDir
+					mainFile:  request.rootResourcePath
+					compiler:  request.compiler
+					timeout:   request.timeout
+					image:     request.imageName
+				}, (error) ->
 					return callback(error) if error?
-					OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
-						callback null, newOutputFiles
+					logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "done compile"
+					timer.done()
+
+					OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
+						return callback(error) if error?
+						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
+							callback null, newOutputFiles
 	
 	clearProject: (project_id, _callback = (error) ->) ->
 		callback = (error) ->

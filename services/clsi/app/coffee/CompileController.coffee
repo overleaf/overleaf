@@ -11,6 +11,7 @@ module.exports = CompileController =
 		RequestParser.parse req.body, (error, request) ->
 			return next(error) if error?
 			request.project_id = req.params.project_id
+			logger.log {request}, "got request"
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
