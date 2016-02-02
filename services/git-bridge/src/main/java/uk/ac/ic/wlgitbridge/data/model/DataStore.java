@@ -53,7 +53,7 @@ public class DataStore {
         }
     }
 
-    private void makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException, GitAPIException {
+    private void makeCommitsFromSnapshots(String name, Repository repository, List<Snapshot> snapshots) throws IOException, GitAPIException, SnapshotPostException {
         for (Snapshot snapshot : snapshots) {
             List<RawFile> files = new LinkedList<RawFile>();
             files.addAll(snapshot.getSrcs());

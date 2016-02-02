@@ -89,13 +89,13 @@ public class WriteLatexPutHook implements PreReceiveHook {
         }
     }
 
-    private RawDirectory getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException {
+    private RawDirectory getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException, SnapshotPostException {
         return new RepositoryObjectTreeWalker(repository,
                                               receiveCommand.getNewId())
                .getDirectoryContents();
     }
 
-    private RawDirectory getOldDirectoryContents(Repository repository) throws IOException {
+    private RawDirectory getOldDirectoryContents(Repository repository) throws IOException, SnapshotPostException {
         return new RepositoryObjectTreeWalker(repository).getDirectoryContents();
     }
 
