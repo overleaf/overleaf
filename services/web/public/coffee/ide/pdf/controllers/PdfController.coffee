@@ -12,6 +12,11 @@ define [
 
 		$scope.$on "pdf:error:display", () ->
 			$scope.pdf.error = true
+		
+		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
+		$scope.$watch "draft", (new_value, old_value) ->
+			if new_value? and old_value != new_value
+				localStorage("draft:#{$scope.project_id}", new_value)
 
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
@@ -19,6 +24,7 @@ define [
 				url += "?auto_compile=true"
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
+				draft: $scope.draft
 				_csrf: window.csrfToken
 			}
 

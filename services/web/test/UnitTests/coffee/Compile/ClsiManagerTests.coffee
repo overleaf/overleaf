@@ -166,6 +166,7 @@ describe "ClsiManager", ->
 							compiler: @compiler
 							timeout : 100
 							imageName: @image
+							draft: false
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
@@ -220,6 +221,12 @@ describe "ClsiManager", ->
 			
 			it "should return an error", ->
 				expect(@error).to.exist
+		
+		describe "with the draft option", ->
+			it "should add the draft option into the request", (done) ->
+				@ClsiManager._buildRequest @project_id, {timeout:100, draft: true}, (error, request) =>
+					request.compile.options.draft.should.equal true
+					done()
 
 
 	describe '_postToClsi', ->
