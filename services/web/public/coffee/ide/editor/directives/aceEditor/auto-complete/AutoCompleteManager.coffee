@@ -12,14 +12,6 @@ define [
 		else
 			return null
 
-	referenceKeyToAutocompleteEntry = (commandName, key) ->
-		return {
-			caption: "\\#{commandName}{#{key}",
-			snippet: "\\#{commandName}{#{key}",
-			meta: "reference",
-			score: 10000
-		}
-
 	class AutoCompleteManager
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
@@ -57,9 +49,13 @@ define [
 					lineUpToCursor = editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\(cite[a-z]?){\w*/)
+						citeMatch = commandFragment.match(/^~?\\(cite[a-z]?){(.*,)?(\w*)/)
 						if citeMatch
 							commandName = citeMatch[1]
+							previousArgs = citeMatch[2]
+							currentArg = citeMatch[3]
+							if previousArgs == undefined
+								previousArgs = ""
 							result = []
 							result.push {
 								caption: "\\#{commandName}{",
@@ -69,7 +65,12 @@ define [
 							}
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
-									result.push(referenceKeyToAutocompleteEntry(commandName, key))
+									result.push({
+										caption: "\\#{commandName}{#{previousArgs}#{key}",
+										snippet: "\\#{commandName}{#{previousArgs}#{key}",
+										meta: "reference",
+										score: 10000
+									})
 								callback null, result
 							else
 								callback null, result
