@@ -43,14 +43,15 @@ describe "CompileController", ->
 		@res = new MockResponse()
 
 	describe "compile", ->
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+			@req.session = {}
+			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
+			@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
 
 		describe "when not an auto compile", ->
 			beforeEach ->
-				@req.params =
-					Project_id: @project_id
-				@req.session = {}
-				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
-				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"], @output = "mock-output")
 				@CompileController.compile @req, @res, @next
 
 			it "should look up the user id", ->
@@ -77,17 +78,24 @@ describe "CompileController", ->
 
 		describe "when an auto compile", ->
 			beforeEach ->
-				@req.params =
-					Project_id: @project_id
 				@req.query =
 					auto_compile: "true"
-				@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
-				@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
 				@CompileController.compile @req, @res, @next
 
 			it "should do the compile with the auto compile flag", ->
 				@CompileManager.compile
 					.calledWith(@project_id, @user_id, { isAutoCompile: true })
+					.should.equal true
+		
+		describe "with the draft attribute", ->
+			beforeEach ->
+				@req.body =
+					draft: true
+				@CompileController.compile @req, @res, @next
+
+			it "should do the compile without the draft compile flag", ->
+				@CompileManager.compile
+					.calledWith(@project_id, @user_id, { isAutoCompile: false, draft: true })
 					.should.equal true
 
 	describe "downloadPdf", ->
