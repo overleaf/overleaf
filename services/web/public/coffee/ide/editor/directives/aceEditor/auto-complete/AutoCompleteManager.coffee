@@ -12,10 +12,10 @@ define [
 		else
 			return null
 
-	referenceKeyToAutocompleteEntry = (key) ->
+	referenceKeyToAutocompleteEntry = (commandName, key) ->
 		return {
-			caption: "\\cite{#{key}",
-			snippet: "\\cite{#{key}",
+			caption: "\\#{commandName}{#{key}",
+			snippet: "\\#{commandName}{#{key}",
 			meta: "reference",
 			score: 10000
 		}
@@ -56,20 +56,23 @@ define [
 					range = new Range(pos.row, 0, pos.row, pos.column)
 					lineUpToCursor = editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
-					if commandFragment and commandFragment.match(/^~?\\cite{\w*/)
-						result = []
-						result.push {
-							caption: "\\cite{",
-							snippet: "\\cite{",
-							meta: "reference",
-							score: 11000
-						}
-						if references.keys and references.keys.length > 0
-							references.keys.forEach (key) ->
-								result.push(referenceKeyToAutocompleteEntry(key))
-							callback null, result
-						else
-							callback null, result
+					if commandFragment
+						citeMatch = commandFragment.match(/^~?\\(cite[a-z]?){\w*/)
+						if citeMatch
+							commandName = citeMatch[1]
+							result = []
+							result.push {
+								caption: "\\#{commandName}{",
+								snippet: "\\#{commandName}{",
+								meta: "reference",
+								score: 11000
+							}
+							if references.keys and references.keys.length > 0
+								references.keys.forEach (key) ->
+									result.push(referenceKeyToAutocompleteEntry(commandName, key))
+								callback null, result
+							else
+								callback null, result
 
 			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
 
