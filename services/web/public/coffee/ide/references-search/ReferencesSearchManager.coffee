@@ -27,8 +27,6 @@ define [
 			)
 
 		_storeReferencesKeys: (newKeys) ->
-			if window._ENABLE_REFERENCES_AUTOCOMPLETE != true
-				return
 			# console.log '>> storing references keys'
 			oldKeys = @$scope.$root._references.keys
 			@$scope.$root._references.keys = _.union(oldKeys, newKeys)
