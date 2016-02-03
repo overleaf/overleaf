@@ -142,7 +142,7 @@ the package name.
 
 ### Configuration Options
 
-You can pass configuration options to ShareLaTeX as environment variables:
+You can pass the core configuration options to ShareLaTeX as environment variables:
 
 ```
 $ docker run -d \
@@ -166,6 +166,8 @@ configured correctly!
 * `SHARELATEX_REDIS_PASS`: The password to use when connecting to Redis (if applicable)
 * `SHARELATEX_SECURE_COOKIE`: Set this to something non-zero to use a secure cookie.
   Only use this if your ShareLaTeX instance is running behind a reverse proxy with SSL configured.
+
+Other settings such as email setup need to be edited in the docker container at /etc/sharelatex/settings.coffee. We realise this is not an ideal solution and are working on a more streamlined settings file approach.
 
 ### Creating and Managing users
 
