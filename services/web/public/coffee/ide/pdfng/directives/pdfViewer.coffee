@@ -369,7 +369,8 @@ define [
 				scope.$on 'pdf:error', (event, error) ->
 					return if error == 'cancelled'
 					# check if too many retries or file is missing
-					if scope.loadCount > 3 || error?.match(/^Missing PDF/i) || error?.match(/^loading/i)
+					message = error?.message or error
+					if scope.loadCount > 3 || message.match(/^Missing PDF/i) || message.match(/^loading/i)
 						scope.$emit 'pdf:error:display'
 						return
 					if scope.loadSuccess
