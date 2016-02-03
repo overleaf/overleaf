@@ -45,7 +45,8 @@ module.exports = SubscriptionDomainHandler =
 	_findDomainLicence: (email)->
 		licence = _.find settings.domainLicences, (licence)->
 			_.find licence.domains, (domain)->
-				_s.endsWith email, domain
+				regex = "[@\.]#{domain}"
+				return email.match(regex)
 
 		return licence
 
