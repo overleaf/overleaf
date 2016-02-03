@@ -76,7 +76,7 @@ define [
 
 
 	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack) ->
-		freeTrialEndDate = new Date(subscription.trial_ends_at)
+		freeTrialEndDate = new Date(subscription?.trial_ends_at)
 
 		sevenDaysTime = new Date()
 		sevenDaysTime.setDate(sevenDaysTime.getDate() + 7)

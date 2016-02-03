@@ -105,7 +105,7 @@ module.exports = SubscriptionController =
 							recomendedCurrency: subscription?.currency
 							taxRate:subscription?.taxRate
 							plans: plans
-							subscription: subscription
+							subscription: subscription || {}
 							groups: groups
 							subscriptionTabActive: true
 
