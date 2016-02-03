@@ -109,8 +109,8 @@ define [
 			doc = ide.editorManager.getCurrentDocValue()
 			return null if !doc?
 			for line in doc.split("\n")
-				match = line.match /(.*)\\documentclass/
-				if match and !match[1].match /%/
+				match = line.match /^[^%]*\\documentclass/
+				if match
 					return ide.editorManager.getCurrentDocId()
 			return null
 
