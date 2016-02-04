@@ -1,19 +1,17 @@
 span(ng-controller="NotificationsController")
-	aside.col-md-2.col-xs-3
-	.col-md-10.col-xs-9
+	.col-md-12
 		.row
-			.col-xs-12(ng-cloak)
-				ul.list-unstyled.notifications-list(
-					ng-if="notifications.length > 0",
-					ng-cloak
+			ul.list-unstyled.notifications-list(
+				ng-if="notifications.length > 0",
+				ng-cloak
+			)
+				li.notification_entry(
+					ng-repeat="unreadNotification in notifications",
 				)
-					li.notification_entry(
-						ng-repeat="unreadNotification in notifications",
-					)
-						.row(ng-hide="unreadNotification.hide")
-							.col-xs-12
-								.alert.alert-info
-									span {{unreadNotification.html}}
-									button(ng-click="dismiss(unreadNotification)").close.pull-right
-										span(aria-hidden="true") &times;
-										span.sr-only #{translate("close")}
+					.row(ng-hide="unreadNotification.hide")
+						.col-xs-12
+							.alert.alert-warning
+								span(ng-bind-html="unreadNotification.html")
+								button(ng-click="dismiss(unreadNotification)").close.pull-right
+									span(aria-hidden="true") &times;
+									span.sr-only #{translate("close")}

@@ -21,14 +21,14 @@ block content
 
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
-			.row(ng-cloak)
-				include ./list/notifications
+				
 			.row(ng-cloak)
 				span(ng-show="first_sign_up == 'default' || projects.length > 0")
 					aside.col-md-2.col-xs-3
 						include ./list/side-bar
 
 					.col-md-10.col-xs-9
+						include ./list/notifications
 						include ./list/project-list
 				
 				span(ng-if="first_sign_up == 'minimial' && projects.length == 0")
