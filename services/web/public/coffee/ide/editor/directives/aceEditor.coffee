@@ -69,6 +69,21 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+				
+				# For European keyboards, the / is above 7 so needs Shift pressing.
+				# This comes through as Ctrl-Shift-/ which is mapped to toggleBlockComment.
+				# This doesn't do anything for LaTeX, so remap this to togglecomment to
+				# work for European keyboards as normal.
+				editor.commands.removeCommand "toggleBlockComment"
+				editor.commands.removeCommand "togglecomment"
+				
+				editor.commands.addCommand {
+					name: "togglecomment",
+					bindKey: { win: "Ctrl-/|Ctrl-Shift-/", mac: "Command-/|Command-Shift-/" },
+					exec: (editor) -> editor.toggleCommentLines(),
+					multiSelectAction: "forEachLine",
+					scrollIntoView: "selectionPart"
+				}
 
 				# Trigger search AND replace on CMD+F
 				editor.commands.addCommand
