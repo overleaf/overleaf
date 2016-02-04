@@ -1,7 +1,7 @@
 module.exports = Settings =
 	internal:
 		notifications:
-			port: 3033
+			port: 3042
 			host: "localhost"
 
 	mongo:
