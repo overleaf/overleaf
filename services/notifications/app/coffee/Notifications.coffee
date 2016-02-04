@@ -8,14 +8,14 @@ module.exports =
 
 	getUserNotifications: (user_id, callback = (err, notifications)->)->
 		query =
-			user_id: user_id
+			user_id: ObjectId(user_id)
 			templateKey: {"$exists":true}
 		db.notifications.find query, (err, notifications)->
 			callback err, notifications
 
 	addNotification: (user_id, notification, callback)->
 		query =
-			user_id: user_id
+			user_id: ObjectId(user_id)
 			key: notification.key
 		db.notifications.count query, (err, number)->
 			if number > 0
@@ -23,7 +23,7 @@ module.exports =
 				callback number
 			else
 				doc = 
-					user_id: user_id
+					user_id: ObjectId(user_id)
 					key: notification.key
 					messageOpts: notification.messageOpts
 					templateKey: notification.templateKey
@@ -31,7 +31,7 @@ module.exports =
 
 	removeNotification: (user_id, notification_id, callback)->
 		searchOps = 
-			user_id:user_id
+			user_id:ObjectId(user_id)
 			_id:ObjectId(notification_id)
 		updateOperation = 
 			"$unset": {templateKey:true, messageOpts: true}

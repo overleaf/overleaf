@@ -32,7 +32,7 @@ describe 'creating a user', ->
 			'settings-sharelatex': {}
 			'mongojs':@mongojs
 
-		@stubbedNotification = {user_id: user_id, key:"notification-key", messageOpts:"some info", templateKey:"template-key"}
+		@stubbedNotification = {user_id: ObjectId(user_id), key:"notification-key", messageOpts:"some info", templateKey:"template-key"}
 		@stubbedNotificationArray = [@stubbedNotification]
 
 	describe 'getUserNotifications', ->
@@ -40,7 +40,7 @@ describe 'creating a user', ->
 			@findStub.callsArgWith(1, null, @stubbedNotificationArray)
 			@notifications.getUserNotifications user_id, (err, notifications)=>
 				notifications.should.equal @stubbedNotificationArray
-				@findStub.calledWith({"user_id" : user_id, "templateKey": {"$exists":true}}).should.equal true
+				@findStub.calledWith({"user_id" : ObjectId(user_id), "templateKey": {"$exists":true}}).should.equal true
 				done()
 
 	describe 'addNotification', ->
@@ -66,7 +66,7 @@ describe 'creating a user', ->
 
 			@notifications.removeNotification user_id, notification_id, (err)=>
 				searchOps = 
-					user_id:user_id
+					user_id:ObjectId(user_id)
 					_id:ObjectId(notification_id)
 				updateOperation = 
 					"$unset": {templateKey:true, messageOpts:true}

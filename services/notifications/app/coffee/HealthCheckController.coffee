@@ -34,11 +34,11 @@ module.exports =
 						cb(null,body)
 					else
 						logger.log body:body, "what is in the body"
-						cb("notification not found in response")
+						return cb("notification not found in response")
 		]
 		async.series jobs, (err, body)->
 			if err?
-				callback(err)
+				return callback(err)
 			else
 				notification_id = body[1][0]._id
 				opts = getOpts("/notification/#{notification_id}")
