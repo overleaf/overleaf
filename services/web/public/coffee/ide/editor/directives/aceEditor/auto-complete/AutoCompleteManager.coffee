@@ -56,6 +56,7 @@ define [
 							currentArg = citeMatch[3]
 							if previousArgs == undefined
 								previousArgs = ""
+							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
 							result = []
 							result.push {
 								caption: "\\#{commandName}{",
@@ -66,8 +67,8 @@ define [
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
 									result.push({
-										caption: "\\#{commandName}{#{previousArgs}#{key}",
-										snippet: "\\#{commandName}{#{previousArgs}#{key}",
+										caption: "\\#{commandName}{#{previousArgsCaption}#{key}",
+										value: "\\#{commandName}{#{previousArgs}#{key}",
 										meta: "reference",
 										score: 10000
 									})
