@@ -3,7 +3,7 @@ fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
 db = mongojs(Settings.mongo.url, ['docs','docHistory', 'docHistoryStats'])
-_ = require("lodash")
+_ = require("underscore")
 async = require("async")
 exec = require("child_process").exec
 BSON = db.bson.BSON
@@ -12,6 +12,14 @@ logger = {
 	log: ->
 	err: ->
 }
+
+needToExit = false
+handleExit = () ->
+	needToExit = true
+	console.log('Got signal.  Shutting down.')
+
+process.on 'SIGINT', handleExit
+process.on 'SIGHUP', handleExit
 
 finished_docs_path = "/tmp/finished-docs-3"
 all_docs_path = "/tmp/all-docs-3"
@@ -56,23 +64,24 @@ markDocAsUnmigrated = (doc_id, callback)->
 	markDocAsProcessed doc_id, (err)->
 		fs.appendFile unmigrated_docs_path, "#{doc_id}\n", callback
 
-printProgress = ->
-	count = Object.keys(finished_docs).length
-	console.log "completed", count
-
 checkIfDocHasBeenProccessed = (doc_id, callback)->
 	callback(null, finished_docs[doc_id])
 
 processNext = (doc_id, callback)->
 	if !doc_id? or doc_id.length == 0
 		return callback()
+	if needToExit
+		return callback(new Error("graceful shutdown"))
 	checkIfDocHasBeenProccessed doc_id, (err, hasBeenProcessed)->
 		if hasBeenProcessed
 			console.log "#{doc_id} already processed, skipping"
 			return callback()
-		console.log "#{doc_id} processing"
 		PackManager._packDocHistory doc_id, {}, (err) ->
-			markDocAsProcessed doc_id, callback
+			if err?
+				console.log "error processing #{doc_id}"
+				markDocAsUnmigrated doc_id, callback
+			else
+				markDocAsProcessed doc_id, callback
 
 updateIndexes = (callback) ->
 	async.series [
@@ -91,15 +100,27 @@ updateIndexes = (callback) ->
 
 exports.migrate = (client, done = ->)->
 	getDocIds (err, ids)->
+		totalDocCount = ids.length
+		alreadyFinishedCount = Object.keys(finished_docs).length
+		t0 = Date.now()
+		printProgress = () ->
+			count = Object.keys(finished_docs).length
+			processedFraction = (count-alreadyFinishedCount)/totalDocCount
+			remainingFraction = (totalDocCount-count)/totalDocCount
+			t = Date.now()
+			dt = (t-t0)*remainingFraction/processedFraction
+			estFinishTime = new Date(t + dt)
+			console.log "completed #{count}/#{totalDocCount} processed=#{processedFraction.toFixed(2)} remaining=#{remainingFraction.toFixed(2)} elapsed=#{(t-t0)/1000} est Finish=#{estFinishTime}"
 		interval = setInterval printProgress, 3*1000
-		jobs = _.map ids, (id)->
+
+		jobs = _.map _.filter(ids, (id) -> not finished_docs[id]), (id)->
 			return (cb)->
 				processNext(id, cb)
 		async.series jobs, (err)->
 			if err?
 				console.error err, "at end of jobs"
 			else
-				console.log "finished"
+				console.log "finished at #{new Date}"
 			clearInterval interval
 			done(err)
 
