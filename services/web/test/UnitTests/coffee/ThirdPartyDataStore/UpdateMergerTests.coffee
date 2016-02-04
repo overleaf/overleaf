@@ -24,6 +24,7 @@ describe 'UpdateMerger :', ->
 				log: ->
 				err: ->
 		@project_id = "project_id_here"
+		@user_id = "mock-user-id"
 		@source = "dropbox"
 		@update = new BufferedStream()
 		@update.headers = {}
@@ -37,7 +38,7 @@ describe 'UpdateMerger :', ->
 
 		it 'should get the element id', (done)->
 			@projectLocator.findElementByPath = sinon.spy()
-			@updateMerger.mergeUpdate @project_id, @path, @update, @source, =>
+			@updateMerger.mergeUpdate @user_id, @project_id, @path, @update, @source, =>
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 			done()
 
@@ -45,12 +46,12 @@ describe 'UpdateMerger :', ->
 			doc_id = "231312s"
 			@FileTypeManager.isBinary.callsArgWith(2, null, false)
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:doc_id})
-			@updateMerger.p.processDoc = sinon.stub().callsArgWith(5)
+			@updateMerger.p.processDoc = sinon.stub().callsArgWith(6)
 			filePath = "/folder/doc.tex"
 
-			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
+			@updateMerger.mergeUpdate @user_id, @project_id, filePath, @update, @source, =>
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
-				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @fsPath, filePath, @source).should.equal true
+				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @user_id, @fsPath, filePath, @source).should.equal true
 				@fs.unlink.calledWith(@fsPath).should.equal true
 				done()
 
@@ -61,7 +62,7 @@ describe 'UpdateMerger :', ->
 			@updateMerger.p.processFile = sinon.stub().callsArgWith(5)
 			filePath = "/folder/file1.png"
 
-			@updateMerger.mergeUpdate @project_id, filePath, @update, @source, =>
+			@updateMerger.mergeUpdate @user_id, @project_id, filePath, @update, @source, =>
 				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source).should.equal true
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				@fs.unlink.calledWith(@fsPath).should.equal true
@@ -77,12 +78,12 @@ describe 'UpdateMerger :', ->
 
 		it 'should set the doc text in the editor controller', (done)->
 			@editorController.setDoc = ->
-			mock = sinon.mock(@editorController).expects("setDoc").withArgs(@project_id, @doc_id, @splitDocLines, @source).callsArg(4)
+			mock = sinon.mock(@editorController).expects("setDoc").withArgs(@project_id, @doc_id, @user_id, @splitDocLines, @source).callsArg(5)
 
 			@update.write(@docLines)
 			@update.end()
 
-			@updateMerger.p.processDoc @project_id, @doc_id, @update, "path", @source, ->
+			@updateMerger.p.processDoc @project_id, @doc_id, @user_id, @update, "path", @source, ->
 				mock.verify()
 				done()
 
@@ -97,7 +98,7 @@ describe 'UpdateMerger :', ->
 			@update.write(@docLines)
 			@update.end()
 
-			@updateMerger.p.processDoc @project_id, undefined, @update, path, @source, ->
+			@updateMerger.p.processDoc @project_id, undefined, @user_id, @update, path, @source, ->
 				mock.verify()
 				done()
 

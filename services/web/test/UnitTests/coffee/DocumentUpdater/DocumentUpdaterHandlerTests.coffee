@@ -15,6 +15,7 @@ describe 'Flushing documents :', ->
 		@doc_id = "doc-id-394"
 		@lines = ["one", "two", "three"]
 		@version = 42
+		@user_id = "mock-user-id-123"
 		@project =
 			_id: @project_id
 
@@ -218,7 +219,7 @@ describe 'Flushing documents :', ->
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
-				@handler.setDocument @project_id, @doc_id, @lines, @source, @callback
+				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it 'should set the document in the document updater', ->
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
@@ -228,6 +229,7 @@ describe 'Flushing documents :', ->
 						json:
 							lines: @lines
 							source: @source
+							user_id: @user_id
 					})
 					.should.equal true
 
@@ -237,7 +239,7 @@ describe 'Flushing documents :', ->
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
-				@handler.setDocument @project_id, @doc_id, @lines, @source, @callback
+				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(@error).should.equal true
@@ -245,7 +247,7 @@ describe 'Flushing documents :', ->
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
-				@handler.setDocument @project_id, @doc_id, @lines, @source, @callback
+				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it "should return the callback with an error", ->
 				@callback

@@ -13,8 +13,8 @@ LockManager = require("../../infrastructure/LockManager")
 _ = require('underscore')
 
 module.exports = EditorController =
-	setDoc: (project_id, doc_id, docLines, source, callback = (err)->)->
-		DocumentUpdaterHandler.setDocument project_id, doc_id, docLines, source, (err)=>
+	setDoc: (project_id, doc_id, user_id, docLines, source, callback = (err)->)->
+		DocumentUpdaterHandler.setDocument project_id, doc_id, user_id, docLines, source, (err)=>
 			logger.log project_id:project_id, doc_id:doc_id, "notifying users that the document has been updated"
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
