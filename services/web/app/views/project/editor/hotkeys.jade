@@ -50,16 +50,22 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 				.hotkey
 					span.combination {{ctrl}} + A
 					span.description Select All
-			.col-xs-6
 				.hotkey
 					span.combination Tab
 					span.description Indent Selection
+			.col-xs-6
 				.hotkey
-					span.combination {{ctrl}} + U
+					span.combination Ctrl + U
 					span.description To Uppercase
 				.hotkey
 					span.combination Ctrl + Shift + U
 					span.description To Lowercase
+				.hotkey
+					span.combination {{ctrl}} + B
+					span.description Bold text
+				.hotkey
+					span.combination {{ctrl}} + I
+					span.description Italic Text
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
