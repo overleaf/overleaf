@@ -14,7 +14,7 @@ module.exports =
 			statusCode =  if res? then res.statusCode else 500
 			if err? or statusCode != 200
 				e = new Error("something went wrong getting notifications, #{err}, #{statusCode}")
-				logger.err err:err
+				logger.err err:err, "something went wrong getting notifications"
 				callback(null, [])
 			else
 				if !unreadNotifications?
