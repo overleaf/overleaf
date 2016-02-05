@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.git.util;
 
+import org.eclipse.jgit.errors.LargeObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -7,6 +8,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,7 +36,7 @@ public class RepositoryObjectTreeWalker {
         this(repository, repository.resolve("HEAD~" + fromHead));
     }
 
-    public RawDirectory getDirectoryContents() throws IOException {
+    public RawDirectory getDirectoryContents() throws IOException, SnapshotPostException {
         return new RawDirectory(walkGitObjectTree());
     }
 
@@ -48,14 +51,21 @@ public class RepositoryObjectTreeWalker {
         return treeWalk;
     }
 
-    private Map<String, RawFile> walkGitObjectTree() throws IOException {
+    private Map<String, RawFile> walkGitObjectTree() throws IOException, SnapshotPostException {
         Map<String, RawFile> fileContentsTable = new HashMap<String, RawFile>();
         if (treeWalk == null) {
             return fileContentsTable;
         }
         while (treeWalk.next()) {
             String path = treeWalk.getPathString();
-            fileContentsTable.put(path, new RepositoryFile(path, repository.open(treeWalk.getObjectId(0)).getBytes()));
+
+            try {
+                byte[] content = repository.open(treeWalk.getObjectId(0)).getBytes();
+                fileContentsTable.put(path, new RepositoryFile(path, content));
+            }
+            catch (LargeObjectException e) {
+                throw new SizeLimitExceededException(path);
+            }
         }
         return fileContentsTable;
     }

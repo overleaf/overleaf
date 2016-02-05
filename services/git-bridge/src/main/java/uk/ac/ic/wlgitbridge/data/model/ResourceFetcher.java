@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.ByteArrayOutputStream;
@@ -28,7 +29,7 @@ public class ResourceFetcher {
         this.persistentStore = persistentStore;
     }
 
-    public RawFile get(String projectName, String url, String newPath, Repository repository, Map<String, byte[]> fetchedUrls) throws IOException {
+    public RawFile get(String projectName, String url, String newPath, Repository repository, Map<String, byte[]> fetchedUrls) throws IOException, SnapshotPostException {
         String path = persistentStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {
