@@ -42,7 +42,31 @@ describe 'NotificationsHandler', ->
 				unreadNotifications.length.should.equal 0
 
 	describe "markAsRead", ->
+		beforeEach ->
+			@key = "some key here"
+
 		it 'should send a delete request when a delete has been received to mark a notification', (done)->
-			@handler.markAsRead user_id, notification_id, =>
-				@request.del.calledWith({uri:"#{notificationUrl}/user/#{user_id}/notification/#{notification_id}", timeout:1000}).should.equal true
+			@handler.markAsReadWithKey user_id, @key, =>
+				opts =
+					uri: "#{notificationUrl}/user/#{user_id}"
+					json:
+						key:@key
+					timeout:1000
+				@request.del.calledWith(opts).should.equal true
+				done()
+
+
+	describe "createNotification", ->
+		beforeEach ->
+			@key = "some key here"
+			@messageOpts = {value:12344}
+			@templateKey = "renderThisHtml"
+
+		it "should post the message over", (done)->
+			@handler.createNotification user_id, @key, @templateKey, @messageOpts, =>
+				args = @request.post.args[0][0]
+				args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
+				args.timeout.should.equal 1000
+				expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts}
+				assert.deepEqual(args.json, expectedJson)
 				done()

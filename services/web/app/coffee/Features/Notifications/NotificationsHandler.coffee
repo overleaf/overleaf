@@ -21,6 +21,27 @@ module.exports =
 					unreadNotifications = []
 				callback(null, unreadNotifications)
 
+	createNotification: (user_id, key, templateKey, messageOpts, callback)->
+		opts = 
+			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
+			timeout: 1000
+			json: {
+				key:key
+				messageOpts:messageOpts
+				templateKey:templateKey
+			}
+		request.post opts, callback
+
+	markAsReadWithKey: (user_id, key, callback)->
+		opts = 
+			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
+			timeout: 1000
+			json: {
+				key:key
+			}
+		request.del opts, callback
+	
+
 	markAsRead: (user_id, notification_id, callback)->
 		opts =
 			uri: "#{settings.apis.notifications.url}/user/#{user_id}/notification/#{notification_id}"

@@ -1,3 +1,4 @@
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 async = require("async")
 _ = require("underscore")
 settings = require("settings-sharelatex")
@@ -7,17 +8,18 @@ _s = require("underscore.string")
 module.exports = SubscriptionDomainHandler =
 
 
-	getLicenceUserCanJoin: (user, callback)->
+	getLicenceUserCanJoin: (user)->
 		licence = SubscriptionDomainHandler._findDomainLicence(user.email)
-		if licence?
-			callback null, licence
-		else
-			callback()
+		return licence
 
 	attemptToJoinGroup: (user, callback)->
 		licence = SubscriptionDomainHandler._findDomainLicence(user.email)
 		if licence? and user.emailVerified
-			SubscriptionGroupHandler.addUserToGroup licence.adminUser_id, user.email, callback
+			SubscriptionGroupHandler.addUserToGroup licence.adminUser_id, user.email, (err)->
+				if err?
+					logger.err err:err, "error adding user to group"
+					return callback(err)
+				NotificationsBuilder.groupPlan(user, licence).read()
 		else
 			callback "user not verified"
 
