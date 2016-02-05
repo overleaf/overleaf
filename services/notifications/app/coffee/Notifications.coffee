@@ -34,7 +34,7 @@ module.exports =
 			user_id:ObjectId(user_id)
 			_id:ObjectId(notification_id)
 		updateOperation = 
-			"$unset": {templateKey:true}
+			"$unset": {templateKey:true, messageOpts: true}
 		db.notifications.update searchOps, updateOperation, callback
 
 	removeNotificationKey: (user_id, notification_key, callback)->

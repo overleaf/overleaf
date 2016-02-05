@@ -40,6 +40,6 @@ app.get '*', (req, res)->
 	res.send 404
 
 host = Settings.internal?.notifications?.host || "localhost"
-port = Settings.internal?.notifications?.port || 3033
+port = Settings.internal?.notifications?.port || 3042
 app.listen port, host, ->
 	logger.info "notifications starting up, listening on #{host}:#{port}"

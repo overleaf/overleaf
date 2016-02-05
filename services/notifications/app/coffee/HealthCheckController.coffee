@@ -26,18 +26,21 @@ module.exports =
 				opts.json = true
 				request.get opts, (err, res, body)->
 					if res.statusCode != 200
-						return cb("status code not 200, its #{res.statusCode}")
+						e = "status code not 200 #{res.statusCode}"
+						logger.err err:err, e
+						return cb(e)
 
 					hasNotification = _.some body, (notification)-> 
 						notification.key == notification_key and notification.user_id == user_id.toString()
 					if hasNotification
-						cb(null,body)
+						cb(null, body)
 					else
-						logger.log body:body, "what is in the body"
+						logger.log body:body, "got notifications response for health check"
 						return cb("notification not found in response")
 		]
 		async.series jobs, (err, body)->
 			if err?
+				logger.err err:err, "error running health check"
 				return callback(err)
 			else
 				notification_id = body[1][0]._id

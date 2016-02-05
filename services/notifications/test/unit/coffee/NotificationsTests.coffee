@@ -69,7 +69,7 @@ describe 'Notifications Tests', ->
 					user_id:ObjectId(user_id)
 					_id:ObjectId(notification_id)
 				updateOperation = 
-					"$unset": {templateKey:true}
+					"$unset": {templateKey:true, messageOpts:true}
 				@updateStub.calledWith(searchOps, updateOperation).should.equal true
 				done()
 
