@@ -10,7 +10,7 @@ user_id = "51dc93e6fb625a261300003b"
 notification_id = "fb625a26f09d"
 notification_key = "notification-key"
 
-describe 'creating a user', ->
+describe 'Notifications Tests', ->
 	beforeEach ->
 		self = @
 		@findStub = sinon.stub()
@@ -60,14 +60,27 @@ describe 'creating a user', ->
 				@insertStub.calledWith(@stubbedNotification).should.equal false
 				done()
 
-	describe 'removeNotification', ->
+	describe 'removeNotificationId', ->
 		it 'should mark the notification id as read', (done)->
 			@updateStub.callsArgWith(2, null)
 
-			@notifications.removeNotification user_id, notification_id, (err)=>
+			@notifications.removeNotificationId user_id, notification_id, (err)=>
 				searchOps = 
 					user_id:ObjectId(user_id)
 					_id:ObjectId(notification_id)
+				updateOperation = 
+					"$unset": {templateKey:true}
+				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				done()
+
+	describe 'removeNotificationKey', ->
+		it 'should mark the notification key as read', (done)->
+			@updateStub.callsArgWith(2, null)
+
+			@notifications.removeNotificationKey user_id, notification_key, (err)=>
+				searchOps = 
+					user_id:ObjectId(user_id)
+					key: notification_key
 				updateOperation = 
 					"$unset": {templateKey:true}
 				@updateStub.calledWith(searchOps, updateOperation).should.equal true

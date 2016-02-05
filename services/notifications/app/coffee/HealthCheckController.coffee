@@ -41,6 +41,10 @@ module.exports =
 				return callback(err)
 			else
 				notification_id = body[1][0]._id
+				notification_key = body[1][0].key
 				opts = getOpts("/notification/#{notification_id}")
 				request.del opts, (err, res, body)->
-					db.notifications.remove {_id:ObjectId(notification_id)}, callback
+					opts = getOpts("")
+					opts.json = {key: notification_key}
+					request.del opts, (err, res, body)->
+						db.notifications.remove {_id:ObjectId(notification_id)}, callback

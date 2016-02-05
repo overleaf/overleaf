@@ -7,8 +7,9 @@ assert = require('assert')
 
 user_id = "51dc93e6fb625a261300003b"
 notification_id = "fb625a26f09d"
+notification_key = "my-notification-key"
 
-describe 'Notifications controller', ->
+describe 'Notifications Controller', ->
 	beforeEach ->
 		self = @
 		@notifications = {}
@@ -18,7 +19,7 @@ describe 'Notifications controller', ->
 			'metrics-sharelatex':
 				inc: sinon.stub()
 
-		@stubbedNotification = [{key:"notification-key", messageOpts:"some info", templateKey:"template-key"}]
+		@stubbedNotification = [{key: notification_key, messageOpts:"some info", templateKey:"template-key"}]
 
 	describe "getUserNotifications", ->
 		it 'should ask the notifications for the users notifications', (done)->
@@ -42,13 +43,24 @@ describe 'Notifications controller', ->
 				@notifications.addNotification.calledWith(user_id, @stubbedNotification).should.equal true
 				done()
 
-	describe "removeNotification", ->
-		it "should tell the notifications to mark the notification as read", (done)->
-			@notifications.removeNotification = sinon.stub().callsArgWith(2)
+	describe "removeNotificationId", ->
+		it "should tell the notifications to mark the notification Id as read", (done)->
+			@notifications.removeNotificationId = sinon.stub().callsArgWith(2)
 			req = 
 				params:
 					user_id: user_id
 					notification_id: notification_id
-			@controller.removeNotification req, send:(result)=>
-				@notifications.removeNotification.calledWith(user_id, notification_id).should.equal true
+			@controller.removeNotificationId req, send:(result)=>
+				@notifications.removeNotificationId.calledWith(user_id, notification_id).should.equal true
+				done()
+
+	describe "removeNotificationKey", ->
+		it "should tell the notifications to mark the notification Key as read", (done)->
+			@notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
+			req = 
+				params:
+					user_id: user_id
+				body: {key: notification_key}
+			@controller.removeNotificationKey req, send:(result)=>
+				@notifications.removeNotificationKey.calledWith(user_id, notification_key).should.equal true
 				done()

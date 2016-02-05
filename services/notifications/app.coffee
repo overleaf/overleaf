@@ -22,7 +22,8 @@ app.configure ()->
 
 app.post '/user/:user_id', controller.addNotification
 app.get '/user/:user_id', controller.getUserNotifications
-app.del '/user/:user_id/notification/:notification_id', controller.removeNotification
+app.del '/user/:user_id/notification/:notification_id', controller.removeNotificationId
+app.del '/user/:user_id', controller.removeNotificationKey
 
 app.get '/status', (req, res)->
 	res.send('notifications sharelatex up')

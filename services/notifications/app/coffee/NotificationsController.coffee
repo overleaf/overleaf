@@ -19,8 +19,14 @@ module.exports =
 			else
 				res.send()
 
-	removeNotification: (req, res)->
-		logger.log user_id: req.params.user_id, notification_id: req.params.notification_id, "mark notification as read"
-		metrics.inc "removeNotification"
-		Notifications.removeNotification req.params.user_id, req.params.notification_id, (err, notifications)->
+	removeNotificationId: (req, res)->
+		logger.log user_id: req.params.user_id, notification_id: req.params.notification_id, "mark id notification as read"
+		metrics.inc "removeNotificationId"
+		Notifications.removeNotificationId req.params.user_id, req.params.notification_id, (err, notifications)->
+			res.send()
+
+	removeNotificationKey: (req, res)->
+		logger.log user_id: req.params.user_id, notification_key: req.body.key, "mark key notification as read"
+		metrics.inc "removeNotificationKey"
+		Notifications.removeNotificationKey req.params.user_id, req.body.key, (err, notifications)->
 			res.send()

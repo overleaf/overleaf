@@ -29,10 +29,18 @@ module.exports =
 					templateKey: notification.templateKey
 				db.notifications.insert(doc, callback)
 
-	removeNotification: (user_id, notification_id, callback)->
+	removeNotificationId: (user_id, notification_id, callback)->
 		searchOps = 
 			user_id:ObjectId(user_id)
 			_id:ObjectId(notification_id)
+		updateOperation = 
+			"$unset": {templateKey:true}
+		db.notifications.update searchOps, updateOperation, callback
+
+	removeNotificationKey: (user_id, notification_key, callback)->
+		searchOps = 
+			user_id:ObjectId(user_id)
+			key: notification_key
 		updateOperation = 
 			"$unset": {templateKey:true}
 		db.notifications.update searchOps, updateOperation, callback
