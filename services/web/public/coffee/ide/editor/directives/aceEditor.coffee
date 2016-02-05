@@ -92,7 +92,6 @@ define [
 					exec: (editor) ->
 						ace.require("ace/ext/searchbox").Search(editor, true)
 					readOnly: true
-				editor.commands.removeCommand "replace"
 				
 				# Bold text on CMD+B
 				editor.commands.addCommand
