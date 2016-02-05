@@ -5,7 +5,11 @@ logger = require('logger-sharelatex')
 async = require('async')
 
 module.exports =
-	findElement: (options, callback = (err, element, path, parentFolder)->)->
+	findElement: (options, _callback = (err, element, path, parentFolder)->)->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		{project, project_id, element_id, type} = options
 		elementType = sanitizeTypeOfElement type
 
