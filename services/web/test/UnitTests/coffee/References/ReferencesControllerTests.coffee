@@ -2,11 +2,11 @@ SandboxedModule = require('sandboxed-module')
 should = require('chai').should()
 sinon = require 'sinon'
 assert = require("chai").assert
-modulePath = "../../../../app/js/Features/ReferencesSearch/ReferencesSearchController"
+modulePath = "../../../../app/js/Features/References/ReferencesController"
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
 
-describe "ReferencesSearchController", ->
+describe "ReferencesController", ->
 
 	beforeEach ->
 		@projectId = '2222'
@@ -18,7 +18,7 @@ describe "ReferencesSearchController", ->
 			'settings-sharelatex': @settings = {
 				apis: {web: {url: 'http://some.url'}}
 			},
-			'./ReferencesSearchHandler': @ReferencesSearchHandler = {
+			'./ReferencesHandler': @ReferencesHandler = {
 				index: sinon.stub()
 				indexAll: sinon.stub()
 			},
@@ -41,7 +41,7 @@ describe "ReferencesSearchController", ->
 
 		beforeEach ->
 			@req.body = {shouldBroadcast: false}
-			@ReferencesSearchHandler.indexAll.callsArgWith(1, null, @fakeResponseData)
+			@ReferencesHandler.indexAll.callsArgWith(1, null, @fakeResponseData)
 			@call = (callback) =>
 				@controller.indexAll @req, @res
 				callback()
@@ -59,16 +59,16 @@ describe "ReferencesSearchController", ->
 				@res.json.calledWith(@fakeResponseData).should.equal true
 				done()
 
-		it 'should call ReferencesSearchHandler.indexAll', (done) ->
+		it 'should call ReferencesHandler.indexAll', (done) ->
 			@call () =>
-				@ReferencesSearchHandler.indexAll.callCount.should.equal 1
-				@ReferencesSearchHandler.indexAll.calledWith(@projectId).should.equal true
+				@ReferencesHandler.indexAll.callCount.should.equal 1
+				@ReferencesHandler.indexAll.calledWith(@projectId).should.equal true
 				done()
 
 		describe 'when shouldBroadcast is true', ->
 
 			beforeEach ->
-				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@ReferencesHandler.index.callsArgWith(2, null, @fakeResponseData)
 				@req.body.shouldBroadcast = true
 
 			it 'should call EditorRealTimeController.emitToRoom', (done) ->
@@ -92,7 +92,7 @@ describe "ReferencesSearchController", ->
 		describe 'when shouldBroadcast is false', ->
 
 			beforeEach ->
-				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@ReferencesHandler.index.callsArgWith(2, null, @fakeResponseData)
 				@req.body.shouldBroadcast = false
 
 			it 'should not call EditorRealTimeController.emitToRoom', (done) ->
@@ -119,15 +119,15 @@ describe "ReferencesSearchController", ->
 		describe 'with docIds as an array and shouldBroadcast as false', ->
 
 			beforeEach ->
-				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@ReferencesHandler.index.callsArgWith(2, null, @fakeResponseData)
 				@call = (callback) =>
 					@controller.index @req, @res
 					callback()
 
-			it 'should call ReferencesSearchHandler.index', (done) ->
+			it 'should call ReferencesHandler.index', (done) ->
 				@call () =>
-					@ReferencesSearchHandler.index.callCount.should.equal 1
-					@ReferencesSearchHandler.index.calledWith(@projectId, @docIds).should.equal true
+					@ReferencesHandler.index.callCount.should.equal 1
+					@ReferencesHandler.index.calledWith(@projectId, @docIds).should.equal true
 					done()
 
 			it 'should return data', (done) ->
@@ -148,10 +148,10 @@ describe "ReferencesSearchController", ->
 					@EditorRealTimeController.emitToRoom.callCount.should.equal 0
 					done()
 
-			describe 'when ReferencesSearchHandler.index produces an error', ->
+			describe 'when ReferencesHandler.index produces an error', ->
 
 				beforeEach ->
-					@ReferencesSearchHandler.index.callsArgWith(2, new Error('woops'), null)
+					@ReferencesHandler.index.callsArgWith(2, new Error('woops'), null)
 
 				it 'should produce an error response', (done) ->
 					@call () =>
@@ -162,7 +162,7 @@ describe "ReferencesSearchController", ->
 		describe 'when shouldBroadcast is true', ->
 
 			beforeEach ->
-				@ReferencesSearchHandler.index.callsArgWith(2, null, @fakeResponseData)
+				@ReferencesHandler.index.callsArgWith(2, null, @fakeResponseData)
 				@req.body.shouldBroadcast = true
 
 			it 'should call EditorRealTimeController.emitToRoom', (done) ->
@@ -194,9 +194,9 @@ describe "ReferencesSearchController", ->
 					@res.send.calledWith(400).should.equal true
 					done()
 
-			it 'should not call ReferencesSearchHandler.index', (done) ->
+			it 'should not call ReferencesHandler.index', (done) ->
 				@call () =>
-					@ReferencesSearchHandler.index.callCount.should.equal 0
+					@ReferencesHandler.index.callCount.should.equal 0
 					done()
 
 		describe 'with invalid docIds', ->
@@ -210,7 +210,7 @@ describe "ReferencesSearchController", ->
 					@res.send.calledWith(400).should.equal true
 					done()
 
-			it 'should not call ReferencesSearchHandler.index', (done) ->
+			it 'should not call ReferencesHandler.index', (done) ->
 				@call () =>
-					@ReferencesSearchHandler.index.callCount.should.equal 0
+					@ReferencesHandler.index.callCount.should.equal 0
 					done()

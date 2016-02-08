@@ -37,7 +37,7 @@ RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")
-ReferencesSearchController = require('./Features/ReferencesSearch/ReferencesSearchController')
+ReferencesController = require('./Features/References/ReferencesController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -175,8 +175,8 @@ module.exports = class Router
 
 		webRouter.get  /learn(\/.*)?/, WikiController.getPage
 
-		webRouter.post "/project/:Project_id/references/index", SecurityManager.requestCanAccessProject, ReferencesSearchController.index
-		webRouter.post "/project/:Project_id/references/indexAll", SecurityManager.requestCanAccessProject, ReferencesSearchController.indexAll
+		webRouter.post "/project/:Project_id/references/index", SecurityManager.requestCanAccessProject, ReferencesController.index
+		webRouter.post "/project/:Project_id/references/indexAll", SecurityManager.requestCanAccessProject, ReferencesController.indexAll
 
 		#Admin Stuff
 		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index

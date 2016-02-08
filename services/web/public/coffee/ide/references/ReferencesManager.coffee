@@ -1,6 +1,6 @@
 define [
 ], () ->
-	class ReferencesSearchManager
+	class ReferencesManager
 		constructor: (@ide, @$scope) ->
 
 			@$scope.$root._references = @state = keys: []
