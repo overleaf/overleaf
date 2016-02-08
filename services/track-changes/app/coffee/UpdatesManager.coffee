@@ -7,7 +7,6 @@ WebApiManager = require "./WebApiManager"
 UpdateTrimmer = require "./UpdateTrimmer"
 logger = require "logger-sharelatex"
 async = require "async"
-DocArchiveManager = require "./DocArchiveManager"
 _ = require "underscore"
 Settings = require "settings-sharelatex"
 
@@ -17,6 +16,8 @@ module.exports = UpdatesManager =
 		if length == 0
 			return callback()
 
+		# FIXME: we no longer need the lastCompressedUpdate, so change functions not to need it
+		# CORRECTION:  we do use it to log the time in case of error
 		MongoManager.peekLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
 			# lastCompressedUpdate is the most recent update in Mongo, and
 			# lastVersion is its sharejs version number.
@@ -58,46 +59,10 @@ module.exports = UpdatesManager =
 					logger.error err: error, doc_id: doc_id, project_id: project_id, size: size, rawUpdate: rawUpdate, "dropped op - too big"
 					rawUpdate.op = []
 
-			if (not lastCompressedUpdate?) or lastCompressedUpdate.pack? # handle pack append as a special case
-				UpdatesManager._updatePack project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
-			else #use the existing op code
-				UpdatesManager._updateOp project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback
-
-	_updatePack: (project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback) ->
-		compressedUpdates = UpdateCompressor.compressRawUpdates null, rawUpdates
-		PackManager.insertCompressedUpdates project_id, doc_id, lastCompressedUpdate, compressedUpdates, temporary, (error, result) ->
-			return callback(error) if error?
-			logger.log {project_id, doc_id, orig_v: lastCompressedUpdate?.v, new_v: result.v}, "inserted updates into pack"	if result?
-			callback()
-
-	_updateOp: (project_id, doc_id, rawUpdates, temporary, lastCompressedUpdate, lastVersion, callback) ->
-		compressedUpdates = UpdateCompressor.compressRawUpdates lastCompressedUpdate, rawUpdates
-
-		if not lastCompressedUpdate?
-			# no existing update, insert everything
-			updateToModify = null
-			updatesToInsert = compressedUpdates
-		else
-			# there are existing updates, see what happens when we
-			# compress them together with the new ones
-			[firstUpdate, additionalUpdates...] = compressedUpdates
-
-			if firstUpdate.v == lastCompressedUpdate.v and _.isEqual(firstUpdate, lastCompressedUpdate)
-				# first update version hasn't changed, skip it and insert remaining updates
-				# this is an optimisation, we could update the existing op with itself
-				updateToModify = null
-				updatesToInsert = additionalUpdates
-			else
-				# first update version did changed, modify it and insert remaining updates
-				updateToModify = firstUpdate
-				updatesToInsert = additionalUpdates
-
-		MongoManager.modifyCompressedUpdate lastCompressedUpdate, updateToModify, (error, result) ->
-			return callback(error) if error?
-			logger.log {project_id, doc_id, orig_v: lastCompressedUpdate.v, new_v: result.v}, "applied update in-place"	if result?
-			MongoManager.insertCompressedUpdates project_id, doc_id, updatesToInsert, temporary,(error) ->
+			compressedUpdates = UpdateCompressor.compressRawUpdates null, rawUpdates
+			PackManager.insertCompressedUpdates project_id, doc_id, lastCompressedUpdate, compressedUpdates, temporary, (error, result) ->
 				return callback(error) if error?
-				logger.log project_id: project_id, doc_id: doc_id, rawUpdatesLength: rawUpdates.length, compressedUpdatesLength: compressedUpdates.length, "compressed doc updates"
+				logger.log {project_id, doc_id, orig_v: lastCompressedUpdate?.v, new_v: result.v}, "inserted updates into pack"	if result?
 				callback()
 
 	REDIS_READ_BATCH_SIZE: 100
@@ -151,32 +116,15 @@ module.exports = UpdatesManager =
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?
-			MongoManager.getDocUpdates doc_id, options, callback
+			#console.log "options", options
+			PackManager.getOpsByVersionRange project_id, doc_id, options.from, options.to, (error, updates) ->
+				return callback(error) if error?
+				UpdatesManager.fillUserInfo updates, (err, results) ->
+					return callback(err) if err?
+					callback null, results
 
 	getDocUpdatesWithUserInfo: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getDocUpdates project_id, doc_id, options, (error, updates) ->
-			return callback(error) if error?
-			UpdatesManager.fillUserInfo updates, (error, updates) ->
-				return callback(error) if error?
-				callback null, updates
-
-	getProjectUpdates: (project_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
-			return callback(error) if error?
-			MongoManager.getProjectUpdates project_id, options, (error, updates) ->
-				jobs = []
-				for update in updates
-					if update.inS3
-						do (update) ->
-							jobs.push (callback) -> DocArchiveManager.unArchiveDocChanges update.project_id, update.doc_id, callback
-				if jobs.length?
-					async.series jobs, (err) ->
-						MongoManager.getProjectUpdates project_id, options, callback
-				else
-					callback(error, updates)
-
-	getProjectUpdatesWithUserInfo: (project_id, options = {}, callback = (error, updates) ->) ->
-		UpdatesManager.getProjectUpdates project_id, options, (error, updates) ->
 			return callback(error) if error?
 			UpdatesManager.fillUserInfo updates, (error, updates) ->
 				return callback(error) if error?
@@ -186,72 +134,79 @@ module.exports = UpdatesManager =
 		options.min_count ||= 25
 		summarizedUpdates = []
 		before = options.before
-		do fetchNextBatch = () ->
-			UpdatesManager._extendBatchOfSummarizedUpdates project_id, summarizedUpdates, before, options.min_count, (error, updates, nextBeforeUpdate) ->
-				return callback(error) if error?
-				if !nextBeforeUpdate? or updates.length >= options.min_count
-					callback null, updates, nextBeforeUpdate
-				else
-					before = nextBeforeUpdate
-					summarizedUpdates = updates
-					fetchNextBatch()
-
-	_extendBatchOfSummarizedUpdates: (
-		project_id,
-		existingSummarizedUpdates,
-		before, desiredLength,
-		callback = (error, summarizedUpdates, endOfDatabase) ->
-	) ->
-		UpdatesManager.getProjectUpdatesWithUserInfo project_id, { before: before, limit: 3 * desiredLength }, (error, updates) ->
+		nextBeforeTimestamp = null
+		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
 			return callback(error) if error?
+			PackManager.makeProjectIterator project_id, before, (err, iterator) ->
+				return callback(err) if err?
+				# repeatedly get updates and pass them through the summariser to get an final output with user info
+				async.whilst () ->
+					#console.log "checking iterator.done", iterator.done()
+					return summarizedUpdates.length < options.min_count and not iterator.done()
+				, (cb) ->
+					iterator.next (err, partialUpdates) ->
+						return callback(err) if err?
+						#logger.log {partialUpdates}, 'got partialUpdates'
+						return cb() if partialUpdates.length is 0 ## FIXME should try to avoid this happening
+						nextBeforeTimestamp = partialUpdates[partialUpdates.length - 1].meta.end_ts
+						# add the updates to the summary list
+						summarizedUpdates = UpdatesManager._summarizeUpdates partialUpdates, summarizedUpdates
+						cb()
+				, () ->
+					# finally done all updates
+					#console.log 'summarized Updates', summarizedUpdates
+					UpdatesManager.fillSummarizedUserInfo summarizedUpdates, (err, results) ->
+						return callback(err) if err?
+						callback null, results,	if not iterator.done() then nextBeforeTimestamp else undefined
 
-			# Suppose in this request we have fetch the solid updates. In the next request we need
-			# to fetch the dotted updates. These are defined by having an end timestamp less than
-			# the last update's end timestamp (updates are ordered by descending end_ts). I.e.
-			#                 start_ts--v       v--end_ts
-			#   doc1: |......|  |...|   |-------|
-			#   doc2:     |------------------|
-			#                                ^----- Next time, fetch all updates with an
-			#                                       end_ts less than this
-			#          
-			if updates? and updates.length > 0
-				nextBeforeTimestamp = updates[updates.length - 1].meta.end_ts
-				if nextBeforeTimestamp >= before
-					error = new Error("history order is broken")
-					logger.error err: error, project_id:project_id, nextBeforeTimestamp: nextBeforeTimestamp, before:before, "error in project history"
-					return callback(error)
-			else
-				nextBeforeTimestamp = null
-
-			summarizedUpdates = UpdatesManager._summarizeUpdates(
-				updates, existingSummarizedUpdates
-			)
-			callback null,
-				summarizedUpdates,
-				nextBeforeTimestamp
-
-	fillUserInfo: (updates, callback = (error, updates) ->) ->
-		users = {}
-		for update in updates
-			if UpdatesManager._validUserId(update.meta.user_id)
-				users[update.meta.user_id] = true
-
+	fetchUserInfo: (users, callback = (error, fetchedUserInfo) ->) ->
 		jobs = []
+		fetchedUserInfo = {}
 		for user_id of users
 			do (user_id) ->
 				jobs.push (callback) ->
 					WebApiManager.getUserInfo user_id, (error, userInfo) ->
 						return callback(error) if error?
-						users[user_id] = userInfo
+						fetchedUserInfo[user_id] = userInfo
 						callback()
 
-		async.series jobs, (error) ->
+		async.series jobs, (err) ->
+			return callback(err) if err?
+			callback(null, fetchedUserInfo)
+
+	fillUserInfo: (updates, callback = (error, updates) ->) ->
+		users = {}
+		for update in updates
+			user_id = update.meta.user_id
+			if UpdatesManager._validUserId(user_id)
+				users[user_id] = true
+
+		UpdatesManager.fetchUserInfo users, (error, fetchedUserInfo) ->
 			return callback(error) if error?
 			for update in updates
 				user_id = update.meta.user_id
 				delete update.meta.user_id
 				if UpdatesManager._validUserId(user_id)
-					update.meta.user = users[user_id]
+					update.meta.user = fetchedUserInfo[user_id]
+			callback null, updates
+
+	fillSummarizedUserInfo: (updates, callback = (error, updates) ->) ->
+		users = {}
+		for update in updates
+			user_ids = update.meta.user_ids or []
+			for user_id in user_ids
+				if UpdatesManager._validUserId(user_id)
+					users[user_id] = true
+
+		UpdatesManager.fetchUserInfo users, (error, fetchedUserInfo) ->
+			return callback(error) if error?
+			for update in updates
+				user_ids = update.meta.user_ids or []
+				update.meta.users = []
+				delete update.meta.user_ids
+				for user_id in user_ids
+					if UpdatesManager._validUserId(user_id)
+						update.meta.users.push fetchedUserInfo[user_id]
 			callback null, updates
 
 	_validUserId: (user_id) ->
@@ -259,7 +214,6 @@ module.exports = UpdatesManager =
 			return false
 		else
 			return !!user_id.match(/^[a-f0-9]{24}$/)
-
 
 	TIME_BETWEEN_DISTINCT_UPDATES: fiveMinutes = 5 * 60 * 1000
 	_summarizeUpdates: (updates, existingSummarizedUpdates = []) ->
@@ -269,13 +223,7 @@ module.exports = UpdatesManager =
 			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
 				# check if the user in this update is already present in the earliest update,
 				# if not, add them to the users list of the earliest update
-				userExists = false
-				for user in earliestUpdate.meta.users
-					if (!user and !update.meta.user) or (user?.id == update.meta.user?.id)
-						userExists = true
-						break
-				if !userExists
-					earliestUpdate.meta.users.push update.meta.user
+				earliestUpdate.meta.user_ids = _.union earliestUpdate.meta.user_ids, update.meta.user_id
 
 				doc_id = update.doc_id.toString()
 				doc = earliestUpdate.docs[doc_id]
@@ -292,7 +240,7 @@ module.exports = UpdatesManager =
 			else
 				newUpdate =
 					meta:
-						users: []
+						user_ids: []
 						start_ts: update.meta.start_ts
 						end_ts: update.meta.end_ts
 					docs: {}
@@ -300,7 +248,7 @@ module.exports = UpdatesManager =
 				newUpdate.docs[update.doc_id.toString()] =
 					fromV: update.v
 					toV: update.v
-				newUpdate.meta.users.push update.meta.user
+				newUpdate.meta.user_ids.push update.meta.user_id
 				summarizedUpdates.push newUpdate
 
 		return summarizedUpdates

@@ -48,12 +48,6 @@ app.post "/project/:project_id/flush", HttpController.flushProject
 
 app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpController.restore
 
-app.post "/doc/:doc_id/pack", HttpController.packDoc
-app.get "/doc/list", HttpController.listDocs
-
-app.post  '/project/:project_id/archive', HttpController.archiveProject
-app.post  '/project/:project_id/unarchive', HttpController.unArchiveProject
-
 packWorker = null # use a single packing worker
 
 app.post "/pack", (req, res, next) ->

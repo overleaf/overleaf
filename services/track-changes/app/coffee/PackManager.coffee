@@ -3,463 +3,49 @@ _ = require "underscore"
 {db, ObjectId, BSON} = require "./mongojs"
 logger = require "logger-sharelatex"
 LockManager = require "./LockManager"
+MongoAWS = require "./MongoAWS"
+ProjectIterator = require "./ProjectIterator"
+
+# Sharejs operations are stored in a 'pack' object
+#
+#  e.g.  a single sharejs update looks like
+#
+#   {
+#     "doc_id" : 549dae9e0a2a615c0c7f0c98,
+#     "project_id" : 549dae9c0a2a615c0c7f0c8c,
+#     "op" : [ {"p" : 6981,	"d" : "?"	} ],
+#     "meta" : {	"user_id" : 52933..., "start_ts" : 1422310693931,	"end_ts" : 1422310693931 },
+#     "v" : 17082
+#   }
+#
+#  and a pack looks like this
+#
+#   {
+#     "doc_id" : 549dae9e0a2a615c0c7f0c98,
+#     "project_id" : 549dae9c0a2a615c0c7f0c8c,
+#     "pack" : [ U1, U2, U3, ...., UN],
+#     "meta" : {	"user_id" : 52933..., "start_ts" : 1422310693931,	"end_ts" : 1422310693931 },
+#     "v" : 17082
+#     "v_end" : ...
+#   }
+#
+#  where U1, U2, U3, .... are single updates stripped of their
+#  doc_id and project_id fields (which are the same for all the
+#  updates in the pack).
+#
+#  The pack itself has v and meta fields, this makes it possible to
+#  treat packs and single updates in a similar way.
+#
+#  The v field of the pack itself is from the first entry U1, the
+#  v_end field from UN.  The meta.end_ts field of the pack itself is
+#  from the last entry UN, the meta.start_ts field from U1.
 
 DAYS = 24 * 3600 * 1000 # one day in milliseconds
 
 module.exports = PackManager =
-	# The following functions implement methods like a mongo find, but
-	# expands any documents containing a 'pack' field into multiple
-	# values
-	#
-	#  e.g.  a single update looks like
-	#
-	#   {
-	#     "doc_id" : 549dae9e0a2a615c0c7f0c98,
-	#     "project_id" : 549dae9c0a2a615c0c7f0c8c,
-	#     "op" : [ {"p" : 6981,	"d" : "?"	} ],
-	#     "meta" : {	"user_id" : 52933..., "start_ts" : 1422310693931,	"end_ts" : 1422310693931 },
-	#     "v" : 17082
-	#   }
-	#
-	#  and a pack looks like this
-	#
-	#   {
-	#     "doc_id" : 549dae9e0a2a615c0c7f0c98,
-	#     "project_id" : 549dae9c0a2a615c0c7f0c8c,
-	#     "pack" : [ U1, U2, U3, ...., UN],
-	#     "meta" : {	"user_id" : 52933..., "start_ts" : 1422310693931,	"end_ts" : 1422310693931 },
-	#     "v" : 17082
-	#   }
-	#
-	#  where U1, U2, U3, .... are single updates stripped of their
-	#  doc_id and project_id fields (which are the same for all the
-	#  updates in the pack).
-	#
-	#  The pack itself has v and meta fields, this makes it possible to
-	#  treat packs and single updates in the same way.
-	#
-	#  The v field of the pack itself is from the first entry U1
-	#  The meta.end_ts field of the pack itself is from the last entry UN.
-
-	findDocResults: (collection, query, limit, callback) ->
-		# query - the mongo query selector, includes both the doc_id/project_id and
-		# the range on v
-		# limit - the mongo limit, we need to apply it after unpacking any
-		# packs
-
-		sort = {}
-		sort['v'] = -1;
-		cursor = collection
-			.find( query )
-			.sort( sort )
-		# if we have packs, we will trim the results more later after expanding them
-		if limit?
-			cursor.limit(limit)
-
-		# take the part of the query which selects the range over the parameter
-		rangeQuery = query['v']
-
-		# helper function to check if an item from a pack is inside the
-		# desired range
-		filterFn = (item) ->
-			return false if rangeQuery?['$gte']? && item['v'] < rangeQuery['$gte']
-			return false if rangeQuery?['$lte']? && item['v'] > rangeQuery['$lte']
-			return false if rangeQuery?['$lt']? && item['v'] >= rangeQuery['$lt']
-			return false if rangeQuery?['$gt']? && item['v'] <= rangeQuery['$gt']
-			return true
-
-		versionOrder = (a, b) ->
-			b.v - a.v
-
-		# create a query which can be used to select the entries BEFORE
-		# the range because we sometimes need to find extra ones (when the
-		# boundary falls in the middle of a pack)
-		extraQuery = _.clone(query)
-		# The pack uses its first entry for its metadata and v, so the
-		# only queries where we might not get all the packs are those for
-		# $gt and $gte (i.e. we need to find packs which start before our
-		# range but end in it)
-		if rangeQuery?['$gte']?
-			extraQuery['v'] = {'$lt' : rangeQuery['$gte']}
-		else if rangeQuery?['$gt']
-			extraQuery['v'] = {'$lte' : rangeQuery['$gt']}
-		else
-			delete extraQuery['v']
-
-		needMore = false  # keep track of whether we need to load more data
-		updates = [] # used to accumulate the set of results
-
-		# FIXME: packs are big so we should accumulate the results
-		# incrementally instead of using .toArray() to avoid reading all
-		# of the changes into memory
-		cursor.toArray (err, result) ->
-			unpackedSet = PackManager._unpackResults(result)
-			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
-			# check if we need to retrieve more data, because there is a
-			# pack that crosses into our range
-			last = if unpackedSet.length then unpackedSet[unpackedSet.length-1] else null
-			if limit? && updates.length == limit
-				needMore = false
-			else if extraQuery['v']? && last? && filterFn(last)
-				needMore = true
-			else if extraQuery['v']? && updates.length == 0
-				needMore = true
-			if needMore
-				# we do need an extra result set
-				extra = collection
-					.find(extraQuery)
-					.sort(sort)
-					.limit(1)
-				extra.toArray (err, result2) ->
-					if err?
-						return callback err, updates.sort versionOrder
-					else
-						extraSet = PackManager._unpackResults(result2)
-						updates = PackManager._filterAndLimit(updates, extraSet, filterFn, limit)
-						callback err, updates.sort versionOrder
-				return
-			if err?
-				callback err, result
-			else
-				callback err, updates.sort versionOrder
-
-	findProjectResults: (collection, query, limit, callback) ->
-		# query - the mongo query selector, includes both the doc_id/project_id and
-		# the range on meta.end_ts
-		# limit - the mongo limit, we need to apply it after unpacking any
-		# packs
-
-		sort = {}
-		sort['meta.end_ts'] = -1;
-
-		projection = {"op":false, "pack.op": false}
-		cursor = collection
-			.find( query, projection ) # no need to return the op only need version info
-			.sort( sort )
-		# if we have packs, we will trim the results more later after expanding them
-		if limit?
-			cursor.limit(limit)
-
-		# take the part of the query which selects the range over the parameter
-		before = query['meta.end_ts']?['$lt']  # may be null
-
-		updates = [] # used to accumulate the set of results
-
-		# FIXME: packs are big so we should accumulate the results
-		# incrementally instead of using .toArray() to avoid reading all
-		# of the changes into memory
-		cursor.toArray (err, result) ->
-			if err?
-				return callback err, result
-			if result.length == 0 && not before?  # no results and no time range specified
-				return callback err, result
-
-			unpackedSet = PackManager._unpackResults(result)
-			if limit?
-				unpackedSet = unpackedSet.slice(0, limit)
-			# find the end time of the last result, we will take all the
-			# results up to this, and then all the changes at that time
-			# (without imposing a limit) and any overlapping packs
-			cutoff = if unpackedSet.length then unpackedSet[unpackedSet.length-1].meta.end_ts else null
-
-			filterFn = (item) ->
-				ts = item?.meta?.end_ts
-				return false if before? && ts >= before
-				return false if cutoff? && ts < cutoff
-				return true
-
-			timeOrder = (a, b) ->
-				(b.meta.end_ts - a.meta.end_ts) || documentOrder(a, b)
-
-			documentOrder = (a, b) ->
-				x = a.doc_id.valueOf()
-				y = b.doc_id.valueOf()
-				if x > y then 1 else if x < y then -1 else 0
-
-			updates = PackManager._filterAndLimit(updates, unpackedSet, filterFn, limit)
-
-			# get all elements on the lower bound (cutoff)
-			tailQuery = _.clone(query)
-			tailQuery['meta.end_ts'] = cutoff
-			tail = collection
-				.find(tailQuery, projection)
-				.sort(sort)
-
-			# now find any packs that overlap with the time window from outside
-			#     cutoff             before
-			#    --|-----wanted-range--|------------------  time=>
-			#                  |-------------|pack(end_ts)
-			#
-			# these were not picked up by the original query because
-			# end_ts>before but the beginning of the pack may be in the time range
-			overlapQuery = _.clone(query)
-			if before? && cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['meta.start_ts'] = {"$lte": before }
-			else if before? && not cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": before}
-				overlapQuery['meta.start_ts'] = {"$lte": before }
-			else if not before? && cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": cutoff}  # we already have these??
-			else if not before? && not cutoff?
-				overlapQuery['meta.end_ts'] = {"$gte": 0 } # shouldn't happen??
-
-			overlap = collection
-				.find(overlapQuery, projection)
-				.sort(sort)
-
-			# we don't specify a limit here, as there could be any number of overlaps
-			# NB. need to catch items in original query and followup query for duplicates
-
-			applyAndUpdate = (result) ->
-				extraSet = PackManager._unpackResults(result)
-				# note: final argument is null, no limit applied because we
-				# need all the updates at the final time to avoid breaking
-				# the changeset into parts
-				updates = PackManager._filterAndLimit(updates, extraSet, filterFn, null)
-			tail.toArray (err, result2) ->
-				if err?
-					return callback err, updates.sort timeOrder
-				else
-					applyAndUpdate result2
-					overlap.toArray (err, result3) ->
-						if err?
-							return callback err, updates.sort timeOrder
-						else
-							applyAndUpdate result3
-							callback err, updates.sort timeOrder
-
-	_unpackResults: (updates) ->
-		#	iterate over the updates, if there's a pack, expand it into ops and
-		# insert it into the array at that point
-		result = []
-		updates.forEach (item) ->
-			if item.pack?
-				all = PackManager._explodePackToOps item
-				result = result.concat all
-			else
-				result.push item
-		return result
-
-	_explodePackToOps: (packObj) ->
-		# convert a pack into an array of ops
-		doc_id = packObj.doc_id
-		project_id = packObj.project_id
-		result = packObj.pack.map (item) ->
-			item.doc_id = doc_id
-			item.project_id = project_id
-			item
-		return result.reverse()
-
-	_filterAndLimit: (results, extra, filterFn, limit) ->
-		# update results with extra docs, after filtering and limiting
-		filtered = extra.filter(filterFn)
-		newResults = results.concat filtered
-		# remove duplicates
-		seen = {}
-		newResults = newResults.filter (item) ->
-			key = item.doc_id + ' ' + item.v
-			if seen[key]
-				return false
-			else
-				seen[key] = true
-			return true
-		newResults.slice(0, limit) if limit?
-		return newResults
 
 	MAX_SIZE:  1024*1024 # make these configurable parameters
-	MAX_COUNT: 512
-
-	convertDocsToPacks: (docs, callback) ->
-		packs = []
-		top = null
-		docs.forEach (d,i) ->
-			# skip existing packs
-			if d.pack?
-				top = null
-				return
-			sz = BSON.calculateObjectSize(d)
-			# decide if this doc can be added to the current pack
-			validLength = top? && (top.pack.length < PackManager.MAX_COUNT)
-			validSize = top? && (top.sz + sz < PackManager.MAX_SIZE)
-			bothPermanent = top? && (top.expiresAt? is false) && (d.expiresAt? is false)
-			bothTemporary = top? && (top.expiresAt? is true) && (d.expiresAt? is true)
-			within1Day = bothTemporary && (d.meta.start_ts - top.meta.start_ts < 24 * 3600 * 1000)
-			if top? && validLength && validSize && (bothPermanent || (bothTemporary && within1Day))
-				top.pack = top.pack.concat {v: d.v, meta: d.meta,  op: d.op, _id: d._id}
-				top.sz += sz
-				top.n += 1
-				top.v_end = d.v
-				top.meta.end_ts = d.meta.end_ts
-				top.expiresAt = d.expiresAt if top.expiresAt?
-				return
-			else
-				# create a new pack
-				top = _.clone(d)
-				top.pack = [ {v: d.v, meta: d.meta,  op: d.op, _id: d._id} ]
-				top.meta = { start_ts: d.meta.start_ts, end_ts: d.meta.end_ts }
-				top.sz = sz
-				top.n = 1
-				top.v_end = d.v
-				delete top.op
-				delete top._id
-				packs.push top
-
-		callback(null, packs)
-
-	checkHistory: (docs, callback) ->
-		errors = []
-		prev = null
-		error = (args...) ->
-			errors.push args
-		docs.forEach (d,i) ->
-			if d.pack?
-				n = d.pack.length
-				last = d.pack[n-1]
-				error('bad pack v_end', d) if d.v_end != last.v
-				error('bad pack start_ts', d) if d.meta.start_ts != d.pack[0].meta.start_ts
-				error('bad pack end_ts', d) if d.meta.end_ts != last.meta.end_ts
-				d.pack.forEach (p, i) ->
-					prev = v
-					v = p.v
-					error('bad version', v, 'in', p) if v <= prev
-					#error('expired op', p, 'in pack') if p.expiresAt?
-			else
-				prev = v
-				v = d.v
-				error('bad version', v, 'in', d) if v <= prev
-		if errors.length
-			callback(errors)
-		else
-			callback()
-
-	insertPack: (packObj, callback) ->
-		bulk = db.docHistory.initializeOrderedBulkOp()
-		doc_id = packObj.doc_id
-		expect_nInserted = 1
-		expect_nRemoved = packObj.pack.length
-		logger.log {doc_id: doc_id}, "adding pack, removing #{expect_nRemoved} ops"
-		bulk.insert packObj
-		ids = (op._id for op in packObj.pack)
-		bulk.find({_id:{$in:ids}}).remove()
-		bulk.execute (err, result) ->
-			if err?
-				logger.error {doc_id: doc_id}, "error adding pack"
-				callback(err, result)
-			else if result.nInserted != expect_nInserted or result.nRemoved != expect_nRemoved
-				logger.error {doc_id: doc_id, result}, "unexpected result adding pack"
-				callback(new Error(
-					msg: 'unexpected result'
-					expected: {expect_nInserted, expect_nRemoved}
-				), result)
-			else
-				db.docHistoryStats.update {doc_id:doc_id}, {
-					$inc:{update_count:-expect_nRemoved},
-					$currentDate:{last_packed:true}
-				}, {upsert:true}, () ->
-					callback(err, result)
-
-	# retrieve document ops/packs and check them
-	getDocHistory: (doc_id, callback) ->
-		db.docHistory.find({doc_id:ObjectId(doc_id)}).sort {v:1}, (err, docs) ->
-			return callback(err) if err?
-			# for safety, do a consistency check of the history
-			logger.log {doc_id}, "checking history for document"
-			PackManager.checkHistory docs, (err) ->
-				return callback(err) if err?
-				callback(err, docs)
-				#PackManager.deleteExpiredPackOps docs, (err) ->
-				#	return callback(err) if err?
-				#	callback err, docs
-
-	packDocHistory: (doc_id, options, callback) ->
-		if typeof callback == "undefined" and typeof options == 'function'
-			callback = options
-			options = {}
-		LockManager.runWithLock(
-			"HistoryLock:#{doc_id}",
-			(releaseLock) ->
-				PackManager._packDocHistory(doc_id, options, releaseLock)
-			,	callback
-		)
-
-	_packDocHistory: (doc_id, options, callback) ->
-		logger.log {doc_id},"starting pack operation for document history"
-
-		PackManager.getDocHistory doc_id, (err, docs) ->
-			return callback(err) if err?
-			origDocs = 0
-			origPacks = 0
-			for d in docs
-				if d.pack? then	origPacks++	else origDocs++
-			PackManager.convertDocsToPacks docs, (err, packs) ->
-				return callback(err) if err?
-				total = 0
-				for p in packs
-					total = total + p.pack.length
-				logger.log {doc_id, origDocs, origPacks, newPacks: packs.length, totalOps: total}, "document stats"
-				if packs.length
-					if options['dry-run']
-						logger.log {doc_id}, 'dry-run, skipping write packs'
-						return callback()
-					PackManager.savePacks packs, (err) ->
-						return callback(err) if err?
-						# check the history again
-						PackManager.getDocHistory doc_id, callback
-				else
-					logger.log {doc_id}, "no packs to write"
-					# keep a record that we checked this one to avoid rechecking it
-					db.docHistoryStats.update {doc_id:doc_id}, {
-						$currentDate:{last_checked:true}
-					}, {upsert:true}, () ->
-						callback null, null
-
-	DB_WRITE_DELAY: 100
-
-	savePacks: (packs, callback) ->
-		async.eachSeries packs, PackManager.safeInsert, (err, result) ->
-			if err?
-				logger.log {err, result}, "error writing packs"
-				callback err, result
-			else
-				callback()
-
-	safeInsert: (packObj, callback) ->
-		PackManager.insertPack packObj, (err, result) ->
-			setTimeout () ->
-				callback(err,result)
-			, PackManager.DB_WRITE_DELAY
-
-	deleteExpiredPackOps: (docs, callback) ->
-		now = Date.now()
-		toRemove = []
-		toUpdate = []
-		docs.forEach (d,i) ->
-			if d.pack?
-				newPack = d.pack.filter (op) ->
-					if op.expiresAt? then op.expiresAt > now else true
-				if newPack.length == 0
-					toRemove.push d
-				else if newPack.length < d.pack.length
-					# adjust the pack properties
-					d.pack = newPack
-					first = d.pack[0]
-					last = d.pack[d.pack.length - 1]
-					d.v_end = last.v
-					d.meta.start_ts = first.meta.start_ts
-					d.meta.end_ts = last.meta.end_ts
-					toUpdate.push d
-		if toRemove.length or toUpdate.length
-			bulk = db.docHistory.initializeOrderedBulkOp()
-			toRemove.forEach (pack) ->
-				console.log "would remove", pack
-				#bulk.find({_id:pack._id}).removeOne()
-			toUpdate.forEach (pack) ->
-				console.log "would update", pack
-				#bulk.find({_id:pack._id}).updateOne(pack);
-			bulk.execute callback
-		else
-			callback()
+	MAX_COUNT: 1024
 
 	insertCompressedUpdates: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
 		return callback() if newUpdates.length == 0
@@ -509,7 +95,12 @@ module.exports = PackManager =
 		if temporary
 			newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
-		db.docHistory.insert newPack, callback
+		db.docHistory.save newPack, (err, result) ->
+			return callback(err) if err?
+			if temporary
+				return callback()
+			else
+				PackManager.updateIndex project_id, doc_id, callback
 
 	appendUpdatesToExistingPack: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
 		first = newUpdates[0]
@@ -533,11 +124,330 @@ module.exports = PackManager =
 		if lastUpdate.expiresAt and temporary
 			update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
-		db.docHistory.findAndModify {query, update}, callback
+		db.docHistory.findAndModify {query, update,	new:true, fields:{meta:1,v_end:1}}, callback
 
-	listDocs: (options, callback) ->
-		query = {"op.p":{$exists:true}}
-		query.doc_id = {$gt: ObjectId(options.doc_id)} if options.doc_id?
-		db.docHistory.find(query, {doc_id:true}).sort({doc_id:1}).limit (options.limit||100), (err, docs) ->
+	# Retrieve all changes for a document
+
+	getOpsByVersionRange: (project_id, doc_id, fromVersion, toVersion, callback = (error, updates) ->) ->
+		PackManager.loadPacksByVersionRange project_id, doc_id, fromVersion, toVersion, (error) ->
+			query = {doc_id:ObjectId(doc_id.toString())}
+			query.v = {$lte:toVersion} if toVersion?
+			query.v_end = {$gte:fromVersion} if fromVersion?
+			#console.log "query:", query
+			db.docHistory.find(query).sort {v:-1}, (err, result) ->
+				return callback(err) if err?
+				#console.log "getOpsByVersionRange:", err, result
+				updates = []
+				opInRange = (op, from, to) ->
+					return false if fromVersion? and op.v < fromVersion
+					return false if toVersion? and op.v > toVersion
+					return true
+				for docHistory in result
+					#console.log 'adding', docHistory.pack
+					for op in docHistory.pack.reverse() when opInRange(op, fromVersion, toVersion)
+						op.project_id = docHistory.project_id
+						op.doc_id = docHistory.doc_id
+						#console.log "added op", op.v, fromVersion, toVersion
+						updates.push op
+				callback(null, updates)
+
+	loadPacksByVersionRange: (project_id, doc_id, fromVersion, toVersion, callback) ->
+		PackManager.getIndex doc_id, (err, indexResult) ->
 			return callback(err) if err?
-			callback(null, docs)
+			indexPacks = indexResult?.packs or []
+			packInRange = (pack, from, to) ->
+				return false if fromVersion? and pack.v_end < fromVersion
+				return false if toVersion? and pack.v > toVersion
+				return true
+			neededIds = (pack._id for pack in indexPacks when packInRange(pack, fromVersion, toVersion))
+			PackManager.fetchPacksIfNeeded project_id, doc_id, neededIds, callback
+
+	fetchPacksIfNeeded: (project_id, doc_id, pack_ids, callback) ->
+		db.docHistory.find {_id: {$in: (ObjectId(id) for id in pack_ids)}}, {_id:1}, (err, loadedPacks) ->
+			return callback(err) if err?
+			allPackIds = (id.toString() for id in pack_ids)
+			loadedPackIds = (pack._id.toString() for pack in loadedPacks)
+			packIdsToFetch = _.difference allPackIds, loadedPackIds
+			logger.log {loadedPackIds, allPackIds, packIdsToFetch}, "analysed packs"
+			async.eachLimit packIdsToFetch, 4, (pack_id, cb) ->
+				MongoAWS.unArchivePack project_id, doc_id, pack_id, cb
+			, (err) ->
+				return callback(err) if err?
+				logger.log "done unarchiving"
+				callback()
+
+	# Retrieve all changes across a project
+
+	makeProjectIterator: (project_id, before, callback) ->
+		# get all the docHistory Entries
+		db.docHistory.find({project_id: ObjectId(project_id)},{pack:false}).sort {"meta.end_ts":-1}, (err, packs) ->
+			return callback(err) if err?
+			allPacks = []
+			seenIds = {}
+			for pack in packs
+				allPacks.push pack
+				seenIds[pack._id] = true
+			db.docHistoryIndex.find {project_id: ObjectId(project_id)}, (err, indexes) ->
+				return callback(err) if err?
+				for index in indexes
+					for pack in index.packs when not seenIds[pack._id]
+						pack.project_id = index.project_id
+						pack.doc_id = index._id
+						pack.fromIndex = true
+						allPacks.push pack
+						seenIds[pack._id] = true
+				callback(null, new ProjectIterator(allPacks, before, PackManager.getPackById))
+
+	getPackById: (project_id, doc_id, pack_id, callback) ->
+		db.docHistory.findOne {_id: pack_id}, (err, pack) ->
+			return callback(err) if err?
+			if not pack?
+				MongoAWS.unArchivePack project_id, doc_id, pack_id, callback
+			else if pack.expiresAt?
+				# we only need to touch the TTL on the listing of changes in the project
+				# because diffs on individual documents are always done after that
+				PackManager.increaseTTL pack, callback
+			else
+				callback(null, pack)
+
+	increaseTTL: (pack, callback) ->
+		if pack.expiresAt < new Date(Date.now() + 6 * DAYS)
+			# update cache expiry since we are using this pack
+			db.docHistory.findAndModify {
+				query: {_id: pack._id}
+				update: {$set: {expiresAt: new Date(Date.now() + 7 * DAYS)}}
+			}, (err) ->
+				return callback(err, pack)
+		else
+			callback(null, pack)
+
+	# Manage docHistoryIndex collection
+
+	getIndex: (doc_id, callback) ->
+		db.docHistoryIndex.findOne {_id:ObjectId(doc_id.toString())}, callback
+
+	getPackFromIndex: (doc_id, pack_id, callback) ->
+		db.docHistoryIndex.findOne {_id:ObjectId(doc_id.toString()), "packs._id": pack_id}, {"packs.$":1}, callback
+
+	getLastPackFromIndex: (doc_id, callback) ->
+		db.docHistoryIndex.findOne {_id: ObjectId(doc_id.toString())}, {packs:{$slice:-1}}, (err, indexPack) ->
+			return callback(err) if err?
+			return callback() if not indexPack?
+			callback(null,indexPack[0])
+
+	getIndexWithKeys: (doc_id, callback) ->
+		PackManager.getIndex doc_id, (err, index) ->
+			return callback(err) if err?
+			return callback() if not index?
+			for pack in index?.packs or []
+				index[pack._id] = pack
+			callback(null, index)
+
+	initialiseIndex: (project_id, doc_id, callback) ->
+		PackManager.findCompletedPacks project_id, doc_id, (err, packs) ->
+			#console.log 'err', err, 'packs', packs, packs?.length
+			return callback(err) if err?
+			return callback() if not packs?
+			PackManager.insertPacksIntoIndexWithLock project_id, doc_id, packs, callback
+
+	updateIndex: (project_id, doc_id, callback) ->
+		# find all packs prior to current pack
+		PackManager.findUnindexedPacks project_id, doc_id, (err, newPacks) ->
+			return callback(err) if err?
+			return callback() if not newPacks?
+			PackManager.insertPacksIntoIndexWithLock project_id, doc_id, newPacks, (err) ->
+				return callback(err) if err?
+				logger.log {project_id, doc_id, newPacks}, "added new packs to index"
+				callback()
+
+	findCompletedPacks: (project_id, doc_id, callback) ->
+		query = { doc_id: ObjectId(doc_id.toString()) }
+		db.docHistory.find(query, {pack:false}).sort {v:1}, (err, packs) ->
+			return callback(err) if err?
+			return callback() if not packs?
+			return callback() if packs?.length <= 1
+			packs.pop()  #  discard the last pack, it's still in progress
+			callback(null, packs)
+
+	# findPacks: (project_id, doc_id, queryFilter, callback) ->
+	# 	query = { doc_id: ObjectId(doc_id.toString()) }
+	# 	query = _.defaults query, queryFilter if queryFilter?
+	# 	db.docHistory.find(query, {pack:false}).sort {v:1}, callback
+
+	findUnindexedPacks: (project_id, doc_id, callback) ->
+		PackManager.getIndexWithKeys doc_id, (err, indexResult) ->
+			return callback(err) if err?
+			PackManager.findCompletedPacks project_id, doc_id, (err, historyPacks) ->
+				return callback(err) if err?
+				return callback() if not historyPacks?
+				# select only the new packs not already in the index
+				newPacks = (pack for pack in historyPacks when not indexResult[pack._id]?)
+				newPacks = (_.omit(pack, 'doc_id', 'project_id', 'n', 'sz') for pack in newPacks)
+				logger.log {project_id, doc_id, n: newPacks.length}, "found new packs"
+				callback(null, newPacks)
+
+	insertPacksIntoIndexWithLock: (project_id, doc_id, newPacks, callback) ->
+		LockManager.runWithLock(
+			"HistoryIndexLock:#{doc_id}",
+			(releaseLock) ->
+				PackManager._insertPacksIntoIndex project_id, doc_id, newPacks, releaseLock
+			callback
+		)
+
+	_insertPacksIntoIndex: (project_id, doc_id, newPacks, callback) ->
+		db.docHistoryIndex.findAndModify {
+			query: {_id:ObjectId(doc_id.toString())}
+			update:
+				$setOnInsert: project_id: ObjectId(project_id.toString())
+				$push:
+					packs: {$each: newPacks, $sort: {v: 1}}
+			upsert: true
+		}, callback
+
+	# Archiving packs to S3
+
+	archivePack: (project_id, doc_id, pack_id, callback) ->
+		clearFlagOnError = (err, cb) ->
+			if err? # clear the inS3 flag on error
+				PackManager.clearPackAsArchiveInProgress project_id, doc_id, pack_id, (err2) ->
+					return cb(err2) if err2?
+					return cb(err)
+			else
+				cb()
+		async.series [
+			(cb) ->
+				PackManager.checkArchiveNotInProgress project_id, doc_id, pack_id, cb
+			(cb) ->
+				PackManager.markPackAsArchiveInProgress project_id, doc_id, pack_id, cb
+			(cb) ->
+				MongoAWS.archivePack project_id, doc_id, pack_id, (err) ->
+					clearFlagOnError(err, cb)
+			(cb) ->
+				PackManager.checkArchivedPack project_id, doc_id, pack_id, (err) ->
+					clearFlagOnError(err, cb)
+			(cb) ->
+				PackManager.markPackAsArchived project_id, doc_id, pack_id, cb
+			(cb) ->
+				PackManager.setTTLOnArchivedPack project_id, doc_id, pack_id, callback
+		], callback
+
+
+	checkArchivedPack: (project_id, doc_id, pack_id, callback) ->
+		db.docHistory.findOne {_id: pack_id}, (err, pack) ->
+			return callback(err) if err?
+			return callback new Error("pack not found") if not pack?
+			MongoAWS.readArchivedPack project_id, doc_id, pack_id, (err, result) ->
+				delete result.last_checked
+				delete pack.last_checked
+				# need to compare ids as ObjectIds with .equals()
+				for key in ['_id', 'project_id', 'doc_id']
+					result[key] = pack[key] if result[key].equals(pack[key])
+				for op, i in result.pack
+					op._id = pack.pack[i]._id if op._id? and op._id.equals(pack.pack[i]._id)
+				if _.isEqual pack, result
+					callback()
+				else
+					logger.err {pack, result, jsondiff: JSON.stringify(pack) is JSON.stringify(result)}, "difference when comparing packs"
+					callback new Error("pack retrieved from s3 does not match pack in mongo")
+
+	# Processing old packs via worker
+
+	processOldPack: (project_id, doc_id, pack_id, callback) ->
+		markAsChecked = (err) ->
+			PackManager.markPackAsChecked project_id, doc_id, pack_id, (err2) ->
+				return callback(err2) if err2?
+				callback(err)
+		logger.log {project_id, doc_id}, "processing old packs"
+		db.docHistory.findOne {_id:pack_id}, (err, pack) ->
+			return markAsChecked(err) if err?
+			return markAsChecked() if not pack?
+			return callback() if pack.expiresAt? # return directly
+			PackManager.updateIndexIfNeeded project_id, doc_id, (err) ->
+				return markAsChecked(err) if err?
+				PackManager.findUnarchivedPacks project_id, doc_id, (err, unarchivedPacks) ->
+					return markAsChecked(err) if err?
+					if not unarchivedPacks?.length
+						logger.log "no packs need archiving"
+						return markAsChecked()
+					async.eachSeries unarchivedPacks, (pack, cb) ->
+						PackManager.archivePack project_id, doc_id, pack._id, cb
+					, (err) ->
+						return markAsChecked(err) if err?
+						logger.log "done processing"
+						markAsChecked()
+
+	updateIndexIfNeeded: (project_id, doc_id, callback) ->
+		logger.log {project_id, doc_id}, "archiving old packs"
+		PackManager.getIndexWithKeys doc_id, (err, index) ->
+			return callback(err) if err?
+			if not index?
+				PackManager.initialiseIndex project_id, doc_id, callback
+			else
+				PackManager.updateIndex project_id, doc_id, callback
+
+	markPackAsChecked: (project_id, doc_id, pack_id, callback) ->
+		logger.log {project_id, doc_id, pack_id}, "marking pack as checked"
+		db.docHistory.findAndModify {
+			query: {_id: pack_id}
+			update: {$currentDate: {"last_checked":true}}
+		}, callback
+
+	findUnarchivedPacks: (project_id, doc_id, callback) ->
+		PackManager.getIndex doc_id, (err, indexResult) ->
+			return callback(err) if err?
+			indexPacks = indexResult?.packs or []
+			unArchivedPacks = (pack for pack in indexPacks when not pack.inS3?)
+			logger.log {project_id, doc_id, n: unArchivedPacks.length}, "find unarchived packs"
+			callback(null, unArchivedPacks)
+
+	# Archive locking flags
+
+	checkArchiveNotInProgress: (project_id, doc_id, pack_id, callback) ->
+		logger.log {project_id, doc_id, pack_id}, "checking if archive in progress"
+		PackManager.getPackFromIndex doc_id, pack_id, (err, result) ->
+			return callback(err) if err?
+			return callback new Error("pack not found in index") if not result?
+			if result.inS3?
+				callback new Error("pack archiving already in progress")
+			else
+				callback()
+
+	markPackAsArchiveInProgress: (project_id, doc_id, pack_id, callback) ->
+		logger.log {project_id, doc_id}, "marking pack as archive in progress status"
+		db.docHistoryIndex.findAndModify {
+			query: {_id:ObjectId(doc_id.toString()),  packs: {$elemMatch: {"_id": pack_id, inS3: {$exists:false}}}}
+			fields:  { "packs.$": 1 }
+			update: {$set: {"packs.$.inS3":false}}
+		}, (err, result) ->
+			return callback(err) if err?
+			return callback new Error("archive is already in progress") if not result?
+			logger.log {project_id, doc_id, pack_id}, "marked as archive in progress"
+			callback()
+
+	clearPackAsArchiveInProgress: (project_id, doc_id, pack_id, callback) ->
+		logger.log {project_id, doc_id, pack_id}, "clearing as archive in progress"
+		db.docHistoryIndex.findAndModify {
+			query: {_id:ObjectId(doc_id.toString()), "packs" : {$elemMatch: {"_id": pack_id, inS3: false}}}
+			fields:  { "packs.$": 1 }
+			update: {$unset: {"packs.$.inS3":true}}
+		}, callback
+
+	markPackAsArchived: (project_id, doc_id, pack_id, callback) ->
+		logger.log {project_id, doc_id, pack_id}, "marking pack as archived"
+		db.docHistoryIndex.findAndModify {
+			query: {_id:ObjectId(doc_id.toString()), "packs" : {$elemMatch: {"_id": pack_id, inS3: false}}}
+			fields: { "packs.$": 1 }
+			update: {$set: {"packs.$.inS3":true}}
+		}, (err, result) ->
+			return callback(err) if err?
+			return callback new Error("archive is not marked as progress") if not result?
+			logger.log {project_id, doc_id, pack_id}, "marked as archived"
+			callback()
+
+	setTTLOnArchivedPack: (project_id, doc_id, pack_id, callback) ->
+		db.docHistory.findAndModify {
+			query: {_id: pack_id}
+			update: {$set: {expiresAt: new Date(Date.now() + 1*DAYS)}}
+		}, (err) ->
+			logger.log {project_id, doc_id, pack_id}, "set expiry on pack"
+			callback()

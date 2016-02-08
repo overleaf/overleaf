@@ -9,12 +9,12 @@ describe "MongoAWS", ->
 	beforeEach ->
 		@MongoAWS = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
-				filestore:
+				trackchanges:
 					s3:
 						secret: "s3-secret"
 						key: "s3-key"
 					stores:
-						user_files: "s3-bucket"
+						doc_history: "s3-bucket"
 			"child_process": @child_process = {}
 			"mongo-uri": @mongouri = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
