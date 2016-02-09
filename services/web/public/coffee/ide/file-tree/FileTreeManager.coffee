@@ -19,6 +19,12 @@ define [
 					@recalculateDocList()
 
 			@_bindToSocketEvents()
+			
+			@$scope.multiSelectedCount = 0
+			
+			$(document).on "click", =>
+				@clearMultiSelectedEntities()
+				$scope.$digest()
 
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
@@ -78,6 +84,52 @@ define [
 			@ide.fileTreeManager.forEachEntity (entity) ->
 				entity.selected = false
 			entity.selected = true
+		
+		toggleMultiSelectEntity: (entity) ->
+			entity.multiSelected = !entity.multiSelected
+			@$scope.multiSelectedCount = @multiSelectedCount()
+		
+		multiSelectedCount: () ->
+			count = 0
+			@forEachEntity (entity) ->
+				if entity.multiSelected
+					count++
+			return count
+		
+		getMultiSelectedEntities: () ->
+			entities = []
+			@forEachEntity (e) ->
+				if e.multiSelected
+					entities.push e
+			return entities
+		
+		getMultiSelectedEntityChildNodes: () ->
+			entities = @getMultiSelectedEntities()
+			paths = {}
+			for entity in entities
+				paths[@getEntityPath(entity)] = entity
+			prefixes = {}
+			for path, entity of paths
+				parts = path.split("/")
+				if parts.length <= 1
+					continue
+				else
+					# Record prefixes a/b/c.tex -> 'a' and 'a/b'
+					for i in [1..(parts.length - 1)]
+						prefixes[parts.slice(0,i).join("/")] = true
+			child_entities = []
+			for path, entity of paths
+				# If the path is in the prefixes, then it's a parent folder and
+				# should be ignore
+				if !prefixes[path]?
+					child_entities.push entity
+			return child_entities
+		
+		clearMultiSelectedEntities: () ->
+			return if @$scope.multiSelectedCount == 0 # Be efficient, this is called a lot on 'click'
+			@forEachEntity (entity) ->
+				entity.multiSelected = false
+			@$scope.multiSelectedCount = 0
 
 		findSelectedEntity: () ->
 			selected = null
@@ -277,7 +329,7 @@ define [
 		deleteEntity: (entity, callback = (error) ->) ->
 			# We'll wait for the socket.io notification to 
 			# delete from scope.
-			return @ide.$http {
+			return @ide.queuedHttp {
 				method: "DELETE"
 				url:    "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}"
 				headers:
@@ -289,7 +341,7 @@ define [
 			# since that would break the tree structure.
 			return if @_isChildFolder(entity, parent_folder)
 			@_moveEntityInScope(entity, parent_folder)
-			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
+			return @ide.queuedHttp.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
 			}

@@ -11,4 +11,5 @@ define [
 							opacity: 0.7
 							helper: "clone"
 							scroll: true
+							helper: scope.$eval(attrs.draggableHelper)
 		}

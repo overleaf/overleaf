@@ -25,6 +25,7 @@ define [
 	"directives/onEnter"
 	"directives/stopPropagation"
 	"directives/rightClick"
+	"services/queued-http"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"

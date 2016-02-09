@@ -1,4 +1,4 @@
-aside#file-tree(ng-controller="FileTreeController").full-size
+aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }").full-size
 	.toolbar.toolbar-small.toolbar-alt(ng-if="permissions.write")
 		a(
 			href,
@@ -27,7 +27,8 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 				href,
 				ng-click="startRenamingSelected()",
 				tooltip="#{translate('rename')}",
-				tooltip-placement="bottom"
+				tooltip-placement="bottom",
+				ng-show="multiSelectedCount == 0"
 			)
 				i.fa.fa-pencil
 			a(
@@ -81,27 +82,25 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 				)
 					.entity
 						.entity-name(
-							ng-click="select()"
+							ng-click="select($event)"
 						)
 							//- Just a spacer to align with folders
 							i.fa.fa-fw.toggle
 							i.fa.fa-fw.fa-file
 
 							span  {{ entity.name }}
-							
-		
-
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
-		ng-class="{ 'selected': entity.selected }",
+		ng-class="{ 'selected': entity.selected, 'multi-selected': entity.multiSelected }",
 		ng-controller="FileTreeEntityController"
 	)
 		.entity(ng-if="entity.type != 'folder'")
 			.entity-name(
-				ng-click="select()"
+				ng-click="select($event)"
 				ng-dblclick="permissions.write && startRenaming()"
 				draggable="permissions.write"
+				draggable-helper="draggableHelper"
 				context-menu
 				data-target="context-menu-{{ entity.id }}"
 				context-menu-container="body"
@@ -113,6 +112,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
 				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
 
+				{{ $parent.multiSelectedCount }}
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
@@ -126,12 +126,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						on-enter="finishRenaming()"
 					)
 
-				span.dropdown(
+				span.dropdown.entity-menu-toggle(
 					dropdown,
-					ng-show="entity.selected",
 					ng-if="permissions.write"
 				)
-					a.dropdown-toggle(href, dropdown-toggle)
+					a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 						i.fa.fa-chevron-down
 
 					ul.dropdown-menu.dropdown-menu-right
@@ -140,12 +139,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								href
 								ng-click="startRenaming()"
 								right-click="startRenaming()"
+								ng-show="!entity.multiSelected"
 							) #{translate("rename")}
 						li
 							a(
 								href
 								ng-click="openDeleteModal()"
 								right-click="openDeleteModal()"
+								stop-propagation="click"
 							) #{translate("delete")}
 
 				div.dropdown.context-menu(
@@ -158,20 +159,23 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								href
 								ng-click="startRenaming()"
 								right-click="startRenaming()"
+								ng-show="!entity.multiSelected"
 							) #{translate("rename")}
 						li
 							a(
 								href
 								ng-click="openDeleteModal()"
 								right-click="openDeleteModal()"
+								stop-propagation="click"
 							) #{translate("delete")}
 
 
 		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
 			.entity-name(
-				ng-click="select()"
+				ng-click="select($event)"
 				ng-dblclick="permissions.write && startRenaming()"
 				draggable="permissions.write"
+				draggable-helper="draggableHelper"
 				droppable="permissions.write"
 				accept=".entity-name"
 				on-drop-callback="onDrop"
@@ -194,7 +198,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 							'fa-folder': !expanded, \
 							'fa-folder-open': expanded \
 						}"
-						ng-click="select()"
+						ng-click="select($event)"
 					)
 
 					span(
@@ -210,12 +214,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 							on-enter="finishRenaming()"
 						)
 
-					span.dropdown(
+					span.dropdown.entity-menu-toggle(
 						dropdown,
 						ng-if="permissions.write"
-						ng-show="entity.selected"
 					)
-						a.dropdown-toggle(href, dropdown-toggle)
+						a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 							i.fa.fa-chevron-down
 
 						ul.dropdown-menu.dropdown-menu-right
@@ -224,12 +227,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									href
 									ng-click="startRenaming()"
 									right-click="startRenaming()"
+									ng-show="!entity.multiSelected"
 								) #{translate("rename")}
 							li
 								a(
 									href
 									ng-click="openDeleteModal()"
 									right-click="openDeleteModal()"
+									stop-propagation="click"
 								) #{translate("delete")}
 							li.divider
 							li
@@ -261,12 +266,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									href
 									ng-click="startRenaming()"
 									right-click="startRenaming()"
+									ng-show="!entity.multiSelected"
 								) #{translate("rename")}
 							li
 								a(
 									href
 									ng-click="openDeleteModal()"
 									right-click="openDeleteModal()"
+									stop-propagation="click"
 								) #{translate("delete")}
 							li.divider
 							li
@@ -382,6 +389,8 @@ script(type='text/ng-template', id='deleteEntityModalTemplate')
 		h3 #{translate("delete")} {{ entity.name }}
 	.modal-body
 		p !{translate("sure_you_want_to_delete")}
+		ul
+			li(ng-repeat="entity in entities") {{entity.name}}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"

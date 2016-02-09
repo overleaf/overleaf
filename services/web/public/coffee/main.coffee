@@ -25,6 +25,7 @@ define [
 	"directives/onEnter"
 	"directives/selectAll"
 	"directives/maxHeight"
+	"services/queued-http"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
