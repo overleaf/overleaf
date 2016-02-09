@@ -1,4 +1,4 @@
-ShareLaTeX Docker Image
+ShareLaTeX Comunity Docker Image
 =======================
 
 **Please read this entire file before installing ShareLaTeX via Docker. It's only
