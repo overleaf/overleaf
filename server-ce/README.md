@@ -5,6 +5,10 @@ ShareLaTeX
 
 *[If you want help installing and maintaining ShareLaTeX at your university or workplace, we offer an officially supported version called ShareLaTeX Server Pro. It also comes with extra security and admin features. Click here to find out more!](https://www.sharelatex.com/university/onsite.html)*
 
+Keeping up to date
+------------
+Sign up to the [mailing list](http://eepurl.com/bPWeiH) to get updates on ShareLaTeX Releases and development
+
 Installation
 ------------
 
