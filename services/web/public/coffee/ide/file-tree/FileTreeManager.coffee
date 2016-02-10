@@ -71,6 +71,7 @@ define [
 				@$scope.$apply () =>
 					@_deleteEntityFromScope entity
 					@recalculateDocList()
+				@$scope.$emit "entity:deleted", entity
 
 			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
 				entity = @findEntityById(entity_id)
@@ -367,8 +368,6 @@ define [
 			if entity.type == "doc" and options.moveToDeleted
 				entity.deleted = true
 				@$scope.deletedDocs.push entity
-
-			@$scope.$emit "entity:deleted", entity
 
 		_moveEntityInScope: (entity, parent_folder) ->
 			return if entity in parent_folder.children
