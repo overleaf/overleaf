@@ -9,6 +9,7 @@ define [
 						element.droppable
 							greedy: true
 							hoverClass: "droppable-hover"
+							tolerance: "pointer"
 							accept: attrs.accept
 							drop: scope.$eval(attrs.onDropCallback)
 		}

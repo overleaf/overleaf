@@ -11,4 +11,6 @@ define [
 			for dropped_entity in entities
 				ide.fileTreeManager.moveEntity(dropped_entity, rootFolder)
 			$scope.$digest()
+			# clear highlight explicitly
+			$('.file-tree-inner .droppable-hover').removeClass('droppable-hover')
 	]
