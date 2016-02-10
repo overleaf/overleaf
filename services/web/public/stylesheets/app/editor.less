@@ -243,6 +243,9 @@
 	margin-bottom:0px;
 }
 
+.references-search-modal-backdrop {
+	background-color: transparent;
+}
 .references-search-modal {
 	.search-form {
 		input {
@@ -254,11 +257,15 @@
 	}
 	.search-results {
 		margin-top: 14px;
-		.hit {
+		.search-result-hit {
 			border-bottom: 1px solid #ddd;
 			padding: 15px;
 			&:last-child {
 				border-bottom: 1px solid transparent;
+			}
+			.hit-title {
+				font-size: 1.3em;
+				font-weight: bold;
 			}
 		}
 	}
