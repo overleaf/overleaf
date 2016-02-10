@@ -131,6 +131,9 @@ define [
 			@forEachEntity (entity) ->
 				entity.multiSelected = false
 			@$scope.multiSelectedCount = 0
+		
+		multiSelectSelectedEntity: () ->
+			@findSelectedEntity()?.multiSelected = true
 
 		findSelectedEntity: () ->
 			selected = null

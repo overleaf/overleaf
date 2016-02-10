@@ -5,16 +5,20 @@ define [
 		$scope.select = (e) ->
 			if e.ctrlKey or e.metaKey
 				e.stopPropagation()
-				ide.fileTreeManager.toggleMultiSelectEntity($scope.entity)
+				initialMultiSelectCount = ide.fileTreeManager.multiSelectedCount()
+				ide.fileTreeManager.toggleMultiSelectEntity($scope.entity) == 0
+				if initialMultiSelectCount == 0
+					# On first multi selection, also include the current active/open file.
+					ide.fileTreeManager.multiSelectSelectedEntity()
 			else
 				ide.fileTreeManager.selectEntity($scope.entity)
 				$scope.$emit "entity:selected", $scope.entity
 		
 		$scope.draggableHelper = () ->
 			if ide.fileTreeManager.multiSelectedCount() > 0
-				return $("<div style='z-index:100'>#{ide.fileTreeManager.multiSelectedCount()} Files</div>")
+				return $("<strong style='z-index:100'>#{ide.fileTreeManager.multiSelectedCount()} Files</strong>")
 			else
-				return $("<div style='z-index:100'>#{$scope.entity.name}</div>")
+				return $("<strong style='z-index:100'>#{$scope.entity.name}</strong>")
 
 		$scope.inputs =
 			name: $scope.entity.name
