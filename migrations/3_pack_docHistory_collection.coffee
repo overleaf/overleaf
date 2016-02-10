@@ -113,10 +113,20 @@ exports.migrate = (client, done = ->)->
 			console.log "completed #{count}/#{totalDocCount} processed=#{processedFraction.toFixed(2)} remaining=#{remainingFraction.toFixed(2)} elapsed=#{(t-t0)/1000} est Finish=#{estFinishTime}"
 		interval = setInterval printProgress, 3*1000
 
-		jobs = _.map _.filter(ids, (id) -> not finished_docs[id]), (id)->
-			return (cb)->
-				processNext(id, cb)
-		async.series jobs, (err)->
+		nextId = null
+
+		testFn = () ->
+			return false if needToExit
+			id = ids.shift()
+			while id? and finished_docs[id]	# skip finished
+				id = ids.shift()
+			nextId = id
+			return nextId?
+
+		executeFn = (cb) ->
+			processNext nextId, cb
+
+		async.whilst testFn, executeFn, (err)->
 			if err?
 				console.error err, "at end of jobs"
 			else
@@ -126,6 +136,10 @@ exports.migrate = (client, done = ->)->
 
 exports.rollback = (client, done)->
 	done()
+
+# process.nextTick () ->
+# 	exports.migrate () ->
+# 		console.log "done"
 
 DAYS = 24 * 3600 * 1000 # one day in milliseconds
 
