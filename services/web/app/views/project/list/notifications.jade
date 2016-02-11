@@ -8,7 +8,7 @@ span(ng-controller="NotificationsController").userNotifications
 		)
 			.row(ng-hide="unreadNotification.hide")
 				.col-xs-12
-					.alert.alert-warning
+					.alert.alert-info
 						span(ng-bind-html="unreadNotification.html")
 						button(ng-click="dismiss(unreadNotification)").close.pull-right
 							span(aria-hidden="true") &times;
