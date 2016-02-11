@@ -155,7 +155,7 @@ module.exports = ProjectController =
 						priority_title: true
 						projects: projects
 						tags: tags
-						notifications: notifications
+						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
 					}
