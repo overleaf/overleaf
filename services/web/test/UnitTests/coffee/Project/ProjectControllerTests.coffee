@@ -33,6 +33,8 @@ describe "ProjectController", ->
 			userHasSubscriptionOrIsGroupMember: sinon.stub()
 		@TagsHandler =
 			getAllTags: sinon.stub()
+		@NotificationsHandler =
+			getUserNotifications: sinon.stub()
 		@ProjectModel =
 			findAllUsersProjects: sinon.stub()
 			findPopulatedById: sinon.stub()
@@ -60,6 +62,7 @@ describe "ProjectController", ->
 			"../Subscription/SubscriptionLocator": @SubscriptionLocator
 			"../Subscription/LimitationsManager": @LimitationsManager
 			"../Tags/TagsHandler":@TagsHandler
+			"../Notifications/NotificationsHandler":@NotificationsHandler
 			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
 			"../../managers/SecurityManager":@SecurityManager
@@ -78,6 +81,8 @@ describe "ProjectController", ->
 				user: @user
 			body:
 				projectName: @projectName 
+			i18n:
+				translate:->
 		@res = 
 			locals:
 				jsPath:"js path here"
@@ -198,6 +203,7 @@ describe "ProjectController", ->
 
 		beforeEach ->
 			@tags = [{name:1, project_ids:["1","2","3"]}, {name:2, project_ids:["a","1"]}, {name:3, project_ids:["a", "b", "c", "d"]}]
+			@notifications = [{_id:'1',user_id:'2',templateKey:'3',messageOpts:'4',key:'5'}]
 			@projects = [{lastUpdated:1, _id:1, owner_ref: "user-1"}, {lastUpdated:2, _id:2, owner_ref: "user-2"}]
 			@collabertions = [{lastUpdated:5, _id:5, owner_ref: "user-1"}]
 			@readOnly = [{lastUpdated:3, _id:3, owner_ref: "user-1"}]
@@ -213,6 +219,7 @@ describe "ProjectController", ->
 
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
+			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
 		it "should render the project/list page", (done)->

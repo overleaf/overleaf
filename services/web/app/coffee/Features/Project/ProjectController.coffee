@@ -9,6 +9,7 @@ Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
+NotificationsHandler = require("../Notifications/NotificationsHandler")
 LimitationsManager = require("../Subscription/LimitationsManager")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
@@ -127,6 +128,8 @@ module.exports = ProjectController =
 		async.parallel {
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
+			notifications: (cb)->
+				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
 				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			hasSubscription: (cb)->
@@ -139,6 +142,9 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
+				notifications = require("underscore").map results.notifications, (notification)-> 
+					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
+					return notification
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
@@ -149,6 +155,7 @@ module.exports = ProjectController =
 						priority_title: true
 						projects: projects
 						tags: tags
+						notifications: notifications
 						user: user
 						hasSubscription: results.hasSubscription[0]
 					}

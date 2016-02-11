@@ -16,6 +16,7 @@ ReferalController = require('./Features/Referal/ReferalController')
 ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
+NotificationsController = require("./Features/Notifications/NotificationsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
 UserController = require("./Features/User/UserController")
@@ -137,6 +138,9 @@ module.exports = class Router
 		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
 		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.addProjectToTag
 		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
+
+		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
+		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead	
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
