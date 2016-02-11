@@ -249,7 +249,7 @@
 .references-search-modal {
 	.search-form {
 		input {
-			width: 85%;
+			//width: 85%;
 		}
 		button {
 			width: 14%;
@@ -263,6 +263,10 @@
 			padding: 8px;
 			&:last-child {
 				border-bottom: 1px solid transparent;
+			}
+			border-left: 4px solid transparent;
+			&.selected-search-result-hit {
+				border-left: 4px solid @red;
 			}
 			.hit-title {
 				font-size: 1.3em;
