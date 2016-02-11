@@ -2273,7 +2273,8 @@ $.widget( "ui.droppable", {
 	},
 
 	_over: function( event ) {
-
+		
+		// console.log("_over", this.element[0]);
 		var draggable = $.ui.ddmanager.current;
 
 		// Bail if draggable and droppable are same element
@@ -2486,9 +2487,10 @@ $.ui.ddmanager = {
 			$.ui.ddmanager.prepareOffsets( draggable, event );
 		}
 
+		var droppables = $.ui.ddmanager.droppables[ draggable.options.scope ] || [];
+		
 		// Run through all droppables and check their positions based on specific tolerance options
-		$.each( $.ui.ddmanager.droppables[ draggable.options.scope ] || [], function() {
-
+		$.each( droppables, function() {
 			if ( this.options.disabled || this.greedyChild || !this.visible ) {
 				return;
 			}
@@ -2501,36 +2503,50 @@ $.ui.ddmanager = {
 			}
 
 			if ( this.options.greedy ) {
+
 				// find droppable parents with same scope
 				scope = this.options.scope;
-				parent = this.element.parents( ":data(ui-droppable)" ).filter(function() {
+				parent = this.element.parents( ":data(ui-droppable)" ).filter( function() {
 					return $( this ).droppable( "instance" ).options.scope === scope;
-				});
+				} );
 
 				if ( parent.length ) {
 					parentInstance = $( parent[ 0 ] ).droppable( "instance" );
-					parentInstance.greedyChild = ( c === "isover" );
+					parentInstance.enteredGreedyChild = parentInstance.enteredGreedyChild || ( c === "isover" );
+					parentInstance.leftGreedyChild = parentInstance.leftGreedyChild || ( c === "isout" );
 				}
 			}
 
-			// we just moved into a greedy child
-			if ( parentInstance && c === "isover" ) {
-				parentInstance.isover = false;
-				parentInstance.isout = true;
-				parentInstance._out.call( parentInstance, event );
-			}
-
 			this[ c ] = true;
-			this[c === "isout" ? "isover" : "isout"] = false;
-			this[c === "isover" ? "_over" : "_out"].call( this, event );
-
-			// we just moved out of a greedy child
-			if ( parentInstance && c === "isout" ) {
-				parentInstance.isout = false;
-				parentInstance.isover = true;
-				parentInstance._over.call( parentInstance, event );
+			this[ c === "isout" ? "isover" : "isout" ] = false;
+			this.c = c;
+		} );
+		
+		$.each( droppables, function() {
+			if ( this.enteredGreedyChild ) {
+				this.greedyChild = true
+				this.isover = false
+				this.isout = true
+				this.c = "isout"
 			}
-		});
+			// Only move into the parent if we haven't moved into another greedy child
+			if ( this.leftGreedyChild && !this.enteredGreedyChild ) {
+				this.greedyChild = false
+				this.isover = true
+				this.isout = false
+				this.c = "isover"
+			}
+
+			if ( !this.c ) {
+				return;
+			}
+
+			this[this.c === "isover" ? "_over" : "_out"].call( this, event );
+
+			this.leftGreedyChild = false;
+			this.enteredGreedyChild = false;
+			this.c = null;
+		} );
 
 	},
 	dragStop: function( draggable, event ) {
