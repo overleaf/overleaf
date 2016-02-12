@@ -255,10 +255,20 @@
 			width: 14%;
 		}
 	}
+	.alert-danger {
+		margin-top: 12px;
+		margin-bottom: 0px;
+	}
 	.search-results {
 		margin-top: 14px;
 		font-size: 12px;
+		.no-results-message {
+			font-size: 16px;
+		}
 		.search-result-hit {
+			&:hover {
+				cursor: pointer;
+			}
 			border-bottom: 1px solid #ddd;
 			padding: 8px;
 			&:last-child {
@@ -266,7 +276,9 @@
 			}
 			border-left: 4px solid transparent;
 			&.selected-search-result-hit {
-				border-left: 4px solid @red;
+				//border-left: 4px solid @red;
+				background-color: @red;
+				color: white;
 			}
 			.hit-title {
 				font-size: 1.3em;
