@@ -32,7 +32,7 @@ describe "ReferencesSearchController", ->
 			shouldBroadcast: false
 		@res = new MockResponse()
 		@res.json = sinon.stub()
-		@res.send = sinon.stub()
+		@res.sendStatus = sinon.stub()
 		@fakeResponseData =
 			projectId: @projectId,
 			keys: ['one', 'two', 'three']
@@ -48,9 +48,9 @@ describe "ReferencesSearchController", ->
 
 		it 'should not produce an error', (done) ->
 			@call () =>
-				@res.send.callCount.should.equal 0
-				@res.send.calledWith(500).should.equal false
-				@res.send.calledWith(400).should.equal false
+				@res.sendStatus.callCount.should.equal 0
+				@res.sendStatus.calledWith(500).should.equal false
+				@res.sendStatus.calledWith(400).should.equal false
 				done()
 
 		it 'should return data', (done) ->
@@ -78,9 +78,9 @@ describe "ReferencesSearchController", ->
 
 			it 'should not produce an error', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 0
-					@res.send.calledWith(500).should.equal false
-					@res.send.calledWith(400).should.equal false
+					@res.sendStatus.callCount.should.equal 0
+					@res.sendStatus.calledWith(500).should.equal false
+					@res.sendStatus.calledWith(400).should.equal false
 					done()
 
 			it 'should still return data', (done) ->
@@ -102,9 +102,9 @@ describe "ReferencesSearchController", ->
 
 			it 'should not produce an error', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 0
-					@res.send.calledWith(500).should.equal false
-					@res.send.calledWith(400).should.equal false
+					@res.sendStatus.callCount.should.equal 0
+					@res.sendStatus.calledWith(500).should.equal false
+					@res.sendStatus.calledWith(400).should.equal false
 					done()
 
 			it 'should still return data', (done) ->
@@ -138,9 +138,9 @@ describe "ReferencesSearchController", ->
 
 			it 'should not produce an error', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 0
-					@res.send.calledWith(500).should.equal false
-					@res.send.calledWith(400).should.equal false
+					@res.sendStatus.callCount.should.equal 0
+					@res.sendStatus.calledWith(500).should.equal false
+					@res.sendStatus.calledWith(400).should.equal false
 					done()
 
 			it 'should not call EditorRealTimController.emitToRoom', (done) ->
@@ -155,8 +155,8 @@ describe "ReferencesSearchController", ->
 
 				it 'should produce an error response', (done) ->
 					@call () =>
-						@res.send.callCount.should.equal 1
-						@res.send.calledWith(500).should.equal true
+						@res.sendStatus.callCount.should.equal 1
+						@res.sendStatus.calledWith(500).should.equal true
 						done()
 
 		describe 'when shouldBroadcast is true', ->
@@ -172,9 +172,9 @@ describe "ReferencesSearchController", ->
 
 			it 'should not produce an error', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 0
-					@res.send.calledWith(500).should.equal false
-					@res.send.calledWith(400).should.equal false
+					@res.sendStatus.callCount.should.equal 0
+					@res.sendStatus.calledWith(500).should.equal false
+					@res.sendStatus.calledWith(400).should.equal false
 					done()
 
 			it 'should still return data', (done) ->
@@ -190,8 +190,8 @@ describe "ReferencesSearchController", ->
 
 			it 'should produce an error response', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 1
-					@res.send.calledWith(400).should.equal true
+					@res.sendStatus.callCount.should.equal 1
+					@res.sendStatus.calledWith(400).should.equal true
 					done()
 
 			it 'should not call ReferencesSearchHandler.index', (done) ->
@@ -206,8 +206,8 @@ describe "ReferencesSearchController", ->
 
 			it 'should produce an error response', (done) ->
 				@call () =>
-					@res.send.callCount.should.equal 1
-					@res.send.calledWith(400).should.equal true
+					@res.sendStatus.callCount.should.equal 1
+					@res.sendStatus.calledWith(400).should.equal true
 					done()
 
 			it 'should not call ReferencesSearchHandler.index', (done) ->

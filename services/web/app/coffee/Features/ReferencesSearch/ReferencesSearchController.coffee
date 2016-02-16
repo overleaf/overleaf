@@ -12,12 +12,12 @@ module.exports = ReferencesSearchController =
 		docIds = req.body.docIds
 		if (!docIds or !(docIds instanceof Array))
 			logger.err {projectId, docIds}, "docIds is not valid, should be either Array or String 'ALL'"
-			return res.send 400
+			return res.sendStatus 400
 		logger.log {projectId, docIds: docIds}, "index references for project"
 		ReferencesSearchHandler.index projectId, docIds, (err, data) ->
 			if err
 				logger.err {err, projectId}, "error indexing all references"
-				return res.send 500
+				return res.sendStatus 500
 			ReferencesSearchController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
 
 	indexAll: (req, res) ->
@@ -27,7 +27,7 @@ module.exports = ReferencesSearchController =
 		ReferencesSearchHandler.indexAll projectId, (err, data) ->
 			if err
 				logger.err {err, projectId}, "error indexing all references"
-				return res.send 500
+				return res.sendStatus 500
 			ReferencesSearchController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
 
 	_handleIndexResponse: (req, res, projectId, shouldBroadcast, data) ->
