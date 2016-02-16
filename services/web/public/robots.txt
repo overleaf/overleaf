@@ -1,18 +1,2 @@
-# robots.txt for https://www.sharelatex.com/
-
 User-agent: *
-Disallow: /project/*
-Disallow: /recurly.com
-Allow: /
-
-User-Agent: AhrefsBot
-Disallow: /
-
-User-Agent: XoviBot
-Disallow: /
-
-User-Agent: RankSonicBot
-Disallow: /
-
-User-Agent: SMTBot
 Disallow: /
