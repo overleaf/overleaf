@@ -10,7 +10,7 @@ module.exports =
 			messageOpts = 
 				groupName: licence.name
 				subscription_id: licence.subscription_id
-			NotificationsHandler.createNotification user._id, key, "joinSubscriptionInvite", messageOpts, callback
+			NotificationsHandler.createNotification user._id, @key, "notification_group_invite", messageOpts, callback
 
 		read: (callback = ->)->
-			NotificationsHandler.markAsReadWithKey user._id, key, callback
+			NotificationsHandler.markAsReadWithKey user._id, @key, callback

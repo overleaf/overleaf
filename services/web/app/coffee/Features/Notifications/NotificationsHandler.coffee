@@ -30,6 +30,7 @@ module.exports =
 				messageOpts:messageOpts
 				templateKey:templateKey
 			}
+		logger.log opts:opts, "creating notification for user"
 		request.post opts, callback
 
 	markAsReadWithKey: (user_id, key, callback)->

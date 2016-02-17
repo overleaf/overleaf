@@ -8,7 +8,7 @@ querystring = require('querystring')
 Url = require("url")
 Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
-
+UserHandler = require("../User/UserHandler")
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
@@ -29,6 +29,7 @@ module.exports = AuthenticationController =
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
 				if user?
+					UserHandler.setupLoginData user, ->
 					LoginRateLimiter.recordSuccessfulLogin email
 					AuthenticationController._recordSuccessfulLogin user._id
 					AuthenticationController.establishUserSession req, user, (error) ->
