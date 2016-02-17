@@ -248,15 +248,30 @@
 }
 .references-search-modal {
 	.references-search-upgrade-prompt {
-		.preview-gif {
-			align-content: center;
-			width: 100%;
-		}
-		.message {
-			margin-top: 15px;
+		padding: 24px;
+		padding-bottom: 48px;
+		.upgrade-prompt {
 			text-align: center;
-			&.call-to-action {
-				font-weight: bold;
+			width: 400px;
+			padding-top: 14px;
+			padding-bottom: 14px;
+			padding-left: 38px;
+			padding-right: 38px;
+			margin: auto;
+			background: white;
+			opacity: 0.95;
+			border-radius: 8px;
+			.message {
+				margin-top: 15px;
+				&.call-to-action {
+					font-weight: bold;
+				}
+				ul.list-unstyled {
+					text-align: left;
+				}
+			}
+			a.btn {
+				opacity: 1.0;
 			}
 		}
 	}
