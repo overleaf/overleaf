@@ -111,8 +111,6 @@ script(type='text/ng-template', id='entityListItemTemplate')
 
 				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
 				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
-
-				{{ $parent.multiSelectedCount }}
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
