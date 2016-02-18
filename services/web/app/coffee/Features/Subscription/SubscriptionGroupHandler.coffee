@@ -9,15 +9,17 @@ logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = SubscriptionGroupHandler =
 
-	addUserToGroup: (adminUser_id, newEmail, callback)->
+	addUserToGroup: (subscription, newEmail, callback)->
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
-			LimitationsManager.hasGroupMembersLimitReached adminUser_id, (err, limitReached)->
+			LimitationsManager.hasGroupMembersLimitReached subscription.admin_id, (err, limitReached)->
 				if limitReached
 					return callback(limitReached:limitReached)
-				SubscriptionUpdater.addUserToGroup adminUser_id, user._id, (err)->
+				SubscriptionUpdater.addUserToGroup subscription.admin_id, user._id, (err)->
+					NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
 					userViewModel = buildUserViewModel(user)
 					callback(err, userViewModel)
 
@@ -66,7 +68,7 @@ module.exports = SubscriptionGroupHandler =
 				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
 				return callback("token_not_found")
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, userEmail, callback
+				SubscriptionGroupHandler.addUserToGroup subscription, userEmail, callback
 
 
 buildUserViewModel = (user)->

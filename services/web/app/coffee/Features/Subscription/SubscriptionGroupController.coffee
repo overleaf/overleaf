@@ -70,7 +70,9 @@ module.exports =
 		subscription_id = req.params.subscription_id
 		if !SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)?
 			return ErrorsController.notFound(req, res)
-		SubscriptionGroupHandler.processGroupVerification req.session.user.email, subscription_id, req.query.token, (err)->
+		email = req?.session?.user?.email
+		logger.log subscription_id:subscription_id, user_id:req?.session?.user?._id, email:email, "starting the completion of joining group"
+		SubscriptionGroupHandler.processGroupVerification email, subscription_id, req.query?.token, (err)->
 			if err? and err == "token_not_found"
 				res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
 			else if err?

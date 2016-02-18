@@ -32,7 +32,7 @@ describe 'NotificationsHandler', ->
 				getOpts =
 					uri: "#{notificationUrl}/user/#{user_id}"
 					json:true
-					timeout:2000
+					timeout:1000
 				@request.get.calledWith(getOpts).should.equal true
 				done()
 

@@ -12,6 +12,11 @@ describe "SubscriptionGroupHandler", ->
 		@newEmail = "bob@smith.com"
 		@user_id = "3121321"
 		@user = {_id:@user_id, email:@newEmail}
+		@subscription_id = "31DSd1123D"
+
+		@subscription =
+			admin_id:@adminUser_id
+			_id:@subscription_id
 
 		@SubscriptionLocator = 
 			getUsersSubscription: sinon.stub()
@@ -41,6 +46,10 @@ describe "SubscriptionGroupHandler", ->
 		@settings = 
 			siteUrl:"http://www.sharelatex.com"
 
+		@readStub = sinon.stub()
+		@NotificationsBuilder =
+			groupPlan: sinon.stub().returns({read:@readStub})
+
 		@Handler = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
 			"../User/UserCreator": @UserCreator
@@ -51,6 +60,7 @@ describe "SubscriptionGroupHandler", ->
 			"../Security/OneTimeTokenHandler":@OneTimeTokenHandler
 			"../Email/EmailHandler":@EmailHandler
 			"settings-sharelatex":@settings
+			"../Notifications/NotificationsBuilder": @NotificationsBuilder
 			"logger-sharelatex": 
 				err:->
 				log:->
@@ -59,27 +69,35 @@ describe "SubscriptionGroupHandler", ->
 	describe "addUserToGroup", ->
 		it "should find or create the user", (done)->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
+			@Handler.addUserToGroup @subscription, @newEmail, (err)=>
 				@UserCreator.getUserOrCreateHoldingAccount.calledWith(@newEmail).should.equal true
 				done()
 
 		it "should add the user to the group", (done)->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
+			@Handler.addUserToGroup @subscription, @newEmail, (err)=>
 				@SubscriptionUpdater.addUserToGroup.calledWith(@adminUser_id, @user._id).should.equal true
 				done()
 				
 		it "should not add the user to the group if the limit has been reached", (done)->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, true)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
+			@Handler.addUserToGroup @subscription, @newEmail, (err)=>
 				@SubscriptionUpdater.addUserToGroup.called.should.equal false
 				done()
 
 		it "should return error that limit has been reached", (done)->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, true)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
+			@Handler.addUserToGroup @subscription, @newEmail, (err)=>
 				err.limitReached.should.equal true
 				done()
+
+		it "should mark any notification as read if it is part of a licence", (done)->
+			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false)
+			@Handler.addUserToGroup @subscription, @newEmail, (err)=>
+				@NotificationsBuilder.groupPlan.calledWith(@user, {subscription_id:@subscription._id}).should.equal true
+				@readStub.called.should.equal true
+				done()
+				
 
 	describe "removeUserFromGroup", ->
 
@@ -157,15 +175,14 @@ describe "SubscriptionGroupHandler", ->
 	describe "processGroupVerification", ->
 		beforeEach ->
 			@token = "31dDAd2Da"
-			@subscription_id = "31DSd1123D"
 			@admin_id = "eDSda1ew"
-			@SubscriptionLocator.getSubscription.callsArgWith(1, null, {admin_id:@admin_id})
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @Subscription)
 			@Handler.addUserToGroup = sinon.stub().callsArgWith(2)
 
 		it "should addUserToGroup", (done)->
 			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @subscription_id)
 			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
-				@Handler.addUserToGroup.calledWith(@admin_id, @email).should.equal true
+				@Handler.addUserToGroup.calledWith(@Subscription, @email).should.equal true
 				done()
 
 		it "should return token_not_found error if it couldn't get the token", (done)->

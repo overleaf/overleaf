@@ -1,6 +1,8 @@
 SubscriptionDomainHandler = require("../Subscription/SubscriptionDomainHandler")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 SubscriptionGroupHandler = require("../Subscription/SubscriptionGroupHandler")
+logger = require("logger-sharelatex")
+
 
 module.exports = UserHandler =
 
@@ -10,8 +12,11 @@ module.exports = UserHandler =
 			return callback()
 
 		SubscriptionGroupHandler.isUserPartOfGroup user._id, licence.subscription_id, (err, alreadyPartOfGroup)->
-			if err? or alreadyPartOfGroup
+			if err?
 				return callback(err)
+			else if alreadyPartOfGroup
+				logger.log user_id:user._id, "user already part of group, not creating notifcation for them"
+				return callback()
 			else
 				NotificationsBuilder.groupPlan(user, licence).create(callback)
 

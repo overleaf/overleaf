@@ -9,7 +9,7 @@ module.exports =
 		opts = 
 			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
 			json: true
-			timeout: 2000
+			timeout: oneSecond
 		request.get opts, (err, res, unreadNotifications)->
 			statusCode =  if res? then res.statusCode else 500
 			if err? or statusCode != 200
@@ -24,7 +24,7 @@ module.exports =
 	createNotification: (user_id, key, templateKey, messageOpts, callback)->
 		opts = 
 			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
-			timeout: 1000
+			timeout: oneSecond
 			json: {
 				key:key
 				messageOpts:messageOpts
@@ -36,10 +36,11 @@ module.exports =
 	markAsReadWithKey: (user_id, key, callback)->
 		opts = 
 			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
-			timeout: 1000
+			timeout: oneSecond
 			json: {
 				key:key
 			}
+		logger.log user_id:user_id, key:key, "sending mark notification as read with key to notifications api"
 		request.del opts, callback
 	
 
@@ -47,5 +48,5 @@ module.exports =
 		opts =
 			uri: "#{settings.apis.notifications.url}/user/#{user_id}/notification/#{notification_id}"
 			timeout:oneSecond
-		logger.log user_id:user_id, notification_id:notification_id, "send mark notification to notifications api"
+		logger.log user_id:user_id, notification_id:notification_id, "sending mark notification as read to notifications api"
 		request.del opts, callback
