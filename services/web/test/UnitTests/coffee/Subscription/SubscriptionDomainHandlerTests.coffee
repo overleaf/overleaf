@@ -54,19 +54,3 @@ describe "SubscriptionDomainHandler", ->
 			expect(licence).to.not.exist
 			done(licence)
 
-	describe "autoAllocate", ->
-		beforeEach ->
-			@email = "bob@somewhere.com"
-			@SubscriptionDomainHandler._findDomainLicence = sinon.stub()
-
-		it "should call the SubscriptionGroupHandler if there is licence", (done)->
-			@SubscriptionDomainHandler._findDomainLicence.returns(@settings.domainLicences[0])
-			@SubscriptionDomainHandler.autoAllocate {email:@email}, (err)=>
-				@SubscriptionGroupHandler.addUserToGroup.calledWith(@adminUser_id, @email).should.equal true
-				done()
-
-		it "should not call the SubscriptionGroupHandler if there is no licence", (done)->
-			@SubscriptionDomainHandler._findDomainLicence.returns()
-			@SubscriptionDomainHandler.autoAllocate {email:@email}, (err)=>
-				@SubscriptionGroupHandler.addUserToGroup.called.should.equal false
-				done()
