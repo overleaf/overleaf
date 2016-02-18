@@ -16,5 +16,5 @@ module.exports = UserHandler =
 				NotificationsBuilder.groupPlan(user, licence).create(callback)
 
 	setupLoginData: (user, callback = ->)->
-		_populateGroupLicenceInvite user, callback
+		@_populateGroupLicenceInvite user, callback
 

@@ -18,6 +18,7 @@ describe "AuthenticationController", ->
 			"../User/UserUpdater" : @UserUpdater = {}
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
+			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"settings-sharelatex": {}
 		@user =
@@ -68,6 +69,9 @@ describe "AuthenticationController", ->
 					.calledWith(email: @email.toLowerCase(), @password)
 					.should.equal true
 
+			it "should setup the user data in the background", ->
+				@UserHandler.setupLoginData.calledWith(@user).should.equal true
+
 			it "should establish the user's session", ->
 				@AuthenticationController.establishUserSession
 					.calledWith(@req, @user)
@@ -108,6 +112,9 @@ describe "AuthenticationController", ->
 
 			it "should not establish a session", ->
 				@AuthenticationController.establishUserSession.called.should.equal false
+			
+			it "should not setup the user data in the background", ->
+				@UserHandler.setupLoginData.called.should.equal false
 
 			it "should record a failed login", ->
 				@AuthenticationController._recordFailedLogin.called.should.equal true
