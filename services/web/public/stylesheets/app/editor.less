@@ -243,10 +243,14 @@
 	margin-bottom:0px;
 }
 
+// -- References Search Modal --
 .references-search-modal-backdrop {
+	// don't grey out the editor when the
+	// modal is active
 	background-color: transparent;
 }
 .references-search-modal {
+	// upgrade prompt
 	.references-search-upgrade-prompt {
 		padding: 24px;
 		padding-bottom: 48px;
@@ -276,9 +280,7 @@
 		}
 	}
 	.search-form {
-		input {
-			//width: 85%;
-		}
+		// position the spinner inside the input element
 		i.fa-spinner {
 			margin-top: -30px;
 		}
@@ -287,6 +289,7 @@
 		margin-top: 12px;
 		margin-bottom: 0px;
 	}
+	// search result items list
 	.search-results {
 		margin-top: 14px;
 		font-size: 12px;
@@ -304,7 +307,6 @@
 			}
 			border-left: 4px solid transparent;
 			&.selected-search-result-hit {
-				//border-left: 4px solid @red;
 				background-color: @red;
 				color: white;
 				.hit-year.small {
