@@ -10,7 +10,7 @@ oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
 
 
-module.exports = ReferencesSearchHandler =
+module.exports = ReferencesHandler =
 
 	_buildDocUrl: (projectId, docId) ->
 		"#{settings.apis.docstore.url}/project/#{projectId}/doc/#{docId}/raw"
@@ -40,18 +40,18 @@ module.exports = ReferencesSearchHandler =
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
 			logger.log {projectId}, "indexing all bib files in project"
-			docIds = ReferencesSearchHandler._findBibDocIds(project)
-			ReferencesSearchHandler._doIndexOperation(projectId, project, docIds, callback)
+			docIds = ReferencesHandler._findBibDocIds(project)
+			ReferencesHandler._doIndexOperation(projectId, project, docIds, callback)
 
 	index: (projectId, docIds, callback=(err, data)->) ->
 		Project.findPopulatedById projectId, (err, project) ->
 			if err
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
-			ReferencesSearchHandler._doIndexOperation(projectId, project, docIds, callback)
+			ReferencesHandler._doIndexOperation(projectId, project, docIds, callback)
 
 	_doIndexOperation: (projectId, project, docIds, callback) ->
-		ReferencesSearchHandler._isFullIndex project, (err, isFullIndex) ->
+		ReferencesHandler._isFullIndex project, (err, isFullIndex) ->
 			if err
 				logger.err {err, projectId}, "error checking whether to do full index"
 				return callback(err)
@@ -64,7 +64,7 @@ module.exports = ReferencesSearchHandler =
 						logger.err {err, projectId, docIds}, "error flushing docs to mongo"
 						return callback(err)
 					bibDocUrls = docIds.map (docId) ->
-						ReferencesSearchHandler._buildDocUrl projectId, docId
+						ReferencesHandler._buildDocUrl projectId, docId
 					logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
 					request.post {
 						url: "#{settings.apis.references.url}/project/#{projectId}/index"

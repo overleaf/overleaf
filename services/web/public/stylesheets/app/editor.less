@@ -242,3 +242,81 @@
 	margin-top:10px;
 	margin-bottom:0px;
 }
+
+// -- References Search Modal --
+.references-search-modal-backdrop {
+	// don't grey out the editor when the
+	// modal is active
+	background-color: transparent;
+}
+.references-search-modal {
+	// upgrade prompt
+	.references-search-upgrade-prompt {
+		padding: 24px;
+		padding-bottom: 48px;
+		.upgrade-prompt {
+			text-align: center;
+			width: 400px;
+			padding-top: 14px;
+			padding-bottom: 14px;
+			padding-left: 38px;
+			padding-right: 38px;
+			margin: auto;
+			background: white;
+			opacity: 0.95;
+			border-radius: 8px;
+			.message {
+				margin-top: 15px;
+				&.call-to-action {
+					font-weight: bold;
+				}
+				ul.list-unstyled {
+					text-align: left;
+				}
+			}
+			a.btn {
+				opacity: 1.0;
+			}
+		}
+	}
+	.search-form {
+		// position the spinner inside the input element
+		i.fa-spinner {
+			margin-top: -30px;
+		}
+	}
+	.alert-danger {
+		margin-top: 12px;
+		margin-bottom: 0px;
+	}
+	// search result items list
+	.search-results {
+		margin-top: 14px;
+		font-size: 12px;
+		.no-results-message {
+			font-size: 16px;
+		}
+		.search-result-hit {
+			&:hover {
+				cursor: pointer;
+			}
+			border-bottom: 1px solid #ddd;
+			padding: 8px;
+			&:last-child {
+				border-bottom: 1px solid transparent;
+			}
+			border-left: 4px solid transparent;
+			&.selected-search-result-hit {
+				background-color: @red;
+				color: white;
+				.hit-year.small {
+					color: white;
+				}
+			}
+			.hit-title {
+				font-size: 1.3em;
+				font-style: italic;
+			}
+		}
+	}
+}

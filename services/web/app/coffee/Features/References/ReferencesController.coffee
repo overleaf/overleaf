@@ -1,9 +1,9 @@
 logger = require('logger-sharelatex')
-ReferencesSearchHandler = require('./ReferencesSearchHandler')
+ReferencesHandler = require('./ReferencesHandler')
 settings = require('settings-sharelatex')
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
-module.exports = ReferencesSearchController =
+module.exports = ReferencesController =
 
 
 	index: (req, res) ->
@@ -14,21 +14,21 @@ module.exports = ReferencesSearchController =
 			logger.err {projectId, docIds}, "docIds is not valid, should be either Array or String 'ALL'"
 			return res.sendStatus 400
 		logger.log {projectId, docIds: docIds}, "index references for project"
-		ReferencesSearchHandler.index projectId, docIds, (err, data) ->
+		ReferencesHandler.index projectId, docIds, (err, data) ->
 			if err
 				logger.err {err, projectId}, "error indexing all references"
 				return res.sendStatus 500
-			ReferencesSearchController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
+			ReferencesController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
 
 	indexAll: (req, res) ->
 		projectId = req.params.Project_id
 		shouldBroadcast = req.body.shouldBroadcast
 		logger.log {projectId}, "index all references for project"
-		ReferencesSearchHandler.indexAll projectId, (err, data) ->
+		ReferencesHandler.indexAll projectId, (err, data) ->
 			if err
 				logger.err {err, projectId}, "error indexing all references"
 				return res.sendStatus 500
-			ReferencesSearchController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
+			ReferencesController._handleIndexResponse(req, res, projectId, shouldBroadcast, data)
 
 	_handleIndexResponse: (req, res, projectId, shouldBroadcast, data) ->
 		if shouldBroadcast

@@ -3,9 +3,9 @@ should = require('chai').should()
 expect = require('chai').expect
 sinon = require 'sinon'
 assert = require("chai").assert
-modulePath = "../../../../app/js/Features/ReferencesSearch/ReferencesSearchHandler"
+modulePath = "../../../../app/js/Features/References/ReferencesHandler"
 
-describe 'ReferencesSearchHandler', ->
+describe 'ReferencesHandler', ->
 
 	beforeEach ->
 		@projectId = '222'
