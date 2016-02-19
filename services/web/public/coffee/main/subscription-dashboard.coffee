@@ -53,11 +53,9 @@ define [
 
 			price = ""
 
-
-
 	App.controller "ConfirmChangePlanController", ($scope, $modalInstance, $http)->
+		
 		$scope.confirmChangePlan = ->
-
 			body = 
 				plan_code: $scope.plan.planCode
 				_csrf : window.csrfToken
@@ -74,8 +72,23 @@ define [
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
 
+	App.controller "LeaveGroupModalController", ($scope, $modalInstance, $http)->
+		$scope.confirmLeaveGroup = ->
+			$scope.inflight = true
+			$http({
+				url: "/subscription/group/user", 
+				method: "DELETE",
+				params: {admin_user_id: $scope.admin_id, _csrf: window.csrfToken}
+			}).success ->
+				location.reload()
+			.error ->
+				console.log "something went wrong changing plan"
 
-	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack) ->
+		$scope.cancel = () ->
+			$modalInstance.dismiss('cancel')
+
+
+	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack, $modal) ->
 		freeTrialEndDate = new Date(subscription?.trial_ends_at)
 
 		sevenDaysTime = new Date()
@@ -120,6 +133,7 @@ define [
 		$scope.cancelSubscription = ->
 			body = 
 				_csrf : window.csrfToken
+
 			$scope.inflight = true
 			$http.post("/user/subscription/cancel", body)
 				.success ->
@@ -130,6 +144,13 @@ define [
 					console.log "something went wrong changing plan"
 
 
+		$scope.removeSelfFromGroup = (admin_id)->
+			$scope.admin_id = admin_id
+			$modal.open(
+				templateUrl: "LeaveGroupModalTemplate"
+				controller:  "LeaveGroupModalController"
+				scope: $scope
+			)
 
 		$scope.switchToCancelationView = ->
 			sixpack.participate 'cancelation-options-view', ['basic', 'downgrade-options'], (view, rawResponse)->

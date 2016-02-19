@@ -27,6 +27,13 @@ module.exports =
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
 		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, ->
 			res.send()
+			
+	removeSelfFromGroup: (req, res)->
+		adminUserId = req.query.admin_user_id
+		userToRemove_id = req.session.user._id
+		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription after self request"
+		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, ->
+			res.send()
 
 	renderSubscriptionGroupAdminPage: (req, res)->
 		user_id = req.session.user._id
