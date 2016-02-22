@@ -97,7 +97,7 @@ module.exports = SubscriptionController =
 				else
 					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groups) ->
 						return next(error) if error?
-						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, "showing subscription dashboard"
+						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, groups:groups, "showing subscription dashboard"
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
