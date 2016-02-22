@@ -15,6 +15,9 @@ module.exports =
 		newEmail = req.body.email
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
 		SubscriptionGroupHandler.addUserToGroup adminUserId, newEmail, (err, user)->
+			if err?
+				logger.err err:err, newEmail:newEmail, adminUserId:adminUserId, "error adding user from group"
+				return res.sendStatus 500
 			result = 
 				user:user
 			if err and err.limitReached
@@ -25,14 +28,20 @@ module.exports =
 		adminUserId = req.session.user._id
 		userToRemove_id = req.params.user_id
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
-		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, ->
+		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
+			if err?
+				logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
+				return res.sendStatus 500
 			res.send()
 			
 	removeSelfFromGroup: (req, res)->
 		adminUserId = req.query.admin_user_id
 		userToRemove_id = req.session.user._id
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription after self request"
-		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, ->
+		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
+			if err?
+				logger.err err:err, userToRemove_id:userToRemove_id, adminUserId:adminUserId, "error removing self from group"
+				return res.sendStatus 500
 			res.send()
 
 	renderSubscriptionGroupAdminPage: (req, res)->

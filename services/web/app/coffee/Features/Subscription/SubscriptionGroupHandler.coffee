@@ -16,9 +16,14 @@ module.exports = SubscriptionGroupHandler =
 	addUserToGroup: (subscription, newEmail, callback)->
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
 			LimitationsManager.hasGroupMembersLimitReached subscription.admin_id, (err, limitReached)->
+				if err?
+					return callback(err)
 				if limitReached
 					return callback(limitReached:limitReached)
 				SubscriptionUpdater.addUserToGroup subscription.admin_id, user._id, (err)->
+					if err?
+						logger.err err:err, "error adding user to group"
+						return callback(err)
 					NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
 					userViewModel = buildUserViewModel(user)
 					callback(err, userViewModel)
