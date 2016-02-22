@@ -49,7 +49,7 @@ define [
 					lineUpToCursor = editor.getSession().getTextRange(range)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\(cite[a-z]?){(.*,)?(\w*)/)
+						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?){(.*,)?(\w*)/)
 						if citeMatch
 							commandName = citeMatch[1]
 							previousArgs = citeMatch[2]
