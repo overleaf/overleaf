@@ -13,14 +13,21 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = SubscriptionGroupHandler =
 
-	addUserToGroup: (subscription, newEmail, callback)->
+	addUserToGroup: (adminUserId, newEmail, callback)->
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
-			LimitationsManager.hasGroupMembersLimitReached subscription.admin_id, (err, limitReached)->
+			if err?
+				logger.err err:err, "error creating user for holding account"
+				return callback(err)
+			if !user?
+				msg = "no user returned whenc reating holidng account or getting user"
+				logger.err adminUserId:adminUserId, newEmail:newEmail, msg
+				return callback(msg)
+			LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
 				if err?
 					return callback(err)
 				if limitReached
 					return callback(limitReached:limitReached)
-				SubscriptionUpdater.addUserToGroup subscription.admin_id, user._id, (err)->
+				SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
 					if err?
 						logger.err err:err, "error adding user to group"
 						return callback(err)
@@ -73,7 +80,14 @@ module.exports = SubscriptionGroupHandler =
 				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
 				return callback("token_not_found")
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				SubscriptionGroupHandler.addUserToGroup subscription, userEmail, callback
+				if err?
+					logger.err err:err, subscription:subscription, userEmail:userEmail, subscription_id:subscription_id, "error getting subscription"
+					return callback(err)
+				if !subscription?
+					logger.warn subscription_id:subscription_id, "no subscription found"
+					return callback()
+				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
+
 
 
 buildUserViewModel = (user)->

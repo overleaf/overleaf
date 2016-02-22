@@ -52,11 +52,17 @@ module.exports =
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
 
-	hasGroupMembersLimitReached: (user_id, callback)->
+	hasGroupMembersLimitReached: (user_id, callback = (err, limitReached, subscription)->)->
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
+			if err?
+				logger.err err:err, user_id:user_id, "error getting users subscription"
+				return callback(err)
+			if !subscription?
+				logger.err user_id:user_id, "no subscription found for user"
+				return callback("no subscription found")
 			limitReached = subscription.member_ids.length >= subscription.membersLimit
 			logger.log user_id:user_id, limitReached:limitReached, currentTotal: subscription.member_ids.length, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
-			callback(err, limitReached)
+			callback(err, limitReached, subscription)
 
 getOwnerOfProject = (project_id, callback)->
 	Project.findById project_id, 'owner_ref', (error, project) ->
