@@ -50,7 +50,7 @@ module.exports =
 							copyFolder = (folder, desFolder, callback)->
 								jobs = folder.folders.map (childFolder)->
 									return (callback)->
-										projectEntityHandler.addFolder newProject, desFolder._id, childFolder.name, (err, newFolder)->
+										projectEntityHandler.addFolder newProject._id, desFolder._id, childFolder.name, (err, newFolder)->
 											copyFolder childFolder, newFolder, callback
 								jobs.push (cb)->
 									copyDocs folder, desFolder, cb

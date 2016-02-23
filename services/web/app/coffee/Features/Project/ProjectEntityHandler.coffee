@@ -236,12 +236,12 @@ module.exports = ProjectEntityHandler =
 					!folder.filterOut
 				callback(null, folders, lastFolder)
 	
-	addFolder: (project_or_id, parentFolder_id, folderName, callback) ->
+	addFolder: (project_id, parentFolder_id, folderName, callback) ->
 		folder = new Folder name: folderName
-		Project.getProject project_or_id, "", (err, project) ->
+		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
 			return callback(err) if err?
 			confirmFolder project, parentFolder_id, (parentFolder_id)=>
-				logger.log project: project_or_id, parentFolder_id:parentFolder_id, folderName:folderName, "new folder added"
+				logger.log project: project_id, parentFolder_id:parentFolder_id, folderName:folderName, "new folder added"
 				Project.putElement project._id, parentFolder_id, folder, "folder", (err, result)=>
 					if callback?
 						callback(err, folder, parentFolder_id)

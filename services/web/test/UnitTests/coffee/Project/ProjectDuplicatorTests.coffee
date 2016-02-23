@@ -124,8 +124,8 @@ describe 'ProjectDuplicator', ->
 
 	it 'should copy all the folders', (done)->
 		@duplicator.duplicate @owner, @project_id, "", (err, newProject)=>
-			@entityHandler.addFolder.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @level1folder.name).should.equal true
-			@entityHandler.addFolder.calledWith(@stubbedNewProject, @newFolder._id, @level2folder.name).should.equal true
+			@entityHandler.addFolder.calledWith(@stubbedNewProject._id, @stubbedNewProject.rootFolder[0]._id, @level1folder.name).should.equal true
+			@entityHandler.addFolder.calledWith(@stubbedNewProject._id, @newFolder._id, @level2folder.name).should.equal true
 			@entityHandler.addFolder.callCount.should.equal 2
 			done()
 
