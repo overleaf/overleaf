@@ -80,7 +80,7 @@ ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callba
 		logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 		return callback(e)
 	type = sanitizeTypeOfElement type
-	this.findById project_id, (err, project)=>
+	require('../Features/Project/ProjectGetter').getProjectWithOnlyFolders project_id, (err, project)=>
 		if err?
 			callback(err)
 		if !folder_id?
