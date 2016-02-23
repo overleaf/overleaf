@@ -9,17 +9,17 @@ module.exports = ProjectUploadHandler =
 	createProjectFromZipArchive: (owner_id, name, zipPath, callback = (error, project) ->) ->
 		ProjectCreationHandler.createBlankProject owner_id, name, (error, project) =>
 			return callback(error) if error?
-			@insertZipArchiveIntoFolder project._id, project.rootFolder[0]._id, zipPath, (error) ->
+			@insertZipArchiveIntoFolder owner_id, project._id, project.rootFolder[0]._id, zipPath, (error) ->
 				return callback(error) if error?
 				ProjectRootDocManager.setRootDocAutomatically project._id, (error) ->
 					return callback(error) if error?
 					callback(error, project)
 
-	insertZipArchiveIntoFolder: (project_id, folder_id, path, callback = (error) ->) ->
+	insertZipArchiveIntoFolder: (owner_id, project_id, folder_id, path, callback = (error) ->) ->
 		destination = @_getDestinationDirectory path
 		ArchiveManager.extractZipArchive path, destination, (error) ->
 			return callback(error) if error?
-			FileSystemImportManager.addFolderContents project_id, folder_id, destination, false, (error) ->
+			FileSystemImportManager.addFolderContents owner_id, project_id, folder_id, destination, false, (error) ->
 				return callback(error) if error?
 				rimraf(destination, callback)
 
