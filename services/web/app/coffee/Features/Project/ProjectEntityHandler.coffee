@@ -183,7 +183,7 @@ module.exports = ProjectEntityHandler =
 							callback()
 
 	copyFileFromExistingProject: (project_or_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
-		Project.getProject project_or_id, "", (err, project) ->
+		Project.getProject project_or_id, "name", (err, project) ->
 			logger.log project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>

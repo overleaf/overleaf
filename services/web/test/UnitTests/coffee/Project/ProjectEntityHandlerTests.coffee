@@ -872,6 +872,8 @@ describe 'ProjectEntityHandler', ->
 		filePath = "dumpFolder/somewhere/image.jpeg"
 		oldProject_id = "123kljadas"
 		oldFileRef = {name:fileName, _id:"oldFileRef"}
+		beforeEach ->
+			@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, {name:@project.name, _id:@project._id})
 
 		it 'should copy the file in FileStoreHandler', (done)->
 			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)=>     
