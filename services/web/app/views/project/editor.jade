@@ -53,7 +53,13 @@ block content
 
 				include ./editor/share
 
-				#ide-body(ng-cloak, layout="main", ng-hide="state.loading", resize-on="layout:chat:resize")
+				#ide-body(
+					ng-cloak,
+					layout="main",
+					ng-hide="state.loading",
+					resize-on="layout:chat:resize",
+					minimum-restore-size-west="130"
+				)
 					.ui-layout-west
 						include ./editor/file-tree
 
