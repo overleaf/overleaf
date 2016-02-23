@@ -257,9 +257,11 @@ define [
 			modalInstance.result.then (project_id) ->
 				window.location = "/project/#{project_id}"
 
+		MAX_PROJECT_NAME_LENGTH = 150
 		$scope.renameProject = (project, newName) ->
-			if newName.length < 150
-				project.name = newName
+			if !newName? or newName.length == 0 or newName.length > MAX_PROJECT_NAME_LENGTH
+				return
+			project.name = newName
 			queuedHttp.post "/project/#{project.id}/rename", {
 				newProjectName: project.name
 				_csrf: window.csrfToken

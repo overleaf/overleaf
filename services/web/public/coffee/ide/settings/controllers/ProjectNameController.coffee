@@ -1,6 +1,7 @@
 define [
 	"base"
 ], (App) ->
+	MAX_PROJECT_NAME_LENGTH = 150
 	App.controller "ProjectNameController", ["$scope", "settings", "ide", ($scope, settings, ide) ->
 		$scope.state =
 			renaming: false
@@ -12,11 +13,12 @@ define [
 			$scope.$emit "project:rename:start"
 
 		$scope.finishRenaming = () ->
-			newName = $scope.inputs.name
-			if newName.length < 150
-				$scope.project.name = newName
-			settings.saveProjectSettings({name: $scope.project.name})
 			$scope.state.renaming = false
+			newName = $scope.inputs.name
+			if !newName? or newName.length == 0 or newName.length > MAX_PROJECT_NAME_LENGTH
+				return
+			$scope.project.name = newName
+			settings.saveProjectSettings({name: $scope.project.name})
 
 		ide.socket.on "projectNameUpdated", (name) ->
 			$scope.$apply () ->
