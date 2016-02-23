@@ -109,6 +109,15 @@
 	}
 	a.rename {
 		visibility: hidden;
+		display: inline-block;
+		color: @gray-light;
+		padding: 5px;
+		border-radius: @border-radius-small;
+		&:hover {
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+			color: @gray-dark;
+			text-decoration: none;
+		}
 	}
 	&:hover {
 		a.rename {
