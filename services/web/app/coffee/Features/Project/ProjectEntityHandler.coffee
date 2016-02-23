@@ -82,16 +82,14 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					for docPath, doc of docs
 						do (docPath, doc) ->
-							requests.push (callback) ->
-								tpdsUpdateSender.addDoc {project_id:project_id, doc_id:doc._id, path:docPath, project_name:project.name, rev:doc.rev||0},
-									callback
+							requests.push (cb) ->
+								tpdsUpdateSender.addDoc {project_id:project_id, doc_id:doc._id, path:docPath, project_name:project.name, rev:doc.rev||0}, cb
 					self.getAllFiles project_id, (error, files) ->
 						return callback(error) if error?
 						for filePath, file of files
 							do (filePath, file) ->
-								requests.push (callback) ->
-									tpdsUpdateSender.addFile {project_id:project_id, file_id:file._id, path:filePath, project_name:project.name, rev:file.rev},
-										callback
+								requests.push (cb) ->
+									tpdsUpdateSender.addFile {project_id:project_id, file_id:file._id, path:filePath, project_name:project.name, rev:file.rev}, cb
 						async.series requests, (err) ->
 							logger.log project_id:project_id, "finished flushing project to tpds"
 							callback(err)
