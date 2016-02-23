@@ -505,7 +505,6 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
 
 			@tpdsUpdateSender.addFile = (options)=>
-				console.log @project.name, options.project_name
 				options.project_id.should.equal project_id
 				options.path.should.equal opts.path
 				options.project_name.should.equal @project.name
