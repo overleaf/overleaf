@@ -204,7 +204,7 @@ module.exports = ProjectEntityHandler =
 		folders = _.select folders, (folder)->
 			return folder.length != 0
 
-		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)=>
+		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
 			if path == '/'
 				logger.log project_id: project._id, "mkdir is only trying to make path of / so sending back root folder"
 				return callback(null, [], project.rootFolder[0])
