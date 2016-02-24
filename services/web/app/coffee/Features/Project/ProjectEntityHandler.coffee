@@ -118,7 +118,7 @@ module.exports = ProjectEntityHandler =
 				# which hasn't been created in docstore.
 				DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
 					return callback(err) if err? 
-					Project.putElement project._id, folder_id, doc, "doc", (err, result)=>
+					ProjectEntityHandler._putElement project._id, folder_id, doc, "doc", (err, result)=>
 						return callback(err) if err?
 						tpdsUpdateSender.addDoc {
 							project_id:   project._id,
@@ -147,7 +147,7 @@ module.exports = ProjectEntityHandler =
 					if err?
 						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 						return callback(err)
-					Project.putElement project._id, folder_id, fileRef, "file", (err, result)=>
+					ProjectEntityHandler._putElement project._id, folder_id, fileRef, "file", (err, result)=>
 						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, project_name:project.name, rev:fileRef.rev}, ->
 							callback(err, fileRef, folder_id)
 
@@ -192,7 +192,7 @@ module.exports = ProjectEntityHandler =
 				FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
 					if err?
 						logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
-					Project.putElement project._id, folder_id, fileRef, "file", (err, result)=>
+					ProjectEntityHandler._putElement project._id, folder_id, fileRef, "file", (err, result)=>
 						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
 							callback(error, fileRef, folder_id)
 
@@ -240,7 +240,7 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			confirmFolder project, parentFolder_id, (parentFolder_id)=>
 				logger.log project: project_id, parentFolder_id:parentFolder_id, folderName:folderName, "new folder added"
-				Project.putElement project._id, parentFolder_id, folder, "folder", (err, result)=>
+				ProjectEntityHandler._putElement project._id, parentFolder_id, folder, "folder", (err, result)=>
 					if callback?
 						callback(err, folder, parentFolder_id)
 
@@ -300,7 +300,7 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
 						return callback(err) if err?
-						Project.putElement project_id, destinationFolder_id, entity, entityType, (err, result)->
+						ProjectEntityHandler._putElement project_id, destinationFolder_id, entity, entityType, (err, result)->
 							return callback(err) if err?
 							opts = 
 								project_id:project_id
@@ -423,6 +423,45 @@ module.exports = ProjectEntityHandler =
 				}
 			}
 		}, {}, callback
+
+	_putElement: (project_id, folder_id, element, type, callback = (err, path)->)->
+		sanitizeTypeOfElement = (elementType)->
+			lastChar = elementType.slice -1
+			if lastChar != "s"
+				elementType +="s"
+			if elementType == "files"
+				elementType = "fileRefs"
+			return elementType
+
+		if !element?
+			e = new Error("no element passed to be inserted")
+			logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
+			return callback(e)
+		type = sanitizeTypeOfElement type
+		ProjectGetter.getProject project_id, "rootFolder", (err, project)=>
+			if err?
+				return callback(err)
+			if !folder_id?
+				folder_id = project.rootFolder[0]._id
+			projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
+				newPath =
+					fileSystem: "#{path.fileSystem}/#{element.name}"
+					mongo: path.mongo
+				if err?
+					logger.err err:err, project_id:project_id, folder_id:folder_id, type:type, element:element, "error finding folder for _putElement"
+					return callback(err)
+				logger.log project_id: project_id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
+				id = element._id+''
+				element._id = require('mongoose').Types.ObjectId(id)
+				conditions = _id:project_id
+				mongopath = "#{path.mongo}.#{type}"
+				update = "$push":{}
+				update["$push"][mongopath] = element
+				Project.update conditions, update, {}, (err)->
+					if err?
+						logger.err err: err, project_id: project_id, 'error saving in putElement project'
+						return callback(err)
+					callback(err, {path:newPath})
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"

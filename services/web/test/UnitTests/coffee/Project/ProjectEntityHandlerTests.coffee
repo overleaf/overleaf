@@ -28,6 +28,7 @@ describe 'ProjectEntityHandler', ->
 			folders:[
 				{name:"level1", folders:[]}
 			]
+		@ProjectUpdateStub = sinon.stub()
 		@ProjectModel = class Project
 			constructor:(options)->
 				@._id = project_id
@@ -35,6 +36,7 @@ describe 'ProjectEntityHandler', ->
 				@rev = 0
 			save:(callback)->callback()
 			rootFolder:[@rootFolder]
+		@ProjectModel.update = @ProjectUpdateStub
 
 		@DocModel = class Doc
 			constructor:(options)->
@@ -57,8 +59,10 @@ describe 'ProjectEntityHandler', ->
 		@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, @project)
 		@ProjectGetter = 
 			getProjectWithOnlyFolders : (project_id, callback)=> callback(null, @project)
-		@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:"somehintg"}})
+			getProject:sinon.stub()
 		@projectUpdater = markAsUpdated:sinon.stub()
+		@projectLocator = 
+			findElement : sinon.stub()
 		@ProjectEntityHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': Project:@ProjectModel
 			'../../models/Doc': Doc:@DocModel
@@ -66,10 +70,10 @@ describe 'ProjectEntityHandler', ->
 			'../../models/File': File:@FileModel
 			'../FileStore/FileStoreHandler':@FileStoreHandler
 			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
-			'./ProjectLocator':@projectLocator = {}
+			'./ProjectLocator': @projectLocator
 			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@documentUpdaterHandler = {}
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
-			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub()}
+			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub(), err:->}
 			'./ProjectUpdateHandler': @projectUpdater
 			"./ProjectGetter": @ProjectGetter
 
@@ -226,7 +230,7 @@ describe 'ProjectEntityHandler', ->
 				fileSystem: "/somewhere/else.txt"
 			}
 			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
-			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
 			@tpdsUpdateSender.moveEntity = sinon.stub().callsArg(1)
 			
 		describe "moving a doc", ->
@@ -259,7 +263,7 @@ describe 'ProjectEntityHandler', ->
 					.should.equal true
 					
 			it "should put the element back in the new folder", ->
-				@ProjectModel.putElement
+				@ProjectEntityHandler._putElement
 					.calledWith(
 						project_id,
 						folder_id,
@@ -327,7 +331,7 @@ describe 'ProjectEntityHandler', ->
 						.should.equal true
 						
 				it "should put the element back in the new folder", ->
-					@ProjectModel.putElement
+					@ProjectEntityHandler._putElement
 						.calledWith(
 							project_id,
 							@move_to_folder_id,
@@ -407,7 +411,7 @@ describe 'ProjectEntityHandler', ->
 			@lines = ['1234','abc']
 			@path = "/path/to/doc"
 
-			@ProjectModel.putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
 			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, true, 0)
@@ -415,12 +419,12 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
 
 			# Created doc
-			@doc = @ProjectModel.putElement.args[0][2]
+			@doc = @ProjectEntityHandler._putElement.args[0][2]
 			@doc.name.should.equal @name
 			expect(@doc.lines).to.be.undefined
 
 		it 'should call put element', ->
-			@ProjectModel.putElement
+			@ProjectEntityHandler._putElement
 				.calledWith(project_id, folder_id, @doc)
 				.should.equal true
 
@@ -482,7 +486,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, @filePath, (err, fileRef, parentFolder)->
 
 		it 'should put file into folder by calling put element', (done)->
-			@ProjectModel.putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)->
+			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)->
 				passedProject_id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFileRef.name.should.equal fileName
@@ -492,6 +496,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
 
 		it 'should return doc and parent folder', (done)->
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
 				parentFolder.should.equal folder_id
 				fileRef.name.should.equal fileName
@@ -502,7 +507,7 @@ describe 'ProjectEntityHandler', ->
 			opts =
 				path : "/somehwere/idsadsds"
 				project_id : project_id
-			@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
+			@ProjectEntityHandler._putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
 
 			@tpdsUpdateSender.addFile = (options)=>
 				options.project_id.should.equal project_id
@@ -572,7 +577,7 @@ describe 'ProjectEntityHandler', ->
 		folderName = "folder1234"
 
 		it 'should call put element', (done)->
-			@ProjectModel.putElement = (passedProject_id, passedFolder_id, passedFolder, passedType, callback)->
+			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFolder, passedType, callback)->
 				passedProject_id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFolder.name.should.equal folderName
@@ -581,6 +586,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, parentFolder)->
 
 		it 'should return the folder and parent folder', (done)->
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4)
 			@ProjectEntityHandler.addFolder project_id, folder_id, folderName, (err, folder, parentFolder)->
 				parentFolder.should.equal folder_id
 				folder.name.should.equal folderName
@@ -873,14 +879,17 @@ describe 'ProjectEntityHandler', ->
 		oldFileRef = {name:fileName, _id:"oldFileRef"}
 		beforeEach ->
 			@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, {name:@project.name, _id:@project._id})
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
+
 
 		it 'should copy the file in FileStoreHandler', (done)->
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)=>     
 				@FileStoreHandler.copyFile.calledWith(oldProject_id, oldFileRef._id, project_id, fileRef._id).should.equal true
 				done()
 
 		it 'should put file into folder by calling put element', (done)->
-			@ProjectModel.putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)-> 
+			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)-> 
 				passedProject_id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFileRef.name.should.equal fileName
@@ -900,7 +909,7 @@ describe 'ProjectEntityHandler', ->
 			opts =
 				path : "/somehwere/idsadsds"
 				project_id : project_id
-			@ProjectModel.putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
+			@ProjectEntityHandler._putElement = (project_id, folder_id, doc, type, callback)-> callback(null, {path:{fileSystem:opts.path}})
 
 			@tpdsUpdateSender.addFile = (options)=>
 				options.project_id.should.equal project_id
@@ -1010,3 +1019,52 @@ describe 'ProjectEntityHandler', ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
+
+
+	describe "_putElement", ->
+		beforeEach ->
+			@project_id = project_id
+			@project =
+				_id: ObjectId(project_id)
+				rootFolder: [_id:ObjectId()]
+			@folder =
+				_id: ObjectId()
+				name: "someFolder"
+			@doc = 
+				_id: ObjectId()
+				name: "new.tex"
+			@path = mongo: "mongo.path", fileSystem: "/file/system/old.tex"
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
+			@projectLocator.findElement.callsArgWith(1, null, @folder, @path)
+			@ProjectUpdateStub.callsArgWith(3)
+
+
+		describe "updating the project", ->
+			
+
+			it "should use the correct mongo path", (done)->
+				@ProjectEntityHandler._putElement @project_id, @folder._id, @doc, "docs", (err)=>
+					@ProjectModel.update.args[0][0]._id.should.equal @project_id
+					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
+					done()
+
+			it "should add an s onto the type if not included", (done)->
+				@ProjectEntityHandler._putElement @project_id, @folder._id, @doc, "doc", (err)=>
+					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
+					done()
+
+
+			it "should not call update if elemenet is null", (done)->
+				@ProjectEntityHandler._putElement @project_id, @folder._id, null, "doc", (err)=>
+					@ProjectModel.update.called.should.equal false
+					done()
+
+			it "should default to root folder insert", (done)->
+				@ProjectEntityHandler._putElement @project_id, null, @doc, "doc", (err)=>
+					@projectLocator.findElement.args[0][0].element_id.should.equal @project.rootFolder[0]._id
+					done()
+
+
+
+
+
