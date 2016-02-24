@@ -64,6 +64,7 @@ describe "ProjectUploadManager", ->
 			@destination = "/path/to/zile/file-extracted"
 			@ProjectUploadManager._getDestinationDirectory = sinon.stub().returns @destination
 			@ArchiveManager.extractZipArchive = sinon.stub().callsArg(2)
+			@ArchiveManager.findTopLevelDirectory = sinon.stub().callsArgWith(1, null, @topLevelDestination = "/path/to/zip/file-extracted/nested")
 			@FileSystemImportManager.addFolderContents = sinon.stub().callsArg(5)
 
 			@ProjectUploadManager.insertZipArchiveIntoFolder @owner_id, @project_id, @folder_id, @source, @callback
@@ -74,8 +75,11 @@ describe "ProjectUploadManager", ->
 		it "should extract the archive", ->
 			@ArchiveManager.extractZipArchive.calledWith(@source, @destination).should.equal true
 
+		it "should find the top level directory", ->
+			@ArchiveManager.findTopLevelDirectory.calledWith(@destination).should.equal true
+
 		it "should insert the extracted archive into the folder", ->
-			@FileSystemImportManager.addFolderContents.calledWith(@owner_id, @project_id, @folder_id, @destination, false)
+			@FileSystemImportManager.addFolderContents.calledWith(@owner_id, @project_id, @folder_id, @topLevelDestination, false)
 				.should.equal true
 
 		it "should return the callback", ->

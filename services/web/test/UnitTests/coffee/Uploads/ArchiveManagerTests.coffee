@@ -22,6 +22,7 @@ describe "ArchiveManager", ->
 			"child_process": @child
 			"logger-sharelatex": @logger
 			"../../infrastructure/Metrics": @metrics
+			"fs": @fs = {}
 	
 	describe "extractZipArchive", ->
 		beforeEach ->
@@ -69,4 +70,57 @@ describe "ArchiveManager", ->
 
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
+	
+	describe "findTopLevelDirectory", ->
+		beforeEach ->
+			@fs.readdir = sinon.stub()
+			@fs.stat = sinon.stub()
+			@directory = "test/directory"
+
+		describe "with multiple files", ->
+			beforeEach ->
+				@fs.readdir.callsArgWith(1, null, ["multiple", "files"])
+				@ArchiveManager.findTopLevelDirectory(@directory, @callback)
+			
+			it "should find the files in the directory", ->
+				@fs.readdir
+					.calledWith(@directory)
+					.should.equal true
+			
+			it "should return the original directory", ->
+				@callback
+					.calledWith(null, @directory)
+					.should.equal true
+		
+		describe "with a single file (not folder)", ->
+			beforeEach ->
+				@fs.readdir.callsArgWith(1, null, ["foo.tex"])
+				@fs.stat.callsArgWith(1, null, { isDirectory: () -> false })
+				@ArchiveManager.findTopLevelDirectory(@directory, @callback)
+			
+			it "should check if the file is a directory", ->
+				@fs.stat
+					.calledWith(@directory + "/foo.tex")
+					.should.equal true
+			
+			it "should return the original directory", ->
+				@callback
+					.calledWith(null, @directory)
+					.should.equal true
+		
+		describe "with a single top-level folder", ->
+			beforeEach ->
+				@fs.readdir.callsArgWith(1, null, ["folder"])
+				@fs.stat.callsArgWith(1, null, { isDirectory: () -> true })
+				@ArchiveManager.findTopLevelDirectory(@directory, @callback)
+			
+			it "should check if the file is a directory", ->
+				@fs.stat
+					.calledWith(@directory + "/folder")
+					.should.equal true
+			
+			it "should return the child directory", ->
+				@callback
+					.calledWith(null, @directory + "/folder")
+					.should.equal true
 

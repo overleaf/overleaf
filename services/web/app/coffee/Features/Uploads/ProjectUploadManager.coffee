@@ -19,9 +19,11 @@ module.exports = ProjectUploadHandler =
 		destination = @_getDestinationDirectory path
 		ArchiveManager.extractZipArchive path, destination, (error) ->
 			return callback(error) if error?
-			FileSystemImportManager.addFolderContents owner_id, project_id, folder_id, destination, false, (error) ->
+			ArchiveManager.findTopLevelDirectory destination, (error, topLevelDestination) ->
 				return callback(error) if error?
-				rimraf(destination, callback)
+				FileSystemImportManager.addFolderContents owner_id, project_id, folder_id, topLevelDestination, false, (error) ->
+					return callback(error) if error?
+					rimraf(destination, callback)
 
 	_getDestinationDirectory: (source) ->
 		return path.join(path.dirname(source), "#{path.basename(source, ".zip")}-#{Date.now()}")
