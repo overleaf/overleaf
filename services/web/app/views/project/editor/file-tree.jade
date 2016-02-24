@@ -46,26 +46,24 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 		ng-controller="FileTreeRootFolderController",
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
-
-		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')")
-			ul.list-unstyled.file-tree-list
-				li(
-					ng-class="{ 'selected': ui.view == 'pdf' }"
-					ng-controller="PdfViewToggleController"
-				)
-					.entity
-						.entity-name(
-							ng-click="togglePdfView()"
-						)
-							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file-pdf-o
-							|  PDF
-	
 		ul.list-unstyled.file-tree-list(
 			droppable="permissions.write"
 			accept=".entity-name"
 			on-drop-callback="onDrop"
 		)
+			li(
+				ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')"
+				ng-class="{ 'selected': ui.view == 'pdf' }"
+				ng-controller="PdfViewToggleController"
+			)
+				.entity
+					.entity-name(
+						ng-click="togglePdfView()"
+					)
+						i.fa.fa-fw.toggle
+						i.fa.fa-fw.fa-file-pdf-o
+						|  PDF
+
 			file-entity(
 				entity="entity",
 				permissions="permissions",
