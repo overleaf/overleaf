@@ -74,13 +74,26 @@ sanitizeTypeOfElement = (elementType)->
 		elementType = "fileRefs"
 	return elementType
 
+countElements = (project, callback)->
+	
+	countFolder = (folder, cb)->
+		jobs = _.map folder?.folders, (folder)->
+			(asyncCb)-> countFolder folder, asyncCb
+		async.series jobs, (err, results)->
+			total = _.reduce results, (a, b)-> return a+b
+			total += folder?.docs?.length
+			total += folder?.fileRefs?.length
+			cb(null, subTotal)
+
+	countFolder project.rootFolder[0], callback
+
 ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callback)->
 	if !element?
 		e = new Error("no element passed to be inserted")
 		logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 		return callback(e)
 	type = sanitizeTypeOfElement type
-	require('../Features/Project/ProjectGetter').getProjectWithOnlyFolders project_id, (err, project)=>
+	require('../Features/Project/ProjectGetter').getProject project_id, "rootFolder", (err, project)=>
 		if err?
 			callback(err)
 		if !folder_id?
@@ -100,7 +113,7 @@ ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callba
 			update["$push"][mongopath] = element
 			this.update conditions, update, {}, (err)->
 				if(err)
-					logger.err err: err, project: project, 'error saving in putElement project'
+					logger.err err: err, project_id: project_id, 'error saving in putElement project'
 				if callback?
 					callback(err, {path:newPath})
 
