@@ -12,7 +12,7 @@ module.exports =
 
 	addUserToGroup: (req, res)->
 		adminUserId = req.session.user._id
-		newEmail = req.body.email
+		newEmail = req.body?.email?.toLowerCase()?.trim()
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
 		SubscriptionGroupHandler.addUserToGroup adminUserId, newEmail, (err, user)->
 			if err?
