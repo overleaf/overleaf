@@ -8,7 +8,7 @@ _ = require("underscore")
 module.exports = 
 
 	getDetails: (project_id, callback)->
-		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
+		ProjectGetter.getProject project_id, {name:1, description:1, compiler:1, features:1, owner_ref:1}, (err, project)->
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)

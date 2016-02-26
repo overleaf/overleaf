@@ -5,7 +5,7 @@ sinon = require('sinon')
 assert = require("chai").assert
 require('chai').should()
 
-describe 'Project details handler', ->
+describe 'ProjectDetailsHandler', ->
 
 	beforeEach ->
 		@project_id = "321l3j1kjkjl"
@@ -50,7 +50,7 @@ describe 'Project details handler', ->
 
 		it "should return the error", (done)->
 			error = "some error"
-			@ProjectGetter.getProjectWithoutDocLines.callsArgWith(1, error)
+			@ProjectGetter.getProject.callsArgWith(2, error)
 			@handler.getDetails @project_id, (err)=>
 				err.should.equal error
 				done()
