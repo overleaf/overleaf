@@ -1,4 +1,5 @@
 Project = require('../../models/Project').Project
+ProjectGetter = require("./ProjectGetter")
 logger = require('logger-sharelatex')
 documentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 tagsHandler = require("../Tags/TagsHandler")
@@ -34,7 +35,7 @@ module.exports = ProjectDeleter =
 
 	archiveProject: (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "deleting project"
-		Project.findById project_id, (err, project)=>
+		ProjectGetter.getProject project_id, {owner_ref:1, collaberator_refs:1, readOnly_refs:1}, (err, project)=>
 			if err? or !project?
 				logger.err err:err, project_id:project_id, "error getting project to delete it"
 				callback(err)

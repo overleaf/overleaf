@@ -25,12 +25,15 @@ describe 'ProjectDeleter', ->
 		@editorController = notifyUsersProjectHasBeenDeletedOrRenamed : sinon.stub().callsArgWith(1)
 		@TagsHandler = 
 			removeProjectFromAllTags: sinon.stub().callsArgWith(2)
+		@ProjectGetter =
+			getProject:sinon.stub()
 		@deleter = SandboxedModule.require modulePath, requires:
 			"../Editor/EditorController": @editorController
 			'../../models/Project':{Project:@Project}
 			'../DocumentUpdater/DocumentUpdaterHandler': @documentUpdaterHandler
 			"../Tags/TagsHandler":@TagsHandler
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
+			"./ProjectGetter": @ProjectGetter
 			'logger-sharelatex':
 				log:->
 
@@ -89,6 +92,7 @@ describe 'ProjectDeleter', ->
 
 	describe "archiveProject", ->
 		beforeEach ->
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@Project.update.callsArgWith(2)
 
 		it "should flushProjectToMongoAndDelete in doc updater", (done)->
