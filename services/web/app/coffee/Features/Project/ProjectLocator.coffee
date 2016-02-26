@@ -5,7 +5,7 @@ _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
 
-module.exports =
+module.exports = ProjectLocator =
 	findElement: (options, _callback = (err, element, path, parentFolder)->)->
 		callback = (args...) ->
 			_callback(args...)
@@ -67,7 +67,7 @@ module.exports =
 		if project?
 			getRootDoc project
 		else
-			Project.findById project_id, (err, project)->
+			ProjectGetter.getProject project_id, (err, project)->
 				getRootDoc project
 
 	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity)->)->
