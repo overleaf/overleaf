@@ -30,7 +30,7 @@ project.rootFolder[0] = rootFolder
 project.rootDoc_id = rootDoc._id
 
 
-describe 'project model', ->
+describe 'ProjectLocatorTests', ->
 
 	beforeEach ->
 		Project.getProject = (project_id, fields, callback)=>
@@ -38,9 +38,12 @@ describe 'project model', ->
 
 		Project.findById = (project_id, callback)=>
 			callback(null, project)
+		@ProjectGetter = 
+			getProject: sinon.stub().callsArgWith(1, null, project)
 		@locator = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:Project}
 			'../../models/User':{User:@User}
+			"./ProjectGetter":@ProjectGetter
 			'logger-sharelatex':
 				log:->
 				err:->

@@ -1,4 +1,5 @@
 Project = require('../../models/Project').Project
+ProjectGetter = require("./ProjectGetter")
 Errors = require "../../errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
@@ -50,7 +51,7 @@ module.exports =
 		if project?
 			startSearch(project)
 		else
-			Project.findById project_id, (err, project)->
+			ProjectGetter.getProject project_id, (err, project)->
 				return callback(err) if err?
 				if !project?
 					return callback(new Errors.NotFoundError("project not found"))
