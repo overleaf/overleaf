@@ -1063,5 +1063,66 @@ describe 'ProjectEntityHandler', ->
 
 
 
+		describe "_countElements", ->
+
+			beforeEach ->
+				@project.rootFolder[0].docs = [{_id:123}, {_id:345}]
+				@project.rootFolder[0].fileRefs = [{_id:123}, {_id:345}, {_id:456}]
+				@project.rootFolder[0].folders = [
+					{
+						docs:
+							[{_id:123}, {_id:345}, {_id:456}]
+						fileRefs:{}
+						folders: [
+							{
+								docs:[_id:1234], 
+								fileRefs:[{_id:23123}, {_id:123213}, {_id:2312}]
+								folders:[
+									{
+										docs:[{_id:321321}, {_id:123213}]
+										fileRefs:[{_id:312321}]
+										folders:[]
+									}
+								]
+							}
+						]
+					},{
+						docs:[{_id:123}, {_id:32131}]
+						fileRefs:[]
+						folders:[
+							{
+								docs:[{_id:3123}]
+								fileRefs:[{_id:321321}, {_id:321321}, {_id:313122}]
+								folders:0
+							}
+						]
+					}
+				]				
+
+			it "should return the correct number", (done)->
+				@ProjectEntityHandler._countElements @project, (err, count)->
+					count.should.equal 21
+					done()
+
+			it "should deal with null folders", (done)->
+				@project.rootFolder[0].folders[0].folders = undefined
+				@ProjectEntityHandler._countElements @project, (err, count)->
+					count.should.equal 14
+					done()				
+
+			it "should deal with null docs", (done)->
+				@project.rootFolder[0].folders[0].docs = undefined
+				@ProjectEntityHandler._countElements @project, (err, count)->
+					count.should.equal 18
+					done()				
+
+			it "should deal with null fileRefs", (done)->
+				@project.rootFolder[0].folders[0].folders[0].fileRefs = undefined
+				@ProjectEntityHandler._countElements @project, (err, count)->
+					count.should.equal 18
+					done()	
+
+
+
 
 

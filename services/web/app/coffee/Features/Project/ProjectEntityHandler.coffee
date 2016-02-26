@@ -424,6 +424,26 @@ module.exports = ProjectEntityHandler =
 			}
 		}, {}, callback
 
+	_countElements : (project, callback)->
+	
+		countFolder = (folder, cb = (err, count)->)->
+
+			jobs = _.map folder?.folders, (folder)->
+				(asyncCb)-> countFolder folder, asyncCb
+
+			async.series jobs, (err, subfolderCounts)->
+				total = 0
+
+				if subfolderCounts?.length > 0
+					total = _.reduce subfolderCounts, (a, b)-> return a + b
+				if folder?.docs?.length?
+					total += folder?.docs?.length
+				if folder?.fileRefs?.length?
+					total += folder?.fileRefs?.length
+				cb(null, total)
+
+		countFolder project.rootFolder[0], callback
+
 	_putElement: (project_id, folder_id, element, type, callback = (err, path)->)->
 		sanitizeTypeOfElement = (elementType)->
 			lastChar = elementType.slice -1

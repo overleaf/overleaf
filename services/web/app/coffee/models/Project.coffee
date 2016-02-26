@@ -66,26 +66,7 @@ ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)
 			this.find {readOnly_refs:user_id}, requiredFields, (err, readOnlyProjects)=>
 				callback(err, projects, collabertions, readOnlyProjects)
 
-countElements = (project, callback)->
-	
-	countFolder = (folder, cb)->
-		jobs = _.map folder?.folders, (folder)->
-			(asyncCb)-> countFolder folder, asyncCb
-		async.series jobs, (err, results)->
-			total = _.reduce results, (a, b)-> return a+b
-			total += folder?.docs?.length
-			total += folder?.fileRefs?.length
-			cb(null, subTotal)
 
-	countFolder project.rootFolder[0], callback
-
-getIndexOf = (searchEntity, id)->
-	length = searchEntity.length
-	count = 0
-	while(count < length)
-		if searchEntity[count]._id+"" == id+""
-			return count
-		count++
 
 
 
