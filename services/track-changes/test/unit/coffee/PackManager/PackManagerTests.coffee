@@ -18,10 +18,13 @@ describe "PackManager", ->
 		@PackManager = SandboxedModule.require modulePath, requires:
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId, BSON: BSON }
 			"./LockManager" : {}
+			"./MongoAWS": {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+		@PackManager.MAX_COUNT = 512
+
 
 	afterEach ->
 		tk.reset()
@@ -42,6 +45,7 @@ describe "PackManager", ->
 				{ op: "op-4", meta: "meta-4", v: 4}
 			]
 			@db.docHistory =
+				save: sinon.stub().callsArg(1)
 				insert: sinon.stub().callsArg(1)
 				findAndModify: sinon.stub().callsArg(1)
 
@@ -150,7 +154,7 @@ describe "PackManager", ->
 
 				describe "for a small update  that will expire", ->
 					it "should insert the update into mongo", ->
-						@db.docHistory.insert.calledWithMatch({
+						@db.docHistory.save.calledWithMatch({
 							pack: @newUpdates,
 							project_id: ObjectId(@project_id),
 							doc_id: ObjectId(@doc_id)
@@ -160,7 +164,7 @@ describe "PackManager", ->
 						}).should.equal true
 
 					it "should set an expiry time in the future", ->
-						@db.docHistory.insert.calledWithMatch({
+						@db.docHistory.save.calledWithMatch({
 							expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
 						}).should.equal true
 
@@ -216,7 +220,7 @@ describe "PackManager", ->
 
 			describe "for a small update that will expire", ->
 				it "should insert the update into mongo", ->
-					@db.docHistory.insert.calledWithMatch({
+					@db.docHistory.save.calledWithMatch({
 						pack: @newUpdates,
 						project_id: ObjectId(@project_id),
 						doc_id: ObjectId(@doc_id)
@@ -226,7 +230,7 @@ describe "PackManager", ->
 					}).should.equal true
 
 				it "should set an expiry time in the future", ->
-					@db.docHistory.insert.calledWithMatch({
+					@db.docHistory.save.calledWithMatch({
 						expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000)
 					}).should.equal true
 
