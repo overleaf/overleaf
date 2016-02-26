@@ -75,6 +75,9 @@ describe 'ProjectDuplicator', ->
 		@Project =
 			findById: sinon.stub().callsArgWith(1, null, @project)
 
+		@ProjectGetter =
+			getProject: sinon.stub().callsArgWith(1, null, @project)
+
 		@duplicator = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:@Project}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler
@@ -83,12 +86,13 @@ describe 'ProjectDuplicator', ->
 			'./ProjectLocator': @locator
 			'./ProjectOptionsHandler': @projectOptionsHandler
 			"../Docstore/DocstoreManager": @DocstoreManager
+			"./ProjectGetter":@ProjectGetter
 			'logger-sharelatex':{log:->}
 
 	it "should look up the original project", (done) ->
 		newProjectName = "someProj"
 		@duplicator.duplicate @owner, @project_id, newProjectName, (err, newProject)=>
-			@Project.findById.calledWith(@project_id).should.equal true
+			@ProjectGetter.getProject.calledWith(@project_id).should.equal true
 			done()
 
 	it "should flush the original project to mongo", (done) ->

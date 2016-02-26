@@ -4,6 +4,7 @@ projectLocator = require('./ProjectLocator')
 projectOptionsHandler = require('./ProjectOptionsHandler')
 DocumentUpdaterHandler = require("../DocumentUpdater/DocumentUpdaterHandler")
 DocstoreManager = require "../Docstore/DocstoreManager"
+ProjectGetter = require("./ProjectGetter")
 Project = require("../../models/Project").Project
 _ = require('underscore')
 async = require('async')
@@ -12,7 +13,7 @@ module.exports =
 	duplicate: (owner, originalProjectId, newProjectName, callback)->
 		DocumentUpdaterHandler.flushProjectToMongo originalProjectId, (err) ->
 			return callback(err) if err?
-			Project.findById originalProjectId, (err, originalProject) ->
+			ProjectGetter.getProject originalProjectId, (err, originalProject) ->
 				return callback(err) if err?
 				projectCreationHandler.createBlankProject owner._id, newProjectName, (err, newProject)->
 					return callback(err) if err?
