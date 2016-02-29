@@ -120,7 +120,7 @@ module.exports = ProjectEntityHandler =
 				DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
 					return callback(err) if err? 
 
-					ProjectEntityHandler._putElement project._id, folder_id, doc, "doc", (err, result)=>
+					ProjectEntityHandler._putElement project, folder_id, doc, "doc", (err, result)=>
 						return callback(err) if err?
 						tpdsUpdateSender.addDoc {
 							project_id:   project?._id,
@@ -194,10 +194,11 @@ module.exports = ProjectEntityHandler =
 				FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
 					if err?
 						logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
+						return callback(err)
 					ProjectEntityHandler._putElement project._id, folder_id, fileRef, "file", (err, result)=>
 						if err?
 							logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
-							return callback()
+							return callback(err)
 						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
 							callback(error, fileRef, folder_id)
 
@@ -463,7 +464,7 @@ module.exports = ProjectEntityHandler =
 
 		if !element?
 			e = new Error("no element passed to be inserted")
-			logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
+			logger.err project_id:project_or_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 			return callback(e)
 		type = sanitizeTypeOfElement type
 		ProjectGetter.getProject project_or_id, {rootFolder:true}, (err, project)=>

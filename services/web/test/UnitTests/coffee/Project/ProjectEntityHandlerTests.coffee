@@ -59,6 +59,7 @@ describe 'ProjectEntityHandler', ->
 		@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, @project)
 		@ProjectGetter = 
 			getProjectWithOnlyFolders : (project_id, callback)=> callback(null, @project)
+			getProjectWithoutDocLines : (project_id, callback)=> callback(null, @project)
 			getProject:sinon.stub()
 		@projectUpdater = markAsUpdated:sinon.stub()
 		@projectLocator = 
@@ -426,9 +427,7 @@ describe 'ProjectEntityHandler', ->
 			expect(@doc.lines).to.be.undefined
 
 		it 'should call put element', ->
-			@ProjectEntityHandler._putElement
-				.calledWith(project_id, folder_id, @doc)
-				.should.equal true
+			@ProjectEntityHandler._putElement.calledWith(@project, folder_id, @doc).should.equal true
 
 		it 'should return doc and parent folder', ->
 			@callback.calledWith(null, @doc, folder_id).should.equal true
@@ -868,13 +867,13 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.update.calledWith({_id : @project_id}, {$unset : {rootDoc_id: true}})
 				.should.equal true
 
-	describe 'copying file', ->
+	describe 'copyFileFromExistingProject', ->
 		fileName = "something.jpg"
 		filePath = "dumpFolder/somewhere/image.jpeg"
 		oldProject_id = "123kljadas"
 		oldFileRef = {name:fileName, _id:"oldFileRef"}
 		beforeEach ->
-			@ProjectModel.getProject = (project_id, fields, callback)=> callback(null, {name:@project.name, _id:@project._id})
+			@ProjectGetter.getProject = (project_id, fields, callback)=> callback(null, {name:@project.name, _id:@project._id})
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 
 
@@ -1041,7 +1040,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should use the correct mongo path", (done)->
 				@ProjectEntityHandler._putElement @project_id, @folder._id, @doc, "docs", (err)=>
-					@ProjectModel.update.args[0][0]._id.should.equal @project_id
+					@ProjectModel.update.args[0][0]._id.should.equal @project._id
 					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
 					done()
 
