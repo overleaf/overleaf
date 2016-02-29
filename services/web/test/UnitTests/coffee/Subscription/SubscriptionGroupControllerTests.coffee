@@ -54,11 +54,11 @@ describe "SubscriptionGroupController", ->
 	describe "addUserToGroup", ->
 
 		it "should use the admin id for the logged in user and take the email address from the body", (done)->
-			newEmail = "31231"
+			newEmail = " boB@gmaiL.com "
 			@req.body = email: newEmail
 			res =
 				json : (data)=>
-					@GroupHandler.addUserToGroup.calledWith(@adminUserId, newEmail).should.equal true
+					@GroupHandler.addUserToGroup.calledWith(@adminUserId, "bob@gmail.com").should.equal true
 					data.user.should.deep.equal @user
 					done()
 			@Controller.addUserToGroup @req, res

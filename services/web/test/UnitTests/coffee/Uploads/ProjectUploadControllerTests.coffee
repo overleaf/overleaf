@@ -103,6 +103,9 @@ describe "ProjectUploadController", ->
 				qqfile:
 					path: @path
 					originalname: @name
+			@req.session =
+				user:
+					_id: @user_id
 			@req.params =
 				Project_id: @project_id
 			@req.query =
@@ -115,34 +118,18 @@ describe "ProjectUploadController", ->
 			beforeEach ->
 				@entity =
 					_id : "1234"
-				@FileSystemImportManager.addEntity = sinon.stub().callsArgWith(5, null, @entity)
+				@FileSystemImportManager.addEntity = sinon.stub().callsArgWith(6, null, @entity)
 				@ProjectUploadController.uploadFile @req, @res
 
-			it "should insert the file into the correct project", ->
+			it "should insert the file", ->
 				@FileSystemImportManager.addEntity
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should insert the file into the provided folder", ->
-				@FileSystemImportManager.addEntity
-					.calledWith(sinon.match.any, @folder_id)
-					.should.equal true
-
-			it "should insert the file with the correct name", ->
-				@FileSystemImportManager.addEntity
-					.calledWith(sinon.match.any, sinon.match.any, @name)
-					.should.equal true
-
-			it "should insert the file from the uploaded path", ->
-				@FileSystemImportManager.addEntity
-					.calledWith(sinon.match.any, sinon.match.any, sinon.match.any, @path)
+					.calledWith(@user_id, @project_id, @folder_id, @name, @path)
 					.should.equal true
 
 			it "should return a successful response to the FileUploader client", ->
 				expect(@res.body).to.deep.equal
 					success: true
 					entity_id: @entity._id
-
 
 			it "should output a log line", ->
 				@logger.log
@@ -158,7 +145,7 @@ describe "ProjectUploadController", ->
 		describe "when FileSystemImportManager.addEntity returns an error", ->
 			beforeEach ->
 				@FileSystemImportManager.addEntity = sinon.stub()
-					.callsArgWith(5, new Error("Sorry something went wrong"))
+					.callsArgWith(6, new Error("Sorry something went wrong"))
 				@ProjectUploadController.uploadFile @req, @res
 
 			it "should return an unsuccessful response to the FileUploader client", ->

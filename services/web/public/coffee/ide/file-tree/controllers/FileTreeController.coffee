@@ -106,7 +106,8 @@ define [
 			$scope.rateLimitHit = false
 			$scope.secondsToRedirect = 10
 			$scope.notLoggedIn = false
-
+			$scope.conflicts = []
+			$scope.control = {}
 
 			needToLogBackIn = ->
 				$scope.notLoggedIn = true
@@ -120,11 +121,6 @@ define [
 					), 1000
 
 				decreseTimeout()
-
-
-			uploadCount = 0
-			$scope.onUpload = () ->
-				uploadCount++
 
 			$scope.max_files = 40
 			$scope.onComplete = (error, name, response) ->
@@ -150,6 +146,34 @@ define [
 				else if reason.indexOf("403") != -1
 					needToLogBackIn()
 
+			_uploadTimer = null
+			uploadIfNoConflicts = () ->
+				if $scope.conflicts.length == 0
+					$scope.doUpload()
+
+			uploadCount = 0
+			$scope.onSubmit = (id, name) ->
+				uploadCount++
+				if ide.fileTreeManager.existsInFolder($scope.parent_folder_id, name)
+					$scope.conflicts.push name
+					$scope.$apply()
+				if !_uploadTimer?
+					_uploadTimer = setTimeout () ->
+						_uploadTimer = null
+						uploadIfNoConflicts()
+					, 0
+				return true
+			
+			$scope.onCancel = (id, name) ->
+				uploadCount--
+				index = $scope.conflicts.indexOf(name)
+				if index > -1
+					$scope.conflicts.splice(index, 1)
+				$scope.$apply()
+				uploadIfNoConflicts()
+
+			$scope.doUpload = () ->
+				$scope.control?.q?.uploadStoredFiles()
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
