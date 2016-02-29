@@ -61,6 +61,8 @@ define [
 				$scope.state.inflight = true
 				ide.fileTreeManager
 					.createDoc(name, parent_folder)
+					.error (e)->
+						$scope.error = e
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -90,6 +92,8 @@ define [
 				$scope.state.inflight = true
 				ide.fileTreeManager
 					.createFolder(name, parent_folder)
+					.error (e)->
+						$scope.error = e
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()

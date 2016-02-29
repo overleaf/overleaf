@@ -129,6 +129,9 @@ module.exports =
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
+
+	maxFilesPerProject: 200
+	
 	# Security
 	# --------
 	security:

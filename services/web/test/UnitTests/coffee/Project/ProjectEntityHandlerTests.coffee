@@ -1101,25 +1101,25 @@ describe 'ProjectEntityHandler', ->
 
 			it "should return the correct number", (done)->
 				@ProjectEntityHandler._countElements @project, (err, count)->
-					count.should.equal 21
+					count.should.equal 26
 					done()
 
 			it "should deal with null folders", (done)->
 				@project.rootFolder[0].folders[0].folders = undefined
 				@ProjectEntityHandler._countElements @project, (err, count)->
-					count.should.equal 14
+					count.should.equal 17
 					done()				
 
 			it "should deal with null docs", (done)->
 				@project.rootFolder[0].folders[0].docs = undefined
 				@ProjectEntityHandler._countElements @project, (err, count)->
-					count.should.equal 18
+					count.should.equal 23
 					done()				
 
 			it "should deal with null fileRefs", (done)->
 				@project.rootFolder[0].folders[0].folders[0].fileRefs = undefined
 				@ProjectEntityHandler._countElements @project, (err, count)->
-					count.should.equal 18
+					count.should.equal 23
 					done()	
 
 

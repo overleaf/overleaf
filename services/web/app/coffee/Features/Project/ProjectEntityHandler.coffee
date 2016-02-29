@@ -1,4 +1,5 @@
 Project = require('../../models/Project').Project
+settings = require "settings-sharelatex"
 Doc = require('../../models/Doc').Doc
 Folder = require('../../models/Folder').Folder
 File = require('../../models/File').File
@@ -436,6 +437,8 @@ module.exports = ProjectEntityHandler =
 
 				if subfolderCounts?.length > 0
 					total = _.reduce subfolderCounts, (a, b)-> return a + b
+				if folder?.folders?.length?
+					total += folder?.folders?.length
 				if folder?.docs?.length?
 					total += folder?.docs?.length
 				if folder?.fileRefs?.length?
@@ -458,30 +461,34 @@ module.exports = ProjectEntityHandler =
 			logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 			return callback(e)
 		type = sanitizeTypeOfElement type
-		ProjectGetter.getProject project_id, "rootFolder", (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true}, (err, project)=>
 			if err?
 				return callback(err)
 			if !folder_id?
 				folder_id = project.rootFolder[0]._id
-			projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
-				newPath =
-					fileSystem: "#{path.fileSystem}/#{element.name}"
-					mongo: path.mongo
-				if err?
-					logger.err err:err, project_id:project_id, folder_id:folder_id, type:type, element:element, "error finding folder for _putElement"
-					return callback(err)
-				logger.log project_id: project_id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
-				id = element._id+''
-				element._id = require('mongoose').Types.ObjectId(id)
-				conditions = _id:project_id
-				mongopath = "#{path.mongo}.#{type}"
-				update = "$push":{}
-				update["$push"][mongopath] = element
-				Project.update conditions, update, {}, (err)->
+			ProjectEntityHandler._countElements project, (err, count)->
+				if count > settings.maxFilesPerProject
+					logger.warn project_id:project_id, "project too big, stopping insertions"
+					return callback("project_has_to_many_files")
+				projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
+					newPath =
+						fileSystem: "#{path.fileSystem}/#{element.name}"
+						mongo: path.mongo
 					if err?
-						logger.err err: err, project_id: project_id, 'error saving in putElement project'
+						logger.err err:err, project_id:project_id, folder_id:folder_id, type:type, element:element, "error finding folder for _putElement"
 						return callback(err)
-					callback(err, {path:newPath})
+					logger.log project_id: project_id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
+					id = element._id+''
+					element._id = require('mongoose').Types.ObjectId(id)
+					conditions = _id:project_id
+					mongopath = "#{path.mongo}.#{type}"
+					update = "$push":{}
+					update["$push"][mongopath] = element
+					Project.update conditions, update, {}, (err)->
+						if err?
+							logger.err err: err, project_id: project_id, 'error saving in putElement project'
+							return callback(err)
+						callback(err, {path:newPath})
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"
