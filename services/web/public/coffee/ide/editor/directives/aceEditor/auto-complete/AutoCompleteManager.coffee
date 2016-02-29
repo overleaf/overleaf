@@ -66,12 +66,13 @@ define [
 							}
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
-									result.push({
-										caption: "\\#{commandName}{#{previousArgsCaption}#{key}",
-										value: "\\#{commandName}{#{previousArgs}#{key}",
-										meta: "reference",
-										score: 10000
-									})
+									if !(key in [null, undefined])
+										result.push({
+											caption: "\\#{commandName}{#{previousArgsCaption}#{key}",
+											value: "\\#{commandName}{#{previousArgs}#{key}",
+											meta: "reference",
+											score: 10000
+										})
 								callback null, result
 							else
 								callback null, result
