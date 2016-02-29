@@ -76,7 +76,7 @@ describe 'ProjectDuplicator', ->
 			findById: sinon.stub().callsArgWith(1, null, @project)
 
 		@ProjectGetter =
-			getProject: sinon.stub().callsArgWith(1, null, @project)
+			getProject: sinon.stub().callsArgWith(2, null, @project)
 
 		@duplicator = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:@Project}

@@ -36,7 +36,7 @@ module.exports =
 				return callback(error) if error?
 				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
 					if error?
-						logger.err err:error, "error adding doc"
+						logger.err err:error, "error adding doc when creating basic project"
 						return callback(error)
 					ProjectEntityHandler.setRootDoc project._id, doc._id, (error) ->
 						callback(error, project)

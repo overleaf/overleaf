@@ -5,7 +5,6 @@ projectOptionsHandler = require('./ProjectOptionsHandler')
 DocumentUpdaterHandler = require("../DocumentUpdater/DocumentUpdaterHandler")
 DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require("./ProjectGetter")
-Project = require("../../models/Project").Project
 _ = require('underscore')
 async = require('async')
 
@@ -13,7 +12,7 @@ module.exports =
 	duplicate: (owner, originalProjectId, newProjectName, callback)->
 		DocumentUpdaterHandler.flushProjectToMongo originalProjectId, (err) ->
 			return callback(err) if err?
-			ProjectGetter.getProject originalProjectId, (err, originalProject) ->
+			ProjectGetter.getProject originalProjectId, {compiler:true, rootFolder:true, rootDoc_id:true}, (err, originalProject) ->
 				return callback(err) if err?
 				projectCreationHandler.createBlankProject owner._id, newProjectName, (err, newProject)->
 					return callback(err) if err?
@@ -36,7 +35,7 @@ module.exports =
 									return (callback)->
 										content = docContents[doc._id.toString()]
 										return callback(new Error("doc_id not found: #{doc._id}")) if !content?
-										projectEntityHandler.addDoc newProject._id, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
+										projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
 											if originalRootDoc? and newDoc.name == originalRootDoc.name
 												setRootDoc newDoc._id
 											callback()
@@ -51,7 +50,7 @@ module.exports =
 							copyFolder = (folder, desFolder, callback)->
 								jobs = folder.folders.map (childFolder)->
 									return (callback)->
-										projectEntityHandler.addFolder newProject._id, desFolder._id, childFolder.name, (err, newFolder)->
+										projectEntityHandler.addFolder newProject, desFolder._id, childFolder.name, (err, newFolder)->
 											copyFolder childFolder, newFolder, callback
 								jobs.push (cb)->
 									copyDocs folder, desFolder, cb

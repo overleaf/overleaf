@@ -109,8 +109,8 @@ module.exports = ProjectEntityHandler =
 			options = {}
 		DocstoreManager.getDoc project_id, doc_id, options, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+	addDoc: (project_or_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project) ->
 			logger.log project: project._id, folder_id: folder_id, doc_name: docName, "adding doc"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
@@ -182,7 +182,7 @@ module.exports = ProjectEntityHandler =
 							callback()
 
 	copyFileFromExistingProject: (project_or_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
-		Project.getProject project_or_id, "name", (err, project) ->
+		ProjectGetter.getProjectWithOnlyFolders project_or_id, {name:true}, (err, project) ->
 			logger.log project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
 			return callback(err) if err?
 			confirmFolder project, folder_id, (folder_id)=>
@@ -216,7 +216,7 @@ module.exports = ProjectEntityHandler =
 				if parentFolder?  
 					parentFolder_id = parentFolder._id
 				builtUpPath = "#{builtUpPath}/#{folderName}"
-				projectLocator.findElementByPath project_id, builtUpPath, (err, foundFolder)=>
+				projectLocator.findElementByPath project, builtUpPath, (err, foundFolder)=>
 					if !foundFolder?
 						logger.log path:path, project_id:project._id, folderName:folderName, "making folder from mkdirp"
 						@addFolder project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
@@ -235,9 +235,9 @@ module.exports = ProjectEntityHandler =
 					!folder.filterOut
 				callback(null, folders, lastFolder)
 	
-	addFolder: (project_id, parentFolder_id, folderName, callback) ->
+	addFolder: (project_or_id, parentFolder_id, folderName, callback) ->
 		folder = new Folder name: folderName
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
+		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project)=>
 			return callback(err) if err?
 			confirmFolder project, parentFolder_id, (parentFolder_id)=>
 				logger.log project: project_id, parentFolder_id:parentFolder_id, folderName:folderName, "new folder added"
@@ -318,7 +318,6 @@ module.exports = ProjectEntityHandler =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		console.log "getting project"
 		ProjectGetter.getProject project_id, {name:true, rootFolder:true}, (err, project)=>
 			return callback(error) if error?
 			projectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path)=>

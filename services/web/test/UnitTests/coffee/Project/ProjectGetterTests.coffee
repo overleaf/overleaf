@@ -20,63 +20,116 @@ describe "ProjectGetter", ->
 	describe "getProjectWithoutDocLines", ->
 		beforeEach ->
 			@project =
-				_id: @project_id = "0123456789abcd9876543210"
+				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
-			@ProjectGetter.getProjectWithoutDocLines @project_id, @callback
 
-		it "should call find with the project id", ->
-			@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+		describe "passing an id", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithoutDocLines @project_id, @callback
 
-		it "should exclude the doc lines", ->
-			excludes =
-				"rootFolder.docs.lines": 0
-				"rootFolder.folder.docs.lines": 0
-				"rootFolder.folder.folder.docs.lines": 0
-				"rootFolder.folder.folder.folder.docs.lines": 0
-				"rootFolder.folder.folder.folder.folder.docs.lines": 0
-				"rootFolder.folder.folder.folder.folder.folder.docs.lines": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.docs.lines": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs.lines": 0
-			@db.projects.find.calledWith(sinon.match.any, excludes)
-				.should.equal true
+			it "should call find with the project id", ->
+				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
 
-		it "should call the callback with the project", ->
-			@callback.calledWith(null, @project).should.equal true
+			it "should exclude the doc lines", ->
+				excludes =
+					"rootFolder.docs.lines": 0
+					"rootFolder.folder.docs.lines": 0
+					"rootFolder.folder.folder.docs.lines": 0
+					"rootFolder.folder.folder.folder.docs.lines": 0
+					"rootFolder.folder.folder.folder.folder.docs.lines": 0
+					"rootFolder.folder.folder.folder.folder.folder.docs.lines": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.docs.lines": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs.lines": 0
+				@db.projects.find.calledWith(sinon.match.any, excludes)
+					.should.equal true
+
+			it "should call the callback with the project", ->
+				@callback.calledWith(null, @project).should.equal true
+
+
+		describe "passing a project", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithoutDocLines @project, @callback
+
+			it "should not call the db", ->
+				@db.projects.find.called.should.equal false
+
+			it "should call the callback with the project", ->
+				@callback.calledWith(null, @project).should.equal true
+
 
 	describe "getProjectWithOnlyFolders", ->
-		beforeEach ->
+		beforeEach ()->
 			@project =
-				_id: @project_id = "0123456789abcd9876543210"
+				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
-			@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
+	
+		describe "passing an id", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
 
-		it "should call find with the project id", ->
-			@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+			it "should call find with the project id", ->
+				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
 
-		it "should exclude the docs and files lines", ->
-			excludes =
-				"rootFolder.docs": 0
-				"rootFolder.fileRefs": 0
-				"rootFolder.folder.docs": 0
-				"rootFolder.folder.fileRefs": 0
-				"rootFolder.folder.folder.docs": 0
-				"rootFolder.folder.folder.fileRefs": 0
-				"rootFolder.folder.folder.folder.docs": 0
-				"rootFolder.folder.folder.folder.fileRefs": 0
-				"rootFolder.folder.folder.folder.folder.docs": 0
-				"rootFolder.folder.folder.folder.folder.fileRefs": 0
-				"rootFolder.folder.folder.folder.folder.folder.docs": 0
-				"rootFolder.folder.folder.folder.folder.folder.fileRefs": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.docs": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.fileRefs": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs": 0
-				"rootFolder.folder.folder.folder.folder.folder.folder.folder.fileRefs": 0
-			@db.projects.find.calledWith(sinon.match.any, excludes)
-				.should.equal true
+			it "should exclude the docs and files linesaaaa", ->
+				excludes =
+					"rootFolder.docs": 0
+					"rootFolder.fileRefs": 0
+					"rootFolder.folder.docs": 0
+					"rootFolder.folder.fileRefs": 0
+					"rootFolder.folder.folder.docs": 0
+					"rootFolder.folder.folder.fileRefs": 0
+					"rootFolder.folder.folder.folder.docs": 0
+					"rootFolder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folder.folder.folder.folder.docs": 0
+					"rootFolder.folder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folder.folder.folder.folder.folder.docs": 0
+					"rootFolder.folder.folder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.docs": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs": 0
+					"rootFolder.folder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+				@db.projects.find.calledWith(sinon.match.any, excludes).should.equal true
 
-		it "should call the callback with the project", ->
-			@callback.calledWith(null, @project).should.equal true
+			it "should call the callback with the project", ->
+				@callback.calledWith(null, @project).should.equal true
+		
+		describe "passing a project", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithoutDocLines @project, @callback
 
+			it "should not call the db", ->
+				@db.projects.find.called.should.equal false
+
+			it "should call the callback with the project", ->
+				@callback.calledWith(null, @project).should.equal true
+
+
+
+	describe "getProject", ->
+		beforeEach ()->
+			@project =
+				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
+			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
+
+
+			it "should call find with the project id when string id is passed", (done)->
+				@ProjectGetter.getProject @project_id, (err, project)=>
+					@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+					assert.deepEqual @project, project
+					done()
+
+			it "should call find with the project id when object id is passed", (done)->
+				@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
+					@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+					assert.deepEqual @project, project
+					done()
+
+			it "should not call db when project is passed", (done)->
+				@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
+					@db.projects.find.called.should.equal false
+					assert.deepEqual @project, project
+					done()
 
 	describe "populateProjectWithUsers", ->
 		beforeEach ->
