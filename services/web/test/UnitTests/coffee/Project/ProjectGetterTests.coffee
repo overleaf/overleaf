@@ -16,6 +16,9 @@ describe "ProjectGetter", ->
 					projects: {}
 					users: {}
 				ObjectId: ObjectId
+			"logger-sharelatex":
+				err:->
+				log:->
 
 	describe "getProjectWithoutDocLines", ->
 		beforeEach ->
@@ -106,30 +109,37 @@ describe "ProjectGetter", ->
 
 
 
-	describe "getProject", ->
+	describe "getProjectaaaaa", ->
 		beforeEach ()->
 			@project =
 				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
 
 
-			it "should call find with the project id when string id is passed", (done)->
-				@ProjectGetter.getProject @project_id, (err, project)=>
-					@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
-					assert.deepEqual @project, project
-					done()
+		it "should call find with the project id when string id is passed", (done)->
+			@ProjectGetter.getProject @project_id, (err, project)=>
+				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				assert.deepEqual @project, project
+				done()
 
-			it "should call find with the project id when object id is passed", (done)->
-				@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
-					@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
-					assert.deepEqual @project, project
-					done()
+		it "should call find with the project id when object id is passed", (done)->
+			@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
+				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				assert.deepEqual @project, project
+				done()
 
-			it "should not call db when project is passed", (done)->
-				@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
-					@db.projects.find.called.should.equal false
-					assert.deepEqual @project, project
-					done()
+		it "should not call db when project is passed", (done)->
+			@ProjectGetter.getProject @project, (err, project)=>
+				@db.projects.find.called.should.equal false
+				assert.deepEqual @project, project
+				done()
+
+		it "should call the db when a mongoose objectid is used", (done)->
+			mongooseID = require('mongoose').Types.ObjectId(@project_id)
+			@ProjectGetter.getProject mongooseID, (err, project)=>
+				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				assert.deepEqual @project, project
+				done()
 
 	describe "populateProjectWithUsers", ->
 		beforeEach ->

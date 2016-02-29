@@ -3,6 +3,9 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
 Errors = require("../../errors")
+logger = require("logger-sharelatex")
+
+
 
 module.exports = ProjectGetter =
 	EXCLUDE_DEPTH: 8
@@ -39,12 +42,26 @@ module.exports = ProjectGetter =
 			db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
 				callback error, projects[0]
 
-	getProject: (query, projection, callback = (error, project) ->) ->
+	getProject: (project_or_id, projection, callback = (error, project) ->) ->
+		if !project_or_id?
+			return callback("no id or project provided")
+
+		if typeof(projection) == "function"
+			callback = projection
+
 		ProjectGetter._returnProjectIfPassed project_or_id, callback, (err)->
-			if typeof query == "string"
-				query = _id: ObjectId(query)
-			else if query instanceof ObjectId
-				query = _id: query
+
+			if typeof project_or_id == "string"
+				query = _id: ObjectId(project_or_id)
+			else if project_or_id instanceof ObjectId
+				query = _id: project_or_id
+			else if project_or_id?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
+				query = _id:  ObjectId(project_or_id.toString())
+			else
+				err = new Error("malformed get request")
+				logger.log project_or_id:project_or_id, err:err, type:typeof(project_or_id), "malformed get request"
+				return callback(err)
+
 			db.projects.find query, projection, (err, project)->
 				if err?
 					logger.err err:err, query:query, projection:projection, "error getting project"

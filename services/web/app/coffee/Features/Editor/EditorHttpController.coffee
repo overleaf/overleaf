@@ -67,6 +67,7 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
+		logger.log project_id:project_id, name:name, parent_folder_id:parent_folder_id, "getting request to add doc to project"
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
 		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", (error, doc) ->
