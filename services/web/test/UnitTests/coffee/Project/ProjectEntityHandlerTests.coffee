@@ -144,7 +144,7 @@ describe 'ProjectEntityHandler', ->
 	describe 'deleteEntity', ->
 		entity_id = "4eecaffcbffa66588e000009"
 		beforeEach ->
-			@ProjectGetter.getProject.callsArgWith(1, null, @project)
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@tpdsUpdateSender.deleteEntity = sinon.stub().callsArg(1)
 			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
 			@ProjectEntityHandler._cleanUpEntity = sinon.stub().callsArg(3)
@@ -232,7 +232,7 @@ describe 'ProjectEntityHandler', ->
 			}
 			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
-			@ProjectGetter.getProject.callsArgWith(1, null, @project)
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@tpdsUpdateSender.moveEntity = sinon.stub().callsArg(1)
 			
 		describe "moving a doc", ->
@@ -810,7 +810,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
 
-			@ProjectGetter.getProject.callsArgWith(1, null, @project)
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 
 			@ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, () -> done()
 
@@ -927,7 +927,7 @@ describe 'ProjectEntityHandler', ->
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
 			@ProjectModel.update = sinon.stub().callsArgWith(3)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
-			@ProjectGetter.getProject.callsArgWith(1, null, @project)
+			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 
 		it "should update the name in mongo", (done)->
 

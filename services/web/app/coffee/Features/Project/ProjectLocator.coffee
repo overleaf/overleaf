@@ -51,7 +51,7 @@ module.exports = ProjectLocator =
 		if project?
 			startSearch(project)
 		else
-			ProjectGetter.getProject project_id, (err, project)->
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
 				return callback(err) if err?
 				if !project?
 					return callback(new Errors.NotFoundError("project not found"))
@@ -67,8 +67,12 @@ module.exports = ProjectLocator =
 		if project?
 			getRootDoc project
 		else
-			ProjectGetter.getProject project_id, (err, project)->
-				getRootDoc project
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
+				if err?
+					logger.err err:err, "error getting project"
+					return callback(err)
+				else
+					getRootDoc project
 
 	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity)->)->
 

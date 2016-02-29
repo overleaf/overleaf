@@ -39,7 +39,7 @@ describe 'ProjectLocatorTests', ->
 		Project.findById = (project_id, callback)=>
 			callback(null, project)
 		@ProjectGetter = 
-			getProject: sinon.stub().callsArgWith(1, null, project)
+			getProject: sinon.stub().callsArgWith(2, null, project)
 		@locator = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:Project}
 			'../../models/User':{User:@User}

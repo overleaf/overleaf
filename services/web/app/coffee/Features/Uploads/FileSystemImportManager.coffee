@@ -4,6 +4,7 @@ _     = require "underscore"
 FileTypeManager  = require "./FileTypeManager"
 EditorController = require "../Editor/EditorController"
 ProjectLocator   = require "../Project/ProjectLocator"
+logger  = require "logger-sharelatex"
 
 module.exports = FileSystemImportManager =
 	addDoc: (project_id, folder_id, name, path, replace, callback = (error, doc)-> )->
@@ -14,6 +15,7 @@ module.exports = FileSystemImportManager =
 			EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
 
 	addFile: (project_id, folder_id, name, path, replace, callback = (error, file)-> )->
+		logger.log project_id:project_id, folder_id:folder_id, name:name, path:path, replace:replace, "adding file from filesystem"
 		if replace
 			ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
 				return callback(error) if error?

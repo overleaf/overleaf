@@ -76,7 +76,7 @@ module.exports = ProjectEntityHandler =
 		documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
 		documentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
-			ProjectGetter.getProject project_id, (error, project) ->
+			ProjectGetter.getProject project_id, {name:true}, (error, project) ->
 				return callback(error) if error?
 				requests = []
 				self.getAllDocs project_id, (error, docs) ->
@@ -280,7 +280,7 @@ module.exports = ProjectEntityHandler =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true}, (err, project)=>
 			return callback(err) if err?
 			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
 				return callback(err) if err?
@@ -318,7 +318,8 @@ module.exports = ProjectEntityHandler =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, (err, project)=>
+		console.log "getting project"
+		ProjectGetter.getProject project_id, {name:true, rootFolder:true}, (err, project)=>
 			return callback(error) if error?
 			projectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path)=>
 				return callback(error) if error?
@@ -337,7 +338,7 @@ module.exports = ProjectEntityHandler =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path, folder)=>
 				if err?
 					return callback err
