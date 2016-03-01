@@ -73,3 +73,7 @@ module.exports = MongoManager =
 		db.projectHistoryMetaData.ensureIndex { project_id: 1 }, { background: true }
 		# TTL index for auto deleting week old temporary ops
 		db.docHistory.ensureIndex { expiresAt: 1 }, { expireAfterSeconds: 0, background: true }
+		# For finding packs to be checked for archiving
+		db.docHistory.ensureIndex { last_checked: 1 }, { background: true }
+		# For finding archived packs
+		db.docHistoryIndex.ensureIndex { project_id: 1 }, { background: true }
