@@ -12,7 +12,8 @@ module.exports =
 				language: "en"
 			timeout: 1000 * 20
 		request.post opts, (err, response, body)->
-			console.log body?.misspellings?[0]?.suggestions.length
+			if err?
+				return res.sendStatus 500
 			numberOfSuggestions = body?.misspellings?[0]?.suggestions?.length
 			if numberOfSuggestions > 10
 				logger.log "health check passed"
