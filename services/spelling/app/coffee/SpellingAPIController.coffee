@@ -10,8 +10,7 @@ module.exports = SpellingAPIController =
 			if error?
 				logger.err err:error, user_id:req?.params?.user_id, word_count: req?.body?.words?.length, "error processing spelling request"
 				return res.sendStatus(500)
-			# res.send(result)
-			res.writeHead 200
+			res.send(result)
 
 	learn: (req, res, next) ->
 		metrics.inc "spelling-learn", 0.1
