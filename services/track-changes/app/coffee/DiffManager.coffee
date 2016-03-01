@@ -14,7 +14,6 @@ module.exports = DiffManager =
 				callback(null, content, version, updates)
 	
 	getDiff: (project_id, doc_id, fromVersion, toVersion, callback = (error, diff) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, from: fromVersion, to: toVersion, "getting diff"
 		DiffManager.getDocumentBeforeVersion project_id, doc_id, fromVersion, (error, startingContent, updates) ->
 			if error?
 				if error.message == "broken-history"

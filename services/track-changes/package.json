@@ -23,7 +23,8 @@
     "underscore": "~1.7.0",
     "mongo-uri": "^0.1.2",
     "s3-streams": "^0.3.0",
-    "JSONStream": "^1.0.4"
+    "JSONStream": "^1.0.4",
+    "heap": "^0.2.6"
   },
   "devDependencies": {
     "chai": "~1.9.0",

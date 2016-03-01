@@ -3,7 +3,6 @@ DiffManager = require "./DiffManager"
 PackManager = require "./PackManager"
 RestoreManager = require "./RestoreManager"
 logger = require "logger-sharelatex"
-DocArchiveManager = require "./DocArchiveManager"
 HealthChecker = require "./HealthChecker"
 _ = require "underscore"
 
@@ -20,23 +19,6 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "compressing project history"
 		UpdatesManager.processUncompressedUpdatesForProject project_id, (error) ->
-			return next(error) if error?
-			res.send 204
-
-	listDocs: (req, res, next = (error) ->) ->
-		logger.log "listing packing doc history"
-		limit = +req.query?.limit || 100
-		doc_id = req.query?.doc_id if req.query?.doc_id?.match(/^[0-9a-f]{24}$/)
-		PackManager.listDocs {limit, doc_id},  (error, doc_ids) ->
-			return next(error) if error?
-			ids = (doc.doc_id.toString() for doc in doc_ids)
-			output = _.uniq(ids).join("\n") + "\n"
-			res.send output
-
-	packDoc: (req, res, next = (error) ->) ->
-		doc_id = req.params.doc_id
-		logger.log doc_id: doc_id, "packing doc history"
-		PackManager.packDocHistory doc_id, (error) ->
 			return next(error) if error?
 			res.send 204
 
@@ -68,7 +50,7 @@ module.exports = HttpController =
 		else
 			to = null
 
-		logger.log project_id, doc_id: doc_id, from: from, to: to, "getting diff"
+		logger.log {project_id, doc_id, from, to}, "getting diff"
 		DiffManager.getDiff project_id, doc_id, from, to, (error, diff) ->
 			return next(error) if error?
 			res.send JSON.stringify(diff: diff)
@@ -92,20 +74,6 @@ module.exports = HttpController =
 		user_id = req.headers["x-user-id"]
 		version = parseInt(version, 10)
 		RestoreManager.restoreToBeforeVersion project_id, doc_id, version, user_id, (error) ->
-			return next(error) if error?
-			res.send 204
-
-	archiveProject: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		logger.log project_id: project_id, "archiving all track changes to s3"
-		DocArchiveManager.archiveAllDocsChanges project_id, (error) ->
-			return next(error) if error?
-			res.send 204
-
-	unArchiveProject: (req, res, next = (error) ->) ->
-		project_id = req.params.project_id
-		logger.log project_id: project_id, "unarchiving all track changes from s3"
-		DocArchiveManager.unArchiveAllDocsChanges project_id, (error) ->
 			return next(error) if error?
 			res.send 204
 

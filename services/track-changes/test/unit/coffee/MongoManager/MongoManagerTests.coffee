@@ -13,10 +13,7 @@ describe "MongoManager", ->
 		tk.freeze(new Date())
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
-			"./PackManager" : SandboxedModule.require packModulePath, requires:
-				"./LockManager" : {}
-				"./mongojs": {db: bson: BSON = sinon.stub(), ObjectId}
-				"logger-sharelatex": {}
+			"./PackManager" : @PackManager = {}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
@@ -29,6 +26,7 @@ describe "MongoManager", ->
 			@update = "mock-update"
 			@db.docHistory = {}
 			@db.docHistory.find = sinon.stub().returns @db.docHistory
+			@db.docHistory.findOne = sinon.stub().returns @db.docHistory
 			@db.docHistory.sort = sinon.stub().returns @db.docHistory
 			@db.docHistory.limit = sinon.stub().returns @db.docHistory
 			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, [@update])
@@ -57,8 +55,7 @@ describe "MongoManager", ->
 	describe "peekLastCompressedUpdate", ->
 		describe "when there is no last update", ->
 			beforeEach ->
-				@db.docHistoryStats = {}
-				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, null)
+				@PackManager.getLastPackFromIndex =  sinon.stub().callsArgWith(1, null, null)
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
@@ -86,9 +83,8 @@ describe "MongoManager", ->
 
 		describe "when there is a last update in S3", ->
 			beforeEach ->
-				@update = { _id: Object(), v: 12345}
-				@db.docHistoryStats = {}
-				@db.docHistoryStats.findOne = sinon.stub().callsArgWith(2, null, {inS3:true, lastVersion: @update.v})
+				@update = { _id: Object(), v: 12345, v_end: 12345, inS3:true}
+				@PackManager.getLastPackFromIndex =  sinon.stub().callsArgWith(1, null, @update)
 				@MongoManager.getLastCompressedUpdate = sinon.stub().callsArgWith(1, null)
 				@MongoManager.peekLastCompressedUpdate @doc_id, @callback
 
@@ -98,246 +94,186 @@ describe "MongoManager", ->
 					.should.equal true
 
 			it "should call the callback with a null update and the correct version", ->
-				@callback.calledWith(null, null, @update.v).should.equal true
+				@callback.calledWith(null, null, @update.v_end).should.equal true
 
 
-	describe "insertCompressedUpdate", ->
-		beforeEach ->
-			@update = { op: "op", meta: "meta", v: "v"}
-			@db.docHistory =
-				insert: sinon.stub().callsArg(1)
+	# describe "getDocUpdates", ->
+	# 	beforeEach ->
+	# 		@results = [
+	# 			{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+	# 			{pack: [ {foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+	# 				{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+	# 				{foo: "mock-update", v: 52, doc_id: 100, project_id: 1} ]
+	# 				, v: 52, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 42, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 41, doc_id: 100, project_id: 1}
+	# 		]
+	# 		@updates_between = [
+	# 			{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
+	# 		]
+	# 		@updates_after = [
+	# 			{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
+	# 		]
+	# 		@db.docHistory = {}
+	# 		@db.docHistory.find = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.sort = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.limit = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
 
-		describe "temporarly", ->
-			beforeEach ->
-				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, true, @callback
+	# 		@from = 42
+	# 		@to   = 55
 
-			it "should insert the update with a expiresAt field one week away", ->
-				@db.docHistory.insert
-					.calledWith({
-						project_id: ObjectId(@project_id),
-						doc_id: ObjectId(@doc_id),
-						op: @update.op,
-						meta: @update.meta,
-						v: @update.v
-						expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-					})
-					.should.equal true
+	# 	describe "with a to version", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getDocUpdates @doc_id, from: @from, to: @to, @callback
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+	# 		it "should find the all updates between the to and from versions", ->
+	# 			@db.docHistory.find
+	# 				.calledWith({
+	# 					doc_id: ObjectId(@doc_id)
+	# 					v: { $gte: @from, $lte: @to }
+	# 				})
+	# 				.should.equal true
 
-		describe "permanenty", ->
-			beforeEach ->
-				@MongoManager.insertCompressedUpdate @project_id, @doc_id, @update, false, @callback
+	# 		it "should sort in descending version order", ->
+	# 			@db.docHistory.sort
+	# 				.calledWith("v": -1)
+	# 				.should.equal true
 
-			it "should insert the update with no expiresAt field", ->
-				@db.docHistory.insert
-					.calledWith({
-						project_id: ObjectId(@project_id),
-						doc_id: ObjectId(@doc_id),
-						op: @update.op,
-						meta: @update.meta,
-						v: @update.v
-					})
-					.should.equal true
+	# 		#it "should not limit the results", ->
+	# 		#	@db.docHistory.limit
+	# 		#		.called.should.equal false
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+	# 		it "should call the call back with the results", ->
+	# 			@callback.calledWith(null, @updates_between).should.equal true
 
-	describe "insertCompressedUpdates", ->
-		beforeEach (done) ->
-			@updates = [ "mock-update-1", "mock-update-2" ]
-			@MongoManager.insertCompressedUpdate = sinon.stub().callsArg(4)
-			@MongoManager.insertCompressedUpdates @project_id, @doc_id, @updates, @temporary = true, (args...) =>
-				@callback(args...)
-				done()
+	# 	describe "without a to version", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getDocUpdates @doc_id, from: @from, @callback
 
-		it "should insert each update", ->
-			for update in @updates
-				@MongoManager.insertCompressedUpdate
-					.calledWith(@project_id, @doc_id, update, @temporary)
-					.should.equal true
+	# 		it "should find the all updates after the from version", ->
+	# 			@db.docHistory.find
+	# 				.calledWith({
+	# 					doc_id: ObjectId(@doc_id)
+	# 					v: { $gte: @from }
+	# 				})
+	# 				.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	# 		it "should call the call back with the updates", ->
+	# 			@callback.calledWith(null, @updates_after).should.equal true
 
-	describe "getDocUpdates", ->
-		beforeEach ->
-			@results = [
-				{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
-				{pack: [ {foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
-					{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
-					{foo: "mock-update", v: 52, doc_id: 100, project_id: 1} ]
-					, v: 52, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 41, doc_id: 100, project_id: 1}
-			]
-			@updates_between = [
-				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
-			]
-			@updates_after = [
-				{foo: "mock-update", v: 56, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 55, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 54, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 53, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 52, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 42, doc_id: 100, project_id: 1}
-			]
-			@db.docHistory = {}
-			@db.docHistory.find = sinon.stub().returns @db.docHistory
-			@db.docHistory.sort = sinon.stub().returns @db.docHistory
-			@db.docHistory.limit = sinon.stub().returns @db.docHistory
-			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
+	# 	describe "with a limit", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getDocUpdates @doc_id, from: @from, limit: @limit = 10, @callback
 
-			@from = 42
-			@to   = 55
-
-		describe "with a to version", ->
-			beforeEach ->
-				@MongoManager.getDocUpdates @doc_id, from: @from, to: @to, @callback
-
-			it "should find the all updates between the to and from versions", ->
-				@db.docHistory.find
-					.calledWith({
-						doc_id: ObjectId(@doc_id)
-						v: { $gte: @from, $lte: @to }
-					})
-					.should.equal true
-
-			it "should sort in descending version order", ->
-				@db.docHistory.sort
-					.calledWith("v": -1)
-					.should.equal true
-
-			#it "should not limit the results", ->
-			#	@db.docHistory.limit
-			#		.called.should.equal false
-
-			it "should call the call back with the results", ->
-				@callback.calledWith(null, @updates_between).should.equal true
-
-		describe "without a to version", ->
-			beforeEach ->
-				@MongoManager.getDocUpdates @doc_id, from: @from, @callback
-
-			it "should find the all updates after the from version", ->
-				@db.docHistory.find
-					.calledWith({
-						doc_id: ObjectId(@doc_id)
-						v: { $gte: @from }
-					})
-					.should.equal true
-
-			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates_after).should.equal true
-
-		describe "with a limit", ->
-			beforeEach ->
-				@MongoManager.getDocUpdates @doc_id, from: @from, limit: @limit = 10, @callback
-
-			it "should limit the results", ->
-				@db.docHistory.limit
-					.calledWith(@limit)
-					.should.equal true
+	# 		it "should limit the results", ->
+	# 			@db.docHistory.limit
+	# 				.calledWith(@limit)
+	# 				.should.equal true
 
 
-	describe "getDocUpdates", ->
-		beforeEach ->
-			@results = [
-				{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
-				{pack: [
-					{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
-					{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
-					{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1}	]
-					, v: 52, meta: {end_ts: 100}, doc_id: 300, project_id: 1},
-				{pack: [
-					{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
-					{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
-					{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1}	]
-					, v: 52, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
-				{foo: "mock-update", v: 42, meta:{end_ts: 90}, doc_id: 100, project_id: 1}
-			]
-			@updates_before = [
-				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
-				{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1},
-			]
-			@updates_all = [
-				{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
-				{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
-				{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
-				{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
-				{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
-				{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1}
-			]
+	# describe "getDocUpdates", ->
+	# 	beforeEach ->
+	# 		@results = [
+	# 			{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+	# 			{pack: [
+	# 				{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+	# 				{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+	# 				{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1}	]
+	# 				, v: 52, meta: {end_ts: 100}, doc_id: 300, project_id: 1},
+	# 			{pack: [
+	# 				{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+	# 				{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
+	# 				{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1}	]
+	# 				, v: 52, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+	# 			{foo: "mock-update", v: 42, meta:{end_ts: 90}, doc_id: 100, project_id: 1}
+	# 		]
+	# 		@updates_before = [
+	# 			{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
+	# 			{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1},
+	# 		]
+	# 		@updates_all = [
+	# 			{foo: "mock-update", v: 56, meta: {end_ts: 110}, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 54, meta: {end_ts: 103}, doc_id: 200, project_id: 1},
+	# 			{foo: "mock-update", v: 53, meta: {end_ts: 101}, doc_id: 200, project_id: 1},
+	# 			{foo: "mock-update", v: 55, meta: {end_ts: 100}, doc_id: 100, project_id: 1},
+	# 			{foo: "mock-update", v: 52, meta: {end_ts: 99}, doc_id: 200, project_id: 1},
+	# 			{foo: "mock-update", v: 54, meta: {end_ts: 99}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 53, meta: {end_ts: 98}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 52, meta: {end_ts: 97}, doc_id: 300, project_id: 1},
+	# 			{foo: "mock-update", v: 42, meta: {end_ts: 90}, doc_id: 100, project_id: 1}
+	# 		]
 
 
-			@db.docHistory = {}
-			@db.docHistory.find = sinon.stub().returns @db.docHistory
-			@db.docHistory.sort = sinon.stub().returns @db.docHistory
-			@db.docHistory.limit = sinon.stub().returns @db.docHistory
-			@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
+	# 		@db.docHistory = {}
+	# 		@db.docHistory.find = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.sort = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.limit = sinon.stub().returns @db.docHistory
+	# 		@db.docHistory.toArray = sinon.stub().callsArgWith(0, null, @results)
 
-			@before = 101
+	# 		@before = 101
 
-		describe "with a before timestamp", ->
-			beforeEach ->
-				@MongoManager.getProjectUpdates @project_id, before: @before, @callback
+	# 	describe "with a before timestamp", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getProjectUpdates @project_id, before: @before, @callback
 
-			it "should find the all updates before the timestamp", ->
-				@db.docHistory.find
-					.calledWith({
-						project_id: ObjectId(@project_id)
-						"meta.end_ts": { $lt: @before }
-					})
-					.should.equal true
+	# 		it "should find the all updates before the timestamp", ->
+	# 			@db.docHistory.find
+	# 				.calledWith({
+	# 					project_id: ObjectId(@project_id)
+	# 					"meta.end_ts": { $lt: @before }
+	# 				})
+	# 				.should.equal true
 
-			it "should sort in descending version order", ->
-				@db.docHistory.sort
-					.calledWith("meta.end_ts": -1)
-					.should.equal true
+	# 		it "should sort in descending version order", ->
+	# 			@db.docHistory.sort
+	# 				.calledWith("meta.end_ts": -1)
+	# 				.should.equal true
 
-			it "should not limit the results", ->
-				@db.docHistory.limit
-					.called.should.equal false
+	# 		it "should not limit the results", ->
+	# 			@db.docHistory.limit
+	# 				.called.should.equal false
 
-			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates_before).should.equal true
+	# 		it "should call the call back with the updates", ->
+	# 			@callback.calledWith(null, @updates_before).should.equal true
 
-		describe "without a before timestamp", ->
-			beforeEach ->
-				@MongoManager.getProjectUpdates @project_id, {}, @callback
+	# 	describe "without a before timestamp", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getProjectUpdates @project_id, {}, @callback
 
-			it "should find the all updates", ->
-				@db.docHistory.find
-					.calledWith({
-						project_id: ObjectId(@project_id)
-					})
-					.should.equal true
+	# 		it "should find the all updates", ->
+	# 			@db.docHistory.find
+	# 				.calledWith({
+	# 					project_id: ObjectId(@project_id)
+	# 				})
+	# 				.should.equal true
 
-			it "should call the call back with the updates", ->
-				@callback.calledWith(null, @updates_all).should.equal true
+	# 		it "should call the call back with the updates", ->
+	# 			@callback.calledWith(null, @updates_all).should.equal true
 
-		describe "with a limit", ->
-			beforeEach ->
-				@MongoManager.getProjectUpdates @project_id, before: @before, limit: @limit = 10, @callback
+	# 	describe "with a limit", ->
+	# 		beforeEach ->
+	# 			@MongoManager.getProjectUpdates @project_id, before: @before, limit: @limit = 10, @callback
 
-			it "should limit the results", ->
-				@db.docHistory.limit
-					.calledWith(@limit)
-					.should.equal true
+	# 		it "should limit the results", ->
+	# 			@db.docHistory.limit
+	# 				.calledWith(@limit)
+	# 				.should.equal true
 
 	describe "backportProjectId", ->
 		beforeEach ->
@@ -396,83 +332,83 @@ describe "MongoManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	describe "getDocChangesCount", ->
-		beforeEach ->
-			@db.docHistory =
-				count: sinon.stub().callsArg(1)
-			@MongoManager.getDocChangesCount @doc_id, @callback
+	# describe "getDocChangesCount", ->
+	# 	beforeEach ->
+	# 		@db.docHistory =
+	# 			count: sinon.stub().callsArg(1)
+	# 		@MongoManager.getDocChangesCount @doc_id, @callback
 
-		it "should return if there is any doc changes", ->
-			@db.docHistory.count
-				.calledWith({
-					doc_id: ObjectId(@doc_id)
-				})
-				.should.equal true
+	# 	it "should return if there is any doc changes", ->
+	# 		@db.docHistory.count
+	# 			.calledWith({
+	# 				doc_id: ObjectId(@doc_id)
+	# 			})
+	# 			.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	# 	it "should call the callback", ->
+	# 		@callback.called.should.equal true
 
-	describe "getArchivedDocStatus", ->
-		beforeEach ->
-			@db.docHistoryStats =
-				findOne: sinon.stub().callsArg(2)
-			@MongoManager.getArchivedDocStatus @doc_id, @callback
+	# describe "getArchivedDocStatus", ->
+	# 	beforeEach ->
+	# 		@db.docHistoryStats =
+	# 			findOne: sinon.stub().callsArg(2)
+	# 		@MongoManager.getArchivedDocStatus @doc_id, @callback
 
-		it "should return if there is any archived doc changes", ->
-			@db.docHistoryStats.findOne
-				.calledWith({
-					doc_id: ObjectId(@doc_id)
-					inS3: {$exists: true}
-				})
-				.should.equal true
+	# 	it "should return if there is any archived doc changes", ->
+	# 		@db.docHistoryStats.findOne
+	# 			.calledWith({
+	# 				doc_id: ObjectId(@doc_id)
+	# 				inS3: {$exists: true}
+	# 			})
+	# 			.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	# 	it "should call the callback", ->
+	# 		@callback.called.should.equal true
 
-	describe "markDocHistoryAsArchived", ->
-		beforeEach ->
-			@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
-			@db.docHistoryStats =
-				update: sinon.stub().callsArg(3)
-			@db.docHistory =
-				remove: sinon.stub().callsArg(1)
-			@MongoManager.markDocHistoryAsArchived @doc_id, @update.v, @callback
+	# describe "markDocHistoryAsArchived", ->
+	# 	beforeEach ->
+	# 		@update = { _id: ObjectId(), op: "op", meta: "meta", v: "v"}
+	# 		@db.docHistoryStats =
+	# 			update: sinon.stub().callsArg(3)
+	# 		@db.docHistory =
+	# 			remove: sinon.stub().callsArg(1)
+	# 		@MongoManager.markDocHistoryAsArchived @doc_id, @update.v, @callback
 
-		it "should update doc status with inS3 flag", ->
-			@db.docHistoryStats.update
-				.calledWith({
-					doc_id: ObjectId(@doc_id)
-				},{
-					$set : { inS3 : true }
-				})
-				.should.equal true
+	# 	it "should update doc status with inS3 flag", ->
+	# 		@db.docHistoryStats.update
+	# 			.calledWith({
+	# 				doc_id: ObjectId(@doc_id)
+	# 			},{
+	# 				$set : { inS3 : true }
+	# 			})
+	# 			.should.equal true
 
-		it "should remove any other doc changes before last update", ->
-			@db.docHistory.remove
-				.calledWith({
-					doc_id: ObjectId(@doc_id)
-					v: { $lte : @update.v }
-					expiresAt: {$exists : false}
-				})
-				.should.equal true
+	# 	it "should remove any other doc changes before last update", ->
+	# 		@db.docHistory.remove
+	# 			.calledWith({
+	# 				doc_id: ObjectId(@doc_id)
+	# 				v: { $lte : @update.v }
+	# 				expiresAt: {$exists : false}
+	# 			})
+	# 			.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	# 	it "should call the callback", ->
+	# 		@callback.called.should.equal true
 
-	describe "markDocHistoryAsUnarchived", ->
-		beforeEach ->
-			@db.docHistoryStats =
-				update: sinon.stub().callsArg(2)
-			@MongoManager.markDocHistoryAsUnarchived @doc_id, @callback
+	# describe "markDocHistoryAsUnarchived", ->
+	# 	beforeEach ->
+	# 		@db.docHistoryStats =
+	# 			update: sinon.stub().callsArg(2)
+	# 		@MongoManager.markDocHistoryAsUnarchived @doc_id, @callback
 
-		it "should remove any doc changes inS3 flag", ->
-			@db.docHistoryStats.update
-				.calledWith({
-					doc_id: ObjectId(@doc_id)
-				},{
-					$unset : { inS3 : true, lastVersion: true }
-				})
-				.should.equal true
+	# 	it "should remove any doc changes inS3 flag", ->
+	# 		@db.docHistoryStats.update
+	# 			.calledWith({
+	# 				doc_id: ObjectId(@doc_id)
+	# 			},{
+	# 				$unset : { inS3 : true, lastVersion: true }
+	# 			})
+	# 			.should.equal true
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	# 	it "should call the callback", ->
+	# 		@callback.called.should.equal true
