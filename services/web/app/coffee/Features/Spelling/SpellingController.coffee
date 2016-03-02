@@ -12,5 +12,5 @@ module.exports = SpellingController =
 		request(url: Settings.apis.spelling.url + url, method: req.method, headers: req.headers, json: req.body, timeout:TEN_SECONDS)
 		.on "error", (error) ->
 			logger.error err: error, "Spelling API error"
-			res.sendStatus 500
+			res.end()
 		.pipe(res)

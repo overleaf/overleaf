@@ -16,6 +16,7 @@ define [
 				_csrf : window.csrfToken
 
 		$scope.showForm = ->
+			GrooveWidget.toggle()
 			$scope.formVisable = true
 
 		$scope.getPercentComplete = ->

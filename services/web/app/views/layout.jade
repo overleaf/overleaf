@@ -7,6 +7,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			// Stop superfish from loading
 			window.similarproducts = true
 		style [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak  {display: none !important; display: none; }
+		style #groove-button { display:none;}
 
 		-if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
@@ -24,6 +25,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
 				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
 
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
 		
@@ -60,8 +62,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 				sixpackDomain: '#{settings.sixpack.domain}'
 			};
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
-			window.ab = {}
-			window.user_id = '#{getLoggedInUserId()}'
+			window.ab = {};
+			window.user_id = '#{getLoggedInUserId()}';
+
+		script.
+			(function() {var s=document.createElement('script'); s.type='text/javascript';s.async=true; s.src=('https:'==document.location.protocol?'https':'http') + '://sharelatex-accounts.groovehq.com/widgets/f5ad3b09-7d99-431b-8af5-c5725e3760ce/ticket.js'; var q = document.getElementsByTagName('script')[0];q.parentNode.insertBefore(s, q);})();
+
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
@@ -118,21 +124,20 @@ html(itemscope, itemtype='http://schema.org/Product')
 					"paths" : {
 						"moment": "libs/moment-2.7.0"
 					}
-				};	
+				};
 			script(
 				data-main=jsPath+'main.js',
 				baseurl=jsPath,
 				src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 			)
 
-		- if (typeof(tenderUrl) != "undefined")
-			script(src="https://#{tenderUrl}/tender_widget.js" )
-			script(type="text/javascript").
-				Tender = {
-					hideToggle: true,
-					widgetToggles: $(".js-tender-widget"),
-					category: "questions"
-				};
+
+			script.
+				var toggleGroove = function(){
+					var e = arguments[0]||window.event;
+					e.stopPropagation();
+					GrooveWidget.toggle()
+				}
 
 
 
