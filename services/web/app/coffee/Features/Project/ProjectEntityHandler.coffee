@@ -124,12 +124,13 @@ module.exports = ProjectEntityHandler =
 						return callback(err) if err?
 						tpdsUpdateSender.addDoc {
 							project_id:   project?._id,
-							doc_id:		  doc?._id	
+							doc_id:		  doc?._id
 							path:         result?.path?.fileSystem,
 							project_name: project.name,
 							rev:          0
 						}, (err) ->
-							return callback(err) if err?
+							if err?
+								logger.err err:err, "error adding doc to tpdsworker, contining anyway"
 							callback(null, doc, folder_id)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->

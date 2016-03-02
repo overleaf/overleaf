@@ -7,6 +7,8 @@ DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require("./ProjectGetter")
 _ = require('underscore')
 async = require('async')
+logger = require("logger-sharelatex")
+
 
 module.exports =
 	duplicate: (owner, originalProjectId, newProjectName, callback)->
@@ -29,13 +31,15 @@ module.exports =
 
 							setRootDoc = _.once (doc_id)->
 								projectEntityHandler.setRootDoc newProject, doc_id
-
 							copyDocs = (originalFolder, newParentFolder, callback)->
 								jobs = originalFolder.docs.map (doc)->
 									return (callback)->
 										content = docContents[doc._id.toString()]
 										return callback(new Error("doc_id not found: #{doc._id}")) if !content?
 										projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
+											if err?
+												logger.err err:err, originalProjectId:originalProjectId, newProjectName:newProjectName, "error adding doc"
+												return callback(err)
 											if originalRootDoc? and newDoc.name == originalRootDoc.name
 												setRootDoc newDoc._id
 											callback()
@@ -59,6 +63,8 @@ module.exports =
 
 								async.series jobs, callback
 
-							copyFolder originalProject.rootFolder[0], newProject.rootFolder[0], ->
+							copyFolder originalProject.rootFolder[0], newProject.rootFolder[0], (err)->
+								if err?
+									logger.err err:err, originalProjectId:originalProjectId,  newProjectName:newProjectName, "error cloning project"
 								callback(err, newProject)
 
