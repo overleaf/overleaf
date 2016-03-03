@@ -60,12 +60,6 @@ ProjectSchema.statics.findPopulatedById = (project_id, callback)->
 					logger.log project_id:project_id, "finished findPopulatedById"
 					callback(null, projects[0])
 
-ProjectSchema.statics.findAllUsersProjects = (user_id, requiredFields, callback)->
-	this.find {owner_ref:user_id}, requiredFields, (err, projects)=>
-		this.find {collaberator_refs:user_id}, requiredFields, (err, collabertions)=>
-			this.find {readOnly_refs:user_id}, requiredFields, (err, readOnlyProjects)=>
-				callback(err, projects, collabertions, readOnlyProjects)
-
 sanitizeTypeOfElement = (elementType)->
 	lastChar = elementType.slice -1
 	if lastChar != "s"

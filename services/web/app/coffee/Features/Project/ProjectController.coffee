@@ -17,6 +17,7 @@ SecurityManager = require("../../managers/SecurityManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
+ProjectGetter = require("./ProjectGetter")
 
 module.exports = ProjectController =
 
@@ -129,7 +130,7 @@ module.exports = ProjectController =
 			notifications: (cb)->
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
 			user: (cb) ->

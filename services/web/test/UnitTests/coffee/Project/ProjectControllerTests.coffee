@@ -36,7 +36,6 @@ describe "ProjectController", ->
 		@NotificationsHandler =
 			getUserNotifications: sinon.stub()
 		@ProjectModel =
-			findAllUsersProjects: sinon.stub()
 			findPopulatedById: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
@@ -50,6 +49,8 @@ describe "ProjectController", ->
 			markAsOpened: sinon.stub()
 		@ReferencesSearchHandler =
 			indexProjectReferences: sinon.stub()
+		@ProjectGetter =
+			findAllUsersProjects: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -69,6 +70,7 @@ describe "ProjectController", ->
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
+			"./ProjectGetter": @ProjectGetter
 
 		@user = 
 			_id:"!£123213kjljkl"
@@ -220,7 +222,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
-			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>

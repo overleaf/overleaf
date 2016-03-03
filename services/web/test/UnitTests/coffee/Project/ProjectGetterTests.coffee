@@ -16,6 +16,8 @@ describe "ProjectGetter", ->
 					projects: {}
 					users: {}
 				ObjectId: ObjectId
+			"../../models/Project": Project: @Project = {}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 
 	describe "getProjectWithoutDocLines", ->
 		beforeEach ->
@@ -111,4 +113,17 @@ describe "ProjectGetter", ->
 
 		it "should call the callback", ->
 			assert.deepEqual @callback.args[0][1], @project
-					
+			
+	describe "findAllUsersProjects", ->
+		beforeEach ->
+			@fields = {"mock": "fields"}
+			@Project.find = sinon.stub()
+			@Project.find.withArgs({owner_ref: @user_id}, @fields).yields(null, ["mock-owned-projects"])
+			@CollaboratorsHandler.getProjectsUserIsMemberOf = sinon.stub()
+			@CollaboratorsHandler.getProjectsUserIsMemberOf.withArgs(@user_id, @fields).yields(null, ["mock-rw-projects"], ["mock-ro-projects"])
+			@ProjectGetter.findAllUsersProjects @user_id, @fields, @callback
+		
+		it "should call the callback with all the projects", ->
+			@callback
+				.calledWith(null, ["mock-owned-projects"], ["mock-rw-projects"], ["mock-ro-projects"])
+				.should.equal true
