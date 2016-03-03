@@ -15,6 +15,7 @@ module.exports =
 			(cb)->
 				request.get {url:"http://localhost:#{port}/check_lock", timeout:3000}, (err, res, body) ->
 					if err?
+						logger.err err:err, project_id:project_id, "error checking lock for health check"
 						cb(err)
 					else if res?.statusCode != 200
 						cb("status code not 200, it's #{res.statusCode}")
@@ -23,6 +24,7 @@ module.exports =
 			(cb)->
 				request.post {url:"#{url}/flush", timeout:3000}, (err, res, body) ->
 					if err?
+						logger.err err:err, project_id:project_id, "error flushing for health check"
 						cb(err)
 					else if res?.statusCode != 204
 						cb("status code not 204, it's #{res.statusCode}")
@@ -31,6 +33,7 @@ module.exports =
 			(cb)->
 				request.get {url:"#{url}/updates", timeout:3000}, (err, res, body)->
 					if err?
+						logger.err err:err, project_id:project_id, "error getting updates for health check"
 						cb(err)
 					else if res?.statusCode != 200
 						cb("status code not 200, it's #{res.statusCode}")
