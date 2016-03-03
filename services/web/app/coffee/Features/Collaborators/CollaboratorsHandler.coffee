@@ -6,8 +6,48 @@ logger = require('logger-sharelatex')
 UserGetter = require "../User/UserGetter"
 ContactManager = require "../Contacts/ContactManager"
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
+async = require "async"
 
 module.exports = CollaboratorsHandler =
+	getMemberIdsWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
+		Project.findOne { _id: project_id }, { collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
+			return callback(error) if error?
+			return callback null, null if !project?
+			members = []
+			for member_id in project.readOnly_refs or []
+				members.push { id: member_id, privilegeLevel: "readOnly" }
+			for member_id in project.collaberator_refs or []
+				members.push { id: member_id, privilegeLevel: "readAndWrite" }
+			return callback null, members
+	
+	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			async.mapLimit (members or []), 3,
+				(member, cb) ->
+					UserGetter.getUser member.id, (error, user) ->
+						return cb(error) if error?
+						return cb(null, { user: user, privilegeLevel: member.privilegeLevel })
+				callback 
+	
+	getMemberCount: (project_id, callback = (error, count) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			return callback null, (members or []).length
+
+	isUserMemberOfProject: (user_id, project_id, callback = (error, isMember, privilegeLevel) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			for member in members or []
+				if member.id.toString() == user_id.toString()
+					return callback null, true, member.privilegeLevel
+			return callback null, false, null
+			
+	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
+		Project.find {collaberator_refs:user_id}, fields, (err, readAndWriteProjects)=>
+			Project.find {readOnly_refs:user_id}, fields, (err, readOnlyProjects)=>
+				callback(err, readAndWriteProjects, readOnlyProjects)
+		
 	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
 		logger.log user_id: user_id, project_id: project_id, "removing user"
 		conditions = _id:project_id
