@@ -133,38 +133,3 @@ describe "HttpController", ->
 		it "should return a success code", ->
 			@res.send.calledWith(204).should.equal true
 
-	# describe "archiveProject", ->
-	# 	beforeEach ->
-	# 		@req =
-	# 			params:
-	# 				project_id: @project_id
-	# 		@res =
-	# 			send: sinon.stub()
-	# 		@DocArchiveManager.archiveAllDocsChanges = sinon.stub().callsArg(1)
-	# 		@HttpController.archiveProject @req, @res, @next
-
-	# 	it "should process archive doc changes", ->
-	# 		@DocArchiveManager.archiveAllDocsChanges
-	# 			.calledWith(@project_id)
-	# 			.should.equal true
-
-	# 	it "should return a success code", ->
-	# 		@res.send.calledWith(204).should.equal true
-
-	# describe "unArchiveProject", ->
-	# 	beforeEach ->
-	# 		@req =
-	# 			params:
-	# 				project_id: @project_id
-	# 		@res =
-	# 			send: sinon.stub()
-	# 		@DocArchiveManager.unArchiveAllDocsChanges = sinon.stub().callsArg(1)
-	# 		@HttpController.unArchiveProject @req, @res, @next
-
-	# 	it "should process unarchive doc changes", ->
-	# 		@DocArchiveManager.unArchiveAllDocsChanges
-	# 			.calledWith(@project_id)
-	# 			.should.equal true
-
-	# 	it "should return a success code", ->
-	# 		@res.send.calledWith(204).should.equal true
