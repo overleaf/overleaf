@@ -39,6 +39,7 @@
     "bunyan": "~0.22.1",
     "grunt-bunyan": "~0.5.0",
     "grunt-forever": "~0.4.2",
-    "timekeeper": "0.0.4"
+    "timekeeper": "0.0.4",
+    "memorystream": "0.3.1"
   }
 }
