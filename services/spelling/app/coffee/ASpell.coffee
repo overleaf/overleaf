@@ -2,8 +2,29 @@ async = require "async"
 ASpellWorkerPool = require "./ASpellWorkerPool"
 LRU = require "lru-cache"
 logger = require 'logger-sharelatex'
+fs = require 'fs'
 
 cache = LRU(10000)
+OneMinute = 60 * 1000
+
+# load any existing cache
+try
+	oldCache = fs.readFileSync "spell.cache"
+	cache.load JSON.parse(oldCache)
+catch err
+	logger.log {err}, "could not load cache file"
+
+# write the cache every 30 minutes
+setInterval () ->
+	dump = JSON.stringify cache.dump()
+	fs.writeFile "spell.cache.tmp", dump, (err) ->
+		if err?
+			logger.log {err}, "error writing cache file"
+			fs.unlink "spell.cache.tmp"
+		else
+			fs.rename "spell.cache.tmp", "spell.cache"
+			logger.log {len: dump.length}, "wrote cache file"
+, 30 * OneMinute
 
 class ASpellRunner
 	checkWords: (language, words, callback = (error, result) ->) ->
