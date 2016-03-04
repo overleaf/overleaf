@@ -85,7 +85,7 @@ module.exports = MongoAWS =
 		outputStream = inputStream.pipe gunzip
 		parts = []
 		outputStream.on 'error', (err) ->
-				return callback(err)
+			return callback(err)
 		outputStream.on 'end', () ->
 			logger.log {project_id, doc_id, pack_id}, "download from s3 completed"
 			try
