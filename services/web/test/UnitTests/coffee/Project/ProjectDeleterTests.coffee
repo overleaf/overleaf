@@ -31,6 +31,7 @@ describe 'ProjectDeleter', ->
 			'../DocumentUpdater/DocumentUpdaterHandler': @documentUpdaterHandler
 			"../Tags/TagsHandler":@TagsHandler
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			'logger-sharelatex':
 				log:->
 
@@ -89,6 +90,8 @@ describe 'ProjectDeleter', ->
 
 	describe "archiveProject", ->
 		beforeEach ->
+			@CollaboratorsHandler.getMemberIds = sinon.stub()
+			@CollaboratorsHandler.getMemberIds.withArgs(@project_id).yields(null, ["member-id-1", "member-id-2"])
 			@Project.update.callsArgWith(2)
 
 		it "should flushProjectToMongoAndDelete in doc updater", (done)->
@@ -107,12 +110,8 @@ describe 'ProjectDeleter', ->
 
 		it "should removeProjectFromAllTags", (done)->
 			@deleter.archiveProject @project_id, =>
-				@TagsHandler.removeProjectFromAllTags.calledWith(@project.owner_ref, @project_id).should.equal true
-				@TagsHandler.removeProjectFromAllTags.calledWith(@project.collaberator_refs[0], @project_id).should.equal true
-				@TagsHandler.removeProjectFromAllTags.calledWith(@project.collaberator_refs[1], @project_id).should.equal true
-				@TagsHandler.removeProjectFromAllTags.calledWith(@project.readOnly_refs[0], @project_id).should.equal true
-				@TagsHandler.removeProjectFromAllTags.calledWith(@project.readOnly_refs[1], @project_id).should.equal true
-
+				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-1", @project_id).should.equal true
+				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-2", @project_id).should.equal true
 				done()
 
 	describe "restoreProject", ->

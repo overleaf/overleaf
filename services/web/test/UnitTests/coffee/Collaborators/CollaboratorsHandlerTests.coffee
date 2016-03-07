@@ -44,6 +44,19 @@ describe "CollaboratorsHandler", ->
 				])
 				.should.equal true
 	
+	describe "getMemberIds", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels
+				.withArgs(@project_id)
+				.yields(null, [{id: "member-id-1"}, {id: "member-id-2"}])
+			@CollaboratorHandler.getMemberIds @project_id, @callback
+
+		it "should return the ids", ->
+			@callback
+				.calledWith(null, ["member-id-1", "member-id-2"])
+				.should.equal true
+	
 	describe "getMembersWithPrivilegeLevels", ->
 		beforeEach ->
 			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()

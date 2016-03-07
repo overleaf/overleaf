@@ -21,6 +21,11 @@ module.exports = CollaboratorsHandler =
 				members.push { id: member_id, privilegeLevel: "readAndWrite" }
 			return callback null, members
 	
+	getMemberIds: (project_id, callback = (error, member_ids) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			return callback null, members.map (m) -> m.id
+	
 	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
 			return callback(error) if error?

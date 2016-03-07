@@ -4,6 +4,7 @@ documentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 tagsHandler = require("../Tags/TagsHandler")
 async = require("async")
 FileStoreHandler = require("../FileStore/FileStoreHandler")
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 
 module.exports = ProjectDeleter =
 
@@ -43,16 +44,10 @@ module.exports = ProjectDeleter =
 					(cb)->
 						documentUpdaterHandler.flushProjectToMongoAndDelete project_id, cb
 					(cb)->
-						tagsHandler.removeProjectFromAllTags project.owner_ref, project_id, (err)->
+						CollaboratorsHandler.getMemberIds project_id, (error, member_ids = []) ->
+							for member_id in member_ids
+								tagsHandler.removeProjectFromAllTags member_id, project_id, (err)->
 						cb() #doesn't matter if this fails or the order it happens in
-					(cb)->
-						project.collaberator_refs.forEach (collaberator_ref)->
-							tagsHandler.removeProjectFromAllTags collaberator_ref, project_id, ->
-						cb()
-					(cb)->
-						project.readOnly_refs.forEach (readOnly_ref)->
-							tagsHandler.removeProjectFromAllTags readOnly_ref, project_id, ->
-						cb()
 					(cb)->
 						Project.update {_id:project_id}, { $set: { archived: true }}, cb
 				], (err)->
