@@ -8,13 +8,12 @@ mimelib = require("mimelib")
 
 module.exports = CollaboratorsController =
 	getCollaborators: (req, res, next = (error) ->) ->
-		ProjectGetter.getProject req.params.Project_id, { owner_ref: true, collaberator_refs: true, readOnly_refs: true}, (error, project) ->
+		project_id = req.params.Project_id
+		CollaboratorsHandler.getMembersWithPrivilegeLevels project_id, (error, members) ->
 			return next(error) if error?
-			ProjectGetter.populateProjectWithUsers project, (error, project) ->
+			CollaboratorsController._formatCollaborators members, (error, collaborators) ->
 				return next(error) if error?
-				CollaboratorsController._formatCollaborators project, (error, collaborators) ->
-					return next(error) if error?
-					res.send(JSON.stringify(collaborators))
+				res.json(collaborators)
 			
 	addUserToProject: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -59,7 +58,7 @@ module.exports = CollaboratorsController =
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			callback()
 
-	_formatCollaborators: (project, callback = (error, collaborators) ->) ->
+	_formatCollaborators: (members, callback = (error, collaborators) ->) ->
 		collaborators = []
 
 		pushCollaborator = (user, permissions, owner) ->
@@ -71,16 +70,14 @@ module.exports = CollaboratorsController =
 				permissions: permissions
 				owner: owner
 			}
-			
-		if project.owner_ref?
-			pushCollaborator(project.owner_ref, ["read", "write", "admin"], true)
-
-		if project.collaberator_refs? and project.collaberator_refs.length > 0
-			for user in project.collaberator_refs
+		
+		for member in members
+			{user, privilegeLevel} = member
+			if privilegeLevel == "admin"
+				pushCollaborator(user, ["read", "write", "admin"], true)
+			else if privilegeLevel == "readAndWrite"
 				pushCollaborator(user, ["read", "write"], false)
-
-		if project.readOnly_refs? and project.readOnly_refs.length > 0
-			for user in project.readOnly_refs
+			else
 				pushCollaborator(user, ["read"], false)
 
 		callback null, collaborators

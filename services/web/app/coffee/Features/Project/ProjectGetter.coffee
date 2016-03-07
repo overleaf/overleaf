@@ -3,7 +3,6 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
 Project = require("../../models/Project").Project
-CollaboratorsHandler = require "../Collaborators/CollaboratorsHandler"
 
 module.exports = ProjectGetter =
 	EXCLUDE_DEPTH: 8
@@ -31,6 +30,7 @@ module.exports = ProjectGetter =
 		db.projects.findOne query, projection, callback
 	
 	findAllUsersProjects: (user_id, fields, callback = (error, ownedProjects, readAndWriteProjects, readOnlyProjects) ->) ->
+		CollaboratorsHandler = require "../Collaborators/CollaboratorsHandler"
 		Project.find {owner_ref: user_id}, fields, (error, projects) ->
 			return callback(error) if error?
 			CollaboratorsHandler.getProjectsUserIsMemberOf user_id, fields, (error, readAndWriteProjects, readOnlyProjects) ->

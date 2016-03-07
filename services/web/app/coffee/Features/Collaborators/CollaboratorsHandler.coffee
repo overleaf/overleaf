@@ -10,10 +10,11 @@ async = require "async"
 
 module.exports = CollaboratorsHandler =
 	getMemberIdsWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
-		Project.findOne { _id: project_id }, { collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
+		Project.findOne { _id: project_id }, { owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
 			return callback(error) if error?
 			return callback null, null if !project?
 			members = []
+			members.push { id: project.owner_ref.toString(), privilegeLevel: "admin" }
 			for member_id in project.readOnly_refs or []
 				members.push { id: member_id, privilegeLevel: "readOnly" }
 			for member_id in project.collaberator_refs or []
@@ -34,6 +35,11 @@ module.exports = CollaboratorsHandler =
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
 			return callback(error) if error?
 			return callback null, (members or []).length
+		
+	getCollaboratorCount: (project_id, callback = (error, count) ->) ->
+		CollaboratorsHandler.getMemberCount project_id, (error, count) ->
+			return callback(error) if error?
+			return callback null, count - 1 # Don't count project owner
 
 	isUserMemberOfProject: (user_id, project_id, callback = (error, isMember, privilegeLevel) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->

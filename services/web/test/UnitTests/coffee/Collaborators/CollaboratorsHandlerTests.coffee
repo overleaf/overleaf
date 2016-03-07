@@ -26,7 +26,8 @@ describe "CollaboratorsHandler", ->
 	describe "getMemberIdsWithPrivilegeLevels", ->
 		beforeEach ->
 			@Project.findOne = sinon.stub()
-			@Project.findOne.withArgs({_id: @project_id}, {collaberator_refs: 1, readOnly_refs: 1}).yields(null, @project = {
+			@Project.findOne.withArgs({_id: @project_id}, {owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1}).yields(null, @project = {
+				owner_ref: [ "owner-ref" ]
 				readOnly_refs: [ "read-only-ref-1", "read-only-ref-2" ]
 				collaberator_refs: [ "read-write-ref-1", "read-write-ref-2" ]
 			})
@@ -35,6 +36,7 @@ describe "CollaboratorsHandler", ->
 		it "should return an array of member ids with their privilege levels", ->
 			@callback
 				.calledWith(null, [
+					{ id: "owner-ref", privilegeLevel: "admin" }
 					{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
 					{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
 					{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
