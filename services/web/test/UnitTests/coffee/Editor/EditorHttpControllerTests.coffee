@@ -16,6 +16,7 @@ describe "EditorHttpController", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./EditorController": @EditorController = {}
 			'../../infrastructure/Metrics': @Metrics = {inc: sinon.stub()}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
@@ -85,13 +86,14 @@ describe "EditorHttpController", ->
 			@user =
 				_id: @user_id = "user-id"
 				projects: {}
+			@members = ["members", "mock"]
 			@projectModelView = 
 				_id: @project_id
 				owner:{_id:"something"}
 				view: true
 			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
-			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
+			@CollaboratorsHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				
 		describe "when authorized", ->
@@ -105,8 +107,8 @@ describe "EditorHttpController", ->
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should populate the user references in the project", ->
-				@ProjectGetter.populateProjectWithUsers
+			it "should get the list of users in the project", ->
+				@CollaboratorsHandler.getMembersWithPrivilegeLevels
 					.calledWith(@project)
 					.should.equal true
 			

@@ -38,33 +38,41 @@ describe "ProjectEditorHandler", ->
 					folders  : []
 				}]
 			}]
-			owner_ref :
-				_id: "owner-id"
-				first_name : "Owner"
-				last_name  : "ShareLaTeX"
-				email      : "owner@sharelatex.com"
-			readOnly_refs: [{
-				_id: "read-only-id"
-				first_name : "Read"
-				last_name  : "Only"
-				email      : "read-only@sharelatex.com"
-			}]
-			collaberator_refs: [{
-				_id: "read-write-id"
-				first_name : "Read"
-				last_name  : "Write"
-				email      : "read-write@sharelatex.com"
-			}]
 			deletedDocs: [{
 				_id: "deleted-doc-id"
 				name: "main.tex"
 			}]
+		@members = [{
+			user: @owner = {
+				_id: "owner-id"
+				first_name : "Owner"
+				last_name  : "ShareLaTeX"
+				email      : "owner@sharelatex.com"
+			},
+			privilegeLevel: "admin"
+		},{
+			user: {
+				_id: "read-only-id"
+				first_name : "Read"
+				last_name  : "Only"
+				email      : "read-only@sharelatex.com"
+			},
+			privilegeLevel: "readOnly"
+		},{
+			user: {
+				_id: "read-write-id"
+				first_name : "Read"
+				last_name  : "Write"
+				email      : "read-write@sharelatex.com"
+			},
+			privilegeLevel: "readAndWrite"
+		}]
 		@handler = SandboxedModule.require modulePath
 
 	describe "buildProjectModelView", ->
 		describe "with owner and members included", ->
 			beforeEach ->
-				@result = @handler.buildProjectModelView @project
+				@result = @handler.buildProjectModelView @project, @members
 
 			it "should include the id", ->
 				should.exist @result._id
@@ -140,41 +148,30 @@ describe "ProjectEditorHandler", ->
 
 			it "should set the deletedByExternalDataSource flag to false when it is not there", ->
 				delete @project.deletedByExternalDataSource
-				result = @handler.buildProjectModelView @project
+				result = @handler.buildProjectModelView @project, @members
 				result.deletedByExternalDataSource.should.equal false
 
 			it "should set the deletedByExternalDataSource flag to false when it is false", ->
-				result = @handler.buildProjectModelView @project
+				result = @handler.buildProjectModelView @project, @members
 				result.deletedByExternalDataSource.should.equal false
 
 			it "should set the deletedByExternalDataSource flag to true when it is true", ->
 				@project.deletedByExternalDataSource = true
-				result = @handler.buildProjectModelView @project
+				result = @handler.buildProjectModelView @project, @members
 				result.deletedByExternalDataSource.should.equal true
 
 		describe "features", ->
 			beforeEach ->
-				@project.owner_ref.features =
+				@owner.features =
 					versioning: true
 					collaborators: 3
 					compileGroup:"priority"
 					compileTimeout: 96
-				@result = @handler.buildProjectModelView @project
+				@result = @handler.buildProjectModelView @project, @members
 			
 			it "should copy the owner features to the project", ->
-				@result.features.versioning.should.equal @project.owner_ref.features.versioning
-				@result.features.collaborators.should.equal @project.owner_ref.features.collaborators
-				@result.features.compileGroup.should.equal @project.owner_ref.features.compileGroup
-				@result.features.compileTimeout.should.equal @project.owner_ref.features.compileTimeout
+				@result.features.versioning.should.equal @owner.features.versioning
+				@result.features.collaborators.should.equal @owner.features.collaborators
+				@result.features.compileGroup.should.equal @owner.features.compileGroup
+				@result.features.compileTimeout.should.equal @owner.features.compileTimeout
 
-
-		describe "without owners and members", ->
-			beforeEach ->
-				@result = @handler.buildProjectModelView @project, includeUsers: false
-			
-			it "should not include the owner", ->
-				should.not.exist @result.owner
-
-			it "should not include the members", ->
-				should.not.exist @result.members
-			

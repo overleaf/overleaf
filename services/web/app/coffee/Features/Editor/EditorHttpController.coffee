@@ -8,6 +8,7 @@ UserGetter = require('../User/UserGetter')
 AuthorizationManager = require("../Security/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 
 module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
@@ -29,7 +30,7 @@ module.exports = EditorHttpController =
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			return callback(new Error("not found")) if !project?
-			ProjectGetter.populateProjectWithUsers project, (error, project) ->
+			CollaboratorsHandler.getMembersWithPrivilegeLevels project, (error, members) ->
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
@@ -39,7 +40,7 @@ module.exports = EditorHttpController =
 							callback null, null, false
 						else
 							callback(null,
-								ProjectEditorHandler.buildProjectModelView(project),
+								ProjectEditorHandler.buildProjectModelView(project, members),
 								privilegeLevel
 							)
 

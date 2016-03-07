@@ -1,11 +1,7 @@
 _ = require("underscore")
 
 module.exports = ProjectEditorHandler =
-	buildProjectModelView: (project, options) ->
-		options ||= {}
-		if !options.includeUsers?
-			options.includeUsers = true
-			
+	buildProjectModelView: (project, members) ->
 		result =
 			_id        : project._id
 			name       : project.name
@@ -18,40 +14,41 @@ module.exports = ProjectEditorHandler =
 			spellCheckLanguage: project.spellCheckLanguage
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
+			members:     []
 
-		if options.includeUsers
-			result.features =
-				collaborators: -1 # Infinite
-				versioning: false
-				dropbox:false
-				compileTimeout: 60
-				compileGroup:"standard"
-				templates: false
-				references: false
+		result.features = # defaults
+			collaborators: -1 # Infinite
+			versioning: false
+			dropbox:false
+			compileTimeout: 60
+			compileGroup:"standard"
+			templates: false
+			references: false
+		
+		owner = null
+		for member in members
+			if member.privilegeLevel == "admin"
+				owner = member.user
+			else
+				result.members.push @buildUserModelView member.user, member.privilegeLevel
+		result.owner = @buildUserModelView owner, "owner"
 
-			if project.owner_ref.features?
-				if project.owner_ref.features.collaborators?
-					result.features.collaborators = project.owner_ref.features.collaborators
-				if project.owner_ref.features.versioning?
-					result.features.versioning = project.owner_ref.features.versioning
-				if project.owner_ref.features.dropbox?
-					result.features.dropbox = project.owner_ref.features.dropbox
-				if project.owner_ref.features.compileTimeout?
-					result.features.compileTimeout = project.owner_ref.features.compileTimeout
-				if project.owner_ref.features.compileGroup?
-					result.features.compileGroup = project.owner_ref.features.compileGroup
-				if project.owner_ref.features.templates?
-					result.features.templates = project.owner_ref.features.templates
-				if project.owner_ref.features.references?
-					result.features.references = project.owner_ref.features.references
+		if owner?.features?
+			if owner.features.collaborators?
+				result.features.collaborators = owner.features.collaborators
+			if owner.features.versioning?
+				result.features.versioning = owner.features.versioning
+			if owner.features.dropbox?
+				result.features.dropbox = owner.features.dropbox
+			if owner.features.compileTimeout?
+				result.features.compileTimeout = owner.features.compileTimeout
+			if owner.features.compileGroup?
+				result.features.compileGroup = owner.features.compileGroup
+			if owner.features.templates?
+				result.features.templates = owner.features.templates
+			if owner.features.references?
+				result.features.references = owner.features.references
 
-					
-			result.owner = @buildUserModelView project.owner_ref, "owner"
-			result.members = []
-			for ref in project.readOnly_refs
-				result.members.push @buildUserModelView ref, "readOnly"
-			for ref in project.collaberator_refs
-				result.members.push @buildUserModelView ref, "readAndWrite"
 		return result
 
 	buildUserModelView: (user, privileges) ->
