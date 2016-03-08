@@ -286,7 +286,7 @@ module.exports = ProjectEntityHandler =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, {rootFolder:true}, (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			return callback(err) if err?
 			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
 				return callback(err) if err?
@@ -496,6 +496,7 @@ module.exports = ProjectEntityHandler =
 							logger.err err: err, project_id: project._id, 'error saving in putElement project'
 							return callback(err)
 						callback(err, {path:newPath})
+
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"
