@@ -12,7 +12,7 @@ define(function() {
       throw new Error("BiberLogParser Error: text parameter must be a string");
     }
     this.text = text.replace(/(\r\n)|\r/g, '\n');
-    this.options = options;
+    this.options = options || {};
     this.lines = text.split('\n');
   };
   (function() {
@@ -26,7 +26,7 @@ define(function() {
         typesetting: []
       };
       this.lines.forEach(function(line) {
-        var fullLine, lineNumber, match, message, messageType, newEntry;
+        var _, fileName, fullLine, lineMatch, lineNumber, match, message, messageType, newEntry, realMessage;
         match = line.match(LINE_SPLITTER_REGEX);
         if (match) {
           fullLine = match[0], lineNumber = match[1], messageType = match[2], message = match[3];
@@ -37,6 +37,13 @@ define(function() {
             line: null,
             raw: fullLine
           };
+          lineMatch = newEntry.message.match(/^BibTeX subsystem: \/.*\/(\w*\.\w*)_.*, line (\d+), (.*)$/);
+          if (lineMatch && lineMatch.length === 4) {
+            _ = lineMatch[0], fileName = lineMatch[1], lineNumber = lineMatch[2], realMessage = lineMatch[3];
+            newEntry.file = fileName;
+            newEntry.line = lineNumber;
+            newEntry.message = realMessage;
+          }
           result.all.push(newEntry);
           switch (newEntry.level) {
             case 'error':
