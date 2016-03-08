@@ -90,12 +90,11 @@ define [
 					$scope.pdf.logEntries = logEntries
 					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
 					# # # #
-					forward = () ->
+					proceed = () ->
 						$scope.pdf.logEntryAnnotations = {}
 						for entry in logEntries.all
 							if entry.file?
 								entry.file = normalizeFilePath(entry.file)
-
 								entity = ide.fileTreeManager.findEntityByPath(entry.file)
 								if entity?
 									$scope.pdf.logEntryAnnotations[entity.id] ||= []
@@ -104,23 +103,21 @@ define [
 										type: if entry.level == "error" then "error" else "warning"
 										text: entry.message
 									}
+					# Get the biber log and parse it too
 					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
 						.success (log) ->
 							window._s = $scope
-							console.log ">> yay"
-							console.log log
 							biberLogEntries = BiberLogParser.parse(log, {})
-							console.log biberLogEntries
 							if $scope.pdf.logEntries
 								entries = $scope.pdf.logEntries
 								all = biberLogEntries.errors.concat(biberLogEntries.warnings)
 								entries.all = entries.all.concat(all)
 								entries.errors = entries.errors.concat(biberLogEntries.errors)
 								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
-							forward()
+							proceed()
 						.error (e) ->
-							console.log ">> error", e
-							forward()
+							console.error ">> error", e
+							proceed()
 					# # # #
 				.error () ->
 					$scope.pdf.logEntries = []

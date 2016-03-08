@@ -37,7 +37,7 @@ define(function() {
             line: null,
             raw: fullLine
           };
-          lineMatch = newEntry.message.match(/^BibTeX subsystem: \/.*\/(\w*\.\w*)_.*, line (\d+), (.*)$/);
+          lineMatch = newEntry.message.match(/^BibTeX subsystem: \/.+\/(\w+\.\w+)_.+, line (\d+), (.+)$/);
           if (lineMatch && lineMatch.length === 4) {
             _ = lineMatch[0], fileName = lineMatch[1], lineNumber = lineMatch[2], realMessage = lineMatch[3];
             newEntry.file = fileName;
