@@ -71,6 +71,14 @@ module.exports = (grunt) ->
 				dest: 'test/UnitTests/js/',
 				ext: '.js'
 
+			acceptance_tests: 
+				expand: true,
+				flatten: false,
+				cwd: 'test/acceptance/coffee',
+				src: ['**/*.coffee'],
+				dest: 'test/acceptance/js/',
+				ext: '.js'
+
 		less:
 			app:
 				files:
@@ -119,6 +127,7 @@ module.exports = (grunt) ->
 		clean:
 			app: ["app/js"]
 			unit_tests: ["test/UnitTests/js"]
+			acceptance_tests: ["test/acceptance/js"]
 
 		mochaTest:
 			unit:
@@ -128,6 +137,11 @@ module.exports = (grunt) ->
 					grep: grunt.option("grep")
 			smoke:
 				src: ['test/smoke/js/**/*.js']
+				options:
+					reporter: grunt.option('reporter') or 'spec'
+					grep: grunt.option("grep")
+			acceptance:
+				src: ["test/acceptance/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
@@ -184,6 +198,7 @@ module.exports = (grunt) ->
 		            	]
 		            	"Test tasks": [
 		            		"test:unit"
+		            		"test:acceptance"
 		            	]
 		            	"Run tasks": [
 		            		"run"
@@ -290,6 +305,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
 	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append"]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
+	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
 	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests']
 	grunt.registerTask 'compile', 'Compiles everything need to run web-sharelatex', ['compile:server', 'compile:client', 'compile:css']
@@ -297,6 +313,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install', "Compile everything when installing as an npm module", ['compile']
 
 	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:server', 'compile:modules:server', 'compile:unit_tests', 'compile:modules:unit_tests', 'mochaTest:unit'].concat(moduleUnitTestTasks)
+	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
 	grunt.registerTask 'test:smoke', 'Run the smoke tests', ['compile:smoke_tests', 'mochaTest:smoke']
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
