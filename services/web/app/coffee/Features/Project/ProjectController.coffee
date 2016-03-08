@@ -229,7 +229,6 @@ module.exports = ProjectController =
 					title:  project.name
 					priority_title: true
 					bodyClasses: ["editor"]
-					project : project
 					project_id : project._id
 					user : {
 						id    : user.id

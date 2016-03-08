@@ -2,6 +2,7 @@ logger = require("logger-sharelatex")
 request = require("request")
 settings = require("settings-sharelatex")
 Project = require("../../models/Project").Project
+User = require("../../models/User").User
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 U = require('underscore')
 Async = require('async')
@@ -31,11 +32,12 @@ module.exports = ReferencesHandler =
 		return ids
 
 	_isFullIndex: (project, callback = (err, result) ->) ->
-		owner = project.owner_ref
-		callback(null, owner.features.references == true)
+		User.find { _id: project.owner_ref }, { features: true }, (err, owner) ->
+			return callback(err) if err?
+			callback(null, owner?.features?.references == true)
 
 	indexAll: (projectId, callback=(err, data)->) ->
-		Project.findPopulatedById projectId, (err, project) ->
+		Project.find { _id: projectId }, (err, project) ->
 			if err
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
@@ -44,7 +46,7 @@ module.exports = ReferencesHandler =
 			ReferencesHandler._doIndexOperation(projectId, project, docIds, callback)
 
 	index: (projectId, docIds, callback=(err, data)->) ->
-		Project.findPopulatedById projectId, (err, project) ->
+		Project.find { _id: projectId }, (err, project) ->
 			if err
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
