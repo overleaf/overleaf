@@ -52,7 +52,7 @@ module.exports = ProjectController =
 	deleteProject: (req, res) ->
 		project_id = req.params.Project_id
 		forever    = req.query?.forever?
-		logger.log project_id: project_id, forever: forever, "received request to delete project"
+		logger.log project_id: project_id, forever: forever, "received request to archive project"
 
 		if forever
 			doDelete = projectDeleter.deleteProject
