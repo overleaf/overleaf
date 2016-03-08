@@ -1,8 +1,8 @@
 define [
 	"base"
 	"libs/latex-log-parser"
-	"libs/biber-log-parser"
-], (App, LogParser, BiberLogParser) ->
+	"libs/bib-log-parser"
+], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		autoCompile = true
 		$scope.$on "project:joined", () ->
@@ -107,7 +107,7 @@ define [
 					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
 						.success (log) ->
 							window._s = $scope
-							biberLogEntries = BiberLogParser.parse(log, {})
+							biberLogEntries = BibLogParser.parse(log, {})
 							if $scope.pdf.logEntries
 								entries = $scope.pdf.logEntries
 								all = biberLogEntries.errors.concat(biberLogEntries.warnings)
