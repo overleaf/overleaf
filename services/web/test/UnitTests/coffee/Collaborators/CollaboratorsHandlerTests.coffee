@@ -112,13 +112,13 @@ describe "CollaboratorsHandler", ->
 					.calledWith(null, false, null)
 					.should.equal true
 	
-	describe "getProjectsUserIsMemberOf", ->
+	describe "getProjectsUserIsCollaboratorOf", ->
 		beforeEach ->
 			@fields = "mock fields"
 			@Project.find = sinon.stub()
 			@Project.find.withArgs({collaberator_refs:@user_id}, @fields).yields(null, ["mock-read-write-project-1", "mock-read-write-project-2"])
 			@Project.find.withArgs({readOnly_refs:@user_id}, @fields).yields(null, ["mock-read-only-project-1", "mock-read-only-project-2"])
-			@CollaboratorHandler.getProjectsUserIsMemberOf @user_id, @fields, @callback
+			@CollaboratorHandler.getProjectsUserIsCollaboratorOf @user_id, @fields, @callback
 		
 		it "should call the callback with the projects", ->
 			@callback

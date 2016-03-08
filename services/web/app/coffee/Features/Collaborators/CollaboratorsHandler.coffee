@@ -54,7 +54,7 @@ module.exports = CollaboratorsHandler =
 					return callback null, true, member.privilegeLevel
 			return callback null, false, null
 			
-	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
+	getProjectsUserIsCollaboratorOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
 		Project.find {collaberator_refs:user_id}, fields, (err, readAndWriteProjects)=>
 			Project.find {readOnly_refs:user_id}, fields, (err, readOnlyProjects)=>
 				callback(err, readAndWriteProjects, readOnlyProjects)

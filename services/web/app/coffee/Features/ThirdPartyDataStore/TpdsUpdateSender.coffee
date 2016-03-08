@@ -5,6 +5,7 @@ Project = require('../../models/Project').Project
 keys = require('../../infrastructure/Keys')
 metrics = require("../../infrastructure/Metrics")
 request = require("request")
+CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 
 buildPath = (user_id, project_name, filePath)->
 	projectPath = path.join(project_name, "/", filePath)
@@ -116,9 +117,11 @@ module.exports = TpdsUpdateSender =
 		TpdsUpdateSender._enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
 
 getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
-	Project.findById project_id, "_id owner_ref readOnly_refs collaberator_refs", (err, project)->
-		allUserIds = [].concat(project.collaberator_refs).concat(project.readOnly_refs).concat(project.owner_ref)
-		callback err, project.owner_ref, allUserIds
+	Project.findById project_id, "_id owner_ref", (err, project) ->
+		return callback(err) if err?
+		CollaboratorsHandler.getMemberIds project_id, (err, member_ids) ->
+			return callback(err) if err?
+			callback err, project.owner_ref, member_ids
 
 mergeProjectNameAndPath = (project_name, path)->
 	if(path.indexOf('/') == 0)

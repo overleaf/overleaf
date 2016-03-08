@@ -33,6 +33,6 @@ module.exports = ProjectGetter =
 		CollaboratorsHandler = require "../Collaborators/CollaboratorsHandler"
 		Project.find {owner_ref: user_id}, fields, (error, projects) ->
 			return callback(error) if error?
-			CollaboratorsHandler.getProjectsUserIsMemberOf user_id, fields, (error, readAndWriteProjects, readOnlyProjects) ->
+			CollaboratorsHandler.getProjectsUserIsCollaboratorOf user_id, fields, (error, readAndWriteProjects, readOnlyProjects) ->
 				return callback(error) if error?
 				callback null, projects, readAndWriteProjects, readOnlyProjects

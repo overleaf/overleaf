@@ -20,7 +20,10 @@ filestoreUrl = "filestore.sharelatex.com"
 describe 'TpdsUpdateSender', ->
 	beforeEach ->
 		@requestQueuer = (queue, meth, opts, callback)->
-		project = {owner_ref:user_id,readOnly_refs:[read_only_ref_1], collaberator_refs:[collaberator_ref_1]}
+		project = {owner_ref:user_id}
+		member_ids = [collaberator_ref_1, read_only_ref_1, user_id]
+		@CollaboratorsHandler =
+			getMemberIds: sinon.stub().yields(null, member_ids)
 		@Project = findById:sinon.stub().callsArgWith(2, null, project)
 		@docstoreUrl = "docstore.sharelatex.env"
 		@request = sinon.stub().returns(pipe:->)
@@ -38,6 +41,7 @@ describe 'TpdsUpdateSender', ->
 			"logger-sharelatex":{log:->}
 			'../../models/Project': Project:@Project
 			'request':@request
+			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
 
 	describe "_enqueue", ->
 
