@@ -41,7 +41,7 @@ describe 'ReferencesHandler', ->
 			}
 			'../../models/Project': {
 				Project: @Project = {
-					find: sinon.stub().callsArgWith(1, null, @fakeProject)
+					findOne: sinon.stub().callsArgWith(1, null, @fakeProject)
 				}
 			}
 			'../../models/User': {
@@ -73,10 +73,10 @@ describe 'ReferencesHandler', ->
 					@handler._findBibDocIds.callCount.should.equal 0
 					done()
 
-			it 'should call Project.find', (done) ->
+			it 'should call Project.findOne', (done) ->
 				@call (err, data) =>
-					@Project.find.callCount.should.equal 1
-					@Project.find.calledWith(_id: @projectId).should.equal true
+					@Project.findOne.callCount.should.equal 1
+					@Project.findOne.calledWith(_id: @projectId).should.equal true
 					done()
 
 			it 'should not call _findBibDocIds', (done) ->
@@ -112,10 +112,10 @@ describe 'ReferencesHandler', ->
 					expect(data).to.equal @fakeResponseData
 					done()
 
-		describe 'when Project.find produces an error', ->
+		describe 'when Project.findOne produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, new Error('woops'))
+				@Project.findOne.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err, data) =>
@@ -132,7 +132,7 @@ describe 'ReferencesHandler', ->
 		describe 'when _isFullIndex produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
@@ -150,7 +150,7 @@ describe 'ReferencesHandler', ->
 		describe 'when flushDocToMongo produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, false)
 				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, new Error('woops'))
 
@@ -170,7 +170,7 @@ describe 'ReferencesHandler', ->
 		describe 'when request produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, null, false)
 				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, null)
 				@request.post.callsArgWith(1, new Error('woops'))
@@ -185,7 +185,7 @@ describe 'ReferencesHandler', ->
 		describe 'when request responds with error status', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, null, false)
 				@request.post.callsArgWith(1, null, {statusCode: 500}, null)
 
@@ -237,10 +237,10 @@ describe 'ReferencesHandler', ->
 				expect(data).to.equal @fakeResponseData
 				done()
 
-		describe 'when Project.find produces an error', ->
+		describe 'when Project.findOne produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, new Error('woops'))
+				@Project.findOne.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err, data) =>
@@ -257,7 +257,7 @@ describe 'ReferencesHandler', ->
 		describe 'when _isFullIndex produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
@@ -275,7 +275,7 @@ describe 'ReferencesHandler', ->
 		describe 'when flushDocToMongo produces an error', ->
 
 			beforeEach ->
-				@Project.find.callsArgWith(1, null, @fakeProject)
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
 				@handler._isFullIndex.callsArgWith(1, false)
 				@DocumentUpdaterHandler.flushDocToMongo.callsArgWith(2, new Error('woops'))
 

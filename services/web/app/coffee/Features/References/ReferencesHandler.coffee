@@ -37,7 +37,7 @@ module.exports = ReferencesHandler =
 			callback(null, owner?.features?.references == true)
 
 	indexAll: (projectId, callback=(err, data)->) ->
-		Project.find { _id: projectId }, (err, project) ->
+		Project.findOne { _id: projectId }, (err, project) ->
 			if err
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
@@ -46,7 +46,7 @@ module.exports = ReferencesHandler =
 			ReferencesHandler._doIndexOperation(projectId, project, docIds, callback)
 
 	index: (projectId, docIds, callback=(err, data)->) ->
-		Project.find { _id: projectId }, (err, project) ->
+		Project.findOne { _id: projectId }, (err, project) ->
 			if err
 				logger.err {err, projectId}, "error finding project"
 				return callback(err)
