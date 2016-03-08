@@ -84,8 +84,8 @@ describe "ProjectGetter", ->
 			@fields = {"mock": "fields"}
 			@Project.find = sinon.stub()
 			@Project.find.withArgs({owner_ref: @user_id}, @fields).yields(null, ["mock-owned-projects"])
-			@CollaboratorsHandler.getProjectsUserIsMemberOf = sinon.stub()
-			@CollaboratorsHandler.getProjectsUserIsMemberOf.withArgs(@user_id, @fields).yields(null, ["mock-rw-projects"], ["mock-ro-projects"])
+			@CollaboratorsHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
+			@CollaboratorsHandler.getProjectsUserIsCollaboratorOf.withArgs(@user_id, @fields).yields(null, ["mock-rw-projects"], ["mock-ro-projects"])
 			@ProjectGetter.findAllUsersProjects @user_id, @fields, @callback
 		
 		it "should call the callback with all the projects", ->
