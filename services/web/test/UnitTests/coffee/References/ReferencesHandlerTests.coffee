@@ -319,8 +319,8 @@ describe 'ReferencesHandler', ->
 			@owner =
 				features:
 					references: false
-			@User.find = sinon.stub()
-			@User.find.withArgs({_id: @owner_ref}, {features: true}).yields(null, @owner)
+			@User.findOne = sinon.stub()
+			@User.findOne.withArgs({_id: @owner_ref}, {features: true}).yields(null, @owner)
 			@call = (callback) =>
 				@handler._isFullIndex @fakeProject, callback
 
