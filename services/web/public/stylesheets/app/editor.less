@@ -252,6 +252,20 @@
 	margin-bottom:0px;
 }
 
+.sl_references_search_hint {
+	position: absolute;
+	bottom: -22px;
+	left: -1px;
+	right: 0px;
+	text-align: center;
+	padding: 2px;
+	background: rgb(202, 214, 250);
+	border: 1px solid lightgray;
+	box-shadow: 3px 3px 5px rgba(0,0,0,.2);
+	span {
+		color: black;
+	}
+}
 // -- References Search Modal --
 .references-search-modal-backdrop {
 	// don't grey out the editor when the
@@ -318,6 +332,9 @@
 				background-color: @red;
 				color: white;
 				.hit-year.small {
+					color: white;
+				}
+				.hit-journal.small {
 					color: white;
 				}
 			}

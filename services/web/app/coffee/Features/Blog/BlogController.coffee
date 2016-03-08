@@ -4,15 +4,13 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 ErrorController = require "../Errors/ErrorController"
 
-extensionsToProxy = [".png", ".xml", ".jpeg", ".json", ".zip", ".eps"]
-
 module.exports = BlogController = 
 
 	getPage: (req, res, next)->
 		url = req.url?.toLowerCase()
 		blogUrl = "#{settings.apis.blog.url}#{url}"
 
-		extensionsToProxy = [".png", ".xml", ".jpeg", ".json", ".zip", ".eps"]
+		extensionsToProxy = [".png", ".xml", ".jpeg", ".json", ".zip", ".eps", ".gif"]
 
 		shouldProxy = _.find extensionsToProxy, (extension)->
 			url.indexOf(extension) != -1
