@@ -32,7 +32,7 @@ module.exports = ReferencesHandler =
 		return ids
 
 	_isFullIndex: (project, callback = (err, result) ->) ->
-		User.find { _id: project.owner_ref }, { features: true }, (err, owner) ->
+		User.findOne { _id: project.owner_ref }, { features: true }, (err, owner) ->
 			return callback(err) if err?
 			callback(null, owner?.features?.references == true)
 
