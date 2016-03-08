@@ -187,7 +187,7 @@ module.exports = ProjectController =
 
 		async.parallel {
 			project: (cb)->
-				Project.findPopulatedById project_id, cb
+				Project.findOne { _id: project_id }, cb
 			user: (cb)->
 				if user_id == 'openUser'
 					cb null, defaultSettingsForAnonymousUser(user_id)

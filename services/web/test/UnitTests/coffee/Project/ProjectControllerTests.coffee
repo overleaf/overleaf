@@ -36,7 +36,7 @@ describe "ProjectController", ->
 		@NotificationsHandler =
 			getUserNotifications: sinon.stub()
 		@ProjectModel =
-			findPopulatedById: sinon.stub()
+			findOne: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
 		@SecurityManager =
@@ -295,7 +295,7 @@ describe "ProjectController", ->
 					fontSize:"massive"
 					theme:"sexy"
 				email: "bob@bob.com"
-			@ProjectModel.findPopulatedById.callsArgWith 1, null, @project
+			@ProjectModel.findOne.callsArgWith 1, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
@@ -307,12 +307,6 @@ describe "ProjectController", ->
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>
 				pageName.should.equal "project/editor"
-				done()
-			@ProjectController.loadEditor @req, @res
-
-		it "should add the project onto the opts", (done)->		
-			@res.render = (pageName, opts)=>
-				opts.project.should.equal @project
 				done()
 			@ProjectController.loadEditor @req, @res
 
