@@ -90,11 +90,12 @@ module.exports =
 		logger.log subscription_id:subscription_id, user_id:req?.session?.user?._id, email:email, "starting the completion of joining group"
 		SubscriptionGroupHandler.processGroupVerification email, subscription_id, req.query?.token, (err)->
 			if err? and err == "token_not_found"
-				res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
+				return res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
 			else if err?
-				res.sendStatus 500
+				return res.sendStatus 500
 			else
-				res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
+				logger.log subscription_id:subscription_id, email:email, "user successful completed join of group subscription"
+				return res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id

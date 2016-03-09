@@ -14,9 +14,10 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 module.exports = SubscriptionGroupHandler =
 
 	addUserToGroup: (adminUserId, newEmail, callback)->
+		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group"
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
 			if err?
-				logger.err err:err, "error creating user for holding account"
+				logger.err err:err,  adminUserId:adminUserId, newEmail:newEmail, "error creating user for holding account"
 				return callback(err)
 			if !user?
 				msg = "no user returned whenc reating holidng account or getting user"
@@ -24,8 +25,10 @@ module.exports = SubscriptionGroupHandler =
 				return callback(msg)
 			LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
 				if err?
+					logger.err err:err, adminUserId:adminUserId, newEmail:newEmail, "error checking if limit reached for group plan"
 					return callback(err)
 				if limitReached
+					logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
 					return callback(limitReached:limitReached)
 				SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
 					if err?
@@ -74,8 +77,8 @@ module.exports = SubscriptionGroupHandler =
 			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
 
 	processGroupVerification: (userEmail, subscription_id, token, callback)->
+		logger.log userEmail:userEmail, subscription_id:subscription_id, "processing group verification for user"
 		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
-			
 			if err?  or subscription_id != token_subscription_id
 				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
 				return callback("token_not_found")
@@ -84,7 +87,7 @@ module.exports = SubscriptionGroupHandler =
 					logger.err err:err, subscription:subscription, userEmail:userEmail, subscription_id:subscription_id, "error getting subscription"
 					return callback(err)
 				if !subscription?
-					logger.warn subscription_id:subscription_id, "no subscription found"
+					logger.warn subscription_id:subscription_id, userEmail:userEmail, "no subscription found"
 					return callback()
 				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
 
