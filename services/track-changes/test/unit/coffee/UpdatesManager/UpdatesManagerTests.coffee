@@ -333,52 +333,43 @@ describe "UpdatesManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
+	describe "getSummarizedProjectUpdates", ->
+		beforeEach ->
+			@updates = [{doc_id: 123, v:456, op: "mock-updates", meta: {user_id: 123, start_ts: 1233, end_ts:1234}}]
+			@options = { before: "mock-before", limit: "mock-limit" }
+			@summarizedUpdates = [
+				{meta: {user_ids: [123], start_ts: 1233, end_ts:1234},docs:{"123":{fromV:456,toV:456}}}
+			]
+			@updatesWithUserInfo = ["updates-with-user-info"]
+			@done_state = false
+			@iterator =
+				next: (cb) =>
+					@done_state = true
+					cb(null, @updates)
+				done: () =>
+					@done_state
+			@PackManager.makeProjectIterator = sinon.stub().callsArgWith(2, null, @iterator)
+			@UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1)
+			@UpdatesManager.fillSummarizedUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
+			@UpdatesManager.getSummarizedProjectUpdates @project_id, @options, @callback
 
-	# describe "getProjectUpdates", ->
-	# 	beforeEach ->
-	# 		@updates = ["mock-updates"]
-	# 		@options = { before: "mock-before", limit: "mock-limit" }
-	# 		@MongoManager.getProjectUpdates = sinon.stub().callsArgWith(2, null, @updates)
-	# 		@UpdatesManager.processUncompressedUpdatesForProject = sinon.stub().callsArg(1)
-	# 		@UpdatesManager.getProjectUpdates @project_id, @options, @callback
+		it "should process any outstanding updates", ->
+			@UpdatesManager.processUncompressedUpdatesForProject
+				.calledWith(@project_id)
+				.should.equal true
 
-	# 	it "should process any outstanding updates", ->
-	# 		@UpdatesManager.processUncompressedUpdatesForProject
-	# 			.calledWith(@project_id)
-	# 			.should.equal true
+		it "should get the updates", ->
+			@PackManager.makeProjectIterator
+				.calledWith(@project_id, @options.before)
+				.should.equal true
 
-	# 	it "should get the updates from the database", ->
-	# 		@MongoManager.getProjectUpdates
-	# 			.calledWith(@project_id, @options)
-	# 			.should.equal true
+		it "should fill the updates with the user info", ->
+			@UpdatesManager.fillSummarizedUserInfo
+				.calledWith(@summarizedUpdates)
+				.should.equal true
 
-	# 	it "should return the updates", ->
-	# 		@callback
-	# 			.calledWith(null, @updates)
-	# 			.should.equal true
-
-
-	# describe "getProjectUpdatesWithUserInfo", ->
-	# 	beforeEach ->
-	# 		@updates = ["mock-updates"]
-	# 		@options = { before: "mock-before", limit: "mock-limit" }
-	# 		@updatesWithUserInfo = ["updates-with-user-info"]
-	# 		@UpdatesManager.getProjectUpdates = sinon.stub().callsArgWith(2, null, @updates)
-	# 		@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
-	# 		@UpdatesManager.getProjectUpdatesWithUserInfo @project_id, @options, @callback
-
-	# 	it "should get the updates", ->
-	# 		@UpdatesManager.getProjectUpdates
-	# 			.calledWith(@project_id, @options)
-	# 			.should.equal true
-
-	# 	it "should file the updates with the user info", ->
-	# 		@UpdatesManager.fillUserInfo
-	# 			.calledWith(@updates)
-	# 			.should.equal true
-
-	# 	it "should return the updates with the filled details", ->
-	# 		@callback.calledWith(null, @updatesWithUserInfo).should.equal true
+		it "should return the updates with the filled details", ->
+			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
 
 	# describe "_extendBatchOfSummarizedUpdates", ->
 	# 	beforeEach ->
@@ -485,93 +476,93 @@ describe "UpdatesManager", ->
 	# 		it "should call the callback with the updates", ->
 	# 			@callback.calledWith(null, @updates, null).should.equal true
 
-	# describe "fillUserInfo", ->
-	# 	describe "with valid users", ->
-	# 		beforeEach (done) ->
-	# 			{ObjectId} = require "mongojs"
-	# 			@user_id_1 = ObjectId().toString()
-	# 			@user_id_2 = ObjectId().toString()
-	# 			@updates = [{
-	# 				meta:
-	# 					user_id: @user_id_1
-	# 				op: "mock-op-1"
-	# 			}, {
-	# 				meta:
-	# 					user_id: @user_id_1
-	# 				op: "mock-op-2"
-	# 			}, {
-	# 				meta:
-	# 					user_id: @user_id_2
-	# 				op: "mock-op-3"
-	# 			}]
-	# 			@user_info = {}
-	# 			@user_info[@user_id_1] = email: "user1@sharelatex.com"
-	# 			@user_info[@user_id_2] = email: "user2@sharelatex.com"
+	describe "fillUserInfo", ->
+		describe "with valid users", ->
+			beforeEach (done) ->
+				{ObjectId} = require "mongojs"
+				@user_id_1 = ObjectId().toString()
+				@user_id_2 = ObjectId().toString()
+				@updates = [{
+					meta:
+						user_id: @user_id_1
+					op: "mock-op-1"
+				}, {
+					meta:
+						user_id: @user_id_1
+					op: "mock-op-2"
+				}, {
+					meta:
+						user_id: @user_id_2
+					op: "mock-op-3"
+				}]
+				@user_info = {}
+				@user_info[@user_id_1] = email: "user1@sharelatex.com"
+				@user_info[@user_id_2] = email: "user2@sharelatex.com"
 				
-	# 			@WebApiManager.getUserInfo = (user_id, callback = (error, userInfo) ->) =>
-	# 				callback null, @user_info[user_id]
-	# 			sinon.spy @WebApiManager, "getUserInfo"
+				@WebApiManager.getUserInfo = (user_id, callback = (error, userInfo) ->) =>
+					callback null, @user_info[user_id]
+				sinon.spy @WebApiManager, "getUserInfo"
 
-	# 			@UpdatesManager.fillUserInfo @updates, (error, @results) =>
-	# 				done()
+				@UpdatesManager.fillUserInfo @updates, (error, @results) =>
+					done()
 
-	# 		it "should only call getUserInfo once for each user_id", ->
-	# 			@WebApiManager.getUserInfo.calledTwice.should.equal true
-	# 			@WebApiManager.getUserInfo
-	# 				.calledWith(@user_id_1)
-	# 				.should.equal true
-	# 			@WebApiManager.getUserInfo
-	# 				.calledWith(@user_id_2)
-	# 				.should.equal true
+			it "should only call getUserInfo once for each user_id", ->
+				@WebApiManager.getUserInfo.calledTwice.should.equal true
+				@WebApiManager.getUserInfo
+					.calledWith(@user_id_1)
+					.should.equal true
+				@WebApiManager.getUserInfo
+					.calledWith(@user_id_2)
+					.should.equal true
 
-	# 		it "should return the updates with the user info filled", ->
-	# 			expect(@results).to.deep.equal [{
-	# 				meta:
-	# 					user:
-	# 						email: "user1@sharelatex.com"
-	# 				op: "mock-op-1"
-	# 			}, {
-	# 				meta:
-	# 					user:
-	# 						email: "user1@sharelatex.com"
-	# 				op: "mock-op-2"
-	# 			}, {
-	# 				meta:
-	# 					user:
-	# 						email: "user2@sharelatex.com"
-	# 				op: "mock-op-3"
-	# 			}]
+			it "should return the updates with the user info filled", ->
+				expect(@results).to.deep.equal [{
+					meta:
+						user:
+							email: "user1@sharelatex.com"
+					op: "mock-op-1"
+				}, {
+					meta:
+						user:
+							email: "user1@sharelatex.com"
+					op: "mock-op-2"
+				}, {
+					meta:
+						user:
+							email: "user2@sharelatex.com"
+					op: "mock-op-3"
+				}]
 
 
-	# 	describe "with invalid user ids", ->
-	# 		beforeEach (done) ->
-	# 			@updates = [{
-	# 				meta:
-	# 					user_id: null
-	# 				op: "mock-op-1"
-	# 			}, {
-	# 				meta:
-	# 					user_id: "anonymous-user"
-	# 				op: "mock-op-2"
-	# 			}]
-	# 			@WebApiManager.getUserInfo = (user_id, callback = (error, userInfo) ->) =>
-	# 				callback null, @user_info[user_id]
-	# 			sinon.spy @WebApiManager, "getUserInfo"
+		describe "with invalid user ids", ->
+			beforeEach (done) ->
+				@updates = [{
+					meta:
+						user_id: null
+					op: "mock-op-1"
+				}, {
+					meta:
+						user_id: "anonymous-user"
+					op: "mock-op-2"
+				}]
+				@WebApiManager.getUserInfo = (user_id, callback = (error, userInfo) ->) =>
+					callback null, @user_info[user_id]
+				sinon.spy @WebApiManager, "getUserInfo"
 
-	# 			@UpdatesManager.fillUserInfo @updates, (error, @results) =>
-	# 				done()
+				@UpdatesManager.fillUserInfo @updates, (error, @results) =>
+					done()
 
-	# 		it "should not call getUserInfo", ->
-	# 			@WebApiManager.getUserInfo.called.should.equal false
+			it "should not call getUserInfo", ->
+				@WebApiManager.getUserInfo.called.should.equal false
 
-	# 		it "should return the updates without the user info filled", ->
-	# 			expect(@results).to.deep.equal [{
-	# 				meta: {}
-	# 				op: "mock-op-1"
-	# 			}, {
-	# 				meta: {}
-	# 				op: "mock-op-2"
-	# 			}]
+			it "should return the updates without the user info filled", ->
+				expect(@results).to.deep.equal [{
+					meta: {}
+					op: "mock-op-1"
+				}, {
+					meta: {}
+					op: "mock-op-2"
+				}]
 
 	describe "_summarizeUpdates", ->
 		beforeEach ->
