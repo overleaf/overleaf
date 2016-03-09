@@ -248,32 +248,14 @@ describe 'ProjectEntityHandler', ->
 				@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", done
 
 			it 'should find the project then element', ->
-				@projectLocator.findElement
-					.calledWith({
-						element_id: @docId,
-						type: "docs",
-						project: @project
-					})
-					.should.equal true
+				@projectLocator.findElement.calledWith({element_id: @docId, type: "docs", project: @project }).should.equal true
 
 			it 'should remove the element from its current position', ->
 				@ProjectEntityHandler._removeElementFromMongoArray
-					.calledWith(
-						@ProjectModel,
-						project_id,
-						@path.mongo
-					)
-					.should.equal true
+					.calledWith(@ProjectModel, project_id, @path.mongo ).should.equal true
 					
 			it "should put the element back in the new folder", ->
-				@ProjectEntityHandler._putElement
-					.calledWith(
-						project_id,
-						folder_id,
-						@doc,
-						"docs"
-					)
-					.should.equal true
+				@ProjectEntityHandler._putElement.calledWith(@project, folder_id, @doc, "docs").should.equal true
 					
 			it 'should tell the third party data store', ->
 				@tpdsUpdateSender.moveEntity
@@ -336,7 +318,7 @@ describe 'ProjectEntityHandler', ->
 				it "should put the element back in the new folder", ->
 					@ProjectEntityHandler._putElement
 						.calledWith(
-							project_id,
+							@project,
 							@move_to_folder_id,
 							@folder,
 							"folder"
@@ -487,8 +469,8 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, @filePath, (err, fileRef, parentFolder)->
 
 		it 'should put file into folder by calling put element', (done)->
-			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)->
-				passedProject_id.should.equal project_id
+			@ProjectEntityHandler._putElement = (passedProject, passedFolder_id, passedFileRef, passedType, callback)->
+				passedProject._id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFileRef.name.should.equal fileName
 				passedType.should.equal 'file'
@@ -530,6 +512,7 @@ describe 'ProjectEntityHandler', ->
 			@filePaths = {fileSystem:"/folder1/file.png", mongo:"folder.1.files.somewhere"}
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @fileRef, @filePaths)
 			@ProjectModel.update = (_, __, ___, cb)-> cb()
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		it 'should find the file', (done)->
 
@@ -574,12 +557,14 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
 
 
-	describe 'adding a folder', ->
+	describe 'addFolder', ->
 		folderName = "folder1234"
+		beforeEach ->
+			@ProjectGetter.getProjectWithOnlyFolders = sinon.stub().callsArgWith(1, null, @project)
 
 		it 'should call put element', (done)->
-			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFolder, passedType, callback)->
-				passedProject_id.should.equal project_id
+			@ProjectEntityHandler._putElement = (passedProject, passedFolder_id, passedFolder, passedType, callback)->
+				passedProject._id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFolder.name.should.equal folderName
 				passedType.should.equal 'folder'
@@ -884,8 +869,8 @@ describe 'ProjectEntityHandler', ->
 				done()
 
 		it 'should put file into folder by calling put element', (done)->
-			@ProjectEntityHandler._putElement = (passedProject_id, passedFolder_id, passedFileRef, passedType, callback)-> 
-				passedProject_id.should.equal project_id
+			@ProjectEntityHandler._putElement = (passedProject, passedFolder_id, passedFileRef, passedType, callback)-> 
+				passedProject._id.should.equal project_id
 				passedFolder_id.should.equal folder_id
 				passedFileRef.name.should.equal fileName
 				passedType.should.equal 'file'
@@ -1039,24 +1024,24 @@ describe 'ProjectEntityHandler', ->
 			
 
 			it "should use the correct mongo path", (done)->
-				@ProjectEntityHandler._putElement @project_id, @folder._id, @doc, "docs", (err)=>
+				@ProjectEntityHandler._putElement @project, @folder._id, @doc, "docs", (err)=>
 					@ProjectModel.update.args[0][0]._id.should.equal @project._id
 					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
 					done()
 
 			it "should add an s onto the type if not included", (done)->
-				@ProjectEntityHandler._putElement @project_id, @folder._id, @doc, "doc", (err)=>
+				@ProjectEntityHandler._putElement @project, @folder._id, @doc, "doc", (err)=>
 					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
 					done()
 
 
 			it "should not call update if elemenet is null", (done)->
-				@ProjectEntityHandler._putElement @project_id, @folder._id, null, "doc", (err)=>
+				@ProjectEntityHandler._putElement @project, @folder._id, null, "doc", (err)=>
 					@ProjectModel.update.called.should.equal false
 					done()
 
 			it "should default to root folder insert", (done)->
-				@ProjectEntityHandler._putElement @project_id, null, @doc, "doc", (err)=>
+				@ProjectEntityHandler._putElement @project, null, @doc, "doc", (err)=>
 					@projectLocator.findElement.args[0][0].element_id.should.equal @project.rootFolder[0]._id
 					done()
 

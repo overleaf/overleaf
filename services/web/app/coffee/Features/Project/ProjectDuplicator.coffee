@@ -35,8 +35,7 @@ module.exports =
 								jobs = originalFolder.docs.map (doc)->
 									return (callback)->
 										content = docContents[doc._id.toString()]
-										return callback(new Error("doc_id not found: #{doc._id}")) if !content?
-										projectEntityHandler.addDoc newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
+										projectEntityHandler.addDocWithProject newProject, newParentFolder._id, doc.name, content.lines, (err, newDoc)->
 											if err?
 												logger.err err:err, originalProjectId:originalProjectId, newProjectName:newProjectName, "error adding doc"
 												return callback(err)
@@ -48,13 +47,13 @@ module.exports =
 							copyFiles = (originalFolder, newParentFolder, callback)->
 								jobs = originalFolder.fileRefs.map (file)->
 									return (callback)->
-										projectEntityHandler.copyFileFromExistingProject newProject, newParentFolder._id, originalProject._id, file, callback
+										projectEntityHandler.copyFileFromExistingProjectWithProject newProject, newParentFolder._id, originalProject._id, file, callback
 								async.parallelLimit jobs, 5, callback
 
 							copyFolder = (folder, desFolder, callback)->
 								jobs = folder.folders.map (childFolder)->
 									return (callback)->
-										projectEntityHandler.addFolder newProject, desFolder._id, childFolder.name, (err, newFolder)->
+										projectEntityHandler.addFolderWithProject newProject, desFolder._id, childFolder.name, (err, newFolder)->
 											copyFolder childFolder, newFolder, callback
 								jobs.push (cb)->
 									copyDocs folder, desFolder, cb

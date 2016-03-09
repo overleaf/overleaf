@@ -109,29 +109,36 @@ module.exports = ProjectEntityHandler =
 			options = {}
 		DocstoreManager.getDoc project_id, doc_id, options, callback
 
-	addDoc: (project_or_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
-		ProjectGetter.getProjectWithoutDocLines project_or_id, (err, project) ->
-			return callback(err) if err?
-			logger.log project_id: project._id, folder_id: folder_id, doc_name: docName, "adding doc to project"
-			confirmFolder project, folder_id, (folder_id)=>
-				doc = new Doc name: docName
-				# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
-				# which hasn't been created in docstore.
-				DocstoreManager.updateDoc project._id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
-					return callback(err) if err? 
 
-					ProjectEntityHandler._putElement project, folder_id, doc, "doc", (err, result)=>
-						return callback(err) if err?
-						tpdsUpdateSender.addDoc {
-							project_id:   project?._id,
-							doc_id:		  doc?._id
-							path:         result?.path?.fileSystem,
-							project_name: project.name,
-							rev:          0
-						}, (err) ->
-							if err?
-								logger.err err:err, "error adding doc to tpdsworker, contining anyway"
-							callback(null, doc, folder_id)
+	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+			if err?
+				logger.err project_id:project_id, err:err, "error getting project for add doc"
+				return callback(err)
+			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, callback
+
+	addDocWithProject: (project, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+		project_id = project._id
+		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
+		confirmFolder project, folder_id, (folder_id)=>
+			doc = new Doc name: docName
+			# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
+			# which hasn't been created in docstore.
+			DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
+				return callback(err) if err? 
+
+				ProjectEntityHandler._putElement project, folder_id, doc, "doc", (err, result)=>
+					return callback(err) if err?
+					tpdsUpdateSender.addDoc {
+						project_id:   project_id,
+						doc_id:		  doc?._id
+						path:         result?.path?.fileSystem,
+						project_name: project.name,
+						rev:          0
+					}, (err) ->
+						if err?
+							logger.err err:err, "error adding doc to tpdsworker, contining anyway"
+						callback(null, doc, folder_id)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
@@ -140,22 +147,29 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
-	addFile: (project_or_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
-		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project) ->
-			logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
-			return callback(err) if err?
-			confirmFolder project, folder_id, (folder_id)->
-				fileRef = new File name : fileName
-				FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err)->
-					if err?
-						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-						return callback(err)
-					ProjectEntityHandler._putElement project._id, folder_id, fileRef, "file", (err, result)=>
-						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, project_name:project.name, rev:fileRef.rev}, ->
-							callback(err, fileRef, folder_id)
+	addFile: (project_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+			if err?
+				logger.err project_id:project_id, err:err, "error getting project for add file"
+				return callback(err)
+			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, callback
 
-	replaceFile: (project_or_id, file_id, fsPath, callback)->
-		Project.getProject project_or_id, "", (err, project) ->
+	addFileWithProject: (project, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+		project_id = project._id
+		logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
+		return callback(err) if err?
+		confirmFolder project, folder_id, (folder_id)->
+			fileRef = new File name : fileName
+			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err)->
+				if err?
+					logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+					return callback(err)
+				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, project_name:project.name, rev:fileRef.rev}, ->
+						callback(err, fileRef, folder_id)
+
+	replaceFile: (project_id, file_id, fsPath, callback)->
+		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
 			return callback(err) if err?
 			findOpts = 
 				project_id:project._id
@@ -183,25 +197,34 @@ module.exports = ProjectEntityHandler =
 						Project.update conditons, update, {}, (err, second)->
 							callback()
 
-	copyFileFromExistingProject: (project_or_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
-		ProjectGetter.getProject project_or_id, {name:true}, (err, project) ->
-			logger.log project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
-			return callback(err) if err?
-			confirmFolder project, folder_id, (folder_id)=>
-				if !origonalFileRef?
-					logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
-					return callback()
-				fileRef = new File name : origonalFileRef.name
-				FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
+	copyFileFromExistingProject: (project_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
+		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
+		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
+			if err?
+				logger.err project_id:project_id, err:err, "error getting project for copy file from existing project"
+				return callback(err)
+			ProjectEntityHandler.copyFileFromExistingProjectWithProject project, folder_id, originalProject_id, origonalFileRef, callback
+
+
+	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
+		project_id = project._id
+		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3 with project"
+		return callback(err) if err?
+		confirmFolder project, folder_id, (folder_id)=>
+			if !origonalFileRef?
+				logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
+				return callback()
+			fileRef = new File name : origonalFileRef.name
+			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
+				if err?
+					logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
+					return callback(err)
+				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
 					if err?
-						logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
+						logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
 						return callback(err)
-					ProjectEntityHandler._putElement project._id, folder_id, fileRef, "file", (err, result)=>
-						if err?
-							logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
-							return callback(err)
-						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
-							callback(error, fileRef, folder_id)
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
+						callback(error, fileRef, folder_id)
 
 	mkdirp: (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
 		self = @
@@ -240,16 +263,23 @@ module.exports = ProjectEntityHandler =
 				folders = _.select folders, (folder)->
 					!folder.filterOut
 				callback(null, folders, lastFolder)
-	
-	addFolder: (project_or_id, parentFolder_id, folderName, callback) ->
-		folder = new Folder name: folderName
-		ProjectGetter.getProjectWithOnlyFolders project_or_id, (err, project)=>
-			return callback(err) if err?
-			confirmFolder project, parentFolder_id, (parentFolder_id)=>
-				logger.log project: project._id, parentFolder_id:parentFolder_id, folderName:folderName, "new folder added"
-				ProjectEntityHandler._putElement project._id, parentFolder_id, folder, "folder", (err, result)=>
-					if callback?
-						callback(err, folder, parentFolder_id)
+
+	addFolder: (project_id, parentFolder_id, folderName, callback) ->
+		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
+			if err?
+				logger.err project_id:project_id, err:err, "error getting project for add folder"
+				return callback(err)
+			ProjectEntityHandler.addFolderWithProject project, parentFolder_id, folderName, callback
+
+	addFolderWithProject: (project, parentFolder_id, folderName, callback = (err, folder, parentFolder_id)->) ->
+		confirmFolder project, parentFolder_id, (parentFolder_id)=>
+			folder = new Folder name: folderName
+			logger.log project: project._id, parentFolder_id:parentFolder_id, folderName:folderName, "adding new folder"
+			ProjectEntityHandler._putElement project, parentFolder_id, folder, "folder", (err, result)=>
+				if err?
+					logger.err err:err, project_id:project._id, "error adding folder to project"
+					return callback(err)
+				callback(err, folder, parentFolder_id)
 
 	updateDocLines : (project_id, doc_id, lines, callback = (error) ->)->
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
@@ -307,7 +337,7 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
 						return callback(err) if err?
-						ProjectEntityHandler._putElement project_id, destinationFolder_id, entity, entityType, (err, result)->
+						ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
 							return callback(err) if err?
 							opts = 
 								project_id:project_id
@@ -431,6 +461,7 @@ module.exports = ProjectEntityHandler =
 			}
 		}, {}, callback
 
+
 	_countElements : (project, callback)->
 	
 		countFolder = (folder, cb = (err, count)->)->
@@ -453,7 +484,7 @@ module.exports = ProjectEntityHandler =
 
 		countFolder project.rootFolder[0], callback
 
-	_putElement: (project_or_id, folder_id, element, type, callback = (err, path)->)->
+	_putElement: (project, folder_id, element, type, callback = (err, path)->)->
 
 		sanitizeTypeOfElement = (elementType)->
 			lastChar = elementType.slice -1
@@ -465,37 +496,35 @@ module.exports = ProjectEntityHandler =
 
 		if !element?
 			e = new Error("no element passed to be inserted")
-			logger.err project_id:project_or_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
+			logger.err project_id:project._id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 			return callback(e)
 		type = sanitizeTypeOfElement type
-		ProjectGetter.getProject project_or_id, {rootFolder:true}, (err, project)=>
-			if err?
-				return callback(err)
-			if !folder_id?
-				folder_id = project.rootFolder[0]._id
-			ProjectEntityHandler._countElements project, (err, count)->
-				if count > settings.maxFilesPerProject
-					logger.warn project_id:project._id, "project too big, stopping insertions"
-					return callback("project_has_to_many_files")
-				projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
+
+		if !folder_id?
+			folder_id = project.rootFolder[0]._id
+		ProjectEntityHandler._countElements project, (err, count)->
+			if count > settings.maxFilesPerProject
+				logger.warn project_id:project._id, "project too big, stopping insertions"
+				return callback("project_has_to_many_files")
+			projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
+				if err?
+					logger.err err:err, project_id:project._id, folder_id:folder_id, type:type, element:element, "error finding folder for _putElement"
+					return callback(err)
+				newPath =
+					fileSystem: "#{path.fileSystem}/#{element.name}"
+					mongo: path.mongo
+				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
+				id = element._id+''
+				element._id = require('mongoose').Types.ObjectId(id)
+				conditions = _id:project._id
+				mongopath = "#{path.mongo}.#{type}"
+				update = "$push":{}
+				update["$push"][mongopath] = element
+				Project.update conditions, update, {}, (err)->
 					if err?
-						logger.err err:err, project_id:project._id, folder_id:folder_id, type:type, element:element, "error finding folder for _putElement"
+						logger.err err: err, project_id: project._id, 'error saving in putElement project'
 						return callback(err)
-					newPath =
-						fileSystem: "#{path.fileSystem}/#{element.name}"
-						mongo: path.mongo
-					logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
-					id = element._id+''
-					element._id = require('mongoose').Types.ObjectId(id)
-					conditions = _id:project._id
-					mongopath = "#{path.mongo}.#{type}"
-					update = "$push":{}
-					update["$push"][mongopath] = element
-					Project.update conditions, update, {}, (err)->
-						if err?
-							logger.err err: err, project_id: project._id, 'error saving in putElement project'
-							return callback(err)
-						callback(err, {path:newPath})
+					callback(err, {path:newPath})
 
 
 confirmFolder = (project, folder_id, callback)->

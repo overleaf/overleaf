@@ -11,62 +11,45 @@ module.exports = ProjectGetter =
 	EXCLUDE_DEPTH: 8
 
 
-	_returnProjectIfPassed: (project_or_id, callback, continueCallback)->
-		if project_or_id._id?
-			callback null, project_or_id
-		else
-			try
-				ObjectId(project_or_id.toString())
-			catch e
-				return continueCallback(new Errors.NotFoundError(e.message))
-			continueCallback()
+	getProjectWithoutDocLines: (project_id, callback=(error, project) ->) ->
+		excludes = {}
+		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
+			excludes["rootFolder#{Array(i).join(".folder")}.docs.lines"] = 0
+		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
+			callback error, projects[0]
 
-	getProjectWithoutDocLines: (project_or_id, callback=(error, project) ->) ->
-		ProjectGetter._returnProjectIfPassed project_or_id, callback, (err)->
-			return callback(err) if err?
-			project_id = project_or_id
-			excludes = {}
-			for i in [1..ProjectGetter.EXCLUDE_DEPTH]
-				excludes["rootFolder#{Array(i).join(".folder")}.docs.lines"] = 0
-			db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
-				callback error, projects[0]
+	getProjectWithOnlyFolders: (project_id, callback=(error, project) ->) ->
+		excludes = {}
+		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
+			excludes["rootFolder#{Array(i).join(".folder")}.docs"] = 0
+			excludes["rootFolder#{Array(i).join(".folder")}.fileRefs"] = 0
+		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
+			callback error, projects[0]
 
-	getProjectWithOnlyFolders: (project_or_id, callback=(error, project) ->) ->
-		ProjectGetter._returnProjectIfPassed project_or_id, callback, (err)->
-			return callback(err) if err?
-			project_id = project_or_id
-			excludes = {}
-			for i in [1..ProjectGetter.EXCLUDE_DEPTH]
-				excludes["rootFolder#{Array(i).join(".folder")}.docs"] = 0
-				excludes["rootFolder#{Array(i).join(".folder")}.fileRefs"] = 0
-			db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
-				callback error, projects[0]
 
-	getProject: (project_or_id, projection, callback = (error, project) ->) ->
-		if !project_or_id?
-			return callback("no id or project provided")
+	getProject: (query, projection, callback = (error, project) ->) ->
+		if !query?
+			return callback("no query provided")
 
 		if typeof(projection) == "function"
 			callback = projection
 
-		ProjectGetter._returnProjectIfPassed project_or_id, callback, (err)->
+		if typeof query == "string"
+			query = _id: ObjectId(query)
+		else if query instanceof ObjectId
+			query = _id: query
+		else if query?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
+			query = _id:  ObjectId(query.toString())
+		else
+			err = new Error("malformed get request")
+			logger.log query:query, err:err, type:typeof(query), "malformed get request"
+			return callback(err)
 
-			if typeof project_or_id == "string"
-				query = _id: ObjectId(project_or_id)
-			else if project_or_id instanceof ObjectId
-				query = _id: project_or_id
-			else if project_or_id?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
-				query = _id:  ObjectId(project_or_id.toString())
-			else
-				err = new Error("malformed get request")
-				logger.log project_or_id:project_or_id, err:err, type:typeof(project_or_id), "malformed get request"
+		db.projects.find query, projection, (err, project)->
+			if err?
+				logger.err err:err, query:query, projection:projection, "error getting project"
 				return callback(err)
-
-			db.projects.find query, projection, (err, project)->
-				if err?
-					logger.err err:err, query:query, projection:projection, "error getting project"
-					return callback(err)
-				callback(null, project?[0])
+			callback(null, project?[0])
 
 	populateProjectWithUsers: (project, callback=(error, project) ->) ->
 		# eventually this should be in a UserGetter.getUser module
