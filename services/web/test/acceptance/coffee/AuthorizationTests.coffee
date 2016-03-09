@@ -287,7 +287,7 @@ describe "Authorization", ->
 			expect_read_access @other1, @project_id, done
 			
 		it "should allow a user write access to its content", (done) ->
-			expect_content_write_access @owner, @project_id, done
+			expect_content_write_access @other1, @project_id, done
 			
 		it "should not allow a user write access to its settings"#, (done) ->
 		# 	expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
@@ -299,11 +299,41 @@ describe "Authorization", ->
 			expect_read_access @anon, @project_id, done
 			
 		it "should allow an anonymous user write access to its content", (done) ->
-			expect_content_write_access @owner, @project_id, done
+			expect_content_write_access @anon, @project_id, done
 			
 		it "should not allow an anonymous user write access to its settings", (done) ->
 			expect_no_settings_write_access @anon, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow an anonymous user admin access to it", (done) ->
 			expect_no_admin_access @anon, @project_id, redirect_to: "/restricted", done
+
+	describe "public read-only project", ->
+		before (done) ->
+			@owner.createProject "public-ro-project", (error, project_id) =>
+				return done(error) if error?
+				@project_id = project_id
+				@owner.makePublic @project_id, "readOnly", done
+
+		it "should allow a user read access to it", (done) ->
+			expect_read_access @other1, @project_id, done
+			
+		it "should not allow a user write access to its content", (done) ->
+			expect_no_content_write_access @other1, @project_id, done
+			
+		it "should not allow a user write access to its settings"#, (done) ->
+		# 	expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
 		
+		it "should not allow a user admin access to it", (done) ->
+			expect_no_admin_access @other1, @project_id, redirect_to: "/restricted", done
+
+		it "should allow an anonymous user read access to it", (done) ->
+			expect_read_access @anon, @project_id, done
+			
+		it "should not allow an anonymous user write access to its content", (done) ->
+			expect_no_content_write_access @anon, @project_id, done
+			
+		it "should not allow an anonymous user write access to its settings", (done) ->
+			expect_no_settings_write_access @anon, @project_id, redirect_to: "/restricted", done
+			
+		it "should not allow an anonymous user admin access to it", (done) ->
+			expect_no_admin_access @anon, @project_id, redirect_to: "/restricted", done
