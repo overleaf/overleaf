@@ -265,50 +265,74 @@ describe "UpdatesManager", ->
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
-	# describe "getDocUpdates", ->
-	# 	beforeEach ->
-	# 		@updates = ["mock-updates"]
-	# 		@options = { to: "mock-to", limit: "mock-limit" }
-	# 		@MongoManager.getDocUpdates = sinon.stub().callsArgWith(2, null, @updates)
-	# 		@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
-	# 		@UpdatesManager.getDocUpdates @project_id, @doc_id, @options, @callback
+	describe "getDocUpdates", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { to: "mock-to", limit: "mock-limit" }
+			@PackManager.getOpsByVersionRange = sinon.stub().callsArgWith(4, null, @updates)
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
+			@UpdatesManager.getDocUpdates @project_id, @doc_id, @options, @callback
 
-	# 	it "should process outstanding updates", ->
-	# 		@UpdatesManager.processUncompressedUpdatesWithLock
-	# 			.calledWith(@project_id, @doc_id)
-	# 			.should.equal true
+		it "should process outstanding updates", ->
+			@UpdatesManager.processUncompressedUpdatesWithLock
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
 
-	# 	it "should get the updates from the database", ->
-	# 		@MongoManager.getDocUpdates
-	# 			.calledWith(@doc_id, @options)
-	# 			.should.equal true
+		it "should get the updates from the database", ->
+			@PackManager.getOpsByVersionRange
+				.calledWith(@project_id, @doc_id, @options.from, @options.to)
+				.should.equal true
 
-	# 	it "should return the updates", ->
-	# 		@callback
-	# 			.calledWith(null, @updates)
-	# 			.should.equal true
+		it "should return the updates", ->
+			@callback
+				.calledWith(null, @updates)
+				.should.equal true
 
-	# describe "getDocUpdatesWithUserInfo", ->
-	# 	beforeEach ->
-	# 		@updates = ["mock-updates"]
-	# 		@options = { to: "mock-to", limit: "mock-limit" }
-	# 		@updatesWithUserInfo = ["updates-with-user-info"]
-	# 		@UpdatesManager.getDocUpdates = sinon.stub().callsArgWith(3, null, @updates)
-	# 		@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
-	# 		@UpdatesManager.getDocUpdatesWithUserInfo @project_id, @doc_id, @options, @callback
+	describe "getDocUpdatesWithUserInfo", ->
+		beforeEach ->
+			@updates = ["mock-updates"]
+			@options = { to: "mock-to", limit: "mock-limit" }
+			@updatesWithUserInfo = ["updates-with-user-info"]
+			@UpdatesManager.getDocUpdates = sinon.stub().callsArgWith(3, null, @updates)
+			@UpdatesManager.fillUserInfo = sinon.stub().callsArgWith(1, null, @updatesWithUserInfo)
+			@UpdatesManager.getDocUpdatesWithUserInfo @project_id, @doc_id, @options, @callback
 
-	# 	it "should get the updates", ->
-	# 		@UpdatesManager.getDocUpdates
-	# 			.calledWith(@project_id, @doc_id, @options)
-	# 			.should.equal true
+		it "should get the updates", ->
+			@UpdatesManager.getDocUpdates
+				.calledWith(@project_id, @doc_id, @options)
+				.should.equal true
 
-	# 	it "should file the updates with the user info", ->
-	# 		@UpdatesManager.fillUserInfo
-	# 			.calledWith(@updates)
-	# 			.should.equal true
+		it "should file the updates with the user info", ->
+			@UpdatesManager.fillUserInfo
+				.calledWith(@updates)
+				.should.equal true
 
-	# 	it "should return the updates with the filled details", ->
-	# 		@callback.calledWith(null, @updatesWithUserInfo).should.equal true
+		it "should return the updates with the filled details", ->
+			@callback.calledWith(null, @updatesWithUserInfo).should.equal true
+
+	describe "processUncompressedUpdatesForProject", ->
+		beforeEach (done) ->
+			@doc_ids = ["mock-id-1", "mock-id-2"]
+			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
+			@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
+			@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
+				@callback()
+				done()
+
+		it "should get all the docs with history ops", ->
+			@RedisManager.getDocIdsWithHistoryOps
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should process the doc ops for the each doc_id", ->
+			for doc_id in @doc_ids
+				@UpdatesManager.processUncompressedUpdatesWithLock
+					.calledWith(@project_id, doc_id)
+					.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
 
 	# describe "getProjectUpdates", ->
 	# 	beforeEach ->
@@ -333,28 +357,6 @@ describe "UpdatesManager", ->
 	# 			.calledWith(null, @updates)
 	# 			.should.equal true
 
-	# describe "processUncompressedUpdatesForProject", ->
-	# 	beforeEach (done) ->
-	# 		@doc_ids = ["mock-id-1", "mock-id-2"]
-	# 		@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
-	# 		@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
-	# 		@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
-	# 			@callback()
-	# 			done()
-
-	# 	it "should get all the docs with history ops", ->
-	# 		@RedisManager.getDocIdsWithHistoryOps
-	# 			.calledWith(@project_id)
-	# 			.should.equal true
-
-	# 	it "should process the doc ops for the each doc_id", ->
-	# 		for doc_id in @doc_ids
-	# 			@UpdatesManager.processUncompressedUpdatesWithLock
-	# 				.calledWith(@project_id, doc_id)
-	# 				.should.equal true
-
-	# 	it "should call the callback", ->
-	# 		@callback.called.should.equal true
 
 	# describe "getProjectUpdatesWithUserInfo", ->
 	# 	beforeEach ->
@@ -571,200 +573,200 @@ describe "UpdatesManager", ->
 	# 				op: "mock-op-2"
 	# 			}]
 
-	# describe "_summarizeUpdates", ->
-	# 	beforeEach ->
-	# 		@now = Date.now()
-	# 		@user_1 = { id: "mock-user-1" }
-	# 		@user_2 = { id: "mock-user-2" }
+	describe "_summarizeUpdates", ->
+		beforeEach ->
+			@now = Date.now()
+			@user_1 = { id: "mock-user-1" }
+			@user_2 = { id: "mock-user-2" }
 
-	# 	it "should concat updates that are close in time", ->
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now + 20
-	# 				end_ts:   @now + 30
-	# 			v: 5
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_2
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}]
+		it "should concat updates that are close in time", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_2.id
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]
 
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 4
-	# 					toV: 5
-	# 			meta:
-	# 				users: [@user_1, @user_2]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 30
-	# 		}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					user_ids: [@user_1.id, @user_2.id]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
 
-	# 	it "should leave updates that are far apart in time", ->
-	# 		oneDay = 1000 * 60 * 60 * 24
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_2
-	# 				start_ts: @now + oneDay
-	# 				end_ts:   @now + oneDay + 10
-	# 			v: 5
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}]
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 5
-	# 					toV: 5
-	# 			meta:
-	# 				users: [@user_2]
-	# 				start_ts: @now + oneDay
-	# 				end_ts:   @now + oneDay + 10
-	# 		}, {
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 4
-	# 					toV: 4
-	# 			meta:
-	# 				users: [@user_1]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 		}]
+		it "should leave updates that are far apart in time", ->
+			oneDay = 1000 * 60 * 60 * 24
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_2.id
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 5
+						toV: 5
+				meta:
+					user_ids: [@user_2.id]
+					start_ts: @now + oneDay
+					end_ts:   @now + oneDay + 10
+			}, {
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 4
+				meta:
+					user_ids: [@user_1.id]
+					start_ts: @now
+					end_ts:   @now + 10
+			}]
 
-	# 	it "should concat onto existing summarized updates", ->
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-2"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now + 20
-	# 				end_ts:   @now + 30
-	# 			v: 5
-	# 		}, {
-	# 			doc_id: "doc-id-2"
-	# 			meta:
-	# 				user: @user_2
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}], [{
-	# 			docs: 
-	# 				"doc-id-1": 
-	# 					fromV: 6
-	# 					toV: 8
-	# 			meta:
-	# 				users: [@user_1]
-	# 				start_ts: @now + 40
-	# 				end_ts:   @now + 50
-	# 		}]
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					toV: 8
-	# 					fromV: 6
-	# 				"doc-id-2":
-	# 					toV: 5
-	# 					fromV: 4
-	# 			meta:
-	# 				users: [@user_1, @user_2]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 50
-	# 		}]
+		it "should concat onto existing summarized updates", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-2"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-2"
+				meta:
+					user_id: @user_2.id
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}], [{
+				docs: 
+					"doc-id-1": 
+						fromV: 6
+						toV: 8
+				meta:
+					user_ids: [@user_1.id]
+					start_ts: @now + 40
+					end_ts:   @now + 50
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						toV: 8
+						fromV: 6
+					"doc-id-2":
+						toV: 5
+						fromV: 4
+				meta:
+					user_ids: [@user_1.id, @user_2.id]
+					start_ts: @now
+					end_ts:   @now + 50
+			}]
 
-	# 	it "should include null user values", ->
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now + 20
-	# 				end_ts:   @now + 30
-	# 			v: 5
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: null
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}]
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 4
-	# 					toV: 5
-	# 			meta:
-	# 				users: [@user_1, null]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 30
-	# 		}]
+		it "should include null user values", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: null
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					user_ids: [@user_1.id, null]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
 
-	# 	it "should include null user values, when the null is earlier in the updates list", ->
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: null
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now + 20
-	# 				end_ts:   @now + 30
-	# 			v: 5
-	# 		}]
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 4
-	# 					toV: 5
-	# 			meta:
-	# 				users: [null, @user_1]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 30
-	# 		}]
+		it "should include null user values, when the null is earlier in the updates list", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user_id: null
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					user_ids: [null, @user_1.id]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
 
-	# 	it "should roll several null user values into one", ->
-	# 		result = @UpdatesManager._summarizeUpdates [{
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: @user_1
-	# 				start_ts: @now + 20
-	# 				end_ts:   @now + 30
-	# 			v: 5
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: null
-	# 				start_ts: @now
-	# 				end_ts:   @now + 10
-	# 			v: 4
-	# 		}, {
-	# 			doc_id: "doc-id-1"
-	# 			meta:
-	# 				user: null
-	# 				start_ts: @now + 2
-	# 				end_ts:   @now + 4
-	# 			v: 4
-	# 		}]
-	# 		expect(result).to.deep.equal [{
-	# 			docs:
-	# 				"doc-id-1":
-	# 					fromV: 4
-	# 					toV: 5
-	# 			meta:
-	# 				users: [@user_1, null]
-	# 				start_ts: @now
-	# 				end_ts:   @now + 30
-	# 		}]
+		it "should roll several null user values into one", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: null
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: null
+					start_ts: @now + 2
+					end_ts:   @now + 4
+				v: 4
+			}]
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 5
+				meta:
+					user_ids: [@user_1.id, null]
+					start_ts: @now
+					end_ts:   @now + 30
+			}]
