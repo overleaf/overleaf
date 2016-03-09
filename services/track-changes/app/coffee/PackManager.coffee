@@ -407,10 +407,12 @@ module.exports = PackManager =
 		PackManager.getPackFromIndex doc_id, pack_id, (err, result) ->
 			return callback(err) if err?
 			return callback new Error("pack not found in index") if not result?
-			if result.inS3?
-				callback new Error("pack archiving already in progress")
+			if result.inS3
+				return callback new Error("pack archiving already done")
+			else if result.inS3?
+				return callback new Error("pack archiving already in progress")
 			else
-				callback()
+				return callback()
 
 	markPackAsArchiveInProgress: (project_id, doc_id, pack_id, callback) ->
 		logger.log {project_id, doc_id}, "marking pack as archive in progress status"
