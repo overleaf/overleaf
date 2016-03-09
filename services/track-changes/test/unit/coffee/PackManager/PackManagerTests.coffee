@@ -237,3 +237,64 @@ describe "PackManager", ->
 				it "should call the callback", ->
 					@callback.called.should.equal true
 
+
+	describe "getOpsByVersionRange", ->
+
+	describe "loadPacksByVersionRange", ->
+
+	describe "fetchPacksIfNeeded", ->
+
+	describe "makeProjectIterator", ->
+
+	describe "getPackById", ->
+
+	describe "increaseTTL", ->
+
+	describe "getIndex", ->
+
+	describe "getPackFromIndex", ->
+# getLastPackFromIndex:
+# getIndexWithKeys
+# initialiseIndex
+# updateIndex
+# findCompletedPacks
+# findUnindexedPacks
+# insertPacksIntoIndexWithLock
+# _insertPacksIntoIndex
+# archivePack
+# checkArchivedPack
+# processOldPack
+# 	updateIndexIfNeeded
+# 	findUnarchivedPacks
+
+	describe "checkArchiveNotInProgress", ->
+
+		describe "when an archive is in progress", ->
+			beforeEach ->
+				@db.docHistoryIndex =
+					findOne: sinon.stub().callsArgWith(2, null, {inS3:false})
+				@PackManager.checkArchiveNotInProgress @project_id, @doc_id, @pack_id, @callback
+			it "should call the callback", ->
+				@callback.called.should.equal true
+			it "should return an error", ->
+				@callback.calledWith(new Error()).should.equal true
+
+		describe "when an archive is completed", ->
+			beforeEach ->
+				@db.docHistoryIndex =
+					findOne: sinon.stub().callsArgWith(2, null, {inS3:true})
+				@PackManager.checkArchiveNotInProgress @project_id, @doc_id, @pack_id, @callback
+			it "should call the callback", ->
+				@callback.called.should.equal true
+			it "should return an error", ->
+				@callback.calledWith(new Error()).should.equal true
+
+		describe "when the archive has not started or completed", ->
+			beforeEach ->
+				@db.docHistoryIndex =
+					findOne: sinon.stub().callsArgWith(2, null, {})
+				@PackManager.checkArchiveNotInProgress @project_id, @doc_id, @pack_id, @callback
+			it "should call the callback", ->
+				@callback.called.should.equal true
+			it "should return with no error", ->
+				@callback.calledWith(undefined).should.equal true
