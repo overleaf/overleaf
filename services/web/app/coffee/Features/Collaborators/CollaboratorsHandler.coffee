@@ -1,6 +1,5 @@
 UserCreator = require('../User/UserCreator')
 Project = require("../../models/Project").Project
-ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 mimelib = require("mimelib")
 logger = require('logger-sharelatex')
 UserGetter = require "../User/UserGetter"
@@ -108,6 +107,7 @@ module.exports = CollaboratorsHandler =
 			Project.update { _id: project_id }, { $addToSet: level }, (error) ->
 				return callback(error) if error?
 				# Flush to TPDS in background to add files to collaborator's Dropbox
+				ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 				ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, (error) ->
 					if error?
 						logger.error {err: error, project_id, user_id}, "error flushing to TPDS after adding collaborator"
