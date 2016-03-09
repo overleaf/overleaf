@@ -119,9 +119,7 @@ module.exports = UpdatesManager =
 			#console.log "options", options
 			PackManager.getOpsByVersionRange project_id, doc_id, options.from, options.to, (error, updates) ->
 				return callback(error) if error?
-				UpdatesManager.fillUserInfo updates, (err, results) ->
-					return callback(err) if err?
-					callback null, results
+				callback null, updates
 
 	getDocUpdatesWithUserInfo: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.getDocUpdates project_id, doc_id, options, (error, updates) ->
