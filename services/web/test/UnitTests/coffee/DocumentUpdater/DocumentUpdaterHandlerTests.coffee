@@ -8,7 +8,7 @@ path = require 'path'
 _ = require 'underscore'
 modulePath = path.join __dirname, '../../../../app/js/Features/DocumentUpdater/DocumentUpdaterHandler'
 
-describe 'Flushing documents :', ->
+describe 'DocumentUpdaterHandler - Flushing documents :', ->
 
 	beforeEach ->
 		@project_id = "project-id-923"
@@ -33,6 +33,9 @@ describe 'Flushing documents :', ->
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}
 			'redis-sharelatex' : createClient: () => @rclient
+			"../../infrastructure/Metrics": 
+				Timer:->
+					done:->
 
 	describe 'queueChange', ->
 		beforeEach ->

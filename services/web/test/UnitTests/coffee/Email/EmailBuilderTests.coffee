@@ -9,7 +9,7 @@ _ = require('underscore')
 _.templateSettings =
   interpolate: /\{\{(.+?)\}\}/g
 
-describe "Email Templator ", ->
+describe "EmailBuilder", ->
 
 	beforeEach ->
 

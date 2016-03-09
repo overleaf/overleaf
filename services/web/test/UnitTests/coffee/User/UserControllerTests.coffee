@@ -55,7 +55,7 @@ describe "UserController", ->
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"settings-sharelatex": @settings
 			"logger-sharelatex": {log:->}
-
+			"../../infrastructure/Metrics": inc:->
 
 		@req = 
 			session: 
@@ -178,7 +178,6 @@ describe "UserController", ->
 				.should.equal true
 		
 		it "should return the user and activation url", ->
-			console.log @res.json.args
 			@res.json
 				.calledWith({
 					email: @email,

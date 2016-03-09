@@ -14,6 +14,8 @@ describe 'TpdsController', ->
 			'logger-sharelatex':
 				log:->
 				err:->
+			"../../infrastructure/Metrics": inc:->
+				
 		@user_id = "dsad29jlkjas"
 
 	describe 'getting an update', ->

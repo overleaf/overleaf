@@ -1,10 +1,7 @@
 SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
-
 ErrorsController = require("../Errors/ErrorController")
-settings = require("settings-sharelatex")
-
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 _ = require("underscore")
 
