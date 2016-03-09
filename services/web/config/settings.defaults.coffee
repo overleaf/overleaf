@@ -130,7 +130,7 @@ module.exports =
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
 
-	maxFilesPerProject: 200
+	maxEntitiesPerProject: 2000
 	
 	# Security
 	# --------

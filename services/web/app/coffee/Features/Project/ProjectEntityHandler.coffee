@@ -503,7 +503,7 @@ module.exports = ProjectEntityHandler =
 		if !folder_id?
 			folder_id = project.rootFolder[0]._id
 		ProjectEntityHandler._countElements project, (err, count)->
-			if count > settings.maxFilesPerProject
+			if count > settings.maxEntitiesPerProject
 				logger.warn project_id:project._id, "project too big, stopping insertions"
 				return callback("project_has_to_many_files")
 			projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
