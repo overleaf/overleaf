@@ -261,7 +261,7 @@ module.exports = PackManager =
 				callback()
 
 	findCompletedPacks: (project_id, doc_id, callback) ->
-		query = { doc_id: ObjectId(doc_id.toString()) }
+		query = { doc_id: ObjectId(doc_id.toString()), expiresAt: {$exists:false} }
 		db.docHistory.find(query, {pack:false}).sort {v:1}, (err, packs) ->
 			return callback(err) if err?
 			return callback() if not packs?
