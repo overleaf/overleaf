@@ -221,7 +221,7 @@ module.exports = UpdatesManager =
 			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
 				# check if the user in this update is already present in the earliest update,
 				# if not, add them to the users list of the earliest update
-				earliestUpdate.meta.user_ids = _.union earliestUpdate.meta.user_ids, update.meta.user_id
+				earliestUpdate.meta.user_ids = _.union earliestUpdate.meta.user_ids, [update.meta.user_id]
 
 				doc_id = update.doc_id.toString()
 				doc = earliestUpdate.docs[doc_id]
