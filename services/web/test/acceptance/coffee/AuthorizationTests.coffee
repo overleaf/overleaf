@@ -49,6 +49,15 @@ class User
 			return callback(error) if error?
 			callback(null, body.user)
 	
+	makePublic: (project_id, level, callback = (error) ->) ->
+		@request.post {
+			url: "/project/#{project_id}/settings",
+			json:
+				publicAccessLevel: level
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback(null)
+
 	getCsrfToken: (callback = (error) ->) ->
 		@request.get {
 			url: "/register"
@@ -77,7 +86,7 @@ try_read_access = (requester, project_id, test, callback) ->
 				cb()
 	], callback
 
-try_write_access = (requester, project_id, test, callback) ->
+try_settings_write_access = (requester, project_id, test, callback) ->
 	async.parallel [
 		(cb) ->
 			requester.post {
@@ -105,11 +114,13 @@ try_admin_access = (requester, project_id, test, callback) ->
 
 expect_read_access = (requester, project_id, callback) ->
 	try_read_access(requester, project_id, (response, body) ->
+		if response.statusCode not in [200,204]
+			console.log response.statusCode, response.headers
 		expect(response.statusCode).to.be.oneOf [200, 204]
 	, callback)
 
-expect_write_access = (requester, project_id, callback) ->
-	try_write_access(requester, project_id, (response, body) ->
+expect_settings_write_access = (requester, project_id, callback) ->
+	try_settings_write_access(requester, project_id, (response, body) ->
 		expect(response.statusCode).to.be.oneOf [200, 204]
 	, callback)
 
@@ -118,40 +129,22 @@ expect_admin_access = (requester, project_id, callback) ->
 		expect(response.statusCode).to.be.oneOf [200, 204]
 	, callback)
 
-expect_no_read_access = (requester, project_id, callback) ->
+expect_no_read_access = (requester, project_id, options, callback) ->
 	try_read_access(requester, project_id, (response, body) ->
 		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/restricted"
+		expect(response.headers.location).to.equal options.redirect_to
 	, callback)
 
-expect_no_write_access = (requester, project_id, callback) ->
-	try_write_access(requester, project_id, (response, body) ->
+expect_no_settings_write_access = (requester, project_id, options, callback) ->
+	try_settings_write_access(requester, project_id, (response, body) ->
 		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/restricted"
+		expect(response.headers.location).to.equal options.redirect_to
 	, callback)
 
-expect_no_admin_access = (requester, project_id, callback) ->
+expect_no_admin_access = (requester, project_id, options, callback) ->
 	try_admin_access(requester, project_id, (response, body) ->
 		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/restricted"
-	, callback)
-
-expect_no_anonymous_read_access = (requester, project_id, callback) ->
-	try_read_access(requester, project_id, (response, body) ->
-		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/login"
-	, callback)
-
-expect_no_anonymous_write_access = (requester, project_id, callback) ->
-	try_write_access(requester, project_id, (response, body) ->
-		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/login"
-	, callback)
-
-expect_no_anonymous_admin_access = (requester, project_id, callback) ->
-	try_admin_access(requester, project_id, (response, body) ->
-		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.equal "/login"
+		expect(response.headers.location).to.equal options.redirect_to
 	, callback)
 
 describe "Authorization", ->
@@ -178,29 +171,29 @@ describe "Authorization", ->
 		it "should allow the owner read access to it", (done) ->
 			expect_read_access @owner.request, @project_id, done
 			
-		it "should allow the owner write access to it", (done) ->
-			expect_write_access @owner.request, @project_id, done
+		it "should allow the owner write access to its settings", (done) ->
+			expect_settings_write_access @owner.request, @project_id, done
 		
 		it "should allow the owner admin access to it", (done) ->
 			expect_admin_access @owner.request, @project_id, done
 			
 		it "should not allow another user read access to it", (done) ->
-			expect_no_read_access(@other1.request, @project_id, done)
+			expect_no_read_access @other1.request, @project_id, redirect_to: "/restricted", done
 			
-		it "should not allow another user write access to it", (done) ->
-			expect_no_write_access(@other1.request, @project_id, done)
+		it "should not allow another user write access to its settings", (done) ->
+			expect_no_settings_write_access @other1.request, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow another user admin access to it", (done) ->
-			expect_no_admin_access(@other1.request, @project_id, done)
+			expect_no_admin_access @other1.request, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow anonymous user read access to it", (done) ->
-			expect_no_anonymous_read_access(@anon.request, @project_id, done)
+			expect_no_read_access @other1.request, @project_id, redirect_to: "/restricted", done
 			
-		it "should not allow anonymous user write access to it", (done) ->
-			expect_no_anonymous_write_access(@anon.request, @project_id, done)
+		it "should not allow anonymous user write access to its settings", (done) ->
+			expect_no_settings_write_access @other1.request, @project_id, redirect_to: "/restricted", done
 			
-		it "should not allow anonymous user write access to it", (done) ->
-			expect_no_anonymous_admin_access(@anon.request, @project_id, done)
+		it "should not allow anonymous user admin access to it", (done) ->
+			expect_no_admin_access @other1.request, @project_id, redirect_to: "/restricted", done
 
 	describe "shared project", ->
 		before (done) ->
@@ -218,19 +211,43 @@ describe "Authorization", ->
 		it "should allow the read-only user read access to it", (done) ->
 			expect_read_access @ro_user.request, @project_id, done
 			
-		it "should not allow the read-only user write access to it", (done) ->
-			expect_no_write_access @ro_user.request, @project_id, done
+		it "should not allow the read-only user write access to its settings", (done) ->
+			expect_no_settings_write_access @ro_user.request, @project_id, redirect_to: "/restricted", done
 		
 		it "should not allow the read-only user admin access to it", (done) ->
-			expect_no_admin_access @ro_user.request, @project_id, done
+			expect_no_admin_access @ro_user.request, @project_id, redirect_to: "/restricted", done
 
 		it "should allow the read-write user read access to it", (done) ->
 			expect_read_access @rw_user.request, @project_id, done
 
-		it "should allow the read-write user write access to it", (done) ->
-			expect_write_access @rw_user.request, @project_id, done
+		it "should allow the read-write user write access to its settings", (done) ->
+			expect_settings_write_access @rw_user.request, @project_id, done
 
 		it "should not allow the read-write user admin access to it", (done) ->
-			expect_no_admin_access @rw_user.request, @project_id, done
+			expect_no_admin_access @rw_user.request, @project_id, redirect_to: "/restricted", done
 
+	describe "public read-write project", ->
+		before (done) ->
+			@owner.createProject "public-rw-project", (error, project_id) =>
+				return done(error) if error?
+				@project_id = project_id
+				@owner.makePublic @project_id, "readAndWrite", done
+
+		it "should allow a user read access to it", (done) ->
+			expect_read_access @other1.request, @project_id, done
+			
+		it "should not allow a user write access to its settings"#, (done) ->
+		# 	expect_no_settings_write_access @other1.request, @project_id, redirect_to: "/restricted", done
+		
+		it "should not allow a user admin access to it", (done) ->
+			expect_no_admin_access @other1.request, @project_id, redirect_to: "/restricted", done
+
+		it "should allow anonymous user read access to it", (done) ->
+			expect_read_access @anon.request, @project_id, done
+			
+		it "should not allow anonymous user write access to its settings", (done) ->
+			expect_no_settings_write_access @anon.request, @project_id, redirect_to: "/restricted", done
+			
+		it "should not allow anonymous user admin access to it", (done) ->
+			expect_no_admin_access @anon.request, @project_id, redirect_to: "/restricted", done
 		
