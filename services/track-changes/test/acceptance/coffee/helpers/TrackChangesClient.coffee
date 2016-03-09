@@ -74,16 +74,16 @@ module.exports = TrackChangesClient =
 			response.statusCode.should.equal 204
 			callback null
 
-	archiveProject: (project_id, callback = (error) ->) ->
+	pushDocHistory: (project_id, doc_id, callback = (error) ->) ->
 		request.post {
-			url: "http://localhost:3015/project/#{project_id}/archive"
+			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/push"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback(error)
 
-	unarchiveProject: (project_id, callback = (error) ->) ->
+	pullDocHistory: (project_id, doc_id, callback = (error) ->) ->
 		request.post {
-			url: "http://localhost:3015/project/#{project_id}/unarchive"
+			url: "http://localhost:3015/project/#{project_id}/doc/#{doc_id}/pull"
 		}, (error, response, body) =>
 			response.statusCode.should.equal 204
 			callback(error)
@@ -91,12 +91,12 @@ module.exports = TrackChangesClient =
 	buildS3Options: (content, key)->
 		return {
 				aws:
-					key: Settings.filestore.s3.key
-					secret: Settings.filestore.s3.secret
-					bucket: Settings.filestore.stores.user_files
+					key: Settings.trackchanges.s3.key
+					secret: Settings.trackchanges.s3.secret
+					bucket: Settings.trackchanges.stores.doc_history
 				timeout: 30 * 1000
 				json: content
-				uri:"https://#{Settings.filestore.stores.user_files}.s3.amazonaws.com/#{key}"
+				uri:"https://#{Settings.trackchanges.stores.doc_history}.s3.amazonaws.com/#{key}"
 		}
 
 	getS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->

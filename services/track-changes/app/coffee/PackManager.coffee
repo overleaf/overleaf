@@ -349,6 +349,17 @@ module.exports = PackManager =
 				else
 					logger.err {pack, result, jsondiff: JSON.stringify(pack) is JSON.stringify(result)}, "difference when comparing packs"
 					callback new Error("pack retrieved from s3 does not match pack in mongo")
+	# Extra methods to test archive/unarchive for a doc_id
+
+	pushOldPacks: (project_id, doc_id, callback) ->
+		PackManager.findCompletedPacks project_id, doc_id, (err, packs) ->
+			return callback(err) if err?
+			return callback() if not packs?.length
+			PackManager.processOldPack project_id, doc_id, packs[0]._id, callback
+
+	pullOldPacks: (project_id, doc_id, callback) ->
+		PackManager.loadPacksByVersionRange project_id, doc_id, null, null, callback
+
 
 	# Processing old packs via worker
 

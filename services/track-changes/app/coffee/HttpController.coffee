@@ -77,6 +77,22 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send 204
 
+	pushDocHistory: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		doc_id = req.params.doc_id
+		logger.log {project_id, doc_id}, "pushing all finalised changes to s3"
+		PackManager.pushOldPacks project_id, doc_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
+	pullDocHistory: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		doc_id = req.params.doc_id
+		logger.log {project_id, doc_id}, "pulling all packs from s3"
+		PackManager.pullOldPacks project_id, doc_id, (error) ->
+			return next(error) if error?
+			res.send 204
+
 	healthCheck: (req, res)->
 		HealthChecker.check (err)->
 			if err?
