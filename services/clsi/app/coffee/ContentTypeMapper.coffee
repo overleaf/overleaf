@@ -6,7 +6,7 @@ Path = require 'path'
 module.exports = ContentTypeMapper =
 	map: (path) ->
 		switch Path.extname(path)
-			when '.txt', '.html', '.js', '.css'
+			when '.txt', '.html', '.js', '.css', '.svg'
 				return 'text/plain'
 			when '.csv'
 				return 'text/csv'
@@ -20,7 +20,5 @@ module.exports = ContentTypeMapper =
 				return 'image/tiff'
 			when '.gif'
 				return 'image/gif'
-			when '.svg'
-				return 'image/svg+xml'
 			else
 				return 'application/octet-stream'

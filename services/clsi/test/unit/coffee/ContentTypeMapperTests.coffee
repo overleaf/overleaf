@@ -49,3 +49,7 @@ describe 'ContentTypeMapper', ->
 			it 'should map .jpeg to image/jpeg', ->
 				content_type = @ContentTypeMapper.map('example.jpeg')
 				content_type.should.equal 'image/jpeg'
+				
+			it 'should map .svg to text/plain to protect against XSS (SVG can execute JS)', ->
+				content_type = @ContentTypeMapper.map('example.svg')
+				content_type.should.equal 'text/plain'
