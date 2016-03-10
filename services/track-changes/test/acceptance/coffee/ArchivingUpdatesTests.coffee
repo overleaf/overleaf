@@ -104,10 +104,8 @@ describe "Archiving updates", ->
 		it "should store 1024 doc changes in S3 in one pack", (done) ->
 			db.docHistoryIndex.findOne { _id: ObjectId(@doc_id) }, (error, index) =>
 				throw error if error?
-				console.log "index", index, JSON.stringify(index)
 				pack_id = index.packs[0]._id
 				TrackChangesClient.getS3Doc @project_id, @doc_id, pack_id, (error, doc) =>
-					console.log error, "DOC", doc
 					doc.n.should.equal 1024
 					doc.pack.length.should.equal 1024
 					done()

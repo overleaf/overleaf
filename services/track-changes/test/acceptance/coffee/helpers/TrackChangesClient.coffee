@@ -105,7 +105,6 @@ module.exports = TrackChangesClient =
 		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id+"/pack-"+pack_id)
 		options.encoding = null
 		request.get options, (err, res, body) ->
-			console.log "body", typeof body
 			return callback(error) if error?
 			zlib.gunzip body, (err, result) ->
 				return callback(err) if err?
