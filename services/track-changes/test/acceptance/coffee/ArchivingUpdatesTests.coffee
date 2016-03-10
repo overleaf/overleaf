@@ -42,15 +42,15 @@ describe "Archiving updates", ->
 		sinon.spy MockDocStoreApi, "getAllDoc"
 
 		@updates = []
-		for i in [0..1024+9]
+		for i in [0..512+10]
 			@updates.push {
 				op: [{ i: "a", p: 0 }]
-				meta: { ts: @now - i * @hours, user_id: @user_id }
+				meta: { ts: @now + (i-2048) * @hours, user_id: @user_id }
 				v: 2 * i + 1
 			}
 			@updates.push {
 				op: [{ i: "b", p: 0 }]
-				meta: { ts: @now - i * @hours + 10*@minutes, user_id: @user_id }
+				meta: { ts: @now + (i-2048) * @hours + 10*@minutes, user_id: @user_id }
 				v: 2 * i + 2
 			}
 
@@ -62,8 +62,9 @@ describe "Archiving updates", ->
 
 	after (done) ->
 		MockWebApi.getUserInfo.restore()
-		db.docHistory.remove {project_id: ObjectId(@project_id)}, () ->
-			TrackChangesClient.removeS3Doc @project_id, @doc_id, done
+		db.docHistory.remove {project_id: ObjectId(@project_id)}, () =>
+			db.docHistoryIndex.remove {project_id: ObjectId(@project_id)}, () =>
+				TrackChangesClient.removeS3Doc @project_id, @doc_id, done
 
 	describe "archiving a doc's updates", ->
 		before (done) ->
@@ -97,14 +98,19 @@ describe "Archiving updates", ->
 		it "should have a docHistoryIndex entry with the last version", (done) ->
 			db.docHistoryIndex.findOne { _id: ObjectId(@doc_id) }, (error, index) ->
 				throw error if error?
-				index.packs[0].v_end.should.equal 100
+				index.packs[0].v_end.should.equal 1024
 				done()
 
-		# it "should store twenty doc changes in S3 in one pack", (done) ->
-		# 	TrackChangesClient.getS3Doc @project_id, @doc_id, (error, res, doc) =>
-		# 		doc.length.should.equal 1
-		# 		doc[0].pack.length.should.equal 20
-		# 		done()
+		it "should store 1024 doc changes in S3 in one pack", (done) ->
+			db.docHistoryIndex.findOne { _id: ObjectId(@doc_id) }, (error, index) =>
+				throw error if error?
+				console.log "index", index, JSON.stringify(index)
+				pack_id = index.packs[0]._id
+				TrackChangesClient.getS3Doc @project_id, @doc_id, pack_id, (error, doc) =>
+					console.log error, "DOC", doc
+					doc.n.should.equal 1024
+					doc.pack.length.should.equal 1024
+					done()
 
 	describe "unarchiving a doc's updates", ->
 		before (done) ->

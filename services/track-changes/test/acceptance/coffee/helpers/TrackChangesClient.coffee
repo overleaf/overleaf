@@ -1,3 +1,5 @@
+async = require 'async'
+zlib = require 'zlib'
 request = require "request"
 rclient = require("redis").createClient() # Only works locally for now
 {db, ObjectId} = require "../../../../app/js/mongojs"
@@ -99,10 +101,21 @@ module.exports = TrackChangesClient =
 				uri:"https://#{Settings.trackchanges.stores.doc_history}.s3.amazonaws.com/#{key}"
 		}
 
-	getS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
-		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id)
-		request.get options, callback	
+	getS3Doc: (project_id, doc_id, pack_id, callback = (error, body) ->) ->
+		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id+"/pack-"+pack_id)
+		options.encoding = null
+		request.get options, (err, res, body) ->
+			console.log "body", typeof body
+			return callback(error) if error?
+			zlib.gunzip body, (err, result) ->
+				return callback(err) if err?
+				callback(null, JSON.parse(result.toString()))
 
 	removeS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
-		options = TrackChangesClient.buildS3Options(true, project_id+"/changes-"+doc_id)
-		request.del options, callback	
+		options = TrackChangesClient.buildS3Options(true, "?prefix=" + project_id + "/changes-" +doc_id)
+		request.get options, (error, res, body) ->
+			keys = body.match /[0-9a-f]{24}\/changes-[0-9a-f]{24}\/pack-[0-9a-f]{24}/g
+			async.eachSeries keys, (key, cb) ->
+				options = TrackChangesClient.buildS3Options(true, key)
+				request.del options, cb
+			, callback
