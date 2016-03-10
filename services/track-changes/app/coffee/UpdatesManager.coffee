@@ -205,6 +205,8 @@ module.exports = UpdatesManager =
 				for user_id in user_ids
 					if UpdatesManager._validUserId(user_id)
 						update.meta.users.push fetchedUserInfo[user_id]
+					else
+						update.meta.users.push null
 			callback null, updates
 
 	_validUserId: (user_id) ->
