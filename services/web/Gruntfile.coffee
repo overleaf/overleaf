@@ -143,6 +143,7 @@ module.exports = (grunt) ->
 			acceptance:
 				src: ["test/acceptance/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
+					timeout: 10000
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
 

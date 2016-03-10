@@ -126,18 +126,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.updateProjectSettings @req, @res
 
-		it "should update the public access level", (done) ->
-			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
-			@req.body =
-				publicAccessLevel: @publicAccessLevel = "readonly"
-			@res.sendStatus = (code) =>
-				@EditorController.setPublicAccessLevel
-					.calledWith(@project_id, @publicAccessLevel)
-					.should.equal true
-				code.should.equal 204
-				done()
-			@ProjectController.updateProjectSettings @req, @res
-
 		it "should update the root doc", (done) ->
 			@EditorController.setRootDoc = sinon.stub().callsArg(2)
 			@req.body =
@@ -149,6 +137,19 @@ describe "ProjectController", ->
 				code.should.equal 204
 				done()
 			@ProjectController.updateProjectSettings @req, @res
+	
+	describe "updateProjectAdminSettings", ->
+		it "should update the public access level", (done) ->
+			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
+			@req.body =
+				publicAccessLevel: @publicAccessLevel = "readonly"
+			@res.sendStatus = (code) =>
+				@EditorController.setPublicAccessLevel
+					.calledWith(@project_id, @publicAccessLevel)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectAdminSettings @req, @res
 
 	describe "deleteProject", ->
 		it "should tell the project deleter to archive when forever=false", (done)->

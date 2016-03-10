@@ -103,6 +103,7 @@ module.exports = class Router
 		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
 		webRouter.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
 		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
+		webRouter.post '/project/:Project_id/settings/admin', SecurityManager.requestIsOwner, ProjectController.updateProjectAdminSettings
 
 		webRouter.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
 		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf

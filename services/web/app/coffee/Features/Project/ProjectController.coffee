@@ -42,6 +42,14 @@ module.exports = ProjectController =
 			jobs.push (callback) ->
 				editorController.setRootDoc project_id, req.body.rootDocId, callback
 
+		async.series jobs, (error) ->
+			return next(error) if error?
+			res.sendStatus(204)
+			
+	updateProjectAdminSettings: (req, res, next) ->
+		project_id = req.params.Project_id
+		
+		jobs = []
 		if req.body.publicAccessLevel?
 			jobs.push (callback) ->
 				editorController.setPublicAccessLevel project_id, req.body.publicAccessLevel, callback

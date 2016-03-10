@@ -56,7 +56,7 @@ class User
 	
 	makePublic: (project_id, level, callback = (error) ->) ->
 		@request.post {
-			url: "/project/#{project_id}/settings",
+			url: "/project/#{project_id}/settings/admin",
 			json:
 				publicAccessLevel: level
 		}, (error, response, body) ->
@@ -78,7 +78,7 @@ class User
 			callback()
 
 try_read_access = (user, project_id, test, callback) ->
-	async.parallel [
+	async.series [
 		(cb) ->
 			user.request.get "/project/#{project_id}", (error, response, body) ->
 				return cb(error) if error?
@@ -92,7 +92,7 @@ try_read_access = (user, project_id, test, callback) ->
 	], callback
 
 try_settings_write_access = (user, project_id, test, callback) ->
-	async.parallel [
+	async.series [
 		(cb) ->
 			user.request.post {
 				uri: "/project/#{project_id}/settings"
@@ -105,12 +105,21 @@ try_settings_write_access = (user, project_id, test, callback) ->
 	], callback
 
 try_admin_access = (user, project_id, test, callback) ->
-	async.parallel [
+	async.series [
 		(cb) ->
 			user.request.post {
 				uri: "/project/#{project_id}/rename"
 				json:
 					newProjectName: "new-name"
+			}, (error, response, body) ->
+				return cb(error) if error?
+				test(response, body)
+				cb()
+		(cb) ->
+			user.request.post {
+				uri: "/project/#{project_id}/settings/admin"
+				json:
+					publicAccessLevel: "private"
 			}, (error, response, body) ->
 				return cb(error) if error?
 				test(response, body)
@@ -198,7 +207,7 @@ describe "Authorization", ->
 		@other1 = new User()
 		@other2 = new User()
 		@anon = new User()
-		async.parallel [
+		async.series [
 			(cb) => @owner.login cb
 			(cb) => @other1.login cb
 			(cb) => @other2.login cb
