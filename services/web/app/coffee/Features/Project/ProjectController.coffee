@@ -13,7 +13,7 @@ NotificationsHandler = require("../Notifications/NotificationsHandler")
 LimitationsManager = require("../Subscription/LimitationsManager")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
-SecurityManager = require("../../managers/SecurityManager")
+AuthorizationManager = require("../Authorization/AuthorizationManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
@@ -225,7 +225,8 @@ module.exports = ProjectController =
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
-			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
+			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, canAccess, privilegeLevel)->
+				return next(error) if error?
 				if !canAccess
 					return res.sendStatus 401
 

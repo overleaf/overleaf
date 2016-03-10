@@ -1,4 +1,4 @@
-SecurityManager     = require '../../managers/SecurityManager'
+AuthenticationController = require '../Authentication/AuthenticationController'
 SubscriptionHandler  = require './SubscriptionHandler'
 PlansLocator = require("./PlansLocator")
 SubscriptionFormatters = require("./SubscriptionFormatters")
@@ -32,7 +32,7 @@ module.exports = SubscriptionController =
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->
-		SecurityManager.getCurrentUser req, (error, user) =>
+		AuthenticationController.getLoggedInUser req, (error, user) =>
 			return next(error) if error?
 			plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
 			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
@@ -81,7 +81,7 @@ module.exports = SubscriptionController =
 
 
 	userSubscriptionPage: (req, res, next) ->
-		SecurityManager.getCurrentUser req, (error, user) =>
+		AuthenticationController.getLoggedInUser req, (error, user) =>
 			return next(error) if error?
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
 				groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
@@ -110,7 +110,7 @@ module.exports = SubscriptionController =
 
 
 	userCustomSubscriptionPage: (req, res, next)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
 				res.render "subscriptions/custom_account",
 					title: "your_subscription"
@@ -118,7 +118,7 @@ module.exports = SubscriptionController =
 
 
 	editBillingDetailsPage: (req, res, next) ->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return next(error) if error?
 			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
 				if !hasSubscription
@@ -139,7 +139,7 @@ module.exports = SubscriptionController =
 								id : user.id
 
 	createSubscription: (req, res, next)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return callback(error) if error?
 			recurly_token_id = req.body.recurly_token_id
 			subscriptionDetails = req.body.subscriptionDetails
@@ -151,14 +151,14 @@ module.exports = SubscriptionController =
 				res.sendStatus 201
 
 	successful_subscription: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) =>
+		AuthenticationController.getLoggedInUser req, (error, user) =>
 			SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription) ->
 				res.render "subscriptions/successful_subscription",
 					title: "thank_you"
 					subscription:subscription
 
 	cancelSubscription: (req, res, next) ->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			logger.log user_id:user._id, "canceling subscription"
 			return next(error) if error?
 			SubscriptionHandler.cancelSubscription user, (err)->
@@ -167,7 +167,7 @@ module.exports = SubscriptionController =
 				res.redirect "/user/subscription"
  
 	updateSubscription: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return next(error) if error?
 			planCode = req.body.plan_code
 			logger.log planCode: planCode, user_id:user._id, "updating subscription"
@@ -177,7 +177,7 @@ module.exports = SubscriptionController =
 				res.redirect "/user/subscription"
 
 	reactivateSubscription: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			logger.log user_id:user._id, "reactivating subscription"
 			return next(error) if error?
 			SubscriptionHandler.reactivateSubscription user, (err)->
@@ -196,7 +196,7 @@ module.exports = SubscriptionController =
 			res.sendStatus 200
 
 	renderUpgradeToAnnualPlanPage: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
 				planCode = subscription?.planCode.toLowerCase()
 				if planCode?.indexOf("annual") != -1
@@ -213,7 +213,7 @@ module.exports = SubscriptionController =
 					planName: planName
 
 	processUpgradeToAnnualPlan: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			{planName} = req.body
 			coupon_code = Settings.coupon_codes.upgradeToAnnualPromo[planName]
 			annualPlanName = "#{planName}-annual"
@@ -226,7 +226,7 @@ module.exports = SubscriptionController =
 					res.sendStatus 200
 
 	extendTrial: (req, res)->
-		SecurityManager.getCurrentUser req, (error, user) ->
+		AuthenticationController.getLoggedInUser req, (error, user) ->
 			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
 				SubscriptionHandler.extendTrial subscription, 14, (err)->
 					if err?

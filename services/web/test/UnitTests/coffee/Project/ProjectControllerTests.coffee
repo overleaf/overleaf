@@ -39,8 +39,8 @@ describe "ProjectController", ->
 			findOne: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
-		@SecurityManager =
-			userCanAccessProject:sinon.stub()
+		@AuthorizationManager =
+			getPrivilegeLevelForProject:sinon.stub()
 		@EditorController = 
 			renameProject:sinon.stub()
 		@InactiveProjectManager =
@@ -66,7 +66,7 @@ describe "ProjectController", ->
 			"../Notifications/NotificationsHandler":@NotificationsHandler
 			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
-			"../../managers/SecurityManager":@SecurityManager
+			"../Authorization/AuthorizationManager":@AuthorizationManager
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
@@ -299,7 +299,7 @@ describe "ProjectController", ->
 			@ProjectModel.findOne.callsArgWith 1, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
-			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
+			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 2, null, true, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
 			@ProjectUpdateHandler.markAsOpened.callsArgWith(1)
@@ -332,7 +332,7 @@ describe "ProjectController", ->
 			@ProjectController.loadEditor @req, @res
 
 		it "should not render the page if the project can not be accessed", (done)->
-			@SecurityManager.userCanAccessProject = sinon.stub().callsArgWith 2, false
+			@AuthorizationManager.getPrivilegeLevelForProject = sinon.stub().callsArgWith 2, null, false
 			@res.sendStatus = (resCode, opts)=>
 				resCode.should.equal 401
 				done()

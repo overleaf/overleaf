@@ -10,7 +10,7 @@ describe "EditorHttpController", ->
 			'../Project/ProjectDeleter' : @ProjectDeleter = {}
 			'../Project/ProjectGetter' : @ProjectGetter = {}
 			'../User/UserGetter' : @UserGetter = {}
-			"../Security/AuthorizationManager": @AuthorizationManager = {}
+			"../Authorization/AuthorizationManager": @AuthorizationManager = {}
 			'../Project/ProjectEditorHandler': @ProjectEditorHandler = {}
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
@@ -119,7 +119,7 @@ describe "EditorHttpController", ->
 					
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
-					.calledWith(@project, @user)
+					.calledWith(@user_id, @project_id)
 					.should.equal true
 
 			it "should return the project model view, privilege level and protocol version", ->

@@ -3,8 +3,6 @@ ErrorController = require('./Features/Errors/ErrorController')
 ProjectController = require("./Features/Project/ProjectController")
 ProjectApiController = require("./Features/Project/ProjectApiController")
 SpellingController = require('./Features/Spelling/SpellingController')
-SecurityManager = require('./managers/SecurityManager')
-AuthorizationManager = require('./Features/Security/AuthorizationManager')
 EditorController = require("./Features/Editor/EditorController")
 EditorRouter = require("./Features/Editor/EditorRouter")
 Settings = require('settings-sharelatex')
@@ -39,6 +37,7 @@ RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
+AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -54,7 +53,7 @@ module.exports = class Router
 
 		webRouter.post '/login', AuthenticationController.login
 		webRouter.get  '/logout', UserController.logout
-		webRouter.get  '/restricted', SecurityManager.restricted
+		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
 		# Left as a placeholder for implementing a public register page
 		webRouter.get  '/register', UserPagesController.registerPage
@@ -99,13 +98,13 @@ module.exports = class Router
 			params: ["Project_id"]
 			maxRequests: 10
 			timeInterval: 60
-		}), SecurityManager.requestCanAccessProject, ProjectController.loadEditor
-		webRouter.get  '/Project/:Project_id/file/:File_id', SecurityManager.requestCanAccessProject, FileStoreController.getFile
-		webRouter.post '/project/:Project_id/settings', SecurityManager.requestCanModifyProject, ProjectController.updateProjectSettings
-		webRouter.post '/project/:Project_id/settings/admin', SecurityManager.requestIsOwner, ProjectController.updateProjectAdminSettings
+		}), AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.loadEditor
+		webRouter.get  '/Project/:Project_id/file/:File_id', AuthorizationMiddlewear.ensureUserCanReadProject, FileStoreController.getFile
+		webRouter.post '/project/:Project_id/settings', AuthorizationMiddlewear.ensureUserCanWriteProjectSettings, ProjectController.updateProjectSettings
+		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
-		webRouter.post '/project/:Project_id/compile', SecurityManager.requestCanAccessProject, CompileController.compile
-		webRouter.get  '/Project/:Project_id/output/output.pdf', SecurityManager.requestCanAccessProject, CompileController.downloadPdf
+		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
+		webRouter.get  '/Project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
@@ -113,24 +112,24 @@ module.exports = class Router
 					"file":       req.params[1]
 				req.params = params
 				next()
-			), SecurityManager.requestCanAccessProject, CompileController.getFileFromClsi
-		webRouter.delete "/project/:Project_id/output", SecurityManager.requestCanAccessProject, CompileController.deleteAuxFiles
-		webRouter.get "/project/:Project_id/sync/code", SecurityManager.requestCanAccessProject, CompileController.proxySync
-		webRouter.get "/project/:Project_id/sync/pdf", SecurityManager.requestCanAccessProject, CompileController.proxySync
-		webRouter.get "/project/:Project_id/wordcount", SecurityManager.requestCanAccessProject, CompileController.wordCount
+			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+		webRouter.delete "/project/:Project_id/output", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.deleteAuxFiles
+		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySync
+		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySync
+		webRouter.get "/project/:Project_id/wordcount", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.wordCount
 
-		webRouter.delete '/Project/:Project_id', SecurityManager.requestIsOwner, ProjectController.deleteProject
-		webRouter.post '/Project/:Project_id/restore', SecurityManager.requestIsOwner, ProjectController.restoreProject
-		webRouter.post '/Project/:Project_id/clone', SecurityManager.requestCanAccessProject, ProjectController.cloneProject
+		webRouter.delete '/Project/:Project_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.deleteProject
+		webRouter.post '/Project/:Project_id/restore', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.restoreProject
+		webRouter.post '/Project/:Project_id/clone', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.cloneProject
 
-		webRouter.post '/project/:Project_id/rename', SecurityManager.requestIsOwner, ProjectController.renameProject
+		webRouter.post '/project/:Project_id/rename', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.renameProject
 
-		webRouter.get  "/project/:Project_id/updates", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", SecurityManager.requestCanAccessProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
 
-		webRouter.get  '/Project/:Project_id/download/zip', SecurityManager.requestCanAccessProject, ProjectDownloadsController.downloadProject
-		webRouter.get  '/project/download/zip', SecurityManager.requestCanAccessMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
+		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
+		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag
@@ -174,26 +173,26 @@ module.exports = class Router
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		webRouter.get  "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.getMessages
-		webRouter.post "/project/:Project_id/messages", SecurityManager.requestCanAccessProject, ChatController.sendMessage
+		webRouter.get  "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
+		webRouter.post "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
 
 		webRouter.get  /learn(\/.*)?/, WikiController.getPage
 
-		webRouter.post "/project/:Project_id/references/index", SecurityManager.requestCanAccessProject, ReferencesController.index
-		webRouter.post "/project/:Project_id/references/indexAll", SecurityManager.requestCanAccessProject, ReferencesController.indexAll
+		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
+		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
 
 		#Admin Stuff
-		webRouter.get  '/admin', SecurityManager.requestIsAdmin, AdminController.index
-		webRouter.get  '/admin/user', SecurityManager.requestIsAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
-		webRouter.get  '/admin/register', SecurityManager.requestIsAdmin, AdminController.registerNewUser
-		webRouter.post '/admin/register', SecurityManager.requestIsAdmin, UserController.register
-		webRouter.post '/admin/closeEditor', SecurityManager.requestIsAdmin, AdminController.closeEditor
-		webRouter.post '/admin/dissconectAllUsers', SecurityManager.requestIsAdmin, AdminController.dissconectAllUsers
-		webRouter.post '/admin/syncUserToSubscription', SecurityManager.requestIsAdmin, AdminController.syncUserToSubscription
-		webRouter.post '/admin/flushProjectToTpds', SecurityManager.requestIsAdmin, AdminController.flushProjectToTpds
-		webRouter.post '/admin/pollDropboxForUser', SecurityManager.requestIsAdmin, AdminController.pollDropboxForUser
-		webRouter.post '/admin/messages', SecurityManager.requestIsAdmin, AdminController.createMessage
-		webRouter.post '/admin/messages/clear', SecurityManager.requestIsAdmin, AdminController.clearMessages
+		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
+		webRouter.get  '/admin/user', AuthorizationMiddlewear.ensureUserIsSiteAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
+		webRouter.get  '/admin/register', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.registerNewUser
+		webRouter.post '/admin/register', AuthorizationMiddlewear.ensureUserIsSiteAdmin, UserController.register
+		webRouter.post '/admin/closeEditor', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.closeEditor
+		webRouter.post '/admin/dissconectAllUsers', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.dissconectAllUsers
+		webRouter.post '/admin/syncUserToSubscription', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.syncUserToSubscription
+		webRouter.post '/admin/flushProjectToTpds', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.flushProjectToTpds
+		webRouter.post '/admin/pollDropboxForUser', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.pollDropboxForUser
+		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
+		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
 
 		apiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
@@ -205,7 +204,7 @@ module.exports = class Router
 		webRouter.get '/health_check', HealthCheckController.check
 		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
-		apiRouter.get "/status/compiler/:Project_id", SecurityManager.requestCanAccessProject, (req, res) ->
+		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->
 				res.writeHead statusCode
 				res.end message

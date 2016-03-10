@@ -5,7 +5,7 @@ EditorRealTimeController = require "./EditorRealTimeController"
 EditorController = require "./EditorController"
 ProjectGetter = require('../Project/ProjectGetter')
 UserGetter = require('../User/UserGetter')
-AuthorizationManager = require("../Security/AuthorizationManager")
+AuthorizationManager = require("../Authorization/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
@@ -34,7 +34,7 @@ module.exports = EditorHttpController =
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject project, user, (error, canAccess, privilegeLevel) ->
+					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, canAccess, privilegeLevel) ->
 						return callback(error) if error?
 						if !canAccess
 							callback null, null, false
