@@ -3,9 +3,11 @@ CompileManager = require "./CompileManager"
 db = require "./db"
 async = require "async"
 logger = require "logger-sharelatex"
+oneDay = 24 * 60 * 60 * 1000
 
 module.exports = ProjectPersistenceManager =
-	EXPIRY_TIMEOUT: (oneDay = 24 * 60 * 60 * 1000) * 1.5 #ms
+
+	EXPIRY_TIMEOUT: oneDay * 2.5
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
 		db.Project.findOrCreate(where: {project_id: project_id})
