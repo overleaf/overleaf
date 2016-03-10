@@ -17,7 +17,7 @@ module.exports = ProjectDuplicator =
 			projectEntityHandler.setRootDoc newProject._id, doc_id
 
 		jobs = originalFolder.docs.map (doc)->
-			return (callback)->
+			return (cb)->
 				content = docContents[doc._id.toString()]
 				projectEntityHandler.addDocWithProject newProject, desFolder._id, doc.name, content.lines, (err, newDoc)->
 					if err?
@@ -25,7 +25,7 @@ module.exports = ProjectDuplicator =
 						return callback(err)
 					if originalRootDoc? and newDoc.name == originalRootDoc.name
 						setRootDoc newDoc._id
-					callback()
+					cb()
 
 		async.series jobs, callback
 
