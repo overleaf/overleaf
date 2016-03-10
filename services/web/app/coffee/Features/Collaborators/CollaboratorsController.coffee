@@ -7,14 +7,6 @@ UserGetter = require "../User/UserGetter"
 mimelib = require("mimelib")
 
 module.exports = CollaboratorsController =
-	getCollaborators: (req, res, next = (error) ->) ->
-		project_id = req.params.Project_id
-		CollaboratorsHandler.getMembersWithPrivilegeLevels project_id, (error, members) ->
-			return next(error) if error?
-			CollaboratorsController._formatCollaborators members, (error, collaborators) ->
-				return next(error) if error?
-				res.json(collaborators)
-			
 	addUserToProject: (req, res, next) ->
 		project_id = req.params.Project_id
 		LimitationsManager.canAddXCollaborators project_id, 1, (error, allowed) =>
@@ -58,27 +50,3 @@ module.exports = CollaboratorsController =
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			callback()
 
-	_formatCollaborators: (members, callback = (error, collaborators) ->) ->
-		collaborators = []
-
-		pushCollaborator = (user, permissions, owner) ->
-			collaborators.push {
-				id: user._id.toString()
-				first_name: user.first_name
-				last_name: user.last_name
-				email: user.email
-				permissions: permissions
-				owner: owner
-			}
-		
-		for member in members
-			{user, privilegeLevel} = member
-			if privilegeLevel == "admin"
-				pushCollaborator(user, ["read", "write", "admin"], true)
-			else if privilegeLevel == "readAndWrite"
-				pushCollaborator(user, ["read", "write"], false)
-			else
-				pushCollaborator(user, ["read"], false)
-
-		callback null, collaborators
-			

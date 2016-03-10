@@ -24,52 +24,6 @@ describe "CollaboratorsController", ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
-	describe "getCollaborators", ->
-		beforeEach ->
-			@req.params =
-				Project_id: @project_id
-			@members = [
-				{
-					user: { _id: "admin-id", email: "admin@example.com", first_name: "Joe", last_name: "Admin", foo: "bar" }
-					privilegeLevel: "admin"
-				},
-				{
-					user: { _id: "rw-id", email: "rw@example.com", first_name: "Jane", last_name: "Write", foo: "bar" }
-					privilegeLevel: "readAndWrite"
-				},
-				{
-					user: { _id: "ro-id", email: "ro@example.com", first_name: "Joe", last_name: "Read", foo: "bar" }
-					privilegeLevel: "readOnly"
-				}
-			]
-			@CollaboratorsHandler.getMembersWithPrivilegeLevels = sinon.stub()
-			@CollaboratorsHandler.getMembersWithPrivilegeLevels
-				.withArgs(@project_id)
-				.yields(null, @members)
-			@res.json = sinon.stub()
-			@CollaboratorsController.getCollaborators(@req, @res)
-
-		it "should return the formatted collaborators", ->
-			@res.json
-				.calledWith([
-					{
-						id: "admin-id", email: "admin@example.com", first_name: "Joe", last_name: "Admin"
-						permissions: ["read", "write", "admin"]
-						owner: true
-					}
-					{
-						id: "rw-id", email: "rw@example.com", first_name: "Jane", last_name: "Write"
-						permissions: ["read", "write"]
-						owner: false
-					}
-					{
-						id: "ro-id", email: "ro@example.com", first_name: "Joe", last_name: "Read"
-						permissions: ["read"]
-						owner: false
-					}
-				])
-				.should.equal true
-
 	describe "addUserToProject", ->
 		beforeEach ->
 			@req.params =

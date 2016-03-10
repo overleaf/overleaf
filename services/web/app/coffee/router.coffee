@@ -88,8 +88,7 @@ module.exports = class Router
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		webRouter.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser
 
-		webRouter.get  '/user/auth_token', AuthenticationController.requireLogin(), AuthenticationController.getAuthToken
-		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(allow_auth_token: true), UserInfoController.getLoggedInUsersPersonalInfo
+		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
 		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage

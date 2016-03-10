@@ -44,50 +44,27 @@ module.exports = AuthenticationController =
 						text: req.i18n.translate("email_or_password_wrong_try_again"),
 						type: 'error'
 
-	getAuthToken: (req, res, next = (error) ->) ->
-		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
-			return next(error) if error?
-			AuthenticationManager.getAuthToken user_id, (error, auth_token) ->
-				return next(error) if error?
-				res.send(auth_token)
-
 	getLoggedInUserId: (req, callback = (error, user_id) ->) ->
 		if req?.session?.user?._id?
 			callback null, req.session.user._id.toString()
 		else
 			callback null, null
 
-	getLoggedInUser: (req, options = {allow_auth_token: false}, callback = (error, user) ->) ->
-		if typeof(options) == "function"
-			callback = options
-			options = {allow_auth_token: false}
-
+	getLoggedInUser: (req, callback = (error, user) ->) ->
 		if req.session?.user?._id?
 			query = req.session.user._id
-		else if req.query?.auth_token? and options.allow_auth_token
-			query = { auth_token: req.query.auth_token }
 		else
 			return callback null, null
 
 		UserGetter.getUser query, callback
 
-	requireLogin: (options = {allow_auth_token: false, load_from_db: false}) ->
+	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
-			load_from_db = options.load_from_db
-			if req.query?.auth_token? and options.allow_auth_token
-				load_from_db = true
-			if load_from_db
-				AuthenticationController.getLoggedInUser req, { allow_auth_token: options.allow_auth_token }, (error, user) ->
-					return next(error) if error?
-					return AuthenticationController._redirectToLoginOrRegisterPage(req, res) if !user?
-					req.user = user
-					return next()
+			if !req.session.user?
+				AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
 			else
-				if !req.session.user?
-					AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
-				else
-					req.user = req.session.user
-					return next()
+				req.user = req.session.user
+				return next()
 
 		return doRequest
 
