@@ -1,27 +1,24 @@
 package uk.ac.ic.wlgitbridge.data.model;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
-
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 /**
  * Created by m on 20/11/15.
@@ -33,7 +30,7 @@ public class ResourceFetcherTest {
     private MockServerClient mockServerClient;
 
     @Test
-    public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException {
+    public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException, SnapshotPostException {
         final String testProjectName = "123abc";
         final String testUrl = "http://localhost:" + mockServerRule.getHttpPort() + "/123abc";
         final String oldTestPath = "testPath";

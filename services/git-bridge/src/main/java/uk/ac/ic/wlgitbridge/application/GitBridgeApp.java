@@ -1,11 +1,11 @@
 package uk.ac.ic.wlgitbridge.application;
 
 import uk.ac.ic.wlgitbridge.application.config.Config;
-import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
 import uk.ac.ic.wlgitbridge.application.exception.ArgsException;
+import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.server.GitBridgeServer;
-import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
@@ -15,12 +15,14 @@ import java.io.IOException;
  */
 
 /**
- * Class that represents the application. Parses arguments and gives them to the server, or dies with a usage message.
+ * Class that represents the application. Parses arguments and gives them to the
+ * server, or dies with a usage message.
  */
 public class GitBridgeApp implements Runnable {
 
     public static final int EXIT_CODE_FAILED = 1;
-    private static final String USAGE_MESSAGE = "usage: writelatex-git-bridge config_file";
+    private static final String USAGE_MESSAGE =
+            "usage: writelatex-git-bridge config_file";
 
     private String configFilePath;
     private Config config;
@@ -34,28 +36,39 @@ public class GitBridgeApp implements Runnable {
         try {
             parseArguments(args);
             loadConfigFile();
+            Log.info("Config file loaded");
         } catch (ArgsException e) {
             printUsage();
             System.exit(EXIT_CODE_FAILED);
         } catch (ConfigFileException e) {
-            System.err.println("The property for " + e.getMissingMember() + " is invalid. Check your config file.");
+            Log.error(
+                    "The property for " +
+                    e.getMissingMember() +
+                    " is invalid. Check your config file."
+            );
             System.exit(EXIT_CODE_FAILED);
         } catch (IOException e) {
-            System.err.println("Invalid config file. Check the file path.");
+            Log.error("Invalid config file. Check the file path.");
             System.exit(EXIT_CODE_FAILED);
         }
         try {
             server = new GitBridgeServer(config);
         } catch (ServletException e) {
-            Util.printStackTrace(e);
+            Log.error(
+                    "Servlet exception when instantiating GitBridgeServer",
+                    e
+            );
         } catch (InvalidRootDirectoryPathException e) {
-            System.out.println("Invalid root git directory path. Check your config file.");
+            Log.error(
+                    "Invalid root git directory path. Check your config file."
+            );
             System.exit(EXIT_CODE_FAILED);
         }
     }
 
     /**
-     * Starts the server with the port number and root directory path given in the command-line arguments.
+     * Starts the server with the port number and root directory path given in
+     * the command-line arguments.
      */
     @Override
     public void run() {
@@ -88,7 +101,7 @@ public class GitBridgeApp implements Runnable {
     }
 
     private void printUsage() {
-        System.out.println(USAGE_MESSAGE);
+        System.err.println(USAGE_MESSAGE);
     }
 
 }

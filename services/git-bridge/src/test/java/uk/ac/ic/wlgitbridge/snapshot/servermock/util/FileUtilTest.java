@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.servermock.util;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URISyntaxException;

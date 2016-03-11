@@ -7,13 +7,13 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.log.Log;
 import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.DispatcherType;
@@ -41,7 +41,7 @@ public class GitBridgeServer {
     private String apiBaseURL;
 
     public GitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
-        Log.setLog(new NullLogger());
+        org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
         bridgeAPI = new BridgeAPI(rootGitDirectoryPath);
@@ -61,15 +61,15 @@ public class GitBridgeServer {
     public void start() {
         try {
             jettyServer.start();
-            Util.sout(Util.getServiceName() + "-Git Bridge server started");
-            Util.sout("Listening on port: " + port);
-            Util.sout("Bridged to: " + apiBaseURL);
-            Util.sout("Postback base URL: " + Util.getPostbackURL());
-            Util.sout("Root git directory path: " + rootGitDirectoryPath);
+            Log.info(Util.getServiceName() + "-Git Bridge server started");
+            Log.info("Listening on port: " + port);
+            Log.info("Bridged to: " + apiBaseURL);
+            Log.info("Postback base URL: " + Util.getPostbackURL());
+            Log.info("Root git directory path: " + rootGitDirectoryPath);
         } catch (BindException e) {
-            Util.printStackTrace(e);
+            Log.error("Failed to bind Jetty", e);
         } catch (Exception e) {
-            Util.printStackTrace(e);
+            Log.error("Failed to start Jetty", e);
         }
     }
 
@@ -77,7 +77,7 @@ public class GitBridgeServer {
         try {
             jettyServer.stop();
         } catch (Exception e) {
-            Util.printStackTrace(e);
+            Log.error("Failed to stop Jetty", e);
         }
     }
 
