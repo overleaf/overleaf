@@ -1,7 +1,6 @@
 logger = require('logger-sharelatex')
 metrics = require('../../infrastructure/Metrics')
 Settings = require('settings-sharelatex')
-metrics = require("../../infrastructure/Metrics")
 nodemailer = require("nodemailer")
 sesTransport = require('nodemailer-ses-transport')
 _ = require("underscore")

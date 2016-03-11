@@ -1,5 +1,4 @@
 _ = require('underscore')
-
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
 settings = require("settings-sharelatex")

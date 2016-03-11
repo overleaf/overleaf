@@ -55,6 +55,10 @@ describe "ProjectController", ->
 			"logger-sharelatex": 
 				log:->
 				err:->
+			"../../infrastructure/Metrics": 
+				Timer:->
+					done:->
+				inc:->
 			"./ProjectDeleter": @ProjectDeleter
 			"./ProjectDuplicator": @ProjectDuplicator
 			"./ProjectCreationHandler": @ProjectCreationHandler

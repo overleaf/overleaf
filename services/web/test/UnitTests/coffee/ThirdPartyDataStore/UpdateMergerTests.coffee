@@ -20,9 +20,13 @@ describe 'UpdateMerger :', ->
 			'../Project/ProjectEntityHandler': @projectEntityHandler
 			'fs': @fs
 			'../Uploads/FileTypeManager':@FileTypeManager
+			'settings-sharelatex':{path:{dumpPath:"dump_here"}}
 			'logger-sharelatex':
 				log: ->
 				err: ->
+			"../../infrastructure/Metrics": 
+				Timer:->
+					done:->
 		@project_id = "project_id_here"
 		@user_id = "mock-user-id"
 		@source = "dropbox"

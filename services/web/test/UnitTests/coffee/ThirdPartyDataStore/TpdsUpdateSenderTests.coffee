@@ -38,6 +38,8 @@ describe 'TpdsUpdateSender', ->
 			"logger-sharelatex":{log:->}
 			'../../models/Project': Project:@Project
 			'request':@request
+			"../../infrastructure/Metrics":
+				inc:-> 
 
 	describe "_enqueue", ->
 

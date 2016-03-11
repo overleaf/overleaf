@@ -5,7 +5,7 @@ modulePath = "../../../../app/js/Features/Subscription/UserFeaturesUpdater"
 assert = require("chai").assert
 
 
-describe "user Features updater", ->
+describe "UserFeaturesUpdater", ->
 
 	beforeEach ->
 
