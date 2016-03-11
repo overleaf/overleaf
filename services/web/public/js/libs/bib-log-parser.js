@@ -55,10 +55,10 @@ define(function() {
         var fullMatch, message;
         fullMatch = match[0], message = match[1];
         return {
-          file: null,
+          file: '',
           level: "warning",
           message: message,
-          line: null,
+          line: '',
           raw: fullMatch
         };
       }
@@ -82,10 +82,10 @@ define(function() {
         var fullMatch, message;
         fullMatch = match[0], message = match[1];
         return {
-          file: null,
+          file: '',
           level: "error",
           message: message,
-          line: null,
+          line: '',
           raw: fullMatch
         };
       }
@@ -147,10 +147,10 @@ define(function() {
         if (match) {
           fullLine = match[0], lineNumber = match[1], messageType = match[2], message = match[3];
           newEntry = {
-            file: null,
+            file: '',
             level: MESSAGE_LEVELS[messageType] || "INFO",
             message: message,
-            line: null,
+            line: '',
             raw: fullLine
           };
           lineMatch = newEntry.message.match(/^BibTeX subsystem: \/.+\/(\w+\.\w+)_.+, line (\d+), (.+)$/);
