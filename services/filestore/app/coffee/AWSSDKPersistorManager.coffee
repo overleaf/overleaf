@@ -85,3 +85,7 @@ module.exports =
 				return callback err
 			callback null, data.ETag?
 
+	getProjectSize:(bucketName, key, callback)->
+		logger.log bucketName:bucketName, key:key, "get project size in s3"
+		callback null, 1024
+

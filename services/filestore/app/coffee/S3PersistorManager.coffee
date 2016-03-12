@@ -137,3 +137,7 @@ module.exports =
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
+
+	getProjectSize:(bucketName, key, callback)->
+		logger.log bucketName:bucketName, key:key, "get project size in s3"
+		callback null, 1024

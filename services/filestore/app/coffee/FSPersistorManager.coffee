@@ -87,3 +87,7 @@ module.exports =
     fs.exists "#{location}/#{filteredName}", (exists) ->
       logger.log location:location, name:filteredName, exists:exists, "checked if file exists"
       callback null, exists
+
+  getProjectSize:(location, name, callback)->
+    logger.log location:location, name:name, "get project size in file system"
+    callback null, 1024

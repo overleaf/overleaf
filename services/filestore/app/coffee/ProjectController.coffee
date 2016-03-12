@@ -10,9 +10,9 @@ module.exports = projectController =
 		metrics.inc "projectSize"
 		{project_id, bucket} = req
 		logger.log project_id:project_id, bucket:bucket, "reciving request to project size"
-		FileHandler.getFile bucket, project_id, req, (err)->
+		ProjectHandler.getSize bucket, project_id, req, (err, size)->
 			if err?
 				logger.log err: err, project_id: project_id, bucket: bucket, "error inserting file"
 				res.send 500
 			else
-				res.send 200
+				res.json {'total bytes' : size}
