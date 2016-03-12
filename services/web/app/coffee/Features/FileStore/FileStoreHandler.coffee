@@ -11,11 +11,12 @@ module.exports = FileStoreHandler =
 	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
 		fs.lstat fsPath, (err, stat)->
 			if err?
-				logger.err err:err, "error with path symlink check"
-				return callback(err)
-			if stat.isSymbolicLink()
-				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "error uploading file from disk, file path is symlink"
-				return callback('file is from symlink')
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "error stating file"
+				callback(err)
+			if !stat.isFile()
+				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "tried to upload symlink, not contining"
+				return callback(new Error("can not upload symlink"))
+
 			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
 			readStream = fs.createReadStream(fsPath)
 			opts =

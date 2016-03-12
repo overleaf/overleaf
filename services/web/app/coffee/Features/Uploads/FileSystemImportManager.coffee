@@ -8,8 +8,8 @@ logger = require("logger-sharelatex")
 
 module.exports = FileSystemImportManager =
 	addDoc: (user_id, project_id, folder_id, name, path, replace, callback = (error, doc)-> )->
-		FileSystemImportManager._isSymLink path, (err, isSymLink)->
-			if isSymLink
+		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
+			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add doc is from symlink, stopping process"
 				return callback("path is symlink")
 			fs.readFile path, "utf8", (error, content = "") ->
@@ -33,8 +33,8 @@ module.exports = FileSystemImportManager =
 					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
 
 	addFile: (user_id, project_id, folder_id, name, path, replace, callback = (error, file)-> )->
-		FileSystemImportManager._isSymLink path, (err, isSymLink)->
-			if isSymLink
+		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
+			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add file is from symlink, stopping insert"
 				return callback("path is symlink")
 
@@ -55,8 +55,8 @@ module.exports = FileSystemImportManager =
 						EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", callback
 
 	addFolder: (user_id, project_id, folder_id, name, path, replace, callback = (error)-> ) ->
-		FileSystemImportManager._isSymLink path, (err, isSymLink)->
-			if isSymLink
+		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
+			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, path:path, "add folder is from symlink, stopping insert"
 				return callback("path is symlink")
 			EditorController.addFolderWithoutLock project_id, folder_id, name, "upload", (error, new_folder) =>
@@ -66,8 +66,8 @@ module.exports = FileSystemImportManager =
 					callback null, new_folder
 
 	addFolderContents: (user_id, project_id, parent_folder_id, folderPath, replace, callback = (error)-> ) ->
-		FileSystemImportManager._isSymLink folderPath, (err, isSymLink)->
-			if isSymLink
+		FileSystemImportManager._isSafeOnFileSystem folderPath, (err, isSafe)->
+			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, parent_folder_id:parent_folder_id, folderPath:folderPath, "add folder contents is from symlink, stopping insert"
 				return callback("path is symlink")
 			fs.readdir folderPath, (error, entries = []) =>
@@ -83,8 +83,8 @@ module.exports = FileSystemImportManager =
 				async.parallelLimit jobs, 5, callback
 
 	addEntity: (user_id, project_id, folder_id, name, path, replace, callback = (error, entity)-> ) ->
-		FileSystemImportManager._isSymLink path, (err, isSymLink)->
-			if isSymLink
+		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
+			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, path:path, "add entry is from symlink, stopping insert"
 				return callback("path is symlink")
 
@@ -101,11 +101,11 @@ module.exports = FileSystemImportManager =
 							FileSystemImportManager.addDoc user_id, project_id, folder_id, name, path, replace, callback
 
 
-	_isSymLink: (path, callback = (err, isSymLink)->)->
+	_isSafeOnFileSystem: (path, callback = (err, isSafe)->)->
 		fs.lstat path, (err, stat)->
 			if err?
 				logger.err err:err, "error with path symlink check"
 				return callback(err)
-			isSymLink = stat.isSymbolicLink()
-			callback(err, isSymLink)
+			isSafe = stat.isFile() or stat.isDirectory()
+			callback(err, isSafe)
 
