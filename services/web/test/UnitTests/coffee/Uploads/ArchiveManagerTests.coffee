@@ -1,4 +1,5 @@
 sinon = require('sinon')
+expect = require("chai").expect
 chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/Features/Uploads/ArchiveManager.js"
@@ -9,13 +10,16 @@ describe "ArchiveManager", ->
 	beforeEach ->
 		@logger =
 			error: sinon.stub()
+			err:->
 			log: sinon.stub()
 		@process = new events.EventEmitter
 		@process.stdout = new events.EventEmitter
 		@process.stderr = new events.EventEmitter
+
 		@child =
 			spawn: sinon.stub().returns(@process)
-			exec: sinon.stub().callsArgWith(1, null, "   109042                   2 files")
+
+
 		@metrics =
 			Timer: class Timer
 				done: sinon.stub()
@@ -30,6 +34,7 @@ describe "ArchiveManager", ->
 			@source = "/path/to/zip/source.zip"
 			@destination = "/path/to/zip/destination"
 			@callback = sinon.stub()
+			@ArchiveManager._isZipTooLarge = sinon.stub().callsArgWith(1, null, false)
 
 		describe "successfully", ->
 			beforeEach (done) ->
@@ -61,7 +66,7 @@ describe "ArchiveManager", ->
 
 		describe "with a zip that is too large", ->
 			beforeEach (done) ->
-				@child.exec = sinon.stub().callsArgWith(1, null, "   10000000000009042                   2 files")
+				@ArchiveManager._isZipTooLarge = sinon.stub().callsArgWith(1, null, true)
 				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
 					@callback(error)
 					done()
@@ -85,6 +90,45 @@ describe "ArchiveManager", ->
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
 	
+	describe "_isZipTooLarge", ->
+		beforeEach ->
+			@output = (totalSize)->"  Length     Date   Time    Name \n--------    ----   ----    ---- \n241  03-12-16 12:20   main.tex \n108801  03-12-16 12:20   ddd/x1J5kHh.jpg \n--------                   ------- \n#{totalSize}                   2 files\n"
+
+		it "should return false with small output", (done)->
+			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
+				isTooLarge.should.equal false
+				done()
+			@process.stdout.emit "data", @output("109042")
+			@process.emit "exit"
+
+		it "should return true with large bytes", (done)->
+			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
+				isTooLarge.should.equal true
+				done()
+			@process.stdout.emit "data", @output("1090000000000000042")
+			@process.emit "exit"
+
+		it "should return error on no data", (done)->
+			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
+				expect(error).to.exist
+				done()
+			@process.stdout.emit "data", ""
+			@process.emit "exit"
+
+		it "should return error if it didn't get a number", (done)->
+			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
+				expect(error).to.exist
+				done()
+			@process.stdout.emit "data", @output("total_size_string")
+			@process.emit "exit"
+
+		it "should return error if the is only a bit of data", (done)->
+			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
+				expect(error).to.exist
+				done()
+			@process.stdout.emit "data", "  Length     Date   Time    Name \n--------"
+			@process.emit "exit"
+
 	describe "findTopLevelDirectory", ->
 		beforeEach ->
 			@fs.readdir = sinon.stub()
