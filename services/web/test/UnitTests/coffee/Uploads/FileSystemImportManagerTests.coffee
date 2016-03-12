@@ -18,12 +18,29 @@ describe "FileSystemImportManager", ->
 			"../Editor/EditorController": @EditorController = {}
 			"./FileTypeManager": @FileTypeManager = {}
 			"../Project/ProjectLocator": @ProjectLocator = {}
+			"logger-sharelatex":
+				log:->
+				err:->
 	
 	describe "addDoc", ->
 		beforeEach ->
 			@docContent = "one\ntwo\nthree"
 			@docLines = @docContent.split("\n")
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
+			@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
+
+
+		describe "when path is symlink", ->
+			beforeEach ->
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, true)
+				@EditorController.addDocWithoutLock = sinon.stub()
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
+
+			it "should not read the file from disk", ->
+				@fs.readFile.called.should.equal false
+
+			it "should not insert the doc", ->
+				@EditorController.addDocWithoutLock.called.should.equal false
 
 		describe "with replace set to false", ->
 			beforeEach ->
@@ -98,11 +115,23 @@ describe "FileSystemImportManager", ->
 	describe "addFile with replace set to false", ->
 		beforeEach ->
 			@EditorController.addFileWithoutLock = sinon.stub().callsArg(5)
+			@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 			@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should add the file", ->
 			@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload")
 				.should.equal true
+
+	describe "addFile with symlink", ->
+		beforeEach ->
+			@EditorController.addFileWithoutLock = sinon.stub()
+			@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, true)
+			@EditorController.replaceFile = sinon.stub()
+			@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
+
+		it "should node add the file", ->
+			@EditorController.addFileWithoutLock.called.should.equal false
+			@EditorController.replaceFile.called.should.equal false
 
 	describe "addFile with replace set to true", ->
 		describe "when the file doesn't exist", ->
@@ -113,6 +142,7 @@ describe "FileSystemImportManager", ->
 						name: "not-the-right-file.tex"
 					}]
 				}
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @folder)
 				@EditorController.addFileWithoutLock = sinon.stub().callsArg(5)
 				@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, true, @callback
@@ -137,6 +167,7 @@ describe "FileSystemImportManager", ->
 						name: "not-the-right-file.tex"
 					}]
 				}
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @folder)
 				@EditorController.replaceFile = sinon.stub().callsArg(4)
 				@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, true, @callback
@@ -151,20 +182,34 @@ describe "FileSystemImportManager", ->
 					.should.equal true
 
 	describe "addFolder", ->
+
 		beforeEach ->
 			@new_folder_id = "new-folder-id"
 			@EditorController.addFolderWithoutLock  = sinon.stub().callsArgWith(4, null, _id: @new_folder_id)
 			@FileSystemImportManager.addFolderContents = sinon.stub().callsArg(5)
-			@FileSystemImportManager.addFolder @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
-		it "should add a folder to the project", ->
-			@EditorController.addFolderWithoutLock.calledWith(@project_id, @folder_id, @name, "upload")
-				.should.equal true
+		describe "successfully", ->
+			beforeEach ->
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
+				@FileSystemImportManager.addFolder @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
-		it "should add the folders contents", ->
-			@FileSystemImportManager.addFolderContents.calledWith(@user_id, @project_id, @new_folder_id, @path_on_disk, @replace)
-				.should.equal true
+			it "should add a folder to the project", ->
+				@EditorController.addFolderWithoutLock.calledWith(@project_id, @folder_id, @name, "upload")
+					.should.equal true
 
+			it "should add the folders contents", ->
+				@FileSystemImportManager.addFolderContents.calledWith(@user_id, @project_id, @new_folder_id, @path_on_disk, @replace)
+					.should.equal true
+
+		describe "with symlink", ->
+			beforeEach ->
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, true)
+				@FileSystemImportManager.addFolder @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
+
+			it "should not add a folder to the project", ->
+				@EditorController.addFolderWithoutLock.called.should.equal false
+				@FileSystemImportManager.addFolderContents.called.should.equal false
+				
 	describe "addFolderContents", ->
 		beforeEach ->
 			@folderEntries = ["path1", "path2", "path3"]
@@ -173,6 +218,7 @@ describe "FileSystemImportManager", ->
 			@FileSystemImportManager.addEntity = sinon.stub().callsArg(6)
 			@FileTypeManager.shouldIgnore = (path, callback) =>
 				callback null, @ignoredEntries.indexOf(require("path").basename(path)) != -1
+			@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 			@FileSystemImportManager.addFolderContents @user_id, @project_id, @folder_id, @path_on_disk, @replace, @callback
 
 		it "should call addEntity for each file in the folder which is not ignored", ->
@@ -188,11 +234,12 @@ describe "FileSystemImportManager", ->
 		it "should look in the correct directory", ->
 			@fs.readdir.calledWith(@path_on_disk).should.equal true
 
-	describe "addEntity", ->
+	describe "addEntity  dddddddd", ->
 		describe "with directory", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, true)
 				@FileSystemImportManager.addFolder = sinon.stub().callsArg(6)
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 			it "should call addFolder", ->
@@ -203,6 +250,7 @@ describe "FileSystemImportManager", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
 				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, true)
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 				@FileSystemImportManager.addFile = sinon.stub().callsArg(6)
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
@@ -215,6 +263,7 @@ describe "FileSystemImportManager", ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
 				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, false)
 				@FileSystemImportManager.addDoc = sinon.stub().callsArg(6)
+				@FileSystemImportManager._isSymLink = sinon.stub().callsArgWith(1, null, false)
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 			it "should call addFile", ->

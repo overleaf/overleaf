@@ -6,24 +6,31 @@ settings = require("settings-sharelatex")
 oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
 
-module.exports =
+module.exports = FileStoreHandler =
 
 	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
-		logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
-		readStream = fs.createReadStream(fsPath)
-		opts =
-			method: "post"
-			uri: @_buildUrl(project_id, file_id)
-			timeout:fiveMinsInMs
-		writeStream = request(opts)
-		readStream.pipe writeStream
-		writeStream.on "end", callback
-		readStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
-			callback err
-		writeStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
-			callback err
+		fs.lstat fsPath, (err, stat)->
+			if err?
+				logger.err err:err, "error with path symlink check"
+				return callback(err)
+			if stat.isSymbolicLink()
+				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "error uploading file from disk, file path is symlink"
+				return callback('file is from symlink')
+			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
+			readStream = fs.createReadStream(fsPath)
+			opts =
+				method: "post"
+				uri: FileStoreHandler._buildUrl(project_id, file_id)
+				timeout:fiveMinsInMs
+			writeStream = request(opts)
+			readStream.pipe writeStream
+			writeStream.on "end", callback
+			readStream.on "error", (err)->
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
+				callback err
+			writeStream.on "error", (err)->
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
+				callback err
 
 	getFileStream: (project_id, file_id, query, callback)->
 		logger.log project_id:project_id, file_id:file_id, query:query, "getting file stream from file store"
