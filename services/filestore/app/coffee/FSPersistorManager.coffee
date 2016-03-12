@@ -89,5 +89,17 @@ module.exports =
       callback null, exists
 
   getProjectSize:(location, name, callback)->
-    logger.log location:location, name:name, "get project size in file system"
-    callback null, 1024
+    filteredName = filterName name.replace(/\/$/,'')
+    logger.log location:location, name:filteredName, "get project size in file system"
+    fs.readdir "#{location}/#{filteredName}", (err, files) ->
+      if err?
+        logger.err err:err, location:location, name:filteredName, "something went wrong listing prefix in aws"
+        return callback(err)
+      totalSize = 0
+      _.each files, (entry)->
+        fd = fs.openSync "#{location}/#{filteredName}/#{entry}", 'r'
+        fileStats = fs.fstatSync(fd)
+        totalSize += fileStats.size
+        fs.closeSync fd
+      logger.log totalSize:totalSize, "total size", files:files
+      callback null, totalSize

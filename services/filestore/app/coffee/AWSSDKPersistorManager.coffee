@@ -87,5 +87,15 @@ module.exports =
 
 	getProjectSize:(bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "get project size in s3"
-		callback null, 1024
+		s3.listObjects {Bucket: bucketName, Prefix: key}, (err, data) ->
+			if err?
+				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in s3"
+				return callback err
+			if data.Contents.length == 0
+				logger.log bucketName:bucketName, key:key, "the directory is empty"
+				return callback()
+			totalSize = 0
+			_.each data.Contents, (entry)->
+				totalSize += entry.Size
+			callback null, totalSize
 
