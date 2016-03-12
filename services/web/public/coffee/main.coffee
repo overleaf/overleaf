@@ -30,3 +30,6 @@ define [
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])
+
+	
+
