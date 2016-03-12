@@ -15,6 +15,7 @@ describe "ArchiveManager", ->
 		@process.stderr = new events.EventEmitter
 		@child =
 			spawn: sinon.stub().returns(@process)
+			exec: sinon.stub().callsArgWith(1, null, "   109042                   2 files")
 		@metrics =
 			Timer: class Timer
 				done: sinon.stub()
@@ -57,6 +58,19 @@ describe "ArchiveManager", ->
 
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
+
+		describe "with a zip that is too large", ->
+			beforeEach (done) ->
+				@child.exec = sinon.stub().callsArgWith(1, null, "   10000000000009042                   2 files")
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+
+			it "should return the callback with an error", ->
+				@callback.calledWithExactly(new Error("zip_too_large")).should.equal true
+
+			it "should not call spawn", ->
+				@child.spawn.called.should.equal false
 
 		describe "with an error on the process", ->
 			beforeEach (done) ->
