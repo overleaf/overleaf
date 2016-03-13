@@ -138,7 +138,7 @@ module.exports =
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
 
-	getProjectSize:(bucketName, key, callback)->
+	directorySize:(bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "get project size in s3"
 		s3Client = knox.createClient
 			key: settings.filestore.s3.key

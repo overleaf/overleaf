@@ -83,3 +83,14 @@ module.exports = FileController =
 		else
 			range = parsed[0]
 			{start: range.start, end: range.end}
+
+	directorySize: (req, res)->
+		metrics.inc "projectSize"
+		{project_id, bucket} = req
+		logger.log project_id:project_id, bucket:bucket, "reciving request to project size"
+		FileHandler.getDirectorySize bucket, project_id, (err, size)->
+			if err?
+				logger.log err: err, project_id: project_id, bucket: bucket, "error inserting file"
+				res.send 500
+			else
+				res.json {'total bytes' : size}

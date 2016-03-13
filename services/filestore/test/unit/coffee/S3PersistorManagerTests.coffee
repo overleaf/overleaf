@@ -256,3 +256,8 @@ describe "S3PersistorManagerTests", ->
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err)=>
 				err.should.equal @error
 				done()
+
+  describe "directorySize", ->
+
+    it "should sum directory files size", (done) ->
+      done()

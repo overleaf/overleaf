@@ -192,3 +192,8 @@ describe "FileHandler", ->
 				@FileConverter.convert.calledWith(@stubbedPath, @format).should.equal true
 				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
 				done()
+
+  describe "directorySize", ->
+
+    it "should call the filestore manager to get directory size", (done) ->
+      done()

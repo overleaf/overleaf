@@ -152,3 +152,8 @@ describe "FileController", ->
 			result = @controller._get_range('carrots=0-200')
 			expect(result).to.equal null
 			done()
+
+  describe "directorySize", ->
+
+    it "should call the file handler the directory size", (done) ->
+      done()

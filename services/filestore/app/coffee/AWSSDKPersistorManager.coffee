@@ -85,7 +85,7 @@ module.exports =
 				return callback err
 			callback null, data.ETag?
 
-	getProjectSize:(bucketName, key, callback)->
+	directorySize:(bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "get project size in s3"
 		s3.listObjects {Bucket: bucketName, Prefix: key}, (err, data) ->
 			if err?

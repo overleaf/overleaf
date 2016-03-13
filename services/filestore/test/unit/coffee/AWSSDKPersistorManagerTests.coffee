@@ -247,3 +247,11 @@ describe "AWSSDKPersistorManager", ->
 			@AWSSDKPersistorManager.checkIfFileExists @bucketName, @key, (err, exists) =>
 				expect(err).to.equal @error
 				done()
+
+	describe "directorySize", ->
+
+		it "should list the directory content using s3.listObjects", (done) ->
+			done()
+
+		it "should sum directory files size", (done) ->
+			done()

@@ -4,7 +4,6 @@ logger.initialize("filestore")
 settings = require("settings-sharelatex")
 request = require("request")
 fileController = require("./app/js/FileController")
-projectController = require("./app/js/ProjectController")
 keyBuilder = require("./app/js/KeyBuilder")
 domain = require("domain")
 appIsOk = true
@@ -86,7 +85,7 @@ app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey
 app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, express.bodyParser(), fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
-app.get "/project/:project_id/size", keyBuilder.publicProjectKey, projectController.projectSize
+app.get "/project/:project_id/size", keyBuilder.publicProjectKey, fileController.directorySize
 
 app.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.filestore.heapsnapshot', (err, filename)->

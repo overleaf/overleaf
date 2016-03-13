@@ -208,3 +208,8 @@ describe "FSPersistorManagerTests", ->
       @FSPersistorManager.checkIfFileExists @location, @name1, (err,exists) =>
         exists.should.be.false
         done()
+
+  describe "directorySize", ->
+
+    it "should sum directory files size", (done) ->
+      done()

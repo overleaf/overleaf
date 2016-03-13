@@ -88,7 +88,7 @@ module.exports =
       logger.log location:location, name:filteredName, exists:exists, "checked if file exists"
       callback null, exists
 
-  getProjectSize:(location, name, callback)->
+  directorySize:(location, name, callback)->
     filteredName = filterName name.replace(/\/$/,'')
     logger.log location:location, name:filteredName, "get project size in file system"
     fs.readdir "#{location}/#{filteredName}", (err, files) ->
