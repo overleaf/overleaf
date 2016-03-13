@@ -251,7 +251,22 @@ describe "AWSSDKPersistorManager", ->
 	describe "directorySize", ->
 
 		it "should list the directory content using s3.listObjects", (done) ->
-			done()
+			@s3.listObjects.callsArgWith 1, null, Contents: []
+			@AWSSDKPersistorManager.directorySize @bucketName, @key, (err) =>
+				expect(err).to.not.be.ok
+				expect(@s3.listObjects.calledOnce, "called only once").to.be.true
+				expect((@s3.listObjects.calledWith Bucket: @bucketName, Prefix: @key),
+					"called with correct arguments").to.be.true
+				done()
 
-		it "should sum directory files size", (done) ->
-			done()
+		it "should dispatch the error from s3.listObjects", (done) ->
+			@s3.listObjects.callsArgWith 1, @error
+			@AWSSDKPersistorManager.directorySize @bucketName, @key, (err) =>
+				expect(err).to.equal @error
+				done()
+
+		it "should sum directory files sizes", (done) ->
+			@s3.listObjects.callsArgWith 1, null, Contents: [ { Size: 1024 }, { Size: 2048 }]
+			@AWSSDKPersistorManager.directorySize @bucketName, @key, (err, size) =>
+				expect(size).to.equal 3072
+				done()

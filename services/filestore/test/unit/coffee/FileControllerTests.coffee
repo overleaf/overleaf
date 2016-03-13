@@ -22,6 +22,7 @@ describe "FileController", ->
 			getFile: sinon.stub()
 			deleteFile: sinon.stub()
 			insertFile: sinon.stub()
+			getDirectorySize: sinon.stub()
 		@LocalFileWriter = {}
 		@controller = SandboxedModule.require modulePath, requires:
 			"./LocalFileWriter":@LocalFileWriter
@@ -153,7 +154,17 @@ describe "FileController", ->
 			expect(result).to.equal null
 			done()
 
-  describe "directorySize", ->
+	describe "directorySize", ->
 
-    it "should call the file handler the directory size", (done) ->
-      done()
+		it "should return total directory size bytes", (done) ->
+			@FileHandler.getDirectorySize.callsArgWith(2, null, 1024)
+			@controller.directorySize @req, json:(result)=>
+				expect(result['total bytes']).to.equal 1024
+				done()
+
+		it "should send a 500 if there was an error", (done)->
+			@FileHandler.getDirectorySize.callsArgWith(2, "error")
+			@res.send = (code)->
+				code.should.equal 500
+				done()
+			@controller.directorySize @req, @res
