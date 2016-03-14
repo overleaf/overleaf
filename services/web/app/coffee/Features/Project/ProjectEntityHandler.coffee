@@ -223,8 +223,10 @@ module.exports = ProjectEntityHandler =
 					if err?
 						logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
 						return callback(err)
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (error) ->
-						callback(error, fileRef, folder_id)
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
+						if err?
+							logger.err err:err,  project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error sending file to tpds worker"
+						callback(null, fileRef, folder_id)
 
 	mkdirp: (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
 		self = @
