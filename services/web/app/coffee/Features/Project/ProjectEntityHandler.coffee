@@ -165,7 +165,10 @@ module.exports = ProjectEntityHandler =
 					logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 					return callback(err)
 				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result.path.fileSystem, project_name:project.name, rev:fileRef.rev}, ->
+					if err?
+						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+						return callback(err)
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, ->
 						callback(err, fileRef, folder_id)
 
 	replaceFile: (project_id, file_id, fsPath, callback)->
