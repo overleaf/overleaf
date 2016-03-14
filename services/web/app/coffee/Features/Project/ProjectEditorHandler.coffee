@@ -27,11 +27,12 @@ module.exports = ProjectEditorHandler =
 		
 		owner = null
 		for member in members
-			if member.privilegeLevel == "admin"
+			if member.privilegeLevel == "owner"
 				owner = member.user
 			else
 				result.members.push @buildUserModelView member.user, member.privilegeLevel
-		result.owner = @buildUserModelView owner, "owner"
+		if owner?
+			result.owner = @buildUserModelView owner, "owner"
 
 		if owner?.features?
 			if owner.features.collaborators?

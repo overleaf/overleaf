@@ -44,6 +44,8 @@ class User
 				projectName: name
 		}, (error, response, body) ->
 			return callback(error) if error?
+			if !body?.project_id?
+				console.error "SOMETHING WENT WRONG CREATING PROJECT", response.statusCode, response.headers["location"], body
 			callback(null, body.project_id)
 	
 	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
@@ -240,7 +242,7 @@ describe "Authorization", ->
 			expect_no_admin_access @other1, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow anonymous user read access to it", (done) ->
-			expect_no_read_access @anon, @project_id, redirect_to: "/login", done
+			expect_no_read_access @anon, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow anonymous user write access to its settings", (done) ->
 			expect_no_settings_write_access @anon, @project_id, redirect_to: "/restricted", done

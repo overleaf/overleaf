@@ -36,7 +36,7 @@ describe "CollaboratorsHandler", ->
 		it "should return an array of member ids with their privilege levels", ->
 			@callback
 				.calledWith(null, [
-					{ id: "owner-ref", privilegeLevel: "admin" }
+					{ id: "owner-ref", privilegeLevel: "owner" }
 					{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
 					{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
 					{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
@@ -82,6 +82,26 @@ describe "CollaboratorsHandler", ->
 					{ user: { _id: "read-write-ref-2" }, privilegeLevel: "readAndWrite" }
 				])
 				.should.equal true
+	
+	describe "getMemberIdPrivilegeLevel", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels
+				.withArgs(@project_id)
+				.yields(null, [
+					{id: "member-id-1", privilegeLevel: "readAndWrite"}
+					{id: "member-id-2", privilegeLevel: "readOnly"}
+				])
+
+		it "should return the privilege level if it exists", (done) ->
+			@CollaboratorHandler.getMemberIdPrivilegeLevel "member-id-2", @project_id, (error, level) ->
+				expect(level).to.equal "readOnly"
+				done()
+
+		it "should return false if the member has no privilege level", (done) ->
+			@CollaboratorHandler.getMemberIdPrivilegeLevel "member-id-3", @project_id, (error, level) ->
+				expect(level).to.equal false
+				done()
 	
 	describe "isUserMemberOfProject", ->
 		beforeEach ->

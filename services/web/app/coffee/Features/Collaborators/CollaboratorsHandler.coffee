@@ -13,11 +13,11 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, null if !project?
 			members = []
-			members.push { id: project.owner_ref.toString(), privilegeLevel: "admin" }
+			members.push { id: project.owner_ref.toString(), privilegeLevel: "owner" }
 			for member_id in project.readOnly_refs or []
-				members.push { id: member_id, privilegeLevel: "readOnly" }
+				members.push { id: member_id.toString(), privilegeLevel: "readOnly" }
 			for member_id in project.collaberator_refs or []
-				members.push { id: member_id, privilegeLevel: "readAndWrite" }
+				members.push { id: member_id.toString(), privilegeLevel: "readAndWrite" }
 			return callback null, members
 	
 	getMemberIds: (project_id, callback = (error, member_ids) ->) ->
@@ -33,7 +33,17 @@ module.exports = CollaboratorsHandler =
 					UserGetter.getUser member.id, (error, user) ->
 						return cb(error) if error?
 						return cb(null, { user: user, privilegeLevel: member.privilegeLevel })
-				callback 
+				callback
+	
+	getMemberIdPrivilegeLevel: (user_id, project_id, callback = (error, privilegeLevel) ->) ->
+		# In future if the schema changes and getting all member ids is more expensive (multiple documents)
+		# then optimise this.
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			for member in members or []
+				if member.id == user_id?.toString()
+					return callback null, member.privilegeLevel
+			return callback null, false
 	
 	getMemberCount: (project_id, callback = (error, count) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->

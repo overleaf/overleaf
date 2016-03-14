@@ -49,7 +49,7 @@ describe "ProjectEditorHandler", ->
 				last_name  : "ShareLaTeX"
 				email      : "owner@sharelatex.com"
 			},
-			privilegeLevel: "admin"
+			privilegeLevel: "owner"
 		},{
 			user: {
 				_id: "read-only-id"

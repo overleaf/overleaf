@@ -34,9 +34,9 @@ module.exports = EditorHttpController =
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, canAccess, privilegeLevel) ->
+					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
-						if !canAccess
+						if !privilegeLevel
 							callback null, null, false
 						else
 							callback(null,

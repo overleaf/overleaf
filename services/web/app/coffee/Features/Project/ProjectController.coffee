@@ -225,9 +225,9 @@ module.exports = ProjectController =
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
-			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, canAccess, privilegeLevel)->
+			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
 				return next(error) if error?
-				if !canAccess
+				if !privilegeLevel
 					return res.sendStatus 401
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?

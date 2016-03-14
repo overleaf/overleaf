@@ -99,7 +99,7 @@ describe "EditorHttpController", ->
 		describe "when authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, true, "owner")
+					sinon.stub().callsArgWith(2, null, "owner")
 				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
 				
 			it "should find the project without doc lines", ->
@@ -128,7 +128,7 @@ describe "EditorHttpController", ->
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, false, null)
+					sinon.stub().callsArgWith(2, null, null)
 				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
 				
 			it "should return false in the callback", ->
