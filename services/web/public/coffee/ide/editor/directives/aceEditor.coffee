@@ -18,7 +18,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -29,6 +29,7 @@ define [
 				fontSize: "="
 				autoComplete: "="
 				sharejsDoc: "="
+				spellCheck: "="
 				spellCheckLanguage: "="
 				highlights: "="
 				text: "="
@@ -55,7 +56,9 @@ define [
 				scope.name = attrs.aceEditor
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
-				spellCheckManager     = new SpellCheckManager(scope, editor, element)
+				if scope.spellCheck # only enable spellcheck when explicitly required
+					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
+					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)

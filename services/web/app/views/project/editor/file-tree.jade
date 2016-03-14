@@ -46,26 +46,24 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 		ng-controller="FileTreeRootFolderController",
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
-
-		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')")
-			ul.list-unstyled.file-tree-list
-				li(
-					ng-class="{ 'selected': ui.view == 'pdf' }"
-					ng-controller="PdfViewToggleController"
-				)
-					.entity
-						.entity-name(
-							ng-click="togglePdfView()"
-						)
-							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file-pdf-o
-							|  PDF
-	
 		ul.list-unstyled.file-tree-list(
 			droppable="permissions.write"
 			accept=".entity-name"
 			on-drop-callback="onDrop"
 		)
+			li(
+				ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')"
+				ng-class="{ 'selected': ui.view == 'pdf' }"
+				ng-controller="PdfViewToggleController"
+			)
+				.entity
+					.entity-name(
+						ng-click="togglePdfView()"
+					)
+						i.fa.fa-fw.toggle
+						i.fa.fa-fw.fa-file-pdf-o
+						|  PDF
+
 			file-entity(
 				entity="entity",
 				permissions="permissions",
@@ -364,6 +362,17 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		.alert.alert-warning.small.modal-alert(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
 		.alert.alert-warning.small.modal-alert(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
 		.alert.alert-warning.small.modal-alert(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
+		.alert.alert-warning.small.modal-alert(ng-if="conflicts.length > 0")
+			p.text-center
+				| The following files already exist in this project:
+			ul.text-center.list-unstyled.row-spaced-small
+				li(ng-repeat="conflict in conflicts"): strong {{ conflict }}
+			p.text-center.row-spaced-small
+				| Do you want to overwrite them?
+			p.text-center
+				a(href, ng-click="doUpload()").btn.btn-primary Overwrite
+				| &nbsp;
+				a(href, ng-click="cancel()").btn.btn-default Cancel
 
 	.modal-body(
 		fine-upload
@@ -374,10 +383,14 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		drag-area-text="{{drag_files}}"
 		hint-text="{{hint_press_and_hold_control_key}}"
 		multiple="true"
+		auto-upload="false"
 		on-complete-callback="onComplete"
 		on-upload-callback="onUpload"
 		on-validate-batch="onValidateBatch"
 		on-error-callback="onError"
+		on-submit-callback="onSubmit"
+		on-cancel-callback="onCancel"
+		control="control"
 		params="{'folder_id': parent_folder_id}"
 	)
 		span #{translate("upload_files")}

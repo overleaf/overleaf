@@ -37,8 +37,12 @@ define [
 
 					# Restore previously recorded state
 					if (state = ide.localStorage("layout.#{name}"))?
-						options.west = state.west
-						options.east = state.east
+						if state.east?
+							if !attrs.minimumRestoreSizeEast? or (state.east.size >= attrs.minimumRestoreSizeEast and !state.east.initClosed)
+								options.east = state.east
+						if state.west?
+							if !attrs.minimumRestoreSizeWest? or (state.west.size >= attrs.minimumRestoreSizeWest and !state.west.initClosed)
+								options.west = state.west
 
 					repositionControls = () ->
 						state = element.layout().readState()

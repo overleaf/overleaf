@@ -135,6 +135,12 @@ define [
 		multiSelectSelectedEntity: () ->
 			@findSelectedEntity()?.multiSelected = true
 
+		existsInFolder: (folder_id, name) ->
+			folder = @findEntityById(folder_id)
+			return false if !folder?
+			entity = @_findEntityByPathInFolder(folder, name)
+			return entity?
+			
 		findSelectedEntity: () ->
 			selected = null
 			@forEachEntity (entity) ->

@@ -1,4 +1,3 @@
-Settings = require "settings-sharelatex"
 logger = require("logger-sharelatex")
 User = require('../../models/User').User
 PlansLocator = require("./PlansLocator")

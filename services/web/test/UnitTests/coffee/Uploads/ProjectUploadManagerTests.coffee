@@ -8,6 +8,7 @@ describe "ProjectUploadManager", ->
 	beforeEach ->
 		@project_id = "project-id-123"
 		@folder_id = "folder-id-123"
+		@owner_id = "onwer-id-123"
 		@callback = sinon.stub()
 		@ProjectUploadManager = SandboxedModule.require modulePath, requires:
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
@@ -26,7 +27,7 @@ describe "ProjectUploadManager", ->
 				_id: @project_id
 				rootFolder: [ _id: @root_folder_id ]
 			@ProjectCreationHandler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
-			@ProjectUploadManager.insertZipArchiveIntoFolder = sinon.stub().callsArg(3)
+			@ProjectUploadManager.insertZipArchiveIntoFolder = sinon.stub().callsArg(4)
 			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArg(1)
 			@ProjectUploadManager.createProjectFromZipArchive @owner_id, @name, @source, @callback
 
@@ -45,7 +46,7 @@ describe "ProjectUploadManager", ->
 		it "should insert the zip file contents into the root folder", ->
 			@ProjectUploadManager
 				.insertZipArchiveIntoFolder
-				.calledWith(@project_id, @root_folder_id, @source)
+				.calledWith(@owner_id, @project_id, @root_folder_id, @source)
 				.should.equal true
 
 		it "should automatically set the root doc", ->
@@ -63,9 +64,10 @@ describe "ProjectUploadManager", ->
 			@destination = "/path/to/zile/file-extracted"
 			@ProjectUploadManager._getDestinationDirectory = sinon.stub().returns @destination
 			@ArchiveManager.extractZipArchive = sinon.stub().callsArg(2)
-			@FileSystemImportManager.addFolderContents = sinon.stub().callsArg(4)
+			@ArchiveManager.findTopLevelDirectory = sinon.stub().callsArgWith(1, null, @topLevelDestination = "/path/to/zip/file-extracted/nested")
+			@FileSystemImportManager.addFolderContents = sinon.stub().callsArg(5)
 
-			@ProjectUploadManager.insertZipArchiveIntoFolder @project_id, @folder_id, @source, @callback
+			@ProjectUploadManager.insertZipArchiveIntoFolder @owner_id, @project_id, @folder_id, @source, @callback
 
 		it "should set up the directory to extract the archive to", ->
 			@ProjectUploadManager._getDestinationDirectory.calledWith(@source).should.equal true
@@ -73,8 +75,11 @@ describe "ProjectUploadManager", ->
 		it "should extract the archive", ->
 			@ArchiveManager.extractZipArchive.calledWith(@source, @destination).should.equal true
 
+		it "should find the top level directory", ->
+			@ArchiveManager.findTopLevelDirectory.calledWith(@destination).should.equal true
+
 		it "should insert the extracted archive into the folder", ->
-			@FileSystemImportManager.addFolderContents.calledWith(@project_id, @folder_id, @destination, false)
+			@FileSystemImportManager.addFolderContents.calledWith(@owner_id, @project_id, @folder_id, @topLevelDestination, false)
 				.should.equal true
 
 		it "should return the callback", ->

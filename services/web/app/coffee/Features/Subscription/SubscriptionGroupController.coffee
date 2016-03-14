@@ -1,10 +1,7 @@
 SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
-
 ErrorsController = require("../Errors/ErrorController")
-settings = require("settings-sharelatex")
-
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 _ = require("underscore")
 
@@ -12,7 +9,7 @@ module.exports =
 
 	addUserToGroup: (req, res)->
 		adminUserId = req.session.user._id
-		newEmail = req.body.email
+		newEmail = req.body?.email?.toLowerCase()?.trim()
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
 		SubscriptionGroupHandler.addUserToGroup adminUserId, newEmail, (err, user)->
 			if err?
@@ -90,11 +87,12 @@ module.exports =
 		logger.log subscription_id:subscription_id, user_id:req?.session?.user?._id, email:email, "starting the completion of joining group"
 		SubscriptionGroupHandler.processGroupVerification email, subscription_id, req.query?.token, (err)->
 			if err? and err == "token_not_found"
-				res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
+				return res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
 			else if err?
-				res.sendStatus 500
+				return res.sendStatus 500
 			else
-				res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
+				logger.log subscription_id:subscription_id, email:email, "user successful completed join of group subscription"
+				return res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id

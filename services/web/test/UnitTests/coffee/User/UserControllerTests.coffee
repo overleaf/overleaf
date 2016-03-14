@@ -42,6 +42,8 @@ describe "UserController", ->
 			changeEmailAddress:sinon.stub()
 		@settings =
 			siteUrl: "sharelatex.example.com"
+		@UserHandler = 
+			populateGroupLicenceInvite:sinon.stub().callsArgWith(1)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -53,9 +55,10 @@ describe "UserController", ->
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
+			"./UserHandler":@UserHandler
 			"settings-sharelatex": @settings
 			"logger-sharelatex": {log:->}
-
+			"../../infrastructure/Metrics": inc:->
 
 		@req = 
 			session: 
@@ -151,7 +154,14 @@ describe "UserController", ->
 				done()
 			@UserController.updateUserSettings @req, @res
 
-
+		it "should call populateGroupLicenceInvite", (done)->
+			@req.body.email = @newEmail.toUpperCase()
+			@UserUpdater.changeEmailAddress.callsArgWith(2)
+			@res.sendStatus = (code)=>
+				code.should.equal 200
+				@UserHandler.populateGroupLicenceInvite.calledWith(@user).should.equal true
+				done()
+			@UserController.updateUserSettings @req, @res
 
 	describe "logout", ->
 
@@ -178,7 +188,6 @@ describe "UserController", ->
 				.should.equal true
 		
 		it "should return the user and activation url", ->
-			console.log @res.json.args
 			@res.json
 				.calledWith({
 					email: @email,

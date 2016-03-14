@@ -64,6 +64,8 @@ describe 'ProjectEntityHandler', ->
 		@projectUpdater = markAsUpdated:sinon.stub()
 		@projectLocator = 
 			findElement : sinon.stub()
+		@settings =
+			maxEntitiesPerProject:200
 		@ProjectEntityHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': Project:@ProjectModel
 			'../../models/Doc': Doc:@DocModel
@@ -77,6 +79,7 @@ describe 'ProjectEntityHandler', ->
 			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub(), err:->}
 			'./ProjectUpdateHandler': @projectUpdater
 			"./ProjectGetter": @ProjectGetter
+			"settings-sharelatex":@settings
 
 
 	describe 'mkdirp', ->

@@ -35,7 +35,8 @@ module.exports = ProjectUploadController =
 			logger.err project_id:project_id, name:name, "bad name when trying to upload file"
 			return res.send success: false
 		logger.log folder_id:folder_id, project_id:project_id, "getting upload file request"
-		FileSystemImportManager.addEntity project_id, folder_id, name, path, true, (error, entity) ->
+		user_id = req.session.user._id
+		FileSystemImportManager.addEntity user_id, project_id, folder_id, name, path, true, (error, entity) ->
 			fs.unlink path, ->
 			timer.done()
 			if error?

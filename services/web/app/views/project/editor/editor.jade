@@ -6,6 +6,7 @@ div.full-size(
 	resize-on="layout:main:resize"
 	resize-proportionally="true"
 	initial-size-east="'50%'"
+	minimum-restore-size-east="300"
 )
 	.ui-layout-center
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
@@ -19,6 +20,7 @@ div.full-size(
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
 			auto-complete="settings.autoComplete",
+			spell-check="true",
 			spell-check-language="project.spellCheckLanguage",
 			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
 			show-print-margin="false",

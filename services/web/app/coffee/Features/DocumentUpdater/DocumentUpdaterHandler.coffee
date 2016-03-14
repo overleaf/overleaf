@@ -1,6 +1,5 @@
 request = require 'request'
 request = request.defaults()
-async = require 'async'
 settings = require 'settings-sharelatex'
 _ = require 'underscore'
 async = require 'async'
