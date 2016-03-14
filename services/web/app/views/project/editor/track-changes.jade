@@ -1,83 +1,39 @@
 div#trackChanges(ng-show="ui.view == 'track-changes'")
 	span(ng-controller="TrackChangesPremiumPopup")
-		span(ng-if="versioningPopupType == 'default'")
-			.upgrade-prompt(ng-show="!project.features.versioning")
-				.message(ng-show="project.owner._id == user.id")
-
-					p #{translate("upgrade_to_get_feature", {feature:"Entire Doc History"})}
-					p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
-					h4 
+		.upgrade-prompt(ng-show="!project.features.versioning")
+			.message(ng-show="project.owner._id == user.id")
+				p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
+				p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+				ul.list-unstyled
+					li 
 						i.fa.fa-check &nbsp;
 						| #{translate("unlimited_projects")}
 					
-					h4
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
 					
-					h4 
+					li 
 						i.fa.fa-check &nbsp;
 						| #{translate("full_doc_history")}
 					
-					h4 
+					li 
 						i.fa.fa-check &nbsp;
 						| #{translate("sync_to_dropbox")}
 
-					h4 
+					li 
 						i.fa.fa-check &nbsp;
 						| #{translate("sync_to_github")}
 
-					h4  
+					li  
 						i.fa.fa-check &nbsp;
 						|#{translate("compile_larger_projects")}
 
-					p(ng-controller="FreeTrialModalController")
-						a.btn.btn-success(
-							href
-							ng-class="buttonClass"
-							ng-click="startFreeTrial('track-changes')"
-						) #{translate("start_free_trial")}
-
-
-				
-				.message(ng-show="project.owner._id != user.id")
-					p #{translate("ask_proj_owner_to_upgrade_for_history")}
-					p
-						a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
-						
-		.upgrade-prompt(ng-show="!project.features.versioning", ng-if="versioningPopupType == 'discount'")
-			.message(ng-show="project.owner._id == user.id")
-
-				p #{translate("upgrade_to_get_feature", {feature:"Entire Doc History"})}
-				h2(style="color:#a93529;") 20% Off First 6 Months!
-				p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
-				h4 
-					i.fa.fa-check &nbsp;
-					| #{translate("unlimited_projects")}
-				
-				h4
-					i.fa.fa-check &nbsp;
-					| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-				
-				h4 
-					i.fa.fa-check &nbsp;
-					| #{translate("full_doc_history")}
-				
-				h4 
-					i.fa.fa-check &nbsp;
-					| #{translate("sync_to_dropbox")}
-
-				h4 
-					i.fa.fa-check &nbsp;
-					| #{translate("sync_to_github")}
-
-				h4  
-					i.fa.fa-check &nbsp;
-					|#{translate("compile_larger_projects")}
-				p(ng-controller="FreeTrialModalController")
+				p.text-center(ng-controller="FreeTrialModalController")
 					a.btn.btn-success(
 						href
 						ng-class="buttonClass"
-						ng-click="startFreeTrial('track-changes', 'cf3yutfzu7ztxz')"
+						ng-click="startFreeTrial('track-changes')"
 					) #{translate("start_free_trial")}
 
 

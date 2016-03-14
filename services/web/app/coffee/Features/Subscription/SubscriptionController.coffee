@@ -1,7 +1,6 @@
 SecurityManager     = require '../../managers/SecurityManager'
 SubscriptionHandler  = require './SubscriptionHandler'
 PlansLocator = require("./PlansLocator")
-SubscriptionFormatters = require("./SubscriptionFormatters")
 SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
 LimitationsManager = require("./LimitationsManager")
 RecurlyWrapper = require './RecurlyWrapper'
@@ -9,7 +8,6 @@ Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
-require("../../infrastructure/Sixpack")
 
 module.exports = SubscriptionController =
 
@@ -98,14 +96,14 @@ module.exports = SubscriptionController =
 				else
 					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groups) ->
 						return next(error) if error?
-						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, "showing subscription dashboard"
+						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, groups:groups, "showing subscription dashboard"
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
 							recomendedCurrency: subscription?.currency
 							taxRate:subscription?.taxRate
 							plans: plans
-							subscription: subscription
+							subscription: subscription || {}
 							groups: groups
 							subscriptionTabActive: true
 
@@ -226,6 +224,14 @@ module.exports = SubscriptionController =
 				else
 					res.sendStatus 200
 
+	extendTrial: (req, res)->
+		SecurityManager.getCurrentUser req, (error, user) ->
+			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				SubscriptionHandler.extendTrial subscription, 14, (err)->
+					if err?
+						res.send 500
+					else
+						res.send 200
 
 	recurlyNotificationParser: (req, res, next) ->
 		xml = ""

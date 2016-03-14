@@ -3,8 +3,12 @@ logger = require 'logger-sharelatex'
 logger.initialize("web-sharelatex")
 logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializers").user
 logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSerializers").project
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 metrics = require("metrics-sharelatex")
 metrics.initialize("web")
+metrics.memory.monitor(logger)
 Server = require("./app/js/infrastructure/Server")
 Errors = require "./app/js/errors"
 
@@ -15,6 +19,10 @@ argv = require("optimist")
 	.argv
 
 Server.app.use (error, req, res, next) ->
+	if error?.code is 'EBADCSRFTOKEN'
+		logger.log err: error,url:req.url, method:req.method, user:req?.sesson?.user, "invalid csrf"
+		res.sendStatus(403)
+		return
 	logger.error err: error, url:req.url, method:req.method, user:req?.sesson?.user, "error passed to top level next middlewear"
 	res.statusCode = error.status or 500
 	if res.statusCode == 500

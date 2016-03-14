@@ -1,5 +1,4 @@
 _ = require('underscore')
-
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
 settings = require("settings-sharelatex")
@@ -14,8 +13,6 @@ templates.registered =
 <p>Congratulations, you've just had an account created for you on #{settings.appName} with the email address "<%= to %>".</p>
 
 <p><a href="<%= setNewPasswordUrl %>">Click here to set your password and log in.</a></p>
-
-<p>Once you have reset your password you can <a href="#{settings.siteUrl}/login">log in here</a>.</p>
 
 <p>If you have any questions or problems, please contact <a href="mailto:#{settings.adminEmail}">#{settings.adminEmail}</a>.</p>
 """

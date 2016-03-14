@@ -10,7 +10,6 @@ describe "RateLimiterMiddlewear", ->
 			"logger-sharelatex": @logger = {warn: sinon.stub()}
 		@req =
 			params: {}
-			session: {}
 		@res =
 			status: sinon.stub()
 			write: sinon.stub()
@@ -30,9 +29,30 @@ describe "RateLimiterMiddlewear", ->
 				doc_id: @doc_id = "doc-id"
 			}
 			
+		describe "when there is no session", ->
+			beforeEach ->
+				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+				@req.ip = @ip = "1.2.3.4"
+				@rateLimiter(@req, @res, @next)
+
+			it "should call the rate limiter backend with the ip address", ->
+				@RateLimiter.addCount
+					.calledWith({
+						endpointName: "test-endpoint"
+						timeInterval: 42
+						throttle: 12
+						subjectName: "#{@project_id}:#{@doc_id}:#{@ip}"
+					})
+					.should.equal true
+					
+			it "should pass on to next()", ->
+
+
 		describe "when under the rate limit with logged in user", ->
 			beforeEach ->
-				@req.session.user = { _id: @user_id = "user-id" }
+				@req.session =
+					user : 
+						_id: @user_id = "user-id"
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
 				@rateLimiter(@req, @res, @next)
 				
@@ -70,7 +90,9 @@ describe "RateLimiterMiddlewear", ->
 				
 		describe "when over the rate limit", ->
 			beforeEach ->
-				@req.session.user = { _id: @user_id = "user-id" }
+				@req.session  = 
+					user : 
+						_id: @user_id = "user-id"
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
 				@rateLimiter(@req, @res, @next)
 				

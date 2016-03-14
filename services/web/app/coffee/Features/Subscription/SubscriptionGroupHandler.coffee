@@ -9,15 +9,32 @@ logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = SubscriptionGroupHandler =
 
-	addUserToGroup: (adminUser_id, newEmail, callback)->
+	addUserToGroup: (adminUserId, newEmail, callback)->
+		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group"
 		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
-			LimitationsManager.hasGroupMembersLimitReached adminUser_id, (err, limitReached)->
+			if err?
+				logger.err err:err,  adminUserId:adminUserId, newEmail:newEmail, "error creating user for holding account"
+				return callback(err)
+			if !user?
+				msg = "no user returned whenc reating holidng account or getting user"
+				logger.err adminUserId:adminUserId, newEmail:newEmail, msg
+				return callback(msg)
+			LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
+				if err?
+					logger.err err:err, adminUserId:adminUserId, newEmail:newEmail, "error checking if limit reached for group plan"
+					return callback(err)
 				if limitReached
+					logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
 					return callback(limitReached:limitReached)
-				SubscriptionUpdater.addUserToGroup adminUser_id, user._id, (err)->
+				SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
+					if err?
+						logger.err err:err, "error adding user to group"
+						return callback(err)
+					NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
 					userViewModel = buildUserViewModel(user)
 					callback(err, userViewModel)
 
@@ -60,13 +77,20 @@ module.exports = SubscriptionGroupHandler =
 			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
 
 	processGroupVerification: (userEmail, subscription_id, token, callback)->
+		logger.log userEmail:userEmail, subscription_id:subscription_id, "processing group verification for user"
 		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
-			
 			if err?  or subscription_id != token_subscription_id
 				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
 				return callback("token_not_found")
 			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				SubscriptionGroupHandler.addUserToGroup subscription.admin_id, userEmail, callback
+				if err?
+					logger.err err:err, subscription:subscription, userEmail:userEmail, subscription_id:subscription_id, "error getting subscription"
+					return callback(err)
+				if !subscription?
+					logger.warn subscription_id:subscription_id, userEmail:userEmail, "no subscription found"
+					return callback()
+				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
+
 
 
 buildUserViewModel = (user)->

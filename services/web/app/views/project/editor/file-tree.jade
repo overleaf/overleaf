@@ -1,4 +1,4 @@
-aside#file-tree(ng-controller="FileTreeController").full-size
+aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }").full-size
 	.toolbar.toolbar-small.toolbar-alt(ng-if="permissions.write")
 		a(
 			href,
@@ -27,7 +27,8 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 				href,
 				ng-click="startRenamingSelected()",
 				tooltip="#{translate('rename')}",
-				tooltip-placement="bottom"
+				tooltip-placement="bottom",
+				ng-show="multiSelectedCount == 0"
 			)
 				i.fa.fa-pencil
 			a(
@@ -45,26 +46,24 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 		ng-controller="FileTreeRootFolderController",
 		ng-class="{ 'no-toolbar': !permissions.write }"
 	)
-
-		div(ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')")
-			ul.list-unstyled.file-tree-list
-				li(
-					ng-class="{ 'selected': ui.view == 'pdf' }"
-					ng-controller="PdfViewToggleController"
-				)
-					.entity
-						.entity-name(
-							ng-click="togglePdfView()"
-						)
-							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file-pdf-o
-							|  PDF
-	
 		ul.list-unstyled.file-tree-list(
 			droppable="permissions.write"
 			accept=".entity-name"
 			on-drop-callback="onDrop"
 		)
+			li(
+				ng-show="ui.pdfLayout == 'flat' && (ui.view == 'editor' || ui.view == 'pdf' || ui.view == 'file')"
+				ng-class="{ 'selected': ui.view == 'pdf' }"
+				ng-controller="PdfViewToggleController"
+			)
+				.entity
+					.entity-name(
+						ng-click="togglePdfView()"
+					)
+						i.fa.fa-fw.toggle
+						i.fa.fa-fw.fa-file-pdf-o
+						|  PDF
+
 			file-entity(
 				entity="entity",
 				permissions="permissions",
@@ -81,27 +80,25 @@ aside#file-tree(ng-controller="FileTreeController").full-size
 				)
 					.entity
 						.entity-name(
-							ng-click="select()"
+							ng-click="select($event)"
 						)
 							//- Just a spacer to align with folders
 							i.fa.fa-fw.toggle
 							i.fa.fa-fw.fa-file
 
 							span  {{ entity.name }}
-							
-		
-
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
-		ng-class="{ 'selected': entity.selected }",
+		ng-class="{ 'selected': entity.selected, 'multi-selected': entity.multiSelected }",
 		ng-controller="FileTreeEntityController"
 	)
 		.entity(ng-if="entity.type != 'folder'")
 			.entity-name(
-				ng-click="select()"
+				ng-click="select($event)"
 				ng-dblclick="permissions.write && startRenaming()"
 				draggable="permissions.write"
+				draggable-helper="draggableHelper"
 				context-menu
 				data-target="context-menu-{{ entity.id }}"
 				context-menu-container="body"
@@ -112,7 +109,6 @@ script(type='text/ng-template', id='entityListItemTemplate')
 
 				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
 				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
-
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}
@@ -126,12 +122,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						on-enter="finishRenaming()"
 					)
 
-				span.dropdown(
+				span.dropdown.entity-menu-toggle(
 					dropdown,
-					ng-show="entity.selected",
 					ng-if="permissions.write"
 				)
-					a.dropdown-toggle(href, dropdown-toggle)
+					a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 						i.fa.fa-chevron-down
 
 					ul.dropdown-menu.dropdown-menu-right
@@ -140,12 +135,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								href
 								ng-click="startRenaming()"
 								right-click="startRenaming()"
+								ng-show="!entity.multiSelected"
 							) #{translate("rename")}
 						li
 							a(
 								href
 								ng-click="openDeleteModal()"
 								right-click="openDeleteModal()"
+								stop-propagation="click"
 							) #{translate("delete")}
 
 				div.dropdown.context-menu(
@@ -158,20 +155,23 @@ script(type='text/ng-template', id='entityListItemTemplate')
 								href
 								ng-click="startRenaming()"
 								right-click="startRenaming()"
+								ng-show="!entity.multiSelected"
 							) #{translate("rename")}
 						li
 							a(
 								href
 								ng-click="openDeleteModal()"
 								right-click="openDeleteModal()"
+								stop-propagation="click"
 							) #{translate("delete")}
 
 
 		.entity(ng-if="entity.type == 'folder'", ng-controller="FileTreeFolderController")
 			.entity-name(
-				ng-click="select()"
+				ng-click="select($event)"
 				ng-dblclick="permissions.write && startRenaming()"
 				draggable="permissions.write"
+				draggable-helper="draggableHelper"
 				droppable="permissions.write"
 				accept=".entity-name"
 				on-drop-callback="onDrop"
@@ -194,7 +194,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 							'fa-folder': !expanded, \
 							'fa-folder-open': expanded \
 						}"
-						ng-click="select()"
+						ng-click="select($event)"
 					)
 
 					span(
@@ -210,12 +210,11 @@ script(type='text/ng-template', id='entityListItemTemplate')
 							on-enter="finishRenaming()"
 						)
 
-					span.dropdown(
+					span.dropdown.entity-menu-toggle(
 						dropdown,
 						ng-if="permissions.write"
-						ng-show="entity.selected"
 					)
-						a.dropdown-toggle(href, dropdown-toggle)
+						a.dropdown-toggle(href, dropdown-toggle, stop-propagation="click")
 							i.fa.fa-chevron-down
 
 						ul.dropdown-menu.dropdown-menu-right
@@ -224,12 +223,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									href
 									ng-click="startRenaming()"
 									right-click="startRenaming()"
+									ng-show="!entity.multiSelected"
 								) #{translate("rename")}
 							li
 								a(
 									href
 									ng-click="openDeleteModal()"
 									right-click="openDeleteModal()"
+									stop-propagation="click"
 								) #{translate("delete")}
 							li.divider
 							li
@@ -261,12 +262,14 @@ script(type='text/ng-template', id='entityListItemTemplate')
 									href
 									ng-click="startRenaming()"
 									right-click="startRenaming()"
+									ng-show="!entity.multiSelected"
 								) #{translate("rename")}
 							li
 								a(
 									href
 									ng-click="openDeleteModal()"
 									right-click="openDeleteModal()"
+									stop-propagation="click"
 								) #{translate("delete")}
 							li.divider
 							li
@@ -306,6 +309,7 @@ script(type='text/ng-template', id='newDocModalTemplate')
 		h3 #{translate("new_file")}
 	.modal-body
 		form(novalidate, name="newDocForm")
+			div.alert.alert-danger(ng-if="error") {{error}}
 			input.form-control(
 				type="text",
 				placeholder="File Name",
@@ -330,6 +334,7 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}
 	.modal-body
+		div.alert.alert-danger(ng-if="error") {{error}}
 		form(novalidate, name="newFolderForm")
 			input.form-control(
 				type="text",
@@ -354,9 +359,20 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-header
 		h3 #{translate("upload_files")}
-		span &nbsp;
-		.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
-		.alert.alert-warning.small(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
+		.alert.alert-warning.small.modal-alert(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
+		.alert.alert-warning.small.modal-alert(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
+		.alert.alert-warning.small.modal-alert(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
+		.alert.alert-warning.small.modal-alert(ng-if="conflicts.length > 0")
+			p.text-center
+				| The following files already exist in this project:
+			ul.text-center.list-unstyled.row-spaced-small
+				li(ng-repeat="conflict in conflicts"): strong {{ conflict }}
+			p.text-center.row-spaced-small
+				| Do you want to overwrite them?
+			p.text-center
+				a(href, ng-click="doUpload()").btn.btn-primary Overwrite
+				| &nbsp;
+				a(href, ng-click="cancel()").btn.btn-default Cancel
 
 	.modal-body(
 		fine-upload
@@ -367,10 +383,14 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		drag-area-text="{{drag_files}}"
 		hint-text="{{hint_press_and_hold_control_key}}"
 		multiple="true"
+		auto-upload="false"
 		on-complete-callback="onComplete"
 		on-upload-callback="onUpload"
 		on-validate-batch="onValidateBatch"
 		on-error-callback="onError"
+		on-submit-callback="onSubmit"
+		on-cancel-callback="onCancel"
+		control="control"
 		params="{'folder_id': parent_folder_id}"
 	)
 		span #{translate("upload_files")}
@@ -382,6 +402,8 @@ script(type='text/ng-template', id='deleteEntityModalTemplate')
 		h3 #{translate("delete")} {{ entity.name }}
 	.modal-body
 		p !{translate("sure_you_want_to_delete")}
+		ul
+			li(ng-repeat="entity in entities") {{entity.name}}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"

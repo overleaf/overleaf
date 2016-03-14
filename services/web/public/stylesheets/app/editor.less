@@ -109,6 +109,15 @@
 	}
 	a.rename {
 		visibility: hidden;
+		display: inline-block;
+		color: @gray-light;
+		padding: 5px;
+		border-radius: @border-radius-small;
+		&:hover {
+			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+			color: @gray-dark;
+			text-decoration: none;
+		}
 	}
 	&:hover {
 		a.rename {
@@ -234,6 +243,105 @@
 			background-color: darken(@gray, 5%);
 			border-color: darken(@gray-dark, 20%);
 			
+		}
+	}
+}
+
+.modal-alert {
+	margin-top:10px;
+	margin-bottom:0px;
+}
+
+.sl_references_search_hint {
+	position: absolute;
+	bottom: -22px;
+	left: -1px;
+	right: 0px;
+	text-align: center;
+	padding: 2px;
+	background: rgb(202, 214, 250);
+	border: 1px solid lightgray;
+	box-shadow: 3px 3px 5px rgba(0,0,0,.2);
+	span {
+		color: black;
+	}
+}
+// -- References Search Modal --
+.references-search-modal-backdrop {
+	// don't grey out the editor when the
+	// modal is active
+	background-color: transparent;
+}
+.references-search-modal {
+	// upgrade prompt
+	.references-search-upgrade-prompt {
+		padding: 24px;
+		padding-bottom: 48px;
+		.upgrade-prompt {
+			text-align: center;
+			width: 400px;
+			padding-top: 14px;
+			padding-bottom: 14px;
+			padding-left: 38px;
+			padding-right: 38px;
+			margin: auto;
+			background: white;
+			opacity: 0.95;
+			border-radius: 8px;
+			.message {
+				margin-top: 15px;
+				&.call-to-action {
+					font-weight: bold;
+				}
+				ul.list-unstyled {
+					text-align: left;
+				}
+			}
+			a.btn {
+				opacity: 1.0;
+			}
+		}
+	}
+	.search-form {
+		// position the spinner inside the input element
+		i.fa-spinner {
+			margin-top: -30px;
+		}
+	}
+	.alert-danger {
+		margin-top: 12px;
+		margin-bottom: 0px;
+	}
+	// search result items list
+	.search-results {
+		font-size: 12px;
+		.no-results-message {
+			font-size: 16px;
+		}
+		.search-result-hit {
+			&:hover {
+				cursor: pointer;
+			}
+			border-bottom: 1px solid #ddd;
+			padding: 8px;
+			&:last-child {
+				border-bottom: 1px solid transparent;
+			}
+			border-left: 4px solid transparent;
+			&.selected-search-result-hit {
+				background-color: @red;
+				color: white;
+				.hit-year.small {
+					color: white;
+				}
+				.hit-journal.small {
+					color: white;
+				}
+			}
+			.hit-title {
+				font-size: 1.3em;
+				font-style: italic;
+			}
 		}
 	}
 }

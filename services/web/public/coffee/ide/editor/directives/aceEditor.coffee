@@ -18,7 +18,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -29,6 +29,7 @@ define [
 				fontSize: "="
 				autoComplete: "="
 				sharejsDoc: "="
+				spellCheck: "="
 				spellCheckLanguage: "="
 				highlights: "="
 				text: "="
@@ -55,7 +56,9 @@ define [
 				scope.name = attrs.aceEditor
 
 				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
-				spellCheckManager     = new SpellCheckManager(scope, editor, element)
+				if scope.spellCheck # only enable spellcheck when explicitly required
+					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
+					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
@@ -69,6 +72,21 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+				
+				# For European keyboards, the / is above 7 so needs Shift pressing.
+				# This comes through as Ctrl-Shift-/ which is mapped to toggleBlockComment.
+				# This doesn't do anything for LaTeX, so remap this to togglecomment to
+				# work for European keyboards as normal.
+				editor.commands.removeCommand "toggleBlockComment"
+				editor.commands.removeCommand "togglecomment"
+				
+				editor.commands.addCommand {
+					name: "togglecomment",
+					bindKey: { win: "Ctrl-/|Ctrl-Shift-/", mac: "Command-/|Command-Shift-/" },
+					exec: (editor) -> editor.toggleCommentLines(),
+					multiSelectAction: "forEachLine",
+					scrollIntoView: "selectionPart"
+				}
 
 				# Trigger search AND replace on CMD+F
 				editor.commands.addCommand
@@ -77,7 +95,6 @@ define [
 					exec: (editor) ->
 						ace.require("ace/ext/searchbox").Search(editor, true)
 					readOnly: true
-				editor.commands.removeCommand "replace"
 				
 				# Bold text on CMD+B
 				editor.commands.addCommand

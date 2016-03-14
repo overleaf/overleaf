@@ -28,14 +28,26 @@
 	}
 }
 
+.userNotifications {
+	ul {
+		margin-bottom:0px;
+	}
+	.alert {
+		.box-shadow(2px 4px 6px rgba(0, 0, 0, 0.25));
+	}
+
+}
+
 ul.folders-menu {
 	margin: 0;
 	.subdued {
 		color: @gray-light;
 	}
-	li {
+	> li {
+		cursor: pointer;
 		line-height: 1.8;
-		a {
+		position: relative;
+		> a {
 			font-size: 0.9rem;
 			color: #333;
 			padding: (@line-height-computed / 4);
@@ -43,19 +55,19 @@ ul.folders-menu {
 			line-height: 1.2;
 		}
 	}
-	li.active {
+	> li.active {
 		//border-right: 4px solid @red;
-		a {
+		background-color: @link-color;
+		border-radius: @border-radius-small;
+		> a {
 			font-weight: 700;
 			color: white;
-			background-color: @link-color;
-			border-radius: @border-radius-small;
 			.subdued {
 				color: white;
 			}
 		}
 	}
-	li > a.small {
+	> li > a.small {
 		color: @gray;
 	}
 	h2 {
@@ -65,19 +77,67 @@ ul.folders-menu {
 		font-weight: 500;
 		font-family: @font-family-sans-serif;
 	}
-	a.tag {
-		padding: 2px (@line-height-computed / 4);
-		display: inline-block;
-		position: relative;
-		i {
-			position: absolute;
-			top: 5px;
-			left: 6px;
+	> li.tag {
+		&.active {
+			.tag-menu > a {
+				color: white;
+				border-color: white;
+				&:hover {
+					background-color: darken(@brand-primary, 10%);
+				}
+			}
 		}
-		span.name {
+		&:hover {
+			&:not(.active) {
+				background-color: darken(@gray-lightest, 2%);
+			}
+			.tag-menu {
+				display: block
+			}
+		}
+		&:not(.active) {
+			.tag-menu > a:hover {
+				background-color: @gray-light;
+			}
+		}
+		a.tag-name {
+			padding: 2px (@line-height-computed / 4);
+			margin-right: 18px;
 			display: inline-block;
-			padding-left: 22px;
-			line-height: 1.4;
+			position: relative;
+			i {
+				position: absolute;
+				top: 5px;
+				left: 6px;
+			}
+			span.name {
+				display: inline-block;
+				padding-left: 22px;
+				line-height: 1.4;
+			}
+		}
+		.tag-menu {
+			> a {
+				border: 1px solid @gray;
+				border-radius: @border-radius-small;
+				color: @text-color;
+				display: block;
+				width: 16px;
+				height: 16px;
+				position: relative;
+				.caret {
+					position: absolute;
+					top: 6px;
+					left: 1px;
+				}
+			}
+			display: none;
+			position: absolute;
+			top: 6px;
+			right: 4px;
+			&.open {
+				display: block;
+			}
 		}
 	}
 }

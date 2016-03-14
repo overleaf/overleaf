@@ -8,7 +8,7 @@ _ = require("underscore")
 module.exports = 
 
 	getDetails: (project_id, callback)->
-		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
+		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
@@ -37,7 +37,7 @@ module.exports =
 
 	renameProject: (project_id, newName, callback = ->)->
 		logger.log project_id: project_id, newName:newName, "renaming project"
-		ProjectGetter.getProject project_id, {"name":1}, (err, project)->
+		ProjectGetter.getProject project_id, {name:true}, (err, project)->
 			if err? or !project?
 				logger.err err:err,  project_id:project_id, "error getting project or could not find it todo project rename"
 				return callback(err)

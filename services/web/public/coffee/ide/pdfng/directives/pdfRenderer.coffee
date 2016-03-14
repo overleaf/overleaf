@@ -16,7 +16,8 @@ define [
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
-				@pdfjs = PDFJS.getDocument @url, null, null, @options.progressCallback
+				@pdfjs = PDFJS.getDocument @url
+				@pdfjs.onProgress = @options.progressCallback
 				@document = $q.when(@pdfjs)
 				@navigateFn = @options.navigateFn
 				@spinner = new pdfSpinner
@@ -26,7 +27,7 @@ define [
 						@options.loadedCallback()
 				@errorCallback = @options.errorCallback
 				@pageSizeChangeCallback = @options.pageSizeChangeCallback
-				@pdfjs.catch (exception) =>
+				@pdfjs.promise.catch (exception) =>
 					# console.log 'ERROR in get document', exception
 					@errorCallback(exception)
 
@@ -208,9 +209,6 @@ define [
 					element.container.width(newWidth + 'px')
 					@pageSizeChangeCallback?(pagenum, newHeight - oldHeight)
 
-				if pixelRatio != 1
-					ctx.scale(pixelRatio, pixelRatio)
-
 				textLayer = new pdfTextLayer({
 					textLayerDiv: element.text[0]
 					viewport: viewport
@@ -229,6 +227,7 @@ define [
 				result = page.render {
 					canvasContext: ctx
 					viewport: viewport
+					transform: [pixelRatio, 0, 0, pixelRatio, 0, 0]
 				}
 
 				timedOut = false

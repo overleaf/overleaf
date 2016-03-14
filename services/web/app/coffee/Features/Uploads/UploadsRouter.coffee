@@ -13,8 +13,8 @@ module.exports =
 			RateLimiterMiddlewear.rateLimit({
 				endpointName: "file-upload"
 				params: ["Project_id"]
-				maxRequests: 100
-				timeInterval: 60 * 20
+				maxRequests: 200
+				timeInterval: 60 * 30
 			}),
 			SecurityManager.requestCanModifyProject,
 			ProjectUploadController.uploadFile

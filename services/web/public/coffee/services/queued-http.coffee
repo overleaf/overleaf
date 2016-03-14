@@ -1,7 +1,6 @@
 define [
 	"base"
 ], (App) ->
-
 	App.factory "queuedHttp", ($http, $q) ->
 		pendingRequests = []
 		inflight = false

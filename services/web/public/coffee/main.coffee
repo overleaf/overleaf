@@ -15,6 +15,7 @@ define [
 	"main/annual-upgrade"
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
+	"main/universties-site"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
@@ -24,6 +25,7 @@ define [
 	"directives/onEnter"
 	"directives/selectAll"
 	"directives/maxHeight"
+	"services/queued-http"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->

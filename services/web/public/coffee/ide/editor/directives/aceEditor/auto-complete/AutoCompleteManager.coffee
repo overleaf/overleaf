@@ -16,7 +16,7 @@ define [
 		constructor: (@$scope, @editor) ->
 			@suggestionManager = new SuggestionManager()
 
-			@monkeyPatchAutocomplete()	
+			@monkeyPatchAutocomplete()
 
 			@$scope.$watch "autoComplete", (autocomplete) =>
 				if autocomplete
@@ -37,11 +37,47 @@ define [
 				enableSnippets: true,
 				enableLiveAutocompletion: false
 			})
-			
+
 			SnippetCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					callback null, Snippets
-			@editor.completers = [@suggestionManager, SnippetCompleter]
+
+			references = @$scope.$root._references
+			ReferencesCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) ->
+					range = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(range)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment
+						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?){(.*,)?(\w*)/)
+						if citeMatch
+							commandName = citeMatch[1]
+							previousArgs = citeMatch[2]
+							currentArg = citeMatch[3]
+							if previousArgs == undefined
+								previousArgs = ""
+							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
+							result = []
+							result.push {
+								caption: "\\#{commandName}{",
+								snippet: "\\#{commandName}{",
+								meta: "reference",
+								score: 11000
+							}
+							if references.keys and references.keys.length > 0
+								references.keys.forEach (key) ->
+									if !(key in [null, undefined])
+										result.push({
+											caption: "\\#{commandName}{#{previousArgsCaption}#{key}",
+											value: "\\#{commandName}{#{previousArgs}#{key}",
+											meta: "reference",
+											score: 10000
+										})
+								callback null, result
+							else
+								callback null, result
+
+			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
 
 		disable: () ->
 			@editor.setOptions({
@@ -83,7 +119,7 @@ define [
 					# since it will be adding in with the autocomplete of \begin{item}...
 					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
 						editor.session.remove(range)
-					
+
 					Autocomplete::_insertMatch.call this, data
 
 				# Overwrite this to set autoInsert = false and set font size

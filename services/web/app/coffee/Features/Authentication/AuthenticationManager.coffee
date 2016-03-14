@@ -1,4 +1,3 @@
-Settings = require 'settings-sharelatex'
 User = require("../../models/User").User
 {db, ObjectId} = require("../../infrastructure/mongojs")
 crypto = require 'crypto'

@@ -24,6 +24,8 @@ module.exports =
 		webRouter.post '/subscription/group/user', AuthenticationController.requireLogin(),  SubscriptionGroupController.addUserToGroup
 		webRouter.get '/subscription/group/export',  AuthenticationController.requireLogin(), SubscriptionGroupController.exportGroupCsv
 		webRouter.delete '/subscription/group/user/:user_id', AuthenticationController.requireLogin(), SubscriptionGroupController.removeUserFromGroup
+		webRouter.delete '/subscription/group/user', AuthenticationController.requireLogin(), SubscriptionGroupController.removeSelfFromGroup
+
 
 		webRouter.get '/user/subscription/:subscription_id/group/invited', AuthenticationController.requireLogin(), SubscriptionGroupController.renderGroupInvitePage
 		webRouter.post '/user/subscription/:subscription_id/group/begin-join', AuthenticationController.requireLogin(), SubscriptionGroupController.beginJoinGroup
@@ -39,6 +41,7 @@ module.exports =
 		webRouter.post '/user/subscription/cancel',     AuthenticationController.requireLogin(), SubscriptionController.cancelSubscription
 		webRouter.post '/user/subscription/reactivate', AuthenticationController.requireLogin(), SubscriptionController.reactivateSubscription
 
+		webRouter.put '/user/subscription/extend', AuthenticationController.requireLogin(), SubscriptionController.extendTrial
 
 		webRouter.get "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.renderUpgradeToAnnualPlanPage
 		webRouter.post "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.processUpgradeToAnnualPlan

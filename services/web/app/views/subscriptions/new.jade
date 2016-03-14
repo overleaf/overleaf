@@ -112,7 +112,6 @@ block content
 												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
 													select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
 														option(value="", disabled, selected) Year
-														option(value="2015") 2015
 														option(value="2016") 2016
 														option(value="2017") 2017
 														option(value="2018") 2018

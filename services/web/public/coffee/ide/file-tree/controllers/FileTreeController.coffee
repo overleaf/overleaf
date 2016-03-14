@@ -61,6 +61,8 @@ define [
 				$scope.state.inflight = true
 				ide.fileTreeManager
 					.createDoc(name, parent_folder)
+					.error (e)->
+						$scope.error = e
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -90,6 +92,8 @@ define [
 				$scope.state.inflight = true
 				ide.fileTreeManager
 					.createFolder(name, parent_folder)
+					.error (e)->
+						$scope.error = e
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
@@ -99,17 +103,30 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "$window"
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, $window) ->
 			$scope.parent_folder_id = parent_folder?.id
 			$scope.tooManyFiles = false
 			$scope.rateLimitHit = false
+			$scope.secondsToRedirect = 10
+			$scope.notLoggedIn = false
+			$scope.conflicts = []
+			$scope.control = {}
 
-			uploadCount = 0
-			$scope.onUpload = () ->
-				uploadCount++
+			needToLogBackIn = ->
+				$scope.notLoggedIn = true
+				decreseTimeout = ->
+					$timeout (() ->
+						if $scope.secondsToRedirect == 0
+							$window.location.href = "/login?redir=/project/#{ide.project_id}"
+						else
+							decreseTimeout()
+							$scope.secondsToRedirect = $scope.secondsToRedirect - 1
+					), 1000
 
-			$scope.max_files = 20
+				decreseTimeout()
+
+			$scope.max_files = 40
 			$scope.onComplete = (error, name, response) ->
 				$timeout (() ->
 					uploadCount--
@@ -127,8 +144,40 @@ define [
 					return true
 
 			$scope.onError = (id, name, reason)->
+				console.log(id, name, reason)
 				if reason.indexOf("429") != -1
 					$scope.rateLimitHit = true
+				else if reason.indexOf("403") != -1
+					needToLogBackIn()
+
+			_uploadTimer = null
+			uploadIfNoConflicts = () ->
+				if $scope.conflicts.length == 0
+					$scope.doUpload()
+
+			uploadCount = 0
+			$scope.onSubmit = (id, name) ->
+				uploadCount++
+				if ide.fileTreeManager.existsInFolder($scope.parent_folder_id, name)
+					$scope.conflicts.push name
+					$scope.$apply()
+				if !_uploadTimer?
+					_uploadTimer = setTimeout () ->
+						_uploadTimer = null
+						uploadIfNoConflicts()
+					, 0
+				return true
+			
+			$scope.onCancel = (id, name) ->
+				uploadCount--
+				index = $scope.conflicts.indexOf(name)
+				if index > -1
+					$scope.conflicts.splice(index, 1)
+				$scope.$apply()
+				uploadIfNoConflicts()
+
+			$scope.doUpload = () ->
+				$scope.control?.q?.uploadStoredFiles()
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

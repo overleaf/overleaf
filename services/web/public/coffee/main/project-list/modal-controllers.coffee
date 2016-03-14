@@ -1,23 +1,6 @@
 define [
 	"base"
 ], (App) ->
-
-
-	App.controller 'NewTagModalController', ($scope, $modalInstance, $timeout) ->
-		$scope.inputs = 
-			newTagName: ""
-
-		$modalInstance.opened.then () ->
-			$timeout () ->
-				$scope.$broadcast "open"
-			, 200
-
-		$scope.create = () ->
-			$modalInstance.close($scope.inputs.newTagName)
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss('cancel')
-
 	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, projectName) ->
 		$scope.inputs = 
 			projectName: projectName

@@ -1,11 +1,16 @@
 Project = require('../../models/Project').Project
+ProjectGetter = require("./ProjectGetter")
 Errors = require "../../errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
 
-module.exports =
-	findElement: (options, callback = (err, element, path, parentFolder)->)->
+module.exports = ProjectLocator =
+	findElement: (options, _callback = (err, element, path, parentFolder)->)->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
+
 		{project, project_id, element_id, type} = options
 		elementType = sanitizeTypeOfElement type
 
@@ -46,7 +51,7 @@ module.exports =
 		if project?
 			startSearch(project)
 		else
-			Project.findById project_id, (err, project)->
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
 				return callback(err) if err?
 				if !project?
 					return callback(new Errors.NotFoundError("project not found"))
@@ -62,8 +67,12 @@ module.exports =
 		if project?
 			getRootDoc project
 		else
-			Project.findById project_id, (err, project)->
-				getRootDoc project
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
+				if err?
+					logger.err err:err, "error getting project"
+					return callback(err)
+				else
+					getRootDoc project
 
 	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity)->)->
 
@@ -122,11 +131,11 @@ module.exports =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		Project.findAllUsersProjects user_id, 'name', (err, projects, collabertions=[])->
+		Project.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
 			projects = projects.concat(collabertions)
 			projectName = projectName.toLowerCase()
-			project = _.find projects, (project)-> 
-				project.name.toLowerCase() == projectName
+			project = _.find projects, (project)->
+				project.name.toLowerCase() == projectName and project.archived != true
 			logger.log user_id:user_id, projectName:projectName, totalProjects:projects.length, project:project, "looking for project by name"
 			callback(null, project)
 

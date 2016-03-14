@@ -24,6 +24,8 @@ aside#file-tree {
 		font-size: 0.8rem;
 		margin: 0;
 		padding: (@line-height-computed / 4) 0;
+		overflow-x: hidden;
+		height: 100%;
 
 		ul {
 			margin-left: (@line-height-computed / 2);
@@ -46,7 +48,7 @@ aside#file-tree {
 					line-height: 1.6;
 				}
 				&.droppable-hover {
-					background-color: @file-tree-droppable-background-color;
+					background-color: fade(@file-tree-droppable-background-color, 60%);
 				}
 			}
 
@@ -66,16 +68,13 @@ aside#file-tree {
 				font-size: 0.7rem;
 				color: @gray
 			}
-
-			&.selected {
+			
+			&.multi-selected {
 				> .entity > .entity-name {
-					color: @link-color;
-					border-right: 4px solid @link-color;
-					font-weight: bold;
-					i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image, i.fa-file-pdf-o {
-						color: @link-color;
+					background-color: lighten(@brand-info, 40%);
+					&:hover {
+						background-color: lighten(@brand-info, 30%);
 					}
-					padding-right: 32px;
 				}
 			}
 
@@ -97,11 +96,34 @@ aside#file-tree {
 					width: 100%;
 				}
 			}
+			
+			> .entity > .entity-name {
+				.entity-menu-toggle {
+					display: none;
+				}
+			}
+		}
+	}
+	
+	&:not(.multi-selected) {
+		ul.file-tree-list li.selected {
+			> .entity > .entity-name {
+				color: @link-color;
+				border-right: 4px solid @link-color;
+				font-weight: bold;
+				padding-right: 32px;
+				i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image, i.fa-file-pdf-o {
+					color: @link-color;
+				}
+				.entity-menu-toggle {
+					display: inline;
+				}
+			}
 		}
 	}
 
 	ul.droppable-hover {
-		background-color: @file-tree-droppable-background-color;
+		background-color: fade(@file-tree-droppable-background-color, 60%);
 	}
 }
 

@@ -71,7 +71,7 @@ describe "AuthenticationManager", ->
 			@bcrypt.genSalt = sinon.stub().callsArgWith(1, null, @salt)
 			@bcrypt.hash = sinon.stub().callsArgWith(2, null, @hashedPassword)
 			@db.users.update = sinon.stub().callsArg(2)
-			@AuthenticationManager.setUserPassword(@user_id, @unencryptedPassword, @callback)
+			@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
 
 		it "should update the user's password in the database", ->
 			@db.users.update

@@ -8,7 +8,7 @@ uuid = require('node-uuid')
 fs = require('fs')
 
 module.exports =
-	mergeUpdate: (project_id, path, updateRequest, source, callback = (error) ->)->
+	mergeUpdate: (user_id, project_id, path, updateRequest, source, callback = (error) ->)->
 		self = @
 		logger.log project_id:project_id, path:path, "merging update from tpds"
 		projectLocator.findElementByPath project_id, path, (err, element)=>
@@ -30,7 +30,7 @@ module.exports =
 					if isFile
 						self.p.processFile project_id, elementId, fsPath, path, source, callback
 					else
-						self.p.processDoc project_id, elementId, fsPath, path, source, callback
+						self.p.processDoc project_id, elementId, user_id, fsPath, path, source, callback
 
 	deleteUpdate: (project_id, path, source, callback)->
 		projectLocator.findElementByPath project_id, path, (err, element)->
@@ -49,14 +49,14 @@ module.exports =
 
 	p:
 
-		processDoc: (project_id, doc_id, fsPath, path, source, callback)->
+		processDoc: (project_id, doc_id, user_id, fsPath, path, source, callback)->
 			readFileIntoTextArray fsPath, (err, docLines)->
 				if err?
 					logger.err project_id:project_id, doc_id:doc_id, fsPath:fsPath, "error reading file into text array for process doc update"
 					return callback(err)
 				logger.log docLines:docLines, doc_id:doc_id, project_id:project_id, "processing doc update from tpds"
 				if doc_id?
-					editorController.setDoc project_id, doc_id, docLines, source, (err)->
+					editorController.setDoc project_id, doc_id, user_id, docLines, source, (err)->
 						callback()
 				else
 					setupNewEntity project_id, path, (err, folder, fileName)->

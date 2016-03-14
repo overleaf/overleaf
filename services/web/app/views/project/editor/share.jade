@@ -79,33 +79,36 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 								type="submit"
 								ng-mousedown="addMembers()"
 							) #{translate("share")}
-				div.text-center(ng-hide="canAddCollaborators")
-					p #{translate("need_to_upgrade_for_more_collabs")}.
-					h4 
-						i.fa.fa-check &nbsp;
-						| #{translate("unlimited_projects")}
-					
-					h4
-						i.fa.fa-check &nbsp;
-						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-					
-					h4 
-						i.fa.fa-check &nbsp;
-						| #{translate("full_doc_history")}
-					
-					h4 
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_dropbox")}
+				div(ng-hide="canAddCollaborators")
+					p.text-center #{translate("need_to_upgrade_for_more_collabs")}. Also:
+					.row
+						.col-md-8.col-md-offset-2
+							ul.list-unstyled
+								li 
+									i.fa.fa-check &nbsp;
+									| #{translate("unlimited_projects")}
+								
+								li
+									i.fa.fa-check &nbsp;
+									| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+								
+								li 
+									i.fa.fa-check &nbsp;
+									| #{translate("full_doc_history")}
+								
+								li 
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_dropbox")}
 
-					h4 
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_github")}
+								li 
+									i.fa.fa-check &nbsp;
+									| #{translate("sync_to_github")}
 
-					h4  
-						i.fa.fa-check &nbsp;
-						|#{translate("compile_larger_projects")}
+								li  
+									i.fa.fa-check &nbsp;
+									|#{translate("compile_larger_projects")}
 
-					p(ng-controller="FreeTrialModalController")
+					p.text-center.row-spaced-thin(ng-controller="FreeTrialModalController")
 						a.btn.btn-success(
 							href
 							ng-class="buttonClass"
@@ -122,7 +125,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
 		button.btn.btn-primary(
 			ng-click="done()"
-		) #{translate("done")}
+		) #{translate("close")}
 
 script(type="text/ng-template", id="makePublicModalTemplate")
 	.modal-header

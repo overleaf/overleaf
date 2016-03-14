@@ -32,6 +32,9 @@ module.exports =
 		insertOperation = 
 			"$addToSet": {member_ids:user_id}
 		Subscription.findAndModify searchOps, insertOperation, (err, subscription)->
+			if err?
+				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
+				return callback(err)
 			UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
 
 	removeUserFromGroup: (adminUser_id, user_id, callback)->
@@ -39,9 +42,11 @@ module.exports =
 			admin_id: adminUser_id
 		removeOperation = 
 			"$pull": {member_ids:user_id}
-		Subscription.update searchOps, removeOperation, ->
+		Subscription.update searchOps, removeOperation, (err)->
+			if err?
+				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
+				return callback(err)
 			UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, callback
-
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"

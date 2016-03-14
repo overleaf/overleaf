@@ -2,7 +2,7 @@
 	height: 40px;
 	border-bottom: 1px solid @toolbar-border-color;
 
-	a {
+	> a, .toolbar-right > a {
 		position: relative;
 		.label {
 			position: absolute;
@@ -13,7 +13,11 @@
 		}
 	}
 
-	a:not(.btn) {
+	> a:focus {
+		outline: none;
+	}
+
+	> a:not(.btn), .toolbar-right > a:not(.btn) {
 		display: inline-block;
 		color: @gray-light;
 		padding: 4px 10px 5px;
@@ -90,27 +94,34 @@
 
 	&.toolbar-small {
 		height: 32px;
-		a {
-			padding: 4px 2px 2px;
+		> a, .toolbar-right > a {
+			padding: 2px 4px 1px 4px;
 			margin: 0;
-			margin-left: 6px;
+			margin-top: 2px;
 		}
-		.toolbar-right {
-			a {
-				margin-left: 0;
-				margin-right: 6px;
-			}
+		> a {
+			margin-left: 2px;
+		}
+		.toolbar-right > a {
+			margin-left: 0;
+			margin-right: 2px;
 		}
 	}
 
 	&.toolbar-tall {
 		height: 58px;
 		padding-top: 10px;
-		a.btn {
+		> a, .toolbar-right > a {
+			padding: 4px 10px 5px;
+		}
+		> a.btn, .toolbar-right > a.btn {
 			margin: 0 (@line-height-computed / 2);
 		}
-		a {
-			padding: 4px 10px 5px;
+		.btn-group {
+			margin: 0 (@line-height-computed / 2);
+			> .btn-group {
+				margin: 0;
+			}
 		}
 	}
 
@@ -135,7 +146,7 @@
 		&.toolbar-header {
 			box-shadow: none;
 		}
-		a:not(.btn) {
+		> a:not(.btn) {
 			color: @gray;
 			&:hover {
 				color: @gray-light;

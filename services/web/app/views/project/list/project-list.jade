@@ -58,7 +58,7 @@
 					)
 						li.dropdown-header #{translate("add_to_folder")}
 						li(
-							ng-repeat="tag in tags | filter:nonEmpty | orderBy:'name'",
+							ng-repeat="tag in tags | orderBy:'name'",
 							ng-controller="TagDropdownItemController"
 						)
 							a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
@@ -79,7 +79,7 @@
 						href='#',
 						data-toggle="dropdown",
 						dropdown-toggle
-					) #{translate("more")}
+					) #{translate("more")} 
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right(role="menu")
 						li(ng-show="getFirstSelectedProject().accessLevel == 'owner'")

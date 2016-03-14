@@ -109,6 +109,7 @@ describe "ClsiManager", ->
 				_id: @project_id
 				compiler: @compiler = "latex"
 				rootDoc_id: "mock-doc-id-1"
+				imageName: @image = "mock-image-name"
 
 			@docs = {
 				"/main.tex": @doc_1 = {
@@ -145,7 +146,7 @@ describe "ClsiManager", ->
 
 			it "should get the project with the required fields", ->
 				@Project.findById
-					.calledWith(@project_id, {compiler:1, rootDoc_id: 1})
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
 					.should.equal true
 
 			it "should get all the docs", ->
@@ -164,6 +165,8 @@ describe "ClsiManager", ->
 						options:
 							compiler: @compiler
 							timeout : 100
+							imageName: @image
+							draft: false
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
@@ -218,6 +221,12 @@ describe "ClsiManager", ->
 			
 			it "should return an error", ->
 				expect(@error).to.exist
+		
+		describe "with the draft option", ->
+			it "should add the draft option into the request", (done) ->
+				@ClsiManager._buildRequest @project_id, {timeout:100, draft: true}, (error, request) =>
+					request.compile.options.draft.should.equal true
+					done()
 
 
 	describe '_postToClsi', ->
@@ -264,7 +273,7 @@ describe "ClsiManager", ->
 	describe "wordCount", ->
 		beforeEach ->
 			@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body = { mock: "foo" })
-			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, { compile: { rootResourcePath: "rootfile.text" } })
+			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @req = { compile: { rootResourcePath: "rootfile.text", options: {} } })
 			@ClsiManager._getCompilerUrl = sinon.stub().returns "compiler.url"
 
 		describe "with root file", ->
@@ -286,4 +295,14 @@ describe "ClsiManager", ->
 			it "should call wordCount with param file", ->
 				@request.get
 					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex" })
+					.should.equal true
+					
+		describe "with image", ->
+			beforeEach ->
+				@req.compile.options.imageName = @image = "example.com/mock/image"
+				@ClsiManager.wordCount @project_id, "main.tex", {}, @callback
+
+			it "should call wordCount with file and image", ->
+				@request.get
+					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex&image=#{encodeURIComponent(@image)}" })
 					.should.equal true

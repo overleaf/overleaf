@@ -1,6 +1,5 @@
 request = require 'request'
 request = request.defaults()
-async = require 'async'
 settings = require 'settings-sharelatex'
 _ = require 'underscore'
 async = require 'async'
@@ -116,7 +115,7 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	setDocument : (project_id, doc_id, docLines, source, callback = (error) ->)->
+	setDocument : (project_id, doc_id, user_id, docLines, source, callback = (error) ->)->
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}"
 		body =
@@ -124,7 +123,8 @@ module.exports = DocumentUpdaterHandler =
 			json:
 				lines: docLines
 				source: source
-		logger.log project_id:project_id, doc_id: doc_id, source: source, "setting doc in document updater"
+				user_id: user_id
+		logger.log project_id:project_id, doc_id: doc_id, source: source, user_id: user_id, "setting doc in document updater"
 		request.post body, (error, res, body)->
 			timer.done()
 			if error?

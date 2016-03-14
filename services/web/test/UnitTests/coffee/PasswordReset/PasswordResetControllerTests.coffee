@@ -1,4 +1,5 @@
 should = require('chai').should()
+expect = require("chai").expect
 SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
@@ -21,6 +22,8 @@ describe "PasswordResetController", ->
 			"./PasswordResetHandler":@PasswordResetHandler
 			"logger-sharelatex": log:->
 			"../../infrastructure/RateLimiter":@RateLimiter
+			"../Authentication/AuthenticationController": @AuthenticationController = {}
+			"../User/UserGetter": @UserGetter = {}
 
 		@email = "bob@bob.com "
 		@token = "my security token that was emailed to me"
@@ -101,7 +104,7 @@ describe "PasswordResetController", ->
 
 		it "should send 404 if the token didn't work", (done)->
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, false)
-			@res.send = (code)=>
+			@res.sendStatus = (code)=>
 				code.should.equal 404
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
@@ -129,6 +132,19 @@ describe "PasswordResetController", ->
 			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@req.session.should.not.have.property 'resetToken'
+				done()
+			@PasswordResetController.setNewUserPassword @req, @res
+		
+		it "should login user if login_after is set", (done) ->
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, { email: "joe@example.com" })
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id = "user-id-123")
+			@req.body.login_after = "true"
+			@AuthenticationController.doLogin = (options, req, res, next)=>
+				@UserGetter.getUser.calledWith(@user_id).should.equal true
+				expect(options).to.deep.equal {
+					email: "joe@example.com",
+					password: @password
+				}
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 

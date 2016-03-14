@@ -15,7 +15,7 @@ module.exports = RateLimiterMiddlewear =
 	###
 	rateLimit: (opts) ->
 		return (req, res, next) ->
-			if req.session.user?
+			if req.session?.user?
 				user_id = req.session.user._id
 			else
 				user_id = req.ip

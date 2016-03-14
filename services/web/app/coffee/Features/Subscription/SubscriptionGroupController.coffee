@@ -1,10 +1,7 @@
 SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
-
 ErrorsController = require("../Errors/ErrorController")
-settings = require("settings-sharelatex")
-
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 _ = require("underscore")
 
@@ -12,9 +9,12 @@ module.exports =
 
 	addUserToGroup: (req, res)->
 		adminUserId = req.session.user._id
-		newEmail = req.body.email
+		newEmail = req.body?.email?.toLowerCase()?.trim()
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
 		SubscriptionGroupHandler.addUserToGroup adminUserId, newEmail, (err, user)->
+			if err?
+				logger.err err:err, newEmail:newEmail, adminUserId:adminUserId, "error adding user from group"
+				return res.sendStatus 500
 			result = 
 				user:user
 			if err and err.limitReached
@@ -25,7 +25,20 @@ module.exports =
 		adminUserId = req.session.user._id
 		userToRemove_id = req.params.user_id
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
-		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, ->
+		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
+			if err?
+				logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
+				return res.sendStatus 500
+			res.send()
+			
+	removeSelfFromGroup: (req, res)->
+		adminUserId = req.query.admin_user_id
+		userToRemove_id = req.session.user._id
+		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription after self request"
+		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
+			if err?
+				logger.err err:err, userToRemove_id:userToRemove_id, adminUserId:adminUserId, "error removing self from group"
+				return res.sendStatus 500
 			res.send()
 
 	renderSubscriptionGroupAdminPage: (req, res)->
@@ -70,13 +83,16 @@ module.exports =
 		subscription_id = req.params.subscription_id
 		if !SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)?
 			return ErrorsController.notFound(req, res)
-		SubscriptionGroupHandler.processGroupVerification req.session.user.email, subscription_id, req.query.token, (err)->
+		email = req?.session?.user?.email
+		logger.log subscription_id:subscription_id, user_id:req?.session?.user?._id, email:email, "starting the completion of joining group"
+		SubscriptionGroupHandler.processGroupVerification email, subscription_id, req.query?.token, (err)->
 			if err? and err == "token_not_found"
-				res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
+				return res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
 			else if err?
-				res.sendStatus 500
+				return res.sendStatus 500
 			else
-				res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
+				logger.log subscription_id:subscription_id, email:email, "user successful completed join of group subscription"
+				return res.redirect "/user/subscription/#{subscription_id}/group/successful-join"
 
 	renderSuccessfulJoinPage: (req, res)->
 		subscription_id = req.params.subscription_id

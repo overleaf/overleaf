@@ -106,6 +106,10 @@ module.exports =
 			url: "http://localhost:3036"
 		sixpack:
 			url: ""
+		references:
+			url: "http://localhost:3040"
+		notifications:
+			url: "http://localhost:3042" 
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -125,6 +129,9 @@ module.exports =
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
+
+	maxEntitiesPerProject: 2000
+	
 	# Security
 	# --------
 	security:
@@ -143,6 +150,8 @@ module.exports =
 		versioning: true
 		compileTimeout: 60
 		compileGroup: "standard"
+		references: true
+		templates: true
 
 	plans: plans = [{
 		planCode: "personal"
@@ -291,7 +300,7 @@ module.exports =
 		title: "ShareLaTeX Community Edition"
 		
 		left_footer: [{
-			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2015"
+			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2016"
 		}]
 
 		right_footer: [{

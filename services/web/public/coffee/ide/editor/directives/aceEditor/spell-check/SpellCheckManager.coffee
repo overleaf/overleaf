@@ -5,7 +5,7 @@ define [
 	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
-		constructor: (@$scope, @editor, @element) ->
+		constructor: (@$scope, @editor, @element, @cache) ->
 			$(document.body).append @element.find(".spell-check-menu")
 			
 			@updatedLines = []
@@ -102,6 +102,8 @@ define [
 		learnWord: (highlight) ->
 			@apiRequest "/learn", word: highlight.word
 			@highlightedWordManager.removeWord highlight.word
+			language = @$scope.spellCheckLanguage
+			@cache?.put("#{language}:#{highlight.word}", true)
 
 		getHighlightedWordAtCursor: () ->
 			cursor = @editor.getCursorPosition()
@@ -143,24 +145,67 @@ define [
 		runSpellCheck: (linesToProcess) ->
 			{words, positions} = @getWords(linesToProcess)
 			language = @$scope.spellCheckLanguage
-			@apiRequest "/check", {language: language, words: words}, (error, result) =>
-				if error? or !result? or !result.misspellings?
-					return null
 
+			highlights = []
+			seen = {}
+			newWords = []
+			newPositions = []
+
+			# iterate through all words, building up a list of
+			# newWords/newPositions not in the cache
+			for word, i in words
+				key = "#{language}:#{word}"
+				seen[key] ?= @cache.get(key) # avoid hitting the cache unnecessarily
+				cached = seen[key]
+				if not cached?
+					newWords.push words[i]
+					newPositions.push positions[i]
+				else if cached is true
+					# word is correct
+				else
+					highlights.push
+						column: positions[i].column
+						row: positions[i].row
+						word: word
+						suggestions: cached
+			words = newWords
+			positions = newPositions
+
+			displayResult = (highlights) =>
 				if linesToProcess?
 					for shouldProcess, row in linesToProcess
 						@highlightedWordManager.clearRows(row, row) if shouldProcess
 				else
 					@highlightedWordManager.clearRows()
+				for highlight in highlights
+					@highlightedWordManager.addHighlight highlight
 
-				for misspelling in result.misspellings
-					word = words[misspelling.index]
-					position = positions[misspelling.index]
-					@highlightedWordManager.addHighlight
-						column: position.column
-						row: position.row
-						word: word
-						suggestions: misspelling.suggestions
+			if not words.length
+				displayResult highlights
+			else
+				@apiRequest "/check", {language: language, words: words}, (error, result) =>
+					if error? or !result? or !result.misspellings?
+						return null
+					mispelled = []
+					for misspelling in result.misspellings
+						word = words[misspelling.index]
+						position = positions[misspelling.index]
+						mispelled[misspelling.index] = true
+						highlights.push
+							column: position.column
+							row: position.row
+							word: word
+							suggestions: misspelling.suggestions
+						key = "#{language}:#{word}"
+						if not seen[key]
+							@cache.put key, misspelling.suggestions
+							seen[key] = true
+					for word, i in words when not mispelled[i]
+						key = "#{language}:#{word}"
+						if not seen[key]
+							@cache.put(key, true)
+							seen[key] = true
+					displayResult highlights
 
 		getWords: (linesToProcess) ->
 			lines = @editor.getValue().split("\n")

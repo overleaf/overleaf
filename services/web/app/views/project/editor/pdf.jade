@@ -1,16 +1,34 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		a.btn.btn-info(
-			href,
-			ng-disabled="pdf.compiling",
-			ng-click="recompile()"
-		)
-			i.fa.fa-refresh(
-				ng-class="{'fa-spin': pdf.compiling }"
+		.btn-group(dropdown)
+			a.btn.btn-info(
+				href,
+				ng-disabled="pdf.compiling",
+				ng-click="recompile()"
 			)
-			| &nbsp;&nbsp;
-			span(ng-show="!pdf.compiling") #{translate("recompile")}
-			span(ng-show="pdf.compiling") #{translate("compiling")}...
+				i.fa.fa-refresh(
+					ng-class="{'fa-spin': pdf.compiling }"
+				)
+				| &nbsp;&nbsp;
+				span(ng-show="!pdf.compiling") #{translate("recompile")}
+				span(ng-show="pdf.compiling") #{translate("compiling")}...
+			a.btn.btn-info.dropdown-toggle(
+				href,
+				ng-disabled="pdf.compiling",
+				dropdown-toggle
+			)
+				span.caret
+			ul.dropdown-menu.dropdown-menu-right
+				li.dropdown-header #{translate("compile_mode")}
+				li
+					a(href, ng-click="draft = false")
+						i.fa.fa-fw(ng-class="{'fa-check': !draft}")
+						| &nbsp;#{translate("normal")}
+				li
+					a(href, ng-click="draft = true")
+						i.fa.fa-fw(ng-class="{'fa-check': draft}")
+						| &nbsp;#{translate("fast")}&nbsp;
+						span.subdued [draft]
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
@@ -94,41 +112,43 @@ div.full-size.pdf(ng-controller="PdfController")
 					| #{translate("learn_how_to_make_documents_compile_quickly")}
 
 		.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
-					p
-						strong #{translate("upgrade_for_faster_compiles")}
-					h5 #{translate("free_accounts_have_timeout_upgrade_to_increase")}
-					h4 Plus:
-					h4 
+			p
+				strong #{translate("upgrade_for_faster_compiles")}
+			p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+			p Plus:
+			p
+				ul.list-unstyled
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("unlimited_projects")}
 					
-					h4
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
 					
-					h4 
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("full_doc_history")}
 					
-					h4 
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("sync_to_dropbox")}
 
-					h4 
+					li
 						i.fa.fa-check &nbsp;
 						| #{translate("sync_to_github")}
 
-					h4  
+					li
 						i.fa.fa-check &nbsp;
 						|#{translate("compile_larger_projects")}
 
-					p(ng-controller="FreeTrialModalController")
-						a.btn.btn-success(
-							href
-							ng-class="buttonClass"
-							sixpack-convert="track_changes_feature_info"
-							ng-click="startFreeTrial('compile-timeout')"
-						) #{translate("start_free_trial")}
+			p(ng-controller="FreeTrialModalController")
+				a.btn.btn-success.row-spaced-small(
+					href
+					ng-class="buttonClass"
+					sixpack-convert="track_changes_feature_info"
+					ng-click="startFreeTrial('compile-timeout')"
+				) #{translate("start_free_trial")}
 
 	.pdf-errors(ng-show="pdf.projectTooLarge")
 		.alert.alert-danger

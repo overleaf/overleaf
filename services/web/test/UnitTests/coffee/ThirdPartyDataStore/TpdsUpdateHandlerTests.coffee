@@ -8,7 +8,7 @@ describe 'TpdsUpdateHandler', ->
 		@requestQueuer = {}
 		@updateMerger = 
 			deleteUpdate: (user_id, path, source, cb)->cb()
-			mergeUpdate:(user_id, path, update, source, cb)->cb()
+			mergeUpdate:(user_id, project_id, path, update, source, cb)->cb()
 		@editorController = {}
 		@project_id = "dsjajilknaksdn"
 		@project = {_id:@project_id, name:"projectNameHere"}
@@ -36,7 +36,7 @@ describe 'TpdsUpdateHandler', ->
 			path = "/path/here"
 			update = {}
 			@updateMerger.mergeUpdate = sinon.stub()
-			@updateMerger.mergeUpdate.withArgs(@project_id, path, update, @source).callsArg(4)
+			@updateMerger.mergeUpdate.withArgs(@user_id, @project_id, path, update, @source).callsArg(5)
 			@handler.newUpdate @user_id, @project.name, path, update, @source, =>
 				@projectCreationHandler.createBlankProject.called.should.equal false
 				done()

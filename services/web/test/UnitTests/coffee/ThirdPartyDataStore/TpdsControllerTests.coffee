@@ -14,6 +14,8 @@ describe 'TpdsController', ->
 			'logger-sharelatex':
 				log:->
 				err:->
+			"../../infrastructure/Metrics": inc:->
+				
 		@user_id = "dsad29jlkjas"
 
 	describe 'getting an update', ->
@@ -76,7 +78,7 @@ describe 'TpdsController', ->
 			
 	describe 'updateProjectContents', ->
 		beforeEach ->
-			@UpdateMerger.mergeUpdate = sinon.stub().callsArg(4)
+			@UpdateMerger.mergeUpdate = sinon.stub().callsArg(5)
 			@req =
 				params:
 					0: @path = "chapters/main.tex"
@@ -92,7 +94,7 @@ describe 'TpdsController', ->
 			
 		it "should merge the update", ->
 			@UpdateMerger.mergeUpdate
-				.calledWith(@project_id, "/" + @path, @req, @source)
+				.calledWith(null, @project_id, "/" + @path, @req, @source)
 				.should.equal true
 				
 		it "should return a success", ->

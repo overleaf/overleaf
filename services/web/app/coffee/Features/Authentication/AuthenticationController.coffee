@@ -8,13 +8,16 @@ querystring = require('querystring')
 Url = require("url")
 Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
-
+UserHandler = require("../User/UserHandler")
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
-		email = req.body?.email?.toLowerCase()
-		password = req.body?.password
-		redir = Url.parse(req.body?.redir or "/project").path
+		AuthenticationController.doLogin req.body, req, res, next
+	
+	doLogin: (options, req, res, next) ->
+		email = options.email?.toLowerCase()
+		password = options.password
+		redir = Url.parse(options.redir or "/project").path
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 			if !isAllowed
 				logger.log email:email, "too many login requests"
@@ -26,17 +29,18 @@ module.exports = AuthenticationController =
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return next(error) if error?
 				if user?
+					UserHandler.setupLoginData user, ->
 					LoginRateLimiter.recordSuccessfulLogin email
 					AuthenticationController._recordSuccessfulLogin user._id
 					AuthenticationController.establishUserSession req, user, (error) ->
 						return next(error) if error?
 						req.session.justLoggedIn = true
 						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.send redir: redir
+						res.json redir: redir
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
-					res.send message:
+					res.json message:
 						text: req.i18n.translate("email_or_password_wrong_try_again"),
 						type: 'error'
 

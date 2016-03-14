@@ -27,7 +27,7 @@ module.exports =
 			FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
 				if shouldIgnore
 					return callback()
-				updateMerger.mergeUpdate project._id, path, updateRequest, source, callback
+				updateMerger.mergeUpdate user_id, project._id, path, updateRequest, source, callback
 
 
 	deleteUpdate: (user_id, projectName, path, source, callback)->	

@@ -1,3 +1,4 @@
+UserHandler = require("./UserHandler")
 UserDeleter = require("./UserDeleter")
 UserLocator = require("./UserLocator")
 User = require("../../models/User").User
@@ -8,12 +9,9 @@ metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserUpdater = require("./UserUpdater")
-EmailHandler = require("../Email/EmailHandler")
-OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
 settings = require "settings-sharelatex"
-crypto = require "crypto"
 
-module.exports =
+module.exports = UserController =
 
 	deleteUser: (req, res)->
 		user_id = req.session.user._id
@@ -66,11 +64,18 @@ module.exports =
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
 							if err.message == "alread_exists"
-								message = req.i18n.translate("alread_exists")
+								message = req.i18n.translate("email_already_registered")
 							else
 								message = req.i18n.translate("problem_changing_email_address")
 							return res.send 500, {message:message}
-						res.sendStatus(200)
+						User.findById user_id, (err, user)->
+							if err?
+								logger.err err:err, user_id:user_id, "error getting user for email update"
+								return res.send 500
+							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
+								if err?
+									logger.err err:err, "error populateGroupLicenceInvite"
+								res.sendStatus(200)
 
 	logout : (req, res)->
 		metrics.inc "user.logout"
@@ -85,32 +90,12 @@ module.exports =
 		if !email? or email == ""
 			res.sendStatus 422 # Unprocessable Entity
 			return
-		logger.log {email}, "registering new user"
-		UserRegistrationHandler.registerNewUser {
-			email: email
-			password: crypto.randomBytes(32).toString("hex")
-		}, (err, user)->
-			if err? and err?.message != "EmailAlreadyRegistered"
-				return next(err)
-			
-			if err?.message == "EmailAlreadyRegistered"
-				logger.log {email}, "user already exists, resending welcome email"
-
-			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
-			OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
-				return next(err) if err?
-				
-				setNewPasswordUrl = "#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}&email=#{encodeURIComponent(email)}"
-
-				EmailHandler.sendEmail "registered", {
-					to: user.email
-					setNewPasswordUrl: setNewPasswordUrl
-				}, () ->
-					
-				res.json {
-					email: user.email
-					setNewPasswordUrl: setNewPasswordUrl
-				}
+		UserRegistrationHandler.registerNewUserAndSendActivationEmail email, (error, user, setNewPasswordUrl) ->
+			return next(error) if error?
+			res.json {
+				email: user.email
+				setNewPasswordUrl: setNewPasswordUrl
+			}
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"

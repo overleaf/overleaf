@@ -58,8 +58,8 @@ module.exports = ClsiManager =
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
-	_buildRequest: (project_id, settingsOverride={}, callback = (error, request) ->) ->
-		Project.findById project_id, {compiler: 1, rootDoc_id: 1}, (error, project) ->
+	_buildRequest: (project_id, options={}, callback = (error, request) ->) ->
+		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
 
@@ -82,7 +82,7 @@ module.exports = ClsiManager =
 							content: doc.lines.join("\n")
 						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 							rootResourcePath = path
-						if settingsOverride.rootDoc_id? and doc._id.toString() == settingsOverride.rootDoc_id.toString()
+						if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
 							rootResourcePathOverride = path
 
 					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
@@ -101,7 +101,9 @@ module.exports = ClsiManager =
 							compile:
 								options:
 									compiler: project.compiler
-									timeout: settingsOverride.timeout
+									timeout: options.timeout
+									imageName: project.imageName
+									draft: !!options.draft
 								rootResourcePath: rootResourcePath
 								resources: resources
 						}
@@ -110,8 +112,11 @@ module.exports = ClsiManager =
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
 			filename = file || req?.compile?.rootResourcePath
+			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
+			if req.compile.options.imageName?
+				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
 			request.get {
-				url:  "#{compilerUrl}/project/#{project_id}/wordcount?file=#{filename}"
+				url: wordcount_url
 			}, (error, response, body) ->
 				return callback(error) if error?
 				if 200 <= response.statusCode < 300

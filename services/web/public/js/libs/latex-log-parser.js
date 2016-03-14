@@ -3,10 +3,11 @@ define(function() {
     var LOG_WRAP_LIMIT = 79;
     var LATEX_WARNING_REGEX = /^LaTeX Warning: (.*)$/;
     var HBOX_WARNING_REGEX = /^(Over|Under)full \\(v|h)box/;
-    var BIBER_WARNING_REGEX = /^Package biblatex Warning: (.*)$/;
-    var NATBIB_WARNING_REGEX = /^Package natbib Warning: (.*)$/;
+    var PACKAGE_WARNING_REGEX = /^(Package \b.+\b Warning:.*)$/; 
     // This is used to parse the line number from common latex warnings
     var LINES_REGEX = /lines? ([0-9]+)/;
+    // This is used to parse the package name from the package warnings
+    var PACKAGE_REGEX = /^Package (\b.+\b) Warning/;
 
     var LogText = function(text) {
         this.text = text.replace(/(\r\n)|\r/g, "\n");
@@ -101,10 +102,8 @@ define(function() {
                         this.parseSingleWarningLine(LATEX_WARNING_REGEX);
                     } else if (this.currentLineIsHboxWarning()) {
                         this.parseHboxLine();
-                    } else if (this.currentLineIsBiberWarning()) {
-                        this.parseBiberWarningLine();
-                    } else if (this.currentLineIsNatbibWarning()) {
-                        this.parseSingleWarningLine(NATBIB_WARNING_REGEX);
+                    } else if (this.currentLineIsPackageWarning()) {
+                        this.parseMultipleWarningLine();
                     } else {
                         this.parseParensForFilenames();
                     }
@@ -140,12 +139,8 @@ define(function() {
             return !!(this.currentLine.match(LATEX_WARNING_REGEX));
         };
 
-        this.currentLineIsBiberWarning = function () {
-            return !!(this.currentLine.match(BIBER_WARNING_REGEX));
-        };
-
-        this.currentLineIsNatbibWarning = function () {
-            return !!(this.currentLine.match(NATBIB_WARNING_REGEX));
+        this.currentLineIsPackageWarning = function () {
+            return !!(this.currentLine.match(PACKAGE_WARNING_REGEX));
         };
 
         this.currentLineIsHboxWarning = function() {
@@ -169,22 +164,31 @@ define(function() {
             });
         };
 
-        this.parseBiberWarningLine = function() {
-            // Biber warnings are multiple lines, let's parse the first line
-            var warningMatch = this.currentLine.match(BIBER_WARNING_REGEX);
+        this.parseMultipleWarningLine = function() {
+            // Some package warnings are multiple lines, let's parse the first line
+            var warningMatch = this.currentLine.match(PACKAGE_WARNING_REGEX);
             if (!warningMatch) return;  // Something strange happened, return early
 
-            // Now loop over the other output and just grab the message part
-            // Each line is prefiex with: (biblatex)
             var warning_lines = [warningMatch[1]];
-            while (((this.currentLine = this.log.nextLine()) !== false) &&
-                (warningMatch = this.currentLine.match(/^\(biblatex\)[\s]+(.*)$/))) {
-                warning_lines.push(warningMatch[1])
+            var lineMatch = this.currentLine.match(LINES_REGEX);
+            var line = lineMatch ? parseInt(lineMatch[1], 10) : null;
+            var packageMatch = this.currentLine.match(PACKAGE_REGEX);
+            var packageName = packageMatch[1];
+
+            // Regex to get rid of the unnecesary (packagename) prefix in most multi-line warnings
+            var prefixRegex = new RegExp("(?:\\(" + packageName + "\\))*[\\s]*(.*)", "i");
+
+            // After every warning message there's a blank line, let's use it
+            while (!!(this.currentLine = this.log.nextLine())) {
+                lineMatch = this.currentLine.match(LINES_REGEX);
+                line = lineMatch ? parseInt(lineMatch[1], 10) : line;
+                warningMatch = this.currentLine.match(prefixRegex)
+                warning_lines.push(warningMatch[1]);
             }
 
             var raw_message = warning_lines.join(' ');
             this.data.push({
-                line    : null,  // Unfortunately, biber doesn't return a line number
+                line    : line,
                 file    : this.currentFilePath,
                 level   : "warning",
                 message : raw_message,

@@ -10,6 +10,7 @@ describe "EditorRealTimeController", ->
 				createClient: () ->
 					auth:->
 			"../../infrastructure/Server" : io: @io = {}
+			"settings-sharelatex":{redis:{}}
 		@EditorRealTimeController.rclientPub = publish: sinon.stub()
 		@EditorRealTimeController.rclientSub =
 			subscribe: sinon.stub()
