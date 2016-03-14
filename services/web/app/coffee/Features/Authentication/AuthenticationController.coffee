@@ -99,7 +99,6 @@ module.exports = AuthenticationController =
 
 	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
-		console.log req.session
 		req.query.redir = req.path
 		url = "/login?#{querystring.stringify(req.query)}"
 		res.redirect url
@@ -142,5 +141,4 @@ module.exports = AuthenticationController =
 			req.session[key] = value
 
 		req.session.user = lightUser
-		console.log "LOGGED IN", req.session
 		callback()
