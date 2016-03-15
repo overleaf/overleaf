@@ -501,7 +501,7 @@ module.exports = ProjectEntityHandler =
 				elementType = "fileRefs"
 			return elementType
 
-		if !element?
+		if !element? or !element._id?
 			e = new Error("no element passed to be inserted")
 			logger.err project_id:project._id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 			return callback(e)
