@@ -121,7 +121,7 @@ getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
 		return callback(err) if err?
 		CollaboratorsHandler.getMemberIds project_id, (err, member_ids) ->
 			return callback(err) if err?
-			callback err, project.owner_ref, member_ids
+			callback err, project?.owner_ref, member_ids
 
 mergeProjectNameAndPath = (project_name, path)->
 	if(path.indexOf('/') == 0)
