@@ -344,15 +344,18 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
 						return callback(err) if err?
-						ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+						# We've updated the project structure by removing the element, so must refresh it.
+						ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 							return callback(err) if err?
-							opts = 
-								project_id:project_id
-								project_name:project.name
-								startPath:path.fileSystem
-								endPath:result.path.fileSystem,
-								rev:entity.rev
-							tpdsUpdateSender.moveEntity opts, callback
+							ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+								return callback(err) if err?
+								opts = 
+									project_id:project_id
+									project_name:project.name
+									startPath:path.fileSystem
+									endPath:result.path.fileSystem,
+									rev:entity.rev
+								tpdsUpdateSender.moveEntity opts, callback
 
 	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
 		self = @
