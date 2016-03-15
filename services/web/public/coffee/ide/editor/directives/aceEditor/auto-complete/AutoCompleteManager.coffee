@@ -45,12 +45,15 @@ define [
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					range = new Range(pos.row, 0, pos.row, pos.column)
-					lineUpToCursor = editor.getSession().getTextRange(range)
+					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?){(.*,)?(\w*)/)
+						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?){([^}]*,)?(\w*)/)
 						if citeMatch
+							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
+							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
+							needsClosingBrace = !lineBeyondCursor.match(/\w*}/)
 							commandName = citeMatch[1]
 							previousArgs = citeMatch[2]
 							currentArg = citeMatch[3]
@@ -59,8 +62,8 @@ define [
 							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
 							result = []
 							result.push {
-								caption: "\\#{commandName}{",
-								snippet: "\\#{commandName}{",
+								caption: "\\#{commandName}{}",
+								snippet: "\\#{commandName}{}",
 								meta: "reference",
 								score: 11000
 							}
@@ -68,8 +71,8 @@ define [
 								references.keys.forEach (key) ->
 									if !(key in [null, undefined])
 										result.push({
-											caption: "\\#{commandName}{#{previousArgsCaption}#{key}",
-											value: "\\#{commandName}{#{previousArgs}#{key}",
+											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{if needsClosingBrace then '}' else ''}",
+											value: "\\#{commandName}{#{previousArgs}#{key}#{if needsClosingBrace then '}' else ''}",
 											meta: "reference",
 											score: 10000
 										})
