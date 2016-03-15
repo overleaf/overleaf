@@ -27,9 +27,20 @@ module.exports = LatexRunner =
 		else
 			return callback new Error("unknown compiler: #{compiler}")
 
-		CommandRunner.run project_id, command, directory, image, timeout, callback
+		CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
+			return callback(error) if error?
+			runs = output?.stderr?.match(/^Run number \d+ of .*latex/mg)?.length or 0
+			failed = if output?.stdout?.match(/^Latexmk: Errors/m)? then 1 else 0
+			# counters from latexmk output
+			stats = {}
+			stats["latexmk-errors"] = failed
+			stats["latex-runs"] = runs
+			stats["latex-runs-with-errors"] = if failed then runs else 0
+			stats["latex-runs-#{runs}"] = 1
+			stats["latex-runs-with-errors-#{runs}"] = if failed then 1 else 0
+			callback error, output, stats
 
-	_latexmkBaseCommand: [ "latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
+	_latexmkBaseCommand: ["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
 
 	_pdflatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [

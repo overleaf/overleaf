@@ -10,6 +10,7 @@ child_process = require "child_process"
 CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
 DraftModeManager = require "./DraftModeManager"
 fs = require("fs")
+os = require("os")
 
 module.exports = CompileManager =
 	doCompile: (request, callback = (error, outputFiles) ->) ->
@@ -38,10 +39,17 @@ module.exports = CompileManager =
 					compiler:  request.compiler
 					timeout:   request.timeout
 					image:     request.imageName
-				}, (error) ->
+				}, (error, output, stats) ->
 					return callback(error) if error?
-					logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "done compile"
-					timer.done()
+					Metrics.inc("compiles")
+					for metric_key, metric_value of stats or {}
+						Metrics.count(metric_key, metric_value)
+					loadavg = os.loadavg?()
+					Metrics.gauge("load-avg", loadavg[0]) if loadavg?
+					ts = timer.done()
+					logger.log {project_id: request.project_id, time_taken: ts, stats:stats, loadavg:loadavg}, "done compile"
+					if stats?["latex-runs"] > 0
+						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"])
 
 					OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
 						return callback(error) if error?

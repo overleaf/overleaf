@@ -15,7 +15,7 @@
     "request": "~2.21.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.3.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
     "sequelize": "^2.1.3",
     "wrench": "~1.5.4",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v0.2.0",
