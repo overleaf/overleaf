@@ -35,6 +35,7 @@ module.exports =
 		done:->
 			timeSpan = new Date - this.start
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
+			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
