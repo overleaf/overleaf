@@ -9,6 +9,7 @@ AuthorizationManager = require("../Authorization/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 
 module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
@@ -36,7 +37,7 @@ module.exports = EditorHttpController =
 					return callback(error) if error?
 					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
-						if !privilegeLevel
+						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 							callback null, null, false
 						else
 							callback(null,
