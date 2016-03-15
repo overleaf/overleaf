@@ -65,8 +65,10 @@ module.exports = CollaboratorsHandler =
 			
 	getProjectsUserIsCollaboratorOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
 		Project.find {collaberator_refs:user_id}, fields, (err, readAndWriteProjects)=>
+			return callback(err) if err?
 			Project.find {readOnly_refs:user_id}, fields, (err, readOnlyProjects)=>
-				callback(err, readAndWriteProjects, readOnlyProjects)
+				return callback(err) if err?
+				callback(null, readAndWriteProjects, readOnlyProjects)
 		
 	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
 		logger.log user_id: user_id, project_id: project_id, "removing user"
