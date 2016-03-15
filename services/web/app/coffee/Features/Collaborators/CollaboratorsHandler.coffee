@@ -6,6 +6,7 @@ UserGetter = require "../User/UserGetter"
 ContactManager = require "../Contacts/ContactManager"
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 async = require "async"
+PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 
 module.exports = CollaboratorsHandler =
 	getMemberIdsWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
@@ -13,11 +14,11 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, null if !project?
 			members = []
-			members.push { id: project.owner_ref.toString(), privilegeLevel: "owner" }
+			members.push { id: project.owner_ref.toString(), privilegeLevel: PrivilegeLevels.OWNER }
 			for member_id in project.readOnly_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: "readOnly" }
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY }
 			for member_id in project.collaberator_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: "readAndWrite" }
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE }
 			return callback null, members
 	
 	getMemberIds: (project_id, callback = (error, member_ids) ->) ->
@@ -43,7 +44,7 @@ module.exports = CollaboratorsHandler =
 			for member in members
 				if member.id == user_id?.toString()
 					return callback null, member.privilegeLevel
-			return callback null, false
+			return callback null, PrivilegeLevels.NONE
 	
 	getMemberCount: (project_id, callback = (error, count) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
@@ -100,10 +101,10 @@ module.exports = CollaboratorsHandler =
 			if existing_users.indexOf(user_id.toString()) > -1
 				return callback null # User already in Project
 				
-			if privilegeLevel == 'readAndWrite'
+			if privilegeLevel == PrivilegeLevels.READ_AND_WRITE
 				level = {"collaberator_refs":user_id}
 				logger.log {privileges: "readAndWrite", user_id, project_id}, "adding user"
-			else if privilegeLevel == 'readOnly'
+			else if privilegeLevel == PrivilegeLevels.READ_ONLY
 				level = {"readOnly_refs":user_id}
 				logger.log {privileges: "readOnly", user_id, project_id}, "adding user"
 			else

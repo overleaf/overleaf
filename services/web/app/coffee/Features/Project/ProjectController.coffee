@@ -17,6 +17,7 @@ fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
 ProjectGetter = require("./ProjectGetter")
+PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 
 module.exports = ProjectController =
 
@@ -226,7 +227,7 @@ module.exports = ProjectController =
 
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
 				return next(error) if error?
-				if !privilegeLevel
+				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 					return res.sendStatus 401
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
