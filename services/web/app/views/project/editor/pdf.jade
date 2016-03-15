@@ -112,8 +112,10 @@ div.full-size.pdf(ng-controller="PdfController")
 					| #{translate("learn_how_to_make_documents_compile_quickly")}
 
 		.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
-			p
+			p(ng-if="project.owner._id == user.id")
 				strong #{translate("upgrade_for_faster_compiles")}
+			p(ng-if="project.owner._id != user.id")
+				strong #{translate("ask_proj_owner_to_upgrade_for_faster_compiles")}
 			p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
 			p Plus:
 			p
@@ -142,7 +144,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-check &nbsp;
 						|#{translate("compile_larger_projects")}
 
-			p(ng-controller="FreeTrialModalController")
+			p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
 				a.btn.btn-success.row-spaced-small(
 					href
 					ng-class="buttonClass"
