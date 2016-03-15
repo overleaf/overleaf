@@ -518,12 +518,23 @@ describe "EditorController", ->
 			@folder_id = "313dasd21dasdsa"
 			@ProjectEntityHandler.moveEntity = sinon.stub().callsArgWith(4, @err)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@LockManager.releaseLock.callsArgWith(1)
+			@LockManager.getLock.callsArgWith(1)
 
 		it "should call the ProjectEntityHandler", (done)->
 			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
 				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType).should.equal true
 				done()
 
+		it "should take the lock", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@LockManager.getLock.calledWith(@project_id).should.equal true
+				done()
+
+		it "should release the lock", (done)->
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+				@LockManager.releaseLock.calledWith(@project_id).should.equal true
+				done()
 
 		it "should emit the update to the room", (done)->
 			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>

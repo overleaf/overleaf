@@ -520,13 +520,13 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
 				id = element._id+''
 				element._id = require('mongoose').Types.ObjectId(id)
 				conditions = _id:project._id
 				mongopath = "#{path.mongo}.#{type}"
 				update = "$push":{}
 				update["$push"][mongopath] = element
+				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
 				Project.update conditions, update, {}, (err)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'
