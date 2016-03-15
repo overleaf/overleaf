@@ -15,15 +15,6 @@ module.exports = ProjectEditorHandler =
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
 			members:     []
-
-		result.features = # defaults
-			collaborators: -1 # Infinite
-			versioning: false
-			dropbox:false
-			compileTimeout: 60
-			compileGroup:"standard"
-			templates: false
-			references: false
 		
 		owner = null
 		for member in members
@@ -34,21 +25,15 @@ module.exports = ProjectEditorHandler =
 		if owner?
 			result.owner = @buildUserModelView owner, "owner"
 
-		if owner?.features?
-			if owner.features.collaborators?
-				result.features.collaborators = owner.features.collaborators
-			if owner.features.versioning?
-				result.features.versioning = owner.features.versioning
-			if owner.features.dropbox?
-				result.features.dropbox = owner.features.dropbox
-			if owner.features.compileTimeout?
-				result.features.compileTimeout = owner.features.compileTimeout
-			if owner.features.compileGroup?
-				result.features.compileGroup = owner.features.compileGroup
-			if owner.features.templates?
-				result.features.templates = owner.features.templates
-			if owner.features.references?
-				result.features.references = owner.features.references
+		result.features = _.defaults(owner?.features or {}, {
+			collaborators: -1 # Infinite
+			versioning: false
+			dropbox:false
+			compileTimeout: 60
+			compileGroup:"standard"
+			templates: false
+			references: false
+		})
 
 		return result
 
