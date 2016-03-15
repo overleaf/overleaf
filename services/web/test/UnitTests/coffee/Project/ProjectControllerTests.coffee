@@ -35,8 +35,6 @@ describe "ProjectController", ->
 			getAllTags: sinon.stub()
 		@NotificationsHandler =
 			getUserNotifications: sinon.stub()
-		@ProjectModel =
-			findOne: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
 		@AuthorizationManager =
@@ -51,6 +49,7 @@ describe "ProjectController", ->
 			indexProjectReferences: sinon.stub()
 		@ProjectGetter =
 			findAllUsersProjects: sinon.stub()
+			getProject: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -64,7 +63,6 @@ describe "ProjectController", ->
 			"../Subscription/LimitationsManager": @LimitationsManager
 			"../Tags/TagsHandler":@TagsHandler
 			"../Notifications/NotificationsHandler":@NotificationsHandler
-			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
 			"../Authorization/AuthorizationManager":@AuthorizationManager
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
@@ -296,7 +294,7 @@ describe "ProjectController", ->
 					fontSize:"massive"
 					theme:"sexy"
 				email: "bob@bob.com"
-			@ProjectModel.findOne.callsArgWith 1, null, @project
+			@ProjectGetter.getProject.callsArgWith 2, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 2, null, "owner"

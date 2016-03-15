@@ -5,7 +5,6 @@ projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
 editorController = require("../Editor/EditorController")
 metrics = require('../../infrastructure/Metrics')
-Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
@@ -195,7 +194,7 @@ module.exports = ProjectController =
 
 		async.parallel {
 			project: (cb)->
-				Project.findOne { _id: project_id }, cb
+				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1}, cb
 			user: (cb)->
 				if user_id == 'openUser'
 					cb null, defaultSettingsForAnonymousUser(user_id)
