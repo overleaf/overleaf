@@ -21,6 +21,9 @@ module.exports =
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
 
+	count : (key, count, sampleRate = 1)->
+		statsd.count buildKey(key), count, sampleRate
+
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
 
