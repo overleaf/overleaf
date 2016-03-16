@@ -53,7 +53,7 @@ define [
 						if citeMatch
 							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
 							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
-							needsClosingBrace = !lineBeyondCursor.match(/\w*}/)
+							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
 							commandName = citeMatch[1]
 							previousArgs = citeMatch[2]
 							currentArg = citeMatch[3]
