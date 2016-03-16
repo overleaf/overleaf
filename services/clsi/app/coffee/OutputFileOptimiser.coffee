@@ -2,6 +2,7 @@ fs = require "fs"
 Path = require "path"
 spawn = require("child_process").spawn
 logger = require "logger-sharelatex"
+Metrics = require "./Metrics"
 _ = require "underscore"
 
 module.exports = OutputFileOptimiser =
@@ -19,6 +20,7 @@ module.exports = OutputFileOptimiser =
 		args = ["--linearize", src, tmpOutput]
 		logger.log args: args, "running qpdf command"
 
+		timer = new Metrics.Timer("qpdf")
 		proc = spawn("qpdf", args)
 		stdout = ""
 		proc.stdout.on "data", (chunk) ->
@@ -28,6 +30,7 @@ module.exports = OutputFileOptimiser =
 			logger.warn {err, args}, "qpdf failed"
 			callback(null) # ignore the error
 		proc.on "close", (code) ->
+			timer.done()
 			if code != 0
 				logger.warn {code, args}, "qpdf returned error"
 				return callback(null) # ignore the error
