@@ -115,6 +115,19 @@ define () ->
 			docText = session.getValue()
 			customEnvironmentNames = parseCustomEnvironmentNames(docText)
 			# console.log customEnvironmentNames
-			callback null, staticSnippets
+			snippets = staticSnippets.concat(
+				customEnvironmentNames.map (name) ->
+					{
+						caption: "\\begin{#{name}}..."
+						snippet: """
+							\\begin{#{name}}
+							\t$1
+							\\end{#{name}}
+						"""
+						meta: "env"
+
+					}
+			)
+			callback null, snippets
 
 	return SnippetManager
