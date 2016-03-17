@@ -97,9 +97,24 @@ define () ->
 		meta: "env"
 	}]
 
+	CUSTOM_ENVIRONMENT_REGEX = /^\\newenvironment{(\w+)}.*$/gm
+
+	parseCustomEnvironmentNames = (text) ->
+		names = []
+		iterations = 0
+		while match = CUSTOM_ENVIRONMENT_REGEX.exec(text)
+			names.push match[1]
+			iterations += 1
+			if iterations >= 1000
+				return names
+		return names
+
 	class SnippetManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			console.log ">> get snippet completions"
+			# console.log ">> get snippet completions", editor, session, pos, prefix
+			docText = session.getValue()
+			customEnvironmentNames = parseCustomEnvironmentNames(docText)
+			# console.log customEnvironmentNames
 			callback null, staticSnippets
 
 	return SnippetManager
