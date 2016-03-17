@@ -126,7 +126,12 @@ define () ->
 			docText = session.getValue()
 			customEnvironments = parseCustomEnvironments(docText)
 			beginCommands = parseBeginCommands(docText)
-			parsedItems = _.union(customEnvironments, beginCommands)
+			parsedItemsMap = {}
+			for environment in customEnvironments
+				parsedItemsMap[environment.name] = environment
+			for command in beginCommands
+				parsedItemsMap[command.name] = command
+			parsedItems = _.values(parsedItemsMap)
 			snippets = staticSnippets.concat(
 				parsedItems.map (item) ->
 					{
