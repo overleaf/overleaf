@@ -9,7 +9,7 @@ define () ->
 		"verbatim"
 	]
 
-	snippets = for env in environments
+	staticSnippets = for env in environments
 		{
 			caption: "\\begin{#{env}}..."
 			snippet: """
@@ -20,7 +20,7 @@ define () ->
 			meta: "env"
 		}
 
-	snippets = snippets.concat [{
+	staticSnippets = staticSnippets.concat [{
 		caption: "\\begin{array}..."
 		snippet: """
 			\\begin{array}{${1:cc}}
@@ -96,9 +96,10 @@ define () ->
 		"""
 		meta: "env"
 	}]
+
 	class SnippetManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			console.log ">> get snippet completions"
-			callback null, snippets
+			callback null, staticSnippets
 
 	return SnippetManager

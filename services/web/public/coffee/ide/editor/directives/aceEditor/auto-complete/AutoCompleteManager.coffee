@@ -1,6 +1,6 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
-	"ide/editor/directives/aceEditor/auto-complete/Snippets"
+	"ide/editor/directives/aceEditor/auto-complete/SnippetManager"
 	"ace/ace"
 	"ace/ext-language_tools"
 ], (SuggestionManager, SnippetManager) ->
