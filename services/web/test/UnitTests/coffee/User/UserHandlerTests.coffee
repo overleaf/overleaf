@@ -29,12 +29,12 @@ describe "UserHandler", ->
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../Subscription/SubscriptionGroupHandler":@SubscriptionGroupHandler
 
-	describe "_populateGroupLicenceInvite", ->
+	describe "populateGroupLicenceInvite", ->
 
 		describe "no licence", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns()
-				@UserHandler._populateGroupLicenceInvite @user, done
+				@UserHandler.populateGroupLicenceInvite @user, done
 
 			it "should not call NotificationsBuilder", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false
@@ -49,7 +49,7 @@ describe "UserHandler", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, false)
-				@UserHandler._populateGroupLicenceInvite @user, done
+				@UserHandler.populateGroupLicenceInvite @user, done
 
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.calledWith(@user, @licence).should.equal true
@@ -62,7 +62,7 @@ describe "UserHandler", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, true)
-				@UserHandler._populateGroupLicenceInvite @user, done
+				@UserHandler.populateGroupLicenceInvite @user, done
 
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false

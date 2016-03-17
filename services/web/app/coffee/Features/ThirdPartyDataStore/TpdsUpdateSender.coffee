@@ -43,6 +43,9 @@ module.exports = TpdsUpdateSender =
 
 	_addEntity: (options, callback = (err)->)->
 		getProjectsUsersIds options.project_id, (err, user_id, allUserIds)->
+			if err?
+				logger.err err:err, options:options, "error getting projects user ids"
+				return callback(err)
 			logger.log project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, rev:options.rev, "sending file to third party data store"
 			postOptions =
 				method : "post"
@@ -54,6 +57,9 @@ module.exports = TpdsUpdateSender =
 				title: "addFile"
 				streamOrigin : options.streamOrigin
 			TpdsUpdateSender._enqueue options.project_id, "pipeStreamFrom", postOptions, (err)->
+				if err?
+					logger.err err:err,  project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, rev:options.rev, "error sending file to third party data store queued up for processing"
+					return callback(err)
 				logger.log project_id: options.project_id, user_id:user_id, path: options.path, uri:options.uri, rev:options.rev, "sending file to third party data store queued up for processing"
 				callback(err)
 	

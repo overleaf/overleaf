@@ -69,11 +69,16 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
+		logger.log project_id:project_id, name:name, parent_folder_id:parent_folder_id, "getting request to add doc to project"
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
 		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", (error, doc) ->
-			return next(error) if error?
-			res.json doc
+			if error == "project_has_to_many_files"
+				res.status(400).json(req.i18n.translate("project_has_to_many_files"))
+			else if error?
+				next(error)
+			else
+				res.json doc
 
 	addFolder: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -82,8 +87,12 @@ module.exports = EditorHttpController =
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
 		EditorController.addFolder project_id, parent_folder_id, name, "editor", (error, doc) ->
-			return next(error) if error?
-			res.json doc
+			if error == "project_has_to_many_files"
+				res.status(400).json(req.i18n.translate("project_has_to_many_files"))
+			else if error?
+				next(error)
+			else
+				res.json doc
 
 	renameEntity: (req, res, next) ->
 		project_id  = req.params.Project_id

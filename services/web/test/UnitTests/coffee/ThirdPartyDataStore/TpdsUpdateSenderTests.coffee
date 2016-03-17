@@ -42,6 +42,8 @@ describe 'TpdsUpdateSender', ->
 			'../../models/Project': Project:@Project
 			'request':@request
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
+			"../../infrastructure/Metrics":
+				inc:-> 
 
 	describe "_enqueue", ->
 

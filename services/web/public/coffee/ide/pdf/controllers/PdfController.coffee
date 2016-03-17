@@ -1,7 +1,8 @@
 define [
 	"base"
 	"libs/latex-log-parser"
-], (App, LogParser) ->
+	"libs/bib-log-parser"
+], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		autoCompile = true
 		$scope.$on "project:joined", () ->
@@ -12,7 +13,7 @@ define [
 
 		$scope.$on "pdf:error:display", () ->
 			$scope.pdf.error = true
-		
+
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
 		$scope.$watch "draft", (new_value, old_value) ->
 			if new_value? and old_value != new_value
@@ -82,25 +83,42 @@ define [
 			qs = if outputFile?.build? then "?build=#{outputFile.build}" else ""
 			$http.get "/project/#{$scope.project_id}/output/output.log" + qs
 				.success (log) ->
+					#console.log ">>", log
 					$scope.pdf.rawLog = log
 					logEntries = LogParser.parse(log, ignoreDuplicates: true)
+					#console.log ">>", logEntries
 					$scope.pdf.logEntries = logEntries
 					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
-
-					$scope.pdf.logEntryAnnotations = {}
-					for entry in logEntries.all
-						if entry.file?
-							entry.file = normalizeFilePath(entry.file)
-
-							entity = ide.fileTreeManager.findEntityByPath(entry.file)
-							if entity?
-								$scope.pdf.logEntryAnnotations[entity.id] ||= []
-								$scope.pdf.logEntryAnnotations[entity.id].push {
-									row: entry.line - 1
-									type: if entry.level == "error" then "error" else "warning"
-									text: entry.message
-								}
-
+					# # # #
+					proceed = () ->
+						$scope.pdf.logEntryAnnotations = {}
+						for entry in logEntries.all
+							if entry.file?
+								entry.file = normalizeFilePath(entry.file)
+								entity = ide.fileTreeManager.findEntityByPath(entry.file)
+								if entity?
+									$scope.pdf.logEntryAnnotations[entity.id] ||= []
+									$scope.pdf.logEntryAnnotations[entity.id].push {
+										row: entry.line - 1
+										type: if entry.level == "error" then "error" else "warning"
+										text: entry.message
+									}
+					# Get the biber log and parse it too
+					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
+						.success (log) ->
+							window._s = $scope
+							biberLogEntries = BibLogParser.parse(log, {})
+							if $scope.pdf.logEntries
+								entries = $scope.pdf.logEntries
+								all = biberLogEntries.errors.concat(biberLogEntries.warnings)
+								entries.all = entries.all.concat(all)
+								entries.errors = entries.errors.concat(biberLogEntries.errors)
+								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
+							proceed()
+						.error (e) ->
+							console.error ">> error", e
+							proceed()
+					# # # #
 				.error () ->
 					$scope.pdf.logEntries = []
 					$scope.pdf.rawLog = ""
@@ -127,7 +145,7 @@ define [
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 			$scope.pdf.compiling = true
-			
+
 			ide.$scope.$broadcast("flush-changes")
 
 			options.rootDocOverride_id = getRootDocOverride_id()
@@ -140,7 +158,7 @@ define [
 				.error () ->
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
-					
+
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
 
@@ -177,17 +195,17 @@ define [
 				.then (data) ->
 					{doc, line} = data
 					ide.editorManager.openDoc(doc, gotoLine: line)
-					
+
 		$scope.switchToFlatLayout = () ->
 			$scope.ui.pdfLayout = 'flat'
 			$scope.ui.view = 'pdf'
 			ide.localStorage "pdf.layout", "flat"
-			
+
 		$scope.switchToSideBySideLayout = () ->
 			$scope.ui.pdfLayout = 'sideBySide'
 			$scope.ui.view = 'editor'
 			localStorage "pdf.layout", "split"
-			
+
 		if pdfLayout = localStorage("pdf.layout")
 			$scope.switchToSideBySideLayout() if pdfLayout == "split"
 			$scope.switchToFlatLayout() if pdfLayout == "flat"
@@ -216,7 +234,7 @@ define [
 				if !path?
 					deferred.reject()
 					return deferred.promise
-				
+
 				# If the root file is folder/main.tex, then synctex sees the
 				# path as folder/./main.tex
 				rootDocDirname = ide.fileTreeManager.getRootDocDirname()
@@ -226,7 +244,7 @@ define [
 				{row, column} = cursorPosition
 
 				$http({
-						url: "/project/#{ide.project_id}/sync/code", 
+						url: "/project/#{ide.project_id}/sync/code",
 						method: "GET",
 						params: {
 							file: path
@@ -253,7 +271,7 @@ define [
 					position.offset.top = position.offset.top + 80
 
 				$http({
-						url: "/project/#{ide.project_id}/sync/pdf", 
+						url: "/project/#{ide.project_id}/sync/pdf",
 						method: "GET",
 						params: {
 							page: position.page + 1

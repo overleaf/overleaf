@@ -12,12 +12,13 @@ define [
 				console.log "email not set"
 				return
 			$scope.sending = true
+			ticketNumber = Math.floor((1 + Math.random()) * 0x10000).toString(32)
 			params = 
 				name: $scope.form.name || $scope.form.email
 				email: $scope.form.email
 				labels: $scope.form.source
 				message: "Please contact me with more details"
-				subject: $scope.form.subject
+				subject: $scope.form.subject + " - [#{ticketNumber}]"
 				about : "#{$scope.form.position || ''} #{$scope.form.university || ''}"
 
 			Groove.createTicket params, (err, json)->

@@ -12,6 +12,9 @@ describe 'LockManager - getting the lock', ->
 			"redis-sharelatex":
 				createClient : () =>
 					auth:->
+			"settings-sharelatex":{redis:{}}
+			"./Metrics": inc:->
+
 		@callback = sinon.stub()
 		@doc_id = "doc-id-123"
 	

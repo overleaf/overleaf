@@ -50,6 +50,9 @@ describe 'ProjectCreationHandler', ->
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex': {log:->}
+			"../../infrastructure/Metrics": inc:->
+				
+
 
 	describe 'Creating a Blank project', ->
 		beforeEach ->

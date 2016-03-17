@@ -6,7 +6,8 @@ logger = require("logger-sharelatex")
 
 module.exports = UserHandler =
 
-	_populateGroupLicenceInvite: (user, callback)->
+	populateGroupLicenceInvite: (user, callback)->
+		logger.log user_id:user._id, "populating any potential group licence invites"
 		licence = SubscriptionDomainHandler.getLicenceUserCanJoin user
 		if !licence?
 			return callback()
@@ -21,5 +22,5 @@ module.exports = UserHandler =
 				NotificationsBuilder.groupPlan(user, licence).create(callback)
 
 	setupLoginData: (user, callback = ->)->
-		@_populateGroupLicenceInvite user, callback
+		@populateGroupLicenceInvite user, callback
 

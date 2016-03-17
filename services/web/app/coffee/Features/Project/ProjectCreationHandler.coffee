@@ -35,7 +35,9 @@ module.exports =
 			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
 				return callback(error) if error?
 				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
-					return callback(error) if error?
+					if error?
+						logger.err err:error, "error adding doc when creating basic project"
+						return callback(error)
 					ProjectEntityHandler.setRootDoc project._id, doc._id, (error) ->
 						callback(error, project)
 

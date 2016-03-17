@@ -43,54 +43,6 @@ ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 			return callback(new Errors.NotFoundError(e.message))
 		this.findById project_or_id, fields, callback
 
-sanitizeTypeOfElement = (elementType)->
-	lastChar = elementType.slice -1
-	if lastChar != "s"
-		elementType +="s"
-	if elementType == "files"
-		elementType = "fileRefs"
-	return elementType
-
-ProjectSchema.statics.putElement = (project_id, folder_id, element, type, callback)->
-	if !element?
-		e = new Error("no element passed to be inserted")
-		logger.err project_id:project_id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
-		return callback(e)
-	type = sanitizeTypeOfElement type
-	this.findById project_id, (err, project)=>
-		if err?
-			callback(err)
-		if !folder_id?
-			folder_id = project.rootFolder[0]._id
-		require('../Features/Project/ProjectLocator').findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
-			newPath =
-				fileSystem: "#{path.fileSystem}/#{element.name}"
-				mongo: path.mongo # TODO: This is not correct
-			if err?
-				callback(err)
-			logger.log project_id: project_id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
-			id = element._id+''
-			element._id = concreteObjectId(id)
-			conditions = _id:project_id
-			mongopath = "#{path.mongo}.#{type}"
-			update = "$push":{}
-			update["$push"][mongopath] = element
-			this.update conditions, update, {}, (err)->
-				if(err)
-					logger.err err: err, project: project, 'error saving in putElement project'
-				if callback?
-					callback(err, {path:newPath})
-
-getIndexOf = (searchEntity, id)->
-	length = searchEntity.length
-	count = 0
-	while(count < length)
-		if searchEntity[count]._id+"" == id+""
-			return count
-		count++
-
-
-
 applyToAllFilesRecursivly = ProjectSchema.statics.applyToAllFilesRecursivly = (folder, fun)->
 	_.each folder.fileRefs, (file)->
 		fun(file)

@@ -6,7 +6,7 @@ sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Email/EmailSender.js"
 expect = require("chai").expect
 
-describe "Email", ->
+describe "EmailSender", ->
 
 	beforeEach ->
 
@@ -30,6 +30,9 @@ describe "Email", ->
 				log:->
 				warn:->
 				err:->
+			"../../infrastructure/Metrics": inc:->
+				
+
 
 		@opts =
 			to: "bob@bob.com"

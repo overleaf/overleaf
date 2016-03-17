@@ -1,7 +1,6 @@
 AuthenticationController = require '../Authentication/AuthenticationController'
 SubscriptionHandler  = require './SubscriptionHandler'
 PlansLocator = require("./PlansLocator")
-SubscriptionFormatters = require("./SubscriptionFormatters")
 SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
 LimitationsManager = require("./LimitationsManager")
 RecurlyWrapper = require './RecurlyWrapper'

@@ -1,11 +1,12 @@
 Project = require('../../models/Project').Project
+ProjectGetter = require("./ProjectGetter")
 Errors = require "../../errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
 ProjectGetter = require "./ProjectGetter"
 
-module.exports =
+module.exports = ProjectLocator =
 	findElement: (options, _callback = (err, element, path, parentFolder)->)->
 		callback = (args...) ->
 			_callback(args...)
@@ -51,7 +52,7 @@ module.exports =
 		if project?
 			startSearch(project)
 		else
-			Project.findById project_id, (err, project)->
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
 				return callback(err) if err?
 				if !project?
 					return callback(new Errors.NotFoundError("project not found"))
@@ -67,8 +68,12 @@ module.exports =
 		if project?
 			getRootDoc project
 		else
-			Project.findById project_id, (err, project)->
-				getRootDoc project
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
+				if err?
+					logger.err err:err, "error getting project"
+					return callback(err)
+				else
+					getRootDoc project
 
 	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity)->)->
 

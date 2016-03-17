@@ -17,6 +17,8 @@ define [
 			newName = $scope.inputs.name
 			if !newName? or newName.length == 0 or newName.length > MAX_PROJECT_NAME_LENGTH
 				return
+			if $scope.project.name == newName
+				return
 			$scope.project.name = newName
 			settings.saveProjectSettings({name: $scope.project.name})
 

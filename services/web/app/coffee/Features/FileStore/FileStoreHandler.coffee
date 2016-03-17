@@ -6,24 +6,32 @@ settings = require("settings-sharelatex")
 oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
 
-module.exports =
+module.exports = FileStoreHandler =
 
 	uploadFileFromDisk: (project_id, file_id, fsPath, callback)->
-		logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
-		readStream = fs.createReadStream(fsPath)
-		opts =
-			method: "post"
-			uri: @_buildUrl(project_id, file_id)
-			timeout:fiveMinsInMs
-		writeStream = request(opts)
-		readStream.pipe writeStream
-		writeStream.on "end", callback
-		readStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
-			callback err
-		writeStream.on "error", (err)->
-			logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
-			callback err
+		fs.lstat fsPath, (err, stat)->
+			if err?
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "error stating file"
+				callback(err)
+			if !stat.isFile()
+				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "tried to upload symlink, not contining"
+				return callback(new Error("can not upload symlink"))
+
+			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
+			readStream = fs.createReadStream(fsPath)
+			opts =
+				method: "post"
+				uri: FileStoreHandler._buildUrl(project_id, file_id)
+				timeout:fiveMinsInMs
+			writeStream = request(opts)
+			readStream.pipe writeStream
+			writeStream.on "end", callback
+			readStream.on "error", (err)->
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
+				callback err
+			writeStream.on "error", (err)->
+				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
+				callback err
 
 	getFileStream: (project_id, file_id, query, callback)->
 		logger.log project_id:project_id, file_id:file_id, query:query, "getting file stream from file store"

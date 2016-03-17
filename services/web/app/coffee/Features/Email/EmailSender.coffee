@@ -1,7 +1,6 @@
 logger = require('logger-sharelatex')
 metrics = require('../../infrastructure/Metrics')
 Settings = require('settings-sharelatex')
-metrics = require("../../infrastructure/Metrics")
 nodemailer = require("nodemailer")
 sesTransport = require('nodemailer-ses-transport')
 _ = require("underscore")
@@ -25,7 +24,6 @@ else if Settings?.email?.parameters?
 
 
 	logger.log "using smtp for email"
-	console.log smtp
 	nm_client = nodemailer.createTransport(smtp)
 else
 	nm_client = client
