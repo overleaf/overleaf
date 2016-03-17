@@ -138,7 +138,7 @@ define () ->
 						caption: "\\begin{#{item.name}}..."
 						snippet: """
 							\\begin{#{item.name}}
-							#{item.whitespace || ''}$1
+							#{item.whitespace || ''}$0
 							\\end{#{item.name}}
 						"""
 						meta: "env"
