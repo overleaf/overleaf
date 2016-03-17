@@ -97,46 +97,44 @@ define () ->
 		meta: "env"
 	}]
 
-	CUSTOM_ENVIRONMENT_REGEX = /^\\newenvironment{(\w+)}.*$/gm
 
-	parseCustomEnvironmentNames = (text) ->
-		names = []
+	parseCustomEnvironments = (text) ->
+		re = /^\\newenvironment{(\w+)}.*$/gm
+		result = []
 		iterations = 0
-		while match = CUSTOM_ENVIRONMENT_REGEX.exec(text)
-			names.push match[1]
+		while match = re.exec(text)
+			result.push {name: match[1], whitespace: null}
 			iterations += 1
 			if iterations >= 1000
-				return names
-		return names
+				return result
+		return result
 
-	BEGIN_COMMAND_REGEX = /^\\begin{(\w+)}.*$/gm
 
-	parseBeginCommandNames = (text) ->
-		names = []
+	parseBeginCommands = (text) ->
+		re = /^\\begin{(\w+)}.*\n([\t ]*).*$/gm
+		result = []
 		iterations = 0
-		while match = BEGIN_COMMAND_REGEX.exec(text)
-			names.push match[1]
+		while match = re.exec(text)
+			result.push {name: match[1], whitespace: match[2]}
 			iterations += 1
 			if iterations >= 1000
-				return names
-		return names
+				return result
+		return result
 
 	class SnippetManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			# console.log ">> get snippet completions", editor, session, pos, prefix
 			docText = session.getValue()
-			customEnvironmentNames = parseCustomEnvironmentNames(docText)
-			beginCommandNames = parseBeginCommandNames(docText)
-			# console.log customEnvironmentNames
-			parsedNames = _.union(customEnvironmentNames, beginCommandNames)
+			customEnvironments = parseCustomEnvironments(docText)
+			beginCommands = parseBeginCommands(docText)
+			parsedItems = _.union(customEnvironments, beginCommands)
 			snippets = staticSnippets.concat(
-				parsedNames.map (name) ->
+				parsedItems.map (item) ->
 					{
-						caption: "\\begin{#{name}}..."
+						caption: "\\begin{#{item.name}}..."
 						snippet: """
-							\\begin{#{name}}
-							$1
-							\\end{#{name}}
+							\\begin{#{item.name}}
+							#{item.whitespace || ''}$1
+							\\end{#{item.name}}
 						"""
 						meta: "env"
 					}
@@ -144,10 +142,10 @@ define () ->
 				# arguably these `end` commands shouldn't be here, as they're not snippets
 				# but this is where we have access to the `begin` environment names
 				# *shrug*
-				parsedNames.map (name) ->
+				parsedItems.map (item) ->
 					{
-						caption: "\\end{#{name}}"
-						value: "\\end{#{name}}"
+						caption: "\\end{#{item.name}}"
+						value: "\\end{#{item.name}}"
 						meta: "env"
 					}
 			)
