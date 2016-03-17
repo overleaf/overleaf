@@ -140,6 +140,16 @@ define () ->
 						"""
 						meta: "env"
 					}
+			).concat(
+				# arguably these `end` commands shouldn't be here, as they're not snippets
+				# but this is where we have access to the `begin` environment names
+				# *shrug*
+				parsedNames.map (name) ->
+					{
+						caption: "\\end{#{name}}"
+						value: "\\end{#{name}}"
+						meta: "env"
+					}
 			)
 			callback null, snippets
 
