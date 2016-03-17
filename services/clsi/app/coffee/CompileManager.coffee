@@ -41,7 +41,7 @@ module.exports = CompileManager =
 					image:     request.imageName
 				}, (error, output, stats) ->
 					return callback(error) if error?
-					Metrics.inc("compiles")
+					Metrics.inc("compiles-succeeded")
 					for metric_key, metric_value of stats or {}
 						Metrics.count(metric_key, metric_value)
 					loadavg = os.loadavg?()
