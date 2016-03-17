@@ -135,7 +135,7 @@ define () ->
 						caption: "\\begin{#{name}}..."
 						snippet: """
 							\\begin{#{name}}
-							\t$1
+							$1
 							\\end{#{name}}
 						"""
 						meta: "env"
