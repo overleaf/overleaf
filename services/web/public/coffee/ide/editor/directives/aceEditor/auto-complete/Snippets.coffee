@@ -1,6 +1,6 @@
 define () ->
 	environments = [
-		"abstract", 
+		"abstract",
 		"align", "align*",
 		"equation", "equation*",
 		"gather", "gather*",
@@ -96,5 +96,9 @@ define () ->
 		"""
 		meta: "env"
 	}]
+	class SnippetManager
+		getCompletions: (editor, session, pos, prefix, callback) ->
+			console.log ">> get snippet completions"
+			callback null, snippets
 
-	return snippets
+	return SnippetManager
