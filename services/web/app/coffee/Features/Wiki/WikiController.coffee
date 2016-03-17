@@ -4,7 +4,7 @@ logger = require("logger-sharelatex")
 ErrorController = require "../Errors/ErrorController"
 _ = require("underscore")
 AuthenticationController = require("../Authentication/AuthenticationController")
-
+async = require("async")
 other_lngs = ["es"]
 
 module.exports = WikiController = 
@@ -28,19 +28,22 @@ module.exports = WikiController =
 				lngPage = "#{page}_#{req.lng}"
 			else
 				lngPage = page
-
-			WikiController._getPageContent "Contents", (error, contents) ->
+			jobs =
+				contents: (cb)-> 
+					WikiController._getPageContent "Contents", cb
+				pageData: (cb)->
+					WikiController._getPageContent lngPage, cb
+			async.parallel jobs, (error, results)->
 				return next(error) if error?
-				WikiController._getPageContent lngPage, (error, pageData) ->
-					return next(error) if error?
-					if pageData.content?.length > 280
-						if _.include(other_lngs, req.lng)
-							pageData.title = pageData.title.slice(0, pageData.title.length - (req.lng.length+1) )
+				{pageData, contents} = results
+				if pageData.content?.length > 280
+					if _.include(other_lngs, req.lng)
+						pageData.title = pageData.title.slice(0, pageData.title.length - (req.lng.length+1) )
+					WikiController._renderPage(pageData, contents, res)
+				else
+					WikiController._getPageContent page, (error, pageData) ->
+						return next(error) if error?
 						WikiController._renderPage(pageData, contents, res)
-					else
-						WikiController._getPageContent page, (error, pageData) ->
-							return next(error) if error?
-							WikiController._renderPage(pageData, contents, res)
 
 
 					
@@ -62,7 +65,6 @@ module.exports = WikiController =
 			result = 
 				content: data?.parse?.text?['*']
 				title: data?.parse?.title
-
 			callback null, result
 
 
