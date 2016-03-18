@@ -15,7 +15,7 @@ define [
 	"main/annual-upgrade"
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
-	"main/universties-site"
+	"main/contact-us"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"

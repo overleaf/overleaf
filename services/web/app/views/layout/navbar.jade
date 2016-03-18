@@ -27,7 +27,7 @@ nav.navbar.navbar-default
 								a.dropdown-toggle(href, dropdown-toggle)
 									| !{translate(item.text)}
 									b.caret
-								ul.dropdown-menu(ng-controller="NavController")
+								ul.dropdown-menu
 									each child in item.dropdown
 										if child.divider
 											li.divider

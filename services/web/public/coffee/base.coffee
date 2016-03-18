@@ -24,13 +24,4 @@ define [
 			client_id: window.user_id
 		})
 
-	App.controller "NavController", ($scope) ->
-
-		$scope.toggleGroove = ->
-			$scope['is-open'] = false
-			$scope['isOpen'] = false
-			GrooveWidget.toggle()
-
-
-
 	return App
