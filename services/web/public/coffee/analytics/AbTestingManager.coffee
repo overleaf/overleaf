@@ -22,24 +22,20 @@ define [
 
 		_buildCookieKey = (testName, bucket)-> 
 			key = "sl_abt_#{testName}_#{bucket}"
-			#console.log key
 			return key
 
 
 		_getTestCookie = (testName, bucket)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			cookie =  ipCookie(cookieKey)
-			#console.log cookieKey, cookie
 			return cookie
 
 		_persistCookieStep = (testName, bucket, newStep)->
 			cookieKey = _buildCookieKey(testName, bucket)
 			ipCookie(cookieKey, {step:newStep}, {expires:100, path:"/"})
-			#console.log("persisting", cookieKey, {step:newStep})
 			ga('send', 'event', 'ab_tests', "#{testName}:#{bucket}", "step-#{newStep}")
 
 		_checkIfStepIsNext = (cookieStep, newStep)->
-			#console.log cookieStep, newStep, "checking if step is next"
 			if !cookieStep? and newStep != 0
 				return false
 			else if newStep == 0
@@ -69,6 +65,50 @@ define [
 			return buckets[bucketIndex]
 
 
+	App.factory "algoliawiki", ->
+		client = new AlgoliaSearch("SK53GL4JLY", "e398f35d3074fde57ca6d6c88d8be37c")
+		index = client.initIndex("lean-wiki-index")
+		return index
+
+	App.controller "SearchWikiController", ($scope, algoliawiki, _) ->
+		algolia = algoliawiki
+		$scope.hits = []
+
+		$scope.clearSearchText = ->
+			$scope.searchQueryText = ""
+			updateHits []
+
+		$scope.safeApply = (fn)->
+			phase = $scope.$root.$$phase
+			if(phase == '$apply' || phase == '$digest')
+				$scope.$eval(fn)
+			else
+				$scope.$apply(fn)
+
+		buildHitViewModel = (hit)->
+			page_underscored = hit.title.replace(/\s/g,'_')
+			result =
+				name : hit._highlightResult.title.value
+				url :"/learn/#{page_underscored}"
+			console.log result
+			return result
+
+		updateHits = (hits)->
+			$scope.safeApply ->
+				$scope.hits = hits
+
+		$scope.search = ->
+			query = $scope.searchQueryText
+			if !query? or query.length == 0
+				updateHits []
+				return
+
+			algolia.search query, (err, response)->
+				if response.hits.length == 0
+					updateHits []
+				else
+					hits = _.map response.hits, buildHitViewModel
+					updateHits hits
 
 	App.controller "AbTestController", ($scope, abTestManager)->
 		testKeys = _.keys(window.ab)
