@@ -1,6 +1,8 @@
 AuthorizationManager = require("./AuthorizationManager")
 async = require "async"
 logger = require "logger-sharelatex"
+ObjectId = require("mongojs").ObjectId
+Errors = require "../Errors/Errors"
 
 module.exports = AuthorizationMiddlewear =
 	ensureUserCanReadMultipleProjects: (req, res, next) ->
@@ -83,6 +85,8 @@ module.exports = AuthorizationMiddlewear =
 		project_id = req.params?.project_id or req.params?.Project_id
 		if !project_id?
 			return callback(new Error("Expected project_id in request parameters"))
+		if !ObjectId.isValid(project_id)
+			return callback(new Errors.NotFoundError("invalid project_id: #{project_id}"))
 		AuthorizationMiddlewear._getUserId req, (error, user_id) ->
 			return callback(error) if error?
 			callback(null, user_id, project_id)

@@ -4,16 +4,21 @@ should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Authorization/AuthorizationMiddlewear.js"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Features/Errors/Errors.js"
 
 describe "AuthorizationMiddlewear", ->
 	beforeEach ->
 		@AuthorizationMiddlewear = SandboxedModule.require modulePath, requires:
 			"./AuthorizationManager": @AuthorizationManager = {}
 			"logger-sharelatex": {log: () ->}
+			"mongojs": ObjectId: @ObjectId = {}
+			"../Errors/Errors": Errors
 		@user_id = "user-id-123"
 		@project_id = "project-id-123"
 		@req = {}
 		@res = {}
+		@ObjectId.isValid = sinon.stub()
+		@ObjectId.isValid.withArgs(@project_id).returns true
 		@next = sinon.stub()
 	
 	METHODS_TO_TEST = {
@@ -90,6 +95,17 @@ describe "AuthorizationMiddlewear", ->
 							@AuthorizationMiddlewear.redirectToRestricted
 								.calledWith(@req, @res, @next)
 								.should.equal true
+				
+				describe "with malformed project id", ->
+					beforeEach ->
+						@req.params =
+							project_id: "blah"
+						@ObjectId.isValid = sinon.stub().returns false
+					
+					it "should return a not found error", (done) ->
+						@AuthorizationMiddlewear[middlewearMethod] @req, @res, (error) ->
+							error.should.be.instanceof Errors.NotFoundError
+							done()
 	
 	describe "ensureUserIsSiteAdmin", ->
 		beforeEach ->

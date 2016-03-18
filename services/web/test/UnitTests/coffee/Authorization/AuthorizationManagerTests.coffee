@@ -4,6 +4,7 @@ should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Authorization/AuthorizationManager.js"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Features/Errors/Errors.js"
 
 describe "AuthorizationManager", ->
 	beforeEach ->
@@ -11,6 +12,7 @@ describe "AuthorizationManager", ->
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../../models/Project": Project: @Project = {}
 			"../../models/User": User: @User = {}
+			"../Errors/Errors": Errors
 		@user_id = "user-id-1"
 		@project_id = "project-id-1"
 		@callback = sinon.stub()
@@ -91,6 +93,16 @@ describe "AuthorizationManager", ->
 				
 				it "should return the public privilege level", ->
 					@callback.calledWith(null, "readAndWrite", true).should.equal true
+		
+		describe "when the project doesn't exist", ->
+			beforeEach ->
+				@Project.findOne
+					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+					.yields(null, null)
+				
+			it "should return a NotFoundError", ->
+				@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, (error) ->
+					error.should.be.instanceof Errors.NotFoundError
 	
 	describe "canUserReadProject", ->
 		beforeEach ->

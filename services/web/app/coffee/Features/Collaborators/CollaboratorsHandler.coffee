@@ -7,12 +7,13 @@ ContactManager = require "../Contacts/ContactManager"
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
+Errors = require "../Errors/Errors"
 
 module.exports = CollaboratorsHandler =
 	getMemberIdsWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		Project.findOne { _id: project_id }, { owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
 			return callback(error) if error?
-			return callback null, null if !project?
+			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
 			members = []
 			members.push { id: project.owner_ref.toString(), privilegeLevel: PrivilegeLevels.OWNER }
 			for member_id in project.readOnly_refs or []

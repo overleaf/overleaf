@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+	.content
+		.container
+			.row
+				.col-md-8.col-md-offset-2.text-center
+					.page-header
+						h2 Oh dear, something went wrong.
+					p: img(src="/img/lion-sad-128.png", alt="Sad Lion")
+					p
+						| Something went wrong with your request, sorry. Our staff are probably looking into this, but it continues, please contact us at #{settings.adminEmail}
+					p
+						a(href="/")
+							i.fa.fa-arrow-circle-o-left
+							|  #{translate("take_me_home")}

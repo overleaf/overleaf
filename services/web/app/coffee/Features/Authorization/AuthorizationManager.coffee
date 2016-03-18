@@ -3,6 +3,7 @@ Project = require("../../models/Project").Project
 User = require("../../models/User").User
 PrivilegeLevels = require("./PrivilegeLevels")
 PublicAccessLevels = require("./PublicAccessLevels")
+Errors = require("../Errors/Errors")
 
 module.exports = AuthorizationManager =
 	# Get the privilege level that the user has for the project
@@ -14,8 +15,10 @@ module.exports = AuthorizationManager =
 		getPublicAccessLevel = () ->
 			Project.findOne { _id: project_id }, { publicAccesLevel: 1 }, (error, project) ->
 				return callback(error) if error?
+				if !project?
+					return callback new Errors.NotFoundError("no project found with id #{project_id}")
 				if project.publicAccesLevel == PublicAccessLevels.READ_ONLY
-					return callback null, PrivilegeLevels.READ_ONLY
+					return callback null, PrivilegeLevels.READ_ONLY, true
 				else if project.publicAccesLevel == PublicAccessLevels.READ_AND_WRITE
 					return callback null, PrivilegeLevels.READ_AND_WRITE, true
 				else

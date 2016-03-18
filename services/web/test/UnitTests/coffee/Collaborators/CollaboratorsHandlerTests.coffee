@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Collaborators/CollaboratorsHandler"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors.js"
 
 describe "CollaboratorsHandler", ->
 	beforeEach ->
@@ -16,6 +17,7 @@ describe "CollaboratorsHandler", ->
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			"./CollaboratorsEmailHandler": @CollaboratorsEmailHandler = {}
+			"../Errors/Errors": Errors
 
 		@project_id = "mock-project-id"
 		@user_id = "mock-user-id"
@@ -24,25 +26,35 @@ describe "CollaboratorsHandler", ->
 		@callback = sinon.stub()
 	
 	describe "getMemberIdsWithPrivilegeLevels", ->
-		beforeEach ->
-			@Project.findOne = sinon.stub()
-			@Project.findOne.withArgs({_id: @project_id}, {owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1}).yields(null, @project = {
-				owner_ref: [ "owner-ref" ]
-				readOnly_refs: [ "read-only-ref-1", "read-only-ref-2" ]
-				collaberator_refs: [ "read-write-ref-1", "read-write-ref-2" ]
-			})
-			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, @callback
+		describe "with project", ->
+			beforeEach ->
+				@Project.findOne = sinon.stub()
+				@Project.findOne.withArgs({_id: @project_id}, {owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1}).yields(null, @project = {
+					owner_ref: [ "owner-ref" ]
+					readOnly_refs: [ "read-only-ref-1", "read-only-ref-2" ]
+					collaberator_refs: [ "read-write-ref-1", "read-write-ref-2" ]
+				})
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, @callback
 
-		it "should return an array of member ids with their privilege levels", ->
-			@callback
-				.calledWith(null, [
-					{ id: "owner-ref", privilegeLevel: "owner" }
-					{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
-					{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
-					{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
-					{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
-				])
-				.should.equal true
+			it "should return an array of member ids with their privilege levels", ->
+				@callback
+					.calledWith(null, [
+						{ id: "owner-ref", privilegeLevel: "owner" }
+						{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
+						{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
+						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
+						{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+					])
+					.should.equal true
+		
+		describe "with a missing project", ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().yields(null, null)
+			
+			it "should return a NotFoundError", (done) ->
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, (error) ->
+					error.should.be.instanceof Errors.NotFoundError
+					done()
 	
 	describe "getMemberIds", ->
 		beforeEach ->
