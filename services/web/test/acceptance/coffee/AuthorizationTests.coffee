@@ -300,8 +300,8 @@ describe "Authorization", ->
 		it "should allow a user write access to its content", (done) ->
 			expect_content_write_access @other1, @project_id, done
 			
-		it "should not allow a user write access to its settings"#, (done) ->
-		# 	expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
+		it "should not allow a user write access to its settings", (done) ->
+			expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
 		
 		it "should not allow a user admin access to it", (done) ->
 			expect_no_admin_access @other1, @project_id, redirect_to: "/restricted", done
@@ -331,8 +331,8 @@ describe "Authorization", ->
 		it "should not allow a user write access to its content", (done) ->
 			expect_no_content_write_access @other1, @project_id, done
 			
-		it "should not allow a user write access to its settings"#, (done) ->
-		# 	expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
+		it "should not allow a user write access to its settings", (done) ->
+			expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
 		
 		it "should not allow a user admin access to it", (done) ->
 			expect_no_admin_access @other1, @project_id, redirect_to: "/restricted", done
