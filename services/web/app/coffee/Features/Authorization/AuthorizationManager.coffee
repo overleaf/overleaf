@@ -33,7 +33,12 @@ module.exports = AuthorizationManager =
 					# The user has direct access
 					callback null, privilegeLevel, false
 				else
-					getPublicAccessLevel()
+					AuthorizationManager.isUserSiteAdmin user_id, (error, isAdmin) ->
+						return callback(error) if error?
+						if isAdmin
+							callback null, PrivilegeLevels.OWNER, false
+						else
+							getPublicAccessLevel()
 
 	canUserReadProject: (user_id, project_id, callback = (error, canRead) ->) ->
 		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->

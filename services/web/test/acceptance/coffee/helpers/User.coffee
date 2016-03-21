@@ -1,6 +1,6 @@
 request = require("./request")
 settings = require("settings-sharelatex")
-{db} = require("../../../../app/js/infrastructure/mongojs")
+{db, ObjectId} = require("../../../../app/js/infrastructure/mongojs")
 
 count = 0
 
@@ -28,6 +28,9 @@ class User
 					return callback(error) if error?
 					@id = user?._id?.toString()
 					callback()
+	
+	ensure_admin: (callback = (error) ->) ->
+		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
 	
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {

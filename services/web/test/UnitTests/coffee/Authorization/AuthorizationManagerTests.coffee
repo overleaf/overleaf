@@ -20,6 +20,7 @@ describe "AuthorizationManager", ->
 	describe "getPrivilegeLevelForProject", ->
 		beforeEach ->
 			@Project.findOne = sinon.stub()
+			@AuthorizationManager.isUserSiteAdmin = sinon.stub()
 			@CollaboratorsHandler.getMemberIdPrivilegeLevel = sinon.stub()
 
 		describe "with a private project", ->
@@ -30,6 +31,7 @@ describe "AuthorizationManager", ->
 			
 			describe "with a user_id with a privilege level", ->
 				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel
 						.withArgs(@user_id, @project_id)
 						.yields(null, "readOnly")
@@ -40,6 +42,7 @@ describe "AuthorizationManager", ->
 			
 			describe "with a user_id with no privilege level", ->
 				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel
 						.withArgs(@user_id, @project_id)
 						.yields(null, false)
@@ -48,12 +51,26 @@ describe "AuthorizationManager", ->
 				it "should return false", ->
 					@callback.calledWith(null, false, false).should.equal true
 			
+			describe "with a user_id who is an admin", ->
+				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, true)
+					@CollaboratorsHandler.getMemberIdPrivilegeLevel
+						.withArgs(@user_id, @project_id)
+						.yields(null, false)
+					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @callback
+				
+				it "should return the user as an owner", ->
+					@callback.calledWith(null, "owner", false).should.equal true
+			
 			describe "with no user (anonymous)", ->
 				beforeEach ->
 					@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @callback
 				
 				it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+				
+				it "should not call AuthorizationManager.isUserSiteAdmin", ->
+					@AuthorizationManager.isUserSiteAdmin.called.should.equal false
 				
 				it "should return false", ->
 					@callback.calledWith(null, false, false).should.equal true
@@ -66,6 +83,7 @@ describe "AuthorizationManager", ->
 			
 			describe "with a user_id with a privilege level", ->
 				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel
 						.withArgs(@user_id, @project_id)
 						.yields(null, "readOnly")
@@ -76,6 +94,7 @@ describe "AuthorizationManager", ->
 			
 			describe "with a user_id with no privilege level", ->
 				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel
 						.withArgs(@user_id, @project_id)
 						.yields(null, false)
@@ -84,12 +103,26 @@ describe "AuthorizationManager", ->
 				it "should return the public privilege level", ->
 					@callback.calledWith(null, "readAndWrite", true).should.equal true
 			
+			describe "with a user_id who is an admin", ->
+				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, true)
+					@CollaboratorsHandler.getMemberIdPrivilegeLevel
+						.withArgs(@user_id, @project_id)
+						.yields(null, false)
+					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @callback
+				
+				it "should return the user as an owner", ->
+					@callback.calledWith(null, "owner", false).should.equal true
+			
 			describe "with no user (anonymous)", ->
 				beforeEach ->
 					@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @callback
 				
 				it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
 					@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+				
+				it "should not call AuthorizationManager.isUserSiteAdmin", ->
+					@AuthorizationManager.isUserSiteAdmin.called.should.equal false
 				
 				it "should return the public privilege level", ->
 					@callback.calledWith(null, "readAndWrite", true).should.equal true

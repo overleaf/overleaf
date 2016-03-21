@@ -134,11 +134,16 @@ describe "Authorization", ->
 		@other1 = new User()
 		@other2 = new User()
 		@anon = new User()
-		async.series [
+		@site_admin = new User({email: "admin@example.com"})
+		async.parallel [
 			(cb) => @owner.login cb
 			(cb) => @other1.login cb
 			(cb) => @other2.login cb
 			(cb) => @anon.getCsrfToken cb
+			(cb) =>
+				@site_admin.login (err) =>
+					return cb(err) if error?
+					@site_admin.ensure_admin cb
 		], done
 
 	describe "private project", ->
@@ -151,6 +156,9 @@ describe "Authorization", ->
 		it "should allow the owner read access to it", (done) ->
 			expect_read_access @owner, @project_id, done
 			
+		it "should allow the owner write access to its content", (done) ->
+			expect_content_write_access @owner, @project_id, done
+			
 		it "should allow the owner write access to its settings", (done) ->
 			expect_settings_write_access @owner, @project_id, done
 		
@@ -159,6 +167,9 @@ describe "Authorization", ->
 			
 		it "should not allow another user read access to the project", (done) ->
 			expect_no_read_access @other1, @project_id, redirect_to: "/restricted", done
+			
+		it "should not allow another user write access to its content", (done) ->
+			expect_no_content_write_access @other1, @project_id, done
 			
 		it "should not allow another user write access to its settings", (done) ->
 			expect_no_settings_write_access @other1, @project_id, redirect_to: "/restricted", done
@@ -169,11 +180,27 @@ describe "Authorization", ->
 		it "should not allow anonymous user read access to it", (done) ->
 			expect_no_read_access @anon, @project_id, redirect_to: "/restricted", done
 			
+		it "should not allow anonymous user write access to its content", (done) ->
+			expect_no_content_write_access @anon, @project_id, done
+			
 		it "should not allow anonymous user write access to its settings", (done) ->
 			expect_no_settings_write_access @anon, @project_id, redirect_to: "/restricted", done
 			
 		it "should not allow anonymous user admin access to it", (done) ->
 			expect_no_admin_access @anon, @project_id, redirect_to: "/restricted", done
+		
+		it "should allow site admin users read access to it", (done) ->
+			expect_read_access @site_admin, @project_id, done
+			
+		it "should allow site admin users write access to its content", (done) ->
+			expect_content_write_access @site_admin, @project_id, done
+			
+		it "should allow site admin users write access to its settings", (done) ->
+			expect_settings_write_access @site_admin, @project_id, done
+		
+		it "should allow site admin users admin access to it", (done) ->
+			expect_admin_access @site_admin, @project_id, done
+			
 
 	describe "shared project", ->
 		before (done) ->
