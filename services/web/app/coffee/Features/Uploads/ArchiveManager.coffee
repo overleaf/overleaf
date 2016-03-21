@@ -39,11 +39,11 @@ module.exports = ArchiveManager =
 			lastLine = lines[lines.length - 2]?.trim()
 			totalSizeInBytes = lastLine?.split(" ")?[0]
 
-			totalSizeInBytes = parseInt(totalSizeInBytes)
+			totalSizeInBytesAsInt = parseInt(totalSizeInBytes)
 
-			if !totalSizeInBytes? or isNaN(totalSizeInBytes)
-				logger.err source:source, "error getting bytes of zip"
-				return callback(new Error("something went wrong"))
+			if !totalSizeInBytesAsInt? or isNaN(totalSizeInBytesAsInt)
+				logger.err source:source, totalSizeInBytes:totalSizeInBytes, totalSizeInBytesAsInt:totalSizeInBytesAsInt, lastLine:lastLine, "error getting bytes of zip"
+				return callback(new Error("error getting bytes of zip"))
 
 			isTooLarge = totalSizeInBytes > (ONE_MEG * 300)
 
