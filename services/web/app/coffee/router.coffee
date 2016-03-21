@@ -221,9 +221,9 @@ module.exports = class Router
 				headers: req.headers
 			})
 
-		apiRouter.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
-		apiRouter.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
-		apiRouter.get '/oops-mongo', (req, res, next) ->
+		webRouter.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
+		webRouter.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
+		webRouter.get '/oops-mongo', (req, res, next) ->
 			require("./models/Project").Project.findOne {}, () ->
 				throw new Error("Test error")
 

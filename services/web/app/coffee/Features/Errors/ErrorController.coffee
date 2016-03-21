@@ -17,8 +17,9 @@ module.exports = ErrorController =
 			logger.log err: error,url:req.url, method:req.method, user:req?.sesson?.user, "invalid csrf"
 			res.sendStatus(403)
 			return
-		logger.error err: error, url:req.url, method:req.method, user:req?.sesson?.user, "error passed to top level next middlewear"
 		if error instanceof Errors.NotFoundError
+			logger.warn {err: error, url: req.url}, "not found error"
 			ErrorController.notFound req, res
 		else
+			logger.error err: error, url:req.url, method:req.method, user:req?.sesson?.user, "error passed to top level next middlewear"
 			ErrorController.serverError req, res
