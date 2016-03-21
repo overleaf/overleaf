@@ -32,7 +32,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
-			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled }"
+			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.timeout && !pdf.uncompiled }"
 			tooltip="#{translate('logs_and_output_files')}"
 			tooltip-placement="bottom"
 		)
@@ -162,7 +162,7 @@ div.full-size.pdf(ng-controller="PdfController")
 
 
 
-	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
+	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
 			| #{translate("no_errors_good_job")}
 
