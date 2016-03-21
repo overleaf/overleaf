@@ -76,7 +76,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				i.split-screen
 	// end of toolbar
 	
-	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error && !pdf.renderingError && !pdf.clsiMaintenance")
+	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error && !pdf.renderingError && !pdf.clsiMaintenance && !pdf.tooRecentlyCompiled")
 		div(
 			pdfng
 			ng-if="settings.pdfViewer == 'pdfjs'"
@@ -98,7 +98,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
 	
-	.pdf-errors(ng-show="(pdf.timedout || pdf.error || pdf.renderingError || pdf.clsiMaintenance) && pdf.view != 'logs'")
+	.pdf-errors(ng-show="(pdf.timedout || pdf.error || pdf.renderingError || pdf.clsiMaintenance || pdf.tooRecentlyCompiled) && pdf.view != 'logs'")
 		.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
@@ -106,6 +106,10 @@ div.full-size.pdf(ng-controller="PdfController")
 		.alert.alert-danger(ng-show="pdf.clsiMaintenance")
 			strong #{translate("server_error")} 
 			span #{translate("clsi_maintenance")}
+
+		.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
+			strong #{translate("server_error")} 
+			span #{translate("too_recently_compiled")}
 
 		.alert.alert-danger(ng-show="pdf.timedout")
 			p

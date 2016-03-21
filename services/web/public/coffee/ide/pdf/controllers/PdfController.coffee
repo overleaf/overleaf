@@ -38,6 +38,7 @@ define [
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
 			$scope.pdf.clsiMaintenance = false
+			$scope.pdf.tooRecentlyCompiled = false
 
 			if response.status == "timedout"
 				$scope.pdf.timedout = true
@@ -50,6 +51,8 @@ define [
 				fetchLogs()
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.clsiMaintenance = true
+			else if response.status == "too-recently-compiled"
+				$scope.pdf.tooRecentlyCompiled = true
 			else if response.status == "success"
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
