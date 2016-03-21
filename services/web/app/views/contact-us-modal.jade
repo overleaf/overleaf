@@ -6,9 +6,8 @@ script(type='text/ng-template', id='supportModalTemplate')
 			ng-click="close()"
 		) &times;
 		h3 Contact Us
-	.modal-body
+	.modal-body.contact-us-modal
 		span(ng-show="sent == false")
-			.form-group
 			label
 				| Subject
 			.form-group
@@ -16,7 +15,7 @@ script(type='text/ng-template', id='supportModalTemplate')
 			label.desc
 				| Email
 			.form-group
-				input.field.text.medium.span8.form-control(ng-model="form.email", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
 			label#title12.desc
 				| Project URL (optional)
 			.form-group

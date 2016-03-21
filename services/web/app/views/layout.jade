@@ -82,8 +82,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 				}
 				
 	body
-		div(ng-controller="ContactModal")
-			a(ng-click="contactUsModal()") contact us
 
 		- if(typeof(suppressSystemMessages) == "undefined")
 			.system-messages(
@@ -129,11 +127,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 				baseurl=jsPath,
 				src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 			)
-
-			script(type='text/javascript').
-				(function() {var s=document.createElement('script'); s.type='text/javascript';s.async=true; 
-				s.src=('https:'==document.location.protocol?'https':'http') + '://sharelatex-accounts.groovehq.com/widgets/f5ad3b09-7d99-431b-8af5-c5725e3760ce/ticket/api.js'; 
-				var q = document.getElementsByTagName('script')[0];q.parentNode.insertBefore(s, q);})(); 
 
 		include contact-us-modal
 

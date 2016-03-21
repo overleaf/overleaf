@@ -11,7 +11,6 @@ define [
 			)
 
 	App.controller 'SupportModalController', ($scope, $modal) ->
-
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
@@ -26,6 +25,7 @@ define [
 				message: $scope.form.message
 				subject: $scope.form.subject + " - [#{ticketNumber}]"
 				about : $scope.form.project_url
+				labels: "support"
 
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
@@ -34,8 +34,6 @@ define [
 
 		$scope.close = () ->
 			$modalInstance.close()
-
-
 
 
 	App.controller 'UniverstiesContactController', ($scope, $modal) ->
@@ -52,11 +50,10 @@ define [
 			params =
 				name: $scope.form.name || $scope.form.email
 				email: $scope.form.email
-				labels: $scope.form.source
+				labels: "#{$scope.form.source} accounts"
 				message: "Please contact me with more details"
 				subject: $scope.form.subject + " - [#{ticketNumber}]"
 				about : "#{$scope.form.position || ''} #{$scope.form.university || ''}"
-				to: "support@sharelatex.com"
 
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
