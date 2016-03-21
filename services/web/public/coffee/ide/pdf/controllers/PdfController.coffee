@@ -12,7 +12,7 @@ define [
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
-			$scope.pdf.error = true
+			$scope.pdf.renderingError = true
 
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
 		$scope.$watch "draft", (new_value, old_value) ->

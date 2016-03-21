@@ -32,7 +32,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
-			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.timeout && !pdf.uncompiled }"
+			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled }"
 			tooltip="#{translate('logs_and_output_files')}"
 			tooltip-placement="bottom"
 		)
@@ -75,7 +75,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				i.split-screen
 				i.split-screen
 
-	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
+	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error && !pdf.renderingError")
 		div(
 			pdfng
 			ng-if="settings.pdfViewer == 'pdfjs'"
@@ -97,8 +97,8 @@ div.full-size.pdf(ng-controller="PdfController")
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
 
-	.pdf-errors(ng-show="pdf.timedout || pdf.error")
-		.alert.alert-danger(ng-show="pdf.error")
+	.pdf-errors(ng-show="pdf.timedout || pdf.error || pdf.renderingError")
+		.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
 		
@@ -162,7 +162,7 @@ div.full-size.pdf(ng-controller="PdfController")
 
 
 
-	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.timeout && !pdf.uncompiled")
+	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
 			| #{translate("no_errors_good_job")}
 
