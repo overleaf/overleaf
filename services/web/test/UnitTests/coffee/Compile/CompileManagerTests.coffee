@@ -27,7 +27,7 @@ describe "CompileManager", ->
 				Timer: class Timer
 					done: sinon.stub()
 				inc: sinon.stub()
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), warn: sinon.stub() }
 		@project_id = "mock-project-id-123"
 		@user_id = "mock-user-id-123"
 		@callback = sinon.stub()
@@ -90,15 +90,12 @@ describe "CompileManager", ->
 					.should.equal true
 				
 		describe "when the project has been recently compiled", ->
-			beforeEach ->
+			it "should return", (done)->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
 				@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, true)
-				@CompileManager.compile @project_id, @user_id, {}, @callback
-
-			it "should return the callback with an error", ->
-				@callback
-					.calledWith(new Error("project was recently compiled so not continuing"))
-					.should.equal true
+				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
+					status.should.equal "too-recently-compiled"
+					done()
 
 		describe "should check the rate limit", ->
 			it "should return", (done)->
