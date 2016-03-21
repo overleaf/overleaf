@@ -25,7 +25,7 @@ module.exports = ArchiveManager =
 			error += chunk
 
 		unzip.on "error", (err) ->
-			logger.error {err, source, destination}, "unzip failed"
+			logger.error {err, source}, "unzip failed"
 			if err.code == "ENOENT"
 				logger.error "unzip command not found. Please check the unzip command is installed"
 			callback(err)
@@ -33,7 +33,7 @@ module.exports = ArchiveManager =
 		unzip.on "exit", () ->
 			if error?
 				error = new Error(error)
-				logger.error err:error, source: source, destination: destination, "error checking zip size"
+				logger.error err:error, source: source, "error checking zip size"
 
 			lines = output.split("\n")
 			lastLine = lines[lines.length - 2]?.trim()
