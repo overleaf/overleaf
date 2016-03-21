@@ -37,6 +37,7 @@ define [
 			$scope.pdf.uncompiled = false
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
+			$scope.pdf.clsiMaintenance = false
 
 			if response.status == "timedout"
 				$scope.pdf.timedout = true
@@ -47,6 +48,8 @@ define [
 			else if response.status == "failure"
 				$scope.pdf.failure = true
 				fetchLogs()
+			else if response.status == 'clsi-maintenance'
+				$scope.pdf.clsiMaintenance = true
 			else if response.status == "success"
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"

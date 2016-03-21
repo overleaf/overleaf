@@ -74,8 +74,9 @@ div.full-size.pdf(ng-controller="PdfController")
 			)
 				i.split-screen
 				i.split-screen
-
-	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error && !pdf.renderingError")
+	// end of toolbar
+	
+	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error && !pdf.renderingError && !pdf.clsiMaintenance")
 		div(
 			pdfng
 			ng-if="settings.pdfViewer == 'pdfjs'"
@@ -96,12 +97,15 @@ div.full-size.pdf(ng-controller="PdfController")
 		| &nbsp;
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
-
-	.pdf-errors(ng-show="(pdf.timedout || pdf.error || pdf.renderingError) && pdf.view != 'logs'")
+	
+	.pdf-errors(ng-show="(pdf.timedout || pdf.error || pdf.renderingError || pdf.clsiMaintenance) && pdf.view != 'logs'")
 		.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
 		
+		.alert.alert-danger(ng-show="pdf.clsiMaintenance")
+			strong #{translate("server_error")} 
+			span #{translate("clsi_maintenance")}
 
 		.alert.alert-danger(ng-show="pdf.timedout")
 			p
@@ -157,10 +161,6 @@ div.full-size.pdf(ng-controller="PdfController")
 			strong #{translate("project_too_large")} 
 			span #{translate("project_too_large_please_reduce")}
 		
-
-		
-
-
 
 	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
