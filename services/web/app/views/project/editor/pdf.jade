@@ -97,7 +97,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
 		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
 
-	.pdf-errors(ng-show="pdf.timedout || pdf.error || pdf.renderingError")
+	.pdf-errors(ng-show="(pdf.timedout || pdf.error || pdf.renderingError) && pdf.view != 'logs'")
 		.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
 			strong #{translate("server_error")} 
 			span #{translate("somthing_went_wrong_compiling")}
