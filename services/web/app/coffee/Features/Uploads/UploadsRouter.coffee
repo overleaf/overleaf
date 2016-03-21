@@ -16,6 +16,7 @@ module.exports =
 				maxRequests: 200
 				timeInterval: 60 * 30
 			}),
+			AuthenticationController.requireLogin(),
 			AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
 			ProjectUploadController.uploadFile
 
