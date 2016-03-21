@@ -232,7 +232,7 @@ module.exports = class Router
 			res.send()
 
 		webRouter.post '/error/client', (req, res, next) ->
-			logger.error err: req.body.error, meta: req.body.meta, "client side error"
+			logger.warn err: req.body.error, meta: req.body.meta, "client side error"
 			res.sendStatus(204)
 
 		webRouter.get '*', ErrorController.notFound
