@@ -30,7 +30,7 @@ module.exports = ArchiveManager =
 				logger.error "unzip command not found. Please check the unzip command is installed"
 			callback(err)
 
-		unzip.on "exit", () ->
+		unzip.on "close", (exitCode) ->
 			if error?
 				error = new Error(error)
 				logger.error err:error, source: source, "error checking zip size"
@@ -42,14 +42,12 @@ module.exports = ArchiveManager =
 			totalSizeInBytesAsInt = parseInt(totalSizeInBytes)
 
 			if !totalSizeInBytesAsInt? or isNaN(totalSizeInBytesAsInt)
-				logger.err source:source, totalSizeInBytes:totalSizeInBytes, totalSizeInBytesAsInt:totalSizeInBytesAsInt, lastLine:lastLine, "error getting bytes of zip"
+				logger.err source:source, totalSizeInBytes:totalSizeInBytes, totalSizeInBytesAsInt:totalSizeInBytesAsInt, lastLine:lastLine, exitCode:exitCode, "error getting bytes of zip"
 				return callback(new Error("error getting bytes of zip"))
 
 			isTooLarge = totalSizeInBytes > (ONE_MEG * 300)
 
 			callback(error, isTooLarge)
-
-
 
 
 					
@@ -87,7 +85,7 @@ module.exports = ArchiveManager =
 					logger.error "unzip command not found. Please check the unzip command is installed"
 				callback(err)
 
-			unzip.on "exit", () ->
+			unzip.on "close", () ->
 				timer.done()
 				if error?
 					error = new Error(error)
