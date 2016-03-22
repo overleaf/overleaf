@@ -22,9 +22,9 @@ define [
 			ticketNumber = Math.floor((1 + Math.random()) * 0x10000).toString(32)
 			params =
 				email: $scope.form.email
-				message: $scope.form.message
+				message: $scope.form.message or ""
 				subject: $scope.form.subject + " - [#{ticketNumber}]"
-				about : $scope.form.project_url
+				about : $scope.form.project_url or ""
 				labels: "support"
 
 			Groove.createTicket params, (err, json)->
