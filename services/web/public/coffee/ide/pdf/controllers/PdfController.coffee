@@ -4,8 +4,10 @@ define [
 	"libs/bib-log-parser"
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
+
 		autoCompile = true
-		$scope.pdf.view = 'uncompiled' # uncompiled | pdf | errors
+		$scope.pdf.view = 'uncompiled'  # uncompiled | pdf | errors
+		$scope.shouldShowLogs = false
 
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -62,7 +64,7 @@ define [
 			else if response.status == "too-recently-compiled"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.tooRecentlyCompiled = true
-			else if response.status == "success"
+			else if response.status == "success				"
 				$scope.pdf.view = 'pdf'
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
@@ -186,7 +188,6 @@ define [
 					"X-Csrf-Token": window.csrfToken
 			}
 
-		$scope.shouldShowLogs = false
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
 

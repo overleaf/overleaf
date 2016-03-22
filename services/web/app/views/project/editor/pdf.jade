@@ -76,7 +76,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				i.split-screen
 	// end of toolbar
 
-	// views
+	// logs view
 	.pdf-logs(ng-show="shouldShowLogs")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
 			| #{translate("no_errors_good_job")}
@@ -131,6 +131,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
 	
 	
+	// non-log views (pdf and errors)
 	div(ng-show="!shouldShowLogs", ng-switch on="pdf.view")
 		.pdf-uncompiled(ng-switch-when="uncompiled" ng-show="!pdf.compiling")
 			| &nbsp;
@@ -209,9 +210,6 @@ div.full-size.pdf(ng-controller="PdfController")
 						sixpack-convert="track_changes_feature_info"
 						ng-click="startFreeTrial('compile-timeout')"
 					) #{translate("start_free_trial")}
-
-		.pdf-logs(ng-switch-when="logs")
-
 	// // // //
 
 
