@@ -10,7 +10,7 @@ define [
 				controller: "SupportModalController"
 			)
 
-	App.controller 'SupportModalController', ($scope, $modal) ->
+	App.controller 'SupportModalController', ($scope, $modalInstance) ->
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
@@ -30,7 +30,6 @@ define [
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
 				$scope.$apply()
-
 
 		$scope.close = () ->
 			$modalInstance.close()
