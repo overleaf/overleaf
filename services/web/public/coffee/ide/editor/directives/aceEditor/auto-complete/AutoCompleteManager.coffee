@@ -1,9 +1,9 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
-	"ide/editor/directives/aceEditor/auto-complete/Snippets"
+	"ide/editor/directives/aceEditor/auto-complete/SnippetManager"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, Snippets) ->
+], (SuggestionManager, SnippetManager) ->
 	Range = ace.require("ace/range").Range
 
 	getLastCommandFragment = (lineUpToCursor) ->
@@ -38,9 +38,7 @@ define [
 				enableLiveAutocompletion: false
 			})
 
-			SnippetCompleter =
-				getCompletions: (editor, session, pos, prefix, callback) ->
-					callback null, Snippets
+			SnippetCompleter = new SnippetManager()
 
 			references = @$scope.$root._references
 			ReferencesCompleter =
