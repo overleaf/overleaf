@@ -86,10 +86,11 @@ define [
 				$scope.$apply(fn)
 
 		buildHitViewModel = (hit)->
-			page_underscored = hit.title.replace(/\s/g,'_')
+			page_underscored = hit.pageName.replace(/\s/g,'_')
+			section_underscored = hit.sectionName.replace(/\s/g,'_')
 			result =
-				name : hit._highlightResult.title.value
-				url :"/learn/#{page_underscored}"
+				name : hit._highlightResult.pageName.value + " - " + hit._highlightResult.sectionName.value
+				url :"/learn/#{page_underscored}##{section_underscored}"
 			console.log result
 			return result
 
@@ -99,6 +100,7 @@ define [
 
 		$scope.search = ->
 			query = $scope.searchQueryText
+			console.log query
 			if !query? or query.length == 0
 				updateHits []
 				return

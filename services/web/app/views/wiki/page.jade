@@ -3,34 +3,35 @@ extends ../layout
 block content
 	.content.content-alt(ng-cloak)
 		.container.wiki
-			.row.template-page-header(ng-controller="SearchWikiController")
-				.col-xs-3
-				.col-md-8
-					form.project-search.form-horizontal(role="form")
-						.form-group.has-feedback.has-feedback-left.col-md-12
-							input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
-							i.fa.fa-search.form-control-feedback-left
-							i.fa.fa-times.form-control-feedback(
-								ng-click="clearSearchText()",
-								style="cursor: pointer;",
-								ng-show="searchQueryText.length > 0"
-							)
+			.row.template-page-header
 				.col-md-8(ng-cloak)
-					ul.list-unstyled
-						li(ng-repeat='hit in hits')
-							.thumbnail.searchResult
-								.row
-									a(ng-href='{{hit.url}}')
-										.col-md-3
-											img(ng-src='{{hit.image_url}}')
-										.col-md-7
-											h1(ng-bind-html='hit.name')
-											p(ng-bind-html='hit.description')
-			.row(ng-non-bindable)
-				.col-xs-3.contents
+
+			.row
+				.col-xs-3.contents(ng-non-bindable)
 					| !{contents.content}
-				.col-xs-9.page
-					.card
+				.col-xs-9.page(ng-controller="SearchWikiController")
+					.row
+						.col-md-12
+							form.project-search.form-horizontal(role="form")
+								.form-group.has-feedback.has-feedback-left.col-md-12
+									input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
+									i.fa.fa-search.form-control-feedback-left
+									i.fa.fa-times.form-control-feedback(
+										ng-click="clearSearchText()",
+										style="cursor: pointer;",
+										ng-show="searchQueryText.length > 0"
+									)
+					.row
+						.col-md-12(ng-cloak)
+							ul.list-unstyled
+								li(ng-repeat='hit in hits')
+									.searchResult
+										.row
+											.col.-md-12
+												a(ng-href='{{hit.url}}')
+													span(ng-bind-html='hit.name')
+
+					.card(ng-non-bindable)
 						.page-header
 							h1 #{title}
 							
