@@ -19,7 +19,7 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = {}
 		@project_id = "project-id"
 		@callback = sinon.stub()
@@ -218,9 +218,9 @@ describe "ClsiManager", ->
 				@project.rootDoc_id = "not-valid"
 				@ClsiManager._buildRequest @project, null, (@error, @request) =>
 					done()
-			
-			it "should return an error", ->
-				expect(@error).to.exist
+
+			it "should set to main.tex", ->
+				@request.compile.rootResourcePath.should.equal "main.tex"
 		
 		describe "with the draft option", ->
 			it "should add the draft option into the request", (done) ->

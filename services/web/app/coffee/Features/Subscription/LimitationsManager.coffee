@@ -3,6 +3,7 @@ Project = require("../../models/Project").Project
 User = require("../../models/User").User
 SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 
 module.exports =
 
@@ -13,16 +14,11 @@ module.exports =
 				callback null, owner.features.collaborators
 			else
 				callback null, Settings.defaultPlanCode.collaborators
-	
-	currentNumberOfCollaboratorsInProject: (project_id, callback) ->
-		Project.findById project_id, 'collaberator_refs readOnly_refs', (error, project) ->
-			return callback(error) if error?
-			callback null, (project.collaberator_refs.length + project.readOnly_refs.length)
 
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
 			return callback(error) if error?
-			@currentNumberOfCollaboratorsInProject project_id, (error, current_number) =>
+			CollaboratorsHandler.getCollaboratorCount project_id, (error, current_number) =>
 				return callback(error) if error?
 				if current_number + x_collaborators <= allowed_number or allowed_number < 0
 					callback null, true

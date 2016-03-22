@@ -10,5 +10,10 @@ define [
 			saveProjectSettings: (data) ->
 				data._csrf = window.csrfToken
 				ide.$http.post "/project/#{ide.project_id}/settings", data
+				
+			saveProjectAdminSettings: (data) ->
+				data._csrf = window.csrfToken
+				ide.$http.post "/project/#{ide.project_id}/settings/admin", data
+				
 		}
 	]

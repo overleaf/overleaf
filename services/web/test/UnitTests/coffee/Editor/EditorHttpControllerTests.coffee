@@ -10,12 +10,13 @@ describe "EditorHttpController", ->
 			'../Project/ProjectDeleter' : @ProjectDeleter = {}
 			'../Project/ProjectGetter' : @ProjectGetter = {}
 			'../User/UserGetter' : @UserGetter = {}
-			"../Security/AuthorizationManager": @AuthorizationManager = {}
+			"../Authorization/AuthorizationManager": @AuthorizationManager = {}
 			'../Project/ProjectEditorHandler': @ProjectEditorHandler = {}
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./EditorController": @EditorController = {}
 			'../../infrastructure/Metrics': @Metrics = {inc: sinon.stub()}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
@@ -76,6 +77,17 @@ describe "EditorHttpController", ->
 				@ProjectDeleter.unmarkAsDeletedByExternalSource 
 					.calledWith(@project_id)
 					.should.equal true
+					
+		describe "with an anonymous user", ->
+			beforeEach ->
+				@req.query =
+					user_id: "anonymous-user"
+				@EditorHttpController.joinProject @req, @res
+			
+			it "should pass the user id as null", ->
+				@EditorHttpController._buildJoinProjectView
+					.calledWith(@project_id, null)
+					.should.equal true
 
 	describe "_buildJoinProjectView", ->
 		beforeEach ->
@@ -85,19 +97,20 @@ describe "EditorHttpController", ->
 			@user =
 				_id: @user_id = "user-id"
 				projects: {}
+			@members = ["members", "mock"]
 			@projectModelView = 
 				_id: @project_id
 				owner:{_id:"something"}
 				view: true
 			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
-			@ProjectGetter.populateProjectWithUsers = sinon.stub().callsArgWith(1, null, @project)
+			@CollaboratorsHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				
 		describe "when authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, true, "owner")
+					sinon.stub().callsArgWith(2, null, "owner")
 				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
 				
 			it "should find the project without doc lines", ->
@@ -105,8 +118,8 @@ describe "EditorHttpController", ->
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should populate the user references in the project", ->
-				@ProjectGetter.populateProjectWithUsers
+			it "should get the list of users in the project", ->
+				@CollaboratorsHandler.getMembersWithPrivilegeLevels
 					.calledWith(@project)
 					.should.equal true
 			
@@ -117,7 +130,7 @@ describe "EditorHttpController", ->
 					
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
-					.calledWith(@project, @user)
+					.calledWith(@user_id, @project_id)
 					.should.equal true
 
 			it "should return the project model view, privilege level and protocol version", ->
@@ -126,7 +139,7 @@ describe "EditorHttpController", ->
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, false, null)
+					sinon.stub().callsArgWith(2, null, null)
 				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
 				
 			it "should return false in the callback", ->

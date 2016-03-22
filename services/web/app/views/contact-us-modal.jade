@@ -1,0 +1,30 @@
+script(type='text/ng-template', id='supportModalTemplate')
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="close()"
+		) &times;
+		h3 Contact Us
+	.modal-body.contact-us-modal
+		span(ng-show="sent == false")
+			label
+				| Subject
+			.form-group
+				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
+			label.desc
+				| Email
+			.form-group
+				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+			label#title12.desc
+				| Project URL (optional)
+			.form-group
+				input.field.text.medium.span8.form-control(ng-model="form.project_url", tabindex='3', onkeyup='')
+			label.desc
+				| Message
+			.form-group
+				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+			.form-group.text-center
+				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value='Get in Touch')
+		span(ng-show="sent")
+			p Request Sent, Thank you.

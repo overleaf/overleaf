@@ -35,13 +35,10 @@ describe "ProjectController", ->
 			getAllTags: sinon.stub()
 		@NotificationsHandler =
 			getUserNotifications: sinon.stub()
-		@ProjectModel =
-			findAllUsersProjects: sinon.stub()
-			findPopulatedById: sinon.stub()
 		@UserModel =
 			findById: sinon.stub()
-		@SecurityManager =
-			userCanAccessProject:sinon.stub()
+		@AuthorizationManager =
+			getPrivilegeLevelForProject:sinon.stub()
 		@EditorController = 
 			renameProject:sinon.stub()
 		@InactiveProjectManager =
@@ -50,6 +47,9 @@ describe "ProjectController", ->
 			markAsOpened: sinon.stub()
 		@ReferencesSearchHandler =
 			indexProjectReferences: sinon.stub()
+		@ProjectGetter =
+			findAllUsersProjects: sinon.stub()
+			getProject: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": 
@@ -67,12 +67,12 @@ describe "ProjectController", ->
 			"../Subscription/LimitationsManager": @LimitationsManager
 			"../Tags/TagsHandler":@TagsHandler
 			"../Notifications/NotificationsHandler":@NotificationsHandler
-			'../../models/Project': Project:@ProjectModel
 			"../../models/User":User:@UserModel
-			"../../managers/SecurityManager":@SecurityManager
+			"../Authorization/AuthorizationManager":@AuthorizationManager
 			"../InactiveData/InactiveProjectManager":@InactiveProjectManager
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
+			"./ProjectGetter": @ProjectGetter
 
 		@user = 
 			_id:"!£123213kjljkl"
@@ -128,18 +128,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.updateProjectSettings @req, @res
 
-		it "should update the public access level", (done) ->
-			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
-			@req.body =
-				publicAccessLevel: @publicAccessLevel = "readonly"
-			@res.sendStatus = (code) =>
-				@EditorController.setPublicAccessLevel
-					.calledWith(@project_id, @publicAccessLevel)
-					.should.equal true
-				code.should.equal 204
-				done()
-			@ProjectController.updateProjectSettings @req, @res
-
 		it "should update the root doc", (done) ->
 			@EditorController.setRootDoc = sinon.stub().callsArg(2)
 			@req.body =
@@ -151,6 +139,19 @@ describe "ProjectController", ->
 				code.should.equal 204
 				done()
 			@ProjectController.updateProjectSettings @req, @res
+	
+	describe "updateProjectAdminSettings", ->
+		it "should update the public access level", (done) ->
+			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
+			@req.body =
+				publicAccessLevel: @publicAccessLevel = "readonly"
+			@res.sendStatus = (code) =>
+				@EditorController.setPublicAccessLevel
+					.calledWith(@project_id, @publicAccessLevel)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectAdminSettings @req, @res
 
 	describe "deleteProject", ->
 		it "should tell the project deleter to archive when forever=false", (done)->
@@ -224,7 +225,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
-			@ProjectModel.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -297,10 +298,10 @@ describe "ProjectController", ->
 					fontSize:"massive"
 					theme:"sexy"
 				email: "bob@bob.com"
-			@ProjectModel.findPopulatedById.callsArgWith 1, null, @project
+			@ProjectGetter.getProject.callsArgWith 2, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
-			@SecurityManager.userCanAccessProject.callsArgWith 2, true, "owner"
+			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 2, null, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
 			@ProjectUpdateHandler.markAsOpened.callsArgWith(1)
@@ -309,12 +310,6 @@ describe "ProjectController", ->
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>
 				pageName.should.equal "project/editor"
-				done()
-			@ProjectController.loadEditor @req, @res
-
-		it "should add the project onto the opts", (done)->		
-			@res.render = (pageName, opts)=>
-				opts.project.should.equal @project
 				done()
 			@ProjectController.loadEditor @req, @res
 
@@ -339,7 +334,7 @@ describe "ProjectController", ->
 			@ProjectController.loadEditor @req, @res
 
 		it "should not render the page if the project can not be accessed", (done)->
-			@SecurityManager.userCanAccessProject = sinon.stub().callsArgWith 2, false
+			@AuthorizationManager.getPrivilegeLevelForProject = sinon.stub().callsArgWith 2, null, null
 			@res.sendStatus = (resCode, opts)=>
 				resCode.should.equal 401
 				done()

@@ -4,6 +4,7 @@ Errors = require "../../errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
+ProjectGetter = require "./ProjectGetter"
 
 module.exports = ProjectLocator =
 	findElement: (options, _callback = (err, element, path, parentFolder)->)->
@@ -131,7 +132,8 @@ module.exports = ProjectLocator =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		Project.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
+		ProjectGetter.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
+			return callback(error) if error?
 			projects = projects.concat(collabertions)
 			projectName = projectName.toLowerCase()
 			project = _.find projects, (project)->

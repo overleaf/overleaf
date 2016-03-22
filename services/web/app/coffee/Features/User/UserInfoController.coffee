@@ -6,10 +6,6 @@ sanitize = require('sanitizer')
 
 module.exports = UserController =
 	getLoggedInUsersPersonalInfo: (req, res, next = (error) ->) ->
-		# this is funcky as hell, we don't use the current session to get the user
-		# we use the auth token, actually destroying session from the chat api request
-		if req.query?.auth_token?
-			req.session?.destroy() 
 		logger.log user: req.user, "reciving request for getting logged in users personal info"
 		return next(new Error("User is not logged in")) if !req.user?
 		UserGetter.getUser req.user._id, {

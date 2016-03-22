@@ -39,7 +39,7 @@ describe "ArchiveManager", ->
 		describe "successfully", ->
 			beforeEach (done) ->
 				@ArchiveManager.extractZipArchive @source, @destination, done
-				@process.emit "exit"
+				@process.emit "close"
 
 			it "should run unzip", ->
 				@child.spawn.calledWithExactly("unzip", [@source, "-d", @destination]).should.equal true
@@ -56,7 +56,7 @@ describe "ArchiveManager", ->
 					@callback(error)
 					done()
 				@process.stderr.emit "data", "Something went wrong"
-				@process.emit "exit"
+				@process.emit "close"
 
 			it "should return the callback with an error", ->
 				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
@@ -99,35 +99,35 @@ describe "ArchiveManager", ->
 				isTooLarge.should.equal false
 				done()
 			@process.stdout.emit "data", @output("109042")
-			@process.emit "exit"
+			@process.emit "close"
 
 		it "should return true with large bytes", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				isTooLarge.should.equal true
 				done()
 			@process.stdout.emit "data", @output("1090000000000000042")
-			@process.emit "exit"
+			@process.emit "close"
 
 		it "should return error on no data", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
 			@process.stdout.emit "data", ""
-			@process.emit "exit"
+			@process.emit "close"
 
 		it "should return error if it didn't get a number", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
 			@process.stdout.emit "data", @output("total_size_string")
-			@process.emit "exit"
+			@process.emit "close"
 
 		it "should return error if the is only a bit of data", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
 			@process.stdout.emit "data", "  Length     Date   Time    Name \n--------"
-			@process.emit "exit"
+			@process.emit "close"
 
 	describe "findTopLevelDirectory", ->
 		beforeEach ->

@@ -30,7 +30,7 @@ project.rootFolder[0] = rootFolder
 project.rootDoc_id = rootDoc._id
 
 
-describe 'ProjectLocatorTests', ->
+describe 'ProjectLocator', ->
 
 	beforeEach ->
 		Project.getProject = (project_id, fields, callback)=>
@@ -301,7 +301,7 @@ describe 'ProjectLocatorTests', ->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis"}
 			projects = [{name:"notThis"}, {name:"wellll"}, stubbedProject, {name:"Noooo"}]	
-			Project.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project.should.equal stubbedProject
 				done()
@@ -310,7 +310,7 @@ describe 'ProjectLocatorTests', ->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis", _id:12331321}
 			projects = [{name:"notThis"}, {name:"wellll"}, {name:"findThis",archived:true}, stubbedProject, {name:"findThis",archived:true}, {name:"Noooo"}]	
-			Project.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project._id.should.equal stubbedProject._id
 				done()
@@ -319,7 +319,7 @@ describe 'ProjectLocatorTests', ->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis"}
 			projects = [{name:"notThis"}, {name:"wellll"}, {name:"Noooo"}]	
-			Project.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects, [stubbedProject])
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects, [stubbedProject])
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project.should.equal stubbedProject
 				done()

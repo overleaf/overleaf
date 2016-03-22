@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Collaborators/CollaboratorsHandler"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors.js"
 
 describe "CollaboratorsHandler", ->
 	beforeEach ->
@@ -16,12 +17,145 @@ describe "CollaboratorsHandler", ->
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			"./CollaboratorsEmailHandler": @CollaboratorsEmailHandler = {}
+			"../Errors/Errors": Errors
 
 		@project_id = "mock-project-id"
 		@user_id = "mock-user-id"
 		@adding_user_id = "adding-user-id"
 		@email = "joe@sharelatex.com"
 		@callback = sinon.stub()
+	
+	describe "getMemberIdsWithPrivilegeLevels", ->
+		describe "with project", ->
+			beforeEach ->
+				@Project.findOne = sinon.stub()
+				@Project.findOne.withArgs({_id: @project_id}, {owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1}).yields(null, @project = {
+					owner_ref: [ "owner-ref" ]
+					readOnly_refs: [ "read-only-ref-1", "read-only-ref-2" ]
+					collaberator_refs: [ "read-write-ref-1", "read-write-ref-2" ]
+				})
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, @callback
+
+			it "should return an array of member ids with their privilege levels", ->
+				@callback
+					.calledWith(null, [
+						{ id: "owner-ref", privilegeLevel: "owner" }
+						{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
+						{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
+						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
+						{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+					])
+					.should.equal true
+		
+		describe "with a missing project", ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().yields(null, null)
+			
+			it "should return a NotFoundError", (done) ->
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, (error) ->
+					error.should.be.instanceof Errors.NotFoundError
+					done()
+	
+	describe "getMemberIds", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels
+				.withArgs(@project_id)
+				.yields(null, [{id: "member-id-1"}, {id: "member-id-2"}])
+			@CollaboratorHandler.getMemberIds @project_id, @callback
+
+		it "should return the ids", ->
+			@callback
+				.calledWith(null, ["member-id-1", "member-id-2"])
+				.should.equal true
+	
+	describe "getMembersWithPrivilegeLevels", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
+				{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
+				{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
+				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
+				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+			])
+			@UserGetter.getUser = sinon.stub()
+			@UserGetter.getUser.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
+			@UserGetter.getUser.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
+			@UserGetter.getUser.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
+			@UserGetter.getUser.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
+			@CollaboratorHandler.getMembersWithPrivilegeLevels @project_id, @callback
+		
+		it "should return an array of members with their privilege levels", ->
+			@callback
+				.calledWith(undefined, [
+					{ user: { _id: "read-only-ref-1" }, privilegeLevel: "readOnly" }
+					{ user: { _id: "read-only-ref-2" }, privilegeLevel: "readOnly" }
+					{ user: { _id: "read-write-ref-1" }, privilegeLevel: "readAndWrite" }
+					{ user: { _id: "read-write-ref-2" }, privilegeLevel: "readAndWrite" }
+				])
+				.should.equal true
+	
+	describe "getMemberIdPrivilegeLevel", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels
+				.withArgs(@project_id)
+				.yields(null, [
+					{id: "member-id-1", privilegeLevel: "readAndWrite"}
+					{id: "member-id-2", privilegeLevel: "readOnly"}
+				])
+
+		it "should return the privilege level if it exists", (done) ->
+			@CollaboratorHandler.getMemberIdPrivilegeLevel "member-id-2", @project_id, (error, level) ->
+				expect(level).to.equal "readOnly"
+				done()
+
+		it "should return false if the member has no privilege level", (done) ->
+			@CollaboratorHandler.getMemberIdPrivilegeLevel "member-id-3", @project_id, (error, level) ->
+				expect(level).to.equal false
+				done()
+	
+	describe "isUserMemberOfProject", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+
+		describe "when user is a member of the project", ->
+			beforeEach ->
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
+					{ id: "not-the-user", privilegeLevel: "readOnly" }
+					{ id: @user_id, privilegeLevel: "readAndWrite" }
+				])
+				@CollaboratorHandler.isUserMemberOfProject @user_id, @project_id, @callback
+			
+			it "should return true and the privilegeLevel", ->
+				@callback
+					.calledWith(null, true, "readAndWrite")
+					.should.equal true
+
+		describe "when user is not a member of the project", ->
+			beforeEach ->
+				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
+					{ id: "not-the-user", privilegeLevel: "readOnly" }
+				])
+				@CollaboratorHandler.isUserMemberOfProject @user_id, @project_id, @callback
+			
+			it "should return false", ->
+				@callback
+					.calledWith(null, false, null)
+					.should.equal true
+	
+	describe "getProjectsUserIsCollaboratorOf", ->
+		beforeEach ->
+			@fields = "mock fields"
+			@Project.find = sinon.stub()
+			@Project.find.withArgs({collaberator_refs:@user_id}, @fields).yields(null, ["mock-read-write-project-1", "mock-read-write-project-2"])
+			@Project.find.withArgs({readOnly_refs:@user_id}, @fields).yields(null, ["mock-read-only-project-1", "mock-read-only-project-2"])
+			@CollaboratorHandler.getProjectsUserIsCollaboratorOf @user_id, @fields, @callback
+		
+		it "should call the callback with the projects", ->
+			@callback
+				.calledWith(null, ["mock-read-write-project-1", "mock-read-write-project-2"], ["mock-read-only-project-1", "mock-read-only-project-2"])
+				.should.equal true
 
 	describe "removeUserFromProject", ->
 		beforeEach ->

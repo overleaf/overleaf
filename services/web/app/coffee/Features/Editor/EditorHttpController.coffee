@@ -5,14 +5,18 @@ EditorRealTimeController = require "./EditorRealTimeController"
 EditorController = require "./EditorController"
 ProjectGetter = require('../Project/ProjectGetter')
 UserGetter = require('../User/UserGetter')
-AuthorizationManager = require("../Security/AuthorizationManager")
+AuthorizationManager = require("../Authorization/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
+CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 
 module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
 		project_id = req.params.Project_id
 		user_id = req.query.user_id
+		if user_id == "anonymous-user"
+			user_id = null
 		logger.log {user_id, project_id}, "join project request"
 		Metrics.inc "editor.join-project"
 		EditorHttpController._buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
@@ -29,17 +33,17 @@ module.exports = EditorHttpController =
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			return callback(new Error("not found")) if !project?
-			ProjectGetter.populateProjectWithUsers project, (error, project) ->
+			CollaboratorsHandler.getMembersWithPrivilegeLevels project, (error, members) ->
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject project, user, (error, canAccess, privilegeLevel) ->
+					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
-						if !canAccess
+						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 							callback null, null, false
 						else
 							callback(null,
-								ProjectEditorHandler.buildProjectModelView(project),
+								ProjectEditorHandler.buildProjectModelView(project, members),
 								privilegeLevel
 							)
 

@@ -15,7 +15,7 @@ define [
 	"main/annual-upgrade"
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
-	"main/universties-site"
+	"main/contact-us"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
@@ -30,3 +30,6 @@ define [
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])
+
+	
+

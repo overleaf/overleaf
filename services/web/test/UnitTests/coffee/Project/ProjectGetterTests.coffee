@@ -16,6 +16,8 @@ describe "ProjectGetter", ->
 					projects: {}
 					users: {}
 				ObjectId: ObjectId
+			"../../models/Project": Project: @Project = {}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"logger-sharelatex":
 				err:->
 				log:->
@@ -134,56 +136,16 @@ describe "ProjectGetter", ->
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
 
 
-		it "should call find with the project id when string id is passed", (done)->
-			@ProjectGetter.getProject @project_id, (err, project)=>
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
-				assert.deepEqual @project, project
-				done()
-
-		it "should call find with the project id when object id is passed", (done)->
-			@ProjectGetter.getProject ObjectId(@project_id), (err, project)=>
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
-				assert.deepEqual @project, project
-				done()
-
-		it "should call the db when a mongoose objectid is used", (done)->
-			mongooseID = require('mongoose').Types.ObjectId(@project_id)
-			@ProjectGetter.getProject mongooseID, (err, project)=>
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
-				assert.deepEqual @project, project
-				done()
-
-	describe "populateProjectWithUsers", ->
+	describe "findAllUsersProjects", ->
 		beforeEach ->
-			@users = []
-			@user_lookup = {}
-			for i in [0..4]
-				@users[i] = _id: ObjectId.createPk()
-				@user_lookup[@users[i]._id.toString()] = @users[i]
-			@project =
-				_id: ObjectId.createPk()
-				owner_ref: @users[0]._id
-				readOnly_refs: [@users[1]._id, @users[2]._id]
-				collaberator_refs: [@users[3]._id, @users[4]._id]
-			@db.users.find = (query, callback) =>
-				callback null, [@user_lookup[query._id.toString()]]
-			sinon.spy @db.users, "find"
-			@ProjectGetter.populateProjectWithUsers @project, (err, project)=>
-				@callback err, project
-
-		it "should look up each user", ->
-			for user in @users
-				@db.users.find.calledWith(_id: user._id).should.equal true
-
-		it "should set the owner_ref to the owner", ->
-			@project.owner_ref.should.equal @users[0]
-
-		it "should set the readOnly_refs to the read only users", ->
-			expect(@project.readOnly_refs).to.deep.equal [@users[1], @users[2]]
-
-		it "should set the collaberator_refs to the collaborators", ->
-			expect(@project.collaberator_refs).to.deep.equal [@users[3], @users[4]]
-
-		it "should call the callback", ->
-			assert.deepEqual @callback.args[0][1], @project
-					
+			@fields = {"mock": "fields"}
+			@Project.find = sinon.stub()
+			@Project.find.withArgs({owner_ref: @user_id}, @fields).yields(null, ["mock-owned-projects"])
+			@CollaboratorsHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
+			@CollaboratorsHandler.getProjectsUserIsCollaboratorOf.withArgs(@user_id, @fields).yields(null, ["mock-rw-projects"], ["mock-ro-projects"])
+			@ProjectGetter.findAllUsersProjects @user_id, @fields, @callback
+		
+		it "should call the callback with all the projects", ->
+			@callback
+				.calledWith(null, ["mock-owned-projects"], ["mock-rw-projects"], ["mock-ro-projects"])
+				.should.equal true

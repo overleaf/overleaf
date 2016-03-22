@@ -26,7 +26,8 @@ module.exports = CompileManager =
 			CompileManager._checkIfRecentlyCompiled project_id, user_id, (error, recentlyCompiled) ->
 				return callback(error) if error?
 				if recentlyCompiled
-					return callback new Error("project was recently compiled so not continuing")
+					logger.warn {project_id, user_id}, "project was recently compiled so not continuing"
+					return callback null, "too-recently-compiled", []
 				
 				CompileManager._ensureRootDocumentIsSet project_id, (error) ->
 					return callback(error) if error?
