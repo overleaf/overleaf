@@ -66,6 +66,7 @@ define [
 				$scope.pdf.tooRecentlyCompiled = true
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
+				$scope.shouldShowLogs = false
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
 				# add a query string parameter for the compile group
