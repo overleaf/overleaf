@@ -188,7 +188,7 @@ module.exports = ProjectController =
 			anonymous = false
 		else
 			anonymous = true
-			user_id = 'openUser'
+			user_id = null
 
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, "loading editor"
@@ -197,14 +197,14 @@ module.exports = ProjectController =
 			project: (cb)->
 				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1}, cb
 			user: (cb)->
-				if user_id == 'openUser'
+				if !user_id?
 					cb null, defaultSettingsForAnonymousUser(user_id)
 				else
 					User.findById user_id, (err, user)->
 						logger.log project_id:project_id, user_id:user_id, "got user"
 						cb err, user
 			subscription: (cb)->
-				if user_id == 'openUser'
+				if !user_id?
 					return cb()
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			activate: (cb)->
