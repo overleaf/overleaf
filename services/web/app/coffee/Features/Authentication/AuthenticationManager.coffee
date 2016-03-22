@@ -35,19 +35,3 @@ module.exports = AuthenticationManager =
 					$unset: password: true
 				}, callback)
 
-	getAuthToken: (user_id, callback = (error, auth_token) ->) ->
-		db.users.findOne { _id: ObjectId(user_id.toString()) }, { auth_token : true }, (error, user) =>
-			return callback(error) if error?
-			return callback(new Error("user could not be found: #{user_id}")) if !user?
-			if user.auth_token?
-				callback null, user.auth_token
-			else
-				@_createSecureToken (error, auth_token) ->
-					db.users.update { _id: ObjectId(user_id.toString()) }, { $set : auth_token: auth_token }, (error) ->
-						return callback(error) if error?
-						callback null, auth_token
-		
-	_createSecureToken: (callback = (error, token) ->) ->
-		crypto.randomBytes 48, (error, buffer) ->
-			return callback(error) if error?
-			callback null, buffer.toString("hex")

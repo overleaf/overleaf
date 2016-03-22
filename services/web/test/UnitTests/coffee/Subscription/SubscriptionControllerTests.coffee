@@ -23,8 +23,8 @@ describe "SubscriptionController sanboxed", ->
 		@user = {email:"tom@yahoo.com"}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
 
-		@SecurityManager =
-			getCurrentUser: sinon.stub().callsArgWith(1, null, @user)
+		@AuthenticationController =
+			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
 		@SubscriptionHandler = 
 			createSubscription: sinon.stub().callsArgWith(3)
 			updateSubscription: sinon.stub().callsArgWith(3)
@@ -61,7 +61,7 @@ describe "SubscriptionController sanboxed", ->
 		@SubscriptionDomainHandler = 
 			getDomainLicencePage:sinon.stub()	
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
-			'../../managers/SecurityManager': @SecurityManager
+			'../Authentication/AuthenticationController': @AuthenticationController
 			'./SubscriptionHandler': @SubscriptionHandler
 			"./PlansLocator": @PlansLocator
 			'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder

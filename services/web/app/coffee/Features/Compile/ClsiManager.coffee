@@ -86,6 +86,9 @@ module.exports = ClsiManager =
 							rootResourcePathOverride = path
 
 					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
+					if !rootResourcePath?
+						logger.warn {project_id}, "no root document found, setting to main.tex"
+						rootResourcePath = "main.tex"
 
 					for path, file of files
 						path = path.replace(/^\//, "") # Remove leading /
@@ -94,19 +97,16 @@ module.exports = ClsiManager =
 							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
 							modified: file.created?.getTime()
 
-					if !rootResourcePath?
-						callback new Error("no root document exists")
-					else
-						callback null, {
-							compile:
-								options:
-									compiler: project.compiler
-									timeout: options.timeout
-									imageName: project.imageName
-									draft: !!options.draft
-								rootResourcePath: rootResourcePath
-								resources: resources
-						}
+					callback null, {
+						compile:
+							options:
+								compiler: project.compiler
+								timeout: options.timeout
+								imageName: project.imageName
+								draft: !!options.draft
+							rootResourcePath: rootResourcePath
+							resources: resources
+					}
 
 	wordCount: (project_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->

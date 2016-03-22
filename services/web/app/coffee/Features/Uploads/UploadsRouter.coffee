@@ -1,4 +1,4 @@
-SecurityManager = require('../../managers/SecurityManager')
+AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
 AuthenticationController = require('../Authentication/AuthenticationController')
 ProjectUploadController = require "./ProjectUploadController"
 RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
@@ -16,6 +16,7 @@ module.exports =
 				maxRequests: 200
 				timeInterval: 60 * 30
 			}),
-			SecurityManager.requestCanModifyProject,
+			AuthenticationController.requireLogin(),
+			AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
 			ProjectUploadController.uploadFile
 
