@@ -65,6 +65,12 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
+		res.locals.getUserEmail = ->
+			email = req?.session?.user?.email or ""
+			return email
+		next()
+
+	webRouter.use (req, res, next)->
 		res.locals.formatProjectPublicAccessLevel = (privilegeLevel)->
 			formatedPrivileges = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
 			return formatedPrivileges[privilegeLevel] || "Private"

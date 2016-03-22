@@ -12,6 +12,7 @@ define [
 	"libs/angular-cookies"
 	"libs/passfield"
 	"libs/sixpack"
+	"libs/groove"
 	"libs/angular-sixpack"
 	"libs/ng-tags-input-3.0.0"
 ], () ->
