@@ -59,6 +59,7 @@ define [
 			else if response.status == "failure"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
+				$scope.shouldShowLogs = true
 				fetchLogs()
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.view = 'errors'
