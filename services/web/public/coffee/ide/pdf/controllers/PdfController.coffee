@@ -5,6 +5,8 @@ define [
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		autoCompile = true
+		$scope.pdf.view = 'uncompiled' # uncompiled | pdf | errors
+
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
@@ -12,6 +14,7 @@ define [
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
+			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
@@ -41,19 +44,26 @@ define [
 			$scope.pdf.tooRecentlyCompiled = false
 
 			if response.status == "timedout"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.uncompiled = true
 			else if response.status == "project-too-large"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
 			else if response.status == "failure"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
 				fetchLogs()
 			else if response.status == 'clsi-maintenance'
+				$scope.pdf.view = 'errors'
 				$scope.pdf.clsiMaintenance = true
 			else if response.status == "too-recently-compiled"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.tooRecentlyCompiled = true
 			else if response.status == "success"
+				$scope.pdf.view = 'pdf'
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
 				# add a query string parameter for the compile group
@@ -176,14 +186,13 @@ define [
 					"X-Csrf-Token": window.csrfToken
 			}
 
+		$scope.shouldShowLogs = false
 		$scope.toggleLogs = () ->
-			if !$scope.pdf.view? or $scope.pdf.view == "pdf"
-				$scope.pdf.view = "logs"
-			else
-				$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = !$scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = false
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
