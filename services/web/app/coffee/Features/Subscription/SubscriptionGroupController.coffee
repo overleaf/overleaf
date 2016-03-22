@@ -4,6 +4,7 @@ SubscriptionLocator = require("./SubscriptionLocator")
 ErrorsController = require("../Errors/ErrorController")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 _ = require("underscore")
+async = require("async")
 
 module.exports =
 
@@ -53,19 +54,26 @@ module.exports =
 					subscription: subscription
 
 	renderGroupInvitePage: (req, res)->
-		subscription_id = req.params.subscription_id
+		group_subscription_id = req.params.subscription_id
 		user_id = req.session.user._id
-		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
+		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(group_subscription_id)
 		if !licence?
 			return ErrorsController.notFound(req, res)
-		SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.subscription_id, (err, partOfGroup)->
+		jobs = 
+			partOfGroup: (cb)->
+				SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.group_subscription_id, cb
+			subscription: (cb)->
+				SubscriptionLocator.getUsersSubscription user_id, cb
+		async.series jobs, (err, results)->
+			{partOfGroup, subscription} = results
 			if partOfGroup
 				return res.redirect("/user/subscription/custom_account")
 			else
 				res.render "subscriptions/group/invite",
 					title: "Group Invitation"
-					subscription_id:subscription_id
+					group_subscription_id:group_subscription_id
 					licenceName:licence.name
+					has_personal_subscription: subscription?
 
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id
