@@ -179,6 +179,7 @@ define [
 				.error () ->
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
+					$scope.pdf.view = 'errors'
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
