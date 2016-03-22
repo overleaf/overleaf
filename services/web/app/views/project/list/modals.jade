@@ -183,7 +183,9 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 {{action}} #{translate("projects")}
+		h3(ng-if="action == 'delete'") #{translate("delete_projects")}
+		h3(ng-if="action == 'leave'") #{translate("leave_projects")}
+		h3(ng-if="action == 'delete-and-leave'") #{translate("delete_and_leave_projects")}
 	.modal-body
 		div(ng-show="projectsToDelete.length > 0")
 			p #{translate("about_to_delete_projects")}

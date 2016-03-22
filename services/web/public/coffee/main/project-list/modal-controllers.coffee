@@ -65,11 +65,11 @@ define [
 		$scope.projectsToLeave = projects.filter (project) -> project.accessLevel != "owner"
 
 		if $scope.projectsToLeave.length > 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "Delete & Leave"
+			$scope.action = "delete-and-leave"
 		else if $scope.projectsToLeave.length == 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "Delete"
+			$scope.action = "delete"
 		else
-			$scope.action = "Leave"
+			$scope.action = "leave"
 
 		$scope.delete = () ->
 			$modalInstance.close()
