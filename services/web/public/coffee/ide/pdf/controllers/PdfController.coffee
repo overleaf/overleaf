@@ -64,7 +64,7 @@ define [
 			else if response.status == "too-recently-compiled"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.tooRecentlyCompiled = true
-			else if response.status == "success				"
+			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
