@@ -75,7 +75,8 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 			li(
 				ng-class="{ 'selected': entity.selected }",
 				ng-repeat="entity in deletedDocs | orderBy:'name'",
-				ng-controller="FileTreeEntityController"
+				ng-controller="FileTreeEntityController",
+				ng-show="ui.view == 'track-changes'"
 			)
 				.entity
 					.entity-name(
