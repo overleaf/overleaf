@@ -32,7 +32,7 @@ div.full-size.pdf(ng-controller="PdfController")
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
-			ng-class="{ 'active': (pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled }"
+			ng-class="{ 'active': shouldShowLogs == true }"
 			tooltip="#{translate('logs_and_output_files')}"
 			tooltip-placement="bottom"
 		)
@@ -74,95 +74,10 @@ div.full-size.pdf(ng-controller="PdfController")
 			)
 				i.split-screen
 				i.split-screen
+	// end of toolbar
 
-	.pdf-viewer(ng-show="pdf.url && pdf.view == 'pdf' && !pdf.failure && !pdf.timeout && !pdf.error")
-		div(
-			pdfng
-			ng-if="settings.pdfViewer == 'pdfjs'"
-			pdf-src="pdf.url"
-			key="{{ project_id }}"
-			resize-on="layout:main:resize,layout:pdf:resize"
-			highlights="pdf.highlights"
-			position="pdf.position"
-			dbl-click-callback="syncToCode"
-		)
-
-		iframe(
-			ng-src="{{ pdf.url }}"
-			ng-if="settings.pdfViewer == 'native'"
-		)
-
-	.pdf-uncompiled(ng-show="pdf.uncompiled && !pdf.compiling")
-		| &nbsp;
-		i.fa.fa-level-up.fa-flip-horizontal.fa-2x
-		| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
-
-	.pdf-errors(ng-show="pdf.timedout || pdf.error")
-		.alert.alert-danger(ng-show="pdf.error")
-			strong #{translate("server_error")} 
-			span #{translate("somthing_went_wrong_compiling")}
-		
-
-		.alert.alert-danger(ng-show="pdf.timedout")
-			p
-				strong #{translate("timedout")}. 
-				span #{translate("proj_timed_out_reason")}
-			p
-				a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
-					| #{translate("learn_how_to_make_documents_compile_quickly")}
-
-		.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
-			p(ng-if="project.owner._id == user.id")
-				strong #{translate("upgrade_for_faster_compiles")}
-			p(ng-if="project.owner._id != user.id")
-				strong #{translate("ask_proj_owner_to_upgrade_for_faster_compiles")}
-			p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
-			p Plus:
-			p
-				ul.list-unstyled
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("unlimited_projects")}
-					
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-					
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("full_doc_history")}
-					
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_dropbox")}
-
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_github")}
-
-					li
-						i.fa.fa-check &nbsp;
-						|#{translate("compile_larger_projects")}
-
-			p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
-				a.btn.btn-success.row-spaced-small(
-					href
-					ng-class="buttonClass"
-					sixpack-convert="track_changes_feature_info"
-					ng-click="startFreeTrial('compile-timeout')"
-				) #{translate("start_free_trial")}
-
-	.pdf-errors(ng-show="pdf.projectTooLarge")
-		.alert.alert-danger
-			strong #{translate("project_too_large")} 
-			span #{translate("project_too_large_please_reduce")}
-		
-
-		
-
-
-
-	.pdf-logs(ng-show="(pdf.view == 'logs' || pdf.failure) && !pdf.error && !pdf.timeout && !pdf.uncompiled")
+	// logs view
+	.pdf-logs(ng-show="shouldShowLogs")
 		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
 			| #{translate("no_errors_good_job")}
 
@@ -214,6 +129,90 @@ div.full-size.pdf(ng-controller="PdfController")
 				span(ng-show="pdf.showRawLog") #{translate("hide_raw_logs")}
 
 		pre(ng-bind="pdf.rawLog", ng-show="pdf.showRawLog")
+	
+	
+	// non-log views (pdf and errors)
+	div(ng-show="!shouldShowLogs", ng-switch on="pdf.view")
+		.pdf-uncompiled(ng-switch-when="uncompiled" ng-show="!pdf.compiling")
+			| &nbsp;
+			i.fa.fa-level-up.fa-flip-horizontal.fa-2x
+			| &nbsp;&nbsp;#{translate('click_here_to_preview_pdf')}
+		
+		.pdf-viewer(ng-switch-when="pdf")
+			div(
+				pdfng
+				ng-if="settings.pdfViewer == 'pdfjs'"
+				pdf-src="pdf.url"
+				key="{{ project_id }}"
+				resize-on="layout:main:resize,layout:pdf:resize"
+				highlights="pdf.highlights"
+				position="pdf.position"
+				dbl-click-callback="syncToCode"
+			)
+			iframe(
+				ng-src="{{ pdf.url }}"
+				ng-if="settings.pdfViewer == 'native'"
+			)
+
+		.pdf-errors(ng-switch-when="errors")
+	
+			.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
+				strong #{translate("server_error")} 
+				span #{translate("somthing_went_wrong_compiling")}
+	
+			.alert.alert-danger(ng-show="pdf.clsiMaintenance")
+				strong #{translate("server_error")} 
+				span #{translate("clsi_maintenance")}
+
+			.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
+				strong #{translate("server_error")} 
+				span #{translate("too_recently_compiled")}
+	
+			.alert.alert-danger(ng-show="pdf.timedout")
+				p
+					strong #{translate("timedout")}. 
+					span #{translate("proj_timed_out_reason")}
+				p
+					a.text-info(href="https://www.sharelatex.com/learn/Debugging_Compilation_timeout_errors", target="_blank")
+						| #{translate("learn_how_to_make_documents_compile_quickly")}
+
+			.alert.alert-success(ng-show="pdf.timedout && !hasPremiumCompile")
+				p(ng-if="project.owner._id == user.id")
+					strong #{translate("upgrade_for_faster_compiles")}
+				p(ng-if="project.owner._id != user.id")
+					strong #{translate("ask_proj_owner_to_upgrade_for_faster_compiles")}
+				p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
+				p Plus:
+				p
+					ul.list-unstyled
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("unlimited_projects")}
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("full_doc_history")}
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_dropbox")}
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_github")}
+						li
+							i.fa.fa-check &nbsp;
+							|#{translate("compile_larger_projects")}
+				p(ng-controller="FreeTrialModalController", ng-if="project.owner._id == user.id")
+					a.btn.btn-success.row-spaced-small(
+						href
+						ng-class="buttonClass"
+						sixpack-convert="track_changes_feature_info"
+						ng-click="startFreeTrial('compile-timeout')"
+					) #{translate("start_free_trial")}
+	// // // //
+
+
 
 script(type='text/ng-template', id='clearCacheModalTemplate')
 	.modal-header
