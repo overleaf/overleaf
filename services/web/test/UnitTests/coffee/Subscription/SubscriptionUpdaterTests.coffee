@@ -23,6 +23,14 @@ describe "Subscription Updater", ->
 			freeTrial:{}
 			plan_code:"student_or_something"
 
+		@groupSubscription =
+			admin_id: @adminUser._id
+			members_id: @allUserIds
+			save: sinon.stub().callsArgWith(0)
+			freeTrial:{}
+			plan_code:"group_subscription"
+
+
 		@updateStub = sinon.stub().callsArgWith(2, null)
 		@findAndModifyStub = sinon.stub().callsArgWith(2, null, @subscription)
 		@SubscriptionModel = class
@@ -34,6 +42,7 @@ describe "Subscription Updater", ->
 
 		@SubscriptionLocator = 
 			getUsersSubscription: sinon.stub()
+			getGroupSubscriptionMemberOf:sinon.stub()
 			
 		@Settings = 
 			freeTrialPlanCode: "collaborator"
@@ -58,14 +67,39 @@ describe "Subscription Updater", ->
 
 
 	describe "syncSubscription", ->
-		it "should update the subscription if the user already is admin of one", (done)->
+
+		beforeEach ->
+
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null, @groupSubscription)
 			@SubscriptionUpdater._updateSubscription = sinon.stub().callsArgWith(2)
+
+		it "should update the subscription if the user already is admin of one", (done)->
 			@SubscriptionUpdater._createNewSubscription = sinon.stub()
+
 			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
 				@SubscriptionUpdater._updateSubscription.called.should.equal true
 				@SubscriptionUpdater._updateSubscription.calledWith(@recurlySubscription, @subscription).should.equal true
+				done()
+
+		it "should sync with the group subscription if the recurly subscription is expired", (done)->
+			@recurlySubscription.state = "expired"
+
+			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
+				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
+				@SubscriptionUpdater._updateSubscription.called.should.equal true
+				@SubscriptionUpdater._updateSubscription.calledWith(@recurlySubscription, @subscription).should.equal true
+				@UserFeaturesUpdater.updateFeatures.calledWith(@adminUser._id, @groupSubscription.planCode).should.equal true
+				done()
+
+		it "should not call updateFeatures with group subscription if recurly subscription is not expired", (done)->
+
+			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
+				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
+				@SubscriptionUpdater._updateSubscription.called.should.equal true
+				@SubscriptionUpdater._updateSubscription.calledWith(@recurlySubscription, @subscription).should.equal true
+				@UserFeaturesUpdater.updateFeatures.called.should.equal false
 				done()
 
 

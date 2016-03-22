@@ -16,10 +16,24 @@ module.exports =
 	syncSubscription: (recurlySubscription, adminUser_id, callback) ->
 		self = @
 		logger.log adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "syncSubscription, creating new if subscription does not exist"
-		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
+		jobs =
+			subscription: (cb)->
+				SubscriptionLocator.getUsersSubscription adminUser_id, cb
+			groupSubscription: (cb)->
+				SubscriptionLocator.getGroupSubscriptionMemberOf adminUser_id, cb
+		async.series jobs, (err, results)->
+			{subscription, groupSubscription} = results
 			if subscription?
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does exist"
-				self._updateSubscription recurlySubscription, subscription, callback
+				self._updateSubscription recurlySubscription, subscription, (err)->
+					if err?
+						logger.err err:err, adminUser_id:adminUser_id, "error syncing subscription"
+						return callback(err)
+					if groupSubscription? and recurlySubscription.state == "expired"
+						logger.log  adminUser_id:adminUser_id, "subscription does exist"
+						UserFeaturesUpdater.updateFeatures adminUser_id, groupSubscription.planCode, callback
+					else
+						callback()
 			else
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does not exist, creating a new one"
 				self._createNewSubscription adminUser_id, (err, subscription)->
