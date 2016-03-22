@@ -68,7 +68,9 @@ describe "SubscriptionController sanboxed", ->
 			"./LimitationsManager": @LimitationsManager
 			"../../infrastructure/GeoIpLookup":@GeoIpLookup
 			'./RecurlyWrapper': @RecurlyWrapper
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				warn:->
 			"settings-sharelatex": @settings
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 
@@ -273,7 +275,7 @@ describe "SubscriptionController sanboxed", ->
 	describe "userCustomSubscriptionPage", ->
 		beforeEach (done) ->
 			@res.callback = done
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 			@SubscriptionController.userCustomSubscriptionPage @req, @res
 
 		it "should render the page", (done)->
