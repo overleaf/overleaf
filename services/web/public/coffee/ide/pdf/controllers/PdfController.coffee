@@ -6,7 +6,9 @@ define [
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 
 		autoCompile = true
-		$scope.pdf.view = 'uncompiled'  # uncompiled | pdf | errors
+
+		# pdf.view = uncompiled | pdf | errors
+		$scope.pdf.view = if $scope?.pdf?.url then 'pdf' else 'uncompiled'
 		$scope.shouldShowLogs = false
 
 		$scope.$on "project:joined", () ->
