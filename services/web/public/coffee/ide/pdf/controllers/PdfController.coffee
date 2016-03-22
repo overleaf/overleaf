@@ -137,7 +137,7 @@ define [
 								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
 							proceed()
 						.error (e) ->
-							console.error ">> error", e
+							# it's not an error for the output.blg file to not be present
 							proceed()
 					# # # #
 				.error () ->
