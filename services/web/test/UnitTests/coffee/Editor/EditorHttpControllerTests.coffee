@@ -77,6 +77,17 @@ describe "EditorHttpController", ->
 				@ProjectDeleter.unmarkAsDeletedByExternalSource 
 					.calledWith(@project_id)
 					.should.equal true
+					
+		describe "with an anonymous user", ->
+			beforeEach ->
+				@req.query =
+					user_id: "anonymous-user"
+				@EditorHttpController.joinProject @req, @res
+			
+			it "should pass the user id as null", ->
+				@EditorHttpController._buildJoinProjectView
+					.calledWith(@project_id, null)
+					.should.equal true
 
 	describe "_buildJoinProjectView", ->
 		beforeEach ->

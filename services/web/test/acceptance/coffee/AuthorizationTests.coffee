@@ -56,9 +56,13 @@ try_admin_access = (user, project_id, test, callback) ->
 try_content_access = (user, project_id, test, callback) ->
 	# The real-time service calls this end point to determine the user's 
 	# permissions.
+	if user.id?
+		user_id = user.id
+	else
+		user_id = "anonymous-user"
 	request.post {
 		url: "/project/#{project_id}/join"
-		qs: {user_id: user.id}
+		qs: {user_id}
 		auth:
 			user: settings.apis.web.user
 			pass: settings.apis.web.pass

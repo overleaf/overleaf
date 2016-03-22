@@ -15,6 +15,8 @@ module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
 		project_id = req.params.Project_id
 		user_id = req.query.user_id
+		if user_id == "anonymous-user"
+			user_id = null
 		logger.log {user_id, project_id}, "join project request"
 		Metrics.inc "editor.join-project"
 		EditorHttpController._buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
