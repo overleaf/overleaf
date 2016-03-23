@@ -28,7 +28,7 @@ define [], () ->
 
 		# Ignore single letter commands since auto complete is moot then.
 		commandRegex: /\\([a-zA-Z][a-zA-Z]+)/
-		
+
 		nextCommand: () ->
 			i = @doc.search(@commandRegex)
 			if i == -1
@@ -123,4 +123,3 @@ define [], () ->
 					completionBeforeCursor: completionBeforeCursor
 					completionAfterCursor: completionAfterCursor
 				}
-

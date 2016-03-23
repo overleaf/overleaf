@@ -4,7 +4,13 @@ define [
 	"libs/bib-log-parser"
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
+
 		autoCompile = true
+
+		# pdf.view = uncompiled | pdf | errors
+		$scope.pdf.view = if $scope?.pdf?.url then 'pdf' else 'uncompiled'
+		$scope.shouldShowLogs = false
+
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
@@ -12,7 +18,8 @@ define [
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
-			$scope.pdf.error = true
+			$scope.pdf.view = 'errors'
+			$scope.pdf.renderingError = true
 
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
 		$scope.$watch "draft", (new_value, old_value) ->
@@ -37,17 +44,32 @@ define [
 			$scope.pdf.uncompiled = false
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
+			$scope.pdf.clsiMaintenance = false
+			$scope.pdf.tooRecentlyCompiled = false
 
 			if response.status == "timedout"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.uncompiled = true
 			else if response.status == "project-too-large"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
 			else if response.status == "failure"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
+				$scope.shouldShowLogs = true
 				fetchLogs()
+			else if response.status == 'clsi-maintenance'
+				$scope.pdf.view = 'errors'
+				$scope.pdf.clsiMaintenance = true
+			else if response.status == "too-recently-compiled"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.tooRecentlyCompiled = true
 			else if response.status == "success"
+				$scope.pdf.view = 'pdf'
+				$scope.shouldShowLogs = false
 				# define the base url
 				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
 				# add a query string parameter for the compile group
@@ -116,7 +138,7 @@ define [
 								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
 							proceed()
 						.error (e) ->
-							console.error ">> error", e
+							# it's not an error for the output.blg file to not be present
 							proceed()
 					# # # #
 				.error () ->
@@ -158,6 +180,7 @@ define [
 				.error () ->
 					$scope.pdf.compiling = false
 					$scope.pdf.error = true
+					$scope.pdf.view = 'errors'
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
@@ -171,13 +194,11 @@ define [
 			}
 
 		$scope.toggleLogs = () ->
-			if !$scope.pdf.view? or $scope.pdf.view == "pdf"
-				$scope.pdf.view = "logs"
-			else
-				$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = !$scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = false
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
