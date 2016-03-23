@@ -43,6 +43,8 @@ module.exports = FileStoreHandler =
 			uri: "#{@_buildUrl(project_id, file_id)}#{queryString}"
 			timeout:fiveMinsInMs
 		readStream = request(opts)
+		readStream.on "error", (err) ->
+			logger.err {err, project_id, file_id, query}, "error in file stream"
 		callback(null, readStream)
 
 	deleteFile: (project_id, file_id, callback)->
