@@ -3,7 +3,6 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
 Project = require("../../models/Project").Project
-Errors = require("../../errors")
 logger = require("logger-sharelatex")
 
 module.exports = ProjectGetter =

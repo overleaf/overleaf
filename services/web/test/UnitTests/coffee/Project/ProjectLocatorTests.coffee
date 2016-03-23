@@ -5,7 +5,7 @@ should = chai.should()
 modulePath = "../../../../app/js/Features/Project/ProjectLocator"
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
-Errors = require "../../../../app/js/errors"
+Errors = require "../../../../app/js/Features/Errors/Errors"
 expect = require("chai").expect
 Project = class Project
 

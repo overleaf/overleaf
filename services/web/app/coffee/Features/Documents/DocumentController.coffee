@@ -1,5 +1,4 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
-Errors = require "../../errors"
 logger = require("logger-sharelatex")
 
 module.exports =

@@ -10,7 +10,6 @@ metrics = require("metrics-sharelatex")
 metrics.initialize("web")
 metrics.memory.monitor(logger)
 Server = require("./app/js/infrastructure/Server")
-Errors = require "./app/js/errors"
 
 argv = require("optimist")
 	.options("user", {alias : "u", description : "Run the server with permissions of the specified user"})

@@ -7,7 +7,7 @@ modulePath = "../../../../app/js/Features/Project/ProjectEntityHandler"
 SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongoose").Types.ObjectId
 tk = require 'timekeeper'
-Errors = require "../../../../app/js/errors"
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe 'ProjectEntityHandler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'

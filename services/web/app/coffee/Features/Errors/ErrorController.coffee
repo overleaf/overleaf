@@ -14,7 +14,7 @@ module.exports = ErrorController =
 	
 	handleError: (error, req, res, next) ->
 		if error?.code is 'EBADCSRFTOKEN'
-			logger.log err: error,url:req.url, method:req.method, user:req?.sesson?.user, "invalid csrf"
+			logger.warn err: error,url:req.url, method:req.method, user:req?.sesson?.user, "invalid csrf"
 			res.sendStatus(403)
 			return
 		if error instanceof Errors.NotFoundError

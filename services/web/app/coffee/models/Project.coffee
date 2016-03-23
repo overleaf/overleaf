@@ -5,7 +5,7 @@ FolderSchema = require('./Folder.js').FolderSchema
 logger = require('logger-sharelatex')
 sanitize = require('sanitizer')
 concreteObjectId = require('mongoose').Types.ObjectId
-Errors  = require "../errors"
+Errors  = require "../Features/Errors/Errors"
 
 
 Schema = mongoose.Schema

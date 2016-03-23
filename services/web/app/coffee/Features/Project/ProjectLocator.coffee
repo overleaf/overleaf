@@ -1,6 +1,6 @@
 Project = require('../../models/Project').Project
 ProjectGetter = require("./ProjectGetter")
-Errors = require "../../errors"
+Errors = require "../Errors/Errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
