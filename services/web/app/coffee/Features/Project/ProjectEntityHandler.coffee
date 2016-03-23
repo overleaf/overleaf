@@ -22,7 +22,9 @@ module.exports = ProjectEntityHandler =
 		folders = {}
 		processFolder = (basePath, folder) ->
 			folders[basePath] = folder
-			processFolder path.join(basePath, childFolder.name), childFolder for childFolder in folder.folders
+			for childFolder in (folder.folders or [])
+				if childFolder.name?
+					processFolder path.join(basePath, childFolder.name), childFolder
 
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
 			return callback(err) if err?
@@ -43,11 +45,11 @@ module.exports = ProjectEntityHandler =
 			for docContent in docContentsArray
 				docContents[docContent._id] = docContent
 
-			ProjectEntityHandler.getAllFolders project_id, (error, folders) ->
+			ProjectEntityHandler.getAllFolders project_id, (error, folders = {}) ->
 				return callback(error) if error?
 				docs = {}
 				for folderPath, folder of folders
-					for doc in folder.docs
+					for doc in (folder.docs or [])
 						content = docContents[doc._id.toString()]
 						if content?
 							docs[path.join(folderPath, doc.name)] = {
@@ -61,11 +63,11 @@ module.exports = ProjectEntityHandler =
 
 	getAllFiles: (project_id, callback) ->
 		logger.log project_id:project_id, "getting all files for project"
-		@getAllFolders project_id, (err, folders) ->
+		@getAllFolders project_id, (err, folders = {}) ->
 			return callback(err) if err?
 			files = {}
 			for folderPath, folder of folders
-				for file in folder.fileRefs
+				for file in (folder.fileRefs or [])
 					if file?
 						files[path.join(folderPath, file.name)] = file
 			callback null, files

@@ -20,13 +20,13 @@ module.exports = ReferencesHandler =
 		ids = []
 
 		_process = (folder) ->
-			folder.docs.forEach (doc) ->
+			(folder.docs or []).forEach (doc) ->
 				if doc?.name?.match(/^.*\.bib$/)
 					ids.push(doc._id)
-			folder.folders.forEach (folder) ->
+			(folder.folders or []).forEach (folder) ->
 				_process(folder)
 
-		project.rootFolder.forEach (rootFolder) ->
+		(project.rootFolder or []).forEach (rootFolder) ->
 			_process(rootFolder)
 
 		return ids
