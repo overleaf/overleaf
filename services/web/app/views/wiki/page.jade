@@ -11,8 +11,7 @@ block content
 					| !{contents.content}
 				.col-xs-9.page(ng-controller="SearchWikiController")
 					.row
-						
-						form.project-search.form-horizontal.col-md-12(role="form")
+						form.project-search.form-horizontal.col-md-9(role="form")
 							.form-group.has-feedback.has-feedback-left.col-md-12
 								input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
 								i.fa.fa-search.form-control-feedback-left
@@ -21,6 +20,9 @@ block content
 									style="cursor: pointer;",
 									ng-show="searchQueryText.length > 0"
 								)
+						.col-md-2
+							a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_page")}
+
 					.row
 						.col-md-12(ng-cloak)
 							ul.list-unstyled
