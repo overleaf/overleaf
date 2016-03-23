@@ -242,7 +242,6 @@ module.exports = ProjectEntityHandler =
 			return folder.length != 0
 
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
-			return callback(err) if err?
 			if path == '/'
 				logger.log project_id: project._id, "mkdir is only trying to make path of / so sending back root folder"
 				return callback(null, [], project.rootFolder[0])
@@ -256,11 +255,9 @@ module.exports = ProjectEntityHandler =
 					parentFolder_id = parentFolder._id
 				builtUpPath = "#{builtUpPath}/#{folderName}"
 				projectLocator.findElementByPath project, builtUpPath, (err, foundFolder)=>
-					return callback(err) if err?
 					if !foundFolder?
 						logger.log path:path, project_id:project._id, folderName:folderName, "making folder from mkdirp"
 						@addFolder project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
-							return callback(err) if err?
 							newFolder.parentFolder_id = parentFolder_id
 							previousFolders.push newFolder
 							callback null, previousFolders
