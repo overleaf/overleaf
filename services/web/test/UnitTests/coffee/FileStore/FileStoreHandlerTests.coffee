@@ -19,7 +19,7 @@ describe "FileStoreHandler", ->
 			on: (type, cb)-> 
 				if type == "end"
 					cb()
-		@readStream = {my:"readStream"}
+		@readStream = {my:"readStream", on: sinon.stub()}
 		@request = sinon.stub()
 		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
 		@handler = SandboxedModule.require modulePath, requires:
@@ -128,6 +128,12 @@ describe "FileStoreHandler", ->
 			@handler.getFileStream @project_id, @file_id, {}, (err, stream)=>
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
+		
+		it "should add an error handler", (done) ->
+			@handler.getFileStream @project_id, @file_id, {}, (err, stream)=>
+				stream.on.calledWith("error").should.equal true
+				done()
+			
 
 	describe "copyFile", ->
 
