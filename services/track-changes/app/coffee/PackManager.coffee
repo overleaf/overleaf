@@ -161,7 +161,10 @@ module.exports = PackManager =
 				return false if toVersion? and pack.v > toVersion
 				return true
 			neededIds = (pack._id for pack in indexPacks when packInRange(pack, fromVersion, toVersion))
-			PackManager.fetchPacksIfNeeded project_id, doc_id, neededIds, callback
+			if neededIds.length
+				PackManager.fetchPacksIfNeeded project_id, doc_id, neededIds, callback
+			else
+				callback()
 
 	fetchPacksIfNeeded: (project_id, doc_id, pack_ids, callback) ->
 		db.docHistory.find {_id: {$in: (ObjectId(id) for id in pack_ids)}}, {_id:1}, (err, loadedPacks) ->
@@ -169,12 +172,13 @@ module.exports = PackManager =
 			allPackIds = (id.toString() for id in pack_ids)
 			loadedPackIds = (pack._id.toString() for pack in loadedPacks)
 			packIdsToFetch = _.difference allPackIds, loadedPackIds
-			logger.log {loadedPackIds, allPackIds, packIdsToFetch}, "analysed packs"
+			logger.log {project_id, doc_id, loadedPackIds, allPackIds, packIdsToFetch}, "analysed packs"
+			return callback() if packIdsToFetch.length is 0
 			async.eachLimit packIdsToFetch, 4, (pack_id, cb) ->
 				MongoAWS.unArchivePack project_id, doc_id, pack_id, cb
 			, (err) ->
 				return callback(err) if err?
-				logger.log "done unarchiving"
+				logger.log {project_id, doc_id}, "done unarchiving"
 				callback()
 
 	# Retrieve all changes across a project
