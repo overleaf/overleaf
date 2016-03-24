@@ -9,29 +9,32 @@ block content
 			.row
 				.col-xs-3.contents(ng-non-bindable)
 					| !{contents.content}
-				.col-xs-9.page(ng-controller="SearchWikiController")
-					.row
-						form.project-search.form-horizontal.col-md-9(role="form")
-							.form-group.has-feedback.has-feedback-left.col-md-12
-								input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
-								i.fa.fa-search.form-control-feedback-left
-								i.fa.fa-times.form-control-feedback(
-									ng-click="clearSearchText()",
-									style="cursor: pointer;",
-									ng-show="searchQueryText.length > 0"
-								)
-						.col-md-2
-							a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_page")}
 
-					.row
-						.col-md-12(ng-cloak)
-							ul.list-unstyled
-								li(ng-repeat='hit in hits')
-									.searchResult.thumbnail
-										.row
-											.col-md-12
-												a(ng-href='{{hit.url}}')
-													span(ng-bind-html='hit.name')
+				.col-xs-9.page
+					- if(typeof(settings.algolia) != "undefined" && typeof(settings.algolia.indexes) != "undefined" && typeof(settings.algolia.indexes.wiki) != "undefined")
+						span(ng-controller="SearchWikiController")
+							.row
+								form.project-search.form-horizontal.col-md-9(role="form")
+									.form-group.has-feedback.has-feedback-left.col-md-12
+										input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
+										i.fa.fa-search.form-control-feedback-left
+										i.fa.fa-times.form-control-feedback(
+											ng-click="clearSearchText()",
+											style="cursor: pointer;",
+											ng-show="searchQueryText.length > 0"
+										)
+								.col-md-2
+									a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_page")}
+
+							.row
+								.col-md-12(ng-cloak)
+									ul.list-unstyled
+										li(ng-repeat='hit in hits')
+											.searchResult.thumbnail
+												.row
+													.col-md-12
+														a(ng-href='{{hit.url}}')
+															span(ng-bind-html='hit.name')
 
 					.card(ng-non-bindable)
 						.page-header

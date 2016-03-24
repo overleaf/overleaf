@@ -3,9 +3,10 @@ define [
 ], (App) ->
 	
 	App.factory "algoliawiki", ->
-		client = new AlgoliaSearch("SK53GL4JLY", "e398f35d3074fde57ca6d6c88d8be37c")
-		index = client.initIndex("lean-wiki-index")
-		return index
+		if window.sharelatex?.algolia? and window.sharelatex.algolia?.indexes?.wiki?
+			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
+			index = client.initIndex(window.sharelatex.algolia?.indexes?.wiki)
+			return index
 
 	App.controller "SearchWikiController", ($scope, algoliawiki, _) ->
 		algolia = algoliawiki
