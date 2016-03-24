@@ -20,6 +20,7 @@ describe "FileHandler", ->
 			deleteDirectory: sinon.stub()
 			sendStream: sinon.stub()
 			insertFile: sinon.stub()
+			directorySize: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
 			deleteFile: sinon.stub()
@@ -191,4 +192,14 @@ describe "FileHandler", ->
 				path.should.equal @formattedStubbedPath
 				@FileConverter.convert.calledWith(@stubbedPath, @format).should.equal true
 				@LocalFileWriter.deleteFile.calledWith(@stubbedPath).should.equal true
+				done()
+
+	describe "getDirectorySize", ->
+
+		beforeEach ->
+			@PersistorManager.directorySize.callsArgWith(2)
+
+		it "should call the filestore manager to get directory size", (done)->
+			@handler.getDirectorySize @bucket, @key, =>
+				@PersistorManager.directorySize.calledWith(@bucket, @key).should.equal true
 				done()

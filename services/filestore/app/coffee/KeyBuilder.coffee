@@ -42,4 +42,9 @@ module.exports =
 		opts = req.query
 		next()
 
+	publicProjectKey: (req, res, next)->
+		{project_id} = req.params
+		req.project_id = project_id
+		req.bucket = settings.filestore.stores.user_files
+		next()
 	

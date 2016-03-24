@@ -18,6 +18,10 @@ describe "FSPersistorManagerTests", ->
       unlink:sinon.stub()
       rmdir:sinon.stub()
       exists:sinon.stub()
+      readdir:sinon.stub()
+      openSync:sinon.stub()
+      fstatSync:sinon.stub()
+      closeSync:sinon.stub()
     @Rimraf = sinon.stub()
     @LocalFileWriter =
       writeStream: sinon.stub()
@@ -207,4 +211,19 @@ describe "FSPersistorManagerTests", ->
       @Fs.exists.callsArgWith(1,false)
       @FSPersistorManager.checkIfFileExists @location, @name1, (err,exists) =>
         exists.should.be.false
+        done()
+
+  describe "directorySize", ->
+
+    it "should propogate the error", (done) ->
+      @Fs.readdir.callsArgWith(1, @error)
+      @FSPersistorManager.directorySize @location, @name1, (err, totalsize) =>
+        err.should.equal @error
+        done()
+
+    it "should sum directory files size", (done) ->
+      @Fs.readdir.callsArgWith(1, null, [ {'file1'}, {'file2'} ])
+      @Fs.fstatSync.returns({size : 1024})
+      @FSPersistorManager.directorySize @location, @name1, (err, totalsize) =>
+        expect(totalsize).to.equal 2048
         done()

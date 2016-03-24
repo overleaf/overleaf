@@ -87,3 +87,10 @@ module.exports =
 			if err?
 				return callback(err)
 			LocalFileWriter.writeStream fileStream, key, callback
+
+	getDirectorySize: (bucket, project_id, callback)->
+		logger.log bucket:bucket, project_id:project_id, "getting project size"
+		PersistorManager.directorySize bucket, project_id, (err, size)->
+			if err?
+				logger.err  bucket:bucket, project_id:project_id, "error getting size"
+			callback err, size

@@ -256,3 +256,16 @@ describe "S3PersistorManagerTests", ->
 			@S3PersistorManager.checkIfFileExists @bucketName, @key, (err)=>
 				err.should.equal @error
 				done()
+
+	describe "directorySize", ->
+
+		beforeEach ->
+			@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+
+		it "should sum directory files size", (done) ->
+			data =
+				Contents: [ {Size: 1024}, {Size: 2048} ]
+			@stubbedKnoxClient.list.callsArgWith(1, null, data)
+			@S3PersistorManager.directorySize @bucketName, @key, (err, totalSize)=>
+				totalSize.should.equal 3072
+				done()

@@ -137,3 +137,19 @@ module.exports =
 			exists = res.statusCode == 200
 			logger.log bucketName:bucketName, key:key, exists:exists, "checked if file exsists in s3"
 			callback(err, exists)
+
+	directorySize:(bucketName, key, callback)->
+		logger.log bucketName:bucketName, key:key, "get project size in s3"
+		s3Client = knox.createClient
+			key: settings.filestore.s3.key
+			secret: settings.filestore.s3.secret
+			bucket: bucketName
+		s3Client.list prefix:key, (err, data)->
+			if err?
+				logger.err err:err, bucketName:bucketName, key:key, "something went wrong listing prefix in aws"
+				return callback(err)
+			totalSize = 0
+			_.each data.Contents, (entry)->
+				totalSize += entry.Size
+			logger.log totalSize:totalSize, "total size"
+			callback null, totalSize
