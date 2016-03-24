@@ -204,10 +204,12 @@ module.exports = PackManager =
 			return callback(err) if err?
 			if not pack?
 				MongoAWS.unArchivePack project_id, doc_id, pack_id, callback
-			else if pack.expiresAt?
+			else if pack.expiresAt? and not pack.temporary
 				# we only need to touch the TTL on the listing of changes in the project
 				# because diffs on individual documents are always done after that
 				PackManager.increaseTTL pack, callback
+				# only do this for cached packs, not temporary ones to avoid older packs
+				# being kept longer than newer ones (which messes up the last update version)
 			else
 				callback(null, pack)
 
