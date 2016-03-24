@@ -92,6 +92,7 @@ module.exports = PackManager =
 				end_ts: last.meta.end_ts
 			v: first.v
 			v_end: last.v
+			temporary: temporary
 		if temporary
 			newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
