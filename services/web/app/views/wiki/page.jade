@@ -23,20 +23,16 @@ block content
 											style="cursor: pointer;",
 											ng-show="searchQueryText.length > 0"
 										)
-								.col-md-2
+								.col-md-3.text-right
 									a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_page")}
 
 							.row
 								.col-md-12(ng-cloak)
-									ul.list-unstyled
-										li(ng-repeat='hit in hits')
-											.searchResult.thumbnail
-												.row
-													.col-md-12
-														a(ng-href='{{hit.url}}')
-															span(ng-bind-html='hit.name')
+									a(ng-href='{{hit.url}}',ng-repeat='hit in hits').search-result.card.card-thin
+										span(ng-bind-html='hit.name')
+										div.search-result-content(ng-show="hit.content != ''", ng-bind-html='hit.content')
 
-					.card(ng-non-bindable)
+					.card.row-spaced(ng-non-bindable)
 						.page-header
 							h1 #{title}
 							

@@ -26,10 +26,22 @@ define [
 		buildHitViewModel = (hit)->
 			page_underscored = hit.pageName.replace(/\s/g,'_')
 			section_underscored = hit.sectionName.replace(/\s/g,'_')
+			content = hit._highlightResult.content.value
+			# Replace many new lines
+			content = content.replace(/\n\n+/g, "\n\n")
+			lines = content.split("\n")
+			# Only show the lines that have a highlighted match
+			matching_lines = []
+			for line in lines
+				if !line.match(/^\[edit\]/)
+					content += line + "\n"
+					if line.match(/<em>/)
+						matching_lines.push line
+			content = matching_lines.join("\n...\n")
 			result =
 				name : hit._highlightResult.pageName.value + " - " + hit._highlightResult.sectionName.value
 				url :"/learn/#{page_underscored}##{section_underscored}"
-			console.log result
+				content: content
 			return result
 
 		updateHits = (hits)->

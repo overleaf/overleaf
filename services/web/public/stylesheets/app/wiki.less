@@ -104,9 +104,27 @@
 
 	/*]]>*/
 
-	.thumbnail {
-		margin-bottom:0px;
-		margin-top:5px;
+	a.search-result {
+		display: block;
+		margin-top: @line-height-computed / 2;
+		.search-result-content {
+			margin-top: @line-height-computed / 4;
+			white-space: pre-wrap;
+			font-size: 0.8em;
+			color: @gray-dark;
+			em {
+				font-weight: bold;
+			}
+		}
+		
+		&:hover {
+			text-decoration: none;
+			.search-result-content {
+				color: @gray-darker;
+				
+			}
+			box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+		}
 	}
 
 }
