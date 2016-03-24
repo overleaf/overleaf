@@ -16,7 +16,7 @@ define [
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
 	"main/contact-us"
-	"main/templates"
+	"main/learn"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"

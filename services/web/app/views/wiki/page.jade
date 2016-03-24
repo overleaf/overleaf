@@ -24,7 +24,7 @@ block content
 											ng-show="searchQueryText.length > 0"
 										)
 								.col-md-3.text-right
-									a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("missing_page")}
+									a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("suggest_new_doc")}
 
 							.row
 								.col-md-12(ng-cloak)
@@ -37,3 +37,32 @@ block content
 							h1 #{title}
 							
 						| !{page.content}
+
+
+
+
+	script(type="text/ng-template", id="missingWikiPageModal")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="close()"
+			) &times;
+			h3 #{translate("suggest_new_doc")}
+		.modal-body.contact-us-modal
+			span(ng-show="sent == false")
+				label.desc
+					| #{translate("email")} (#{translate("optional")})
+				.form-group
+					input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+				label.desc
+					| #{translate("suggestion")}
+				.form-group
+					textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+			span(ng-show="sent")
+				p #{translate("request_sent_thank_you")}
+		.modal-footer
+			button.btn.btn-default(ng-click="close()") 
+				span #{translate("dismiss")}
+			button.btn-success.btn(type='submit', ng-disabled="sending", ng-click="contactUs()") #{translate("contact_us")}
+

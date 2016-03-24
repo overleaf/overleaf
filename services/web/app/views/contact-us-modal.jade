@@ -5,26 +5,26 @@ script(type='text/ng-template', id='supportModalTemplate')
 			data-dismiss="modal"
 			ng-click="close()"
 		) &times;
-		h3 Contact Us
+		h3 #{translate("contact_us")}
 	.modal-body.contact-us-modal
 		span(ng-show="sent == false")
 			label
-				| Subject
+				| #{translate("subject")}
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
 			label.desc
-				| Email
+				| #{translate("email")}
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
 			label#title12.desc
-				| Project URL (optional)
+				| #{translate("project_url")} (#{translate("optional")})
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.project_url", tabindex='3', onkeyup='')
 			label.desc
-				| Message
+				| #{translate("suggestion")}
 			.form-group
 				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', maxlength='255', tabindex='4', onkeyup='')
 			.form-group.text-center
-				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value='Get in Touch')
+				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value='#{translate("contact_us")}')
 		span(ng-show="sent")
-			p Request Sent, Thank you.
+			p #{translate("request_sent_thank_you")}
