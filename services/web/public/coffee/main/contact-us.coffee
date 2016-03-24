@@ -20,11 +20,13 @@ define [
 				return
 			$scope.sending = true
 			ticketNumber = Math.floor((1 + Math.random()) * 0x10000).toString(32)
+			message = $scope.form.message
+			if $scope.form.project_url
+				message	= "#{message}\n\n project_url = #{$scope.form.project_url}" 
 			params =
 				email: $scope.form.email
-				message: $scope.form.message or ""
+				message: message or ""
 				subject: $scope.form.subject + " - [#{ticketNumber}]"
-				about : $scope.form.project_url or ""
 				labels: "support"
 
 			Groove.createTicket params, (err, json)->

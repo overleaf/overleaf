@@ -53,7 +53,7 @@ define [
 			if !query? or query.length == 0
 				updateHits []
 				return
-
+				
 			algolia.search query, (err, response)->
 				if response.hits.length == 0
 					updateHits []
