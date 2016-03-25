@@ -10,8 +10,7 @@
   "author": "",
   "license": "Proprietary",
   "dependencies": {
-    "coffee-script": "^1.10.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master"
+    "coffee-script": "^1.10.0"
   },
   "devDependencies": {
 		"nock": "0.15.2",
