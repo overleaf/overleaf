@@ -1,0 +1,28 @@
+{
+  "name": "access-token-encryptor-sharelatex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Proprietary",
+  "dependencies": {
+    "coffee-script": "^1.10.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#master"
+  },
+  "devDependencies": {
+		"nock": "0.15.2",
+		"sandboxed-module": "",
+		"sinon": "",
+		"chai": "",
+		"grunt-contrib-clean": "~0.5.0",
+		"grunt-mocha-test": "~0.10.2",
+		"grunt-contrib-coffee": "~0.10.1",
+		"grunt": "~0.4.5",
+		"grunt-execute": "~0.2.1",
+		"bunyan": "~0.22.3",
+		"grunt-bunyan": "~0.5.0"
+	}
+}
