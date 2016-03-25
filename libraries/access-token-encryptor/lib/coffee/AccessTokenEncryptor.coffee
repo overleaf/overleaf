@@ -1,37 +1,38 @@
 crypto = require('crypto')
 
-settings = require('settings-sharelatex')
-
-cipherLabel = settings.cipherLabel
-throw Error("cipherLabel must not contain a colon (:)") if cipherLabel?.match(/:/)
-
-cipherPassword = settings.cipherPasswords[settings.cipherLabel]
-throw Error("cipherPassword not set") if not cipherPassword?
-throw Error("cipherPassword too short") if cipherPassword.length < 16
-
 ALGORITHM = 'aes-256-ctr'
 
 keyFn = (password, salt, callback)->
 	return crypto.pbkdf2(password, salt, 10000, 64, callback)
 
-module.exports =
+class AccessTokenEncryptor
 
-	encryptJson: (json, callback)->
+	constructor: (settings) ->
+
+		@settings = settings
+		@cipherLabel = @settings.cipherLabel
+		throw Error("cipherLabel must not contain a colon (:)") if @cipherLabel?.match(/:/)
+
+		@cipherPassword = @settings.cipherPasswords[@cipherLabel]
+		throw Error("cipherPassword not set") if not @cipherPassword?
+		throw Error("cipherPassword too short") if @cipherPassword.length < 16
+
+	encryptJson: (json, callback) ->
 		string = JSON.stringify(json)
 		salt = crypto.randomBytes(16)
-		keyFn cipherPassword, salt, (err, key)->
+		keyFn @cipherPassword, salt, (err, key) =>
 			if err?
 				logger.err err:err, "error getting Fn key"
 				return callback(err)
 			cipher = crypto.createCipher(ALGORITHM,  key)
 			crypted  = cipher.update(string, 'utf8', 'base64') + cipher.final('base64')
-			callback(null, cipherLabel + ":" + salt.toString('hex') + ":" + crypted)
+			callback(null, @cipherLabel + ":" + salt.toString('hex') + ":" + crypted)
 
-	decryptToJson: (encryptedJson, callback)->
+	decryptToJson: (encryptedJson, callback) ->
 		[label, salt, cipherText] = encryptedJson.split(':', 3)
-		password = settings.cipherPasswords[label]
+		password = @settings.cipherPasswords[label]
 		return callback(new Error("invalid password")) if not password? or password.length < 16
-		keyFn password, new Buffer(salt, 'hex'), (err, key)->
+		keyFn password, new Buffer(salt, 'hex'), (err, key) =>
 			if err?
 				logger.err err:err, "error getting Fn key"
 				return callback(err)
@@ -42,3 +43,5 @@ module.exports =
 			catch e
 				return callback(new Error("error decrypting token"))
 			callback(null, json)
+
+module.exports = AccessTokenEncryptor
