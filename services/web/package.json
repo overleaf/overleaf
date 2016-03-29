@@ -39,6 +39,7 @@
     "multer": "^0.1.8",
     "node-uuid": "1.4.1",
     "nodemailer": "2.1.0",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-ses-transport": "^1.3.0",
     "optimist": "0.6.1",
     "redback": "0.4.0",
