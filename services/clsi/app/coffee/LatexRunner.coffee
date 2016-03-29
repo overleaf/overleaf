@@ -26,6 +26,9 @@ module.exports = LatexRunner =
 			command = LatexRunner._lualatexCommand mainFile
 		else
 			return callback new Error("unknown compiler: #{compiler}")
+		
+		if Settings.clsi?.strace
+			command = ["strace", "-o", "strace-#{Date.now()}", "-ff"].concat(command)
 
 		CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
 			return callback(error) if error?
