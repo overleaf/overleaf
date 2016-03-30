@@ -2,6 +2,9 @@ CompileController = require "./app/js/CompileController"
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 logger.initialize("clsi")
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 smokeTest = require "smoke-test-sharelatex"
 ContentTypeMapper = require "./app/js/ContentTypeMapper"
 
@@ -62,6 +65,11 @@ app.get "/project/:project_id/output/*", (req, res, next) ->
 	else
 		req.url = "/#{req.params.project_id}/#{req.params[0]}"
 	staticServer(req, res, next)
+
+app.get "/oops", (req, res, next) ->
+	logger.error {err: "hello"}, "test error"
+	res.send "error\n"
+
 
 app.get "/status", (req, res, next) ->
 	res.send "CLSI is alive\n"
