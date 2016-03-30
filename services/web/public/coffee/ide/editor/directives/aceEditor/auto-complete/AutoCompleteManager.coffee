@@ -7,7 +7,7 @@ define [
 	Range = ace.require("ace/range").Range
 
 	getLastCommandFragment = (lineUpToCursor) ->
-		if m = lineUpToCursor.match(/(\\[^\\ ]+)$/)
+		if m = lineUpToCursor.match(/(\\[^\\]+)$/)
 			return m[1]
 		else
 			return null
@@ -47,7 +47,7 @@ define [
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?){([^}]*,)?(\w*)/)
+						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]?(?:\[.*])?){([^}]*,)?(\w*)/)
 						if citeMatch
 							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
 							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
