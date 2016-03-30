@@ -35,7 +35,7 @@ module.exports = OutputCacheManager =
 		OutputCacheManager.expireOutputFiles cacheRoot, {keep: buildId}
 
 		# Archive logs in background
-		if Settings.clsi?.archive_logs
+		if Settings.clsi?.archive_logs or Settings.clsi?.strace
 			OutputCacheManager.archiveLogs outputFiles, compileDir, (err) ->
 				if err?
 					logger.warn err:err, "erroring archiving log files"
@@ -153,6 +153,6 @@ module.exports = OutputCacheManager =
 	_checkIfShouldArchive: (src, callback = (err, shouldCopy) ->) ->
 		if Path.basename(src).match(/^strace/)
 			return callback(null, true)
-		if Path.basename(src).match(/^output\.(?!pdf)/)
+		if Settings.clsi?.archive_logs and Path.basename(src) in ["output.log", "output.blg"]
 			return callback(null, true)
 		return callback(null, false)

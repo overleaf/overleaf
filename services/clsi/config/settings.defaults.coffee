@@ -17,6 +17,8 @@ module.exports =
 		synctexBaseDir: (project_id) -> Path.join(@compilesDir, project_id)
 
 	# clsi:
+	# 	strace: true
+	# 	archive_logs: true
 	# 	commandRunner: "docker-runner-sharelatex"
 	# 	docker:
 	# 		image: "quay.io/sharelatex/texlive-full"
