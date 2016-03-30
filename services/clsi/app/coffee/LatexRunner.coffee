@@ -28,7 +28,7 @@ module.exports = LatexRunner =
 			return callback new Error("unknown compiler: #{compiler}")
 		
 		if Settings.clsi?.strace
-			command = ["strace", "-o", "strace-#{Date.now()}", "-ff"].concat(command)
+			command = ["strace", "-o", "strace", "-ff"].concat(command)
 
 		CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
 			return callback(error) if error?
