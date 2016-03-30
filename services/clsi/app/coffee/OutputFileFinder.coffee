@@ -29,7 +29,7 @@ module.exports = OutputFileFinder =
 			_callback(error, fileList)
 			_callback = () ->
 				
-		args = [directory, "-name", ".cache", "-prune", "-o", "-type", "f", "-print"]
+		args = [directory, "-name", ".*", "-prune", "-o", "-type", "f", "-print"]
 		logger.log args: args, "running find command"
 
 		proc = spawn("find", args)
