@@ -7,7 +7,7 @@ path = require "path"
 describe "ResourceWriter", ->
 	beforeEach ->
 		@ResourceWriter = SandboxedModule.require modulePath, requires:
-			"fs": @fs = {}
+			"fs": @fs = { mkdir: sinon.stub().callsArg(1) }
 			"wrench": @wrench = {}
 			"./UrlCache" : @UrlCache = {}
 			"mkdirp" : @mkdirp = sinon.stub().callsArg(1)

@@ -9,12 +9,25 @@ logger = require "logger-sharelatex"
 
 module.exports = ResourceWriter =
 	syncResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
-		@_removeExtraneousFiles resources, basePath, (error) =>
+		@_createDirectory basePath, (error) =>
 			return callback(error) if error?
-			jobs = for resource in resources
-				do (resource) =>
-					(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
-			async.parallelLimit jobs, 5, callback
+			@_removeExtraneousFiles resources, basePath, (error) =>
+				return callback(error) if error?
+				jobs = for resource in resources
+					do (resource) =>
+						(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
+				async.parallelLimit jobs, 5, callback
+
+	_createDirectory: (basePath, callback = (error) ->) ->
+		fs.mkdir basePath, (err) ->
+			if err?
+				if err.code is 'EEXIST'
+					return callback()
+				else
+					logger.log {err: err, dir:basePath}, "error creating directory"
+					return callback(err)
+			else
+				return callback()
 
 	_removeExtraneousFiles: (resources, basePath, _callback = (error) ->) ->
 		timer = new Metrics.Timer("unlink-output-files")
