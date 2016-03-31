@@ -29,10 +29,10 @@ module.exports = ForbidSymlinks = (staticFn, root, options) ->
 		# check that the requested path is not a symlink
 		fs.realpath requestedFsPath, (err, realFsPath)->
 			if err?
-				logger.warn err:err, requestedFsPath:requestedFsPath, realFsPath:realFsPath, path: req.params[0], project_id: req.params.project_id, "error checking file access"
 				if err.code == 'ENOENT'
 					return res.sendStatus(404)
 				else
+					logger.error err:err, requestedFsPath:requestedFsPath, realFsPath:realFsPath, path: req.params[0], project_id: req.params.project_id, "error checking file access"
 					return res.sendStatus(500)
 			else if requestedFsPath != realFsPath
 				logger.warn requestedFsPath:requestedFsPath, realFsPath:realFsPath, path: req.params[0], project_id: req.params.project_id, "trying to access a different file (symlink), aborting"
