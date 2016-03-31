@@ -3,9 +3,9 @@ package uk.ac.ic.wlgitbridge.application.config;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
+import uk.ac.ic.wlgitbridge.util.Instance;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,6 +16,19 @@ import java.io.Reader;
  */
 public class Config implements JSONSource {
 
+    static Config asSanitised(Config config) {
+        return new Config(
+                config.port,
+                config.rootGitDirectory,
+                config.username,
+                "<password>",
+                config.apiBaseURL,
+                config.postbackURL,
+                config.serviceName,
+                Oauth2.asSanitised(config.oauth2)
+        );
+    }
+
     private int port;
     private String rootGitDirectory;
     private String username;
@@ -25,7 +38,8 @@ public class Config implements JSONSource {
     private String serviceName;
     private Oauth2 oauth2;
 
-    public Config(String configFilePath) throws ConfigFileException, IOException {
+    public Config(String configFilePath) throws ConfigFileException,
+                                                IOException {
         this(new FileReader(configFilePath));
     }
 
@@ -33,14 +47,38 @@ public class Config implements JSONSource {
         fromJSON(new Gson().fromJson(reader, JsonElement.class));
     }
 
+    public Config(int port,
+                  String rootGitDirectory,
+                  String username,
+                  String password,
+                  String apiBaseURL,
+                  String postbackURL,
+                  String serviceName,
+                  Oauth2 oauth2) {
+        this.port = port;
+        this.rootGitDirectory = rootGitDirectory;
+        this.username = username;
+        this.password = password;
+        this.apiBaseURL = apiBaseURL;
+        this.postbackURL = postbackURL;
+        this.serviceName = serviceName;
+        this.oauth2 = oauth2;
+    }
+
     @Override
     public void fromJSON(JsonElement json) {
         JsonObject configObject = json.getAsJsonObject();
         port = getElement(configObject, "port").getAsInt();
-        rootGitDirectory = getElement(configObject, "rootGitDirectory").getAsString();
+        rootGitDirectory = getElement(
+                configObject,
+                "rootGitDirectory"
+        ).getAsString();
         username = getOptionalString(configObject, "username");
         password = getOptionalString(configObject, "password");
-        String apiBaseURL = getElement(configObject, "apiBaseUrl").getAsString();
+        String apiBaseURL = getElement(
+                configObject,
+                "apiBaseUrl"
+        ).getAsString();
         if (!apiBaseURL.endsWith("/")) {
             apiBaseURL += "/";
         }
@@ -51,6 +89,10 @@ public class Config implements JSONSource {
             postbackURL += "/";
         }
         oauth2 = new Gson().fromJson(configObject.get("oauth2"), Oauth2.class);
+    }
+
+    public String getSanitisedString() {
+        return Instance.prettyGson.toJson(Config.asSanitised(this));
     }
 
     public int getPort() {

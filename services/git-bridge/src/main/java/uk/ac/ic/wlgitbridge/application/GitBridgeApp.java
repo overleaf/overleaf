@@ -36,7 +36,7 @@ public class GitBridgeApp implements Runnable {
         try {
             parseArguments(args);
             loadConfigFile();
-            Log.info("Config file loaded");
+            Log.info("Config loaded: {}", config.getSanitisedString());
         } catch (ArgsException e) {
             printUsage();
             System.exit(EXIT_CODE_FAILED);

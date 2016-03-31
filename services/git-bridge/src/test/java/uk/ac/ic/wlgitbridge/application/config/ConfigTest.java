@@ -66,4 +66,42 @@ public class ConfigTest {
         config.getOauth2();
     }
 
+    @Test
+    public void asSanitised() throws Exception {
+        Reader reader = new StringReader("{\n" +
+                "    \"port\": 80,\n" +
+                "    \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
+                "    \"apiBaseUrl\": \"http://127.0.0.1:60000/api/v0\",\n" +
+                "    \"username\": \"username\",\n" +
+                "    \"password\": \"my super secret password\",\n" +
+                "    \"postbackBaseUrl\": \"http://127.0.0.1\",\n" +
+                "    \"serviceName\": \"Overleaf\",\n" +
+                "    \"oauth2\": {\n" +
+                "        \"oauth2ClientID\": \"my oauth2 client id\",\n" +
+                "        \"oauth2ClientSecret\": \"my oauth2 client secret\",\n" +
+                "        \"oauth2Server\": \"https://www.overleaf.com\"\n" +
+                "    }\n" +
+                "}\n");
+        Config config = new Config(reader);
+        String expected = "{\n" +
+                "  \"port\": 80,\n" +
+                "  \"rootGitDirectory\": \"/var/wlgb/git\",\n" +
+                "  \"username\": \"username\",\n" +
+                "  \"password\": \"<password>\",\n" +
+                "  \"apiBaseURL\": \"http://127.0.0.1:60000/api/v0/\",\n" +
+                "  \"postbackURL\": \"http://127.0.0.1/\",\n" +
+                "  \"serviceName\": \"Overleaf\",\n" +
+                "  \"oauth2\": {\n" +
+                "    \"oauth2ClientID\": \"<oauth2ClientID>\",\n" +
+                "    \"oauth2ClientSecret\": \"<oauth2ClientSecret>\",\n" +
+                "    \"oauth2Server\": \"https://www.overleaf.com\"\n" +
+                "  }\n" +
+                "}";
+        assertEquals(
+                "sanitised config did not hide sensitive fields",
+                expected,
+                config.getSanitisedString()
+        );
+    }
+
 }

@@ -9,7 +9,12 @@ import uk.ac.ic.wlgitbridge.util.Util;
 public class FailedConnectionException extends ServiceMayNotContinueException {
 
     public FailedConnectionException() {
-        super(Util.getServiceName() + " server not available. Please try again later.");
+        super(Util.getServiceName() +
+                " server not available. Please try again later.");
+    }
+
+    public FailedConnectionException(Throwable cause) {
+        super(cause);
     }
 
 }

@@ -77,6 +77,10 @@ public class Log {
         logger.error(msg);
     }
 
+    public static void error(String msg, Object... args) {
+        logger.error(msg, args);
+    }
+
     public static void error(String msg, Throwable t) {
         logger.error(msg, t);
     }

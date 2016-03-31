@@ -9,6 +9,7 @@ import uk.ac.ic.wlgitbridge.data.model.db.sql.update.create.CreateURLIndexStoreS
 import uk.ac.ic.wlgitbridge.data.model.db.sql.update.delete.DeleteFilesForProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.data.model.db.sql.update.insert.AddURLIndexSQLUpdate;
 import uk.ac.ic.wlgitbridge.data.model.db.sql.update.insert.SetProjectSQLUpdate;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.File;
 import java.sql.*;
@@ -23,7 +24,12 @@ public class SQLiteWLDatabase {
 
     public SQLiteWLDatabase(File rootGitDirectory) throws SQLException, ClassNotFoundException {
         File databaseFile = new File(rootGitDirectory, "/.wlgb/wlgb.db");
-        databaseFile.getParentFile().mkdirs();
+        File dotWlgbDir = databaseFile.getParentFile();
+        if (!dotWlgbDir.exists()) {
+            if (!dotWlgbDir.mkdirs()) {
+                Log.error("{} directory didn't exist, and unable to create. Check your permissions", dotWlgbDir.getAbsolutePath());
+            }
+        }
         Class.forName("org.sqlite.JDBC");
         connection = DriverManager.getConnection("jdbc:sqlite:" + databaseFile.getAbsolutePath());
         createTables();

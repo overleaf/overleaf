@@ -27,4 +27,12 @@ public class Oauth2 {
         return oauth2Server;
     }
 
+    public static Oauth2 asSanitised(Oauth2 oauth2) {
+        return new Oauth2(
+                "<oauth2ClientID>",
+                "<oauth2ClientSecret>",
+                oauth2.oauth2Server
+        );
+    }
+
 }

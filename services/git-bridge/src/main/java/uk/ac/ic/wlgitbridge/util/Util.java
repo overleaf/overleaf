@@ -90,7 +90,7 @@ public class Util {
     }
 
     private static void println(PrintStream ps, String ln) {
-        ps.println(getStringBuilder().append(ln));
+        Log.info(ln);
     }
 
     public static void sout(String ln) {
@@ -108,10 +108,6 @@ public class Util {
         return sb;
     }
 
-    public static void sout() {
-        sout("");
-    }
-
     public static void serr() {
         serr("");
     }
@@ -121,8 +117,7 @@ public class Util {
     }
 
     public static void printStackTrace(Throwable t) {
-        serr();
-        t.printStackTrace();
+        Log.warn("Exception", t);
     }
 
     public static void deleteDirectory(File directory) {

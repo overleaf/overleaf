@@ -1,16 +1,13 @@
 package uk.ac.ic.wlgitbridge.snapshot.base;
 
 import com.google.api.client.http.*;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.AsyncHttpClient;
-import com.ning.http.client.Response;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Instance;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -47,22 +44,32 @@ public abstract class Request<T extends Result> {
     public T getResult() throws FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
-            Util.sout(response.getStatusCode() + " " + response.getStatusMessage() + " (" + response.getHeaders().getContentLength() + "B) -> " + url);
-            JsonElement json = new Gson().fromJson(response.parseAsString(), JsonElement.class);
+            Log.info(
+                    "{} {} ({}B) -> " + url,
+                    response.getStatusCode(),
+                    response.getStatusMessage(),
+                    response.getHeaders().getContentLength()
+            );
+            JsonElement json = Instance.gson.fromJson(
+                    response.parseAsString(),
+                    JsonElement.class
+            );
             return parseResponse(json);
         } catch (InterruptedException e) {
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            int statusCode = ((HttpResponseException) cause).getStatusCode();
-            if (cause instanceof HttpResponseException && (statusCode == HttpServletResponse.SC_UNAUTHORIZED || statusCode == HttpServletResponse.SC_FORBIDDEN)) {
+            if (cause instanceof HttpResponseException &&
+                    (((HttpResponseException) cause).getStatusCode() ==
+                            HttpServletResponse.SC_UNAUTHORIZED ||
+                    ((HttpResponseException) cause).getStatusCode() ==
+                            HttpServletResponse.SC_FORBIDDEN)) {
                 throw new ForbiddenException();
             } else {
-                throw new FailedConnectionException();
+                throw new FailedConnectionException(cause);
             }
         } catch (IOException e) {
-            Util.serr("Failed to parse JSON");
-            e.printStackTrace();
+            Log.error("Failed to parse JSON.", e);
             throw new FailedConnectionException();
         }
     }
@@ -73,7 +80,8 @@ public abstract class Request<T extends Result> {
 
     }
 
-    protected abstract T parseResponse(JsonElement json) throws FailedConnectionException;
+    protected abstract
+    T parseResponse(JsonElement json) throws FailedConnectionException;
 
     protected String getPostBody() {
         return null;
@@ -82,7 +90,9 @@ public abstract class Request<T extends Result> {
     private void performGetRequest() {
         Util.sout("GET -> " + url);
         try {
-            HttpRequest request = Instance.httpRequestFactory.buildGetRequest(new GenericUrl(url));
+            HttpRequest request = Instance.httpRequestFactory.buildGetRequest(
+                    new GenericUrl(url)
+            );
             request(request);
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,7 +103,13 @@ public abstract class Request<T extends Result> {
     private void performPostRequest() {
         Util.sout("POST -> " + url);
         try {
-            HttpRequest request = Instance.httpRequestFactory.buildPostRequest(new GenericUrl(url), new ByteArrayContent("application/json", getPostBody().getBytes()));
+            HttpRequest request = Instance.httpRequestFactory.buildPostRequest(
+                    new GenericUrl(url),
+                    new ByteArrayContent(
+                            "application/json",
+                            getPostBody().getBytes()
+                    )
+            );
             request(request);
         } catch (IOException e) {
             e.printStackTrace();
