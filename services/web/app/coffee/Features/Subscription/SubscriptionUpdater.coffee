@@ -88,7 +88,7 @@ module.exports = SubscriptionUpdater =
 				logger.err err:err, user_id:user, "error getting subscription or group for _setUsersMinimumFeatures"
 				return callback(err)
 			{subscription, groupSubscription} = results
-			if subscription? and subscription.planCode?
+			if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
 				logger.log user_id:user_id, "using users subscription plan code for features"
 				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
 			else if groupSubscription? and groupSubscription.planCode?
