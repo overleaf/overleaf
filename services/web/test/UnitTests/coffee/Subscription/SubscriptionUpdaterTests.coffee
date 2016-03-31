@@ -18,14 +18,14 @@ describe "SubscriptionUpdater", ->
 		@allUserIds = ["13213", "dsadas", "djsaiud89"]
 		@subscription = subscription =
 			admin_id: @adminUser._id
-			members_id: @allUserIds
+			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
 			planCode:"student_or_something"
 
 		@groupSubscription =
 			admin_id: @adminUser._id
-			members_id: @allUserIds
+			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
 			planCode:"group_subscription"

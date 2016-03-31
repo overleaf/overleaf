@@ -71,7 +71,7 @@ module.exports = SubscriptionUpdater =
 			subscription.groupPlan = true
 			subscription.membersLimit = plan.membersLimit
 		subscription.save ->
-			allIds = _.union subscription.members_id, [subscription.admin_id]
+			allIds = _.union subscription.member_ids, [subscription.admin_id]
 			jobs = allIds.map (user_id)->
 				return (cb)->
 					SubscriptionUpdater._setUsersMinimumFeatures user_id, cb
