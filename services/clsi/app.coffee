@@ -36,6 +36,12 @@ app.use (req, res, next) ->
 	res.setTimeout TIMEOUT
 	next()
 
+app.param 'project_id', (req, res, next, project_id) ->
+	if project_id?.match /^[a-zA-Z0-9_-]+$/
+		next()
+	else
+		next new Error("invalid project id")
+
 app.post   "/project/:project_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
 app.delete "/project/:project_id", CompileController.clearCache
 
