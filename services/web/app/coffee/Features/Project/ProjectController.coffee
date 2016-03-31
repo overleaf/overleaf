@@ -240,7 +240,7 @@ module.exports = ProjectController =
 					bodyClasses: ["editor"]
 					project_id : project._id
 					user : {
-						id    : user.id
+						id    : user_id
 						email : user.email
 						first_name : user.first_name
 						last_name  : user.last_name

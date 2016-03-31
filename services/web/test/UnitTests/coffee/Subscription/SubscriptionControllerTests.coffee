@@ -99,7 +99,7 @@ describe "SubscriptionController sanboxed", ->
 		describe "with a user with a subscription", ->
 			beforeEach (done) ->
 				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
-				@user.id = @activeRecurlySubscription.account.account_code
+				@user._id = @activeRecurlySubscription.account.account_code
 				@res.callback = done
 				@SubscriptionController.editBillingDetailsPage(@req, @res)
 
@@ -110,7 +110,7 @@ describe "SubscriptionController sanboxed", ->
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
 				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
-				@res.renderedVariables.user.id.should.equal @user.id
+				@res.renderedVariables.user.id.should.equal @user._id
 
 		describe "with a user without subscription", ->
 			beforeEach (done) ->
@@ -137,14 +137,6 @@ describe "SubscriptionController sanboxed", ->
 				it "should render the new subscription page", (done)->
 					@res.render = (page, opts)=>
 						page.should.equal "subscriptions/new"
-						done()
-					@SubscriptionController.paymentPage @req, @res
-
-				it "should set the successURL", (done)->
-					@req.session._csrf = @csrfToken = "mock-csrf-token"
-					@res.render = (page, opts)=>
-						url = JSON.parse(opts.subscriptionFormOptions).successURL
-						url.should.equal("#{@settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
 						done()
 					@SubscriptionController.paymentPage @req, @res
 

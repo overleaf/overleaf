@@ -48,7 +48,7 @@ module.exports = SubscriptionController =
 							subscription:
 								plan_code : req.query.planCode
 								currency: currency
-							account_code: user.id
+							account_code: user._id
 						}, (error, signature) ->
 							return next(error) if error?
 							res.render "subscriptions/new",
@@ -64,19 +64,7 @@ module.exports = SubscriptionController =
 								showCouponField: req.query.scf
 								showVatField: req.query.svf
 								couponCode:      req.query.cc or ""
-								subscriptionFormOptions: JSON.stringify
-									acceptedCards: ['discover', 'mastercard', 'visa']
-									target      : "#subscribeForm"
-									signature   : signature
-									planCode    : req.query.planCode
-									successURL  : "#{Settings.siteUrl}/user/subscription/create?_csrf=#{req.session._csrf}"
-									accountCode : user.id
-									enableCoupons: true
-									acceptPaypal: true
-									account     :
-										firstName : user.first_name
-										lastName  : user.last_name
-										email     : user.email
+
 
 
 	userSubscriptionPage: (req, res, next) ->
@@ -128,7 +116,7 @@ module.exports = SubscriptionController =
 					res.redirect "/user/subscription"
 				else
 					RecurlyWrapper.sign {
-						account_code: user.id
+						account_code: user._id
 					}, (error, signature) ->
 						return next(error) if error?
 						res.render "subscriptions/edit-billing-details",
@@ -139,7 +127,7 @@ module.exports = SubscriptionController =
 							signature  : signature
 							successURL : "#{Settings.siteUrl}/user/subscription/update"
 							user       :
-								id : user.id
+								id : user._id
 
 	createSubscription: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->

@@ -108,7 +108,7 @@ block content
 														option(value="10") 10
 														option(value="11") 11
 														option(value="12") 12
-											.col-md-3
+											.col-md-4
 												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
 													select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
 														option(value="", disabled, selected) Year
