@@ -62,18 +62,36 @@ module.exports = CompileManager =
 			_callback = () ->
 
 		compileDir = Path.join(Settings.path.compilesDir, project_id)
-		proc = child_process.spawn "rm", ["-r", compileDir]
 
-		proc.on "error", callback
+		CompileManager._checkDirectory compileDir, (err, exists) ->
+			return callback(err) if err?
+			return callback() if not exists # skip removal if no directory present
 
-		stderr = ""
-		proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
+			proc = child_process.spawn "rm", ["-r", compileDir]
 
-		proc.on "close", (code) ->
-			if code == 0
-				return callback(null)
+			proc.on "error", callback
+
+			stderr = ""
+			proc.stderr.on "data", (chunk) -> stderr += chunk.toString()
+
+			proc.on "close", (code) ->
+				if code == 0
+					return callback(null)
+				else
+					return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))
+
+	_checkDirectory: (compileDir, callback = (error, exists) ->) ->
+		fs.lstat compileDir, (err, stats) ->
+			if err?.code is 'ENOENT'
+				return callback(null, false) #  directory does not exist
+			else if err?
+				logger.err {dir: compileDir, err:err}, "error on stat of project directory for removal"
+				return callback(err)
+			else if not stats?.isDirectory()
+				logger.err {dir: compileDir, stats:stats}, "bad project directory for removal"
+				return callback new Error("project directory is not directory")
 			else
-				return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))
+				callback(null, true) # directory exists
 
 	syncFromCode: (project_id, file_name, line, column, callback = (error, pdfPositions) ->) ->
 		# If LaTeX was run in a virtual environment, the file path that synctex expects

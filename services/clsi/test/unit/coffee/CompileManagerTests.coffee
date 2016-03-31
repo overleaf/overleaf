@@ -99,6 +99,7 @@ describe "CompileManager", ->
 		describe "succesfully", ->
 			beforeEach ->
 				@Settings.compileDir = "compiles"
+				@fs.lstat = sinon.stub().callsArgWith(1, null,{isDirectory: ()->true})
 				@proc = new EventEmitter()
 				@proc.stdout = new EventEmitter()
 				@proc.stderr = new EventEmitter()
@@ -117,6 +118,7 @@ describe "CompileManager", ->
 		describe "with a non-success status code", ->
 			beforeEach ->
 				@Settings.compileDir = "compiles"
+				@fs.lstat = sinon.stub().callsArgWith(1, null,{isDirectory: ()->true})
 				@proc = new EventEmitter()
 				@proc.stdout = new EventEmitter()
 				@proc.stderr = new EventEmitter()
