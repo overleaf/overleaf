@@ -161,7 +161,6 @@ module.exports = CompileManager =
 			catch err
 				logger.err err:err, command:command, directory:directory, project_id:project_id, "error reading word count output"
 				return callback(err)
-			console.log "rooooof"
 			callback null, CompileManager._parseWordcountFromOutput(stdout)
 
 	_parseWordcountFromOutput: (output) ->
