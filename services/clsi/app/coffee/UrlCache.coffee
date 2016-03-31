@@ -87,7 +87,11 @@ module.exports = UrlCache =
 				callback null
 
 	_deleteUrlCacheFromDisk: (project_id, url, callback = (error) ->) ->
-		fs.unlink UrlCache._cacheFilePathForUrl(project_id, url), callback
+		fs.unlink UrlCache._cacheFilePathForUrl(project_id, url), (error) ->
+			if error? and error.code != 'ENOENT' # no error if the file isn't present
+				return callback(error)
+			else
+				return callback()
 
 	_findUrlDetails: (project_id, url, callback = (error, urlDetails) ->) ->
 		db.UrlCache.find(where: { url: url, project_id: project_id })
