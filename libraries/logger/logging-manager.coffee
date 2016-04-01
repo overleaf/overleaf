@@ -12,16 +12,27 @@ module.exports = Logger =
 		@raven = new raven.Client(sentry_dsn, options)
 
 	captureException: (attributes, message, level) ->
-		error = attributes.err or attributes.error or message
-		req = attributes.req
+		# handle case of logger.error "message"
+		if typeof attributes is 'string'
+			attributes = {err: attributes}
+		# extract any error object
+		error = attributes.err or attributes.error
+		# use our log message as the title when available
+		if not error?
+			error = {message: message} if typeof message is 'string'
+		else if message?
+			error.exception = error.message
+			error.message = message
+		# report the error
 		if error?
+			# capture attributes and use *_id objects as tags
 			tags = {}
 			extra = {}
-			# capture attributes and use *_id objects as tags
 			for key, value of attributes
 				tags[key] = value if key.match(/_id/) and typeof value == 'string'
 				extra[key] = value
 			# capture req object if available
+			req = attributes.req
 			if req?
 				extra.req =
 					method: req.method
