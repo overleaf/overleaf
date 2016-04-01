@@ -36,6 +36,8 @@ UserSchema = new Schema
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 							templates:     { type:Boolean, default: Settings.defaultFeatures.templates }
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
+							mendeley:    { type:Boolean, default: Settings.defaultFeatures.mendeley }
+							zotero:    { type:Boolean, default: Settings.defaultFeatures.zotero }
 						}
 	featureSwitches	  : {
 		pdfng: { type: Boolean }
@@ -54,6 +56,10 @@ UserSchema = new Schema
 					# For example, a user signing up directly for a paid plan
 					# has this set to true, despite never having had a free trial
 					hadFreeTrial: {type: Boolean, default: false}
+	refProviders: {
+		mendeley: Boolean  # coerce the refProviders values to Booleans
+		zotero: Boolean
+	}
 
 conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
 

@@ -249,6 +249,7 @@ module.exports = ProjectController =
 							freeTrial: {allowed: allowedFreeTrial}
 						featureSwitches: user.featureSwitches
 						features: user.features
+						refProviders: user.refProviders
 					}
 					userSettings: {
 						mode  : user.ace.mode
