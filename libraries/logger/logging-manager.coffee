@@ -14,15 +14,14 @@ module.exports = Logger =
 	captureException: (attributes, message, level) ->
 		# handle case of logger.error "message"
 		if typeof attributes is 'string'
-			attributes = {err: attributes}
+			attributes = {err: new Error(attributes)}
 		# extract any error object
 		error = attributes.err or attributes.error
-		# use our log message as the title when available
+		# include our log message in the error report
 		if not error?
 			error = {message: message} if typeof message is 'string'
 		else if message?
-			error.exception = error.message
-			error.message = message
+			attributes.description = message
 		# report the error
 		if error?
 			# capture attributes and use *_id objects as tags
