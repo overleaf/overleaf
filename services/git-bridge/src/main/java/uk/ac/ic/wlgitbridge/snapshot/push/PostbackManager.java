@@ -22,7 +22,7 @@ public class PostbackManager {
         postbackContentsTable = new HashMap<String, PostbackPromise>();
     }
 
-    public int getVersionID(String projectName) throws SnapshotPostException {
+    public int waitForVersionIdOrThrow(String projectName) throws SnapshotPostException {
         try {
             return postbackContentsTable.get(projectName).waitForPostback();
         } catch (SnapshotPostException e) {

@@ -612,7 +612,12 @@ public class WLGitBridgeIntegrationTest {
                 "\t\"username\": \"\",\n" +
                 "\t\"password\": \"\",\n" +
                 "\t\"postbackBaseUrl\": \"http://127.0.0.1:" + port + "\",\n" +
-                "\t\"serviceName\": \"Overleaf\"\n" +
+                "\t\"serviceName\": \"Overleaf\"\n," +
+                "    \"oauth2\": {\n" +
+                "        \"oauth2ClientID\": \"clientID\",\n" +
+                "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n" +
+                "        \"oauth2Server\": \"https://www.overleaf.com\"\n" +
+                "    }\n" +
                 "}\n");
         writer.close();
         return config.getAbsolutePath();

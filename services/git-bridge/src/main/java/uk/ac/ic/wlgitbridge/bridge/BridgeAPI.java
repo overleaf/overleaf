@@ -17,6 +17,7 @@ import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushRequest;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.IOException;
@@ -45,7 +46,8 @@ public class BridgeAPI {
         mainProjectLock.unlockForProject(projectName);
     }
 
-    public boolean repositoryExists(Credential oauth2, String projectName) throws ServiceMayNotContinueException, ForbiddenException {
+    public boolean repositoryExists(Credential oauth2, String projectName)
+            throws ServiceMayNotContinueException, ForbiddenException {
         lockForProject(projectName);
         GetDocRequest getDocRequest = new GetDocRequest(oauth2, projectName);
         getDocRequest.request();
@@ -63,28 +65,71 @@ public class BridgeAPI {
         return true;
     }
 
-    public void getWritableRepositories(Credential oauth2, String projectName, Repository repository) throws IOException, SnapshotPostException, GitAPIException, ForbiddenException {
+    public void getWritableRepositories(Credential oauth2,
+                                        String projectName,
+                                        Repository repository)
+            throws IOException,
+                   SnapshotPostException,
+                   GitAPIException,
+                   ForbiddenException {
         Util.sout("Fetching project: " + projectName);
         dataStore.updateProjectWithName(oauth2, projectName, repository);
     }
 
-    public void putDirectoryContentsToProjectWithName(Credential oauth2, String projectName, RawDirectory directoryContents, RawDirectory oldDirectoryContents, String hostname) throws SnapshotPostException, IOException, ForbiddenException {
+    public void
+    putDirectoryContentsToProjectWithName(Credential oauth2,
+                                          String projectName,
+                                          RawDirectory directoryContents,
+                                          RawDirectory oldDirectoryContents,
+                                          String hostname)
+            throws SnapshotPostException, IOException, ForbiddenException {
         mainProjectLock.lockForProject(projectName);
         CandidateSnapshot candidate = null;
         try {
-            Util.sout("Pushing project: " + projectName);
+            Log.info("[Project {}] Pushing", projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
-            candidate = dataStore.createCandidateSnapshotFromProjectWithContents(projectName, directoryContents, oldDirectoryContents);
-            PushRequest pushRequest = new PushRequest(oauth2, candidate, postbackKey);
+            Log.info(
+                    "[Project {}] Created postback key: {}",
+                    projectName,
+                    postbackKey
+            );
+            candidate =
+                    dataStore.createCandidateSnapshotFromProjectWithContents(
+                            projectName,
+                            directoryContents,
+                            oldDirectoryContents
+                    );
+            PushRequest pushRequest = new PushRequest(
+                    oauth2,
+                    candidate,
+                    postbackKey
+            );
             pushRequest.request();
             PushResult result = pushRequest.getResult();
             if (result.wasSuccessful()) {
-                dataStore.approveSnapshot(postbackManager.getVersionID(projectName), candidate);
+                Log.info(
+                        "[Project {}] Push to Overleaf successful",
+                        projectName
+                );
+                Log.info("[Project {}] Waiting for postback...", projectName);
+                int versionID =
+                        postbackManager.waitForVersionIdOrThrow(projectName);
+                Log.info(
+                        "[Project {}] Got version ID for push: {}",
+                        projectName,
+                        versionID
+                );
+                dataStore.approveSnapshot(versionID, candidate);
+                Log.info(
+                        "[Project {}] Approved version ID: {}",
+                        projectName,
+                        versionID
+                );
             } else {
                 throw new OutOfDateException();
             }
         } catch (SevereSnapshotPostException e) {
-            e.printStackTrace();
+            Log.warn("Failed to put to Overleaf", e);
             throw e;
         } catch (SnapshotPostException e) {
             throw e;
@@ -93,22 +138,37 @@ public class BridgeAPI {
         } finally {
             if (candidate != null) {
                 candidate.deleteServletFiles();
+            } else {
+                Log.error(
+                        "Candidate snapshot was null: this should never happen."
+                );
             }
             mainProjectLock.unlockForProject(projectName);
         }
     }
 
-    public void checkPostbackKey(String projectName, String postbackKey) throws InvalidPostbackKeyException {
+    public void checkPostbackKey(String projectName, String postbackKey)
+            throws InvalidPostbackKeyException {
         postbackManager.checkPostbackKey(projectName, postbackKey);
     }
 
     /* Called by postback thread. */
-    public void postbackReceivedSuccessfully(String projectName, String postbackKey, int versionID) throws UnexpectedPostbackException {
+    public void postbackReceivedSuccessfully(String projectName,
+                                             String postbackKey,
+                                             int versionID)
+            throws UnexpectedPostbackException {
         postbackManager.postVersionIDForProject(projectName, versionID, postbackKey);
     }
 
-    public void postbackReceivedWithException(String projectName, String postbackKey, SnapshotPostException exception) throws UnexpectedPostbackException {
-        postbackManager.postExceptionForProject(projectName, exception, postbackKey);
+    public void postbackReceivedWithException(String projectName,
+                                              String postbackKey,
+                                              SnapshotPostException exception)
+            throws UnexpectedPostbackException {
+        postbackManager.postExceptionForProject(
+                projectName,
+                exception,
+                postbackKey
+        );
     }
 
 }
