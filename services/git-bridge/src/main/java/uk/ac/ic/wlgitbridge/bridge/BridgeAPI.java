@@ -7,8 +7,8 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLock;
 import uk.ac.ic.wlgitbridge.data.ShutdownHook;
-import uk.ac.ic.wlgitbridge.data.model.DataStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
+import uk.ac.ic.wlgitbridge.data.model.DataStore;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
@@ -18,7 +18,6 @@ import uk.ac.ic.wlgitbridge.snapshot.push.PushRequest;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
-import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.IOException;
 
@@ -72,7 +71,7 @@ public class BridgeAPI {
                    SnapshotPostException,
                    GitAPIException,
                    ForbiddenException {
-        Util.sout("Fetching project: " + projectName);
+        Log.info("[{}] Fetching", projectName);
         dataStore.updateProjectWithName(oauth2, projectName, repository);
     }
 
@@ -86,19 +85,24 @@ public class BridgeAPI {
         mainProjectLock.lockForProject(projectName);
         CandidateSnapshot candidate = null;
         try {
-            Log.info("[Project {}] Pushing", projectName);
+            Log.info("[{}] Pushing", projectName);
             String postbackKey = postbackManager.makeKeyForProject(projectName);
             Log.info(
-                    "[Project {}] Created postback key: {}",
+                    "[{}] Created postback key: {}",
                     projectName,
                     postbackKey
             );
             candidate =
-                    dataStore.createCandidateSnapshotFromProjectWithContents(
+                    dataStore.createCandidateSnapshot(
                             projectName,
                             directoryContents,
                             oldDirectoryContents
                     );
+            Log.info(
+                    "[{}] Candindate snapshot created: {}",
+                    projectName,
+                    candidate
+            );
             PushRequest pushRequest = new PushRequest(
                     oauth2,
                     candidate,
@@ -108,39 +112,52 @@ public class BridgeAPI {
             PushResult result = pushRequest.getResult();
             if (result.wasSuccessful()) {
                 Log.info(
-                        "[Project {}] Push to Overleaf successful",
+                        "[{}] Push to Overleaf successful",
                         projectName
                 );
-                Log.info("[Project {}] Waiting for postback...", projectName);
+                Log.info("[{}] Waiting for postback...", projectName);
                 int versionID =
                         postbackManager.waitForVersionIdOrThrow(projectName);
                 Log.info(
-                        "[Project {}] Got version ID for push: {}",
+                        "[{}] Got version ID for push: {}",
                         projectName,
                         versionID
                 );
                 dataStore.approveSnapshot(versionID, candidate);
                 Log.info(
-                        "[Project {}] Approved version ID: {}",
+                        "[{}] Approved version ID: {}",
                         projectName,
                         versionID
                 );
             } else {
+                Log.warn(
+                        "[{}] Went out of date while waiting for push",
+                        projectName
+                );
                 throw new OutOfDateException();
             }
         } catch (SevereSnapshotPostException e) {
-            Log.warn("Failed to put to Overleaf", e);
+            Log.warn("[" + projectName + "] Failed to put to Overleaf", e);
             throw e;
         } catch (SnapshotPostException e) {
+            /* Stack trace should be printed further up */
+            Log.warn(
+                    "[{}] Exception when waiting for postback: {}",
+                    projectName,
+                    e.getClass().getSimpleName()
+            );
             throw e;
         } catch (IOException e) {
+            Log.warn("[{}] IOException on put", projectName);
             throw e;
         } finally {
             if (candidate != null) {
                 candidate.deleteServletFiles();
             } else {
                 Log.error(
-                        "Candidate snapshot was null: this should never happen."
+                        "[{}] Candidate snapshot was null: " +
+                                "this should never happen.",
+                        projectName
                 );
             }
             mainProjectLock.unlockForProject(projectName);
@@ -157,13 +174,23 @@ public class BridgeAPI {
                                              String postbackKey,
                                              int versionID)
             throws UnexpectedPostbackException {
-        postbackManager.postVersionIDForProject(projectName, versionID, postbackKey);
+        Log.info(
+                "[{}]" +
+                        " Postback received by postback thread, version: {}",
+                projectName,
+                versionID);
+        postbackManager.postVersionIDForProject(
+                projectName,
+                versionID,
+                postbackKey
+        );
     }
 
     public void postbackReceivedWithException(String projectName,
                                               String postbackKey,
                                               SnapshotPostException exception)
             throws UnexpectedPostbackException {
+        Log.warn("[{}] Postback received with exception", projectName);
         postbackManager.postExceptionForProject(
                 projectName,
                 exception,

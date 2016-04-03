@@ -1,8 +1,7 @@
 package uk.ac.ic.wlgitbridge.snapshot.push;
 
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.InvalidPostbackKeyException;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -22,25 +21,41 @@ public class PostbackManager {
         postbackContentsTable = new HashMap<String, PostbackPromise>();
     }
 
-    public int waitForVersionIdOrThrow(String projectName) throws SnapshotPostException {
+    public int waitForVersionIdOrThrow(String projectName)
+            throws SnapshotPostException {
         try {
-            return postbackContentsTable.get(projectName).waitForPostback();
-        } catch (SnapshotPostException e) {
-            throw e;
+            PostbackPromise postbackPromise =
+                    postbackContentsTable.get(projectName);
+            if (postbackPromise == null) {
+                Log.warn("[{}] PostbackPromise was null.", projectName);
+                throw new InternalErrorException();
+            }
+            return postbackPromise.waitForPostback();
         } finally {
             postbackContentsTable.remove(projectName);
         }
     }
 
-    public void postVersionIDForProject(String projectName, int versionID, String postbackKey) throws UnexpectedPostbackException {
-        getPostbackForProject(projectName).receivedVersionID(versionID, postbackKey);
+    public void postVersionIDForProject(String projectName,
+                                        int versionID,
+                                        String postbackKey)
+            throws UnexpectedPostbackException {
+        getPostbackForProject(
+                projectName
+        ).receivedVersionID(versionID, postbackKey);
     }
 
-    public void postExceptionForProject(String projectName, SnapshotPostException exception, String postbackKey) throws UnexpectedPostbackException {
-        getPostbackForProject(projectName).receivedException(exception, postbackKey);
+    public void postExceptionForProject(String projectName,
+                                        SnapshotPostException exception,
+                                        String postbackKey)
+            throws UnexpectedPostbackException {
+        getPostbackForProject(
+                projectName
+        ).receivedException(exception, postbackKey);
     }
 
-    private PostbackPromise getPostbackForProject(String projectName) throws UnexpectedPostbackException {
+    private PostbackPromise getPostbackForProject(String projectName)
+            throws UnexpectedPostbackException {
         PostbackPromise contents = postbackContentsTable.remove(projectName);
         if (contents == null) {
             throw new UnexpectedPostbackException();
@@ -55,7 +70,8 @@ public class PostbackManager {
         return key;
     }
 
-    public void checkPostbackKey(String projectName, String postbackKey) throws InvalidPostbackKeyException {
+    public void checkPostbackKey(String projectName, String postbackKey)
+            throws InvalidPostbackKeyException {
         postbackContentsTable.get(projectName).checkPostbackKey(postbackKey);
     }
 

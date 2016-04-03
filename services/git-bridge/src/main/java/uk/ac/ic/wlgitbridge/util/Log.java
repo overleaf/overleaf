@@ -13,6 +13,7 @@ public class Log {
     static {
         System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
         System.setProperty(SimpleLogger.DATE_TIME_FORMAT_KEY, "yyyy-MM-dd HH:mm:ss:SSS Z");
+        System.setProperty(SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
     }
 
     private static Logger logger = LoggerFactory.getLogger(GitBridgeApp.class);

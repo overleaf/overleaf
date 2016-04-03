@@ -29,4 +29,9 @@ public class ServletFile extends RawFile {
         return changed;
     }
 
+    @Override
+    public String toString() {
+        return getPath();
+    }
+
 }

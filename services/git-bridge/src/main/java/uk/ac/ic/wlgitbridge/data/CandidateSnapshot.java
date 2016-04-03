@@ -76,7 +76,9 @@ public class CandidateSnapshot {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("latestVerId", currentVersion);
         jsonObject.add("files", getFilesAsJson(projectURL, postbackKey));
-        jsonObject.addProperty("postbackUrl", projectURL + "/" + postbackKey + "/postback");
+        jsonObject.addProperty(
+                "postbackUrl", projectURL + "/" + postbackKey + "/postback"
+        );
         return jsonObject;
     }
 
@@ -103,6 +105,18 @@ public class CandidateSnapshot {
 
     public List<String> getDeleted() {
         return deleted;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("VersionId: ");
+        sb.append(currentVersion);
+        sb.append(", files: ");
+        sb.append(files);
+        sb.append(", deleted: ");
+        sb.append(deleted);
+        return sb.toString();
     }
 
 }

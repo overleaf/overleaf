@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.data.filestore;
 
+import uk.ac.ic.wlgitbridge.util.Log;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,6 +23,7 @@ public abstract class RawFile {
         OutputStream out = new FileOutputStream(file);
         out.write(getContents());
         out.close();
+        Log.info("Wrote file: {}", file.getAbsolutePath());
     }
 
     @Override

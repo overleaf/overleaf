@@ -144,6 +144,7 @@ public class Util {
                             deleteInDirectory(file);
                         }
                         file.delete();
+                        Log.info("Deleted file: {}", file.getAbsolutePath());
                     }
                 }
             }
