@@ -198,21 +198,21 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 		div(ng-if="!status.loading")
 			.container-fluid
 				.row
-					.col-md-4
+					.col-xs-4
 						.pull-right #{translate("total_words")} :
-					.col-md-6 {{data.textWords}}
+					.col-xs-6 {{data.textWords}}
 				.row 
-					.col-md-4
+					.col-xs-4
 						.pull-right #{translate("headers")} :
-					.col-md-6 {{data.headers}}
+					.col-xs-6 {{data.headers}}
 				.row 
-					.col-md-4 
+					.col-xs-4 
 						.pull-right #{translate("math_inline")} :
-					.col-md-6 {{data.mathInline}}
+					.col-xs-6 {{data.mathInline}}
 				.row 
-					.col-md-4 
+					.col-xs-4 
 						.pull-right #{translate("math_display")} :
-					.col-md-6 {{data.mathDisplay}}
+					.col-xs-6 {{data.mathDisplay}}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
