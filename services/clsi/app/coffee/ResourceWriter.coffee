@@ -54,9 +54,18 @@ module.exports = ResourceWriter =
 
 	_deleteFileIfNotDirectory: (path, callback = (error) ->) ->
 		fs.stat path, (error, stat) ->
-			return callback(error) if error?
-			if stat.isFile()
-				fs.unlink path, callback
+			if error? and error.code is 'ENOENT'
+				return callback()
+			else if error?
+				logger.err {err: error, path: path}, "error stating file in deleteFileIfNotDirectory"
+				return callback(error)
+			else if stat.isFile()
+				fs.unlink path, (error) ->
+					if error?
+						logger.err {err: error, path: path}, "error removing file in deleteFileIfNotDirectory"
+						callback(error)
+					else
+						callback()
 			else
 				callback()
 
