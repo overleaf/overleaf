@@ -1,6 +1,7 @@
 define [
 	"base"
-], (App) ->
+	"libs/platform"
+], (App, platform) ->
 
 
 	App.controller 'ContactModal', ($scope, $modal) ->
@@ -28,6 +29,8 @@ define [
 				message: message or ""
 				subject: $scope.form.subject + " - [#{ticketNumber}]"
 				labels: "support"
+				about: "<div>browser: #{platform?.name} #{platform?.version}</div>
+						<div>os: #{platform?.os?.family} #{platform?.os?.version}</div>"
 
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
@@ -59,3 +62,5 @@ define [
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
 				$scope.$apply()
+
+
