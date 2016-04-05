@@ -6,6 +6,8 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
 
+import static org.junit.Assert.*;
+
 /**
  * Created by winston on 05/04/2016.
  */
@@ -20,7 +22,7 @@ public class PostbackManagerTest {
         String key = postbackManager.makeKeyForProject("proj");
         postbackManager.postVersionIDForProject("proj", 1, key);
         int versionId = postbackManager.waitForVersionIdOrThrow("proj");
-        Assert.assertEquals("Version id didn't match posted", 1, versionId);
+        assertEquals("Version id didn't match posted", 1, versionId);
     }
 
     @Test
@@ -36,6 +38,22 @@ public class PostbackManagerTest {
             return;
         }
         Assert.fail("Exception wasn't thrown as required");
+    }
+
+    @Test
+    public void testTableConsistency() throws UnexpectedPostbackException,
+                                              SnapshotPostException {
+        String key1 = postbackManager.makeKeyForProject("proj1");
+        assertEquals(1, postbackManager.postbackContentsTable.size());
+        String key2 = postbackManager.makeKeyForProject("proj2");
+        assertEquals(2, postbackManager.postbackContentsTable.size());
+        postbackManager.postVersionIDForProject("proj1", 1, key1);
+        postbackManager.postVersionIDForProject("proj2", 1, key2);
+        assertEquals(2, postbackManager.postbackContentsTable.size());
+        postbackManager.waitForVersionIdOrThrow("proj1");
+        assertEquals(1, postbackManager.postbackContentsTable.size());
+        postbackManager.waitForVersionIdOrThrow("proj2");
+        Assert.assertTrue(postbackManager.postbackContentsTable.isEmpty());
     }
 
 }

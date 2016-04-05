@@ -1,10 +1,13 @@
 package uk.ac.ic.wlgitbridge.snapshot.push;
 
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
-import uk.ac.ic.wlgitbridge.util.Log;
+import com.google.common.base.Preconditions;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.InvalidPostbackKeyException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,11 +17,17 @@ import java.util.Map;
 public class PostbackManager {
 
     private final SecureRandom random;
-    private final Map<String, PostbackPromise> postbackContentsTable;
+    final Map<String, PostbackPromise> postbackContentsTable;
+
+    PostbackManager(SecureRandom random) {
+        this.random = random;
+        postbackContentsTable = Collections.synchronizedMap(
+                new HashMap<String, PostbackPromise>()
+        );
+    }
 
     public PostbackManager() {
-        random = new SecureRandom();
-        postbackContentsTable = new HashMap<String, PostbackPromise>();
+        this(new SecureRandom());
     }
 
     public int waitForVersionIdOrThrow(String projectName)
@@ -26,10 +35,7 @@ public class PostbackManager {
         try {
             PostbackPromise postbackPromise =
                     postbackContentsTable.get(projectName);
-            if (postbackPromise == null) {
-                Log.warn("[{}] PostbackPromise was null.", projectName);
-                throw new InternalErrorException();
-            }
+            Preconditions.checkNotNull(postbackPromise);
             return postbackPromise.waitForPostback();
         } finally {
             postbackContentsTable.remove(projectName);
@@ -56,7 +62,7 @@ public class PostbackManager {
 
     private PostbackPromise getPostbackForProject(String projectName)
             throws UnexpectedPostbackException {
-        PostbackPromise contents = postbackContentsTable.remove(projectName);
+        PostbackPromise contents = postbackContentsTable.get(projectName);
         if (contents == null) {
             throw new UnexpectedPostbackException();
         }
