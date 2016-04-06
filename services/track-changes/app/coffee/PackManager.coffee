@@ -291,7 +291,8 @@ module.exports = PackManager =
 				# select only the new packs not already in the index
 				newPacks = (pack for pack in historyPacks when not indexResult?[pack._id]?)
 				newPacks = (_.omit(pack, 'doc_id', 'project_id', 'n', 'sz') for pack in newPacks)
-				logger.log {project_id, doc_id, n: newPacks.length}, "found new packs"
+				if newPacks.length
+					logger.log {project_id, doc_id, n: newPacks.length}, "found new packs"
 				callback(null, newPacks)
 
 	insertPacksIntoIndexWithLock: (project_id, doc_id, newPacks, callback) ->
@@ -388,27 +389,29 @@ module.exports = PackManager =
 					PackManager.findUnarchivedPacks project_id, doc_id, (err, unarchivedPacks) ->
 						return markAsChecked(err) if err?
 						if not unarchivedPacks?.length
-							logger.log "no packs need archiving"
+							logger.log {project_id, doc_id}, "no packs need archiving"
 							return markAsChecked()
 						async.eachSeries unarchivedPacks, (pack, cb) ->
 							PackManager.archivePack project_id, doc_id, pack._id, cb
 						, (err) ->
 							return markAsChecked(err) if err?
-							logger.log "done processing"
+							logger.log  {project_id, doc_id}, "done processing"
 							markAsChecked()
 
 	finaliseIfNeeded: (project_id, doc_id, pack_id, pack, callback) ->
-		logger.log {project_id, doc_id}, "archiving old packs"
 		sz = pack.sz / (1024 * 1024) # in fractions of a megabyte
 		n = pack.n / 1024 # in fraction of 1024 ops
 		age = (Date.now() - pack.meta.end_ts) / DAYS
 		if age < 30 # always keep if less than 1 month old
+			logger.log {project_id, doc_id, pack_id, age}, "less than 30 days old"
 			return callback()
 		# compute an archiving threshold which decreases for each month of age
 		archive_threshold = 30 / age
 		if sz > archive_threshold or n > archive_threshold or age > 90
+			logger.log {project_id, doc_id, pack_id, age, archive_threshold, sz, n}, "meets archive threshold"
 			PackManager.markPackAsFinalisedWithLock project_id, doc_id, pack_id, callback
 		else
+			logger.log {project_id, doc_id, pack_id, age, archive_threshold, sz, n}, "does not meet archive threshold"
 			callback()
 
 	markPackAsFinalisedWithLock: (project_id, doc_id, pack_id, callback) ->
@@ -448,7 +451,8 @@ module.exports = PackManager =
 			return callback(err) if err?
 			indexPacks = indexResult?.packs or []
 			unArchivedPacks = (pack for pack in indexPacks when not pack.inS3?)
-			logger.log {project_id, doc_id, n: unArchivedPacks.length}, "find unarchived packs"
+			if unArchivedPacks.length
+				logger.log {project_id, doc_id, n: unArchivedPacks.length}, "find unarchived packs"
 			callback(null, unArchivedPacks)
 
 	# Archive locking flags
