@@ -23,11 +23,13 @@ module.exports = MongoManager =
 		MongoManager.getLastCompressedUpdate doc_id, (error, update) ->
 			return callback(error) if error?
 			if update?
-				if update.broken
-					# the update is marked as broken so we will force a new op
+				if update.broken # marked as broken so we will force a new op
 					return callback null, null
 				else if update.pack?
-					return callback null, update, update.pack[0]?.v
+					if update.finalised # no more ops can be appended
+						return callback null, null, update.pack[0]?.v
+					else
+						return callback null, update, update.pack[0]?.v
 				else
 					return callback null, update, update.v
 			else
