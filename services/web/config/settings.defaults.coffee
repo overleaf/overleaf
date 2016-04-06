@@ -393,6 +393,10 @@ module.exports =
 	# 	anonymous: false
 	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
 	#	adminPW: 'password'
+	#	starttls: true
+	#	tlsOptions:
+	#		rejectUnauthorized: false
+	#		ca: '/etc/ldap/ca_certs.pem'
 	
 	#templateLinks: [{
 	#	name : "CV projects",
