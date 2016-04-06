@@ -261,7 +261,7 @@ module.exports = PackManager =
 		# find all packs prior to current pack
 		PackManager.findUnindexedPacks project_id, doc_id, (err, newPacks) ->
 			return callback(err) if err?
-			return callback() if not newPacks?
+			return callback() if not newPacks? or newPacks.length is 0
 			PackManager.insertPacksIntoIndexWithLock project_id, doc_id, newPacks, (err) ->
 				return callback(err) if err?
 				logger.log {project_id, doc_id, newPacks}, "added new packs to index"
