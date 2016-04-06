@@ -95,6 +95,7 @@ module.exports = PackManager =
 			temporary: temporary
 		if temporary
 			newPack.expiresAt = new Date(Date.now() + 7 * DAYS)
+			newPack.last_checked = new Date(Date.now() + 30 * DAYS) # never check temporary packs
 		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
 		db.docHistory.save newPack, (err, result) ->
 			return callback(err) if err?
