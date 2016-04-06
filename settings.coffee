@@ -469,9 +469,11 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
 		anonymous: process.env["SHARELATEX_LDAP_ANONYMOUS"] or false
 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
-		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]	
-
-
+		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
+		starttls:  process.env["SHARELATEX_LDAP_TLS"] or false
+		tlsOptions:
+			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] or false
+			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
 
 
 
