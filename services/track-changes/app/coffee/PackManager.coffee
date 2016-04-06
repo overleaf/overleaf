@@ -294,7 +294,7 @@ module.exports = PackManager =
 				return callback() if not historyPacks?
 				# select only the new packs not already in the index
 				newPacks = (pack for pack in historyPacks when not indexResult?[pack._id]?)
-				newPacks = (_.omit(pack, 'doc_id', 'project_id', 'n', 'sz') for pack in newPacks)
+				newPacks = (_.omit(pack, 'doc_id', 'project_id', 'n', 'sz', 'last_checked', 'finalised') for pack in newPacks)
 				if newPacks.length
 					logger.log {project_id, doc_id, n: newPacks.length}, "found new packs"
 				callback(null, newPacks)
