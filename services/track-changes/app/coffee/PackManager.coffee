@@ -277,10 +277,13 @@ module.exports = PackManager =
 			packs.push(last) if last.finalised # it's finalised so we push it back to archive it
 			callback(null, packs)
 
-	# findPacks: (project_id, doc_id, queryFilter, callback) ->
-	# 	query = { doc_id: ObjectId(doc_id.toString()) }
-	# 	query = _.defaults query, queryFilter if queryFilter?
-	# 	db.docHistory.find(query, {pack:false}).sort {v:1}, callback
+	findPacks: (project_id, doc_id, callback) ->
+		query = { doc_id: ObjectId(doc_id.toString()), expiresAt: {$exists:false} }
+		db.docHistory.find(query, {pack:false}).sort {v:1}, (err, packs) ->
+			return callback(err) if err?
+			return callback() if not packs?
+			return callback() if not packs?.length
+			callback(null, packs)
 
 	findUnindexedPacks: (project_id, doc_id, callback) ->
 		PackManager.getIndexWithKeys doc_id, (err, indexResult) ->
@@ -361,7 +364,7 @@ module.exports = PackManager =
 	# Extra methods to test archive/unarchive for a doc_id
 
 	pushOldPacks: (project_id, doc_id, callback) ->
-		PackManager.findCompletedPacks project_id, doc_id, (err, packs) ->
+		PackManager.findPacks project_id, doc_id, (err, packs) ->
 			return callback(err) if err?
 			return callback() if not packs?.length
 			PackManager.processOldPack project_id, doc_id, packs[0]._id, callback
