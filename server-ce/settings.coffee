@@ -104,7 +104,7 @@ module.exports =
 	# If provided, a sessionSecret is used to sign cookies so that they cannot be
 	# spoofed. This is recommended.
 	security:
-		sessionSecret: "CRYPTO_RANDOM" # This was randomly generated for you
+		sessionSecret: process.env["SHARELATEX_SESSION_SECRET"] or "CRYPTO_RANDOM" # This was randomly generated for you
 
 	# These credentials are used for authenticating api requests
 	# between services that may need to go over public channels
