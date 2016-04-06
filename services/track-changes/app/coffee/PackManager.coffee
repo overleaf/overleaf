@@ -50,6 +50,9 @@ module.exports = PackManager =
 	insertCompressedUpdates: (project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
 		return callback() if newUpdates.length == 0
 
+		# never append permanent ops to a pack that will expire
+		lastUpdate = null if lastUpdate?.expiresAt? and not temporary
+
 		updatesToFlush = []
 		updatesRemaining = newUpdates.slice()
 
@@ -71,7 +74,19 @@ module.exports = PackManager =
 
 	flushCompressedUpdates:	(project_id, doc_id, lastUpdate, newUpdates, temporary, callback = (error) ->) ->
 		return callback() if newUpdates.length == 0
-		if lastUpdate? and not (temporary and ((Date.now() - lastUpdate.meta?.start_ts) > 1 * DAYS))
+
+		canAppend = false
+		# check if it is safe to append to an existing pack
+		if lastUpdate?
+			if not temporary and not lastUpdate.expiresAt?
+				# permanent pack appends to permanent pack
+				canAppend = true
+			age = Date.now() - lastUpdate.meta?.start_ts
+			if temporary and lastUpdate.expiresAt? and age < 1 * DAYS
+				# temporary pack appends to temporary pack if same day
+				canAppend = true
+
+		if canAppend
 			PackManager.appendUpdatesToExistingPack project_id, doc_id, lastUpdate, newUpdates, temporary, callback
 		else
 			PackManager.insertUpdatesIntoNewPack project_id, doc_id, newUpdates, temporary, callback

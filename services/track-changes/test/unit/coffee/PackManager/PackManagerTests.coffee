@@ -171,7 +171,7 @@ describe "PackManager", ->
 					it "should call the callback", ->
 						@callback.called.should.equal true
 
-		describe "when there is a recent previous update in mongo", ->
+		describe "when there is a recent previous update in mongo that expires", ->
 			beforeEach ->
 				@lastUpdate = {
 					_id: "12345"
@@ -181,6 +181,7 @@ describe "PackManager", ->
 					]
 					n : 2
 					sz : 100
+					meta: {start_ts: Date.now() - 6 * 3600 * 1000}
 					expiresAt: new Date(Date.now())
 				}
 
@@ -201,6 +202,41 @@ describe "PackManager", ->
 				it "should call the callback", ->
 					@callback.called.should.equal true
 
+
+		describe "when there is a recent previous update in mongo that expires", ->
+			beforeEach ->
+				@PackManager.updateIndex = sinon.stub().callsArg(2)
+
+				@lastUpdate = {
+					_id: "12345"
+					pack: [
+						{ op: "op-1", meta: "meta-1", v: 1},
+						{ op: "op-2", meta: "meta-2", v: 2}
+					]
+					n : 2
+					sz : 100
+					meta: {start_ts: Date.now() - 6 * 3600 * 1000}
+					expiresAt: new Date(Date.now())
+				}
+
+				@PackManager.flushCompressedUpdates @project_id, @doc_id, @lastUpdate, @newUpdates, false, @callback
+
+			describe "for a small update that will not expire", ->
+				it "should insert the update into mongo", ->
+					@db.docHistory.save.calledWithMatch({
+						pack: @newUpdates,
+						project_id: ObjectId(@project_id),
+						doc_id: ObjectId(@doc_id)
+						n: @newUpdates.length
+						v: @newUpdates[0].v
+						v_end: @newUpdates[@newUpdates.length-1].v
+					}).should.equal true
+
+				it "should not set any expiry time", ->
+					@db.docHistory.save.neverCalledWithMatch(sinon.match.has("expiresAt")).should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
 
 		describe "when there is an old previous update in mongo", ->
 			beforeEach ->
