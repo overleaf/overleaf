@@ -106,6 +106,7 @@ module.exports = TrackChangesClient =
 		options.encoding = null
 		request.get options, (err, res, body) ->
 			return callback(error) if error?
+			return callback(new Error("empty response from s3")) if not body?
 			zlib.gunzip body, (err, result) ->
 				return callback(err) if err?
 				callback(null, JSON.parse(result.toString()))
