@@ -113,7 +113,6 @@ else
 		expiresAt: {$exists: false}
 		project_id: {$exists: true}
 		v_end: {$exists: true}
-		$or: [ {n:512}, {n:1024} ]
 		_id: {$lt: ObjectIdFromDate(new Date(Date.now() - 7 * DAYS))}
 	}, {_id:1, doc_id:1, project_id:1}).sort({
 		last_checked:1
