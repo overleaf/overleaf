@@ -4,6 +4,7 @@ _ = require "underscore"
 logger = require "logger-sharelatex"
 LockManager = require "./LockManager"
 MongoAWS = require "./MongoAWS"
+Metrics = require "./Metrics"
 ProjectIterator = require "./ProjectIterator"
 
 # Sharejs operations are stored in a 'pack' object
@@ -114,6 +115,7 @@ module.exports = PackManager =
 		logger.log {project_id, doc_id, newUpdates}, "inserting updates into new pack"
 		db.docHistory.save newPack, (err, result) ->
 			return callback(err) if err?
+			Metrics.inc("insert-pack-" + if temporary then "temporary" else "permanent")
 			if temporary
 				return callback()
 			else

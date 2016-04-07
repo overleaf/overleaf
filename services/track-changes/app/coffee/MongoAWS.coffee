@@ -6,6 +6,7 @@ S3S = require 's3-streams'
 JSONStream = require "JSONStream"
 ReadlineStream = require "byline"
 zlib = require "zlib"
+Metrics = require "./Metrics"
 
 DAYS = 24 * 3600 * 1000 # one day in milliseconds
 
@@ -51,6 +52,7 @@ module.exports = MongoAWS =
 				upload.on 'error', (err) ->
 					callback(err)
 				upload.on 'finish', () ->
+					Metrics.inc("archive-pack")
 					logger.log {project_id, doc_id, pack_id}, "upload to s3 completed"
 					callback(null)
 				upload.write buf
@@ -103,6 +105,7 @@ module.exports = MongoAWS =
 	unArchivePack: (project_id, doc_id, pack_id, callback = (error) ->) ->
 		MongoAWS.readArchivedPack project_id, doc_id, pack_id, (err, object) ->
 			return callback(err) if err?
+			Metrics.inc("unarchive-pack")
 			# allow the object to expire, we can always retrieve it again
 			object.expiresAt = new Date(Date.now() + 7 * DAYS)
 			logger.log {project_id, doc_id, pack_id}, "inserting object from s3"
