@@ -50,7 +50,11 @@ module.exports = DiffGenerator =
 
 	rewindUpdates: (content, updates) ->
 		for update in updates.reverse()
-			content = DiffGenerator.rewindUpdate(content, update)
+			try
+				content = DiffGenerator.rewindUpdate(content, update)
+			catch e
+				e.attempted_update = update # keep a record of the attempted update
+				throw e # rethrow the exception
 		return content
 
 	buildDiff: (initialContent, updates) ->
