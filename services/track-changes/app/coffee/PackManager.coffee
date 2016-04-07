@@ -143,6 +143,7 @@ module.exports = PackManager =
 		if lastUpdate.expiresAt and temporary
 			update.$set.expiresAt = new Date(Date.now() + 7 * DAYS)
 		logger.log {project_id, doc_id, lastUpdate, newUpdates}, "appending updates to existing pack"
+		Metrics.inc("append-pack-" + if temporary then "temporary" else "permanent")
 		db.docHistory.findAndModify {query, update,	new:true, fields:{meta:1,v_end:1}}, callback
 
 	# Retrieve all changes for a document
