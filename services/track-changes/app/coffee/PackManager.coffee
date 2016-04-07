@@ -224,8 +224,8 @@ module.exports = PackManager =
 			return callback(err) if err?
 			if not pack?
 				MongoAWS.unArchivePack project_id, doc_id, pack_id, callback
-			else if pack.expiresAt? and not pack.temporary and false # TODO: remove false, temporarily disabled
-				# we only need to touch the TTL on the listing of changes in the project
+			else if pack.expiresAt? and pack.temporary is false
+				# we only need to touch the TTL when listing the changes in the project
 				# because diffs on individual documents are always done after that
 				PackManager.increaseTTL pack, callback
 				# only do this for cached packs, not temporary ones to avoid older packs
