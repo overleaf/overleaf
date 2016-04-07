@@ -64,6 +64,19 @@ module.exports = MongoManager =
 			upsert: true
 		}, callback
 
+	upgradeHistory: (project_id, callback = (error) ->) ->
+		# preserve the project's existing history
+		db.docHistory.update {
+			project_id: ObjectId(project_id)
+			temporary: true
+			expiresAt: {$exists: true}
+		}, {
+			$set: {temporary: false}
+			$unset: {expiresAt: ""}
+		}, {
+			multi: true
+		}, callback
+
 	ensureIndices: () ->
 		# For finding all updates that go into a diff for a doc
 		db.docHistory.ensureIndex { doc_id: 1, v: 1 }, { background: true }

@@ -29,6 +29,7 @@ describe "UpdateTrimmer", ->
 				features: {}
 			@MongoManager.getProjectMetaData = sinon.stub().callsArgWith(1, null, @metadata)
 			@MongoManager.setProjectMetaData = sinon.stub().callsArgWith(2)
+			@MongoManager.upgradeHistory = sinon.stub().callsArgWith(1)
 			@WebApiManager.getProjectDetails = sinon.stub().callsArgWith(1, null, @details)
 
 		describe "with preserveHistory set in the project meta data", ->
@@ -73,6 +74,11 @@ describe "UpdateTrimmer", ->
 						.calledWith(@project_id, {preserveHistory: true})
 						.should.equal true
 
+				it "should upgrade any existing history", ->
+					@MongoManager.upgradeHistory
+						.calledWith(@project_id)
+						.should.equal true
+
 				it "should return false", ->
 					@callback.calledWith(null, false).should.equal true
 
@@ -96,6 +102,11 @@ describe "UpdateTrimmer", ->
 				it "should insert preserveHistory into the metadata", ->
 					@MongoManager.setProjectMetaData
 						.calledWith(@project_id, {preserveHistory: true})
+						.should.equal true
+
+				it "should upgrade any existing history", ->
+					@MongoManager.upgradeHistory
+						.calledWith(@project_id)
 						.should.equal true
 
 				it "should return false", ->

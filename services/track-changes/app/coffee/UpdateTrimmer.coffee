@@ -15,7 +15,9 @@ module.exports = UpdateTrimmer =
 					if details?.features?.versioning
 						MongoManager.setProjectMetaData project_id, preserveHistory: true, (error) ->
 							return callback(error) if error?
-							callback null, false
+							MongoManager.upgradeHistory project_id, (error) ->
+								return callback(error) if error?
+								callback null, false
 					else
 						callback null, true
 
