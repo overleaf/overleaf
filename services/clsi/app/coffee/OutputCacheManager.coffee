@@ -125,8 +125,11 @@ module.exports = OutputCacheManager =
 	_checkFileIsSafe: (src, callback = (error, isSafe) ->) ->
 		# check if we have a valid file to copy into the cache
 		fs.stat src, (err, stats) ->
-			if err?
-				# some problem reading the file
+			if err?.code is 'ENOENT'
+				logger.warn err: err, file: src, "file has disappeared before copying to build cache"
+				callback(err, false)
+			else if err?
+				# some other problem reading the file
 				logger.error err: err, file: src, "stat error for file in cache"
 				callback(err, false)
 			else if not stats.isFile()
@@ -140,7 +143,10 @@ module.exports = OutputCacheManager =
 	_copyFile: (src, dst, callback) ->
 		# copy output file into the cache
 		fse.copy src, dst, (err) ->
-			if err?
+			if err?.code is 'ENOENT'
+				logger.warn err: err, file: src, "file has disappeared when copying to build cache"
+				callback(err, false)
+			else if err?
 				logger.error err: err, src: src, dst: dst, "copy error for file in cache"
 				callback(err)
 			else
