@@ -131,11 +131,11 @@ os = require('os')
 
 
 server = net.createServer (socket) ->
-	fiveMinLoad = os.loadavg()[1]
+	fiveMinLoad = os.loadavg()[0]
 	availableWorkingCpus = os.cpus().length - 1
 	freeLoad = availableWorkingCpus - fiveMinLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
-	socket.write "#{freeLoadPercentage}%\n", "ASCII"
+	socket.write "up, #{freeLoadPercentage}%\n", "ASCII"
 	socket.pipe socket
 	return
 
