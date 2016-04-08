@@ -128,15 +128,16 @@ setInterval () ->
 net = require('net')
 os = require('os')
 
-fiveMinLoad = os.loadavg()[1]
-availableWorkingCpus = os.cpus().length - 1
-freeLoad = availableWorkingCpus - fiveMinLoad
-freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+
 
 server = net.createServer (socket) ->
-  socket.write "#{freeLoadPercentage}%\n", "ASCII"
-  socket.pipe socket
-  return
+	fiveMinLoad = os.loadavg()[1]
+	availableWorkingCpus = os.cpus().length - 1
+	freeLoad = availableWorkingCpus - fiveMinLoad
+	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+	socket.write "#{freeLoadPercentage}%\n", "ASCII"
+	socket.pipe socket
+	return
 
 port = 4080
 
