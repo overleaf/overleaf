@@ -3,6 +3,8 @@ async = require "async"
 _ = require "underscore"
 {db, ObjectId, BSON} = require "./mongojs"
 fs = require "fs"
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("track-changes")
 logger = require "logger-sharelatex"
 logger.initialize("track-changes-packworker")
 if Settings.sentry?.dsn?
