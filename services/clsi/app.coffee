@@ -122,3 +122,26 @@ app.listen port = (Settings.internal?.clsi?.port or 3013), host = (Settings.inte
 setInterval () ->
 	ProjectPersistenceManager.clearExpiredProjects()
 , tenMinutes = 10 * 60 * 1000
+
+
+
+net = require('net')
+os = require('os')
+
+fiveMinLoad = os.loadavg()[1]
+availableWorkingCpus = os.cpus().length - 1
+freeLoad = availableWorkingCpus - fiveMinLoad
+freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+
+server = net.createServer (socket) ->
+  socket.write "#{freeLoadPercentage}%\n", "ASCII"
+  socket.pipe socket
+  return
+
+port = 4080
+
+server.listen port,  ->
+  console.log "listening on port #{port}"
+  # netcat 127.0.0.1 4080
+
+
