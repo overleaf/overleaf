@@ -135,10 +135,12 @@ server = net.createServer (socket) ->
 	availableWorkingCpus = os.cpus().length - 1
 	freeLoad = availableWorkingCpus - fiveMinLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+	if freeLoadPercentage < 0
+		freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects about
 	socket.write "up, #{freeLoadPercentage}%\n", "ASCII"
 	socket.on "error", (err)->
 		console.log err, "error with socket"
-	socket.pipe socket
+	socket.destroy()
 	return
 
 port = 4080
