@@ -136,6 +136,8 @@ server = net.createServer (socket) ->
 	freeLoad = availableWorkingCpus - fiveMinLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
 	socket.write "up, #{freeLoadPercentage}%\n", "ASCII"
+	socket.on "error", (err)->
+		console.log err, "error with socket"
 	socket.pipe socket
 	return
 
