@@ -13,6 +13,8 @@ define [], () ->
 		constructor: (@doc) ->
 
 		parse: () ->
+			# Safari regex is super slow, freezes browser for minutes on end,
+			# hacky solution: limit iterations
 			limit = null
 			if browserIsSafari()
 				limit = 100
