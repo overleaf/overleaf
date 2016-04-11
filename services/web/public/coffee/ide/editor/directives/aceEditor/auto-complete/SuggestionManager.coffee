@@ -1,14 +1,5 @@
 define [], () ->
 
-	browserIsSafari = () ->
-		userAgent = navigator.userAgent
-		(
-			userAgent.match(/.*Safari\/.*/) &&
-			!userAgent.match(/.*Chrome\/.*/) &&
-			!userAgent.match(/.*Chromium\/.*/)
-		)
-
-
 	class Parser
 		constructor: (@doc) ->
 
@@ -16,7 +7,7 @@ define [], () ->
 			# Safari regex is super slow, freezes browser for minutes on end,
 			# hacky solution: limit iterations
 			limit = null
-			if browserIsSafari()
+			if window?._ide?.browserIsSafari
 				limit = 100
 
 			commands = []
