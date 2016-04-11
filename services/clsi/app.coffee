@@ -128,25 +128,20 @@ setInterval () ->
 net = require('net')
 os = require('os')
 
-
-
 server = net.createServer (socket) ->
-	fiveMinLoad = os.loadavg()[0]
+	socket.on "error", (err)->
+		logger.err err:err, "error with socket on load check"
+	currentLoad = os.loadavg()[0]
 	availableWorkingCpus = os.cpus().length - 1
-	freeLoad = availableWorkingCpus - fiveMinLoad
+	freeLoad = availableWorkingCpus - currentLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
 	if freeLoadPercentage < 0
-		freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects about
+		freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects to different servers
 	socket.write "up, #{freeLoadPercentage}%\n", "ASCII"
-	socket.on "error", (err)->
-		console.log err, "error with socket"
 	socket.destroy()
-	return
 
-port = 4080
-
-server.listen port,  ->
+server.listen port = (Settings.internal?.clsi?.load_port or 3044),  ->
   console.log "listening on port #{port}"
-  # netcat 127.0.0.1 4080
+  # netcat 127.0.0.1 3044
 
 
