@@ -1,11 +1,23 @@
 define [], () ->
+
 	class Parser
 		constructor: (@doc) ->
 
 		parse: () ->
+			# Safari regex is super slow, freezes browser for minutes on end,
+			# hacky solution: limit iterations
+			limit = null
+			if window?._ide?.browserIsSafari
+				limit = 100
+
 			commands = []
 			seen = {}
+			iterations = 0
 			while command = @nextCommand()
+				iterations += 1
+				if limit && iterations > limit
+					return commands
+
 				docState = @doc
 
 				optionalArgs = 0
