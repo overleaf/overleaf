@@ -35,7 +35,7 @@ module.exports = ReferalAllocator =
 		query = _id: user_id
 		User.findOne query, (error, user) ->
 			return callback(error) if error
-			return callback(new Error("user not found")) if !user?
+			return callback(new Error("user not found #{user_id} for assignBonus")) if !user?
 			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"
 			if user.refered_user_count? and user.refered_user_count > 0
 				newFeatures = ReferalAllocator._calculateFeatures(user)

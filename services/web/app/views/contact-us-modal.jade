@@ -12,9 +12,9 @@ script(type='text/ng-template', id='supportModalTemplate')
 				| #{translate("subject")}
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
-			label.desc
+			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
 				| #{translate("email")}
-			.form-group
+			.form-group(ng-show="'#{getUserEmail()}'.length < 1")
 				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
 			label#title12.desc
 				| #{translate("project_url")} (#{translate("optional")})

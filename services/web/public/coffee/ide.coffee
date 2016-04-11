@@ -112,4 +112,17 @@ define [
 
 		ide.localStorage = localStorage
 
+		ide.browserIsSafari = false
+		try
+			userAgent = navigator.userAgent
+			ide.browserIsSafari = (
+				userAgent &&
+				userAgent.match(/.*Safari\/.*/) &&
+				!userAgent.match(/.*Chrome\/.*/) &&
+				!userAgent.match(/.*Chromium\/.*/)
+			)
+		catch err
+			console.error err
+
+
 	angular.bootstrap(document.body, ["SharelatexApp"])

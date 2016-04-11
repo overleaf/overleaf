@@ -18,14 +18,14 @@ describe "SubscriptionUpdater", ->
 		@allUserIds = ["13213", "dsadas", "djsaiud89"]
 		@subscription = subscription =
 			admin_id: @adminUser._id
-			members_id: @allUserIds
+			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
 			planCode:"student_or_something"
 
 		@groupSubscription =
 			admin_id: @adminUser._id
-			members_id: @allUserIds
+			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
 			planCode:"group_subscription"
@@ -183,8 +183,6 @@ describe "SubscriptionUpdater", ->
 
 	describe "_setUsersMinimumFeatures", ->
 
-
-
 		it "should call updateFeatures with the subscription if set", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null)
@@ -200,6 +198,16 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null, @groupSubscription)
 
 			@SubscriptionUpdater._setUsersMinimumFeatures @adminUser._id, (err)=>
+				args = @UserFeaturesUpdater.updateFeatures.args[0]
+				assert.equal args[0], @adminUser._id
+				assert.equal args[1], @groupSubscription.planCode
+				done()
+
+		it "should call not call updateFeatures  with users subscription if the subscription plan code is the default one (downgraded)", (done)->
+			@subscription.planCode = @Settings.defaultPlanCode
+			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null, @groupSubscription)
+			@SubscriptionUpdater._setUsersMinimumFeatures @adminuser_id, (err)=>
 				args = @UserFeaturesUpdater.updateFeatures.args[0]
 				assert.equal args[0], @adminUser._id
 				assert.equal args[1], @groupSubscription.planCode

@@ -71,7 +71,7 @@ module.exports = SubscriptionUpdater =
 			subscription.groupPlan = true
 			subscription.membersLimit = plan.membersLimit
 		subscription.save ->
-			allIds = _.union subscription.members_id, [subscription.admin_id]
+			allIds = _.union subscription.member_ids, [subscription.admin_id]
 			jobs = allIds.map (user_id)->
 				return (cb)->
 					SubscriptionUpdater._setUsersMinimumFeatures user_id, cb
@@ -84,12 +84,18 @@ module.exports = SubscriptionUpdater =
 			groupSubscription: (cb)->
 				SubscriptionLocator.getGroupSubscriptionMemberOf user_id, cb
 		async.series jobs, (err, results)->
+			if err?
+				logger.err err:err, user_id:user, "error getting subscription or group for _setUsersMinimumFeatures"
+				return callback(err)
 			{subscription, groupSubscription} = results
-			if subscription? and subscription.planCode?
+			if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
+				logger.log user_id:user_id, "using users subscription plan code for features"
 				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
 			else if groupSubscription? and groupSubscription.planCode?
+				logger.log user_id:user_id, "using group which user is memor of for features"
 				UserFeaturesUpdater.updateFeatures user_id, groupSubscription.planCode, callback
 			else
+				logger.log user_id:user_id, "using default features for user with no subscription or group"
 				UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, (err)->
 					if err?
 						logger.err err:err, user_id:user_id, "Error setting minimum user feature"
