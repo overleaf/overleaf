@@ -1,11 +1,30 @@
 define [], () ->
+
+	browserIsSafari = () ->
+		userAgent = navigator.userAgent
+		(
+			userAgent.match(/.*Safari\/.*/) &&
+			!userAgent.match(/.*Chrome\/.*/) &&
+			!userAgent.match(/.*Chromium\/.*/)
+		)
+
+
 	class Parser
 		constructor: (@doc) ->
 
 		parse: () ->
+			limit = null
+			if browserIsSafari()
+				limit = 100
+
 			commands = []
 			seen = {}
+			iterations = 0
 			while command = @nextCommand()
+				iterations += 1
+				if limit && iterations > limit
+					return commands
+
 				docState = @doc
 
 				optionalArgs = 0
