@@ -1,6 +1,7 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+expect = chai.expect
 async = require "async"
 {db, ObjectId} = require "../../../app/js/mongojs"
 
@@ -71,3 +72,30 @@ describe "Flushing a doc to Mongo", ->
 		it "should not flush the doc to the web api", ->
 			MockWebApi.setDocumentLines.called.should.equal false
 
+	describe "when the web api http request takes a long time", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			@timeout = 10000
+			MockWebApi.insertDoc @project_id, @doc_id, {
+				lines: @lines
+			}
+			sinon.stub MockWebApi, "setDocumentLines", (project_id, doc_id, lines, callback = (error) ->) ->
+				setTimeout callback, 30000
+
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
+				throw error if error?
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, done
+
+		after ->
+			MockWebApi.setDocumentLines.restore()
+		
+		it "should return quickly(ish)", (done) ->
+			start = Date.now()
+			DocUpdaterClient.flushDoc @project_id, @doc_id, (error, res, doc) =>
+				res.statusCode.should.equal 500
+				delta = Date.now() - start
+				expect(delta).to.be.below 20000
+				done()

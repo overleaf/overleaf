@@ -41,6 +41,7 @@ describe "PersistenceManager.getDocFromWeb", ->
 						pass: @pass
 						sendImmediately: true
 					jar: false
+					timeout: 5000
 				})
 				.should.equal true
 

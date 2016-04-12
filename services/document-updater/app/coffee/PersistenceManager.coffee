@@ -5,6 +5,11 @@ Metrics = require "./Metrics"
 {db, ObjectId} = require("./mongojs")
 logger = require "logger-sharelatex"
 
+# We have to be quick with HTTP calls because we're holding a lock that
+# expires after 30 seconds. We can't let any errors in the rest of the stack
+# hold us up, and need to bail out quickly if there is a problem.
+MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
+
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines) ->
@@ -37,6 +42,7 @@ module.exports = PersistenceManager =
 				pass: Settings.apis.web.pass
 				sendImmediately: true
 			jar: false
+			timeout: MAX_HTTP_REQUEST_LENGTH
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
@@ -69,6 +75,7 @@ module.exports = PersistenceManager =
 				pass: Settings.apis.web.pass
 				sendImmediately: true
 			jar: false
+			timeout: MAX_HTTP_REQUEST_LENGTH
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300

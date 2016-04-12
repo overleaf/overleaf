@@ -1,6 +1,7 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+expect = chai.expect
 {db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
@@ -113,7 +114,22 @@ describe "Getting a document", ->
 		it "should return 500", ->
 			@statusCode.should.equal 500
 
+	describe "when the web api http request takes a long time", ->
+		before (done) ->
+			@timeout = 10000
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			sinon.stub MockWebApi, "getDocument", (project_id, doc_id, callback = (error, doc) ->) ->
+				setTimeout callback, 30000
+			done()
 
-
-
+		after ->
+			MockWebApi.getDocument.restore()
+		
+		it "should return quickly(ish)", (done) ->
+			start = Date.now()
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				res.statusCode.should.equal 500
+				delta = Date.now() - start
+				expect(delta).to.be.below 20000
+				done()
 
