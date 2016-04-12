@@ -130,6 +130,9 @@ os = require('os')
 
 server = net.createServer (socket) ->
 	socket.on "error", (err)->
+		if err.code == "ECONNRESET"
+			# this always comes up, we don't know why
+			return
 		logger.err err:err, "error with socket on load check"
 		socket.destroy()
 
