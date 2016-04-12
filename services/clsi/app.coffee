@@ -131,17 +131,19 @@ os = require('os')
 server = net.createServer (socket) ->
 	socket.on "error", (err)->
 		logger.err err:err, "error with socket on load check"
+		socket.destroy()
+
 	currentLoad = os.loadavg()[0]
 	availableWorkingCpus = os.cpus().length - 1
 	freeLoad = availableWorkingCpus - currentLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
-	if freeLoadPercentage < 0
+	if freeLoadPercentage <= 0
 		freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects to different servers
-	socket.write "up, #{freeLoadPercentage}%\n", "ASCII"
-	socket.destroy()
+	socket.write("up, #{freeLoadPercentage}%\n", "ASCII")
+	socket.end()
 
 server.listen port = (Settings.internal?.clsi?.load_port or 3044),  ->
-  console.log "listening on port #{port}"
-  # netcat 127.0.0.1 3044
+  logger.info "tcp load endpoint listening on port #{port}"
+  # telnet 127.0.0.1 3044
 
 
