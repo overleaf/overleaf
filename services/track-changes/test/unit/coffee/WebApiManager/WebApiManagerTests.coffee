@@ -37,7 +37,7 @@ describe "WebApiManager", ->
 
 			it 'should get the user from the web api', ->
 				@request.get
-					.calledWith({
+					.calledWithMatch({
 						url: "#{@settings.apis.web.url}/user/#{@user_id}/personal_info"
 						auth:
 							user: @settings.apis.web.user
@@ -92,7 +92,7 @@ describe "WebApiManager", ->
 
 			it 'should get the project from the web api', ->
 				@request.get
-					.calledWith({
+					.calledWithMatch({
 						url: "#{@settings.apis.web.url}/project/#{@project_id}/details"
 						auth:
 							user: @settings.apis.web.user

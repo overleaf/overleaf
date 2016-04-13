@@ -2,6 +2,9 @@ request = require "request"
 logger = require "logger-sharelatex"
 Settings = require "settings-sharelatex"
 
+# Don't let HTTP calls hang for a long time
+MAX_HTTP_REQUEST_LENGTH = 15000 # 15 seconds
+
 # DEPRECATED! This method of getting user details via track-changes is deprecated
 # in the way we lay out our services.
 # Instead, web should be responsible for collecting the raw data (user_ids) and
@@ -11,6 +14,7 @@ module.exports = WebApiManager =
 	sendRequest: (url, callback = (error, body) ->) ->
 		request.get {
 			url: "#{Settings.apis.web.url}#{url}"
+			timeout: MAX_HTTP_REQUEST_LENGTH
 			auth:
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass
