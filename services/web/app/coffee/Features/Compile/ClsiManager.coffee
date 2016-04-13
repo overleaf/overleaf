@@ -37,6 +37,8 @@ module.exports = ClsiManager =
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
 			jar:  false
+			query:
+				project_id:project_id
 		}, (error, response, body) ->
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300

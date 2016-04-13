@@ -127,6 +127,7 @@ module.exports = CompileController =
 			for h, v of req.headers
 				newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
 			options.headers = newHeaders
+		req.query.project_id = project_id
 		proxy = request(options)
 		proxy.pipe(res)
 		proxy.on "error", (error) ->
