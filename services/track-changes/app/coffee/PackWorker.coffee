@@ -79,6 +79,10 @@ processUpdates = (pending) ->
 			logger.log {project_id, doc_id}, "skipping pack, missing project/doc id"
 			return callback()
 		handler = (err, result) ->
+			if err? and err.code is "InternalError" and err.retryable
+				logger.warn {err, result}, "ignoring S3 error in pack archive worker"
+				# Ignore any s3 errors due to random problems
+				err = null
 			if err?
 				logger.error {err, result}, "error in pack archive worker"
 				return callback(err)
