@@ -35,7 +35,7 @@ module.exports = LockManager =
 				callback err, true, lockValue
 			else
 				metrics.inc "doc-blocking"
-				logger.log {doc_id, lockValue}, "doc is locked"
+				logger.log {doc_id}, "doc is locked"
 				callback err, false
 
 	getLock: (doc_id, callback = (error) ->) ->
