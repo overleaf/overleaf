@@ -9,6 +9,8 @@ crypto = require "crypto"
 
 HOST = os.hostname()
 PID = process.pid
+RND = crypto.randomBytes(4).toString('hex')
+COUNT = 0
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
@@ -20,8 +22,7 @@ module.exports = LockManager =
 	# to prevent accidental unlocking by multiple processes
 	randomLock : () ->
 		time = Date.now()
-		RND = crypto.randomBytes(4).toString('hex')
-		return "locked:host=#{HOST}:pid=#{PID}:random=#{RND}:time=#{time}"
+		return "locked:host=#{HOST}:pid=#{PID}:random=#{RND}:time=#{time}:count=#{COUNT++}"
 
 	unlockScript: 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
 
