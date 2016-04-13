@@ -7,7 +7,7 @@ oneDay = 24 * 60 * 60 * 1000
 
 module.exports = ProjectPersistenceManager =
 
-	EXPIRY_TIMEOUT: oneDay * 2.5
+	EXPIRY_TIMEOUT: oneDay * 3.5
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
 		db.Project.findOrCreate(where: {project_id: project_id})
