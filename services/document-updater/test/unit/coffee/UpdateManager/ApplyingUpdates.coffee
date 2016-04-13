@@ -67,8 +67,8 @@ describe "UpdateManager", ->
 	describe "processOutstandingUpdatesWithLock", ->
 		describe "when the lock is free", ->
 			beforeEach ->
-				@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true)
-				@LockManager.releaseLock = sinon.stub().callsArg(1)
+				@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true, @lockValue = "mock-lock-value")
+				@LockManager.releaseLock = sinon.stub().callsArg(2)
 				@UpdateManager.continueProcessingUpdatesWithLock = sinon.stub().callsArg(2)
 				@UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
 
@@ -80,7 +80,7 @@ describe "UpdateManager", ->
 					@LockManager.tryLock.calledWith(@doc_id).should.equal true
 
 				it "should free the lock", ->
-					@LockManager.releaseLock.calledWith(@doc_id).should.equal true
+					@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
 
 				it "should process the outstanding updates", ->
 					@UpdateManager.processOutstandingUpdates.calledWith(@project_id, @doc_id).should.equal true
@@ -101,7 +101,7 @@ describe "UpdateManager", ->
 					@UpdateManager.processOutstandingUpdatesWithLock @project_id, @doc_id, @callback
 
 				it "should free the lock", ->
-					@LockManager.releaseLock.calledWith(@doc_id).should.equal true
+					@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
 					
 				it "should return the error in the callback", ->
 					@callback.calledWith(@error).should.equal true

@@ -10,20 +10,21 @@ SandboxedModule = require('sandboxed-module')
 
 describe 'LockManager - releasing the lock', ()->
 
-	deleteStub = sinon.stub().callsArgWith(1)
+	evalStub = sinon.stub().yields(1)
 	mocks =
 		"logger-sharelatex": log:->
 
 		"redis-sharelatex":
 			createClient : ()->
 				auth:->
-				del:deleteStub
+				eval: evalStub
 		"./Metrics": {inc: () ->}
 	
 	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should put a all data into memory', (done)->
-		LockManager.releaseLock doc_id, ->
-			deleteStub.calledWith("Blocking:#{doc_id}").should.equal true
+		lockValue = "lock-value-stub"
+		LockManager.releaseLock doc_id, lockValue, ->
+			evalStub.calledWith(LockManager.unlockScript, 1, "Blocking:#{doc_id}", lockValue).should.equal true
 			done()
 

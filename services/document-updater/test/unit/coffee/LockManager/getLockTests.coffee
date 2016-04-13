@@ -17,7 +17,8 @@ describe 'LockManager - getting the lock', ->
 	
 	describe "when the lock is not set", ->
 		beforeEach (done) ->
-			@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true)
+			@lockValue = "mock-lock-value"
+			@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true, @lockValue)
 			@LockManager.getLock @doc_id, (args...) =>
 				@callback(args...)
 				done()
@@ -30,20 +31,21 @@ describe 'LockManager - getting the lock', ->
 		it "should only need to try once", ->
 			@LockManager.tryLock.callCount.should.equal 1
 
-		it "should return the callback", ->
-			@callback.calledWith(null).should.equal true
+		it "should return the callback with the lock value", ->
+			@callback.calledWith(null, @lockValue).should.equal true
 
 	describe "when the lock is initially set", ->
 		beforeEach (done) ->
+			@lockValue = "mock-lock-value"
 			startTime = Date.now()
 			tries = 0
 			@LockManager.LOCK_TEST_INTERVAL = 5
-			@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) ->
+			@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) =>
 				if (Date.now() - startTime < 20) or (tries < 2)
 					tries = tries + 1
 					callback null, false
 				else
-					callback null, true
+					callback null, true, @lockValue
 			sinon.spy @LockManager, "tryLock"
 
 			@LockManager.getLock @doc_id, (args...) =>
@@ -53,8 +55,8 @@ describe 'LockManager - getting the lock', ->
 		it "should call tryLock multiple times until free", ->
 			(@LockManager.tryLock.callCount > 1).should.equal true
 
-		it "should return the callback", ->
-			@callback.calledWith(null).should.equal true
+		it "should return the callback with the lock value", ->
+			@callback.calledWith(null, @lockValue).should.equal true
 
 	describe "when the lock times out", ->
 		beforeEach (done) ->
@@ -66,7 +68,9 @@ describe 'LockManager - getting the lock', ->
 				done()
 
 		it "should return the callback with an error", ->
-			@callback.calledWith(new Error("timeout")).should.equal true
+			e = new Error("Timeout")
+			e.doc_id = @doc_id
+			@callback.calledWith(e).should.equal true
 		
 
 

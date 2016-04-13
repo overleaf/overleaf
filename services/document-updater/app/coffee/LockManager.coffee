@@ -4,42 +4,60 @@ redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
 keys = require('./RedisKeyBuilder')
 logger = require "logger-sharelatex"
+os = require "os"
+crypto = require "crypto"
+
+HOST = os.hostname()
+PID = process.pid
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
-	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
+	LOCK_TTL: 30 # seconds. Time until lock auto expires in redis.
+
+	# Use a signed lock value as described in
+	# http://redis.io/topics/distlock#correct-implementation-with-a-single-instance
+	# to prevent accidental unlocking by multiple processes
+	randomLock : () ->
+		time = Date.now()
+		RND = crypto.randomBytes(4).toString('hex')
+		return "locked:host=#{HOST}:pid=#{PID}:random=#{RND}:time=#{time}"
+
+	unlockScript: 'if redis.call("get", KEYS[1]) == ARGV[1] then return redis.call("del", KEYS[1]) else return 0 end';
 
 	tryLock : (doc_id, callback = (err, isFree)->)->
-		rclient.set keys.blockingKey(doc_id: doc_id), "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
+		lockValue = LockManager.randomLock()
+		key = keys.blockingKey(doc_id:doc_id)
+		rclient.set key, lockValue, "EX", @LOCK_TTL, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
 				metrics.inc "doc-not-blocking"
-				callback err, true
+				callback err, true, lockValue
 			else
 				metrics.inc "doc-blocking"
-				logger.log doc_id: doc_id, redis_response: gotLock, "doc is locked"
+				logger.log {doc_id, lockValue}, "doc is locked"
 				callback err, false
 
 	getLock: (doc_id, callback = (error) ->) ->
 		startTime = Date.now()
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
-				return callback(new Error("Timeout"))
+				e = new Error("Timeout")
+				e.doc_id = doc_id
+				return callback(e)
 
-			LockManager.tryLock doc_id, (error, gotLock) ->
+			LockManager.tryLock doc_id, (error, gotLock, lockValue) ->
 				return callback(error) if error?
 				if gotLock
-					callback(null)
+					callback(null, lockValue)
 				else
 					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
 
 	checkLock: (doc_id, callback = (err, isFree)->)->
-		multi = rclient.multi()
-		multi.exists keys.blockingKey(doc_id:doc_id)
-		multi.exec (err, replys)->
+		key = keys.blockingKey(doc_id:doc_id)
+		rclient.exists key, (err, exists) ->
 			return callback(err) if err?
-			exists = parseInt replys[0]
+			exists = parseInt exists
 			if exists == 1
 				metrics.inc "doc-blocking"
 				callback err, false
@@ -47,7 +65,8 @@ module.exports = LockManager =
 				metrics.inc "doc-not-blocking"
 				callback err, true
 
-	releaseLock: (doc_id, callback)->
-		rclient.del keys.blockingKey(doc_id:doc_id), callback
+	releaseLock: (doc_id, lockValue, callback)->
+		key = keys.blockingKey(doc_id:doc_id)
+		rclient.eval LockManager.unlockScript, 1, key, lockValue, callback
 
 	

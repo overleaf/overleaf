@@ -17,8 +17,9 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 		@callback = sinon.stub()
 		@arg1 = "argument 1"
 		@response_arg1 = "response argument 1"
-		@LockManager.getLock = sinon.stub().callsArgWith(1, null, true)
-		@LockManager.releaseLock = sinon.stub().callsArg(1)
+		@lockValue = "mock-lock-value"
+		@LockManager.getLock = sinon.stub().callsArgWith(1, null, @lockValue)
+		@LockManager.releaseLock = sinon.stub().callsArg(2)
 
 	describe "successfully", ->
 		beforeEach ->
@@ -48,7 +49,7 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 
 		it "should release the lock", ->
 			@LockManager.releaseLock
-				.calledWith(@doc_id)
+				.calledWith(@doc_id, @lockValue)
 				.should.equal true
 
 		it "should continue processing updates", ->
@@ -62,7 +63,7 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 			@UpdateManager.lockUpdatesAndDo @method, @project_id, @doc_id, @arg1, @callback
 
 		it "should free the lock", ->
-			@LockManager.releaseLock.calledWith(@doc_id).should.equal true
+			@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
 			
 		it "should return the error in the callback", ->
 			@callback.calledWith(@error).should.equal true
@@ -74,7 +75,7 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 			@UpdateManager.lockUpdatesAndDo @method, @project_id, @doc_id, @arg1, @callback
 
 		it "should free the lock", ->
-			@LockManager.releaseLock.calledWith(@doc_id).should.equal true
+			@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
 			
 		it "should return the error in the callback", ->
 			@callback.calledWith(@error).should.equal true

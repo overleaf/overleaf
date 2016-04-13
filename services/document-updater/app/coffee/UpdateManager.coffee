@@ -29,12 +29,12 @@ module.exports = UpdateManager =
 				callback()
 
 	processOutstandingUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
-		LockManager.tryLock doc_id, (error, gotLock) =>
+		LockManager.tryLock doc_id, (error, gotLock, lockValue) =>
 			return callback(error) if error?
 			return callback() if !gotLock
 			UpdateManager.processOutstandingUpdates project_id, doc_id, (error) ->
-				return UpdateManager._handleErrorInsideLock(doc_id, error, callback) if error?
-				LockManager.releaseLock doc_id, (error) =>
+				return UpdateManager._handleErrorInsideLock(doc_id, lockValue, error, callback) if error?
+				LockManager.releaseLock doc_id, lockValue, (error) =>
 					return callback(error) if error?
 					UpdateManager.continueProcessingUpdatesWithLock project_id, doc_id, callback
 
@@ -62,20 +62,20 @@ module.exports = UpdateManager =
 			RedisManager.setDocument doc_id, updatedDocLines, version, callback
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
-		LockManager.getLock doc_id, (error) ->
+		LockManager.getLock doc_id, (error, lockValue) ->
 			return callback(error) if error?
 			UpdateManager.processOutstandingUpdates project_id, doc_id, (error) ->
-				return UpdateManager._handleErrorInsideLock(doc_id, error, callback) if error?
+				return UpdateManager._handleErrorInsideLock(doc_id, lockValue, error, callback) if error?
 				method project_id, doc_id, args..., (error, response_args...) ->
-					return UpdateManager._handleErrorInsideLock(doc_id, error, callback) if error?
-					LockManager.releaseLock doc_id, (error) ->
+					return UpdateManager._handleErrorInsideLock(doc_id, lockValue, error, callback) if error?
+					LockManager.releaseLock doc_id, lockValue, (error) ->
 						return callback(error) if error?
 						callback null, response_args...
 						# We held the lock for a while so updates might have queued up
 						UpdateManager.continueProcessingUpdatesWithLock project_id, doc_id
 
-	_handleErrorInsideLock: (doc_id, original_error, callback = (error) ->) ->
-		LockManager.releaseLock doc_id, (lock_error) ->
+	_handleErrorInsideLock: (doc_id, lockValue, original_error, callback = (error) ->) ->
+		LockManager.releaseLock doc_id, lockValue, (lock_error) ->
 			callback(original_error)
 	
 	_sanitizeUpdate: (update) ->
