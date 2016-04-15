@@ -210,8 +210,10 @@ div.full-size.pdf(ng-controller="PdfController")
 						sixpack-convert="track_changes_feature_info"
 						ng-click="startFreeTrial('compile-timeout')"
 					) #{translate("start_free_trial")}
-	// // // //
 
+			.alert.alert-danger(ng-show="pdf.projectTooLarge")
+				strong #{translate("project_too_large")} 
+				span #{translate("project_too_large_please_reduce")}
 
 
 script(type='text/ng-template', id='clearCacheModalTemplate')
