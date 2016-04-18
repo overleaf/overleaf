@@ -6,7 +6,6 @@ import com.ning.http.client.AsyncHttpClient;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Instance;
 import uk.ac.ic.wlgitbridge.util.Log;
-import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -88,7 +87,7 @@ public abstract class Request<T extends Result> {
     }
 
     private void performGetRequest() {
-        Util.sout("GET -> " + url);
+        Log.info("GET -> " + url);
         try {
             HttpRequest request = Instance.httpRequestFactory.buildGetRequest(
                     new GenericUrl(url)
@@ -101,7 +100,7 @@ public abstract class Request<T extends Result> {
     }
 
     private void performPostRequest() {
-        Util.sout("POST -> " + url);
+        Log.info("POST -> " + url);
         try {
             HttpRequest request = Instance.httpRequestFactory.buildPostRequest(
                     new GenericUrl(url),

@@ -6,6 +6,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.ServletException;
@@ -37,7 +38,7 @@ public class PostbackHandler extends AbstractHandler {
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                Util.sout(baseRequest.getMethod() + " <- " + baseRequest.getUri());
+                Log.info(baseRequest.getMethod() + " <- " + baseRequest.getUri());
                 PostbackContents postbackContents = new PostbackContents(bridgeAPI, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
@@ -56,13 +57,24 @@ public class PostbackHandler extends AbstractHandler {
                 baseRequest.setHandled(true);
             }
         } catch (IOException e) {
-            Util.printStackTrace(e);
+            Log.warn(
+                    "IOException when handling postback to target: " + target,
+                    e
+            );
             throw e;
         } catch (ServletException e) {
-            Util.printStackTrace(e);
+            Log.warn(
+                    "ServletException when handling postback to target: " +
+                            target,
+                    e
+            );
             throw e;
         } catch (RuntimeException e) {
-            Util.printStackTrace(e);
+            Log.warn(
+                    "RuntimeException when handling postback to target: " +
+                            target,
+                    e
+            );
             throw e;
         }
     }

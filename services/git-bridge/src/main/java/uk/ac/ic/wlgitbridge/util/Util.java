@@ -89,37 +89,6 @@ public class Util {
         return POSTBACK_URL;
     }
 
-    private static void println(PrintStream ps, String ln) {
-        Log.info(ln);
-    }
-
-    public static void sout(String ln) {
-        println(System.out, ln);
-    }
-
-    public static void serr(String ln) {
-        println(System.err, ln);
-    }
-
-    private static StringBuilder getStringBuilder() {
-        StringBuilder sb = new StringBuilder("[");
-        sb.append(dateFormat.format(new Date()));
-        sb.append("] ");
-        return sb;
-    }
-
-    public static void serr() {
-        serr("");
-    }
-
-    public static void serr(Object obj) {
-        serr(obj.toString());
-    }
-
-    public static void printStackTrace(Throwable t) {
-        Log.warn("Exception", t);
-    }
-
     public static void deleteDirectory(File directory) {
         if (directory != null) {
             deleteInDirectory(directory);
@@ -195,9 +164,9 @@ public class Util {
 
         if (codeElement == null) {
             String error = "Unexpected error";
-            serr("Unexpected response from API:");
-            serr(json.toString());
-            serr("End of response");
+            Log.warn("Unexpected response from API:");
+            Log.warn(json.toString());
+            Log.warn("End of response");
             JsonElement statusElement = json.get("status");
             if (statusElement != null) {
                 String status = statusElement.getAsString();

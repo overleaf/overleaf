@@ -5,7 +5,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.exception.InvalidAPICallException;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponse;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponseBuilder;
-import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ public class MockSnapshotRequestHandler extends AbstractHandler {
         } catch (InvalidAPICallException e) {
             handled = false;
         } catch (RuntimeException e) {
-            Util.printStackTrace(e);
+            Log.warn("Runtime exception when handling request", e);
             handled = true;
         }
         baseRequest.setHandled(handled);

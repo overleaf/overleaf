@@ -7,11 +7,11 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +36,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         try {
             return snapshotRepositoryBuilder.getRepositoryWithNameAtRootDirectory(Util.removeAllSuffixes(name, "/", ".git"), rootGitDirectory, oauth2);
         } catch (RepositoryNotFoundException e) {
-            Util.printStackTrace(e);
+            Log.info("Repository not found: " + name);
             throw e;
             /*
         } catch (ServiceNotAuthorizedException e) {
@@ -47,7 +47,7 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
         } catch (ServiceMayNotContinueException e) { /* Such as FailedConnectionException */
             throw e;
         } catch (RuntimeException e) {
-            Util.printStackTrace(e);
+            Log.warn("Runtime exception when trying to open repo", e);
             throw new ServiceMayNotContinueException(e);
         } catch (ForbiddenException e) {
             throw new ServiceNotAuthorizedException();

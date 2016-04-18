@@ -4,9 +4,9 @@ import org.eclipse.jetty.http.HttpURI;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.util.MultiMap;
-import uk.ac.ic.wlgitbridge.util.Util;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InvalidPostbackKeyException;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +29,7 @@ public class FileServlet extends ResourceHandler {
         String method = baseRequest.getMethod();
         if (method.equals("GET")) {
             HttpURI uri = baseRequest.getUri();
-            Util.sout(method + " <- " + uri);
+            Log.info(method + " <- " + uri);
             MultiMap<String> multimap = new MultiMap<String>();
             uri.decodeQueryTo(multimap);
             String[] pathSections = uri.getPath().split("/");

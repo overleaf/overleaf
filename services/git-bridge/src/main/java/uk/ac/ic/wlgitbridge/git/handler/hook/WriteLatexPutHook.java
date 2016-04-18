@@ -7,16 +7,15 @@ import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceiveCommand.Result;
 import org.eclipse.jgit.transport.ReceivePack;
 import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
-import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
-import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.OutOfDateException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -49,7 +48,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
             } catch (SnapshotPostException e) {
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
-                Util.printStackTrace(t);
+                Log.warn("Throwable on pre receive: ", t);
                 handleSnapshotPostException(receivePack, receiveCommand, new InternalErrorException());
             }
         }

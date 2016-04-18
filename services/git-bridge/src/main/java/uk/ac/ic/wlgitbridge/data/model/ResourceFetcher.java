@@ -11,7 +11,7 @@ import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,14 +37,13 @@ public class ResourceFetcher {
             contents = fetch(projectName, url, path);
             fetchedUrls.put(url, contents);
         } else {
-            Util.sout("Found (" + projectName + "): " + url);
-            Util.sout("At (" + projectName + "): " + path);
+            Log.info("Found (" + projectName + "): " + url);
+            Log.info("At (" + projectName + "): " + path);
             contents = fetchedUrls.get(url);
             if (contents == null) {
                 RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
                 if (rawFile == null) {
-                    Util.sout(
-                        "WARNING: " +
+                    Log.warn(
                         "File " + path + " was not in the current commit, or the git tree, yet path was not null. " +
                         "File url is: " + url
                     );
@@ -59,7 +58,7 @@ public class ResourceFetcher {
 
     private byte[] fetch(String projectName, final String url, String path) throws FailedConnectionException {
         byte[] contents;
-        Util.sout("GET -> " + url);
+        Log.info("GET -> " + url);
         try {
             contents = Request.httpClient.prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
 
@@ -75,16 +74,32 @@ public class ResourceFetcher {
                 public byte[] onCompleted(Response response) throws Exception {
                     byte[] data = bytes.toByteArray();
                     bytes.close();
-                    Util.sout(response.getStatusCode() + " " + response.getStatusText() + " (" + data.length + "B) -> " + url);
+                    Log.info(response.getStatusCode() + " " + response.getStatusText() + " (" + data.length + "B) -> " + url);
                     return data;
                 }
 
             }).get();
         } catch (InterruptedException e) {
-            Util.printStackTrace(e);
+            Log.warn(
+                    "Interrupted when fetching project: "  +
+                            projectName  +
+                            ", url: " +
+                            url +
+                            ", path: " +
+                            path,
+                    e
+            );
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
-            Util.printStackTrace(e);
+            Log.warn(
+                    "ExecutionException when fetching project: " +
+                            projectName +
+                            ", url: " +
+                            url +
+                            ", path: " +
+                            path,
+                    e
+            );
             throw new FailedConnectionException();
         }
         persistentStore.addURLIndexForProject(projectName, url, path);

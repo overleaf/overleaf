@@ -6,7 +6,7 @@ import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponseBuilder;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
-import uk.ac.ic.wlgitbridge.util.Util;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.File;
 
@@ -42,7 +42,7 @@ public class MockSnapshotServer {
         try {
             server.start();
         } catch (Exception e) {
-            Util.printStackTrace(e);
+            Log.warn("Exception when trying to start server", e);
         }
         port = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
     }
