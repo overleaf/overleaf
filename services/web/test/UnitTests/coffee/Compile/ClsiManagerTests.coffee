@@ -7,6 +7,9 @@ SandboxedModule = require('sandboxed-module')
 
 describe "ClsiManager", ->
 	beforeEach ->
+		@jar = {cookie:"stuff"}
+		@ClsiRequestManager = 
+			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
@@ -19,8 +22,9 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
+			"./ClsiRequestManager": @ClsiRequestManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
-			"request": @request = {}
+			"request": @request = sinon.stub()
 		@project_id = "project-id"
 		@callback = sinon.stub()
 
@@ -80,15 +84,15 @@ describe "ClsiManager", ->
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@request.del = sinon.stub().callsArg(1)
+			@ClsiManager._makeRequest = sinon.stub().callsArg(2)
 			
 		describe "with the standard compileGroup", ->
 			beforeEach ->
 				@ClsiManager.deleteAuxFiles @project_id, {compileGroup: "standard"}, @callback
 
 			it "should call the delete method in the standard CLSI", ->
-				@request.del
-					.calledWith("#{@settings.apis.clsi.url}/project/#{@project_id}")
+				@ClsiManager._makeRequest
+					.calledWith(@project_id, { method:"DELETE", url:"#{@settings.apis.clsi.url}/project/#{@project_id}"})
 					.should.equal true
 
 			it "should call the callback", ->
@@ -99,8 +103,8 @@ describe "ClsiManager", ->
 				@ClsiManager.deleteAuxFiles @project_id, {compileGroup: "priority"}, @callback
 
 			it "should call the delete method in the CLSI", ->
-				@request.del
-					.calledWith("#{@settings.apis.clsi_priority.url}/project/#{@project_id}")
+				@ClsiManager._makeRequest
+					.calledWith(@project_id, { method:"DELETE", url:"#{@settings.apis.clsi_priority.url}/project/#{@project_id}"})
 					.should.equal true
 
 	describe "_buildRequest", ->
@@ -235,15 +239,15 @@ describe "ClsiManager", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, @body = { mock: "foo" })
+				@ClsiManager._makeRequest = sinon.stub().callsArgWith(2, null, {statusCode: 204}, @body = { mock: "foo" })
 				@ClsiManager._postToClsi @project_id, @req, "standard", @callback
 
 			it 'should send the request to the CLSI', ->
 				url = "#{@settings.apis.clsi.url}/project/#{@project_id}/compile"
-				@request.post.calledWith({
+				@ClsiManager._makeRequest.calledWith(@project_id, {
+					method: "POST",
 					url: url
 					json: @req
-					jar: false
 				}).should.equal true
 
 			it "should call the callback with the body and no error", ->
@@ -251,7 +255,7 @@ describe "ClsiManager", ->
 
 		describe "when the CLSI returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
+				@ClsiManager._makeRequest = sinon.stub().callsArgWith(2, null, {statusCode: 500}, @body = { mock: "foo" })
 				@ClsiManager._postToClsi @project_id, @req, "standard", @callback
 
 			it "should call the callback with the body and the error", ->
@@ -259,20 +263,20 @@ describe "ClsiManager", ->
 
 		describe "when the compiler is priority", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, @body = { mock: "foo" })
+				@ClsiManager._makeRequest = sinon.stub()
 				@ClsiManager._postToClsi @project_id, @req, "priority", @callback
 
 			it "should use the clsi_priority url", ->
 				url = "#{@settings.apis.clsi_priority.url}/project/#{@project_id}/compile"
-				@request.post.calledWith({
+				@ClsiManager._makeRequest.calledWith(@project_id, {
+					method: "POST",
 					url: url
 					json: @req
-					jar: false
 				}).should.equal true
 
 	describe "wordCount", ->
 		beforeEach ->
-			@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body = { mock: "foo" })
+			@ClsiManager._makeRequest = sinon.stub().callsArgWith(2, null, {statusCode: 200}, @body = { mock: "foo" })
 			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @req = { compile: { rootResourcePath: "rootfile.text", options: {} } })
 			@ClsiManager._getCompilerUrl = sinon.stub().returns "compiler.url"
 
@@ -281,8 +285,8 @@ describe "ClsiManager", ->
 				@ClsiManager.wordCount @project_id, false, {}, @callback
 
 			it "should call wordCount with root file", ->
-				@request.get
-					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=rootfile.text" })
+				@ClsiManager._makeRequest
+					.calledWith(@project_id, { method: "GET", url: "compiler.url/project/#{@project_id}/wordcount?file=rootfile.text" })
 					.should.equal true
 
 			it "should call the callback", ->
@@ -293,8 +297,8 @@ describe "ClsiManager", ->
 				@ClsiManager.wordCount @project_id, "main.tex", {}, @callback
 
 			it "should call wordCount with param file", ->
-				@request.get
-					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex" })
+				@ClsiManager._makeRequest
+					.calledWith(@project_id, { method: "GET", url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex" })
 					.should.equal true
 					
 		describe "with image", ->
@@ -303,6 +307,6 @@ describe "ClsiManager", ->
 				@ClsiManager.wordCount @project_id, "main.tex", {}, @callback
 
 			it "should call wordCount with file and image", ->
-				@request.get
-					.calledWith({ url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex&image=#{encodeURIComponent(@image)}" })
+				@ClsiManager._makeRequest
+					.calledWith(@project_id, { method: "GET", url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex&image=#{encodeURIComponent(@image)}" })
 					.should.equal true

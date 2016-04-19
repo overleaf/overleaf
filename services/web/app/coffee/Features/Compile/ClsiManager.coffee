@@ -6,8 +6,19 @@ Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 url = require("url")
+ClsiRequestManager = require("./ClsiRequestManager")
+
 
 module.exports = ClsiManager =
+
+	_makeRequest: (project_id, opts, callback)->
+		ClsiRequestManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			opts.jar = jar
+			request opts, callback
+
 	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
@@ -23,7 +34,10 @@ module.exports = ClsiManager =
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
-		request.del "#{compilerUrl}/project/#{project_id}", callback
+		opts =
+			url:"#{compilerUrl}/project/#{project_id}"
+			method:"DELETE"
+		ClsiManager._makeRequest project_id, opts, callback
 
 	_getCompilerUrl: (compileGroup) ->
 		if compileGroup == "priority"
@@ -33,13 +47,11 @@ module.exports = ClsiManager =
 
 	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
 		compilerUrl = @_getCompilerUrl(compileGroup)
-		request.post {
+		opts = 
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
-			jar:  false
-			query:
-				project_id:project_id
-		}, (error, response, body) ->
+			method: "POST"
+		ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300
 				callback null, body
@@ -117,9 +129,10 @@ module.exports = ClsiManager =
 			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
 			if req.compile.options.imageName?
 				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
-			request.get {
+			opts =
 				url: wordcount_url
-			}, (error, response, body) ->
+				method: "GET"
+			ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 				return callback(error) if error?
 				if 200 <= response.statusCode < 300
 					callback null, body
