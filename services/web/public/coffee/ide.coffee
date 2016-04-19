@@ -124,5 +124,8 @@ define [
 		catch err
 			console.error err
 
+		# User can append ?ft=somefeature to url to activate a feature toggle
+		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
+
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
