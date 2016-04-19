@@ -396,7 +396,7 @@ module.exports =
 	#	starttls: true
 	#	tlsOptions:
 	#		rejectUnauthorized: false
-	#		ca: '/etc/ldap/ca_certs.pem'
+	#		ca: ['/etc/ldap/ca_certs.pem']
 	
 	#templateLinks: [{
 	#	name : "CV projects",
