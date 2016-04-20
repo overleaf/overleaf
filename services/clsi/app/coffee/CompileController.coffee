@@ -78,3 +78,7 @@ module.exports = CompileController =
 			res.send JSON.stringify {
 				texcount: result
 			}
+
+	status: (req, res, next = (error)-> )->
+		res.send("OK")
+
