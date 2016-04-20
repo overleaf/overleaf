@@ -44,7 +44,11 @@ module.exports = ClsiManager =
 				if err?
 					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
 					return callback(err)
-				ClsiCookieManager.setServerId project_id, response, callback
+				ClsiCookieManager.setServerId project_id, response, (err)->
+					if err?
+						logger.warn err:err, project_id:project_id, "error setting server id"
+						
+					return callback err, response, body
 
 
 	_getCompilerUrl: (compileGroup) ->

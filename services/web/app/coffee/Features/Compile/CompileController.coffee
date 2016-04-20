@@ -33,7 +33,7 @@ module.exports = CompileController =
 			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, output, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
-				res.send 200, JSON.stringify {
+				res.status(200).send JSON.stringify {
 					status: status
 					outputFiles: outputFiles
 					compileGroup: limits?.compileGroup
