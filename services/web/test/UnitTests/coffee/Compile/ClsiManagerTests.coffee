@@ -10,6 +10,7 @@ describe "ClsiManager", ->
 		@jar = {cookie:"stuff"}
 		@ClsiCookieManager = 
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
+			setServerId: sinon.stub().callsArgWith(2)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
@@ -310,3 +311,47 @@ describe "ClsiManager", ->
 				@ClsiManager._makeRequest
 					.calledWith(@project_id, { method: "GET", url: "compiler.url/project/#{@project_id}/wordcount?file=main.tex&image=#{encodeURIComponent(@image)}" })
 					.should.equal true
+
+
+
+	describe "_makeRequest", ->
+
+		beforeEach ->
+			@response = {there:"something"}
+			@request.callsArgWith(1, null, @response)
+			@opts = 
+				method: "SOMETHIGN"
+				url: "http://a place on the web"
+
+		it "should process a request with a cookie jar", (done)->
+			@ClsiManager._makeRequest @project_id, @opts, =>
+				args = @request.args[0]
+				args[0].method.should.equal @opts.method
+				args[0].url.should.equal @opts.url
+				args[0].jar.should.equal @jar
+				done()
+
+		it "should set the cookie again on response as it might have changed", (done)->
+			@ClsiManager._makeRequest @project_id, @opts, =>
+				@ClsiCookieManager.setServerId.calledWith(@project_id, @response).should.equal true
+				done()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

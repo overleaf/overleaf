@@ -44,12 +44,6 @@ describe "ClsiCookieManager", ->
 				serverId.should.equal "clsi-7"
 				done()
 
-		it "should expire the key", (done)->
-			@redisMulti.exec.callsArgWith(0, null, ["clsi-7"])
-			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
-				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", 60 * 60 * 24 * 7).should.equal true
-				done()
-
 		it "should _populateServerIdViaRequest if no key is found", (done)->
 			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
 			@redisMulti.exec.callsArgWith(0, null, [])

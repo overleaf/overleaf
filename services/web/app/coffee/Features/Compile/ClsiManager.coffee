@@ -40,7 +40,11 @@ module.exports = ClsiManager =
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
 			opts.jar = jar
-			request opts, callback
+			request opts, (err, response, body)->
+				if err?
+					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					return callback(err)
+				ClsiCookieManager.setServerId project_id, response, callback
 
 
 	_getCompilerUrl: (compileGroup) ->

@@ -16,7 +16,6 @@ module.exports = ClsiCookieManager =
 	_getServerId : (project_id, callback = (err, serverId)->)->
 		multi = rclient.multi()
 		multi.get buildKey(project_id)
-		multi.expire buildKey(project_id), ONE_WEEK_IN_SECONDS
 		multi.exec (err, results)->
 			if err?
 				return callback(err)
