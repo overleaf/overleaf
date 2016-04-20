@@ -8,7 +8,7 @@ SandboxedModule = require('sandboxed-module')
 describe "ClsiManager", ->
 	beforeEach ->
 		@jar = {cookie:"stuff"}
-		@ClsiRequestManager = 
+		@ClsiCookieManager = 
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
@@ -22,7 +22,7 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
-			"./ClsiRequestManager": @ClsiRequestManager
+			"./ClsiCookieManager": @ClsiCookieManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 		@project_id = "project-id"

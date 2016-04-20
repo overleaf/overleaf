@@ -6,25 +6,19 @@ Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 url = require("url")
-ClsiRequestManager = require("./ClsiRequestManager")
+ClsiCookieManager = require("./ClsiCookieManager")
 
 
 module.exports = ClsiManager =
-
-	_makeRequest: (project_id, opts, callback)->
-		ClsiRequestManager.getCookieJar project_id, (err, jar)->
-			if err?
-				logger.err err:err, "error getting cookie jar for clsi request"
-				return callback(err)
-			opts.jar = jar
-			request opts, callback
 
 	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
-				return callback(error) if error?
+				if error?
+					logger.err err:error, project_id:project_id, "error sending request to clsi"
+					return callback(error)
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
 				callback(
 					null
@@ -38,6 +32,16 @@ module.exports = ClsiManager =
 			url:"#{compilerUrl}/project/#{project_id}"
 			method:"DELETE"
 		ClsiManager._makeRequest project_id, opts, callback
+
+
+	_makeRequest: (project_id, opts, callback)->
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			opts.jar = jar
+			request opts, callback
+
 
 	_getCompilerUrl: (compileGroup) ->
 		if compileGroup == "priority"

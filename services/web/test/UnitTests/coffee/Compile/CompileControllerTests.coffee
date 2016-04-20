@@ -23,7 +23,7 @@ describe "CompileController", ->
 				clsi_priority:
 					url: "clsi-priority.example.com"
 		@jar = {cookie:"stuff"}
-		@ClsiRequestManager = 
+		@ClsiCookieManager = 
 			getCookieJar:sinon.stub().callsArgWith(1, null, @jar)
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
@@ -36,7 +36,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 			"../../infrastructure/RateLimiter":@RateLimiter
-			"./ClsiRequestManager":@ClsiRequestManager
+			"./ClsiCookieManager":@ClsiCookieManager
 		@project_id = "project-id"
 		@user = 
 			features:

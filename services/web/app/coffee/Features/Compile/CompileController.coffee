@@ -8,7 +8,7 @@ Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
-ClsiRequestManager = require("./ClsiRequestManager")
+ClsiCookieManager = require("./ClsiCookieManager")
 
 
 module.exports = CompileController =
@@ -109,7 +109,7 @@ module.exports = CompileController =
 				CompileController.proxyToClsiWithLimits(project_id, url, limits, req, res, next)
 
 	proxyToClsiWithLimits: (project_id, url, limits, req, res, next = (error) ->) ->
-		ClsiRequestManager.getCookieJar project_id, (err, jar)->
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)

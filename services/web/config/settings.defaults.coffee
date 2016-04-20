@@ -126,6 +126,9 @@ module.exports =
 	# cookieDomain: ".sharelatex.dev"
 	cookieName:"sharelatex.sid"
 
+	# this is only used if cookies are used for clsi backend
+	#clsiCookieKey: "clsiserver"
+	
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
