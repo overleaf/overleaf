@@ -14,15 +14,22 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 
 # Install ShareLaTeX
 RUN apt-get install -y git python
-RUN git clone -b release https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
-RUN cd /var/www/sharelatex && git pull origin release
+RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
 
 # zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
 RUN apt-get install -y zlib1g-dev
 
+
+ADD services.js /var/www/sharelatex/config/services.js
+ADD package.json /var/www/package.json
+ADD git-revision.js /var/www/git-revision.js
+RUN cd /var/www && npm install
+
 RUN cd /var/www/sharelatex; \
 	npm install; \
 	grunt install;
+
+RUN cd /var/www && node git-revision > revisions.txt
 	
 # Minify js assets
 RUN cd /var/www/sharelatex/web; \
