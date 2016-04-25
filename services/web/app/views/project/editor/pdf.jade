@@ -156,9 +156,13 @@ div.full-size.pdf(ng-controller="PdfController")
 
 		.pdf-errors(ng-switch-when="errors")
 	
-			.alert.alert-danger(ng-show="pdf.error || pdf.renderingError")
+			.alert.alert-danger(ng-show="pdf.error")
 				strong #{translate("server_error")} 
 				span #{translate("somthing_went_wrong_compiling")}
+
+			.alert.alert-danger(ng-show="pdf.renderingError")
+				strong #{translate("pdf_rendering_error")} 
+				span #{translate("something_went_wrong_rendering_pdf")}
 	
 			.alert.alert-danger(ng-show="pdf.clsiMaintenance")
 				strong #{translate("server_error")} 

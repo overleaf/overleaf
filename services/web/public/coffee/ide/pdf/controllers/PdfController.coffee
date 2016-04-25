@@ -46,6 +46,7 @@ define [
 			$scope.pdf.url        = null
 			$scope.pdf.clsiMaintenance = false
 			$scope.pdf.tooRecentlyCompiled = false
+			$scope.pdf.renderingError = false
 
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
@@ -179,6 +180,7 @@ define [
 					parseCompileResponse(data)
 				.error () ->
 					$scope.pdf.compiling = false
+					$scope.pdf.renderingError = false
 					$scope.pdf.error = true
 					$scope.pdf.view = 'errors'
 
