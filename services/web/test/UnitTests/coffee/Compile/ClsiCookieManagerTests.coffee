@@ -5,6 +5,7 @@ expect = chai.expect
 modulePath = "../../../../app/js/Features/Compile/ClsiCookieManager.js"
 SandboxedModule = require('sandboxed-module')
 realRequst = require("request")
+
 describe "ClsiCookieManager", ->
 	beforeEach ->
 		@redisMulti =
@@ -54,27 +55,40 @@ describe "ClsiCookieManager", ->
 
 	describe "_populateServerIdViaRequest", ->
 
+		beforeEach ->
+			@response  = "some data"
+			@request.get.callsArgWith(1, null, @response)
+			@ClsiCookieManager.setServerId = sinon.stub().callsArgWith(2, null, "clsi-9")
+
 		it "should make a request to the clsi", (done)->
-			response  = "some data"
-			@request.get.callsArgWith(1, null, response)
-			@ClsiCookieManager.setServerId = sinon.stub().callsArgWith(2)
 			@ClsiCookieManager._populateServerIdViaRequest @project_id, (err, serverId)=>
 				args = @ClsiCookieManager.setServerId.args[0]
 				args[0].should.equal @project_id
-				args[1].should.deep.equal response
+				args[1].should.deep.equal @response
+				done()
+
+		it "should return the server id", (done)->
+			@ClsiCookieManager._populateServerIdViaRequest @project_id, (err, serverId)=>
+				serverId.should.equal "clsi-9"
 				done()
 
 	describe "setServerId", ->
 
-		it "should set the server id with a ttl", (done)->
+		beforeEach ->
+			@response = "dsadsakj"
 			@ClsiCookieManager._parseServerIdFromResponse = sinon.stub().returns("clsi-8")
-			response = "dsadsakj"
 			@redisMulti.exec.callsArgWith(0)
-			@ClsiCookieManager.setServerId @project_id, response, (err)=>
+
+		it "should set the server id with a ttl", (done)->
+			@ClsiCookieManager.setServerId @project_id, @response, (err)=>
 				@redisMulti.set.calledWith("clsiserver:#{@project_id}", "clsi-8").should.equal true
 				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", 60 * 60 * 24 * 7).should.equal true
 				done()
 
+		it "should return the server id", (done)->
+			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
+				serverId.should.equal "clsi-8"
+				done()
 
 	describe "getCookieJar", ->
 

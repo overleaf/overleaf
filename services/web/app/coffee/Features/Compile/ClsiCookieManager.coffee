@@ -32,21 +32,22 @@ module.exports = ClsiCookieManager =
 			if err?
 				logger.err err:err, project_id:project_id, "error getting initial server id for project"
 				return callback(err)
-			ClsiCookieManager.setServerId project_id, res, (err)->
+			ClsiCookieManager.setServerId project_id, res, (err, serverId)->
 				if err?
 					logger.err err:err, project_id:project_id, "error setting server id via populate request"
-				callback(err)
+				callback(err, serverId)
 
 	_parseServerIdFromResponse : (response)->
 		cookies = Cookie.parse(response.headers["set-cookie"]?[0] or "")
 		return cookies?[Settings.clsiCookieKey]
 
-	setServerId: (project_id, response, callback = ->)->
+	setServerId: (project_id, response, callback = (err, serverId)->)->
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
 		multi = rclient.multi()
 		multi.set buildKey(project_id), serverId
 		multi.expire buildKey(project_id), ONE_WEEK_IN_SECONDS
-		multi.exec callback
+		multi.exec (err)->
+			callback(err, serverId)
 
 
 	getCookieJar: (project_id, callback = (err, jar)->)->
