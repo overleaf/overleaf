@@ -8,12 +8,16 @@ realRequst = require("request")
 
 describe "ClsiCookieManager", ->
 	beforeEach ->
+		self = @
 		@redisMulti =
 			set:sinon.stub()
 			get:sinon.stub()
 			expire:sinon.stub()
 			exec:sinon.stub()
-		self = @
+		@redis =
+			auth:->
+			get:sinon.stub()
+			multi: -> return self.redisMulti
 		@project_id = "123423431321"
 		@request =
 			get: sinon.stub()
@@ -22,14 +26,14 @@ describe "ClsiCookieManager", ->
 		@ClsiCookieManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex" :
 				createClient: =>
-					auth:->
-					multi: -> return self.redisMulti
+					@redis
 			"settings-sharelatex": @settings =
 				redis:
 					web:"redis.something"
 				apis:
 					clsi:
 						url: "http://clsi.example.com"
+				clsiCookieKey: "coooookie"
 			"request": @request
 
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
@@ -39,15 +43,15 @@ describe "ClsiCookieManager", ->
 	describe "getServerId", ->
 
 		it "should call get for the key", (done)->
-			@redisMulti.exec.callsArgWith(0, null, ["clsi-7"])
+			@redis.get.callsArgWith(1, null, "clsi-7")
 			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
-				@redisMulti.get.calledWith("clsiserver:#{@project_id}").should.equal true
+				@redis.get.calledWith("clsiserver:#{@project_id}").should.equal true
 				serverId.should.equal "clsi-7"
 				done()
 
 		it "should _populateServerIdViaRequest if no key is found", (done)->
 			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
-			@redisMulti.exec.callsArgWith(0, null, [])
+			@redis.get.callsArgWith(1, null)
 			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
 				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
 				done()

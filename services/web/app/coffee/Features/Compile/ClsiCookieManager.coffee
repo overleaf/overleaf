@@ -9,17 +9,16 @@ buildKey = (project_id)->
 	return "clsiserver:#{project_id}"
 
 
+clsiCookiesEnabled = Settings.clsiCookieKey? and Settings.clsiCookieKey.length != 0
+
 ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7
 
 module.exports = ClsiCookieManager =
 
 	_getServerId : (project_id, callback = (err, serverId)->)->
-		multi = rclient.multi()
-		multi.get buildKey(project_id)
-		multi.exec (err, results)->
+		rclient.get buildKey(project_id), (err, serverId)->
 			if err?
 				return callback(err)
-			serverId = results[0]
 			if serverId?
 				return callback(null, serverId)
 			else
@@ -51,6 +50,8 @@ module.exports = ClsiCookieManager =
 
 
 	getCookieJar: (project_id, callback = (err, jar)->)->
+		# if !clsiCookiesEnabled
+		# 	return callback(null, request.jar())
 		ClsiCookieManager._getServerId project_id, (err, serverId)=>
 			if err?
 				logger.err err:err, project_id:project_id, "error getting server id"
