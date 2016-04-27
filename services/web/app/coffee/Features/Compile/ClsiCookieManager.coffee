@@ -8,7 +8,6 @@ logger = require "logger-sharelatex"
 buildKey = (project_id)->
 	return "clsiserver:#{project_id}"
 
-
 clsiCookiesEnabled = Settings.clsiCookieKey? and Settings.clsiCookieKey.length != 0
 
 ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7
@@ -41,6 +40,8 @@ module.exports = ClsiCookieManager =
 		return cookies?[Settings.clsiCookieKey]
 
 	setServerId: (project_id, response, callback = (err, serverId)->)->
+		if !clsiCookiesEnabled
+			return callback()
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
 		multi = rclient.multi()
 		multi.set buildKey(project_id), serverId
@@ -50,8 +51,8 @@ module.exports = ClsiCookieManager =
 
 
 	getCookieJar: (project_id, callback = (err, jar)->)->
-		# if !clsiCookiesEnabled
-		# 	return callback(null, request.jar())
+		if !clsiCookiesEnabled
+			return callback(null, request.jar())
 		ClsiCookieManager._getServerId project_id, (err, serverId)=>
 			if err?
 				logger.err err:err, project_id:project_id, "error getting server id"

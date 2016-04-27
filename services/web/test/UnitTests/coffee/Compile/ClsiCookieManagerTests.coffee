@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+assert = chai.assert
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Compile/ClsiCookieManager.js"
@@ -23,20 +24,22 @@ describe "ClsiCookieManager", ->
 			get: sinon.stub()
 			cookie:realRequst.cookie
 			jar: realRequst.jar
-		@ClsiCookieManager = SandboxedModule.require modulePath, requires:
+		@settings =
+			redis:
+				web:"redis.something"
+			apis:
+				clsi:
+					url: "http://clsi.example.com"
+			clsiCookieKey: "coooookie"
+		@requires = 
 			"redis-sharelatex" :
 				createClient: =>
 					@redis
-			"settings-sharelatex": @settings =
-				redis:
-					web:"redis.something"
-				apis:
-					clsi:
-						url: "http://clsi.example.com"
-				clsiCookieKey: "coooookie"
+			"settings-sharelatex": @settings
 			"request": @request
 
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
+		@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
 
 
 
@@ -94,17 +97,32 @@ describe "ClsiCookieManager", ->
 				serverId.should.equal "clsi-8"
 				done()
 
+
+		it "should not set the server id if clsiCookies are not enabled", (done)->
+			delete @settings.clsiCookieKey 
+			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
+				@redisMulti.exec.called.should.equal false
+				done()
+
 	describe "getCookieJar", ->
 
-		it "should return a jar with the cookie set populated from redis", (done)->
+		beforeEach ->
 			@ClsiCookieManager._getServerId = sinon.stub().callsArgWith(1, null, "clsi-11")
-			opts = {}
+
+		it "should return a jar with the cookie set populated from redis", (done)->
 			@ClsiCookieManager.getCookieJar @project_id, (err, jar)->
 				jar._jar.store.idx["clsi.example.com"]["/"].clsiserver.key.should.equal "clsiserver"
 				jar._jar.store.idx["clsi.example.com"]["/"].clsiserver.value.should.equal "clsi-11"
 				done()
 
 
+		it "should return empty cookie jar if clsiCookies are not enabled", (done)->
+			delete @settings.clsiCookieKey 
+			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager.getCookieJar @project_id, (err, jar)->
+				assert.deepEqual jar, realRequst.jar()
+				done()
 
 
 
