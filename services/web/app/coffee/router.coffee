@@ -176,7 +176,12 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
 
-		webRouter.get  /learn(\/.*)?/, WikiController.getPage
+		webRouter.get  /learn(\/.*)?/, RateLimiterMiddlewear.rateLimit({
+			endpointName: "wiki"
+			params: []
+			maxRequests: 60
+			timeInterval: 60
+		}), WikiController.getPage
 
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
