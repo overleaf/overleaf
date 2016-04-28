@@ -36,7 +36,7 @@ docker rm sharelatex
 
 ### Mongo and Redis
 
-ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later), and
+ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later, 3.x is recommended), and
 [Redis](http://redis.io/) (must be version 2.6.12 or later).
 These should be running on the host system.
 
