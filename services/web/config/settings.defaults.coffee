@@ -388,7 +388,7 @@ module.exports =
 	# 	filter: "(uid=:userKey)"
 	# 	failMessage: 'LDAP User Fail'
 	# 	fieldName: 'LDAP User'
-	# 	placeholder: 'LDAP User ID'
+	# 	placeholder: 'email@example.com'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
 	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
