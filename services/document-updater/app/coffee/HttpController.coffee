@@ -4,6 +4,8 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 
+TWO_MEGABYTES = 2 * 1024 * 1024
+
 module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
@@ -34,6 +36,9 @@ module.exports = HttpController =
 		lines = req.body.lines
 		source = req.body.source
 		user_id = req.body.user_id
+		if req.headers['content-length'] > TWO_MEGABYTES
+			logger.log {project_id, doc_id, source, user_id}, "document too large, returning 406 response"
+			return res.send 406
 		logger.log project_id: project_id, doc_id: doc_id, lines: lines, source: source, user_id: user_id, "setting doc via http"
 		timer = new Metrics.Timer("http.setDoc")
 		DocumentManager.setDocWithLock project_id, doc_id, lines, source, user_id, (error) ->
@@ -41,7 +46,7 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "set doc via http"
 			res.send 204 # No Content
-		
+
 
 	flushDocIfLoaded: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
@@ -53,7 +58,7 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "flushed doc via http"
 			res.send 204 # No Content
-		
+
 	flushAndDeleteDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
@@ -74,7 +79,7 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "flushed project via http"
 			res.send 204 # No Content
-		
+
 	deleteProject: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "deleting project via http"
@@ -84,4 +89,3 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "deleted project via http"
 			res.send 204 # No Content
-			

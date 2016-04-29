@@ -24,6 +24,7 @@ describe "HttpController.setDoc", ->
 		@res =
 			send: sinon.stub()
 		@req =
+			headers: {}
 			params:
 				project_id: @project_id
 				doc_id: @doc_id
@@ -65,7 +66,15 @@ describe "HttpController.setDoc", ->
 			@next
 				.calledWith(new Error("oops"))
 				.should.equal true
-		
 
+	describe "when the payload is too large", ->
+		beforeEach ->
+			@req.headers['content-length'] = 40 * 1024 * 1024
+			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)
+			@HttpController.setDoc(@req, @res, @next)
 
+		it 'should send back a 406 response', ->
+			@res.send.calledWith(406).should.equal true
 
+		it 'should not call setDocWithLock', ->
+			@DocumentManager.setDocWithLock.callCount.should.equal 0
