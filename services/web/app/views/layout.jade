@@ -23,7 +23,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
-				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
 
 
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
