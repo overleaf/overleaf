@@ -4,15 +4,21 @@ div.binary-file.full-size(
 	ng-if="openFile"
 )
 	img(
+		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}"
 		ng-if="['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(openFile)) > -1"
+		onerror="sl_binaryFilePreviewError()"
+		onabort="sl_binaryFilePreviewError()"
 	)
 	img(
+		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}?format=png"
 		ng-if="['pdf', 'eps'].indexOf(extension(openFile)) > -1"
+		onerror="sl_binaryFilePreviewError()"
+		onabort="sl_binaryFilePreviewError()"
 	)
 	p.no-preview(
-		ng-if="['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
+		ng-if="failedLoad || ['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
 	) #{translate("no_preview_available")}
 	a.btn.btn-info(
 		ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
