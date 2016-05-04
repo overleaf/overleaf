@@ -45,7 +45,6 @@ module.exports = FileStoreHandler =
 		readStream = request(opts)
 		readStream.on "error", (err) ->
 			logger.err {err, project_id, file_id, query}, "error in file stream"
-			return callback(err)
 		callback(null, readStream)
 
 	deleteFile: (project_id, file_id, callback)->
