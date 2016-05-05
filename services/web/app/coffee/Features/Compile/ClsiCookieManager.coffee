@@ -10,7 +10,6 @@ buildKey = (project_id)->
 
 clsiCookiesEnabled = Settings.clsiCookieKey? and Settings.clsiCookieKey.length != 0
 
-ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7
 
 module.exports = ClsiCookieManager =
 
@@ -45,7 +44,7 @@ module.exports = ClsiCookieManager =
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
 		multi = rclient.multi()
 		multi.set buildKey(project_id), serverId
-		multi.expire buildKey(project_id), ONE_WEEK_IN_SECONDS
+		multi.expire buildKey(project_id), Settings.clsi_cookie_expire_length
 		multi.exec (err)->
 			callback(err, serverId)
 

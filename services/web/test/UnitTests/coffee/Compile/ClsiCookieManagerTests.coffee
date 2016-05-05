@@ -30,6 +30,7 @@ describe "ClsiCookieManager", ->
 			apis:
 				clsi:
 					url: "http://clsi.example.com"
+			clsi_cookie_expire_length: Math.random()
 			clsiCookieKey: "coooookie"
 		@requires = 
 			"redis-sharelatex" :
@@ -89,7 +90,7 @@ describe "ClsiCookieManager", ->
 		it "should set the server id with a ttl", (done)->
 			@ClsiCookieManager.setServerId @project_id, @response, (err)=>
 				@redisMulti.set.calledWith("clsiserver:#{@project_id}", "clsi-8").should.equal true
-				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", 60 * 60 * 24 * 7).should.equal true
+				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", @settings.clsi_cookie_expire_length).should.equal true
 				done()
 
 		it "should return the server id", (done)->
