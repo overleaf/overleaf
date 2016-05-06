@@ -44,7 +44,7 @@ module.exports = ClsiCookieManager =
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
 		multi = rclient.multi()
 		multi.set buildKey(project_id), serverId
-		multi.expire buildKey(project_id), Settings.clsi_cookie_expire_length
+		multi.expire buildKey(project_id), Settings.clsi_cookie_expire_length_seconds
 		multi.exec (err)->
 			callback(err, serverId)
 
