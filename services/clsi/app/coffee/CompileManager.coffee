@@ -32,7 +32,11 @@ module.exports = CompileManager =
 			injectDraftModeIfRequired (error) ->
 				return callback(error) if error?
 				timer = new Metrics.Timer("run-compile")
+				# find the image tag to log it as a metric
+				tag = request.imageName?.match(/:(.*)/)?[1] or "default"
+				tag = "other" if project_id?.match(/^[0-9a-f]{24}$/) # exclude smoke test
 				Metrics.inc("compiles")
+				Metrics.inc("compiles-with-image.#{tag}")
 				LatexRunner.runLatex request.project_id, {
 					directory: compileDir
 					mainFile:  request.rootResourcePath
