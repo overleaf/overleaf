@@ -30,6 +30,10 @@ module.exports =
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
+		
+	commands:
+		# Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
+		convertCommandPrefix: []
 
 	# Filestore health check
 	# ----------------------

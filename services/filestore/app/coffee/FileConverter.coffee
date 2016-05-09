@@ -3,6 +3,7 @@ metrics = require("metrics-sharelatex")
 logger = require("logger-sharelatex")
 safe_exec = require("./SafeExec")
 approvedFormats = ["png"]
+Settings = require "settings-sharelatex"
 
 fourtySeconds = 40 * 1000
 
@@ -22,8 +23,9 @@ module.exports =
 			err = new Error("invalid format requested")
 			return callback err
 		width = "600x"
-		args = "nice convert -define pdf:fit-page=#{width} -flatten -density 300 #{sourcePath} #{destPath}"
-		safe_exec args, childProcessOpts, (err, stdout, stderr)->
+		command = ["convert", "-define", "pdf:fit-page=#{width}", "-flatten", "-density", "300", sourcePath, destPath]
+		command = Settings.commands.convertCommandPrefix.concat(command)
+		safe_exec command, childProcessOpts, (err, stdout, stderr)->
 			timer.done()
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, requestedFormat:requestedFormat, destPath:destPath,  "something went wrong converting file"
@@ -36,8 +38,9 @@ module.exports =
 		destPath = "#{sourcePath}.png"
 		sourcePath = "#{sourcePath}[0]"
 		width = "260x"
-		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
-		safe_exec args, childProcessOpts, (err, stdout, stderr)->
+		command = ["convert", "-flatten", "-background", "white", "-density", "300", "-define", "pdf:fit-page=#{width}", sourcePath, "-resize", width, destPath]
+		command = Settings.commands.convertCommandPrefix.concat(command)
+		safe_exec command, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, "something went wrong converting file to thumbnail"
 			else
@@ -49,8 +52,9 @@ module.exports =
 		destPath = "#{sourcePath}.png"
 		sourcePath = "#{sourcePath}[0]"
 		width = "548x"
-		args = "nice convert -flatten -background white -density 300 -define pdf:fit-page=#{width} #{sourcePath} -resize #{width} #{destPath}"
-		safe_exec args, childProcessOpts, (err, stdout, stderr)->
+		command = ["convert", "-flatten", "-background", "white", "-density", "300", "-define", "pdf:fit-page=#{width}", sourcePath, "-resize", width, destPath]
+		command = Settings.commands.convertCommandPrefix.concat(command)
+		safe_exec command, childProcessOpts, (err, stdout, stderr)->
 			if err?
 				logger.err err:err, stderr:stderr, sourcePath:sourcePath, destPath:destPath, "something went wrong converting file to preview"
 			else

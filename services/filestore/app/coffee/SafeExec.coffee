@@ -10,7 +10,7 @@ child_process = require('child_process')
 
 module.exports = (command, options, callback = (err, stdout, stderr) ->) ->
 	# options are {timeout:  number-of-milliseconds, killSignal: signal-name}
-	[cmd, args...] = command.split(' ')
+	[cmd, args...] = command
 
 	child = child_process.spawn cmd, args, {detached:true}
 	stdout = ""

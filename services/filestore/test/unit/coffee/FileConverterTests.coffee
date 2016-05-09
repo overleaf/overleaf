@@ -16,6 +16,9 @@ describe "FileConverter", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			"settings-sharelatex": @Settings =
+				commands:
+					convertCommandPrefix: []
 
 		@sourcePath = "/this/path/here.eps"
 		@format = "png"
@@ -27,8 +30,8 @@ describe "FileConverter", ->
 			@safe_exec.callsArgWith(2)
 			@converter.convert @sourcePath, @format, (err)=>
 				args = @safe_exec.args[0][0]
-				args.indexOf(@sourcePath).should.not.equal -1 
-				args.indexOf(@format).should.not.equal -1 
+				args.indexOf("#{@sourcePath}[0]").should.not.equal -1 
+				args.indexOf("#{@sourcePath}.#{@format}").should.not.equal -1 
 				done()
 
 		it "should return the dest path", (done)->
@@ -48,13 +51,21 @@ describe "FileConverter", ->
 			@converter.convert @sourcePath, "ahhhhh", (err)=>
 				expect(err).to.exist
 				done()
+		
+		it "should prefix the command with Settings.commands.convertCommandPrefix", (done) ->
+			@safe_exec.callsArgWith(2)
+			@Settings.commands.convertCommandPrefix = ["nice"]
+			@converter.convert @sourcePath, @format, (err)=>
+				command = @safe_exec.args[0][0]
+				command[0].should.equal "nice"
+				done()
 
 	describe "thumbnail", ->
 		it "should call converter resize with args", (done)->
 			@safe_exec.callsArgWith(2)
 			@converter.thumbnail @sourcePath, (err)=>
 				args = @safe_exec.args[0][0]
-				args.indexOf(@sourcePath).should.not.equal -1 
+				args.indexOf("#{@sourcePath}[0]").should.not.equal -1 
 				done()
 
 	describe "preview", ->
@@ -62,5 +73,5 @@ describe "FileConverter", ->
 			@safe_exec.callsArgWith(2)
 			@converter.preview @sourcePath, (err)=>
 				args = @safe_exec.args[0][0]
-				args.indexOf(@sourcePath).should.not.equal -1 
+				args.indexOf("#{@sourcePath}[0]").should.not.equal -1 
 				done()
