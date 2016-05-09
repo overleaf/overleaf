@@ -41,9 +41,13 @@ module.exports = LatexRunner =
 			stats["latex-runs-with-errors"] = if failed then runs else 0
 			stats["latex-runs-#{runs}"] = 1
 			stats["latex-runs-with-errors-#{runs}"] = if failed then 1 else 0
-			callback error, output, stats
+			# timing information from /usr/bin/time
+			timings = {}
+			timings["cpu-percent"] = output?.stderr?.match(/Percent of CPU this job got: (\d+)/m)?[1] or 0
+			timings["cpu-time"] = output?.stderr?.match(/User time.*: (\d+.\d+)/m)?[1] or 0
+			callback error, output, stats, timings
 
-	_latexmkBaseCommand: ["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
+	_latexmkBaseCommand: ["/usr/bin/time", "-v", "latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
 
 	_pdflatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [

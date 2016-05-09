@@ -43,17 +43,19 @@ module.exports = CompileManager =
 					compiler:  request.compiler
 					timeout:   request.timeout
 					image:     request.imageName
-				}, (error, output, stats) ->
+				}, (error, output, stats, timings) ->
 					return callback(error) if error?
 					Metrics.inc("compiles-succeeded")
 					for metric_key, metric_value of stats or {}
 						Metrics.count(metric_key, metric_value)
+					for metric_key, metric_value of timings or {}
+						Metrics.timing(metric_key, metric_value)
 					loadavg = os.loadavg?()
 					Metrics.gauge("load-avg", loadavg[0]) if loadavg?
 					ts = timer.done()
-					logger.log {project_id: request.project_id, time_taken: ts, stats:stats, loadavg:loadavg}, "done compile"
-					if stats?["latex-runs"] > 0
-						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"])
+					logger.log {project_id: request.project_id, time_taken: ts, stats:stats, timings:timings, loadavg:loadavg}, "done compile"
+					if stats?["latex-runs"] > 0 and timings?["cpu-time"] > 0
+						Metrics.timing("run-compile-per-pass", timings["cpu-time"] / stats["latex-runs"])
 
 					OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
 						return callback(error) if error?
