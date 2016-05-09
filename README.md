@@ -34,6 +34,9 @@ If you want to permanently remove ShareLaTeX from your docker containers:
 docker rm sharelatex
 ```
 
+### Operating systems
+We recommend a debian based operating system such as Ubuntu for ShareLaTeX, this is what the software has been developed using and most people use when running ShareLaTeX.
+
 ### Mongo and Redis
 
 ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later, 3.x is recommended), and
