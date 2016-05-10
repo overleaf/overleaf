@@ -54,8 +54,10 @@ module.exports = CompileManager =
 					Metrics.gauge("load-avg", loadavg[0]) if loadavg?
 					ts = timer.done()
 					logger.log {project_id: request.project_id, time_taken: ts, stats:stats, timings:timings, loadavg:loadavg}, "done compile"
+					if stats?["latex-runs"] > 0
+						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"])
 					if stats?["latex-runs"] > 0 and timings?["cpu-time"] > 0
-						Metrics.timing("run-compile-per-pass", timings["cpu-time"] / stats["latex-runs"])
+						Metrics.timing("run-compile-cpu-time-per-pass", timings["cpu-time"] / stats["latex-runs"])
 
 					OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
 						return callback(error) if error?
