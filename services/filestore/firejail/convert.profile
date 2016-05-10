@@ -16,7 +16,7 @@ blacklist /media
 blacklist /mnt
 blacklist /opt
 blacklist /root
-blacklist /run
+read-only /run
 blacklist /sbin
 blacklist /selinux
 blacklist /src
