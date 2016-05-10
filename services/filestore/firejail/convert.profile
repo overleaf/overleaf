@@ -32,8 +32,8 @@ net none
 private-tmp
 private-dev
 shell none
-seccomp.keep access,arch_prctl,brk,chown,clone,close,dup,execve,exit_group,fcntl,fstat,futex,getcwd,getdents,getrlimit,getrusage,lseek,mmap,mprotect,munmap,nanosleep,open,openat,prctl,read,readlink,rt_sigaction,rt_sigprocmask,sched_getaffinity,set_robust_list,set_tid_address,stat,symlink,times,unlink,unshare,wait4,write
+seccomp.keep access,arch_prctl,brk,chown,clone,close,dup,execve,exit_group,fcntl,fstat,futex,getcwd,getdents,getegid,geteuid,getgid,getpeername,getpgrp,getpid,getppid,getrlimit,getrusage,getuid,ioctl,lseek,mmap,mprotect,munmap,nanosleep,open,openat,prctl,read,readlink,rt_sigaction,rt_sigprocmask,sched_getaffinity,set_robust_list,set_tid_address,stat,symlink,times,uname,unlink,unshare,wait4,write,madvise
 
 rlimit-fsize 524288000 #500Mb
-rlimit-nproc 100
+rlimit-nproc 200
 rlimit-nofile 100
