@@ -43,8 +43,10 @@ module.exports = LatexRunner =
 			stats["latex-runs-with-errors-#{runs}"] = if failed then 1 else 0
 			# timing information from /usr/bin/time
 			timings = {}
-			timings["cpu-percent"] = output?.stderr?.match(/Percent of CPU this job got: (\d+)/m)?[1] or 0
-			timings["cpu-time"] = output?.stderr?.match(/User time.*: (\d+.\d+)/m)?[1] or 0
+			stderr = output?.stderr
+			timings["cpu-percent"] = stderr?.match(/Percent of CPU this job got: (\d+)/m)?[1] or 0
+			timings["cpu-time"] = stderr?.match(/User time.*: (\d+.\d+)/m)?[1] or 0
+			timings["sys-time"] = stderr?.match(/System time.*: (\d+.\d+)/m)?[1] or 0
 			callback error, output, stats, timings
 
 	_latexmkBaseCommand: ["/usr/bin/time", "-v", "latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
