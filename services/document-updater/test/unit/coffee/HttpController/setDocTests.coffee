@@ -69,7 +69,10 @@ describe "HttpController.setDoc", ->
 
 	describe "when the payload is too large", ->
 		beforeEach ->
-			@req.headers['content-length'] = 40 * 1024 * 1024
+			lines = []
+			for _ in [0..300000]
+				lines.push "test test test"
+			@req.body.lines = lines
 			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)
 			@HttpController.setDoc(@req, @res, @next)
 

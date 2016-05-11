@@ -30,14 +30,21 @@ module.exports = HttpController =
 				version: version
 				ops: ops
 
+	_getTotalSizeOfLines: (lines) ->
+		size = 0
+		for line in lines
+			size += line.length
+		return size
+
 	setDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
 		lines = req.body.lines
 		source = req.body.source
 		user_id = req.body.user_id
-		if req.headers['content-length'] > TWO_MEGABYTES
-			logger.log {project_id, doc_id, source, user_id}, "document too large, returning 406 response"
+		lineSize = HttpController._getTotalSizeOfLines(lines)
+		if lineSize > TWO_MEGABYTES
+			logger.log {project_id, doc_id, source, lineSize, user_id}, "document too large, returning 406 response"
 			return res.send 406
 		logger.log project_id: project_id, doc_id: doc_id, lines: lines, source: source, user_id: user_id, "setting doc via http"
 		timer = new Metrics.Timer("http.setDoc")
