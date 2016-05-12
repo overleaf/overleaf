@@ -70,7 +70,7 @@ describe "HttpController.setDoc", ->
 	describe "when the payload is too large", ->
 		beforeEach ->
 			lines = []
-			for _ in [0..300000]
+			for _ in [0..200000]
 				lines.push "test test test"
 			@req.body.lines = lines
 			@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)

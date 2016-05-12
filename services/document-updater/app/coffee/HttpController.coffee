@@ -33,7 +33,7 @@ module.exports = HttpController =
 	_getTotalSizeOfLines: (lines) ->
 		size = 0
 		for line in lines
-			size += line.length
+			size += (line.length + 1)
 		return size
 
 	setDoc: (req, res, next = (error) ->) ->
