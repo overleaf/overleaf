@@ -47,7 +47,7 @@ define [
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*,)?(\w*)/)
+						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/)
 						if citeMatch
 							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
 							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
