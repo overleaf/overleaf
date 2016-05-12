@@ -41,7 +41,6 @@ define [
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
 			$scope.pdf.failure    = false
-			$scope.pdf.uncompiled = false
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
 			$scope.pdf.clsiMaintenance = false
@@ -52,8 +51,7 @@ define [
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
-				$scope.pdf.view = 'errors'
-				$scope.pdf.uncompiled = true
+				$scope.pdf.view = 'uncompiled'
 			else if response.status == "project-too-large"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
