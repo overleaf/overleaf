@@ -16,7 +16,7 @@ define [
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
-				@pdfjs = PDFJS.getDocument @url
+				@pdfjs = PDFJS.getDocument {url: @url, rangeChunkSize: 2*65536}
 				@pdfjs.onProgress = @options.progressCallback
 				@document = $q.when(@pdfjs)
 				@navigateFn = @options.navigateFn

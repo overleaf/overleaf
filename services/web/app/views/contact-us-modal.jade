@@ -23,7 +23,7 @@ script(type='text/ng-template', id='supportModalTemplate')
 			label.desc
 				| #{translate("suggestion")}
 			.form-group
-				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', tabindex='4', onkeyup='')
 			.form-group.text-center
 				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value='#{translate("contact_us")}')
 		span(ng-show="sent")
