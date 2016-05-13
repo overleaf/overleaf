@@ -93,7 +93,12 @@ module.exports = CompileController =
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/#{req.params.file}", req, res, next)
+		build = req.params.build
+		if build?
+			url = "/project/#{project_id}/build/#{build}/output/#{req.params.file}"
+		else
+			url = "/project/#{project_id}/output/#{req.params.file}"
+		CompileController.proxyToClsi(project_id, url, req, res, next)
 
 	proxySync: (req, res, next = (error) ->) ->
 		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
