@@ -71,20 +71,28 @@ define [
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
-				# define the base url
-				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
-				# add a query string parameter for the compile group
-				if response.compileGroup?
-					$scope.pdf.compileGroup = response.compileGroup
-					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
 				# make a cache to look up files by name
 				fileByPath = {}
 				for file in response.outputFiles
 					fileByPath[file.path] = file
-				# if the pdf file has a build number, pass it to the clsi
+				# prepare query string
+				qs = {}
+				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
 				if fileByPath['output.pdf']?.build?
 					build = fileByPath['output.pdf'].build
-					$scope.pdf.url = $scope.pdf.url + "&build=#{build}"
+					$scope.pdf.url = "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
+					# no need to bust cache, build id is unique
+				else
+					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
+					qs = { cache_bust : "#{Date.now()}" }
+				# add a query string parameter for the compile group
+				if response.compileGroup?
+					$scope.pdf.compileGroup = response.compileGroup
+					qs.compileGroup = "#{$scope.pdf.compileGroup}"
+				# convert the qs hash into a query string and append it
+				qs_args = ("#{k}=#{v}" for k, v of qs)
+				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
+				$scope.pdf.url += $scope.pdf.qs
 
 				fetchLogs(fileByPath['output.log'])
 
@@ -103,8 +111,11 @@ define [
 					$scope.pdf.outputFiles.push file
 
 		fetchLogs = (outputFile) ->
-			qs = if outputFile?.build? then "?build=#{outputFile.build}" else ""
-			$http.get "/project/#{$scope.project_id}/output/output.log" + qs
+			if outputFile?.build?
+				logUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.log"
+			else
+				logUrl = "/project/#{$scope.project_id}/output/output.log"
+			$http.get logUrl
 				.success (log) ->
 					#console.log ">>", log
 					$scope.pdf.rawLog = log
@@ -126,8 +137,12 @@ define [
 										type: if entry.level == "error" then "error" else "warning"
 										text: entry.message
 									}
-					# Get the biber log and parse it too
-					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
+					# Get the biber log and parse it
+					if outputFile?.build?
+						biberLogUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.blg"
+					else
+						biberLogUrl = "/project/#{$scope.project_id}/output/output.blg"
+					$http.get biberLogUrl
 						.success (log) ->
 							window._s = $scope
 							biberLogEntries = BibLogParser.parse(log, {})
