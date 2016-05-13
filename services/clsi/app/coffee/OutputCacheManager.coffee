@@ -5,13 +5,16 @@ Path = require "path"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 Settings = require "settings-sharelatex"
+crypto = require "crypto"
 
 OutputFileOptimiser = require "./OutputFileOptimiser"
 
 module.exports = OutputCacheManager =
 	CACHE_SUBDIR: '.cache/clsi'
 	ARCHIVE_SUBDIR: '.archive/clsi'
-	BUILD_REGEX: /^[0-9a-f]+$/  # build id is Date.now() converted to hex
+	# build id is HEXDATE-HEXRANDOM from Date.now()and RandomBytes
+	# for backwards compatibility, make the randombytes part optional
+	BUILD_REGEX: /^[0-9a-f]+(-[0-9a-f]+)?$/
 	CACHE_LIMIT: 2  # maximum number of cache directories
 	CACHE_AGE: 60*60*1000 # up to one hour old
 
@@ -23,12 +26,24 @@ module.exports = OutputCacheManager =
 			# for invalid build id, return top level
 			return file
 
+	generateBuildId: (callback = (error, buildId) ->) ->
+		# generate a secure build id from Date.now() and 8 random bytes in hex
+		crypto.randomBytes 8, (err, buf) ->
+			return callback(err) if err?
+			random = buf.toString('hex')
+			date = Date.now().toString(16)
+			callback err, "#{date}-#{random}"
+
 	saveOutputFiles: (outputFiles, compileDir, callback = (error) ->) ->
+		OutputCacheManager.generateBuildId (err, buildId) ->
+			return callback(err) if err?
+			OutputCacheManager.saveOutputFilesInBuildDir outputFiles, compileDir, buildId, callback
+
+	saveOutputFilesInBuildDir: (outputFiles, compileDir, buildId, callback = (error) ->) ->
 		# make a compileDir/CACHE_SUBDIR/build_id directory and
 		# copy all the output files into it
 		cacheRoot = Path.join(compileDir, OutputCacheManager.CACHE_SUBDIR)
 		# Put the files into a new cache subdirectory
-		buildId = Date.now().toString(16)
 		cacheDir = Path.join(compileDir, OutputCacheManager.CACHE_SUBDIR, buildId)
 
 		# let file expiry run in the background
@@ -36,7 +51,7 @@ module.exports = OutputCacheManager =
 
 		# Archive logs in background
 		if Settings.clsi?.archive_logs or Settings.clsi?.strace
-			OutputCacheManager.archiveLogs outputFiles, compileDir, (err) ->
+			OutputCacheManager.archiveLogs outputFiles, compileDir, buildId, (err) ->
 				if err?
 					logger.warn err:err, "erroring archiving log files"
 
@@ -71,9 +86,8 @@ module.exports = OutputCacheManager =
 					else
 						# pass back the list of new files in the cache
 						callback(err, results)
-	
-	archiveLogs: (outputFiles, compileDir, callback = (error) ->) ->
-		buildId = Date.now().toString(16)
+
+	archiveLogs: (outputFiles, compileDir, buildId, callback = (error) ->) ->
 		archiveDir = Path.join(compileDir, OutputCacheManager.ARCHIVE_SUBDIR, buildId)
 		logger.log {dir: archiveDir}, "archiving log files for project"
 		fse.ensureDir archiveDir, (err) ->
@@ -104,8 +118,9 @@ module.exports = OutputCacheManager =
 				return false if options?.keep == dir
 				# remove any directories over the hard limit
 				return true if index > OutputCacheManager.CACHE_LIMIT
-				# we can get the build time from the directory name
-				dirTime = parseInt(dir, 16)
+				# we can get the build time from the first part of the directory name DDDD-RRRR
+				# DDDD is date and RRRR is random bytes
+				dirTime = parseInt(dir.split('-')?[0], 16)
 				age = currentTime - dirTime
 				return age > OutputCacheManager.CACHE_AGE
 
