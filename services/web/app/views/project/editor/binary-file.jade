@@ -10,6 +10,7 @@ div.binary-file.full-size(
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
 	)
+
 	img(
 		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}?format=png"
@@ -17,9 +18,24 @@ div.binary-file.full-size(
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
 	)
+	
+	p(
+		ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtex.error" 
+		ng-init="loadBibtexFilePreview()"
+	)
+		div(ng-if="bibtex.loading")
+			| #{translate('loading')}...
+		div.bib-preview(ng-if="!bibtex.loading && !bibtex.error")
+			div.scroll-container
+				p
+					| {{ bibtexPreview.data }}
+				p
+					| ...
+	
 	p.no-preview(
-		ng-if="failedLoad || ['png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
+		ng-if="failedLoad || bibtex.error || ['bib', 'png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
 	) #{translate("no_preview_available")}
+
 	a.btn.btn-info(
 		ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
 	) #{translate("download")} {{ openFile.name }}
