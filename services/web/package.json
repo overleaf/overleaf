@@ -52,6 +52,7 @@
     "sanitizer": "0.1.1",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "sixpack-client": "^1.0.0",
+    "temp": "^0.8.3",
     "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
     "underscore": "1.6.0",
     "underscore.string": "^3.0.2",
