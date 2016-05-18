@@ -20,11 +20,13 @@ module.exports = ClsiManager =
 					logger.err err:error, project_id:project_id, "error sending request to clsi"
 					return callback(error)
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
-				callback(
-					null
-					response?.compile?.status
-					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-				)
+				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+					if err?
+						logger.err err:err, project_id:project_id, "error getting server id"
+						return callback(err)
+					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles, clsiServerId)
+					console.log outputFiles
+					callback(null, response?.compile?.status, outputFiles)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
@@ -74,11 +76,17 @@ module.exports = ClsiManager =
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
 				callback error, body
 
-	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
+	_parseOutputFiles: (project_id, rawOutputFiles = [], clsiServer) ->
+		# console.log rawOutputFiles
 		outputFiles = []
 		for file in rawOutputFiles
+			console.log path
+			path = url.parse(file.url).path
+			path = path.replace("/project/#{project_id}/output/", "")
+			if clsiServer?
+				path = "#{path}?clsiserver=#{clsiServer}"
 			outputFiles.push
-				path: url.parse(file.url).path.replace("/project/#{project_id}/output/", "")
+				path: path
 				type: file.type
 				build: file.build
 		return outputFiles

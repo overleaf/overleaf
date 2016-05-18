@@ -11,6 +11,7 @@ describe "ClsiManager", ->
 		@ClsiCookieManager = 
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 			setServerId: sinon.stub().callsArgWith(2)
+			_getServerId:sinon.stub()
 		@ClsiManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
@@ -32,6 +33,7 @@ describe "ClsiManager", ->
 	describe "sendRequest", ->
 		beforeEach ->
 			@ClsiManager._buildRequest = sinon.stub().callsArgWith(2, null, @request = "mock-request")
+			@ClsiCookieManager._getServerId.callsArgWith(1, null, "clsi3")
 
 		describe "with a successful compile", ->
 			beforeEach ->

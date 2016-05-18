@@ -1,8 +1,6 @@
 Settings = require('settings-sharelatex')
-
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
-
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
@@ -13,6 +11,8 @@ logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
+
+
 	compile: (project_id, user_id, options = {}, _callback = (error) ->) ->
 		timer = new Metrics.Timer("editor.compile")
 		callback = (args...) ->
