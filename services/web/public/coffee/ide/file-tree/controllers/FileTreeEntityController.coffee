@@ -60,6 +60,8 @@ define [
 				return "table"
 			else if ext in ["py", "r"]
 				return "file-text"
+			else if ext in ['bib']
+				return 'book'
 			else
 				return "file"
 	]
