@@ -92,7 +92,7 @@ define [
 				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
 				$scope.pdf.url += $scope.pdf.qs
 
-				fetchLogs(fileByPath['output.log'])
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
@@ -108,56 +108,72 @@ define [
 						file.name = file.path
 					$scope.pdf.outputFiles.push file
 
-		fetchLogs = (outputFile) ->
-			if outputFile?.build?
-				logUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.log"
-			else
-				logUrl = "/project/#{$scope.project_id}/output/output.log"
-			$http.get logUrl
-				.success (log) ->
-					#console.log ">>", log
-					$scope.pdf.rawLog = log
-					logEntries = LogParser.parse(log, ignoreDuplicates: true)
-					#console.log ">>", logEntries
-					$scope.pdf.logEntries = logEntries
-					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
-					# # # #
-					proceed = () ->
-						$scope.pdf.logEntryAnnotations = {}
-						for entry in logEntries.all
-							if entry.file?
-								entry.file = normalizeFilePath(entry.file)
-								entity = ide.fileTreeManager.findEntityByPath(entry.file)
-								if entity?
-									$scope.pdf.logEntryAnnotations[entity.id] ||= []
-									$scope.pdf.logEntryAnnotations[entity.id].push {
-										row: entry.line - 1
-										type: if entry.level == "error" then "error" else "warning"
-										text: entry.message
-									}
-					# Get the biber log and parse it
-					if outputFile?.build?
-						biberLogUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.blg"
-					else
-						biberLogUrl = "/project/#{$scope.project_id}/output/output.blg"
-					$http.get biberLogUrl
-						.success (log) ->
-							window._s = $scope
-							biberLogEntries = BibLogParser.parse(log, {})
-							if $scope.pdf.logEntries
-								entries = $scope.pdf.logEntries
-								all = biberLogEntries.errors.concat(biberLogEntries.warnings)
-								entries.all = entries.all.concat(all)
-								entries.errors = entries.errors.concat(biberLogEntries.errors)
-								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
-							proceed()
-						.error (e) ->
-							# it's not an error for the output.blg file to not be present
-							proceed()
-					# # # #
-				.error () ->
-					$scope.pdf.logEntries = []
-					$scope.pdf.rawLog = ""
+		fetchLogs = (logFile, blgFile) ->
+
+			getFile = (name, file) ->
+				if file?.build?
+					url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
+				else
+					url = "/project/#{$scope.project_id}/output/#{name}"
+				return $http.get url
+
+			# accumulate the log entries
+			logEntries =
+				all: []
+				errors: []
+				warnings: []
+
+			accumulateResults = (newEntries) ->
+				for key in ['all', 'errors', 'warnings']
+					logEntries[key] = logEntries[key].concat newEntries[key]
+
+			# use the parsers for each file type
+			processLog = (log) ->
+				$scope.pdf.rawLog = log
+				{errors, warnings, typesetting} = LogParser.parse(log, ignoreDuplicates: true)
+				all = [].concat errors, warnings, typesetting
+				accumulateResults {all, errors, warnings}
+
+			processBiber = (log) ->
+				{errors, warnings} = BibLogParser.parse(log, {})
+				all = [].concat errors, warnings
+				accumulateResults {all, errors, warnings}
+
+			# output the results
+			handleError = () ->
+				$scope.pdf.logEntries = []
+				$scope.pdf.rawLog = ""
+
+			annotateFiles = () ->
+				$scope.pdf.logEntries = logEntries
+				$scope.pdf.logEntryAnnotations = {}
+				for entry in logEntries.all
+					if entry.file?
+						entry.file = normalizeFilePath(entry.file)
+						entity = ide.fileTreeManager.findEntityByPath(entry.file)
+						if entity?
+							$scope.pdf.logEntryAnnotations[entity.id] ||= []
+							$scope.pdf.logEntryAnnotations[entity.id].push {
+								row: entry.line - 1
+								type: if entry.level == "error" then "error" else "warning"
+								text: entry.message
+							}
+
+			# retrieve the logfile and process it
+			response = getFile('output.log', logFile)
+				.success processLog
+				.error handleError
+
+			if blgFile?	# retrieve the blg file if present
+				response.success () ->
+					getFile('output.blg', blgFile)
+						# ignore errors in biber file
+						.success processBiber
+						# display the combined result
+						.then annotateFiles
+			else # otherwise just display the result
+				response.success annotateFiles
+
 
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
