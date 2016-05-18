@@ -41,7 +41,7 @@ define [
 			guide = document.querySelector('.file-tree-inner')
 			table_wrap = document.querySelector('.bib-preview .scroll-container')
 			if table_wrap
-				desired_height = guide.offsetHeight - 60
+				desired_height = guide.offsetHeight - 44
 				if table_wrap.offsetHeight > desired_height
 					table_wrap.style.height = desired_height + 'px'
 					table_wrap.style['max-height'] = desired_height + 'px'

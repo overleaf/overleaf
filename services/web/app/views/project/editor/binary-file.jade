@@ -19,10 +19,7 @@ div.binary-file.full-size(
 		onabort="sl_binaryFilePreviewError()"
 	)
 	
-	p(
-		ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtex.error" 
-		ng-init="loadBibtexFilePreview()"
-	)
+	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtex.error", ng-init="loadBibtexFilePreview()")
 		div(ng-if="bibtex.loading")
 			| #{translate('loading')}...
 		div.bib-preview(ng-if="!bibtex.loading && !bibtex.error")
