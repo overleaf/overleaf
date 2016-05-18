@@ -37,7 +37,7 @@ define [
 			}
 
 		parseCompileResponse = (response) ->
-			if response.clsiServerId? and response.clsiServerId != $scope.pdf.clsiServerId
+			if response.clsiServerId? and response.clsiServerId != ide.clsiServerId
 				ide.clsiServerId = response.clsiServerId
 
 			# Reset everything
