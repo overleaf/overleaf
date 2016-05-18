@@ -30,13 +30,14 @@ module.exports = CompileController =
 			if req.body?.draft
 				options.draft = req.body.draft
 			logger.log {options, project_id}, "got compile request"
-			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, output, limits) ->
+			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
 				res.status(200).send JSON.stringify {
 					status: status
 					outputFiles: outputFiles
 					compileGroup: limits?.compileGroup
+					clsiServerId:clsiServerId
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->

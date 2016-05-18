@@ -5,11 +5,15 @@ define [
 		$scope.status = 
 			loading:true
 			
-		$http.get("/project/#{ide.project_id}/wordcount")
+		opts =
+			url:"/project/#{ide.project_id}/wordcount"
+			method:"GET"
+			params:
+				clsiserverid:ide.clsiServerId
+		$http opts
 			.success (data) ->
 				$scope.status.loading = false
 				$scope.data = data.texcount
-				console.log $scope.data
 			.error () ->
 				$scope.status.error = true
 

@@ -25,8 +25,7 @@ module.exports = ClsiManager =
 						logger.err err:err, project_id:project_id, "error getting server id"
 						return callback(err)
 					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles, clsiServerId)
-					console.log outputFiles
-					callback(null, response?.compile?.status, outputFiles)
+					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
@@ -83,8 +82,6 @@ module.exports = ClsiManager =
 			console.log path
 			path = url.parse(file.url).path
 			path = path.replace("/project/#{project_id}/output/", "")
-			if clsiServer?
-				path = "#{path}?clsiserver=#{clsiServer}"
 			outputFiles.push
 				path: path
 				type: file.type

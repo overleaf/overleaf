@@ -121,7 +121,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
 							a(
-								href="/project/{{project_id}}/output/{{file.path}}"
+								href="{{file.url}}"
 								target="_blank"
 							) {{ file.name }}
 			a.btn.btn-info.btn-sm(href, ng-click="toggleRawLog()")

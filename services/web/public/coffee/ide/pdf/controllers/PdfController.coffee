@@ -37,6 +37,9 @@ define [
 			}
 
 		parseCompileResponse = (response) ->
+			if response.clsiServerId? and response.clsiServerId != $scope.pdf.clsiServerId
+				ide.clsiServerId = response.clsiServerId
+
 			# Reset everything
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
@@ -76,6 +79,8 @@ define [
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
 					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
+				if response.clsiServerId?
+					$scope.pdf.url = $scope.pdf.url + "&clsiserverid=#{response.clsiServerId}"
 				# make a cache to look up files by name
 				fileByPath = {}
 				for file in response.outputFiles
@@ -99,11 +104,19 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
+					file.url = "/project/#{project_id}/output/#{file.path}"
+					if response.clsiServerId?
+						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
 
 		fetchLogs = (outputFile) ->
-			qs = if outputFile?.build? then "?build=#{outputFile.build}" else ""
-			$http.get "/project/#{$scope.project_id}/output/output.log" + qs
+			opts =
+				method:"GET"
+				url:"/project/#{$scope.project_id}/output/output.log"
+				params:
+					build:outputFile.build
+					clsiserverid:ide.clsiServerId
+			$http opts
 				.success (log) ->
 					#console.log ">>", log
 					$scope.pdf.rawLog = log
@@ -126,7 +139,8 @@ define [
 										text: entry.message
 									}
 					# Get the biber log and parse it too
-					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
+					opts.url = "/project/#{$scope.project_id}/output/output.blg"
+					$http opts 
 						.success (log) ->
 							window._s = $scope
 							biberLogEntries = BibLogParser.parse(log, {})
@@ -189,6 +203,8 @@ define [
 			$http {
 				url: "/project/#{$scope.project_id}/output"
 				method: "DELETE"
+				params:
+					clsiserverid:ide.clsiServerId
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
@@ -271,6 +287,7 @@ define [
 							file: path
 							line: row + 1
 							column: column
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
@@ -298,6 +315,7 @@ define [
 							page: position.page + 1
 							h: position.offset.left.toFixed(2)
 							v: position.offset.top.toFixed(2)
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
