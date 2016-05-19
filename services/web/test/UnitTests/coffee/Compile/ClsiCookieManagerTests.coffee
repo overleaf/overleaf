@@ -30,8 +30,9 @@ describe "ClsiCookieManager", ->
 			apis:
 				clsi:
 					url: "http://clsi.example.com"
-			clsi_cookie_expire_length_seconds: Math.random()
-			clsiCookieKey: "coooookie"
+			clsiCookie:
+				ttl:Math.random()
+				key: "coooookie"
 		@requires = 
 			"redis-sharelatex" :
 				createClient: =>
@@ -90,7 +91,7 @@ describe "ClsiCookieManager", ->
 		it "should set the server id with a ttl", (done)->
 			@ClsiCookieManager.setServerId @project_id, @response, (err)=>
 				@redisMulti.set.calledWith("clsiserver:#{@project_id}", "clsi-8").should.equal true
-				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", @settings.clsi_cookie_expire_length_seconds).should.equal true
+				@redisMulti.expire.calledWith("clsiserver:#{@project_id}", @settings.clsiCookie.ttl).should.equal true
 				done()
 
 		it "should return the server id", (done)->
@@ -100,7 +101,7 @@ describe "ClsiCookieManager", ->
 
 
 		it "should not set the server id if clsiCookies are not enabled", (done)->
-			delete @settings.clsiCookieKey 
+			delete @settings.clsiCookie.key 
 			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
 			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
 				@redisMulti.exec.called.should.equal false
@@ -113,13 +114,13 @@ describe "ClsiCookieManager", ->
 
 		it "should return a jar with the cookie set populated from redis", (done)->
 			@ClsiCookieManager.getCookieJar @project_id, (err, jar)=>
-				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookieKey].key.should.equal 
-				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookieKey].value.should.equal "clsi-11"
+				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookie.key].key.should.equal 
+				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookie.key].value.should.equal "clsi-11"
 				done()
 
 
 		it "should return empty cookie jar if clsiCookies are not enabled", (done)->
-			delete @settings.clsiCookieKey 
+			delete @settings.clsiCookie.key 
 			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
 			@ClsiCookieManager.getCookieJar @project_id, (err, jar)->
 				assert.deepEqual jar, realRequst.jar()
