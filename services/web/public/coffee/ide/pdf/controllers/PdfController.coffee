@@ -36,9 +36,7 @@ define [
 				_csrf: window.csrfToken
 			}
 
-		parseCompileResponse = (response) ->
-			if response.clsiServerId? and response.clsiServerId != ide.clsiServerId
-				ide.clsiServerId = response.clsiServerId
+		parseCompileResponse = (response) ->		
 
 			# Reset everything
 			$scope.pdf.error      = false
@@ -72,14 +70,7 @@ define [
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
-				# define the base url
-				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
-				# add a query string parameter for the compile group
-				if response.compileGroup?
-					$scope.pdf.compileGroup = response.compileGroup
-					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
-				if response.clsiServerId?
-					$scope.pdf.url = $scope.pdf.url + "&clsiserverid=#{response.clsiServerId}"
+
 				# make a cache to look up files by name
 				fileByPath = {}
 				for file in response.outputFiles
@@ -98,6 +89,9 @@ define [
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
 					qs.compileGroup = "#{$scope.pdf.compileGroup}"
+				if response.clsiServerId?
+					qs.clsiserverid = response.clsiServerId
+					ide.clsiServerId = response.clsiServerId
 				# convert the qs hash into a query string and append it
 				qs_args = ("#{k}=#{v}" for k, v of qs)
 				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
