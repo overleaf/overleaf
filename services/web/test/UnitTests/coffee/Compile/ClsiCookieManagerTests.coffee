@@ -112,9 +112,9 @@ describe "ClsiCookieManager", ->
 			@ClsiCookieManager._getServerId = sinon.stub().callsArgWith(1, null, "clsi-11")
 
 		it "should return a jar with the cookie set populated from redis", (done)->
-			@ClsiCookieManager.getCookieJar @project_id, (err, jar)->
-				jar._jar.store.idx["clsi.example.com"]["/"].clsiserver.key.should.equal "clsiserver"
-				jar._jar.store.idx["clsi.example.com"]["/"].clsiserver.value.should.equal "clsi-11"
+			@ClsiCookieManager.getCookieJar @project_id, (err, jar)=>
+				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookieKey].key.should.equal 
+				jar._jar.store.idx["clsi.example.com"]["/"][@settings.clsiCookieKey].value.should.equal "clsi-11"
 				done()
 
 

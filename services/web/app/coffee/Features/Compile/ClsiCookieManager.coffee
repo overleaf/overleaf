@@ -56,7 +56,7 @@ module.exports = ClsiCookieManager =
 			if err?
 				logger.err err:err, project_id:project_id, "error getting server id"
 				return callback(err)
-			serverCookie = request.cookie("clsiserver=#{serverId}")
+			serverCookie = request.cookie("#{Settings.clsiCookieKey}=#{serverId}")
 			jar = request.jar()
 			jar.setCookie serverCookie, Settings.apis.clsi.url
 			callback(null, jar)
