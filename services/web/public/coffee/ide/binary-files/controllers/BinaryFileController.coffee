@@ -3,6 +3,8 @@ define [
 ], (App) ->
 	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", ($scope, $rootScope, $http, $timeout) ->
 
+		TWO_MEGABYTES = 2 * 1024 * 1024
+
 		$scope.bibtexPreview =
 			loading: false
 			error: false
@@ -20,7 +22,7 @@ define [
 			return file.name.split(".").pop()?.toLowerCase()
 
 		$scope.loadBibtexFilePreview = () ->
-			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-5000"
+			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
 			$scope.bibtexPreview.loading = true
 			$http.get(url)
 				.success (data) ->
