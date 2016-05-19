@@ -158,8 +158,8 @@ server = net.createServer (socket) ->
 	socket.write("up, #{freeLoadPercentage}%\n", "ASCII")
 	socket.end()
 
-server.listen port = (Settings.internal?.clsi?.load_port or 3044),  ->
-  logger.info "tcp load endpoint listening on port #{port}"
+server.listen load_port = (Settings.internal?.clsi?.load_port or 3044),  ->
+  logger.info "tcp load endpoint listening on port #{load_port}"
   # telnet 127.0.0.1 3044
 
 
