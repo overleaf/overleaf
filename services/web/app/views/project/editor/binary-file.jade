@@ -20,9 +20,10 @@ div.binary-file.full-size(
 	)
 	
 	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtex.error", ng-init="loadBibtexFilePreview()")
-		div(ng-if="bibtex.loading")
+		div.bib-loading(ng-if="bibtexPreview.loading")
 			| #{translate('loading')}...
-		div.bib-preview(ng-if="!bibtex.loading && !bibtex.error")
+
+		div.bib-preview(ng-if="!bibtexPreview.loading && !bibtexPreview.error")
 			div.scroll-container
 				p
 					| {{ bibtexPreview.data }}
