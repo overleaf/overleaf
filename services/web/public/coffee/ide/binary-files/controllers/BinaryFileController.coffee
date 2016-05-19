@@ -19,7 +19,7 @@ define [
 		$scope.loadBibtexIfRequired = () ->
 			if $scope.extension($scope.openFile) == 'bib'
 				$scope.bibtexPreview.data = null
-				$timeout($scope.loadBibtexFilePreview, 0)
+				$scope.loadBibtexFilePreview()
 
 		window.sl_binaryFilePreviewError = () =>
 			$scope.failedLoad = true
