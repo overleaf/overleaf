@@ -6,24 +6,51 @@ Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 url = require("url")
+ClsiCookieManager = require("./ClsiCookieManager")
+
 
 module.exports = ClsiManager =
+
 	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
-				return callback(error) if error?
+				if error?
+					logger.err err:error, project_id:project_id, "error sending request to clsi"
+					return callback(error)
 				logger.log project_id: project_id, response: response, "received compile response from CLSI"
-				callback(
-					null
-					response?.compile?.status
-					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-				)
+				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+					if err?
+						logger.err err:err, project_id:project_id, "error getting server id"
+						return callback(err)
+					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles, clsiServerId)
+					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
-		request.del "#{compilerUrl}/project/#{project_id}", callback
+		opts =
+			url:"#{compilerUrl}/project/#{project_id}"
+			method:"DELETE"
+		ClsiManager._makeRequest project_id, opts, callback
+
+
+	_makeRequest: (project_id, opts, callback)->
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			opts.jar = jar
+			request opts, (err, response, body)->
+				if err?
+					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					return callback(err)
+				ClsiCookieManager.setServerId project_id, response, (err)->
+					if err?
+						logger.warn err:err, project_id:project_id, "error setting server id"
+						
+					return callback err, response, body
+
 
 	_getCompilerUrl: (compileGroup) ->
 		if compileGroup == "priority"
@@ -33,11 +60,11 @@ module.exports = ClsiManager =
 
 	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
 		compilerUrl = @_getCompilerUrl(compileGroup)
-		request.post {
+		opts = 
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
-			jar:  false
-		}, (error, response, body) ->
+			method: "POST"
+		ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300
 				callback null, body
@@ -48,11 +75,15 @@ module.exports = ClsiManager =
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
 				callback error, body
 
-	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
+	_parseOutputFiles: (project_id, rawOutputFiles = [], clsiServer) ->
+		# console.log rawOutputFiles
 		outputFiles = []
 		for file in rawOutputFiles
+			console.log path
+			path = url.parse(file.url).path
+			path = path.replace("/project/#{project_id}/output/", "")
 			outputFiles.push
-				path: url.parse(file.url).path.replace("/project/#{project_id}/output/", "")
+				path: path
 				type: file.type
 				build: file.build
 		return outputFiles
@@ -115,9 +146,10 @@ module.exports = ClsiManager =
 			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
 			if req.compile.options.imageName?
 				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
-			request.get {
+			opts =
 				url: wordcount_url
-			}, (error, response, body) ->
+				method: "GET"
+			ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 				return callback(error) if error?
 				if 200 <= response.statusCode < 300
 					callback null, body

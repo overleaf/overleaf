@@ -37,6 +37,9 @@ define [
 			}
 
 		parseCompileResponse = (response) ->
+			if response.clsiServerId? and response.clsiServerId != ide.clsiServerId
+				ide.clsiServerId = response.clsiServerId
+
 			# Reset everything
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
@@ -69,6 +72,14 @@ define [
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
+				# define the base url
+				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
+				# add a query string parameter for the compile group
+				if response.compileGroup?
+					$scope.pdf.compileGroup = response.compileGroup
+					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
+				if response.clsiServerId?
+					$scope.pdf.url = $scope.pdf.url + "&clsiserverid=#{response.clsiServerId}"
 				# make a cache to look up files by name
 				fileByPath = {}
 				for file in response.outputFiles
@@ -106,14 +117,23 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
+					file.url = "/project/#{project_id}/output/#{file.path}"
+					if response.clsiServerId?
+						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
 
 		fetchLogs = (outputFile) ->
+
+			opts =
+				method:"GET"
+				params:
+					build:outputFile.build
+					clsiserverid:ide.clsiServerId
 			if outputFile?.build?
-				logUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.log"
+				opts.url = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.log"
 			else
-				logUrl = "/project/#{$scope.project_id}/output/output.log"
-			$http.get logUrl
+				opts.url = "/project/#{$scope.project_id}/output/output.log"
+			$http opts
 				.success (log) ->
 					#console.log ">>", log
 					$scope.pdf.rawLog = log
@@ -137,10 +157,10 @@ define [
 									}
 					# Get the biber log and parse it
 					if outputFile?.build?
-						biberLogUrl = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.blg"
+						opts.url = "/project/#{$scope.project_id}/build/#{outputFile.build}/output/output.blg"
 					else
-						biberLogUrl = "/project/#{$scope.project_id}/output/output.blg"
-					$http.get biberLogUrl
+						opts.url = "/project/#{$scope.project_id}/output/output.blg"
+					$http opts 
 						.success (log) ->
 							window._s = $scope
 							biberLogEntries = BibLogParser.parse(log, {})
@@ -204,6 +224,8 @@ define [
 			$http {
 				url: "/project/#{$scope.project_id}/output"
 				method: "DELETE"
+				params:
+					clsiserverid:ide.clsiServerId
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
@@ -286,6 +308,7 @@ define [
 							file: path
 							line: row + 1
 							column: column
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
@@ -313,6 +336,7 @@ define [
 							page: position.page + 1
 							h: position.offset.left.toFixed(2)
 							v: position.offset.top.toFixed(2)
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->

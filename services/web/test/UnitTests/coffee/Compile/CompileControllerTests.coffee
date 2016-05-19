@@ -22,6 +22,9 @@ describe "CompileController", ->
 					url: "clsi.example.com"
 				clsi_priority:
 					url: "clsi-priority.example.com"
+		@jar = {cookie:"stuff"}
+		@ClsiCookieManager = 
+			getCookieJar:sinon.stub().callsArgWith(1, null, @jar)
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"request": @request = sinon.stub()
@@ -33,6 +36,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 			"../../infrastructure/RateLimiter":@RateLimiter
+			"./ClsiCookieManager":@ClsiCookieManager
 		@project_id = "project-id"
 		@user = 
 			features:
@@ -182,6 +186,7 @@ describe "CompileController", ->
 				it "should open a request to the CLSI", ->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
@@ -204,6 +209,7 @@ describe "CompileController", ->
 				it "should proxy to the priority url if the user has the feature", ()->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi_priority.url}#{@url}",
 							timeout: 60 * 1000
@@ -218,6 +224,7 @@ describe "CompileController", ->
 				it "should open a request to the CLSI", ->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
@@ -240,6 +247,7 @@ describe "CompileController", ->
 				it "should proxy to the priority url if the user has the feature", ()->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi_priority.url}#{@url}",
 							timeout: 60 * 1000
@@ -254,6 +262,7 @@ describe "CompileController", ->
 				it "should proxy to the standard url", ()->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
@@ -269,6 +278,7 @@ describe "CompileController", ->
 				it "should proxy to the standard url without the build parameter", ()->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
@@ -286,6 +296,7 @@ describe "CompileController", ->
 				it "should open a request to the CLSI", ->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi.url}#{@url}",
 							timeout: 60 * 1000
@@ -313,6 +324,7 @@ describe "CompileController", ->
 				it "should proxy to the priority url if the user has the feature", ()->
 					@request
 						.calledWith(
+							jar:@jar
 							method: @req.method
 							url: "#{@settings.apis.clsi_priority.url}#{@url}",
 							timeout: 60 * 1000
@@ -331,8 +343,8 @@ describe "CompileController", ->
 					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
 				it "should proxy to the standard url with the build parameter", ()->
-					@request
-						.calledWith(
+					@request.calledWith(
+							jar:@jar
 							method: @req.method
 							qs: {build: 1234}
 							url: "#{@settings.apis.clsi.url}#{@url}",
