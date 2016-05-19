@@ -8,11 +8,18 @@ define [
 		$scope.bibtexPreview =
 			loading: false
 			error: false
-			data: ""
+			data: null
 
 		$scope.failedLoad = false
+
 		$rootScope.$on 'entity:selected', () ->
 			$scope.failedLoad = false
+			$scope.loadBibtexIfRequired()
+
+		$scope.loadBibtexIfRequired = () ->
+			if $scope.extension($scope.openFile) == 'bib'
+				$scope.bibtexPreview.data = null
+				$timeout($scope.loadBibtexFilePreview, 0)
 
 		window.sl_binaryFilePreviewError = () =>
 			$scope.failedLoad = true
@@ -24,6 +31,7 @@ define [
 		$scope.loadBibtexFilePreview = () ->
 			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
 			$scope.bibtexPreview.loading = true
+			$scope.$apply()
 			$http.get(url)
 				.success (data) ->
 					$scope.bibtexPreview.loading = false
@@ -47,4 +55,7 @@ define [
 				if table_wrap.offsetHeight > desired_height
 					table_wrap.style.height = desired_height + 'px'
 					table_wrap.style['max-height'] = desired_height + 'px'
+
+		$scope.loadBibtexIfRequired()
+
 	]

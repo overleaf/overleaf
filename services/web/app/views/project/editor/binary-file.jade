@@ -19,11 +19,11 @@ div.binary-file.full-size(
 		onabort="sl_binaryFilePreviewError()"
 	)
 	
-	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtex.error", ng-init="loadBibtexFilePreview()")
-		div.bib-loading(ng-if="bibtexPreview.loading")
+	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtexPreview.error")
+		div.bib-loading(ng-show="bibtexPreview.loading == true")
 			| #{translate('loading')}...
 
-		div.bib-preview(ng-if="!bibtexPreview.loading && !bibtexPreview.error")
+		div.bib-preview(ng-show="bibtexPreview.data && !bibtexPreview.loading && !bibtexPreview.error")
 			div.scroll-container
 				p
 					| {{ bibtexPreview.data }}
@@ -31,7 +31,7 @@ div.binary-file.full-size(
 					| ...
 	
 	p.no-preview(
-		ng-if="failedLoad || bibtex.error || ['bib', 'png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
+		ng-if="failedLoad || bibtexPreview.error || ['bib', 'png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
 	) #{translate("no_preview_available")}
 
 	a.btn.btn-info(
