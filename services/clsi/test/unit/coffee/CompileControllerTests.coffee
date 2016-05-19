@@ -76,6 +76,7 @@ describe "CompileController", ->
 							error: null
 							outputFiles: @output_files.map (file) =>
 								url: "#{@Settings.apis.clsi.url}/project/#{@project_id}/output/#{file.path}"
+								path: file.path
 								type: file.type
 								build: file.build
 					)
