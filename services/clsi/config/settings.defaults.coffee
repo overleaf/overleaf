@@ -35,8 +35,10 @@ module.exports =
 			load_port: 3044
 			host: "localhost"
 
+	
 	apis:
 		clsi:
 			url: "http://localhost:3013"
 			
 	smokeTest: false
+	project_cache_length_ms: 60 * 60 * 24

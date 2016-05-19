@@ -4,10 +4,11 @@ db = require "./db"
 async = require "async"
 logger = require "logger-sharelatex"
 oneDay = 24 * 60 * 60 * 1000
+Settings = require "settings-sharelatex"
 
 module.exports = ProjectPersistenceManager =
 
-	EXPIRY_TIMEOUT: oneDay * 2.5
+	EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
 		db.Project.findOrCreate(where: {project_id: project_id})
@@ -52,3 +53,4 @@ module.exports = ProjectPersistenceManager =
 			.then((projects) ->
 				callback null, projects.map((project) -> project.project_id)
 			).error callback
+
