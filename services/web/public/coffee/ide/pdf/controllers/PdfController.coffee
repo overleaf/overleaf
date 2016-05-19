@@ -84,7 +84,7 @@ define [
 					# no need to bust cache, build id is unique
 				else
 					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
-					qs = { cache_bust : "#{Date.now()}" }
+					qs.cache_bust = "#{Date.now()}"
 				# add a query string parameter for the compile group
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
