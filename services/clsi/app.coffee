@@ -42,6 +42,12 @@ app.param 'project_id', (req, res, next, project_id) ->
 	else
 		next new Error("invalid project id")
 
+app.param 'user_id', (req, res, next, project_id) ->
+	if project_id?.match /^[a-zA-Z0-9_-]+$/
+		next()
+	else
+		next new Error("invalid user id")
+
 app.param 'build_id', (req, res, next, build_id) ->
 	if build_id?.match OutputCacheManager.BUILD_REGEX
 		next()
@@ -71,6 +77,11 @@ staticServer = ForbidSymlinks express.static, Settings.path.compilesDir, setHead
 			'-' + Number(stat.size).toString(16) + '"'
 		res.set("Etag", etag(path, stat))
 	res.set("Content-Type", ContentTypeMapper.map(path))
+
+app.get "/project/:project_id/user/:user_id/build/:build_id/output/*", (req, res, next) ->
+	# for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
+	req.url = "/#{req.params.project_id}-#{req.params.user_id}/" + OutputCacheManager.path(req.params.build_id, "/#{req.params[0]}")
+	staticServer(req, res, next)
 
 app.get "/project/:project_id/build/:build_id/output/*", (req, res, next) ->
 	# for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
