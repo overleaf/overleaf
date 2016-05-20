@@ -7,16 +7,20 @@ div.binary-file.full-size(
 		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}"
 		ng-if="['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(openFile)) > -1"
+		ng-class="{'img-preview': !imgLoaded}"
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
+		onload="sl_binaryFilePreviewLoaded()"
 	)
 
 	img(
 		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}?format=png"
 		ng-if="['pdf', 'eps'].indexOf(extension(openFile)) > -1"
+		ng-class="{'img-preview': !imgLoaded}"
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
+		onload="sl_binaryFilePreviewLoaded()"
 	)
 	
 	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtexPreview.error")

@@ -11,10 +11,18 @@ define [
 			error: false
 			data: null
 
+		# Callback fired when the `img` tag fails to load,
+		# `failedLoad` used to show the "No Preview" message
 		$scope.failedLoad = false
-
 		window.sl_binaryFilePreviewError = () =>
 			$scope.failedLoad = true
+			$scope.$apply()
+
+		# Callback fired when the `img` tag is done loading,
+		# `imgLoaded` is used to show the spinner gif while loading
+		$scope.imgLoaded = false
+		window.sl_binaryFilePreviewLoaded = () =>
+			$scope.imgLoaded = true
 			$scope.$apply()
 
 		$scope.extension = (file) ->
