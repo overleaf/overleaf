@@ -88,8 +88,6 @@ module.exports =
 			url: "http://localhost:3009"
 		clsi:
 			url: "http://localhost:3013"
-		clsi_priority:
-			url: "http://localhost:3013"
 		templates:
 			url: "http://localhost:3007"
 		githubSync:

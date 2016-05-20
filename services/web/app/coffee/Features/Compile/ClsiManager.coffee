@@ -53,13 +53,10 @@ module.exports = ClsiManager =
 
 
 	_getCompilerUrl: (compileGroup) ->
-		if compileGroup == "priority"
-			return Settings.apis.clsi_priority.url
-		else
-			return Settings.apis.clsi.url
+		return Settings.apis.clsi.url
 
 	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
-		compilerUrl = @_getCompilerUrl(compileGroup)
+		compilerUrl = Settings.apis.clsi.url
 		opts = 
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req

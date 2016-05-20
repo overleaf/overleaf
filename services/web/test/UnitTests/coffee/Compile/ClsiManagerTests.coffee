@@ -101,14 +101,6 @@ describe "ClsiManager", ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 				
-		describe "with the priority compileGroup", ->
-			beforeEach ->
-				@ClsiManager.deleteAuxFiles @project_id, {compileGroup: "priority"}, @callback
-
-			it "should call the delete method in the CLSI", ->
-				@ClsiManager._makeRequest
-					.calledWith(@project_id, { method:"DELETE", url:"#{@settings.apis.clsi_priority.url}/project/#{@project_id}"})
-					.should.equal true
 
 	describe "_buildRequest", ->
 		beforeEach ->
@@ -264,18 +256,6 @@ describe "ClsiManager", ->
 			it "should call the callback with the body and the error", ->
 				@callback.calledWith(new Error("CLSI returned non-success code: 500"), @body).should.equal true
 
-		describe "when the compiler is priority", ->
-			beforeEach ->
-				@ClsiManager._makeRequest = sinon.stub()
-				@ClsiManager._postToClsi @project_id, @req, "priority", @callback
-
-			it "should use the clsi_priority url", ->
-				url = "#{@settings.apis.clsi_priority.url}/project/#{@project_id}/compile"
-				@ClsiManager._makeRequest.calledWith(@project_id, {
-					method: "POST",
-					url: url
-					json: @req
-				}).should.equal true
 
 	describe "wordCount", ->
 		beforeEach ->
