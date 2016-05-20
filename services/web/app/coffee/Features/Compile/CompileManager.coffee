@@ -1,8 +1,6 @@
 Settings = require('settings-sharelatex')
-
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
-
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
@@ -13,6 +11,8 @@ logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CompileManager =
+
+
 	compile: (project_id, user_id, options = {}, _callback = (error) ->) ->
 		timer = new Metrics.Timer("editor.compile")
 		callback = (args...) ->
@@ -37,10 +37,10 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, output) ->
+							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, clsiServerId) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
-								callback(null, status, outputFiles, output, limits)
+								callback(null, status, outputFiles, clsiServerId, limits)
 								
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->

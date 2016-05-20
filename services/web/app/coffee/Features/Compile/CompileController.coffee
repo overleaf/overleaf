@@ -8,6 +8,8 @@ Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
+ClsiCookieManager = require("./ClsiCookieManager")
+
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -28,13 +30,14 @@ module.exports = CompileController =
 			if req.body?.draft
 				options.draft = req.body.draft
 			logger.log {options, project_id}, "got compile request"
-			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, output, limits) ->
+			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
-				res.send 200, JSON.stringify {
+				res.status(200).send JSON.stringify {
 					status: status
 					outputFiles: outputFiles
 					compileGroup: limits?.compileGroup
+					clsiServerId:clsiServerId
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->
@@ -112,30 +115,34 @@ module.exports = CompileController =
 				CompileController.proxyToClsiWithLimits(project_id, url, limits, req, res, next)
 
 	proxyToClsiWithLimits: (project_id, url, limits, req, res, next = (error) ->) ->
-		if limits.compileGroup == "priority"
-			compilerUrl = Settings.apis.clsi_priority.url
-		else
-			compilerUrl = Settings.apis.clsi.url
-		url = "#{compilerUrl}#{url}"
-		logger.log url: url, "proxying to CLSI"
-		oneMinute = 60 * 1000
-		# the base request
-		options = { url: url, method: req.method,	timeout: oneMinute }
-		# if we have a build parameter, pass it through to the clsi
-		if req.query?.pdfng && req.query?.build? # only for new pdf viewer
-			options.qs = {}
-			options.qs.build = req.query.build
-		# if we are byte serving pdfs, pass through If-* and Range headers
-		# do not send any others, there's a proxying loop if Host: is passed!
-		if req.query?.pdfng
-			newHeaders = {}
-			for h, v of req.headers
-				newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
-			options.headers = newHeaders
-		proxy = request(options)
-		proxy.pipe(res)
-		proxy.on "error", (error) ->
-			logger.warn err: error, url: url, "CLSI proxy error"
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			if limits.compileGroup == "priority"
+				compilerUrl = Settings.apis.clsi_priority.url
+			else
+				compilerUrl = Settings.apis.clsi.url
+			url = "#{compilerUrl}#{url}"
+			logger.log url: url, "proxying to CLSI"
+			oneMinute = 60 * 1000
+			# the base request
+			options = { url: url, method: req.method, timeout: oneMinute, jar : jar }
+			# if we have a build parameter, pass it through to the clsi
+			if req.query?.pdfng && req.query?.build? # only for new pdf viewer
+				options.qs = {}
+				options.qs.build = req.query.build
+			# if we are byte serving pdfs, pass through If-* and Range headers
+			# do not send any others, there's a proxying loop if Host: is passed!
+			if req.query?.pdfng
+				newHeaders = {}
+				for h, v of req.headers
+					newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
+				options.headers = newHeaders
+			proxy = request(options)
+			proxy.pipe(res)
+			proxy.on "error", (error) ->
+				logger.warn err: error, url: url, "CLSI proxy error"
 
 	wordCount: (req, res, next) ->
 		project_id = req.params.Project_id
