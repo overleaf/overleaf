@@ -125,8 +125,8 @@ module.exports = class Router
 			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
 
 		webRouter.delete "/project/:Project_id/output", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.deleteAuxFiles
-		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySync
-		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySync
+		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncCode
+		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncPdf
 		webRouter.get "/project/:Project_id/wordcount", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.wordCount
 
 		webRouter.delete '/Project/:Project_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.deleteProject

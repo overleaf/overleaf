@@ -9,7 +9,7 @@ AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
 ClsiCookieManager = require("./ClsiCookieManager")
-
+Path = require("path")
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -98,8 +98,29 @@ module.exports = CompileController =
 			url = "/project/#{project_id}/output/#{req.params.file}"
 		CompileController.proxyToClsi(project_id, url, req, res, next)
 
-	proxySync: (req, res, next = (error) ->) ->
-		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
+	proxySyncPdf: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{page, h, v} = req.query
+		if not page?.match(/^\d+$/)
+			return next(new Error("invalid page parameter"))
+		if not h?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid h parameter"))
+		if not v?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid v parameter"))
+		destination = {url: "/project/#{project_id}/sync/pdf", qs: {page, h, v}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
+
+	proxySyncCode: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{file, line, column} = req.query
+		if not file? or Path.resolve("/", file) isnt "/#{file}"
+			return next(new Error("invalid file parameter"))
+		if not line?.match(/^\d+$/)
+			return next(new Error("invalid line parameter"))
+		if not column?.match(/^\d+$/)
+			return next(new Error("invalid column parameter"))
+		destination = {url:"/project/#{project_id}/sync/code", qs: {file, line, column}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
 		if req.query?.compileGroup
