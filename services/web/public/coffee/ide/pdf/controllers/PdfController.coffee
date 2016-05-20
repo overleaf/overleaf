@@ -76,12 +76,15 @@ define [
 				# prepare query string
 				qs = {}
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
-				if fileByPath['output.pdf']?.build?
+				if fileByPath['output.pdf']?.url?
+					$scope.pdf.url = fileByPath['output.pdf'].url
+				else if fileByPath['output.pdf']?.build?
 					build = fileByPath['output.pdf'].build
 					$scope.pdf.url = "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
-					# no need to bust cache, build id is unique
 				else
 					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
+				# check if we need to bust cache (build id is unique so don't need it in that case)
+				if not fileByPath['output.pdf']?.build?
 					qs = { cache_bust : "#{Date.now()}" }
 				# add a query string parameter for the compile group
 				if response.compileGroup?
@@ -111,7 +114,9 @@ define [
 		fetchLogs = (logFile, blgFile) ->
 
 			getFile = (name, file) ->
-				if file?.build?
+				if file.url?  # FIXME clean this up when we have file.urls out consistently
+					url = file.url
+				else if file?.build?
 					url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
 					url = "/project/#{$scope.project_id}/output/#{name}"
