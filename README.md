@@ -1,4 +1,4 @@
-ShareLaTeX Docker Image
+ShareLaTeX Community Docker Image
 =======================
 
 **Please read this entire file before installing ShareLaTeX via Docker. It's only
@@ -34,9 +34,12 @@ If you want to permanently remove ShareLaTeX from your docker containers:
 docker rm sharelatex
 ```
 
+### Operating systems
+We recommend a debian based operating system such as Ubuntu for ShareLaTeX, this is what the software has been developed using and most people use when running ShareLaTeX.
+
 ### Mongo and Redis
 
-ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later), and
+ShareLaTeX depends on [MongoDB](http://www.mongodb.org/) (must be 2.4 or later, 3.x is recommended), and
 [Redis](http://redis.io/) (must be version 2.6.12 or later).
 These should be running on the host system.
 
@@ -142,7 +145,7 @@ the package name.
 
 ### Configuration Options
 
-You can pass configuration options to ShareLaTeX as environment variables:
+You can pass the core configuration options to ShareLaTeX as environment variables:
 
 ```
 $ docker run -d \
@@ -166,6 +169,8 @@ configured correctly!
 * `SHARELATEX_REDIS_PASS`: The password to use when connecting to Redis (if applicable)
 * `SHARELATEX_SECURE_COOKIE`: Set this to something non-zero to use a secure cookie.
   Only use this if your ShareLaTeX instance is running behind a reverse proxy with SSL configured.
+
+Other settings such as email setup need to be edited in the docker container at /etc/sharelatex/settings.coffee. We realise this is not an ideal solution and are working on a more streamlined settings file approach.
 
 ### Creating and Managing users
 
