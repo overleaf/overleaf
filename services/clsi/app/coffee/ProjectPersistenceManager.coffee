@@ -55,4 +55,4 @@ module.exports = ProjectPersistenceManager =
 			).error callback
 
 
-logger.log EXPIRY_TIMEOUT:EXPIRY_TIMEOUT, "project assets kept timeout"
+logger.log {EXPIRY_TIMEOUT: ProjectPersistenceManager.EXPIRY_TIMEOUT}, "project assets kept timeout"
