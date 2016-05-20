@@ -13,15 +13,6 @@ define [
 
 		$scope.failedLoad = false
 
-		$rootScope.$on 'entity:selected', () ->
-			$scope.failedLoad = false
-			$scope.loadBibtexIfRequired()
-
-		$scope.loadBibtexIfRequired = () ->
-			if $scope.extension($scope.openFile) == 'bib'
-				$scope.bibtexPreview.data = null
-				$scope.loadBibtexFilePreview()
-
 		window.sl_binaryFilePreviewError = () =>
 			$scope.failedLoad = true
 			$scope.$apply()
@@ -60,6 +51,11 @@ define [
 				if table_wrap.offsetHeight > desired_height
 					table_wrap.style.height = desired_height + 'px'
 					table_wrap.style['max-height'] = desired_height + 'px'
+
+		$scope.loadBibtexIfRequired = () ->
+			if $scope.extension($scope.openFile) == 'bib'
+				$scope.bibtexPreview.data = null
+				$scope.loadBibtexFilePreview()
 
 		$scope.loadBibtexIfRequired()
 
