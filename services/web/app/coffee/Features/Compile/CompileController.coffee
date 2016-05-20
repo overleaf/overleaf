@@ -114,6 +114,9 @@ module.exports = CompileController =
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
+			# expand any url parameter passed in as {url:..., qs:...}
+			if typeof url is "object"
+				{url, qs} = url
 			if limits.compileGroup == "priority"
 				compilerUrl = Settings.apis.clsi_priority.url
 			else
@@ -123,9 +126,11 @@ module.exports = CompileController =
 			oneMinute = 60 * 1000
 			# the base request
 			options = { url: url, method: req.method, timeout: oneMinute, jar : jar }
+			# add any provided query string
+			options.qs = qs if qs?
 			# if we have a build parameter, pass it through to the clsi
 			if req.query?.pdfng && req.query?.build? # only for new pdf viewer
-				options.qs = {}
+				options.qs ?= {}
 				options.qs.build = req.query.build
 			# if we are byte serving pdfs, pass through If-* and Range headers
 			# do not send any others, there's a proxying loop if Host: is passed!
