@@ -28,7 +28,7 @@ div.binary-file.full-size(
 			div.scroll-container
 				p
 					| {{ bibtexPreview.data }}
-				p
+				p(ng-show="bibtexPreview.shouldShowDots")
 					| ...
 	
 	p.no-preview(

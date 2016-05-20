@@ -7,6 +7,7 @@ define [
 
 		$scope.bibtexPreview =
 			loading: false
+			shouldShowDots: false
 			error: false
 			data: null
 
@@ -31,11 +32,15 @@ define [
 		$scope.loadBibtexFilePreview = () ->
 			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
 			$scope.bibtexPreview.loading = true
+			$scope.bibtexPreview.shouldShowDots = false
 			$scope.$apply()
 			$http.get(url)
 				.success (data) ->
 					$scope.bibtexPreview.loading = false
 					$scope.bibtexPreview.error = false
+					# show dots when payload is closs to cutoff
+					if data.length >= (TWO_MEGABYTES - 200)
+						$scope.bibtexPreview.shouldShowDots = true
 					try
 						# remove last partial line
 						data = data.replace(/\n.*$/, '')
