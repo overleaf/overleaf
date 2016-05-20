@@ -9,4 +9,12 @@ define [
 
 		openFile: (file) ->
 			@$scope.ui.view = "file"
-			@$scope.openFile = file
+			@$scope.openFile = null
+			@$scope.$apply()
+			window.setTimeout(
+				() =>
+					@$scope.openFile = file
+					@$scope.$apply()
+				, 0
+				, this
+			)

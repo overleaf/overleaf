@@ -7,19 +7,11 @@ define [
 
 		$scope.bibtexPreview =
 			loading: false
+			shouldShowDots: false
 			error: false
 			data: null
 
 		$scope.failedLoad = false
-
-		$rootScope.$on 'entity:selected', () ->
-			$scope.failedLoad = false
-			$scope.loadBibtexIfRequired()
-
-		$scope.loadBibtexIfRequired = () ->
-			if $scope.extension($scope.openFile) == 'bib'
-				$scope.bibtexPreview.data = null
-				$scope.loadBibtexFilePreview()
 
 		window.sl_binaryFilePreviewError = () =>
 			$scope.failedLoad = true
@@ -31,11 +23,15 @@ define [
 		$scope.loadBibtexFilePreview = () ->
 			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
 			$scope.bibtexPreview.loading = true
+			$scope.bibtexPreview.shouldShowDots = false
 			$scope.$apply()
 			$http.get(url)
 				.success (data) ->
 					$scope.bibtexPreview.loading = false
 					$scope.bibtexPreview.error = false
+					# show dots when payload is closs to cutoff
+					if data.length >= (TWO_MEGABYTES - 200)
+						$scope.bibtexPreview.shouldShowDots = true
 					try
 						# remove last partial line
 						data = data.replace(/\n.*$/, '')
@@ -55,6 +51,11 @@ define [
 				if table_wrap.offsetHeight > desired_height
 					table_wrap.style.height = desired_height + 'px'
 					table_wrap.style['max-height'] = desired_height + 'px'
+
+		$scope.loadBibtexIfRequired = () ->
+			if $scope.extension($scope.openFile) == 'bib'
+				$scope.bibtexPreview.data = null
+				$scope.loadBibtexFilePreview()
 
 		$scope.loadBibtexIfRequired()
 
