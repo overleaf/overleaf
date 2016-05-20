@@ -36,7 +36,8 @@ define [
 				_csrf: window.csrfToken
 			}
 
-		parseCompileResponse = (response) ->
+		parseCompileResponse = (response) ->		
+
 			# Reset everything
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
@@ -69,6 +70,7 @@ define [
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
+
 				# make a cache to look up files by name
 				fileByPath = {}
 				for file in response.outputFiles
@@ -85,11 +87,14 @@ define [
 					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not fileByPath['output.pdf']?.build?
-					qs = { cache_bust : "#{Date.now()}" }
+					qs.cache_bust = "#{Date.now()}"
 				# add a query string parameter for the compile group
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
 					qs.compileGroup = "#{$scope.pdf.compileGroup}"
+				if response.clsiServerId?
+					qs.clsiserverid = response.clsiServerId
+					ide.clsiServerId = response.clsiServerId
 				# convert the qs hash into a query string and append it
 				qs_args = ("#{k}=#{v}" for k, v of qs)
 				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
@@ -109,18 +114,27 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
+					file.url = "/project/#{project_id}/output/#{file.path}"
+					if response.clsiServerId?
+						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
+
 
 		fetchLogs = (logFile, blgFile) ->
 
 			getFile = (name, file) ->
+				opts =
+					method:"GET"
+					params:
+						build:file.build
+						clsiserverid:ide.clsiServerId
 				if file.url?  # FIXME clean this up when we have file.urls out consistently
-					url = file.url
+					opts.url = file.url
 				else if file?.build?
-					url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
+					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
-					url = "/project/#{$scope.project_id}/output/#{name}"
-				return $http.get url
+					opts.url = "/project/#{$scope.project_id}/output/#{name}"
+				return $http(opts)
 
 			# accumulate the log entries
 			logEntries =
@@ -179,7 +193,6 @@ define [
 			else # otherwise just display the result
 				response.success annotateFiles
 
-
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
 			return null if !doc?
@@ -225,6 +238,8 @@ define [
 			$http {
 				url: "/project/#{$scope.project_id}/output"
 				method: "DELETE"
+				params:
+					clsiserverid:ide.clsiServerId
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
@@ -307,6 +322,7 @@ define [
 							file: path
 							line: row + 1
 							column: column
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
@@ -334,6 +350,7 @@ define [
 							page: position.page + 1
 							h: position.offset.left.toFixed(2)
 							v: position.offset.top.toFixed(2)
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
