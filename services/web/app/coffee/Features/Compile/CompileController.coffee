@@ -41,17 +41,12 @@ module.exports = CompileController =
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->
-	
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id
 		isPdfjsPartialDownload = req.query?.pdfng
-
-
-
 		rateLimit = (callback)->
 			if isPdfjsPartialDownload
 				callback null, true
-	
 			else
 				rateLimitOpts =
 					endpointName: "full-pdf-download"
