@@ -27,7 +27,7 @@ module.exports = (grunt) ->
                                         #        access_token: ''
                                         concat: true
                                 src: repos
-                                dest: 'version/' + tag + '.json'
+                                dest: 'versions/' + tag + '.json'
 
         grunt.loadNpmTasks 'grunt-docker-io'
         grunt.loadNpmTasks 'grunt-github-api'
