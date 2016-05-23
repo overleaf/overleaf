@@ -6,6 +6,9 @@ mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
 Metrics = require "./Metrics"
 logger = require "logger-sharelatex"
+settings = require("settings-sharelatex")
+
+parallelFileDownloads = settings.parallelFileDownloads or 1
 
 module.exports = ResourceWriter =
 	syncResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
@@ -16,7 +19,7 @@ module.exports = ResourceWriter =
 				jobs = for resource in resources
 					do (resource) =>
 						(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
-				async.parallelLimit jobs, 5, callback
+				async.parallelLimit jobs, parallelFileDownloads, callback
 
 	_createDirectory: (basePath, callback = (error) ->) ->
 		fs.mkdir basePath, (err) ->

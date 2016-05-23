@@ -42,3 +42,4 @@ module.exports =
 			
 	smokeTest: false
 	project_cache_length_ms: 60 * 60 * 24
+	parallelFileDownloads:1
