@@ -25,6 +25,9 @@ RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
 # zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
 RUN apt-get install -y zlib1g-dev
 
+RUN apt-get install -y time
+RUN apt-get install -y strace
+
 
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 ADD ${baseDir}/package.json /var/www/package.json
@@ -62,9 +65,6 @@ RUN mkdir /etc/service/chat-sharelatex; \
 	mkdir /etc/service/tags-sharelatex; \
 	mkdir /etc/service/track-changes-sharelatex; \
 	mkdir /etc/service/web-sharelatex;
-
-
-
 
 
 ADD ${baseDir}/runit/chat-sharelatex.sh             /etc/service/chat-sharelatex/run
