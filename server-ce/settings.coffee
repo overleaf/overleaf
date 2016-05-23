@@ -423,7 +423,7 @@ settings =
 
 if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 	
-	settings.email:
+	settings.email =
 		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 		replyTo: process.env["SHARELATEX_EMAIL_REPLY_TO"] or ""
 		parameters:
@@ -446,7 +446,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 # opts are from http://antelle.github.io/passfield
 if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"]
 
-	settings.passwordStrengthOptions:
+	settings.passwordStrengthOptions =
 		pattern: process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or "aA$3"
 		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 50}
 
@@ -467,7 +467,7 @@ if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELA
 	
 
 if process.env["SHARELATEX_LDAP_HOST"]
-	settings.ldap :
+	settings.ldap =
 		host: process.env["SHARELATEX_LDAP_HOST"]
 		dn: process.env["SHARELATEX_LDAP_DN"]
 		baseSearch: process.env["SHARELATEX_LDAP_BASE_SEARCH"]
@@ -486,7 +486,6 @@ if process.env["SHARELATEX_LDAP_HOST"]
 
 # Compiler
 # --------
-
 if process.env["DOCKER_IN_DOCKER"]
 	clsi:
 		commandRunner: "docker-runner-sharelatex"
