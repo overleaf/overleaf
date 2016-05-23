@@ -1,6 +1,8 @@
 spawn = require("child_process").spawn
 logger = require "logger-sharelatex"
 
+logger.info "using standard command runner"
+
 module.exports = CommandRunner =
 	run: (project_id, command, directory, image, timeout, callback = (error) ->) ->
 		command = (arg.replace('$COMPILE_DIR', directory) for arg in command)
