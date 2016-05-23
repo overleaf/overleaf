@@ -8,5 +8,8 @@ module.exports = CommandRunner =
 		logger.warn "timeouts and sandboxing are not enabled with CommandRunner"
 
 		proc = spawn command[0], command.slice(1), stdio: "inherit", cwd: directory
+		proc.on "error", (err)->
+			logger.err err:err, project_id:project_id, command: command, directory: directory, "error running command"
+			callback(err)
 		proc.on "close", () ->
 			callback()
