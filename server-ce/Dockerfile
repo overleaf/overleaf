@@ -12,7 +12,11 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 	mkdir -p /var/lib/sharelatex; \
 	chown sharelatex:sharelatex /var/lib/sharelatex; \
 	mkdir -p /var/log/sharelatex; \
-	chown sharelatex:sharelatex /var/log/sharelatex;
+	chown sharelatex:sharelatex /var/log/sharelatex; \
+	mkdir -p /var/lib/sharelatex/data/template_files; \
+	chown sharelatex:sharelatex /var/lib/sharelatex/data/template_files;
+
+
 
 # Install ShareLaTeX
 RUN apt-get install -y git python
@@ -57,7 +61,11 @@ RUN mkdir /etc/service/chat-sharelatex; \
 	mkdir /etc/service/spelling-sharelatex; \
 	mkdir /etc/service/tags-sharelatex; \
 	mkdir /etc/service/track-changes-sharelatex; \
-	mkdir /etc/service/web-sharelatex; 
+	mkdir /etc/service/web-sharelatex;
+
+
+
+
 
 ADD ${baseDir}/runit/chat-sharelatex.sh             /etc/service/chat-sharelatex/run
 ADD ${baseDir}/runit/clsi-sharelatex.sh             /etc/service/clsi-sharelatex/run
