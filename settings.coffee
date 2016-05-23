@@ -10,7 +10,8 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 DATA_DIR = '/var/lib/sharelatex/data'
 TMP_DIR = '/var/lib/sharelatex/tmp'
 
-module.exports =
+settings =
+
 	# Databases
 	# ---------
 
@@ -60,6 +61,7 @@ module.exports =
 		backend: "fs"	
 		stores:
 			user_files: Path.join(DATA_DIR, "user_files")
+			template_files: Path.join(DATA_DIR, "template_files")
 			
 	# To use Amazon S3 as a storage backend, comment out the above config, and
 	# uncomment the following, filling in your key, secret, and bucket name:
@@ -97,6 +99,11 @@ module.exports =
 	# The name this is used to describe your ShareLaTeX Installation
 	appName: process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX (Community Edition)"
 
+
+	nav:
+		title: process.env["SHARELATEX_NAV_TITLE"] or  process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX Comunity Edition"
+
+
 	# The email address which users will be directed to as the main point of
 	# contact for this installation of ShareLaTeX.
 	adminEmail: process.env["SHARELATEX_ADMIN_EMAIL"] or "placeholder@example.com"
@@ -127,29 +134,13 @@ module.exports =
 	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
-	behindProxy: true
+	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
 
-	# Sending Email
-	# -------------
-	#
-	# You must configure a mail server to be able to send invite emails from
-	# ShareLaTeX. The config settings are passed to nodemailer. See the nodemailer
-	# documentation for available options:
-	#
-	#     http://www.nodemailer.com/docs/transports
-	#
-	# email:
-	#	fromAddress: ""
-	#	replyTo: ""
-	#	transport: "SES"
-	#	parameters:
-	#		AWSAccessKeyID: ""
-	#		AWSSecretKey: ""
 
 	# Spell Check Languages
 	# ---------------------
 	#
-	# You must have the corresponding aspell dictionary installed to 
+	# You must have the corresponding aspell dictionary installed to
 	# be able to use a language. Run `grunt check:aspell` to check which
 	# dictionaries you have installed. These should be set for the `code` for
 	# each language.
@@ -386,6 +377,9 @@ module.exports =
 	# 	spelling:
 	# 		port: spellingPort = 3005
 	# 		host: "localhost"
+	# 	templates:
+	# 		port: templatesPort = 3007
+	# 		host: "localhost"
 
 	# If you change the above config, or run some services on remote servers,
 	# you need to tell the other services where to find them:
@@ -410,7 +404,109 @@ module.exports =
 	# 		url: "http://localhost:#{spellingPort}"
 	# 	chat:
 	# 		url: "http://localhost:#{chatPort}"
+	#	templates:
+	#		url: "http://localhost:#{templatesPort}"
+
+
+#### OPTIONAL CONFIGERABLE SETTINGS
+
+
+# Sending Email
+# -------------
+#
+# You must configure a mail server to be able to send invite emails from
+# ShareLaTeX. The config settings are passed to nodemailer. See the nodemailer
+# documentation for available options:
+#
+#     http://www.nodemailer.com/docs/transports
+
+
+if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 	
+	settings.email:
+		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
+		replyTo: process.env["SHARELATEX_EMAIL_REPLY_TO"] or ""
+		parameters:
+			#AWS Creds
+			AWSAccessKeyID: process.env["SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID"]
+			AWSSecretKey: process.env["SHARELATEX_EMAIL_AWS_SES_SECRET_KEY"]
+
+			#SMTP Creds
+			host: process.env["SHARELATEX_EMAIL_SMTP_HOST"]
+			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
+			secure: process.env["SHARELATEX_EMAIL_SMTP_SECURE"]
+			auth:
+				user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
+				pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+
+
+# Password Settings
+# -----------
+# These restrict the passwords users can use when registering
+# opts are from http://antelle.github.io/passfield
+if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"]
+
+	settings.passwordStrengthOptions:
+		pattern: process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or "aA$3"
+		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 50}
+
+
+
+
+#######################
+# ShareLaTeX Server Pro
+#######################
+
+
+
+
+# LDAP - SERVER PRO ONLY
+# ----------
+# Settings below use a working LDAP test server kindly provided by forumsys.com
+# When testing with forumsys.com use username = einstein and password = password
+	
+
+if process.env["SHARELATEX_LDAP_HOST"]
+	settings.ldap :
+		host: process.env["SHARELATEX_LDAP_HOST"]
+		dn: process.env["SHARELATEX_LDAP_DN"]
+		baseSearch: process.env["SHARELATEX_LDAP_BASE_SEARCH"]
+		filter:  process.env["SHARELATEX_LDAP_FILTER"]
+		failMessage: process.env["SHARELATEX_LDAP_FAIL_MESSAGE"] or 'LDAP User Fail'
+		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
+		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
+		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
+		anonymous: process.env["SHARELATEX_LDAP_ANONYMOUS"] or false
+		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
+		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
+		starttls:  process.env["SHARELATEX_LDAP_TLS"] or false
+		tlsOptions:
+			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] or false
+			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
+
+# Compiler
+# --------
+
+if process.env["DOCKER_IN_DOCKER"]
+	clsi:
+		commandRunner: "docker-runner-sharelatex"
+		docker:
+			image: "sharelatex-texlive"
+			env:
+				PATH: process.env["COMPILER_PATH"] or "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+			user: "tex"
+
+
+# Templates
+# ---------
+if process.env["SHARELATEX_TEMPLATES_USER_ID"]
+	templates:
+		mountPointUrl: "/templates"
+		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
+
+
+
+
 
 # With lots of incoming and outgoing HTTP connections to different services,
 # sometimes long running, it is a good idea to increase the default number
@@ -419,3 +515,5 @@ http = require('http')
 http.globalAgent.maxSockets = 300
 https = require('https')
 https.globalAgent.maxSockets = 300
+
+module.exports = settings
