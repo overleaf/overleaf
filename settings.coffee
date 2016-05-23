@@ -451,6 +451,15 @@ if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELA
 		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 50}
 
 
+
+
+#######################
+# ShareLaTeX Server Pro
+#######################
+
+
+
+
 # LDAP - SERVER PRO ONLY
 # ----------
 # Settings below use a working LDAP test server kindly provided by forumsys.com
@@ -474,6 +483,26 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		tlsOptions:
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] or false
 			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
+
+# Compiler
+# --------
+
+if process.env["DOCKER_IN_DOCKER"]
+	clsi:
+		commandRunner: "docker-runner-sharelatex"
+		docker:
+			image: "sharelatex-texlive"
+			env:
+				PATH: process.env["COMPILER_PATH"] or "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+			user: "tex"
+
+
+# Templates
+# ---------
+if process.env["SHARELATEX_TEMPLATES_USER_ID"]
+	templates:
+		mountPointUrl: "/templates"
+		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
 
 
 
