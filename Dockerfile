@@ -95,10 +95,10 @@ RUN apt-get install -y unzip
 RUN apt-get install -y imagemagick optipng
 
 # phusion/baseimage init script
-ADD ${baseDir}/00_regen_sharelatex_secrets.sh  /etc/my_init.d/00_regen_sharelatex_secrets.sh
-ADD ${baseDir}/00_make_sharelatex_data_dirs.sh /etc/my_init.d/00_make_sharelatex_data_dirs.sh
-ADD ${baseDir}/00_set_docker_host_ipaddress.sh /etc/my_init.d/00_set_docker_host_ipaddress.sh
-ADD ${baseDir}/99_migrate.sh /etc/my_init.d/99_migrate.sh
+ADD ${baseDir}/init_scripts/00_regen_sharelatex_secrets.sh  /etc/my_init.d/00_regen_sharelatex_secrets.sh
+ADD ${baseDir}/init_scripts/00_make_sharelatex_data_dirs.sh /etc/my_init.d/00_make_sharelatex_data_dirs.sh
+ADD ${baseDir}/init_scripts/00_set_docker_host_ipaddress.sh /etc/my_init.d/00_set_docker_host_ipaddress.sh
+ADD ${baseDir}/init_scripts/99_migrate.sh /etc/my_init.d/99_migrate.sh
 
 # Install ShareLaTeX settings file
 RUN mkdir /etc/sharelatex
