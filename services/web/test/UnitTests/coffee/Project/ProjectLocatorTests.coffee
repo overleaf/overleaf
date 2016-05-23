@@ -169,6 +169,13 @@ describe 'ProjectLocator', ->
 				assert !err?
 				expect(doc).to.equal null
 				done()
+		
+		it 'should return null when the rootDoc_id no longer exists', (done) ->
+			project.rootDoc_id = "doesntexist"
+			@locator.findRootDoc project, (err, doc)->
+				assert !err?
+				expect(doc).to.equal null
+				done()
 
 	describe 'findElementByPath', ->
 

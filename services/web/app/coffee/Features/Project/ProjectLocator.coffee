@@ -61,7 +61,13 @@ module.exports = ProjectLocator =
 	findRootDoc : (opts, callback)->
 		getRootDoc = (project)=>
 			if project.rootDoc_id?
-				@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, callback
+				@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, (error, args...) ->
+					if error?
+						if error instanceof Errors.NotFoundError
+							return callback null, null
+						else
+							return callback error
+					return callback null, args...
 			else
 				callback null, null
 		{project, project_id} = opts

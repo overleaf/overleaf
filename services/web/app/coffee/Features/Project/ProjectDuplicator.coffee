@@ -75,7 +75,7 @@ module.exports = ProjectDuplicator =
 				return callback(err)
 			{originalProject, newProject, originalRootDoc, docContentsArray} = results
 
-			originalRootDoc = originalRootDoc[0]
+			originalRootDoc = originalRootDoc?[0]
 
 			docContents = {}
 			for docContent in docContentsArray
