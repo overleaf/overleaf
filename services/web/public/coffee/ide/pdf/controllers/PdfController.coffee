@@ -48,6 +48,11 @@ define [
 			$scope.pdf.tooRecentlyCompiled = false
 			$scope.pdf.renderingError = false
 
+			# make a cache to look up files by name
+			fileByPath = {}
+			for file in response.outputFiles
+				fileByPath[file.path] = file
+
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
@@ -60,7 +65,7 @@ define [
 				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
 				$scope.shouldShowLogs = true
-				fetchLogs()
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.view = 'errors'
 				$scope.pdf.clsiMaintenance = true
@@ -71,10 +76,6 @@ define [
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
 
-				# make a cache to look up files by name
-				fileByPath = {}
-				for file in response.outputFiles
-					fileByPath[file.path] = file
 				# prepare query string
 				qs = {}
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
@@ -123,6 +124,7 @@ define [
 		fetchLogs = (logFile, blgFile) ->
 
 			getFile = (name, file) ->
+				console.log "[getFile]", name, file
 				opts =
 					method:"GET"
 					params:
