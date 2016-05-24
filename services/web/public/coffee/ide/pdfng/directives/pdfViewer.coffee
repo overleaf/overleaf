@@ -290,11 +290,18 @@ define [
 						rescaleTimer = null
 					, 0
 
+				spinnerTimer = null
 				doRescale = (scale) ->
 					# console.log 'doRescale', scale
 					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
+					
+					if not spinnerTimer?
+						spinnerTimer = setTimeout () ->
+							spinner.add(element)
+							spinnerTimer = null
+						, 100
 					layoutReady.promise.then (parentSize) ->
 						[h, w] = parentSize
 						# console.log 'in promise', h, w
@@ -312,7 +319,6 @@ define [
 							scope.$emit 'pdf:error', error
 
 				elementTimer = null
-				spinnerTimer = null
 				updateLayout = () ->
 					# if element is zero-sized keep checking until it is ready
 					# console.log 'checking element ready', element.height(), element.width()
@@ -329,11 +335,6 @@ define [
 						]
 						# console.log 'resolving layoutReady with', scope.parentSize
 						$timeout () ->
-							if not spinnerTimer?
-								spinnerTimer = setTimeout () ->
-									spinner.add(element)
-									spinnerTimer = null
-								, 100
 							layoutReady.resolve scope.parentSize
 							scope.$emit 'flash-controls'
 
