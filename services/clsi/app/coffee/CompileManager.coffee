@@ -7,10 +7,13 @@ Path = require "path"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 child_process = require "child_process"
-CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
 DraftModeManager = require "./DraftModeManager"
 fs = require("fs")
 os = require("os")
+
+commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
+logger.info commandRunner:commandRunner, "selecting command runner for clsi"
+CommandRunner = require(commandRunner)
 
 module.exports = CompileManager =
 	doCompile: (request, callback = (error, outputFiles) ->) ->
