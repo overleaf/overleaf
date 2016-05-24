@@ -480,7 +480,11 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
 		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
 		starttls:  process.env["SHARELATEX_LDAP_TLS"] or false
-		tlsOptions:
+		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
+		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
+
+	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
+		settings.ldap.tlsOptions =
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] or false
 			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
 
