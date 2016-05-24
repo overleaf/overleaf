@@ -476,22 +476,22 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
 		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
 		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
-		anonymous: process.env["SHARELATEX_LDAP_ANONYMOUS"] or false
+		anonymous: process.env["SHARELATEX_LDAP_ANONYMOUS"] == "true"
 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
 		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
-		starttls:  process.env["SHARELATEX_LDAP_TLS"] or false
+		starttls:  process.env["SHARELATEX_LDAP_TLS"] == "true"
 		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
 		settings.ldap.tlsOptions =
-			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] or false
+			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
 			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
 
 # Compiler
 # --------
-if process.env["DOCKER_IN_DOCKER"]
-	clsi:
+if process.env["DOCKER_IN_DOCKER"] == "true"
+	settings.clsi =
 		commandRunner: "docker-runner-sharelatex"
 		docker:
 			image: "sharelatex-texlive"
@@ -503,7 +503,7 @@ if process.env["DOCKER_IN_DOCKER"]
 # Templates
 # ---------
 if process.env["SHARELATEX_TEMPLATES_USER_ID"]
-	templates:
+	settings.templates =
 		mountPointUrl: "/templates"
 		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
 
