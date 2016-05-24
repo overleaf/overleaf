@@ -14,7 +14,7 @@ describe "CompileManager", ->
 			"./OutputFileFinder": @OutputFileFinder = {}
 			"./OutputCacheManager": @OutputCacheManager = {}
 			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
-			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub() , info:->}
 			"child_process": @child_process = {}
 			"./CommandRunner": @CommandRunner = {}
 			"./DraftModeManager": @DraftModeManager = {}
