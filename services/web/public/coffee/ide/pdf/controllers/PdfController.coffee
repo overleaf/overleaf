@@ -124,7 +124,6 @@ define [
 		fetchLogs = (logFile, blgFile) ->
 
 			getFile = (name, file) ->
-				console.log "[getFile]", name, file
 				opts =
 					method:"GET"
 					params:
