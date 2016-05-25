@@ -9,7 +9,7 @@ AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
 ClsiCookieManager = require("./ClsiCookieManager")
-
+Path = require("path")
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -98,8 +98,29 @@ module.exports = CompileController =
 			url = "/project/#{project_id}/output/#{req.params.file}"
 		CompileController.proxyToClsi(project_id, url, req, res, next)
 
-	proxySync: (req, res, next = (error) ->) ->
-		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
+	proxySyncPdf: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{page, h, v} = req.query
+		if not page?.match(/^\d+$/)
+			return next(new Error("invalid page parameter"))
+		if not h?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid h parameter"))
+		if not v?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid v parameter"))
+		destination = {url: "/project/#{project_id}/sync/pdf", qs: {page, h, v}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
+
+	proxySyncCode: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{file, line, column} = req.query
+		if not file? or Path.resolve("/", file) isnt "/#{file}"
+			return next(new Error("invalid file parameter"))
+		if not line?.match(/^\d+$/)
+			return next(new Error("invalid line parameter"))
+		if not column?.match(/^\d+$/)
+			return next(new Error("invalid column parameter"))
+		destination = {url:"/project/#{project_id}/sync/code", qs: {file, line, column}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
 		if req.query?.compileGroup
@@ -114,6 +135,9 @@ module.exports = CompileController =
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
+			# expand any url parameter passed in as {url:..., qs:...}
+			if typeof url is "object"
+				{url, qs} = url
 			if limits.compileGroup == "priority"
 				compilerUrl = Settings.apis.clsi_priority.url
 			else
@@ -123,9 +147,11 @@ module.exports = CompileController =
 			oneMinute = 60 * 1000
 			# the base request
 			options = { url: url, method: req.method, timeout: oneMinute, jar : jar }
+			# add any provided query string
+			options.qs = qs if qs?
 			# if we have a build parameter, pass it through to the clsi
 			if req.query?.pdfng && req.query?.build? # only for new pdf viewer
-				options.qs = {}
+				options.qs ?= {}
 				options.qs.build = req.query.build
 			# if we are byte serving pdfs, pass through If-* and Range headers
 			# do not send any others, there's a proxying loop if Host: is passed!
