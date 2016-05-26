@@ -5,7 +5,7 @@ request = require('request')
 Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
-url = require("url")
+Url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")
 
 
@@ -75,7 +75,7 @@ module.exports = ClsiManager =
 	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
 		outputFiles = []
 		for file in rawOutputFiles
-			path = url.parse(file.url).path
+			path = Url.parse(file.url).path
 			path = path.replace("/project/#{project_id}/output/", "")
 			outputFiles.push
 				path: path
