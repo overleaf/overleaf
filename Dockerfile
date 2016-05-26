@@ -2,6 +2,15 @@ FROM phusion/baseimage:0.9.16
 
 ENV baseDir .
 
+# Install TexLive
+RUN apt-get install -y wget
+RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
+	mkdir /install-tl-unx; \
+	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
+
+RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
+	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
+
 # Install Node.js and Grunt
 RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
 RUN apt-get install -y build-essential nodejs
@@ -15,7 +24,6 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 	chown sharelatex:sharelatex /var/log/sharelatex; \
 	mkdir -p /var/lib/sharelatex/data/template_files; \
 	chown sharelatex:sharelatex /var/lib/sharelatex/data/template_files;
-
 
 
 # Install ShareLaTeX
@@ -43,6 +51,9 @@ RUN cd /var/www && node git-revision > revisions.txt
 # Minify js assets
 RUN cd /var/www/sharelatex/web; \
 	grunt compile:minify;
+
+RUN cd /var/www/sharelatex/clsi; \
+	grunt compile:bin
 
 # Install Nginx as a reverse proxy
 run apt-get update
@@ -78,14 +89,8 @@ ADD ${baseDir}/runit/tags-sharelatex.sh             /etc/service/tags-sharelatex
 ADD ${baseDir}/runit/track-changes-sharelatex.sh    /etc/service/track-changes-sharelatex/run
 ADD ${baseDir}/runit/web-sharelatex.sh              /etc/service/web-sharelatex/run
 
-# Install TexLive
-RUN apt-get install -y wget
-RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
-	mkdir /install-tl-unx; \
-	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
 
-RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
-	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
+
 RUN rm -r /install-tl-unx; \
 	rm install-tl-unx.tar.gz
 
@@ -112,6 +117,8 @@ ADD ${baseDir}/init_scripts/99_migrate.sh /etc/my_init.d/99_migrate.sh
 RUN mkdir /etc/sharelatex
 ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
+
+
 
 EXPOSE 80
 
