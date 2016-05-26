@@ -249,6 +249,7 @@ module.exports = class Router
 
 		webRouter.post '/error/client', (req, res, next) ->
 			logger.warn err: req.body.error, meta: req.body.meta, "client side error"
+			metrics.inc("client-side-error")
 			res.sendStatus(204)
 
 		webRouter.get '*', ErrorController.notFound
