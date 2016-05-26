@@ -42,10 +42,12 @@ describe "ClsiManager", ->
 						status: @status = "success"
 						outputFiles: [{
 							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.pdf"
+							path: "output.pdf"
 							type: "pdf"
 							build: 1234
 						},{
 							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.log"
+							path: "output.log"
 							type: "log"
 							build: 1234
 						}]
