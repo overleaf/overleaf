@@ -34,7 +34,8 @@ define [
 					if window.dropUpdates? and Math.random() < window.dropUpdates
 						sl_console.log "Simulating a lost update", update
 						return
-					@socket.emit "applyOtUpdate", @doc_id, update
+					@socket.emit "applyOtUpdate", @doc_id, update, (error) =>
+						return @_handleError(error) if error?
 				state: "ok"
 				id:    @socket.socket.sessionid
 			}
