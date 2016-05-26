@@ -2,6 +2,10 @@ FROM phusion/baseimage:0.9.16
 
 ENV baseDir .
 
+RUN apt-get update
+RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
+RUN apt-get install -y build-essential nodejs
+
 # Install TexLive
 RUN apt-get install -y wget
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
@@ -12,9 +16,25 @@ RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
 	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
 
 # Install Node.js and Grunt
-RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
-RUN apt-get install -y build-essential nodejs
 RUN npm install -g grunt-cli
+
+# Install Aspell
+RUN apt-get install -y aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-nr aspell-ns aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-ta aspell-te aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu 
+
+# Install unzip for file uploads
+RUN apt-get install -y unzip
+
+# Install imagemagick for image conversions
+RUN apt-get install -y imagemagick optipng
+
+# zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
+RUN apt-get install -y zlib1g-dev
+
+RUN apt-get install -y time
+RUN apt-get install -y strace
+RUN apt-get install -y nginx
+RUN apt-get install -y git
+RUN apt-get install -y python
 
 # Set up sharelatex user and home directory
 RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex; \
@@ -27,15 +47,7 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 
 
 # Install ShareLaTeX
-RUN apt-get install -y git python
 RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
-
-# zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
-RUN apt-get install -y zlib1g-dev
-
-RUN apt-get install -y time
-RUN apt-get install -y strace
-
 
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 ADD ${baseDir}/package.json /var/www/package.json
@@ -54,13 +66,6 @@ RUN cd /var/www/sharelatex/web; \
 
 RUN cd /var/www/sharelatex/clsi; \
 	grunt compile:bin
-
-# Install Nginx as a reverse proxy
-run apt-get update
-RUN apt-get install -y nginx;
-RUN rm /etc/nginx/sites-enabled/default
-ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
-ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
 RUN mkdir /etc/service/nginx
 ADD ${baseDir}/runit/nginx.sh /etc/service/nginx/run
@@ -89,7 +94,9 @@ ADD ${baseDir}/runit/tags-sharelatex.sh             /etc/service/tags-sharelatex
 ADD ${baseDir}/runit/track-changes-sharelatex.sh    /etc/service/track-changes-sharelatex/run
 ADD ${baseDir}/runit/web-sharelatex.sh              /etc/service/web-sharelatex/run
 
-
+RUN rm /etc/nginx/sites-enabled/default
+ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
+ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
 RUN rm -r /install-tl-unx; \
 	rm install-tl-unx.tar.gz
@@ -97,15 +104,6 @@ RUN rm -r /install-tl-unx; \
 ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2015/bin/x86_64-linux/
 RUN apt-get update
 RUN tlmgr install latexmk
-
-# Install Aspell
-RUN apt-get install -y aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-nr aspell-ns aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-ta aspell-te aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu 
-
-# Install unzip for file uploads
-RUN apt-get install -y unzip
-
-# Install imagemagick for image conversions
-RUN apt-get install -y imagemagick optipng
 
 # phusion/baseimage init script
 ADD ${baseDir}/init_scripts/00_regen_sharelatex_secrets.sh  /etc/my_init.d/00_regen_sharelatex_secrets.sh
@@ -117,7 +115,6 @@ ADD ${baseDir}/init_scripts/99_migrate.sh /etc/my_init.d/99_migrate.sh
 RUN mkdir /etc/sharelatex
 ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
-
 
 
 EXPOSE 80
