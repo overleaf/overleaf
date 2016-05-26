@@ -23,7 +23,7 @@ module.exports = Router =
 			attrs.err = error
 			logger.error attrs, "server side error in #{method}"
 		# Don't return raw error to prevent leaking server side info
-		return callback {message: "Something went wrong"}
+		return callback {message: "Something went wrong in real-time service"}
 
 	configure: (app, io, session) ->
 		app.set("io", io)
