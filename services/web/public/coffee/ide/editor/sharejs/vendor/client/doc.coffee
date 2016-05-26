@@ -192,6 +192,13 @@ class Doc
         callback error for callback in @inflightCallbacks
       else
         # The op applied successfully.
+        
+        # We may get multiple acks of the same message if we retried it, 
+        # so its ok if we receive an ack for a version that we've already gone past.
+        # If so, just ignore it
+        if msg.v < @version
+            return
+
         throw new Error('Invalid version from server') unless msg.v == @version
 
         @serverOps[@version] = oldInflightOp
