@@ -172,14 +172,14 @@ define [
 				update: update
 
 			if window.disconnectOnAck? and Math.random() < window.disconnectOnAck
-				console.log "Disconnecting on ack", update
+				sl_console.log "Disconnecting on ack", update
 				window._ide.socket.socket.disconnect()
 				# Pretend we never received the ack
 				return
 
 			if window.dropAcks? and Math.random() < window.dropAcks
 				if !update.op? # Only drop our own acks, not collaborator updates
-					console.log "Simulating a lost ack", update
+					sl_console.log "Simulating a lost ack", update
 					return
 
 			if update?.doc == @doc_id and @doc?
@@ -194,6 +194,7 @@ define [
 			@doc?.updateConnectionState "disconnected"
 
 		_onReconnect: () ->
+			sl_console.log "[onReconnect] reconnected (joined project)"
 			@ide.pushEvent "reconnected:afterJoinProject"
 
 			@connected = true

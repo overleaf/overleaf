@@ -29,10 +29,10 @@ define [
 				send: (update) =>
 					@_startInflightOpTimeout(update)
 					if window.disconnectOnUpdate? and Math.random() < window.disconnectOnUpdate
-						console.log "Disconnecting on update", update
+						sl_console.log "Disconnecting on update", update
 						window._ide.socket.socket.disconnect()
 					if window.dropUpdates? and Math.random() < window.dropUpdates
-						console.log "Simulating a lost update", update
+						sl_console.log "Simulating a lost update", update
 						return
 					@socket.emit "applyOtUpdate", @doc_id, update
 				state: "ok"
@@ -95,6 +95,7 @@ define [
 			@_doc.flush()
 
 		updateConnectionState: (state) ->
+			sl_console.log "[updateConnectionState] Setting state to #{state}"
 			@connection.state = state
 			@connection.id = @socket.socket.sessionid
 			@_doc.autoOpen = false

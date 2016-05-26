@@ -61,6 +61,8 @@ define [], () ->
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
 
+				sl_console.log "[socket.io connect] Connected"
+
 				setTimeout(() =>
 					@joinProject()
 				, 100)
@@ -97,6 +99,7 @@ define [], () ->
 				, 10 * 1000
 				
 		joinProject: () ->
+			sl_console.log "[joinProject] joining..."
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
 			}, (err, project, permissionsLevel, protocolVersion) =>
