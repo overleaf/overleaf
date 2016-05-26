@@ -112,12 +112,14 @@ define [
 		detachFromAce: () -> @_doc.detach_ace?()
 	
 		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
+		WAIT_FOR_CONNECTION_TIMEOUT: 500 # If we're waiting for the project to join, try again in 0.5 seconds
 		_startInflightOpTimeout: (update) ->
 			@_startFatalTimeoutTimer(update)
-			timer = setTimeout () =>
+			retryOp = () =>
 				# Only send the update again if inflightOp is still populated
 				# This can be cleared when hard reloading the document in which
 				# case we don't want to keep trying to send it.
+				sl_console.log "[inflightOpTimeout] Trying op again"
 				if @_doc.inflightOp?
 					# When there is a socket.io disconnect, @_doc.inflightSubmittedIds
 					# is updated with the socket.io client id of the current op in flight
@@ -126,8 +128,18 @@ define [
 					# So we need both depending on whether the op was submitted before
 					# one or more disconnects, or if it was submitted during the current session.
 					update.dupIfSource = [@connection.id, @_doc.inflightSubmittedIds...]
-					@connection.send(update)
-			, @INFLIGHT_OP_TIMEOUT
+					
+					# We must be joined to a project for applyOtUpdate to work on the real-time
+					# service, so don't send an op if we're not. Connection state is set to 'ok'
+					# when we've joined the project
+					if @connection.state != "ok"
+						sl_console.log "[inflightOpTimeout] Not connected, retrying in 0.5s"
+						timer = setTimeout retryOp, @WAIT_FOR_CONNECTION_TIMEOUT
+					else
+						sl_console.log "[inflightOpTimeout] Sending"
+						@connection.send(update)
+			
+			timer = setTimeout retryOp, @INFLIGHT_OP_TIMEOUT
 			@_doc.inflightCallbacks.push () =>
 				@_clearFatalTimeoutTimer()
 				clearTimeout timer
