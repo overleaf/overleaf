@@ -13,7 +13,9 @@ module.exports = OutputFileFinder =
 		logger.log directory: directory, "getting output files"
 
 		OutputFileFinder._getAllFiles directory, (error, allFiles = []) ->
-			return callback(error) if error?
+			if error?
+				logger.err err:error, "error finding all output files"
+				return callback(error)
 			jobs = []
 			outputFiles = []
 			for file in allFiles
