@@ -15,17 +15,23 @@ commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
 logger.info commandRunner:commandRunner, "selecting command runner for clsi"
 CommandRunner = require(commandRunner)
 
+getCompileName = (project_id, user_id) ->
+	if user_id? then "#{project_id}-#{user_id}" else project_id
+
+getCompileDir = (project_id, user_id) ->
+	Path.join(Settings.path.compilesDir, getCompileName(project_id, user_id))
+
 module.exports = CompileManager =
 	doCompile: (request, callback = (error, outputFiles) ->) ->
-		compileDir = Path.join(Settings.path.compilesDir, request.project_id)
+		compileDir = getCompileDir(request.project_id, request.user_id)
 
 		timer = new Metrics.Timer("write-to-disk")
-		logger.log project_id: request.project_id, "starting doCompile"
+		logger.log project_id: request.project_id, user_id: request.user_id, "starting compile"
 		ResourceWriter.syncResourcesToDisk request.project_id, request.resources, compileDir, (error) ->
 			if error?
-				logger.err err:error, project_id: request.project_id, "error writing resources to disk"
+				logger.err err:error, project_id: request.project_id, user_id: request.user_id, "error writing resources to disk"
 				return callback(error) 
-			logger.log project_id: request.project_id, time_taken: Date.now() - timer.start, "written files to disk"
+			logger.log project_id: request.project_id, user_id: request.user_id, time_taken: Date.now() - timer.start, "written files to disk"
 			timer.done()
 			
 			injectDraftModeIfRequired = (callback) ->
@@ -42,7 +48,8 @@ module.exports = CompileManager =
 				tag = "other" if not request.project_id.match(/^[0-9a-f]{24}$/) # exclude smoke test
 				Metrics.inc("compiles")
 				Metrics.inc("compiles-with-image.#{tag}")
-				LatexRunner.runLatex request.project_id, {
+				compileName = getCompileName(request.project_id, request.user_id)
+				LatexRunner.runLatex compileName, {
 					directory: compileDir
 					mainFile:  request.rootResourcePath
 					compiler:  request.compiler
@@ -58,7 +65,7 @@ module.exports = CompileManager =
 					loadavg = os.loadavg?()
 					Metrics.gauge("load-avg", loadavg[0]) if loadavg?
 					ts = timer.done()
-					logger.log {project_id: request.project_id, time_taken: ts, stats:stats, timings:timings, loadavg:loadavg}, "done compile"
+					logger.log {project_id: request.project_id, user_id: request.user_id, time_taken: ts, stats:stats, timings:timings, loadavg:loadavg}, "done compile"
 					if stats?["latex-runs"] > 0
 						Metrics.timing("run-compile-per-pass", ts / stats["latex-runs"])
 					if stats?["latex-runs"] > 0 and timings?["cpu-time"] > 0
@@ -106,24 +113,28 @@ module.exports = CompileManager =
 			else
 				callback(null, true) # directory exists
 
-	syncFromCode: (project_id, file_name, line, column, callback = (error, pdfPositions) ->) ->
+	syncFromCode: (project_id, user_id, file_name, line, column, callback = (error, pdfPositions) ->) ->
 		# If LaTeX was run in a virtual environment, the file path that synctex expects
 		# might not match the file path on the host. The .synctex.gz file however, will be accessed
 		# wherever it is on the host.
-		base_dir = Settings.path.synctexBaseDir(project_id)
+		compileName = getCompileName(project_id, user_id)
+		base_dir = Settings.path.synctexBaseDir(compileName)
 		file_path = base_dir + "/" + file_name
-		synctex_path = Path.join(Settings.path.compilesDir, project_id, "output.pdf")
+		compileDir = getCompileDir(project_id, user_id)
+		synctex_path = Path.join(compileDir, "output.pdf")
 		CompileManager._runSynctex ["code", synctex_path, file_path, line, column], (error, stdout) ->
 			return callback(error) if error?
-			logger.log project_id: project_id, file_name: file_name, line: line, column: column, stdout: stdout, "synctex code output"
+			logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, stdout: stdout, "synctex code output"
 			callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
 
-	syncFromPdf: (project_id, page, h, v, callback = (error, filePositions) ->) ->
-		base_dir = Settings.path.synctexBaseDir(project_id)
-		synctex_path = Path.join(Settings.path.compilesDir, project_id, "output.pdf")
+	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
+		compileName = getCompileName(project_id, user_id)
+		base_dir = Settings.path.synctexBaseDir(compileName)
+		compileDir = getCompileDir(project_id, user_id)
+		synctex_path = Path.join(compileDir, "output.pdf")
 		CompileManager._runSynctex ["pdf", synctex_path, page, h, v], (error, stdout) ->
 			return callback(error) if error?
-			logger.log project_id: project_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
+			logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
 			callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
 
 	_runSynctex: (args, callback = (error, stdout) ->) ->
@@ -162,19 +173,20 @@ module.exports = CompileManager =
 				}
 		return results
 
-	wordcount: (project_id, file_name, image, callback = (error, pdfPositions) ->) ->
-		logger.log project_id:project_id, file_name:file_name, image:image, "running wordcount"
+	wordcount: (project_id, user_id, file_name, image, callback = (error, pdfPositions) ->) ->
+		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-inc', file_path, "-out=" + file_path + ".wc"]
-		directory = Path.join(Settings.path.compilesDir, project_id)
+		directory = getCompileDir(project_id, user_id)
 		timeout = 10 * 1000
+		compileName = getCompileName(project_id, user_id)
 
-		CommandRunner.run project_id, command, directory, image, timeout, (error) ->
+		CommandRunner.run compileName, command, directory, image, timeout, (error) ->
 			return callback(error) if error?
 			try
 				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
 			catch err
-				logger.err err:err, command:command, directory:directory, project_id:project_id, "error reading word count output"
+				logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
 				return callback(err)
 			callback null, CompileManager._parseWordcountFromOutput(stdout)
 

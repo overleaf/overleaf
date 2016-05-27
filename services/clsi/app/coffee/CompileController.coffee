@@ -11,6 +11,7 @@ module.exports = CompileController =
 		RequestParser.parse req.body, (error, request) ->
 			return next(error) if error?
 			request.project_id = req.params.project_id
+			request.user_id = req.params.user_id if req.params.user_id?
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
@@ -35,6 +36,7 @@ module.exports = CompileController =
 							outputFiles: outputFiles.map (file) ->
 								url:
 									"#{Settings.apis.clsi.url}/project/#{request.project_id}" +
+									(if request.user_id? then "/user/#{request.user_id}" else "") +
 									(if file.build? then "/build/#{file.build}" else "") +
 									"/output/#{file.path}"
 								path: file.path
@@ -52,8 +54,9 @@ module.exports = CompileController =
 		line   = parseInt(req.query.line, 10)
 		column = parseInt(req.query.column, 10)
 		project_id = req.params.project_id
+		user_id = req.params.user_id
 
-		CompileManager.syncFromCode project_id, file, line, column, (error, pdfPositions) ->
+		CompileManager.syncFromCode project_id, user_id, file, line, column, (error, pdfPositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {
 				pdf: pdfPositions
@@ -64,8 +67,9 @@ module.exports = CompileController =
 		h      = parseFloat(req.query.h)
 		v      = parseFloat(req.query.v)
 		project_id = req.params.project_id
+		user_id = req.params.user_id
 
-		CompileManager.syncFromPdf project_id, page, h, v, (error, codePositions) ->
+		CompileManager.syncFromPdf project_id, user_id, page, h, v, (error, codePositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {
 				code: codePositions
@@ -74,10 +78,11 @@ module.exports = CompileController =
 	wordcount: (req, res, next = (error) ->) ->
 		file   = req.query.file || "main.tex"
 		project_id = req.params.project_id
+		user_id = req.params.user_id
 		image = req.query.image
 		logger.log {image, file, project_id}, "word count request"
 
-		CompileManager.wordcount project_id, file, image, (error, result) ->
+		CompileManager.wordcount project_id, user_id, file, image, (error, result) ->
 			return next(error) if error?
 			res.send JSON.stringify {
 				texcount: result

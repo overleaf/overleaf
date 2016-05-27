@@ -43,11 +43,12 @@ describe "CompileManager", ->
 				resources: @resources = "mock-resources"
 				rootResourcePath: @rootResourcePath = "main.tex"
 				project_id: @project_id = "project-id-123"
+				user_id: @user_id = "1234"
 				compiler: @compiler = "pdflatex"
 				timeout: @timeout = 42000
 				imageName: @image = "example.com/image"
 			@Settings.compileDir = "compiles"
-			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}"
+			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArg(3)
 			@LatexRunner.runLatex = sinon.stub().callsArg(2)
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
@@ -65,7 +66,7 @@ describe "CompileManager", ->
 
 			it "should run LaTeX", ->
 				@LatexRunner.runLatex
-					.calledWith(@project_id, {
+					.calledWith("#{@project_id}-#{@user_id}", {
 						directory: @compileDir
 						mainFile:  @rootResourcePath
 						compiler:  @compiler
@@ -150,17 +151,17 @@ describe "CompileManager", ->
 			@column = 3
 			@file_name = "main.tex"
 			@child_process.execFile = sinon.stub()
-			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}"
+			@Settings.path.synctexBaseDir = (project_id) => "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 
 		describe "syncFromCode", ->
 			beforeEach ->
 				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n", "")
-				@CompileManager.syncFromCode @project_id, @file_name, @line, @column, @callback
+				@CompileManager.syncFromCode @project_id, @user_id, @file_name, @line, @column, @callback
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
-				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
-				file_path = "#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}"
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
+				file_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}"
 				@child_process.execFile
 					.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column], timeout: 10000)
 					.should.equal true
@@ -178,12 +179,12 @@ describe "CompileManager", ->
 
 		describe "syncFromPdf", ->
 			beforeEach ->
-				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}/#{@file_name}\t#{@line}\t#{@column}\n", "")
-				@CompileManager.syncFromPdf @project_id, @page, @h, @v, @callback
+				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}\t#{@line}\t#{@column}\n", "")
+				@CompileManager.syncFromPdf @project_id, @user_id, @page, @h, @v, @callback
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
-				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}/output.pdf"
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
 				@child_process.execFile
 					.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v], timeout: 10000)
 					.should.equal true
@@ -209,15 +210,15 @@ describe "CompileManager", ->
 			@Settings.path.compilesDir = "/local/compile/directory"
 			@image = "example.com/image"
 
-			@CompileManager.wordcount @project_id, @file_name, @image, @callback
+			@CompileManager.wordcount @project_id, @user_id, @file_name, @image, @callback
 
 		it "should run the texcount command", ->
-			@directory = "#{@Settings.path.compilesDir}/#{@project_id}"
+			@directory = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@file_path = "$COMPILE_DIR/#{@file_name}"
 			@command =[ "texcount", "-inc", @file_path, "-out=" + @file_path + ".wc"]
 			
 			@CommandRunner.run
-				.calledWith(@project_id, @command, @directory, @image, @timeout)
+				.calledWith("#{@project_id}-#{@user_id}", @command, @directory, @image, @timeout)
 				.should.equal true
 
 		it "should call the callback with the parsed output", ->
