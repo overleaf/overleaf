@@ -25,11 +25,11 @@ RUN npm install -g grunt-cli
 # Set up sharelatex user and home directory
 RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex; \
 	mkdir -p /var/lib/sharelatex; \
-	chown sharelatex:sharelatex /var/lib/sharelatex; \
+	chown www-data:www-data /var/lib/sharelatex; \
 	mkdir -p /var/log/sharelatex; \
-	chown sharelatex:sharelatex /var/log/sharelatex; \
+	chown www-data:www-data /var/log/sharelatex; \
 	mkdir -p /var/lib/sharelatex/data/template_files; \
-	chown sharelatex:sharelatex /var/lib/sharelatex/data/template_files;
+	chown www-data:www-data /var/lib/sharelatex/data/template_files;
 
 
 # Install ShareLaTeX
