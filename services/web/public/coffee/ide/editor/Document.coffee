@@ -198,6 +198,7 @@ define [
 					@leave()
 
 		_onDisconnect: () ->
+			sl_console.log '[onDisconnect] disconnecting'
 			@connected = false
 			@joined = false
 			@doc?.updateConnectionState "disconnected"
@@ -253,7 +254,7 @@ define [
 			else
 				# It's possible that this instance has error, and the doc has been reloaded.
 				# This creates a new instance in Document.openDoc with the same id. We shouldn't
-				# clear it because it's not use.
+				# clear it because it's not this instance.
 				sl_console.log "[_cleanUp] New instance of (#{@doc_id}) created. Not removing"
 			@_unBindFromEditorEvents()
 			@_unBindFromSocketEvents()
@@ -296,5 +297,9 @@ define [
 			console.error "ShareJS error", error, meta
 			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{@ide.socket.socket.transport.name}" )
 			@doc?.clearInflightAndPendingOps()
-			@_cleanUp()
 			@trigger "error", error, meta
+			# The clean up should run after the error is triggered because the error triggers a
+			# disconnect. If we run the clean up first, we remove our event handlers and miss
+			# the disconnect event, which means we try to leaveDoc when the connection comes back.
+			# This could intefere with the new connection of a new instance of this document.
+			@_cleanUp()

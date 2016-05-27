@@ -52,6 +52,7 @@ define [], () ->
 				"force new connection": true
 
 			@ide.socket.on "connect", () =>
+				sl_console.log "[socket.io connect] Connected"
 				@connected = true
 				@ide.pushEvent("connected")
 
@@ -60,8 +61,6 @@ define [], () ->
 					@$scope.connection.inactive_disconnect = false
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
-
-				sl_console.log "[socket.io connect] Connected"
 
 				setTimeout(() =>
 					@joinProject()
@@ -75,6 +74,7 @@ define [], () ->
 
 
 			@ide.socket.on 'disconnect', () =>
+				sl_console.log "[socket.io disconnect] Disconnected"
 				@connected = false
 				@ide.pushEvent("disconnected")
 
