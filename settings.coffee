@@ -497,7 +497,7 @@ if process.env["DOCKER_IN_DOCKER"] == "true"
 			image: process.env["TEX_LIVE_DOCKER_IMAGE"]
 			env:
 				PATH: process.env["COMPILER_PATH"] or "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-			user: "tex"
+			user: "www-data"
 
 
 # Templates
