@@ -4,10 +4,11 @@ ENV baseDir .
 
 RUN apt-get update
 RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
-RUN apt-get install -y build-essential nodejs
+RUN apt-get install -y build-essential wget nodejs unzip time imagemagick optipng strace nginx git python zlib1g-dev; \
+ install -y aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-nr aspell-ns aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-ta aspell-te aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu 
+
 
 # Install TexLive
-RUN apt-get install -y wget
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
 	mkdir /install-tl-unx; \
 	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
@@ -18,23 +19,8 @@ RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
 # Install Node.js and Grunt
 RUN npm install -g grunt-cli
 
-# Install Aspell
-RUN apt-get install -y aspell aspell-en aspell-af aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-id aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-nr aspell-ns aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-ss aspell-st aspell-sv aspell-ta aspell-te aspell-tl aspell-tn aspell-ts aspell-uk aspell-uz aspell-xh aspell-zu 
 
-# Install unzip for file uploads
-RUN apt-get install -y unzip
 
-# Install imagemagick for image conversions
-RUN apt-get install -y imagemagick optipng
-
-# zlib1g-dev is needed to compile the synctex binaries in the CLSI during `grunt install`.
-RUN apt-get install -y zlib1g-dev
-
-RUN apt-get install -y time
-RUN apt-get install -y strace
-RUN apt-get install -y nginx
-RUN apt-get install -y git
-RUN apt-get install -y python
 
 # Set up sharelatex user and home directory
 RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharelatex; \
