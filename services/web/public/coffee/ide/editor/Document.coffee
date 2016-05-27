@@ -238,7 +238,14 @@ define [
 				callback(error)
 
 		_cleanUp: () ->
-			delete Document.openDocs[@doc_id]
+			if Document.openDocs[@doc_id] == @
+				sl_console.log "[_cleanUp] Removing self (#{@doc_id}) from in openDocs"
+				delete Document.openDocs[@doc_id]
+			else
+				# It's possible that this instance has error, and the doc has been reloaded.
+				# This creates a new instance in Document.openDoc with the same id. We shouldn't
+				# clear it because it's not use.
+				sl_console.log "[_cleanUp] New instance of (#{@doc_id}) created. Not removing"
 			@_unBindFromEditorEvents()
 			@_unBindFromSocketEvents()
 
