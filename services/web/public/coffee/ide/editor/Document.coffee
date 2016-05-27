@@ -146,12 +146,15 @@ define [
 			if !inflightOp? and !pendingOp?
 				# there's nothing going on
 				saved = true
-			else if inflightOp == @oldInflightOp
+				sl_console.log "[pollSavedStatus] no inflight or pending ops"
+			else if inflightOp? and inflightOp == @oldInflightOp
+				# The same inflight op has been sitting unacked since we
+				# last checked.
 				saved = false
-			else if pendingOp?
-				saved = false
+				sl_console.log "[pollSavedStatus] inflight op is same as before"
 			else
 				saved = true
+				sl_console.log "[pollSavedStatus] assuming saved (inflightOp?: #{inflightOp?}, pendingOp?: #{pendingOp?})"
 
 			@oldInflightOp = inflightOp
 			return saved
