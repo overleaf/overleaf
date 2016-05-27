@@ -6,7 +6,10 @@ define [
 		@getDocument: (ide, doc_id) ->
 			@openDocs ||= {}
 			if !@openDocs[doc_id]?
+				sl_console.log "[getDocument] Creating new document instance for #{doc_id}"
 				@openDocs[doc_id] = new Document(ide, doc_id)
+			else
+				sl_console.log "[getDocument] Returning existing document instance for #{doc_id}"
 			return @openDocs[doc_id]
 
 		@hasUnsavedChanges: () ->
@@ -107,11 +110,14 @@ define [
 			@wantToBeJoined = false
 			@_cancelJoin()
 			if (@doc? and @doc.hasBufferedOps())
+				sl_console.log "[leave] Doc has buffered ops, pushing callback for later"
 				@_leaveCallbacks ||= []
 				@_leaveCallbacks.push callback
 			else if !@connected
+				sl_console.log "[leave] Not connected, returning now"
 				callback()
 			else
+				sl_console.log "[leave] Leaving now"
 				@_leaveDoc(callback)
 
 		flush: () ->
@@ -202,6 +208,7 @@ define [
 
 			@connected = true
 			if @wantToBeJoined or @doc?.hasBufferedOps()
+				sl_console.log "[onReconnect] Rejoining (wantToBeJoined: #{@wantToBeJoined} OR hasBufferedOps: #{@doc?.hasBufferedOps()})"
 				@_joinDoc (error) =>
 					return @_onError(error) if error?
 					@doc.updateConnectionState "ok"
@@ -229,10 +236,12 @@ define [
 					callback()
 
 		_leaveDoc: (callback = (error) ->) ->
+			sl_console.log '[_leaveDoc] Sending leaveDoc request'
 			@ide.socket.emit 'leaveDoc', @doc_id, (error) =>
 				return callback(error) if error?
 				@joined = false
 				for callback in @_leaveCallbacks or []
+					sl_console.log '[_leaveDoc] Calling buffered callback', callback
 					callback(error)
 				delete @_leaveCallbacks
 				callback(error)
