@@ -20,7 +20,7 @@ module.exports = CompileManager =
 		compileDir = Path.join(Settings.path.compilesDir, request.project_id)
 
 		timer = new Metrics.Timer("write-to-disk")
-		logger.log project_id: request.project_id, "starting compile"
+		logger.log project_id: request.project_id, "starting doCompile"
 		ResourceWriter.syncResourcesToDisk request.project_id, request.resources, compileDir, (error) ->
 			if error?
 				logger.err err:error, project_id: request.project_id, "error writing resources to disk"
@@ -130,7 +130,9 @@ module.exports = CompileManager =
 		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
 		seconds = 1000
 		child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
-			return callback(error) if error?
+			if error?
+				logger.err err:error, args:args, "error running synctex"
+				return callback(error)
 			callback(null, stdout)
 
 	_parseSynctexFromCodeOutput: (output) ->
