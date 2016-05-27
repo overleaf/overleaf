@@ -33,7 +33,10 @@ module.exports = CompileController =
 							status: status
 							error:  error?.message or error
 							outputFiles: outputFiles.map (file) ->
-								url: "#{Settings.apis.clsi.url}/project/#{request.project_id}/output/#{file.path}"
+								url:
+									"#{Settings.apis.clsi.url}/project/#{request.project_id}" +
+									(if file.build? then "/build/#{file.build}" else "") +
+									"/output/#{file.path}"
 								path: file.path
 								type: file.type
 								build: file.build
