@@ -65,7 +65,7 @@ app.get  "/project/:project_id/status", CompileController.status
 
 # Per-user containers
 app.post   "/project/:project_id/user/:user_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
-# app.delete "/project/:project_id/user/:user_id", CompileController.clearCache
+app.delete "/project/:project_id/user/:user_id", CompileController.clearCache
 
 app.get  "/project/:project_id/user/:user_id/sync/code", CompileController.syncFromCode
 app.get  "/project/:project_id/user/:user_id/sync/pdf", CompileController.syncFromPdf

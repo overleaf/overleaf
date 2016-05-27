@@ -105,12 +105,12 @@ describe "CompileManager", ->
 				@proc.stdout = new EventEmitter()
 				@proc.stderr = new EventEmitter()
 				@child_process.spawn = sinon.stub().returns(@proc)
-				@CompileManager.clearProject @project_id, @callback
+				@CompileManager.clearProject @project_id, @user_id, @callback
 				@proc.emit "close", 0
 
 			it "should remove the project directory", ->
 				@child_process.spawn
-					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}"])
+					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"])
 					.should.equal true
 
 			it "should call the callback", ->
@@ -124,13 +124,13 @@ describe "CompileManager", ->
 				@proc.stdout = new EventEmitter()
 				@proc.stderr = new EventEmitter()
 				@child_process.spawn = sinon.stub().returns(@proc)
-				@CompileManager.clearProject @project_id, @callback
+				@CompileManager.clearProject @project_id, @user_id, @callback
 				@proc.stderr.emit "data", @error = "oops"
 				@proc.emit "close", 1
 
 			it "should remove the project directory", ->
 				@child_process.spawn
-					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}"])
+					.calledWith("rm", ["-r", "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"])
 					.should.equal true
 
 			it "should call the callback with an error from the stderr", ->
@@ -138,7 +138,7 @@ describe "CompileManager", ->
 					.calledWith(new Error())
 					.should.equal true
 
-				@callback.args[0][0].message.should.equal "rm -r #{@Settings.path.compilesDir}/#{@project_id} failed: #{@error}"
+				@callback.args[0][0].message.should.equal "rm -r #{@Settings.path.compilesDir}/#{@project_id}-#{@user_id} failed: #{@error}"
 
 	describe "syncing", ->
 		beforeEach ->

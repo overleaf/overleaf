@@ -9,7 +9,9 @@ Metrics = require "./Metrics"
 child_process = require "child_process"
 DraftModeManager = require "./DraftModeManager"
 fs = require("fs")
+fse = require "fs-extra"
 os = require("os")
+async = require "async"
 
 commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
 logger.info commandRunner:commandRunner, "selecting command runner for clsi"
@@ -76,12 +78,12 @@ module.exports = CompileManager =
 						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 							callback null, newOutputFiles
 	
-	clearProject: (project_id, _callback = (error) ->) ->
+	clearProject: (project_id, user_id, _callback = (error) ->) ->
 		callback = (error) ->
 			_callback(error)
 			_callback = () ->
 
-		compileDir = Path.join(Settings.path.compilesDir, project_id)
+		compileDir = getCompileDir(project_id, user_id)
 
 		CompileManager._checkDirectory compileDir, (err, exists) ->
 			return callback(err) if err?
@@ -99,6 +101,27 @@ module.exports = CompileManager =
 					return callback(null)
 				else
 					return callback(new Error("rm -r #{compileDir} failed: #{stderr}"))
+
+	_findAllDirs: (callback = (error, allDirs) ->) ->
+		root = Settings.path.compilesDir
+		fs.readdir root, (err, files) ->
+			return callback(err) if err?
+			allDirs = (Path.join(root, file) for file in files)
+			callback(null, allDirs)
+
+	clearExpiredProjects: (max_cache_age_ms, callback = (error) ->) ->
+		now = Date.now()
+		# action for each directory
+		expireIfNeeded = (checkDir, cb) ->
+			fs.stat checkDir, (err, stats) ->
+				return cb() if err?  # ignore errors checking directory
+				age = now - stats.mtime
+				hasExpired = (age > max_cache_age_ms)
+				if hasExpired then fse.remove(checkDir, cb) else cb()
+		# iterate over all project directories
+		CompileManager._findAllDirs (error, allDirs) ->
+			return callback() if error?
+			async.eachSeries allDirs, expireIfNeeded,	callback
 
 	_checkDirectory: (compileDir, callback = (error, exists) ->) ->
 		fs.lstat compileDir, (err, stats) ->

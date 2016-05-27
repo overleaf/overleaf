@@ -45,7 +45,7 @@ module.exports = CompileController =
 					}
 		
 	clearCache: (req, res, next = (error) ->) ->
-		ProjectPersistenceManager.clearProject req.params.project_id, (error) ->
+		ProjectPersistenceManager.clearProject req.params.project_id, req.params.user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus(204) # No content
 

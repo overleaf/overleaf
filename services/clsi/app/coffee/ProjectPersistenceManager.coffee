@@ -27,21 +27,30 @@ module.exports = ProjectPersistenceManager =
 			jobs = for project_id in (project_ids or [])
 				do (project_id) ->
 					(callback) ->
-						ProjectPersistenceManager.clearProject project_id, (err) ->
+						ProjectPersistenceManager.clearProjectFromCache project_id, (err) ->
 							if err?
 								logger.error err: err, project_id: project_id, "error clearing project"
 							callback()
-			async.series jobs, callback
-
-	clearProject: (project_id, callback = (error) ->) ->
-		logger.log project_id: project_id, "clearing project"
-		CompileManager.clearProject project_id, (error) ->
-			return callback(error) if error?
-			UrlCache.clearProject project_id, (error) ->
+			async.series jobs, (error) ->
 				return callback(error) if error?
-				ProjectPersistenceManager._clearProjectFromDatabase project_id, (error) ->
-					return callback(error) if error?
-					callback()
+				CompileManager.clearExpiredProjects ProjectPersistenceManager.EXPIRY_TIMEOUT, (error) ->
+					callback() # ignore any errors from deleting directories
+
+	clearProject: (project_id, user_id, callback = (error) ->) ->
+		logger.log project_id: project_id, "clearing project for user"
+		CompileManager.clearProject project_id, user_id, (error) ->
+			return callback(error) if error?
+			ProjectPersistenceManager.clearProjectFromCache project_id, (error) ->
+				return callback(error) if error?
+				callback()
+
+	clearProjectFromCache: (project_id, callback = (error) ->) ->
+		logger.log project_id: project_id, "clearing project from cache"
+		UrlCache.clearProject project_id, (error) ->
+			return callback(error) if error?
+			ProjectPersistenceManager._clearProjectFromDatabase project_id, (error) ->
+				return callback(error) if error?
+				callback()
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
 		db.Project.destroy(where: {project_id: project_id})
@@ -53,6 +62,5 @@ module.exports = ProjectPersistenceManager =
 			.then((projects) ->
 				callback null, projects.map((project) -> project.project_id)
 			).error callback
-
 
 logger.log {EXPIRY_TIMEOUT: ProjectPersistenceManager.EXPIRY_TIMEOUT}, "project assets kept timeout"
