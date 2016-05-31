@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/RedisManager"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Errors"
 
 describe "RedisManager.getPreviousDocOpsTests", ->
 	beforeEach ->
@@ -13,7 +14,7 @@ describe "RedisManager.getPreviousDocOpsTests", ->
 				@rclient ?=
 					auth: ->
 					multi: => @rclient
-			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub() }
+			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 		@doc_id = "doc-id-123"
 
 	describe "with a start and an end value", ->
@@ -94,7 +95,7 @@ describe "RedisManager.getPreviousDocOpsTests", ->
 			@RedisManager.getPreviousDocOps(@doc_id, @start, @end, @callback)
 			
 		it "should return an error", ->
-			@callback.calledWith(new Error("range is not loaded in redis")).should.equal true
+			@callback.calledWith(new Errors.OpRangeNotAvailableError("doc ops range is not loaded in redis")).should.equal true
 
 		it "should log out the problem", ->
-			@logger.error.called.should.equal true
+			@logger.warn.called.should.equal true
