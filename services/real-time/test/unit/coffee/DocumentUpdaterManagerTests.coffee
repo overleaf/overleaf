@@ -17,7 +17,7 @@ describe 'DocumentUpdaterManager', ->
 			
 		@DocumentUpdaterManager = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex':@settings
-			'logger-sharelatex': @logger = {log: sinon.stub(), error: sinon.stub()}
+			'logger-sharelatex': @logger = {log: sinon.stub(), error: sinon.stub(), warn: sinon.stub()}
 			'request': @request = {}
 			'redis-sharelatex' : createClient: () => @rclient
 
@@ -49,6 +49,18 @@ describe 'DocumentUpdaterManager', ->
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a 422 status code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 422 }, "")
+				@DocumentUpdaterManager.getDocument @project_id, @doc_id, @fromVersion, @callback
+
+			it "should return the callback with an error", ->
+				err = new Error("doc updater could not load requested ops")
+				err.statusCode = 422
+				@callback
+					.calledWith(err)
+					.should.equal true
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->

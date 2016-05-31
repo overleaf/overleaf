@@ -23,6 +23,11 @@ module.exports = DocumentUpdaterManager =
 				catch error
 					return callback(error)
 				callback null, body?.lines, body?.version, body?.ops
+			else if res.statusCode == 422 # Unprocessable Entity
+				err = new Error("doc updater could not load requested ops")
+				err.statusCode = res.statusCode
+				logger.warn {err, project_id, doc_id, url, fromVersion}, "doc updater could not load requested ops"
+				callback err
 			else
 				err = new Error("doc updater returned a non-success status code: #{res.statusCode}")
 				err.statusCode = res.statusCode

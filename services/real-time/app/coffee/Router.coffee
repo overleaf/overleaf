@@ -21,8 +21,8 @@ module.exports = Router =
 				attrs[key] = value
 			attrs.client_id = client.id
 			attrs.err = error
-			if error.message == "not authorized"
-				logger.warn attrs, "client is not authorized"
+			if error.message in ["not authorized", "doc updater could not load requested ops"]
+				logger.warn attrs, error.message
 				return callback {message: error.message}
 			else
 				logger.error attrs, "server side error in #{method}"
