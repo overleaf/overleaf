@@ -45,13 +45,13 @@ describe "CompileController", ->
 		@next = sinon.stub()
 		@req = new MockRequest()
 		@res = new MockResponse()
+		@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 
 	describe "compile", ->
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
 			@req.session = {}
-			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 			@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
 
 		describe "when not an auto compile", ->
@@ -359,7 +359,7 @@ describe "CompileController", ->
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(1)
+			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(2)
 			@req.params =
 				Project_id: @project_id
 			@res.sendStatus = sinon.stub()
@@ -380,6 +380,8 @@ describe "CompileController", ->
 			@req =
 				params:
 					project_id:@project_id
+				query:
+					isolated: "true"
 			@CompileManager.compile.callsArgWith(3)
 			@CompileController.proxyToClsi = sinon.stub()
 			@res = 
@@ -392,21 +394,25 @@ describe "CompileController", ->
 
 		it "should proxy the res to the clsi with correct url", (done)->
 			@CompileController.compileAndDownloadPdf @req, @res
-			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
+			sinon.assert.calledWith @CompileController.proxyToClsi, @project_id, @user_id, "/project/#{@project_id}/output/output.pdf", @req, @res
+
+			@CompileController.proxyToClsi.calledWith(@project_id, @user_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()
 
 	describe "wordCount", ->
 		beforeEach ->
-			@CompileManager.wordCount = sinon.stub().callsArgWith(2, null, {content:"body"})
+			@CompileManager.wordCount = sinon.stub().callsArgWith(3, null, {content:"body"})
 			@req.params =
 				Project_id: @project_id
+			@req.query =
+				isolated: "true"
 			@res.send = sinon.stub()
 			@res.contentType = sinon.stub()
 			@CompileController.wordCount @req, @res, @next
 
 		it "should proxy to the CLSI", ->
 			@CompileManager.wordCount
-				.calledWith(@project_id, false)
+				.calledWith(@project_id, @user_id, false)
 				.should.equal true
 
 		it "should return a 200 and body", ->
