@@ -37,7 +37,7 @@ module.exports = ProjectPersistenceManager =
 					callback() # ignore any errors from deleting directories
 
 	clearProject: (project_id, user_id, callback = (error) ->) ->
-		logger.log project_id: project_id, "clearing project for user"
+		logger.log project_id: project_id, user_id:user_id, "clearing project for user"
 		CompileManager.clearProject project_id, user_id, (error) ->
 			return callback(error) if error?
 			ProjectPersistenceManager.clearProjectFromCache project_id, (error) ->
