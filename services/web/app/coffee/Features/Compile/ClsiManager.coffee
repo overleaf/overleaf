@@ -11,11 +11,11 @@ ClsiCookieManager = require("./ClsiCookieManager")
 
 module.exports = ClsiManager =
 
-	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
+	sendRequest: (project_id, user_id, options = {}, callback = (error, success) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
+			ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
 				if error?
 					logger.err err:error, project_id:project_id, "error sending request to clsi"
 					return callback(error)
@@ -27,13 +27,12 @@ module.exports = ClsiManager =
 					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
 					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
-	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
-		compilerUrl = @_getCompilerUrl(options?.compileGroup)
+	deleteAuxFiles: (project_id, user_id, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id)
 		opts =
-			url:"#{compilerUrl}/project/#{project_id}"
+			url:compilerUrl
 			method:"DELETE"
 		ClsiManager._makeRequest project_id, opts, callback
-
 
 	_makeRequest: (project_id, opts, callback)->
 		ClsiCookieManager.getCookieJar project_id, (err, jar)->
@@ -51,14 +50,17 @@ module.exports = ClsiManager =
 						
 					return callback err, response, body
 
+	_getCompilerUrl: (compileGroup, project_id, user_id, action) ->
+		host = Settings.apis.clsi.url
+		path = "/project/#{project_id}"
+		path += "/user/#{user_id}" if user_id?
+		path += "/#{action}" if action?
+		return "#{host}#{path}"
 
-	_getCompilerUrl: (compileGroup) ->
-		return Settings.apis.clsi.url
-
-	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
-		compilerUrl = Settings.apis.clsi.url
-		opts = 
-			url:  "#{compilerUrl}/project/#{project_id}/compile"
+	_postToClsi: (project_id, user_id, req, compileGroup, callback = (error, response) ->) ->
+		compileUrl = @_getCompilerUrl(compileGroup, project_id, user_id, "compile")
+		opts =
+			url:  compileUrl
 			json: req
 			method: "POST"
 		ClsiManager._makeRequest project_id, opts, (error, response, body) ->
@@ -133,15 +135,15 @@ module.exports = ClsiManager =
 							resources: resources
 					}
 
-	wordCount: (project_id, file, options, callback = (error, response) ->) ->
+	wordCount: (project_id, user_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
-			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
 			filename = file || req?.compile?.rootResourcePath
-			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
-			if req.compile.options.imageName?
-				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
+			wordcount_url = ClsiManager._getCompilerUrl(options?.compileGroup, project_id, user_id, "wordcount")
 			opts =
 				url: wordcount_url
+				qs:
+					file: filename
+					image: req.compile.options.imageName
 				method: "GET"
 			ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 				return callback(error) if error?

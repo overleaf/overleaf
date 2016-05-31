@@ -37,15 +37,16 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, clsiServerId) ->
+							user_id = undefined if not options.isolated
+							ClsiManager.sendRequest project_id, user_id, options, (error, status, outputFiles, clsiServerId) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, clsiServerId, limits)
 								
-	deleteAuxFiles: (project_id, callback = (error) ->) ->
+	deleteAuxFiles: (project_id, user_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
-			ClsiManager.deleteAuxFiles project_id, limits, callback
+			ClsiManager.deleteAuxFiles project_id, user_id, limits, callback
 
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
 		Project.findById project_id, {owner_ref: 1}, (error, project) ->
@@ -92,7 +93,7 @@ module.exports = CompileManager =
 			else
 				ProjectRootDocManager.setRootDocAutomatically project_id, callback
 		
-	wordCount: (project_id, file, callback = (error) ->) ->
+	wordCount: (project_id, user_id, file, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
-			ClsiManager.wordCount project_id, file, limits, callback
+			ClsiManager.wordCount project_id, user_id, file, limits, callback

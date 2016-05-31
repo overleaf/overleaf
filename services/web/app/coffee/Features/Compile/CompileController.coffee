@@ -29,7 +29,9 @@ module.exports = CompileController =
 				options.compiler = req.body.compiler
 			if req.body?.draft
 				options.draft = req.body.draft
-			logger.log {options, project_id}, "got compile request"
+			if req.query?.isolated is "true"
+				options.isolated = true
+			logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
 			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
@@ -39,6 +41,13 @@ module.exports = CompileController =
 					compileGroup: limits?.compileGroup
 					clsiServerId:clsiServerId
 				}
+
+	_compileAsUser: (req, callback) ->
+		isolated = req.query?.isolated is "true"
+		if isolated
+			AuthenticationController.getLoggedInUserId req, callback
+		else
+			callback()
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
@@ -76,27 +85,39 @@ module.exports = CompileController =
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
-		CompileManager.deleteAuxFiles project_id, (error) ->
+		CompileController._compileAsUser req, (error, user_id) ->
 			return next(error) if error?
-			res.sendStatus(200)
+			CompileManager.deleteAuxFiles project_id, user_id, (error) ->
+				return next(error) if error?
+				res.sendStatus(200)
 
 	compileAndDownloadPdf: (req, res, next)->
 		project_id = req.params.project_id
-		CompileManager.compile project_id, null, {}, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
-				res.sendStatus 500
-			url = "/project/#{project_id}/output/output.pdf"
-			CompileController.proxyToClsi project_id, url, req, res, next
+		CompileController._compileAsUser req, (error, user_id) ->
+			return next(error) if error?
+			CompileManager.compile project_id, user_id, {}, (err)->
+				if err?
+					logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
+					res.sendStatus 500
+				url = "/project/#{project_id}/output/output.pdf"
+				CompileController.proxyToClsi project_id, user_id, url, req, res, next
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		build = req.params.build
-		if build?
+		user = req.params.user
+		if user? and build?
+			url = "/project/#{project_id}/user/#{user}/build/#{build}/output/#{req.params.file}"
+		else if build?
 			url = "/project/#{project_id}/build/#{build}/output/#{req.params.file}"
 		else
 			url = "/project/#{project_id}/output/#{req.params.file}"
 		CompileController.proxyToClsi(project_id, url, req, res, next)
+
+	_getUrl: (project_id, user_id, action) ->
+		path = "/project/#{project_id}"
+		path += "/user/#{user_id}" if user_id?
+		return "#{path}/#{action}"
 
 	proxySyncPdf: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
@@ -107,8 +128,12 @@ module.exports = CompileController =
 			return next(new Error("invalid h parameter"))
 		if not v?.match(/^\d+\.\d+$/)
 			return next(new Error("invalid v parameter"))
-		destination = {url: "/project/#{project_id}/sync/pdf", qs: {page, h, v}}
-		CompileController.proxyToClsi(project_id, destination, req, res, next)
+		url = CompileController._getUrl(project_id, user_id, "sync/pdf")
+		destination = {url: url, qs: {page, h, v}}
+		# whether this request is going to a per-user container
+		CompileController._compileAsUser req, (error, user_id) ->
+			return next(error) if error?
+			CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxySyncCode: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
@@ -119,8 +144,11 @@ module.exports = CompileController =
 			return next(new Error("invalid line parameter"))
 		if not column?.match(/^\d+$/)
 			return next(new Error("invalid column parameter"))
-		destination = {url:"/project/#{project_id}/sync/code", qs: {file, line, column}}
-		CompileController.proxyToClsi(project_id, destination, req, res, next)
+		url = CompileController._getUrl(project_id, user_id, "sync/code")
+		destination = {url:url, qs: {file, line, column}}
+		CompileController._compileAsUser req, (error, user_id) ->
+			return next(error) if error?
+			CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
 		if req.query?.compileGroup
@@ -168,7 +196,9 @@ module.exports = CompileController =
 	wordCount: (req, res, next) ->
 		project_id = req.params.Project_id
 		file   = req.query.file || false
-		CompileManager.wordCount project_id, file, (error, body) ->
+		CompileController._compileAsUser req, (error, user_id) ->
 			return next(error) if error?
-			res.contentType("application/json")
-			res.send body
+			CompileManager.wordCount project_id, user_id, file, (error, body) ->
+				return next(error) if error?
+				res.contentType("application/json")
+				res.send body

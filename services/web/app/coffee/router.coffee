@@ -124,6 +124,19 @@ module.exports = class Router
 				next()
 			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
 
+		# direct url access to output files for a specific user and build (query string not required)
+		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"user":       req.params[1]
+					"build":      req.params[2]
+					"file":       req.params[3]
+				req.params = params
+				next()
+			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+
+
 		webRouter.delete "/project/:Project_id/output", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.deleteAuxFiles
 		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncCode
 		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncPdf
