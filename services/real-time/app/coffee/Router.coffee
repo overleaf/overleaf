@@ -21,9 +21,13 @@ module.exports = Router =
 				attrs[key] = value
 			attrs.client_id = client.id
 			attrs.err = error
-			logger.error attrs, "server side error in #{method}"
-		# Don't return raw error to prevent leaking server side info
-		return callback {message: "Something went wrong in real-time service"}
+			if error.message == "not authorized"
+				logger.warn attrs, "client is not authorized"
+				return callback {message: error.message}
+			else
+				logger.error attrs, "server side error in #{method}"
+				# Don't return raw error to prevent leaking server side info
+				return callback {message: "Something went wrong in real-time service"}
 
 	configure: (app, io, session) ->
 		app.set("io", io)
