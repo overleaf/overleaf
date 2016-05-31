@@ -103,6 +103,16 @@ define [], () ->
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
 			}, (err, project, permissionsLevel, protocolVersion) =>
+				if err?
+					if err.message == "not authorized"
+						window.location = "/login?redir=#{encodeURI(window.location.pathname)}"
+					else
+						@ide.socket.disconnect()
+						@ide.showGenericMessageModal("Something went wrong connecting", """
+							Something went wrong connecting to your project. Please refresh is this continues to happen.
+						""")
+					return
+
 				if @$scope.protocolVersion? and @$scope.protocolVersion != protocolVersion
 					location.reload(true)
 
