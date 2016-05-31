@@ -490,7 +490,7 @@ if process.env["SHARELATEX_LDAP_HOST"]
 
 # Compiler
 # --------
-if process.env["DOCKER_IN_DOCKER"] == "true"
+if process.env["SANDBOXED_COMPILES"] == "true"
 	settings.clsi =
 		commandRunner: "docker-runner-sharelatex"
 		docker:
