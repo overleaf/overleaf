@@ -1,0 +1,13 @@
+# circle.yml
+machine:
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - grunt
+
+test:
+  post:
+    - docker run -d -v --name=sharelatex -p 5000:80 -; sleep 20
+    - curl --retry 10 --retry-delay 5 -v http://localhost:5000/status
