@@ -106,5 +106,7 @@ ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 
 EXPOSE 80
 
+WORKDIR /
+
 ENTRYPOINT ["/sbin/my_init"]
 
