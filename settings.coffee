@@ -499,6 +499,10 @@ if process.env["DOCKER_IN_DOCKER"] == "true"
 				PATH: process.env["COMPILER_PATH"] or "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 			user: "www-data"
 
+	if !settings.path?
+		settings.path = {}
+	settings.path.synctexBaseDir = () -> "/compile"
+
 
 # Templates
 # ---------
