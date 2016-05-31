@@ -132,7 +132,6 @@ define [
 				opts =
 					method:"GET"
 					params:
-						build:file.build
 						clsiserverid:ide.clsiServerId
 				if file.url?  # FIXME clean this up when we have file.urls out consistently
 					opts.url = file.url
