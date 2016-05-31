@@ -70,7 +70,7 @@ describe "Getting a document", ->
 				lines: @lines = ["one", "two", "three"]
 			}
 
-			@updates = for v in [0..99]
+			@updates = for v in [0..199]
 				doc_id: @doc_id,
 				op: [i: v.toString(), p: 0]
 				v: v
@@ -78,16 +78,27 @@ describe "Getting a document", ->
 			DocUpdaterClient.sendUpdates @project_id, @doc_id, @updates, (error) =>
 				throw error if error?
 				sinon.spy MockWebApi, "getDocument"
-				DocUpdaterClient.getDocAndRecentOps @project_id, @doc_id, 90, (error, res, @returnedDoc) => done()
+				done()
 
 		after ->
 			MockWebApi.getDocument.restore()
+			
+		describe "when the ops are loaded", ->
+			before (done) ->
+				DocUpdaterClient.getDocAndRecentOps @project_id, @doc_id, 190, (error, res, @returnedDoc) => done()
 
-		it "should return the recent ops", ->
-			@returnedDoc.ops.length.should.equal 10
-			for update, i in @updates.slice(90, -1)
-				@returnedDoc.ops[i].op.should.deep.equal update.op
+			it "should return the recent ops", ->
+				@returnedDoc.ops.length.should.equal 10
+				for update, i in @updates.slice(190, -1)
+					@returnedDoc.ops[i].op.should.deep.equal update.op
+					
+		describe "when the ops are not all loaded", ->
+			before (done) ->
+				# We only track 100 ops
+				DocUpdaterClient.getDocAndRecentOps @project_id, @doc_id, 10, (error, @res, @returnedDoc) => done()
 
+			it "should return UnprocessableEntity", ->
+				@res.statusCode.should.equal 422
 
 	describe "when the document does not exist", ->
 		before (done) ->

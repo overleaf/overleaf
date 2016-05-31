@@ -74,10 +74,12 @@ app.get "/health_check/redis", (req, res, next)->
 
 
 app.use (error, req, res, next) ->
-	logger.error err: error, "request errored"
 	if error instanceof Errors.NotFoundError
 		res.send 404
+	else if error instanceof Errors.OpRangeNotAvailableError
+		res.send 422 # Unprocessable Entity
 	else
+		logger.error err: error, "request errored"
 		res.send(500, "Oops, something went wrong")
 
 shutdownCleanly = (signal) ->

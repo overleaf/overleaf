@@ -7,6 +7,7 @@ keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 ZipManager = require('./ZipManager')
+Errors = require "./Errors"
 
 redisOptions = _.clone(Settings.redis.web)
 redisOptions.return_buffers = true
@@ -125,8 +126,8 @@ module.exports = RedisManager =
 				first_version_in_redis = version - length
 
 				if start < first_version_in_redis or end > version
-					error = new Error("doc ops range is not loaded in redis")
-					logger.error err: error, length: length, version: version, start: start, end: end, "inconsistent version or length"
+					error = new Errors.OpRangeNotAvailableError("doc ops range is not loaded in redis")
+					logger.warn {err: error, doc_id, length, version, start, end}, "doc ops range is not loaded in redis"
 					return callback(error)
 
 				start = start - first_version_in_redis
@@ -135,7 +136,7 @@ module.exports = RedisManager =
 
 				if isNaN(start) or isNaN(end)
 					error = new Error("inconsistent version or lengths")
-					logger.error err: error, length: length, version: version, start: start, end: end, "inconsistent version or length"
+					logger.error {err: error, doc_id, length, version, start, end}, "inconsistent version or length"
 					return callback(error)
 
 				rclient.lrange keys.docOps(doc_id: doc_id), start, end, (error, jsonOps) ->
