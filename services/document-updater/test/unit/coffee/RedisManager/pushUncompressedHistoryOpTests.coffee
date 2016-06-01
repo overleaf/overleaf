@@ -36,7 +36,7 @@ describe "RedisManager.pushUncompressedHistoryOp", ->
 				.should.equal true
 
 		it "should call the callback with the length", ->
-			@callback.calledWith(undefined, @length).should.equal true
+			@callback.calledWith(null, @length).should.equal true
 
 
 

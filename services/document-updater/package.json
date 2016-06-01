@@ -7,31 +7,31 @@
     "url": "https://github.com/sharelatex/document-updater-sharelatex.git"
   },
   "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "coffee-script": "1.4.0",
     "express": "3.3.4",
-    "underscore": "1.2.2",
-    "chai": "",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "lynx": "0.0.11",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
+    "mongojs": "0.9.11",
+    "redis-sharelatex": "0.0.9",
     "request": "2.25.0",
     "sandboxed-module": "~0.2.0",
-    "chai-spies": "",
-    "async": "",
-    "lynx": "0.0.11",
-    "coffee-script": "1.4.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.0.0",
     "sinon": "~1.5.2",
-    "mongojs": "0.9.11",
-    "redis-sharelatex": "0.0.9"
+    "underscore": "1.2.2"
   },
   "devDependencies": {
-    "grunt-execute": "~0.1.5",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-mocha-test": "~0.9.0",
+    "bunyan": "~0.22.1",
+    "chai": "^3.5.0",
+    "chai-spies": "^0.7.1",
     "grunt": "~0.4.2",
     "grunt-available-tasks": "~0.4.1",
-    "grunt-contrib-coffee": "~0.10.0",
-    "bunyan": "~0.22.1",
     "grunt-bunyan": "~0.5.0",
-    "grunt-forever": "0.4.1"
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.10.0",
+    "grunt-execute": "~0.1.5",
+    "grunt-forever": "0.4.1",
+    "grunt-mocha-test": "~0.9.0"
   }
 }
