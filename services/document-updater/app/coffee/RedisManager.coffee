@@ -6,12 +6,10 @@ _ = require('underscore')
 keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
-ZipManager = require('./ZipManager')
 Errors = require "./Errors"
 
 redisOptions = _.clone(Settings.redis.web)
 redisOptions.return_buffers = true
-rclientBuffer = redis.createClient(redisOptions)
 
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
@@ -48,21 +46,18 @@ module.exports = RedisManager =
 
 	getDoc : (doc_id, callback = (error, lines, version) ->)->
 		timer = new metrics.Timer("redis.get-doc")
-		# use Buffer when retrieving data as it may be gzipped
-		multi = rclientBuffer.multi()
-		linesKey = keys.docLines(doc_id:doc_id)
-		multi.get linesKey
+		multi = rclient.multi()
+		multi.get keys.docLines(doc_id:doc_id)
 		multi.get keys.docVersion(doc_id:doc_id)
 		multi.exec (error, result)->
 			timer.done()
 			return callback(error) if error?
-			ZipManager.uncompressIfNeeded doc_id, result, (error, result) ->
-				try
-					docLines = JSON.parse result[0]
-				catch e
-					return callback(e)
-				version = parseInt(result[1] or 0, 10)
-				callback null, docLines, version
+			try
+				docLines = JSON.parse result[0]
+			catch e
+				return callback(e)
+			version = parseInt(result[1] or 0, 10)
+			callback null, docLines, version
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -76,12 +71,11 @@ module.exports = RedisManager =
 			callback null, len
 
 	setDocument : (doc_id, docLines, version, callback = (error) ->)->
-		ZipManager.compressIfNeeded doc_id, JSON.stringify(docLines), (err, result) ->
-			multi = rclient.multi()
-			multi.set keys.docLines(doc_id:doc_id), result
-			multi.set keys.docVersion(doc_id:doc_id), version
-			multi.incr keys.now("docsets")
-			multi.exec (error, replys) -> callback(error)
+		multi = rclient.multi()
+		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+		multi.set keys.docVersion(doc_id:doc_id), version
+		multi.incr keys.now("docsets")
+		multi.exec (error, replys) -> callback(error)
 
 	getPendingUpdatesForDoc : (doc_id, callback)->
 		multi = rclient.multi()
