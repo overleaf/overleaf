@@ -25,7 +25,10 @@ module.exports =
 				opts = getOpts("/")
 				opts.json = true
 				request.get opts, (err, res, body)->
-					if res.statusCode != 200
+					if err?
+						logger.err err:err, "Health Check: error getting notification"
+						return callback(err)
+					else if res.statusCode != 200
 						e = "status code not 200 #{res.statusCode}"
 						logger.err err:err, e
 						return cb(e)
