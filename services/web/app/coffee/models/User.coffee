@@ -36,6 +36,7 @@ UserSchema = new Schema
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 							templates:     { type:Boolean, default: Settings.defaultFeatures.templates }
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
+							betaProgram:   { type:Boolean, default: Settings.defaultFeatures.betaProgram}
 						}
 	featureSwitches	  : {
 		pdfng: { type: Boolean }
