@@ -46,7 +46,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 			
 		a(
-			ng-href="{{pdf.url}}"
+			ng-href="{{pdf.downloadUrl || pdf.url}}"
 			target="_blank"
 			ng-if="pdf.url"
 			tooltip="#{translate('download_pdf')}"
