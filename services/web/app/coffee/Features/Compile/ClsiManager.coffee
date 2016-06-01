@@ -7,6 +7,8 @@ ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")
+_ = require("underscore")
+async = require("async")
 
 
 module.exports = ClsiManager =
@@ -152,4 +154,71 @@ module.exports = ClsiManager =
 					error = new Error("CLSI returned non-success code: #{response.statusCode}")
 					logger.error err: error, project_id: project_id, "CLSI returned failure code"
 					callback error, body
+
+	_checkRecoursesForErrors: (resources, callback)->
+		jobs = 
+			duplicatePaths: (cb)->
+				ClsiManager._checkForFilesWithSameName resources, cb
+
+			conflictedPaths: (cb)->
+				ClsiManager._checkForConflictingPaths resources, cb
+
+			sizeCheck: (cb)->
+				ClsiManager._checkDocsAreUnderSizeLimit resources, cb
+				
+		async.series jobs, callback
+
+	_checkForFilesWithSameName: (resources, callback)->
+		paths = _.pluck(resources, 'path')
+
+		duplicates = _.filter paths, (path)->
+			return _.countBy(paths)[path] > 1
+
+		duplicates = _.uniq(duplicates)
+
+		duplicateObjects = _.map duplicates, (dup)->
+			path:dup
+
+		callback(null, duplicateObjects)
+
+	_checkForConflictingPaths: (resources, callback)->
+		paths = _.pluck(resources, 'path')
+
+		conflicts = _.filter paths, (path)->
+			matchingPaths = _.filter paths, (checkPath)->
+				return checkPath.indexOf(path+"/") != -1
+
+			return matchingPaths.length > 0
+
+		conflictObjects = _.map conflicts, (conflict)->
+			path:conflict
+
+		callback null, conflictObjects
+
+	_checkDocsAreUnderSizeLimit: (resources, callback)->
+		
+		FIVEMB = 1000 * 1000 * 5
+
+		totalSize = 0
+
+		sizedResources = _.map resources, (resource)->
+			result = {path:resource.path}
+			if resource.content?
+				result.size = resource.content.join("").length
+			else
+				result.size = 0
+			totalSize += result.size
+			return result
+
+		tooLarge = totalSize > FIVEMB
+
+		sizedResources = _.sortBy(sizedResources, "size").slice(10).reverse()
+
+		callback(null, {resources:sizedResources, totalSize:totalSize, tooLarge:tooLarge})
+
+
+
+
+
+
 

@@ -320,16 +320,90 @@ describe "ClsiManager", ->
 
 
 
+	describe "_checkRecoursesForErrors", ->
 
+		beforeEach ->
+			@resources = [{
+				path:    "main.tex"
+				content: ["stuff"]
+			}, {
+				path:    "chapters/chapter1"
+				content: ["other stuff"]
+			}, {
+				path: "stuff/image/image.png"
+				url:  "#{@settings.apis.filestore.url}/project/#{@project_id}/file/1234124321312"
+				modified: ["more stuff"]
+			}]
 
+		it "should call _checkForFilesWithSameName and _checkForConflictingPaths", (done)->
 
+			@ClsiManager._checkForFilesWithSameName = sinon.stub().callsArgWith(1)
+			@ClsiManager._checkForConflictingPaths = sinon.stub().callsArgWith(1)
+			@ClsiManager._checkDocsAreUnderSizeLimit = sinon.stub().callsArgWith(1)
+			@ClsiManager._checkRecoursesForErrors @resources, =>
+				@ClsiManager._checkForFilesWithSameName.called.should.equal true
+				@ClsiManager._checkForConflictingPaths.called.should.equal true
+				@ClsiManager._checkDocsAreUnderSizeLimit.called.should.equal true
+				done()
 
+		describe "_checkForFilesWithSameName", ->
 
+			it "should flag up 2 nested files with same path", (done)->
 
+				@resources.push({
+					path: "chapters/chapter1"
+					url: "http://somwhere.com"
+				})
 
+				@ClsiManager._checkForFilesWithSameName @resources, (err, duplicateErrors)->
+					duplicateErrors.length.should.equal 1
+					duplicateErrors[0].path.should.equal "chapters/chapter1"
+					done()
 
+		describe "_checkForConflictingPaths", ->
 
+			it "should flag up when a nested file has folder with same subpath as file elsewhere", (done)->
+				@resources.push({
+					path: "stuff/image"
+					url: "http://somwhere.com"
+				})
 
+				@resources.push({
+					path:    "chapters/chapter1.tex"
+					content: ["other stuff"]
+				})
+
+				@resources.push({
+					path:    "chapters.tex"
+					content: ["other stuff"]
+				})
+
+				@ClsiManager._checkForConflictingPaths @resources, (err, conflictPathErrors)->
+					conflictPathErrors.length.should.equal 1
+					conflictPathErrors[0].path.should.equal "stuff/image"
+					done()
+				
+
+		describe "_checkDocsAreUnderSizeLimit", ->
+
+			it "should error when there is more than 2mb of data", (done)->
+
+				@resources.push({
+					path:    "massive.tex"
+					content: [require("crypto").randomBytes(1000 * 1000 * 5).toString("hex")]
+				})
+
+				while @resources.length < 20
+					@resources.push({path:"chapters/chapter1.tex",url: "http://somwhere.com"})
+
+				@ClsiManager._checkDocsAreUnderSizeLimit @resources, (err, sizeError)->
+					sizeError.tooLarge.should.equal true
+					sizeError.totalSize.should.equal 10000016
+					sizeError.resources.length.should.equal 10
+					sizeError.resources[0].path.should.equal "massive.tex"
+					sizeError.resources[0].size.should.equal 1000 * 1000 * 10
+					done()
+			
 
 
 
