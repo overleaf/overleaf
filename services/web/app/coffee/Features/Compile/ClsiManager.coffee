@@ -17,17 +17,24 @@ module.exports = ClsiManager =
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
-				if error?
-					logger.err err:error, project_id:project_id, "error sending request to clsi"
-					return callback(error)
-				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
-				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
-					if err?
-						logger.err err:err, project_id:project_id, "error getting server id"
-						return callback(err)
-					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-					callback(null, response?.compile?.status, outputFiles, clsiServerId)
+			ClsiManager._checkRecoursesForErrors req.compile.resources, (err, problems)->
+				if err?
+					logger.err err, project_id, "could not check resources for potential problems before sending to clsi"
+					return callback(err)
+				if problems?
+					logger.log project_id:project_id, problems:problems, "problems with users latex before compile was attempted"
+					return callback(null, problems)
+				ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
+					if error?
+						logger.err err:error, project_id:project_id, "error sending request to clsi"
+						return callback(error)
+					logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
+					ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+						if err?
+							logger.err err:err, project_id:project_id, "error getting server id"
+							return callback(err)
+						outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+						callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
@@ -158,17 +165,25 @@ module.exports = ClsiManager =
 	_checkRecoursesForErrors: (resources, callback)->
 		jobs = 
 			duplicatePaths: (cb)->
-				ClsiManager._checkForFilesWithSameName resources, cb
+				ClsiManager._checkForDuplicatePaths resources, cb
 
 			conflictedPaths: (cb)->
 				ClsiManager._checkForConflictingPaths resources, cb
 
 			sizeCheck: (cb)->
 				ClsiManager._checkDocsAreUnderSizeLimit resources, cb
-				
-		async.series jobs, callback
 
-	_checkForFilesWithSameName: (resources, callback)->
+		async.series jobs, (err, problems)->
+			if err? 
+				return callback(err)
+			problems = _.omit(problems, _.isEmpty)
+			if _.isEmpty(problems)
+				return callback()
+			else
+				callback(null, problems)
+
+
+	_checkForDuplicatePaths: (resources, callback)->
 		paths = _.pluck(resources, 'path')
 
 		duplicates = _.filter paths, (path)->
@@ -211,10 +226,11 @@ module.exports = ClsiManager =
 			return result
 
 		tooLarge = totalSize > FIVEMB
-
-		sizedResources = _.sortBy(sizedResources, "size").slice(10).reverse()
-
-		callback(null, {resources:sizedResources, totalSize:totalSize, tooLarge:tooLarge})
+		if !tooLarge
+			return callback()
+		else
+			sizedResources = _.sortBy(sizedResources, "size").slice(10).reverse()
+			return callback(null, {resources:sizedResources, totalSize:totalSize})
 
 
 

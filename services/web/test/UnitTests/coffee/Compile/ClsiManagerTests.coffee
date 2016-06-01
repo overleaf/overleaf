@@ -335,18 +335,31 @@ describe "ClsiManager", ->
 				modified: ["more stuff"]
 			}]
 
-		it "should call _checkForFilesWithSameName and _checkForConflictingPaths", (done)->
+		it "should call _checkForDuplicatePaths and _checkForConflictingPaths", (done)->
 
-			@ClsiManager._checkForFilesWithSameName = sinon.stub().callsArgWith(1)
+			@ClsiManager._checkForDuplicatePaths = sinon.stub().callsArgWith(1)
 			@ClsiManager._checkForConflictingPaths = sinon.stub().callsArgWith(1)
 			@ClsiManager._checkDocsAreUnderSizeLimit = sinon.stub().callsArgWith(1)
-			@ClsiManager._checkRecoursesForErrors @resources, =>
-				@ClsiManager._checkForFilesWithSameName.called.should.equal true
+			@ClsiManager._checkRecoursesForErrors @resources, (err, problems)=>
+				@ClsiManager._checkForDuplicatePaths.called.should.equal true
 				@ClsiManager._checkForConflictingPaths.called.should.equal true
 				@ClsiManager._checkDocsAreUnderSizeLimit.called.should.equal true
+				expect(problems).to.not.exist
 				done()
 
-		describe "_checkForFilesWithSameName", ->
+
+		it "should remove undefined errors", (done)->
+			@ClsiManager._checkForDuplicatePaths = sinon.stub().callsArgWith(1, null, [path:"something/here"])
+			@ClsiManager._checkForConflictingPaths = sinon.stub().callsArgWith(1, null, [])
+			@ClsiManager._checkDocsAreUnderSizeLimit = sinon.stub().callsArgWith(1, null)
+			@ClsiManager._checkRecoursesForErrors @resources, (err, problems)=>
+				problems.duplicatePaths[0].path.should.equal "something/here"
+				expect(problems.conflictedPaths).to.not.exist
+				expect(problems.sizeCheck).to.not.exist
+
+				done()
+
+		describe "_checkForDuplicatePaths", ->
 
 			it "should flag up 2 nested files with same path", (done)->
 
@@ -355,7 +368,7 @@ describe "ClsiManager", ->
 					url: "http://somwhere.com"
 				})
 
-				@ClsiManager._checkForFilesWithSameName @resources, (err, duplicateErrors)->
+				@ClsiManager._checkForDuplicatePaths @resources, (err, duplicateErrors)->
 					duplicateErrors.length.should.equal 1
 					duplicateErrors[0].path.should.equal "chapters/chapter1"
 					done()
@@ -397,7 +410,6 @@ describe "ClsiManager", ->
 					@resources.push({path:"chapters/chapter1.tex",url: "http://somwhere.com"})
 
 				@ClsiManager._checkDocsAreUnderSizeLimit @resources, (err, sizeError)->
-					sizeError.tooLarge.should.equal true
 					sizeError.totalSize.should.equal 10000016
 					sizeError.resources.length.should.equal 10
 					sizeError.resources[0].path.should.equal "massive.tex"
