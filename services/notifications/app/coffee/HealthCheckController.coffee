@@ -34,7 +34,7 @@ module.exports =
 					if hasNotification
 						cb(null, body)
 					else
-						logger.log body:body, "Health Check: got notifications response for health check"
+						logger.err body:body, notification_key:notification_key, "Health Check: notification not in response"
 						return cb("notification not found in response")
 		]
 		async.series jobs, (err, body)->
