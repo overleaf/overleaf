@@ -15,7 +15,7 @@ module.exports =
 		user_id = ObjectId(settings.notifications.healthCheck.user_id)
 		notification_key = "smoke-test-notification-#{ObjectId()}"
 		getOpts = (endPath)-> {url:"http://localhost:#{port}/user/#{user_id}#{endPath}", timeout:3000}
-		logger.log user_id:user_id, opts:getOpts(), key:notification_key, user_id:user_id, "running health check"
+		logger.log user_id:user_id, opts:getOpts(), key:notification_key, user_id:user_id, "Health Check: running"
 		jobs = [
 			(cb)->
 				opts = getOpts("/")
@@ -29,25 +29,31 @@ module.exports =
 						e = "status code not 200 #{res.statusCode}"
 						logger.err err:err, e
 						return cb(e)
-
 					hasNotification = _.some body, (notification)-> 
 						notification.key == notification_key and notification.user_id == user_id.toString()
 					if hasNotification
 						cb(null, body)
 					else
-						logger.log body:body, "got notifications response for health check"
+						logger.log body:body, "Health Check: got notifications response for health check"
 						return cb("notification not found in response")
 		]
 		async.series jobs, (err, body)->
 			if err?
-				logger.err err:err, "error running health check"
+				logger.err err:err, "Health Check: error running health check"
 				return callback(err)
 			else
 				notification_id = body[1][0]._id
 				notification_key = body[1][0].key
 				opts = getOpts("/notification/#{notification_id}")
+				logger.log notification_id:notification_id, notification_key:notification_key, "Health Check: doing cleanup"
 				request.del opts, (err, res, body)->
+					if err?
+						logger.err err, opts, "Health Check: error cleaning up notification"
+						return callback(err)
 					opts = getOpts("")
 					opts.json = {key: notification_key}
 					request.del opts, (err, res, body)->
+						if err?
+							logger.err err, opts, "Health Check: error cleaning up notification"
+							return callback(err)
 						db.notifications.remove {_id:ObjectId(notification_id)}, callback
