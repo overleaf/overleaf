@@ -17,7 +17,6 @@ describe 'RedisManager.putDocInMemory', ()->
 	potentialSets[keys.docVersion(doc_id:doc_id)] = version
 
 	potentialSAdds = {}
-	potentialSAdds[keys.allDocs] = doc_id
 	potentialSAdds[keys.docsInProject(project_id:project_id)] = doc_id
 
 	mocks =

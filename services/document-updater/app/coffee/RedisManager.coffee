@@ -22,7 +22,6 @@ module.exports = RedisManager =
 		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
 		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.sadd keys.allDocs, doc_id
 		multi.sadd keys.docsInProject(project_id:project_id), doc_id
 		multi.exec (err, replys)->
 			timer.done()
@@ -35,7 +34,6 @@ module.exports = RedisManager =
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
 		multi.srem keys.docsInProject(project_id:project_id), doc_id
-		multi.srem keys.allDocs, doc_id
 		multi.exec (err, replys)->
 			if err?
 				logger.err project_id:project_id, doc_id:doc_id, err:err, "error removing doc from redis"
@@ -65,16 +63,10 @@ module.exports = RedisManager =
 			version = parseInt(version, 10)
 			callback null, version
 
-	getCountOfDocsInMemory : (callback)->
-		rclient.smembers keys.allDocs, (err, members)->
-			len = members.length
-			callback null, len
-
 	setDocument : (doc_id, docLines, version, callback = (error) ->)->
 		multi = rclient.multi()
 		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.incr keys.now("docsets")
 		multi.exec (error, replys) -> callback(error)
 
 	getPendingUpdatesForDoc : (doc_id, callback)->
