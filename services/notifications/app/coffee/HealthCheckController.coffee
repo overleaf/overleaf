@@ -13,6 +13,9 @@ db = mongojs(Settings.mongo?.url, ['notifications'])
 module.exports = 
 	check : (callback)->
 		user_id = ObjectId()
+		cleanupNotifications = (callback)->
+			db.notifications.remove {user_id:user_id}, callback
+
 		notification_key = "smoke-test-notification-#{ObjectId()}"
 		getOpts = (endPath)-> {url:"http://localhost:#{port}/user/#{user_id}#{endPath}", timeout:5000}
 		logger.log user_id:user_id, opts:getOpts(), key:notification_key, user_id:user_id, "Health Check: running"
@@ -43,7 +46,8 @@ module.exports =
 		async.series jobs, (err, body)->
 			if err?
 				logger.err err:err, "Health Check: error running health check"
-				return callback(err)
+				cleanupNotifications ->
+					return callback(err)
 			else
 				notification_id = body[1][0]._id
 				notification_key = body[1][0].key
@@ -59,4 +63,4 @@ module.exports =
 						if err?
 							logger.err err, opts, "Health Check: error cleaning up notification"
 							return callback(err)
-						db.notifications.remove {user_id:user_id}, callback
+						cleanupNotifications callback
