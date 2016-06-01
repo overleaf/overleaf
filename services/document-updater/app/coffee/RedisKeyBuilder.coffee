@@ -6,7 +6,6 @@ PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINES = "doclines"
 DOCOPS = "DocOps"
 DOCVERSION = "DocVersion"
-DOCIDSWITHPENDINGUPDATES = "DocsWithPendingUpdates"
 DOCSWITHHISTORYOPS = "DocsWithHistoryOps"
 UNCOMPRESSED_HISTORY_OPS = "UncompressedHistoryOps"
 
@@ -20,7 +19,6 @@ module.exports =
 	changeQue : (op)-> CHANGEQUE+":"+op.project_id
 	docsInProject : (op)-> DOCSINPROJECT+":"+op.project_id
 	pendingUpdates : (op)-> PENDINGUPDATESKEY+":"+op.doc_id
-	docsWithPendingUpdates : DOCIDSWITHPENDINGUPDATES
 	combineProjectIdAndDocId: (project_id, doc_id) -> "#{project_id}:#{doc_id}"
 	splitProjectIdAndDocId: (project_and_doc_id) -> project_and_doc_id.split(":")
 	docsWithHistoryOps: (op) -> DOCSWITHHISTORYOPS + ":" + op.project_id

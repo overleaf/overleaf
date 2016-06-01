@@ -4,7 +4,6 @@ Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 logger.initialize("documentupdater")
 RedisManager = require('./app/js/RedisManager')
-UpdateManager = require('./app/js/UpdateManager')
 DispatchManager = require('./app/js/DispatchManager')
 Keys = require('./app/js/RedisKeyBuilder')
 Errors = require "./app/js/Errors"
@@ -26,18 +25,7 @@ app.configure ->
 	app.use express.bodyParser()
 	app.use app.router
 
-rclient.subscribe("pending-updates")
-rclient.on "message", (channel, doc_key) ->
-	[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-	if !Settings.shuttingDown
-		UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-			logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
-	else
-		logger.log project_id: project_id, doc_id: doc_id, "ignoring incoming update"
-
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
-
-UpdateManager.resumeProcessing()
 
 app.get    '/project/:project_id/doc/:doc_id',       HttpController.getDoc
 app.post   '/project/:project_id/doc/:doc_id',       HttpController.setDoc

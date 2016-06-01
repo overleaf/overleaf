@@ -7,26 +7,12 @@ logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
 
 module.exports = UpdateManager =
-	resumeProcessing: (callback = (error) ->) ->
-		RedisManager.getDocsWithPendingUpdates (error, docs) =>
-			return callback(error) if error?
-			jobs = for doc in (docs or [])
-				do (doc) =>
-					(callback) => @processOutstandingUpdatesWithLock doc.project_id, doc.doc_id, callback
-
-			async.parallelLimit jobs, 5, callback
-
-	processOutstandingUpdates: (project_id, doc_id, _callback = (error) ->) ->
+	processOutstandingUpdates: (project_id, doc_id, callback = (error) ->) ->
 		timer = new Metrics.Timer("updateManager.processOutstandingUpdates")
-		callback = (args...) ->
+		UpdateManager.fetchAndApplyUpdates project_id, doc_id, (error) ->
 			timer.done()
-			_callback(args...)
-		
-		UpdateManager.fetchAndApplyUpdates project_id, doc_id, (error) =>
 			return callback(error) if error?
-			RedisManager.clearDocFromPendingUpdatesSet project_id, doc_id, (error) =>
-				return callback(error) if error?
-				callback()
+			callback()
 
 	processOutstandingUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.tryLock doc_id, (error, gotLock, lockValue) =>

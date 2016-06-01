@@ -88,21 +88,6 @@ module.exports = RedisManager =
 	getUpdatesLength: (doc_id, callback)->
 		rclient.llen keys.pendingUpdates(doc_id:doc_id), callback
 
-	getDocsWithPendingUpdates: (callback = (error, docs) ->) ->
-		rclient.smembers keys.docsWithPendingUpdates, (error, doc_keys) ->
-			return callback(error) if error?
-			docs = doc_keys.map (doc_key) ->
-				[project_id, doc_id] = keys.splitProjectIdAndDocId(doc_key)
-				return {
-					doc_id: doc_id
-					project_id: project_id
-				}
-			callback null, docs
-
-	clearDocFromPendingUpdatesSet: (project_id, doc_id, callback = (error) ->) ->
-		doc_key = keys.combineProjectIdAndDocId(project_id, doc_id)
-		rclient.srem keys.docsWithPendingUpdates, doc_key, callback
-
 	getPreviousDocOps: (doc_id, start, end, callback = (error, jsonOps) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), (error, length) ->
 			return callback(error) if error?

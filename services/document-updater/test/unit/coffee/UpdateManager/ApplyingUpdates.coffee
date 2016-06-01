@@ -18,45 +18,13 @@ describe "UpdateManager", ->
 				Timer: class Timer
 					done: sinon.stub()
 
-	describe "resumeProcessing", ->
-		beforeEach (done) ->
-			@docs = [{
-				doc_id: "doc-1"
-				project_id: "project-1"
-			}, {
-				doc_id: "doc-2"
-				project_id: "project-2"
-			}, {
-				doc_id: "doc-3"
-				project_id: "project-3"
-			}]
-			@RedisManager.getDocsWithPendingUpdates = sinon.stub().callsArgWith(0, null, @docs)
-			@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
-			@UpdateManager.resumeProcessing(done)
-
-		it "should the docs that haven't been processed yet", ->
-			@RedisManager.getDocsWithPendingUpdates
-				.called.should.equal true
-
-		it "should call processOutstandingUpdatesWithLock for each doc", ->
-			for doc in @docs
-				@UpdateManager.processOutstandingUpdatesWithLock
-					.calledWith(doc.project_id, doc.doc_id)
-					.should.equal true
-
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
 			@UpdateManager.fetchAndApplyUpdates = sinon.stub().callsArg(2)
-			@RedisManager.clearDocFromPendingUpdatesSet = sinon.stub().callsArg(2)
 			@UpdateManager.processOutstandingUpdates @project_id, @doc_id, @callback
 
 		it "should apply the updates", ->
 			@UpdateManager.fetchAndApplyUpdates.calledWith(@project_id, @doc_id).should.equal true
-
-		it "should clear the doc from the process pending set", ->
-			@RedisManager.clearDocFromPendingUpdatesSet
-				.calledWith(@project_id, @doc_id)
-				.should.equal true
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
