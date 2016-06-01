@@ -18,23 +18,31 @@ module.exports = RedisManager =
 	putDocInMemory : (project_id, doc_id, docLines, version, callback)->
 		timer = new metrics.Timer("redis.put-doc")
 		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
-		multi = rclient.multi()
-		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
-		multi.set keys.projectKey({doc_id:doc_id}), project_id
-		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.sadd keys.docsInProject(project_id:project_id), doc_id
-		multi.exec (err, replys)->
+		async.parallel [
+			(cb) ->
+				multi = rclient.multi()
+				multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+				multi.set keys.projectKey({doc_id:doc_id}), project_id
+				multi.set keys.docVersion(doc_id:doc_id), version
+				multi.exec cb
+			(cb) ->
+				rclient.sadd keys.docsInProject(project_id:project_id), doc_id, cb
+		], (err) ->
 			timer.done()
 			callback(err)
 
 	removeDocFromMemory : (project_id, doc_id, callback)->
 		logger.log project_id:project_id, doc_id:doc_id, "removing doc from redis"
-		multi = rclient.multi()
-		multi.del keys.docLines(doc_id:doc_id)
-		multi.del keys.projectKey(doc_id:doc_id)
-		multi.del keys.docVersion(doc_id:doc_id)
-		multi.srem keys.docsInProject(project_id:project_id), doc_id
-		multi.exec (err, replys)->
+		async.parallel [
+			(cb) ->
+				multi = rclient.multi()
+				multi.del keys.docLines(doc_id:doc_id)
+				multi.del keys.projectKey(doc_id:doc_id)
+				multi.del keys.docVersion(doc_id:doc_id)
+				multi.exec cb
+			(cb) ->
+				rclient.srem keys.docsInProject(project_id:project_id), doc_id, cb
+		], (err) ->
 			if err?
 				logger.err project_id:project_id, doc_id:doc_id, err:err, "error removing doc from redis"
 				callback(err, null)
@@ -135,10 +143,10 @@ module.exports = RedisManager =
 
 	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error, length) ->) ->
 		jsonOp = JSON.stringify op
-		multi = rclient.multi()
-		multi.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp
-		multi.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id
-		multi.exec (error, results) ->
+		async.parallel [
+			(cb) -> rclient.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp, cb
+			(cb) -> rclient.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id, cb
+		], (error, results) ->
 			return callback(error) if error?
 			[length, _] = results
 			callback(error, length)

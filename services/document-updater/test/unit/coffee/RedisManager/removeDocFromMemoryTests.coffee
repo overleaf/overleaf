@@ -19,30 +19,32 @@ describe 'RedisManager.removeDocFromMemory', ()->
 	self = @
 	beforeEach (done)->
 		redisMemory = {}
-
+		rclient =
+			auth:->
+			get:->
+			set:(key, value)->
+				redisMemory[key] = value
+			sadd:(key, value, cb)->
+				if !redisMemory[key]?
+					redisMemory[key] = []
+				redisMemory[key].push value
+				cb()
+			del : (key)->
+				delete redisMemory[key]
+			srem : (key, member, cb)->
+				index = redisMemory[key].indexOf(member)
+				redisMemory[key].splice(index, 1)
+				cb()
+			exec:(callback)->
+				callback(null, [])
+		rclient.multi = () -> rclient
 		mocks =
 			"./ZipManager": {}
 			"logger-sharelatex":
 				error:->
 				log:->
 			"redis-sharelatex":
-				createClient : ->
-					auth:->
-					multi: ->
-						get:->
-						set:(key, value)->
-							redisMemory[key] = value
-						sadd:(key, value)->
-							if !redisMemory[key]?
-								redisMemory[key] = []
-							redisMemory[key].push value
-						del : (key)->
-							delete redisMemory[key]
-						srem : (key, member)->
-							index = redisMemory[key].indexOf(member)
-							redisMemory[key].splice(index, 1)
-						exec:(callback)->
-							callback(null, [])
+				createClient : -> rclient
 		
 		redisManager = SandboxedModule.require(modulePath, requires: mocks)
 		redisManager.putDocInMemory project_id, doc_id1, 0, ["line"], ->

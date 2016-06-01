@@ -19,30 +19,32 @@ describe 'RedisManager.putDocInMemory', ()->
 	potentialSAdds = {}
 	potentialSAdds[keys.docsInProject(project_id:project_id)] = doc_id
 
+	rclient =
+		auth:->
+		set:(key, value)->
+			result = potentialSets[key]
+			delete potentialSets[key]
+			if key == keys.docLines(doc_id:doc_id)
+				value = JSON.parse(value)
+			assert.deepEqual result, value
+		incr:()->
+		sadd:(key, value, cb)->
+			result = potentialSAdds[key]
+			delete potentialSAdds[key]
+			assert.equal result, value
+			cb()
+		del: (key) ->
+			result = potentialDels[key]
+			delete potentialDels[key]
+			assert.equal result, true
+		exec:(callback)->
+			callback()
+	rclient.multi = () -> rclient
 	mocks =
 		"./ZipManager": {}
 		"logger-sharelatex": log:->
 		"redis-sharelatex":
-			createClient : ()->
-				auth:->
-				multi: ()->
-					set:(key, value)->
-						result = potentialSets[key]
-						delete potentialSets[key]
-						if key == keys.docLines(doc_id:doc_id)
-							value = JSON.parse(value)
-						assert.deepEqual result, value
-					incr:()->
-					sadd:(key, value)->
-						result = potentialSAdds[key]
-						delete potentialSAdds[key]
-						assert.equal result, value
-					del: (key) ->
-						result = potentialDels[key]
-						delete potentialDels[key]
-						assert.equal result, true
-					exec:(callback)->
-						callback()
+			createClient : () -> rclient
 	
 	redisManager = SandboxedModule.require(modulePath, requires: mocks)
 

@@ -11,19 +11,19 @@ describe "RedisManager.pushUncompressedHistoryOp", ->
 			"redis-sharelatex": createClient: () =>
 				@rclient ?=
 					auth: () ->
-					multi: () => @rclient
 			"logger-sharelatex": @logger = {log: sinon.stub()}
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
 	describe "successfully", ->
-		beforeEach ->
+		beforeEach (done) ->
 			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.rpush = sinon.stub()
-			@rclient.sadd = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [@length = 42, "1"])
-			@RedisManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
+			@rclient.rpush = sinon.stub().yields(null, @length = 42)
+			@rclient.sadd = sinon.stub().yields()
+			@RedisManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, (args...) =>
+				@callback(args...)
+				done()
 		
 		it "should push the doc op into the doc ops list", ->
 			@rclient.rpush
@@ -36,7 +36,7 @@ describe "RedisManager.pushUncompressedHistoryOp", ->
 				.should.equal true
 
 		it "should call the callback with the length", ->
-			@callback.calledWith(null, @length).should.equal true
+			@callback.calledWith(undefined, @length).should.equal true
 
 
 
