@@ -151,8 +151,5 @@ module.exports = RedisManager =
 			[length, _] = results
 			callback(error, length)
 
-	getDocOpsLength: (doc_id, callback = (error, length) ->) ->
-		rclient.llen keys.docOps(doc_id: doc_id), callback
-
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
