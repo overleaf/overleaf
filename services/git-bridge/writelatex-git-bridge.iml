@@ -17,9 +17,13 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.jmock:jmock:2.6.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest-library:1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit-dep:4.4" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.jetty.aggregate:jetty-all:9.2.6.v20141205" level="project" />
-    <orderEntry type="library" name="Maven: javax.websocket:javax.websocket-api:1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-servlet:9.3.9.v20160517" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-security:9.3.9.v20160517" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-server:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:javax.servlet-api:3.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-http:9.3.9.v20160517" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-util:9.3.9.v20160517" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-io:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.ning:async-http-client:1.9.3" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty:3.9.5.Final" level="project" />

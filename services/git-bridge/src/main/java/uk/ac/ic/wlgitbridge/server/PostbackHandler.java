@@ -38,7 +38,7 @@ public class PostbackHandler extends AbstractHandler {
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                Log.info(baseRequest.getMethod() + " <- " + baseRequest.getUri());
+                Log.info(baseRequest.getMethod() + " <- " + baseRequest.getHttpURI());
                 PostbackContents postbackContents = new PostbackContents(bridgeAPI, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
