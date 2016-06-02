@@ -206,16 +206,6 @@ describe "CompileController", ->
 					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
 					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-						)
-						.should.equal true
-
 			describe "user with standard priority via query string", ->
 				beforeEach ->
 					@req.query = {compileGroup: 'standard'}
@@ -239,20 +229,6 @@ describe "CompileController", ->
 				it "should bind an error handle to the request proxy", ->
 					@proxy.on.calledWith("error").should.equal true
 
-			describe "user with priority compile via query string", ->
-				beforeEach ->
-					@req.query = {compileGroup: 'priority'}
-					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
-
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-						)
-						.should.equal true
 
 			describe "user with non-existent priority via query string", ->
 				beforeEach ->
@@ -316,25 +292,7 @@ describe "CompileController", ->
 				it "should bind an error handle to the request proxy", ->
 					@proxy.on.calledWith("error").should.equal true
 
-			describe "user with priority compile", ->
-				beforeEach ->
-					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
-					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-							headers: {
-								'Range': '123-456'
-								'If-Range': 'abcdef'
-								'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
-							}
-						)
-						.should.equal true
 
 			describe "user with build parameter via query string", ->
 				beforeEach ->

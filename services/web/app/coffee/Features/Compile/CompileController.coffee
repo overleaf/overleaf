@@ -115,10 +115,7 @@ module.exports = CompileController =
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
-			if limits.compileGroup == "priority"
-				compilerUrl = Settings.apis.clsi_priority.url
-			else
-				compilerUrl = Settings.apis.clsi.url
+			compilerUrl = Settings.apis.clsi.url
 			url = "#{compilerUrl}#{url}"
 			logger.log url: url, "proxying to CLSI"
 			oneMinute = 60 * 1000
