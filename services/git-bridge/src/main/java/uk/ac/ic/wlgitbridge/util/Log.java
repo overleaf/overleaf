@@ -2,19 +2,12 @@ package uk.ac.ic.wlgitbridge.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.impl.SimpleLogger;
 import uk.ac.ic.wlgitbridge.application.GitBridgeApp;
 
 /**
  * Created by winston on 19/01/2016.
  */
 public class Log {
-
-    static {
-        System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
-        System.setProperty(SimpleLogger.DATE_TIME_FORMAT_KEY, "yyyy-MM-dd HH:mm:ss:SSS Z");
-        System.setProperty(SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
-    }
 
     private static Logger logger = LoggerFactory.getLogger(GitBridgeApp.class);
 
