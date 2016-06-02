@@ -37,10 +37,10 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, clsiServerId) ->
+							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
-								callback(null, status, outputFiles, clsiServerId, limits)
+								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
 								
 	deleteAuxFiles: (project_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->

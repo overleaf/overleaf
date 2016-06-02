@@ -42,11 +42,11 @@ define [
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
 			$scope.pdf.failure    = false
-			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
 			$scope.pdf.clsiMaintenance = false
 			$scope.pdf.tooRecentlyCompiled = false
 			$scope.pdf.renderingError = false
+			$scope.pdf.projectTooLarge = false
 
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
@@ -60,13 +60,15 @@ define [
 				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
 				$scope.shouldShowLogs = true
-				fetchLogs()
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.view = 'errors'
 				$scope.pdf.clsiMaintenance = true
 			else if response.status == "too-recently-compiled"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.tooRecentlyCompiled = true
+			else if response.status == "validation-problems"
+				$scope.pdf.view = "validation-problems"
+				$scope.pdf.validation = response.validationProblems
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false

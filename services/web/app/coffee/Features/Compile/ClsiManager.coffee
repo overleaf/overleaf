@@ -9,21 +9,21 @@ url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")
 _ = require("underscore")
 async = require("async")
-
+ClsiFormatChecker = require("./ClsiFormatChecker")
 
 module.exports = ClsiManager =
 
-	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
+	sendRequest: (project_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			ClsiManager._checkRecoursesForErrors req.compile.resources, (err, problems)->
+			ClsiFormatChecker.checkRecoursesForProblems req.compile?.resources, (err, validationProblems)->
 				if err?
 					logger.err err, project_id, "could not check resources for potential problems before sending to clsi"
 					return callback(err)
-				if problems?
-					logger.log project_id:project_id, problems:problems, "problems with users latex before compile was attempted"
-					return callback(null, problems)
+				if validationProblems?
+					logger.log project_id:project_id, validationProblems:validationProblems, "problems with users latex before compile was attempted"
+					return callback(null, "validation-problems", null, null, validationProblems)
 				ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
 					if error?
 						logger.err err:error, project_id:project_id, "error sending request to clsi"
@@ -161,80 +161,4 @@ module.exports = ClsiManager =
 					error = new Error("CLSI returned non-success code: #{response.statusCode}")
 					logger.error err: error, project_id: project_id, "CLSI returned failure code"
 					callback error, body
-
-	_checkRecoursesForErrors: (resources, callback)->
-		jobs = 
-			duplicatePaths: (cb)->
-				ClsiManager._checkForDuplicatePaths resources, cb
-
-			conflictedPaths: (cb)->
-				ClsiManager._checkForConflictingPaths resources, cb
-
-			sizeCheck: (cb)->
-				ClsiManager._checkDocsAreUnderSizeLimit resources, cb
-
-		async.series jobs, (err, problems)->
-			if err? 
-				return callback(err)
-			problems = _.omit(problems, _.isEmpty)
-			if _.isEmpty(problems)
-				return callback()
-			else
-				callback(null, problems)
-
-
-	_checkForDuplicatePaths: (resources, callback)->
-		paths = _.pluck(resources, 'path')
-
-		duplicates = _.filter paths, (path)->
-			return _.countBy(paths)[path] > 1
-
-		duplicates = _.uniq(duplicates)
-
-		duplicateObjects = _.map duplicates, (dup)->
-			path:dup
-
-		callback(null, duplicateObjects)
-
-	_checkForConflictingPaths: (resources, callback)->
-		paths = _.pluck(resources, 'path')
-
-		conflicts = _.filter paths, (path)->
-			matchingPaths = _.filter paths, (checkPath)->
-				return checkPath.indexOf(path+"/") != -1
-
-			return matchingPaths.length > 0
-
-		conflictObjects = _.map conflicts, (conflict)->
-			path:conflict
-
-		callback null, conflictObjects
-
-	_checkDocsAreUnderSizeLimit: (resources, callback)->
-		
-		FIVEMB = 1000 * 1000 * 5
-
-		totalSize = 0
-
-		sizedResources = _.map resources, (resource)->
-			result = {path:resource.path}
-			if resource.content?
-				result.size = resource.content.join("").length
-			else
-				result.size = 0
-			totalSize += result.size
-			return result
-
-		tooLarge = totalSize > FIVEMB
-		if !tooLarge
-			return callback()
-		else
-			sizedResources = _.sortBy(sizedResources, "size").slice(10).reverse()
-			return callback(null, {resources:sizedResources, totalSize:totalSize})
-
-
-
-
-
-
 
