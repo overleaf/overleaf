@@ -88,8 +88,6 @@ module.exports =
 			url: "http://localhost:3009"
 		clsi:
 			url: "http://localhost:3013"
-		clsi_priority:
-			url: "http://localhost:3013"
 		templates:
 			url: "http://localhost:3007"
 		githubSync:
@@ -126,6 +124,9 @@ module.exports =
 	# cookieDomain: ".sharelatex.dev"
 	cookieName:"sharelatex.sid"
 
+	# this is only used if cookies are used for clsi backend
+	#clsiCookieKey: "clsiserver"
+	
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
@@ -259,7 +260,7 @@ module.exports =
 	
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
-	allowPublicAccess: false
+	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
 	
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
@@ -388,11 +389,15 @@ module.exports =
 	# 	filter: "(uid=:userKey)"
 	# 	failMessage: 'LDAP User Fail'
 	# 	fieldName: 'LDAP User'
-	# 	placeholder: 'LDAP User ID'
+	# 	placeholder: 'email@example.com'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
 	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
 	#	adminPW: 'password'
+	#	starttls: true
+	#	tlsOptions:
+	#		rejectUnauthorized: false
+	#		ca: ['/etc/ldap/ca_certs.pem']
 	
 	#templateLinks: [{
 	#	name : "CV projects",

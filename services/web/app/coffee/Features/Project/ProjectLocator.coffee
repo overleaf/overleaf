@@ -1,9 +1,10 @@
 Project = require('../../models/Project').Project
 ProjectGetter = require("./ProjectGetter")
-Errors = require "../../errors"
+Errors = require "../Errors/Errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
+ProjectGetter = require "./ProjectGetter"
 
 module.exports = ProjectLocator =
 	findElement: (options, _callback = (err, element, path, parentFolder)->)->
@@ -60,7 +61,13 @@ module.exports = ProjectLocator =
 	findRootDoc : (opts, callback)->
 		getRootDoc = (project)=>
 			if project.rootDoc_id?
-				@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, callback
+				@findElement {project:project, element_id:project.rootDoc_id, type:"docs"}, (error, args...) ->
+					if error?
+						if error instanceof Errors.NotFoundError
+							return callback null, null
+						else
+							return callback error
+					return callback null, args...
 			else
 				callback null, null
 		{project, project_id} = opts
@@ -131,7 +138,8 @@ module.exports = ProjectLocator =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		Project.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
+		ProjectGetter.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
+			return callback(error) if error?
 			projects = projects.concat(collabertions)
 			projectName = projectName.toLowerCase()
 			project = _.find projects, (project)->

@@ -41,6 +41,7 @@ define [
 			@openDoc(doc)
 
 		openDoc: (doc, options = {}) ->
+			sl_console.log "[openDoc] Opening #{doc.id}"
 			@$scope.ui.view = "editor"
 
 			done = () =>
@@ -74,8 +75,10 @@ define [
 					done()
 
 		_openNewDocument: (doc, callback = (error, sharejs_doc) ->) ->
+			sl_console.log "[_openNewDocument] Opening..."
 			current_sharejs_doc = @$scope.editor.sharejs_doc
 			if current_sharejs_doc?
+				sl_console.log "[_openNewDocument] Leaving existing open doc..."
 				current_sharejs_doc.leaveAndCleanUp()
 				@_unbindFromDocumentEvents(current_sharejs_doc)
 

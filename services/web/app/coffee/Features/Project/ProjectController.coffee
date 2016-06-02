@@ -5,7 +5,6 @@ projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
 editorController = require("../Editor/EditorController")
 metrics = require('../../infrastructure/Metrics')
-Project = require('../../models/Project').Project
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
@@ -13,10 +12,12 @@ NotificationsHandler = require("../Notifications/NotificationsHandler")
 LimitationsManager = require("../Subscription/LimitationsManager")
 _ = require("underscore")
 Settings = require("settings-sharelatex")
-SecurityManager = require("../../managers/SecurityManager")
+AuthorizationManager = require("../Authorization/AuthorizationManager")
 fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
+ProjectGetter = require("./ProjectGetter")
+PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 
 module.exports = ProjectController =
 
@@ -41,6 +42,14 @@ module.exports = ProjectController =
 			jobs.push (callback) ->
 				editorController.setRootDoc project_id, req.body.rootDocId, callback
 
+		async.series jobs, (error) ->
+			return next(error) if error?
+			res.sendStatus(204)
+			
+	updateProjectAdminSettings: (req, res, next) ->
+		project_id = req.params.Project_id
+		
+		jobs = []
 		if req.body.publicAccessLevel?
 			jobs.push (callback) ->
 				editorController.setPublicAccessLevel project_id, req.body.publicAccessLevel, callback
@@ -129,7 +138,7 @@ module.exports = ProjectController =
 			notifications: (cb)->
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
-				Project.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
 			user: (cb) ->
@@ -179,23 +188,23 @@ module.exports = ProjectController =
 			anonymous = false
 		else
 			anonymous = true
-			user_id = 'openUser'
+			user_id = null
 
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, "loading editor"
 
 		async.parallel {
 			project: (cb)->
-				Project.findPopulatedById project_id, cb
+				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1}, cb
 			user: (cb)->
-				if user_id == 'openUser'
+				if !user_id?
 					cb null, defaultSettingsForAnonymousUser(user_id)
 				else
 					User.findById user_id, (err, user)->
 						logger.log project_id:project_id, user_id:user_id, "got user"
 						cb err, user
 			subscription: (cb)->
-				if user_id == 'openUser'
+				if !user_id?
 					return cb()
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			activate: (cb)->
@@ -216,8 +225,9 @@ module.exports = ProjectController =
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
-			SecurityManager.userCanAccessProject user, project, (canAccess, privilegeLevel)->
-				if !canAccess
+			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
+				return next(error) if error?
+				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 					return res.sendStatus 401
 
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
@@ -228,10 +238,9 @@ module.exports = ProjectController =
 					title:  project.name
 					priority_title: true
 					bodyClasses: ["editor"]
-					project : project
 					project_id : project._id
 					user : {
-						id    : user.id
+						id    : user_id
 						email : user.email
 						first_name : user.first_name
 						last_name  : user.last_name
@@ -239,6 +248,8 @@ module.exports = ProjectController =
 						subscription :
 							freeTrial: {allowed: allowedFreeTrial}
 						featureSwitches: user.featureSwitches
+						features: user.features
+						refProviders: user.refProviders
 					}
 					userSettings: {
 						mode  : user.ace.mode

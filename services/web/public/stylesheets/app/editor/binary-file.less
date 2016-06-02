@@ -13,9 +13,35 @@
 		.box-shadow(0 2px 3px @gray;);
 		background-color: white;
 	}
+	.img-preview {
+		background: url('/img/spinner.gif') no-repeat;
+		min-width: 200px;
+		min-height: 200px;
+	}
 	p.no-preview {
 		font-size: 24px;
 		color: @gray;
+	}
+	.bib-loading {
+		font-size: 24px;
+		color: @gray;
+		margin-bottom: 12px;
+	}
+	.bib-preview {
+		margin-bottom: 12px;
+		.scroll-container {
+			font-size: 0.8em;
+			line-height: 1.1em;
+			overflow: auto;
+			border: 1px solid @gray-lighter;
+			padding-left: 12px;
+			padding-right: 12px;
+			padding-top: 8px;
+			padding-bottom: 8px;
+			text-align: left;
+			white-space: pre;
+			font-family: monospace;
+		}
 	}
 
 }

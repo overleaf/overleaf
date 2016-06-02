@@ -4,7 +4,13 @@ define [
 	"libs/bib-log-parser"
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
+
 		autoCompile = true
+
+		# pdf.view = uncompiled | pdf | errors
+		$scope.pdf.view = if $scope?.pdf?.url then 'pdf' else 'uncompiled'
+		$scope.shouldShowLogs = false
+
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
@@ -12,7 +18,8 @@ define [
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
-			$scope.pdf.error = true
+			$scope.pdf.view = 'errors'
+			$scope.pdf.renderingError = true
 
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
 		$scope.$watch "draft", (new_value, old_value) ->
@@ -29,41 +36,72 @@ define [
 				_csrf: window.csrfToken
 			}
 
-		parseCompileResponse = (response) ->
+		parseCompileResponse = (response) ->		
+
 			# Reset everything
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
 			$scope.pdf.failure    = false
-			$scope.pdf.uncompiled = false
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
+			$scope.pdf.clsiMaintenance = false
+			$scope.pdf.tooRecentlyCompiled = false
+			$scope.pdf.renderingError = false
+
+			# make a cache to look up files by name
+			fileByPath = {}
+			for file in response.outputFiles
+				fileByPath[file.path] = file
 
 			if response.status == "timedout"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
 			else if response.status == "autocompile-backoff"
-				$scope.pdf.uncompiled = true
+				$scope.pdf.view = 'uncompiled'
 			else if response.status == "project-too-large"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
 			else if response.status == "failure"
+				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
-				fetchLogs()
+				$scope.shouldShowLogs = true
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+			else if response.status == 'clsi-maintenance'
+				$scope.pdf.view = 'errors'
+				$scope.pdf.clsiMaintenance = true
+			else if response.status == "too-recently-compiled"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.tooRecentlyCompiled = true
 			else if response.status == "success"
-				# define the base url
-				$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf?cache_bust=#{Date.now()}"
+				$scope.pdf.view = 'pdf'
+				$scope.shouldShowLogs = false
+
+				# prepare query string
+				qs = {}
+				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
+				if fileByPath['output.pdf']?.url?
+					$scope.pdf.url = fileByPath['output.pdf'].url
+				else if fileByPath['output.pdf']?.build?
+					build = fileByPath['output.pdf'].build
+					$scope.pdf.url = "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
+				else
+					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
+				# check if we need to bust cache (build id is unique so don't need it in that case)
+				if not fileByPath['output.pdf']?.build?
+					qs.cache_bust = "#{Date.now()}"
 				# add a query string parameter for the compile group
 				if response.compileGroup?
 					$scope.pdf.compileGroup = response.compileGroup
-					$scope.pdf.url = $scope.pdf.url + "&compileGroup=#{$scope.pdf.compileGroup}"
-				# make a cache to look up files by name
-				fileByPath = {}
-				for file in response.outputFiles
-					fileByPath[file.path] = file
-				# if the pdf file has a build number, pass it to the clsi
-				if fileByPath['output.pdf']?.build?
-					build = fileByPath['output.pdf'].build
-					$scope.pdf.url = $scope.pdf.url + "&build=#{build}"
+					qs.compileGroup = "#{$scope.pdf.compileGroup}"
+				if response.clsiServerId?
+					qs.clsiserverid = response.clsiServerId
+					ide.clsiServerId = response.clsiServerId
+				# convert the qs hash into a query string and append it
+				qs_args = ("#{k}=#{v}" for k, v of qs)
+				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
+				$scope.pdf.url += $scope.pdf.qs
 
-				fetchLogs(fileByPath['output.log'])
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
@@ -77,51 +115,84 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
+					file.url = "/project/#{project_id}/output/#{file.path}"
+					if response.clsiServerId?
+						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
 
-		fetchLogs = (outputFile) ->
-			qs = if outputFile?.build? then "?build=#{outputFile.build}" else ""
-			$http.get "/project/#{$scope.project_id}/output/output.log" + qs
-				.success (log) ->
-					#console.log ">>", log
-					$scope.pdf.rawLog = log
-					logEntries = LogParser.parse(log, ignoreDuplicates: true)
-					#console.log ">>", logEntries
-					$scope.pdf.logEntries = logEntries
-					$scope.pdf.logEntries.all = logEntries.errors.concat(logEntries.warnings).concat(logEntries.typesetting)
-					# # # #
-					proceed = () ->
-						$scope.pdf.logEntryAnnotations = {}
-						for entry in logEntries.all
-							if entry.file?
-								entry.file = normalizeFilePath(entry.file)
-								entity = ide.fileTreeManager.findEntityByPath(entry.file)
-								if entity?
-									$scope.pdf.logEntryAnnotations[entity.id] ||= []
-									$scope.pdf.logEntryAnnotations[entity.id].push {
-										row: entry.line - 1
-										type: if entry.level == "error" then "error" else "warning"
-										text: entry.message
-									}
-					# Get the biber log and parse it too
-					$http.get "/project/#{$scope.project_id}/output/output.blg" + qs
-						.success (log) ->
-							window._s = $scope
-							biberLogEntries = BibLogParser.parse(log, {})
-							if $scope.pdf.logEntries
-								entries = $scope.pdf.logEntries
-								all = biberLogEntries.errors.concat(biberLogEntries.warnings)
-								entries.all = entries.all.concat(all)
-								entries.errors = entries.errors.concat(biberLogEntries.errors)
-								entries.warnings = entries.warnings.concat(biberLogEntries.warnings)
-							proceed()
-						.error (e) ->
-							console.error ">> error", e
-							proceed()
-					# # # #
-				.error () ->
-					$scope.pdf.logEntries = []
-					$scope.pdf.rawLog = ""
+
+		fetchLogs = (logFile, blgFile) ->
+
+			getFile = (name, file) ->
+				opts =
+					method:"GET"
+					params:
+						build:file.build
+						clsiserverid:ide.clsiServerId
+				if file.url?  # FIXME clean this up when we have file.urls out consistently
+					opts.url = file.url
+				else if file?.build?
+					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
+				else
+					opts.url = "/project/#{$scope.project_id}/output/#{name}"
+				return $http(opts)
+
+			# accumulate the log entries
+			logEntries =
+				all: []
+				errors: []
+				warnings: []
+
+			accumulateResults = (newEntries) ->
+				for key in ['all', 'errors', 'warnings']
+					logEntries[key] = logEntries[key].concat newEntries[key]
+
+			# use the parsers for each file type
+			processLog = (log) ->
+				$scope.pdf.rawLog = log
+				{errors, warnings, typesetting} = LogParser.parse(log, ignoreDuplicates: true)
+				all = [].concat errors, warnings, typesetting
+				accumulateResults {all, errors, warnings}
+
+			processBiber = (log) ->
+				{errors, warnings} = BibLogParser.parse(log, {})
+				all = [].concat errors, warnings
+				accumulateResults {all, errors, warnings}
+
+			# output the results
+			handleError = () ->
+				$scope.pdf.logEntries = []
+				$scope.pdf.rawLog = ""
+
+			annotateFiles = () ->
+				$scope.pdf.logEntries = logEntries
+				$scope.pdf.logEntryAnnotations = {}
+				for entry in logEntries.all
+					if entry.file?
+						entry.file = normalizeFilePath(entry.file)
+						entity = ide.fileTreeManager.findEntityByPath(entry.file)
+						if entity?
+							$scope.pdf.logEntryAnnotations[entity.id] ||= []
+							$scope.pdf.logEntryAnnotations[entity.id].push {
+								row: entry.line - 1
+								type: if entry.level == "error" then "error" else "warning"
+								text: entry.message
+							}
+
+			# retrieve the logfile and process it
+			response = getFile('output.log', logFile)
+				.success processLog
+				.error handleError
+
+			if blgFile?	# retrieve the blg file if present
+				response.success () ->
+					getFile('output.blg', blgFile)
+						# ignore errors in biber file
+						.success processBiber
+						# display the combined result
+						.then annotateFiles
+			else # otherwise just display the result
+				response.success annotateFiles
 
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
@@ -157,7 +228,9 @@ define [
 					parseCompileResponse(data)
 				.error () ->
 					$scope.pdf.compiling = false
+					$scope.pdf.renderingError = false
 					$scope.pdf.error = true
+					$scope.pdf.view = 'errors'
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
@@ -166,18 +239,18 @@ define [
 			$http {
 				url: "/project/#{$scope.project_id}/output"
 				method: "DELETE"
+				params:
+					clsiserverid:ide.clsiServerId
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
 
 		$scope.toggleLogs = () ->
-			if !$scope.pdf.view? or $scope.pdf.view == "pdf"
-				$scope.pdf.view = "logs"
-			else
-				$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = !$scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
+			$scope.shouldShowLogs = false
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
@@ -250,6 +323,7 @@ define [
 							file: path
 							line: row + 1
 							column: column
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->
@@ -277,6 +351,7 @@ define [
 							page: position.page + 1
 							h: position.offset.left.toFixed(2)
 							v: position.offset.top.toFixed(2)
+							clsiserverid:ide.clsiServerId
 						}
 					})
 					.success (data) ->

@@ -11,6 +11,9 @@ define [
 					if entity?.name?.match /.*\.bib$/
 						@indexReferences([doc.doc_id], true)
 
+			@$scope.$on 'references:should-reindex', (e, data) =>
+				@indexAllReferences(true)
+
 			# When we join the project:
 			#   index all references files
 			#   and don't broadcast to all clients

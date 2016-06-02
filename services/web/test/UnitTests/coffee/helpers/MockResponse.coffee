@@ -63,6 +63,10 @@ class MockResponse
 		@body = body if body
 		@callback() if @callback?
 
+	status: (@statusCode)->
+		return @
+
+
 	setHeader: (header, value) ->
 		@headers[header] = value
 

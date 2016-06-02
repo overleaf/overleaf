@@ -112,4 +112,20 @@ define [
 
 		ide.localStorage = localStorage
 
+		ide.browserIsSafari = false
+		try
+			userAgent = navigator.userAgent
+			ide.browserIsSafari = (
+				userAgent &&
+				userAgent.match(/.*Safari\/.*/) &&
+				!userAgent.match(/.*Chrome\/.*/) &&
+				!userAgent.match(/.*Chromium\/.*/)
+			)
+		catch err
+			console.error err
+
+		# User can append ?ft=somefeature to url to activate a feature toggle
+		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
+
+
 	angular.bootstrap(document.body, ["SharelatexApp"])

@@ -7,4 +7,3 @@ NotFoundError.prototype.__proto__ = Error.prototype
 
 module.exports = Errors =
 	NotFoundError: NotFoundError
-

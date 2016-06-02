@@ -23,5 +23,9 @@ define [
 			baseUrl: window.sharelatex.sixpackDomain
 			client_id: window.user_id
 		})
+	
+	sl_debugging = window.location?.search?.match(/debug=true/)?
+	window.sl_console =
+		log: (args...) -> console.log(args...) if sl_debugging
 
 	return App

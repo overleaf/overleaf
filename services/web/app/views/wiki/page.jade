@@ -1,14 +1,68 @@
 extends ../layout
 
 block content
-	.content.content-alt(ng-non-bindable)
+	.content.content-alt(ng-cloak)
 		.container.wiki
+			.row.template-page-header
+				.col-md-8(ng-cloak)
+
 			.row
-				.col-xs-3.contents
+				.col-xs-3.contents(ng-non-bindable)
 					| !{contents.content}
+
 				.col-xs-9.page
-					.card
+					- if(typeof(settings.algolia) != "undefined" && typeof(settings.algolia.indexes) != "undefined" && typeof(settings.algolia.indexes.wiki) != "undefined")
+						span(ng-controller="SearchWikiController")
+							.row
+								form.project-search.form-horizontal.col-md-9(role="form")
+									.form-group.has-feedback.has-feedback-left.col-md-12
+										input.form-control.col-md-12(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
+										i.fa.fa-search.form-control-feedback-left
+										i.fa.fa-times.form-control-feedback(
+											ng-click="clearSearchText()",
+											style="cursor: pointer;",
+											ng-show="searchQueryText.length > 0"
+										)
+								.col-md-3.text-right
+									a.btn.btn-primary(ng-click="showMissingTemplateModal()") #{translate("suggest_new_doc")}
+
+							.row
+								.col-md-12(ng-cloak)
+									a(ng-href='{{hit.url}}',ng-repeat='hit in hits').search-result.card.card-thin
+										span(ng-bind-html='hit.name')
+										div.search-result-content(ng-show="hit.content != ''", ng-bind-html='hit.content')
+
+					.card.row-spaced(ng-non-bindable)
 						.page-header
 							h1 #{title}
 							
 						| !{page.content}
+
+
+
+
+	script(type="text/ng-template", id="missingWikiPageModal")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="close()"
+			) &times;
+			h3 #{translate("suggest_new_doc")}
+		.modal-body.contact-us-modal
+			span(ng-show="sent == false")
+				label.desc
+					| #{translate("email")} (#{translate("optional")})
+				.form-group
+					input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+				label.desc
+					| #{translate("suggestion")}
+				.form-group
+					textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+			span(ng-show="sent")
+				p #{translate("request_sent_thank_you")}
+		.modal-footer
+			button.btn.btn-default(ng-click="close()") 
+				span #{translate("dismiss")}
+			button.btn-success.btn(type='submit', ng-disabled="sending", ng-click="contactUs()") #{translate("contact_us")}
+

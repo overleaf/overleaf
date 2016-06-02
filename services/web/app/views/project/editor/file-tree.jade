@@ -70,23 +70,23 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
 			)
 
-		div(ng-show="deletedDocs.length > 0 && ui.view == 'track-changes'")
-			h3 #{translate("deleted_files")}
-			ul.list-unstyled.file-tree-list.deleted-docs
-				li(
-					ng-class="{ 'selected': entity.selected }",
-					ng-repeat="entity in deletedDocs | orderBy:'name'",
-					ng-controller="FileTreeEntityController"
-				)
-					.entity
-						.entity-name(
-							ng-click="select($event)"
-						)
-							//- Just a spacer to align with folders
-							i.fa.fa-fw.toggle
-							i.fa.fa-fw.fa-file
+			li(ng-show="deletedDocs.length > 0 && ui.view == 'track-changes'")
+				h3 #{translate("deleted_files")}
+			li(
+				ng-class="{ 'selected': entity.selected }",
+				ng-repeat="entity in deletedDocs | orderBy:'name'",
+				ng-controller="FileTreeEntityController",
+				ng-show="ui.view == 'track-changes'"
+			)
+				.entity
+					.entity-name(
+						ng-click="select($event)"
+					)
+						//- Just a spacer to align with folders
+						i.fa.fa-fw.toggle
+						i.fa.fa-fw.fa-file
 
-							span  {{ entity.name }}
+						span  {{ entity.name }}
 
 script(type='text/ng-template', id='entityListItemTemplate')
 	li(
@@ -107,8 +107,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				//- Just a spacer to align with folders
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
 
-				i.fa.fa-fw.fa-file(ng-if="entity.type == 'doc'")
-				i.fa.fa-fw.fa-image(ng-if="entity.type == 'file'")
+				i.fa.fa-fw(ng-if="entity.type != 'folder'", ng-class="'fa-' + iconTypeFromName(entity.name)")
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.name }}

@@ -8,6 +8,8 @@ Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
+ClsiCookieManager = require("./ClsiCookieManager")
+Path = require("path")
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -28,27 +30,23 @@ module.exports = CompileController =
 			if req.body?.draft
 				options.draft = req.body.draft
 			logger.log {options, project_id}, "got compile request"
-			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, output, limits) ->
+			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits) ->
 				return next(error) if error?
 				res.contentType("application/json")
-				res.send 200, JSON.stringify {
+				res.status(200).send JSON.stringify {
 					status: status
 					outputFiles: outputFiles
 					compileGroup: limits?.compileGroup
+					clsiServerId:clsiServerId
 				}
 
 	downloadPdf: (req, res, next = (error) ->)->
-	
 		Metrics.inc "pdf-downloads"
 		project_id = req.params.Project_id
 		isPdfjsPartialDownload = req.query?.pdfng
-
-
-
 		rateLimit = (callback)->
 			if isPdfjsPartialDownload
 				callback null, true
-	
 			else
 				rateLimitOpts =
 					endpointName: "full-pdf-download"
@@ -93,10 +91,36 @@ module.exports = CompileController =
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/#{req.params.file}", req, res, next)
+		build = req.params.build
+		if build?
+			url = "/project/#{project_id}/build/#{build}/output/#{req.params.file}"
+		else
+			url = "/project/#{project_id}/output/#{req.params.file}"
+		CompileController.proxyToClsi(project_id, url, req, res, next)
 
-	proxySync: (req, res, next = (error) ->) ->
-		CompileController.proxyToClsi(req.params.Project_id, req.url, req, res, next)
+	proxySyncPdf: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{page, h, v} = req.query
+		if not page?.match(/^\d+$/)
+			return next(new Error("invalid page parameter"))
+		if not h?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid h parameter"))
+		if not v?.match(/^\d+\.\d+$/)
+			return next(new Error("invalid v parameter"))
+		destination = {url: "/project/#{project_id}/sync/pdf", qs: {page, h, v}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
+
+	proxySyncCode: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		{file, line, column} = req.query
+		if not file? or Path.resolve("/", file) isnt "/#{file}"
+			return next(new Error("invalid file parameter"))
+		if not line?.match(/^\d+$/)
+			return next(new Error("invalid line parameter"))
+		if not column?.match(/^\d+$/)
+			return next(new Error("invalid column parameter"))
+		destination = {url:"/project/#{project_id}/sync/code", qs: {file, line, column}}
+		CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
 		if req.query?.compileGroup
@@ -107,30 +131,39 @@ module.exports = CompileController =
 				CompileController.proxyToClsiWithLimits(project_id, url, limits, req, res, next)
 
 	proxyToClsiWithLimits: (project_id, url, limits, req, res, next = (error) ->) ->
-		if limits.compileGroup == "priority"
-			compilerUrl = Settings.apis.clsi_priority.url
-		else
-			compilerUrl = Settings.apis.clsi.url
-		url = "#{compilerUrl}#{url}"
-		logger.log url: url, "proxying to CLSI"
-		oneMinute = 60 * 1000
-		# the base request
-		options = { url: url, method: req.method,	timeout: oneMinute }
-		# if we have a build parameter, pass it through to the clsi
-		if req.query?.pdfng && req.query?.build? # only for new pdf viewer
-			options.qs = {}
-			options.qs.build = req.query.build
-		# if we are byte serving pdfs, pass through If-* and Range headers
-		# do not send any others, there's a proxying loop if Host: is passed!
-		if req.query?.pdfng
-			newHeaders = {}
-			for h, v of req.headers
-				newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
-			options.headers = newHeaders
-		proxy = request(options)
-		proxy.pipe(res)
-		proxy.on "error", (error) ->
-			logger.warn err: error, url: url, "CLSI proxy error"
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			# expand any url parameter passed in as {url:..., qs:...}
+			if typeof url is "object"
+				{url, qs} = url
+			if limits.compileGroup == "priority"
+				compilerUrl = Settings.apis.clsi_priority.url
+			else
+				compilerUrl = Settings.apis.clsi.url
+			url = "#{compilerUrl}#{url}"
+			logger.log url: url, "proxying to CLSI"
+			oneMinute = 60 * 1000
+			# the base request
+			options = { url: url, method: req.method, timeout: oneMinute, jar : jar }
+			# add any provided query string
+			options.qs = qs if qs?
+			# if we have a build parameter, pass it through to the clsi
+			if req.query?.pdfng && req.query?.build? # only for new pdf viewer
+				options.qs ?= {}
+				options.qs.build = req.query.build
+			# if we are byte serving pdfs, pass through If-* and Range headers
+			# do not send any others, there's a proxying loop if Host: is passed!
+			if req.query?.pdfng
+				newHeaders = {}
+				for h, v of req.headers
+					newHeaders[h] = req.headers[h] if h.match /^(If-|Range)/i
+				options.headers = newHeaders
+			proxy = request(options)
+			proxy.pipe(res)
+			proxy.on "error", (error) ->
+				logger.warn err: error, url: url, "CLSI proxy error"
 
 	wordCount: (req, res, next) ->
 		project_id = req.params.Project_id

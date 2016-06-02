@@ -164,12 +164,17 @@ module.exports = EditorController =
 
 	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
 		Metrics.inc "editor.move-entity"
-		ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
+		LockManager.getLock project_id, (err)->
 			if err?
-				logger.err err:err, project_id:project_id, entity_id:entity_id, folder_id:folder_id, "error moving entity"
+				logger.err err:err, project_id:project_id, "could not get lock for move entity"
 				return callback(err)
-			EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
-			callback?()
+			ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
+				if err?
+					logger.err err:err, project_id:project_id, entity_id:entity_id, folder_id:folder_id, "error moving entity"
+					return callback(err)
+				LockManager.releaseLock project_id, ->
+					EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
+					callback?()
 
 	renameProject: (project_id, newName, callback = (err) ->) ->
 		ProjectDetailsHandler.renameProject project_id, newName, ->

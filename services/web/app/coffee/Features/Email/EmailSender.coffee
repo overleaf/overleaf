@@ -3,6 +3,8 @@ metrics = require('../../infrastructure/Metrics')
 Settings = require('settings-sharelatex')
 nodemailer = require("nodemailer")
 sesTransport = require('nodemailer-ses-transport')
+sgTransport = require('nodemailer-sendgrid-transport')
+
 _ = require("underscore")
 
 if Settings.email? and Settings.email.fromAddress?
@@ -19,6 +21,9 @@ client =
 if Settings?.email?.parameters?.AWSAccessKeyID?
 	logger.log "using aws ses for email"
 	nm_client = nodemailer.createTransport(sesTransport(Settings.email.parameters))
+else if Settings?.email?.parameters?.sendgridApiKey?
+	logger.log "using sendgrid for email"
+	nm_client = nodemailer.createTransport(sgTransport({auth:{api_key:Settings?.email?.parameters?.sendgridApiKey}}))
 else if Settings?.email?.parameters?
 	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth")
 

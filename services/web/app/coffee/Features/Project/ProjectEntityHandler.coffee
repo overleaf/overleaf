@@ -4,7 +4,7 @@ Doc = require('../../models/Doc').Doc
 Folder = require('../../models/Folder').Folder
 File = require('../../models/File').File
 FileStoreHandler = require("../FileStore/FileStoreHandler")
-Errors = require "../../errors"
+Errors = require "../Errors/Errors"
 tpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 projectLocator = require('./ProjectLocator')
 path = require "path"
@@ -22,7 +22,9 @@ module.exports = ProjectEntityHandler =
 		folders = {}
 		processFolder = (basePath, folder) ->
 			folders[basePath] = folder
-			processFolder path.join(basePath, childFolder.name), childFolder for childFolder in folder.folders
+			for childFolder in (folder.folders or [])
+				if childFolder.name?
+					processFolder path.join(basePath, childFolder.name), childFolder
 
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
 			return callback(err) if err?
@@ -43,11 +45,11 @@ module.exports = ProjectEntityHandler =
 			for docContent in docContentsArray
 				docContents[docContent._id] = docContent
 
-			ProjectEntityHandler.getAllFolders project_id, (error, folders) ->
+			ProjectEntityHandler.getAllFolders project_id, (error, folders = {}) ->
 				return callback(error) if error?
 				docs = {}
 				for folderPath, folder of folders
-					for doc in folder.docs
+					for doc in (folder.docs or [])
 						content = docContents[doc._id.toString()]
 						if content?
 							docs[path.join(folderPath, doc.name)] = {
@@ -61,11 +63,11 @@ module.exports = ProjectEntityHandler =
 
 	getAllFiles: (project_id, callback) ->
 		logger.log project_id:project_id, "getting all files for project"
-		@getAllFolders project_id, (err, folders) ->
+		@getAllFolders project_id, (err, folders = {}) ->
 			return callback(err) if err?
 			files = {}
 			for folderPath, folder of folders
-				for file in folder.fileRefs
+				for file in (folder.fileRefs or [])
 					if file?
 						files[path.join(folderPath, file.name)] = file
 			callback null, files
@@ -344,15 +346,18 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
 						return callback(err) if err?
-						ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+						# We've updated the project structure by removing the element, so must refresh it.
+						ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 							return callback(err) if err?
-							opts = 
-								project_id:project_id
-								project_name:project.name
-								startPath:path.fileSystem
-								endPath:result.path.fileSystem,
-								rev:entity.rev
-							tpdsUpdateSender.moveEntity opts, callback
+							ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+								return callback(err) if err?
+								opts = 
+									project_id:project_id
+									project_name:project.name
+									startPath:path.fileSystem
+									endPath:result.path.fileSystem,
+									rev:entity.rev
+								tpdsUpdateSender.moveEntity opts, callback
 
 	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
 		self = @
@@ -501,7 +506,7 @@ module.exports = ProjectEntityHandler =
 				elementType = "fileRefs"
 			return elementType
 
-		if !element?
+		if !element? or !element._id?
 			e = new Error("no element passed to be inserted")
 			logger.err project_id:project._id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as it was null"
 			return callback(e)
@@ -520,13 +525,13 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, "adding element to project"
 				id = element._id+''
 				element._id = require('mongoose').Types.ObjectId(id)
 				conditions = _id:project._id
 				mongopath = "#{path.mongo}.#{type}"
 				update = "$push":{}
 				update["$push"][mongopath] = element
+				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
 				Project.update conditions, update, {}, (err)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'

@@ -6,7 +6,10 @@ define [
 		@getDocument: (ide, doc_id) ->
 			@openDocs ||= {}
 			if !@openDocs[doc_id]?
+				sl_console.log "[getDocument] Creating new document instance for #{doc_id}"
 				@openDocs[doc_id] = new Document(ide, doc_id)
+			else
+				sl_console.log "[getDocument] Returning existing document instance for #{doc_id}"
 			return @openDocs[doc_id]
 
 		@hasUnsavedChanges: () ->
@@ -107,11 +110,14 @@ define [
 			@wantToBeJoined = false
 			@_cancelJoin()
 			if (@doc? and @doc.hasBufferedOps())
+				sl_console.log "[leave] Doc has buffered ops, pushing callback for later"
 				@_leaveCallbacks ||= []
 				@_leaveCallbacks.push callback
 			else if !@connected
+				sl_console.log "[leave] Not connected, returning now"
 				callback()
 			else
+				sl_console.log "[leave] Leaving now"
 				@_leaveDoc(callback)
 
 		flush: () ->
@@ -146,12 +152,15 @@ define [
 			if !inflightOp? and !pendingOp?
 				# there's nothing going on
 				saved = true
-			else if inflightOp == @oldInflightOp
+				sl_console.log "[pollSavedStatus] no inflight or pending ops"
+			else if inflightOp? and inflightOp == @oldInflightOp
+				# The same inflight op has been sitting unacked since we
+				# last checked.
 				saved = false
-			else if pendingOp?
-				saved = false
+				sl_console.log "[pollSavedStatus] inflight op is same as before"
 			else
 				saved = true
+				sl_console.log "[pollSavedStatus] assuming saved (inflightOp?: #{inflightOp?}, pendingOp?: #{pendingOp?})"
 
 			@oldInflightOp = inflightOp
 			return saved
@@ -172,14 +181,14 @@ define [
 				update: update
 
 			if window.disconnectOnAck? and Math.random() < window.disconnectOnAck
-				console.log "Disconnecting on ack", update
+				sl_console.log "Disconnecting on ack", update
 				window._ide.socket.socket.disconnect()
 				# Pretend we never received the ack
 				return
 
 			if window.dropAcks? and Math.random() < window.dropAcks
 				if !update.op? # Only drop our own acks, not collaborator updates
-					console.log "Simulating a lost ack", update
+					sl_console.log "Simulating a lost ack", update
 					return
 
 			if update?.doc == @doc_id and @doc?
@@ -189,15 +198,18 @@ define [
 					@leave()
 
 		_onDisconnect: () ->
+			sl_console.log '[onDisconnect] disconnecting'
 			@connected = false
 			@joined = false
 			@doc?.updateConnectionState "disconnected"
 
 		_onReconnect: () ->
+			sl_console.log "[onReconnect] reconnected (joined project)"
 			@ide.pushEvent "reconnected:afterJoinProject"
 
 			@connected = true
 			if @wantToBeJoined or @doc?.hasBufferedOps()
+				sl_console.log "[onReconnect] Rejoining (wantToBeJoined: #{@wantToBeJoined} OR hasBufferedOps: #{@doc?.hasBufferedOps()})"
 				@_joinDoc (error) =>
 					return @_onError(error) if error?
 					@doc.updateConnectionState "ok"
@@ -225,16 +237,25 @@ define [
 					callback()
 
 		_leaveDoc: (callback = (error) ->) ->
+			sl_console.log '[_leaveDoc] Sending leaveDoc request'
 			@ide.socket.emit 'leaveDoc', @doc_id, (error) =>
 				return callback(error) if error?
 				@joined = false
 				for callback in @_leaveCallbacks or []
+					sl_console.log '[_leaveDoc] Calling buffered callback', callback
 					callback(error)
 				delete @_leaveCallbacks
 				callback(error)
 
 		_cleanUp: () ->
-			delete Document.openDocs[@doc_id]
+			if Document.openDocs[@doc_id] == @
+				sl_console.log "[_cleanUp] Removing self (#{@doc_id}) from in openDocs"
+				delete Document.openDocs[@doc_id]
+			else
+				# It's possible that this instance has error, and the doc has been reloaded.
+				# This creates a new instance in Document.openDoc with the same id. We shouldn't
+				# clear it because it's not this instance.
+				sl_console.log "[_cleanUp] New instance of (#{@doc_id}) created. Not removing"
 			@_unBindFromEditorEvents()
 			@_unBindFromSocketEvents()
 
@@ -276,5 +297,9 @@ define [
 			console.error "ShareJS error", error, meta
 			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{@ide.socket.socket.transport.name}" )
 			@doc?.clearInflightAndPendingOps()
-			@_cleanUp()
 			@trigger "error", error, meta
+			# The clean up should run after the error is triggered because the error triggers a
+			# disconnect. If we run the clean up first, we remove our event handlers and miss
+			# the disconnect event, which means we try to leaveDoc when the connection comes back.
+			# This could intefere with the new connection of a new instance of this document.
+			@_cleanUp()

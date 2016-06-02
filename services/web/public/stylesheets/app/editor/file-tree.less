@@ -52,13 +52,13 @@ aside#file-tree {
 				}
 			}
 
-			i.fa-folder-open, i.fa-folder {
-				color: lighten(desaturate(@link-color, 10%), 5%);
+			i.fa {
+				color: @gray-light;
 				font-size: 14px;
 			}
 
-			i.fa-file, i.fa-image, i.fa-file-pdf-o {
-				color: @gray-light;
+			i.fa-folder-open, i.fa-folder {
+				color: lighten(desaturate(@link-color, 10%), 5%);
 				font-size: 14px;
 			}
 
@@ -112,7 +112,7 @@ aside#file-tree {
 				border-right: 4px solid @link-color;
 				font-weight: bold;
 				padding-right: 32px;
-				i.fa-folder-open, i.fa-folder, i.fa-file, i.fa-image, i.fa-file-pdf-o {
+				i.fa-folder-open, i.fa {
 					color: @link-color;
 				}
 				.entity-menu-toggle {

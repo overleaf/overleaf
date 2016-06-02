@@ -52,6 +52,7 @@ define [], () ->
 				"force new connection": true
 
 			@ide.socket.on "connect", () =>
+				sl_console.log "[socket.io connect] Connected"
 				@connected = true
 				@ide.pushEvent("connected")
 
@@ -73,6 +74,7 @@ define [], () ->
 
 
 			@ide.socket.on 'disconnect', () =>
+				sl_console.log "[socket.io disconnect] Disconnected"
 				@connected = false
 				@ide.pushEvent("disconnected")
 
@@ -97,9 +99,20 @@ define [], () ->
 				, 10 * 1000
 				
 		joinProject: () ->
+			sl_console.log "[joinProject] joining..."
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
 			}, (err, project, permissionsLevel, protocolVersion) =>
+				if err?
+					if err.message == "not authorized"
+						window.location = "/login?redir=#{encodeURI(window.location.pathname)}"
+					else
+						@ide.socket.disconnect()
+						@ide.showGenericMessageModal("Something went wrong connecting", """
+							Something went wrong connecting to your project. Please refresh is this continues to happen.
+						""")
+					return
+
 				if @$scope.protocolVersion? and @$scope.protocolVersion != protocolVersion
 					location.reload(true)
 

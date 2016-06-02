@@ -7,7 +7,7 @@ modulePath = "../../../../app/js/Features/Project/ProjectEntityHandler"
 SandboxedModule = require('sandboxed-module')
 ObjectId = require("mongoose").Types.ObjectId
 tk = require 'timekeeper'
-Errors = require "../../../../app/js/errors"
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe 'ProjectEntityHandler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'
@@ -1048,6 +1048,13 @@ describe 'ProjectEntityHandler', ->
 					@projectLocator.findElement.args[0][0].element_id.should.equal @project.rootFolder[0]._id
 					done()
 
+			it "should error if the element has no _id", (done)->
+				doc = 
+					name:"something"
+				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
+					@ProjectModel.update.called.should.equal false
+					done()
+			
 
 
 		describe "_countElements", ->

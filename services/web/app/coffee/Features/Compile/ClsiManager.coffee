@@ -5,39 +5,63 @@ request = require('request')
 Project = require("../../models/Project").Project
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
-url = require("url")
+Url = require("url")
+ClsiCookieManager = require("./ClsiCookieManager")
+
 
 module.exports = ClsiManager =
+
 	sendRequest: (project_id, options = {}, callback = (error, success) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
-				return callback(error) if error?
-				logger.log project_id: project_id, response: response, "received compile response from CLSI"
-				callback(
-					null
-					response?.compile?.status
-					ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-				)
+				if error?
+					logger.err err:error, project_id:project_id, "error sending request to clsi"
+					return callback(error)
+				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
+				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+					if err?
+						logger.err err:err, project_id:project_id, "error getting server id"
+						return callback(err)
+					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup)
-		request.del "#{compilerUrl}/project/#{project_id}", callback
+		opts =
+			url:"#{compilerUrl}/project/#{project_id}"
+			method:"DELETE"
+		ClsiManager._makeRequest project_id, opts, callback
+
+
+	_makeRequest: (project_id, opts, callback)->
+		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			opts.jar = jar
+			request opts, (err, response, body)->
+				if err?
+					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					return callback(err)
+				ClsiCookieManager.setServerId project_id, response, (err)->
+					if err?
+						logger.warn err:err, project_id:project_id, "error setting server id"
+						
+					return callback err, response, body
+
 
 	_getCompilerUrl: (compileGroup) ->
-		if compileGroup == "priority"
-			return Settings.apis.clsi_priority.url
-		else
-			return Settings.apis.clsi.url
+		return Settings.apis.clsi.url
 
 	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
-		compilerUrl = @_getCompilerUrl(compileGroup)
-		request.post {
+		compilerUrl = Settings.apis.clsi.url
+		opts = 
 			url:  "#{compilerUrl}/project/#{project_id}/compile"
 			json: req
-			jar:  false
-		}, (error, response, body) ->
+			method: "POST"
+		ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300
 				callback null, body
@@ -51,8 +75,10 @@ module.exports = ClsiManager =
 	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
 		outputFiles = []
 		for file in rawOutputFiles
+			path = Url.parse(file.url).path
+			path = path.replace("/project/#{project_id}/output/", "")
 			outputFiles.push
-				path: url.parse(file.url).path.replace("/project/#{project_id}/output/", "")
+				path: path
 				type: file.type
 				build: file.build
 		return outputFiles
@@ -86,6 +112,9 @@ module.exports = ClsiManager =
 							rootResourcePathOverride = path
 
 					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
+					if !rootResourcePath?
+						logger.warn {project_id}, "no root document found, setting to main.tex"
+						rootResourcePath = "main.tex"
 
 					for path, file of files
 						path = path.replace(/^\//, "") # Remove leading /
@@ -94,19 +123,16 @@ module.exports = ClsiManager =
 							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
 							modified: file.created?.getTime()
 
-					if !rootResourcePath?
-						callback new Error("no root document exists")
-					else
-						callback null, {
-							compile:
-								options:
-									compiler: project.compiler
-									timeout: options.timeout
-									imageName: project.imageName
-									draft: !!options.draft
-								rootResourcePath: rootResourcePath
-								resources: resources
-						}
+					callback null, {
+						compile:
+							options:
+								compiler: project.compiler
+								timeout: options.timeout
+								imageName: project.imageName
+								draft: !!options.draft
+							rootResourcePath: rootResourcePath
+							resources: resources
+					}
 
 	wordCount: (project_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
@@ -115,9 +141,10 @@ module.exports = ClsiManager =
 			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
 			if req.compile.options.imageName?
 				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
-			request.get {
+			opts =
 				url: wordcount_url
-			}, (error, response, body) ->
+				method: "GET"
+			ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 				return callback(error) if error?
 				if 200 <= response.statusCode < 300
 					callback null, body

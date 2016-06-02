@@ -7,7 +7,7 @@ SandboxedModule = require('sandboxed-module')
 events = require "events"
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
-Errors = require "../../../../app/js/errors"
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "DocumentController", ->
 	beforeEach ->

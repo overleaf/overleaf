@@ -23,7 +23,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
-				link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
 
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
 		
@@ -60,8 +62,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 				sixpackDomain: '#{settings.sixpack.domain}'
 			};
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
-			window.ab = {}
-			window.user_id = '#{getLoggedInUserId()}'
+			window.ab = {};
+			window.user_id = '#{getLoggedInUserId()}';
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
@@ -80,6 +82,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				}
 				
 	body
+
 		- if(typeof(suppressSystemMessages) == "undefined")
 			.system-messages(
 				ng-cloak
@@ -118,21 +121,14 @@ html(itemscope, itemtype='http://schema.org/Product')
 					"paths" : {
 						"moment": "libs/moment-2.7.0"
 					}
-				};	
+				};
 			script(
 				data-main=jsPath+'main.js',
 				baseurl=jsPath,
 				src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
 			)
 
-		- if (typeof(tenderUrl) != "undefined")
-			script(src="https://#{tenderUrl}/tender_widget.js" )
-			script(type="text/javascript").
-				Tender = {
-					hideToggle: true,
-					widgetToggles: $(".js-tender-widget"),
-					category: "questions"
-				};
+		include contact-us-modal
 
 
 

@@ -23,8 +23,8 @@ describe "SubscriptionController sanboxed", ->
 		@user = {email:"tom@yahoo.com"}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
 
-		@SecurityManager =
-			getCurrentUser: sinon.stub().callsArgWith(1, null, @user)
+		@AuthenticationController =
+			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
 		@SubscriptionHandler = 
 			createSubscription: sinon.stub().callsArgWith(3)
 			updateSubscription: sinon.stub().callsArgWith(3)
@@ -61,14 +61,16 @@ describe "SubscriptionController sanboxed", ->
 		@SubscriptionDomainHandler = 
 			getDomainLicencePage:sinon.stub()	
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
-			'../../managers/SecurityManager': @SecurityManager
+			'../Authentication/AuthenticationController': @AuthenticationController
 			'./SubscriptionHandler': @SubscriptionHandler
 			"./PlansLocator": @PlansLocator
 			'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder
 			"./LimitationsManager": @LimitationsManager
 			"../../infrastructure/GeoIpLookup":@GeoIpLookup
 			'./RecurlyWrapper': @RecurlyWrapper
-			"logger-sharelatex": log:->
+			"logger-sharelatex": 
+				log:->
+				warn:->
 			"settings-sharelatex": @settings
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 
@@ -97,7 +99,7 @@ describe "SubscriptionController sanboxed", ->
 		describe "with a user with a subscription", ->
 			beforeEach (done) ->
 				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
-				@user.id = @activeRecurlySubscription.account.account_code
+				@user._id = @activeRecurlySubscription.account.account_code
 				@res.callback = done
 				@SubscriptionController.editBillingDetailsPage(@req, @res)
 
@@ -108,7 +110,7 @@ describe "SubscriptionController sanboxed", ->
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
 				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
-				@res.renderedVariables.user.id.should.equal @user.id
+				@res.renderedVariables.user.id.should.equal @user._id
 
 		describe "with a user without subscription", ->
 			beforeEach (done) ->
@@ -135,14 +137,6 @@ describe "SubscriptionController sanboxed", ->
 				it "should render the new subscription page", (done)->
 					@res.render = (page, opts)=>
 						page.should.equal "subscriptions/new"
-						done()
-					@SubscriptionController.paymentPage @req, @res
-
-				it "should set the successURL", (done)->
-					@req.session._csrf = @csrfToken = "mock-csrf-token"
-					@res.render = (page, opts)=>
-						url = JSON.parse(opts.subscriptionFormOptions).successURL
-						url.should.equal("#{@settings.siteUrl}/user/subscription/create?_csrf=#{@csrfToken}")
 						done()
 					@SubscriptionController.paymentPage @req, @res
 
@@ -273,7 +267,7 @@ describe "SubscriptionController sanboxed", ->
 	describe "userCustomSubscriptionPage", ->
 		beforeEach (done) ->
 			@res.callback = done
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 			@SubscriptionController.userCustomSubscriptionPage @req, @res
 
 		it "should render the page", (done)->

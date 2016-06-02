@@ -22,4 +22,7 @@ module.exports =
 		Subscription.findOne _id:subscription_id, callback
 
 	getSubscriptionByMemberIdAndId: (user_id, subscription_id, callback)->
-		Subscription.findOne member_ids: user_id, _id:subscription_id, {_id:1}, callback
+		Subscription.findOne {member_ids: user_id, _id:subscription_id}, {_id:1}, callback
+
+	getGroupSubscriptionMemberOf: (user_id, callback)->
+		Subscription.findOne {member_ids: user_id}, {_id:1, planCode:1}, callback

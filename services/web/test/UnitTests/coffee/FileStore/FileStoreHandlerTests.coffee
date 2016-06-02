@@ -19,7 +19,7 @@ describe "FileStoreHandler", ->
 			on: (type, cb)-> 
 				if type == "end"
 					cb()
-		@readStream = {my:"readStream"}
+		@readStream = {my:"readStream", on: sinon.stub()}
 		@request = sinon.stub()
 		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
 		@handler = SandboxedModule.require modulePath, requires:
@@ -111,23 +111,56 @@ describe "FileStoreHandler", ->
 
 	describe "getFileStream", ->
 		beforeEach ->
+			@query = {}
 			@request.returns(@readStream)
 
 		it "should get the stream with the correct params", (done)->
-			@handler.getFileStream @project_id, @file_id, {}, (err, stream)=>
+			@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
 				@request.args[0][0].method.should.equal "get"
 				@request.args[0][0].uri.should.equal @handler._buildUrl()
 				done()
 
 		it "should get stream from request", (done)->
-			@handler.getFileStream @project_id, @file_id, {}, (err, stream)=>
+			@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
 				stream.should.equal @readStream
 				done()
 
 		it "builds the correct url", (done)->
-			@handler.getFileStream @project_id, @file_id, {}, (err, stream)=>
+			@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
+
+		it "should add an error handler", (done) ->
+			@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
+				stream.on.calledWith("error").should.equal true
+				done()
+
+		describe 'when range is specified in query', ->
+
+			beforeEach ->
+				@query = {'range': '0-10'}
+
+			it 'should add a range header', (done) ->
+				@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
+					@request.callCount.should.equal 1
+					headers = @request.firstCall.args[0].headers
+					expect(headers).to.have.keys('range')
+					expect(headers['range']).to.equal 'bytes=0-10'
+					done()
+
+			describe 'when range is invalid', ->
+
+				['0-', '-100', 'one-two', 'nonsense'].forEach (r) =>
+
+					beforeEach ->
+						@query = {'range': "#{r}"}
+
+					it "should not add a range header for '#{r}'", (done) ->
+						@handler.getFileStream @project_id, @file_id, @query, (err, stream)=>
+							@request.callCount.should.equal 1
+							headers = @request.firstCall.args[0].headers
+							expect(headers).to.not.have.keys('range')
+							done()
 
 	describe "copyFile", ->
 
