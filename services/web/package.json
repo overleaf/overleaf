@@ -27,11 +27,7 @@
     "http-proxy": "^1.8.1",
     "jade": "~1.3.1",
     "ldapjs": "^0.7.1",
-<<<<<<< HEAD
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
-=======
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.3.1",
->>>>>>> master
     "lynx": "0.1.1",
     "marked": "^0.3.3",
     "method-override": "^2.3.3",
