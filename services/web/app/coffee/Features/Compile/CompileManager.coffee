@@ -37,8 +37,9 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							user_id = undefined if not options.isolated
-							ClsiManager.sendRequest project_id, user_id, options, (error, status, outputFiles, clsiServerId) ->
+							# only pass user_id down to clsi if this is a per-user compile
+							compileAsUser = if options.isolated then user_id else undefined
+							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, clsiServerId, limits)
