@@ -41,12 +41,12 @@ describe "ClsiManager", ->
 					compile:
 						status: @status = "success"
 						outputFiles: [{
-							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.pdf"
+							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/build/1234/output/output.pdf"
 							path: "output.pdf"
 							type: "pdf"
 							build: 1234
 						},{
-							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/output/output.log"
+							url: "#{@settings.apis.clsi.url}/project/#{@project_id}/build/1234/output/output.log"
 							path: "output.log"
 							type: "log"
 							build: 1234
@@ -66,10 +66,12 @@ describe "ClsiManager", ->
 
 			it "should call the callback with the status and output files", ->
 				outputFiles = [{
+					url: "/project/#{@project_id}/build/1234/output/output.pdf"
 					path: "output.pdf"
 					type: "pdf"
 					build: 1234
 				},{
+					url: "/project/#{@project_id}/build/1234/output/output.log"
 					path: "output.log"
 					type: "log"
 					build: 1234

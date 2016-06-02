@@ -77,6 +77,7 @@ module.exports = ClsiManager =
 		for file in rawOutputFiles
 			outputFiles.push
 				path: file.path # the clsi is now sending this to web
+				url: Url.parse(file.url).path # the location of the file on the clsi, excluding the host part
 				type: file.type
 				build: file.build
 		return outputFiles
