@@ -1,3 +1,0 @@
-command -v mvn >/dev/null 2>&1 || sudo apt-get install maven
-mvn package &&\
-sudo mv ./target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar /usr/local/sbin/writelatex-git-bridge.jar
