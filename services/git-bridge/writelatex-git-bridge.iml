@@ -24,7 +24,7 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-http:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-util:9.3.9.v20160517" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-io:9.3.9.v20160517" level="project" />
-    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.3.1" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: com.ning:async-http-client:1.9.3" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty:3.9.5.Final" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jgit:org.eclipse.jgit:3.6.0.201412230720-r" level="project" />
