@@ -104,12 +104,12 @@ module.exports = CompileController =
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		build = req.params.build
-		user = req.params.user
-		if user? and build?
-			url = "/project/#{project_id}/user/#{user}/build/#{build}/output/#{req.params.file}"
-		else if build?
-			url = "/project/#{project_id}/build/#{build}/output/#{req.params.file}"
+		build_id = req.params.build_id
+		user_id = req.params.user_id
+		if user_id? and build_id?
+			url = "/project/#{project_id}/user/#{user_id}/build/#{build_id}/output/#{req.params.file}"
+		else if build_id?
+			url = "/project/#{project_id}/build/#{build_id}/output/#{req.params.file}"
 		else
 			url = "/project/#{project_id}/output/#{req.params.file}"
 		CompileController.proxyToClsi(project_id, url, req, res, next)

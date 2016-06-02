@@ -118,7 +118,7 @@ module.exports = class Router
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]
-					"build":      req.params[1]
+					"build_id":   req.params[1]
 					"file":       req.params[2]
 				req.params = params
 				next()
@@ -129,8 +129,8 @@ module.exports = class Router
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]
-					"user":       req.params[1]
-					"build":      req.params[2]
+					"user_id":    req.params[1]
+					"build_id":   req.params[2]
 					"file":       req.params[3]
 				req.params = params
 				next()
