@@ -29,7 +29,7 @@ public class ResourceFetcher {
         this.persistentStore = persistentStore;
     }
 
-    public RawFile get(String projectName, String url, String newPath, Repository repository, Map<String, byte[]> fetchedUrls) throws IOException, SnapshotPostException {
+    public RawFile get(String projectName, String url, String newPath, Map<String, RawFile> fileTable, Map<String, byte[]> fetchedUrls) throws IOException, SnapshotPostException {
         String path = persistentStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {
@@ -41,7 +41,7 @@ public class ResourceFetcher {
             Log.info("At (" + projectName + "): " + path);
             contents = fetchedUrls.get(url);
             if (contents == null) {
-                RawFile rawFile = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable().get(path);
+                RawFile rawFile = fileTable.get(path);
                 if (rawFile == null) {
                     Log.warn(
                         "File " + path + " was not in the current commit, or the git tree, yet path was not null. " +
