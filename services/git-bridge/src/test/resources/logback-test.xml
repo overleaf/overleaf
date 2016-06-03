@@ -1,0 +1,17 @@
+<configuration>
+    <!-- Log everything (subject to logger and root levels set below) to stdout. -->
+    <appender name="tempfile" class="ch.qos.logback.core.FileAppender">
+        <file>${java.io.tmpdir}/git-bridge-test.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{0}: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Set log levels for the application (or parts of the application). -->
+    <logger name="uk.ac.ic.wlgitbridge" level="INFO" />
+
+    <!-- The root log level determines how much our dependencies put in the logs. -->
+    <root level="WARN">
+        <appender-ref ref="tempfile" />
+    </root>
+</configuration>
