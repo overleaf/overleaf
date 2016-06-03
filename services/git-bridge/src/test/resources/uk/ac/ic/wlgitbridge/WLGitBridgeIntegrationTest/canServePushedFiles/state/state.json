@@ -1,0 +1,29 @@
+[
+	{
+		"project": "testproj",
+		"getDoc": {
+			"versionID": 1,
+			"createdAt": "2014-11-30T18:40:58.123Z",
+			"email": "test1@example.com",
+			"name": "John+1"
+		},
+		"getSavedVers": [],
+		"getForVers": [
+			{
+				"versionID": 1,
+				"srcs": [
+                    {
+                    	"content": "content\n",
+                    	"path": "main.tex"
+                    }
+	            ],
+				"atts": []
+	        }
+		],
+		"push": "success",
+		"postback": {
+			"type": "success",
+			"versionID": 1
+		}
+	}
+]
