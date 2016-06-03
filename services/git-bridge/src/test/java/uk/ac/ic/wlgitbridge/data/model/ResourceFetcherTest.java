@@ -9,7 +9,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
+import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
@@ -62,8 +64,9 @@ public class ResourceFetcherTest {
         TemporaryFolder repositoryFolder = new TemporaryFolder();
         repositoryFolder.create();
         Repository repository = new FileRepositoryBuilder().setWorkTree(repositoryFolder.getRoot()).build();
+        Map<String, RawFile> fileTable = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable();
         Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
-        resourceFetcher.get(testProjectName, testUrl, newTestPath, repository, fetchedUrls);
+        resourceFetcher.get(testProjectName, testUrl, newTestPath, fileTable, fetchedUrls);
 
         // We don't bother caching in this case, at present.
         assertEquals(0, fetchedUrls.size());

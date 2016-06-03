@@ -12,6 +12,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.data.model.db.SqlitePersistentStore;
+import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -75,6 +76,7 @@ public class DataStore {
                                           List<Snapshot> snapshots)
             throws IOException, GitAPIException, SnapshotPostException {
         for (Snapshot snapshot : snapshots) {
+            Map<String, RawFile> fileTable = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable();
             List<RawFile> files = new LinkedList<RawFile>();
             files.addAll(snapshot.getSrcs());
             Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
@@ -84,7 +86,7 @@ public class DataStore {
                                 name,
                                 snapshotAttachment.getUrl(),
                                 snapshotAttachment.getPath(),
-                                repository,
+                                fileTable,
                                 fetchedUrls
                         )
                 );
