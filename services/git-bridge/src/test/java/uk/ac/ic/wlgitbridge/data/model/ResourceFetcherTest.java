@@ -32,7 +32,7 @@ public class ResourceFetcherTest {
     @Test
     public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException, SnapshotPostException {
         final String testProjectName = "123abc";
-        final String testUrl = "http://localhost:" + mockServerRule.getHttpPort() + "/123abc";
+        final String testUrl = "http://localhost:" + mockServerRule.getPort() + "/123abc";
         final String oldTestPath = "testPath";
         final String newTestPath = "missingPath";
 

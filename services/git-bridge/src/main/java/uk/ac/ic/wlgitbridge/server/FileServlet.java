@@ -28,7 +28,7 @@ public class FileServlet extends ResourceHandler {
     public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         String method = baseRequest.getMethod();
         if (method.equals("GET")) {
-            HttpURI uri = baseRequest.getUri();
+            HttpURI uri = baseRequest.getHttpURI();
             Log.info(method + " <- " + uri);
             MultiMap<String> multimap = new MultiMap<String>();
             uri.decodeQueryTo(multimap);

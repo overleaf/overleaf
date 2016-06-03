@@ -4,21 +4,23 @@ writelatex-git-bridge
 Required
 --------
   * `maven` (for building)
-  * `jdk-7` (for compiling and running)
+  * `jdk-8` (for compiling and running)
 
 Installation
 ------------
-### Ubuntu ###
-Run `./install` to get dependencies, build, test, package, and make it a service.
 
-Use `sudo service wlgb start` and `sudo service wlgb stop` to start and stop the server.
+Install dependencies:
 
-The configuration file will be at `/etc/wlgb/config.json`.
+```
+sudo apt-get update
+sudo apt-get install -y maven
+sudo apt-get install -y openjdk-8-jdk
+sudo update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+sudo update-alternatives --set javac /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/javac
+```
 
-Run `./reinstall` to test, package and install the current version if `./install` has already been run.
+Create a config file according to the format below.
 
-Run `./uninstall` to undo what `./install` did.
-### Manually ###
 Run `mvn package` to build, test, and package it into a jar at `target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar`.
 
 Use `java -jar <path_to_jar> <path_to_config_file>` to run the server.
@@ -26,7 +28,7 @@ Use `java -jar <path_to_jar> <path_to_config_file>` to run the server.
 Runtime Configuration
 ---------------------
 
-The configuration file is in `.json` format. There is an example at `bin/config.json`.
+The configuration file is in `.json` format.
 
     {
         "port" (int): the port number,
