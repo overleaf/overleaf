@@ -32,7 +32,7 @@ public class PostbackHandler extends AbstractHandler {
             if (request.getMethod().equals("POST") && target.endsWith("postback")) {
                 response.setContentType("application/json");
                 String contents = Util.getContentsOfReader(request.getReader());
-                String[] parts = request.getRequestURI().split("/");
+                String[] parts = target.split("/");
                 if (parts.length < 4) {
                     throw new ServletException();
                 }
