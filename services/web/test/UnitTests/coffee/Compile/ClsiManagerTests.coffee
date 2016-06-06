@@ -12,6 +12,8 @@ describe "ClsiManager", ->
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 			setServerId: sinon.stub().callsArgWith(2)
 			_getServerId:sinon.stub()
+		@ClsiFormatChecker =
+			checkRecoursesForProblems:sinon.stub().callsArgWith(1)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
 				apis:
@@ -27,6 +29,7 @@ describe "ClsiManager", ->
 			"./ClsiCookieManager": @ClsiCookieManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
+			"./ClsiFormatChecker": @ClsiFormatChecker
 		@project_id = "project-id"
 		@callback = sinon.stub()
 
@@ -317,20 +320,6 @@ describe "ClsiManager", ->
 			@ClsiManager._makeRequest @project_id, @opts, =>
 				@ClsiCookieManager.setServerId.calledWith(@project_id, @response).should.equal true
 				done()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

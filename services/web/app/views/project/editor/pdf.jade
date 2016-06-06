@@ -154,6 +154,27 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-if="settings.pdfViewer == 'native'"
 			)
 
+		.pdf-validation-problems(ng-switch-when="validation-problems")
+
+			.alert.alert-danger(ng-show="pdf.validation.duplicatePaths")
+				strong #{translate("latex_error")}
+				span #{translate("duplicate_paths_found")}
+
+
+			.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
+				strong #{translate("project_too_large")} 
+				div #{translate("project_too_large_please_reduce")}
+				div
+					li(ng-repeat="entry in pdf.validation.sizeCheck.resources") {{ '/'+entry['path'] }} - {{entry['kbSize']}}kb
+	
+			.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
+				div
+					strong #{translate("conflicting_paths_found")}
+				div #{translate("following_paths_conflict")}
+				div
+					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
+
+
 		.pdf-errors(ng-switch-when="errors")
 	
 			.alert.alert-danger(ng-show="pdf.error")
