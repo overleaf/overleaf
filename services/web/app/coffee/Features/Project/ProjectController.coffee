@@ -250,6 +250,7 @@ module.exports = ProjectController =
 						featureSwitches: user.featureSwitches
 						features: user.features
 						refProviders: user.refProviders
+						betaProgram: user.betaProgram
 					}
 					userSettings: {
 						mode  : user.ace.mode

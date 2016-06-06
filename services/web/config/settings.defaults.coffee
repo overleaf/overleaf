@@ -153,7 +153,6 @@ module.exports =
 		compileGroup: "standard"
 		references: true
 		templates: true
-		betaProgram: false
 
 	plans: plans = [{
 		planCode: "personal"
