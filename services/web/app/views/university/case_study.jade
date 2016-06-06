@@ -1,0 +1,19 @@
+extends ../layout
+
+block content
+	.masthead
+		.container
+			.row
+				.col-md-12
+					h1  !{viewData.title}
+			.row.row-spaced
+
+	.pattern-container
+		.content
+			.container
+				.row
+					.col-md-10.col-md-offset-1
+						.card
+							.row
+								| !{viewData.html}
+

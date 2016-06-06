@@ -5,6 +5,12 @@ _ = require("underscore")
 ErrorController = require "../Errors/ErrorController"
 StaticPageHelpers = require("./StaticPageHelpers")
 sanitize = require('sanitizer')
+Settings = require("settings-sharelatex")
+contentful = require('contentful')
+marked = require("marked")
+
+
+
 
 module.exports = UniversityController = 
 
@@ -17,7 +23,7 @@ module.exports = UniversityController =
 		logger.log url:url, "proxying request to university api"
 		request.get universityUrl, (err, r, data)->
 			if r?.statusCode == 404
-				return ErrorController.notFound(req, res, next)
+				return UniversityController.getContentfulPage(req, res, next)
 			if err?
 				return res.send 500
 			data = data.trim()
@@ -38,3 +44,27 @@ module.exports = UniversityController =
 		upstream.on "error", (error) ->
 			logger.error err: error, "university proxy error"
 		upstream.pipe res
+
+	getContentfulPage: (req, res, next)->
+		console.log Settings.contentful
+		if !Settings.contentful?.uni?.space? and !Settings.contentful?.uni?.accessToken?
+			return ErrorController.notFound(req, res, next)
+
+		client = contentful.createClient({
+			space: Settings.contentful?.uni?.space
+			accessToken: Settings.contentful?.uni?.accessToken
+		})
+
+		url = req.url?.toLowerCase().replace("/university/","")
+		client.getEntries({content_type: 'caseStudy', 'fields.slug':url})
+			.catch (e)->
+				return res.send 500
+			.then (entry)->
+				if !entry? or !entry.items? or entry.items.length == 0
+					return ErrorController.notFound(req, res, next)
+				viewData = entry.items[0].fields
+				viewData.html = marked(viewData.content)
+				res.render "university/case_study", viewData:viewData
+
+
+
