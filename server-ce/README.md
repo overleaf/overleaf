@@ -53,6 +53,10 @@ documents.
 An API for performing CRUD (Create, Read, Update and Delete) operations on text files
 stored in ShareLaTeX.
 
+### [realtime](https://github.com/sharelatex/real-time-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/real-time-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/real-time-sharelatex)
+
+The websocket process clients connect to
+
 ### [filestore](https://github.com/sharelatex/filestore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/filestore-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/filestore-sharelatex)
 
 An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
