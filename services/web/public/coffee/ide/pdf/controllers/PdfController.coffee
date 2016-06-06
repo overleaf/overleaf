@@ -50,8 +50,9 @@ define [
 
 			# make a cache to look up files by name
 			fileByPath = {}
-			for file in response.outputFiles
-				fileByPath[file.path] = file
+			if response?.outputFiles?
+				for file in response?.outputFiles
+					fileByPath[file.path] = file
 
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
