@@ -9,6 +9,22 @@ block content
 						.page-header
 							h1 Admin Panel
 						tabset(ng-cloak)
+							tab(heading="System Messages")
+								each message in systemMessages 
+									.alert.alert-info.row-spaced !{message.content}
+								hr
+								form(enctype='multipart/form-data', method='post', action='/admin/messages')
+									input(name="_csrf", type="hidden", value=csrfToken)
+									.form-group
+										label(for="content")
+										input.form-control(name="content", type="text", placeholder="Message...", required)
+									button.btn.btn-primary(type="submit") Post Message
+								hr
+								form(enctype='multipart/form-data', method='post', action='/admin/messages/clear')
+									input(name="_csrf", type="hidden", value=csrfToken)
+									button.btn.btn-danger(type="submit") Clear all messages
+
+
 							tab(heading="Open Sockets")
 								.row-spaced
 									ul
@@ -17,7 +33,7 @@ block content
 												ul
 													-each agent in agents
 														li #{agent}
-														
+
 							tab(heading="Close Editor")
 								.row-spaced
 									form(enctype='multipart/form-data', method='post',action='/admin/closeEditor')
@@ -66,19 +82,6 @@ block content
 										.form-group
 											button.btn-primary.btn(type='submit') Poll
 										
-							tab(heading="System Messages")
-								each message in systemMessages 
-									.alert.alert-info.row-spaced !{message.content}
-								hr
-								form(enctype='multipart/form-data', method='post', action='/admin/messages')
-									input(name="_csrf", type="hidden", value=csrfToken)
-									.form-group
-										label(for="content")
-										input.form-control(name="content", type="text", placeholder="Message...", required)
-									button.btn.btn-primary(type="submit") Post Message
-								hr
-								form(enctype='multipart/form-data', method='post', action='/admin/messages/clear')
-									input(name="_csrf", type="hidden", value=csrfToken)
-									button.btn.btn-danger(type="submit") Clear all messages
+
 
 
