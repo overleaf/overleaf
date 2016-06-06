@@ -57,7 +57,9 @@ describe "UserController", ->
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"./UserHandler":@UserHandler
 			"settings-sharelatex": @settings
-			"logger-sharelatex": {log:->}
+			"logger-sharelatex": 
+				log:->
+				err:->
 			"../../infrastructure/Metrics": inc:->
 
 		@req = 
@@ -65,6 +67,7 @@ describe "UserController", ->
 				destroy:->
 				user :
 					_id : @user_id
+					email:"old@something.com"
 			body:{}
 		@res =
 			send: sinon.stub()
@@ -151,6 +154,20 @@ describe "UserController", ->
 			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal true
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should update the email on the session", (done)->
+			@req.body.email = @newEmail.toUpperCase()
+			@UserUpdater.changeEmailAddress.callsArgWith(2)
+			callcount = 0
+			@User.findById = (id, cb)=>
+				if ++callcount == 2
+					@user.email = @newEmail
+				cb(null, @user)
+			@res.sendStatus = (code)=>
+				code.should.equal 200
+				@req.session.user.email.should.equal @newEmail
 				done()
 			@UserController.updateUserSettings @req, @res
 

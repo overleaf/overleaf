@@ -72,6 +72,7 @@ module.exports = UserController =
 							if err?
 								logger.err err:err, user_id:user_id, "error getting user for email update"
 								return res.send 500
+							req.session.user.email = user.email
 							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
 								if err?
 									logger.err err:err, "error populateGroupLicenceInvite"
@@ -127,6 +128,5 @@ module.exports = UserController =
 					  type:'error'
 					  text:'Your old password is wrong'
 
-	changeEmailAddress: (req, res)->
 
 
