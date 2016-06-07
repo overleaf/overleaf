@@ -1,0 +1,30 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container.beta-opt-in-wrapper
+			.row
+				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+					.card
+						.page-header.text-centered
+							h1 
+								| #{translate("sharelatex_beta_program")}
+						.beta-opt-in
+							.container-fluid
+								.row
+									.col-md-12
+										p.text-centered #{translate("beta_program_benefits")}
+								.row.text-centered
+									.col-md-12
+										if user.betaProgram
+											p #{translate("beta_program_already_participating")}
+										else
+											form(method="post", action="/beta/opt-in", novalidate)
+												.form-group
+													input(type="hidden", name="_csrf", value=csrfToken)
+													button.btn.btn-lg.btn-primary(
+														type="submit"
+													)
+														span #{translate("beta_program_opt_in_action")}
+														span.beta-feature-badge(tooltip="Beta Feature" tooltip-placement="right") β
+											
