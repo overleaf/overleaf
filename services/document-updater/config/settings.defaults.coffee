@@ -34,9 +34,10 @@ module.exports =
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 		}, {
-			port: "6380"
-			host: "localhost"
-			password:""
+			cluster: [{
+				port: "7000"
+				host: "localhost"
+			}]
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:{#{doc_id}}"
 				docLines: ({doc_id}) -> "doclines:{#{doc_id}}"

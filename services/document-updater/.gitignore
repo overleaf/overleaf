@@ -46,3 +46,8 @@ test/acceptance/js/*
 forever/
 
 **.swp
+
+# Redis cluster
+**/appendonly.aof
+**/dump.rdb
+**/nodes.conf

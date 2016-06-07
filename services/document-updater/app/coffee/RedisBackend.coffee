@@ -1,5 +1,4 @@
 Settings = require "settings-sharelatex"
-redis = require("redis-sharelatex")
 async = require "async"
 
 class Client
@@ -78,7 +77,12 @@ module.exports =
 			client_configs.primary = true
 			client_configs = [client_configs]
 		clients = client_configs.map (config) ->
-			rclient: redis.createClient(config)
+			if config.cluster?
+				Redis = require("ioredis")
+				rclient = new Redis.Cluster(config.cluster)
+			else
+				rclient = require("redis-sharelatex").createClient(config)
+			rclient: rclient
 			key_schema: config.key_schema
 			primary: config.primary
 		return new Client(clients)
