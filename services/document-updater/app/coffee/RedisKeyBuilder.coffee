@@ -1,24 +1,40 @@
-PROJECTKEY = "ProjectId"
-BLOCKINGKEY = "Blocking"
-CHANGEQUE = "ChangeQue"
-DOCSINPROJECT = "DocsIn"
-PENDINGUPDATESKEY = "PendingUpdates"
-DOCLINES = "doclines"
-DOCOPS = "DocOps"
-DOCVERSION = "DocVersion"
-DOCSWITHHISTORYOPS = "DocsWithHistoryOps"
-UNCOMPRESSED_HISTORY_OPS = "UncompressedHistoryOps"
-
-module.exports =
-	docLines : (op)-> DOCLINES+":"+op.doc_id
-	docOps : (op)-> DOCOPS+":"+op.doc_id
-	uncompressedHistoryOp: (op) -> UNCOMPRESSED_HISTORY_OPS + ":" + op.doc_id
-	docVersion : (op)-> DOCVERSION+":"+op.doc_id
-	projectKey : (op)-> PROJECTKEY+":"+op.doc_id
-	blockingKey : (op)-> BLOCKINGKEY+":"+op.doc_id
-	changeQue : (op)-> CHANGEQUE+":"+op.project_id
-	docsInProject : (op)-> DOCSINPROJECT+":"+op.project_id
-	pendingUpdates : (op)-> PENDINGUPDATESKEY+":"+op.doc_id
-	combineProjectIdAndDocId: (project_id, doc_id) -> "#{project_id}:#{doc_id}"
-	splitProjectIdAndDocId: (project_and_doc_id) -> project_and_doc_id.split(":")
-	docsWithHistoryOps: (op) -> DOCSWITHHISTORYOPS + ":" + op.project_id
+# The default key schema looks like:
+# 	doclines:foo
+# 	DocVersion:foo
+# but if we use redis cluster, we want all 'foo' keys to map to the same
+# node, so we must use:
+# 	doclines:{foo}
+# 	DocVersion:{foo}
+# since redis hashes on the contents of {...}.
+# 
+# To transparently support different key schemas for different clients
+# (potential writing/reading to both a cluster and single instance 
+# while we migrate), instead of keys, we now pass around functions which
+# will build the key when passed a schema.
+# 
+# E.g.
+# key_schema = Settings.redis.keys
+# key_schema == { docLines: ({doc_id}) -> "doclines:#{doc_id}", ... }
+# key_builder = RedisKeyBuilder.docLines({doc_id: "foo"})
+# key_builder == (key_schema) -> key_schema.docLines({doc_id: "foo"})
+# key = key_builder(key_schema)
+# key == "doclines:foo"
+module.exports = RedisKeyBuilder =
+	blockingKey: ({doc_id}) ->
+		return (key_schema) -> key_schema.blockingKey({doc_id})
+	docLines: ({doc_id}) ->
+		return (key_schema) -> key_schema.docLines({doc_id})
+	docOps: ({doc_id}) ->
+		return (key_schema) -> key_schema.docOps({doc_id})
+	docVersion: ({doc_id}) ->
+		return (key_schema) -> key_schema.docVersion({doc_id})
+	projectKey: ({doc_id}) ->
+		return (key_schema) -> key_schema.projectKey({doc_id})
+	uncompressedHistoryOp: ({doc_id}) ->
+		return (key_schema) -> key_schema.uncompressedHistoryOp({doc_id})
+	pendingUpdates: ({doc_id}) ->
+		return (key_schema) -> key_schema.pendingUpdates({doc_id})
+	docsInProject: ({project_id}) ->
+		return (key_schema) -> key_schema.docsInProject({project_id})
+	docsWithHistoryOps: ({project_id}) ->
+		return (key_schema) -> key_schema.docsWithHistoryOps({project_id})

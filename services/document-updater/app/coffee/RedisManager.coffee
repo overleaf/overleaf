@@ -1,15 +1,11 @@
 Settings = require('settings-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
 async = require('async')
+rclient = require("./RedisBackend").createClient()
 _ = require('underscore')
 keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
-
-redisOptions = _.clone(Settings.redis.web)
-redisOptions.return_buffers = true
 
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
@@ -140,16 +136,6 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			version = parseInt(version, 10)
 			callback null, version
-
-	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error, length) ->) ->
-		jsonOp = JSON.stringify op
-		async.parallel [
-			(cb) -> rclient.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp, cb
-			(cb) -> rclient.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id, cb
-		], (error, results) ->
-			return callback(error) if error?
-			[length, _] = results
-			callback(error, length)
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback

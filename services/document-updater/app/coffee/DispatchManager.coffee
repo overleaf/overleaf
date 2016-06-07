@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
-Keys = require('./RedisKeyBuilder')
+Keys = require('./UpdateKeys')
 redis = require("redis-sharelatex")
 
 UpdateManager = require('./UpdateManager')

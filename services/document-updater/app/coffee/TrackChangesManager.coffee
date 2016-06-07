@@ -1,8 +1,9 @@
 settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
-RedisManager = require "./RedisManager"
-crypto = require("crypto")
+redis = require("redis-sharelatex")
+rclient = redis.createClient(settings.redis.web)
+async = require "async"
 
 module.exports = TrackChangesManager =
 	flushDocChanges: (project_id, doc_id, callback = (error) ->) ->
@@ -23,8 +24,13 @@ module.exports = TrackChangesManager =
 
 	FLUSH_EVERY_N_OPS: 50
 	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
-		RedisManager.pushUncompressedHistoryOp project_id, doc_id, op, (error, length) ->
+		jsonOp = JSON.stringify op
+		async.parallel [
+			(cb) -> rclient.rpush "UncompressedHistoryOps:#{doc_id}", jsonOp, cb
+			(cb) -> rclient.sadd "DocsWithHistoryOps:#{project_id}", doc_id, cb
+		], (error, results) ->
 			return callback(error) if error?
+			[length, _] = results
 			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.

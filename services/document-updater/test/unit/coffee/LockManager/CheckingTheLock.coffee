@@ -3,7 +3,6 @@ sinon = require('sinon')
 assert = require('assert')
 path = require('path')
 modulePath = path.join __dirname, '../../../../app/js/LockManager.js'
-keys = require(path.join __dirname, '../../../../app/js/RedisKeyBuilder.js')
 project_id = 1234
 doc_id     = 5678
 blockingKey = "Blocking:#{doc_id}"
@@ -15,8 +14,9 @@ describe 'LockManager - checking the lock', ()->
 	
 	mocks =
 		"logger-sharelatex": log:->
-
-		"redis-sharelatex":
+		"./RedisKeyBuilder":
+			blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+		"./RedisBackend":
 			createClient : ()->
 				auth:->
 				exists: existsStub

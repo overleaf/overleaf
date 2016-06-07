@@ -12,7 +12,15 @@ describe "RedisManager", ->
 			exec: sinon.stub()
 		@rclient.multi = () => @rclient
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": createClient: () => @rclient
+			"./RedisBackend": createClient: () => @rclient
+			"./RedisKeyBuilder":
+				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+				docLines: ({doc_id}) -> "doclines:#{doc_id}"
+				docOps: ({doc_id}) -> "DocOps:#{doc_id}"
+				docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
+				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 			"./Metrics": @metrics =
 				inc: sinon.stub()
@@ -170,28 +178,6 @@ describe "RedisManager", ->
 
 			it "should log out the problem", ->
 				@logger.warn.called.should.equal true
-
-	describe "pushUncompressedHistoryOp", ->
-		beforeEach (done) ->
-			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.rpush = sinon.stub().yields(null, @length = 42)
-			@rclient.sadd = sinon.stub().yields()
-			@RedisManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, (args...) =>
-				@callback(args...)
-				done()
-		
-		it "should push the doc op into the doc ops list", ->
-			@rclient.rpush
-				.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@op))
-				.should.equal true
-
-		it "should add the doc_id to the set of which records the project docs", ->
-			@rclient.sadd
-				.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
-				.should.equal true
-
-		it "should call the callback with the length", ->
-			@callback.calledWith(null, @length).should.equal true
 
 	describe "getUpdatesLength", ->
 		beforeEach ->

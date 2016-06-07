@@ -1,4 +1,4 @@
-Keys = require('./RedisKeyBuilder')
+Keys = require('./UpdateKeys')
 Settings = require('settings-sharelatex')
 DocumentManager = require "./DocumentManager"
 RedisManager = require "./RedisManager"

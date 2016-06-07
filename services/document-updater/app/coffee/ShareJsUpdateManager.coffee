@@ -3,7 +3,7 @@ ShareJsDB = require "./ShareJsDB"
 async = require "async"
 logger = require "logger-sharelatex"
 Settings = require('settings-sharelatex')
-Keys = require "./RedisKeyBuilder"
+Keys = require "./UpdateKeys"
 {EventEmitter} = require "events"
 util = require "util"
 
