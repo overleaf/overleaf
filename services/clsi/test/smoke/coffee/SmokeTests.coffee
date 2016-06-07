@@ -6,9 +6,7 @@ Settings = require "settings-sharelatex"
 
 buildUrl = (path) -> "http://#{Settings.internal.clsi.host}:#{Settings.internal.clsi.port}/#{path}"
 
-random = require("crypto").randomBytes(4).toString("hex")
-
-url = buildUrl("project/smoketest-#{random}/compile")
+url = buildUrl("project/smoketest-#{process.pid}/compile")
 
 describe "Running a compile", ->
 	before (done) ->
