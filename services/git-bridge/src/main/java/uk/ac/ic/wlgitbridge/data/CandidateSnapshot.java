@@ -72,7 +72,7 @@ public class CandidateSnapshot {
     }
 
     public JsonElement getJsonRepresentation(String postbackKey) {
-        String projectURL = Util.getPostbackURL() + projectName;
+        String projectURL = Util.getPostbackURL() + "api/" + projectName;
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("latestVerId", currentVersion);
         jsonObject.add("files", getFilesAsJson(projectURL, postbackKey));

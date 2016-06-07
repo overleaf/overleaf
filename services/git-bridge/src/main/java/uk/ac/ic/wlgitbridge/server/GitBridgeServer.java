@@ -2,8 +2,7 @@ package uk.ac.ic.wlgitbridge.server;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.HandlerCollection;
-import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.server.handler.*;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -82,13 +81,23 @@ public class GitBridgeServer {
     }
 
     private void configureJettyServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
-        HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers(new Handler[] {
-                initResourceHandler(),
-                new PostbackHandler(bridgeAPI),
-                initGitHandler(config)
-        });
+        HandlerCollection handlers = new HandlerList();
+        handlers.addHandler(initApiHandler());
+        handlers.addHandler(initGitHandler(config));
         jettyServer.setHandler(handlers);
+    }
+
+    private Handler initApiHandler() {
+        ContextHandler api = new ContextHandler();
+        api.setContextPath("/api");
+
+        HandlerCollection handlers = new HandlerList();
+        handlers.addHandler(initResourceHandler());
+        handlers.addHandler(new PostbackHandler(bridgeAPI));
+        handlers.addHandler(new DefaultHandler());
+
+        api.setHandler(handlers);
+        return api;
     }
 
     private Handler initGitHandler(Config config) throws ServletException, InvalidRootDirectoryPathException {
@@ -107,9 +116,8 @@ public class GitBridgeServer {
     }
 
     private Handler initResourceHandler() {
-        ResourceHandler resourceHandler = new FileServlet(bridgeAPI);
+        ResourceHandler resourceHandler = new FileHandler(bridgeAPI);
         resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
         return resourceHandler;
     }
-
 }

@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge;
 
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -95,6 +98,9 @@ public class WLGitBridgeIntegrationTest {
         put("pushSucceedsAfterRemovingInvalidFiles", new HashMap<String, SnapshotAPIState>() {{
             put("invalidState", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSucceedsAfterRemovingInvalidFiles/invalidState/state.json")).build());
             put("validState", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSucceedsAfterRemovingInvalidFiles/validState/state.json")).build());
+        }});
+        put("canServePushedFiles", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canServePushedFiles/state/state.json")).build());
         }});
     }};
 
@@ -532,6 +538,59 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
         assertEquals(0, pushExitCode);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/pushSucceedsAfterRemovingInvalidFiles/validState/testproj"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void canServePushedFiles() throws IOException, ExecutionException, InterruptedException {
+        //
+        // I don't think we can test this completely without some changes to the mock server, because we have no way
+        // of pausing the test while the push is in progress. Once the push is over, the file isn't actually there for
+        // us to fetch any more. We can however test the access and error conditions, which comprise most of the logic.
+        //
+        int gitBridgePort = 33873;
+        int mockServerPort = 3873;
+
+        MockSnapshotServer server = new MockSnapshotServer(
+                mockServerPort, getResource("/canServePushedFiles").toFile());
+        server.start();
+        server.setState(states.get("canServePushedFiles").get("state"));
+
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+
+        File dir = folder.newFolder();
+        File testprojDir = cloneRepository("testproj", gitBridgePort, dir);
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canServePushedFiles/state/testproj"), testprojDir.toPath()));
+        runtime.exec("touch push.tex", null, testprojDir).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        assertEquals(0, pushExitCode);
+
+        // With no key, we should get a 404.
+        String url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex";
+        Response response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(404, response.getStatusCode());
+
+        // With an invalid project and no key, we should get a 404.
+        url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex";
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(404, response.getStatusCode());
+
+        // With a bad key for a valid project, we should get a 404.
+        url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex?key=notavalidkey";
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(404, response.getStatusCode());
+
+        // With a bad key for an invalid project, we should get a 404.
+        url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex?key=notavalidkey";
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(404, response.getStatusCode());
+
+        wlgb.stop();
     }
 
     private File cloneRepository(String repositoryName, int port, File dir) throws IOException, InterruptedException {

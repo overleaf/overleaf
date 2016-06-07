@@ -78,7 +78,12 @@ public class PostbackManager {
 
     public void checkPostbackKey(String projectName, String postbackKey)
             throws InvalidPostbackKeyException {
-        postbackContentsTable.get(projectName).checkPostbackKey(postbackKey);
+        PostbackPromise postbackPromise = postbackContentsTable.get(projectName);
+        if (postbackPromise == null) {
+            throw new InvalidPostbackKeyException(); // project not found; can't check key
+        } else {
+            postbackPromise.checkPostbackKey(postbackKey);
+        }
     }
 
     private String randomString() {
