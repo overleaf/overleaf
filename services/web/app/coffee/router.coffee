@@ -38,6 +38,7 @@ InactiveProjectController = require("./Features/InactiveData/InactiveProjectCont
 ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
+BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
