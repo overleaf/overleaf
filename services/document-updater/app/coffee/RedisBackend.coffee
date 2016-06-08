@@ -92,7 +92,7 @@ for command, key_pos of COMMANDS
 				key = key_builder(client.key_schema)
 				args_with_key = args.slice(0)
 				args_with_key[key_pos] = key
-				client.rclient[command] key, args...
+				client.rclient[command] args_with_key...
 
 compareResults = (results) ->
 	return if results.length < 2
