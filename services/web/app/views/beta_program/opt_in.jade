@@ -14,6 +14,15 @@ block content
 								.row
 									.col-md-12
 										p.text-centered #{translate("beta_program_benefits")}
+										p.text-centered
+											| #{translate("beta_program_badge_description")}
+											span.beta-feature-badge
+										p.text-centered
+											| #{translate("beta_program_current_beta_features_description")}
+											ul.list-unstyled.text-center
+												li 
+													i.fa.fa-fw.fa-book
+													| &nbsp;#{translate("mendeley_integration")}
 								.row.text-centered
 									.col-md-12
 										if user.betaProgram
@@ -28,5 +37,4 @@ block content
 														type="submit"
 													)
 														span #{translate("beta_program_opt_in_action")}
-														span.beta-feature-badge
 											
