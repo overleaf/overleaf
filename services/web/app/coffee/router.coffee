@@ -38,6 +38,7 @@ InactiveProjectController = require("./Features/InactiveData/InactiveProjectCont
 ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
+BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -196,6 +197,9 @@ module.exports = class Router
 
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
+
+		webRouter.get "/beta/opt-in",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
+		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
 
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
