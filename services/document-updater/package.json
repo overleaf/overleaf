@@ -7,7 +7,7 @@
     "url": "https://github.com/sharelatex/document-updater-sharelatex.git"
   },
   "dependencies": {
-    "async": "^2.0.0-rc.5",
+    "async": "2.0.0-rc.5",
     "coffee-script": "1.4.0",
     "express": "3.3.4",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
