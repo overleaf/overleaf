@@ -15,40 +15,37 @@ redisOptions.return_buffers = true
 minutes = 60 # seconds for Redis expire
 
 module.exports = RedisManager =
-	putDocInMemory : (project_id, doc_id, docLines, version, callback)->
+	putDocInMemory : (project_id, doc_id, docLines, version, _callback)->
 		timer = new metrics.Timer("redis.put-doc")
-		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
-		async.parallel [
-			(cb) ->
-				multi = rclient.multi()
-				multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
-				multi.set keys.projectKey({doc_id:doc_id}), project_id
-				multi.set keys.docVersion(doc_id:doc_id), version
-				multi.exec cb
-			(cb) ->
-				rclient.sadd keys.docsInProject(project_id:project_id), doc_id, cb
-		], (err) ->
+		callback = (error) ->
 			timer.done()
-			callback(err)
+			_callback(error)
+		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
+		multi = rclient.multi()
+		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+		multi.set keys.projectKey({doc_id:doc_id}), project_id
+		multi.set keys.docVersion(doc_id:doc_id), version
+		multi.exec (error) ->
+			return callback(error) if error?
+			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
 
-	removeDocFromMemory : (project_id, doc_id, callback)->
+	removeDocFromMemory : (project_id, doc_id, _callback)->
 		logger.log project_id:project_id, doc_id:doc_id, "removing doc from redis"
-		async.parallel [
-			(cb) ->
-				multi = rclient.multi()
-				multi.del keys.docLines(doc_id:doc_id)
-				multi.del keys.projectKey(doc_id:doc_id)
-				multi.del keys.docVersion(doc_id:doc_id)
-				multi.exec cb
-			(cb) ->
-				rclient.srem keys.docsInProject(project_id:project_id), doc_id, cb
-		], (err) ->
+		callback = (err) ->
 			if err?
 				logger.err project_id:project_id, doc_id:doc_id, err:err, "error removing doc from redis"
-				callback(err, null)
+				_callback(err)
 			else
 				logger.log project_id:project_id, doc_id:doc_id, "removed doc from redis"
-				callback()
+				_callback()
+
+		multi = rclient.multi()
+		multi.del keys.docLines(doc_id:doc_id)
+		multi.del keys.projectKey(doc_id:doc_id)
+		multi.del keys.docVersion(doc_id:doc_id)
+		multi.exec (error) ->
+			return callback(error) if error?
+			rclient.srem keys.docsInProject(project_id:project_id), doc_id, callback
 
 	getDoc : (doc_id, callback = (error, lines, version) ->)->
 		timer = new metrics.Timer("redis.get-doc")
@@ -140,16 +137,6 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			version = parseInt(version, 10)
 			callback null, version
-
-	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error, length) ->) ->
-		jsonOp = JSON.stringify op
-		async.parallel [
-			(cb) -> rclient.rpush keys.uncompressedHistoryOp(doc_id: doc_id), jsonOp, cb
-			(cb) -> rclient.sadd keys.docsWithHistoryOps(project_id: project_id), doc_id, cb
-		], (error, results) ->
-			return callback(error) if error?
-			[length, _] = results
-			callback(error, length)
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback

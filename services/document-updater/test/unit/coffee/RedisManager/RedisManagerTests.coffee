@@ -171,28 +171,6 @@ describe "RedisManager", ->
 			it "should log out the problem", ->
 				@logger.warn.called.should.equal true
 
-	describe "pushUncompressedHistoryOp", ->
-		beforeEach (done) ->
-			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.rpush = sinon.stub().yields(null, @length = 42)
-			@rclient.sadd = sinon.stub().yields()
-			@RedisManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, (args...) =>
-				@callback(args...)
-				done()
-		
-		it "should push the doc op into the doc ops list", ->
-			@rclient.rpush
-				.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@op))
-				.should.equal true
-
-		it "should add the doc_id to the set of which records the project docs", ->
-			@rclient.sadd
-				.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
-				.should.equal true
-
-		it "should call the callback with the length", ->
-			@callback.calledWith(null, @length).should.equal true
-
 	describe "getUpdatesLength", ->
 		beforeEach ->
 			@rclient.llen = sinon.stub().yields(null, @length = 3)
