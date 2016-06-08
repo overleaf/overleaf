@@ -357,3 +357,23 @@ module.exports = (grunt) ->
 						
 					"""
 					done()
+
+	grunt.registerTask 'delete-user', "deletes a user and all their data", () ->
+		done = @async()
+		email = grunt.option("email")
+		if !email?
+			console.error "Usage: grunt delete-user --email joe@example.com"
+			process.exit(1)
+		settings = require "settings-sharelatex"
+		UserGetter = require "./app/js/Features/User/UserGetter"
+		UserDeleter = require "./app/js/Features/User/UserDeleter"
+		UserGetter.getUser email:email, (error, user) ->
+			if error?
+				throw error
+			if !user?
+				console.log("user #{email} not in database, potentially already deleted")
+				return done()
+			UserDeleter.deleteUser user._id, (err)->
+				if err?
+					throw err
+				done()
