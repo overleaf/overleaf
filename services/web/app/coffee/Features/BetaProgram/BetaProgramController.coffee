@@ -14,7 +14,7 @@ module.exports = BetaProgramController =
 		BetaProgramHandler.optIn user_id, (err) ->
 			if err
 				return next(err)
-			return res.redirect "/"
+			return res.redirect "/beta/opt-in"
 
 	optInPage: (req, res, next)->
 		user_id = req.session?.user?._id

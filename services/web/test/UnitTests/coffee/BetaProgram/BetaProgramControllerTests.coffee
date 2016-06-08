@@ -44,9 +44,10 @@ describe "BetaProgramController", ->
 		beforeEach ->
 			@BetaProgramHandler.optIn.callsArgWith(1, null)
 
-		it "should redirect to '/'", () ->
+		it "should redirect to '/beta/opt-in'", () ->
 			@BetaProgramController.optIn @req, @res, @next
 			@res.redirect.callCount.should.equal 1
+			@res.redirect.firstCall.args[0].should.equal "/beta/opt-in"
 
 		it "should not call next with an error", () ->
 			@BetaProgramController.optIn @req, @res, @next
