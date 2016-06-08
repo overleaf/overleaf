@@ -25,10 +25,10 @@ module.exports = TrackChangesManager =
 	FLUSH_EVERY_N_OPS: 50
 	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
 		jsonOp = JSON.stringify op
-		async.parallel [
-			(cb) -> rclient.rpush "UncompressedHistoryOps:#{doc_id}", jsonOp, cb
-			(cb) -> rclient.sadd "DocsWithHistoryOps:#{project_id}", doc_id, cb
-		], (error, results) ->
+		multi = rclient.multi()
+		multi.rpush "UncompressedHistoryOps:#{doc_id}", jsonOp
+		multi.sadd "DocsWithHistoryOps:#{project_id}", doc_id
+		multi.exec (error, results) ->
 			return callback(error) if error?
 			[length, _] = results
 			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0

@@ -43,8 +43,10 @@ describe "TrackChangesManager", ->
 	describe "pushUncompressedHistoryOp", ->
 		beforeEach ->
 			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.rpush = sinon.stub().yields(null, @length = 42)
-			@rclient.sadd = sinon.stub().yields()
+			@rclient.multi = sinon.stub().returns(@multi = {})
+			@multi.rpush = sinon.stub()
+			@multi.sadd = sinon.stub()
+			@multi.exec = sinon.stub().yields(null, [@length = 42, "foo"])
 			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
 
 		describe "pushing the op", ->
@@ -52,10 +54,10 @@ describe "TrackChangesManager", ->
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 
 			it "should push the op into redis", ->
-				@rclient.rpush
+				@multi.rpush
 					.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify @op)
 					.should.equal true
-				@rclient.sadd
+				@multi.sadd
 					.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
 					.should.equal true
 
@@ -67,7 +69,7 @@ describe "TrackChangesManager", ->
 
 		describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
-				@rclient.rpush = sinon.stub().yields(null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
+				@multi.exec = sinon.stub().yields(null, [2 * @TrackChangesManager.FLUSH_EVERY_N_OPS, "foo"])
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 
 			it "should tell the track changes api to flush", ->
@@ -77,7 +79,7 @@ describe "TrackChangesManager", ->
 
 		describe "when TrackChangesManager errors", ->
 			beforeEach ->
-				@rclient.rpush = sinon.stub().yields(null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
+				@multi.exec = sinon.stub().yields(null, [2 * @TrackChangesManager.FLUSH_EVERY_N_OPS, "foo"])
 				@TrackChangesManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 
