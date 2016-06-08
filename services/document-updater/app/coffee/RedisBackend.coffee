@@ -1,5 +1,7 @@
 Settings = require "settings-sharelatex"
 async = require "async"
+_ = require "underscore"
+logger = require "logger-sharelatex"
 
 class Client
 	constructor: (@clients) ->
@@ -10,6 +12,7 @@ class Client
 				rclient: client.rclient.multi()
 				key_schema: client.key_schema
 				primary: client.primary
+				driver: client.driver
 			}
 		)
 
@@ -19,56 +22,84 @@ class MultiClient
 	exec: (callback) ->
 		jobs = @clients.map (client) ->
 			(cb) ->
-				console.error "EXEC", client.rclient.queue
-				client.rclient.exec (result...) ->
-					console.error "EXEC RESULT", result
+				client.rclient.exec (error, result) ->
+					if client.driver == "ioredis"
+						# ioredis returns an results like:
+						# [ [null, 42], [null, "foo"] ]
+						# where the first entries in each 2-tuple are
+						# presumably errors for each individual command,
+						# and the second entry is the result. We need to transform
+						# this into the same result as the old redis driver:
+						# [ 42, "foo" ]
+						filtered_result = []
+						for entry in result or []
+							if entry[0]?
+								return cb(entry[0])
+							else
+								filtered_result.push entry[1]
+						result = filtered_result
+						
 					if client.primary
 						# Return this result as the actual result
-						callback(result...)
+						callback(error, result)
 					# Send the rest through for comparison
-					cb(result...)
+					cb(error, result)
 		async.parallel jobs, (error, results) ->
-			console.error "EXEC RESULTS", results
+			if error?
+				logger.error {err: error}, "error in redis backend"
+			else
+				compareResults(results)
 
-COMMANDS = [
-	"get", "smembers", "set", "srem", "sadd", "del", "lrange",
-	"llen", "rpush", "expire", "ltrim", "incr"
-]
-for command in COMMANDS
-	do (command) ->
-		Client.prototype[command] = (key_builder, args..., callback) ->
-			async.parallel @clients.map (client) ->
+COMMANDS = {
+	"get": 0,
+	"smembers": 0,
+	"set": 0,
+	"srem": 0,
+	"sadd": 0,
+	"del": 0,
+	"lrange": 0,
+	"llen": 0,
+	"rpush": 0,
+	"expire": 0,
+	"ltrim": 0,
+	"incr": 0,
+	"eval": 2
+}
+for command, key_pos of COMMANDS
+	do (command, key_pos) ->
+		Client.prototype[command] = (args..., callback) ->
+			jobs = @clients.map (client) ->
 				(cb) ->
+					key_builder = args[key_pos]
 					key = key_builder(client.key_schema)
-					console.error "COMMAND", command, key, args
-					client.rclient[command] key, args..., (result...) ->
-						console.log "RESULT", command, result
+					args_with_key = args.slice(0)
+					args_with_key[key_pos] = key
+					client.rclient[command] args_with_key..., (error, result...) ->
 						if client.primary
 							# Return this result as the actual result
-							callback?(result...)
+							callback(error, result...)
 						# Send the rest through for comparison
-						cb(result...)
-			, (error, results) ->
-				console.log "#{command} RESULTS", results
+						cb(error, result...)
+			async.parallel jobs, (error, results) ->
+				if error?
+					logger.error {err: error}, "error in redis backend"
+				else
+					compareResults(results)
 
-		MultiClient.prototype[command] = (key_builder, args...) ->
+		MultiClient.prototype[command] = (args...) ->
 			for client in @clients
+				key_builder = args[key_pos]
 				key = key_builder(client.key_schema)
-				console.error "MULTI COMMAND", command, key, args
+				args_with_key = args.slice(0)
+				args_with_key[key_pos] = key
 				client.rclient[command] key, args...
 
-Client::eval = (script, pos, key_builder, args..., callback) ->
-	async.parallel @clients.map (client) ->
-		(cb) ->
-			key = key_builder(client.key_schema)
-			client.rclient.eval script, pos, key, args..., (result...) ->
-				if client.primary
-					# Return this result as the actual result
-					callback(result...)
-				# Send the rest through for comparison
-				cb(result...)
-	, (error, results) ->
-		console.log "#{command} RESULTS", results
+compareResults = (results) ->
+	return if results.length < 2
+	first = results[0]
+	for result in results.slice(1)
+		if not _.isEqual(first, result)
+			logger.warn { results }, "redis return values do not match"
 
 module.exports =
 	createClient: () ->
@@ -80,9 +111,15 @@ module.exports =
 			if config.cluster?
 				Redis = require("ioredis")
 				rclient = new Redis.Cluster(config.cluster)
+				driver = "ioredis"
 			else
-				rclient = require("redis-sharelatex").createClient(config)
-			rclient: rclient
-			key_schema: config.key_schema
-			primary: config.primary
+				{host, port, password} = config
+				rclient = require("redis-sharelatex").createClient({host, port, password})
+				driver = "redis"
+			return {
+				rclient: rclient
+				key_schema: config.key_schema
+				primary: config.primary
+				driver: driver
+			}
 		return new Client(clients)
