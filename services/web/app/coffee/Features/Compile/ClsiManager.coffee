@@ -84,10 +84,8 @@ module.exports = ClsiManager =
 	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
 		outputFiles = []
 		for file in rawOutputFiles
-			path = Url.parse(file.url).path
-			path = path.replace("/project/#{project_id}/output/", "")
 			outputFiles.push
-				path: path
+				path: file.path # the clsi is now sending this to web
 				type: file.type
 				build: file.build
 		return outputFiles
