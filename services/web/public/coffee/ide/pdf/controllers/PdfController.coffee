@@ -104,6 +104,7 @@ define [
 				qs_args = ("#{k}=#{v}" for k, v of qs)
 				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
 				$scope.pdf.url += $scope.pdf.qs
+				$scope.pdf.downloadUrl = "/Project/#{$scope.project_id}/output/output.pdf" + $scope.pdf.qs
 
 				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 
