@@ -3,6 +3,7 @@ services = require('./services')
 module.exports = (grunt) ->
         
         tag = grunt.option("tag") or 'latest'
+        to = grunt.option("to") or 'latest'
         repos = []
         for service in services
                 url = service.repo.split('/')
@@ -29,10 +30,16 @@ module.exports = (grunt) ->
                                 src: repos
                                 dest: 'versions/' + tag + '.json'
 
+                rename:
+                        main:
+                                files: [{ src: ['versions/latest.json'], dest: 'versions/' + to + '.json'}]
+
         grunt.loadNpmTasks 'grunt-docker-io'
         grunt.loadNpmTasks 'grunt-github-api'
+        grunt.loadNpmTasks 'grunt-contrib-rename'
 
         grunt.registerTask 'build', ['docker_io', 'github']
         grunt.registerTask 'gitrev', ['github']
+        grunt.registerTask 'cut', ['rename']
 
         grunt.registerTask 'default', ['build']
