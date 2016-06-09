@@ -136,6 +136,14 @@ settings =
 	# address and http/https protocol information.
 	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
 
+	if process.env["SHARELATEX_LEFT_FOOTER"]
+		left_footer: process.env["SHARELATEX_LEFT_FOOTER"]
+
+	if process.env["SHARELATEX_RIGHT_FOOTER"]
+		right_footer: process.env["SHARELATEX_RIGHT_FOOTER"]
+
+	if process.env["SHARELATEX_HEADER"]
+		header: process.env["SHARELATEX_HEADER"]
 
 	# Spell Check Languages
 	# ---------------------
