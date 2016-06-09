@@ -134,16 +134,8 @@ settings =
 	# If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
+
 	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
-
-	if process.env["SHARELATEX_LEFT_FOOTER"]
-		left_footer: process.env["SHARELATEX_LEFT_FOOTER"]
-
-	if process.env["SHARELATEX_RIGHT_FOOTER"]
-		right_footer: process.env["SHARELATEX_RIGHT_FOOTER"]
-
-	if process.env["SHARELATEX_HEADER"]
-		header: process.env["SHARELATEX_HEADER"]
 
 	# Spell Check Languages
 	# ---------------------
@@ -417,6 +409,16 @@ settings =
 
 
 #### OPTIONAL CONFIGERABLE SETTINGS
+
+
+if process.env["SHARELATEX_LEFT_FOOTER"]?
+	settings.left_footer = process.env["SHARELATEX_LEFT_FOOTER"]
+
+if process.env["SHARELATEX_RIGHT_FOOTER"]?
+	settings.right_footer = process.env["SHARELATEX_RIGHT_FOOTER"]
+
+if process.env["SHARELATEX_HEADER"]?
+	settingsheader = process.env["SHARELATEX_HEADER"]
 
 
 # Sending Email
