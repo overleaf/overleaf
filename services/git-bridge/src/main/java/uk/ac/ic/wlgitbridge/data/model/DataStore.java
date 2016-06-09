@@ -113,11 +113,15 @@ public class DataStore {
         Log.info("[{}] Writing commit", name);
         contents.write();
         Git git = new Git(repository);
+        Log.info("[{}] Getting missing files", name);
         Set<String> missingFiles = git.status().call().getMissing();
         for (String missing : missingFiles) {
+            Log.info("[{}] Git rm {}", name, missing);
             git.rm().setCached(true).addFilepattern(missing).call();
         }
+        Log.info("[{}] Calling Git add", name);
         git.add().addFilepattern(".").call();
+        Log.info("[{}] Calling Git commit", name);
         git.commit(
         ).setAuthor(
                 new PersonIdent(
