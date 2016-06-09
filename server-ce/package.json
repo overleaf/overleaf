@@ -4,8 +4,9 @@
   "description": "none",
   "dependencies": {
     "grunt": "^0.4.5",
+    "grunt-contrib-rename": "0.0.3",
     "grunt-docker-io": "^0.7.0",
-    "simple-git": "^1.32.1",
-    "grunt-github-api": "^0.2.3"
+    "grunt-github-api": "^0.2.3",
+    "simple-git": "^1.32.1"
   }
 }
