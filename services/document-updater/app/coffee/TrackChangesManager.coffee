@@ -39,4 +39,3 @@ module.exports = TrackChangesManager =
 					if error?
 						logger.error err: error, doc_id: doc_id, project_id: project_id, "error flushing doc to track changes api"
 			callback()
-

@@ -93,4 +93,3 @@ describe "TrackChangesManager", ->
 					)
 					.should.equal true
 
-
