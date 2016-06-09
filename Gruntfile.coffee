@@ -264,19 +264,6 @@ module.exports = (grunt) ->
 						exec "mkdir -p #{path}", callback
 			async.series jobs, callback
 
-		installConfig: (callback = (error) ->) ->
-			src = "config/settings.development.coffee.example"
-			dest = "config/settings.development.coffee"
-			if !fs.existsSync(dest)
-				grunt.log.writeln "Creating config at #{dest}"
-				config = fs.readFileSync(src).toString()
-				config = config.replace /CRYPTO_RANDOM/g, () ->
-					crypto.randomBytes(64).toString("hex")
-				fs.writeFileSync dest, config
-				callback()
-			else
-				grunt.log.writeln "Config file already exists. Skipping."
-				callback()
 
 		runGruntInstall: (service, callback = (error) ->) ->
 			dir = service.name
