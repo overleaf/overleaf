@@ -12,7 +12,8 @@ define [
 
 			constructor: (@url, @options) ->
 				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
-				# PDFJS.disableAutoFetch = true # enable this to prevent loading whole file
+				if @options.disableAutoFetch
+					PDFJS.disableAutoFetch = true # prevent loading whole file
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
