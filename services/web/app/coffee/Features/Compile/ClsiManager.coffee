@@ -13,7 +13,7 @@ ClsiFormatChecker = require("./ClsiFormatChecker")
 
 module.exports = ClsiManager =
 
-	sendRequest: (project_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
+	sendRequest: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
@@ -24,25 +24,24 @@ module.exports = ClsiManager =
 				if validationProblems?
 					logger.log project_id:project_id, validationProblems:validationProblems, "problems with users latex before compile was attempted"
 					return callback(null, "validation-problems", null, null, validationProblems)
-				ClsiManager._postToClsi project_id, req, options.compileGroup, (error, response) ->
-					if error?
-						logger.err err:error, project_id:project_id, "error sending request to clsi"
-						return callback(error)
-					logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
-					ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
-						if err?
-							logger.err err:err, project_id:project_id, "error getting server id"
-							return callback(err)
-						outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-						callback(null, response?.compile?.status, outputFiles, clsiServerId)
+			ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
+				if error?
+					logger.err err:error, project_id:project_id, "error sending request to clsi"
+					return callback(error)
+				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
+				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+					if err?
+						logger.err err:err, project_id:project_id, "error getting server id"
+						return callback(err)
+					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
-	deleteAuxFiles: (project_id, options, callback = (error) ->) ->
-		compilerUrl = @_getCompilerUrl(options?.compileGroup)
+	deleteAuxFiles: (project_id, user_id, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id)
 		opts =
-			url:"#{compilerUrl}/project/#{project_id}"
+			url:compilerUrl
 			method:"DELETE"
 		ClsiManager._makeRequest project_id, opts, callback
-
 
 	_makeRequest: (project_id, opts, callback)->
 		ClsiCookieManager.getCookieJar project_id, (err, jar)->
@@ -60,14 +59,17 @@ module.exports = ClsiManager =
 						
 					return callback err, response, body
 
+	_getCompilerUrl: (compileGroup, project_id, user_id, action) ->
+		host = Settings.apis.clsi.url
+		path = "/project/#{project_id}"
+		path += "/user/#{user_id}" if user_id?
+		path += "/#{action}" if action?
+		return "#{host}#{path}"
 
-	_getCompilerUrl: (compileGroup) ->
-		return Settings.apis.clsi.url
-
-	_postToClsi: (project_id, req, compileGroup, callback = (error, response) ->) ->
-		compilerUrl = Settings.apis.clsi.url
-		opts = 
-			url:  "#{compilerUrl}/project/#{project_id}/compile"
+	_postToClsi: (project_id, user_id, req, compileGroup, callback = (error, response) ->) ->
+		compileUrl = @_getCompilerUrl(compileGroup, project_id, user_id, "compile")
+		opts =
+			url:  compileUrl
 			json: req
 			method: "POST"
 		ClsiManager._makeRequest project_id, opts, (error, response, body) ->
@@ -84,10 +86,9 @@ module.exports = ClsiManager =
 	_parseOutputFiles: (project_id, rawOutputFiles = []) ->
 		outputFiles = []
 		for file in rawOutputFiles
-			path = Url.parse(file.url).path
-			path = path.replace("/project/#{project_id}/output/", "")
 			outputFiles.push
-				path: path
+				path: file.path # the clsi is now sending this to web
+				url: Url.parse(file.url).path # the location of the file on the clsi, excluding the host part
 				type: file.type
 				build: file.build
 		return outputFiles
@@ -143,15 +144,15 @@ module.exports = ClsiManager =
 							resources: resources
 					}
 
-	wordCount: (project_id, file, options, callback = (error, response) ->) ->
+	wordCount: (project_id, user_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
-			compilerUrl = ClsiManager._getCompilerUrl(options?.compileGroup)
 			filename = file || req?.compile?.rootResourcePath
-			wordcount_url = "#{compilerUrl}/project/#{project_id}/wordcount?file=#{encodeURIComponent(filename)}"
-			if req.compile.options.imageName?
-				wordcount_url += "&image=#{encodeURIComponent(req.compile.options.imageName)}"
+			wordcount_url = ClsiManager._getCompilerUrl(options?.compileGroup, project_id, user_id, "wordcount")
 			opts =
 				url: wordcount_url
+				qs:
+					file: filename
+					image: req.compile.options.imageName
 				method: "GET"
 			ClsiManager._makeRequest project_id, opts, (error, response, body) ->
 				return callback(error) if error?

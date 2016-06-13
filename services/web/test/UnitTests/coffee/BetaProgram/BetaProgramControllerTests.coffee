@@ -21,6 +21,7 @@ describe "BetaProgramController", ->
 		@BetaProgramController = SandboxedModule.require modulePath, requires:
 			"./BetaProgramHandler": @BetaProgramHandler = {
 				optIn: sinon.stub()
+				optOut: sinon.stub()
 			},
 			"../User/UserLocator": @UserLocator = {
 				findById: sinon.stub()
@@ -44,10 +45,10 @@ describe "BetaProgramController", ->
 		beforeEach ->
 			@BetaProgramHandler.optIn.callsArgWith(1, null)
 
-		it "should redirect to '/beta/opt-in'", () ->
+		it "should redirect to '/beta/participate'", () ->
 			@BetaProgramController.optIn @req, @res, @next
 			@res.redirect.callCount.should.equal 1
-			@res.redirect.firstCall.args[0].should.equal "/beta/opt-in"
+			@res.redirect.firstCall.args[0].should.equal "/beta/participate"
 
 		it "should not call next with an error", () ->
 			@BetaProgramController.optIn @req, @res, @next
@@ -66,7 +67,7 @@ describe "BetaProgramController", ->
 			beforeEach ->
 				@BetaProgramHandler.optIn.callsArgWith(1, new Error('woops'))
 
-			it "should not redirect to '/'", () ->
+			it "should not redirect to '/beta/participate'", () ->
 				@BetaProgramController.optIn @req, @res, @next
 				@res.redirect.callCount.should.equal 0
 
@@ -74,6 +75,43 @@ describe "BetaProgramController", ->
 				@BetaProgramController.optIn @req, @res, @next
 				@next.callCount.should.equal 1
 				@next.firstCall.args[0].should.be.instanceof Error
+
+	describe "optOut", ->
+
+		beforeEach ->
+			@BetaProgramHandler.optOut.callsArgWith(1, null)
+
+		it "should redirect to '/beta/participate'", () ->
+			@BetaProgramController.optOut @req, @res, @next
+			@res.redirect.callCount.should.equal 1
+			@res.redirect.firstCall.args[0].should.equal "/beta/participate"
+
+		it "should not call next with an error", () ->
+			@BetaProgramController.optOut @req, @res, @next
+			@next.callCount.should.equal 0
+
+		it "should not call next with an error", () ->
+			@BetaProgramController.optOut @req, @res, @next
+			@next.callCount.should.equal 0
+
+		it "should call BetaProgramHandler.optOut", () ->
+			@BetaProgramController.optOut @req, @res, @next
+			@BetaProgramHandler.optOut.callCount.should.equal 1
+
+		describe "when BetaProgramHandler.optOut produces an error", ->
+
+			beforeEach ->
+				@BetaProgramHandler.optOut.callsArgWith(1, new Error('woops'))
+
+			it "should not redirect to '/beta/participate'", () ->
+				@BetaProgramController.optOut @req, @res, @next
+				@res.redirect.callCount.should.equal 0
+
+			it "should produce an error", () ->
+				@BetaProgramController.optOut @req, @res, @next
+				@next.callCount.should.equal 1
+				@next.firstCall.args[0].should.be.instanceof Error
+
 
 	describe "optInPage", ->
 

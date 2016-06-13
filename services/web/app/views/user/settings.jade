@@ -99,6 +99,17 @@ block content
 
 							| !{moduleIncludes("userSettings", locals)}
 
+							if (user.betaProgram)
+								hr
+
+								h3
+									| #{translate("sharelatex_beta_program")}
+
+								p.small
+									| #{translate("beta_program_already_participating")}
+								div
+									a(href="/beta/participate") #{translate("manage_beta_program_membership")}
+
 							hr
 
 							if !externalAuthenticationSystemUsed()
