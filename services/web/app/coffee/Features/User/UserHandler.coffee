@@ -6,7 +6,7 @@ logger = require("logger-sharelatex")
 
 module.exports = UserHandler =
 
-	populateGroupLicenceInvite: (user, callback)->
+	populateGroupLicenceInvite: (user, callback = ->)->
 		logger.log user_id:user._id, "populating any potential group licence invites"
 		licence = SubscriptionDomainHandler.getLicenceUserCanJoin user
 		if !licence?
