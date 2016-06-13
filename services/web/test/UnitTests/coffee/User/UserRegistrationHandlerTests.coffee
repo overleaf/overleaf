@@ -106,7 +106,7 @@ describe "UserRegistrationHandler", ->
 
 			it "should create a new user", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
-					@UserCreator.createNewUser.calledWith({email:@passingRequest.email, holdingAccount:false, password:"123"}).should.equal true
+					@UserCreator.createNewUser.calledWith({email:@passingRequest.email, holdingAccount:false, first_name:@passingRequest.first_name, last_name:@passingRequest.last_name}).should.equal true
 					done()
 
 			it 'lower case email', (done)->
