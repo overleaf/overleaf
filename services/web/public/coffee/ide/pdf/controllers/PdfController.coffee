@@ -5,6 +5,8 @@ define [
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 
+		# enable per-user containers if querystring includes isolated=true
+		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
 		autoCompile = true
 
 		# pdf.view = uncompiled | pdf | errors
@@ -28,13 +30,16 @@ define [
 
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
+			params = {}
 			if options.isAutoCompile
-				url += "?auto_compile=true"
+				params["auto_compile"]=true
+			if perUserCompile # send ?isolated=true for per-user compiles
+				params["isolated"] = true
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
 				_csrf: window.csrfToken
-			}
+			}, {params: params}
 
 		parseCompileResponse = (response) ->		
 
@@ -132,7 +137,6 @@ define [
 				opts =
 					method:"GET"
 					params:
-						build:file.build
 						clsiserverid:ide.clsiServerId
 				if file.url?  # FIXME clean this up when we have file.urls out consistently
 					opts.url = file.url
@@ -246,6 +250,7 @@ define [
 				method: "DELETE"
 				params:
 					clsiserverid:ide.clsiServerId
+					isolated: perUserCompile
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
@@ -329,6 +334,7 @@ define [
 							line: row + 1
 							column: column
 							clsiserverid:ide.clsiServerId
+							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
@@ -357,6 +363,7 @@ define [
 							h: position.offset.left.toFixed(2)
 							v: position.offset.top.toFixed(2)
 							clsiserverid:ide.clsiServerId
+							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
