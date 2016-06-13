@@ -80,6 +80,7 @@ module.exports = class Router
 		webRouter.get '/blog/*', BlogController.getPage
 
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
+		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
 
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
