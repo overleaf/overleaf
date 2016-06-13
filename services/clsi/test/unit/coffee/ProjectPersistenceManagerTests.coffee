@@ -13,6 +13,7 @@ describe "ProjectPersistenceManager", ->
 			"./db": @db = {}
 		@callback = sinon.stub()
 		@project_id = "project-id-123"
+		@user_id = "1234"
 
 	describe "clearExpiredProjects", ->
 		beforeEach ->
@@ -21,12 +22,13 @@ describe "ProjectPersistenceManager", ->
 				"project-id-2"
 			]
 			@ProjectPersistenceManager._findExpiredProjectIds = sinon.stub().callsArgWith(0, null, @project_ids)
-			@ProjectPersistenceManager.clearProject = sinon.stub().callsArg(1)
+			@ProjectPersistenceManager.clearProjectFromCache = sinon.stub().callsArg(1)
+			@CompileManager.clearExpiredProjects = sinon.stub().callsArg(1)
 			@ProjectPersistenceManager.clearExpiredProjects @callback
 
 		it "should clear each expired project", ->
 			for project_id in @project_ids
-				@ProjectPersistenceManager.clearProject
+				@ProjectPersistenceManager.clearProjectFromCache
 					.calledWith(project_id)
 					.should.equal true
 
@@ -37,8 +39,8 @@ describe "ProjectPersistenceManager", ->
 		beforeEach ->
 			@ProjectPersistenceManager._clearProjectFromDatabase = sinon.stub().callsArg(1)
 			@UrlCache.clearProject = sinon.stub().callsArg(1)
-			@CompileManager.clearProject = sinon.stub().callsArg(1)
-			@ProjectPersistenceManager.clearProject @project_id, @callback
+			@CompileManager.clearProject = sinon.stub().callsArg(2)
+			@ProjectPersistenceManager.clearProject @project_id, @user_id, @callback
 
 		it "should clear the project from the database", ->
 			@ProjectPersistenceManager._clearProjectFromDatabase
@@ -52,7 +54,7 @@ describe "ProjectPersistenceManager", ->
 
 		it "should clear the project compile folder", ->
 			@CompileManager.clearProject
-				.calledWith(@project_id)
+				.calledWith(@project_id, @user_id)
 				.should.equal true
 
 		it "should call the callback", ->

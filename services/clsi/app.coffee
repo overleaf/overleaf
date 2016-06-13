@@ -42,8 +42,8 @@ app.param 'project_id', (req, res, next, project_id) ->
 	else
 		next new Error("invalid project id")
 
-app.param 'user_id', (req, res, next, project_id) ->
-	if project_id?.match /^[a-zA-Z0-9_-]+$/
+app.param 'user_id', (req, res, next, user_id) ->
+	if user_id?.match /^[0-9a-f]{24}$/
 		next()
 	else
 		next new Error("invalid user id")
@@ -62,6 +62,14 @@ app.get  "/project/:project_id/sync/code", CompileController.syncFromCode
 app.get  "/project/:project_id/sync/pdf", CompileController.syncFromPdf
 app.get  "/project/:project_id/wordcount", CompileController.wordcount
 app.get  "/project/:project_id/status", CompileController.status
+
+# Per-user containers
+app.post   "/project/:project_id/user/:user_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
+app.delete "/project/:project_id/user/:user_id", CompileController.clearCache
+
+app.get  "/project/:project_id/user/:user_id/sync/code", CompileController.syncFromCode
+app.get  "/project/:project_id/user/:user_id/sync/pdf", CompileController.syncFromPdf
+app.get  "/project/:project_id/user/:user_id/wordcount", CompileController.wordcount
 
 ForbidSymlinks = require "./app/js/StaticServerForbidSymlinks"
 
