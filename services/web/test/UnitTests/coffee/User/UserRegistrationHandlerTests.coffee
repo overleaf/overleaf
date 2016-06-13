@@ -106,19 +106,19 @@ describe "UserRegistrationHandler", ->
 
 			it "should create a new user", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
-					@UserCreator.createNewUser.calledWith({email:@passingRequest.email, holdingAccount:false}).should.equal true
+					@UserCreator.createNewUser.calledWith({email:@passingRequest.email, holdingAccount:false, password:"123"}).should.equal true
 					done()
 
 			it 'lower case email', (done)->
 				@passingRequest.email = "soMe@eMail.cOm"
 				@handler.registerNewUser @passingRequest, (err)=>
-					@UserCreator.createNewUser.calledWith({email:@passingRequest.email.toLowerCase(), holdingAccount:false}).should.equal true
+					@UserCreator.createNewUser.args[0][0].email.should.equal "some@email.com"
 					done()
 
 			it 'trim white space from email', (done)->
 				@passingRequest.email = " some@email.com "
 				@handler.registerNewUser @passingRequest, (err)=>
-					@UserCreator.createNewUser.calledWith({email:"some@email.com", holdingAccount:false}).should.equal true
+					@UserCreator.createNewUser.args[0][0].email.should.equal "some@email.com"
 					done()
 
 

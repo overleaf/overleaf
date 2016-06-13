@@ -20,6 +20,7 @@ describe "UserCreator", ->
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
 			"./UserLocator":@UserLocator
+			"logger-sharelatex":{log:->}
 
 		@email = "bob.oswald@gmail.com"
 
@@ -53,5 +54,36 @@ describe "UserCreator", ->
 				assert.equal user.first_name, "bob.oswald"
 				done()
 
+		it "should use the start of the email if the first name is empty string", (done)->
+			opts =
+				email:@email
+				holdingAccount:true
+				first_name:""
+			@UserCreator.createNewUser opts, (err, user)=>
+				assert.equal user.email, @email
+				assert.equal user.holdingAccount, true
+				assert.equal user.first_name, "bob.oswald"
+				done()
 
 
+		it "should use the first name if passed", (done)->
+			opts =
+				email:@email
+				holdingAccount:true
+				first_name:"fiiirstname"
+			@UserCreator.createNewUser opts, (err, user)=>
+				assert.equal user.email, @email
+				assert.equal user.holdingAccount, true
+				assert.equal user.first_name, "fiiirstname"
+				done()
+
+		it "should use the last name if passed", (done)->
+			opts =
+				email:@email
+				holdingAccount:true
+				last_name:"lastNammmmeee"
+			@UserCreator.createNewUser opts, (err, user)=>
+				assert.equal user.email, @email
+				assert.equal user.holdingAccount, true
+				assert.equal user.last_name, "lastNammmmeee"
+				done()
