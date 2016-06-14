@@ -1,6 +1,11 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		.btn-group(dropdown)
+		.btn-group(
+			dropdown,
+			tooltip="{{modifierKey}} + Enter",
+			tooltip-popup-delay="500"
+			tooltip-append-to-body="true"
+		)
 			a.btn.btn-info(
 				href,
 				ng-disabled="pdf.compiling",
