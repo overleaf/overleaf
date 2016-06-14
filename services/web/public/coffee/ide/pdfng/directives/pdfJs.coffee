@@ -50,7 +50,11 @@ define [
 						scope.scale = { scaleMode: 'scale_mode_fit_width' }
 
 					if (position = localStorage("pdf.position.#{attrs.key}"))
-						scope.position = { page: +position.page, offset: { "top": +position.offset.top, "left": +position.offset.left } }
+						scope.position =
+							page: +position.page,
+							offset:
+								"top": +position.offset.top
+								"left": +position.offset.left
 
 					#scope.position = pdfListView.getPdfPosition(true)
 

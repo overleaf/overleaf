@@ -187,7 +187,8 @@ define [
 			# console.log 'converted to offset = ', pdfOffset
 			newPosition = {
 				"page": topPageIdx,
-				"offset" : { "top" : pdfOffset[1], "left": 0	}
+				"offset" : { "top" : pdfOffset[1], "left": 0}
+				"pageSize": { "height": viewport.viewBox[3], "width": viewport.viewBox[2] }
 			}
 			return newPosition
 
@@ -208,6 +209,8 @@ define [
 			return $scope.document.getPdfViewport(page.pageNum).then (viewport) ->
 				page.viewport = viewport
 				pageOffset = viewport.convertToViewportPoint(offset.left, offset.top)
+				# if the passed-in position doesn't have the page height/width add them now
+				position.pageSize ?= {"height": viewport.viewBox[3], "width": viewport.viewBox[2]}
 				# console.log 'addition offset =', pageOffset
 				# console.log 'total', pageTop + pageOffset[1]
 				Math.round(pageTop + pageOffset[1] + currentScroll) ## 10 is margin
@@ -515,6 +518,7 @@ define [
 
 					pageNum = scope.pages[first.page].pageNum
 
+					# use a visual offset of 72pt to match the offset in PdfController syncToCode
 					scope.document.getPdfViewport(pageNum).then (viewport) ->
 						position = {
 							page: first.page
