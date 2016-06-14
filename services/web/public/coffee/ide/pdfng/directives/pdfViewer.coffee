@@ -516,7 +516,15 @@ define [
 
 					first = highlights[0]
 
-					pageNum = scope.pages[first.page].pageNum
+					# switching between split and full pdf views can cause
+					# highlights to appear before rendering
+					if !scope.pages
+						return # ignore highlight scroll if still rendering
+
+					pageNum = scope.pages[first.page]?.pageNum
+
+					if !pageNum?
+						return # ignore highlight scroll if page not found
 
 					# use a visual offset of 72pt to match the offset in PdfController syncToCode
 					scope.document.getPdfViewport(pageNum).then (viewport) ->
