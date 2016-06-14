@@ -301,6 +301,9 @@ define [
 			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
+		# enable per-user containers if querystring includes isolated=true
+		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
+
 		synctex =
 			syncToPdf: (cursorPosition) ->
 				deferred = $q.defer()

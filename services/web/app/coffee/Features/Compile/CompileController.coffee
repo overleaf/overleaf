@@ -129,11 +129,11 @@ module.exports = CompileController =
 			return next(new Error("invalid h parameter"))
 		if not v?.match(/^\d+\.\d+$/)
 			return next(new Error("invalid v parameter"))
-		url = CompileController._getUrl(project_id, user_id, "sync/pdf")
-		destination = {url: url, qs: {page, h, v}}
 		# whether this request is going to a per-user container
 		CompileController._compileAsUser req, (error, user_id) ->
 			return next(error) if error?
+			url = CompileController._getUrl(project_id, user_id, "sync/pdf")
+			destination = {url: url, qs: {page, h, v}}
 			CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxySyncCode: (req, res, next = (error) ->) ->
@@ -145,10 +145,10 @@ module.exports = CompileController =
 			return next(new Error("invalid line parameter"))
 		if not column?.match(/^\d+$/)
 			return next(new Error("invalid column parameter"))
-		url = CompileController._getUrl(project_id, user_id, "sync/code")
-		destination = {url:url, qs: {file, line, column}}
 		CompileController._compileAsUser req, (error, user_id) ->
 			return next(error) if error?
+			url = CompileController._getUrl(project_id, user_id, "sync/code")
+			destination = {url:url, qs: {file, line, column}}
 			CompileController.proxyToClsi(project_id, destination, req, res, next)
 
 	proxyToClsi: (project_id, url, req, res, next = (error) ->) ->
