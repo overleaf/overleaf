@@ -5,8 +5,8 @@ define [
 ], (App, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 
-		# enable per-user containers if querystring includes isolated=true
-		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
+		# enable per-user containers
+		perUserCompile = true
 		autoCompile = true
 
 		# pdf.view = uncompiled | pdf | errors
@@ -301,8 +301,8 @@ define [
 			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
-		# enable per-user containers if querystring includes isolated=true
-		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
+		# enable per-user containers by default
+		perUserCompile = true
 
 		synctex =
 			syncToPdf: (cursorPosition) ->
