@@ -125,7 +125,8 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
-					file.url = "/project/#{project_id}/output/#{file.path}"
+					if not file.url?
+						file.url = "/project/#{project_id}/output/#{file.path}"
 					if response.clsiServerId?
 						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
