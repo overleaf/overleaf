@@ -101,7 +101,7 @@ module.exports = CompileController =
 					logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
 					res.sendStatus 500
 				url = "/project/#{project_id}/output/output.pdf"
-				CompileController.proxyToClsi project_id, user_id, url, req, res, next
+				CompileController.proxyToClsi project_id, url, req, res, next
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
