@@ -125,7 +125,8 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
-					file.url = "/project/#{project_id}/output/#{file.path}"
+					if not file.url?
+						file.url = "/project/#{project_id}/output/#{file.path}"
 					if response.clsiServerId?
 						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
 					$scope.pdf.outputFiles.push file
@@ -301,6 +302,9 @@ define [
 			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
+		# enable per-user containers if querystring includes isolated=true
+		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
+
 		synctex =
 			syncToPdf: (cursorPosition) ->
 				deferred = $q.defer()
@@ -350,18 +354,35 @@ define [
 					deferred.reject()
 					return deferred.promise
 
+				# FIXME: this actually works better if it's halfway across the
+				# page (or the visible part of the page). Synctex doesn't
+				# always find the right place in the file when the point is at
+				# the edge of the page, it sometimes returns the start of the
+				# next paragraph instead.
+				h = position.offset.left
+
+				# Compute the vertical position to pass to synctex, which
+				# works with coordinates increasing from the top of the page
+				# down.  This matches the browser's DOM coordinate of the
+				# click point, but the pdf position is measured from the
+				# bottom of the page so we need to invert it.
+				if options.fromPdfPosition and position.pageSize?.height?
+					v = (position.pageSize.height - position.offset.top) or 0 # measure from pdf point (inverted)
+				else
+					v = position.offset.top or 0 # measure from html click position
+
 				# It's not clear exactly where we should sync to if it wasn't directly
 				# clicked on, but a little bit down from the very top seems best.
 				if options.includeVisualOffset
-					position.offset.top = position.offset.top + 80
+					v += 72 # use the same value as in pdfViewer highlighting visual offset
 
 				$http({
 						url: "/project/#{ide.project_id}/sync/pdf",
 						method: "GET",
 						params: {
 							page: position.page + 1
-							h: position.offset.left.toFixed(2)
-							v: position.offset.top.toFixed(2)
+							h: h.toFixed(2)
+							v: v.toFixed(2)
 							clsiserverid:ide.clsiServerId
 							isolated: perUserCompile
 						}
@@ -392,7 +413,7 @@ define [
 
 		$scope.syncToCode = () ->
 			synctex
-				.syncToCode($scope.pdf.position, includeVisualOffset: true)
+				.syncToCode($scope.pdf.position, includeVisualOffset: true, fromPdfPosition: true)
 				.then (data) ->
 					{doc, line} = data
 					ide.editorManager.openDoc(doc, gotoLine: line)
