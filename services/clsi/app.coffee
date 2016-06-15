@@ -96,6 +96,11 @@ app.get "/project/:project_id/build/:build_id/output/*", (req, res, next) ->
 	req.url = "/#{req.params.project_id}/" + OutputCacheManager.path(req.params.build_id, "/#{req.params[0]}")
 	staticServer(req, res, next)
 
+app.get "/project/:project_id/user/:user_id/output/*", (req, res, next) ->
+	# for specific user get the path to the top level file
+	req.url = "/#{req.params.project_id}-#{req.params.user_id}/#{req.params[0]}"
+	staticServer(req, res, next)
+
 app.get "/project/:project_id/output/*", (req, res, next) ->
 	if req.query?.build? && req.query.build.match(OutputCacheManager.BUILD_REGEX)
 		# for specific build get the path from the OutputCacheManager (e.g. .clsi/buildId)
