@@ -3,7 +3,7 @@ define [
 	"ace/ace"
 	"libs/latex-log-parser"
 	"libs/bib-log-parser"
-], (App, LogParser, BibLogParser) ->
+], (App, Ace, LogParser, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 
 		# enable per-user containers if querystring includes isolated=true
