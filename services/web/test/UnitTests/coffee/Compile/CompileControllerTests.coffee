@@ -352,9 +352,9 @@ describe "CompileController", ->
 
 		it "should proxy the res to the clsi with correct url", (done)->
 			@CompileController.compileAndDownloadPdf @req, @res
-			sinon.assert.calledWith @CompileController.proxyToClsi, @project_id, @user_id, "/project/#{@project_id}/output/output.pdf", @req, @res
+			sinon.assert.calledWith @CompileController.proxyToClsi, @project_id, "/project/#{@project_id}/output/output.pdf", @req, @res
 
-			@CompileController.proxyToClsi.calledWith(@project_id, @user_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
+			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()
 
 	describe "wordCount", ->
