@@ -2,7 +2,7 @@ div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
 		.btn-group(
 			dropdown,
-			tooltip="#{translate('recompile_pdf')} ({{modifierKey}} + Enter)"
+			tooltip-html="'#{translate('recompile_pdf')} <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
 			tooltip-class="keyboard-tooltip"
 			tooltip-popup-delay="500"
 			tooltip-append-to-body="true"
