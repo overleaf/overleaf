@@ -101,7 +101,7 @@ settings =
 
 
 	nav:
-		title: process.env["SHARELATEX_NAV_TITLE"] or  process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX Comunity Edition"
+		title: process.env["SHARELATEX_NAV_TITLE"] or  process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX Community Edition"
 
 
 	# The email address which users will be directed to as the main point of
