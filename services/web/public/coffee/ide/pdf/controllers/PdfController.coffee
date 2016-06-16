@@ -117,10 +117,12 @@ define [
 					qs.clsiserverid = response.clsiServerId
 					ide.clsiServerId = response.clsiServerId
 				# convert the qs hash into a query string and append it
-				qs_args = ("#{k}=#{v}" for k, v of qs)
-				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
+				$scope.pdf.qs = createQueryString qs
 				$scope.pdf.url += $scope.pdf.qs
-				$scope.pdf.downloadUrl = "/Project/#{$scope.project_id}/output/output.pdf" + $scope.pdf.qs
+				# special case for the download url
+				if perUserCompile
+					qs.isolated = true
+				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
 				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 
@@ -136,10 +138,12 @@ define [
 						file.name = "#{file.path.replace(/^output\./, "")} file"
 					else
 						file.name = file.path
-					if not file.url?
-						file.url = "/project/#{project_id}/output/#{file.path}"
+					qs = {}
+					if perUserCompile
+						qs.isolated = true
 					if response.clsiServerId?
-						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
+						qs.clsiserverid = response.clsiServerId
+					file.url = "/project/#{project_id}/output/#{file.path}" +	createQueryString qs
 					$scope.pdf.outputFiles.push file
 
 
