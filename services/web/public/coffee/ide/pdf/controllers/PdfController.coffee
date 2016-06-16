@@ -1,9 +1,9 @@
 define [
 	"base"
 	"ace/ace"
-	"libs/latex-log-parser"
+	"ide/human-readable-logs/HumanReadableLogs"
 	"libs/bib-log-parser"
-], (App, Ace, LogParser, BibLogParser) ->
+], (App, Ace, HumanReadableLogs, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 
 		# enable per-user containers if querystring includes isolated=true
@@ -162,11 +162,11 @@ define [
 			accumulateResults = (newEntries) ->
 				for key in ['all', 'errors', 'warnings']
 					logEntries[key] = logEntries[key].concat newEntries[key]
-
+				
 			# use the parsers for each file type
 			processLog = (log) ->
 				$scope.pdf.rawLog = log
-				{errors, warnings, typesetting} = LogParser.parse(log, ignoreDuplicates: true)
+				{errors, warnings, typesetting} = HumanReadableLogs.parse(log, ignoreDuplicates: true)
 				all = [].concat errors, warnings, typesetting
 				accumulateResults {all, errors, warnings}
 
