@@ -44,11 +44,20 @@ module.exports = CompileController =
 				}
 
 	_compileAsUser: (req, callback) ->
+		# callback with user_id if isolated flag is set on request, undefined otherwise
 		isolated = req.query?.isolated is "true"
 		if isolated
-			AuthenticationController.getLoggedInUserId req, callback
+			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
 		else
-			callback()
+			callback() # do a per-project compile, not per-user
+
+	_downloadAsUser: (req, callback) ->
+		# callback with user_id if isolated flag or user_id param is set on request, undefined otherwise
+		isolated = req.query?.isolated is "true" or req.params.user_id?
+		if isolated
+			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
+		else
+			callback() # do a per-project compile, not per-user
 
 	downloadPdf: (req, res, next = (error) ->)->
 		Metrics.inc "pdf-downloads"
@@ -82,7 +91,9 @@ module.exports = CompileController =
 					logger.log project_id:project_id, ip:req.ip, "rate limit hit downloading pdf"
 					res.send 500
 				else
-					CompileController.proxyToClsi(project_id, "/project/#{project_id}/output/output.pdf", req, res, next)
+					CompileController._downloadAsUser req, (error, user_id) ->
+						url = CompileController._getFileUrl project_id, user_id, req.params.build_id, "output.pdf"
+						CompileController.proxyToClsi(project_id, url, req, res, next)
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -92,29 +103,37 @@ module.exports = CompileController =
 				return next(error) if error?
 				res.sendStatus(200)
 
+	# this is only used by templates, so is not called with a user_id
 	compileAndDownloadPdf: (req, res, next)->
 		project_id = req.params.project_id
-		CompileController._compileAsUser req, (error, user_id) ->
-			return next(error) if error?
-			CompileManager.compile project_id, user_id, {}, (err)->
-				if err?
-					logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
-					res.sendStatus 500
-				url = "/project/#{project_id}/output/output.pdf"
-				CompileController.proxyToClsi project_id, url, req, res, next
+		# pass user_id as null, since templates are an "anonymous" compile
+		CompileManager.compile project_id, null, {}, (err)->
+			if err?
+				logger.err err:err, project_id:project_id, "something went wrong compile and downloading pdf"
+				res.sendStatus 500
+			url = "/project/#{project_id}/output/output.pdf"
+			CompileController.proxyToClsi project_id, url, req, res, next
 
 	getFileFromClsi: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		build_id = req.params.build_id
-		user_id = req.params.user_id
-		if user_id? and build_id?
-			url = "/project/#{project_id}/user/#{user_id}/build/#{build_id}/output/#{req.params.file}"
-		else if build_id?
-			url = "/project/#{project_id}/build/#{build_id}/output/#{req.params.file}"
-		else
-			url = "/project/#{project_id}/output/#{req.params.file}"
-		CompileController.proxyToClsi(project_id, url, req, res, next)
+		CompileController._downloadAsUser req, (error, user_id) ->
+			return next(error) if error?
+			url = CompileController._getFileUrl project_id, user_id, req.params.build_id, req.params.file
+			CompileController.proxyToClsi(project_id, url, req, res, next)
 
+	# compute a GET file url for a given project, user (optional), build (optional) and file
+	_getFileUrl: (project_id, user_id, build_id, file) ->
+		if user_id? and build_id?
+			url = "/project/#{project_id}/user/#{user_id}/build/#{build_id}/output/#{file}"
+		else if user_id?
+			url = "/project/#{project_id}/user/#{user_id}/output/#{file}"
+		else if build_id?
+			url = "/project/#{project_id}/build/#{build_id}/output/#{file}"
+		else
+			url = "/project/#{project_id}/output/#{file}"
+		return url
+
+	# compute a POST url for a project, user (optional) and action
 	_getUrl: (project_id, user_id, action) ->
 		path = "/project/#{project_id}"
 		path += "/user/#{user_id}" if user_id?
