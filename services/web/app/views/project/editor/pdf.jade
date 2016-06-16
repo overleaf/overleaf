@@ -105,7 +105,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
-				p.entry-content(ng-show="entry.humanReadableMessage") {{ entry.humanReadableMessage }}
+				p.entry-content(ng-show="entry.humanReadableMessage", ng-bind-html="entry.humanReadableMessage")
 				p.entry-content(ng-show="entry.content && !entry.humanReadableMessage") {{ entry.content }}
 
 		p
