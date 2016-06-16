@@ -106,7 +106,9 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
 		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
-		webRouter.get  '/Project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		# Used by the web download buttons, adds filename header
+		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		# Used by the pdf viewers
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
