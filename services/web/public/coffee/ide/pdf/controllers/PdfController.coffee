@@ -122,6 +122,8 @@ define [
 				# special case for the download url
 				if perUserCompile
 					qs.isolated = true
+				# Save all downloads as files
+				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
 				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
