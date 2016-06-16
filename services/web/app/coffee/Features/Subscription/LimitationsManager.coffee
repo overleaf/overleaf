@@ -43,7 +43,7 @@ module.exports =
 			callback err, hasValidSubscription, subscription
 			
 	userIsMemberOfGroupSubscription: (user, callback = (error, isMember, subscriptions) ->) ->
-		logger.log user_id: user._ud, "checking is user is member of subscription groups"
+		logger.log user_id: user._id, "checking is user is member of subscription groups"
 		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
