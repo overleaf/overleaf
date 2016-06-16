@@ -5,6 +5,11 @@ define [
 	parse : (rawLog, options) ->
 		parsedLogEntries = LogParser.parse(rawLog, options)
 
-		console.log entry.message for entry in parsedLogEntries.all
+		_getHumanReadableMessage = (logMessage) ->
+			return rule.humanReadableMessage for rule in ruleset when rule.regexToMatch.test logMessage
+
+		for entry in parsedLogEntries.all
+			humanReadableMessage = _getHumanReadableMessage entry.message
+			entry.humanReadableMessage = humanReadableMessage if humanReadableMessage?
 
 		return parsedLogEntries

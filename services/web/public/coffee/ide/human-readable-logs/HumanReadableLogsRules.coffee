@@ -1,6 +1,6 @@
 define -> [
-		regExToMatch: /Too many }'s/
-		humanReadableLogText: "The reason LaTeX thinks there are too many }'s 
+		regexToMatch: /Too many }'s/
+		humanReadableMessage: "The reason LaTeX thinks there are too many }'s 
 		here is that the opening curly brace is missing after the \\date control 
 		sequence and before the word December, so the closing curly brace is 
 		seen as one too many (which it is!). In fact, there are other things 
@@ -8,8 +8,8 @@ define -> [
 		so LaTeX cannot possibly guess that you've missed out the opening curly 
 		brace until it finds a closing one!"
 	,
-		regExToMatch: /Undefined control sequence/
-		humanReadableLogText: "In this example, LaTeX is complaining that it has
+		regexToMatch: /Undefined control sequence/
+		humanReadableMessage: "In this example, LaTeX is complaining that it has
 		no such command (\"control sequence\") as \\dtae. Obviously it's been 
 		mistyped, but only a human can detect that fact: all LaTeX knows is that
 		\\dtae is not a command it knows about: it's undefined. Mistypings are 
@@ -17,8 +17,8 @@ define -> [
 		environments to be inserted using drop-down menus or icons, which may
 		be used to avoid these errors."
 	,
-		regExToMatch: /Missing \$ inserted/
-		humanReadableLogText: "A character that can only be used in the
+		regexToMatch: /Missing \$ inserted/
+		humanReadableMessage: "A character that can only be used in the
 		mathematics was inserted in normal text. If you intended to use
 		mathematics mode, then use $...$ or \\begin{math}...\\end{math} or use 
 		the 'quick math mode': \ensuremath{...}. If you did not intend to use 
@@ -32,16 +32,16 @@ define -> [
 		iso8859-1 without \"\\usepackage[latin1]{inputenc}\", there are several 
 		character encoding formats, make sure to pick the right one."
 	,
-		regExToMatch: /Runaway argument/
-		humanReadableLogText: "In this error, the closing curly brace has been 
+		regexToMatch: /Runaway argument/
+		humanReadableMessage: "In this error, the closing curly brace has been 
 		omitted from the date. It's the opposite of the error of too many }'s, 
 		and it results in \\maketitle trying to format the title page while 
 		LaTeX is still expecting more text for the date! As \\maketitle creates 
 		new paragraphs on the title page, this is detected and LaTeX complains 
 		that the previous paragraph has ended but \\date is not yet finished."
 	,
-		regExToMatch: /Underfull \\hbox/
-		humanReadableLogText: "This is a warning that LaTeX cannot stretch the 
+		regexToMatch: /Underfull \\hbox/
+		humanReadableMessage: "This is a warning that LaTeX cannot stretch the 
 		line wide enough to fit, without making the spacing bigger than its 
 		currently permitted maximum. The badness (0-10,000) indicates how severe
 		this is (here you can probably ignore a badness of 1394). It says what 
@@ -59,8 +59,8 @@ define -> [
 		using the \\textwidth or possibly \\linewidth options, e.g. 
 		\\includegraphics[width=\\textwidth]{image_name}"
 	,
-		regExToMatch: /Overfull \\hbox/
-		humanReadableLogText: "An overfull \hbox means that there is a 
+		regexToMatch: /Overfull \\hbox/
+		humanReadableMessage: "An overfull \hbox means that there is a 
 		hyphenation or justification problem: moving the last word on the line 
 		to the next line would make the spaces in the line wider than the 
 		current limit; keeping the word on the line would make the spaces 
@@ -88,8 +88,8 @@ define -> [
 		The warning can also be issued when the \\end{document} tag was not 
 		included or was deleted."
 	,
-		regExToMatch: /LaTeX Error: File .* not found/
-		humanReadableLogText: "When you use the \\usepackage command to request 
+		regexToMatch: /LaTeX Error: File .* not found/
+		humanReadableMessage: "When you use the \\usepackage command to request 
 		LaTeX to use a certain package, it will look for a file with the 
 		specified name and the filetype .sty. In this case the user has mistyped 
 		the name of the paralist package, so it's easy to fix. However, if you 
