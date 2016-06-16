@@ -19,6 +19,11 @@ define [
 		else
 			$scope.modifierKey = "Ctrl"
 
+		# utility for making a query string from a hash, could use jquery $.param
+		createQueryString = (args) ->
+			qs_args = ("#{k}=#{v}" for k, v of args)
+			if qs_args.length then "?" + qs_args.join("&") else ""
+
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
