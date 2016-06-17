@@ -137,6 +137,7 @@ module.exports =
 	# --------
 	security:
 		sessionSecret: sessionSecret
+		bcryptRounds: 14
 
 	httpAuthUsers: httpAuthUsers
 
