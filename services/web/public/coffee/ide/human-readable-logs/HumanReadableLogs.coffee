@@ -5,11 +5,12 @@ define [
 	parse : (rawLog, options) ->
 		parsedLogEntries = LogParser.parse(rawLog, options)
 
-		_getHumanReadableMessage = (logMessage) ->
-			return rule.humanReadableMessage for rule in ruleset when rule.regexToMatch.test logMessage
+		_getRule = (logMessage) ->
+			return rule for rule in ruleset when rule.regexToMatch.test logMessage
 
 		for entry in parsedLogEntries.all
-			humanReadableMessage = _getHumanReadableMessage entry.message
-			entry.humanReadableMessage = humanReadableMessage if humanReadableMessage?
+			{ humanReadableHint, extraInfoURL } = _getRule entry.message
+			entry.humanReadableHint = humanReadableHint if humanReadableHint?
+			entry.extraInfoURL = extraInfoURL if extraInfoURL?
 
 		return parsedLogEntries
