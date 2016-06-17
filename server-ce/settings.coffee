@@ -418,7 +418,7 @@ if process.env["SHARELATEX_RIGHT_FOOTER"]?
 	settings.right_footer = process.env["SHARELATEX_RIGHT_FOOTER"]
 
 if process.env["SHARELATEX_HEADER"]?
-	settingsheader = process.env["SHARELATEX_HEADER"]
+	settings.header = process.env["SHARELATEX_HEADER"]
 
 
 # Sending Email
