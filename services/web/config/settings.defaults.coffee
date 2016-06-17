@@ -137,7 +137,7 @@ module.exports =
 	# --------
 	security:
 		sessionSecret: sessionSecret
-		bcryptRounds: 14
+		bcryptRounds: 12 # number of rounds used to hash user passwords (raised to power 2)
 
 	httpAuthUsers: httpAuthUsers
 
