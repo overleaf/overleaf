@@ -49,7 +49,9 @@ module.exports = LatexRunner =
 			timings["sys-time"] = stderr?.match(/System time.*: (\d+.\d+)/m)?[1] or 0
 			callback error, output, stats, timings
 
-	_latexmkBaseCommand: ["/usr/bin/time", "-v", "latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
+	_latexmkBaseCommand: (Settings?.clsi?.latexmkCommandPrefix || []).concat(
+			["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
+		)
 
 	_pdflatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [

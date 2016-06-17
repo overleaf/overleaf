@@ -28,6 +28,9 @@ module.exports =
 	# 		modem:
 	# 			socketPath: false
 	# 		user: "tex"
+	# 		latexmkCommandPrefix: []
+	# 		# latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
+	# 		# latexmkCommandPrefix: ["/usr/local/bin/gtime", "-v"]  # on Mac OSX, installed with `brew install gnu-time`
 
 	internal:
 		clsi:
