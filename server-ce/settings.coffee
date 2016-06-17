@@ -410,15 +410,22 @@ settings =
 
 #### OPTIONAL CONFIGERABLE SETTINGS
 
-
 if process.env["SHARELATEX_LEFT_FOOTER"]?
-	settings.left_footer = process.env["SHARELATEX_LEFT_FOOTER"]
+	try
+		settings.nav.left_footer = JSON.parse(process.env["SHARELATEX_LEFT_FOOTER"])
+	catch e
+		console.error("could not parse SHARELATEX_LEFT_FOOTER, not valid JSON")
 
 if process.env["SHARELATEX_RIGHT_FOOTER"]?
-	settings.right_footer = process.env["SHARELATEX_RIGHT_FOOTER"]
+	settings.nav.right_footer = process.env["SHARELATEX_RIGHT_FOOTER"]
+	try
+		settings.nav.right_footer = JSON.parse(process.env["SHARELATEX_RIGHT_FOOTER"])
+	catch e
+		console.error("could not parse SHARELATEX_RIGHT_FOOTER, not valid JSON")
+		
 
 if process.env["SHARELATEX_HEADER"]?
-	settings.header = process.env["SHARELATEX_HEADER"]
+	settings.nav.header = process.env["SHARELATEX_HEADER"]
 
 
 # Sending Email
