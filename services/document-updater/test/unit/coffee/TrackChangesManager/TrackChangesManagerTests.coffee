@@ -7,9 +7,9 @@ describe "TrackChangesManager", ->
 	beforeEach ->
 		@TrackChangesManager = SandboxedModule.require modulePath, requires:
 			"request": @request = {}
-			"settings-sharelatex": @Settings = { redis: web: {} }
+			"settings-sharelatex": @Settings = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"redis-sharelatex": createClient: () => @rclient = {}
+			"./WebRedisManager": @WebRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -42,23 +42,17 @@ describe "TrackChangesManager", ->
 
 	describe "pushUncompressedHistoryOp", ->
 		beforeEach ->
-			@op = { op: [{ i: "foo", p: 4 }] }
-			@rclient.multi = sinon.stub().returns(@multi = {})
-			@multi.rpush = sinon.stub()
-			@multi.sadd = sinon.stub()
-			@multi.exec = sinon.stub().yields(null, [@length = 42, "foo"])
+			@op = "mock-op"
 			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
 
 		describe "pushing the op", ->
 			beforeEach ->
+				@WebRedisManager.pushUncompressedHistoryOp = sinon.stub().callsArgWith(3, null, 1)
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 
 			it "should push the op into redis", ->
-				@multi.rpush
-					.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify @op)
-					.should.equal true
-				@multi.sadd
-					.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
+				@WebRedisManager.pushUncompressedHistoryOp
+					.calledWith(@project_id, @doc_id, @op)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -69,7 +63,8 @@ describe "TrackChangesManager", ->
 
 		describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
-				@multi.exec = sinon.stub().yields(null, [2 * @TrackChangesManager.FLUSH_EVERY_N_OPS, "foo"])
+				@WebRedisManager.pushUncompressedHistoryOp =
+					sinon.stub().callsArgWith(3, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 
 			it "should tell the track changes api to flush", ->
@@ -79,7 +74,8 @@ describe "TrackChangesManager", ->
 
 		describe "when TrackChangesManager errors", ->
 			beforeEach ->
-				@multi.exec = sinon.stub().yields(null, [2 * @TrackChangesManager.FLUSH_EVERY_N_OPS, "foo"])
+				@WebRedisManager.pushUncompressedHistoryOp =
+					sinon.stub().callsArgWith(3, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
 				@TrackChangesManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
 				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
 

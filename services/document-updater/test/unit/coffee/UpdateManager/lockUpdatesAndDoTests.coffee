@@ -9,6 +9,7 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 		@UpdateManager = SandboxedModule.require modulePath, requires:
 			"./LockManager" : @LockManager = {}
 			"./RedisManager" : @RedisManager = {}
+			"./WebRedisManager" : @WebRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 		@project_id = "project-id-123"

@@ -70,25 +70,6 @@ module.exports = RedisManager =
 		multi.set keys.docVersion(doc_id:doc_id), version
 		multi.exec (error, replys) -> callback(error)
 
-	getPendingUpdatesForDoc : (doc_id, callback)->
-		multi = rclient.multi()
-		multi.lrange keys.pendingUpdates(doc_id:doc_id), 0 , -1
-		multi.del keys.pendingUpdates(doc_id:doc_id)
-		multi.exec (error, replys) ->
-			return callback(error) if error?
-			jsonUpdates = replys[0]
-			updates = []
-			for jsonUpdate in jsonUpdates
-				try
-					update = JSON.parse jsonUpdate
-				catch e
-					return callback e
-				updates.push update
-			callback error, updates
-
-	getUpdatesLength: (doc_id, callback)->
-		rclient.llen keys.pendingUpdates(doc_id:doc_id), callback
-
 	getPreviousDocOps: (doc_id, start, end, callback = (error, jsonOps) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), (error, length) ->
 			return callback(error) if error?

@@ -26,6 +26,7 @@
     "bunyan": "~0.22.1",
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
+    "cluster-key-slot": "^1.0.5",
     "grunt": "~0.4.2",
     "grunt-available-tasks": "~0.4.1",
     "grunt-bunyan": "~0.5.0",

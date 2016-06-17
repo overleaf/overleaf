@@ -1,5 +1,6 @@
 LockManager = require "./LockManager"
 RedisManager = require "./RedisManager"
+WebRedisManager = require "./WebRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
 Settings = require('settings-sharelatex')
 async = require("async")
@@ -25,7 +26,7 @@ module.exports = UpdateManager =
 					UpdateManager.continueProcessingUpdatesWithLock project_id, doc_id, callback
 
 	continueProcessingUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
-		RedisManager.getUpdatesLength doc_id, (error, length) =>
+		WebRedisManager.getUpdatesLength doc_id, (error, length) =>
 			return callback(error) if error?
 			if length > 0
 				UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, callback
@@ -33,7 +34,7 @@ module.exports = UpdateManager =
 				callback()
 
 	fetchAndApplyUpdates: (project_id, doc_id, callback = (error) ->) ->
-		RedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
+		WebRedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
 			return callback(error) if error?
 			if updates.length == 0
 				return callback()

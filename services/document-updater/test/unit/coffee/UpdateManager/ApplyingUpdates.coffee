@@ -12,6 +12,7 @@ describe "UpdateManager", ->
 		@UpdateManager = SandboxedModule.require modulePath, requires:
 			"./LockManager" : @LockManager = {}
 			"./RedisManager" : @RedisManager = {}
+			"./WebRedisManager" : @WebRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics =
@@ -89,7 +90,7 @@ describe "UpdateManager", ->
 	describe "continueProcessingUpdatesWithLock", ->
 		describe "when there are outstanding updates", ->
 			beforeEach ->
-				@RedisManager.getUpdatesLength = sinon.stub().callsArgWith(1, null, 3)
+				@WebRedisManager.getUpdatesLength = sinon.stub().callsArgWith(1, null, 3)
 				@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
 				@UpdateManager.continueProcessingUpdatesWithLock @project_id, @doc_id, @callback
 
@@ -101,7 +102,7 @@ describe "UpdateManager", ->
 
 		describe "when there are no outstanding updates", ->
 			beforeEach ->
-				@RedisManager.getUpdatesLength = sinon.stub().callsArgWith(1, null, 0)
+				@WebRedisManager.getUpdatesLength = sinon.stub().callsArgWith(1, null, 0)
 				@UpdateManager.processOutstandingUpdatesWithLock = sinon.stub().callsArg(2)
 				@UpdateManager.continueProcessingUpdatesWithLock @project_id, @doc_id, @callback
 
@@ -117,12 +118,12 @@ describe "UpdateManager", ->
 				@updates = [{p: 1, t: "foo"}]
 				@updatedDocLines = ["updated", "lines"]
 				@version = 34
-				@RedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
+				@WebRedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
 				@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version)
 				@UpdateManager.fetchAndApplyUpdates @project_id, @doc_id, @callback
 
 			it "should get the pending updates", ->
-				@RedisManager.getPendingUpdatesForDoc.calledWith(@doc_id).should.equal true
+				@WebRedisManager.getPendingUpdatesForDoc.calledWith(@doc_id).should.equal true
 
 			it "should apply the updates", ->
 				@UpdateManager.applyUpdates
@@ -135,7 +136,7 @@ describe "UpdateManager", ->
 		describe "when there are no updates", ->
 			beforeEach ->
 				@updates = []
-				@RedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
+				@WebRedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
 				@UpdateManager.applyUpdates = sinon.stub()
 				@RedisManager.setDocument = sinon.stub()
 				@UpdateManager.fetchAndApplyUpdates @project_id, @doc_id, @callback

@@ -1,4 +1,5 @@
-rclient = require("redis").createClient()
+Settings = require('settings-sharelatex')
+rclient = require("redis").createClient(Settings.redis.web)
 request = require("request").defaults(jar: false)
 async = require "async"
 
@@ -7,6 +8,11 @@ module.exports = DocUpdaterClient =
 		chars = for i in [1..24]
 			Math.random().toString(16)[2]
 		return chars.join("")
+	
+	subscribeToAppliedOps: (callback = (message) ->) ->
+		rclient_sub = require("redis").createClient()
+		rclient_sub.subscribe "applied-ops"
+		rclient_sub.on "message", callback
 
 	sendUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		rclient.rpush "PendingUpdates:#{doc_id}", JSON.stringify(update), (error)->
