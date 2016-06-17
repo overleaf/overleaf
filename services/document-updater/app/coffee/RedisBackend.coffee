@@ -113,8 +113,11 @@ module.exports =
 				rclient = new Redis.Cluster(config.cluster)
 				driver = "ioredis"
 			else
-				{host, port, password, endpoints, masterName} = config
-				rclient = require("redis-sharelatex").createClient({host, port, password, endpoints, masterName})
+				redis_config = {}
+				for key in ["host", "port", "password", "endpoints", "masterName"]
+					if config[key]?
+						redis_config[key] = config[key]
+				rclient = require("redis-sharelatex").createClient(redis_config)
 				driver = "redis"
 			return {
 				rclient: rclient
