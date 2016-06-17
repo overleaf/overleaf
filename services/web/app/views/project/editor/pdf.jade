@@ -105,8 +105,9 @@ div.full-size.pdf(ng-controller="PdfController")
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
-				div
-					i.fa.fa-hand-o-right(aria-hidden="true")
+				.card.card-hint
+					figure.card-hint-icon-container
+						i.fa.fa-lightbulb-o(aria-hidden="true")
 					p.entry-content(ng-show="entry.humanReadableHint", ng-bind-html="entry.humanReadableHint")
 					a(ng-href="{{ entry.extraInfoURL }}", target="_blank") #{translate("log_entry_extra_info")}
 				p.entry-content(ng-show="entry.content") {{ entry.content }}
