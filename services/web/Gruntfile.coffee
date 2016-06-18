@@ -17,6 +17,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
+	grunt.loadNpmTasks 'grunt-contrib-imagemin'
 
 	config =
 
@@ -43,6 +44,17 @@ module.exports = (grunt) ->
 				options:
 					grunt:true
 					stream:true
+
+
+		imagemin:
+			dynamic: {                         
+				files: [{
+					expand: true
+					cwd: 'public/img/'
+					src: ['**/*.{png,jpg,gif}']
+					dest: 'public/img/'
+				}]
+			}			
 
 		coffee:
 			app_dir: 
