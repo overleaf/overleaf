@@ -238,8 +238,8 @@ module.exports = class Router
 			res.send("websharelatex is up")
 
 
-		webRouter.get '/health_check', HealthCheckController.check
-		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		apiRouter.get '/health_check', HealthCheckController.check
+		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->
