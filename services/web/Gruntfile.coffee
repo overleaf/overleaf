@@ -28,7 +28,7 @@ module.exports = (grunt) ->
 
 		watch:
 			coffee:
-				files: '**/*.coffee'
+				files: 'public/**/*.coffee'
 				tasks: ['quickcompile:coffee']
 				options: {}
 
@@ -47,14 +47,17 @@ module.exports = (grunt) ->
 
 
 		imagemin:
-			dynamic: {                         
+			dynamic:                       
 				files: [{
 					expand: true
 					cwd: 'public/img/'
 					src: ['**/*.{png,jpg,gif}']
 					dest: 'public/img/'
 				}]
-			}			
+			options:
+				optimizationLevel: 7
+
+
 
 		coffee:
 			app_dir: 
