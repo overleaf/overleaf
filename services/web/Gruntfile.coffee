@@ -18,6 +18,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
 	grunt.loadNpmTasks 'grunt-contrib-imagemin'
+	grunt.loadNpmTasks 'grunt-contrib-cssmin'
 
 	config =
 
@@ -55,6 +56,7 @@ module.exports = (grunt) ->
 					dest: 'public/img/'
 				}]
 			options:
+				interlaced:false
 				optimizationLevel: 7
 
 
@@ -122,6 +124,11 @@ module.exports = (grunt) ->
 			app:
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
+
+		cssmin:
+			target:
+				files:
+					"public/stylesheets/style.css": "public/stylesheets/style.css"
 
 		env:
 			run:
@@ -347,7 +354,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
-	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append"]
+	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "cssmin"]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
