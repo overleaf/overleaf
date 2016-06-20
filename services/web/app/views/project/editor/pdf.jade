@@ -109,10 +109,16 @@ div.full-size.pdf(ng-controller="PdfController")
 					figure.card-hint-icon-container
 						i.fa.fa-lightbulb-o(aria-hidden="true")
 					p.card-hint-text(ng-show="entry.humanReadableHint", ng-bind-html="entry.humanReadableHint")
-					.clearfix
-						a.btn.btn-sm.btn-default.pull-right(ng-href="{{ entry.extraInfoURL }}", target="_blank")
-							i.fa.fa-external-link
-							|&nbsp;#{translate("log_entry_extra_info")}
+					.card-hint-actions
+						.card-hint-action-ext-link
+							a.btn.btn-sm.btn-default(ng-href="{{ entry.extraInfoURL }}", target="_blank")
+								i.fa.fa-external-link
+								|&nbsp;#{translate("log_hint_extra_info")}
+						.card-hint-action-feedback
+							label.card-hint-enquiry-label #{translate("log_hint_enquiry_helpful")}&nbsp;
+							.btn-group.btn-group-sm(role="group")
+								button.btn.btn-default #{translate("answer_yes")}
+								button.btn.btn-default #{translate("answer_no")}
 				p.entry-content(ng-show="entry.content") {{ entry.content }}
 
 		p
