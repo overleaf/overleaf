@@ -115,8 +115,11 @@ div.full-size.pdf(ng-controller="PdfController")
 							a(ng-href="{{ entry.extraInfoURL }}", target="_blank")
 								i.fa.fa-external-link
 								|&nbsp;#{translate("log_hint_extra_info")}
-						.card-hint-feedback(ng-show="!feedbackSent")
-							label.card-hint-feedback-label #{translate("log_hint_enquiry_helpful")}
+						.card-hint-feedback(
+							ng-show="!feedbackSent"
+							ng-class="entry.ruleId"
+						)
+							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
 							a.card-hint-feedback-positive(
 								ng-click="feedbackSent = true;"
 							) #{translate("answer_yes")}
@@ -124,7 +127,7 @@ div.full-size.pdf(ng-controller="PdfController")
 								ng-click="feedbackSent = true;"
 							) #{translate("answer_no")}
 						.card-hint-feedback(ng-show="feedbackSent")
-							label.card-hint-feedback-label #{translate("log_hint_enquiry_gratitude")}
+							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
 				p.entry-content(ng-show="entry.content") {{ entry.content }}
 
 		p

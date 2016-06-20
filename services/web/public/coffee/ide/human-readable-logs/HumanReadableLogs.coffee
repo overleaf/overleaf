@@ -9,7 +9,8 @@ define [
 			return rule for rule in ruleset when rule.regexToMatch.test logMessage
 
 		for entry in parsedLogEntries.all
-			{ humanReadableHint, extraInfoURL } = _getRule entry.message
+			{ regexToMatch, humanReadableHint, extraInfoURL } = _getRule entry.message
+			entry.ruleId = 'hint_' + regexToMatch.toString().replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()
 			entry.humanReadableHint = humanReadableHint if humanReadableHint?
 			entry.extraInfoURL = extraInfoURL if extraInfoURL?
 
