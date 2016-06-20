@@ -195,6 +195,19 @@
 		.fa {
 			color: #FFF;
 		}
+
+		.alert-danger & {
+			color: @alert-danger-border;
+		}
+
+		.alert-warning & {
+			color: @alert-warning-border;
+		}
+
+		.alert-info & {
+			color: @alert-info-border;
+		}
+
 	}
 
 	&-text, 
@@ -205,9 +218,8 @@
 	}
 
 	&-enquiry-label {
-		font-size: 0.8rem;
+		font-size: inherit;
 		margin-bottom: 0;
-		margin-right: 0.5em;
 		font-weight: normal;
 	}
 
@@ -218,18 +230,19 @@
 	&-action-ext-link,
 	&-action-feedback {
 		display: inline-block;
+		font-size: 0.8rem;
 	}
 	
 	&-action-feedback {
 		float: right;
+
+		a {
+			margin-left: 0.5em;
+		}
 	}
 
 
 	& + p {
 		margin-top: 20px;
-	}
-
-	a {
-
 	}
 }
