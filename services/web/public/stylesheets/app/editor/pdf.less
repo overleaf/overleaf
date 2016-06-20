@@ -181,4 +181,31 @@
 
 .card-hint:extend(.card-thin) {
 	margin-top: 10px;
+
+	&-icon-container {
+		background: currentColor;
+		width: 2.5rem;
+		height: 2.5rem;
+		font-size: 1.5rem;
+		text-align: center;
+		border-radius: 50%;
+		float: left;
+		margin-right: 10px;
+
+		.fa {
+			color: #FFF;
+		}
+	}
+
+	&-text {
+		color: @gray-dark;
+	}
+
+	& + p {
+		margin-top: 20px;
+	}
+
+	a {
+
+	}
 }
