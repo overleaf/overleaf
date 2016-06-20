@@ -100,6 +100,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
+				ng-init="feedbackSent = false;"
 			)
 				span.line-no
 					span(ng-show="entry.file") {{ entry.file }}
@@ -114,10 +115,16 @@ div.full-size.pdf(ng-controller="PdfController")
 							a(ng-href="{{ entry.extraInfoURL }}", target="_blank")
 								i.fa.fa-external-link
 								|&nbsp;#{translate("log_hint_extra_info")}
-						.card-hint-feedback
+						.card-hint-feedback(ng-show="!feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_enquiry_helpful")}
-							a.card-hint-feedback-positive #{translate("answer_yes")}
-							a.card-hint-feedback-negative #{translate("answer_no")}
+							a.card-hint-feedback-positive(
+								ng-click="feedbackSent = true;"
+							) #{translate("answer_yes")}
+							a.card-hint-feedback-negative(
+								ng-click="feedbackSent = true;"
+							) #{translate("answer_no")}
+						.card-hint-feedback(ng-show="feedbackSent")
+							label.card-hint-feedback-label #{translate("log_hint_enquiry_gratitude")}
 				p.entry-content(ng-show="entry.content") {{ entry.content }}
 
 		p
