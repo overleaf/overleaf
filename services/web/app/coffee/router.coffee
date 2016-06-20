@@ -106,7 +106,9 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
 		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
-		webRouter.get  '/Project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		# Used by the web download buttons, adds filename header
+		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		# Used by the pdf viewers
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
@@ -236,8 +238,8 @@ module.exports = class Router
 			res.send("websharelatex is up")
 
 
-		webRouter.get '/health_check', HealthCheckController.check
-		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		apiRouter.get '/health_check', HealthCheckController.check
+		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->

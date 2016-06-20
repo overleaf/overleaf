@@ -66,7 +66,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 		block scripts
 		script(src="#{jsPath}libs/jquery-1.11.1.min.js")
 		script(src="#{jsPath}libs/angular-1.3.15.min.js")
-		include sentry
 		script.
 			window.sharelatex = {
 				siteUrl: '#{settings.siteUrl}',
@@ -141,6 +140,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			)
 
 		include contact-us-modal
-
+		include sentry
+		
 
 
