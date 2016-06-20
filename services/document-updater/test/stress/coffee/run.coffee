@@ -34,38 +34,57 @@ class StressTestClient
 		
 		DocUpdaterClient.subscribeToAppliedOps (channel, update) =>
 			update = JSON.parse(update)
+			if update.error?
+				console.error new Error("Error from server: '#{update.error}'")
 			if update.doc_id == @doc_id
 				@processReply(update)
 	
 	sendUpdate: () ->
 		data = String.fromCharCode(65 + @charCode++ % 26)
 		@content = insert(@content, @pos, data)
+		@inflight_op = {
+			i: data
+			p: @pos++
+		}
+		@resendUpdate()
+		@inflight_op_sent = Date.now()
+	
+	resendUpdate: () ->
+		assert(@inflight_op?)
 		DocUpdaterClient.sendUpdate(
 			@project_id, @doc_id
 			{
 				doc: @doc_id
-				op: [@inflight_op = {
-					i: data
-					p: @pos++
-				}]
+				op: [@inflight_op]
 				v: @version
 				meta:
 					source: @client_id
+				dupIfSource: [@client_id]
 			}
 		)
-		@inflight_op_sent = Date.now()
+		@update_timer = setTimeout () =>
+			console.log "[#{new Date()}] \t[#{@client_id.slice(0,4)}] WARN: Resending update after 5 seconds"
+			@resendUpdate()
+		, 5000
 	
 	processReply: (update) ->
-		if update.error?
-			throw new Error("Error from server: '#{update.error}'")
-		assert(update.op.v == @version, "Op version from server is not increasing by 1 each time")
+		if update.op.v != @version
+			if update.op.v < @version
+				console.log "[#{new Date()}] \t[#{@client_id.slice(0,4)}] WARN: Duplicate ack (already seen version)"
+				return
+			else
+				throw new Error("version jumped ahead")
 		@version++
 		if update.op.meta.source == @client_id
-			@counts.local_updates++
-			@inflight_op = null
-			delay = Date.now() - @inflight_op_sent
-			@counts.max_delay = Math.max(@counts.max_delay, delay)
-			@continue()
+			if @inflight_op?
+				@counts.local_updates++
+				@inflight_op = null
+				clearTimeout @update_timer
+				delay = Date.now() - @inflight_op_sent
+				@counts.max_delay = Math.max(@counts.max_delay, delay)
+				@continue()
+			else
+				console.log "[#{new Date()}] \t[#{@client_id.slice(0,4)}] WARN: Duplicate ack"
 		else
 			assert(update.op.op.length == 1)
 			@counts.remote_updates++
@@ -136,7 +155,7 @@ for doc_and_project_id in process.argv.slice(4)
 			version = body.version
 		
 			clients = []
-			for pos in [1, 2, 3, 4, 5]
+			for pos in [1, 2]
 				do (pos) ->
 					client = new StressTestClient({doc_id, project_id, content, pos: pos, version: version, updateDelay: UPDATE_DELAY})
 					clients.push client
