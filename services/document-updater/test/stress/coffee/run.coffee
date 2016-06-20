@@ -1,4 +1,4 @@
-DocUpdaterClient = require "../../acceptance/js/helpers/DocUpdaterClient"
+DocUpdaterClient = require "../../acceptance/coffee/helpers/DocUpdaterClient"
 # MockTrackChangesApi = require "../../acceptance/js/helpers/MockTrackChangesApi"
 # MockWebApi = require "../../acceptance/js/helpers/MockWebApi"
 assert = require "assert"

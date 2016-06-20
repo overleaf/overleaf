@@ -1,5 +1,5 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis").createClient(Settings.redis.web)
+rclient = require("redis-sharelatex").createClient(Settings.redis.web)
 request = require("request").defaults(jar: false)
 async = require "async"
 
@@ -10,7 +10,7 @@ module.exports = DocUpdaterClient =
 		return chars.join("")
 	
 	subscribeToAppliedOps: (callback = (message) ->) ->
-		rclient_sub = require("redis").createClient()
+		rclient_sub = require("redis-sharelatex").createClient(Settings.redis.web)
 		rclient_sub.subscribe "applied-ops"
 		rclient_sub.on "message", callback
 
