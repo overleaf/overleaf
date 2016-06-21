@@ -106,7 +106,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
-				.card.card-hint
+				.card.card-hint(ng-if="entry.humanReadableHint")
 					figure.card-hint-icon-container
 						i.fa.fa-lightbulb-o(aria-hidden="true")
 					p.card-hint-text(ng-show="entry.humanReadableHint", ng-bind-html="entry.humanReadableHint")
