@@ -5,12 +5,17 @@ assert = require "assert"
 async = require "async"
 
 insert = (string, pos, content) ->
-	string.slice(0, pos) + content + string.slice(pos)
+	result = string.slice(0, pos) + content + string.slice(pos)
+	return result
 
 transform = (op1, op2) ->
 	if op2.p < op1.p
-		op1.p += op2.i.length
-	return op1
+		return {
+			p: op1.p + op2.i.length
+			i: op1.i
+		}
+	else
+		return op1
 
 class StressTestClient
 	constructor: (@options = {}) ->
@@ -36,6 +41,7 @@ class StressTestClient
 			update = JSON.parse(update)
 			if update.error?
 				console.error new Error("Error from server: '#{update.error}'")
+				return
 			if update.doc_id == @doc_id
 				@processReply(update)
 	
@@ -73,7 +79,7 @@ class StressTestClient
 				console.log "[#{new Date()}] \t[#{@client_id.slice(0,4)}] WARN: Duplicate ack (already seen version)"
 				return
 			else
-				throw new Error("version jumped ahead")
+				console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] ERROR: Version jumped ahead (client: #{@version}, op: #{update.op.v})"
 		@version++
 		if update.op.meta.source == @client_id
 			if @inflight_op?
@@ -91,6 +97,7 @@ class StressTestClient
 			external_op = update.op.op[0]
 			if @inflight_op?
 				@counts.conflicts++
+				@inflight_op = transform(@inflight_op, external_op)
 				external_op = transform(external_op, @inflight_op)
 			if external_op.p < @pos
 				@pos += external_op.i.length
@@ -114,12 +121,40 @@ class StressTestClient
 		DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, body) =>
 			throw error if error?
 			if !body.lines?
-				return console.error "[#{new Date()}] ERROR: Invalid response from get doc (#{doc_id})", body
+				return console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] ERROR: Invalid response from get doc (#{doc_id})", body
 			content = body.lines.join("\n")
+			version = body.version
 			if content != @content
-				console.error "[#{new Date()}] Error: Client content does not match server (Server: '#{content}', Client: '#{@content}')"
-			# TODO: Check content is of the correct form
+				if version == @version
+					console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] Error: Client content does not match server."
+					console.error "Server: #{content.split('a')}"
+					console.error "Client: #{@content.split('a')}"
+				else
+					console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] Error: Version mismatch (Server: '#{version}', Client: '#{@version}')"
+
+			if !@isContentValid(@content)
+				for chunk, i in @content.split("")
+					if chunk? and chunk != "a"
+						console.log chunk, i
+				throw new Error("bad content")
 			callback()
+
+	isChunkValid: (chunk) ->
+		char = 0
+		for letter, i in chunk
+			if letter.charCodeAt(0) != 65 + i % 26
+				console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] Invalid Chunk:", chunk
+				return false
+		return true
+
+	isContentValid: (content) ->
+		for chunk in content.split('a')
+			if chunk? and chunk != ""
+				if !@isChunkValid(chunk)
+					
+					console.error "[#{new Date()}] \t[#{@client_id.slice(0,4)}] Invalid content", content
+					return false
+		return true
 
 
 checkDocument = (project_id, doc_id, clients, callback = (error) ->) ->
@@ -140,32 +175,35 @@ printSummary = (doc_id, clients) ->
 			max_delay: 0
 		}
 
-UPDATE_DELAY = parseInt(process.argv[2], 10)
-SAMPLE_INTERVAL = parseInt(process.argv[3], 10)
+CLIENT_COUNT = parseInt(process.argv[2], 10)
+UPDATE_DELAY = parseInt(process.argv[3], 10)
+SAMPLE_INTERVAL = parseInt(process.argv[4], 10)
 
-for doc_and_project_id in process.argv.slice(4)
+for doc_and_project_id in process.argv.slice(5)
 	do (doc_and_project_id) ->
 		[project_id, doc_id] = doc_and_project_id.split(":")
 		console.log {project_id, doc_id}
-		DocUpdaterClient.getDoc project_id, doc_id, (error, res, body) =>
+		DocUpdaterClient.setDocLines project_id, doc_id, [(new Array(CLIENT_COUNT + 2)).join('a')], null, null, (error) ->
 			throw error if error?
-			if !body.lines?
-				return console.error "[#{new Date()}] ERROR: Invalid response from get doc (#{doc_id})", body
-			content = body.lines.join("\n")
-			version = body.version
-		
-			clients = []
-			for pos in [1, 2]
-				do (pos) ->
-					client = new StressTestClient({doc_id, project_id, content, pos: pos, version: version, updateDelay: UPDATE_DELAY})
-					clients.push client
+			DocUpdaterClient.getDoc project_id, doc_id, (error, res, body) =>
+				throw error if error?
+				if !body.lines?
+					return console.error "[#{new Date()}] ERROR: Invalid response from get doc (#{doc_id})", body
+				content = body.lines.join("\n")
+				version = body.version
 			
-			do runBatch = () ->
-				jobs = clients.map (client) ->
-					(cb) -> client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
-				async.parallel jobs, (error) ->
-					throw error if error?
-					printSummary(doc_id, clients)
-					checkDocument project_id, doc_id, clients, (error) ->
+				clients = []
+				for pos in [1..CLIENT_COUNT]
+					do (pos) ->
+						client = new StressTestClient({doc_id, project_id, content, pos: pos, version: version, updateDelay: UPDATE_DELAY})
+						clients.push client
+				
+				do runBatch = () ->
+					jobs = clients.map (client) ->
+						(cb) -> client.runForNUpdates(SAMPLE_INTERVAL / UPDATE_DELAY, cb)
+					async.parallel jobs, (error) ->
 						throw error if error?
-						runBatch()
+						printSummary(doc_id, clients)
+						checkDocument project_id, doc_id, clients, (error) ->
+							throw error if error?
+							runBatch()

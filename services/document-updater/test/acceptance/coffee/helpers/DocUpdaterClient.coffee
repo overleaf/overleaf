@@ -3,6 +3,10 @@ rclient = require("redis-sharelatex").createClient(Settings.redis.web)
 request = require("request").defaults(jar: false)
 async = require "async"
 
+rclient_sub = require("redis-sharelatex").createClient(Settings.redis.web)
+rclient_sub.subscribe "applied-ops"
+rclient_sub.setMaxListeners(0)
+	
 module.exports = DocUpdaterClient =
 	randomId: () ->
 		chars = for i in [1..24]
@@ -10,8 +14,6 @@ module.exports = DocUpdaterClient =
 		return chars.join("")
 	
 	subscribeToAppliedOps: (callback = (message) ->) ->
-		rclient_sub = require("redis-sharelatex").createClient(Settings.redis.web)
-		rclient_sub.subscribe "applied-ops"
 		rclient_sub.on "message", callback
 
 	sendUpdate: (project_id, doc_id, update, callback = (error) ->) ->
