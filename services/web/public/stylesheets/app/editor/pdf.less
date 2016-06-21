@@ -229,6 +229,20 @@
 		font-size: 0.8rem;
 	}
 	
+	&-actions a {
+		.alert-danger & {
+			color: @alert-danger-text;
+		}
+
+		.alert-warning & {
+			color: @alert-warning-text;
+		}
+
+		.alert-info & {
+			color: @alert-info-text;
+		}
+	}
+	
 	&-feedback {
 		float: right;
 
