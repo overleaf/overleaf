@@ -94,18 +94,7 @@
 - if (showUserDetailsArea)
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
-		.row-spaced(ng-if="showDatajoy")
-			hr
-			.card.card-thin
-				p.text-center.small
-					| <strong>Python</strong> or <strong>R</strong> user?
-					p.text-center.small
-						a(href="https://www.getdatajoy.com/", target="_blank").btn.btn-info.btn-small Try DataJoy
-				p.text-center.small(style="font-size: 0.8em")
-					a(href="https://www.getdatajoy.com/", target="_blank") DataJoy
-					|  is a new online Python and R editor from ShareLaTeX.
-
-		.row-spaced#userProfileInformation(ng-if="hasProjects && !showDatajoy")
+		.row-spaced#userProfileInformation(ng-if="hasProjects")
 			div(ng-controller="UserProfileController")
 				hr(ng-show="percentComplete < 100")
 				.text-centered.user-profile(ng-show="percentComplete < 100")
