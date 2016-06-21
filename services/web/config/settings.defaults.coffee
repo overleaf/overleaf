@@ -15,7 +15,7 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = "secret-please-change"
 
-module.exports =
+module.exports = settings =
 	# File storage
 	# ------------
 	#
