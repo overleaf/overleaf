@@ -100,11 +100,35 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
+				ng-init="feedbackSent = false;"
 			)
 				span.line-no
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
+				.card.card-hint(ng-if="entry.humanReadableHint")
+					figure.card-hint-icon-container
+						i.fa.fa-lightbulb-o(aria-hidden="true")
+					p.card-hint-text(ng-show="entry.humanReadableHint", ng-bind-html="entry.humanReadableHint")
+					.card-hint-actions
+						.card-hint-ext-link
+							a(ng-href="{{ entry.extraInfoURL }}", target="_blank")
+								i.fa.fa-external-link
+								|&nbsp;#{translate("log_hint_extra_info")}
+						.card-hint-feedback(
+							ng-show="!feedbackSent"
+							ng-class="entry.ruleId"
+						)
+							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
+							a.card-hint-feedback-positive(
+								ng-click="feedbackSent = true;"
+							) #{translate("answer_yes")}
+							span &nbsp;/&nbsp;
+							a.card-hint-feedback-negative(
+								ng-click="feedbackSent = true;"
+							) #{translate("answer_no")}
+						.card-hint-feedback(ng-show="feedbackSent")
+							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
 				p.entry-content(ng-show="entry.content") {{ entry.content }}
 
 		p
