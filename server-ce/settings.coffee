@@ -422,7 +422,12 @@ if process.env["SHARELATEX_RIGHT_FOOTER"]?
 		settings.nav.right_footer = JSON.parse(process.env["SHARELATEX_RIGHT_FOOTER"])
 	catch e
 		console.error("could not parse SHARELATEX_RIGHT_FOOTER, not valid JSON")
-		
+
+if process.env["SHARELATEX_HEADER_IMAGE_URL"]?
+	settings.nav.custom_logo = process.env["SHARELATEX_HEADER_IMAGE_URL"]
+	
+settings.nav.custom_logo = "http://www.bbc.co.uk/news/special/2015/newsspec_10857/bbc_news_logo.png"
+
 
 if process.env["SHARELATEX_HEADER"]?
 	settings.nav.header = process.env["SHARELATEX_HEADER"]
@@ -501,9 +506,21 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
+		try
+			ca = JSON.parse(process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"])
+		catch e
+			console.error "could not parse SHARELATEX_LDAP_TLS_OPTS_CA_PATH, invalid JSON"
+			
+		if typeof(ca)  == 'string'
+			ca_paths = [ca]
+		else if typeof(ca) == 'object' && ca.length?
+			ca_paths = ca
+		else
+			console.error "problem parsing SHARELATEX_LDAP_TLS_OPTS_CA_PATH"
+
 		settings.ldap.tlsOptions =
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
-			ca: process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"] # e.g.'/etc/ldap/ca_certs.pem'
+			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
 
 # Compiler
 # --------
