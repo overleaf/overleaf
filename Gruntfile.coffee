@@ -36,7 +36,7 @@ module.exports = (grunt) ->
 					limit: SERVICES.length
 					logConcurrentOutput: true
 		coffee:
-			migrate: 
+			migrate:
 				expand: true,
 				flatten: false,
 				cwd: './',
@@ -69,9 +69,8 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
-						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:dirs", "install:config"])
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:dirs"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
-						"Config tasks": ["install:config"]
 						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
 
 	for service in SERVICES
@@ -87,14 +86,13 @@ module.exports = (grunt) ->
 				done = @async()
 				Helpers.createNewRelease(service, grunt.option("release"), done)
 
-	grunt.registerTask 'install:config', "Copy the example config into the real config", () ->
-		Helpers.installConfig @async()
+
 	grunt.registerTask 'install:dirs', "Copy the example config into the real config", () ->
 		Helpers.createDataDirs @async()
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		["check:make"].concat(
 			("install:#{service.name}" for service in SERVICES)
-		).concat(["install:config", "install:dirs"])
+		).concat([ "install:dirs"])
 	grunt.registerTask 'install', 'install:all'
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
 		["check:make"].concat(
@@ -174,7 +172,7 @@ module.exports = (grunt) ->
 				proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
 				proc.on "close", () ->
 					callback()
-					
+
 		createNewRelease: (service, version, callback = (error) ->) ->
 			dir = service.name
 			proc = spawn "sed", [
@@ -224,19 +222,6 @@ module.exports = (grunt) ->
 						exec "mkdir -p #{path}", callback
 			async.series jobs, callback
 
-		installConfig: (callback = (error) ->) ->
-			src = "config/settings.development.coffee.example"
-			dest = "config/settings.development.coffee"
-			if !fs.existsSync(dest)
-				grunt.log.writeln "Creating config at #{dest}"
-				config = fs.readFileSync(src).toString()
-				config = config.replace /CRYPTO_RANDOM/g, () ->
-					crypto.randomBytes(64).toString("hex")
-				fs.writeFileSync dest, config
-				callback()
-			else
-				grunt.log.writeln "Config file already exists. Skipping."
-				callback()
 
 		runGruntInstall: (service, callback = (error) ->) ->
 			dir = service.name
@@ -280,9 +265,9 @@ module.exports = (grunt) ->
 					latexmk comes with TexLive 2013, and must be a version from 2013 or later.
 					If you have already have TeXLive installed, then make sure it is
 					included in your PATH (example for 64-bit linux):
-					
+
 						export PATH=$PATH:/usr/local/texlive/2014/bin/x86_64-linux/
-					
+
 					This is a not a fatal error, but compiling will not work without latexmk.
 					"""
 					return callback(error)
@@ -307,7 +292,7 @@ module.exports = (grunt) ->
 							"""
 							error = new Error("latexmk is too old")
 				callback(error)
-				
+
 		checkAspell: (callback = (error) ->) ->
 			grunt.log.write "Checking aspell is installed... "
 			exec "aspell dump dicts", (error, stdout, stderr) ->
@@ -315,15 +300,15 @@ module.exports = (grunt) ->
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either aspell is not installed or is not in your PATH.
-					
+
 					On Ubuntu you can install aspell with:
-					
+
 						sudo apt-get install aspell
-						
+
 					Or on a mac:
-					
+
 						brew install aspell
-						
+
 					This is not a fatal error, but the spell-checker will not work without aspell
 					"""
 					return callback(error)
@@ -355,11 +340,11 @@ module.exports = (grunt) ->
 					Please configure your Amazon S3 credentials in config/settings.development.coffee
 
 					Amazon S3 (Simple Storage Service) is a cloud storage service provided by
-					Amazon. ShareLaTeX uses S3 for storing binary files like images. You can 
+					Amazon. ShareLaTeX uses S3 for storing binary files like images. You can
 					sign up for an account and find out more at:
 
 							http://aws.amazon.com/s3/
-										
+
 					"""
 					return callback()
 				client.getFile "does-not-exist", (error, response) ->
@@ -386,7 +371,7 @@ module.exports = (grunt) ->
 					else
 						grunt.log.error "FAIL."
 						grunt.log.errorlns """
-						Could not find directory "#{Settings.filestore.stores.user_files}". 
+						Could not find directory "#{Settings.filestore.stores.user_files}".
 						Please check your configuration.
 						"""
 					callback()
@@ -401,11 +386,11 @@ module.exports = (grunt) ->
 					grunt.log.error "FAIL."
 					grunt.log.errorlns """
 					Either make is not installed or is not in your path.
-					
+
 					On Ubuntu you can install make with:
-					
+
 					    sudo apt-get install build-essential
-					
+
 					"""
 					return callback(error)
 				else if error?
@@ -418,4 +403,3 @@ module.exports = (grunt) ->
 			template = fs.readFileSync("package/upstart/sharelatex-template.conf").toString()
 			for service in SERVICES
 				fs.writeFileSync "package/upstart/sharelatex-#{service.name}.conf", template.replace(/__SERVICE__/g, service.name)
-
