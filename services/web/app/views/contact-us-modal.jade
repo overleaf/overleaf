@@ -12,6 +12,18 @@ script(type='text/ng-template', id='supportModalTemplate')
 				| #{translate("subject")}
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
+			.contact-suggestions
+				p.contact-suggestion-label Have you checked our knowledge base?
+				ul.contact-suggestion-list
+					li: a.contact-suggestion-list-item
+						span Item 1 - subsection lorem 
+						i.fa.fa-angle-right
+					li: a.contact-suggestion-list-item
+						span Item 2 - subsection dolor 
+						i.fa.fa-angle-right
+					li: a.contact-suggestion-list-item
+						span Item 3 - subsection sit 
+						i.fa.fa-angle-right
 			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
 				| #{translate("email")}
 			.form-group(ng-show="'#{getUserEmail()}'.length < 1")

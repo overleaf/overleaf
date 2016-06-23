@@ -4,3 +4,50 @@
 		height: 120px;
 	}
 }
+
+.contact-suggestions {
+	margin: -5px -20px 10px;
+	padding: 10px 0;
+	color: @gray-dark;
+	background-color: @gray-lightest;
+	border-top: solid 1px @gray-lighter;
+	border-bottom: solid 1px @gray-lighter;
+	font-size: 0.9rem;
+}
+
+	.contact-suggestion-label {
+		margin-bottom: 10px;
+		padding: 0 20px;
+	}
+
+	.contact-suggestion-list {
+		.list-unstyled();
+		background-color: #FFF;
+		border-top: solid 1px @gray-lighter;
+		border-bottom: solid 1px @gray-lighter;
+
+		li:last-child .contact-suggestion-list-item {
+			border-bottom: none;
+		}
+	}
+
+		.contact-suggestion-list-item {
+			display: table;
+    		width: 100%;
+			color: @dropdown-link-color;
+			padding: 10px 20px; 
+			border-bottom: solid 1px lighten(@gray-lighter, 10%);
+			cursor: pointer;
+
+			&:hover,
+			&:focus {
+				text-decoration: none;
+				color: @dropdown-link-hover-color;
+				background-color: @dropdown-link-hover-bg;
+			}
+
+			i {
+				display: table-cell;
+				text-align: right;
+			}
+		}
