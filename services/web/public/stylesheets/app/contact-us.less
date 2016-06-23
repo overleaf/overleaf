@@ -25,6 +25,7 @@
 		background-color: #FFF;
 		border-top: solid 1px @gray-lighter;
 		border-bottom: solid 1px @gray-lighter;
+		margin: 0;
 
 		li:last-child .contact-suggestion-list-item {
 			border-bottom: none;
@@ -44,10 +45,15 @@
 				text-decoration: none;
 				color: @dropdown-link-hover-color;
 				background-color: @dropdown-link-hover-bg;
+
+				.fa {
+					color: inherit;
+				}
 			}
 
-			i {
+			.fa {
 				display: table-cell;
 				text-align: right;
+				color: @gray-lighter;
 			}
 		}
