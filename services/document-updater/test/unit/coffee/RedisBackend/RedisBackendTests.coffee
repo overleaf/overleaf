@@ -307,16 +307,6 @@ describe "RedisBackend", ->
 						err: @error
 					}, "error in redis backend")
 					.should.equal true
-
-	describe "monitorTcpAndReconnect", ->
-		beforeEach ->
-			@client._monitorCluster = sinon.stub()
-			@client.monitorTcpAndReconnect()
-	
-		it "should monitor the cluster client", ->
-			@client._monitorCluster
-				.calledWith(@rclient_ioredis)
-				.should.equal true
 	
 	describe "_healthCheckNodeRedisClient", ->
 		beforeEach ->
@@ -381,7 +371,7 @@ describe "RedisBackend", ->
 				@nodes[0].ping = (cb) -> cb()
 				@nodes[1].ping = (cb) -> # Just hang
 			
-			it "should return an error", ->
+			it "should return an error", (done) ->
 				@client._healthCheckClusterClient { rclient: @rclient_ioredis }, (error) ->
 					error.message.should.equal "ioredis node ping check timed out"
 					done()
