@@ -10,6 +10,8 @@ Errors = require "./Errors"
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
 
+rclient.monitorAndReconnect()
+
 module.exports = RedisManager =
 	putDocInMemory : (project_id, doc_id, docLines, version, _callback)->
 		timer = new metrics.Timer("redis.put-doc")

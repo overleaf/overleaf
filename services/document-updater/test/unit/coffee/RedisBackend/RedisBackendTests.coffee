@@ -42,6 +42,8 @@ describe "RedisBackend", ->
 		class Cluster
 			constructor: (@config) ->
 				test_context.rclient_ioredis = @
+			
+			nodes: sinon.stub()
 
 		@RedisBackend = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @Settings
@@ -305,3 +307,60 @@ describe "RedisBackend", ->
 					}, "error in redis backend")
 					.should.equal true
 
+	describe "monitorAndReconnect", ->
+		beforeEach ->
+			@client._monitorCluster = sinon.stub()
+			@client.monitorAndReconnect()
+	
+		it "should monitor the cluster client", ->
+			@client._monitorCluster
+				.calledWith(@rclient_ioredis)
+				.should.equal true
+	
+	describe "_monitorCluster", ->
+		beforeEach ->
+			@client.HEARTBEAT_TIMEOUT = 10
+			@client.HEARTBEAT_INTERVAL = 100
+			@nodes = [{
+				options: key: "node-0"
+				stream: destroy: sinon.stub()
+			}, {
+				options: key: "node-1"
+				stream: destroy: sinon.stub()
+			}]
+			@rclient_ioredis.nodes = sinon.stub().returns(@nodes)
+
+		describe "successfully", ->
+			beforeEach ->
+				@nodes[0].ping = (cb) -> cb()
+				@nodes[1].ping = (cb) -> cb()
+				@client._monitorCluster(@rclient_ioredis)
+			
+			it "should get all nodes", ->
+				setTimeout () =>
+					@rclient_ioredis.nodes
+						.calledWith("all")
+						.should.equal true
+				, 200
+			
+			it "should not reset the node connections", (done) ->
+				setTimeout () =>
+					@nodes[0].stream.destroy.called.should.equal false
+					@nodes[1].stream.destroy.called.should.equal false
+					done()
+				, 200
+		
+		describe "when ping fails to a node", ->
+			beforeEach ->
+				@nodes[0].ping = (cb) -> cb()
+				@nodes[1].ping = (cb) -> # Just hang
+				@client._monitorCluster(@rclient_ioredis)
+			
+			it "should reset the failing node connection", (done) ->
+				setTimeout () =>
+					@nodes[0].stream.destroy.called.should.equal false
+					@nodes[1].stream.destroy.called.should.equal true
+					done()
+				, 200
+			
+				

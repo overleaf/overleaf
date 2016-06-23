@@ -5,6 +5,8 @@ logger = require "logger-sharelatex"
 
 class Client
 	constructor: (@clients) ->
+		@HEARTBEAT_INTERVAL = 5000
+		@HEARTBEAT_TIMEOUT = 2000
 		
 	multi: () ->
 		return new MultiClient(
@@ -15,6 +17,29 @@ class Client
 				driver: client.driver
 			}
 		)
+
+	monitorAndReconnect: () ->
+		for client in @clients
+			if client.driver == "ioredis"
+				@_monitorCluster(client.rclient)
+	
+	_monitorCluster: (rclient) ->
+		setInterval () =>
+			# Nodes can come and go as the cluster moves/heals, so each heartbeat
+			# we ask again for the currently known nodes.
+			for node in rclient.nodes("all")
+				do (node) =>
+					timer = setTimeout () =>
+						logger.error {err: new Error("Node timed out, reconnecting"), key: node.options.key}
+						node.stream.destroy()
+						timer = null
+					, @HEARTBEAT_TIMEOUT
+					node.ping (err) ->
+						if !err?
+							clearTimeout timer
+							timer = null
+		, @HEARTBEAT_INTERVAL
+
 
 class MultiClient
 	constructor: (@clients) ->

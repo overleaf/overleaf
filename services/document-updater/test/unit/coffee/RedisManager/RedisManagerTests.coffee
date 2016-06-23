@@ -10,9 +10,11 @@ describe "RedisManager", ->
 		@rclient =
 			auth: () ->
 			exec: sinon.stub()
+			monitorAndReconnect: () ->
 		@rclient.multi = () => @rclient
 		@RedisManager = SandboxedModule.require modulePath, requires:
-			"./RedisBackend": createClient: () => @rclient
+			"./RedisBackend":
+				createClient: () => @rclient
 			"./RedisKeyBuilder":
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 				docLines: ({doc_id}) -> "doclines:#{doc_id}"
