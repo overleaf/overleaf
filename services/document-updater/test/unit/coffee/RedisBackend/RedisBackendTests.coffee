@@ -307,10 +307,10 @@ describe "RedisBackend", ->
 					}, "error in redis backend")
 					.should.equal true
 
-	describe "monitorAndReconnect", ->
+	describe "monitorTcpAndReconnect", ->
 		beforeEach ->
 			@client._monitorCluster = sinon.stub()
-			@client.monitorAndReconnect()
+			@client.monitorTcpAndReconnect()
 	
 		it "should monitor the cluster client", ->
 			@client._monitorCluster

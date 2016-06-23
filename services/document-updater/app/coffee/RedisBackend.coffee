@@ -18,7 +18,7 @@ class Client
 			}
 		)
 
-	monitorAndReconnect: () ->
+	monitorTcpAndReconnect: () ->
 		for client in @clients
 			if client.driver == "ioredis"
 				@_monitorCluster(client.rclient)
@@ -28,18 +28,18 @@ class Client
 			# Nodes can come and go as the cluster moves/heals, so each heartbeat
 			# we ask again for the currently known nodes.
 			for node in rclient.nodes("all")
-				do (node) =>
-					timer = setTimeout () =>
-						logger.error {err: new Error("Node timed out, reconnecting"), key: node.options.key}
-						node.stream.destroy()
-						timer = null
-					, @HEARTBEAT_TIMEOUT
-					node.ping (err) ->
-						if !err?
-							clearTimeout timer
-							timer = null
+				@_checkNode(node)
 		, @HEARTBEAT_INTERVAL
-
+	
+	_checkNode: (node) ->
+		timer = setTimeout () ->
+			logger.error {err: new Error("Node timed out, reconnecting"), key: node.options.key}
+			# Discussion of application layer monitoring recommends this way of reconnecting at https://github.com/luin/ioredis/issues/275
+			node.stream.destroy()
+		, @HEARTBEAT_TIMEOUT
+		node.ping (err) ->
+			if !err?
+				clearTimeout timer
 
 class MultiClient
 	constructor: (@clients) ->

@@ -10,7 +10,7 @@ describe "RedisManager", ->
 		@rclient =
 			auth: () ->
 			exec: sinon.stub()
-			monitorAndReconnect: () ->
+			monitorTcpAndReconnect: () ->
 		@rclient.multi = () => @rclient
 		@RedisManager = SandboxedModule.require modulePath, requires:
 			"./RedisBackend":
