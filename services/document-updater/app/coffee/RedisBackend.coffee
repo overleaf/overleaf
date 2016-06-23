@@ -5,7 +5,6 @@ logger = require "logger-sharelatex"
 
 class Client
 	constructor: (@clients) ->
-		@HEARTBEAT_INTERVAL = 5000
 		@HEARTBEAT_TIMEOUT = 2000
 		
 	multi: () ->
@@ -18,28 +17,41 @@ class Client
 			}
 		)
 
-	monitorTcpAndReconnect: () ->
-		for client in @clients
-			if client.driver == "ioredis"
-				@_monitorCluster(client.rclient)
+	healthCheck: (callback) ->
+		jobs = @clients.map (client) =>
+			(cb) => @_healthCheckClient(client, cb)
+		async.parallel jobs, callback
 	
-	_monitorCluster: (rclient) ->
-		setInterval () =>
-			# Nodes can come and go as the cluster moves/heals, so each heartbeat
-			# we ask again for the currently known nodes.
-			for node in rclient.nodes("all")
-				@_checkNode(node)
-		, @HEARTBEAT_INTERVAL
+	_healthCheckClient: (client, callback) ->
+		if client.driver == "ioredis"
+			@_healthCheckClusterClient(client, callback)
+		else
+			@_healthCheckNodeRedisClient(client, callback)
 	
-	_checkNode: (node) ->
+	_healthCheckNodeRedisClient: (client, callback) ->
+		client.healthCheck ?= require("redis-sharelatex").activeHealthCheckRedis(Settings.redis.web)
+		if client.healthCheck.isAlive()
+			return callback()
+		else
+			return callback(new Error("node-redis client failed health check"))
+	
+	_healthCheckClusterClient: (client, callback) ->
+		jobs = client.rclient.nodes("all").map (n) =>
+			(cb) => @_checkNode(n, cb)
+		async.parallel jobs, callback
+	
+	_checkNode: (node, _callback) ->
+		callback = (args...) ->
+			_callback(args...)
+			_callback = () ->
 		timer = setTimeout () ->
-			logger.error {err: new Error("Node timed out, reconnecting"), key: node.options.key}
-			# Discussion of application layer monitoring recommends this way of reconnecting at https://github.com/luin/ioredis/issues/275
-			node.stream.destroy()
+			error = new Error("ioredis node ping check timed out")
+			logger.error {err: error, key: node.options.key}, "node timed out"
+			callback(error)
 		, @HEARTBEAT_TIMEOUT
 		node.ping (err) ->
-			if !err?
-				clearTimeout timer
+			clearTimeout timer
+			callback(err)
 
 class MultiClient
 	constructor: (@clients) ->

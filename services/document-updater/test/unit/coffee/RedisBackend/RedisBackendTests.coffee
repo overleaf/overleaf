@@ -50,6 +50,7 @@ describe "RedisBackend", ->
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 			"redis-sharelatex": @redis =
 				createClient: sinon.stub().returns @rclient_redis = {}
+				activeHealthCheck: sinon.stub()
 			"ioredis": @ioredis =
 				Cluster: Cluster
 		@client = @RedisBackend.createClient()
@@ -317,10 +318,40 @@ describe "RedisBackend", ->
 				.calledWith(@rclient_ioredis)
 				.should.equal true
 	
-	describe "_monitorCluster", ->
+	describe "_healthCheckNodeRedisClient", ->
+		beforeEach ->
+			@redis.activeHealthCheckRedis = sinon.stub().returns @healthCheck = {
+				isAlive: sinon.stub()
+			}
+		
+		describe "successfully", ->
+			beforeEach (done) ->
+				@healthCheck.isAlive.returns true
+				@redis_client = {}
+				@client._healthCheckNodeRedisClient(@redis_client, done)
+
+			it "should check the status of the node redis client", ->
+				@healthCheck.isAlive.called.should.equal true
+			
+			it "should only create one health check when called multiple times", (done) ->
+				@client._healthCheckNodeRedisClient @redis_client, () =>
+					@redis.activeHealthCheckRedis.calledOnce.should.equal true
+					@healthCheck.isAlive.calledTwice.should.equal true
+					done()
+		
+		describe "when failing", ->
+			beforeEach ->
+				@healthCheck.isAlive.returns false
+				@redis_client = {}
+			
+			it "should return an error", (done) ->
+				@client._healthCheckNodeRedisClient @redis_client, (error) ->
+					error.message.should.equal "node-redis client failed health check"
+					done()
+	
+	describe "_healthCheckClusterClient", ->
 		beforeEach ->
 			@client.HEARTBEAT_TIMEOUT = 10
-			@client.HEARTBEAT_INTERVAL = 100
 			@nodes = [{
 				options: key: "node-0"
 				stream: destroy: sinon.stub()
@@ -329,38 +360,28 @@ describe "RedisBackend", ->
 				stream: destroy: sinon.stub()
 			}]
 			@rclient_ioredis.nodes = sinon.stub().returns(@nodes)
-
-		describe "successfully", ->
-			beforeEach ->
-				@nodes[0].ping = (cb) -> cb()
-				@nodes[1].ping = (cb) -> cb()
-				@client._monitorCluster(@rclient_ioredis)
+	
+		describe "when both clients are successful", ->
+			beforeEach (done) ->
+				@nodes[0].ping = sinon.stub().yields()
+				@nodes[1].ping = sinon.stub().yields()
+				@client._healthCheckClusterClient({ rclient: @rclient_ioredis }, done)
 			
-			it "should get all nodes", ->
-				setTimeout () =>
-					@rclient_ioredis.nodes
-						.calledWith("all")
-						.should.equal true
-				, 200
+			it "should get all cluster nodes", ->
+				@rclient_ioredis.nodes
+					.calledWith("all")
+					.should.equal true
 			
-			it "should not reset the node connections", (done) ->
-				setTimeout () =>
-					@nodes[0].stream.destroy.called.should.equal false
-					@nodes[1].stream.destroy.called.should.equal false
-					done()
-				, 200
+			it "should ping each cluster node", ->
+				for node in @nodes
+					node.ping.called.should.equal true
 		
 		describe "when ping fails to a node", ->
 			beforeEach ->
 				@nodes[0].ping = (cb) -> cb()
 				@nodes[1].ping = (cb) -> # Just hang
-				@client._monitorCluster(@rclient_ioredis)
 			
-			it "should reset the failing node connection", (done) ->
-				setTimeout () =>
-					@nodes[0].stream.destroy.called.should.equal false
-					@nodes[1].stream.destroy.called.should.equal true
+			it "should return an error", ->
+				@client._healthCheckClusterClient { rclient: @rclient_ioredis }, (error) ->
+					error.message.should.equal "ioredis node ping check timed out"
 					done()
-				, 200
-			
-				

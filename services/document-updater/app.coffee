@@ -60,6 +60,13 @@ app.get "/health_check/redis", (req, res, next)->
 	else
 		res.send 500
 
+app.get "/health_check/redis_cluster", (req, res, next) ->
+	RedisManager.rclient.healthCheck (error, alive) ->
+		if error?
+			logger.err {err: error}, "failed redis cluster health check"
+			res.send 500
+		else
+			res.send 200
 
 app.use (error, req, res, next) ->
 	if error instanceof Errors.NotFoundError
