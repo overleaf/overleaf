@@ -454,9 +454,11 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 			host: process.env["SHARELATEX_EMAIL_SMTP_HOST"]
 			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
 			secure: process.env["SHARELATEX_EMAIL_SMTP_SECURE"]
-			auth:
-				user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
-				pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+			
+if process.env["SHARELATEX_EMAIL_SMTP_USER"] or process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+	settings.email.parameters.auth =
+			user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
+			pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
 
 
 # Password Settings
