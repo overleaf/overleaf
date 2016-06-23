@@ -41,13 +41,7 @@ define -> [
 			You have used the same label more than once. Check that each \\label{...} labels only one item.
 		"""
 	,
-		regexToMatch: /`!h' float specifier changed to `!ht'/
-		extraInfoURL: "https://www.sharelatex.com/learn/Errors:%60!h%27_float_specifier_changed_to_%60!ht%27."
-		humanReadableHint: """
-			The float specifier '!h' is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using 'ht', or even 'htbp' if necessary. If you want to try to keep the float here anyway, check out the [float package](https://www.sharelatex.com/learn/Errors:%60!h%27_float_specifier_changed_to_%60!ht%27.).
-		"""
-	,
-		regexToMatch: /`h' float specifier changed to `ht'/
+		regexToMatch: /`!?h' float specifier changed to `!?ht'/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:%60!h%27_float_specifier_changed_to_%60!ht%27."
 		humanReadableHint: """
 			The float specifier 'h' is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using 'ht', or even 'htbp' if necessary. If you want to try keep the float here anyway, check out the [float package](https://www.sharelatex.com/learn/Positioning_of_Figures).
