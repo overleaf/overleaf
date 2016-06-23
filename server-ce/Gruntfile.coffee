@@ -132,7 +132,9 @@ module.exports = (grunt) ->
 		["check:make"].concat(
 			("install:#{service.name}" for service in SERVICES)
 		).concat([ "install:dirs"])
+
 	grunt.registerTask 'install', 'install:all'
+
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
 		["check:make"].concat(
 			("update:#{service.name}" for service in SERVICES)
@@ -194,14 +196,19 @@ module.exports = (grunt) ->
 			if !fs.existsSync(dir)
 				proc = spawn "git", [
 					"clone",
-					"-b", service.version,
 					repo_src,
 					dir
 				], stdio: "inherit"
 				proc.on "close", () ->
-					callback()
+					Helpers.checkoutVersion service, callback
 			else
 				console.log "#{dir} already installed, skipping."
+				callback()
+
+		checkoutVersion: (service, callback = (error) ->) ->
+			dir = service.name
+			proc = spawn "git", ["checkout", service.version], stdio: "inherit", cwd: dir
+			proc.on "close", () ->
 				callback()
 
 		updateGitRepo: (service, callback = (error) ->) ->
