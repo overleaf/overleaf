@@ -155,7 +155,6 @@ module.exports = (grunt) ->
 			if !fs.existsSync(dir)
 				proc = spawn "git", [
 					"clone",
-					"-b", service.version,
 					repo_src,
 					dir
 				], stdio: "inherit"
