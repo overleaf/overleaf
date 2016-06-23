@@ -388,6 +388,7 @@ settings =
 			url: "http://localhost:3000"
 			user: httpAuthUser
 			pass: httpAuthPass
+	references:undefined
 	# 	documentupdater:
 	# 		url : "http://localhost:#{docUpdaterPort}"
 	# 	clsi:
