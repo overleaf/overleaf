@@ -129,7 +129,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							) #{translate("answer_no")}
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
-				p.entry-content(ng-show="entry.content") {{ entry.content }}
+				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
 			.pull-right
