@@ -125,10 +125,12 @@ div.full-size.pdf(ng-controller="PdfController")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
 							a.card-hint-feedback-positive(
 								ng-click="feedbackSent = true;"
+								href
 							) #{translate("answer_yes")}
 							span &nbsp;/&nbsp;
 							a.card-hint-feedback-negative(
 								ng-click="feedbackSent = true;"
+								href
 							) #{translate("answer_no")}
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
