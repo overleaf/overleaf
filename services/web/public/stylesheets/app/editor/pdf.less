@@ -181,6 +181,7 @@
 
 .card-hint:extend(.card-thin) {
 	margin-top: 10px;
+	padding-bottom: 7px;
 	cursor: default;
 
 	&-icon-container {
@@ -235,7 +236,8 @@
 		font-size: 0.8rem;
 	}
 	
-	&-actions a {
+	&-actions a,
+	&-text a {
 		.alert-danger & {
 			color: @alert-danger-text;
 		}
