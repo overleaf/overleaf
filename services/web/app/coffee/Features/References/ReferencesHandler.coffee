@@ -66,6 +66,8 @@ module.exports = ReferencesHandler =
 			ReferencesHandler._doIndexOperation(projectId, project, docIds, [], callback)
 
 	_doIndexOperation: (projectId, project, docIds, fileIds, callback) ->
+		if !settings.apis?.references?.url?
+			return callback()
 		ReferencesHandler._isFullIndex project, (err, isFullIndex) ->
 			if err
 				logger.err {err, projectId}, "error checking whether to do full index"
@@ -84,8 +86,6 @@ module.exports = ReferencesHandler =
 						ReferencesHandler._buildFileUrl projectId, fileId
 					allUrls = bibDocUrls.concat(bibFileUrls)
 					logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
-					if !settings.apis.references.url?
-						return callback()
 					request.post {
 						url: "#{settings.apis.references.url}/project/#{projectId}/index"
 						json:
