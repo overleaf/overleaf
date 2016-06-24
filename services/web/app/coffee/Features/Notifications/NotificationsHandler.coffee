@@ -5,7 +5,7 @@ logger = require("logger-sharelatex")
 oneSecond = 1000
 
 makeRequest = (opts, callback)->
-	if !settings.apis.notifications.url?
+	if !settings.apis.notifications?.url?
 		return callback()
 	else
 		request(opts, callback)
