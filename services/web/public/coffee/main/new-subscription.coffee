@@ -115,6 +115,13 @@ define [
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
 						coupon_code:pricing.items?.coupon?.code || ""
+						isPaypal: $scope.paymentMethod == 'paypal'
+						address:
+							address1: $scope.data.address1
+							address2: $scope.data.address2
+							country:  $scope.data.country
+							state:    $scope.data.state
+							zip:      $scope.data.zip
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->

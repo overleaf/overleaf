@@ -4,11 +4,140 @@ request = require 'request'
 Settings = require "settings-sharelatex"
 xml2js = require "xml2js"
 logger = require("logger-sharelatex")
+Async = require('async')
 
 module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
-	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
+	_createPaypalSubscription: (user, subscriptionDetails, recurly_token_id, callback) ->
+		logger.log {user_id: user._id, recurly_token_id}, "starting process of creating paypal subscription"
+		Async.waterfall([
+				(next) ->  # create account
+					logger.log {user_id: user._id, recurly_token_id}, "creating user in recurly"
+					address = subscriptionDetails.address
+					if !address
+						return next(new Error('no address in subscriptionDetails at createAccount stage'))
+					requestBody = """
+					<account>
+						<account_code>#{user._id}</account_code>
+						<email>#{user.email}</email>
+						<first_name>#{user.first_name}</first_name>
+						<last_name>#{user.last_name}</last_name>
+						<address>
+							<address1>#{address.address1}</address1>
+							<address2>#{address.address2}</address2>
+							<city>#{address.city}</city>
+							<state>#{address.state}</state>
+							<zip>#{address.zip}</zip>
+							<country>#{address.country}</country>
+						</address>
+					</account>
+					"""
+					RecurlyWrapper.apiRequest({
+						url    : "accounts"
+						method : "POST"
+						body   : requestBody
+					}, (error, response, responseBody) =>
+						return next(error) if error?
+						RecurlyWrapper._parseAccountXml responseBody, (err, account) ->
+							if err
+								logger.error {err, user_id: user._id, recurly_token_id}, "error creating account"
+								return next(err)
+							result = {account}
+							return next(null, result)
+					)
+				, (result, next) ->  # create billing info
+					logger.log {user_id: user._id, recurly_token_id}, "creating billing info in recurly"
+					accountCode = result?.account?.account_code
+					if !accountCode
+						return next(new Error('no account code at createBillingInfo stage'))
+					requestBody = """
+					<billing_info>
+  					<token_id>#{recurly_token_id}</token_id>
+					</billing_info>
+					"""
+					RecurlyWrapper.apiRequest({
+						url: "accounts/#{accountCode}/billing_info"
+						method: "POST"
+						body: requestBody
+					}, (error, response, responseBody) =>
+						return next(error) if error?
+						RecurlyWrapper._parseBillingInfoXml responseBody, (err, billingInfo) ->
+							if err
+								logger.error {err, user_id: user._id, accountCode, recurly_token_id}, "error creating billing info"
+								return next(err)
+							result.billingInfo = billingInfo
+							return next(null, result)
+					)
+				, (result, next) ->  # set address
+					logger.log {user_id: user._id, recurly_token_id}, "setting billing address in recurly"
+					accountCode = result?.account?.account_code
+					if !accountCode
+						return next(new Error('no account code at setAddress stage'))
+					address = subscriptionDetails.address
+					if !address
+						return next(new Error('no address in subscriptionDetails at setAddress stage'))
+					requestBody = """
+					<billing_info>
+						<address1>#{address.address1}</address1>
+						<address2 nil="nil">#{address.address2}</address2>
+						<city>#{address.city}</city>
+						<state>#{address.state}</state>
+						<zip>#{address.zip}</zip>
+						<country>#{address.country}</country>
+					</billing_info>
+					"""
+					RecurlyWrapper.apiRequest({
+						url: "accounts/#{accountCode}/billing_info"
+						method: "PUT"
+						body: requestBody
+					}, (error, response, responseBody) =>
+						return next(error) if error?
+						RecurlyWrapper._parseBillingInfoXml responseBody, (err, billingInfo) ->
+							if err
+								logger.error {err, user_id: user._id, recurly_token_id}, "error updating billing info"
+								return next(err)
+							result.billingInfo = billingInfo
+							return next(null, result)
+					)
+				, (result, next) ->  # create subscription
+					logger.log {user_id: user._id, recurly_token_id}, "creating subscription in recurly"
+					requestBody = """
+					<subscription>
+						<plan_code>#{subscriptionDetails.plan_code}</plan_code>
+						<currency>#{subscriptionDetails.currencyCode}</currency>
+						<coupon_code>#{subscriptionDetails.coupon_code}</coupon_code>
+						<account>
+							<account_code>#{user._id}</account_code>
+						</account>
+					</subscription>
+					"""  # TODO: check account details and billing
+					RecurlyWrapper.apiRequest({
+						url    : "subscriptions"
+						method : "POST"
+						body   : requestBody
+					}, (error, response, responseBody) =>
+						return next(error) if error?
+						RecurlyWrapper._parseSubscriptionXml responseBody, (err, subscription) ->
+							if err
+								logger.error {err, user_id: user._id, recurly_token_id}, "error creating subscription"
+								return next(err)
+							result.subscription = subscription
+							return next(null, result)
+					)
+			], (err, result) ->
+				if err
+					logger.error {err, user_id: user._id, recurly_token_id}, "error in paypal subscription creation process"
+					return callback(err)
+				if !result.subscription
+					err = new Error('no subscription object in result')
+					logger.error {err, user_id: user._id, recurly_token_id}, "error in paypal subscription creation process"
+					return callback(err)
+				logger.log {user_id: user._id, recurly_token_id}, "done creating paypal subscription for user"
+				callback(null, result.subscription)
+		)
+
+	_createCreditCardSubscription: (user, subscriptionDetails, recurly_token_id, callback) ->
 		requestBody = """
 		          <subscription>
 		            <plan_code>#{subscriptionDetails.plan_code}</plan_code>
@@ -32,7 +161,13 @@ module.exports = RecurlyWrapper =
 		}, (error, response, responseBody) =>
 			return callback(error) if error?
 			@_parseSubscriptionXml responseBody, callback
-		)		
+		)
+
+	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
+		isPaypal = subscriptionDetails.isPaypal
+		logger.log {user_id: user._id, isPaypal, recurly_token_id}, "setting up subscription in recurly"
+		fn = if isPaypal then RecurlyWrapper._createPaypalSubscription else RecurlyWrapper._createCreditCardSubscription
+		fn user, subscriptionDetails, recurly_token_id, callback
 
 	apiRequest : (options, callback) ->
 		options.url = @apiUrl + "/" + options.url
@@ -60,7 +195,7 @@ module.exports = RecurlyWrapper =
 						newAttributes[key] = value
 				else
 					newAttributes[newKey] = value
-					
+
 			return newAttributes
 
 		crypto.randomBytes 32, (error, buffer) ->
@@ -74,7 +209,7 @@ module.exports = RecurlyWrapper =
 			signature = "#{signed}|#{unsignedQuery}"
 
 			callback null, signature
-	
+
 
 	getSubscriptions: (accountId, callback)->
 		@apiRequest({
@@ -227,7 +362,7 @@ module.exports = RecurlyWrapper =
 		}, (error, response, body) ->
 			callback(error)
 		)
-		
+
 
 	redeemCoupon: (account_code, coupon_code, callback)->
 		requestBody = """
@@ -278,6 +413,15 @@ module.exports = RecurlyWrapper =
 				return callback "I don't understand the response from Recurly"
 			callback null, account
 
+	_parseBillingInfoXml: (xml, callback) ->
+		@_parseXml xml, (error, data) ->
+			return callback(error) if error?
+			if data? and data.account?
+				billingInfo = data.billing_info
+			else
+				return callback "I don't understand the response from Recurly"
+			callback null, billingInfo
+
 	_parseXml: (xml, callback) ->
 		convertDataTypes = (data) ->
 			if data? and data["$"]?
@@ -299,7 +443,7 @@ module.exports = RecurlyWrapper =
 						else
 							array.push(convertDataTypes(value))
 					data = array
-			
+
 			if data instanceof Array
 				data = (convertDataTypes(entry) for entry in data)
 			else if typeof data == "object"
@@ -315,6 +459,3 @@ module.exports = RecurlyWrapper =
 			return callback(error) if error?
 			result = convertDataTypes(data)
 			callback null, result
-
-			
-
