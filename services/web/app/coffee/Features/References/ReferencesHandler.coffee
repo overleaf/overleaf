@@ -84,6 +84,8 @@ module.exports = ReferencesHandler =
 						ReferencesHandler._buildFileUrl projectId, fileId
 					allUrls = bibDocUrls.concat(bibFileUrls)
 					logger.log {projectId, isFullIndex, docIds, bibDocUrls}, "sending request to references service"
+					if !settings.apis.references.url?
+						return callback()
 					request.post {
 						url: "#{settings.apis.references.url}/project/#{projectId}/index"
 						json:
