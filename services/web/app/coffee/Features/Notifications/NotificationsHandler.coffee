@@ -14,7 +14,7 @@ module.exports =
 
 	getUserNotifications: (user_id, callback)->
 		opts = 
-			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
+			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			json: true
 			timeout: oneSecond
 			method: "GET"
@@ -31,7 +31,7 @@ module.exports =
 
 	createNotification: (user_id, key, templateKey, messageOpts, callback)->
 		opts = 
-			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
+			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			timeout: oneSecond
 			method:"POST"
 			json: {
@@ -44,7 +44,7 @@ module.exports =
 
 	markAsReadWithKey: (user_id, key, callback)->
 		opts = 
-			uri: "#{settings.apis.notifications.url}/user/#{user_id}"
+			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			method: "DELETE"
 			timeout: oneSecond
 			json: {
@@ -57,7 +57,7 @@ module.exports =
 	markAsRead: (user_id, notification_id, callback)->
 		opts =
 			method: "DELETE"
-			uri: "#{settings.apis.notifications.url}/user/#{user_id}/notification/#{notification_id}"
+			uri: "#{settings.apis.notifications?.url}/user/#{user_id}/notification/#{notification_id}"
 			timeout:oneSecond
 		logger.log user_id:user_id, notification_id:notification_id, "sending mark notification as read to notifications api"
 		request opts, callback
