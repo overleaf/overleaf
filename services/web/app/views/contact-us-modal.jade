@@ -17,18 +17,13 @@ script(type='text/ng-template', id='supportModalTemplate')
 					maxlength='255',
 					tabindex='1',
 					onkeyup='')
-			.contact-suggestions
-				p.contact-suggestion-label Have you checked our knowledge base? {{ form.subject }}
+			.contact-suggestions(ng-show="suggestions.length")
+				p.contact-suggestion-label Have you checked our knowledge base?
 				ul.contact-suggestion-list
-					li: a.contact-suggestion-list-item
-						span Item 1 - subsection lorem 
-						i.fa.fa-angle-right
-					li: a.contact-suggestion-list-item
-						span Item 2 - subsection dolor 
-						i.fa.fa-angle-right
-					li: a.contact-suggestion-list-item
-						span Item 3 - subsection sit 
-						i.fa.fa-angle-right
+					li(ng-repeat="suggestion in suggestions")
+						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", target="_blank")
+							span(ng-bind-html="suggestion.name")
+							i.fa.fa-angle-right
 			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
 				| #{translate("email")}
 			.form-group(ng-show="'#{getUserEmail()}'.length < 1")
