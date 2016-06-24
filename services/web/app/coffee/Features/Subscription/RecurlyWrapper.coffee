@@ -35,7 +35,7 @@ module.exports = RecurlyWrapper =
 					)
 
 				, (result, next) ->  # create account
-					if !result.userExists
+					if result.userExists
 						logger.log {user_id: user._id, recurly_token_id}, "user already exists in recurly"
 						return next(null, result)
 					logger.log {user_id: user._id, recurly_token_id}, "creating user in recurly"
@@ -51,9 +51,9 @@ module.exports = RecurlyWrapper =
 						<address>
 							<address1>#{address.address1}</address1>
 							<address2>#{address.address2}</address2>
-							<city>#{address.city}</city>
-							<state>#{address.state}</state>
-							<zip>#{address.zip}</zip>
+							<city>#{address.city || ''}</city>
+							<state>#{address.state || ''}</state>
+							<zip>#{address.zip || ''}</zip>
 							<country>#{address.country}</country>
 						</address>
 					</account>
@@ -112,9 +112,9 @@ module.exports = RecurlyWrapper =
 					<billing_info>
 						<address1>#{address.address1}</address1>
 						<address2 nil="nil">#{address.address2}</address2>
-						<city>#{address.city}</city>
-						<state>#{address.state}</state>
-						<zip>#{address.zip}</zip>
+						<city>#{address.city || ''}</city>
+						<state>#{address.state || ''}</state>
+						<zip>#{address.zip || ''}</zip>
 						<country>#{address.country}</country>
 					</billing_info>
 					"""
@@ -454,6 +454,8 @@ module.exports = RecurlyWrapper =
 		@_parseXml xml, (error, data) ->
 			return callback(error) if error?
 			if data? and data.account?
+				billingInfo = data.billing_info
+			else if data? and data.billing_info?
 				billingInfo = data.billing_info
 			else
 				return callback "I don't understand the response from Recurly"
