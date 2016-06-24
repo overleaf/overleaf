@@ -11,9 +11,14 @@ script(type='text/ng-template', id='supportModalTemplate')
 			label
 				| #{translate("subject")}
 			.form-group
-				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
+				input.field.text.medium.span8.form-control(
+					ng-model="form.subject",
+					ng-model-options="{ updateOn: 'default blur', debounce: {'default': 350, 'blur': 0} }"
+					maxlength='255',
+					tabindex='1',
+					onkeyup='')
 			.contact-suggestions
-				p.contact-suggestion-label Have you checked our knowledge base?
+				p.contact-suggestion-label Have you checked our knowledge base? {{ form.subject }}
 				ul.contact-suggestion-list
 					li: a.contact-suggestion-list-item
 						span Item 1 - subsection lorem 

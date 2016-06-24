@@ -36,6 +36,9 @@ define [
 				$scope.sent = true
 				$scope.$apply()
 
+		$scope.$watch 'form.subject', (newVal, oldVal) ->
+			console.log newVal, oldVal
+
 		$scope.close = () ->
 			$modalInstance.close()
 
