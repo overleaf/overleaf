@@ -103,6 +103,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-init="feedbackSent = false;"
 			)
 				span.line-no
+					i.fa.fa-link(aria-hidden="true")&nbsp;
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}

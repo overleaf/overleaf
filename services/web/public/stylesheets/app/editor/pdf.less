@@ -120,6 +120,10 @@
 			float: right;
 			color: @gray;
 			font-weight: 700;
+
+			.fa {
+				display: none;
+			}
 		}
 		.entry-message {
 			font-weight: 700;
@@ -130,6 +134,26 @@
 			font-size: 0.8rem;
 			//font-family: @font-family-monospace;
 		}
+
+		&:hover .line-no {
+			color: inherit;
+			.fa {
+				display: inline-block;
+			}
+		}
+
+		&.alert-danger:hover {
+			background-color: darken(@alert-danger-bg, 5%);
+		}
+
+		&.alert-warning:hover {
+			background-color: darken(@alert-warning-bg, 5%);
+		}
+
+		&.alert-info:hover {
+			background-color: darken(@alert-info-bg, 5%);
+		}
+
 	}
 	pre {
 		font-size: 12px;
