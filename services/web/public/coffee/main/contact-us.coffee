@@ -3,6 +3,18 @@ define [
 	"libs/platform"
 ], (App, platform) ->
 
+	App.factory "algoliaSearch", ->
+		if window.sharelatex?.algolia? and window.sharelatex.algolia?.indexes?.wiki?
+			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
+			wikiIdx = client.initIndex(window.sharelatex.algolia?.indexes?.wiki)
+			kbIdx = client.initIndex(window.sharelatex.algolia?.indexes?.kb)
+
+		service =
+			searchWiki: wikiIdx.search.bind(wikiIdx)
+			searchKB: kbIdx.search.bind(kbIdx)
+		
+		return service
+
 
 	App.controller 'ContactModal', ($scope, $modal) ->
 		$scope.contactUsModal = () ->
@@ -11,10 +23,24 @@ define [
 				controller: "SupportModalController"
 			)
 
-	App.controller 'SupportModalController', ($scope, $modalInstance) ->
+	App.controller 'SupportModalController', ($scope, $modalInstance, algoliaSearch) ->
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
+		$scope.suggestions = [];
+
+		_handleSearchResults = (success, results) ->			
+			suggestions = for hit in results.hits
+				page_underscored = hit.pageName.replace(/\s/g,'_')
+				section_underscored = hit.sectionName.replace(/\s/g,'_')
+
+				suggestion = 
+					url :"/learn/#{page_underscored}##{section_underscored}"
+					name : hit._highlightResult.pageName.value + " - " + hit._highlightResult.sectionName.value
+
+			$scope.$applyAsync () -> 
+				$scope.suggestions = suggestions
+
 		$scope.contactUs = ->
 			if !$scope.form.email?
 				console.log "email not set"
@@ -36,8 +62,11 @@ define [
 				$scope.sent = true
 				$scope.$apply()
 
-		$scope.$watch 'form.subject', (newVal, oldVal) ->
-			console.log newVal, oldVal
+		$scope.$watch "form.subject", (newVal, oldVal) ->
+			if newVal and newVal != oldVal
+				algoliaSearch.searchWiki newVal, _handleSearchResults
+
+		$scope.$watch "suggestions", (newVal) -> console.log newVal
 
 		$scope.close = () ->
 			$modalInstance.close()
