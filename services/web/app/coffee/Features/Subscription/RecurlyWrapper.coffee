@@ -12,7 +12,32 @@ module.exports = RecurlyWrapper =
 	_createPaypalSubscription: (user, subscriptionDetails, recurly_token_id, callback) ->
 		logger.log {user_id: user._id, recurly_token_id}, "starting process of creating paypal subscription"
 		Async.waterfall([
-				(next) ->  # create account
+				(next) ->  # check if account exists
+					logger.log {user_id: user._id, recurly_token_id}, "checking if recurly account exists for user"
+					RecurlyWrapper.apiRequest({
+						url:    "accounts/#{user._id}"
+						method: "GET"
+					}, (error, response, responseBody) ->
+						if error
+							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while checking account"
+							return next(error)
+						result = {userExists: true}
+						if response.statusCode == 404
+							result.userExists = false
+							return next(null, result)
+						logger.log {user_id: user._id, recurly_token_id}, "user appears to exist in recurly"
+						RecurlyWrapper._parseAccountXml responseBody, (err, account) ->
+							if err
+								logger.error {err, user_id: user._id, recurly_token_id}, "error parsing account"
+								return next(err)
+							result.account = account
+							return next(null, result)
+					)
+
+				, (result, next) ->  # create account
+					if !result.userExists
+						logger.log {user_id: user._id, recurly_token_id}, "user already exists in recurly"
+						return next(null, result)
 					logger.log {user_id: user._id, recurly_token_id}, "creating user in recurly"
 					address = subscriptionDetails.address
 					if !address
@@ -38,14 +63,17 @@ module.exports = RecurlyWrapper =
 						method : "POST"
 						body   : requestBody
 					}, (error, response, responseBody) =>
-						return next(error) if error?
+						if error
+							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while creating account"
+							return next(error)
 						RecurlyWrapper._parseAccountXml responseBody, (err, account) ->
 							if err
 								logger.error {err, user_id: user._id, recurly_token_id}, "error creating account"
 								return next(err)
-							result = {account}
+							result.account = account
 							return next(null, result)
 					)
+
 				, (result, next) ->  # create billing info
 					logger.log {user_id: user._id, recurly_token_id}, "creating billing info in recurly"
 					accountCode = result?.account?.account_code
@@ -61,7 +89,9 @@ module.exports = RecurlyWrapper =
 						method: "POST"
 						body: requestBody
 					}, (error, response, responseBody) =>
-						return next(error) if error?
+						if error
+							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while creating billing info"
+							return next(error)
 						RecurlyWrapper._parseBillingInfoXml responseBody, (err, billingInfo) ->
 							if err
 								logger.error {err, user_id: user._id, accountCode, recurly_token_id}, "error creating billing info"
@@ -69,6 +99,7 @@ module.exports = RecurlyWrapper =
 							result.billingInfo = billingInfo
 							return next(null, result)
 					)
+
 				, (result, next) ->  # set address
 					logger.log {user_id: user._id, recurly_token_id}, "setting billing address in recurly"
 					accountCode = result?.account?.account_code
@@ -92,7 +123,9 @@ module.exports = RecurlyWrapper =
 						method: "PUT"
 						body: requestBody
 					}, (error, response, responseBody) =>
-						return next(error) if error?
+						if error
+							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while setting address"
+							return next(error)
 						RecurlyWrapper._parseBillingInfoXml responseBody, (err, billingInfo) ->
 							if err
 								logger.error {err, user_id: user._id, recurly_token_id}, "error updating billing info"
@@ -100,6 +133,7 @@ module.exports = RecurlyWrapper =
 							result.billingInfo = billingInfo
 							return next(null, result)
 					)
+
 				, (result, next) ->  # create subscription
 					logger.log {user_id: user._id, recurly_token_id}, "creating subscription in recurly"
 					requestBody = """
@@ -117,7 +151,9 @@ module.exports = RecurlyWrapper =
 						method : "POST"
 						body   : requestBody
 					}, (error, response, responseBody) =>
-						return next(error) if error?
+						if error
+							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while creating subscription"
+							return next(error)
 						RecurlyWrapper._parseSubscriptionXml responseBody, (err, subscription) ->
 							if err
 								logger.error {err, user_id: user._id, recurly_token_id}, "error creating subscription"
@@ -125,6 +161,7 @@ module.exports = RecurlyWrapper =
 							result.subscription = subscription
 							return next(null, result)
 					)
+
 			], (err, result) ->
 				if err
 					logger.error {err, user_id: user._id, recurly_token_id}, "error in paypal subscription creation process"
