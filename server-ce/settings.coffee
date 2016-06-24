@@ -389,6 +389,8 @@ settings =
 			user: httpAuthUser
 			pass: httpAuthPass
 	references:undefined
+	notifications:undefined
+
 	# 	documentupdater:
 	# 		url : "http://localhost:#{docUpdaterPort}"
 	# 	clsi:
