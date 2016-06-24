@@ -106,7 +106,10 @@ div.full-size.pdf(ng-controller="PdfController")
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
-				.card.card-hint(ng-if="entry.humanReadableHint")
+				.card.card-hint(
+					ng-if="entry.humanReadableHint"
+					stop-propagation="click"
+				)
 					figure.card-hint-icon-container
 						i.fa.fa-lightbulb-o(aria-hidden="true")
 					p.card-hint-text(ng-show="entry.humanReadableHint", ng-bind-html="entry.humanReadableHint")
@@ -129,7 +132,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							) #{translate("answer_no")}
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
-				p.entry-content(ng-show="entry.content") {{ entry.content }}
+				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
 			.pull-right
