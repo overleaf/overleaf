@@ -8,7 +8,7 @@ define -> [
 		regexToMatch: /Extra alignment tab has been changed to \\cr/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:Extra_alignment_tab_has_been_changed_to_%5Ccr"
 		humanReadableHint: """
-			You have written too many alignment tabs in a table, causing one of them to be turned into a line break. Make sure you have specified the correct number of columns in your <a href=\"https://www.sharelatex.com/learn/Tables\">table</a>.
+			You have written too many alignment tabs in a table, causing one of them to be turned into a line break. Make sure you have specified the correct number of columns in your <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Tables\">table</a>.
 		"""
 	,
 		regexToMatch: /Display math should end with \$\$/
@@ -20,7 +20,7 @@ define -> [
 		regexToMatch: /Missing [{$] inserted./
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:Missing_$_inserted"
 		humanReadableHint: """
-			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a href=\"https://www.sharelatex.com/learn/Errors:Missing_$_inserted\">here</a>.
+			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors:Missing_$_inserted\">here</a>.
 		"""
 	,
 		regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/
@@ -44,13 +44,13 @@ define -> [
 		regexToMatch: /`!?h' float specifier changed to `!?ht'/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:%60!h%27_float_specifier_changed_to_%60!ht%27."
 		humanReadableHint: """
-			The float specifier 'h' is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using 'ht', or even 'htbp' if necessary. If you want to try keep the float here anyway, check out the <a href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">float package</a>.
+			The float specifier 'h' is too strict of a demand for LaTeX to place your float in a nice way here. Try relaxing it by using 'ht', or even 'htbp' if necessary. If you want to try keep the float here anyway, check out the <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">float package</a>.
 		"""
 	,
 		regexToMatch: /No positions in optional float specifier/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:No_positions_in_optional_float_specifier."
 		humanReadableHint: """
-			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. Find out more about float specifiers <a href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
+			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
 	,
 		regexToMatch: /Undefined control sequence/
@@ -62,13 +62,13 @@ define -> [
 		regexToMatch: /File .+ not found/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:File_XXX_not_found_on_input_line_XXX."
 		humanReadableHint: """
-			The compiler cannot find the file you want to include. Make sure that you have <a href=\"https://www.sharelatex.com/learn/Including_images_in_ShareLaTeX\">uploaded the file</a> and <a href=\"https://www.sharelatex.com/learn/Errors:File_XXX_not_found_on_input_line_XXX.\">specified the file location correctly</a>.
+			The compiler cannot find the file you want to include. Make sure that you have <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Including_images_in_ShareLaTeX\">uploaded the file</a> and <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors:File_XXX_not_found_on_input_line_XXX.\">specified the file location correctly</a>.
 		"""
 	,
 		regexToMatch: /LaTeX Error: Unknown graphics extension: \..+/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:LaTeX_Error:_Unknown_graphics_extension:_.gif."
 		humanReadableHint: """
-			The compiler does not recognise the file type of one of your images. Make sure you are using a <a href=\"https://www.sharelatex.com/learn/Errors:LaTeX_Error:_Unknown_graphics_extension:_.gif.\">supported image format</a> for your choice of compiler, and check that there are no periods (.) in the name of your image.
+			The compiler does not recognise the file type of one of your images. Make sure you are using a <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors:LaTeX_Error:_Unknown_graphics_extension:_.gif.\">supported image format</a> for your choice of compiler, and check that there are no periods (.) in the name of your image.
 		"""
 	,
 		regexToMatch: /LaTeX Error: Unknown float option `H'/
@@ -80,7 +80,7 @@ define -> [
 		regexToMatch: /LaTeX Error: Unknown float option `.+'/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors:LaTeX_Error:_Unknown_float_option_%60H%27."
 		humanReadableHint: """
-			You have used a float specifier which the compiler does not understand. You can learn more about the different float options available for placing figures <a href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
+			You have used a float specifier which the compiler does not understand. You can learn more about the different float options available for placing figures <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
 	,
 		regexToMatch: /LaTeX Error: \\math.+ allowed only in math mode/
