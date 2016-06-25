@@ -156,7 +156,7 @@ define [
 					method:"GET"
 					params:
 						clsiserverid:ide.clsiServerId
-				if file.url?  # FIXME clean this up when we have file.urls out consistently
+				if file?.url?  # FIXME clean this up when we have file.urls out consistently
 					opts.url = file.url
 				else if file?.build?
 					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
