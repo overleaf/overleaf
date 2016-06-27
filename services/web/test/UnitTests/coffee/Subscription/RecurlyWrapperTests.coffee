@@ -338,6 +338,7 @@ describe "RecurlyWrapper", ->
 				country:  "some_country"
 				state:    "some_state"
 				zip:      "some_zip"
+				postal_code: "some_postal_code"
 				nonsenseKey: "rubbish"
 
 		it 'should generate the correct xml', () ->
@@ -351,6 +352,7 @@ describe "RecurlyWrapper", ->
 				<country>some_country</country>
 				<state>some_state</state>
 				<zip>some_zip</zip>
+				<postal_code>some_postal_code</postal_code>
 				</billing_info>\n
 				"""
 			)

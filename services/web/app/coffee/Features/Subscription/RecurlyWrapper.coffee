@@ -10,7 +10,7 @@ module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
 	_addressToXml: (address) ->
-		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip', 'postal_code']
+		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip']
 		resultString = "<billing_info>\n"
 		for k, v of address
 			if v and (k in allowedKeys)
@@ -27,13 +27,13 @@ module.exports = RecurlyWrapper =
 						url:    "accounts/#{user._id}"
 						method: "GET"
 					}, (error, response, responseBody) ->
+						result = {userExists: true}
 						if error
+							if response.statusCode == 404  # actually not an error in this case, just no existing account
+								result.userExists = false
+								return next(null, result)
 							logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while checking account"
 							return next(error)
-						result = {userExists: true}
-						if response.statusCode == 404
-							result.userExists = false
-							return next(null, result)
 						logger.log {user_id: user._id, recurly_token_id}, "user appears to exist in recurly"
 						RecurlyWrapper._parseAccountXml responseBody, (err, account) ->
 							if err

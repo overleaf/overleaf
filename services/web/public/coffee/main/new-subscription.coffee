@@ -121,7 +121,7 @@ define [
 							address2:    $scope.data.address2
 							country:     $scope.data.country
 							state:       $scope.data.state
-							postal_code: $scope.date.postal_code
+							postal_code: $scope.data.postal_code
 							zip:         $scope.data.zip
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
