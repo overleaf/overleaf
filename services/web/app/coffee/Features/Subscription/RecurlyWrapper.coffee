@@ -191,13 +191,13 @@ module.exports = RecurlyWrapper =
 		            </account>
 		          </subscription>
 		          """
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url    : "subscriptions"
 			method : "POST"
 			body   : requestBody
 		}, (error, response, responseBody) =>
 			return callback(error) if error?
-			@_parseSubscriptionXml responseBody, callback
+			RecurlyWrapper._parseSubscriptionXml responseBody, callback
 		)
 
 	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
@@ -207,7 +207,7 @@ module.exports = RecurlyWrapper =
 		fn user, subscriptionDetails, recurly_token_id, callback
 
 	apiRequest : (options, callback) ->
-		options.url = @apiUrl + "/" + options.url
+		options.url = RecurlyWrapper.apiUrl + "/" + options.url
 		options.headers =
 			"Authorization" : "Basic " + new Buffer(Settings.apis.recurly.apiKey).toString("base64")
 			"Accept"        : "application/xml"
@@ -249,11 +249,11 @@ module.exports = RecurlyWrapper =
 
 
 	getSubscriptions: (accountId, callback)->
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "accounts/#{accountId}/subscriptions"
 		}, (error, response, body) =>
 			return callback(error) if error?
-			@_parseXml body, callback
+			RecurlyWrapper._parseXml body, callback
 		)
 
 
@@ -266,11 +266,11 @@ module.exports = RecurlyWrapper =
 		else
 			url = "subscriptions/#{subscriptionId}"
 
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: url
 		}, (error, response, body) =>
 			return callback(error) if error?
-			@_parseSubscriptionXml body, (error, recurlySubscription) =>
+			RecurlyWrapper._parseSubscriptionXml body, (error, recurlySubscription) =>
 				return callback(error) if error?
 				if options.includeAccount
 					if recurlySubscription.account? and recurlySubscription.account.url?
@@ -278,7 +278,7 @@ module.exports = RecurlyWrapper =
 					else
 						return callback "I don't understand the response from Recurly"
 
-					@getAccount accountId, (error, account) ->
+					RecurlyWrapper.getAccount accountId, (error, account) ->
 						return callback(error) if error?
 						recurlySubscription.account = account
 						callback null, recurlySubscription
@@ -296,9 +296,9 @@ module.exports = RecurlyWrapper =
 					per_page:200
 			if cursor?
 				opts.qs.cursor = cursor
-			@apiRequest opts, (error, response, body) =>
+			RecurlyWrapper.apiRequest opts, (error, response, body) =>
 				return callback(error) if error?
-				@_parseXml body, (err, data)->
+				RecurlyWrapper._parseXml body, (err, data)->
 					if err?
 						logger.err err:err, "could not get accoutns"
 						callback(err)
@@ -314,19 +314,19 @@ module.exports = RecurlyWrapper =
 
 
 	getAccount: (accountId, callback) ->
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "accounts/#{accountId}"
 		}, (error, response, body) =>
 			return callback(error) if error?
-			@_parseAccountXml body, callback
+			RecurlyWrapper._parseAccountXml body, callback
 		)
 
 	getBillingInfo: (accountId, callback)->
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "accounts/#{accountId}/billing_info"
 		}, (error, response, body) =>
 			return callback(error) if error?
-			@_parseXml body, callback
+			RecurlyWrapper._parseXml body, callback
 		)
 
 
@@ -338,13 +338,13 @@ module.exports = RecurlyWrapper =
 		            <timeframe>#{options.timeframe}</timeframe>
 		          </subscription>
 		          """
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url    : "subscriptions/#{subscriptionId}"
 			method : "put"
 			body   : requestBody
 		}, (error, response, responseBody) =>
 			return callback(error) if error?
-			@_parseSubscriptionXml responseBody, callback
+			RecurlyWrapper._parseSubscriptionXml responseBody, callback
 		)
 
 	createFixedAmmountCoupon: (coupon_code, name, currencyCode, discount_in_cents, plan_code, callback)->
@@ -363,7 +363,7 @@ module.exports = RecurlyWrapper =
 			</coupon>
 		"""
 		logger.log coupon_code:coupon_code, requestBody:requestBody, "creating coupon"
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url    : "coupons"
 			method : "post"
 			body   : requestBody
@@ -375,16 +375,16 @@ module.exports = RecurlyWrapper =
 
 
 	lookupCoupon: (coupon_code, callback)->
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "coupons/#{coupon_code}"
 		}, (error, response, body) =>
 			return callback(error) if error?
-			@_parseXml body, callback
+			RecurlyWrapper._parseXml body, callback
 		)
 
 	cancelSubscription: (subscriptionId, callback) ->
 		logger.log subscriptionId:subscriptionId, "telling recurly to cancel subscription"
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "subscriptions/#{subscriptionId}/cancel",
 			method: "put"
 		}, (error, response, body) ->
@@ -393,7 +393,7 @@ module.exports = RecurlyWrapper =
 
 	reactivateSubscription: (subscriptionId, callback) ->
 		logger.log subscriptionId:subscriptionId, "telling recurly to reactivating subscription"
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url: "subscriptions/#{subscriptionId}/reactivate",
 			method: "put"
 		}, (error, response, body) ->
@@ -409,7 +409,7 @@ module.exports = RecurlyWrapper =
 			</redemption>
 		"""
 		logger.log account_code:account_code, coupon_code:coupon_code, requestBody:requestBody, "redeeming coupon for user"
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url    : "coupons/#{coupon_code}/redeem"
 			method : "post"
 			body   : requestBody
@@ -423,7 +423,7 @@ module.exports = RecurlyWrapper =
 		next_renewal_date = new Date()
 		next_renewal_date.setDate(next_renewal_date.getDate() + daysUntilExpire)
 		logger.log subscriptionId:subscriptionId, daysUntilExpire:daysUntilExpire, "Exending Free trial for user"
-		@apiRequest({
+		RecurlyWrapper.apiRequest({
 			url    : "/subscriptions/#{subscriptionId}/postpone?next_renewal_date=#{next_renewal_date}&bulk=false"
 			method : "put"
 		}, (error, response, responseBody) =>
@@ -433,7 +433,7 @@ module.exports = RecurlyWrapper =
 		)
 
 	_parseSubscriptionXml: (xml, callback) ->
-		@_parseXml xml, (error, data) ->
+		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
 			if data? and data.subscription?
 				recurlySubscription = data.subscription
@@ -442,7 +442,7 @@ module.exports = RecurlyWrapper =
 			callback null, recurlySubscription
 
 	_parseAccountXml: (xml, callback) ->
-		@_parseXml xml, (error, data) ->
+		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
 			if data? and data.account?
 				account = data.account
@@ -451,7 +451,7 @@ module.exports = RecurlyWrapper =
 			callback null, account
 
 	_parseBillingInfoXml: (xml, callback) ->
-		@_parseXml xml, (error, data) ->
+		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
 			if data? and data.account?
 				billingInfo = data.billing_info
