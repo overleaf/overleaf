@@ -29,7 +29,7 @@ define [
 		$scope.sending = false
 		$scope.suggestions = [];
 
-		_handleSearchResults = (success, results) ->			
+		_handleSearchResults = (success, results) ->
 			suggestions = for hit in results.hits
 				page_underscored = hit.pageName.replace(/\s/g,'_')
 				section_underscored = hit.sectionName.replace(/\s/g,'_')
@@ -64,9 +64,9 @@ define [
 
 		$scope.$watch "form.subject", (newVal, oldVal) ->
 			if newVal and newVal != oldVal
-				algoliaSearch.searchWiki newVal, _handleSearchResults
-
-		$scope.$watch "suggestions", (newVal) -> console.log newVal
+				algoliaSearch.searchWiki newVal, _handleSearchResults, { hitsPerPage: 3 }
+			else
+				$scope.suggestions = [];
 
 		$scope.close = () ->
 			$modalInstance.close()
