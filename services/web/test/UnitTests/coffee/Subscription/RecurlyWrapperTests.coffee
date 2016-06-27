@@ -475,14 +475,66 @@ describe "RecurlyWrapper", ->
 	describe '_createCreditCardSubscription', ->
 
 		beforeEach ->
+			@user =
+				_id: 'some_id'
+				email: 'user@example.com'
+			@subscriptionDetails =
+				currencyCode: "EUR"
+				plan_code:    "some_plan_code"
+				coupon_code:  ""
+				isPaypal: true
+				address:
+					address1: "addr_one"
+					address2: "addr_two"
+					country:  "some_country"
+					state:    "some_state"
+					zip:      "some_zip"
+			@subscription = {}
+			@recurly_token_id = "a-token-id"
+			@apiRequest = sinon.stub(@RecurlyWrapper, 'apiRequest')
+			@response =
+				statusCode: 200
+			@body = "<xml>is_bad</xml>"
+			@apiRequest.callsArgWith(1, null, @response, @body)
+			@_parseSubscriptionXml = sinon.stub(@RecurlyWrapper, '_parseSubscriptionXml')
+			@_parseSubscriptionXml.callsArgWith(1, null, @subscription)
+			@call = (callback) =>
+				@RecurlyWrapper._createCreditCardSubscription(@user, @subscriptionDetails, @recurly_token_id, callback)
 
-		describe 'when all goes well', ->
+		afterEach ->
+			@apiRequest.restore()
+			@_parseSubscriptionXml.restore()
 
-			beforeEach ->
+		it 'should not produce an error', (done) ->
+			@call (err, sub) =>
+				expect(err).to.not.be.instanceof Error
+				expect(err).to.equal null
+				done()
+
+		it 'should produce a subscription', (done) ->
+			@call (err, sub) =>
+				expect(sub).to.equal @subscription
+				done()
 
 		describe 'when api request produces an error', ->
 
 			beforeEach ->
+				@apiRequest.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, sub) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+		describe 'when parse xml produces an error', ->
+
+			beforeEach ->
+				@_parseSubscriptionXml.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, sub) =>
+					expect(err).to.be.instanceof Error
+					done()
 
 	describe '_createPaypalSubscription', ->
 
