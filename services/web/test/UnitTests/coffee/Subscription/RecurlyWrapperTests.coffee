@@ -2,8 +2,8 @@ should = require('chai').should()
 sinon = require 'sinon'
 crypto = require 'crypto'
 querystring = require 'querystring'
-RecurlyWrapper = require "../../../../app/js/Features/Subscription/RecurlyWrapper"
-Settings = require "settings-sharelatex"
+modulePath = "../../../../app/js/Features/Subscription/RecurlyWrapper"
+SandboxedModule = require('sandboxed-module')
 tk = require("timekeeper")
 
 fixtures =
@@ -97,22 +97,37 @@ mockApiRequest = (options, callback) ->
 
 
 describe "RecurlyWrapper", ->
-	beforeEach ->
-		Settings.plans = [{
-			planCode: "collaborator"
-			name: "Collaborator"
-			features:
-				collaborators: -1
-				versioning: true
-		}]
-		Settings.defaultPlanCode =
-			collaborators: 0
-			versioning: false
+
+	before ->
+		@settings =
+			plans: [{
+				planCode: "collaborator"
+				name: "Collaborator"
+				features:
+					collaborators: -1
+					versioning: true
+			}]
+			defaultPlanCode:
+				collaborators: 0
+				versioning: false
+			apis:
+				recurly:
+					apiKey: 'nonsense'
+					privateKey: 'private_nonsense'
+
+		@RecurlyWrapper = RecurlyWrapper = SandboxedModule.require modulePath, requires:
+			"settings-sharelatex": @settings
+			"logger-sharelatex":
+				err:   sinon.stub()
+				error: sinon.stub()
+				log:   sinon.stub()
+			"request": sinon.stub()
 
 	describe "sign", ->
+
 		before (done) ->
 			tk.freeze Date.now() # freeze the time for these tests
-			RecurlyWrapper.sign({
+			@RecurlyWrapper.sign({
 				subscription :
 					plan_code : "gold"
 					name      : "$$$"
@@ -127,7 +142,7 @@ describe "RecurlyWrapper", ->
 		it "should be signed correctly", ->
 			signed = @signature.split("|")[0]
 			query = @signature.split("|")[1]
-			crypto.createHmac("sha1", Settings.apis.recurly.privateKey).update(query).digest("hex").should.equal signed
+			crypto.createHmac("sha1", @settings.apis.recurly.privateKey).update(query).digest("hex").should.equal signed
 
 		it "should be url escaped", ->
 			query = @signature.split("|")[1]
@@ -180,7 +195,7 @@ describe "RecurlyWrapper", ->
 				"  <a name=\"terminate\" href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/terminate\" method=\"put\"/>" +
 				"  <a name=\"postpone\" href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/postpone\" method=\"put\"/>" +
 				"</subscription>"
-			RecurlyWrapper._parseXml xml, (error, data) ->
+			@RecurlyWrapper._parseXml xml, (error, data) ->
 				data.subscription.plan.plan_code.should.equal "gold"
 				data.subscription.plan.name.should.equal "Gold plan"
 				data.subscription.uuid.should.equal "44f83d7cba354d5b84812419f923ea96"
@@ -188,32 +203,36 @@ describe "RecurlyWrapper", ->
 				data.subscription.unit_amount_in_cents.should.equal 800
 				data.subscription.currency.should.equal "EUR"
 				data.subscription.quantity.should.equal 1
+
 				data.subscription.activated_at.should.deep.equal new Date("2011-05-27T07:00:00Z")
 				should.equal data.subscription.canceled_at, null
 				should.equal data.subscription.expires_at, null
+
 				data.subscription.current_period_started_at.should.deep.equal new Date("2011-06-27T07:00:00Z")
+
 				data.subscription.current_period_ends_at.should.deep.equal new Date("2011-07-27T07:00:00Z")
 				should.equal data.subscription.trial_started_at, null
 				should.equal data.subscription.trial_ends_at, null
-				data.subscription.subscription_add_ons.should.deep.equal [{
+
+				data.subscription.subscription_add_ons[0].should.deep.equal {
 					add_on_code: "ipaddresses"
 					quantity: "10"
 					unit_amount_in_cents: "150"
-				}]
+				}
 				data.subscription.account.url.should.equal "https://api.recurly.com/v2/accounts/1"
 				data.subscription.url.should.equal "https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96"
 				data.subscription.plan.url.should.equal "https://api.recurly.com/v2/plans/gold"
 				done()
-	
+
 	describe "getSubscription", ->
 		describe "with proper subscription id", ->
 			before ->
-				@apiRequest = sinon.stub(RecurlyWrapper, "apiRequest", mockApiRequest)
-				RecurlyWrapper.getSubscription "44f83d7cba354d5b84812419f923ea96", (error, recurlySubscription) =>
+				@apiRequest = sinon.stub(@RecurlyWrapper, "apiRequest", mockApiRequest)
+				@RecurlyWrapper.getSubscription "44f83d7cba354d5b84812419f923ea96", (error, recurlySubscription) =>
 					@recurlySubscription = recurlySubscription
 			after ->
-				RecurlyWrapper.apiRequest.restore()
-			
+				@RecurlyWrapper.apiRequest.restore()
+
 			it "should look up the subscription at the normal API end point", ->
 				@apiRequest.args[0][0].url.should.equal "subscriptions/44f83d7cba354d5b84812419f923ea96"
 
@@ -222,12 +241,12 @@ describe "RecurlyWrapper", ->
 
 		describe "with ReculyJS token", ->
 			before ->
-				@apiRequest = sinon.stub(RecurlyWrapper, "apiRequest", mockApiRequest)
-				RecurlyWrapper.getSubscription "70db44b10f5f4b238669480c9903f6f5", {recurlyJsResult: true}, (error, recurlySubscription) =>
+				@apiRequest = sinon.stub(@RecurlyWrapper, "apiRequest", mockApiRequest)
+				@RecurlyWrapper.getSubscription "70db44b10f5f4b238669480c9903f6f5", {recurlyJsResult: true}, (error, recurlySubscription) =>
 					@recurlySubscription = recurlySubscription
 			after ->
-				RecurlyWrapper.apiRequest.restore()
-				
+				@RecurlyWrapper.apiRequest.restore()
+
 			it "should return the subscription", ->
 				@recurlySubscription.uuid.should.equal "44f83d7cba354d5b84812419f923ea96"
 
@@ -236,30 +255,30 @@ describe "RecurlyWrapper", ->
 
 		describe "with includeAccount", ->
 			beforeEach ->
-				@apiRequest = sinon.stub(RecurlyWrapper, "apiRequest", mockApiRequest)
-				RecurlyWrapper.getSubscription "44f83d7cba354d5b84812419f923ea96", {includeAccount: true}, (error, recurlySubscription) =>
+				@apiRequest = sinon.stub(@RecurlyWrapper, "apiRequest", mockApiRequest)
+				@RecurlyWrapper.getSubscription "44f83d7cba354d5b84812419f923ea96", {includeAccount: true}, (error, recurlySubscription) =>
 					@recurlySubscription = recurlySubscription
 			afterEach ->
-				RecurlyWrapper.apiRequest.restore()
+				@RecurlyWrapper.apiRequest.restore()
 
 			it "should request the account from the API", ->
 				@apiRequest.args[1][0].url.should.equal "accounts/104"
-				
+
 			it "should populate the account attribute", ->
 				@recurlySubscription.account.account_code.should.equal "104"
-			
+
 
 	describe "updateSubscription", ->
 		beforeEach (done) ->
 			@recurlySubscriptionId = "subscription-id-123"
-			@apiRequest = sinon.stub RecurlyWrapper, "apiRequest", (options, callback) =>
+			@apiRequest = sinon.stub @RecurlyWrapper, "apiRequest", (options, callback) =>
 				@requestOptions = options
 				callback null, {}, fixtures["subscriptions/44f83d7cba354d5b84812419f923ea96"]
-			RecurlyWrapper.updateSubscription @recurlySubscriptionId, { plan_code : "silver", timeframe: "now" }, (error, recurlySubscription) =>
+			@RecurlyWrapper.updateSubscription @recurlySubscriptionId, { plan_code : "silver", timeframe: "now" }, (error, recurlySubscription) =>
 				@recurlySubscription = recurlySubscription
 				done()
 		afterEach ->
-			RecurlyWrapper.apiRequest.restore()
+			@RecurlyWrapper.apiRequest.restore()
 
 		it "should send an update request to the API", ->
 			@apiRequest.called.should.equal true
@@ -275,59 +294,58 @@ describe "RecurlyWrapper", ->
 		it "should return the updated subscription", ->
 			should.exist @recurlySubscription
 			@recurlySubscription.plan.plan_code.should.equal "gold"
-			
+
 
 	describe "cancelSubscription", ->
 		beforeEach (done) ->
 			@recurlySubscriptionId = "subscription-id-123"
-			@apiRequest = sinon.stub RecurlyWrapper, "apiRequest", (options, callback) =>
+			@apiRequest = sinon.stub @RecurlyWrapper, "apiRequest", (options, callback) =>
 				options.url.should.equal "subscriptions/#{@recurlySubscriptionId}/cancel"
 				options.method.should.equal "put"
 				callback()
-			RecurlyWrapper.cancelSubscription(@recurlySubscriptionId, done)
+			@RecurlyWrapper.cancelSubscription(@recurlySubscriptionId, done)
 
 		afterEach ->
-			RecurlyWrapper.apiRequest.restore()
+			@RecurlyWrapper.apiRequest.restore()
 
 		it "should send a cancel request to the API", ->
 			@apiRequest.called.should.equal true
-	
+
 	describe "reactivateSubscription", ->
 		beforeEach (done) ->
 			@recurlySubscriptionId = "subscription-id-123"
-			@apiRequest = sinon.stub RecurlyWrapper, "apiRequest", (options, callback) =>
+			@apiRequest = sinon.stub @RecurlyWrapper, "apiRequest", (options, callback) =>
 				options.url.should.equal "subscriptions/#{@recurlySubscriptionId}/reactivate"
 				options.method.should.equal "put"
 				callback()
-			RecurlyWrapper.reactivateSubscription(@recurlySubscriptionId, done)
+			@RecurlyWrapper.reactivateSubscription(@recurlySubscriptionId, done)
 
 		afterEach ->
-			RecurlyWrapper.apiRequest.restore()
+			@RecurlyWrapper.apiRequest.restore()
 
 		it "should send a cancel request to the API", ->
 			@apiRequest.called.should.equal true
-	
-		
+
+
 
 	describe "redeemCoupon", ->
 
 		beforeEach (done) ->
 			@recurlyAccountId = "account-id-123"
 			@coupon_code = "312321312"
-			@apiRequest = sinon.stub RecurlyWrapper, "apiRequest", (options, callback) =>
+			@apiRequest = sinon.stub @RecurlyWrapper, "apiRequest", (options, callback) =>
 				options.url.should.equal "coupons/#{@coupon_code}/redeem"
 				options.body.indexOf("<account_code>#{@recurlyAccountId}</account_code>").should.not.equal -1
 				options.body.indexOf("<currency>USD</currency>").should.not.equal -1
 				options.method.should.equal "post"
 				callback()
-			RecurlyWrapper.redeemCoupon(@recurlyAccountId, @coupon_code, done)
+			@RecurlyWrapper.redeemCoupon(@recurlyAccountId, @coupon_code, done)
 
 		afterEach ->
-			RecurlyWrapper.apiRequest.restore()
+			@RecurlyWrapper.apiRequest.restore()
 
 		it "should send the request to redem the coupon", ->
 			@apiRequest.called.should.equal true
-	
 
 	describe "_addressToXml", ->
 
@@ -341,7 +359,7 @@ describe "RecurlyWrapper", ->
 				nonsenseKey: "rubbish"
 
 		it 'should generate the correct xml', () ->
-			result = RecurlyWrapper._addressToXml @address
+			result = @RecurlyWrapper._addressToXml @address
 			should.equal(
 				result,
 				"""
@@ -355,5 +373,52 @@ describe "RecurlyWrapper", ->
 				"""
 			)
 
+	describe 'createSubscription', ->
+
+		beforeEach ->
+			@user =
+				_id: 'some_id'
+				email: 'user@example.com'
+			@subscriptionDetails =
+				currencyCode: "EUR"
+				plan_code:    "some_plan_code"
+				coupon_code:  ""
+				isPaypal: true
+				address:
+					address1: "addr_one"
+					address2: "addr_two"
+					country:  "some_country"
+					state:    "some_state"
+					zip:      "some_zip"
+			@recurly_token_id = "a-token-id"
 
 
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+			describe 'when paypal', ->
+				beforeEach ->
+
+			describe 'when not paypal', ->
+				beforeEach ->
+
+	describe '_createCreditCardSubscription', ->
+
+		beforeEach ->
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+		describe 'when api request produces an error', ->
+
+			beforeEach ->
+
+	describe '_createPaypalSubscription', ->
+
+		beforeEach ->
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
