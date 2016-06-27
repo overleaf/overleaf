@@ -1,4 +1,5 @@
 should = require('chai').should()
+expect = require('chai').expect
 sinon = require 'sinon'
 crypto = require 'crypto'
 querystring = require 'querystring'
@@ -392,18 +393,84 @@ describe "RecurlyWrapper", ->
 					country:  "some_country"
 					state:    "some_state"
 					zip:      "some_zip"
+			@subscription = {}
 			@recurly_token_id = "a-token-id"
+			@call = (callback) =>
+				@RecurlyWrapper.createSubscription(@user, @subscriptionDetails, @recurly_token_id, callback)
 
 
-		describe 'when all goes well', ->
+		describe 'when paypal', ->
 
 			beforeEach ->
+				@subscriptionDetails.isPaypal = true
+				@_createPaypalSubscription = sinon.stub(@RecurlyWrapper, '_createPaypalSubscription')
+				@_createPaypalSubscription.callsArgWith(3, null, @subscription)
 
-			describe 'when paypal', ->
-				beforeEach ->
+			afterEach ->
+				@_createPaypalSubscription.restore()
 
-			describe 'when not paypal', ->
+			it 'should not produce an error', (done) ->
+				@call (err, sub) =>
+					expect(err).to.equal null
+					expect(err).to.not.be.instanceof Error
+					done()
+
+			it 'should produce a subscription object', (done) ->
+				@call (err, sub) =>
+					expect(sub).to.deep.equal @subscription
+					done()
+
+			it 'should call _createPaypalSubscription', (done) ->
+				@call (err, sub) =>
+					@_createPaypalSubscription.callCount.should.equal 1
+					done()
+
+			describe "when _createPaypalSubscription produces an error", ->
+
 				beforeEach ->
+					@_createPaypalSubscription.callsArgWith(3, new Error('woops'))
+
+				it 'should produce an error', (done) ->
+					@call (err, sub) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+		describe 'when not paypal', ->
+
+			beforeEach ->
+				@subscriptionDetails.isPaypal = false
+				@_createCreditCardSubscription = sinon.stub(@RecurlyWrapper, '_createCreditCardSubscription')
+				@_createCreditCardSubscription.callsArgWith(3, null, @subscription)
+
+			afterEach ->
+				@_createCreditCardSubscription.restore()
+
+			it 'should not produce an error', (done) ->
+				@call (err, sub) =>
+					expect(err).to.equal null
+					expect(err).to.not.be.instanceof Error
+					done()
+
+			it 'should produce a subscription object', (done) ->
+				@call (err, sub) =>
+					expect(sub).to.deep.equal @subscription
+					done()
+
+			it 'should call _createCreditCardSubscription', (done) ->
+				@call (err, sub) =>
+					@_createCreditCardSubscription.callCount.should.equal 1
+					done()
+
+			describe "when _createCreditCardSubscription produces an error", ->
+
+				beforeEach ->
+					@_createCreditCardSubscription.callsArgWith(3, new Error('woops'))
+
+				it 'should produce an error', (done) ->
+					@call (err, sub) =>
+						expect(err).to.be.instanceof Error
+						done()
+
 
 	describe '_createCreditCardSubscription', ->
 
