@@ -164,37 +164,38 @@ describe "RecurlyWrapper", ->
 
 	describe "_parseXml", ->
 		it "should convert different data types into correct representations", (done) ->
-			xml =
-				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-				"<subscription href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96\">" +
-				"  <account href=\"https://api.recurly.com/v2/accounts/1\"/>" +
-				"  <plan href=\"https://api.recurly.com/v2/plans/gold\">" +
-				"    <plan_code>gold</plan_code>" +
-				"    <name>Gold plan</name>" +
-				"  </plan>" +
-				"  <uuid>44f83d7cba354d5b84812419f923ea96</uuid>" +
-				"  <state>active</state>" +
-				"  <unit_amount_in_cents type=\"integer\">800</unit_amount_in_cents>" +
-				"  <currency>EUR</currency>" +
-				"  <quantity type=\"integer\">1</quantity>" +
-				"  <activated_at type=\"datetime\">2011-05-27T07:00:00Z</activated_at>" +
-				"  <canceled_at nil=\"nil\"></canceled_at>" +
-				"  <expires_at nil=\"nil\"></expires_at>" +
-				"  <current_period_started_at type=\"datetime\">2011-06-27T07:00:00Z</current_period_started_at>" +
-				"  <current_period_ends_at type=\"datetime\">2011-07-27T07:00:00Z</current_period_ends_at>" +
-				"  <trial_started_at nil=\"nil\"></trial_started_at>" +
-				"  <trial_ends_at nil=\"nil\"></trial_ends_at>" +
-				"  <subscription_add_ons type=\"array\">" +
-				"    <subscription_add_on>" +
-				"      <add_on_code>ipaddresses</add_on_code>" +
-				"      <quantity>10</quantity>" +
-				"      <unit_amount_in_cents>150</unit_amount_in_cents>" +
-				"    </subscription_add_on>" +
-				"  </subscription_add_ons>" +
-				"  <a name=\"cancel\" href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/cancel\" method=\"put\"/>" +
-				"  <a name=\"terminate\" href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/terminate\" method=\"put\"/>" +
-				"  <a name=\"postpone\" href=\"https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/postpone\" method=\"put\"/>" +
-				"</subscription>"
+			xml = """
+				<?xml version="1.0" encoding="UTF-8"?>
+				<subscription href="https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96">
+				  <account href="https://api.recurly.com/v2/accounts/1"/>
+				  <plan href="https://api.recurly.com/v2/plans/gold">
+				    <plan_code>gold</plan_code>
+				    <name>Gold plan</name>
+				  </plan>
+				  <uuid>44f83d7cba354d5b84812419f923ea96</uuid>
+				  <state>active</state>
+				  <unit_amount_in_cents type="integer">800</unit_amount_in_cents>
+				  <currency>EUR</currency>
+				  <quantity type="integer">1</quantity>
+				  <activated_at type="datetime">2011-05-27T07:00:00Z</activated_at>
+				  <canceled_at nil="nil"></canceled_at>
+				  <expires_at nil="nil"></expires_at>
+				  <current_period_started_at type="datetime">2011-06-27T07:00:00Z</current_period_started_at>
+				  <current_period_ends_at type="datetime">2011-07-27T07:00:00Z</current_period_ends_at>
+				  <trial_started_at nil="nil"></trial_started_at>
+				  <trial_ends_at nil="nil"></trial_ends_at>
+				  <subscription_add_ons type="array">
+				    <subscription_add_on>
+				      <add_on_code>ipaddresses</add_on_code>
+				      <quantity>10</quantity>
+				      <unit_amount_in_cents>150</unit_amount_in_cents>
+				    </subscription_add_on>
+				  </subscription_add_ons>
+				  <a name="cancel" href="https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/cancel" method="put"/>
+				  <a name="terminate" href="https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/terminate" method="put"/>
+				  <a name="postpone" href="https://api.recurly.com/v2/subscriptions/44f83d7cba354d5b84812419f923ea96/postpone" method="put"/>
+				</subscription>
+				"""
 			@RecurlyWrapper._parseXml xml, (error, data) ->
 				data.subscription.plan.plan_code.should.equal "gold"
 				data.subscription.plan.name.should.equal "Gold plan"
@@ -225,6 +226,7 @@ describe "RecurlyWrapper", ->
 				done()
 
 	describe "getSubscription", ->
+
 		describe "with proper subscription id", ->
 			before ->
 				@apiRequest = sinon.stub(@RecurlyWrapper, "apiRequest", mockApiRequest)
