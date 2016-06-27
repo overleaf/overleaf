@@ -63,8 +63,12 @@ define [
 				$scope.$apply()
 
 		$scope.$watch "form.subject", (newVal, oldVal) ->
-			if newVal and newVal != oldVal
-				algoliaSearch.searchWiki newVal, _handleSearchResults, { hitsPerPage: 3 }
+			if newVal and newVal != oldVal and newVal.length > 3
+				# TODO Search the KB index instead; Wiki is used for testing purposes.
+				algoliaSearch.searchWiki newVal, _handleSearchResults, { 
+					hitsPerPage: 3
+					typoTolerance: 'strict'
+				}
 			else
 				$scope.suggestions = [];
 
