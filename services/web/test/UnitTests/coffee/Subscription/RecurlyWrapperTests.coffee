@@ -329,5 +329,31 @@ describe "RecurlyWrapper", ->
 			@apiRequest.called.should.equal true
 	
 
+	describe "_addressToXml", ->
+
+		beforeEach ->
+			@address =
+				address1: "addr_one"
+				address2: "addr_two"
+				country:  "some_country"
+				state:    "some_state"
+				zip:      "some_zip"
+				nonsenseKey: "rubbish"
+
+		it 'should generate the correct xml', () ->
+			result = RecurlyWrapper._addressToXml @address
+			should.equal(
+				result,
+				"""
+				<billing_info>
+				<address1>addr_one</address1>
+				<address2 nil="nil">addr_two</address2>
+				<country>some_country</country>
+				<state>some_state</state>
+				<zip>some_zip</zip>
+				</billing_info>\n
+				"""
+			)
+
 
 

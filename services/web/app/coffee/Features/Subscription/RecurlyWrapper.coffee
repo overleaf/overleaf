@@ -9,6 +9,15 @@ Async = require('async')
 module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
+	_addressToXml: (address) ->
+		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip', 'postal_code']
+		resultString = "<billing_info>\n"
+		for k, v of address
+			if v and (k in allowedKeys)
+				resultString += "<#{k}#{if k == 'address2' then ' nil="nil"' else ''}>#{v || ''}</#{k}>\n"
+		resultString += "</billing_info>\n"
+		return resultString
+
 	_createPaypalSubscription: (user, subscriptionDetails, recurly_token_id, callback) ->
 		logger.log {user_id: user._id, recurly_token_id}, "starting process of creating paypal subscription"
 		Async.waterfall([
@@ -108,16 +117,7 @@ module.exports = RecurlyWrapper =
 					address = subscriptionDetails.address
 					if !address
 						return next(new Error('no address in subscriptionDetails at setAddress stage'))
-					requestBody = """
-					<billing_info>
-						<address1>#{address.address1}</address1>
-						<address2 nil="nil">#{address.address2}</address2>
-						<city>#{address.city || ''}</city>
-						<state>#{address.state || ''}</state>
-						<zip>#{address.zip || ''}</zip>
-						<country>#{address.country}</country>
-					</billing_info>
-					"""
+					requestBody = RecurlyWrapper._addressToXml(address)
 					RecurlyWrapper.apiRequest({
 						url: "accounts/#{accountCode}/billing_info"
 						method: "PUT"
