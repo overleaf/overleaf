@@ -13,6 +13,7 @@ define [
 		# pdf.view = uncompiled | pdf | errors
 		$scope.pdf.view = if $scope?.pdf?.url then 'pdf' else 'uncompiled'
 		$scope.shouldShowLogs = false
+		$scope.wikiEnabled = window.wikiEnabled;
 
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
@@ -23,6 +24,11 @@ define [
 		createQueryString = (args) ->
 			qs_args = ("#{k}=#{v}" for k, v of args)
 			if qs_args.length then "?" + qs_args.join("&") else ""
+
+		$scope.stripHTMLFromString = (htmlStr) ->
+   			tmp = document.createElement("DIV")
+   			tmp.innerHTML = htmlStr
+   			return tmp.textContent || tmp.innerText || ""
 
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -173,7 +179,7 @@ define [
 			accumulateResults = (newEntries) ->
 				for key in ['all', 'errors', 'warnings']
 					logEntries[key] = logEntries[key].concat newEntries[key]
-				
+
 			# use the parsers for each file type
 			processLog = (log) ->
 				$scope.pdf.rawLog = log
