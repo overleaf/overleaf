@@ -516,6 +516,16 @@ describe "RecurlyWrapper", ->
 				expect(sub).to.equal @subscription
 				done()
 
+		it 'should call apiRequest', (done) ->
+			@call (err, sub) =>
+				@apiRequest.callCount.should.equal 1
+				done()
+
+		it 'should call _parseSubscriptionXml', (done) ->
+			@call (err, sub) =>
+				@_parseSubscriptionXml.callCount.should.equal 1
+				done()
+
 		describe 'when api request produces an error', ->
 
 			beforeEach ->
@@ -524,6 +534,16 @@ describe "RecurlyWrapper", ->
 			it 'should produce an error', (done) ->
 				@call (err, sub) =>
 					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should call apiRequest', (done) ->
+				@call (err, sub) =>
+					@apiRequest.callCount.should.equal 1
+					done()
+
+			it 'should not _parseSubscriptionXml', (done) ->
+				@call (err, sub) =>
+					@_parseSubscriptionXml.callCount.should.equal 0
 					done()
 
 		describe 'when parse xml produces an error', ->
@@ -539,7 +559,69 @@ describe "RecurlyWrapper", ->
 	describe '_createPaypalSubscription', ->
 
 		beforeEach ->
+			@checkAccountExists = sinon.stub(@RecurlyWrapper._paypal, 'checkAccountExists')
+			@createAccount = sinon.stub(@RecurlyWrapper._paypal, 'createAccount')
+			@createBillingInfo = sinon.stub(@RecurlyWrapper._paypal, 'createBillingInfo')
+			@setAddress = sinon.stub(@RecurlyWrapper._paypal, 'setAddress')
+			@createSubscription = sinon.stub(@RecurlyWrapper._paypal, 'createSubscription')
+			@user =
+				_id: 'some_id'
+				email: 'user@example.com'
+			@subscriptionDetails =
+				currencyCode: "EUR"
+				plan_code:    "some_plan_code"
+				coupon_code:  ""
+				isPaypal: true
+				address:
+					address1: "addr_one"
+					address2: "addr_two"
+					country:  "some_country"
+					state:    "some_state"
+					zip:      "some_zip"
+			@subscription = {}
+			@recurly_token_id = "a-token-id"
 
-		describe 'when all goes well', ->
+			# set up data callbacks
+			user = @user
+			subscriptionDetails = @subscriptionDetails
+			recurly_token_id = @recurly_token_id
 
-			beforeEach ->
+			@checkAccountExists.callsArgWith(1, null,
+				{user, subscriptionDetails, recurly_token_id,
+				userExists: false, account: {accountCode: 'xx'}}
+			)
+
+			@createAccount.callsArgWith(1, null,
+				{user, subscriptionDetails, recurly_token_id,
+				userExists: false, account: {accountCode: 'xx'}}
+			)
+
+			@createBillingInfo.callsArgWith(1, null,
+				{user, subscriptionDetails, recurly_token_id,
+				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}}
+			)
+
+			@setAddress.callsArgWith(1, null,
+				{user, subscriptionDetails, recurly_token_id,
+				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}}
+			)
+
+			@createSubscription.callsArgWith(1, null,
+				{user, subscriptionDetails, recurly_token_id,
+				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}, subscription: {}}
+			)
+
+			@call = (callback) =>
+				@RecurlyWrapper._createPaypalSubscription @user, @subscriptionDetails, @recurly_token_id, callback
+
+		afterEach ->
+			@checkAccountExists.restore()
+			@createAccount.restore()
+			@createBillingInfo.restore()
+			@setAddress.restore()
+			@createSubscription.restore()
+
+		it 'should not produce an error', (done) ->
+			@call (err, sub) =>
+				expect(err).to.not.be.instanceof Error
+				done()
