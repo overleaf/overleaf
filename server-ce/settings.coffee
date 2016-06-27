@@ -389,6 +389,8 @@ settings =
 			user: httpAuthUser
 			pass: httpAuthPass
 	references:undefined
+	notifications:undefined
+
 	# 	documentupdater:
 	# 		url : "http://localhost:#{docUpdaterPort}"
 	# 	clsi:
@@ -441,7 +443,7 @@ if process.env["SHARELATEX_HEADER"]?
 #     http://www.nodemailer.com/docs/transports
 
 
-if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
+if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 	
 	settings.email =
 		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
@@ -455,12 +457,16 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 			host: process.env["SHARELATEX_EMAIL_SMTP_HOST"]
 			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
 			secure: process.env["SHARELATEX_EMAIL_SMTP_SECURE"]
+			ignoreTLS: process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"]
 			
-if process.env["SHARELATEX_EMAIL_SMTP_USER"] or process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+if process.env["SHARELATEX_EMAIL_SMTP_USER"]? or process.env["SHARELATEX_EMAIL_SMTP_PASS"]?
 	settings.email.parameters.auth =
-			user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
-			pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
+		user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
+		pass: process.env["SHARELATEX_EMAIL_SMTP_PASS"]
 
+if process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]?
+	settings.email.parameters.tls =
+		rejectUnauthorized: process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]
 
 # Password Settings
 # -----------
