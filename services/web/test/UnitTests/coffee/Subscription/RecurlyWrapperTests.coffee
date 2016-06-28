@@ -628,7 +628,7 @@ describe "RecurlyWrapper", ->
 				expect(sub).to.equal @subscription
 				done()
 
-		it 'should call each of the paypal functions', (done) ->
+		it 'should call each of the paypal stages', (done) ->
 			@call (err, sub) =>
 				@checkAccountExists.callCount.should.equal 1
 				@createAccount.callCount.should.equal 1
@@ -636,3 +636,22 @@ describe "RecurlyWrapper", ->
 				@setAddress.callCount.should.equal 1
 				@createSubscription.callCount.should.equal 1
 				done()
+
+		describe 'when one of the paypal stages produces an error', ->
+
+			beforeEach ->
+				@createAccount.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, sub) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should stop calling the paypal stages after the error', (done) ->
+				@call (err, sub) =>
+					@checkAccountExists.callCount.should.equal 1
+					@createAccount.callCount.should.equal 1
+					@createBillingInfo.callCount.should.equal 0
+					@setAddress.callCount.should.equal 0
+					@createSubscription.callCount.should.equal 0
+					done()
