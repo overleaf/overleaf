@@ -39,6 +39,7 @@ module.exports = RecurlyWrapper =
 					if err
 						logger.error {err, user_id: user._id, recurly_token_id}, "error parsing account"
 						return next(err)
+					cache.userExists = true
 					cache.account = account
 					return next(null, cache)
 			)
@@ -46,13 +47,13 @@ module.exports = RecurlyWrapper =
 			user = cache.user
 			recurly_token_id = cache.recurly_token_id
 			subscriptionDetails = cache.subscriptionDetails
+			address = subscriptionDetails.address
+			if !address
+				return next(new Error('no address in subscriptionDetails at createAccount stage'))
 			if cache.userExists
 				logger.log {user_id: user._id, recurly_token_id}, "user already exists in recurly"
 				return next(null, cache)
 			logger.log {user_id: user._id, recurly_token_id}, "creating user in recurly"
-			address = subscriptionDetails.address
-			if !address
-				return next(new Error('no address in subscriptionDetails at createAccount stage'))
 			requestBody = """
 			<account>
 				<account_code>#{user._id}</account_code>
@@ -173,6 +174,9 @@ module.exports = RecurlyWrapper =
 
 	_createPaypalSubscription: (user, subscriptionDetails, recurly_token_id, callback) ->
 		logger.log {user_id: user._id, recurly_token_id}, "starting process of creating paypal subscription"
+		# We use `async.waterfall` to run each of these actions in sequence
+		# passing a `cache` object along the way. The cache is initialized
+		# with required data, and `async.apply` to pass the cache to the first function
 		cache = {user, recurly_token_id, subscriptionDetails}
 		Async.waterfall([
 			Async.apply(RecurlyWrapper._paypal.checkAccountExists, cache),
@@ -471,9 +475,7 @@ module.exports = RecurlyWrapper =
 	_parseBillingInfoXml: (xml, callback) ->
 		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
-			if data? and data.account?
-				billingInfo = data.billing_info
-			else if data? and data.billing_info?
+			if data? and data.billing_info?
 				billingInfo = data.billing_info
 			else
 				return callback "I don't understand the response from Recurly"

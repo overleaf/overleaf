@@ -656,11 +656,13 @@ describe "RecurlyWrapper", ->
 					@createSubscription.callCount.should.equal 0
 					done()
 
-	describe '_paypal.checkAccountExists', ->
+	describe 'paypal actions', ->
 
 		beforeEach ->
 			@apiRequest = sinon.stub(@RecurlyWrapper, 'apiRequest')
 			@_parseAccountXml = sinon.spy(@RecurlyWrapper, '_parseAccountXml')
+			@_parseBillingInfoXml = sinon.spy(@RecurlyWrapper, '_parseBillingInfoXml')
+			@_parseSubscriptionXml = sinon.spy(@RecurlyWrapper, '_parseSubscriptionXml')
 			@cache =
 				user: @user = {_id: 'some_id'}
 				recurly_token_id: @recurly_token_id = "some_token"
@@ -675,83 +677,343 @@ describe "RecurlyWrapper", ->
 						country:  "some_country"
 						state:    "some_state"
 						zip:      "some_zip"
-			@call = (callback) =>
-				@RecurlyWrapper._paypal.checkAccountExists @cache, callback
 
 		afterEach ->
 			@apiRequest.restore()
 			@_parseAccountXml.restore()
+			@_parseBillingInfoXml.restore()
+			@_parseSubscriptionXml.restore()
 
-		describe 'when the account exists', ->
+		describe '_paypal.checkAccountExists', ->
 
 			beforeEach ->
-				resultXml = '<account><account_code>abc</account_code></account>'
-				@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
+				@call = (callback) =>
+					@RecurlyWrapper._paypal.checkAccountExists @cache, callback
 
-			it 'should not produce an error', (done) ->
-				@call (err, result) =>
-					expect(err).to.not.be.instanceof Error
-					done()
+			describe 'when the account exists', ->
 
-			it 'should call apiRequest', (done) ->
-				@call (err, result) =>
-					@apiRequest.callCount.should.equal 1
-					done()
+				beforeEach ->
+					resultXml = '<account><account_code>abc</account_code></account>'
+					@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
 
-			it 'should call _parseAccountXml', (done) ->
-				@call (err, result) =>
-					@RecurlyWrapper._parseAccountXml.callCount.should.equal 1
-					done()
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
 
-			it 'should add the account to the cumulative result', (done) ->
-				@call (err, result) =>
-					expect(result.account).to.not.equal null
-					expect(result.account).to.not.equal undefined
-					expect(result.account).to.deep.equal {
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						done()
+
+				it 'should call _parseAccountXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseAccountXml.callCount.should.equal 1
+						done()
+
+				it 'should add the account to the cumulative result', (done) ->
+					@call (err, result) =>
+						expect(result.account).to.not.equal null
+						expect(result.account).to.not.equal undefined
+						expect(result.account).to.deep.equal {
+							account_code: 'abc'
+						}
+						done()
+
+				it 'should set userExists to true', (done) ->
+					@call (err, result) =>
+						expect(result.userExists).to.equal true
+						done()
+
+			describe 'when the account does not exist', ->
+
+				beforeEach ->
+					@apiRequest.callsArgWith(1, new Error('not found'), {statusCode: 404}, '')
+
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
+
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						@apiRequest.firstCall.args[0].method.should.equal 'GET'
+						done()
+
+				it 'should not call _parseAccountXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseAccountXml.callCount.should.equal 0
+						done()
+
+				it 'should not add the account to result', (done) ->
+					@call (err, result) =>
+						expect(result.account).to.equal undefined
+						done()
+
+				it 'should set userExists to false', (done) ->
+					@call (err, result) =>
+						expect(result.userExists).to.equal false
+						done()
+
+			describe 'when apiRequest produces an error', ->
+
+				beforeEach ->
+					@apiRequest.callsArgWith(1, new Error('woops'), {statusCode: 500})
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+		describe '_paypal.createAccount', ->
+
+			beforeEach ->
+				@call = (callback) =>
+					@RecurlyWrapper._paypal.createAccount @cache, callback
+
+			describe 'when address is missing from subscriptionDetails', ->
+
+				beforeEach ->
+					@cache.subscriptionDetails.address = null
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+			describe 'when account already exists', ->
+
+				beforeEach ->
+					@cache.userExists = true
+					@cache.account =
 						account_code: 'abc'
-					}
-					done()
 
-		describe 'when the account does not exist', ->
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
+
+				it 'should produce cache object', (done) ->
+					@call (err, result) =>
+						expect(result).to.deep.equal @cache
+						expect(result.account).to.deep.equal {
+							account_code: 'abc'
+						}
+						done()
+
+				it 'should not call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 0
+						done()
+
+				it 'should not call _parseAccountXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseAccountXml.callCount.should.equal 0
+						done()
+
+			describe 'when account does not exist', ->
+
+				beforeEach ->
+					@cache.userExists = false
+					resultXml = '<account><account_code>abc</account_code></account>'
+					@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
+
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
+
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						@apiRequest.firstCall.args[0].method.should.equal 'POST'
+						done()
+
+				it 'should call _parseAccountXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseAccountXml.callCount.should.equal 1
+						done()
+
+				describe 'when apiRequest produces an error', ->
+
+					beforeEach ->
+						@apiRequest.callsArgWith(1, new Error('woops'), {statusCode: 500})
+
+					it 'should produce an error', (done) ->
+						@call (err, result) =>
+							expect(err).to.be.instanceof Error
+							done()
+
+		describe '_paypal.createBillingInfo', ->
 
 			beforeEach ->
-				@apiRequest.callsArgWith(1, new Error('not found'), {statusCode: 404}, '')
+				@cache.account =
+					account_code: 'abc'
+				@call = (callback) =>
+					@RecurlyWrapper._paypal.createBillingInfo @cache, callback
 
-			it 'should not produce an error', (done) ->
-				@call (err, result) =>
-					expect(err).to.not.be.instanceof Error
-					done()
+			describe 'when account_code is missing from cache', ->
 
-			it 'should call apiRequest', (done) ->
-				@call (err, result) =>
-					@apiRequest.callCount.should.equal 1
-					done()
+				beforeEach ->
+					@cache.account.account_code = null
 
-			it 'should not call _parseAccountXml', (done) ->
-				@call (err, result) =>
-					@RecurlyWrapper._parseAccountXml.callCount.should.equal 0
-					done()
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
 
-			it 'should not add the account to result', (done) ->
-				@call (err, result) =>
-					expect(result.account).to.equal undefined
-					done()
+			describe 'when all goes well', ->
 
-	# describe '_paypal.createAccount', ->
+				beforeEach ->
+					resultXml = '<billing_info><a>1</a></billing_info>'
+					@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
 
-	# 	beforeEach ->
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
 
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						@apiRequest.firstCall.args[0].method.should.equal 'POST'
+						done()
 
-	# describe '_paypal.createBillingInfo', ->
+				it 'should call _parseBillingInfoXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseBillingInfoXml.callCount.should.equal 1
+						done()
 
-	# 	beforeEach ->
+				it 'should set billingInfo on cache', (done) ->
+					@call (err, result) =>
+						expect(result.billingInfo).to.deep.equal {
+							a: "1"
+						}
+						done()
 
+			describe 'when apiRequest produces an error', ->
 
-	# describe '_paypal.setAddress', ->
+				beforeEach ->
+					@apiRequest.callsArgWith(1, new Error('woops'), {statusCode: 500})
 
-	# 	beforeEach ->
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
 
+		describe '_paypal.setAddress', ->
 
-	# describe '_paypal.createSubscription', ->
+			beforeEach ->
+				@cache.account =
+					account_code: 'abc'
+				@cache.billingInfo = {}
+				@call = (callback) =>
+					@RecurlyWrapper._paypal.setAddress @cache, callback
 
-	# 	beforeEach ->
+			describe 'when account_code is missing from cache', ->
+
+				beforeEach ->
+					@cache.account.account_code = null
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+			describe 'when address is missing from subscriptionDetails', ->
+
+				beforeEach ->
+					@cache.subscriptionDetails.address = null
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+			describe 'when all goes well', ->
+
+				beforeEach ->
+					resultXml = '<billing_info><city>London</city></billing_info>'
+					@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
+
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
+
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						@apiRequest.firstCall.args[0].method.should.equal 'PUT'
+						done()
+
+				it 'should call _parseBillingInfoXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseBillingInfoXml.callCount.should.equal 1
+						done()
+
+				it 'should set billingInfo on cache', (done) ->
+					@call (err, result) =>
+						expect(result.billingInfo).to.deep.equal {
+							city: 'London'
+						}
+						done()
+
+			describe 'when apiRequest produces an error', ->
+
+				beforeEach ->
+					@apiRequest.callsArgWith(1, new Error('woops'), {statusCode: 500})
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+		describe '_paypal.createSubscription', ->
+
+			beforeEach ->
+				@cache.account =
+					account_code: 'abc'
+				@cache.billingInfo = {}
+				@call = (callback) =>
+					@RecurlyWrapper._paypal.createSubscription @cache, callback
+
+			describe 'when all goes well', ->
+
+				beforeEach ->
+					resultXml = '<subscription><a>1</a></subscription>'
+					@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
+
+				it 'should not produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.not.be.instanceof Error
+						done()
+
+				it 'should call apiRequest', (done) ->
+					@call (err, result) =>
+						@apiRequest.callCount.should.equal 1
+						@apiRequest.firstCall.args[0].method.should.equal 'POST'
+						done()
+
+				it 'should call _parseSubscriptionXml', (done) ->
+					@call (err, result) =>
+						@RecurlyWrapper._parseSubscriptionXml.callCount.should.equal 1
+						done()
+
+				it 'should set subscription on cache', (done) ->
+					@call (err, result) =>
+						expect(result.subscription).to.deep.equal {
+							a: "1"
+						}
+						done()
+
+			describe 'when apiRequest produces an error', ->
+
+				beforeEach ->
+					@apiRequest.callsArgWith(1, new Error('woops'), {statusCode: 500})
+
+				it 'should produce an error', (done) ->
+					@call (err, result) =>
+						expect(err).to.be.instanceof Error
+						done()
