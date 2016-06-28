@@ -5,7 +5,9 @@ define [
 		$scope.status = 
 			loading:true
 
-		perUserCompile = window.location?.search?.match(/isolated=true/)? or undefined
+		# enable per-user containers by default
+		perUserCompile = true
+
 		opts =
 			url:"/project/#{ide.project_id}/wordcount"
 			method:"GET"
