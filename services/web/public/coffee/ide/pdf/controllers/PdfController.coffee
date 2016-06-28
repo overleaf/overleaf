@@ -15,6 +15,22 @@ define [
 		$scope.shouldShowLogs = false
 		$scope.wikiEnabled = window.wikiEnabled;
 
+		# view logic to check whether the files dropdown should "drop up" or "drop down"
+		$scope.shouldDropUp = false
+
+		logsContainerEl	= document.querySelector ".pdf-logs"
+		filesDropdownEl	= logsContainerEl?.querySelector ".files-dropdown"
+
+		# get the top coordinate of the files dropdown as a ratio (to the logs container height)
+		# logs container supports scrollable content, so it's possible that ratio > 1.
+		getFilesDropdownTopCoordAsRatio = () ->
+			 filesDropdownEl?.getBoundingClientRect().top / logsContainerEl?.getBoundingClientRect().height
+
+		$scope.$watch "shouldShowLogs", (shouldShow) ->
+			if shouldShow
+				$scope.$applyAsync () -> 
+					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
+
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
 		else

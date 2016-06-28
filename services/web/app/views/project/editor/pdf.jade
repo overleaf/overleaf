@@ -151,12 +151,16 @@ div.full-size.pdf(ng-controller="PdfController")
 				)
 					i.fa.fa-trash-o
 				| &nbsp;
-				div.dropdown(style="display: inline-block;", dropdown)
+				div.files-dropdown(
+					style="display: inline-block;",
+					ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
+					dropdown
+				)
 					a.btn.btn-default.btn-sm(
 						href
 						dropdown-toggle
 					)
-						| !{translate("other_logs_and_files")} 
+						| !{translate("other_logs_and_files")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
