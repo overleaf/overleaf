@@ -590,25 +590,21 @@ describe "RecurlyWrapper", ->
 				{user, subscriptionDetails, recurly_token_id,
 				userExists: false, account: {accountCode: 'xx'}}
 			)
-
 			@createAccount.callsArgWith(1, null,
 				{user, subscriptionDetails, recurly_token_id,
 				userExists: false, account: {accountCode: 'xx'}}
 			)
-
 			@createBillingInfo.callsArgWith(1, null,
 				{user, subscriptionDetails, recurly_token_id,
 				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}}
 			)
-
 			@setAddress.callsArgWith(1, null,
 				{user, subscriptionDetails, recurly_token_id,
 				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}}
 			)
-
 			@createSubscription.callsArgWith(1, null,
 				{user, subscriptionDetails, recurly_token_id,
-				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}, subscription: {}}
+				userExists: false, account: {accountCode: 'xx'}, billingInfo: {token_id: 'abc'}, subscription: @subscription}
 			)
 
 			@call = (callback) =>
@@ -624,4 +620,19 @@ describe "RecurlyWrapper", ->
 		it 'should not produce an error', (done) ->
 			@call (err, sub) =>
 				expect(err).to.not.be.instanceof Error
+				done()
+
+		it 'should produce a subscription object', (done) ->
+			@call (err, sub) =>
+				expect(sub).to.not.equal null
+				expect(sub).to.equal @subscription
+				done()
+
+		it 'should call each of the paypal functions', (done) ->
+			@call (err, sub) =>
+				@checkAccountExists.callCount.should.equal 1
+				@createAccount.callCount.should.equal 1
+				@createBillingInfo.callCount.should.equal 1
+				@setAddress.callCount.should.equal 1
+				@createSubscription.callCount.should.equal 1
 				done()
