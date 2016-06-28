@@ -2,6 +2,7 @@ Settings = require "settings-sharelatex"
 async = require "async"
 _ = require "underscore"
 logger = require "logger-sharelatex"
+Metrics = require "metrics-sharelatex"
 
 class Client
 	constructor: (@clients) ->
@@ -136,7 +137,9 @@ compareResults = (results) ->
 	first = results[0]
 	for result in results.slice(1)
 		if not _.isEqual(first, result)
-			logger.warn { results }, "redis return values do not match"
+			Metrics.inc "backend-conflict"
+		else
+			Metrics.inc "backend-match"
 
 module.exports =
 	createClient: () ->

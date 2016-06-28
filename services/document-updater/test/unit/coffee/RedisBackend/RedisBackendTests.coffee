@@ -53,6 +53,8 @@ describe "RedisBackend", ->
 				activeHealthCheck: sinon.stub()
 			"ioredis": @ioredis =
 				Cluster: Cluster
+			"metrics-sharelatex":
+				@Metrics = inc: sinon.stub()
 		@client = @RedisBackend.createClient()
 		
 		@doc_id = "mock-doc-id"
@@ -96,6 +98,11 @@ describe "RedisBackend", ->
 				@rclient_ioredis.get
 					.calledWith("doclines:{#{@doc_id}}")
 					.should.equal true
+				
+			it "should send a metric", ->
+				@Metrics.inc
+					.calledWith("backend-match")
+					.should.equal true
 
 		describe "with different results", ->
 			beforeEach (done) ->
@@ -110,14 +117,9 @@ describe "RedisBackend", ->
 			it "should return the primary result", ->
 				@result.should.equal "primary-result"
 			
-			it "should log out the difference", ->
-				@logger.warn
-					.calledWith({
-						results: [
-							"primary-result",
-							"secondary-result"
-						]
-					}, "redis return values do not match")
+			it "should send a metric", ->
+				@Metrics.inc
+					.calledWith("backend-conflict")
 					.should.equal true
 
 		describe "when the secondary errors", ->
@@ -233,6 +235,11 @@ describe "RedisBackend", ->
 				@rclient_ioredis.exec
 					.called
 					.should.equal true
+				
+			it "should send a metric", ->
+				@Metrics.inc
+					.calledWith("backend-match")
+					.should.equal true
 
 		describe "with different results", ->
 			beforeEach (done) ->
@@ -251,14 +258,9 @@ describe "RedisBackend", ->
 			it "should return the primary result", ->
 				@result.should.deep.equal [@doclines, @version]
 			
-			it "should log out the difference", ->
-				@logger.warn
-					.calledWith({
-						results: [
-							[@doclines, @version],
-							["different-doc-lines", @version]
-						]
-					}, "redis return values do not match")
+			it "should send a metric", ->
+				@Metrics.inc
+					.calledWith("backend-conflict")
 					.should.equal true
 
 		describe "when the secondary errors", ->
