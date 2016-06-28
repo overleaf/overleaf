@@ -7,6 +7,16 @@ httpAuthPass = "CRYPTO_RANDOM" # Randomly generated for you
 httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
+parse = (option)->
+	if option?
+		try
+			opt = JSON.parse(option)
+			return opt
+		catch err
+			console.error "problem parsing #{option}, invalid JSON"
+			return undefined
+
+
 DATA_DIR = '/var/lib/sharelatex/data'
 TMP_DIR = '/var/lib/sharelatex/tmp'
 
@@ -456,9 +466,9 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 			#SMTP Creds
 			host: process.env["SHARELATEX_EMAIL_SMTP_HOST"]
 			port: process.env["SHARELATEX_EMAIL_SMTP_PORT"],
-			secure: process.env["SHARELATEX_EMAIL_SMTP_SECURE"]
-			ignoreTLS: process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"]
-			
+			secure: parse(process.env["SHARELATEX_EMAIL_SMTP_SECURE"])
+			ignoreTLS: parse(process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"])
+
 	if process.env["SHARELATEX_EMAIL_SMTP_USER"]? or process.env["SHARELATEX_EMAIL_SMTP_PASS"]?
 		settings.email.parameters.auth =
 			user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
@@ -466,7 +476,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 
 	if process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]?
 		settings.email.parameters.tls =
-			rejectUnauthorized: process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]
+			rejectUnauthorized: parse(process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"])
 
 # Password Settings
 # -----------
@@ -504,10 +514,10 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
 		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
 		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
-		anonymous: process.env["SHARELATEX_LDAP_ANONYMOUS"] == "true"
+		anonymous: parse(process.env["SHARELATEX_LDAP_ANONYMOUS"])
 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
 		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
-		starttls:  process.env["SHARELATEX_LDAP_TLS"] == "true"
+		starttls:  parse(process.env["SHARELATEX_LDAP_TLS"])
 		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
 
@@ -552,6 +562,10 @@ if process.env["SHARELATEX_TEMPLATES_USER_ID"]
 		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
 
 
+# /Learn
+# -------
+if process.env["SHARELATEX_PROXY_LEARN"]?
+	settings.proxyLearn = parse(process.env["SHARELATEX_PROXY_LEARN"])
 
 
 
