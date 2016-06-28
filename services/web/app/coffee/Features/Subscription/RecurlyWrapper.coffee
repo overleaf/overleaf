@@ -10,9 +10,11 @@ module.exports = RecurlyWrapper =
 	apiUrl : "https://api.recurly.com/v2"
 
 	_addressToXml: (address) ->
-		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip']
+		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip', 'postal_code']
 		resultString = "<billing_info>\n"
 		for k, v of address
+			if k == 'postal_code'
+				k = 'zip'
 			if v and (k in allowedKeys)
 				resultString += "<#{k}#{if k == 'address2' then ' nil="nil"' else ''}>#{v || ''}</#{k}>\n"
 		resultString += "</billing_info>\n"

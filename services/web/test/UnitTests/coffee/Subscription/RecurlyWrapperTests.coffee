@@ -354,11 +354,11 @@ describe "RecurlyWrapper", ->
 
 		beforeEach ->
 			@address =
-				address1: "addr_one"
-				address2: "addr_two"
-				country:  "some_country"
-				state:    "some_state"
-				zip:      "some_zip"
+				address1:    "addr_one"
+				address2:    "addr_two"
+				country:     "some_country"
+				state:       "some_state"
+				postal_code: "some_zip"
 				nonsenseKey: "rubbish"
 
 		it 'should generate the correct xml', () ->

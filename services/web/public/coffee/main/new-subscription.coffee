@@ -122,7 +122,6 @@ define [
 							country:     $scope.data.country
 							state:       $scope.data.state
 							postal_code: $scope.data.postal_code
-							zip:         $scope.data.zip
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->
