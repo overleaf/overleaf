@@ -76,6 +76,7 @@
     "grunt-contrib-watch": "^1.0.0",
     "grunt-env": "0.4.4",
     "grunt-exec": "^0.4.7",
+    "grunt-execute": "^0.2.2",
     "grunt-file-append": "0.0.6",
     "grunt-git-rev-parse": "^0.1.4",
     "grunt-mocha-test": "0.9.0",
