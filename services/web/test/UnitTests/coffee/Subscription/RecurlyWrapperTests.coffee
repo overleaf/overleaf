@@ -655,3 +655,103 @@ describe "RecurlyWrapper", ->
 					@setAddress.callCount.should.equal 0
 					@createSubscription.callCount.should.equal 0
 					done()
+
+	describe '_paypal.checkAccountExists', ->
+
+		beforeEach ->
+			@apiRequest = sinon.stub(@RecurlyWrapper, 'apiRequest')
+			@_parseAccountXml = sinon.spy(@RecurlyWrapper, '_parseAccountXml')
+			@cache =
+				user: @user = {_id: 'some_id'}
+				recurly_token_id: @recurly_token_id = "some_token"
+				subscriptionDetails: @subscriptionDetails =
+					currencyCode: "EUR"
+					plan_code:    "some_plan_code"
+					coupon_code:  ""
+					isPaypal: true
+					address:
+						address1: "addr_one"
+						address2: "addr_two"
+						country:  "some_country"
+						state:    "some_state"
+						zip:      "some_zip"
+			@call = (callback) =>
+				@RecurlyWrapper._paypal.checkAccountExists @cache, callback
+
+		afterEach ->
+			@apiRequest.restore()
+			@_parseAccountXml.restore()
+
+		describe 'when the account exists', ->
+
+			beforeEach ->
+				resultXml = '<account><account_code>abc</account_code></account>'
+				@apiRequest.callsArgWith(1, null, {statusCode: 200}, resultXml)
+
+			it 'should not produce an error', (done) ->
+				@call (err, result) =>
+					expect(err).to.not.be.instanceof Error
+					done()
+
+			it 'should call apiRequest', (done) ->
+				@call (err, result) =>
+					@apiRequest.callCount.should.equal 1
+					done()
+
+			it 'should call _parseAccountXml', (done) ->
+				@call (err, result) =>
+					@RecurlyWrapper._parseAccountXml.callCount.should.equal 1
+					done()
+
+			it 'should add the account to the cumulative result', (done) ->
+				@call (err, result) =>
+					expect(result.account).to.not.equal null
+					expect(result.account).to.not.equal undefined
+					expect(result.account).to.deep.equal {
+						account_code: 'abc'
+					}
+					done()
+
+		describe 'when the account does not exist', ->
+
+			beforeEach ->
+				@apiRequest.callsArgWith(1, new Error('not found'), {statusCode: 404}, '')
+
+			it 'should not produce an error', (done) ->
+				@call (err, result) =>
+					expect(err).to.not.be.instanceof Error
+					done()
+
+			it 'should call apiRequest', (done) ->
+				@call (err, result) =>
+					@apiRequest.callCount.should.equal 1
+					done()
+
+			it 'should not call _parseAccountXml', (done) ->
+				@call (err, result) =>
+					@RecurlyWrapper._parseAccountXml.callCount.should.equal 0
+					done()
+
+			it 'should not add the account to result', (done) ->
+				@call (err, result) =>
+					expect(result.account).to.equal undefined
+					done()
+
+	# describe '_paypal.createAccount', ->
+
+	# 	beforeEach ->
+
+
+	# describe '_paypal.createBillingInfo', ->
+
+	# 	beforeEach ->
+
+
+	# describe '_paypal.setAddress', ->
+
+	# 	beforeEach ->
+
+
+	# describe '_paypal.createSubscription', ->
+
+	# 	beforeEach ->
