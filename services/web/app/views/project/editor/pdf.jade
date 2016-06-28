@@ -141,7 +141,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
-			.pull-right
+			.files-dropdown-container
 				a.btn.btn-default.btn-sm(
 					href,
 					tooltip="#{translate('clear_cached_files')}",
@@ -152,7 +152,6 @@ div.full-size.pdf(ng-controller="PdfController")
 					i.fa.fa-trash-o
 				| &nbsp;
 				div.files-dropdown(
-					style="display: inline-block;",
 					ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
 					dropdown
 				)
