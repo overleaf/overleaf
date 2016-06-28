@@ -469,6 +469,10 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 			secure: parse(process.env["SHARELATEX_EMAIL_SMTP_SECURE"])
 			ignoreTLS: parse(process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"])
 
+
+		templates:
+			customFooter: process.env["SHARELATEX_CUSTOM_EMAIL_FOOTER"]
+
 	if process.env["SHARELATEX_EMAIL_SMTP_USER"]? or process.env["SHARELATEX_EMAIL_SMTP_PASS"]?
 		settings.email.parameters.auth =
 			user: process.env["SHARELATEX_EMAIL_SMTP_USER"]
@@ -477,6 +481,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 	if process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]?
 		settings.email.parameters.tls =
 			rejectUnauthorized: parse(process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"])
+		
 
 # Password Settings
 # -----------
