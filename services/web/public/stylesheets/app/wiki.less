@@ -39,6 +39,13 @@
 	}
 	
 	.example {
+		max-width: 100%;
+
+		& > div {
+			display: block !important;
+			width: auto !important;
+		}
+
 		.code {
 			pre {
 				background-color: @gray-lightest;
@@ -49,6 +56,9 @@
 			}
 		}
 		.output {
+			text-align: center;
+			padding-top: 10px;
+			
 			img {
 				width: auto !important;
 				height: auto !important;
