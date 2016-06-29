@@ -8,6 +8,7 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+UserSessionsManager = require("./UserSessionsManager")
 UserUpdater = require("./UserUpdater")
 settings = require "settings-sharelatex"
 
@@ -81,9 +82,12 @@ module.exports = UserController =
 	logout : (req, res)->
 		metrics.inc "user.logout"
 		logger.log user: req?.session?.user, "logging out"
+		sessionId = "#{req.sessionID}"
+		user = req?.session?.user
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
+			UserSessionsManager.onLogout(user, sessionId)
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->

@@ -9,6 +9,7 @@ Url = require("url")
 Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
 UserHandler = require("../User/UserHandler")
+UserSessionsManager = require("../User/UserSessionsManager")
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
@@ -141,4 +142,6 @@ module.exports = AuthenticationController =
 			req.session[key] = value
 
 		req.session.user = lightUser
+
+		UserSessionsManager.onLogin(user, req.sessionID, () ->)
 		callback()
