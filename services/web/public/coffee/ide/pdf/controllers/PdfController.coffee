@@ -237,7 +237,7 @@ define [
 			return null
 
 		normalizeFilePath = (path) ->
-			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}-[0-9a-f]{24}\/(\.\/)?/, "")
+			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}(-[0-9a-f]{24})?\/(\.\/)?/, "")
 			path = path.replace(/^\/compile\//, "")
 
 			rootDocDirname = ide.fileTreeManager.getRootDocDirname()
