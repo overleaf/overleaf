@@ -61,7 +61,6 @@ class MultiClient
 		jobs = @clients.map (client) ->
 			(cb) ->
 				client.rclient.exec (error, result) ->
-					console.log "EXEC [#{client.driver}]"
 					if client.driver == "ioredis"
 						# ioredis returns an results like:
 						# [ [null, 42], [null, "foo"] ]
@@ -127,7 +126,6 @@ for command, key_pos of COMMANDS
 
 		MultiClient.prototype[command] = (args...) ->
 			for client in @clients
-				console.log "COMMAND [#{client.driver}]", command, args
 				key_builder = args[key_pos]
 				key = key_builder(client.key_schema)
 				args_with_key = args.slice(0)
