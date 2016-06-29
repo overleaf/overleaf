@@ -90,7 +90,7 @@ module.exports = OutputCacheManager =
 						# pass back the list of new files in the cache
 						callback(err, results)
 						# let file expiry run in the background, expire all previous files if per-user
-						OutputCacheManager.expireOutputFiles cacheRoot, {keep: buildId, limit: if perUser then 0 else null}
+						OutputCacheManager.expireOutputFiles cacheRoot, {keep: buildId, limit: if perUser then 1 else null}
 
 	archiveLogs: (outputFiles, compileDir, buildId, callback = (error) ->) ->
 		archiveDir = Path.join(compileDir, OutputCacheManager.ARCHIVE_SUBDIR, buildId)
