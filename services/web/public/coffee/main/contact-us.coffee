@@ -32,11 +32,10 @@ define [
 		_handleSearchResults = (success, results) ->
 			suggestions = for hit in results.hits
 				page_underscored = hit.pageName.replace(/\s/g,'_')
-				section_underscored = hit.sectionName.replace(/\s/g,'_')
 
 				suggestion = 
-					url :"/learn/#{page_underscored}##{section_underscored}"
-					name : hit._highlightResult.pageName.value + " - " + hit._highlightResult.sectionName.value
+					url :"/learn/kb/#{page_underscored}"
+					name : hit._highlightResult.pageName.value
 
 			$scope.$applyAsync () -> 
 				$scope.suggestions = suggestions
@@ -64,8 +63,7 @@ define [
 
 		$scope.$watch "form.subject", (newVal, oldVal) ->
 			if newVal and newVal != oldVal and newVal.length > 3
-				# TODO Search the KB index instead; Wiki is used for testing purposes.
-				algoliaSearch.searchWiki newVal, _handleSearchResults, { 
+				algoliaSearch.searchKB newVal, _handleSearchResults, { 
 					hitsPerPage: 3
 					typoTolerance: 'strict'
 				}
