@@ -6,7 +6,7 @@ oneSecond = 1000
 
 makeRequest = (opts, callback)->
 	if !settings.apis.notifications?.url?
-		return callback()
+		return callback(null, statusCode:200)
 	else
 		request(opts, callback)
 
@@ -18,7 +18,7 @@ module.exports =
 			json: true
 			timeout: oneSecond
 			method: "GET"
-		request opts, (err, res, unreadNotifications)->
+		makeRequest opts, (err, res, unreadNotifications)->
 			statusCode =  if res? then res.statusCode else 500
 			if err? or statusCode != 200
 				e = new Error("something went wrong getting notifications, #{err}, #{statusCode}")
@@ -40,7 +40,7 @@ module.exports =
 				templateKey:templateKey
 			}
 		logger.log opts:opts, "creating notification for user"
-		request opts, callback
+		makeRequest opts, callback
 
 	markAsReadWithKey: (user_id, key, callback)->
 		opts = 
@@ -51,7 +51,7 @@ module.exports =
 				key:key
 			}
 		logger.log user_id:user_id, key:key, "sending mark notification as read with key to notifications api"
-		request opts, callback
+		makeRequest opts, callback
 	
 
 	markAsRead: (user_id, notification_id, callback)->
@@ -60,4 +60,4 @@ module.exports =
 			uri: "#{settings.apis.notifications?.url}/user/#{user_id}/notification/#{notification_id}"
 			timeout:oneSecond
 		logger.log user_id:user_id, notification_id:notification_id, "sending mark notification as read to notifications api"
-		request opts, callback
+		makeRequest opts, callback
