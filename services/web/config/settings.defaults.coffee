@@ -262,6 +262,10 @@ module.exports = settings =
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
+
+	# Use a single compile directory for all users in a project
+	# (otherwise each user has their own directory)
+	disablePerUserCompiles: true
 	
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
