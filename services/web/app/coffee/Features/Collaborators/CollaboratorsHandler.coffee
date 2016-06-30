@@ -95,6 +95,7 @@ module.exports = CollaboratorsHandler =
 			for project in allProjects
 				do (project) ->
 					jobs.push (cb) ->
+						return cb() if !project?
 						CollaboratorsHandler.removeUserFromProject project._id, user_id, cb
 			async.series jobs, callback
 	

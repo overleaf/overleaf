@@ -276,13 +276,13 @@ describe "CollaboratorsHandler", ->
 			it "should not add any users to the proejct", ->
 				@CollaboratorHandler.addUserIdToProject.called.should.equal false
 
-	describe "removeUserFromAllProjets", ->
+	describe "removeUserFromAllProjects", ->
 		beforeEach (done) ->
 			@CollaboratorHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
 			@CollaboratorHandler.getProjectsUserIsCollaboratorOf.withArgs(@user_id, { _id: 1 }).yields(
 				null,
-				[ { _id: "read-and-write-0" }, { _id: "read-and-write-1" } ],
-				[ { _id: "read-only-0" }, { _id: "read-only-1" } ]
+				[ { _id: "read-and-write-0" }, { _id: "read-and-write-1" }, null ],
+				[ { _id: "read-only-0" }, { _id: "read-only-1" }, null ]
 			)
 			@CollaboratorHandler.removeUserFromProject = sinon.stub().yields()
 			@CollaboratorHandler.removeUserFromAllProjets @user_id, done
