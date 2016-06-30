@@ -24,9 +24,11 @@ module.exports = ProjectDeleter =
 		update = {deletedByExternalDataSource: false}
 		Project.update conditions, update, {}, callback
 
-	deleteUsersProjects: (owner_id, callback)->
-		logger.log owner_id:owner_id, "deleting users projects"
-		Project.remove owner_ref:owner_id, callback
+	deleteUsersProjects: (user_id, callback)->
+		logger.log {user_id}, "deleting users projects"
+		Project.remove owner_ref:user_id, (error) ->
+			return callback(error) if error?
+			CollaboratorsHandler.removeUserFromAllProjets user_id, callback
 
 	deleteProject: (project_id, callback = (error) ->) ->
 		# archiveProject takes care of the clean-up

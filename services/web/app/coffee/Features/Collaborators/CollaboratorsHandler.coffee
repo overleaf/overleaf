@@ -87,6 +87,17 @@ module.exports = CollaboratorsHandler =
 				logger.error err: err, "problem removing user from project collaberators"
 			callback(err)
 	
+	removeUserFromAllProjets: (user_id, callback = (error) ->) ->
+		CollaboratorsHandler.getProjectsUserIsCollaboratorOf user_id, { _id: 1 }, (error, readAndWriteProjects = [], readOnlyProjects = []) ->
+			return callback(error) if error?
+			allProjects = readAndWriteProjects.concat(readOnlyProjects)
+			jobs = []
+			for project in allProjects
+				do (project) ->
+					jobs.push (cb) ->
+						CollaboratorsHandler.removeUserFromProject project._id, user_id, cb
+			async.series jobs, callback
+	
 	addEmailToProject: (project_id, adding_user_id, unparsed_email, privilegeLevel, callback = (error, user) ->) ->
 		emails = mimelib.parseAddresses(unparsed_email)
 		email = emails[0]?.address?.toLowerCase()
