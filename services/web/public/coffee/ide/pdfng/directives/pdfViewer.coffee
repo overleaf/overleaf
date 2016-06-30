@@ -258,7 +258,7 @@ define [
 
 				renderVisiblePages = () ->
 					pages = getVisiblePages()
-					# pages = getExtraPages visiblePages
+					pages = getExtraPages visiblePages
 					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
