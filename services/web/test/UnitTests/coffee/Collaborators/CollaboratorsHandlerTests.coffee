@@ -77,17 +77,19 @@ describe "CollaboratorsHandler", ->
 				{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
 				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
 				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+				{ id: "doesnt-exist", privilegeLevel: "readAndWrite" }
 			])
 			@UserGetter.getUser = sinon.stub()
 			@UserGetter.getUser.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
 			@UserGetter.getUser.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
 			@UserGetter.getUser.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
 			@UserGetter.getUser.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
+			@UserGetter.getUser.withArgs("doesnt-exist").yields(null, null)
 			@CollaboratorHandler.getMembersWithPrivilegeLevels @project_id, @callback
 		
 		it "should return an array of members with their privilege levels", ->
 			@callback
-				.calledWith(undefined, [
+				.calledWith(null, [
 					{ user: { _id: "read-only-ref-1" }, privilegeLevel: "readOnly" }
 					{ user: { _id: "read-only-ref-2" }, privilegeLevel: "readOnly" }
 					{ user: { _id: "read-write-ref-1" }, privilegeLevel: "readAndWrite" }

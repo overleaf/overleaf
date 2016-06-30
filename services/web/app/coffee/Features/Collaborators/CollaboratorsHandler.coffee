@@ -30,12 +30,17 @@ module.exports = CollaboratorsHandler =
 	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
+			result = []
 			async.mapLimit members, 3,
 				(member, cb) ->
 					UserGetter.getUser member.id, (error, user) ->
 						return cb(error) if error?
-						return cb(null, { user: user, privilegeLevel: member.privilegeLevel })
-				callback
+						if user?
+							result.push { user: user, privilegeLevel: member.privilegeLevel }
+						cb()
+				(error) ->
+					return callback(error) if error?
+					callback null, result
 	
 	getMemberIdPrivilegeLevel: (user_id, project_id, callback = (error, privilegeLevel) ->) ->
 		# In future if the schema changes and getting all member ids is more expensive (multiple documents)
