@@ -57,8 +57,6 @@ define [
 			params = {}
 			if options.isAutoCompile
 				params["auto_compile"]=true
-			if perUserCompile # send ?isolated=true for per-user compiles
-				params["isolated"] = true
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
@@ -132,9 +130,6 @@ define [
 				# convert the qs hash into a query string and append it
 				$scope.pdf.qs = createQueryString qs
 				$scope.pdf.url += $scope.pdf.qs
-				# special case for the download url
-				if perUserCompile
-					qs.isolated = true
 				# Save all downloads as files
 				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
@@ -154,8 +149,6 @@ define [
 					else
 						file.name = file.path
 					qs = {}
-					if perUserCompile
-						qs.isolated = true
 					if response.clsiServerId?
 						qs.clsiserverid = response.clsiServerId
 					file.url = "/project/#{project_id}/output/#{file.path}" +	createQueryString qs
@@ -281,7 +274,6 @@ define [
 				method: "DELETE"
 				params:
 					clsiserverid:ide.clsiServerId
-					isolated: perUserCompile
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
@@ -368,7 +360,6 @@ define [
 							line: row + 1
 							column: column
 							clsiserverid:ide.clsiServerId
-							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
@@ -414,7 +405,6 @@ define [
 							h: h.toFixed(2)
 							v: v.toFixed(2)
 							clsiserverid:ide.clsiServerId
-							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
