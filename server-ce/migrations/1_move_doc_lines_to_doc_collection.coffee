@@ -26,6 +26,7 @@ loadProjectIds = (callback)->
 	console.log "loading project ids from #{all_projects_path}"
 	fs.readFile all_projects_path, "utf-8", (err, data)->
 		ids = data.split("\n")
+		ids = _.filter ids, (id)-> id? and id.length == 24
 		console.log "loaded #{ids.length} project ids from #{all_projects_path}"
 		callback err, ids
 
