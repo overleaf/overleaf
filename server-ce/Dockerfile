@@ -19,6 +19,14 @@ RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
 RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
 	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
 
+
+RUN rm -r /install-tl-unx; \
+	rm install-tl-unx.tar.gz
+
+ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2016/bin/x86_64-linux/
+RUN tlmgr install latexmk
+
+
 # Install Node.js and Grunt
 RUN npm install -g grunt-cli
 
@@ -34,7 +42,7 @@ RUN adduser --system --group --home /var/www/sharelatex --no-create-home sharela
 
 
 # Install ShareLaTeX
-RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
+RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex #random_change
 
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 ADD ${baseDir}/package.json /var/www/package.json
@@ -84,13 +92,6 @@ ADD ${baseDir}/runit/web-sharelatex.sh              /etc/service/web-sharelatex/
 RUN rm /etc/nginx/sites-enabled/default
 ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
-
-RUN rm -r /install-tl-unx; \
-	rm install-tl-unx.tar.gz
-
-ENV PATH /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2016/bin/x86_64-linux/
-RUN apt-get update
-RUN tlmgr install latexmk
 
 # phusion/baseimage init script
 ADD ${baseDir}/init_scripts/00_regen_sharelatex_secrets.sh  /etc/my_init.d/00_regen_sharelatex_secrets.sh
