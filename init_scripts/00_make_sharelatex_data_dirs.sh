@@ -11,6 +11,9 @@ chown www-data:www-data /var/lib/sharelatex/data/compiles
 mkdir -p /var/lib/sharelatex/data/cache
 chown www-data:www-data /var/lib/sharelatex/data/cache
 
+mkdir -p /var/lib/sharelatex/data/templates
+chown www-data:www-data /var/lib/sharelatex/data/templates
+
 mkdir -p /var/lib/sharelatex/tmp
 chown www-data:www-data /var/lib/sharelatex/tmp
 
