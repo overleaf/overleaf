@@ -265,7 +265,7 @@ module.exports = settings =
 
 	# Use a single compile directory for all users in a project
 	# (otherwise each user has their own directory)
-	disablePerUserCompiles: true
+	# disablePerUserCompiles: true
 	
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
