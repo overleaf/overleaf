@@ -17,7 +17,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
-	grunt.loadNpmTasks 'grunt-contrib-imagemin'
+	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	grunt.loadNpmTasks 'grunt-contrib-cssmin'
 
 	config =
@@ -47,17 +47,17 @@ module.exports = (grunt) ->
 					stream:true
 
 
-		imagemin:
-			dynamic:                       
-				files: [{
-					expand: true
-					cwd: 'public/img/'
-					src: ['**/*.{png,jpg,gif}']
-					dest: 'public/img/'
-				}]
-			options:
-				interlaced:false
-				optimizationLevel: 7
+		# imagemin:
+		# 	dynamic:                       
+		# 		files: [{
+		# 			expand: true
+		# 			cwd: 'public/img/'
+		# 			src: ['**/*.{png,jpg,gif}']
+		# 			dest: 'public/img/'
+		# 		}]
+		# 	options:
+		# 		interlaced:false
+		# 		optimizationLevel: 7
 
 
 
@@ -217,6 +217,7 @@ module.exports = (grunt) ->
 				path: "app/views/sentry.jade"
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
+
 
 			
 
