@@ -45,9 +45,8 @@ module.exports = OutputCacheManager =
 		cacheRoot = Path.join(compileDir, OutputCacheManager.CACHE_SUBDIR)
 		# Put the files into a new cache subdirectory
 		cacheDir = Path.join(compileDir, OutputCacheManager.CACHE_SUBDIR, buildId)
-
-		# let file expiry run in the background
-		OutputCacheManager.expireOutputFiles cacheRoot, {keep: buildId}
+		# Is it a per-user compile? check if compile directory is PROJECTID-USERID
+		perUser = Path.basename(compileDir).match(/^[0-9a-f]{24}-[0-9a-f]{24}$/)
 
 		# Archive logs in background
 		if Settings.clsi?.archive_logs or Settings.clsi?.strace
@@ -83,9 +82,15 @@ module.exports = OutputCacheManager =
 					if err?
 						# pass back the original files if we encountered *any* error
 						callback(err, outputFiles)
+						# clean up the directory we just created
+						fse.remove cacheDir, (err) ->
+							if err?
+								logger.error err: err, dir: dir, "error removing cache dir after failure"
 					else
 						# pass back the list of new files in the cache
 						callback(err, results)
+						# let file expiry run in the background, expire all previous files if per-user
+						OutputCacheManager.expireOutputFiles cacheRoot, {keep: buildId, limit: if perUser then 1 else null}
 
 	archiveLogs: (outputFiles, compileDir, buildId, callback = (error) ->) ->
 		archiveDir = Path.join(compileDir, OutputCacheManager.ARCHIVE_SUBDIR, buildId)
@@ -116,6 +121,8 @@ module.exports = OutputCacheManager =
 
 			isExpired = (dir, index) ->
 				return false if options?.keep == dir
+				# remove any directories over the requested (non-null) limit
+				return true if options?.limit? and index > options.limit
 				# remove any directories over the hard limit
 				return true if index > OutputCacheManager.CACHE_LIMIT
 				# we can get the build time from the first part of the directory name DDDD-RRRR
