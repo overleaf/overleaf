@@ -15,6 +15,13 @@ define [
 		$scope.shouldShowLogs = false
 		$scope.wikiEnabled = window.wikiEnabled;
 
+		# log hints tracking
+		trackLogHintsFeedback = (isPositive, hintId) ->
+			event_tracking.send 'log-hints', (if isPositive then 'feedback-positive' else 'feedback-negative'), hintId
+
+		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
+		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
+
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
 		else
