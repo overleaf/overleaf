@@ -133,6 +133,8 @@ module.exports = AuthenticationController =
 			isAdmin: user.isAdmin
 			email: user.email
 			referal_id: user.referal_id
+			session_created: (new Date()).toISOString()
+			ip_address: req.ip
 		# Regenerate the session to get a new sessionID (cookie value) to
 		# protect against session fixation attacks
 		oldSession = req.session

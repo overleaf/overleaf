@@ -369,6 +369,7 @@ describe "AuthenticationController", ->
 				destroy : sinon.stub()
 			@req.sessionStore =
 				generate: sinon.stub()
+			@req.ip = "1.2.3.4"
 			@AuthenticationController.establishUserSession @req, @user, @callback
 
 		it "should set the session user to a basic version of the user", ->
@@ -378,6 +379,9 @@ describe "AuthenticationController", ->
 			@req.session.user.last_name.should.equal @user.last_name
 			@req.session.user.referal_id.should.equal @user.referal_id
 			@req.session.user.isAdmin.should.equal @user.isAdmin
+			@req.session.user.ip_address.should.equal @req.ip
+			expect(typeof @req.session.user.ip_address).to.equal 'string'
+			expect(typeof @req.session.user.session_created).to.equal 'string'
 
 		it "should destroy the session", ->
 			@req.session.destroy.called.should.equal true
