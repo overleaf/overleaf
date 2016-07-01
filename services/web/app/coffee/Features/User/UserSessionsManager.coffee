@@ -34,3 +34,7 @@ module.exports = UserSessionsManager =
 				logger.err {err, user_id: user._id, sessionId}, "error while removing session key from UserSessions set"
 				return callback(err)
 			callback()
+
+	revokeAllSessions: (user, callback=(err)->) ->
+		logger.log {user_id: user._id}, "revoking all existing sessions for user"
+		callback(null)
