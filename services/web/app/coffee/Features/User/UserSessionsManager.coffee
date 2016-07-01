@@ -13,6 +13,12 @@ module.exports = UserSessionsManager =
 		return "sess:#{sessionId}"
 
 	trackSession: (user, sessionId, callback=(err)-> ) ->
+		if !user
+			logger.log {sessionId}, "no user to track, returning"
+			return callback(null)
+		if !sessionId
+			logger.log {user_id: user._id}, "no sessionId to track, returning"
+			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogin handler"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
@@ -26,6 +32,12 @@ module.exports = UserSessionsManager =
 				callback()
 
 	untrackSession: (user, sessionId, callback=(err)-> ) ->
+		if !user
+			logger.log {sessionId}, "no user to untrack, returning"
+			return callback(null)
+		if !sessionId
+			logger.log {user_id: user._id}, "no sessionId to untrack, returning"
+			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
 		if !user
 			logger.log {sessionId}, "no user, for some reason"
@@ -42,6 +54,9 @@ module.exports = UserSessionsManager =
 				callback()
 
 	revokeAllUserSessions: (user, callback=(err)->) ->
+		if !user
+			logger.log {}, "no user to revoke sessions for, returning"
+			return callback(null)
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
@@ -60,6 +75,7 @@ module.exports = UserSessionsManager =
 
 	touch: (user, callback=(err)->) ->
 		if !user
+			logger.log {}, "no user to touch sessions for, returning"
 			return callback(null)
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.expire sessionSetKey, "#{Settings.cookieSessionLength}", (err, response) ->
