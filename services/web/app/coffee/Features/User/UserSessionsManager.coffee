@@ -43,7 +43,20 @@ module.exports = UserSessionsManager =
 
 	revokeAllSessions: (user, callback=(err)->) ->
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
-		callback(null)
+		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		rclient.smembers sessionSetKey, (err, sessionKeys) ->
+			if err
+				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
+				return callback(err)
+			logger.log {user_id: user._id, count: sessionKeys.length}, "deleting sessions for user"
+			rclient.multi()
+				.del(sessionKeys)
+				.srem(sessionSetKey, sessionKeys)
+				.exec (err, result) ->
+					if err
+						logger.err {err, user_id: user._id, sessionSetKey}, "error revoking all sessions for user"
+						return callback(err)
+					callback(null)
 
 	touch: (user, callback=(err)->) ->
 		if !user
