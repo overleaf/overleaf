@@ -12,7 +12,7 @@ module.exports = UserSessionsManager =
 	_sessionKey: (sessionId) ->
 		return "sess:#{sessionId}"
 
-	onLogin: (user, sessionId, callback=(err)-> ) ->
+	trackSession: (user, sessionId, callback=(err)-> ) ->
 		logger.log {user_id: user._id, sessionId}, "onLogin handler"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
@@ -25,7 +25,7 @@ module.exports = UserSessionsManager =
 					return callback(err)
 				callback()
 
-	onLogout: (user, sessionId, callback=(err)-> ) ->
+	untrackSession: (user, sessionId, callback=(err)-> ) ->
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
 		if !user
 			logger.log {sessionId}, "no user, for some reason"
@@ -41,7 +41,7 @@ module.exports = UserSessionsManager =
 					return callback(err)
 				callback()
 
-	revokeAllSessions: (user, callback=(err)->) ->
+	revokeAllUserSessions: (user, callback=(err)->) ->
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->

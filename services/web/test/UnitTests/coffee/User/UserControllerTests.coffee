@@ -19,9 +19,9 @@ describe "UserController", ->
 			save:sinon.stub().callsArgWith(0)
 			ace:{}
 
-		@UserDeleter = 
+		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
-		@UserLocator = 
+		@UserLocator =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@User =
 			findById: sinon.stub().callsArgWith(1, null, @user)
@@ -36,18 +36,18 @@ describe "UserController", ->
 			setUserPassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
-		@SubscriptionDomainHandler = 
+		@SubscriptionDomainHandler =
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
 		@settings =
 			siteUrl: "sharelatex.example.com"
-		@UserHandler = 
+		@UserHandler =
 			populateGroupLicenceInvite:sinon.stub().callsArgWith(1)
 		@UserSessionsManager =
-			onLogin: sinon.stub()
-			onLogout: sinon.stub()
-			revokeAllSessions: sinon.stub().callsArgWith(1, null)
+			trackSession: sinon.stub()
+			untrackSession: sinon.stub()
+			revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -62,13 +62,13 @@ describe "UserController", ->
 			"./UserHandler":@UserHandler
 			"./UserSessionsManager": @UserSessionsManager
 			"settings-sharelatex": @settings
-			"logger-sharelatex": 
+			"logger-sharelatex":
 				log:->
 				err:->
 			"../../infrastructure/Metrics": inc:->
 
-		@req = 
-			session: 
+		@req =
+			session:
 				destroy:->
 				user :
 					_id : @user_id
@@ -203,12 +203,12 @@ describe "UserController", ->
 			@UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon.stub().callsArgWith(1, null, @user, @url = "mock/url")
 			@req.body.email = @user.email = @email = "email@example.com"
 			@UserController.register @req, @res
-		
+
 		it "should register the user and send them an email", ->
 			@UserRegistrationHandler.registerNewUserAndSendActivationEmail
 				.calledWith(@email)
 				.should.equal true
-		
+
 		it "should return the user and activation url", ->
 			@res.json
 				.calledWith({
@@ -238,7 +238,7 @@ describe "UserController", ->
 			@res.send = =>
 				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()
-			@UserController.changePassword @req, @res			
+			@UserController.changePassword @req, @res
 
 		it "should set the new password if they do match", (done)->
 			@AuthenticationManager.authenticate.callsArgWith(2, null, @user)
@@ -250,5 +250,3 @@ describe "UserController", ->
 				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
 				done()
 			@UserController.changePassword @req, @res
-
-

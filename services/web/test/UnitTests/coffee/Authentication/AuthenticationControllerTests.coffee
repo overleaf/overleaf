@@ -21,6 +21,10 @@ describe "AuthenticationController", ->
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"settings-sharelatex": {}
+			"../User/UserSessionsManager": @UserSessionsManager =
+				trackSession: sinon.stub()
+				untrackSession: sinon.stub()
+				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -57,7 +61,7 @@ describe "AuthenticationController", ->
 						@res.statusCode.should.equal 429
 						done()
 				@AuthenticationController.login(@req, @res)
-			
+
 		describe 'when the user is authenticated', ->
 			beforeEach ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
@@ -76,7 +80,7 @@ describe "AuthenticationController", ->
 				@AuthenticationController.establishUserSession
 					.calledWith(@req, @user)
 					.should.equal true
-					
+
 			it "should set res.session.justLoggedIn", ->
 				@req.session.justLoggedIn.should.equal true
 
@@ -95,7 +99,7 @@ describe "AuthenticationController", ->
 				@logger.log
 					.calledWith(email: @email.toLowerCase(), user_id: @user._id.toString(), "successful log in")
 					.should.equal true
-				
+
 
 		describe 'when the user is not authenticated', ->
 			beforeEach ->
@@ -112,7 +116,7 @@ describe "AuthenticationController", ->
 
 			it "should not establish a session", ->
 				@AuthenticationController.establishUserSession.called.should.equal false
-			
+
 			it "should not setup the user data in the background", ->
 				@UserHandler.setupLoginData.called.should.equal false
 
@@ -137,12 +141,12 @@ describe "AuthenticationController", ->
 	describe "getLoggedInUserId", ->
 
 		beforeEach ->
-			@req = 
+			@req =
 				session :{}
 
 		it "should return the user id from the session", (done)->
 			@user_id = "2134"
-			@req.session.user = 
+			@req.session.user =
 				_id:@user_id
 			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
 				expect(user_id).to.equal @user_id
@@ -168,7 +172,7 @@ describe "AuthenticationController", ->
 	describe "getLoggedInUser", ->
 		beforeEach ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
-			
+
 		describe "with an established session", ->
 			beforeEach ->
 				@req.session =
@@ -189,7 +193,7 @@ describe "AuthenticationController", ->
 				_id: "user-id-123"
 				email: "user@sharelatex.com"
 			@middleware = @AuthenticationController.requireLogin()
-			
+
 		describe "when the user is logged in", ->
 			beforeEach ->
 				@req.session =
@@ -219,13 +223,13 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@req.headers = {}
 			@AuthenticationController.httpAuth = sinon.stub()
-		
+
 		describe "with white listed url", ->
 			beforeEach ->
 				@AuthenticationController.addEndpointToLoginWhitelist "/login"
 				@req._parsedUrl.pathname = "/login"
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
-			
+
 			it "should call next() directly", ->
 				@next.called.should.equal true
 
@@ -235,9 +239,9 @@ describe "AuthenticationController", ->
 				@req._parsedUrl.pathname = "/login"
 				@req.url = "/login?query=something"
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
-			
+
 			it "should call next() directly", ->
-				@next.called.should.equal true		
+				@next.called.should.equal true
 
 		describe "with http auth", ->
 			beforeEach ->
@@ -248,20 +252,20 @@ describe "AuthenticationController", ->
 				@AuthenticationController.httpAuth
 					.calledWith(@req, @res, @next)
 					.should.equal true
-			
+
 		describe "with a user session", ->
 			beforeEach ->
 				@req.session =
 					user: {"mock": "user"}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
-			
+
 			it "should call next() directly", ->
 				@next.called.should.equal true
-			
+
 		describe "with no login credentials", ->
 			beforeEach ->
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
-				
+
 			it "should redirect to the /login page", ->
 				@res.redirectedTo.should.equal "/login"
 
@@ -274,7 +278,7 @@ describe "AuthenticationController", ->
 			@req.query = {}
 
 		describe "they have come directly to the url", ->
-			beforeEach -> 
+			beforeEach ->
 				@req.query = {}
 				@middleware(@req, @res, @next)
 
@@ -284,7 +288,7 @@ describe "AuthenticationController", ->
 
 		describe "they have come via a templates link", ->
 
-			beforeEach -> 
+			beforeEach ->
 				@req.query.zipUrl = "something"
 				@middleware(@req, @res, @next)
 
@@ -293,8 +297,8 @@ describe "AuthenticationController", ->
 				@AuthenticationController._redirectToLoginPage.calledWith(@req, @res).should.equal false
 
 		describe "they have been invited to a project", ->
-			
-			beforeEach -> 
+
+			beforeEach ->
 				@req.query.project_name = "something"
 				@middleware(@req, @res, @next)
 
@@ -333,7 +337,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@UserUpdater.updateUser = sinon.stub().callsArg(2)
 			@AuthenticationController._recordSuccessfulLogin(@user._id, @callback)
-			
+
 		it "should increment the user.login.success metric", ->
 			@Metrics.inc
 				.calledWith("user.login.success")
@@ -349,7 +353,7 @@ describe "AuthenticationController", ->
 	describe "_recordFailedLogin", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin(@callback)
-			
+
 		it "should increment the user.login.failed metric", ->
 			@Metrics.inc
 				.calledWith("user.login.failed")
@@ -374,13 +378,12 @@ describe "AuthenticationController", ->
 			@req.session.user.last_name.should.equal @user.last_name
 			@req.session.user.referal_id.should.equal @user.referal_id
 			@req.session.user.isAdmin.should.equal @user.isAdmin
-			
+
 		it "should destroy the session", ->
 			@req.session.destroy.called.should.equal true
-			
+
 		it "should regenerate the session to protect against session fixation", ->
 			@req.sessionStore.generate.calledWith(@req).should.equal true
 
 		it "should return the callback", ->
 			@callback.called.should.equal true
-

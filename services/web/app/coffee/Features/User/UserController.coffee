@@ -87,7 +87,7 @@ module.exports = UserController =
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
-			UserSessionsManager.onLogout(user, sessionId)
+			UserSessionsManager.untrackSession(user, sessionId)
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
@@ -121,7 +121,7 @@ module.exports = UserController =
 					logger.log user: user, "password changed"
 					AuthenticationManager.setUserPassword user._id, newPassword1, (error) ->
 						return next(error) if error?
-						UserSessionsManager.revokeAllSessions user, (err) ->
+						UserSessionsManager.revokeAllUserSessions user, (err) ->
 							return next(err) if err
 							res.send
 								message:
