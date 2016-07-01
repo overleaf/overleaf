@@ -66,6 +66,7 @@ module.exports = (grunt) ->
 				options:
 					cssPath:"/img/"
 					'style': '../../public/stylesheets/app/sprites.less'
+					margin: 0
 				src: ['./public/img/flags/24/*.png']
 				dest: './public/img/sprite',
 
