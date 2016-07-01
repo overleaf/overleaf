@@ -44,6 +44,10 @@ describe "UserController", ->
 			siteUrl: "sharelatex.example.com"
 		@UserHandler = 
 			populateGroupLicenceInvite:sinon.stub().callsArgWith(1)
+		@UserSessionsManager =
+			onLogin: sinon.stub()
+			onLogout: sinon.stub()
+			revokeAllSessions: sinon.stub().callsArgWith(1, null)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -56,6 +60,7 @@ describe "UserController", ->
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"./UserHandler":@UserHandler
+			"./UserSessionsManager": @UserSessionsManager
 			"settings-sharelatex": @settings
 			"logger-sharelatex": 
 				log:->
