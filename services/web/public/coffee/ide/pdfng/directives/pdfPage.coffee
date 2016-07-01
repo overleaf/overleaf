@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	# App = angular.module 'pdfPage', ['pdfHighlights']
 
-	App.directive 'pdfPage', ['$timeout', 'pdfHighlights', ($timeout, pdfHighlights) ->
+	App.directive 'pdfPage', ['$timeout', 'pdfHighlights', 'pdfSpinner', ($timeout, pdfHighlights, pdfSpinner) ->
 		{
 			require: '^pdfViewer',
 			template: '''

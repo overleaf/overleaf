@@ -126,7 +126,10 @@ define [
 
 				element.canvas.addClass('pdfng-loading')
 				spinTimer = setTimeout () =>
-					@spinner.add(element.canvas)
+					@spinner.add(element.canvas, {static:true})
+					spinTimer = setTimeout () =>
+						@spinner.start(element.canvas)
+					, 100
 				, 100
 
 				completeRef = @complete
