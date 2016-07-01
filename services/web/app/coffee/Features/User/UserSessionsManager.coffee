@@ -16,11 +16,14 @@ module.exports = UserSessionsManager =
 		logger.log {user_id: user._id, sessionId}, "onLogin handler"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
-		rclient.sadd sessionSetKey, value, (err, response) ->
-			if err
-				logger.err {err, user_id: user._id, sessionId}, "error while adding session key to UserSessions set"
-				return callback(err)
-			callback()
+		rclient.multi()
+			.sadd(sessionSetKey, value)
+			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
+			.exec (err, response) ->
+				if err
+					logger.err {err, user_id: user._id, sessionId}, "error while adding session key to UserSessions set"
+					return callback(err)
+				callback()
 
 	onLogout: (user, sessionId, callback=(err)-> ) ->
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
@@ -29,12 +32,24 @@ module.exports = UserSessionsManager =
 			return callback()
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
-		rclient.srem sessionSetKey, value, (err, response) ->
-			if err
-				logger.err {err, user_id: user._id, sessionId}, "error while removing session key from UserSessions set"
-				return callback(err)
-			callback()
+		rclient.multi()
+			.srem(sessionSetKey, value)
+			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
+			.exec (err, response) ->
+				if err
+					logger.err {err, user_id: user._id, sessionId}, "error while removing session key from UserSessions set"
+					return callback(err)
+				callback()
 
 	revokeAllSessions: (user, callback=(err)->) ->
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
 		callback(null)
+
+	touch: (user, callback=(err)->) ->
+		if !user
+			return callback(null)
+		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		rclient.expire sessionSetKey, "#{Settings.cookieSessionLength}", (err, response) ->
+			if err
+				logger.err {err, user_id: user._id}, "error while updating ttl on UserSessions set"
+				return callback(err)
