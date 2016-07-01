@@ -82,7 +82,7 @@ module.exports = UserController =
 	logout : (req, res)->
 		metrics.inc "user.logout"
 		logger.log user: req?.session?.user, "logging out"
-		sessionId = "#{req.sessionID}"
+		sessionId = req.sessionID
 		user = req?.session?.user
 		req.session.destroy (err)->
 			if err
