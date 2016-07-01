@@ -29,8 +29,6 @@ module.exports = CompileController =
 				options.compiler = req.body.compiler
 			if req.body?.draft
 				options.draft = req.body.draft
-			if req.query?.isolated is "true"
-				options.isolated = true
 			logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
 			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits, validationProblems) ->
 				return next(error) if error?
@@ -44,17 +42,15 @@ module.exports = CompileController =
 				}
 
 	_compileAsUser: (req, callback) ->
-		# callback with user_id if isolated flag is set on request, undefined otherwise
-		isolated = req.query?.isolated is "true"
-		if isolated
+		# callback with user_id if per-user, undefined otherwise
+		if not Settings.disablePerUserCompiles
 			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
 		else
 			callback() # do a per-project compile, not per-user
 
 	_downloadAsUser: (req, callback) ->
-		# callback with user_id if isolated flag or user_id param is set on request, undefined otherwise
-		isolated = req.query?.isolated is "true" or req.params.user_id?
-		if isolated
+		# callback with user_id if per-user, undefined otherwise
+		if not Settings.disablePerUserCompiles
 			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
 		else
 			callback() # do a per-project compile, not per-user

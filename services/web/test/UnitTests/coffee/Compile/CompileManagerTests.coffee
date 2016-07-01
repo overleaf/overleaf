@@ -71,7 +71,7 @@ describe "CompileManager", ->
 
 			it "should run the compile with the compile limits", ->
 				@ClsiManager.sendRequest
-					.calledWith(@project_id, undefined, {
+					.calledWith(@project_id, @user_id, {
 						timeout: @limits.timeout
 					})
 					.should.equal true

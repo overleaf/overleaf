@@ -38,7 +38,7 @@ module.exports = CompileManager =
 							for key, value of limits
 								options[key] = value
 							# only pass user_id down to clsi if this is a per-user compile
-							compileAsUser = if options.isolated then user_id else undefined
+							compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
 							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
