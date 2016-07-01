@@ -21,7 +21,7 @@ module.exports = UserSessionsManager =
 			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
 			.exec (err, response) ->
 				if err
-					logger.err {err, user_id: user._id, sessionId}, "error while adding session key to UserSessions set"
+					logger.err {err, user_id: user._id, sessionSetKey}, "error while adding session key to UserSessions set"
 					return callback(err)
 				callback()
 
@@ -37,7 +37,7 @@ module.exports = UserSessionsManager =
 			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
 			.exec (err, response) ->
 				if err
-					logger.err {err, user_id: user._id, sessionId}, "error while removing session key from UserSessions set"
+					logger.err {err, user_id: user._id, sessionSetKey}, "error while removing session key from UserSessions set"
 					return callback(err)
 				callback()
 
