@@ -82,6 +82,7 @@ define [
 				scope.$watch "pdfSrc", (url) ->
 					if url
 						scope.loading = true
+						scope.loaded = false
 						# console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
@@ -95,12 +96,12 @@ define [
 						#				flashControls()
 				
 				scope.$on "loaded", () ->
+					scope.loaded = true
 					scope.progress = 100
-					scope.$apply()
 					$timeout () ->
 						scope.loading = false
 						delete scope.progress
-					, 250
+					, 500
 
 				#scope.$watch "highlights", (areas) ->
 					# console.log 'got HIGHLIGHTS in pdfJS', areas
@@ -163,6 +164,7 @@ define [
 
 				scope.$on 'progress', (event, progress) ->
 					scope.$apply () ->
+						return if scope.loaded
 						scope.progress = Math.floor(progress.loaded/progress.total*100)
 						scope.progress = 100 if scope.progress > 100
 						scope.progress = 0 if scope.progress < 0
