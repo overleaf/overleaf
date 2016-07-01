@@ -257,7 +257,7 @@ define [
 					# console.log 'layoutReady was resolved'
 
 				renderVisiblePages = () ->
-					pages = getVisiblePages()
+					visiblePages = getVisiblePages()
 					pages = getExtraPages visiblePages
 					scope.document.renderPages(pages)
 
