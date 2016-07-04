@@ -2,6 +2,7 @@ Settings = require('settings-sharelatex')
 redis = require('redis-sharelatex')
 rclient = redis.createClient(Settings.redis.web)
 logger = require("logger-sharelatex")
+Async = require('async')
 
 module.exports = UserSessionsManager =
 
@@ -30,6 +31,8 @@ module.exports = UserSessionsManager =
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while adding session key to UserSessions set"
 					return callback(err)
 				callback()
+		UserSessionsManager._checkSessions(user, () ->)
+		null
 
 	untrackSession: (user, sessionId, callback=(err)-> ) ->
 		if !user
@@ -52,6 +55,8 @@ module.exports = UserSessionsManager =
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while removing session key from UserSessions set"
 					return callback(err)
 				callback()
+		UserSessionsManager._checkSessions(user, () ->)
+		null
 
 	revokeAllUserSessions: (user, callback=(err)->) ->
 		if !user
@@ -82,3 +87,35 @@ module.exports = UserSessionsManager =
 			if err
 				logger.err {err, user_id: user._id}, "error while updating ttl on UserSessions set"
 				return callback(err)
+
+	_checkSessions: (user, callback=(err)->) ->
+		if !user
+			logger.log {}, "no user, returning"
+			return callback(null)
+		logger.log {user_id: user._id}, "checking sessions for user"
+		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		rclient.smembers sessionSetKey, (err, sessionKeys) ->
+			if err
+				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
+				return callback(err)
+			logger.log {user_id: user._id, count: sessionKeys.length}, "checking sessions for user"
+			Async.series(
+				sessionKeys.map(
+					(key) ->
+						(next) ->
+							rclient.get key, (err, val) ->
+								if err
+									return next(err)
+								if val == null
+									logger.log {user_id: user._id, key}, ">> removing key from UserSessions set"
+									rclient.srem sessionSetKey, key, (err, result) ->
+										if err
+											return next(err)
+										return next(null)
+								else
+									next()
+				)
+				, (err, results) ->
+					logger.log {user_id: user._id}, "done checking sessions for user"
+					return callback(err)
+			)
