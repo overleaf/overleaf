@@ -59,6 +59,27 @@ html(itemscope, itemtype='http://schema.org/Product')
 					email: "#{session.user.email}",
 				})
 		// End Heap Analytics
+
+		// Countly Analytics
+		if (settings.analytics && settings.analytics.countly && settings.analytics.countly.token)
+			script(type="text/javascript").
+				var Countly = Countly || {};
+				Countly.q = Countly.q || [];
+				Countly.app_key = "#{settings.analytics.countly.token}";
+				Countly.url = "https://try.count.ly"; 
+				Countly.q.push(['track_sessions']);
+				Countly.q.push(['track_pageview']);
+
+				(function() {
+					var cly = document.createElement('script'); cly.type = 'text/javascript'; 
+					cly.async = true;
+					//enter url of script here
+					cly.src = 'https://cdnjs.cloudflare.com/ajax/libs/countly-sdk-web/16.6.0/countly.min.js';
+					cly.onload = function(){Countly.init()};
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cly, s);
+				})();
+
+		// End countly Analytics
 				
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
