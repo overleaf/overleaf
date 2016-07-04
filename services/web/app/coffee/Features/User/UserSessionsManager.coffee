@@ -1,8 +1,9 @@
 Settings = require('settings-sharelatex')
 redis = require('redis-sharelatex')
-rclient = redis.createClient(Settings.redis.web)
 logger = require("logger-sharelatex")
 Async = require('async')
+
+rclient = redis.createClient(Settings.redis.web)
 
 module.exports = UserSessionsManager =
 
