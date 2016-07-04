@@ -148,3 +148,97 @@ describe 'UserSessionsManager', ->
 				@call (err) =>
 					@_checkSessions.callCount.should.equal 0
 					done()
+
+	describe 'untrackSession', ->
+
+		beforeEach ->
+			@call = (callback) =>
+				@UserSessionsManager.untrackSession @user, @sessionId, callback
+			@rclient.exec.callsArgWith(0, null)
+			@_checkSessions = sinon.stub(@UserSessionsManager, '_checkSessions').returns(null)
+
+		afterEach ->
+			@_checkSessions.restore()
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.not.be.instanceof Error
+				done()
+
+		it 'should call the appropriate redis methods', (done) ->
+			@call (err) =>
+				@rclient.multi.callCount.should.equal 1
+				@rclient.srem.callCount.should.equal 1
+				@rclient.expire.callCount.should.equal 1
+				@rclient.exec.callCount.should.equal 1
+				done()
+
+		it 'should call _checkSessions', (done) ->
+			@call (err) =>
+				@_checkSessions.callCount.should.equal 1
+				done()
+
+		describe 'when rclient produces an error', ->
+
+			beforeEach ->
+				@rclient.exec.callsArgWith(0, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not call _checkSessions', (done) ->
+				@call (err) =>
+					@_checkSessions.callCount.should.equal 0
+					done()
+
+		describe 'when no user is supplied', ->
+
+			beforeEach ->
+				@call = (callback) =>
+					@UserSessionsManager.untrackSession null, @sessionId, callback
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should not call the appropriate redis methods', (done) ->
+				@call (err) =>
+					@rclient.multi.callCount.should.equal 0
+					@rclient.srem.callCount.should.equal 0
+					@rclient.expire.callCount.should.equal 0
+					@rclient.exec.callCount.should.equal 0
+					done()
+
+			it 'should not call _checkSessions', (done) ->
+				@call (err) =>
+					@_checkSessions.callCount.should.equal 0
+					done()
+
+		describe 'when no sessionId is supplied', ->
+
+			beforeEach ->
+				@call = (callback) =>
+					@UserSessionsManager.untrackSession @user, null, callback
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should not call the appropriate redis methods', (done) ->
+				@call (err) =>
+					@rclient.multi.callCount.should.equal 0
+					@rclient.srem.callCount.should.equal 0
+					@rclient.expire.callCount.should.equal 0
+					@rclient.exec.callCount.should.equal 0
+					done()
+
+			it 'should not call _checkSessions', (done) ->
+				@call (err) =>
+					@_checkSessions.callCount.should.equal 0
+					done()
