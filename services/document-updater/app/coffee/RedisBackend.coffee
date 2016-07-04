@@ -60,7 +60,9 @@ class MultiClient
 	exec: (callback) ->
 		jobs = @clients.map (client) ->
 			(cb) ->
+				timer = new Metrics.Timer("redis.#{client.driver}.exec")
 				client.rclient.exec (error, result) ->
+					timer.done()
 					if client.driver == "ioredis"
 						# ioredis returns an results like:
 						# [ [null, 42], [null, "foo"] ]
@@ -112,7 +114,9 @@ for command, key_pos of COMMANDS
 					key = key_builder(client.key_schema)
 					args_with_key = args.slice(0)
 					args_with_key[key_pos] = key
+					timer = new Metrics.Timer("redis.#{client.driver}.#{command}")
 					client.rclient[command] args_with_key..., (error, result...) ->
+						timer.done()
 						if client.primary
 							# Return this result as the actual result
 							callback(error, result...)
@@ -158,7 +162,7 @@ module.exports =
 					if config[key]?
 						redis_config[key] = config[key]
 				rclient = require("redis-sharelatex").createClient(redis_config)
-				driver = "redis"
+				driver = "noderedis"
 			return {
 				rclient: rclient
 				key_schema: config.key_schema

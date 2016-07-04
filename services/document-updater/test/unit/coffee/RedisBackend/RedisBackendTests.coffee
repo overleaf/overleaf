@@ -44,6 +44,11 @@ describe "RedisBackend", ->
 				test_context.rclient_ioredis = @
 			
 			nodes: sinon.stub()
+		
+		@timer = timer = sinon.stub()
+		class Timer
+			constructor: (args...) -> timer(args...)
+			done: () ->
 
 		@RedisBackend = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @Settings
@@ -54,7 +59,10 @@ describe "RedisBackend", ->
 			"ioredis": @ioredis =
 				Cluster: Cluster
 			"metrics-sharelatex":
-				@Metrics = inc: sinon.stub()
+				@Metrics =
+					inc: sinon.stub()
+					Timer: Timer
+				
 		@client = @RedisBackend.createClient()
 		
 		@doc_id = "mock-doc-id"
@@ -102,6 +110,14 @@ describe "RedisBackend", ->
 			it "should send a metric", ->
 				@Metrics.inc
 					.calledWith("backend-match")
+					.should.equal true
+			
+			it "should time the commands", ->
+				@timer
+					.calledWith("redis.ioredis.get")
+					.should.equal true
+				@timer
+					.calledWith("redis.noderedis.get")
 					.should.equal true
 
 		describe "with different results", ->
@@ -239,6 +255,14 @@ describe "RedisBackend", ->
 			it "should send a metric", ->
 				@Metrics.inc
 					.calledWith("backend-match")
+					.should.equal true
+			
+			it "should time the exec", ->
+				@timer
+					.calledWith("redis.ioredis.exec")
+					.should.equal true
+				@timer
+					.calledWith("redis.noderedis.exec")
 					.should.equal true
 
 		describe "with different results", ->
