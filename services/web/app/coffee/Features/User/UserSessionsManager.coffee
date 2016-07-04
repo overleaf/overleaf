@@ -31,9 +31,8 @@ module.exports = UserSessionsManager =
 				if err
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while adding session key to UserSessions set"
 					return callback(err)
+				UserSessionsManager._checkSessions(user, () ->)
 				callback()
-		UserSessionsManager._checkSessions(user, () ->)
-		null
 
 	untrackSession: (user, sessionId, callback=(err)-> ) ->
 		if !user
@@ -55,9 +54,8 @@ module.exports = UserSessionsManager =
 				if err
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while removing session key from UserSessions set"
 					return callback(err)
+				UserSessionsManager._checkSessions(user, () ->)
 				callback()
-		UserSessionsManager._checkSessions(user, () ->)
-		null
 
 	revokeAllUserSessions: (user, callback=(err)->) ->
 		if !user
