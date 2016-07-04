@@ -86,6 +86,7 @@ module.exports = UserSessionsManager =
 			if err
 				logger.err {err, user_id: user._id}, "error while updating ttl on UserSessions set"
 				return callback(err)
+			callback(null)
 
 	_checkSessions: (user, callback=(err)->) ->
 		if !user

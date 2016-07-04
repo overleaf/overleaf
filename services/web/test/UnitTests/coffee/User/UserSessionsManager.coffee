@@ -165,6 +165,7 @@ describe 'UserSessionsManager', ->
 		it 'should not produce an error', (done) ->
 			@call (err) =>
 				expect(err).to.not.be.instanceof Error
+				expect(err).to.equal undefined
 				done()
 
 		it 'should call the appropriate redis methods', (done) ->
@@ -258,6 +259,7 @@ describe 'UserSessionsManager', ->
 		it 'should not produce an error', (done) ->
 			@call (err) =>
 				expect(err).to.not.be.instanceof Error
+				expect(err).to.equal null
 				done()
 
 		it 'should call the appropriate redis methods', (done) ->
@@ -300,4 +302,128 @@ describe 'UserSessionsManager', ->
 					@rclient.del.callCount.should.equal 0
 					@rclient.srem.callCount.should.equal 0
 					@rclient.exec.callCount.should.equal 0
+					done()
+
+	describe 'touch', ->
+
+		beforeEach ->
+			@rclient.expire.callsArgWith(2, null)
+			@call = (callback) =>
+				@UserSessionsManager.touch @user, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.not.be.instanceof Error
+				expect(err).to.equal null
+				done()
+
+		it 'should call rclient.expire', (done) ->
+			@call (err) =>
+				@rclient.expire.callCount.should.equal 1
+				done()
+
+		describe 'when rclient produces an error', ->
+
+			beforeEach ->
+				@rclient.expire.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+		describe 'when no user is supplied', ->
+
+			beforeEach ->
+				@call = (callback) =>
+					@UserSessionsManager.touch null, callback
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should not call expire', (done) ->
+				@call (err) =>
+					@rclient.expire.callCount.should.equal 0
+					done()
+
+	describe '_checkSessions', ->
+
+		beforeEach ->
+			@call = (callback) =>
+				@UserSessionsManager._checkSessions @user, callback
+			@sessionKeys = ['one', 'two']
+			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
+			@rclient.get.callsArgWith(1, null, 'some-value')
+			@rclient.srem.callsArgWith(2, null, {})
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.not.be.instanceof Error
+				expect(err).to.equal undefined
+				done()
+
+		it 'should call the appropriate redis methods', (done) ->
+			@call (err) =>
+				@rclient.smembers.callCount.should.equal 1
+				@rclient.get.callCount.should.equal 2
+				@rclient.srem.callCount.should.equal 0
+				done()
+
+		describe 'when one of the keys is not present in redis', ->
+
+			beforeEach ->
+				@rclient.get.onCall(0).callsArgWith(1, null, 'some-val')
+				@rclient.get.onCall(1).callsArgWith(1, null, null)
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal undefined
+					done()
+
+			it 'should remove that key from the set', (done) ->
+				@call (err) =>
+					@rclient.smembers.callCount.should.equal 1
+					@rclient.get.callCount.should.equal 2
+					@rclient.srem.callCount.should.equal 1
+					@rclient.srem.firstCall.args[1].should.equal 'two'
+					done()
+
+		describe 'when no user is supplied', ->
+
+			beforeEach ->
+				@call = (callback) =>
+					@UserSessionsManager._checkSessions null, callback
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should not call redis methods', (done) ->
+				@call (err) =>
+					@rclient.smembers.callCount.should.equal 0
+					@rclient.get.callCount.should.equal 0
+					done()
+
+		describe 'when one of the get operations produces an error', ->
+
+			beforeEach ->
+				@rclient.get.onCall(0).callsArgWith(1, new Error('woops'), null)
+				@rclient.get.onCall(1).callsArgWith(1, null, null)
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should call the right redis methods, bailing out early', (done) ->
+				@call (err) =>
+					@rclient.smembers.callCount.should.equal 1
+					@rclient.get.callCount.should.equal 1
+					@rclient.srem.callCount.should.equal 0
 					done()
