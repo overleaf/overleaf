@@ -16,8 +16,11 @@ define [
 		$scope.wikiEnabled = window.wikiEnabled;
 
 		# log hints tracking
+		$scope.trackLogHintsLearnMore = () ->
+			event_tracking.send 'logs-hints-learn-more'
+
 		trackLogHintsFeedback = (isPositive, hintId) ->
-			event_tracking.send 'log-hints', (if isPositive then 'feedback-positive' else 'feedback-negative'), hintId
+			event_tracking.send 'log-hints-feedback', { isPositive, hintId }
 
 		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
 		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
@@ -286,6 +289,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
+			event_tracking.send "ide-open-logs" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -293,6 +297,7 @@ define [
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
+			event_tracking.send "logs-view-raw" if $scope.pdf.showRawLog
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
@@ -445,8 +450,9 @@ define [
 					ide.editorManager.openDoc(doc, gotoLine: line)
 	]
 
-	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
+			event_tracking.send 'logs-jump-to-location'
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?
