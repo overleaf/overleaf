@@ -226,11 +226,6 @@ define [
 					navigateFn: @navigateFn
 				})
 
-				renderTimer = setTimeout () ->
-					renderTimer = null
-					element.canvas.replaceWith(canvas)
-				, 1000
-
 				# console.log 'staring page render', pagenum
 
 				result = page.render {
@@ -250,9 +245,7 @@ define [
 
 				result.then () ->
 					# console.log 'page rendered', pagenum
-					if renderTimer?
-						element.canvas.replaceWith(canvas)
-						clearTimeout renderTimer
+					element.canvas.replaceWith(canvas)
 					$timeout.cancel(timer)
 					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
