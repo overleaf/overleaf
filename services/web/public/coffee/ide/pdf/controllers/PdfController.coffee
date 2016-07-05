@@ -247,7 +247,10 @@ define [
 			return path
 
 		$scope.recompile = (options = {}) ->
+			event_tracking.send "editor-recompile", options
+
 			return if $scope.pdf.compiling
+
 			$scope.pdf.compiling = true
 
 			ide.$scope.$broadcast("flush-changes")
@@ -267,6 +270,9 @@ define [
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
+		# This method is a simply wrapper and exists only for tracking purposes.
+		ide.$scope.recompileViaKey = () ->
+			$scope.recompile { keyShortcut: true }
 
 		$scope.clearCache = () ->
 			$http {
