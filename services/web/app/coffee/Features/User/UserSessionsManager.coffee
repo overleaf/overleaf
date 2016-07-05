@@ -61,6 +61,7 @@ module.exports = UserSessionsManager =
 	revokeAllUserSessions: (user, retain, callback=(err)->) ->
 		if !retain
 			retain = []
+		retain = retain.map((i) -> UserSessionsManager._sessionKey(i))
 		if !user
 			logger.log {}, "no user to revoke sessions for, returning"
 			return callback(null)
@@ -70,7 +71,7 @@ module.exports = UserSessionsManager =
 			if err
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
 				return callback(err)
-			keysToDelete = _.filter(sessionKeys, (k) => k not in retain)
+			keysToDelete = _.filter(sessionKeys, (k) -> k not in retain)
 			logger.log {user_id: user._id, count: keysToDelete.length}, "deleting sessions for user"
 			rclient.multi()
 				.del(keysToDelete)
