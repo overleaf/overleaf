@@ -27,15 +27,6 @@ define [
 					"dblClickCallback": "="
 			}
 			link: (scope, element, attrs) ->
-				# pdfListView = new PDFListView element.find(".pdfjs-viewer")[0],
-				#		textLayerBuilder: TextLayerBuilder
-				#		annotationsLayerBuilder: AnnotationsLayerBuilder
-				#		highlightsLayerBuilder: HighlightsLayerBuilder
-				#		ondblclick: (e) -> onDoubleClick(e)
-				#		# logLevel: PDFListView.Logger.DEBUG
-				# pdfListView.listView.pageWidthOffset = 20
-				# pdfListView.listView.pageHeightOffset = 20
-
 				scope.loading = false
 				scope.pleaseJumpTo = null
 				scope.scale = null
@@ -55,8 +46,6 @@ define [
 							offset:
 								"top": +position.offset.top
 								"left": +position.offset.left
-
-					#scope.position = pdfListView.getPdfPosition(true)
 
 					scope.$on "$destroy", () =>
 						localStorage "pdf.scale", scope.scale
@@ -84,18 +73,9 @@ define [
 						scope.loading = true
 						scope.loaded = false
 						scope.progress = 1
-						# console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
-						# pdfListView
-						#		.loadPdf(url, onProgress)
-						#		.then () ->
-						#			scope.$apply () ->
-						#				scope.loading = false
-						#				delete scope.progress
-						#				initializePosition()
-						#				flashControls()
-				
+
 				scope.$on "loaded", () ->
 					scope.loaded = true
 					scope.progress = 100
@@ -103,37 +83,6 @@ define [
 						scope.loading = false
 						delete scope.progress
 					, 500
-
-				#scope.$watch "highlights", (areas) ->
-					# console.log 'got HIGHLIGHTS in pdfJS', areas
-					
-					# return if !areas?
-					# highlights = for area in areas or []
-					# 	{
-					# 		page: area.page
-					# 		highlight:
-					# 			left: area.h
-					# 			top: area.v
-					# 			height: area.height
-					# 			width: area.width
-					# 	}
-
-					# if highlights.length > 0
-					# 	first = highlights[0]
-					# 	position = {
-					# 		page: first.page
-					# 		offset:
-					# 			left: first.highlight.left
-					# 			top: first.highlight.top - 80
-					# 	}
-					# 	console.log 'position is', position, 'in highlights'
-					# 	scope.pleaseJumpTo = position
-					# pdfListView.clearHighlights()
-					# pdfListView.setHighlights(highlights, true)
-
-					# setTimeout () =>
-					#		pdfListView.clearHighlights()
-					# , 1000
 
 				scope.fitToHeight = () ->
 					scale = angular.copy (scope.scale)
@@ -161,7 +110,6 @@ define [
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, (e) ->
 							#console.log 'got a resize event', event, e
-							#
 
 				scope.$on 'progress', (event, progress) ->
 					scope.$apply () ->
