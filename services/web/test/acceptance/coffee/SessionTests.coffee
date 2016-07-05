@@ -17,7 +17,7 @@ describe "Sessions", ->
 
 	describe "one session", ->
 
-		it "should have one session in UserSessions", (done) ->
+		it "should have one session in UserSessions set", (done) ->
 			async.series(
 				[
 					(next) =>
@@ -49,3 +49,67 @@ describe "Sessions", ->
 						throw err
 					done()
 			)
+
+	describe "two sessions", ->
+
+		before ->
+			# set up second session for this user
+			@user2 = new User()
+			@user2.email = @user1.email
+			@user2.password = @user1.password
+
+		it "should have two sessions in UserSessions set", (done) ->
+			async.series(
+				[
+					(next) =>
+						redis.clearUserSessions @user1, next
+
+					# login, should add session to set
+					, (next) =>
+						@user1.login (err) ->
+							next(err)
+
+					, (next) =>
+						redis.getUserSessions @user1, (err, sessions) =>
+							expect(sessions.length).to.equal 1
+							expect(sessions[0].slice(0, 5)).to.equal 'sess:'
+							next()
+
+					# login again, should add the second session to set
+					, (next) =>
+						@user2.login (err) ->
+							next(err)
+
+					, (next) =>
+						redis.getUserSessions @user1, (err, sessions) =>
+							expect(sessions.length).to.equal 2
+							expect(sessions[0].slice(0, 5)).to.equal 'sess:'
+							expect(sessions[1].slice(0, 5)).to.equal 'sess:'
+							next()
+
+					# logout first session, should remove session from set
+					, (next) =>
+						@user1.logout (err) ->
+							next(err)
+
+					, (next) =>
+						redis.getUserSessions @user1, (err, sessions) =>
+							expect(sessions.length).to.equal 1
+							next()
+
+					# logout second session, should remove last session from set
+					, (next) =>
+						@user2.logout (err) ->
+							next(err)
+
+					, (next) =>
+						redis.getUserSessions @user1, (err, sessions) =>
+							expect(sessions.length).to.equal 0
+							next()
+
+				], (err, result) =>
+					if err
+						throw err
+					done()
+			)
+

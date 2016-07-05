@@ -91,4 +91,19 @@ class User
 			})
 			callback()
 
+	resetPassword: (newPassword, callback = (error) ->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.post {
+				url: "/user/password/set" # Register will log in, but also ensure user exists
+				json:
+					password: @password
+			}, (error, response, body) =>
+				return callback(error) if error?
+				db.users.findOne {email: @email}, (error, user) =>
+					return callback(error) if error?
+					@id = user?._id?.toString()
+					@_id = user?._id?.toString()
+					callback()
+
 module.exports = User
