@@ -15,7 +15,7 @@ footer.site-footer
 							aria-expanded="false",
 							tooltip="#{translate('language')}"
 						)
-							figure(class="icon icon-lang icon-#{currentLngCode}")
+							figure(class="sprite-icon sprite-icon-lang sprite-icon-#{currentLngCode}")
 
 						ul.dropdown-menu(role="menu")
 							li.dropdown-header #{translate("language")}
@@ -23,7 +23,7 @@ footer.site-footer
 								if !subdomainDetails.hide
 									li.lngOption
 										a.menu-indent(href=subdomainDetails.url+currentUrl)
-											figure(class="icon icon-lang icon-#{subdomainDetails.lngCode}")
+											figure(class="sprite-icon sprite-icon-lang sprite-icon-#{subdomainDetails.lngCode}")
 											|  #{translate(subdomainDetails.lngCode)}
 										//- img(src="/img/flags/24/.png")
 				each item in nav.left_footer
