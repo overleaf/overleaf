@@ -254,7 +254,7 @@ describe 'UserSessionsManager', ->
 			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
 			@rclient.exec.callsArgWith(0, null)
 			@call = (callback) =>
-				@UserSessionsManager.revokeAllUserSessions @user, callback
+				@UserSessionsManager.revokeAllUserSessions @user, [], callback
 
 		it 'should not produce an error', (done) ->
 			@call (err) =>
@@ -266,10 +266,13 @@ describe 'UserSessionsManager', ->
 			@call (err) =>
 				@rclient.smembers.callCount.should.equal 1
 				@rclient.multi.callCount.should.equal 1
+
 				@rclient.del.callCount.should.equal 1
-				@rclient.del.firstCall.args[0].should.deep.equal(@sessionKeys)
+				expect(@rclient.del.firstCall.args[0]).to.deep.equal @sessionKeys
+
 				@rclient.srem.callCount.should.equal 1
-				@rclient.srem.firstCall.args[1].should.deep.equal(@sessionKeys)
+				expect(@rclient.srem.firstCall.args[1]).to.deep.equal @sessionKeys
+
 				@rclient.exec.callCount.should.equal 1
 				done()
 
@@ -287,7 +290,7 @@ describe 'UserSessionsManager', ->
 
 			beforeEach ->
 				@call = (callback) =>
-					@UserSessionsManager.revokeAllUserSessions null, callback
+					@UserSessionsManager.revokeAllUserSessions null, [], callback
 
 			it 'should not produce an error', (done) ->
 				@call (err) =>

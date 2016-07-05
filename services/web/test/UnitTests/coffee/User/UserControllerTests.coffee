@@ -47,7 +47,7 @@ describe "UserController", ->
 		@UserSessionsManager =
 			trackSession: sinon.stub()
 			untrackSession: sinon.stub()
-			revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
+			revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter

@@ -2,6 +2,7 @@ Settings = require('settings-sharelatex')
 redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
+_ = require('underscore')
 
 rclient = redis.createClient(Settings.redis.web)
 
@@ -57,7 +58,9 @@ module.exports = UserSessionsManager =
 				UserSessionsManager._checkSessions(user, () ->)
 				callback()
 
-	revokeAllUserSessions: (user, callback=(err)->) ->
+	revokeAllUserSessions: (user, retain, callback=(err)->) ->
+		if !retain
+			retain = []
 		if !user
 			logger.log {}, "no user to revoke sessions for, returning"
 			return callback(null)
@@ -67,10 +70,11 @@ module.exports = UserSessionsManager =
 			if err
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
 				return callback(err)
-			logger.log {user_id: user._id, count: sessionKeys.length}, "deleting sessions for user"
+			keysToDelete = _.filter(sessionKeys, (k) => k not in retain)
+			logger.log {user_id: user._id, count: keysToDelete.length}, "deleting sessions for user"
 			rclient.multi()
-				.del(sessionKeys)
-				.srem(sessionSetKey, sessionKeys)
+				.del(keysToDelete)
+				.srem(sessionSetKey, keysToDelete)
 				.exec (err, result) ->
 					if err
 						logger.err {err, user_id: user._id, sessionSetKey}, "error revoking all sessions for user"
