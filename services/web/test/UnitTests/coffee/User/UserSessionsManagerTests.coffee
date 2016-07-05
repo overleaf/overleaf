@@ -250,11 +250,12 @@ describe 'UserSessionsManager', ->
 	describe 'revokeAllUserSessions', ->
 
 		beforeEach ->
-			@sessionKeys = ['one', 'two']
+			@sessionKeys = ['sess:one', 'sess:two']
+			@retain = []
 			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
 			@rclient.exec.callsArgWith(0, null)
 			@call = (callback) =>
-				@UserSessionsManager.revokeAllUserSessions @user, [], callback
+				@UserSessionsManager.revokeAllUserSessions @user, @retain, callback
 
 		it 'should not produce an error', (done) ->
 			@call (err) =>
@@ -276,6 +277,37 @@ describe 'UserSessionsManager', ->
 				@rclient.exec.callCount.should.equal 1
 				done()
 
+		describe 'when a session is retained', ->
+
+			beforeEach ->
+				@sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
+				@retain = ['two']
+				@rclient.smembers.callsArgWith(1, null, @sessionKeys)
+				@rclient.exec.callsArgWith(0, null)
+				@call = (callback) =>
+					@UserSessionsManager.revokeAllUserSessions @user, @retain, callback
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should call the appropriate redis methods', (done) ->
+				@call (err) =>
+					@rclient.smembers.callCount.should.equal 1
+					@rclient.multi.callCount.should.equal 1
+					@rclient.del.callCount.should.equal 1
+					@rclient.srem.callCount.should.equal 1
+					@rclient.exec.callCount.should.equal 1
+					done()
+
+			it 'should remove all sessions except for the retained one', (done) ->
+				@call (err) =>
+					expect(@rclient.del.firstCall.args[0]).to.deep.equal(['sess:one', 'sess:three', 'sess:four'])
+					expect(@rclient.srem.firstCall.args[1]).to.deep.equal(['sess:one', 'sess:three', 'sess:four'])
+					done()
+
 		describe 'when rclient produces an error', ->
 
 			beforeEach ->
@@ -290,7 +322,7 @@ describe 'UserSessionsManager', ->
 
 			beforeEach ->
 				@call = (callback) =>
-					@UserSessionsManager.revokeAllUserSessions null, [], callback
+					@UserSessionsManager.revokeAllUserSessions null, @retain, callback
 
 			it 'should not produce an error', (done) ->
 				@call (err) =>
