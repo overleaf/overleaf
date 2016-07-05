@@ -2,6 +2,7 @@ PasswordResetHandler = require("./PasswordResetHandler")
 RateLimiter = require("../../infrastructure/RateLimiter")
 AuthenticationController = require("../Authentication/AuthenticationController")
 UserGetter = require("../User/UserGetter")
+UserSessionsManager = require("../User/UserSessionsManager")
 logger = require "logger-sharelatex"
 
 module.exports =
@@ -47,11 +48,13 @@ module.exports =
 		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found, user_id) ->
 			return next(err) if err?
 			if found
-				if req.body.login_after
-					UserGetter.getUser user_id, {email: 1}, (err, user) ->
-						return next(err) if err?
-						AuthenticationController.doLogin {email:user.email, password: password}, req, res, next
-				else
-					res.sendStatus 200
+				UserSessionsManager.revokeAllUserSessions {_id: user_id}, [], (err) ->
+					return next(err) if err?
+					if req.body.login_after
+						UserGetter.getUser user_id, {email: 1}, (err, user) ->
+							return next(err) if err?
+							AuthenticationController.doLogin {email:user.email, password: password}, req, res, next
+					else
+						res.sendStatus 200
 			else
 				res.sendStatus 404
