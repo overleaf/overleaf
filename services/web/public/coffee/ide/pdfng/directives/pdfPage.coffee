@@ -82,7 +82,7 @@ define [
 					if scope.timeoutHandler
 						$timeout.cancel(scope.timeoutHandler)
 						highlightsLayer.clearHighlights()
-						scope.timeoutHandler
+						scope.timeoutHandler = null
 
 					# console.log 'got highlight watch in pdfPage', scope.page
 					pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
