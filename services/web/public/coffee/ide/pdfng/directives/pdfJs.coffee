@@ -83,6 +83,7 @@ define [
 					if url
 						scope.loading = true
 						scope.loaded = false
+						scope.progress = 1
 						# console.log 'pdfSrc =', url
 						initializePosition()
 						flashControls()
