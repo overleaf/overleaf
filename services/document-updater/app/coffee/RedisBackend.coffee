@@ -58,6 +58,8 @@ class MultiClient
 	constructor: (@clients) ->
 	
 	exec: (callback) ->
+		primaryError = null
+		primaryResult = null
 		jobs = @clients.map (client) ->
 			(cb) ->
 				timer = new Metrics.Timer("redis.#{client.driver}.exec")
@@ -80,15 +82,15 @@ class MultiClient
 						result = filtered_result
 						
 					if client.primary
-						# Return this result as the actual result
-						callback(error, result)
-					# Send the rest through for comparison
+						primaryError = error
+						primaryResult = result
 					cb(error, result)
 		async.parallel jobs, (error, results) ->
 			if error?
 				logger.error {err: error}, "error in redis backend"
 			else
 				compareResults(results)
+			callback(primaryError, primaryResult)
 
 COMMANDS = {
 	"get": 0,
@@ -108,6 +110,8 @@ COMMANDS = {
 for command, key_pos of COMMANDS
 	do (command, key_pos) ->
 		Client.prototype[command] = (args..., callback) ->
+			primaryError = null
+			primaryResult = null
 			jobs = @clients.map (client) ->
 				(cb) ->
 					key_builder = args[key_pos]
@@ -118,15 +122,15 @@ for command, key_pos of COMMANDS
 					client.rclient[command] args_with_key..., (error, result...) ->
 						timer.done()
 						if client.primary
-							# Return this result as the actual result
-							callback(error, result...)
-						# Send the rest through for comparison
+							primaryError = error
+							primaryResult = result
 						cb(error, result...)
 			async.parallel jobs, (error, results) ->
 				if error?
 					logger.error {err: error}, "error in redis backend"
 				else
 					compareResults(results)
+				callback(primaryError, primaryResult...)
 
 		MultiClient.prototype[command] = (args...) ->
 			for client in @clients
@@ -141,6 +145,7 @@ compareResults = (results) ->
 	first = results[0]
 	for result in results.slice(1)
 		if not _.isEqual(first, result)
+			logger.error results: results, "redis backend conflict"
 			Metrics.inc "backend-conflict"
 		else
 			Metrics.inc "backend-match"
