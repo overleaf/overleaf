@@ -27,11 +27,28 @@ class User
 				db.users.findOne {email: @email}, (error, user) =>
 					return callback(error) if error?
 					@id = user?._id?.toString()
+					@_id = user?._id?.toString()
 					callback()
-	
+
+	logout: (callback = (error) ->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.get {
+				url: "/logout" # Register will log in, but also ensure user exists
+				json:
+					email: @email
+					password: @password
+			}, (error, response, body) =>
+				return callback(error) if error?
+				db.users.findOne {email: @email}, (error, user) =>
+					return callback(error) if error?
+					@id = user?._id?.toString()
+					@_id = user?._id?.toString()
+					callback()
+
 	ensure_admin: (callback = (error) ->) ->
 		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
-	
+
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {
 			url: "/project/new",

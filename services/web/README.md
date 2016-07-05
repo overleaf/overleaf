@@ -42,3 +42,11 @@ in the `public/img/iconshock` directory found via
 [findicons.com](http://findicons.com/icon/498089/height?id=526085#)
 
 
+## Acceptance Tests
+
+To run the Acceptance tests:
+
+- set `allowPublicAccess` to true, either in the configuration file,
+  or by setting the environment variable `SHARELATEX_ALLOW_PUBLIC_ACCESS` to `true`
+- start the server (`grunt`)
+- in a separate terminal, run `grunt test:acceptance`
