@@ -81,6 +81,8 @@ define [
 				@resetState()
 
 			triggerRenderQueue: (interval = @JOB_QUEUE_INTERVAL) ->
+				if @queueTimer?
+					clearTimeout @queueTimer
 				@queueTimer = setTimeout () =>
 					@queueTimer = null
 					@processRenderQueue()
