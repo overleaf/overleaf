@@ -72,6 +72,9 @@ module.exports = UserSessionsManager =
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
 				return callback(err)
 			keysToDelete = _.filter(sessionKeys, (k) -> k not in retain)
+			if keysToDelete.length == 0
+				logger.log {user_id: user._id}, "no sessions in UserSessions set to delete, returning"
+				return callback(null)
 			logger.log {user_id: user._id, count: keysToDelete.length}, "deleting sessions for user"
 			rclient.multi()
 				.del(keysToDelete)

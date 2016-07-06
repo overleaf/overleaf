@@ -339,6 +339,26 @@ describe 'UserSessionsManager', ->
 					@rclient.exec.callCount.should.equal 0
 					done()
 
+		describe 'when there are no keys to delete', ->
+
+			beforeEach ->
+				@rclient.smembers.callsArgWith(1, null, [])
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.equal null
+					done()
+
+			it 'should not do the delete operation', (done) ->
+				@call (err) =>
+					@rclient.smembers.callCount.should.equal 1
+					@rclient.multi.callCount.should.equal 0
+					@rclient.del.callCount.should.equal 0
+					@rclient.srem.callCount.should.equal 0
+					@rclient.exec.callCount.should.equal 0
+					done()
+
 	describe 'touch', ->
 
 		beforeEach ->
