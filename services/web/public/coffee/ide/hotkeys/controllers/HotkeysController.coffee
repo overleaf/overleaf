@@ -4,7 +4,7 @@ define [
 ], (App) ->
 	App.controller "HotkeysController", ($scope, $modal, event_tracking) ->
 		$scope.openHotkeysModal = ->
-			event_tracking.send 'ide-open-hotkeys-modal'
+			event_tracking.sendCountly "ide-open-hotkeys-modal"
 
 			$modal.open {
 				templateUrl: "hotkeysModalTemplate"

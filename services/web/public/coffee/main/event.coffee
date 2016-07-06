@@ -11,7 +11,7 @@ define [
 				eventData = { key }
 				eventData.segmentation = segmentation if segmentation?
 
-				Countly.q.push(['add_event', eventData]);
+				Countly.q.push([ "add_event", eventData ]);
 		}
 
 	# App.directive "countlyTrack", () ->

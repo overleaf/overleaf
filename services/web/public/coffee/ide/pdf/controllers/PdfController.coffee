@@ -17,10 +17,10 @@ define [
 
 		# log hints tracking
 		$scope.trackLogHintsLearnMore = () ->
-			event_tracking.send 'logs-hints-learn-more'
+			event_tracking.sendCountly "logs-hints-learn-more"
 
 		trackLogHintsFeedback = (isPositive, hintId) ->
-			event_tracking.send 'log-hints-feedback', { isPositive, hintId }
+			event_tracking.sendCountly "log-hints-feedback", { isPositive, hintId }
 
 		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
 		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
@@ -250,7 +250,7 @@ define [
 			return path
 
 		$scope.recompile = (options = {}) ->
-			event_tracking.send "editor-recompile", options
+			event_tracking.sendCountly "editor-recompile", options
 
 			return if $scope.pdf.compiling
 
@@ -289,7 +289,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
-			event_tracking.send "ide-open-logs" if $scope.shouldShowLogs
+			event_tracking.sendCountly "ide-open-logs" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -297,7 +297,7 @@ define [
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
-			event_tracking.send "logs-view-raw" if $scope.pdf.showRawLog
+			event_tracking.sendCountly "logs-view-raw" if $scope.pdf.showRawLog
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
@@ -452,7 +452,7 @@ define [
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
-			event_tracking.send 'logs-jump-to-location'
+			event_tracking.sendCountly 'logs-jump-to-location'
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?

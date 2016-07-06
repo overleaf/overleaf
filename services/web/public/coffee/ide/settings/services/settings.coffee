@@ -8,7 +8,7 @@ define [
 				for key in Object.keys(data)
 					changedSetting = key
 					changedSettingVal = data[key]
-					event_tracking.send "setting-changed", { changedSetting, changedSettingVal }
+					event_tracking.sendCountly "setting-changed", { changedSetting, changedSettingVal }
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
@@ -20,7 +20,7 @@ define [
 				for key in Object.keys(data)
 					changedSetting = key
 					changedSettingVal = data[key]
-					event_tracking.send "project-setting-changed", { changedSetting, changedSettingVal}
+					event_tracking.sendCountly "project-setting-changed", { changedSetting, changedSettingVal}
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
@@ -32,7 +32,7 @@ define [
 				for key in Object.keys(data)
 					changedSetting = key
 					changedSettingVal = data[key]
-					event_tracking.send "project-admin-setting-changed", { changedSetting, changedSettingVal }
+					event_tracking.sendCountly "project-admin-setting-changed", { changedSetting, changedSettingVal }
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
