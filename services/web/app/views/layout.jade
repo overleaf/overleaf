@@ -67,6 +67,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				Countly.q = Countly.q || [];
 				Countly.app_key = "#{settings.analytics.countly.token}";
 				Countly.url = "https://try.count.ly"; 
+
 				Countly.q.push(['track_sessions']);
 				Countly.q.push(['track_pageview']);
 
@@ -78,6 +79,15 @@ html(itemscope, itemtype='http://schema.org/Product')
 					cly.onload = function(){Countly.init()};
 					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cly, s);
 				})();
+
+			if (session && session.user)
+				script(type="text/javascript").
+					Countly.q.push(['user_details', {
+						handle: "#{session.user._id}",
+						email: "#{session.user.email}",
+					}]);
+
+
 
 		// End countly Analytics
 				
