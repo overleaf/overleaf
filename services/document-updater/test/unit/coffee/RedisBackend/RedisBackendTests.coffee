@@ -200,6 +200,44 @@ describe "RedisBackend", ->
 				@rclient_ioredis.eval
 					.calledWith(@script, @key_count, "Blocking:{#{@doc_id}}", @value)
 					.should.equal true
+		
+		describe "when the secondary takes longer than SECONDARY_TIMEOUT", ->
+			beforeEach (done) ->
+				@client.SECONDARY_TIMEOUT = 10
+				@content = "bar"
+				@rclient_redis.get = sinon.stub()
+				@rclient_redis.get.withArgs("doclines:#{@doc_id}").yields(null, @content)
+				@rclient_ioredis.get = (key, cb) =>
+					key.should.equal "doclines:{#{@doc_id}}"
+					setTimeout () =>
+						cb(null, @content)
+					, @client.SECONDARY_TIMEOUT * 2
+				@client.get RedisKeyBuilder.docLines({doc_id: @doc_id}), (error, @result) =>
+					done(error)
+		
+			it "should log out an error for the backend", ->
+				@logger.error
+					.calledWith({err: new Error("backend timed out")}, "error in redis backend")
+					.should.equal true
+
+		describe "when the primary takes longer than SECONDARY_TIMEOUT", ->
+			beforeEach (done) ->
+				@client.SECONDARY_TIMEOUT = 10
+				@content = "bar"
+				@rclient_ioredis.get = sinon.stub()
+				@rclient_ioredis.get.withArgs("doclines:{#{@doc_id}}").yields(null, @content)
+				@rclient_redis.get = (key, cb) =>
+					key.should.equal "doclines:#{@doc_id}"
+					setTimeout () =>
+						cb(null, @content)
+					, @client.SECONDARY_TIMEOUT * 2
+				@client.get RedisKeyBuilder.docLines({doc_id: @doc_id}), (error, @result) =>
+					done(error)
+		
+			it "should not consider this an error", ->
+				@logger.error
+					.called
+					.should.equal false
 
 	describe "multi commands", ->
 		beforeEach ->
@@ -333,6 +371,50 @@ describe "RedisBackend", ->
 						err: @error
 					}, "error in redis backend")
 					.should.equal true
+
+		describe "when the secondary takes longer than SECONDARY_TIMEOUT", ->
+			beforeEach (done) ->
+				@rclient_redis.get = sinon.stub()
+				@rclient_redis.exec = sinon.stub().yields(null, [@doclines, @version])
+				@rclient_ioredis.get = sinon.stub()
+				@rclient_ioredis.exec = (cb) =>
+					setTimeout () =>
+						cb(null, [ [null, @doclines], [null, @version] ])
+					, 20
+				
+				multi = @client.multi()
+				multi.SECONDARY_TIMEOUT = 10
+				multi.get RedisKeyBuilder.docLines({doc_id: @doc_id})
+				multi.get RedisKeyBuilder.docVersion({doc_id: @doc_id})
+				multi.exec (error, @result) =>
+					done(error)
+		
+			it "should log out an error for the backend", ->
+				@logger.error
+					.calledWith({err: new Error("backend timed out")}, "error in redis backend")
+					.should.equal true
+
+		describe "when the primary takes longer than SECONDARY_TIMEOUT", ->
+			beforeEach (done) ->
+				@rclient_redis.get = sinon.stub()
+				@rclient_redis.exec = (cb) =>
+					setTimeout () =>
+						cb(null, [@doclines, @version])
+					, 20
+				@rclient_ioredis.get = sinon.stub()
+				@rclient_ioredis.exec = sinon.stub().yields(null, [ [null, @doclines], [null, @version] ])
+			
+				multi = @client.multi()
+				multi.SECONDARY_TIMEOUT = 10
+				multi.get RedisKeyBuilder.docLines({doc_id: @doc_id})
+				multi.get RedisKeyBuilder.docVersion({doc_id: @doc_id})
+				multi.exec (error, @result) =>
+					done(error)
+		
+			it "should not consider this an error", ->
+				@logger.error
+					.called
+					.should.equal false
 	
 	describe "_healthCheckNodeRedisClient", ->
 		beforeEach ->

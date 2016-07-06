@@ -6,6 +6,7 @@ Metrics = require "metrics-sharelatex"
 
 class Client
 	constructor: (@clients) ->
+		@SECONDARY_TIMEOUT = 200
 		@HEARTBEAT_TIMEOUT = 2000
 		
 	multi: () ->
@@ -56,14 +57,24 @@ class Client
 
 class MultiClient
 	constructor: (@clients) ->
+		@SECONDARY_TIMEOUT = 200
 	
 	exec: (callback) ->
 		primaryError = null
 		primaryResult = null
-		jobs = @clients.map (client) ->
-			(cb) ->
+		jobs = @clients.map (client) =>
+			(cb) =>
+				cb = _.once(cb)
 				timer = new Metrics.Timer("redis.#{client.driver}.exec")
-				client.rclient.exec (error, result) ->
+				
+				timeout = null
+				if !client.primary
+					logger.warn {timeout: @SECONDARY_TIMEOUT}, "starting timeout exec"
+					timeout = setTimeout () ->
+						cb(new Error("backend timed out"))
+					, @SECONDARY_TIMEOUT
+
+				client.rclient.exec (error, result) =>
 					timer.done()
 					if client.driver == "ioredis"
 						# ioredis returns an results like:
@@ -84,6 +95,8 @@ class MultiClient
 					if client.primary
 						primaryError = error
 						primaryResult = result
+					if timeout?
+						clearTimeout(timeout)
 					cb(error, result)
 		async.parallel jobs, (error, results) ->
 			if error?
@@ -112,18 +125,29 @@ for command, key_pos of COMMANDS
 		Client.prototype[command] = (args..., callback) ->
 			primaryError = null
 			primaryResult = null
-			jobs = @clients.map (client) ->
-				(cb) ->
+			jobs = @clients.map (client) =>
+				(cb) =>
+					cb = _.once(cb)
 					key_builder = args[key_pos]
 					key = key_builder(client.key_schema)
 					args_with_key = args.slice(0)
 					args_with_key[key_pos] = key
 					timer = new Metrics.Timer("redis.#{client.driver}.#{command}")
-					client.rclient[command] args_with_key..., (error, result...) ->
+					
+					timeout = null
+					if !client.primary
+						logger.warn {timeout: @SECONDARY_TIMEOUT}, "starting timeout #{command}"
+						timeout = setTimeout () ->
+							cb(new Error("backend timed out"))
+						, @SECONDARY_TIMEOUT
+					
+					client.rclient[command] args_with_key..., (error, result...) =>
 						timer.done()
 						if client.primary
 							primaryError = error
 							primaryResult = result
+						if timeout?
+							clearTimeout(timeout)
 						cb(error, result...)
 			async.parallel jobs, (error, results) ->
 				if error?
