@@ -124,7 +124,7 @@ for command, key_pos of COMMANDS
 	do (command, key_pos) ->
 		Client.prototype[command] = (args..., callback) ->
 			primaryError = null
-			primaryResult = null
+			primaryResult = []
 			jobs = @clients.map (client) =>
 				(cb) =>
 					cb = _.once(cb)
