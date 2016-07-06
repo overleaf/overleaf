@@ -42,7 +42,7 @@ define [
 	ReferencesManager
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, event_tracking) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -69,6 +69,16 @@ define [
 
 		$scope.chat = {}
 
+		# Tracking code.
+		$scope.$watch "ui.view", (newView, oldView) ->
+			event_tracking.sendCountly "ide-open-view-#{ newView }" if newView?
+
+		$scope.$watch "ui.chatOpen", (isOpen) ->
+			event_tracking.sendCountly "ide-open-chat" if isOpen
+
+		$scope.$watch "ui.leftMenuShown", (isOpen) ->
+			event_tracking.sendCountly "ide-open-left-menu" if isOpen
+		# End of tracking code.
 
 		window._ide = ide
 

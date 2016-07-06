@@ -17,8 +17,9 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
-	grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	grunt.loadNpmTasks 'grunt-contrib-cssmin'
+	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
+	# grunt.loadNpmTasks 'grunt-sprity'
 
 	config =
 
@@ -47,18 +48,26 @@ module.exports = (grunt) ->
 					stream:true
 
 
-		imagemin:
-			dynamic:                       
-				files: [{
-					expand: true
-					cwd: 'public/img/'
-					src: ['**/*.{png,jpg,gif}']
-					dest: 'public/img/'
-				}]
-			options:
-				interlaced:false
-				optimizationLevel: 7
+		# imagemin:
+		# 	dynamic:                       
+		# 		files: [{
+		# 			expand: true
+		# 			cwd: 'public/img/'
+		# 			src: ['**/*.{png,jpg,gif}']
+		# 			dest: 'public/img/'
+		# 		}]
+		# 	options:
+		# 		interlaced:false
+		# 		optimizationLevel: 7
 
+		# sprity:
+		# 	sprite:
+		# 		options:
+		# 			cssPath:"/img/"
+		# 			'style': '../../public/stylesheets/app/sprites.less'
+		# 			margin: 0
+		# 		src: ['./public/img/flags/24/*.png']
+		# 		dest: './public/img/sprite'
 
 
 		coffee:
@@ -217,6 +226,7 @@ module.exports = (grunt) ->
 				path: "app/views/sentry.jade"
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
+
 
 			
 

@@ -12,7 +12,8 @@ define [
 			ruleDetails = _getRule entry.message
 
 			if (ruleDetails?)
-				entry.ruleId = 'hint_' + ruleDetails.regexToMatch.toString().replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() if ruleDetails.regexToMatch?
+				entry.ruleId = 'hint_' + ruleDetails.regexToMatch.toString().replace(/\s/g, '_').slice(1, -1) if ruleDetails.regexToMatch?
+				
 				entry.humanReadableHint = ruleDetails.humanReadableHint if ruleDetails.humanReadableHint?
 				entry.extraInfoURL = ruleDetails.extraInfoURL if ruleDetails.extraInfoURL?
 	

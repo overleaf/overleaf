@@ -119,7 +119,11 @@ div.full-size.pdf(ng-controller="PdfController")
 						ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
 					.card-hint-actions.clearfix
 						.card-hint-ext-link(ng-if="wikiEnabled")
-							a(ng-href="{{ entry.extraInfoURL }}", target="_blank")
+							a(
+								ng-href="{{ entry.extraInfoURL }}",
+								ng-click="trackLogHintsLearnMore()"
+								target="_blank"
+							)
 								i.fa.fa-external-link
 								|&nbsp;#{translate("log_hint_extra_info")}
 						.card-hint-feedback(
@@ -128,12 +132,12 @@ div.full-size.pdf(ng-controller="PdfController")
 						)
 							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
 							a.card-hint-feedback-positive(
-								ng-click="feedbackSent = true;"
+								ng-click="trackLogHintsPositiveFeedback(entry.ruleId); feedbackSent = true;"
 								href
 							) #{translate("answer_yes")}
 							span &nbsp;/&nbsp;
 							a.card-hint-feedback-negative(
-								ng-click="feedbackSent = true;"
+								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); feedbackSent = true;"
 								href
 							) #{translate("answer_no")}
 						.card-hint-feedback(ng-show="feedbackSent")

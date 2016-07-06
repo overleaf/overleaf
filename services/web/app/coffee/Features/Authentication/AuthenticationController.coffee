@@ -9,11 +9,12 @@ Url = require("url")
 Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
 UserHandler = require("../User/UserHandler")
+UserSessionsManager = require("../User/UserSessionsManager")
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
 		AuthenticationController.doLogin req.body, req, res, next
-	
+
 	doLogin: (options, req, res, next) ->
 		email = options.email?.toLowerCase()
 		password = options.password
@@ -61,7 +62,7 @@ module.exports = AuthenticationController =
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
 			if !req.session.user?
-				AuthenticationController._redirectToLoginOrRegisterPage(req, res) 
+				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
 				req.user = req.session.user
 				return next()
@@ -92,9 +93,9 @@ module.exports = AuthenticationController =
 
 	_redirectToLoginOrRegisterPage: (req, res)->
 		if req.query.zipUrl? or req.query.project_name?
-			return AuthenticationController._redirectToRegisterPage(req, res) 
+			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
-			AuthenticationController._redirectToLoginPage(req, res) 
+			AuthenticationController._redirectToLoginPage(req, res)
 
 
 	_redirectToLoginPage: (req, res) ->
@@ -132,6 +133,8 @@ module.exports = AuthenticationController =
 			isAdmin: user.isAdmin
 			email: user.email
 			referal_id: user.referal_id
+			session_created: (new Date()).toISOString()
+			ip_address: req.ip
 		# Regenerate the session to get a new sessionID (cookie value) to
 		# protect against session fixation attacks
 		oldSession = req.session
@@ -141,4 +144,6 @@ module.exports = AuthenticationController =
 			req.session[key] = value
 
 		req.session.user = lightUser
+
+		UserSessionsManager.trackSession(user, req.sessionID, () ->)
 		callback()
