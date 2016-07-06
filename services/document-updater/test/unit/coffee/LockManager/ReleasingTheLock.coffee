@@ -12,9 +12,7 @@ describe 'LockManager - releasing the lock', ()->
 	evalStub = sinon.stub().yields(1)
 	mocks =
 		"logger-sharelatex": log:->
-		"./RedisKeyBuilder":
-			blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
-		"./RedisBackend":
+		"redis-sharelatex":
 			createClient : ()->
 				auth:->
 				eval: evalStub

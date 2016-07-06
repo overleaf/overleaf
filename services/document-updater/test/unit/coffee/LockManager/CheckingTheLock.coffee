@@ -14,9 +14,7 @@ describe 'LockManager - checking the lock', ()->
 	
 	mocks =
 		"logger-sharelatex": log:->
-		"./RedisKeyBuilder":
-			blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
-		"./RedisBackend":
+		"redis-sharelatex":
 			createClient : ()->
 				auth:->
 				exists: existsStub
