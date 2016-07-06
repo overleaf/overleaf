@@ -106,4 +106,15 @@ class User
 					return callback(error) if error?
 					callback()
 
+	getUserSettingsPage: (callback = (error, statusCode) ->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.get {
+				url: "/user/settings"
+			}, (error, response, body) =>
+				return callback(error) if error?
+				callback(null, response.statusCode)
+
+
+
 module.exports = User
