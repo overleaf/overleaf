@@ -50,7 +50,7 @@ define -> [
 		regexToMatch: /No positions in optional float specifier/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/No_positions_in_optional_float_specifier"
 		humanReadableHint: """
-			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (float options), or remove the square brackets. Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
+			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (e.g. \begin{figure}[h]), or remove the square brackets (e.g. \begin{figure}). Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
 	,
 		regexToMatch: /Undefined control sequence/
