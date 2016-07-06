@@ -20,6 +20,7 @@ define [
 			event_tracking.sendCountly "logs-hints-learn-more"
 
 		trackLogHintsFeedback = (isPositive, hintId) ->
+			event_tracking.send 'log-hints', (if isPositive then 'feedback-positive' else 'feedback-negative'), hintId
 			event_tracking.sendCountly "log-hints-feedback", { isPositive, hintId }
 
 		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
