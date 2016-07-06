@@ -6,8 +6,16 @@ web-sharelatex is the front-end web service of the open-source web-based collabo
 It serves all the HTML pages, CSS and javascript to the client. web-sharelatex also contains 
 a lot of logic around creating and editing projects, and account management.
 
+
 The rest of the ShareLaTeX stack, along with information about contributing can be found in the 
 [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
+
+Build process
+----------------
+
+web-sharelatex uses [Grunt](http://gruntjs.com/) to build its front-end related assets.
+
+Image processing tasks are commented out in the gruntfile and the needed packages aren't presently in the project's `package.json`. If the images need to be processed again (minified and sprited), start by fetching the packages (`npm install grunt-contrib-imagemin grunt-sprity`), then *decomment* the tasks in `Gruntfile.coffee`. After this, the tasks can be called (explicitly, via `grunt imagemin` and `grunt sprity`).
 
 Unit test status
 ----------------

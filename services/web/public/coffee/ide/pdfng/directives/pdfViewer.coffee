@@ -27,13 +27,21 @@ define [
 			$scope.document.destroy() if $scope.document?
 			$scope.loadCount = if $scope.loadCount? then $scope.loadCount + 1 else 1
 			# TODO need a proper url manipulation library to add to query string
-			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
+			url = $scope.pdfSrc
+			# add 'pdfng=true' to show that we are using the angular pdfjs viewer
+			queryStringExists = url.match(/\?/)
+			url = url + (if not queryStringExists then '?' else '&') + 'pdfng=true'
+			# for isolated compiles, load the pdf on-demand because nobody will overwrite it
+			onDemandLoading = window.location?.search?.match(/isolated=true/)?
+			$scope.document = new PDFRenderer(url, {
 				scale: 1,
+				disableAutoFetch: if onDemandLoading then true else undefined
 				navigateFn: (ref) ->
 					# this function captures clicks on the annotation links
 					$scope.navigateTo = ref
 					$scope.$apply()
 				progressCallback: (progress) ->
+					return if onDemandLoading is true # don't show progress for on-demand page loading
 					$scope.$emit 'progress', progress
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
