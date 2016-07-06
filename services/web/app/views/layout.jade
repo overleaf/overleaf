@@ -70,10 +70,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 			if (session && session.user)
 				script(type="text/javascript").
+					Countly.q.push(['change_id', '#{session.user._id}', true ]);
+
 					Countly.q.push(['user_details', {
 						email: '#{session.user.email}',
 						custom: {
-							handle: '#{session.user._id}',
+							userId: '#{session.user._id}',
 						}
 					}]);
 
@@ -85,6 +87,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 			if (justLoggedIn)
 				script(type="text/javascript").
+
 					Countly.q.push(['add_event',{
 						key: 'user-logged-in'
 					}]);
