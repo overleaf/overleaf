@@ -122,7 +122,7 @@
 			font-weight: 700;
 
 			.fa {
-				display: none;
+				opacity: 0;
 			}
 		}
 		.entry-message {
@@ -138,7 +138,7 @@
 		&:hover .line-no {
 			color: inherit;
 			.fa {
-				display: inline-block;
+				opacity: 1;
 			}
 		}
 
@@ -284,3 +284,12 @@
 		margin-top: 20px;
 	}
 }
+
+.files-dropdown-container {
+	.pull-right();
+	position: relative;
+}
+
+	.files-dropdown {
+		display: inline-block;
+	}
