@@ -66,6 +66,7 @@ describe "RedisBackend", ->
 		@client = @RedisBackend.createClient()
 		
 		@doc_id = "mock-doc-id"
+		@project_id = "mock-project-id"
 	
 	it "should create a redis client", ->
 		@redis.createClient
@@ -136,6 +137,24 @@ describe "RedisBackend", ->
 			it "should send a metric", ->
 				@Metrics.inc
 					.calledWith("backend-conflict")
+					.should.equal true
+
+		describe "with differently ordered results from smembers", ->
+			beforeEach (done) ->
+				@rclient_redis.smembers = sinon.stub()
+				@rclient_redis.smembers.withArgs("DocsIn:#{@project_id}").yields(null, ["one", "two"])
+				@rclient_ioredis.smembers = sinon.stub()
+				@rclient_ioredis.smembers.withArgs("DocsIn:{#{@project_id}}").yields(null, ["two", "one"])
+				@client.smembers RedisKeyBuilder.docsInProject({project_id: @project_id}), (error, @result) =>
+					setTimeout () -> # Let all background requests complete
+						done(error)
+			
+			it "should return the primary result", ->
+				@result.should.deep.equal ["one", "two"]
+			
+			it "should send a metric indicating a match", ->
+				@Metrics.inc
+					.calledWith("backend-match")
 					.should.equal true
 
 		describe "when the secondary errors", ->

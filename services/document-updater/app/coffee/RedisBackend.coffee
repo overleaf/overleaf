@@ -102,7 +102,7 @@ class MultiClient
 			if error?
 				logger.error {err: error}, "error in redis backend"
 			else
-				compareResults(results)
+				compareResults(results, "exec")
 			callback(primaryError, primaryResult)
 
 COMMANDS = {
@@ -153,7 +153,7 @@ for command, key_pos of COMMANDS
 				if error?
 					logger.error {err: error}, "error in redis backend"
 				else
-					compareResults(results)
+					compareResults(results, command)
 				callback(primaryError, primaryResult...)
 
 		MultiClient.prototype[command] = (args...) ->
@@ -164,10 +164,14 @@ for command, key_pos of COMMANDS
 				args_with_key[key_pos] = key
 				client.rclient[command] args_with_key...
 
-compareResults = (results) ->
+compareResults = (results, command) ->
 	return if results.length < 2
 	first = results[0]
+	if command == "smembers"
+		first = first.slice().sort()
 	for result in results.slice(1)
+		if command == "smembers"
+			result = result.slice().sort()
 		if not _.isEqual(first, result)
 			logger.error results: results, "redis backend conflict"
 			Metrics.inc "backend-conflict"
