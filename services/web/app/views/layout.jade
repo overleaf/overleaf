@@ -74,6 +74,18 @@ html(itemscope, itemtype='http://schema.org/Product')
 						handle: '#{session.user._id}',
 						email: '#{session.user.email}',
 					}]);
+
+			if (justRegistered)
+				script(type="text/javascript").
+					Countly.q.push(['add_event',{
+						key: 'user-registered'
+					});
+
+			if (justLoggedIn)
+				script(type="text/javascript").
+					Countly.q.push(['add_event',{
+						key: 'user-logged-in'
+					});
 		// End countly Analytics
 				
 		script(type="text/javascript").
