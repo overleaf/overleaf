@@ -50,7 +50,7 @@ define -> [
 		regexToMatch: /No positions in optional float specifier/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/No_positions_in_optional_float_specifier"
 		humanReadableHint: """
-			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
+			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (float options), or remove the square brackets. Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
 	,
 		regexToMatch: /Undefined control sequence/
@@ -77,8 +77,8 @@ define -> [
 			The compiler isn't recognizing the float option 'H'. Include \\usepackage{float} in your preamble to fix this.
 		"""
 	,
-		regexToMatch: /LaTeX Error: Unknown float option `.+'/
-		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_Unknown_float_option_%60H%27"
+		regexToMatch: /LaTeX Error: Unknown float option `q'/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_Unknown_float_option_%60q%27"
 		humanReadableHint: """
 			You have used a float specifier which the compiler does not understand. You can learn more about the different float options available for placing figures <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
