@@ -122,7 +122,7 @@ module.exports = UserController =
 					AuthenticationManager.setUserPassword user._id, newPassword1, (error) ->
 						return next(error) if error?
 						UserSessionsManager.revokeAllUserSessions user, [req.sessionID], (err) ->
-							return next(err) if err
+							return next(err) if err?
 							res.send
 								message:
 									type:'success'

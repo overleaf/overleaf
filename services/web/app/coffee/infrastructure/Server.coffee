@@ -90,7 +90,7 @@ webRouter.use translations.setLangBasedOnDomainMiddlewear
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
-	if req?.session?.user
+	if req?.session?.user?
 		UserSessionsManager.touch(req.session.user, (err)->)
 	next()
 

@@ -16,10 +16,10 @@ module.exports = UserSessionsManager =
 		return "sess:#{sessionId}"
 
 	trackSession: (user, sessionId, callback=(err)-> ) ->
-		if !user
+		if !user?
 			logger.log {sessionId}, "no user to track, returning"
 			return callback(null)
-		if !sessionId
+		if !sessionId?
 			logger.log {user_id: user._id}, "no sessionId to track, returning"
 			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogin handler"
@@ -29,17 +29,17 @@ module.exports = UserSessionsManager =
 			.sadd(sessionSetKey, value)
 			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
 			.exec (err, response) ->
-				if err
+				if err?
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while adding session key to UserSessions set"
 					return callback(err)
 				UserSessionsManager._checkSessions(user, () ->)
 				callback()
 
 	untrackSession: (user, sessionId, callback=(err)-> ) ->
-		if !user
+		if !user?
 			logger.log {sessionId}, "no user to untrack, returning"
 			return callback(null)
-		if !sessionId
+		if !sessionId?
 			logger.log {user_id: user._id}, "no sessionId to untrack, returning"
 			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
@@ -52,7 +52,7 @@ module.exports = UserSessionsManager =
 			.srem(sessionSetKey, value)
 			.expire(sessionSetKey, "#{Settings.cookieSessionLength}")
 			.exec (err, response) ->
-				if err
+				if err?
 					logger.err {err, user_id: user._id, sessionSetKey}, "error while removing session key from UserSessions set"
 					return callback(err)
 				UserSessionsManager._checkSessions(user, () ->)
@@ -68,7 +68,7 @@ module.exports = UserSessionsManager =
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
-			if err
+			if err?
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
 				return callback(err)
 			keysToDelete = _.filter(sessionKeys, (k) -> k not in retain)
@@ -80,7 +80,7 @@ module.exports = UserSessionsManager =
 				.del(keysToDelete)
 				.srem(sessionSetKey, keysToDelete)
 				.exec (err, result) ->
-					if err
+					if err?
 						logger.err {err, user_id: user._id, sessionSetKey}, "error revoking all sessions for user"
 						return callback(err)
 					callback(null)
@@ -91,7 +91,7 @@ module.exports = UserSessionsManager =
 			return callback(null)
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.expire sessionSetKey, "#{Settings.cookieSessionLength}", (err, response) ->
-			if err
+			if err?
 				logger.err {err, user_id: user._id}, "error while updating ttl on UserSessions set"
 				return callback(err)
 			callback(null)
@@ -103,7 +103,7 @@ module.exports = UserSessionsManager =
 		logger.log {user_id: user._id}, "checking sessions for user"
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
-			if err
+			if err?
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
 				return callback(err)
 			logger.log {user_id: user._id, count: sessionKeys.length}, "checking sessions for user"
@@ -112,12 +112,12 @@ module.exports = UserSessionsManager =
 					(key) ->
 						(next) ->
 							rclient.get key, (err, val) ->
-								if err
+								if err?
 									return next(err)
-								if val == null
+								if !val?
 									logger.log {user_id: user._id, key}, ">> removing key from UserSessions set"
 									rclient.srem sessionSetKey, key, (err, result) ->
-										if err
+										if err?
 											return next(err)
 										return next(null)
 								else
