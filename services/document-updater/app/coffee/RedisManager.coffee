@@ -143,4 +143,7 @@ module.exports = RedisManager =
 	getAndSetProject: (project_id, callback = (error) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), (error, doc_ids) ->
 			return callback(error) if error?
-			rclient.sadd keys.docsInProject(project_id: project_id), doc_ids..., callback
+			if doc_ids.length > 0
+				rclient.sadd keys.docsInProject(project_id: project_id), doc_ids..., callback
+			else
+				callback()
