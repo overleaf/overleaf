@@ -145,7 +145,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
-			.pull-right
+			.files-dropdown-container
 				a.btn.btn-default.btn-sm(
 					href,
 					tooltip="#{translate('clear_cached_files')}",
@@ -155,12 +155,15 @@ div.full-size.pdf(ng-controller="PdfController")
 				)
 					i.fa.fa-trash-o
 				| &nbsp;
-				div.dropdown(style="display: inline-block;", dropdown)
+				div.files-dropdown(
+					ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
+					dropdown
+				)
 					a.btn.btn-default.btn-sm(
 						href
 						dropdown-toggle
 					)
-						| !{translate("other_logs_and_files")} 
+						| !{translate("other_logs_and_files")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
