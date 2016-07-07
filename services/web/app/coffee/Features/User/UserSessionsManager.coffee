@@ -43,9 +43,6 @@ module.exports = UserSessionsManager =
 			logger.log {user_id: user._id}, "no sessionId to untrack, returning"
 			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
-		if !user
-			logger.log {sessionId}, "no user, for some reason"
-			return callback()
 		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
 		rclient.multi()
