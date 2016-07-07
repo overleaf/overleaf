@@ -167,10 +167,10 @@ for command, key_pos of COMMANDS
 compareResults = (results, command) ->
 	return if results.length < 2
 	first = results[0]
-	if command == "smembers"
+	if command == "smembers" and first?
 		first = first.slice().sort()
 	for result in results.slice(1)
-		if command == "smembers"
+		if command == "smembers" and result?
 			result = result.slice().sort()
 		if not _.isEqual(first, result)
 			logger.error results: results, "redis backend conflict"
