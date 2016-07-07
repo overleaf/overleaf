@@ -224,8 +224,11 @@ describe "RedisBackend", ->
 			beforeEach (done) ->
 				@client.SECONDARY_TIMEOUT = 10
 				@content = "bar"
-				@rclient_redis.get = sinon.stub()
-				@rclient_redis.get.withArgs("doclines:#{@doc_id}").yields(null, @content)
+				@rclient_redis.get = (key, cb) =>
+					key.should.equal "doclines:#{@doc_id}"
+					setTimeout () =>
+						cb(null, @content)
+					, @client.SECONDARY_TIMEOUT * 3 # If the secondary errors first, don't affect the primary result
 				@rclient_ioredis.get = (key, cb) =>
 					key.should.equal "doclines:{#{@doc_id}}"
 					setTimeout () =>
@@ -236,8 +239,11 @@ describe "RedisBackend", ->
 		
 			it "should log out an error for the backend", ->
 				@logger.error
-					.calledWith({err: new Error("backend timed out")}, "error in redis backend")
+					.calledWith({err: new Error("backend timed out")}, "backend timed out")
 					.should.equal true
+			
+			it "should return the primary result", ->
+				@result.should.equal @content
 
 		describe "when the primary takes longer than SECONDARY_TIMEOUT", ->
 			beforeEach (done) ->
@@ -394,7 +400,10 @@ describe "RedisBackend", ->
 		describe "when the secondary takes longer than SECONDARY_TIMEOUT", ->
 			beforeEach (done) ->
 				@rclient_redis.get = sinon.stub()
-				@rclient_redis.exec = sinon.stub().yields(null, [@doclines, @version])
+				@rclient_redis.exec = (cb) =>
+					setTimeout () =>
+						cb(null, [@doclines, @version])
+					, 30 # If secondary errors first, don't affect the primary result
 				@rclient_ioredis.get = sinon.stub()
 				@rclient_ioredis.exec = (cb) =>
 					setTimeout () =>
@@ -410,8 +419,11 @@ describe "RedisBackend", ->
 		
 			it "should log out an error for the backend", ->
 				@logger.error
-					.calledWith({err: new Error("backend timed out")}, "error in redis backend")
+					.calledWith({err: new Error("backend timed out")}, "backend timed out")
 					.should.equal true
+			
+			it "should return the primary result", ->
+				@result.should.deep.equal [@doclines, @version]
 
 		describe "when the primary takes longer than SECONDARY_TIMEOUT", ->
 			beforeEach (done) ->

@@ -69,9 +69,9 @@ class MultiClient
 				
 				timeout = null
 				if !client.primary
-					logger.warn {timeout: @SECONDARY_TIMEOUT}, "starting timeout exec"
 					timeout = setTimeout () ->
-						cb(new Error("backend timed out"))
+						logger.error {err: new Error("#{client.driver} backend timed out")}, "backend timed out"
+						cb()
 					, @SECONDARY_TIMEOUT
 
 				client.rclient.exec (error, result) =>
@@ -136,9 +136,9 @@ for command, key_pos of COMMANDS
 					
 					timeout = null
 					if !client.primary
-						logger.warn {timeout: @SECONDARY_TIMEOUT}, "starting timeout #{command}"
 						timeout = setTimeout () ->
-							cb(new Error("backend timed out"))
+							logger.error {err: new Error("#{client.driver} backend timed out")}, "backend timed out"
+							cb()
 						, @SECONDARY_TIMEOUT
 					
 					client.rclient[command] args_with_key..., (error, result...) =>
