@@ -1,6 +1,6 @@
 FROM ubuntu
 
-COPY ./test/acceptance/docker-entrypoint.sh /entrypoint.sh
+COPY ./test/acceptance/scripts/docker-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 RUN apt-get update && apt-get upgrade -y
