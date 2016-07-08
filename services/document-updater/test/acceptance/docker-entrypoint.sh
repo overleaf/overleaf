@@ -5,4 +5,11 @@ service mongodb      start
 
 cd /document-updater
 npm install
-grunt test:acceptance:docker
+
+
+source ./test/acceptance/scripts/full-test.sh
+
+service redis-server stop
+service mongodb      stop
+
+exit 0
