@@ -75,7 +75,7 @@ module.exports = (grunt) ->
 				command: """
 				if [ -z $(docker images | awk \'{ print $1 }\' | grep sharelatex-docupdater-tests) ];
 				then
-				  docker build . -t sharelatex-docupdater-tests;
+				  docker build -t sharelatex-docupdater-tests .;
 			  else
 					echo ">> docker image \'sharelatex-docupdater-tests\' already exists";
 				fi
