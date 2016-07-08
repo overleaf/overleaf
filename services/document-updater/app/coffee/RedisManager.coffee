@@ -130,12 +130,15 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			[lines, version, ops, project_id] = results
 			multi = rclient.multi()
-			multi.set keys.docLines(doc_id:doc_id), lines
-			multi.set keys.docVersion(doc_id:doc_id), version
+			if lines?
+				multi.set keys.docLines(doc_id:doc_id), lines
+			if version?
+				multi.set keys.docVersion(doc_id:doc_id), version
 			multi.del keys.docOps(doc_id:doc_id)
 			if ops.length > 0
 				multi.rpush keys.docOps(doc_id:doc_id), ops...
-			multi.set keys.projectKey(doc_id:doc_id), project_id
+			if project_id?
+				multi.set keys.projectKey(doc_id:doc_id), project_id
 			multi.exec (error) ->
 				return callback(error) if error?
 				return callback null, project_id
@@ -143,4 +146,7 @@ module.exports = RedisManager =
 	getAndSetProject: (project_id, callback = (error) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), (error, doc_ids) ->
 			return callback(error) if error?
-			rclient.sadd keys.docsInProject(project_id: project_id), doc_ids..., callback
+			if doc_ids.length > 0
+				rclient.sadd keys.docsInProject(project_id: project_id), doc_ids..., callback
+			else
+				callback()

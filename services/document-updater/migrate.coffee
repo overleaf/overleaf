@@ -2,6 +2,8 @@ RedisManager = require "./app/coffee/RedisManager"
 UpdateManager = require "./app/coffee/UpdateManager"
 LockManager = require "./app/coffee/LockManager"
 
+async = require "async"
+
 handleErrorInsideLock = (doc_id, lockValue, original_error, callback = (error) ->) ->
 	LockManager.releaseLock doc_id, lockValue, (lock_error) ->
 		callback(original_error)
@@ -17,13 +19,18 @@ migrateDoc = (doc_id, callback = (error) ->) ->
 					return callback(error) if error?
 					UpdateManager.continueProcessingUpdatesWithLock project_id, doc_id, callback
 
-doc_id = process.argv[2]
-if !doc_id?
-	console.log "Usage: coffee migrate.coffee DOC_ID"
+doc_ids = process.argv.slice(2)
+if doc_ids.length == 0
+	console.log "Usage: coffee migrate.coffee DOC_ID [DOC_ID ...]"
 	process.exit(1)
 
-migrateDoc doc_id, (error) ->
+jobs = []
+for doc_id in doc_ids
+	do (doc_id) ->
+		jobs.push (cb) ->
+			console.log "MIGRATING #{doc_id}"
+			migrateDoc doc_id, cb
+
+async.series jobs, (error) ->
 	throw error if error?
-	setTimeout () ->
-		process.exit(0)
-	, 200
+	process.exit(0)
