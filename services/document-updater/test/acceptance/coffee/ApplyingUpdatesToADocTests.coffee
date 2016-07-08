@@ -210,7 +210,7 @@ describe "Applying updates to a doc", ->
 				throw error if error?
 				DocUpdaterClient.sendUpdates @project_id, @doc_id, updates, (error) =>
 					throw error if error?
-					setTimeout done, 1000
+					setTimeout done, 2000
 
 		after ->
 			MockTrackChangesApi.flushDoc.restore()
