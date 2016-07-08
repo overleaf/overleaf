@@ -48,17 +48,50 @@ html(itemscope, itemtype='http://schema.org/Product')
 			script(type='text/javascript').
 				window.ga = function() { console.log("Sending to GA", arguments) };
 
-		// Heap Analytics
-		if (settings.analytics && settings.analytics.heap && session && session.user)
+		// Countly Analytics
+		if (settings.analytics && settings.analytics.countly && settings.analytics.countly.token)
 			script(type="text/javascript").
-				window.heap=window.heap||[],heap.load=function(e,t){window.heap.appid=e,window.heap.config=t=t||{};var n=t.forceSSL||"https:"===document.location.protocol,a=document.createElement("script");a.type="text/javascript",a.async=!0,a.src=(n?"https:":"http:")+"//cdn.heapanalytics.com/js/heap-"+e+".js";var o=document.getElementsByTagName("script")[0];o.parentNode.insertBefore(a,o);for(var r=function(e){return function(){heap.push([e].concat(Array.prototype.slice.call(arguments,0)))}},p=["clearEventProperties","identify","setEventProperties","track","unsetEventProperty"],c=0;c<p.length;c++)heap[p[c]]=r(p[c])};
-				heap.load("#{settings.analytics.heap.token}");
-			script(type="text/javascript").
-				heap.identify({
-					handle: "#{session.user._id}",
-					email: "#{session.user.email}",
-				})
-		// End Heap Analytics
+				var Countly = Countly || {};
+				Countly.q = Countly.q || [];
+				Countly.app_key = '#{settings.analytics.countly.token}';
+				Countly.url = 'https://try.count.ly'; 
+
+				Countly.q.push(['track_sessions']);
+				Countly.q.push(['track_pageview']);
+
+				(function() {
+					var cly = document.createElement('script'); cly.type = 'text/javascript';
+					cly.async = true;
+					//enter url of script here
+					cly.src = 'https://cdnjs.cloudflare.com/ajax/libs/countly-sdk-web/16.6.0/countly.min.js';
+					cly.onload = function(){Countly.init()};
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cly, s);
+				})();
+
+			if (session && session.user)
+				script(type="text/javascript").
+					Countly.q.push(['change_id', '#{session.user._id}', true ]);
+
+					Countly.q.push(['user_details', {
+						email: '#{session.user.email}',
+						custom: {
+							userId: '#{session.user._id}',
+						}
+					}]);
+
+			if (justRegistered)
+				script(type="text/javascript").
+					Countly.q.push(['add_event',{
+						key: 'user-registered'
+					}]);
+
+			if (justLoggedIn)
+				script(type="text/javascript").
+
+					Countly.q.push(['add_event',{
+						key: 'user-logged-in'
+					}]);
+		// End countly Analytics
 				
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";

@@ -77,17 +77,19 @@ describe "CollaboratorsHandler", ->
 				{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
 				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
 				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+				{ id: "doesnt-exist", privilegeLevel: "readAndWrite" }
 			])
 			@UserGetter.getUser = sinon.stub()
 			@UserGetter.getUser.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
 			@UserGetter.getUser.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
 			@UserGetter.getUser.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
 			@UserGetter.getUser.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
+			@UserGetter.getUser.withArgs("doesnt-exist").yields(null, null)
 			@CollaboratorHandler.getMembersWithPrivilegeLevels @project_id, @callback
 		
 		it "should return an array of members with their privilege levels", ->
 			@callback
-				.calledWith(undefined, [
+				.calledWith(null, [
 					{ user: { _id: "read-only-ref-1" }, privilegeLevel: "readOnly" }
 					{ user: { _id: "read-only-ref-2" }, privilegeLevel: "readOnly" }
 					{ user: { _id: "read-write-ref-1" }, privilegeLevel: "readAndWrite" }
@@ -274,6 +276,19 @@ describe "CollaboratorsHandler", ->
 			it "should not add any users to the proejct", ->
 				@CollaboratorHandler.addUserIdToProject.called.should.equal false
 
-
-
-
+	describe "removeUserFromAllProjects", ->
+		beforeEach (done) ->
+			@CollaboratorHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
+			@CollaboratorHandler.getProjectsUserIsCollaboratorOf.withArgs(@user_id, { _id: 1 }).yields(
+				null,
+				[ { _id: "read-and-write-0" }, { _id: "read-and-write-1" }, null ],
+				[ { _id: "read-only-0" }, { _id: "read-only-1" }, null ]
+			)
+			@CollaboratorHandler.removeUserFromProject = sinon.stub().yields()
+			@CollaboratorHandler.removeUserFromAllProjets @user_id, done
+		
+		it "should remove the user from each project", ->
+			for project_id in ["read-and-write-0", "read-and-write-1", "read-only-0", "read-only-1"]
+				@CollaboratorHandler.removeUserFromProject
+					.calledWith(project_id, @user_id)
+					.should.equal true

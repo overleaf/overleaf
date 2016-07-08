@@ -20,7 +20,7 @@ module.exports = BlogController =
 
 		logger.log url:url, "proxying request to blog api"
 		request.get blogUrl, (err, r, data)->
-			if r?.statusCode == 404
+			if r?.statusCode == 404 or r?.statusCode == 403
 				return ErrorController.notFound(req, res, next)
 			if err?
 				return res.send 500

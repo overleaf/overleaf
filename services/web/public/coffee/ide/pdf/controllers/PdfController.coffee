@@ -15,6 +15,33 @@ define [
 		$scope.shouldShowLogs = false
 		$scope.wikiEnabled = window.wikiEnabled;
 
+		# view logic to check whether the files dropdown should "drop up" or "drop down"
+		$scope.shouldDropUp = false
+
+		logsContainerEl	= document.querySelector ".pdf-logs"
+		filesDropdownEl	= logsContainerEl?.querySelector ".files-dropdown"
+
+		# get the top coordinate of the files dropdown as a ratio (to the logs container height)
+		# logs container supports scrollable content, so it's possible that ratio > 1.
+		getFilesDropdownTopCoordAsRatio = () ->
+			 filesDropdownEl?.getBoundingClientRect().top / logsContainerEl?.getBoundingClientRect().height
+
+		$scope.$watch "shouldShowLogs", (shouldShow) ->
+			if shouldShow
+				$scope.$applyAsync () -> 
+					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
+
+		# log hints tracking
+		$scope.trackLogHintsLearnMore = () ->
+			event_tracking.sendCountly "logs-hints-learn-more"
+
+		trackLogHintsFeedback = (isPositive, hintId) ->
+			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
+			event_tracking.sendCountly (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
+
+		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
+		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
+
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
 		else
@@ -50,8 +77,6 @@ define [
 			params = {}
 			if options.isAutoCompile
 				params["auto_compile"]=true
-			if perUserCompile # send ?isolated=true for per-user compiles
-				params["isolated"] = true
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
@@ -125,9 +150,6 @@ define [
 				# convert the qs hash into a query string and append it
 				$scope.pdf.qs = createQueryString qs
 				$scope.pdf.url += $scope.pdf.qs
-				# special case for the download url
-				if perUserCompile
-					qs.isolated = true
 				# Save all downloads as files
 				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
@@ -147,8 +169,6 @@ define [
 					else
 						file.name = file.path
 					qs = {}
-					if perUserCompile
-						qs.isolated = true
 					if response.clsiServerId?
 						qs.clsiserverid = response.clsiServerId
 					file.url = "/project/#{project_id}/output/#{file.path}" +	createQueryString qs
@@ -237,7 +257,7 @@ define [
 			return null
 
 		normalizeFilePath = (path) ->
-			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}\/(\.\/)?/, "")
+			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}(-[0-9a-f]{24})?\/(\.\/)?/, "")
 			path = path.replace(/^\/compile\//, "")
 
 			rootDocDirname = ide.fileTreeManager.getRootDocDirname()
@@ -248,6 +268,9 @@ define [
 
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
+
+			event_tracking.sendCountlySampled "editor-recompile-sampled", options
+
 			$scope.pdf.compiling = true
 
 			ide.$scope.$broadcast("flush-changes")
@@ -267,6 +290,9 @@ define [
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
+		# This method is a simply wrapper and exists only for tracking purposes.
+		ide.$scope.recompileViaKey = () ->
+			$scope.recompile { keyShortcut: true }
 
 		$scope.clearCache = () ->
 			$http {
@@ -274,13 +300,13 @@ define [
 				method: "DELETE"
 				params:
 					clsiserverid:ide.clsiServerId
-					isolated: perUserCompile
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			}
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
+			event_tracking.sendCountly "ide-open-logs" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -288,6 +314,7 @@ define [
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
+			event_tracking.sendCountly "logs-view-raw" if $scope.pdf.showRawLog
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
@@ -361,7 +388,6 @@ define [
 							line: row + 1
 							column: column
 							clsiserverid:ide.clsiServerId
-							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
@@ -407,7 +433,6 @@ define [
 							h: h.toFixed(2)
 							v: v.toFixed(2)
 							clsiserverid:ide.clsiServerId
-							isolated: perUserCompile
 						}
 					})
 					.success (data) ->
@@ -442,8 +467,9 @@ define [
 					ide.editorManager.openDoc(doc, gotoLine: line)
 	]
 
-	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
+			event_tracking.sendCountly 'logs-jump-to-location'
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?

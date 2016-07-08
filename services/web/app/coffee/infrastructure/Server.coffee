@@ -31,6 +31,7 @@ translations = require("translations-sharelatex").setup(Settings.i18n)
 Modules = require "./Modules"
 
 ErrorController = require "../Features/Errors/ErrorController"
+UserSessionsManager = require "../Features/User/UserSessionsManager"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -89,6 +90,8 @@ webRouter.use translations.setLangBasedOnDomainMiddlewear
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
+	if req?.session?.user?
+		UserSessionsManager.touch(req.session.user, (err)->)
 	next()
 
 webRouter.use ReferalConnect.use
@@ -114,7 +117,7 @@ app.use (req, res, next) ->
 
 apiRouter.get "/status", (req, res)->
 	res.send("web sharelatex is alive")
-	
+
 profiler = require "v8-profiler"
 apiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")

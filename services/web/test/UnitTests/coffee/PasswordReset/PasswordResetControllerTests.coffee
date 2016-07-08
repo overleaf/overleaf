@@ -17,6 +17,8 @@ describe "PasswordResetController", ->
 			setNewUserPassword:sinon.stub()
 		@RateLimiter =
 			addCount: sinon.stub()
+		@UserSessionsManager =
+			revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
 		@PasswordResetController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"./PasswordResetHandler":@PasswordResetHandler
@@ -24,6 +26,7 @@ describe "PasswordResetController", ->
 			"../../infrastructure/RateLimiter":@RateLimiter
 			"../Authentication/AuthenticationController": @AuthenticationController = {}
 			"../User/UserGetter": @UserGetter = {}
+			"../User/UserSessionsManager": @UserSessionsManager
 
 		@email = "bob@bob.com "
 		@token = "my security token that was emailed to me"
@@ -134,7 +137,14 @@ describe "PasswordResetController", ->
 				@req.session.should.not.have.property 'resetToken'
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
-		
+
+		it 'should clear sessions', (done) ->
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
+			@res.sendStatus = (code)=>
+				@UserSessionsManager.revokeAllUserSessions.callCount.should.equal 1
+				done()
+			@PasswordResetController.setNewUserPassword @req, @res
+
 		it "should login user if login_after is set", (done) ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, { email: "joe@example.com" })
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id = "user-id-123")

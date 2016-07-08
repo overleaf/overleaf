@@ -139,7 +139,7 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should proxy the PDF from the CLSI", ->
-				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res, @next).should.equal true
+				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/user/#{@user_id}/output/output.pdf", @req, @res, @next).should.equal true
 
 		describe "when the pdf is not going to be used in pdfjs viewer", ->
 
@@ -338,8 +338,6 @@ describe "CompileController", ->
 			@req =
 				params:
 					project_id:@project_id
-				query:
-					isolated: "true"
 			@CompileManager.compile.callsArgWith(3)
 			@CompileController.proxyToClsi = sinon.stub()
 			@res = 
@@ -362,8 +360,6 @@ describe "CompileController", ->
 			@CompileManager.wordCount = sinon.stub().callsArgWith(3, null, {content:"body"})
 			@req.params =
 				Project_id: @project_id
-			@req.query =
-				isolated: "true"
 			@res.send = sinon.stub()
 			@res.contentType = sinon.stub()
 			@CompileController.wordCount @req, @res, @next
