@@ -2,7 +2,7 @@
 
 echo ">> Starting server..."
 
-grunt >> /dev/null &
+grunt execute:app >> /dev/null &
 _pid="$!"
 
 echo ">> Server started with pid: $_pid"
