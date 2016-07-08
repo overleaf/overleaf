@@ -10,7 +10,7 @@ echo ">> Server started with pid: $_pid"
 sleep 20
 
 echo ">> Running acceptance tests..."
-grunt test:acceptance
+grunt mochaTest:acceptance
 _test_exit_code=$?
 
 echo ">> Killing server (pid: $_pid)"
