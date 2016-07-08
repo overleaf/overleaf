@@ -11,8 +11,11 @@ sleep 20
 
 echo ">> Running acceptance tests..."
 grunt test:acceptance
+_test_exit_code=$?
 
 echo ">> Killing server (pid: $_pid)"
 kill -1 "$_pid"
 
 echo ">> Done"
+
+exit $_test_exit_code
