@@ -11,6 +11,9 @@ define [
 				eventData = { key }
 				eventData.segmentation = segmentation if segmentation?				
 				Countly?.q.push([ "add_event", eventData ]);
+
+			sendCountlySampled: (key, segmentation) ->
+				@sendCountly key, segmentation if Math.random() < .01 
 		}
 
 	# App.directive "countlyTrack", () ->
