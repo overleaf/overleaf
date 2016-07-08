@@ -267,11 +267,9 @@ define [
 			return path
 
 		$scope.recompile = (options = {}) ->
-			# event_tracking.sendCountly "editor-recompile", options
-			
-			event_tracking.sendCountlySampled "editor-recompile", options
-
 			return if $scope.pdf.compiling
+
+			event_tracking.sendCountlySampled "editor-recompile", options
 
 			$scope.pdf.compiling = true
 
