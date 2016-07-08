@@ -6,7 +6,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
 	grunt.loadNpmTasks 'grunt-forever'
-	
+	grunt.loadNpmTasks 'grunt-shell'
+
 	grunt.initConfig
 		forever:
 			app:
@@ -67,6 +68,21 @@ module.exports = (grunt) ->
 					grep: grunt.option("grep")
 					timeout: 10000
 
+		shell:
+			fullAcceptanceTests:
+				command: "bash ./test/acceptance/scripts/full-test.sh"
+			buildDockerImage:
+				command: """
+				if [ -z $(docker images | awk \'{ print $1 }\' | grep sharelatex-docupdater-tests) ];
+				then
+				  docker build . -t sharelatex-docupdater-tests;
+			  else
+					echo ">> docker image \'sharelatex-docupdater-tests\' already exists";
+				fi
+				"""
+			dockerTests:
+				command: 'docker run -v "$(pwd):/document-updater" --rm --name doc-updater-test sharelatex-docupdater-tests'
+
 		availabletasks:
 			tasks:
 				options:
@@ -111,8 +127,24 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install', "Compile everything when installing as an npm module", ['compile']
 
 	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> for individual tests)', ['compile:server', 'compile:unit_tests', 'mochaTest:unit']
+
+	grunt.registerTask(
+		'test:acceptance:full',
+		"Start server and run acceptance tests",
+		['shell:fullAcceptanceTests']
+	)
+	grunt.registerTask(
+		'test:acceptance:buildDockerImage',
+		"Build docker image for acceptance tests",
+		['shell:buildDockerImage']
+	)
+	grunt.registerTask(
+		'test:acceptance:docker',
+		"Run acceptance tests inside docker container",
+		['shell:buildDockerImage', 'shell:dockerTests']
+	)
+
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
 
 	grunt.registerTask 'run', "Compile and run the document-updater-sharelatex server", ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'default', 'run'
-
