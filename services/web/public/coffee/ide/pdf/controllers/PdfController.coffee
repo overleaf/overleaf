@@ -269,7 +269,7 @@ define [
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 
-			event_tracking.sendCountlySampled "editor-recompile", options
+			event_tracking.sendCountlySampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
 
