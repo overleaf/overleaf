@@ -26,7 +26,7 @@ module.exports = (grunt) ->
 			run:
 				command:"node app.js | ./node_modules/logger-sharelatex/node_modules/bunyan/bin/bunyan --color"
 			cssmin:
-				command:"node_modules/clean-css/bin/cleancss -o public/stylesheets/style.css public/stylesheets/style.css"
+				command:"node_modules/clean-css/bin/cleancss --s0 -o public/stylesheets/style.css public/stylesheets/style.css"
 
 
 		watch:
