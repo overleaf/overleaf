@@ -31,11 +31,10 @@ define [
 				@errorCallback = @options.errorCallback
 				@pageSizeChangeCallback = @options.pageSizeChangeCallback
 				@pdfjs.promise.catch (exception) =>
-					# console.log 'ERROR in get document', exception
+					# error getting document
 					@errorCallback(exception)
 
 			resetState: () ->
-				#console.log 'called reset state'
 				@renderQueue = []
 				clearTimeout @queueTimer if @queueTimer?
 				# clear any existing timers, render tasks
@@ -56,7 +55,6 @@ define [
 
 			getPage: (pageNum) ->
 				@document.then (pdfDocument) ->
-					# console.log 'got pdf document, now getting Page', pageNum
 					pdfDocument.getPage(pageNum)
 
 			getPdfViewport: (pageNum, scale) ->
@@ -197,13 +195,10 @@ define [
 				# update the spinner to make it spinning (signifies loading has begun)
 				@updateIndicator page
 
-				# console.log 'started page load', pagenum
-
 				timedOut = false
-				timer = $timeout () =>
+				timer = $timeout () => # page load timed out
 					return if loadTask.cancelled # return from cancelled page load
 					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
-					# console.log 'page load timed out', pagenum
 					timedOut = true
 					@clearIndicator page
 					# @jobs = @jobs - 1
@@ -219,35 +214,33 @@ define [
 				@pageState[pagenum] = pageState = { loadTask: loadTask }
 
 				loadTask.then (pageObject) =>
-					#console.log 'in page load success', pagenum
+					# page load success
 					$timeout.cancel(timer)
 					return if loadTask.cancelled # return from cancelled page load
 					pageState.renderTask = @doRender element, pagenum, pageObject
 					pageState.renderTask.then () =>
-						#console.log 'render task success', pagenum
+						# render task success
 						@clearIndicator page
 						pageState.complete = true
 						delete pageState.renderTask
 						@removeCompletedJob pagenum
 					, () =>
-						# display an error icon
-						# console.log 'render task failed', pagenum
+						# render task failed
+						# could display an error icon
 						pageState.complete = false
 						delete pageState.renderTask
-						# rejected
 						@removeCompletedJob pagenum
 				.catch (error) ->
-					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
+					# page load error
 					$timeout.cancel(timer)
 					@clearIndicator page
-					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
 				self = this
 				scale = @scale
 
 				if (not scale?)
-					# console.log 'scale is undefined, returning'
+					# scale is undefined, returning
 					return
 
 				canvas = $('<canvas class="pdf-canvas pdfng-rendering"></canvas>')
@@ -296,8 +289,6 @@ define [
 					navigateFn: @navigateFn
 				})
 
-				# console.log 'staring page render', pagenum
-
 				result = page.render {
 					canvasContext: ctx
 					viewport: viewport
@@ -307,14 +298,14 @@ define [
 				timedOut = false
 
 				timer = $timeout () =>
+					# page render timed out
 					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
-					# console.log 'page render timed out', pagenum
 					timedOut = true
 					result.cancel()
 				, @PAGE_RENDER_TIMEOUT
 
 				result.then () ->
-					# console.log 'page rendered', pagenum
+					# page render success
 					element.canvas.replaceWith(canvas)
 					$timeout.cancel(timer)
 					canvas.removeClass('pdfng-rendering')
@@ -327,21 +318,18 @@ define [
 					, (error) ->
 						self.errorCallback?(error)
 				.catch (error) ->
-					# console.log 'page render failed', pagenum, error
+					# page render failed
 					$timeout.cancel(timer)
 					if timedOut
-						# console.log 'calling ERROR callback - was timeout'
 						self.errorCallback?('timeout')
-					else if error != 'cancelled'
-						# console.log 'calling ERROR callback'
+					else if error is 'cancelled'
+						return # do nothing when cancelled
+					else
 						self.errorCallback?(error)
 
 				return result
 
-			stop: () ->
-
 			destroy: () ->
-				# console.log 'in pdf renderer destroy', @renderQueue
 				@shuttingDown = true
 				@resetState()
 				@pdfjs.then (document) ->
