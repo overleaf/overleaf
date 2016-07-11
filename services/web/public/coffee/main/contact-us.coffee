@@ -10,7 +10,7 @@ define [
 				controller: "SupportModalController"
 			)
 
-	App.controller 'SupportModalController', ($scope, $modalInstance, algoliaSearch) ->
+	App.controller 'SupportModalController', ($scope, $modalInstance, algoliaSearch, event_tracking) ->
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
@@ -23,6 +23,8 @@ define [
 				suggestion = 
 					url :"/learn/kb/#{page_underscored}"
 					name : hit._highlightResult.pageName.value
+
+			event_tracking.sendCountly "contact-form-suggestions-shown" if results.hits.length
 
 			$scope.$applyAsync () -> 
 				$scope.suggestions = suggestions
@@ -56,6 +58,9 @@ define [
 				}
 			else
 				$scope.suggestions = [];
+
+		$scope.clickSuggestionLink = (url) ->
+			event_tracking.sendCountly "contact-form-suggestions-clicked", { url }
 
 		$scope.close = () ->
 			$modalInstance.close()

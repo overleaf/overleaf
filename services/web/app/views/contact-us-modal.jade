@@ -21,7 +21,7 @@ script(type='text/ng-template', id='supportModalTemplate')
 				p.contact-suggestion-label #{translate("kb_suggestions_enquiry")}
 				ul.contact-suggestion-list
 					li(ng-repeat="suggestion in suggestions")
-						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", target="_blank")
+						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", ng-click="clickSuggestionLink(suggestion.url);" target="_blank")
 							span(ng-bind-html="suggestion.name")
 							i.fa.fa-angle-right
 			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
