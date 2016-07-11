@@ -9,6 +9,8 @@ define [
 			JOB_QUEUE_INTERVAL: 25
 			PAGE_LOAD_TIMEOUT: 60*1000
 			PAGE_RENDER_TIMEOUT: 60*1000
+			INDICATOR_DELAY1: 100  # time to delay before showing the indicator
+			INDICATOR_DELAY2: 250  # time until the indicator starts animating
 
 			constructor: (@url, @options) ->
 				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
@@ -112,27 +114,82 @@ define [
 				@renderQueue.push current
 				@processRenderQueue()
 
+			getPageDetails: (page) ->
+				return [page.element.canvas, page.pagenum]
+
+			# handle the loading indicators for each page
+
+			startIndicators: () ->
+				# make an array of the pages in the queue
+				@queuedPages = []
+				@queuedPages[page.pagenum] = true for page in @renderQueue
+				# clear any unfinished spinner timers on pages that aren't in the queue any more
+				for pagenum of @spinTimer when not @queuedPages[pagenum]
+					clearTimeout @spinTimer[pagenum]
+					delete @spinTimer[pagenum]
+				# add indicators for any new pages in the current queue
+				for page in @renderQueue when not @spinTimer[page.pagenum] and not @spinTimerDone[page.pagenum]
+					@startIndicator page
+
+			startIndicator: (page) ->
+				[canvas, pagenum] = @getPageDetails page
+				canvas.addClass('pdfng-loading')
+				@spinTimer[pagenum] = setTimeout () =>
+					for queuedPage in @renderQueue
+						if pagenum == queuedPage.pagenum
+							@spinner.add(canvas, {static:true})
+							@spinTimerDone[pagenum] = true
+							break
+					delete @spinTimer[pagenum]
+				, @INDICATOR_DELAY1
+
+			updateIndicator: (page) ->
+				[canvas, pagenum] = @getPageDetails page
+				# did the spinner insert itself already?
+				if @spinTimerDone[pagenum]
+					@spinTimer[pagenum] = setTimeout () =>
+						@spinner.start(canvas)
+						delete @spinTimer[pagenum]
+					, @INDICATOR_DELAY2
+				else
+					# stop the existing spin timer
+					clearTimeout @spinTimer[pagenum]
+					# start a new one which will also start spinning
+					@spinTimer[pagenum] = setTimeout () =>
+						@spinner.add(canvas, {static:true})
+						@spinTimerDone[pagenum] = true
+						@spinTimer[pagenum] = setTimeout () =>
+							@spinner.start(canvas)
+							delete @spinTimer[pagenum]
+						, @INDICATOR_DELAY2
+					, @INDICATOR_DELAY1
+
+			clearIndicator: (page) ->
+				[canvas, pagenum] = @getPageDetails page
+				@spinner.stop(canvas)
+				clearTimeout @spinTimer[pagenum]
+				delete @spinTimer[pagenum]
+				@spinTimerDone[pagenum] = true
+
+			# handle the queue of pages to be rendered
+
 			processRenderQueue: () ->
 				return if @shuttingDown
+				# mark all pages in the queue as loading
+				@startIndicators()
+				# bail out if there is already a render job running
 				return if @jobs > 0
-				current = @renderQueue.shift()
-				return unless current?
-				[element, pagenum] = [current.element, current.pagenum]
-				# if task is underway or complete, go to the next entry in the
-				# render queue
-				# console.log 'processing renderq', pagenum, @renderTask[pagenum], @complete[pagenum]
-				if @pageLoad[pagenum] or @renderTask[pagenum] or @complete[pagenum]
-					@processRenderQueue()
-					return
+				# take the first page in the queue
+				page = @renderQueue.shift()
+				# check if it is in action already
+				while page? and @pageState[page.pagenum]?
+					page = @renderQueue.shift()
+				return unless page?
+				[element, pagenum] = [page.element, page.pagenum]
 				@jobs = @jobs + 1
 
-				element.canvas.addClass('pdfng-loading')
-				spinTimer = setTimeout () =>
-					@spinner.add(element.canvas, {static:true})
-					spinTimer = setTimeout () =>
-						@spinner.start(element.canvas)
-					, 100
-				, 100
+				# update the spinner to make it spinning (signifies loading has begun)
+				@updateIndicator page
 
 				completeRef = @complete
 				renderTaskRef = @renderTask
@@ -143,8 +200,7 @@ define [
 					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
 					# console.log 'page load timed out', pagenum
 					timedOut = true
-					clearTimeout(spinTimer)
-					@spinner.stop(element.canvas)
+					@clearIndicator page
 					# @jobs = @jobs - 1
 					# @triggerRenderQueue(0)
 					@errorCallback?('timeout')
@@ -169,11 +225,12 @@ define [
 				.catch (error) ->
 					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
 					$timeout.cancel(timer)
-					clearTimeout(spinTimer)
+					@clearIndicator page
 					# console.log 'ERROR', error
 
 			doRender: (element, pagenum, page) ->
 				self = this
+						# display an error icon
 				scale = @scale
 
 				if (not scale?)
