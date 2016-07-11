@@ -53,7 +53,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				var Countly = Countly || {};
 				Countly.q = Countly.q || [];
 				Countly.app_key = '#{settings.analytics.countly.token}';
-				Countly.url = 'https://try.count.ly'; 
+				Countly.url = '#{settings.analytics.countly.server}';
 
 				Countly.q.push(['track_sessions']);
 				Countly.q.push(['track_pageview']);
