@@ -35,11 +35,19 @@ define [
 					@errorCallback(exception)
 
 			resetState: () ->
-				@complete = []
-				@timeout = []
-				@pageLoad = []
-				@renderTask = []
+				#console.log 'called reset state'
 				@renderQueue = []
+				clearTimeout @queueTimer if @queueTimer?
+				# clear any existing timers, render tasks
+				for timer in @spinTimer or []
+					clearTimeout timer
+				for page in @pageState or []
+					page?.loadTask?.cancel()
+					page?.renderTask?.cancel()
+				# initialise/reset the state
+				@pageState = []
+				@spinTimer = []     # timers for starting the spinners (to avoid jitter)
+				@spinTimerDone = [] # array of pages where the spinner has activated
 				@jobs = 0
 
 			getNumPages: () ->
@@ -90,9 +98,7 @@ define [
 					@processRenderQueue()
 				, interval
 
-			removeCompletedJob: (taskRef, pagenum) ->
-				# may need to clean up deferred object here
-				delete taskRef[pagenum]
+			removeCompletedJob: (pagenum) ->
 				@jobs = @jobs - 1
 				@triggerRenderQueue(0)
 
@@ -191,12 +197,11 @@ define [
 				# update the spinner to make it spinning (signifies loading has begun)
 				@updateIndicator page
 
-				completeRef = @complete
-				renderTaskRef = @renderTask
 				# console.log 'started page load', pagenum
 
 				timedOut = false
 				timer = $timeout () =>
+					return if loadTask.cancelled # return from cancelled page load
 					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
 					# console.log 'page load timed out', pagenum
 					timedOut = true
@@ -206,22 +211,31 @@ define [
 					@errorCallback?('timeout')
 				, @PAGE_LOAD_TIMEOUT
 
-				@pageLoad[pagenum] = @getPage(pagenum)
+				loadTask = @getPage(pagenum)
 
-				@pageLoad[pagenum].then (pageObject) =>
-					# console.log 'in page load success', pagenum
+				loadTask.cancel = () ->
+					@cancelled = true
+
+				@pageState[pagenum] = pageState = { loadTask: loadTask }
+
+				loadTask.then (pageObject) =>
+					#console.log 'in page load success', pagenum
 					$timeout.cancel(timer)
-					clearTimeout(spinTimer)
-					@renderTask[pagenum] = @doRender element, pagenum, pageObject
-					@renderTask[pagenum].then () =>
-						# complete
-						# console.log 'render task success', pagenum
-						completeRef[pagenum] = true
-						@removeCompletedJob renderTaskRef, pagenum
+					return if loadTask.cancelled # return from cancelled page load
+					pageState.renderTask = @doRender element, pagenum, pageObject
+					pageState.renderTask.then () =>
+						#console.log 'render task success', pagenum
+						@clearIndicator page
+						pageState.complete = true
+						delete pageState.renderTask
+						@removeCompletedJob pagenum
 					, () =>
+						# display an error icon
 						# console.log 'render task failed', pagenum
+						pageState.complete = false
+						delete pageState.renderTask
 						# rejected
-						@removeCompletedJob renderTaskRef, pagenum
+						@removeCompletedJob pagenum
 				.catch (error) ->
 					# console.log 'in page load error', pagenum, 'timedOut=', timedOut
 					$timeout.cancel(timer)
@@ -230,7 +244,6 @@ define [
 
 			doRender: (element, pagenum, page) ->
 				self = this
-						# display an error icon
 				scale = @scale
 
 				if (not scale?)
@@ -325,13 +338,12 @@ define [
 
 				return result
 
+			stop: () ->
+
 			destroy: () ->
 				# console.log 'in pdf renderer destroy', @renderQueue
 				@shuttingDown = true
-				clearTimeout @queueTimer if @queueTimer?
-				@renderQueue = []
-				for task in @renderTask
-					task.cancel() if task?
+				@resetState()
 				@pdfjs.then (document) ->
 					document.cleanup()
 					document.destroy()
