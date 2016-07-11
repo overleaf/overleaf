@@ -19,7 +19,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		link(rel="icon", href="/favicon.ico")
 		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
-		link(href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css",rel="stylesheet")
 
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
@@ -54,7 +53,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				var Countly = Countly || {};
 				Countly.q = Countly.q || [];
 				Countly.app_key = '#{settings.analytics.countly.token}';
-				Countly.url = 'https://try.count.ly'; 
+				Countly.url = '#{settings.analytics.countly.server}';
 
 				Countly.q.push(['track_sessions']);
 				Countly.q.push(['track_pageview']);
