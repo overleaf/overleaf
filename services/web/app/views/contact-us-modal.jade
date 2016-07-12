@@ -18,7 +18,7 @@ script(type='text/ng-template', id='supportModalTemplate')
 					tabindex='1',
 					onkeyup='')
 			.contact-suggestions(ng-show="suggestions.length")
-				p.contact-suggestion-label #{translate("kb_suggestions_enquiry")}
+				p.contact-suggestion-label !{translate("kb_suggestions_enquiry", { kbLink: "<a href='learn/kb' target='_blank'>__kb__</a>", kb: translate("knowledge_base") })} 
 				ul.contact-suggestion-list
 					li(ng-repeat="suggestion in suggestions")
 						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", ng-click="clickSuggestionLink(suggestion.url);" target="_blank")
