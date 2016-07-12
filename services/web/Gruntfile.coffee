@@ -17,7 +17,6 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
-	grunt.loadNpmTasks 'grunt-custom-shrinkwrap'
 	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	# grunt.loadNpmTasks 'grunt-sprity'
 
@@ -209,10 +208,6 @@ module.exports = (grunt) ->
 				options:
 					prop: 'commit'
 
-		customShrinkwrap:
-			defaultTarget:
-				options:
-					excludeDependencies: [ 'translations-sharelatex' ]
 
 		file_append:
 			default_options: files: [ {
