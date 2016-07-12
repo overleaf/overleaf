@@ -57,7 +57,7 @@ class Client
 
 class MultiClient
 	constructor: (@clients) ->
-		@SECONDARY_TIMEOUT = 200
+		@SECONDARY_TIMEOUT = 600
 	
 	exec: (callback) ->
 		primaryError = null
