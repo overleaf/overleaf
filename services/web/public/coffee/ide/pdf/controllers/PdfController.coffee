@@ -161,18 +161,18 @@ define [
 
 			if !response.outputFiles?
 				return
+
+			# prepare list of output files for download dropdown
+			qs = {}
+			if response.clsiServerId?
+				qs.clsiserverid = response.clsiServerId
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
-					# Turn 'output.blg' into 'blg file'.
-					if file.path.match(/^output\./)
-						file.name = "#{file.path.replace(/^output\./, "")} file"
-					else
-						file.name = file.path
-					qs = {}
-					if response.clsiServerId?
-						qs.clsiserverid = response.clsiServerId
-					file.url = "/project/#{project_id}/output/#{file.path}" +	createQueryString qs
-					$scope.pdf.outputFiles.push file
+					$scope.pdf.outputFiles.push {
+						# Turn 'output.blg' into 'blg file'.
+						name: if file.path.match(/^output\./) then "#{file.path.replace(/^output\./, "")} file" else file.path
+						url: "/project/#{project_id}/output/#{file.path}" + createQueryString qs
+					}
 
 
 		fetchLogs = (logFile, blgFile) ->
