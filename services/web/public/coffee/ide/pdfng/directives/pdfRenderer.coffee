@@ -197,7 +197,7 @@ define [
 				timedOut = false
 				timer = $timeout () => # page load timed out
 					return if loadTask.cancelled # return from cancelled page load
-					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
+					Raven?.captureMessage?('pdfng page load timed out after ' + @PAGE_LOAD_TIMEOUT + 'ms')
 					timedOut = true
 					@clearIndicator page
 					# @jobs = @jobs - 1
