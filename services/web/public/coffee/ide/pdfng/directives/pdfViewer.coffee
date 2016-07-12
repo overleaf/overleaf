@@ -41,7 +41,6 @@ define [
 					$scope.navigateTo = ref
 					$scope.$apply()
 				progressCallback: (progress) ->
-					return if onDemandLoading is true # don't show progress for on-demand page loading
 					$scope.$emit 'progress', progress
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
@@ -65,6 +64,7 @@ define [
 						result.pdfViewport.width
 					]
 					# console.log 'resolved q.all, page size is', result
+					$scope.$emit 'loaded'
 					$scope.numPages = result.numPages
 				.catch (error) ->
 					$scope.$emit 'pdf:error', error
@@ -257,8 +257,8 @@ define [
 					# console.log 'layoutReady was resolved'
 
 				renderVisiblePages = () ->
-					pages = getVisiblePages()
-					# pages = getExtraPages visiblePages
+					visiblePages = getVisiblePages()
+					pages = getExtraPages visiblePages
 					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
