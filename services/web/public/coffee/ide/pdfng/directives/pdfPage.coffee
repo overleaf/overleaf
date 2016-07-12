@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	# App = angular.module 'pdfPage', ['pdfHighlights']
 
-	App.directive 'pdfPage', ['$timeout', 'pdfHighlights', ($timeout, pdfHighlights) ->
+	App.directive 'pdfPage', ['$timeout', 'pdfHighlights', 'pdfSpinner', ($timeout, pdfHighlights, pdfSpinner) ->
 		{
 			require: '^pdfViewer',
 			template: '''
@@ -82,7 +82,7 @@ define [
 					if scope.timeoutHandler
 						$timeout.cancel(scope.timeoutHandler)
 						highlightsLayer.clearHighlights()
-						scope.timeoutHandler
+						scope.timeoutHandler = null
 
 					# console.log 'got highlight watch in pdfPage', scope.page
 					pageHighlights = (h for h in highlights when h.page == scope.page.pageNum)
