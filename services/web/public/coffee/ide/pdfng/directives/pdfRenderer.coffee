@@ -8,7 +8,6 @@ define [
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
 			PAGE_LOAD_TIMEOUT: 60*1000
-			PAGE_RENDER_TIMEOUT: 60*1000
 			INDICATOR_DELAY1: 100  # time to delay before showing the indicator
 			INDICATOR_DELAY2: 250  # time until the indicator starts animating
 
@@ -295,19 +294,9 @@ define [
 					transform: [pixelRatio, 0, 0, pixelRatio, 0, 0]
 				}
 
-				timedOut = false
-
-				timer = $timeout () =>
-					# page render timed out
-					Raven?.captureMessage?('pdfng page render timed out after ' + @PAGE_RENDER_TIMEOUT + 'ms (1% sample)') if Math.random() < 0.01
-					timedOut = true
-					result.cancel()
-				, @PAGE_RENDER_TIMEOUT
-
 				result.then () ->
 					# page render success
 					element.canvas.replaceWith(canvas)
-					$timeout.cancel(timer)
 					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
@@ -319,10 +308,7 @@ define [
 						self.errorCallback?(error)
 				.catch (error) ->
 					# page render failed
-					$timeout.cancel(timer)
-					if timedOut
-						self.errorCallback?('timeout')
-					else if error is 'cancelled'
+					if error is 'cancelled'
 						return # do nothing when cancelled
 					else
 						self.errorCallback?(error)
