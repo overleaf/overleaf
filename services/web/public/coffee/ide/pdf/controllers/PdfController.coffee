@@ -348,6 +348,7 @@ define [
 
 		$scope.startFreeTrial = (source) ->
 			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
+			event_tracking.sendCountly 'start-trial', { source }
 			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
 			$scope.startedFreeTrial = true
 

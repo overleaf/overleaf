@@ -1,11 +1,12 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FreeTrialModalController", ($scope, abTestManager, sixpack)->
+	App.controller "FreeTrialModalController", ($scope, abTestManager, sixpack, event_tracking)->
 
 		$scope.buttonClass = "btn-primary"
 
 		$scope.startFreeTrial = (source, couponCode) ->
+			event_tracking.sendCountly 'start-trial', { source }
 			w = window.open()
 			sixpack.convert "track-changes-discount", ->
 				sixpack.participate 'in-editor-free-trial-plan', ['student', 'collaborator'], (planName, rawResponse)->
