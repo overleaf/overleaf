@@ -32,7 +32,7 @@ define [
 			queryStringExists = url.match(/\?/)
 			url = url + (if not queryStringExists then '?' else '&') + 'pdfng=true'
 			# for isolated compiles, load the pdf on-demand because nobody will overwrite it
-			onDemandLoading = window.location?.search?.match(/isolated=true/)?
+			onDemandLoading = true
 			$scope.document = new PDFRenderer(url, {
 				scale: 1,
 				disableAutoFetch: if onDemandLoading then true else undefined
