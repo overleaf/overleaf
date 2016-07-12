@@ -13,7 +13,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		
 
 		-if (typeof(title) == "undefined")
-			title ShareLaTeX, the Online LaTeX Editor
+			title= 'ShareLaTeX, '+ translate("online_latex_editor") 
 		-else
 			title= translate(title) + ' - ShareLaTeX, '+translate("online_latex_editor") 
 
@@ -29,7 +29,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
 		
 		-if (typeof(meta) == "undefined")
-			meta(itemprop="description", name="description", content="An online LaTeX editor that's easy to use. No installation, real-time collaboration, version control, hundreds of LaTeX templates, and more.")
+			meta(itemprop="description", name="description", content='#{translate("site_description")}')
 		-else
 			meta(itemprop="description", name="description" , content=meta)
 		
@@ -45,7 +45,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				ga('send', 'pageview');
 		- else
 			script(type='text/javascript').
-				window.ga = function() { console.log("Sending to GA", arguments) };
+				window.ga = function() { console.log("would send to GA", arguments) };
 
 		// Countly Analytics
 		if (settings.analytics && settings.analytics.countly && settings.analytics.countly.token)
