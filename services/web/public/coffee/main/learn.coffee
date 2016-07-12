@@ -1,15 +1,9 @@
 define [
 	"base"
+	"services/algolia-search"
 ], (App) ->
-	
-	App.factory "algoliawiki", ->
-		if window.sharelatex?.algolia? and window.sharelatex.algolia?.indexes?.wiki?
-			client = new AlgoliaSearch(window.sharelatex.algolia?.app_id, window.sharelatex.algolia?.api_key)
-			index = client.initIndex(window.sharelatex.algolia?.indexes?.wiki)
-			return index
 
-	App.controller "SearchWikiController", ($scope, algoliawiki, _, $modal) ->
-		algolia = algoliawiki
+	App.controller "SearchWikiController", ($scope, algoliaSearch, _, $modal) ->
 		$scope.hits = []
 
 		$scope.clearSearchText = ->
@@ -54,7 +48,7 @@ define [
 				updateHits []
 				return
 				
-			algolia.search query, (err, response)->
+			algoliaSearch.searchWiki query, (err, response)->
 				if response.hits.length == 0
 					updateHits []
 				else

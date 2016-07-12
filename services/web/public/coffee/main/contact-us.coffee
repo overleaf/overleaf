@@ -1,9 +1,8 @@
 define [
 	"base"
+	"services/algolia-search"
 	"libs/platform"
 ], (App, platform) ->
-
-
 	App.controller 'ContactModal', ($scope, $modal) ->
 		$scope.contactUsModal = () ->
 			modalInstance = $modal.open(
@@ -11,10 +10,25 @@ define [
 				controller: "SupportModalController"
 			)
 
-	App.controller 'SupportModalController', ($scope, $modalInstance) ->
+	App.controller 'SupportModalController', ($scope, $modalInstance, algoliaSearch, event_tracking) ->
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
+		$scope.suggestions = [];
+
+		_handleSearchResults = (success, results) ->
+			suggestions = for hit in results.hits
+				page_underscored = hit.pageName.replace(/\s/g,'_')
+
+				suggestion = 
+					url :"/learn/kb/#{page_underscored}"
+					name : hit._highlightResult.pageName.value
+
+			event_tracking.sendCountly "contact-form-suggestions-shown" if results.hits.length
+
+			$scope.$applyAsync () -> 
+				$scope.suggestions = suggestions
+
 		$scope.contactUs = ->
 			if !$scope.form.email?
 				console.log "email not set"
@@ -35,6 +49,18 @@ define [
 			Groove.createTicket params, (err, json)->
 				$scope.sent = true
 				$scope.$apply()
+
+		$scope.$watch "form.subject", (newVal, oldVal) ->
+			if newVal and newVal != oldVal and newVal.length > 3
+				algoliaSearch.searchKB newVal, _handleSearchResults, { 
+					hitsPerPage: 3
+					typoTolerance: 'strict'
+				}
+			else
+				$scope.suggestions = [];
+
+		$scope.clickSuggestionLink = (url) ->
+			event_tracking.sendCountly "contact-form-suggestions-clicked", { url }
 
 		$scope.close = () ->
 			$modalInstance.close()
