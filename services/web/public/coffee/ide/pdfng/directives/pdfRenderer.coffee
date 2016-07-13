@@ -229,7 +229,7 @@ define [
 						pageState.complete = false
 						delete pageState.renderTask
 						@removeCompletedJob pagenum
-				.catch (error) ->
+				.catch (error) =>
 					# page load error
 					$timeout.cancel(timer)
 					@clearIndicator page
