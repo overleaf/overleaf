@@ -7,6 +7,7 @@ define [
 
 		$scope.startFreeTrial = (source, couponCode) ->
 			event_tracking.sendCountly "subscription-start-trial", { source }
+
 			w = window.open()
 			sixpack.convert "track-changes-discount", ->
 				sixpack.participate 'in-editor-free-trial-plan', ['student', 'collaborator'], (planName, rawResponse)->
