@@ -44,5 +44,5 @@ module.exports =
 			url: "http://localhost:3013"
 			
 	smokeTest: false
-	project_cache_length_ms: 60 * 60 * 24
+	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1
