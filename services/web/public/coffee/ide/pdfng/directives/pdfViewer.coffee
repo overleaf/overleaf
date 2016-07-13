@@ -275,20 +275,21 @@ define [
 
 				getExtraPages = (visiblePages) ->
 					extra = []
-					firstVisiblePage = visiblePages[0].pageNum
-					firstVisiblePageIdx = firstVisiblePage - 1
-					len = visiblePages.length
-					lastVisiblePage = visiblePages[len-1].pageNum
-					lastVisiblePageIdx = lastVisiblePage - 1
-					# first page after
-					if lastVisiblePageIdx + 1 < scope.pages.length
-						extra.push scope.pages[lastVisiblePageIdx + 1]
-					# page before
-					if firstVisiblePageIdx > 0
-						extra.push scope.pages[firstVisiblePageIdx - 1]
-					# second page after
-					if lastVisiblePageIdx + 2 < scope.pages.length
-						extra.push scope.pages[lastVisiblePageIdx + 2]
+					if visiblePages.length > 0
+						firstVisiblePage = visiblePages[0].pageNum
+						firstVisiblePageIdx = firstVisiblePage - 1
+						len = visiblePages.length
+						lastVisiblePage = visiblePages[len-1].pageNum
+						lastVisiblePageIdx = lastVisiblePage - 1
+						# first page after
+						if lastVisiblePageIdx + 1 < scope.pages.length
+							extra.push scope.pages[lastVisiblePageIdx + 1]
+						# page before
+						if firstVisiblePageIdx > 0
+							extra.push scope.pages[firstVisiblePageIdx - 1]
+						# second page after
+						if lastVisiblePageIdx + 2 < scope.pages.length
+							extra.push scope.pages[lastVisiblePageIdx + 2]
 					return visiblePages.concat extra
 
 				rescaleTimer = null
