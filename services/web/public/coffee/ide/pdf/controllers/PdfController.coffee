@@ -94,6 +94,7 @@ define [
 			$scope.pdf.tooRecentlyCompiled = false
 			$scope.pdf.renderingError = false
 			$scope.pdf.projectTooLarge = false
+			$scope.pdf.compileTerminated = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -104,6 +105,11 @@ define [
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+			else if response.status == "terminated"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.compileTerminated = true
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 			else if response.status == "autocompile-backoff"
 				$scope.pdf.view = 'uncompiled'
 			else if response.status == "project-too-large"
@@ -293,6 +299,18 @@ define [
 		# This method is a simply wrapper and exists only for tracking purposes.
 		ide.$scope.recompileViaKey = () ->
 			$scope.recompile { keyShortcut: true }
+
+		$scope.stop = () ->
+			return if !$scope.pdf.compiling
+
+			$http {
+				url: "/project/#{$scope.project_id}/compile/stop"
+				method: "POST"
+				params:
+					clsiserverid:ide.clsiServerId
+				headers:
+					"X-Csrf-Token": window.csrfToken
+			}
 
 		$scope.clearCache = () ->
 			$http {

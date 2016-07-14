@@ -36,6 +36,14 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
+		a.log-stop(
+			href
+			ng-click="stop()"
+			ng-show="pdf.compiling",
+			tooltip="#{translate('stop_compile')}"
+			tooltip-placement="bottom"
+		)
+			i.fa.fa-stop()
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
@@ -239,7 +247,11 @@ div.full-size.pdf(ng-controller="PdfController")
 			.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
 				strong #{translate("server_error")} 
 				span #{translate("too_recently_compiled")}
-	
+
+			.alert.alert-danger(ng-show="pdf.compileTerminated")
+				strong #{translate("terminated")}. 
+				span #{translate("compile_terminated_by_user")}
+
 			.alert.alert-danger(ng-show="pdf.timedout")
 				p
 					strong #{translate("timedout")}. 
