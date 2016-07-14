@@ -58,6 +58,13 @@ module.exports = CompileManager =
 					timeout:   request.timeout
 					image:     request.imageName
 				}, (error, output, stats, timings) ->
+					# compile was killed by user
+					if error?.terminated
+						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
+							return callback(err) if err?
+							callback(error, outputFiles) # return output files so user can check logs
+						return
+					# compile completed normally
 					return callback(error) if error?
 					Metrics.inc("compiles-succeeded")
 					for metric_key, metric_value of stats or {}
@@ -78,6 +85,10 @@ module.exports = CompileManager =
 						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 							callback null, newOutputFiles
 	
+	stopCompile: (project_id, user_id, callback = (error) ->) ->
+		compileName = getCompileName(project_id, user_id)
+		LatexRunner.killLatex compileName, callback
+
 	clearProject: (project_id, user_id, _callback = (error) ->) ->
 		callback = (error) ->
 			_callback(error)
