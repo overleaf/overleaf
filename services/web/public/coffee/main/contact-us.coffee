@@ -1,7 +1,7 @@
 define [
 	"base"
-	"services/algolia-search"
 	"libs/platform"
+	"services/algolia-search"
 ], (App, platform) ->
 	App.controller 'ContactModal', ($scope, $modal) ->
 		$scope.contactUsModal = () ->
