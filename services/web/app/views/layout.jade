@@ -82,35 +82,35 @@ html(itemscope, itemtype='http://schema.org/Product')
 				if (user && user.features) 
 					- featureFlagSet = false;
 
-					if user.features.collaborators
+					if user.features.hasOwnProperty('collaborators')
 						| Countly.q.push([ 'userData.set', 'features-collaborators', #{ user.features.collaborators } ]);
 						- featureFlagSet = true;
 
-					if user.features.compileGroup
+					if user.features.hasOwnProperty('compileGroup')
 						| Countly.q.push([ 'userData.set', 'features-compileGroup', '#{ user.features.compileGroup }' ]);
 						- featureFlagSet = true;
 
-					if user.features.compileTimeout
+					if user.features.hasOwnProperty('compileTimeout')
 						| Countly.q.push([ 'userData.set', 'features-compileTimeout', #{ user.features.compileTimeout } ]);
 						- featureFlagSet = true;
 
-					if user.features.dropbox
+					if user.features.hasOwnProperty('dropbox')
 						| Countly.q.push([ 'userData.set', 'features-dropbox', #{ user.features.dropbox } ]);
 						- featureFlagSet = true;
 
-					if user.features.github
+					if user.features.hasOwnProperty('github')
 						| Countly.q.push([ 'userData.set', 'features-github', #{ user.features.github } ]);
 						- featureFlagSet = true;
 
-					if user.features.references
+					if user.features.hasOwnProperty('references')
 						| Countly.q.push([ 'userData.set', 'features-references', #{ user.features.references } ]);
 						- featureFlagSet = true;
 
-					if user.features.templates
+					if user.features.hasOwnProperty('templates')
 						| Countly.q.push([ 'userData.set', 'features-templates', #{ user.features.templates } ]);
 						- featureFlagSet = true;
 
-					if user.features.versioning
+					if user.features.hasOwnProperty('versioning')
 						| Countly.q.push([ 'userData.set', 'features-versioning', #{ user.features.versioning } ]);
 						- featureFlagSet = true;
 
