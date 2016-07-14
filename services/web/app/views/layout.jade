@@ -83,35 +83,35 @@ html(itemscope, itemtype='http://schema.org/Product')
 					- featureFlagSet = false;
 
 					if user.features.collaborators
-						| Countly.q.push([ 'userData.set', 'collaborators', #{ user.features.collaborators } ]);
+						| Countly.q.push([ 'userData.set', 'features-collaborators', #{ user.features.collaborators } ]);
 						- featureFlagSet = true;
 
 					if user.features.compileGroup
-						| Countly.q.push([ 'userData.set', 'compileGroup', '#{ user.features.compileGroup }' ]);
+						| Countly.q.push([ 'userData.set', 'features-compileGroup', '#{ user.features.compileGroup }' ]);
 						- featureFlagSet = true;
 
 					if user.features.compileTimeout
-						| Countly.q.push([ 'userData.set', 'compileTimeout', #{ user.features.compileTimeout } ]);
+						| Countly.q.push([ 'userData.set', 'features-compileTimeout', #{ user.features.compileTimeout } ]);
 						- featureFlagSet = true;
 
 					if user.features.dropbox
-						| Countly.q.push([ 'userData.set', 'dropbox', #{ user.features.dropbox } ]);
+						| Countly.q.push([ 'userData.set', 'features-dropbox', #{ user.features.dropbox } ]);
 						- featureFlagSet = true;
 
 					if user.features.github
-						| Countly.q.push([ 'userData.set', 'github', #{ user.features.github } ]);
+						| Countly.q.push([ 'userData.set', 'features-github', #{ user.features.github } ]);
 						- featureFlagSet = true;
 
 					if user.features.references
-						| Countly.q.push([ 'userData.set', 'references', #{ user.features.references } ]);
+						| Countly.q.push([ 'userData.set', 'features-references', #{ user.features.references } ]);
 						- featureFlagSet = true;
 
 					if user.features.templates
-						| Countly.q.push([ 'userData.set', 'templates', #{ user.features.templates } ]);
+						| Countly.q.push([ 'userData.set', 'features-templates', #{ user.features.templates } ]);
 						- featureFlagSet = true;
 
 					if user.features.versioning
-						| Countly.q.push([ 'userData.set', 'versioning', #{ user.features.versioning } ]);
+						| Countly.q.push([ 'userData.set', 'features-versioning', #{ user.features.versioning } ]);
 						- featureFlagSet = true;
 
 
