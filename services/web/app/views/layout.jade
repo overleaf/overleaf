@@ -54,6 +54,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				Countly.q = Countly.q || [];
 				Countly.app_key = '#{settings.analytics.countly.token}';
 				Countly.url = '#{settings.analytics.countly.server}';
+				!{ session.user ? 'Countly.device_id = "' + session.user._id + '";' : '' } 
 
 				Countly.q.push(['track_sessions']);
 				Countly.q.push(['track_pageview']);
@@ -67,29 +68,56 @@ html(itemscope, itemtype='http://schema.org/Product')
 					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cly, s);
 				})();
 
-			if (session && session.user)
-				script(type="text/javascript").
-					Countly.q.push(['change_id', '#{session.user._id}', true ]);
+			script(type="text/javascript")
+				if (session && session.user)
+					- var name = session.user.first_name + (session.user.last_name ? ' ' + session.user.last_name : '');
+					| Countly.q.push(['user_details', { email: '#{session.user.email}', name: '#{name}' }]);
 
-					Countly.q.push(['user_details', {
-						email: '#{session.user.email}',
-						custom: {
-							userId: '#{session.user._id}',
-						}
-					}]);
+				if (justRegistered)
+					| Countly.q.push(['add_event',{ key: 'user-registered' }]);
 
-			if (justRegistered)
-				script(type="text/javascript").
-					Countly.q.push(['add_event',{
-						key: 'user-registered'
-					}]);
+				if (justLoggedIn)
+					| Countly.q.push(['add_event',{ key: 'user-logged-in' }]);
 
-			if (justLoggedIn)
-				script(type="text/javascript").
+				if (user && user.features) 
+					- featureFlagSet = false;
 
-					Countly.q.push(['add_event',{
-						key: 'user-logged-in'
-					}]);
+					if user.features.collaborators
+						| Countly.q.push([ 'userData.set', 'features-collaborators', #{ user.features.collaborators } ]);
+						- featureFlagSet = true;
+
+					if user.features.compileGroup
+						| Countly.q.push([ 'userData.set', 'features-compileGroup', '#{ user.features.compileGroup }' ]);
+						- featureFlagSet = true;
+
+					if user.features.compileTimeout
+						| Countly.q.push([ 'userData.set', 'features-compileTimeout', #{ user.features.compileTimeout } ]);
+						- featureFlagSet = true;
+
+					if user.features.dropbox
+						| Countly.q.push([ 'userData.set', 'features-dropbox', #{ user.features.dropbox } ]);
+						- featureFlagSet = true;
+
+					if user.features.github
+						| Countly.q.push([ 'userData.set', 'features-github', #{ user.features.github } ]);
+						- featureFlagSet = true;
+
+					if user.features.references
+						| Countly.q.push([ 'userData.set', 'features-references', #{ user.features.references } ]);
+						- featureFlagSet = true;
+
+					if user.features.templates
+						| Countly.q.push([ 'userData.set', 'features-templates', #{ user.features.templates } ]);
+						- featureFlagSet = true;
+
+					if user.features.versioning
+						| Countly.q.push([ 'userData.set', 'features-versioning', #{ user.features.versioning } ]);
+						- featureFlagSet = true;
+
+
+					if featureFlagSet
+						| Countly.q.push(['userData.save'])
+
 		// End countly Analytics
 				
 		script(type="text/javascript").
