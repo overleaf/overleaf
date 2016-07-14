@@ -73,7 +73,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 					Countly.q.push(['user_details', {
 						email: '#{session.user.email}',
 						custom: {
-							userId: '#{session.user._id}',
+							userId: '#{session.user._id}'
 						}
 					}]);
 
@@ -89,6 +89,47 @@ html(itemscope, itemtype='http://schema.org/Product')
 					Countly.q.push(['add_event',{
 						key: 'user-logged-in'
 					}]);
+
+			if (user && user.features && Object.keys(user.features).length) 
+				script(type="text/javascript")
+					- featureFlagSet = false;
+
+					if user.features.collaborators
+						| Countly.q.push([ 'userData.set', 'collaborators', #{ user.features.collaborators } ]);
+						- featureFlagSet = true;
+
+					if user.features.compileGroup
+						| Countly.q.push([ 'userData.set', 'compileGroup', '#{ user.features.compileGroup }' ]);
+						- featureFlagSet = true;
+
+					if user.features.compileTimeout
+						| Countly.q.push([ 'userData.set', 'compileTimeout', #{ user.features.compileTimeout } ]);
+						- featureFlagSet = true;
+
+					if user.features.dropbox
+						| Countly.q.push([ 'userData.set', 'dropbox', #{ user.features.dropbox } ]);
+						- featureFlagSet = true;
+
+					if user.features.github
+						| Countly.q.push([ 'userData.set', 'github', #{ user.features.github } ]);
+						- featureFlagSet = true;
+
+					if user.features.references
+						| Countly.q.push([ 'userData.set', 'references', #{ user.features.references } ]);
+						- featureFlagSet = true;
+
+					if user.features.templates
+						| Countly.q.push([ 'userData.set', 'templates', #{ user.features.templates } ]);
+						- featureFlagSet = true;
+
+					if user.features.versioning
+						| Countly.q.push([ 'userData.set', 'versioning', #{ user.features.versioning } ]);
+						- featureFlagSet = true;
+
+
+					if featureFlagSet
+						| Countly.q.push(['userData.save'])
+
 		// End countly Analytics
 				
 		script(type="text/javascript").
