@@ -70,7 +70,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 			script(type="text/javascript")
 				if (session && session.user)
-					| Countly.q.push(['user_details', { email: '#{session.user.email}' }]);
+					- var name = session.user.first_name + (session.user.last_name ? ' ' + session.user.last_name : '');
+					| Countly.q.push(['user_details', { email: '#{session.user.email}', name: '#{name}' }]);
 
 				if (justRegistered)
 					| Countly.q.push(['add_event',{ key: 'user-registered' }]);
