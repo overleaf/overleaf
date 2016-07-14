@@ -68,30 +68,17 @@ html(itemscope, itemtype='http://schema.org/Product')
 					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(cly, s);
 				})();
 
-			if (session && session.user)
-				script(type="text/javascript").
-					Countly.q.push(['user_details', {
-						email: '#{session.user.email}',
-						custom: {
-							userId: '#{session.user._id}'
-						}
-					}]);
+			script(type="text/javascript")
+				if (session && session.user)
+					| Countly.q.push(['user_details', { email: '#{session.user.email}' }]);
 
-			if (justRegistered)
-				script(type="text/javascript").
-					Countly.q.push(['add_event',{
-						key: 'user-registered'
-					}]);
+				if (justRegistered)
+					| Countly.q.push(['add_event',{ key: 'user-registered' }]);
 
-			if (justLoggedIn)
-				script(type="text/javascript").
+				if (justLoggedIn)
+					| Countly.q.push(['add_event',{ key: 'user-logged-in' }]);
 
-					Countly.q.push(['add_event',{
-						key: 'user-logged-in'
-					}]);
-
-			if (user && user.features && Object.keys(user.features).length) 
-				script(type="text/javascript")
+				if (user && user.features) 
 					- featureFlagSet = false;
 
 					if user.features.collaborators
