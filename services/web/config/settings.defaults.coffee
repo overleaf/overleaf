@@ -339,7 +339,9 @@ module.exports = settings =
 				url: "/logout"
 			}]
 		}]
-	
+
+	customisation: {}
+
 #	templates: [{
 #		name : "cv_or_resume",
 #		url : "/templates/cv"

@@ -49,7 +49,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					.form-group
 						tags-input(
 							template="shareTagTemplate"
-							placeholder="joe@example.com, sue@example.com, ..."
+							placeholder="#{settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, ...'}"
 							ng-model="inputs.contacts"
 							focus-on="open"
 							display-property="display"
