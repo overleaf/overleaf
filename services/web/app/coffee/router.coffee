@@ -242,6 +242,8 @@ module.exports = class Router
 		apiRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
 
+		webRouter.get '/dev/csrf', (req, res) ->
+			res.send res.locals.csrfToken
 
 		apiRouter.get '/health_check', HealthCheckController.check
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
