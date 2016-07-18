@@ -82,6 +82,8 @@ module.exports = (grunt) ->
 				"""
 			dockerTests:
 				command: 'docker run -v "$(pwd):/document-updater" --rm --name doc-updater-test sharelatex-docupdater-tests'
+			dockerTests2:
+				command: 'docker run -v "$(pwd):/app" --rm sl-acceptance-test-runner'
 
 		availabletasks:
 			tasks:
@@ -142,6 +144,12 @@ module.exports = (grunt) ->
 		'test:acceptance:docker',
 		"Run acceptance tests inside docker container",
 		['shell:buildDockerImage', 'shell:dockerTests']
+	)
+
+	grunt.registerTask(
+		'test:acceptance:docker2',
+		"Run acceptance tests inside docker container",
+		['shell:dockerTests2']
 	)
 
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
