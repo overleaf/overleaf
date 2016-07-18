@@ -15,7 +15,9 @@ module.exports = CompileController =
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
-					if error?
+					if error?.terminated
+						status = "terminated"
+					else if error?
 						logger.error err: error, project_id: request.project_id, "error running compile"
 						if error.timedout
 							status = "timedout"
@@ -43,7 +45,13 @@ module.exports = CompileController =
 								type: file.type
 								build: file.build
 					}
-		
+
+	stopCompile: (req, res, next) ->
+		{project_id, user_id} = req.params
+		CompileManager.stopCompile project_id, user_id, (error) ->
+			return next(error) if error?
+			res.sendStatus(204)
+
 	clearCache: (req, res, next = (error) ->) ->
 		ProjectPersistenceManager.clearProject req.params.project_id, req.params.user_id, (error) ->
 			return next(error) if error?

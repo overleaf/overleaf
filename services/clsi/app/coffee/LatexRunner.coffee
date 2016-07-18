@@ -4,6 +4,8 @@ logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
 
+ProcessTable = {}  # table of currently running jobs (pids or docker container names)
+
 module.exports = LatexRunner =
 	runLatex: (project_id, options, callback = (error) ->) ->
 		{directory, mainFile, compiler, timeout, image} = options
@@ -30,7 +32,10 @@ module.exports = LatexRunner =
 		if Settings.clsi?.strace
 			command = ["strace", "-o", "strace", "-ff"].concat(command)
 
-		CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
+		id = "#{project_id}" # record running project under this id
+
+		ProcessTable[id] = CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
+			delete ProcessTable[id]
 			return callback(error) if error?
 			runs = output?.stderr?.match(/^Run number \d+ of .*latex/mg)?.length or 0
 			failed = if output?.stdout?.match(/^Latexmk: Errors/m)? then 1 else 0
@@ -48,6 +53,14 @@ module.exports = LatexRunner =
 			timings["cpu-time"] = stderr?.match(/User time.*: (\d+.\d+)/m)?[1] or 0
 			timings["sys-time"] = stderr?.match(/System time.*: (\d+.\d+)/m)?[1] or 0
 			callback error, output, stats, timings
+
+	killLatex: (project_id, callback = (error) ->) ->
+		id = "#{project_id}"
+		logger.log {id:id}, "killing running compile"
+		if not ProcessTable[id]?
+			return callback new Error("no such project to kill")
+		else
+			CommandRunner.kill ProcessTable[id], callback
 
 	_latexmkBaseCommand: (Settings?.clsi?.latexmkCommandPrefix || []).concat(
 			["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
