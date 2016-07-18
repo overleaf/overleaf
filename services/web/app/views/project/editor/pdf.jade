@@ -36,7 +36,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
-		a.log-stop(
+		a(
 			href
 			ng-click="stop()"
 			ng-show="pdf.compiling",
