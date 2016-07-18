@@ -12,8 +12,7 @@ fingerprints = {}
 Path = require 'path'
 
 
-imgPath = "/img/"
-cssPath = "/stylesheets/"
+
 jsPath =
 	if Settings.useMinifiedJs
 		"/minjs/"
@@ -43,12 +42,19 @@ for path in [
 	else
 		logger.log filePath:filePath, "file does not exist for fingerprints"
 
+getFingerprint = (path) ->
+	if fingerprints[path]?
+		return fingerprints[path]
+	else
+		logger.err "No fingerprint for file: #{path}"
+		return ""
+
 logger.log "Finished generating file fingerprints"
 
+
+staticFilesBase = ""
 if Settings.cdn?.web?.host?
-	jsPath = "#{Settings.cdn?.web?.host}#{jsPath}"
-	imgPath = "#{Settings.cdn?.web?.host}#{imgPath}"
-	cssPath = "#{Settings.cdn?.web?.host}#{cssPath}"
+	staticFilesBase = Settings.cdn?.web?.host
 
 
 module.exports = (app, webRouter, apiRouter)->
@@ -58,9 +64,25 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
-		res.locals.imgPath = imgPath
-		res.locals.cssPath = cssPath
+		imgPath = "/img/"
+		cssPath = "/stylesheets/"
+
+
+		res.locals.buildJsPath = (jsFile, fingerprint)->
+			if !fingerprint?
+				fingerprint = getFingerprint(jsPath + jsFile)
+			p = Path.join(staticFilesBase, jsPath, jsFile) + "?fingerprint=" + fingerprint
+
+
+		res.locals.buildCssPath = (cssFile)->
+			return Path.join(staticFilesBase, cssPath, cssFile) + "?fingerprint=" + getFingerprint(cssPath + cssFile)
+
+		res.locals.buildImgPath = (imgFile)->
+			return Path.join(staticFilesBase, imgPath, imgFile)
+
 		next()
+
+
 
 	webRouter.use (req, res, next)-> 
 		res.locals.settings = Settings
@@ -127,12 +149,7 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)-> 
-		res.locals.fingerprint = (path) ->
-			if fingerprints[path]?
-				return fingerprints[path]
-			else
-				logger.err "No fingerprint for file: #{path}"
-				return ""
+		res.locals.fingerprint = getFingerprint
 		next()
 
 	webRouter.use (req, res, next)-> 
