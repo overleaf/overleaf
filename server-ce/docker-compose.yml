@@ -18,7 +18,54 @@ services:
         environment:
             SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
             SHARELATEX_REDIS_HOST: redis
-            SHARELATEX_APP_NAME: 'ShareLaTeX'
+            SHARELATEX_APP_NAME: 'Our ShareLaTeX'
+
+            # SHARELATEX_SITE_URL: "http://sharelatex.mydomain.com"
+            # SHARELATEX_NAV_TITLE: "Our ShareLaTeX Instance"
+            # SHARELATEX_HEADER_IMAGE_URL: "http://somewhere.com/mylogo.png"
+            # SHARELATEX_ADMIN_EMAIL: "support@it.com"
+
+            # SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"},{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'
+            # SHARELATEX_RIGHT_FOOTER: '[{"text": "Hello I am on the Right"} ]'
+
+            # SHARELATEX_EMAIL_FROM_ADDRESS: "team@sharelatex.com"
+
+            # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID: ""
+            # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY: ""
+
+            # SHARELATEX_EMAIL_SMTP_HOST: "smtp.mydomain.com"
+            # SHARELATEX_EMAIL_SMTP_PORT: 587
+            # SHARELATEX_EMAIL_SMTP_SECURE: 'false'
+            # SHARELATEX_EMAIL_SMTP_USER: ""
+            # SHARELATEX_EMAIL_SMTP_PASS: ""
+            # SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH: 'true'
+            # SHARELATEX_EMAIL_SMTP_IGNORE_TLS: 'false'
+            # SHARELATEX_CUSTOM_EMAIL_FOOTER:"<div>This system is run by department x </div>"
+
+            ################
+            ## Server Pro ##
+            ################
+
+            # SANDBOXED_COMPILES: "true"
+
+            # SHARELATEX_LDAP_HOST: 'ldap://ldap.forumsys.com' 
+            # SHARELATEX_LDAP_DN: 'uid=:userKey,dc=example,dc=com' 
+            # SHARELATEX_LDAP_BASE_SEARCH: 'dc=example,dc=com'
+            # SHARELATEX_LDAP_FILTER: '(uid=:userKey)'
+            # SHARELATEX_LDAP_ADMIN_DN: 'cn=read-only-admin,dc=example,dc=com' 
+            # SHARELATEX_LDAP_ADMIN_PW: password'
+            # SHARELATEX_LDAP_ANONYMOUS: "false"
+            # SHARELATEX_LDAP_EMAIL_ATT: "mail"
+            # SHARELATEX_LDAP_NAME_ATT: "name"
+            # SHARELATEX_LDAP_LAST_NAME_ATT: "secondname"
+            # SHARELATEX_LDAP_PLACEHOLDER: "Username"
+            # SHARELATEX_LDAP_TLS: "true"
+            # SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH:
+            # SHARELATEX_LDAP_TLS_OPTS_CA_PATH: '["/var/one.pem", "/var/two.pem"]'
+
+            # SHARELATEX_TEMPLATES_USER_ID: "578773160210479700917ee5"
+
+            # SHARELATEX_PROXY_LEARN: "true"
 
     mongo:
         restart: always
