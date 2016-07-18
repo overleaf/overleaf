@@ -10,6 +10,10 @@ Modules = require "./Modules"
 
 fingerprints = {}
 Path = require 'path'
+
+
+imgPath = "/img/"
+cssPath = "/stylesheets/"
 jsPath =
 	if Settings.useMinifiedJs
 		"/minjs/"
@@ -17,14 +21,6 @@ jsPath =
 		"/js/"
 
 
-imgPath = "/img/"
-cssPath = "/stylesheets/"
-
-if Settings.cdn?.web?.host?
-	jsPath = "#{Settings.cdn?.web?.host}#{jsPath}"
-	imgPath = "#{Settings.cdn?.web?.host}#{imgPath}"
-	cssPath = "#{Settings.cdn?.web?.host}#{cssPath}"
-	
 logger.log "Generating file fingerprints..."
 for path in [
 	"#{jsPath}libs/require.js",
@@ -46,7 +42,14 @@ for path in [
 		fingerprints[path] = hash
 	else
 		logger.log filePath:filePath, "file does not exist for fingerprints"
-	
+
+logger.log "Finished generating file fingerprints"
+
+if Settings.cdn?.web?.host?
+	jsPath = "#{Settings.cdn?.web?.host}#{jsPath}"
+	imgPath = "#{Settings.cdn?.web?.host}#{imgPath}"
+	cssPath = "#{Settings.cdn?.web?.host}#{cssPath}"
+
 
 module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
