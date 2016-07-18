@@ -6,7 +6,7 @@ Metrics = require "metrics-sharelatex"
 
 class Client
 	constructor: (@clients) ->
-		@SECONDARY_TIMEOUT = 200
+		@SECONDARY_TIMEOUT = 600
 		@HEARTBEAT_TIMEOUT = 2000
 		
 	multi: () ->
@@ -57,7 +57,7 @@ class Client
 
 class MultiClient
 	constructor: (@clients) ->
-		@SECONDARY_TIMEOUT = 200
+		@SECONDARY_TIMEOUT = 600
 	
 	exec: (callback) ->
 		primaryError = null
