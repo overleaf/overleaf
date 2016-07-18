@@ -19,6 +19,9 @@ services:
             SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
             SHARELATEX_REDIS_HOST: redis
             SHARELATEX_APP_NAME: 'Our ShareLaTeX'
+            
+            #Set for SSL via nginx-proxy
+            #VIRTUAL_HOST: 103.112.212.22
 
             # SHARELATEX_SITE_URL: "http://sharelatex.mydomain.com"
             # SHARELATEX_NAV_TITLE: "Our ShareLaTeX Instance"
@@ -84,3 +87,13 @@ services:
             - 6379
         volumes:
             - ~/redis_data:/data
+            
+# nginx-proxy:
+#     image: jwilder/nginx-proxy
+#     container_name: nginx-proxy
+#     ports:
+#       #- "80:80"
+#       - "443:443"
+#     volumes:
+#       - /var/run/docker.sock:/tmp/docker.sock:ro
+#       - /home/sharelatex/tmp:/etc/nginx/certs
