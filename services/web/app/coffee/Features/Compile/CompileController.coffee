@@ -41,6 +41,15 @@ module.exports = CompileController =
 					validationProblems:validationProblems
 				}
 
+	stopCompile: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
+			return next(error) if error?
+			logger.log {project_id:project_id, user_id:user_id}, "stop compile request"
+			CompileManager.stopCompile project_id, user_id, (error) ->
+				return next(error) if error?
+				res.status(200).send()
+
 	_compileAsUser: (req, callback) ->
 		# callback with user_id if per-user, undefined otherwise
 		if not Settings.disablePerUserCompiles

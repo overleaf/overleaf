@@ -44,6 +44,12 @@ module.exports = CompileManager =
 								logger.log files: outputFiles, "output files"
 								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
 								
+
+	stopCompile: (project_id, user_id, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.stopCompile project_id, user_id, limits, callback
+
 	deleteAuxFiles: (project_id, user_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?

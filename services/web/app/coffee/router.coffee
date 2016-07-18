@@ -105,6 +105,8 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
 		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
+		webRouter.post '/project/:Project_id/compile/stop', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.stopCompile
+
 		# Used by the web download buttons, adds filename header
 		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
 		# Used by the pdf viewers
@@ -122,6 +124,17 @@ module.exports = class Router
 				params =
 					"Project_id": req.params[0]
 					"build_id":   req.params[1]
+					"file":       req.params[2]
+				req.params = params
+				next()
+			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+
+		# direct url access to output files for user but no build, to retrieve files when build fails
+		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"user_id":   req.params[1]
 					"file":       req.params[2]
 				req.params = params
 				next()

@@ -36,6 +36,13 @@ module.exports = ClsiManager =
 					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
 					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
+	stopCompile: (project_id, user_id, options, callback = (error) ->) ->
+		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id, "compile/stop")
+		opts =
+			url:compilerUrl
+			method:"POST"
+		ClsiManager._makeRequest project_id, opts, callback
+
 	deleteAuxFiles: (project_id, user_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id)
 		opts =
