@@ -47,7 +47,7 @@ module.exports = CompileController =
 					}
 
 	stopCompile: (req, res, next) ->
-		{project_id, user_id, session_id} = req.params
+		{project_id, user_id} = req.params
 		CompileManager.stopCompile project_id, user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus(204)
