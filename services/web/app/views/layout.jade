@@ -18,7 +18,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			title= translate(title) + ' - ShareLaTeX, '+translate("online_latex_editor") 
 
 		link(rel="icon", href="/favicon.ico")
-		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
+		link(rel='stylesheet', href=cssPath+'/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
 
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang

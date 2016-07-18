@@ -16,6 +16,15 @@ jsPath =
 	else
 		"/js/"
 
+
+imgPath = "/img/"
+cssPath = "/stylesheets/"
+
+if Settings.cdn?.web?.host?
+	jsPath = "#{Settings.cdn?.web?.host}#{jsPath}"
+	imgPath = "#{Settings.cdn?.web?.host}#{imgPath}"
+	cssPath = "#{Settings.cdn?.web?.host}#{cssPath}"
+	
 logger.log "Generating file fingerprints..."
 for path in [
 	"#{jsPath}libs/require.js",
@@ -46,6 +55,8 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
+		res.locals.imgPath = imgPath
+		res.locals.cssPath = cssPath
 		next()
 
 	webRouter.use (req, res, next)-> 
