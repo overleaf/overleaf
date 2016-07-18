@@ -129,6 +129,7 @@ module.exports = class Router
 				next()
 			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
 
+		# direct url access to output files for user but no build, to retrieve files when build fails
 		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
