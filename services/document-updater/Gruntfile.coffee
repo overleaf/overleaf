@@ -22,7 +22,7 @@ module.exports = (grunt) ->
 			strict: false
 
 		coffee:
-			app_dir: 
+			app_dir:
 				expand: true,
 				flatten: false,
 				cwd: 'app/coffee',
@@ -30,7 +30,7 @@ module.exports = (grunt) ->
 				dest: 'app/js/',
 				ext: '.js'
 
-			app: 
+			app:
 				src: 'app.coffee'
 				dest: 'app.js'
 
@@ -42,7 +42,7 @@ module.exports = (grunt) ->
 				dest: 'test/acceptance/js/',
 				ext: '.js'
 
-			unit_tests: 
+			unit_tests:
 				expand: true,
 				flatten: false,
 				cwd: 'test/unit/coffee',
@@ -71,18 +71,7 @@ module.exports = (grunt) ->
 		shell:
 			fullAcceptanceTests:
 				command: "bash ./test/acceptance/scripts/full-test.sh"
-			buildDockerImage:
-				command: """
-				if [ -z $(docker images | awk \'{ print $1 }\' | grep sharelatex-docupdater-tests) ];
-				then
-				  docker build -t sharelatex-docupdater-tests .;
-			  else
-					echo ">> docker image \'sharelatex-docupdater-tests\' already exists";
-				fi
-				"""
 			dockerTests:
-				command: 'docker run -v "$(pwd):/document-updater" --rm --name doc-updater-test sharelatex-docupdater-tests'
-			dockerTests2:
 				command: 'docker run -v "$(pwd):/app" --rm sl-acceptance-test-runner'
 
 		availabletasks:
@@ -135,21 +124,11 @@ module.exports = (grunt) ->
 		"Start server and run acceptance tests",
 		['shell:fullAcceptanceTests']
 	)
-	grunt.registerTask(
-		'test:acceptance:buildDockerImage',
-		"Build docker image for acceptance tests",
-		['shell:buildDockerImage']
-	)
+
 	grunt.registerTask(
 		'test:acceptance:docker',
 		"Run acceptance tests inside docker container",
-		['shell:buildDockerImage', 'shell:dockerTests']
-	)
-
-	grunt.registerTask(
-		'test:acceptance:docker2',
-		"Run acceptance tests inside docker container",
-		['shell:dockerTests2']
+		['shell:dockerTests']
 	)
 
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
