@@ -163,7 +163,15 @@ module.exports = CompileController =
 	proxySyncCode: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		{file, line, column} = req.query
-		if not file? or Path.resolve("/", file) isnt "/#{file}"
+		if not file?
+			return next(new Error("missing file parameter"))
+		# Check that we are dealing with a simple file path (this is not
+		# strictly needed because synctex uses this parameter as a label
+		# to look up in the synctex output, and does not open the file
+		# itself).  Since we have valid synctex paths like foo/./bar we
+		# allow those by replacing /./ with /
+		testPath = file.replace '/./', '/'
+		if Path.resolve("/", testPath) isnt "/#{testPath}"
 			return next(new Error("invalid file parameter"))
 		if not line?.match(/^\d+$/)
 			return next(new Error("invalid line parameter"))
