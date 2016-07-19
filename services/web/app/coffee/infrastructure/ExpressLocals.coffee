@@ -7,10 +7,10 @@ querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 _ = require("underscore")
 Modules = require "./Modules"
+url = require "url"
 
 fingerprints = {}
 Path = require 'path'
-
 
 
 jsPath =
@@ -71,14 +71,17 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.buildJsPath = (jsFile, fingerprint)->
 			if !fingerprint?
 				fingerprint = getFingerprint(jsPath + jsFile)
-			p = Path.join(staticFilesBase, jsPath, jsFile) + "?fingerprint=" + fingerprint
+			p = Path.join(jsPath, jsFile)
+			return url.resolve(staticFilesBase, p) + "?fingerprint=" + fingerprint
 
 
 		res.locals.buildCssPath = (cssFile)->
-			return Path.join(staticFilesBase, cssPath, cssFile) + "?fingerprint=" + getFingerprint(cssPath + cssFile)
+			p = Path.join(cssPath, cssFile)
+			return url.resolve(staticFilesBase, p) + "?fingerprint=" + getFingerprint(cssPath + cssFile)
 
 		res.locals.buildImgPath = (imgFile)->
-			return Path.join(staticFilesBase, imgPath, imgFile)
+			p = Path.join(imgPath, imgFile)
+			return url.resolve(staticFilesBase, p)
 
 		next()
 
