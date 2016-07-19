@@ -68,11 +68,19 @@ module.exports = (app, webRouter, apiRouter)->
 		cssPath = "/stylesheets/"
 
 
-		res.locals.buildJsPath = (jsFile, fingerprint)->
-			if !fingerprint?
-				fingerprint = getFingerprint(jsPath + jsFile)
+		res.locals.buildJsPath = (jsFile, opts = {})->
+			if !opts.qs?
+				opts.qs = {}
+			if !opts.fingerprint?
+				opts.fingerprint = getFingerprint(jsPath + jsFile)
+			else
+				opts.qs.fingerprint = opts.fingerprint
 			p = Path.join(jsPath, jsFile)
-			return url.resolve(staticFilesBase, p) + "?fingerprint=" + fingerprint
+			p = url.resolve(staticFilesBase, p)
+			qs = querystring.stringify(opts.qs)
+			if qs?
+				p = p + "?" + qs
+			return p
 
 
 		res.locals.buildCssPath = (cssFile)->
