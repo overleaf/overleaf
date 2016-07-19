@@ -38,7 +38,7 @@ module.exports =
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
 			if err?
 				return callback(err)
-			hasValidSubscription = subscription? and subscription.recurlySubscription_id?
+			hasValidSubscription = subscription? and (subscription.recurlySubscription_id? or subscription.customAccount?)
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
 			

@@ -127,7 +127,23 @@ describe "LimitationsManager", ->
 			@LimitationsManager.userHasSubscription @user, (err, hasSubOrIsGroupMember, subscription)->
 				subscription.should.deep.equal stubbedSubscription
 				done()
-				
+
+		describe "when user has a custom account", ->
+
+			beforeEach ->
+				@fakeSubscription = {customAccount: true}
+				@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @fakeSubscription)
+
+			it 'should return true', (done) ->
+				@LimitationsManager.userHasSubscription @user, (err, hasSubscription, subscription)->
+					hasSubscription.should.equal true
+					done()
+
+			it 'should return the subscription', (done) ->
+				@LimitationsManager.userHasSubscription @user, (err, hasSubscription, subscription)=>
+					subscription.should.deep.equal @fakeSubscription
+					done()
+
 	describe "userIsMemberOfGroupSubscription", ->
 		beforeEach ->
 			@SubscriptionLocator.getMemberSubscriptions = sinon.stub()
