@@ -102,6 +102,15 @@ define [
 				for file in response?.outputFiles
 					fileByPath[file.path] = file
 
+			# prepare query string
+			qs = {}
+			# add a query string parameter for the compile group
+			if response.compileGroup?
+				ide.compileGroup = qs.compileGroup = response.compileGroup
+			# add a query string parameter for the clsi server id
+			if response.clsiServerId?
+				ide.clsiServerId = qs.clsiserverid = response.clsiServerId
+
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
@@ -133,8 +142,6 @@ define [
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
 
-				# prepare query string
-				qs = {}
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
 				if fileByPath['output.pdf']?.url?
 					$scope.pdf.url = fileByPath['output.pdf'].url
@@ -146,16 +153,8 @@ define [
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not fileByPath['output.pdf']?.build?
 					qs.cache_bust = "#{Date.now()}"
-				# add a query string parameter for the compile group
-				if response.compileGroup?
-					$scope.pdf.compileGroup = response.compileGroup
-					qs.compileGroup = "#{$scope.pdf.compileGroup}"
-				if response.clsiServerId?
-					qs.clsiserverid = response.clsiServerId
-					ide.clsiServerId = response.clsiServerId
 				# convert the qs hash into a query string and append it
-				$scope.pdf.qs = createQueryString qs
-				$scope.pdf.url += $scope.pdf.qs
+				$scope.pdf.url += createQueryString qs
 				# Save all downloads as files
 				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
@@ -187,6 +186,7 @@ define [
 				opts =
 					method:"GET"
 					params:
+						compileGroup:ide.compileGroup
 						clsiserverid:ide.clsiServerId
 				if file?.url?  # FIXME clean this up when we have file.urls out consistently
 					opts.url = file.url
@@ -194,6 +194,9 @@ define [
 					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
 					opts.url = "/project/#{$scope.project_id}/output/#{name}"
+				# check if we need to bust cache (build id is unique so don't need it in that case)
+				if not file?.build?
+					opts.params.cache_bust = "#{Date.now()}"
 				return $http(opts)
 
 			# accumulate the log entries
