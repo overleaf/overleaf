@@ -71,15 +71,14 @@ module.exports = (app, webRouter, apiRouter)->
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			p = Path.join(jsPath, jsFile)
-			doFingerPrint = opts.fingerprint != false
 
+			doFingerPrint = opts.fingerprint != false
+			
 			if !opts.qs?
 				opts.qs = {}
 
-			if !opts.fingerprint? and doFingerPrint
-				opts.fingerprint = getFingerprint(p)
-			else if doFingerPrint
-				opts.qs.fingerprint = opts.fingerprint
+			if !opts.qs?.fingerprint? and doFingerPrint
+				opts.qs.fingerprint = getFingerprint(p)
 
 			p = url.resolve(staticFilesBase, p)
 			qs = querystring.stringify(opts.qs)
