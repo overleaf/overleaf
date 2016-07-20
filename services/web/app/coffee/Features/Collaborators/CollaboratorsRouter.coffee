@@ -24,7 +24,7 @@ module.exports =
 		)
 
 		webRouter.get(
-			'/project/:Project_id/invite/token/:token_id',
+			'/project/:Project_id/invite/token/:token',
 			CollaboratorsInviteController.viewInvite
 		)
 

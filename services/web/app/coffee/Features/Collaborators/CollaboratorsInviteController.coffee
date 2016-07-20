@@ -15,7 +15,7 @@ module.exports = CollaboratorsInviteController =
 		LimitationsManager.canAddXCollaborators project_id, 1, (error, allowed) =>
 			return next(error) if error?
 			if !allowed
-				logger.log {projectId, email, sendingUserId}, "not allowed to invite any more users to this project"
+				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
 				return res.json {}
 			{email, privileges} = req.body
 			email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()
@@ -30,7 +30,18 @@ module.exports = CollaboratorsInviteController =
 				return res.json {inviteId: invite._id}
 
 	revokeInvite: (req, res, next) ->
+		projectId = req.params.Project_id
+		inviteId = req.params.invite_id
+		logger.log {projectId, inviteId}, "revoking invite"
+		CollaboratorsInviteHandler.revokeInvite projectId, inviteId, (err) ->
+			if err?
+				logger.err {projectId, inviteId}, "error revoking invite"
+				return next(err)
+			res.status(201).send()
 
 	viewInvite: (req, res, next) ->
+		projectId = req.params.Project_id
+		token = req.params.token
+
 
 	acceptInvite: (req, res, next) ->

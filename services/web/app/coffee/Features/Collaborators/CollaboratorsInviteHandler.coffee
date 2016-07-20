@@ -1,9 +1,9 @@
 module.experts = CollaboratorsInviteHandler =
 
-	inviteToProject: (callback) ->
+	inviteToProject: (projectId, sendingUserId, email, priveleges, callback=(err,invite)->) ->
 
-	revokeInvite: (callback) ->
+	revokeInvite: (projectId, inviteId, callback=(err)->) ->
 
-	viewInvite: (callback) ->
+	getInviteByToken: (projectId, tokenString, callback=(err,invite)->) ->
 
-	acceptInvite: (callback) ->
+	acceptInvite: (projectId, inviteId, callback=(err)->) ->
