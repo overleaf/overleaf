@@ -64,28 +64,34 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
+		res.locals.fullJsPath = url.resolve(staticFilesBase, jsPath)
+
 		imgPath = "/img/"
 		cssPath = "/stylesheets/"
 
-
 		res.locals.buildJsPath = (jsFile, opts = {})->
+			p = Path.join(jsPath, jsFile)
+			doFingerPrint = opts.fingerprint != false
+
 			if !opts.qs?
 				opts.qs = {}
-			if !opts.fingerprint?
-				opts.fingerprint = getFingerprint(jsPath + jsFile)
-			else
+
+			if !opts.fingerprint? and doFingerPrint
+				opts.fingerprint = getFingerprint(p)
+			else if doFingerPrint
 				opts.qs.fingerprint = opts.fingerprint
-			p = Path.join(jsPath, jsFile)
+
 			p = url.resolve(staticFilesBase, p)
 			qs = querystring.stringify(opts.qs)
-			if qs?
+
+			if qs? and qs.length > 0
 				p = p + "?" + qs
 			return p
 
 
 		res.locals.buildCssPath = (cssFile)->
 			p = Path.join(cssPath, cssFile)
-			return url.resolve(staticFilesBase, p) + "?fingerprint=" + getFingerprint(cssPath + cssFile)
+			return url.resolve(staticFilesBase, p) + "?fingerprint=" + getFingerprint(p)
 
 		res.locals.buildImgPath = (imgFile)->
 			p = Path.join(imgPath, imgFile)
