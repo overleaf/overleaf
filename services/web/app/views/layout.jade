@@ -194,10 +194,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 					}
 				};
 			script(
-				data-main=buildJsPath('main.js'),
+				data-main=buildJsPath('main.js', {fingerprint:false}),
 				baseurl=fullJsPath,
 				src=buildJsPath('libs/require.js')
 			)
+
 
 		include contact-us-modal
 		include sentry

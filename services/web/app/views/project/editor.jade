@@ -136,7 +136,7 @@ block content
 		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
 
 	script(
-		data-main=buildJsPath("ide.js"),
+		data-main=buildJsPath("ide.js", {fingerprint:false}),
 		baseurl=fullJsPath,
 		data-ace-base=buildJsPath('ace', {fingerprint:false}),
 		src=buildJsPath('libs/require.js')
