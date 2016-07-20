@@ -7,14 +7,18 @@ querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 _ = require("underscore")
 Modules = require "./Modules"
+url = require "url"
 
 fingerprints = {}
 Path = require 'path'
+
+
 jsPath =
 	if Settings.useMinifiedJs
 		"/minjs/"
 	else
 		"/js/"
+
 
 logger.log "Generating file fingerprints..."
 for path in [
@@ -37,7 +41,21 @@ for path in [
 		fingerprints[path] = hash
 	else
 		logger.log filePath:filePath, "file does not exist for fingerprints"
-	
+
+getFingerprint = (path) ->
+	if fingerprints[path]?
+		return fingerprints[path]
+	else
+		logger.err "No fingerprint for file: #{path}"
+		return ""
+
+logger.log "Finished generating file fingerprints"
+
+
+staticFilesBase = ""
+if Settings.cdn?.web?.host?
+	staticFilesBase = Settings.cdn?.web?.host
+
 
 module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
@@ -46,7 +64,42 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
+		res.locals.fullJsPath = url.resolve(staticFilesBase, jsPath)
+
+		imgPath = "/img/"
+		cssPath = "/stylesheets/"
+
+		res.locals.buildJsPath = (jsFile, opts = {})->
+			p = Path.join(jsPath, jsFile)
+			doFingerPrint = opts.fingerprint != false
+
+			if !opts.qs?
+				opts.qs = {}
+
+			if !opts.fingerprint? and doFingerPrint
+				opts.fingerprint = getFingerprint(p)
+			else if doFingerPrint
+				opts.qs.fingerprint = opts.fingerprint
+
+			p = url.resolve(staticFilesBase, p)
+			qs = querystring.stringify(opts.qs)
+
+			if qs? and qs.length > 0
+				p = p + "?" + qs
+			return p
+
+
+		res.locals.buildCssPath = (cssFile)->
+			p = Path.join(cssPath, cssFile)
+			return url.resolve(staticFilesBase, p) + "?fingerprint=" + getFingerprint(p)
+
+		res.locals.buildImgPath = (imgFile)->
+			p = Path.join(imgPath, imgFile)
+			return url.resolve(staticFilesBase, p)
+
 		next()
+
+
 
 	webRouter.use (req, res, next)-> 
 		res.locals.settings = Settings
@@ -113,12 +166,7 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)-> 
-		res.locals.fingerprint = (path) ->
-			if fingerprints[path]?
-				return fingerprints[path]
-			else
-				logger.err "No fingerprint for file: #{path}"
-				return ""
+		res.locals.fingerprint = getFingerprint
 		next()
 
 	webRouter.use (req, res, next)-> 

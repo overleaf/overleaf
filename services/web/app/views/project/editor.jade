@@ -100,7 +100,7 @@ block content
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML",
+				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {qs:{config:'TeX-AMS_HTML', fingerprint:false}})}",
 				"moment": "libs/moment-2.7.0",
 				"libs/pdf": "libs/pdfjs-1.3.91/pdf"
 			},
@@ -129,15 +129,18 @@ block content
 
 	- var pdfPath = 'libs/pdfjs-1.3.91/pdf.worker.js'
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
-	- var pdfJsWorkerPath = jsPath+pdfPath+'?fingerprint='+fingerprintedPath
+	- var pdfJsWorkerPath = buildJsPath(pdfPath, {fingerprint:fingerprintedPath})
+
+
 	script(type='text/javascript').
 		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
 
 	script(
-		data-main=jsPath+"ide.js",
-		baseurl=jsPath,
-		data-ace-base=jsPath+'ace',
-		src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+		data-main=buildJsPath("ide.js"),
+		baseurl=fullJsPath,
+		data-ace-base=buildJsPath('ace', {fingerprint:false}),
+		src=buildJsPath('libs/require.js')
 	)
+
 		
 

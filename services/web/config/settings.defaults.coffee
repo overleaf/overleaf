@@ -114,6 +114,10 @@ module.exports = settings =
 		showSocialButtons: false
 		showComments: false
 
+	# cdn:
+	# 	web:
+	# 		host:"http://www.sharelatex.dev:3000"
+
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
 	siteUrl : siteUrl = 'http://localhost:3000'

@@ -1,22 +1,13 @@
 define [
 	"base"
 	"ide/pdfng/directives/pdfViewer"
-	"text!libs/pdfListView/TextLayer.css"
-	"text!libs/pdfListView/AnnotationsLayer.css"
-	"text!libs/pdfListView/HighlightsLayer.css"
 ], (
 	App
 	pdfViewer
-	textLayerCss
-	annotationsLayerCss
-	highlightsLayerCss
+
 ) ->
 	if PDFJS?
 		PDFJS.workerSrc = window.pdfJsWorkerPath
-
-	style = $("<style/>")
-	style.text(textLayerCss + "\n" + annotationsLayerCss + "\n" + highlightsLayerCss)
-	$("body").append(style)
 
 	App.directive "pdfng", ["$timeout", "localStorage", ($timeout, localStorage) ->
 		return {
