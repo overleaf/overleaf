@@ -194,6 +194,9 @@ define [
 					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
 					opts.url = "/project/#{$scope.project_id}/output/#{name}"
+				# check if we need to bust cache (build id is unique so don't need it in that case)
+				if not file?.build?
+					opts.params.cache_bust = "#{Date.now()}"
 				return $http(opts)
 
 			# accumulate the log entries
