@@ -7,7 +7,7 @@ querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 _ = require("underscore")
 Modules = require "./Modules"
-url = require "url"
+Url = require "url"
 
 fingerprints = {}
 Path = require 'path'
@@ -64,13 +64,13 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)-> 
 		res.locals.jsPath = jsPath
-		res.locals.fullJsPath = url.resolve(staticFilesBase, jsPath)
+		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 
 		imgPath = "/img/"
 		cssPath = "/stylesheets/"
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
-			p = Path.join(jsPath, jsFile)
+			path = Path.join(jsPath, jsFile)
 
 			doFingerPrint = opts.fingerprint != false
 			
@@ -80,21 +80,21 @@ module.exports = (app, webRouter, apiRouter)->
 			if !opts.qs?.fingerprint? and doFingerPrint
 				opts.qs.fingerprint = getFingerprint(p)
 
-			p = url.resolve(staticFilesBase, p)
+			path = Url.resolve(staticFilesBase, p)
 			qs = querystring.stringify(opts.qs)
 
 			if qs? and qs.length > 0
-				p = p + "?" + qs
-			return p
+				path = path + "?" + qs
+			return path
 
 
 		res.locals.buildCssPath = (cssFile)->
-			p = Path.join(cssPath, cssFile)
-			return url.resolve(staticFilesBase, p) + "?fingerprint=" + getFingerprint(p)
+			path = Path.join(cssPath, cssFile)
+			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
 
 		res.locals.buildImgPath = (imgFile)->
-			p = Path.join(imgPath, imgFile)
-			return url.resolve(staticFilesBase, p)
+			path = Path.join(imgPath, imgFile)
+			return Url.resolve(staticFilesBase, path)
 
 		next()
 
