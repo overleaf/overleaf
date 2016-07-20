@@ -42,6 +42,14 @@ module.exports = CollaboratorsInviteController =
 	viewInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		token = req.params.token
+		CollaboratorsInviteHandler.getInviteByToken projectId, token, (err, invite) ->
+			if err?
+				logger.err {projectId, token}, "error getting invite by token"
+				return next(err)
+			if !invite
+				logger.log {projectId, token}, "no invite found for token"
+				return res.redirect("/")
+			res.render "project/invite", {invite}
 
 
 	acceptInvite: (req, res, next) ->
