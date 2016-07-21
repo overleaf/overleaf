@@ -11,7 +11,7 @@ Errors = require "../Errors/Errors"
 
 module.experts = CollaboratorsInviteHandler =
 
-	inviteToProject: (projectId, sendingUserId, email, priveleges, callback=(err,invite)->) ->
+	inviteToProject: (projectId, sendingUserId, email, privileges, callback=(err,invite)->) ->
 
 	revokeInvite: (projectId, inviteId, callback=(err)->) ->
 

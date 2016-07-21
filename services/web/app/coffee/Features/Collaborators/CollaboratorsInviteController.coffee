@@ -10,19 +10,19 @@ module.exports = CollaboratorsInviteController =
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
-		sendingUserId = req.session?.user_id
+		sendingUserId = req.session?.user?._id
 		logger.log {projectId, email, sendingUserId}, "inviting to project"
-		LimitationsManager.canAddXCollaborators project_id, 1, (error, allowed) =>
+		LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
 			return next(error) if error?
 			if !allowed
 				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
-				return res.json {}
+				return res.json {inviteId: null}
 			{email, privileges} = req.body
 			email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
-				return res.status(400).send("invalid email address")
-			CollaboratorsInviteHandler.inviteToProject projectId, sendingUserId, email, priveleges, (err, invite) ->
+				return res.sendStatus(400)
+			CollaboratorsInviteHandler.inviteToProject projectId, sendingUserId, email, privileges, (err, invite) ->
 				if err?
 					logger.err {projectId, email, sendingUserId}, "error creating project invite"
 					return next(err)
@@ -37,7 +37,7 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, inviteId}, "error revoking invite"
 				return next(err)
-			res.status(201).send()
+			res.sendStatus(201)
 
 	viewInvite: (req, res, next) ->
 		projectId = req.params.Project_id
@@ -49,7 +49,7 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
-				return res.redirect("/")
+				return res.sendStatus(404)
 			res.render "project/invite", {invite}
 
 	acceptInvite: (req, res, next) ->
@@ -59,6 +59,6 @@ module.exports = CollaboratorsInviteController =
 		logger.log {projectId, inviteId}, "accepting invite"
 		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, currentUser, (err) ->
 			if err?
-				logger.err {projectId, token}, "error getting invite by token"
+				logger.err {projectId, inviteId}, "error getting invite by token"
 				return next(err)
-			rest.status(201).send()
+			res.sendStatus(201)
