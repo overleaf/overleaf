@@ -25,10 +25,12 @@ module.exports =
 
 		webRouter.get(
 			'/project/:Project_id/invite/token/:token',
+			AuthenticationController.requireLogin(),
 			CollaboratorsInviteController.viewInvite
 		)
 
 		webRouter.post(
 			'/project/:Project_id/invite/:invite_id/accept',
+			AuthenticationController.requireLogin(),
 			CollaboratorsInviteController.acceptInvite
 		)
