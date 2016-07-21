@@ -262,6 +262,7 @@
 	background: rgb(202, 214, 250);
 	border: 1px solid lightgray;
 	box-shadow: 3px 3px 5px rgba(0,0,0,.2);
+
 	span {
 		color: black;
 	}
@@ -277,6 +278,7 @@
 	background: #fbfbfb;
 	color: #FFF;
 	box-shadow: 3px 3px 5px rgba(0,0,0,.2);
+	border-left: 1px solid lightgray;
 	font-family: @font-family-sans-serif;
 	font-size: 13px;
 	font-weight: 600;
@@ -295,8 +297,9 @@
 		padding-left: 10px;
 	}
 
-	&_keybinding {
+	kbd {
 		display: block;
+		font-family: inherit;
 		font-size: 12px;
 		font-weight: normal;
 	}
