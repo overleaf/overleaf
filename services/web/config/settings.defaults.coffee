@@ -116,7 +116,7 @@ module.exports = settings =
 
 	# cdn:
 	# 	web:
-	# 		host:"http://www.sharelatex.dev:3000"
+	# 		host:"http://cdn.sharelatex.dev:3000"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.

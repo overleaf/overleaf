@@ -78,9 +78,9 @@ module.exports = (app, webRouter, apiRouter)->
 				opts.qs = {}
 
 			if !opts.qs?.fingerprint? and doFingerPrint
-				opts.qs.fingerprint = getFingerprint(p)
+				opts.qs.fingerprint = getFingerprint(path)
 
-			path = Url.resolve(staticFilesBase, p)
+			path = Url.resolve(staticFilesBase, path)
 			qs = querystring.stringify(opts.qs)
 
 			if qs? and qs.length > 0
