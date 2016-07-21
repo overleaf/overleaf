@@ -52,6 +52,7 @@ getFingerprint = (path) ->
 logger.log "Finished generating file fingerprints"
 
 cdnAvailable = Settings.cdn?.web?.host?
+darkCdnAvailable = Settings.cdn?.web?.darkHost?
 
 module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
@@ -66,6 +67,8 @@ module.exports = (app, webRouter, apiRouter)->
 
 		if cdnAvailable and isLive
 			staticFilesBase = Settings.cdn?.web?.host
+		else if darkCdnAvailable and isDark
+			staticFilesBase = Settings.cdn?.web?.darkHost
 		else
 			staticFilesBase = ""
 		
@@ -84,7 +87,9 @@ module.exports = (app, webRouter, apiRouter)->
 			if !opts.qs?.fingerprint? and doFingerPrint
 				opts.qs.fingerprint = getFingerprint(path)
 
-			path = Url.resolve(staticFilesBase, path)
+			if opts.cdn != false
+				path = Url.resolve(staticFilesBase, path)
+				
 			qs = querystring.stringify(opts.qs)
 
 			if qs? and qs.length > 0
