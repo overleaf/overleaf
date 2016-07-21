@@ -35,7 +35,23 @@ module.experts = CollaboratorsInviteHandler =
 				callback(null, invite)
 
 	revokeInvite: (projectId, inviteId, callback=(err)->) ->
+		logger.log {projectId, inviteId}, "removing invite"
+		ProjectInvite.remove {projectId: projectId, _id: inviteId}, (err) ->
+			if err?
+				logger.err {err, projectId, inviteId}, "error removing invite"
+				return callback(err)
+			callback(null)
 
 	getInviteByToken: (projectId, tokenString, callback=(err,invite)->) ->
+		logger.log {projectId, tokenString}, "fetching invite by token"
+		ProjectInvite.findOne {projectId: projectId, token: tokenString}, (err, invite) ->
+			if err?
+				logger.err {err, projectId, inviteId}, "error fetching invite"
+				return callback(err)
+			now = new Date()
+			if invite.expiresAt < now
+				logger.log {projectId, inviteId, expiresAt: invite.expiresAt}, "invite expired"
+				return callback(null, null)
+			callback(null, invite)
 
 	acceptInvite: (projectId, inviteId, callback=(err)->) ->
