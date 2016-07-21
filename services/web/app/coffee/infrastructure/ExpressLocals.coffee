@@ -51,11 +51,7 @@ getFingerprint = (path) ->
 
 logger.log "Finished generating file fingerprints"
 
-
-staticFilesBase = ""
-if Settings.cdn?.web?.host?
-	staticFilesBase = Settings.cdn?.web?.host
-
+cdnAvailable = Settings.cdn?.web?.host?
 
 module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
@@ -63,11 +59,19 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)-> 
+
+		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
+		isSmoke = req.headers?.host?.slice(0,5)?.toLowerCase() == "smoke"
+		isLive = !isDark and !isSmoke
+
+		if cdnAvailable and isLive
+			staticFilesBase = Settings.cdn?.web?.host
+		else
+			staticFilesBase = ""
+		
 		res.locals.jsPath = jsPath
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 
-		imgPath = "/img/"
-		cssPath = "/stylesheets/"
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
@@ -89,11 +93,11 @@ module.exports = (app, webRouter, apiRouter)->
 
 
 		res.locals.buildCssPath = (cssFile)->
-			path = Path.join(cssPath, cssFile)
+			path = Path.join("/stylesheets/", cssFile)
 			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
 
 		res.locals.buildImgPath = (imgFile)->
-			path = Path.join(imgPath, imgFile)
+			path = Path.join("/img/", imgFile)
 			return Url.resolve(staticFilesBase, path)
 
 		next()
