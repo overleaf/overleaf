@@ -3,7 +3,7 @@ extends ../layout
 block content
 	- locals.supressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-	script(src=jsPath+'libs/recurly.min.js')
+	script(src=buildJsPath('libs/recurly.min.js'))
 
 	.content.content-alt
 		.container

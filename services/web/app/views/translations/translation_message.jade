@@ -2,7 +2,7 @@
 	span(ng-controller="TranslationsPopupController", ng-cloak)
 		.translations-message(ng-hide="hidei18nNotification")
 			a(href=recomendSubdomain.url+currentUrl) !{translate("click_here_to_view_sl_in_lng", {lngName:"<strong>" + translate(recomendSubdomain.lngCode) + "</strong>"})} 
-				img(src="/img/flags/24/#{recomendSubdomain.lngCode}.png")
+				img(src=buildImgPath("flags/24/#{recomendSubdomain.lngCode}.png"))
 			button(ng-click="dismiss()").close.pull-right
 				span(aria-hidden="true") &times;
 				span.sr-only #{translate("close")}

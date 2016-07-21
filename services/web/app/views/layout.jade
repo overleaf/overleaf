@@ -15,10 +15,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 		-if (typeof(title) == "undefined")
 			title= 'ShareLaTeX, '+ translate("online_latex_editor") 
 		-else
-			title= translate(title) + ' - ShareLaTeX, '+translate("online_latex_editor") 
+			title= translate(title) + ' - ShareLaTeX, ' + translate("online_latex_editor") 
 
 		link(rel="icon", href="/favicon.ico")
-		link(rel='stylesheet', href='/stylesheets/style.css?fingerprint='+fingerprint('/stylesheets/style.css'))
+		link(rel='stylesheet', href=buildCssPath('/style.css'))
 
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
@@ -124,8 +124,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 			window.csrfToken = "#{csrfToken}";
 			
 		block scripts
-		script(src="#{jsPath}libs/jquery-1.11.1.min.js")
-		script(src="#{jsPath}libs/angular-1.3.15.min.js")
+		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
+		script(src=buildJsPath("libs/angular-1.3.15.min.js", {fingerprint:false}))
 		script.
 			window.sharelatex = {
 				siteUrl: '#{settings.siteUrl}',
@@ -194,10 +194,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 					}
 				};
 			script(
-				data-main=jsPath+'main.js',
-				baseurl=jsPath,
-				src=jsPath+'libs/require.js?fingerprint='+fingerprint(jsPath + 'libs/require.js')
+				data-main=buildJsPath('main.js', {fingerprint:false}),
+				baseurl=fullJsPath,
+				src=buildJsPath('libs/require.js')
 			)
+
 
 		include contact-us-modal
 		include sentry
