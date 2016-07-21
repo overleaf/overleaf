@@ -116,8 +116,6 @@ describe "CollaboratorsInviteController", ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
 				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user_id,@targetEmail,@privileges).should.equal true
 
-	##
-
 	describe "viewInvite", ->
 
 		beforeEach ->
