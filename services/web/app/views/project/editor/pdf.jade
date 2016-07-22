@@ -108,7 +108,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
-				ng-init="feedbackSent = false;"
+				ng-init="feedbackSent = false; negFeedbackReason = ''"
 			)
 				span.line-no
 					i.fa.fa-link(aria-hidden="true")
@@ -148,8 +148,42 @@ div.full-size.pdf(ng-controller="PdfController")
 								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); feedbackSent = true;"
 								href
 							) #{translate("answer_no")}
+						.card-hint-extra-feedback
+							p Can you help us understand why this hint wasn't helpful?
+							.radio: label
+								input(
+									type="radio"
+									ng-model="negFeedbackReason"
+									value="didnt_understand"
+								)
+								| I didn’t understand the hint
+							.radio: label
+								input(
+									type="radio"
+									ng-model="negFeedbackReason"
+									value="not_applicable"
+								)
+								| I couldn’t apply it to my document
+							.radio: label
+								input(
+									type="radio"
+									ng-model="negFeedbackReason"
+									value="incorrect"
+								)
+								| I don’t think this is correct
+							.radio: label
+								input(
+									type="radio"
+									ng-model="negFeedbackReason"
+									value="other"
+								)
+								| Other:
+							.clearfix
+								button.btn.btn-default.btn-xs.pull-right Submit
+
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
+
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
