@@ -17,7 +17,8 @@ describe "CollaboratorsInviteHandler", ->
 					this[k] = v
 				this
 			save: sinon.stub()
-			findOne: sinon.stub()
+			@findOne: sinon.stub()
+			@remove: sinon.stub()
 		@Project = {}
 		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
@@ -33,6 +34,7 @@ describe "CollaboratorsInviteHandler", ->
 		@sendingUserId = ObjectId()
 		@email = "user@example.com"
 		@userId = ObjectId()
+		@inviteId = ObjectId()
 		@privileges = "readAndWrite"
 
 	describe 'inviteToProject', ->
@@ -87,5 +89,38 @@ describe "CollaboratorsInviteHandler", ->
 
 			it 'should produce an error', (done) ->
 				@call (err, invite) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+	describe 'revokeInvite', ->
+
+		beforeEach ->
+			@ProjectInvite.remove.callsArgWith(1, null)
+			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub()
+			@call = (callback) =>
+				@CollaboratorsInviteHandler.revokeInvite @projectId, @inviteId, callback
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					done()
+
+			it 'should call ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 1
+					@ProjectInvite.remove.calledWith({projectId: @projectId, _id: @inviteId}).should.equal true
+					done()
+
+		describe 'when remove produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.remove.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
 					expect(err).to.be.instanceof Error
 					done()
