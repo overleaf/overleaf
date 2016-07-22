@@ -108,7 +108,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
-				ng-init="feedbackSent = false; negFeedbackReason = ''"
+				ng-init="feedbackSent = false; showNegFeedbackUI = false; negFeedbackReason = '';"
 			)
 				span.line-no
 					i.fa.fa-link(aria-hidden="true")
@@ -135,7 +135,7 @@ div.full-size.pdf(ng-controller="PdfController")
 								i.fa.fa-external-link
 								|&nbsp;#{translate("log_hint_extra_info")}
 						.card-hint-feedback(
-							ng-show="!feedbackSent"
+							ng-hide="feedbackSent || showNegFeedbackUI"
 							ng-class="entry.ruleId"
 						)
 							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
@@ -145,10 +145,12 @@ div.full-size.pdf(ng-controller="PdfController")
 							) #{translate("answer_yes")}
 							span &nbsp;/&nbsp;
 							a.card-hint-feedback-negative(
-								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); feedbackSent = true;"
+								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); showNegFeedbackUI = true;"
 								href
 							) #{translate("answer_no")}
-						.card-hint-extra-feedback
+						.card-hint-extra-feedback(
+							ng-show="showNegFeedbackUI && !feedbackSent"
+						)
 							p Can you help us understand why this hint wasn't helpful?
 							.radio: label
 								input(
@@ -183,7 +185,10 @@ div.full-size.pdf(ng-controller="PdfController")
 								rows="2"
 							)
 							.clearfix
-								button.btn.btn-default.btn-xs.pull-right Submit
+								button.btn.btn-default.btn-sm.pull-right(
+									ng-disabled="!negFeedbackReason"
+									ng-click="feedbackSent = true;"
+								) Submit
 
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
