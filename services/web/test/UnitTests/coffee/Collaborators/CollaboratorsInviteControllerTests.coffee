@@ -239,9 +239,11 @@ describe "CollaboratorsInviteController", ->
 				invite_id: @invite_id = "thuseoautoh"
 			@req.session =
 				user: _id: @current_user_id = "current-user-id"
+			@req.body =
+				token: "thsueothaueotauahsuet"
 			@res.render = sinon.stub()
 			@res.sendStatus = sinon.stub()
-			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(3, null)
+			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, null)
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -261,7 +263,7 @@ describe "CollaboratorsInviteController", ->
 
 			beforeEach ->
 				@err = new Error('woops')
-				@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(3, @err)
+				@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, @err)
 				@CollaboratorsInviteController.acceptInvite @req, @res, @next
 
 			it 'should not produce a 201 response', ->

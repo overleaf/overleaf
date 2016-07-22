@@ -55,9 +55,10 @@ module.exports = CollaboratorsInviteController =
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		inviteId = req.params.inviteId
+		{token} = req.body
 		currentUser = req.session.user
 		logger.log {projectId, inviteId}, "accepting invite"
-		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, currentUser, (err) ->
+		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, token, currentUser, (err) ->
 			if err?
 				logger.err {projectId, inviteId}, "error getting invite by token"
 				return next(err)
