@@ -79,3 +79,13 @@ describe "CollaboratorsInviteHandler", ->
 					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 1
 					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.calledWith(@projectId, @email).should.equal true
 					done()
+
+		describe 'when saving model produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite::save = sinon.spy (cb) -> cb(new Error('woops'), this)
+
+			it 'should produce an error', (done) ->
+				@call (err, invite) =>
+					expect(err).to.be.instanceof Error
+					done()
