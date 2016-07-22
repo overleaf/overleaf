@@ -44,7 +44,7 @@ module.exports = CollaboratorsInviteHandler =
 		logger.log {projectId, tokenString}, "fetching invite by token"
 		ProjectInvite.findOne {projectId: projectId, token: tokenString}, (err, invite) ->
 			if err?
-				logger.err {err, projectId, inviteId}, "error fetching invite"
+				logger.err {err, projectId}, "error fetching invite"
 				return callback(err)
 			if !invite
 				err = new Errors.NotFoundError("no invite found for token")
@@ -53,7 +53,7 @@ module.exports = CollaboratorsInviteHandler =
 			now = new Date()
 			# TODO: re-assess whether we should return null or a notfounderror
 			if invite.expiresAt < now
-				logger.log {projectId, inviteId, expiresAt: invite.expiresAt}, "invite expired"
+				logger.log {projectId, inviteId: invite._id, expiresAt: invite.expiresAt}, "invite expired"
 				return callback(null, null)
 			callback(null, invite)
 

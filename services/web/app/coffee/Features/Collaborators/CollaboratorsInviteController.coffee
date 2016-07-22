@@ -47,6 +47,7 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, token}, "error getting invite by token"
 				return next(err)
+			# TODO: should we render an expired view instead?
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
 				return res.sendStatus(404)
