@@ -50,8 +50,8 @@ module.exports = CollaboratorsInviteController =
 			# TODO: render a not-valid view instead
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
-				return res.sendStatus(404)
-			res.render "project/invite", {invite}
+				return res.render "project/invite/not-valid"
+			res.render "project/invite/show", {invite}
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id

@@ -145,7 +145,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should render the view template', ->
 				@res.render.callCount.should.equal 1
-				@res.render.calledWith('project/invite').should.equal true
+				@res.render.calledWith('project/invite/show').should.equal true
 
 			it 'should not call next', ->
 				@next.callCount.should.equal 0
@@ -173,12 +173,9 @@ describe "CollaboratorsInviteController", ->
 				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
 				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
-			it 'should produce a 404 response', ->
-				@res.sendStatus.callCount.should.equal 1
-				@res.sendStatus.calledWith(404).should.equal true
-
-			it 'should not render the view template', ->
-				@res.render.callCount.should.equal 0
+			it 'should render the not-valid view template', ->
+				@res.render.callCount.should.equal 1
+				@res.render.calledWith('project/invite/not-valid').should.equal true
 
 			it 'should not call next', ->
 				@next.callCount.should.equal 0
