@@ -178,6 +178,10 @@ div.full-size.pdf(ng-controller="PdfController")
 									value="other"
 								)
 								| Other:
+							textarea.form-control(
+								ng-show="negFeedbackReason === 'other'"
+								rows="2"
+							)
 							.clearfix
 								button.btn.btn-default.btn-xs.pull-right Submit
 
