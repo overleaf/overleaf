@@ -6,6 +6,7 @@ modulePath = "../../../../app/js/Features/Collaborators/CollaboratorsInviteHandl
 SandboxedModule = require('sandboxed-module')
 events = require "events"
 ObjectId = require("mongojs").ObjectId
+Crypto = require('crypto')
 
 describe "CollaboratorsInviteHandler", ->
 	beforeEach ->
@@ -18,6 +19,7 @@ describe "CollaboratorsInviteHandler", ->
 			save: sinon.stub()
 			findOne: sinon.stub()
 		@Project = {}
+		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex': @settings = {}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
@@ -25,6 +27,7 @@ describe "CollaboratorsInviteHandler", ->
 			'../Contacts/ContactManager': @ContactManager = {}
 			'../../models/Project': {Project: @Project}
 			'../../models/ProjectInvite': {ProjectInvite: @ProjectInvite}
+			'crypto': @Crypto
 
 		@projectId = ObjectId()
 		@sendingUserId = ObjectId()
@@ -36,9 +39,13 @@ describe "CollaboratorsInviteHandler", ->
 
 		beforeEach ->
 			@ProjectInvite::save = sinon.spy (cb) -> cb(null, this)
+			@randomBytesSpy = sinon.spy(@Crypto, 'randomBytes')
 			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub()
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.inviteToProject @projectId, @sendingUserId, @email, @privileges, callback
+
+		afterEach ->
+			@randomBytesSpy.restore()
 
 		describe 'when all goes well', ->
 
@@ -55,6 +62,11 @@ describe "CollaboratorsInviteHandler", ->
 					expect(invite).to.not.equal undefined
 					expect(invite).to.be.instanceof Object
 					expect(invite).to.have.all.keys ['_id', 'email', 'token', 'sendingUserId', 'projectId', 'privileges']
+					done()
+
+			it 'should have generated a random token', (done) ->
+				@call (err, invite) =>
+					@randomBytesSpy.callCount.should.equal 1
 					done()
 
 			it 'should have called ProjectInvite.save', (done) ->
