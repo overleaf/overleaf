@@ -148,10 +148,8 @@ div.full-size.pdf(ng-controller="PdfController")
 								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); showNegFeedbackUI = true;"
 								href
 							) #{translate("answer_no")}
-						.card-hint-extra-feedback(
-							ng-show="showNegFeedbackUI && !feedbackSent"
-						)
-							p Can you help us understand why this hint wasn't helpful?
+						.card-hint-extra-feedback(ng-hide="!showNegFeedbackUI || feedbackSent")
+							p.card-hint-extra-feedback-label Can you help us understand why this hint wasn't helpful?
 							.radio: label
 								input(
 									type="radio"
@@ -165,14 +163,14 @@ div.full-size.pdf(ng-controller="PdfController")
 									ng-model="negFeedbackReason"
 									value="not_applicable"
 								)
-								| I couldn’t apply it to my document
+								| I can’t apply this solution to my document
 							.radio: label
 								input(
 									type="radio"
 									ng-model="negFeedbackReason"
 									value="incorrect"
 								)
-								| I don’t think this is correct
+								| This doesn’t fix the error
 							.radio: label
 								input(
 									type="radio"
