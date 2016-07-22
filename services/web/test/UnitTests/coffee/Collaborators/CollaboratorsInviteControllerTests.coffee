@@ -45,7 +45,6 @@ describe "CollaboratorsInviteController", ->
 				projectId: @targetEmail,
 				targetEmail: 'user@example.com'
 				createdAt: new Date(),
-				expiresAt: new Date()
 			}
 			@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 			@CollaboratorsInviteHandler.inviteToProject = sinon.stub().callsArgWith(4, null, @invite)
@@ -133,7 +132,6 @@ describe "CollaboratorsInviteController", ->
 				projectId: @projectId,
 				targetEmail: 'user@example.com'
 				createdAt: new Date(),
-				expiresAt: new Date()
 			}
 			@CollaboratorsInviteHandler.getInviteByToken = sinon.stub().callsArgWith(2, null, @invite)
 			@callback = sinon.stub()

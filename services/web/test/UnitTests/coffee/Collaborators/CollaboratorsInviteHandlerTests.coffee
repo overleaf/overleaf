@@ -130,8 +130,6 @@ describe "CollaboratorsInviteHandler", ->
 	describe 'getInviteByToken', ->
 
 		beforeEach ->
-			@theDarkFuture = new Date()
-			@theDarkFuture.setYear(40000)
 			@fakeInvite =
 				_id:            @inviteId
 				email:          @email
@@ -140,7 +138,6 @@ describe "CollaboratorsInviteHandler", ->
 				projectId:      @projectId
 				privileges:     @privileges
 				createdAt:      new Date()
-				expiresAt:      @theDarkFuture
 			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.getInviteByToken @projectId, @token, callback
@@ -150,7 +147,7 @@ describe "CollaboratorsInviteHandler", ->
 			beforeEach ->
 
 			it 'should not produce an error', (done) ->
-				@call (err) =>
+				@call (err, invite) =>
 					expect(err).to.not.be.instanceof Error
 					expect(err).to.be.oneOf [null, undefined]
 					done()
@@ -161,7 +158,7 @@ describe "CollaboratorsInviteHandler", ->
 					done()
 
 			it 'should call ProjectInvite.findOne', (done) ->
-				@call (err) =>
+				@call (err, invite) =>
 					@ProjectInvite.findOne.callCount.should.equal 1
 					@ProjectInvite.findOne.calledWith({projectId: @projectId, token: @token}).should.equal true
 					done()
@@ -172,7 +169,7 @@ describe "CollaboratorsInviteHandler", ->
 				@ProjectInvite.findOne.callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
-				@call (err) =>
+				@call (err, invite) =>
 					expect(err).to.be.instanceof Error
 					done()
 
@@ -181,26 +178,14 @@ describe "CollaboratorsInviteHandler", ->
 			beforeEach ->
 				@ProjectInvite.findOne.callsArgWith(1, null, null)
 
-			it 'should produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.instanceof Error
-					done()
-
-		describe 'when the invite is expired', ->
-
-			beforeEach ->
-				@theDeepPast = new Date()
-				@theDeepPast.setYear(1977)
-				@fakeInvite.expiresAt = @theDeepPast
-				@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
-
 			it 'should not produce an error', (done) ->
-				@call (err) =>
+				@call (err, invite) =>
 					expect(err).to.not.be.instanceof Error
 					expect(err).to.be.oneOf [null, undefined]
 					done()
 
 			it 'should not produce an invite object', (done) ->
 				@call (err, invite) =>
+					expect(invite).to.not.be.instanceof Error
 					expect(invite).to.be.oneOf [null, undefined]
 					done()
