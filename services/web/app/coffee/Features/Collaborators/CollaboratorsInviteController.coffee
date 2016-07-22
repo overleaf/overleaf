@@ -60,6 +60,6 @@ module.exports = CollaboratorsInviteController =
 		logger.log {projectId, inviteId}, "accepting invite"
 		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, token, currentUser, (err) ->
 			if err?
-				logger.err {projectId, inviteId}, "error getting invite by token"
+				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
 			res.sendStatus(201)
