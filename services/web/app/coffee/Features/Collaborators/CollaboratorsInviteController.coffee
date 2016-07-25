@@ -25,7 +25,7 @@ module.exports = CollaboratorsInviteController =
 			return next(error) if error?
 			if !allowed
 				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
-				return res.json {inviteId: null}
+				return res.json {invite: null}
 			{email, privileges} = req.body
 			email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()
 			if !email? or email == ""
@@ -36,7 +36,7 @@ module.exports = CollaboratorsInviteController =
 					logger.err {projectId, email, sendingUserId}, "error creating project invite"
 					return next(err)
 				logger.log {projectId, email, sendingUserId}, "invite created"
-				return res.json {inviteId: invite._id}
+				return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
 		projectId = req.params.Project_id

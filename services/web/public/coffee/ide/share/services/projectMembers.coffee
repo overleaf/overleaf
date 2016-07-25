@@ -17,13 +17,12 @@ define [
 					privileges: privileges
 					_csrf: window.csrfToken
 				})
-			
+
 			addGroup: (group_id, privileges) ->
 				$http.post("/project/#{ide.project_id}/group", {
 					group_id: group_id
 					privileges: privileges
 					_csrf: window.csrfToken
 				})
-				
 		}
 	]

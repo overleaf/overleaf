@@ -48,7 +48,6 @@ define [
 			projectInvites.getInvites().then(
 				(response) ->
 					$scope.state.invites = response?.data?.invites
-					$scope.state.invites = [{_id: "wat", email: "user@example.com"}]
 				, (response) ->
 					console.error response
 			)
@@ -86,8 +85,9 @@ define [
 						return addNextMember()
 
 					# TODO: double-check if member.type == 'user' needs to be an invite
+					console.log ">> inviting", member
 					if member.type == "user"
-						request = projectMembers.addMember(member.email, $scope.inputs.privileges)
+						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
 						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
 					else # Not an auto-complete object, so email == display
@@ -95,14 +95,9 @@ define [
 
 					request
 						.success (data) ->
-							if data.users?
-								users = data.users
-							else if data.user?
-								users = [data.user]
-							else
-								users = []
-
-							$scope.project.members.push users...
+							if data.invite
+								invite = data.invite
+								$scope.state.invites.push invite
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
 								# with new collaborator information.

@@ -65,8 +65,6 @@ describe "CollaboratorsInviteController", ->
 				@next.callCount.should.equal 1
 				@next.firstCall.args[0].should.be.instanceof Error
 
-	# # # #
-
 	describe 'inviteToProject', ->
 
 		beforeEach ->
@@ -101,7 +99,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should produce json response', ->
 				@res.json.callCount.should.equal 1
-				({inviteId: @invite._id}).should.deep.equal(@res.json.firstCall.args[0])
+				({invite: @invite}).should.deep.equal(@res.json.firstCall.args[0])
 
 			it 'should have called canAddXCollaborators', ->
 				@LimitationsManager.canAddXCollaborators.callCount.should.equal 1
@@ -117,9 +115,9 @@ describe "CollaboratorsInviteController", ->
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, false)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
-			it 'should produce json response without inviteId', ->
+			it 'should produce json response without an invite', ->
 				@res.json.callCount.should.equal 1
-				({inviteId: null}).should.deep.equal(@res.json.firstCall.args[0])
+				({invite: null}).should.deep.equal(@res.json.firstCall.args[0])
 
 			it 'should not have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 0
