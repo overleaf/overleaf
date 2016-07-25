@@ -18,6 +18,7 @@ describe "CollaboratorsInviteHandler", ->
 				this
 			save: sinon.stub()
 			@findOne: sinon.stub()
+			@find: sinon.stub()
 			@remove: sinon.stub()
 		@Project = class Project
 			constructor: () ->
@@ -53,6 +54,49 @@ describe "CollaboratorsInviteHandler", ->
 			projectId:      @projectId
 			privileges:     @privileges
 			createdAt:      new Date()
+
+	describe 'getAllInvites', ->
+
+		beforeEach ->
+			@fakeInvites = [
+				{_id: ObjectId(), one: 1},
+				{_id: ObjectId(), two: 2}
+			]
+			@ProjectInvite.find.callsArgWith(1, null, @fakeInvites)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler.getAllInvites @projectId, callback
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+			it 'should not produce an error', (done) ->
+				@call (err, invites) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should produce a list of invite objects', (done) ->
+				@call (err, invites) =>
+					expect(invites).to.not.be.oneOf [null, undefined]
+					expect(invites).to.deep.equal @fakeInvites
+					done()
+
+			it 'should have called ProjectInvite.find', (done) ->
+				@call (err, invites) =>
+					@ProjectInvite.find.callCount.should.equal 1
+					@ProjectInvite.find.calledWith({projectId: @projectId}).should.equal true
+					done()
+
+		describe 'when ProjectInvite.find produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.find.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, invites) =>
+					expect(err).to.be.instanceof Error
+					done()
 
 	describe 'inviteToProject', ->
 

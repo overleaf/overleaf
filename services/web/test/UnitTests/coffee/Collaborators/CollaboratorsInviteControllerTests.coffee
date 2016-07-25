@@ -25,6 +25,48 @@ describe "CollaboratorsInviteController", ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
+
+	describe 'getAllInvites', ->
+
+		beforeEach ->
+			@fakeInvites = [
+				{_id: ObjectId(), one: 1},
+				{_id: ObjectId(), two: 2}
+			]
+			@req.params =
+				Project_id: @project_id
+			@res.json = sinon.stub()
+			@next = sinon.stub()
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+				@CollaboratorsInviteHandler.getAllInvites = sinon.stub().callsArgWith(1, null, @fakeInvites)
+				@CollaboratorsInviteController.getAllInvites @req, @res, @next
+
+			it 'should not produce an error', ->
+				@next.callCount.should.equal 0
+
+			it 'should produce a list of invite objects', ->
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({invites: @fakeInvites}).should.equal true
+
+			it 'should have called CollaboratorsInviteHandler.getAllInvites', ->
+				@CollaboratorsInviteHandler.getAllInvites.callCount.should.equal 1
+				@CollaboratorsInviteHandler.getAllInvites.calledWith(@project_id).should.equal true
+
+		describe 'when CollaboratorsInviteHandler.getAllInvites produces an error', ->
+
+			beforeEach ->
+				@CollaboratorsInviteHandler.getAllInvites = sinon.stub().callsArgWith(1, new Error('woops'))
+				@CollaboratorsInviteController.getAllInvites @req, @res, @next
+
+			it 'should produce an error', ->
+				@next.callCount.should.equal 1
+				@next.firstCall.args[0].should.be.instanceof Error
+
+	# # # #
+
 	describe 'inviteToProject', ->
 
 		beforeEach ->

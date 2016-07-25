@@ -7,6 +7,15 @@ logger = require('logger-sharelatex')
 
 module.exports = CollaboratorsInviteController =
 
+	getAllInvites: (req, res, next) ->
+		projectId = req.params.Project_id
+		logger.log {projectId}, "getting all active invites for project"
+		CollaboratorsInviteHandler.getAllInvites projectId, (err, invites) ->
+			if err?
+				logger.err {projectId}, "error getting invites for project"
+				return next(err)
+			res.json({invites: invites})
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email

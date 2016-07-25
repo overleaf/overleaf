@@ -11,6 +11,14 @@ Crypto = require 'crypto'
 
 module.exports = CollaboratorsInviteHandler =
 
+	getAllInvites: (projectId, callback=(err, invites)->) ->
+		logger.log {projectId}, "fetching invites from mongo"
+		ProjectInvite.find {projectId: projectId}, (err, invites) ->
+			if err?
+				logger.err {err, projectId}, "error getting invites from mongo"
+				return callback(err)
+			callback(null, invites)
+
 	inviteToProject: (projectId, sendingUserId, email, privileges, callback=(err,invite)->) ->
 		logger.log {projectId, sendingUserId, email, privileges}, "adding invite"
 		Crypto.randomBytes 24, (err, buffer) ->

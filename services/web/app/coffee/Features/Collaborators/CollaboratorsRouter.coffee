@@ -17,6 +17,12 @@ module.exports =
 			CollaboratorsInviteController.inviteToProject
 		)
 
+		webRouter.get(
+			'/project/:Project_id/invite',
+			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			CollaboratorsInviteController.getAllInvites
+		)
+
 		webRouter.delete(
 			'/project/:Project_id/invite/:invite_id',
 			AuthorizationMiddlewear.ensureUserCanAdminProject,
