@@ -61,7 +61,7 @@ module.exports = CollaboratorsInviteHandler =
 				logger.log {err, projectId, inviteId}, "no project found"
 				return callback(err)
 			# TODO: check if we need to cast the ids to ObjectId
-			ProjectInvite.findOne {_id: inviteId, projectId: projectId, token: token}, (err, invite) ->
+			ProjectInvite.findOne {_id: inviteId, projectId: projectId, token: tokenString}, (err, invite) ->
 				if err?
 					logger.err {err, projectId, inviteId}, "error finding invite"
 					return callback(err)
@@ -94,9 +94,9 @@ module.exports = CollaboratorsInviteHandler =
 					return callback(error) if error?
 					# Flush to TPDS in background to add files to collaborator's Dropbox
 					ProjectEntityHandler = require("../Project/ProjectEntityHandler")
-					ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, (error) ->
+					ProjectEntityHandler.flushProjectToThirdPartyDataStore project._id, (error) ->
 						if error?
-							logger.error {err: error, project_id, user_id}, "error flushing to TPDS after adding collaborator"
+							logger.error {err: error, project_id: project._id, user_id}, "error flushing to TPDS after adding collaborator"
 					# Remove invite
 					ProjectInvite.remove {_id: inviteId}, (err) ->
 						if err?

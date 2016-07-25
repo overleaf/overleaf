@@ -19,7 +19,11 @@ describe "CollaboratorsInviteHandler", ->
 			save: sinon.stub()
 			@findOne: sinon.stub()
 			@remove: sinon.stub()
-		@Project = {}
+		@Project = class Project
+			constructor: () ->
+				this
+			@findOne: sinon.stub()
+			@update: sinon.stub()
 		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex': @settings = {}
@@ -28,15 +32,27 @@ describe "CollaboratorsInviteHandler", ->
 			'../Contacts/ContactManager': @ContactManager = {}
 			'../../models/Project': {Project: @Project}
 			'../../models/ProjectInvite': {ProjectInvite: @ProjectInvite}
+			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			'crypto': @Crypto
 
 		@projectId = ObjectId()
 		@sendingUserId = ObjectId()
 		@email = "user@example.com"
 		@userId = ObjectId()
+		@user =
+			_id: @userId
+			email: 'someone@example.com'
 		@inviteId = ObjectId()
 		@token = 'hnhteaosuhtaeosuahs'
 		@privileges = "readAndWrite"
+		@fakeInvite =
+			_id:            @inviteId
+			email:          @email
+			token:          @token
+			sendingUserId:  @sendingUserId
+			projectId:      @projectId
+			privileges:     @privileges
+			createdAt:      new Date()
 
 	describe 'inviteToProject', ->
 
@@ -130,14 +146,6 @@ describe "CollaboratorsInviteHandler", ->
 	describe 'getInviteByToken', ->
 
 		beforeEach ->
-			@fakeInvite =
-				_id:            @inviteId
-				email:          @email
-				token:          @token
-				sendingUserId:  @sendingUserId
-				projectId:      @projectId
-				privileges:     @privileges
-				createdAt:      new Date()
 			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.getInviteByToken @projectId, @token, callback
@@ -188,4 +196,66 @@ describe "CollaboratorsInviteHandler", ->
 				@call (err, invite) =>
 					expect(invite).to.not.be.instanceof Error
 					expect(invite).to.be.oneOf [null, undefined]
+					done()
+
+	describe 'acceptInvite', ->
+
+		beforeEach ->
+			@fakeProject =
+				_id: @projectId
+				collaberator_refs: []
+				readOnly_refs: []
+			@Project.findOne.callsArgWith(1, null, @fakeProject)
+			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
+			@ContactManager.addContact = sinon.stub()
+			@Project.update.callsArgWith(2, null)
+			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArgWith(1, null)
+			@ProjectInvite.remove.callsArgWith(1, null)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler.acceptInvite @projectId, @inviteId, @token, @user, callback
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should have called Project.findOne', (done) ->
+				@call (err) =>
+					@Project.findOne.callCount.should.equal 1
+					@Project.findOne.calledWith({_id: @projectId}).should.equal true
+					done()
+
+			it 'should have called ProjectInvite.findOne', (done) ->
+				@call (err) =>
+					@ProjectInvite.findOne.callCount.should.equal 1
+					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId, token: @token}).should.equal true
+					done()
+
+			it 'should have called ContactManager.addContact', (done) ->
+				@call (err) =>
+					@ContactManager.addContact.callCount.should.equal 1
+					@ContactManager.addContact.calledWith(@sendingUserId, @userId).should.equal true
+					done()
+
+			it 'should have called Project.update, adding the user to callaberator_refs', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 1
+					@Project.update.calledWith({_id: @projectId}, {$addToSet: {"collaberator_refs": @userId}}).should.equal true
+					done()
+
+			it 'should have called ProjectEntityHandler.flushProjectToThirdPartyDataStore', (done) ->
+				@call (err) =>
+					@ProjectEntityHandler.flushProjectToThirdPartyDataStore.callCount.should.equal 1
+					@ProjectEntityHandler.flushProjectToThirdPartyDataStore.calledWith(@projectId).should.equal true
+					done()
+
+			it 'should have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 1
+					@ProjectInvite.remove.calledWith({_id: @inviteId}).should.equal true
 					done()
