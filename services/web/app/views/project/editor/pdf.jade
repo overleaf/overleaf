@@ -108,7 +108,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
-				ng-init="feedbackSent = false; showNegFeedbackUI = false; negFeedbackReason = '';"
+				ng-init="feedbackSent = false; showNegFeedbackUI = false; negFeedbackReason = ''; negFeedbackReasonFreeText = ''"
 			)
 				span.line-no
 					i.fa.fa-link(aria-hidden="true")
@@ -154,32 +154,32 @@ div.full-size.pdf(ng-controller="PdfController")
 								input(
 									type="radio"
 									ng-model="negFeedbackReason"
-									value="didnt_understand"
+									value="{{ logHintsNegFeedbackValues.DIDNT_UNDERSTAND }}"
 								)
 								| I didn’t understand the hint
 							.radio: label
 								input(
 									type="radio"
 									ng-model="negFeedbackReason"
-									value="not_applicable"
+									value="{{ logHintsNegFeedbackValues.NOT_APPLICABLE }}"
 								)
 								| I can’t apply this solution to my document
 							.radio: label
 								input(
 									type="radio"
 									ng-model="negFeedbackReason"
-									value="incorrect"
+									value="{{ logHintsNegFeedbackValues.INCORRECT }}"
 								)
 								| This doesn’t fix the error
 							.radio: label
 								input(
 									type="radio"
 									ng-model="negFeedbackReason"
-									value="other"
+									value="{{ logHintsNegFeedbackValues.OTHER }}"
 								)
 								| Other:
 							textarea.form-control(
-								ng-show="negFeedbackReason === 'other'"
+								ng-show="negFeedbackReason === logHintsNegFeedbackValues.OTHER"
 								rows="2"
 							)
 							.clearfix
