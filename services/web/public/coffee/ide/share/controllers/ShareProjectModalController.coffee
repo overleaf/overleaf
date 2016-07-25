@@ -38,7 +38,7 @@ define [
 						else
 							# Must be a group
 							contact.display = contact.name
-		
+
 		getCurrentMemberEmails = () ->
 			$scope.project.members.map (u) -> u.email
 
@@ -60,26 +60,26 @@ define [
 				$scope.inputs.contacts = []
 				$scope.state.error = null
 				$scope.state.inflight = true
-				
+
 				currentMemberEmails = getCurrentMemberEmails()
 				do addNextMember = () ->
 					if members.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
 						$scope.$apply()
 						return
-					
+
 					member = members.shift()
 					if !member.type? and member.display in currentMemberEmails
 						# Skip this existing member
 						return addNextMember()
-					
+
 					if member.type == "user"
 						request = projectMembers.addMember(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
 						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
 					else # Not an auto-complete object, so email == display
 						request = projectMembers.addMember(member.display, $scope.inputs.privileges)
-					
+
 					request
 						.success (data) ->
 							if data.users?
@@ -88,7 +88,7 @@ define [
 								users = [data.user]
 							else
 								users = []
-								
+
 							$scope.project.members.push users...
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
@@ -98,8 +98,7 @@ define [
 						.error () ->
 							$scope.state.inflight = false
 							$scope.state.error = true
-			
-			
+
 			$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
