@@ -242,7 +242,7 @@ describe "CollaboratorsInviteHandler", ->
 					@ContactManager.addContact.calledWith(@sendingUserId, @userId).should.equal true
 					done()
 
-			it 'should have called Project.update, adding the user to callaberator_refs', (done) ->
+			it 'should have called Project.update, adding the user to collaberator_refs', (done) ->
 				@call (err) =>
 					@Project.update.callCount.should.equal 1
 					@Project.update.calledWith({_id: @projectId}, {$addToSet: {"collaberator_refs": @userId}}).should.equal true
@@ -258,4 +258,144 @@ describe "CollaboratorsInviteHandler", ->
 				@call (err) =>
 					@ProjectInvite.remove.callCount.should.equal 1
 					@ProjectInvite.remove.calledWith({_id: @inviteId}).should.equal true
+					done()
+
+		describe 'when the invite is for readOnly access', ->
+
+			beforeEach ->
+				@fakeInvite.privileges = 'readOnly'
+				@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should have called Project.update, adding the user to readOnly_refs', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 1
+					@Project.update.calledWith({_id: @projectId}, {$addToSet: {"readOnly_refs": @userId}}).should.equal true
+					done()
+
+		describe 'when the invite is for an unknown access level', ->
+
+			beforeEach ->
+				@fakeInvite.privileges = 'some_crazy_permission'
+				@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 0
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+		describe 'when ProjectInvite.findOne does not find an invite', ->
+
+			beforeEach ->
+				@ProjectInvite.findOne.callsArgWith(1, null, null)
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					expect(err.name).to.equal "NotFoundError"
+					done()
+
+			it 'should not have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 0
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+		describe 'when Project.findOne produces an error', ->
+
+			beforeEach ->
+				@Project.findOne.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 0
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+		describe 'when ProjectInvite.findOne produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.findOne.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 0
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+		describe 'when Project.update produces an error', ->
+
+			beforeEach ->
+				@Project.update.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 1
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+		describe 'when ProjectInvite.remove produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.remove.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 1
+					done()
+
+			it 'should have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 1
 					done()
