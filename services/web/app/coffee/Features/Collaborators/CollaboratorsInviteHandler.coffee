@@ -70,12 +70,6 @@ module.exports = CollaboratorsInviteHandler =
 					logger.log {err, projectId, inviteId}, "no matching invite found"
 					return callback(err)
 
-				now = new Date()
-				if invite.expiresAt < now
-					err = new Errors.NotFoundError("invite expired")
-					logger.log {err, projectId, inviteId, expiresAt: invite.expiresAt}, "invite expired"
-					return callback(err)
-
 				# do the thing
 				existing_users = (project.collaberator_refs or [])
 				existing_users = existing_users.concat(project.readOnly_refs or [])
