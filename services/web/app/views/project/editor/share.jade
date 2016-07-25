@@ -43,6 +43,19 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="removeMember(member)"
 					)
 						i.fa.fa-times
+			.row.project-invite(ng-repeat="invite in state.invites")
+				.col-xs-8 {{ invite.email }} (invite)
+				.col-xs-3.text-right
+					span(ng-show="member.privileges == 'readAndWrite'") #{translate("can_edit")}
+					span(ng-show="member.privileges == 'readOnly'") #{translate("read_only")}
+				.col-xs-1
+					a(
+						href
+						tooltip="#{translate('revoke_invite')}"
+						tooltip-placement="bottom"
+						ng-click="revokeInvite(invite)"
+					)
+						i.fa.fa-times
 			.row.invite-controls
 				form(ng-show="canAddCollaborators")
 					.small #{translate("share_with_your_collabs")}

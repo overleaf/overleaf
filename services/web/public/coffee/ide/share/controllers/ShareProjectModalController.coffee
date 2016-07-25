@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, $modal, $http) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -10,9 +10,11 @@ define [
 			error: null
 			inflight: false
 			startedFreeTrial: false
+			invites: []
 		}
 
 		$modalInstance.opened.then () ->
+			getOutstandingInvites()
 			$timeout () ->
 				$scope.$broadcast "open"
 			, 200
@@ -41,6 +43,16 @@ define [
 
 		getCurrentMemberEmails = () ->
 			$scope.project.members.map (u) -> u.email
+
+		getOutstandingInvites = (callback) ->
+			projectInvites.getInvites().then(
+				(response) ->
+					$scope.state.invites = response?.data?.invites
+					$scope.state.invites = [{_id: "wat", email: "user@example.com"}]
+				, (response) ->
+					console.error response
+			)
+		window._x = getOutstandingInvites
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
@@ -73,12 +85,13 @@ define [
 						# Skip this existing member
 						return addNextMember()
 
+					# TODO: double-check if member.type == 'user' needs to be an invite
 					if member.type == "user"
 						request = projectMembers.addMember(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
 						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
 					else # Not an auto-complete object, so email == display
-						request = projectMembers.addMember(member.display, $scope.inputs.privileges)
+						request = projectInvites.sendInvite(member.display, $scope.inputs.privileges)
 
 					request
 						.success (data) ->
@@ -111,6 +124,20 @@ define [
 					index = $scope.project.members.indexOf(member)
 					return if index == -1
 					$scope.project.members.splice(index, 1)
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = "Sorry, something went wrong :("
+
+		$scope.revokeInvite = (invite) ->
+			$scope.state.error = null
+			$scope.state.inflight = true
+			projectInvites
+				.revokeInvite(invite._id)
+				.success () ->
+					$scope.state.inflight = false
+					index = $scope.state.invites.indexOf(invite)
+					return if index == -1
+					$scope.state.invites.splice(index, 1)
 				.error () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
