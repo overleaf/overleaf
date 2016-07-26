@@ -27,6 +27,8 @@ module.exports = BlogController =
 			data = data.trim()
 			try
 				data = JSON.parse(data)
+				if settings.cdn?.web?.host?
+					data?.content = data?.content?.replace(/src="([^"]+)"/g, "src='#{settings.cdn?.web?.host}$1'");
 			catch err
 				logger.err err:err, data:data, "error parsing data from data"
 			res.render "blog/blog_holder", data
