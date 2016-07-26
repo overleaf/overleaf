@@ -23,6 +23,11 @@ define [
 			formData.append "Field#{ reasonOtherFieldAPIId }", feedbackOtherVal
 			formData.append "idstamp", idStampVal
 
+			# Allow user to specify "other" without any extra details; an empty string 
+			# would trigger an error submitting.
+			if feedbackOpt == feedbackOpts.OTHER and feedbackOtherVal == ""
+				formData.set "Field#{ reasonOtherFieldAPIId }", "#{ feedbackOpts.OTHER } empty"
+
 			req =
 				method: 'POST'
 				url: submitEndpoint
