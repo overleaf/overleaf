@@ -28,6 +28,9 @@ module.exports = RequestParser =
 				compile.options.draft,
 				default: false,
 				type: "boolean"
+			response.check = @_parseAttribute "check",
+				compile.options.check,
+				type: "string"
 
 			if response.timeout > RequestParser.MAX_TIMEOUT
 				response.timeout = RequestParser.MAX_TIMEOUT

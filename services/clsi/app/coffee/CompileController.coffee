@@ -17,6 +17,8 @@ module.exports = CompileController =
 				CompileManager.doCompile request, (error, outputFiles = []) ->
 					if error?.terminated
 						status = "terminated"
+					else if error?.code is 1
+						status = "exited"
 					else if error?
 						logger.error err: error, project_id: request.project_id, "error running compile"
 						if error.timedout

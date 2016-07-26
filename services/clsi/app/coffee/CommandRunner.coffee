@@ -27,6 +27,10 @@ module.exports = CommandRunner =
 				err = new Error("terminated")
 				err.terminated = true
 				return callback(err)
+			else if code
+				err = new Error("exit")
+				err.code = code
+				return callback(err)
 			else
 				callback()
 

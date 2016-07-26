@@ -44,9 +44,9 @@ module.exports = CompileManager =
 
 			# set up environment variables for chktex
 			env = {}
-			if request.chktex?
-				env['CHKTEX_OPTIONS'] =  '-nall -e9 -e10 -e15 -e16 -e27'
-				if request.chktex is 'error'
+			if request.check?
+				env['CHKTEX_OPTIONS'] =  '-nall -e9 -e10 -w15 -w16 -w27'
+				if request.check is 'error'
 					env['CHKTEX_EXIT_ON_ERROR'] =  1
 
 			injectDraftModeIfRequired (error) ->
@@ -67,7 +67,7 @@ module.exports = CompileManager =
 					environment: env
 				}, (error, output, stats, timings) ->
 					# compile was killed by user
-					if error?.terminated
+					if error?.terminated or error?.code is 1
 						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
 							return callback(err) if err?
 							callback(error, outputFiles) # return output files so user can check logs
