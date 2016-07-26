@@ -58,18 +58,25 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, token}, "error getting invite by token"
 				return next(err)
-			# TODO: render a not-valid view instead
+			_renderInvalidPage = () ->
+				res.render "project/invite/not-valid", {invite}
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
-				return res.render "project/invite/not-valid"
+				return _renderInvalidPage()
 			Project.findOne {_id: projectId}, {owner_ref: 1, name: 1}, (err, project) ->
 				if err?
 					logger.err {err, projectId}, "error getting project"
-					return callback(err)
+					return next(err)
+				if !project
+					logger.log {projectId}, "no project found"
+					return _renderInvalidPage()
 				User.findOne {_id: project.owner_ref}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
 					if err?
 						logger.err {err, projectId}, "error getting project owner"
-						return callback(err)
+						return next(err)
+					if !owner
+						logger.log {projectId}, "no project owner found"
+						return _renderInvalidPage()
 					res.render "project/invite/show", {invite, project, owner}
 
 	acceptInvite: (req, res, next) ->

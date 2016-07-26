@@ -213,6 +213,14 @@ describe "CollaboratorsInviteController", ->
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should call User.findOne', ->
+				@User.findOne.callCount.should.equal 1
+				@User.findOne.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+
 		describe 'when the getInviteByToken produces an error', ->
 
 			beforeEach ->
@@ -226,6 +234,12 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should not call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 0
+
+			it 'should not call User.findOne', ->
+				@User.findOne.callCount.should.equal 0
 
 		describe 'when the getInviteByToken does not produce an invite', ->
 
@@ -242,6 +256,92 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should not call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 0
+
+			it 'should not call User.findOne', ->
+				@User.findOne.callCount.should.equal 0
+
+		describe 'when Project.findOne produces an error', ->
+
+			beforeEach ->
+				@Project.findOne.callsArgWith(2, new Error('woops'))
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should produce an error', ->
+				@next.callCount.should.equal 1
+				expect(@next.firstCall.args[0]).to.be.instanceof Error
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should not call User.findOne', ->
+				@User.findOne.callCount.should.equal 0
+
+		describe 'when Project.findOne does not find a project', ->
+
+			beforeEach ->
+				@Project.findOne.callsArgWith(2, null, null)
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should render the not-valid view template', ->
+				@res.render.callCount.should.equal 1
+				@res.render.calledWith('project/invite/not-valid').should.equal true
+
+			it 'should not call next', ->
+				@next.callCount.should.equal 0
+
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should not call User.findOne', ->
+				@User.findOne.callCount.should.equal 0
+
+		describe 'when User.findOne produces an error', ->
+
+			beforeEach ->
+				@User.findOne.callsArgWith(2, new Error('woops'))
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should produce an error', ->
+				@next.callCount.should.equal 1
+				expect(@next.firstCall.args[0]).to.be.instanceof Error
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should call User.findOne', ->
+				@User.findOne.callCount.should.equal 1
+
+		describe 'when User.findOne does not find a user', ->
+
+			beforeEach ->
+				@User.findOne.callsArgWith(2, null, null)
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should render the not-valid view template', ->
+				@res.render.callCount.should.equal 1
+				@res.render.calledWith('project/invite/not-valid').should.equal true
+
+			it 'should not call next', ->
+				@next.callCount.should.equal 0
+
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should call User.findOne', ->
+				@User.findOne.callCount.should.equal 1
 
 	describe "revokeInvite", ->
 
