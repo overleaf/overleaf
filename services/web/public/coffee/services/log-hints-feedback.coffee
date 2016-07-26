@@ -20,13 +20,14 @@ define [
 
 			formData.append "Field#{ hintFieldAPIId }", hintId
 			formData.append "Field#{ reasonFieldAPIId }", feedbackOpt
-			formData.append "Field#{ reasonOtherFieldAPIId }", feedbackOtherVal
 			formData.append "idstamp", idStampVal
 
 			# Allow user to specify "other" without any extra details; an empty string 
 			# would trigger an error submitting.
 			if feedbackOpt == feedbackOpts.OTHER and feedbackOtherVal == ""
-				formData.set "Field#{ reasonOtherFieldAPIId }", "#{ feedbackOpts.OTHER } empty"
+				formData.append "Field#{ reasonOtherFieldAPIId }", "#{ feedbackOpts.OTHER } empty"
+			else
+				formData.append "Field#{ reasonOtherFieldAPIId }", feedbackOtherVal
 
 			req =
 				method: 'POST'
