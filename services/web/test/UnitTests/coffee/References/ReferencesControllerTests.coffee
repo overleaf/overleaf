@@ -134,9 +134,10 @@ describe "ReferencesController", ->
 					@res.sendStatus.calledWith(400).should.equal false
 					done()
 
-			it 'should close the response', (done) ->
+			it 'should send a response with an empty keys list', (done) ->
 				@call () =>
-					@res.send.called.should.equal true
+					@res.json.called.should.equal true
+					@res.json.calledWith({projectId: @projectId, keys: []}).should.equal true
 					done()
 
 	describe 'index', ->

@@ -101,19 +101,19 @@ if app.get('env') == 'production'
 	logger.info "Production Enviroment"
 	app.enable('view cache')
 
-
-
 app.use (req, res, next)->
 	metrics.inc "http-request"
 	crawlerLogger.log(req)
 	next()
 
-app.use (req, res, next) ->
-	if !Settings.editorIsOpen
+webRouter.use (req, res, next) ->
+	if Settings.editorIsOpen
+		next()
+	else if req.url.indexOf("/admin") == 0
+		next()
+	else
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
-	else
-		next()
 
 apiRouter.get "/status", (req, res)->
 	res.send("web sharelatex is alive")
