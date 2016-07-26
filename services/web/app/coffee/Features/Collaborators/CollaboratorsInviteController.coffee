@@ -1,6 +1,8 @@
 ProjectGetter = require "../Project/ProjectGetter"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
+Project = require("../../models/Project").Project
+User = require("../../models/User").User
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 mimelib = require("mimelib")
 logger = require('logger-sharelatex')
@@ -60,11 +62,19 @@ module.exports = CollaboratorsInviteController =
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
 				return res.render "project/invite/not-valid"
-			res.render "project/invite/show", {invite}
+			Project.findOne {_id: projectId}, {owner_ref: 1, name: 1}, (err, project) ->
+				if err?
+					logger.err {err, projectId}, "error getting project"
+					return callback(err)
+				User.findOne {_id: project.owner_ref}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
+					if err?
+						logger.err {err, projectId}, "error getting project owner"
+						return callback(err)
+					res.render "project/invite/show", {invite, project, owner}
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id
-		inviteId = req.params.inviteId
+		inviteId = req.params.invite_id
 		{token} = req.body
 		currentUser = req.session.user
 		logger.log {projectId, inviteId}, "accepting invite"
@@ -72,4 +82,4 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
-			res.sendStatus(201)
+			res.redirect "/project/#{projectId}"

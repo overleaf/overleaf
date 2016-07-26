@@ -75,7 +75,7 @@ module.exports = CollaboratorsInviteHandler =
 					return callback(err)
 				if !invite
 					err = new Errors.NotFoundError("no matching invite found")
-					logger.log {err, projectId, inviteId}, "no matching invite found"
+					logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
 					return callback(err)
 
 				# do the thing

@@ -1,1 +1,30 @@
-h1 Invite TEST
+extends ../../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card.project-invite-accept
+						.page-header.text-centered
+							h1  #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
+								em #{project.name}
+						.row.text-center
+							.col-md-12
+								p
+									| You are accepting this invite as&nbsp;
+									em #{user.email}
+						.row
+							.col-md-12
+								form.form(
+									name="acceptForm",
+									method="POST",
+									action="/project/#{invite.projectId}/invite/#{invite._id}/accept"
+								)
+									input(name='_csrf', type='hidden', value=csrfToken)
+									input(name='token', type='hidden', value="#{invite.token}")
+									.form-group.text-center
+										button.btn.btn-lg.btn-primary(type="submit")
+											| Accept Invite
+									.form-group.text-center
+							
