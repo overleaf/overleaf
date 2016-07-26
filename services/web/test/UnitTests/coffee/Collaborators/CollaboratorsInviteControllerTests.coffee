@@ -11,6 +11,13 @@ ObjectId = require("mongojs").ObjectId
 
 describe "CollaboratorsInviteController", ->
 	beforeEach ->
+		@User = class User
+			constructor: (options={}) -> this
+			@findOne: sinon.stub()
+		@Project = class Project
+			constructor: () ->
+				this
+			@findOne: sinon.stub()
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			"./CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
@@ -18,6 +25,8 @@ describe "CollaboratorsInviteController", ->
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
 			'../Project/ProjectEditorHandler' : @ProjectEditorHandler = {}
 			'../User/UserGetter': @UserGetter = {}
+			'../../models/Project': {Project: @Project}
+			'../../models/User': {User; @User}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 		@res = new MockResponse()
 		@req = new MockRequest()
@@ -169,10 +178,21 @@ describe "CollaboratorsInviteController", ->
 				_id: ObjectId(),
 				token: "htnseuthaouse",
 				sendingUserId: ObjectId(),
-				projectId: @projectId,
+				projectId: @project_id,
 				targetEmail: 'user@example.com'
 				createdAt: new Date(),
 			}
+			@fakeProject =
+				_id: @project_id
+				name: "some project"
+				owner_ref: @invite.sendingUserId
+			@owner =
+				_id: @fakeProject.owner_ref
+				first_name: "John"
+				last_name: "Doe"
+				email: "john@example.com"
+			@Project.findOne.callsArgWith(2, null, @fakeProject)
+			@User.findOne.callsArgWith(2, null, @owner)
 			@CollaboratorsInviteHandler.getInviteByToken = sinon.stub().callsArgWith(2, null, @invite)
 			@callback = sinon.stub()
 			@next = sinon.stub()
@@ -277,7 +297,7 @@ describe "CollaboratorsInviteController", ->
 			@req.body =
 				token: "thsueothaueotauahsuet"
 			@res.render = sinon.stub()
-			@res.sendStatus = sinon.stub()
+			@res.redirect = sinon.stub()
 			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, null)
 			@callback = sinon.stub()
 			@next = sinon.stub()
@@ -287,9 +307,9 @@ describe "CollaboratorsInviteController", ->
 			beforeEach ->
 				@CollaboratorsInviteController.acceptInvite @req, @res, @next
 
-			it 'should produce a 201 response', ->
-				@res.sendStatus.callCount.should.equal 1
-				@res.sendStatus.calledWith(201).should.equal true
+			it 'should redirect to project page', () ->
+				@res.redirect.callCount.should.equal 1
+				@res.redirect.calledWith("/project/#{@project_id}").should.equal true
 
 			it 'should have called acceptInvite', ->
 				@CollaboratorsInviteHandler.acceptInvite.callCount.should.equal 1
@@ -301,8 +321,8 @@ describe "CollaboratorsInviteController", ->
 				@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, @err)
 				@CollaboratorsInviteController.acceptInvite @req, @res, @next
 
-			it 'should not produce a 201 response', ->
-				@res.sendStatus.callCount.should.equal 0
+			it 'should not redirect to project page', ->
+				@res.redirect.callCount.should.equal 0
 
 			it 'should call next with the error', ->
 				@next.callCount.should.equal 1
