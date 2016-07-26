@@ -71,7 +71,8 @@ define [
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
-			event_tracking.sendCountly "ide-open-view-#{ newView }" if newView?
+			if newView? and newView != "editor" and newView != "pdf"
+				event_tracking.sendCountly "ide-open-view-#{ newView }" 
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
 			event_tracking.sendCountly "ide-open-chat" if isOpen
