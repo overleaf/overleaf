@@ -108,7 +108,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
-				ng-init="feedbackSent = false;"
+				ng-init="feedbackSent = false; showNegFeedbackUI = false; negFeedbackReason = ''; negFeedbackReasonFreeText = ''"
 			)
 				span.line-no
 					i.fa.fa-link(aria-hidden="true")
@@ -135,7 +135,7 @@ div.full-size.pdf(ng-controller="PdfController")
 								i.fa.fa-external-link
 								|&nbsp;#{translate("log_hint_extra_info")}
 						.card-hint-feedback(
-							ng-show="!feedbackSent"
+							ng-hide="feedbackSent || showNegFeedbackUI"
 							ng-class="entry.ruleId"
 						)
 							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
@@ -145,11 +145,57 @@ div.full-size.pdf(ng-controller="PdfController")
 							) #{translate("answer_yes")}
 							span &nbsp;/&nbsp;
 							a.card-hint-feedback-negative(
-								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); feedbackSent = true;"
+								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); showNegFeedbackUI = true;"
 								href
 							) #{translate("answer_no")}
+						.card-hint-extra-feedback(ng-hide="!showNegFeedbackUI || feedbackSent")
+							p.card-hint-extra-feedback-label #{translate("log_hint_ask_extra_feedback")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.DIDNT_UNDERSTAND }}"
+								)
+								| #{translate("log_hint_extra_feedback_didnt_understand")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.NOT_APPLICABLE }}"
+								)
+								| #{translate("log_hint_extra_feedback_not_applicable")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.INCORRECT }}"
+								)
+								| #{translate("log_hint_extra_feedback_incorrect")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.OTHER }}"
+								)
+								| #{translate("log_hint_extra_feedback_other")}
+							textarea.form-control(
+								ng-show="negFeedbackReason === logHintsNegFeedbackValues.OTHER"
+								ng-model="negFeedbackReasonFreeText"
+								rows="2"
+							)
+							.clearfix
+								button.btn.btn-default.btn-sm.pull-right(
+									ng-disabled="!negFeedbackReason"
+									ng-click="trackLogHintsNegFeedbackDetails(entry.ruleId, negFeedbackReason, negFeedbackReasonFreeText); feedbackSent = true;"
+								) #{translate("log_hint_extra_feedback_submit")}
+
 						.card-hint-feedback(ng-show="feedbackSent")
 							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
+
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p

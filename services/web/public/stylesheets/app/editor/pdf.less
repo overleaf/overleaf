@@ -203,6 +203,17 @@
 	white-space: nowrap;
 }
 
+
+@keyframes expand-feedback-area {
+	from {
+		max-height: 0;
+	}
+
+	to {
+		max-height: 500px;
+	}
+}
+
 .card-hint:extend(.card-thin) {
 	margin-top: 10px;
 	padding-bottom: 7px;
@@ -280,9 +291,39 @@
 		float: right;
 	}
 
+	&-extra-feedback {
+		color: @gray-dark;
+		font-size: 0.8rem;
+		margin-top: 10px;
+		padding-bottom: 5px;
+		animation: 0.5s ease-out expand-feedback-area;
+		overflow: hidden;
+
+		&-label {
+			margin: 5px 0 10px;
+			padding-top: 5px;
+			border-top: solid 1px @gray-lighter;
+		}
+
+		.radio {
+			margin: 5px;
+		}
+
+		textarea {
+			font-size: 0.8rem;
+			margin-bottom: 10px;
+			padding: 5px;
+		}
+
+		input[type="radio"] {
+			margin-top: 2px;
+		}
+	}
+
 	& + p {
 		margin-top: 20px;
 	}
+
 }
 
 .files-dropdown-container {
