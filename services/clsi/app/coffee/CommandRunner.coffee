@@ -4,13 +4,18 @@ logger = require "logger-sharelatex"
 logger.info "using standard command runner"
 
 module.exports = CommandRunner =
-	run: (project_id, command, directory, image, timeout, callback = (error) ->) ->
+	run: (project_id, command, directory, image, timeout, environment, callback = (error) ->) ->
 		command = (arg.replace('$COMPILE_DIR', directory) for arg in command)
 		logger.log project_id: project_id, command: command, directory: directory, "running command"
 		logger.warn "timeouts and sandboxing are not enabled with CommandRunner"
 
+		# merge environment settings
+		env = {}
+		env[key] = value for key, value of process.env
+		env[key] = value for key, value of environment
+
 		# run command as detached process so it has its own process group (which can be killed if needed)
-		proc = spawn command[0], command.slice(1), stdio: "inherit", cwd: directory, detached: true
+		proc = spawn command[0], command.slice(1), stdio: "inherit", cwd: directory, detached: true, env: env
 
 		proc.on "error", (err)->
 			logger.err err:err, project_id:project_id, command: command, directory: directory, "error running command"
