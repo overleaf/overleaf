@@ -42,8 +42,8 @@ define [
 			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
 			event_tracking.sendCountly (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
 
-		trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal)
-			logHintsFeedback.submitFeedback
+		$scope.trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal) ->
+			logHintsFeedback.submitFeedback hintId, feedbackOpt, feedbackOtherVal
 
 		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
 		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId

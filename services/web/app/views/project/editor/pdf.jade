@@ -180,12 +180,13 @@ div.full-size.pdf(ng-controller="PdfController")
 								| Other:
 							textarea.form-control(
 								ng-show="negFeedbackReason === logHintsNegFeedbackValues.OTHER"
+								ng-model="negFeedbackReasonFreeText"
 								rows="2"
 							)
 							.clearfix
 								button.btn.btn-default.btn-sm.pull-right(
 									ng-disabled="!negFeedbackReason"
-									ng-click="feedbackSent = true;"
+									ng-click="trackLogHintsNegFeedbackDetails(entry.ruleId, negFeedbackReason, negFeedbackReasonFreeText); feedbackSent = true;"
 								) Submit
 
 						.card-hint-feedback(ng-show="feedbackSent")

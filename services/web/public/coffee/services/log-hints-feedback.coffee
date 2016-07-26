@@ -43,8 +43,7 @@ define [
 
 		submitFeedback = (hintId, feedbackOpt, feedbackOtherVal = "") ->
 			submitRequest = createRequest hintId, feedbackOpt, feedbackOtherVal
-			$http(submitRequest).then (response) ->
-				console.log response
+			$http(submitRequest)
 
 		service =
 			feedbackOpts: feedbackOpts
