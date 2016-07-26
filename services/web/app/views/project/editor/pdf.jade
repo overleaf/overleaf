@@ -153,6 +153,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							.radio: label
 								input(
 									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
 									ng-model="negFeedbackReason"
 									value="{{ logHintsNegFeedbackValues.DIDNT_UNDERSTAND }}"
 								)
@@ -160,6 +161,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							.radio: label
 								input(
 									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
 									ng-model="negFeedbackReason"
 									value="{{ logHintsNegFeedbackValues.NOT_APPLICABLE }}"
 								)
@@ -167,6 +169,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							.radio: label
 								input(
 									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
 									ng-model="negFeedbackReason"
 									value="{{ logHintsNegFeedbackValues.INCORRECT }}"
 								)
@@ -174,6 +177,7 @@ div.full-size.pdf(ng-controller="PdfController")
 							.radio: label
 								input(
 									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
 									ng-model="negFeedbackReason"
 									value="{{ logHintsNegFeedbackValues.OTHER }}"
 								)
