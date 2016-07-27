@@ -17,11 +17,7 @@ define [
 
 		_eventInCache = (key) ->
 			curCache = _getEventCache()
-
-			if (curCache.hasOwnProperty key) 
-				curCache[key]
-			else
-				false
+			curCache[key] || false
 
 		_addEventToCache = (key) ->
 			curCache = _getEventCache()
