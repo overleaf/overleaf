@@ -333,7 +333,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
-			event_tracking.sendCountly "ide-open-logs" if $scope.shouldShowLogs
+			event_tracking.sendCountlyOnce "ide-open-logs" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -499,7 +499,7 @@ define [
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
-			event_tracking.sendCountly 'logs-jump-to-location'
+			event_tracking.sendCountlyOnce 'logs-jump-to-location'
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?
