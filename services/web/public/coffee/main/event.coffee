@@ -1,41 +1,34 @@
 define [
 	"base"
+	"modules/localStorage"
 ], (App) ->
 	CACHE_KEY = "countlyEvents"
 
-	_getEventCache = () -> 
-		eventCacheStr = window.localStorage.getItem CACHE_KEY
+	App.factory "event_tracking", (localStorage) ->
+		_getEventCache = () -> 
+			eventCache = localStorage CACHE_KEY
 
-		# Initialize as an empy object if the event cache is still empty.
-		if !eventCacheStr?
-			eventCacheStr = "{}"
+			# Initialize as an empy object if the event cache is still empty.
+			if !eventCache?
+				eventCache = {}
+				localStorage CACHE_KEY, eventCache 
 
-			# Errors writing to localStorage may happen when quota is full or
-			# browser is in incognito mode. We'll return an empty object, anyway.
-			try
-				window.localStorage.setItem CACHE_KEY, eventCacheStr 
+			return eventCache
 
-		return JSON.parse eventCacheStr
+		_eventInCache = (key) ->
+			curCache = _getEventCache()
 
-	_eventInCache = (key) ->
-		curCache = _getEventCache()
+			if (curCache.hasOwnProperty key) 
+				curCache[key]
+			else
+				false
 
-		if (curCache.hasOwnProperty key) 
-			curCache[key]
-		else
-			false
+		_addEventToCache = (key) ->
+			curCache = _getEventCache()
+			curCache[key] = true
 
-	_addEventToCache = (key) ->
-		curCache = _getEventCache()
-		curCache[key] = true
-		curCacheAsStr  = JSON.stringify curCache
+			localStorage CACHE_KEY, curCache
 
-		# Protection against issues mentioned above.
-		try
-			window.localStorage.setItem CACHE_KEY, curCacheAsStr
-
-
-	App.factory "event_tracking", ->
 		return {
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
