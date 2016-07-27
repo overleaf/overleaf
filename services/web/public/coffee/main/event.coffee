@@ -21,7 +21,7 @@ define [
 		curCache = _getEventCache()
 
 		if (curCache.hasOwnProperty key) 
-			_getEventCache()[key]
+			curCache[key]
 		else
 			false
 
@@ -36,7 +36,6 @@ define [
 
 
 	App.factory "event_tracking", ->
-
 		return {
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
