@@ -15,7 +15,12 @@ define [
 			ruleDetails = _getRule entry.message
 
 			if (ruleDetails?)
-				entry.ruleId = 'hint_' + ruleDetails.regexToMatch.toString().replace(/\s/g, '_').slice(1, -1) if ruleDetails.regexToMatch?
+				if ruleDetails.ruleId?
+					entry.ruleId = ruleDetails.ruleId
+				else if ruleDetails.regexToMatch?
+					entry.ruleId = 'hint_' + ruleDetails.regexToMatch.toString().replace(/\s/g, '_').slice(1, -1)
+				if ruleDetails.newMessage?
+					entry.message = entry.message.replace ruleDetails.regexToMatch, ruleDetails.newMessage
 				
 				entry.humanReadableHint = ruleDetails.humanReadableHint if ruleDetails.humanReadableHint?
 				entry.extraInfoURL = ruleDetails.extraInfoURL if ruleDetails.extraInfoURL?

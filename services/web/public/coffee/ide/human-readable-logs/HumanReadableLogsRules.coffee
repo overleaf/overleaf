@@ -88,4 +88,11 @@ define -> [
 		humanReadableHint: """
 			You have used a font command which is only available in math mode. To use this command, you must be in maths mode (E.g. $ \u2026 $ or \\begin{math} \u2026 \\end{math}). If you want to use it outside of math mode, use the text version instead: \\textrm, \\textit, etc.
 		"""
+	,
+		ruleId: "hint_mismatched_environment"
+		regexToMatch: /Error: `([^']{2,})' expected, found `([^']{2,})'.*/
+		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
+		humanReadableHint: """
+			You have used \\begin{...} without a corresponding \\end{...}
+		"""
 ]
