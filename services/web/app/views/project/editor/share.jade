@@ -138,7 +138,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
 			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
-		button.btn.btn-primary(
+		button.btn.btn-default(
 			ng-click="done()"
 		) #{translate("close")}
 
