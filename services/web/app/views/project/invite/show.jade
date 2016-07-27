@@ -12,7 +12,7 @@ block content
 						.row.text-center
 							.col-md-12
 								p
-									| You are accepting this invite as&nbsp;
+									| #{translate("accepting_invite_as")}&nbsp;
 									em #{user.email}
 						.row
 							.col-md-12
@@ -25,6 +25,6 @@ block content
 									input(name='token', type='hidden', value="#{invite.token}")
 									.form-group.text-center
 										button.btn.btn-lg.btn-primary(type="submit")
-											| Accept Invite
+											| #{translate("accept_invite")}
 									.form-group.text-center
 							
