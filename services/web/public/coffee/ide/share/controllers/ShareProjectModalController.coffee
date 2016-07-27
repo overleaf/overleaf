@@ -85,7 +85,6 @@ define [
 						return addNextMember()
 
 					# TODO: double-check if member.type == 'user' needs to be an invite
-					console.log ">> inviting", member
 					if member.type == "user"
 						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
