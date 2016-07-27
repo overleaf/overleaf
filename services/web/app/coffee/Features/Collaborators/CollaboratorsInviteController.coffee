@@ -54,29 +54,40 @@ module.exports = CollaboratorsInviteController =
 		projectId = req.params.Project_id
 		token = req.params.token
 		currentUser = req.session.user
-		CollaboratorsInviteHandler.getInviteByToken projectId, token, (err, invite) ->
+		_renderInvalidPage = () ->
+			res.render "project/invite/not-valid"
+		# get the target project
+		Project.findOne {_id: projectId}, {owner_ref: 1, name: 1, collaberator_refs: 1, readOnly_refs: 1}, (err, project) ->
 			if err?
-				logger.err {projectId, token}, "error getting invite by token"
+				logger.err {err, projectId}, "error getting project"
 				return next(err)
-			_renderInvalidPage = () ->
-				res.render "project/invite/not-valid"
-			if !invite
-				logger.log {projectId, token}, "no invite found for token"
+			if !project
+				logger.log {projectId}, "no project found"
 				return _renderInvalidPage()
-			Project.findOne {_id: projectId}, {owner_ref: 1, name: 1}, (err, project) ->
+			# get the invite
+			CollaboratorsInviteHandler.getInviteByToken projectId, token, (err, invite) ->
 				if err?
-					logger.err {err, projectId}, "error getting project"
+					logger.err {projectId, token}, "error getting invite by token"
 					return next(err)
-				if !project
-					logger.log {projectId}, "no project found"
-					return _renderInvalidPage()
-				User.findOne {_id: project.owner_ref}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
+				# check if invite is gone
+				if !invite
+					logger.log {projectId, token}, "no invite found for this token"
+					# check if user is already a member of the project, redirect to project if so
+					allMembers = (project.collaberator_refs || []).concat(project.readOnly_refs || []).map((oid) -> oid.toString())
+					if currentUser._id in allMembers
+						logger.log {projectId, userId: currentUser._id}, "user is already a member of this project, redirecting"
+						return res.redirect "/project/#{projectId}"
+					else
+						return _renderInvalidPage()
+				# check the user who sent the invite exists
+				User.findOne {_id: invite.sendingUserId}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
 					if err?
 						logger.err {err, projectId}, "error getting project owner"
 						return next(err)
 					if !owner
 						logger.log {projectId}, "no project owner found"
 						return _renderInvalidPage()
+					# finally render the invite
 					res.render "project/invite/show", {invite, project, owner}
 
 	acceptInvite: (req, res, next) ->

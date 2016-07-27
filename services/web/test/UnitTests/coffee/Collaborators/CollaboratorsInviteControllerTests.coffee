@@ -173,6 +173,7 @@ describe "CollaboratorsInviteController", ->
 			@req.session =
 				user: _id: @current_user_id = "current-user-id"
 			@res.render = sinon.stub()
+			@res.redirect = sinon.stub()
 			@res.sendStatus = sinon.stub()
 			@invite = {
 				_id: ObjectId(),
@@ -186,6 +187,8 @@ describe "CollaboratorsInviteController", ->
 				_id: @project_id
 				name: "some project"
 				owner_ref: @invite.sendingUserId
+				collaberator_refs: []
+				readOnly_refs: []
 			@owner =
 				_id: @fakeProject.owner_ref
 				first_name: "John"
@@ -210,58 +213,16 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call next', ->
 				@next.callCount.should.equal 0
 
-			it 'should call getInviteByToken', ->
-				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
-
 			it 'should call Project.findOne', ->
 				@Project.findOne.callCount.should.equal 1
 				@Project.findOne.calledWith({_id: @project_id}).should.equal true
 
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
 			it 'should call User.findOne', ->
 				@User.findOne.callCount.should.equal 1
 				@User.findOne.calledWith({_id: @fakeProject.owner_ref}).should.equal true
-
-		describe 'when the getInviteByToken produces an error', ->
-
-			beforeEach ->
-				@err = new Error('woops')
-				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, @err)
-				@CollaboratorsInviteController.viewInvite @req, @res, @next
-
-			it 'should call next with the error', ->
-				@next.callCount.should.equal 1
-				@next.calledWith(@err).should.equal true
-
-			it 'should call getInviteByToken', ->
-				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
-
-			it 'should not call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 0
-
-			it 'should not call User.findOne', ->
-				@User.findOne.callCount.should.equal 0
-
-		describe 'when the getInviteByToken does not produce an invite', ->
-
-			beforeEach ->
-				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
-				@CollaboratorsInviteController.viewInvite @req, @res, @next
-
-			it 'should render the not-valid view template', ->
-				@res.render.callCount.should.equal 1
-				@res.render.calledWith('project/invite/not-valid').should.equal true
-
-			it 'should not call next', ->
-				@next.callCount.should.equal 0
-
-			it 'should call getInviteByToken', ->
-				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
-
-			it 'should not call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 0
-
-			it 'should not call User.findOne', ->
-				@User.findOne.callCount.should.equal 0
 
 		describe 'when Project.findOne produces an error', ->
 
@@ -273,12 +234,12 @@ describe "CollaboratorsInviteController", ->
 				@next.callCount.should.equal 1
 				expect(@next.firstCall.args[0]).to.be.instanceof Error
 
-			it 'should call getInviteByToken', ->
-				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
-
 			it 'should call Project.findOne', ->
 				@Project.findOne.callCount.should.equal 1
 				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+
+			it 'should not call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
 
 			it 'should not call User.findOne', ->
 				@User.findOne.callCount.should.equal 0
@@ -300,8 +261,79 @@ describe "CollaboratorsInviteController", ->
 				@Project.findOne.callCount.should.equal 1
 				@Project.findOne.calledWith({_id: @project_id}).should.equal true
 
+			it 'should not call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
+
 			it 'should not call User.findOne', ->
 				@User.findOne.callCount.should.equal 0
+
+		describe 'when the getInviteByToken produces an error', ->
+
+			beforeEach ->
+				@err = new Error('woops')
+				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, @err)
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should call next with the error', ->
+				@next.callCount.should.equal 1
+				@next.calledWith(@err).should.equal true
+
+			it 'should call Project.findOne', ->
+				@Project.findOne.callCount.should.equal 1
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should not call User.findOne', ->
+				@User.findOne.callCount.should.equal 0
+
+		describe 'when the getInviteByToken does not produce an invite', ->
+
+			describe 'when the user is not already a member of this project', ->
+
+				beforeEach ->
+					@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
+					@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+				it 'should render the not-valid view template', ->
+					@res.render.callCount.should.equal 1
+					@res.render.calledWith('project/invite/not-valid').should.equal true
+
+				it 'should not call next', ->
+					@next.callCount.should.equal 0
+
+				it 'should call Project.findOne', ->
+					@Project.findOne.callCount.should.equal 1
+
+				it 'should call getInviteByToken', ->
+					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+				it 'should not call User.findOne', ->
+					@User.findOne.callCount.should.equal 0
+
+			describe 'when the user is already a member of the project', ->
+
+				beforeEach ->
+					@fakeProject.collaberator_refs = [ObjectId(), @current_user_id, ObjectId()]
+					@Project.findOne.callsArgWith(2, null, @fakeProject)
+					@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
+					@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+				it 'should redirect to the project page', ->
+					@res.redirect.callCount.should.equal 1
+					@res.redirect.calledWith("/project/#{@project_id}").should.equal true
+
+				it 'should not call next', ->
+					@next.callCount.should.equal 0
+
+				it 'should call Project.findOne', ->
+					@Project.findOne.callCount.should.equal 1
+
+				it 'should call getInviteByToken', ->
+					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+				it 'should not call User.findOne', ->
+					@User.findOne.callCount.should.equal 0
 
 		describe 'when User.findOne produces an error', ->
 
