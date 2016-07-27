@@ -3,7 +3,10 @@ define [
 	"ide/human-readable-logs/HumanReadableLogsRules"
 ], (LogParser, ruleset) ->
 	parse : (rawLog, options) ->
-		parsedLogEntries = LogParser.parse(rawLog, options)
+		if typeof rawLog is 'string'
+			parsedLogEntries = LogParser.parse(rawLog, options)
+		else
+			parsedLogEntries = rawLog
 
 		_getRule = (logMessage) ->
 			return rule for rule in ruleset when rule.regexToMatch.test logMessage
