@@ -30,7 +30,7 @@ module.exports = CompileController =
 			if req.body?.draft
 				options.draft = req.body.draft
 			if req.body?.check
-				options.check = if req.body.check is "error" then "error" else "warn"
+				options.check = if req.body.check is "validate" then "validate" else undefined
 			logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
 			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits, validationProblems) ->
 				return next(error) if error?

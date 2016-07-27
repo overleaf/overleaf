@@ -86,7 +86,7 @@ define [
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
-				check: if options.check then "error" else "warn"
+				check: if options.check then "validate" else null
 				_csrf: window.csrfToken
 			}, {params: params}
 
@@ -128,6 +128,12 @@ define [
 			else if response.status == "terminated"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.compileTerminated = true
+				fetchLogs(fileByPath)
+			else if response.status in ["validation-fail", "validation-pass"]
+				$scope.pdf.view = 'pdf'
+				$scope.pdf.compileExited = true
+				$scope.pdf.url = last_pdf_url
+				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath)
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
@@ -249,7 +255,8 @@ define [
 						else
 							warnings.push result
 				all = [].concat errors, warnings
-				accumulateResults {type: "ChkTeX", all, errors, warnings}
+				logHints = HumanReadableLogs.parse {type: "Validation", all, errors, warnings}
+				accumulateResults logHints
 
 			processBiber = (log) ->
 				{errors, warnings} = BibLogParser.parse(log, {})
