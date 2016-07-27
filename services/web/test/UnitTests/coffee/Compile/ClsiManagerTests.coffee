@@ -174,6 +174,7 @@ describe "ClsiManager", ->
 							timeout : 100
 							imageName: @image
 							draft: false
+							check: undefined
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
