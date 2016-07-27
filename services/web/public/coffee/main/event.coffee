@@ -4,14 +4,18 @@ define [
 	CACHE_KEY = "countlyEvents"
 
 	_getEventCache = () -> 
-		eventCache = window.localStorage.getItem CACHE_KEY
+		eventCacheStr = window.localStorage.getItem CACHE_KEY
 
 		# Initialize as an empy object if the event cache is still empty.
-		if !eventCache?
-			window.localStorage.setItem(CACHE_KEY, "{}")
-			eventCache = window.localStorage.getItem CACHE_KEY
+		if !eventCacheStr?
+			eventCacheStr = "{}"
 
-		return JSON.parse eventCache
+			# Errors writing to localStorage may happen when quota is full or
+			# browser is in incognito mode. We'll return an empty object, anyway.
+			try
+				window.localStorage.setItem CACHE_KEY, eventCacheStr 
+
+		return JSON.parse eventCacheStr
 
 	_eventInCache = (key) ->
 		curCache = _getEventCache()
@@ -25,7 +29,11 @@ define [
 		curCache = _getEventCache()
 		curCache[key] = true
 		curCacheAsStr  = JSON.stringify curCache
-		window.localStorage.setItem CACHE_KEY, curCacheAsStr
+
+		# Protection against issues mentioned above.
+		try
+			window.localStorage.setItem CACHE_KEY, curCacheAsStr
+
 
 	App.factory "event_tracking", ->
 
