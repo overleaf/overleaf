@@ -1,8 +1,34 @@
 define [
 	"base"
 ], (App) ->
+	CACHE_KEY = "countlyEvents"
+
+	_getEventCache = () -> 
+		eventCache = window.localStorage.getItem CACHE_KEY
+
+		# Initialize as an empy object if the event cache is still empty.
+		if !eventCache?
+			window.localStorage.setItem(CACHE_KEY, "{}")
+			eventCache = window.localStorage.getItem CACHE_KEY
+
+		return JSON.parse eventCache
+
+	_eventInCache = (key) ->
+		curCache = _getEventCache()
+
+		if (curCache.hasOwnProperty key) 
+			_getEventCache()[key]
+		else
+			false
+
+	_addEventToCache = (key) ->
+		curCache = _getEventCache()
+		curCache[key] = true
+		curCacheAsStr  = JSON.stringify curCache
+		window.localStorage.setItem CACHE_KEY, curCacheAsStr
 
 	App.factory "event_tracking", ->
+
 		return {
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
@@ -10,10 +36,15 @@ define [
 			sendCountly: (key, segmentation) ->
 				eventData = { key }
 				eventData.segmentation = segmentation if segmentation?				
-				Countly?.q.push([ "add_event", eventData ]);
+				Countly?.q.push([ "add_event", eventData ])
 
 			sendCountlySampled: (key, segmentation) ->
 				@sendCountly key, segmentation if Math.random() < .01 
+
+			sendCountlyOnce: (key, segmentation) ->
+				if ! _eventInCache(key)
+					_addEventToCache(key)
+					@sendCountly key, segmentation
 		}
 
 	# App.directive "countlyTrack", () ->
