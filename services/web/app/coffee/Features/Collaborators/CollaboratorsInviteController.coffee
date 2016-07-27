@@ -59,7 +59,7 @@ module.exports = CollaboratorsInviteController =
 				logger.err {projectId, token}, "error getting invite by token"
 				return next(err)
 			_renderInvalidPage = () ->
-				res.render "project/invite/not-valid", {invite}
+				res.render "project/invite/not-valid"
 			if !invite
 				logger.log {projectId, token}, "no invite found for token"
 				return _renderInvalidPage()

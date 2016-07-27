@@ -1,1 +1,18 @@
-h1 Invite Not Valid TEST
+extends ../../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card.project-invite-invalid
+						.page-header.text-centered
+							h1  This is not a valid project invite
+						.row.text-center
+							.col-md-12
+								p
+									| The invite may have expired. Please contact the project owner.
+						.row.text-center.actions
+							.col-md-12
+								a.btn.btn-info(href="/project") #{translate("back_to_your_projects")}
+							
