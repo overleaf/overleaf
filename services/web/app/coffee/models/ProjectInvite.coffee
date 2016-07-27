@@ -16,7 +16,7 @@ ProjectInviteSchema = new Schema(
 		sendingUserId:  ObjectId
 		projectId:      ObjectId
 		privileges:     String
-		createdAt:      {type: Date, default: Date.now, index: {expiresAfterSeconds: THIRTY_DAYS_IN_SECONDS}}
+		createdAt:      {type: Date, default: Date.now, index: {expireAfterSeconds: THIRTY_DAYS_IN_SECONDS}}
 	},
 	{
 		collection: 'projectInvites'
