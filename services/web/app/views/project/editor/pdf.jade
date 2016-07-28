@@ -133,7 +133,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						ng-show="entry.humanReadableHint",
 						ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
 					.card-hint-actions.clearfix
-						.card-hint-ext-link(ng-if="wikiEnabled")
+						.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
 							a(
 								ng-href="{{ entry.extraInfoURL }}",
 								ng-click="trackLogHintsLearnMore()"
