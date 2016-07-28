@@ -51,7 +51,6 @@ define [
 				, (response) ->
 					console.error response
 			)
-		window._x = getOutstandingInvites
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
@@ -84,7 +83,7 @@ define [
 						# Skip this existing member
 						return addNextMember()
 
-					# TODO: double-check if member.type == 'user' needs to be an invite
+					# NOTE: groups aren't really a thing in ShareLaTeX, partially inherited from DJ
 					if member.type == "user"
 						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
@@ -97,6 +96,15 @@ define [
 							if data.invite
 								invite = data.invite
 								$scope.state.invites.push invite
+							else
+								if data.users?
+									users = data.users
+								else if data.user?
+									users = [data.user]
+								else
+									users = []
+								$scope.project.members.push users...
+
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
 								# with new collaborator information.
