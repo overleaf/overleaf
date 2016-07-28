@@ -134,7 +134,7 @@ define [
 				$scope.pdf.compileExited = true
 				$scope.pdf.url = last_pdf_url
 				$scope.shouldShowLogs = true
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, { validation: true })
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
 				$scope.pdf.compileExited = true
@@ -202,11 +202,13 @@ define [
 					}
 
 
-		fetchLogs = (fileByPath) ->
+		fetchLogs = (fileByPath, options) ->
 
-			logFile = fileByPath['output.log'];
-			blgFile = fileByPath['output.blg'];
-			chktexFile = fileByPath['output.chktex'];
+			if options?.validation
+				chktexFile = fileByPath['output.chktex']
+			else
+				logFile = fileByPath['output.log']
+				blgFile = fileByPath['output.blg']
 
 			getFile = (name, file) ->
 				opts =
