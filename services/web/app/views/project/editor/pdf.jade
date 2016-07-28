@@ -1,6 +1,13 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		.btn-group(dropdown)
+		.btn-group(
+			dropdown,
+			tooltip-html="'#{translate('recompile_pdf')} <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
+			tooltip-class="keyboard-tooltip"
+			tooltip-popup-delay="500"
+			tooltip-append-to-body="true"
+			tooltip-placement="bottom"
+		)
 			a.btn.btn-info(
 				href,
 				ng-disabled="pdf.compiling",
@@ -29,6 +36,14 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
+		a(
+			href
+			ng-click="stop()"
+			ng-show="pdf.compiling",
+			tooltip="#{translate('stop_compile')}"
+			tooltip-placement="bottom"
+		)
+			i.fa.fa-stop()
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
@@ -46,7 +61,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			) {{ pdf.logEntries.errors.length + pdf.logEntries.warnings.length }}
 			
 		a(
-			ng-href="{{pdf.url}}"
+			ng-href="{{pdf.downloadUrl || pdf.url}}"
 			target="_blank"
 			ng-if="pdf.url"
 			tooltip="#{translate('download_pdf')}"
@@ -93,15 +108,98 @@ div.full-size.pdf(ng-controller="PdfController")
 					'alert-info':    entry.level == 'typesetting'\
 				}"
 				ng-click="openInEditor(entry)"
+				ng-init="feedbackSent = false; showNegFeedbackUI = false; negFeedbackReason = ''; negFeedbackReasonFreeText = ''"
 			)
 				span.line-no
+					i.fa.fa-link(aria-hidden="true")
+					| &nbsp;
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
 				p.entry-message(ng-show="entry.message") {{ entry.message }}
-				p.entry-content(ng-show="entry.content") {{ entry.content }}
+				.card.card-hint(
+					ng-if="entry.humanReadableHint"
+					stop-propagation="click"
+				)
+					figure.card-hint-icon-container
+						i.fa.fa-lightbulb-o(aria-hidden="true")
+					p.card-hint-text(
+						ng-show="entry.humanReadableHint",
+						ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
+					.card-hint-actions.clearfix
+						.card-hint-ext-link(ng-if="wikiEnabled")
+							a(
+								ng-href="{{ entry.extraInfoURL }}",
+								ng-click="trackLogHintsLearnMore()"
+								target="_blank"
+							)
+								i.fa.fa-external-link
+								|&nbsp;#{translate("log_hint_extra_info")}
+						.card-hint-feedback(
+							ng-hide="feedbackSent || showNegFeedbackUI"
+							ng-class="entry.ruleId"
+						)
+							label.card-hint-feedback-label #{translate("log_hint_feedback_label")}
+							a.card-hint-feedback-positive(
+								ng-click="trackLogHintsPositiveFeedback(entry.ruleId); feedbackSent = true;"
+								href
+							) #{translate("answer_yes")}
+							span &nbsp;/&nbsp;
+							a.card-hint-feedback-negative(
+								ng-click="trackLogHintsNegativeFeedback(entry.ruleId); showNegFeedbackUI = true;"
+								href
+							) #{translate("answer_no")}
+						.card-hint-extra-feedback(ng-hide="!showNegFeedbackUI || feedbackSent")
+							p.card-hint-extra-feedback-label #{translate("log_hint_ask_extra_feedback")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.DIDNT_UNDERSTAND }}"
+								)
+								| #{translate("log_hint_extra_feedback_didnt_understand")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.NOT_APPLICABLE }}"
+								)
+								| #{translate("log_hint_extra_feedback_not_applicable")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.INCORRECT }}"
+								)
+								| #{translate("log_hint_extra_feedback_incorrect")}
+							.radio: label
+								input(
+									type="radio"
+									name="{{ 'neg-feedback-reason-' + $index }}"
+									ng-model="negFeedbackReason"
+									value="{{ logHintsNegFeedbackValues.OTHER }}"
+								)
+								| #{translate("log_hint_extra_feedback_other")}
+							textarea.form-control(
+								ng-show="negFeedbackReason === logHintsNegFeedbackValues.OTHER"
+								ng-model="negFeedbackReasonFreeText"
+								rows="2"
+							)
+							.clearfix
+								button.btn.btn-default.btn-sm.pull-right(
+									ng-disabled="!negFeedbackReason"
+									ng-click="trackLogHintsNegFeedbackDetails(entry.ruleId, negFeedbackReason, negFeedbackReasonFreeText); feedbackSent = true;"
+								) #{translate("log_hint_extra_feedback_submit")}
+
+						.card-hint-feedback(ng-show="feedbackSent")
+							label.card-hint-feedback-label #{translate("log_hint_feedback_gratitude")}
+
+				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
 		p
-			.pull-right
+			.files-dropdown-container
 				a.btn.btn-default.btn-sm(
 					href,
 					tooltip="#{translate('clear_cached_files')}",
@@ -111,12 +209,15 @@ div.full-size.pdf(ng-controller="PdfController")
 				)
 					i.fa.fa-trash-o
 				| &nbsp;
-				div.dropdown(style="display: inline-block;", dropdown)
+				div.files-dropdown(
+					ng-class="shouldDropUp ? 'dropup' : 'dropdown'"
+					dropdown
+				)
 					a.btn.btn-default.btn-sm(
 						href
 						dropdown-toggle
 					)
-						| !{translate("other_logs_and_files")} 
+						| !{translate("other_logs_and_files")}
 						span.caret
 					ul.dropdown-menu.dropdown-menu-right
 						li(ng-repeat="file in pdf.outputFiles")
@@ -154,6 +255,27 @@ div.full-size.pdf(ng-controller="PdfController")
 				ng-if="settings.pdfViewer == 'native'"
 			)
 
+		.pdf-validation-problems(ng-switch-when="validation-problems")
+
+			.alert.alert-danger(ng-show="pdf.validation.duplicatePaths")
+				strong #{translate("latex_error")}
+				span #{translate("duplicate_paths_found")}
+
+
+			.alert.alert-danger(ng-show="pdf.validation.sizeCheck")
+				strong #{translate("project_too_large")} 
+				div #{translate("project_too_large_please_reduce")}
+				div
+					li(ng-repeat="entry in pdf.validation.sizeCheck.resources") {{ '/'+entry['path'] }} - {{entry['kbSize']}}kb
+	
+			.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
+				div
+					strong #{translate("conflicting_paths_found")}
+				div #{translate("following_paths_conflict")}
+				div
+					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
+
+
 		.pdf-errors(ng-switch-when="errors")
 	
 			.alert.alert-danger(ng-show="pdf.error")
@@ -171,7 +293,11 @@ div.full-size.pdf(ng-controller="PdfController")
 			.alert.alert-danger(ng-show="pdf.tooRecentlyCompiled")
 				strong #{translate("server_error")} 
 				span #{translate("too_recently_compiled")}
-	
+
+			.alert.alert-danger(ng-show="pdf.compileTerminated")
+				strong #{translate("terminated")}. 
+				span #{translate("compile_terminated_by_user")}
+
 			.alert.alert-danger(ng-show="pdf.timedout")
 				p
 					strong #{translate("timedout")}. 

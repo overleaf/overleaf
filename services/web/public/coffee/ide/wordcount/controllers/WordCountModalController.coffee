@@ -4,7 +4,7 @@ define [
 	App.controller 'WordCountModalController', ($scope, $modalInstance, ide, $http) ->
 		$scope.status = 
 			loading:true
-			
+
 		opts =
 			url:"/project/#{ide.project_id}/wordcount"
 			method:"GET"

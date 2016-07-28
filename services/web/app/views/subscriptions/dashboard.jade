@@ -43,12 +43,8 @@ block content
 					.card(ng-if="view == 'overview'")
 						.page-header
 							h1 #{translate("your_subscription")}
-						-if (groups.length != 0)
-							each groupSubscription in groups
-								p !{translate("member_of_group_subscription", {admin_email: "<strong>" + groupSubscription.admin_id.email + "</strong>"})}
-								span 
-									button.btn.btn-danger(ng-click="removeSelfFromGroup('#{groupSubscription.admin_id._id}')") #{translate("leave_group")}
-						- else if (subscription)
+
+						- if (subscription && user._id+'' == subscription.admin_id+'')
 							case subscription.state
 								when "free-trial"
 									p !{translate("on_free_trial_expiring_at", {expiresAt:"<strong>" + subscription.expiresAt + "</strong>"})}
@@ -72,14 +68,8 @@ block content
 									p !{translate("your_subscription_has_expired")}	
 										a(href="/user/subscription/plans") !{translate("create_new_subscription")}
 								default
-									-if(groups.length == 0)
+									-if(groupSubscriptions.length == 0)
 										p !{translate("problem_with_subscription_contact_us")}
-
-							-if(subscription.groupPlan)
-								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
-
-								
-
 
 							div(ng-show="changePlan", ng-cloak)#changePlanSection
 								h2.col-md-7 !{translate("change_plan")}
@@ -105,6 +95,20 @@ block content
 									mixin printPlans(plans.individualMonthlyPlans)
 									mixin printPlans(plans.individualAnnualPlans)
 							
+
+						each groupSubscription in groupSubscriptions
+							- if (user._id+'' != groupSubscription.admin_id._id+'')
+								div 
+									p !{translate("member_of_group_subscription", {admin_email: "<strong>" + groupSubscription.admin_id.email + "</strong>"})}
+									span 
+										button.btn.btn-danger(ng-click="removeSelfFromGroup('#{groupSubscription.admin_id._id}')") #{translate("leave_group")}
+
+						-if(subscription.groupPlan && user._id+'' == subscription.admin_id+'')
+							div
+								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
+
+
+
 					.card(ng-if="view == 'cancelation'")
 						.page-header
 							h1 #{translate("Cancel Subscription")}

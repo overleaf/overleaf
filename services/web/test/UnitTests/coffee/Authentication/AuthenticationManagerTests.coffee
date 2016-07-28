@@ -16,6 +16,7 @@ describe "AuthenticationManager", ->
 					users: {}
 				ObjectId: ObjectId
 			"bcrypt": @bcrypt = {}
+			"settings-sharelatex": { security: { bcryptRounds: 12 } }
 		@callback = sinon.stub()
 
 	describe "authenticate", ->
@@ -31,6 +32,7 @@ describe "AuthenticationManager", ->
 				beforeEach (done) ->
 					@user.hashedPassword = @hashedPassword = "asdfjadflasdf"
 					@bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+					@bcrypt.getRounds = sinon.stub().returns 12
 					@AuthenticationManager.authenticate email: @email, @unencryptedPassword, (error, user) =>
 						@callback(error, user)
 						done()
@@ -53,6 +55,35 @@ describe "AuthenticationManager", ->
 
 				it "should not return the user", ->
 					@callback.calledWith(null, null).should.equal true
+
+			describe "when the hashed password matches but the number of rounds is too low", ->
+				beforeEach (done) ->
+					@user.hashedPassword = @hashedPassword = "asdfjadflasdf"
+					@bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+					@bcrypt.getRounds = sinon.stub().returns 7
+					@AuthenticationManager.setUserPassword = sinon.stub().callsArgWith(2, null)
+					@AuthenticationManager.authenticate email: @email, @unencryptedPassword, (error, user) =>
+						@callback(error, user)
+						done()
+
+				it "should look up the correct user in the database", ->
+					@User.findOne.calledWith(email: @email).should.equal true
+
+				it "should check that the passwords match", ->
+					@bcrypt.compare
+						.calledWith(@unencryptedPassword, @hashedPassword)
+						.should.equal true
+
+				it "should check the number of rounds", ->
+					@bcrypt.getRounds.called.should.equal true
+
+				it "should set the users password (with a higher number of rounds)", ->
+					@AuthenticationManager.setUserPassword
+						.calledWith("user-id", @unencryptedPassword)
+						.should.equal true
+
+				it "should return the user", ->
+					@callback.calledWith(null, @user).should.equal true
 
 		describe "when the user does not exist in the database", ->
 			beforeEach ->
@@ -87,7 +118,7 @@ describe "AuthenticationManager", ->
 
 		it "should hash the password", ->
 			@bcrypt.genSalt
-				.calledWith(7)
+				.calledWith(12)
 				.should.equal true
 			@bcrypt.hash
 				.calledWith(@password, @salt)

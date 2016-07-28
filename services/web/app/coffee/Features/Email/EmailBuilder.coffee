@@ -3,6 +3,8 @@ PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
 settings = require("settings-sharelatex")
 
+
+
 templates = {}
 
 templates.registered =	
@@ -114,6 +116,8 @@ module.exports =
 		template = templates[templateName]
 		opts.siteUrl = settings.siteUrl
 		opts.body = template.compiledTemplate(opts)
+		if settings.email?.templates?.customFooter?
+			opts.body += settings.email?.templates?.customFooter
 		return {
 			subject : template.subject(opts)
 			html: template.layout(opts)

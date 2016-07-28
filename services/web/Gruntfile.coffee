@@ -7,18 +7,69 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-mocha-test'
 	grunt.loadNpmTasks 'grunt-available-tasks'
 	grunt.loadNpmTasks 'grunt-contrib-requirejs'
-	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
 	grunt.loadNpmTasks 'grunt-sed'
 	grunt.loadNpmTasks 'grunt-git-rev-parse'
 	grunt.loadNpmTasks 'grunt-file-append'
 	grunt.loadNpmTasks 'grunt-file-append'
 	grunt.loadNpmTasks 'grunt-env'
+	grunt.loadNpmTasks 'grunt-newer'
+	grunt.loadNpmTasks 'grunt-contrib-watch'
+	grunt.loadNpmTasks 'grunt-parallel'
+	grunt.loadNpmTasks 'grunt-exec'
+	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
+	# grunt.loadNpmTasks 'grunt-sprity'
 
 	config =
-		execute:
-			app:
-				src: "app.js"
+
+		exec:
+			run:
+				command:"node app.js | ./node_modules/logger-sharelatex/node_modules/bunyan/bin/bunyan --color"
+			cssmin:
+				command:"node_modules/clean-css/bin/cleancss --s0 -o public/stylesheets/style.css public/stylesheets/style.css"
+
+
+		watch:
+			coffee:
+				files: 'public/**/*.coffee'
+				tasks: ['quickcompile:coffee']
+				options: {}
+
+			less:
+				files: '**/*.less'
+				tasks: ['compile:css']
+				options: {}
+
+
+		parallel:
+			run:
+				tasks:['exec', 'watch']
+				options:
+					grunt:true
+					stream:true
+
+
+		# imagemin:
+		# 	dynamic:                       
+		# 		files: [{
+		# 			expand: true
+		# 			cwd: 'public/img/'
+		# 			src: ['**/*.{png,jpg,gif}']
+		# 			dest: 'public/img/'
+		# 		}]
+		# 	options:
+		# 		interlaced:false
+		# 		optimizationLevel: 7
+
+		# sprity:
+		# 	sprite:
+		# 		options:
+		# 			cssPath:"/img/"
+		# 			'style': '../../public/stylesheets/app/sprites.less'
+		# 			margin: 0
+		# 		src: ['./public/img/flags/24/*.png']
+		# 		dest: './public/img/sprite'
+
 
 		coffee:
 			app_dir: 
@@ -84,10 +135,15 @@ module.exports = (grunt) ->
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 
+
+
+
 		env:
 			run:
 				add: 
 					NODE_TLS_REJECT_UNAUTHORIZED:0
+
+
 
 		requirejs:
 			compile:
@@ -170,44 +226,47 @@ module.exports = (grunt) ->
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
+
+			
+
 		availabletasks:
 			tasks:
 				options:
-		            filter: 'exclude',
-		            tasks: [
-		            	'coffee'
-		            	'less'
-		            	'clean'
-		            	'mochaTest'
-		            	'availabletasks'
-		            	'wrap_sharejs'
-		            	'requirejs'
-		            	'execute'
-		            	'bunyan'
-		           	]
-		            groups:
-		            	"Compile tasks": [
-		            		"compile:server"
-		            		"compile:client"
-		            		"compile:tests"
-		            		"compile"
-		            		"compile:unit_tests"
-		            		"compile:smoke_tests"
-		            		"compile:css"
-		            		"compile:minify"
-		            		"install"
-		            	]
-		            	"Test tasks": [
-		            		"test:unit"
-		            		"test:acceptance"
-		            	]
-		            	"Run tasks": [
-		            		"run"
-		            		"default"
-		            	]
-		            	"Misc": [
-		            		"help"
-		            	]
+					filter: 'exclude',
+					tasks: [
+						'coffee'
+						'less'
+						'clean'
+						'mochaTest'
+						'availabletasks'
+						'wrap_sharejs'
+						'requirejs'
+						'execute'
+						'bunyan'
+					]
+					groups:
+						"Compile tasks": [
+							"compile:server"
+							"compile:client"
+							"compile:tests"
+							"compile"
+							"compile:unit_tests"
+							"compile:smoke_tests"
+							"compile:css"
+							"compile:minify"
+							"install"
+						]
+						"Test tasks": [
+							"test:unit"
+							"test:acceptance"
+						]
+						"Run tasks": [
+							"run"
+							"default"
+						]
+						"Misc": [
+							"help"
+						]
 
 	moduleCompileServerTasks = []
 	moduleCompileUnitTestTasks = []
@@ -304,12 +363,14 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
-	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append"]
+	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "exec:cssmin",]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
 	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests']
 	grunt.registerTask 'compile', 'Compiles everything need to run web-sharelatex', ['compile:server', 'compile:client', 'compile:css']
+	grunt.registerTask 'quickcompile:coffee', 'Compiles only changed coffee files',['newer:coffee']
+
 
 	grunt.registerTask 'install', "Compile everything when installing as an npm module", ['compile']
 
@@ -319,10 +380,12 @@ module.exports = (grunt) ->
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 
-	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'bunyan', 'env:run', 'execute']
+	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
+
 	grunt.registerTask 'default', 'run'
 
 	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
+
 
 	grunt.registerTask 'create-admin-user', "Create a user with the given email address and make them an admin. Update in place if the user already exists", () ->
 		done = @async()
@@ -357,3 +420,23 @@ module.exports = (grunt) ->
 						
 					"""
 					done()
+
+	grunt.registerTask 'delete-user', "deletes a user and all their data", () ->
+		done = @async()
+		email = grunt.option("email")
+		if !email?
+			console.error "Usage: grunt delete-user --email joe@example.com"
+			process.exit(1)
+		settings = require "settings-sharelatex"
+		UserGetter = require "./app/js/Features/User/UserGetter"
+		UserDeleter = require "./app/js/Features/User/UserDeleter"
+		UserGetter.getUser email:email, (error, user) ->
+			if error?
+				throw error
+			if !user?
+				console.log("user #{email} not in database, potentially already deleted")
+				return done()
+			UserDeleter.deleteUser user._id, (err)->
+				if err?
+					throw err
+				done()

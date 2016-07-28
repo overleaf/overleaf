@@ -45,13 +45,13 @@ describe "CompileController", ->
 		@next = sinon.stub()
 		@req = new MockRequest()
 		@res = new MockResponse()
+		@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 
 	describe "compile", ->
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
 			@req.session = {}
-			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 			@CompileManager.compile = sinon.stub().callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"])
 
 		describe "when not an auto compile", ->
@@ -139,7 +139,7 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should proxy the PDF from the CLSI", ->
-				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res, @next).should.equal true
+				@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/user/#{@user_id}/output/output.pdf", @req, @res, @next).should.equal true
 
 		describe "when the pdf is not going to be used in pdfjs viewer", ->
 
@@ -206,16 +206,6 @@ describe "CompileController", ->
 					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
 					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-						)
-						.should.equal true
-
 			describe "user with standard priority via query string", ->
 				beforeEach ->
 					@req.query = {compileGroup: 'standard'}
@@ -239,20 +229,6 @@ describe "CompileController", ->
 				it "should bind an error handle to the request proxy", ->
 					@proxy.on.calledWith("error").should.equal true
 
-			describe "user with priority compile via query string", ->
-				beforeEach ->
-					@req.query = {compileGroup: 'priority'}
-					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
-
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-						)
-						.should.equal true
 
 			describe "user with non-existent priority via query string", ->
 				beforeEach ->
@@ -316,25 +292,7 @@ describe "CompileController", ->
 				it "should bind an error handle to the request proxy", ->
 					@proxy.on.calledWith("error").should.equal true
 
-			describe "user with priority compile", ->
-				beforeEach ->
-					@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, {compileGroup: "priority"})
-					@CompileController.proxyToClsi(@project_id, @url = "/test", @req, @res, @next)
 
-				it "should proxy to the priority url if the user has the feature", ()->
-					@request
-						.calledWith(
-							jar:@jar
-							method: @req.method
-							url: "#{@settings.apis.clsi_priority.url}#{@url}",
-							timeout: 60 * 1000
-							headers: {
-								'Range': '123-456'
-								'If-Range': 'abcdef'
-								'If-Modified-Since': 'Mon, 15 Dec 2014 15:23:56 GMT'
-							}
-						)
-						.should.equal true
 
 			describe "user with build parameter via query string", ->
 				beforeEach ->
@@ -359,7 +317,7 @@ describe "CompileController", ->
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
-			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(1)
+			@CompileManager.deleteAuxFiles = sinon.stub().callsArg(2)
 			@req.params =
 				Project_id: @project_id
 			@res.sendStatus = sinon.stub()
@@ -392,12 +350,14 @@ describe "CompileController", ->
 
 		it "should proxy the res to the clsi with correct url", (done)->
 			@CompileController.compileAndDownloadPdf @req, @res
+			sinon.assert.calledWith @CompileController.proxyToClsi, @project_id, "/project/#{@project_id}/output/output.pdf", @req, @res
+
 			@CompileController.proxyToClsi.calledWith(@project_id, "/project/#{@project_id}/output/output.pdf", @req, @res).should.equal true
 			done()
 
 	describe "wordCount", ->
 		beforeEach ->
-			@CompileManager.wordCount = sinon.stub().callsArgWith(2, null, {content:"body"})
+			@CompileManager.wordCount = sinon.stub().callsArgWith(3, null, {content:"body"})
 			@req.params =
 				Project_id: @project_id
 			@res.send = sinon.stub()
@@ -406,7 +366,7 @@ describe "CompileController", ->
 
 		it "should proxy to the CLSI", ->
 			@CompileManager.wordCount
-				.calledWith(@project_id, false)
+				.calledWith(@project_id, @user_id, false)
 				.should.equal true
 
 		it "should return a 200 and body", ->

@@ -35,7 +35,8 @@ module.exports = UserRegistrationHandler =
 
 	_createNewUserIfRequired: (user, userDetails, callback)->
 		if !user?
-			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email}, callback
+			userDetails.holdingAccount = false
+			UserCreator.createNewUser {holdingAccount:false, email:userDetails.email, first_name:userDetails.first_name, last_name:userDetails.last_name}, callback
 		else
 			callback null, user
 

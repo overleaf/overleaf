@@ -39,6 +39,8 @@
 	}
 	
 	.example {
+		max-width: 100%;
+
 		.code {
 			pre {
 				background-color: @gray-lightest;
@@ -49,10 +51,13 @@
 			}
 		}
 		.output {
+			text-align: center;
+			padding-top: 10px;
+			
 			img {
-				width: auto !important;
-				height: auto !important;
-				max-width: 100% !important;
+				width: auto;
+				height: auto;
+				max-width: 100%;
 				box-shadow: 0 1px 3px @gray-light;
 				border-radius: 6px;
 			}

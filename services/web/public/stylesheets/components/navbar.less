@@ -381,13 +381,15 @@
   padding: 1rem 2rem;
 
   .navbar-brand {
-    background-image: url('/img/logo.png');
-    background-size: 135px 16px;
-    background-repeat: no-repeat;
-    height: 16px;
-    margin-top: 10px;
-    padding: 0;
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
     width: 135px;
+    padding: 0;
+    background-image: url('/img/logo.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
   }
   @media
     only screen and (-webkit-min-device-pixel-ratio: 2),

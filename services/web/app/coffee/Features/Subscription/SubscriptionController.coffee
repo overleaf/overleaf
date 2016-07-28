@@ -82,9 +82,9 @@ module.exports = SubscriptionController =
 					logger.log user: user, "redirecting to plans"
 					res.redirect "/user/subscription/plans"
 				else
-					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groups) ->
+					SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions) ->
 						return next(error) if error?
-						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, groups:groups, "showing subscription dashboard"
+						logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, groupSubscriptions:groupSubscriptions, "showing subscription dashboard"
 						plans = SubscriptionViewModelBuilder.buildViewModel()
 						res.render "subscriptions/dashboard",
 							title: "your_subscription"
@@ -92,8 +92,9 @@ module.exports = SubscriptionController =
 							taxRate:subscription?.taxRate
 							plans: plans
 							subscription: subscription || {}
-							groups: groups
+							groupSubscriptions: groupSubscriptions
 							subscriptionTabActive: true
+							user:user
 
 
 	userCustomSubscriptionPage: (req, res, next)->

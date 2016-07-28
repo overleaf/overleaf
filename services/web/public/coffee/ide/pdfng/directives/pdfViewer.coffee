@@ -27,8 +27,15 @@ define [
 			$scope.document.destroy() if $scope.document?
 			$scope.loadCount = if $scope.loadCount? then $scope.loadCount + 1 else 1
 			# TODO need a proper url manipulation library to add to query string
-			$scope.document = new PDFRenderer($scope.pdfSrc + '&pdfng=true' , {
+			url = $scope.pdfSrc
+			# add 'pdfng=true' to show that we are using the angular pdfjs viewer
+			queryStringExists = url.match(/\?/)
+			url = url + (if not queryStringExists then '?' else '&') + 'pdfng=true'
+			# for isolated compiles, load the pdf on-demand because nobody will overwrite it
+			onDemandLoading = true
+			$scope.document = new PDFRenderer(url, {
 				scale: 1,
+				disableAutoFetch: if onDemandLoading then true else undefined
 				navigateFn: (ref) ->
 					# this function captures clicks on the annotation links
 					$scope.navigateTo = ref
@@ -38,7 +45,7 @@ define [
 				loadedCallback: () ->
 					$scope.$emit 'loaded'
 				errorCallback: (error) ->
-					Raven?.captureMessage?('pdfng error ' + error + ' (1% sample)') if Math.random() < 0.01
+					Raven?.captureMessage?('pdfng error ' + error)
 					$scope.$emit 'pdf:error', error
 				pageSizeChangeCallback: (pageNum, deltaH) ->
 					$scope.$broadcast 'pdf:page:size-change', pageNum, deltaH
@@ -57,6 +64,7 @@ define [
 						result.pdfViewport.width
 					]
 					# console.log 'resolved q.all, page size is', result
+					$scope.$emit 'loaded'
 					$scope.numPages = result.numPages
 				.catch (error) ->
 					$scope.$emit 'pdf:error', error
@@ -187,7 +195,8 @@ define [
 			# console.log 'converted to offset = ', pdfOffset
 			newPosition = {
 				"page": topPageIdx,
-				"offset" : { "top" : pdfOffset[1], "left": 0	}
+				"offset" : { "top" : pdfOffset[1], "left": 0}
+				"pageSize": { "height": viewport.viewBox[3], "width": viewport.viewBox[2] }
 			}
 			return newPosition
 
@@ -208,6 +217,8 @@ define [
 			return $scope.document.getPdfViewport(page.pageNum).then (viewport) ->
 				page.viewport = viewport
 				pageOffset = viewport.convertToViewportPoint(offset.left, offset.top)
+				# if the passed-in position doesn't have the page height/width add them now
+				position.pageSize ?= {"height": viewport.viewBox[3], "width": viewport.viewBox[2]}
 				# console.log 'addition offset =', pageOffset
 				# console.log 'total', pageTop + pageOffset[1]
 				Math.round(pageTop + pageOffset[1] + currentScroll) ## 10 is margin
@@ -246,8 +257,8 @@ define [
 					# console.log 'layoutReady was resolved'
 
 				renderVisiblePages = () ->
-					pages = getVisiblePages()
-					# pages = getExtraPages visiblePages
+					visiblePages = getVisiblePages()
+					pages = getExtraPages visiblePages
 					scope.document.renderPages(pages)
 
 				getVisiblePages = () ->
@@ -264,20 +275,21 @@ define [
 
 				getExtraPages = (visiblePages) ->
 					extra = []
-					firstVisiblePage = visiblePages[0].pageNum
-					firstVisiblePageIdx = firstVisiblePage - 1
-					len = visiblePages.length
-					lastVisiblePage = visiblePages[len-1].pageNum
-					lastVisiblePageIdx = lastVisiblePage - 1
-					# first page after
-					if lastVisiblePageIdx + 1 < scope.pages.length
-						extra.push scope.pages[lastVisiblePageIdx + 1]
-					# page before
-					if firstVisiblePageIdx > 0
-						extra.push scope.pages[firstVisiblePageIdx - 1]
-					# second page after
-					if lastVisiblePageIdx + 2 < scope.pages.length
-						extra.push scope.pages[lastVisiblePageIdx + 2]
+					if visiblePages.length > 0
+						firstVisiblePage = visiblePages[0].pageNum
+						firstVisiblePageIdx = firstVisiblePage - 1
+						len = visiblePages.length
+						lastVisiblePage = visiblePages[len-1].pageNum
+						lastVisiblePageIdx = lastVisiblePage - 1
+						# first page after
+						if lastVisiblePageIdx + 1 < scope.pages.length
+							extra.push scope.pages[lastVisiblePageIdx + 1]
+						# page before
+						if firstVisiblePageIdx > 0
+							extra.push scope.pages[firstVisiblePageIdx - 1]
+						# second page after
+						if lastVisiblePageIdx + 2 < scope.pages.length
+							extra.push scope.pages[lastVisiblePageIdx + 2]
 					return visiblePages.concat extra
 
 				rescaleTimer = null
@@ -513,8 +525,17 @@ define [
 
 					first = highlights[0]
 
-					pageNum = scope.pages[first.page].pageNum
+					# switching between split and full pdf views can cause
+					# highlights to appear before rendering
+					if !scope.pages
+						return # ignore highlight scroll if still rendering
 
+					pageNum = scope.pages[first.page]?.pageNum
+
+					if !pageNum?
+						return # ignore highlight scroll if page not found
+
+					# use a visual offset of 72pt to match the offset in PdfController syncToCode
 					scope.document.getPdfViewport(pageNum).then (viewport) ->
 						position = {
 							page: first.page

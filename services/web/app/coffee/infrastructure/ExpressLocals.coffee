@@ -7,14 +7,18 @@ querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 _ = require("underscore")
 Modules = require "./Modules"
+Url = require "url"
 
 fingerprints = {}
 Path = require 'path'
+
+
 jsPath =
 	if Settings.useMinifiedJs
 		"/minjs/"
 	else
 		"/js/"
+
 
 logger.log "Generating file fingerprints..."
 for path in [
@@ -37,7 +41,18 @@ for path in [
 		fingerprints[path] = hash
 	else
 		logger.log filePath:filePath, "file does not exist for fingerprints"
-	
+
+getFingerprint = (path) ->
+	if fingerprints[path]?
+		return fingerprints[path]
+	else
+		logger.err "No fingerprint for file: #{path}"
+		return ""
+
+logger.log "Finished generating file fingerprints"
+
+cdnAvailable = Settings.cdn?.web?.host?
+darkCdnAvailable = Settings.cdn?.web?.darkHost?
 
 module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
@@ -45,8 +60,54 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)-> 
+
+		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
+		isSmoke = req.headers?.host?.slice(0,5)?.toLowerCase() == "smoke"
+		isLive = !isDark and !isSmoke
+
+		if cdnAvailable and isLive
+			staticFilesBase = Settings.cdn?.web?.host
+		else if darkCdnAvailable and isDark
+			staticFilesBase = Settings.cdn?.web?.darkHost
+		else
+			staticFilesBase = ""
+		
 		res.locals.jsPath = jsPath
+		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
+
+
+		res.locals.buildJsPath = (jsFile, opts = {})->
+			path = Path.join(jsPath, jsFile)
+
+			doFingerPrint = opts.fingerprint != false
+			
+			if !opts.qs?
+				opts.qs = {}
+
+			if !opts.qs?.fingerprint? and doFingerPrint
+				opts.qs.fingerprint = getFingerprint(path)
+
+			if opts.cdn != false
+				path = Url.resolve(staticFilesBase, path)
+				
+			qs = querystring.stringify(opts.qs)
+
+			if qs? and qs.length > 0
+				path = path + "?" + qs
+			return path
+
+
+		res.locals.buildCssPath = (cssFile)->
+			path = Path.join("/stylesheets/", cssFile)
+			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
+
+		res.locals.buildImgPath = (imgFile)->
+			path = Path.join("/img/", imgFile)
+			return Url.resolve(staticFilesBase, path)
+
 		next()
+
+
 
 	webRouter.use (req, res, next)-> 
 		res.locals.settings = Settings
@@ -113,12 +174,7 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)-> 
-		res.locals.fingerprint = (path) ->
-			if fingerprints[path]?
-				return fingerprints[path]
-			else
-				logger.err "No fingerprint for file: #{path}"
-				return ""
+		res.locals.fingerprint = getFingerprint
 		next()
 
 	webRouter.use (req, res, next)-> 

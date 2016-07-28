@@ -3,7 +3,9 @@ nav.navbar.navbar-default
 		.navbar-header
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
-			if nav.title
+			if settings.nav.custom_logo
+				a(href='/', style='background-image:url("#{settings.nav.custom_logo}")').navbar-brand
+			else if (nav.title)
 				a(href='/').navbar-title #{nav.title}
 			else
 				a(href='/').navbar-brand
@@ -17,6 +19,8 @@ nav.navbar.navbar-default
 							| Admin
 							b.caret
 						ul.dropdown-menu
+							li
+								a(href="/admin") Manage Site
 							li
 								a(href="/admin/user") Manage Users
 

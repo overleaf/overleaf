@@ -26,6 +26,7 @@ module.exports =
 	activateAccountPage: (req, res) ->
 		# An 'activation' is actually just a password reset on an account that
 		# was set with a random password originally.
+		logger.log query:req.query, "activiate account page called"
 		if !req.query?.user_id? or !req.query?.token?
 			return ErrorController.notFound(req, res)
 			
@@ -34,6 +35,7 @@ module.exports =
 			if !user
 				return ErrorController.notFound(req, res)
 			if user.loginCount > 0
+				logger.log user:user, "user has already logged in so is active, sending them to /login"
 				# Already seen this user, so account must be activate
 				# This lets users keep clicking the 'activate' link in their email
 				# as a way to log in which, if I know our users, they will.

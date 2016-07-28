@@ -32,6 +32,7 @@ describe "ReferencesController", ->
 			shouldBroadcast: false
 		@res = new MockResponse()
 		@res.json = sinon.stub()
+		@res.send = sinon.stub()
 		@res.sendStatus = sinon.stub()
 		@fakeResponseData =
 			projectId: @projectId,
@@ -113,6 +114,31 @@ describe "ReferencesController", ->
 					@res.json.calledWith(@fakeResponseData).should.equal true
 					done()
 
+	describe 'there is no dataaaaaaa', ->
+
+			beforeEach ->
+				@ReferencesHandler.indexAll.callsArgWith(1)
+				@call = (callback) =>
+					@controller.indexAll @req, @res
+					callback()
+
+			it 'should not call EditorRealTimeController.emitToRoom', (done) ->
+				@call () =>
+					@EditorRealTimeController.emitToRoom.callCount.should.equal 0
+					done()
+
+			it 'should not produce an error', (done) ->
+				@call () =>
+					@res.sendStatus.callCount.should.equal 0
+					@res.sendStatus.calledWith(500).should.equal false
+					@res.sendStatus.calledWith(400).should.equal false
+					done()
+
+			it 'should send a response with an empty keys list', (done) ->
+				@call () =>
+					@res.json.called.should.equal true
+					@res.json.calledWith({projectId: @projectId, keys: []}).should.equal true
+					done()
 
 	describe 'index', ->
 

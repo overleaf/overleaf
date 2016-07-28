@@ -30,7 +30,6 @@ PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
-WikiController = require("./Features/Wiki/WikiController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
@@ -38,6 +37,7 @@ InactiveProjectController = require("./Features/InactiveData/InactiveProjectCont
 ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
+BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -79,6 +79,7 @@ module.exports = class Router
 		webRouter.get '/blog/*', BlogController.getPage
 
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
+		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
 
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
@@ -104,7 +105,11 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
 		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
-		webRouter.get  '/Project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		webRouter.post '/project/:Project_id/compile/stop', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.stopCompile
+
+		# Used by the web download buttons, adds filename header
+		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		# Used by the pdf viewers
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
 				params =
@@ -118,11 +123,35 @@ module.exports = class Router
 			((req, res, next) ->
 				params =
 					"Project_id": req.params[0]
-					"build":      req.params[1]
+					"build_id":   req.params[1]
 					"file":       req.params[2]
 				req.params = params
 				next()
 			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+
+		# direct url access to output files for user but no build, to retrieve files when build fails
+		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"user_id":   req.params[1]
+					"file":       req.params[2]
+				req.params = params
+				next()
+			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+
+		# direct url access to output files for a specific user and build (query string not required)
+		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"Project_id": req.params[0]
+					"user_id":    req.params[1]
+					"build_id":   req.params[2]
+					"file":       req.params[3]
+				req.params = params
+				next()
+			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+
 
 		webRouter.delete "/project/:Project_id/output", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.deleteAuxFiles
 		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncCode
@@ -187,15 +216,12 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
 		webRouter.post "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
 
-		webRouter.get  /learn(\/.*)?/, RateLimiterMiddlewear.rateLimit({
-			endpointName: "wiki"
-			params: []
-			maxRequests: 60
-			timeInterval: 60
-		}), WikiController.getPage
-
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
+
+		webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
+		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
+		webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
 
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
@@ -216,9 +242,11 @@ module.exports = class Router
 		apiRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
 
+		webRouter.get '/dev/csrf', (req, res) ->
+			res.send res.locals.csrfToken
 
-		webRouter.get '/health_check', HealthCheckController.check
-		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		apiRouter.get '/health_check', HealthCheckController.check
+		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			sendRes = _.once (statusCode, message)->

@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App)->
 
-	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack)->
+	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 	
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
@@ -51,6 +51,8 @@ define [
 			.done()
 
 		pricing.on "change", =>
+			event_tracking.sendCountly "subscription-form", { plan : pricing.items.plan.code }
+
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial?.length
@@ -115,9 +117,25 @@ define [
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
 						coupon_code:pricing.items?.coupon?.code || ""
+						isPaypal: $scope.paymentMethod == 'paypal'
+						address:
+							address1:    $scope.data.address1
+							address2:    $scope.data.address2
+							country:     $scope.data.country
+							state:       $scope.data.state
+							postal_code: $scope.data.postal_code
+				
+				event_tracking.sendCountly "subscription-form-submitted", { 
+					currencyCode	: postData.subscriptionDetails.currencyCode,
+					plan_code		: postData.subscriptionDetails.plan_code,
+					coupon_code		: postData.subscriptionDetails.coupon_code,
+					isPaypal		: postData.subscriptionDetails.isPaypal
+				}
+
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->
+							event_tracking.sendCountly "subscription-submission-success"
 							window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false

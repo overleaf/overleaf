@@ -66,6 +66,8 @@ module.exports = ReferencesHandler =
 			ReferencesHandler._doIndexOperation(projectId, project, docIds, [], callback)
 
 	_doIndexOperation: (projectId, project, docIds, fileIds, callback) ->
+		if !settings.apis?.references?.url?
+			return callback()
 		ReferencesHandler._isFullIndex project, (err, isFullIndex) ->
 			if err
 				logger.err {err, projectId}, "error checking whether to do full index"

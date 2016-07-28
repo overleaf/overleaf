@@ -19,9 +19,9 @@ describe "UserController", ->
 			save:sinon.stub().callsArgWith(0)
 			ace:{}
 
-		@UserDeleter = 
+		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
-		@UserLocator = 
+		@UserLocator =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@User =
 			findById: sinon.stub().callsArgWith(1, null, @user)
@@ -36,14 +36,18 @@ describe "UserController", ->
 			setUserPassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
-		@SubscriptionDomainHandler = 
+		@SubscriptionDomainHandler =
 			autoAllocate:sinon.stub()
 		@UserUpdater =
 			changeEmailAddress:sinon.stub()
 		@settings =
 			siteUrl: "sharelatex.example.com"
-		@UserHandler = 
+		@UserHandler =
 			populateGroupLicenceInvite:sinon.stub().callsArgWith(1)
+		@UserSessionsManager =
+			trackSession: sinon.stub()
+			untrackSession: sinon.stub()
+			revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -56,15 +60,19 @@ describe "UserController", ->
 			"../Referal/ReferalAllocator":@ReferalAllocator
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"./UserHandler":@UserHandler
+			"./UserSessionsManager": @UserSessionsManager
 			"settings-sharelatex": @settings
-			"logger-sharelatex": {log:->}
+			"logger-sharelatex":
+				log:->
+				err:->
 			"../../infrastructure/Metrics": inc:->
 
-		@req = 
-			session: 
+		@req =
+			session:
 				destroy:->
 				user :
 					_id : @user_id
+					email:"old@something.com"
 			body:{}
 		@res =
 			send: sinon.stub()
@@ -154,6 +162,20 @@ describe "UserController", ->
 				done()
 			@UserController.updateUserSettings @req, @res
 
+		it "should update the email on the session", (done)->
+			@req.body.email = @newEmail.toUpperCase()
+			@UserUpdater.changeEmailAddress.callsArgWith(2)
+			callcount = 0
+			@User.findById = (id, cb)=>
+				if ++callcount == 2
+					@user.email = @newEmail
+				cb(null, @user)
+			@res.sendStatus = (code)=>
+				code.should.equal 200
+				@req.session.user.email.should.equal @newEmail
+				done()
+			@UserController.updateUserSettings @req, @res
+
 		it "should call populateGroupLicenceInvite", (done)->
 			@req.body.email = @newEmail.toUpperCase()
 			@UserUpdater.changeEmailAddress.callsArgWith(2)
@@ -181,12 +203,12 @@ describe "UserController", ->
 			@UserRegistrationHandler.registerNewUserAndSendActivationEmail = sinon.stub().callsArgWith(1, null, @user, @url = "mock/url")
 			@req.body.email = @user.email = @email = "email@example.com"
 			@UserController.register @req, @res
-		
+
 		it "should register the user and send them an email", ->
 			@UserRegistrationHandler.registerNewUserAndSendActivationEmail
 				.calledWith(@email)
 				.should.equal true
-		
+
 		it "should return the user and activation url", ->
 			@res.json
 				.calledWith({
@@ -216,7 +238,7 @@ describe "UserController", ->
 			@res.send = =>
 				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()
-			@UserController.changePassword @req, @res			
+			@UserController.changePassword @req, @res
 
 		it "should set the new password if they do match", (done)->
 			@AuthenticationManager.authenticate.callsArgWith(2, null, @user)
@@ -228,5 +250,3 @@ describe "UserController", ->
 				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
 				done()
 			@UserController.changePassword @req, @res
-
-

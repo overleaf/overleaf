@@ -1,7 +1,10 @@
+Settings = require "settings-sharelatex"
 User = require("../../models/User").User
 {db, ObjectId} = require("../../infrastructure/mongojs")
 crypto = require 'crypto'
 bcrypt = require 'bcrypt'
+
+BCRYPT_ROUNDS = Settings?.security?.bcryptRounds or 12
 
 module.exports = AuthenticationManager =
 	authenticate: (query, password, callback = (error, user) ->) ->
@@ -15,7 +18,9 @@ module.exports = AuthenticationManager =
 					bcrypt.compare password, user.hashedPassword, (error, match) ->
 						return callback(error) if error?
 						if match
-							callback null, user
+							AuthenticationManager.checkRounds user, user.hashedPassword, password, (err) ->
+								return callback(err) if err?
+								callback null, user
 						else
 							callback null, null
 				else
@@ -24,7 +29,7 @@ module.exports = AuthenticationManager =
 				callback null, null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->
-		bcrypt.genSalt 7, (error, salt) ->
+		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
 			bcrypt.hash password, salt, (error, hash) ->
 				return callback(error) if error?
@@ -35,3 +40,10 @@ module.exports = AuthenticationManager =
 					$unset: password: true
 				}, callback)
 
+	checkRounds: (user, hashedPassword, password, callback = (error) ->) ->
+		# check current number of rounds and rehash if necessary
+		currentRounds = bcrypt.getRounds hashedPassword
+		if currentRounds < BCRYPT_ROUNDS
+			AuthenticationManager.setUserPassword user._id, password, callback
+		else
+			callback()

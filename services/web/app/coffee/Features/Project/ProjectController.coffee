@@ -245,11 +245,13 @@ module.exports = ProjectController =
 						first_name : user.first_name
 						last_name  : user.last_name
 						referal_id : user.referal_id
+						signUpDate : user.signUpDate
 						subscription :
 							freeTrial: {allowed: allowedFreeTrial}
 						featureSwitches: user.featureSwitches
 						features: user.features
 						refProviders: user.refProviders
+						betaProgram: user.betaProgram
 					}
 					userSettings: {
 						mode  : user.ace.mode

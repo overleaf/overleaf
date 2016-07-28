@@ -8,7 +8,7 @@ _ = require("underscore")
 
 module.exports =
 
-	buildUsersSubscriptionViewModel: (user, callback = (error, subscription, groups) ->) ->
+	buildUsersSubscriptionViewModel: (user, callback = (error, subscription, memberSubscriptions) ->) ->
 		SubscriptionLocator.getUsersSubscription user, (err, subscription) ->
 			return callback(err) if err?
 			SubscriptionLocator.getMemberSubscriptions user, (err, memberSubscriptions = []) ->
@@ -19,6 +19,7 @@ module.exports =
 					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
 						tax = recurlySubscription?.tax_in_cents || 0
 						callback null, {
+							admin_id:subscription.admin_id
 							name: plan.name
 							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription?.current_period_ends_at)
 							state: recurlySubscription?.state

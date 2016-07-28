@@ -74,15 +74,17 @@ define [
 				editor.commands.removeCommand "foldall"
 				
 				# For European keyboards, the / is above 7 so needs Shift pressing.
-				# This comes through as Ctrl-Shift-/ which is mapped to toggleBlockComment.
+				# This comes through as Command-Shift-/ on OS X, which is mapped to 
+				# toggleBlockComment.
 				# This doesn't do anything for LaTeX, so remap this to togglecomment to
 				# work for European keyboards as normal.
+				# On Windows, the key combo comes as Ctrl-Shift-7.
 				editor.commands.removeCommand "toggleBlockComment"
 				editor.commands.removeCommand "togglecomment"
 				
 				editor.commands.addCommand {
 					name: "togglecomment",
-					bindKey: { win: "Ctrl-/|Ctrl-Shift-/", mac: "Command-/|Command-Shift-/" },
+					bindKey: { win: "Ctrl-/|Ctrl-Shift-7", mac: "Command-/|Command-Shift-/" },
 					exec: (editor) -> editor.toggleCommentLines(),
 					multiSelectAction: "forEachLine",
 					scrollIntoView: "selectionPart"

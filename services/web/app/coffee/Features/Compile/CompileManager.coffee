@@ -37,15 +37,23 @@ module.exports = CompileManager =
 							return callback(error) if error?
 							for key, value of limits
 								options[key] = value
-							ClsiManager.sendRequest project_id, options, (error, status, outputFiles, clsiServerId) ->
+							# only pass user_id down to clsi if this is a per-user compile
+							compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
+							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
 								return callback(error) if error?
 								logger.log files: outputFiles, "output files"
-								callback(null, status, outputFiles, clsiServerId, limits)
+								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
 								
-	deleteAuxFiles: (project_id, callback = (error) ->) ->
+
+	stopCompile: (project_id, user_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
-			ClsiManager.deleteAuxFiles project_id, limits, callback
+			ClsiManager.stopCompile project_id, user_id, limits, callback
+
+	deleteAuxFiles: (project_id, user_id, callback = (error) ->) ->
+		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+			return callback(error) if error?
+			ClsiManager.deleteAuxFiles project_id, user_id, limits, callback
 
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
 		Project.findById project_id, {owner_ref: 1}, (error, project) ->
@@ -92,7 +100,7 @@ module.exports = CompileManager =
 			else
 				ProjectRootDocManager.setRootDocAutomatically project_id, callback
 		
-	wordCount: (project_id, file, callback = (error) ->) ->
+	wordCount: (project_id, user_id, file, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
-			ClsiManager.wordCount project_id, file, limits, callback
+			ClsiManager.wordCount project_id, user_id, file, limits, callback

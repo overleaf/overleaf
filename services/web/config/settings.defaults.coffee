@@ -15,7 +15,7 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = "secret-please-change"
 
-module.exports =
+module.exports = settings =
 	# File storage
 	# ------------
 	#
@@ -104,15 +104,20 @@ module.exports =
 			url: "http://localhost:3036"
 		sixpack:
 			url: ""
-		references:
-			url: "http://localhost:3040"
-		notifications:
-			url: "http://localhost:3042" 
+		# references:
+		# 	url: "http://localhost:3040"
+		# notifications:
+		# 	url: "http://localhost:3042" 
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
 		showSocialButtons: false
 		showComments: false
+
+	# cdn:
+	# 	web:
+	# 		host:"http://cdn.sharelatex.dev:3000"
+	#		darkHost:"http://cdn.sharelatex.dev:3000"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
@@ -137,6 +142,7 @@ module.exports =
 	# --------
 	security:
 		sessionSecret: sessionSecret
+		bcryptRounds: 12 # number of rounds used to hash user passwords (raised to power 2)
 
 	httpAuthUsers: httpAuthUsers
 
@@ -261,6 +267,10 @@ module.exports =
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
+
+	# Use a single compile directory for all users in a project
+	# (otherwise each user has their own directory)
+	# disablePerUserCompiles: true
 	
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
@@ -334,7 +344,9 @@ module.exports =
 				url: "/logout"
 			}]
 		}]
-	
+
+	customisation: {}
+
 #	templates: [{
 #		name : "cv_or_resume",
 #		url : "/templates/cv"

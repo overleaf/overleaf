@@ -8,6 +8,7 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+UserSessionsManager = require("./UserSessionsManager")
 UserUpdater = require("./UserUpdater")
 settings = require "settings-sharelatex"
 
@@ -72,6 +73,7 @@ module.exports = UserController =
 							if err?
 								logger.err err:err, user_id:user_id, "error getting user for email update"
 								return res.send 500
+							req.session.user.email = user.email
 							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
 								if err?
 									logger.err err:err, "error populateGroupLicenceInvite"
@@ -80,9 +82,12 @@ module.exports = UserController =
 	logout : (req, res)->
 		metrics.inc "user.logout"
 		logger.log user: req?.session?.user, "logging out"
+		sessionId = req.sessionID
+		user = req?.session?.user
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
+			UserSessionsManager.untrackSession(user, sessionId)
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
@@ -116,17 +121,15 @@ module.exports = UserController =
 					logger.log user: user, "password changed"
 					AuthenticationManager.setUserPassword user._id, newPassword1, (error) ->
 						return next(error) if error?
-						res.send
-							message:
-							  type:'success'
-							  text:'Your password has been changed'
+						UserSessionsManager.revokeAllUserSessions user, [req.sessionID], (err) ->
+							return next(err) if err?
+							res.send
+								message:
+									type:'success'
+									text:'Your password has been changed'
 			else
 				logger.log user: user, "current password wrong"
 				res.send
 					message:
 					  type:'error'
 					  text:'Your old password is wrong'
-
-	changeEmailAddress: (req, res)->
-
-

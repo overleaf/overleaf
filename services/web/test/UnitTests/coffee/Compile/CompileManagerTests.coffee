@@ -42,7 +42,7 @@ describe "CompileManager", ->
 			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
-			@ClsiManager.sendRequest = sinon.stub().callsArgWith(2, null, @status = "mock-status", @outputFiles = "mock output files", @output = "mock output")
+			@ClsiManager.sendRequest = sinon.stub().callsArgWith(3, null, @status = "mock-status", @outputFiles = "mock output files", @output = "mock output")
 
 		describe "succesfully", ->
 			beforeEach ->
@@ -71,7 +71,7 @@ describe "CompileManager", ->
 
 			it "should run the compile with the compile limits", ->
 				@ClsiManager.sendRequest
-					.calledWith(@project_id, {
+					.calledWith(@project_id, @user_id, {
 						timeout: @limits.timeout
 					})
 					.should.equal true
@@ -135,8 +135,8 @@ describe "CompileManager", ->
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
-			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(2)
-			@CompileManager.deleteAuxFiles @project_id, @callback
+			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(3)
+			@CompileManager.deleteAuxFiles @project_id, @user_id, @callback
 			
 		it "should look up the compile group to use", ->
 			@CompileManager.getProjectCompileLimits
@@ -145,7 +145,7 @@ describe "CompileManager", ->
 				
 		it "should delete the aux files", ->
 			@ClsiManager.deleteAuxFiles
-				.calledWith(@project_id, @limits)
+				.calledWith(@project_id, @user_id, @limits)
 				.should.equal true
 				
 		it "should call the callback", ->
@@ -260,8 +260,8 @@ describe "CompileManager", ->
 	describe "wordCount", ->
 		beforeEach ->
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
-			@ClsiManager.wordCount = sinon.stub().callsArg(3)
-			@CompileManager.wordCount @project_id, false, @callback
+			@ClsiManager.wordCount = sinon.stub().callsArg(4)
+			@CompileManager.wordCount @project_id, @user_id, false, @callback
 			
 		it "should look up the compile group to use", ->
 			@CompileManager.getProjectCompileLimits
@@ -270,7 +270,7 @@ describe "CompileManager", ->
 				
 		it "should call wordCount for project", ->
 			@ClsiManager.wordCount
-				.calledWith(@project_id, false, @limits)
+				.calledWith(@project_id, @user_id, false, @limits)
 				.should.equal true
 				
 		it "should call the callback", ->

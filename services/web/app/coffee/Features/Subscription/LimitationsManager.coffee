@@ -38,12 +38,12 @@ module.exports =
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
 			if err?
 				return callback(err)
-			hasValidSubscription = subscription? and subscription.recurlySubscription_id?
+			hasValidSubscription = subscription? and (subscription.recurlySubscription_id? or subscription?.customAccount == true)
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
 			
 	userIsMemberOfGroupSubscription: (user, callback = (error, isMember, subscriptions) ->) ->
-		logger.log user_id: user._ud, "checking is user is member of subscription groups"
+		logger.log user_id: user._id, "checking is user is member of subscription groups"
 		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions

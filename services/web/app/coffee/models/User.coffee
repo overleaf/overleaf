@@ -58,6 +58,7 @@ UserSchema = new Schema
 		mendeley: Boolean  # coerce the refProviders values to Booleans
 		zotero: Boolean
 	}
+	betaProgram:   { type:Boolean, default: false}
 
 conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
 

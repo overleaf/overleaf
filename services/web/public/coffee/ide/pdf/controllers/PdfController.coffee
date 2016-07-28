@@ -1,15 +1,67 @@
 define [
 	"base"
-	"libs/latex-log-parser"
+	"ace/ace"
+	"ide/human-readable-logs/HumanReadableLogs"
 	"libs/bib-log-parser"
-], (App, LogParser, BibLogParser) ->
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
+	"services/log-hints-feedback"
+], (App, Ace, HumanReadableLogs, BibLogParser) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 
+		# enable per-user containers by default
+		perUserCompile = true
 		autoCompile = true
 
 		# pdf.view = uncompiled | pdf | errors
 		$scope.pdf.view = if $scope?.pdf?.url then 'pdf' else 'uncompiled'
 		$scope.shouldShowLogs = false
+		$scope.wikiEnabled = window.wikiEnabled;
+
+		# view logic to check whether the files dropdown should "drop up" or "drop down"
+		$scope.shouldDropUp = false
+
+		logsContainerEl	= document.querySelector ".pdf-logs"
+		filesDropdownEl	= logsContainerEl?.querySelector ".files-dropdown"
+
+		# get the top coordinate of the files dropdown as a ratio (to the logs container height)
+		# logs container supports scrollable content, so it's possible that ratio > 1.
+		getFilesDropdownTopCoordAsRatio = () ->
+			 filesDropdownEl?.getBoundingClientRect().top / logsContainerEl?.getBoundingClientRect().height
+
+		$scope.$watch "shouldShowLogs", (shouldShow) ->
+			if shouldShow
+				$scope.$applyAsync () -> 
+					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
+
+		# log hints tracking
+		$scope.logHintsNegFeedbackValues = logHintsFeedback.feedbackOpts
+		
+		$scope.trackLogHintsLearnMore = () ->
+			event_tracking.sendCountly "logs-hints-learn-more"
+
+		trackLogHintsFeedback = (isPositive, hintId) ->
+			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
+			event_tracking.sendCountly (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
+
+		$scope.trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal) ->
+			logHintsFeedback.submitFeedback hintId, feedbackOpt, feedbackOtherVal
+
+		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
+		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
+
+		if ace.require("ace/lib/useragent").isMac
+			$scope.modifierKey = "Cmd"
+		else
+			$scope.modifierKey = "Ctrl"
+
+		# utility for making a query string from a hash, could use jquery $.param
+		createQueryString = (args) ->
+			qs_args = ("#{k}=#{v}" for k, v of args)
+			if qs_args.length then "?" + qs_args.join("&") else ""
+
+		$scope.stripHTMLFromString = (htmlStr) ->
+   			tmp = document.createElement("DIV")
+   			tmp.innerHTML = htmlStr
+   			return tmp.textContent || tmp.innerText || ""
 
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
@@ -28,13 +80,14 @@ define [
 
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
+			params = {}
 			if options.isAutoCompile
-				url += "?auto_compile=true"
+				params["auto_compile"]=true
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
 				_csrf: window.csrfToken
-			}
+			}, {params: params}
 
 		parseCompileResponse = (response) ->		
 
@@ -42,20 +95,36 @@ define [
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
 			$scope.pdf.failure    = false
-			$scope.pdf.projectTooLarge = false
 			$scope.pdf.url        = null
 			$scope.pdf.clsiMaintenance = false
 			$scope.pdf.tooRecentlyCompiled = false
 			$scope.pdf.renderingError = false
+			$scope.pdf.projectTooLarge = false
+			$scope.pdf.compileTerminated = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
-			for file in response.outputFiles
-				fileByPath[file.path] = file
+			if response?.outputFiles?
+				for file in response?.outputFiles
+					fileByPath[file.path] = file
+
+			# prepare query string
+			qs = {}
+			# add a query string parameter for the compile group
+			if response.compileGroup?
+				ide.compileGroup = qs.compileGroup = response.compileGroup
+			# add a query string parameter for the clsi server id
+			if response.clsiServerId?
+				ide.clsiServerId = qs.clsiserverid = response.clsiServerId
 
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+			else if response.status == "terminated"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.compileTerminated = true
+				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 			else if response.status == "autocompile-backoff"
 				$scope.pdf.view = 'uncompiled'
 			else if response.status == "project-too-large"
@@ -72,12 +141,13 @@ define [
 			else if response.status == "too-recently-compiled"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.tooRecentlyCompiled = true
+			else if response.status == "validation-problems"
+				$scope.pdf.view = "validation-problems"
+				$scope.pdf.validation = response.validationProblems
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
 
-				# prepare query string
-				qs = {}
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
 				if fileByPath['output.pdf']?.url?
 					$scope.pdf.url = fileByPath['output.pdf'].url
@@ -89,17 +159,11 @@ define [
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not fileByPath['output.pdf']?.build?
 					qs.cache_bust = "#{Date.now()}"
-				# add a query string parameter for the compile group
-				if response.compileGroup?
-					$scope.pdf.compileGroup = response.compileGroup
-					qs.compileGroup = "#{$scope.pdf.compileGroup}"
-				if response.clsiServerId?
-					qs.clsiserverid = response.clsiServerId
-					ide.clsiServerId = response.clsiServerId
 				# convert the qs hash into a query string and append it
-				qs_args = ("#{k}=#{v}" for k, v of qs)
-				$scope.pdf.qs = if qs_args.length then "?" + qs_args.join("&") else ""
-				$scope.pdf.url += $scope.pdf.qs
+				$scope.pdf.url += createQueryString qs
+				# Save all downloads as files
+				qs.popupDownload = true
+				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
 				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
 
@@ -108,17 +172,18 @@ define [
 
 			if !response.outputFiles?
 				return
+
+			# prepare list of output files for download dropdown
+			qs = {}
+			if response.clsiServerId?
+				qs.clsiserverid = response.clsiServerId
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
-					# Turn 'output.blg' into 'blg file'.
-					if file.path.match(/^output\./)
-						file.name = "#{file.path.replace(/^output\./, "")} file"
-					else
-						file.name = file.path
-					file.url = "/project/#{project_id}/output/#{file.path}"
-					if response.clsiServerId?
-						file.url = file.url + "?clsiserverid=#{response.clsiServerId}"
-					$scope.pdf.outputFiles.push file
+					$scope.pdf.outputFiles.push {
+						# Turn 'output.blg' into 'blg file'.
+						name: if file.path.match(/^output\./) then "#{file.path.replace(/^output\./, "")} file" else file.path
+						url: "/project/#{project_id}/output/#{file.path}" + createQueryString qs
+					}
 
 
 		fetchLogs = (logFile, blgFile) ->
@@ -127,14 +192,17 @@ define [
 				opts =
 					method:"GET"
 					params:
-						build:file.build
+						compileGroup:ide.compileGroup
 						clsiserverid:ide.clsiServerId
-				if file.url?  # FIXME clean this up when we have file.urls out consistently
+				if file?.url?  # FIXME clean this up when we have file.urls out consistently
 					opts.url = file.url
 				else if file?.build?
 					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
 					opts.url = "/project/#{$scope.project_id}/output/#{name}"
+				# check if we need to bust cache (build id is unique so don't need it in that case)
+				if not file?.build?
+					opts.params.cache_bust = "#{Date.now()}"
 				return $http(opts)
 
 			# accumulate the log entries
@@ -150,7 +218,7 @@ define [
 			# use the parsers for each file type
 			processLog = (log) ->
 				$scope.pdf.rawLog = log
-				{errors, warnings, typesetting} = LogParser.parse(log, ignoreDuplicates: true)
+				{errors, warnings, typesetting} = HumanReadableLogs.parse(log, ignoreDuplicates: true)
 				all = [].concat errors, warnings, typesetting
 				accumulateResults {all, errors, warnings}
 
@@ -204,7 +272,7 @@ define [
 			return null
 
 		normalizeFilePath = (path) ->
-			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}\/(\.\/)?/, "")
+			path = path.replace(/^(.*)\/compiles\/[0-9a-f]{24}(-[0-9a-f]{24})?\/(\.\/)?/, "")
 			path = path.replace(/^\/compile\//, "")
 
 			rootDocDirname = ide.fileTreeManager.getRootDocDirname()
@@ -215,6 +283,9 @@ define [
 
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
+
+			event_tracking.sendCountlySampled "editor-recompile-sampled", options
+
 			$scope.pdf.compiling = true
 
 			ide.$scope.$broadcast("flush-changes")
@@ -234,6 +305,21 @@ define [
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
+		# This method is a simply wrapper and exists only for tracking purposes.
+		ide.$scope.recompileViaKey = () ->
+			$scope.recompile { keyShortcut: true }
+
+		$scope.stop = () ->
+			return if !$scope.pdf.compiling
+
+			$http {
+				url: "/project/#{$scope.project_id}/compile/stop"
+				method: "POST"
+				params:
+					clsiserverid:ide.clsiServerId
+				headers:
+					"X-Csrf-Token": window.csrfToken
+			}
 
 		$scope.clearCache = () ->
 			$http {
@@ -247,6 +333,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
+			event_tracking.sendCountlyOnce "ide-open-logs-once" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -254,6 +341,7 @@ define [
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
+			event_tracking.sendCountly "logs-view-raw" if $scope.pdf.showRawLog
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
@@ -287,10 +375,16 @@ define [
 
 		$scope.startFreeTrial = (source) ->
 			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
+
+			event_tracking.sendCountly "subscription-start-trial", { source }
+
 			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
 			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
+		# enable per-user containers by default
+		perUserCompile = true
+
 		synctex =
 			syncToPdf: (cursorPosition) ->
 				deferred = $q.defer()
@@ -339,18 +433,35 @@ define [
 					deferred.reject()
 					return deferred.promise
 
+				# FIXME: this actually works better if it's halfway across the
+				# page (or the visible part of the page). Synctex doesn't
+				# always find the right place in the file when the point is at
+				# the edge of the page, it sometimes returns the start of the
+				# next paragraph instead.
+				h = position.offset.left
+
+				# Compute the vertical position to pass to synctex, which
+				# works with coordinates increasing from the top of the page
+				# down.  This matches the browser's DOM coordinate of the
+				# click point, but the pdf position is measured from the
+				# bottom of the page so we need to invert it.
+				if options.fromPdfPosition and position.pageSize?.height?
+					v = (position.pageSize.height - position.offset.top) or 0 # measure from pdf point (inverted)
+				else
+					v = position.offset.top or 0 # measure from html click position
+
 				# It's not clear exactly where we should sync to if it wasn't directly
 				# clicked on, but a little bit down from the very top seems best.
 				if options.includeVisualOffset
-					position.offset.top = position.offset.top + 80
+					v += 72 # use the same value as in pdfViewer highlighting visual offset
 
 				$http({
 						url: "/project/#{ide.project_id}/sync/pdf",
 						method: "GET",
 						params: {
 							page: position.page + 1
-							h: position.offset.left.toFixed(2)
-							v: position.offset.top.toFixed(2)
+							h: h.toFixed(2)
+							v: v.toFixed(2)
 							clsiserverid:ide.clsiServerId
 						}
 					})
@@ -380,14 +491,15 @@ define [
 
 		$scope.syncToCode = () ->
 			synctex
-				.syncToCode($scope.pdf.position, includeVisualOffset: true)
+				.syncToCode($scope.pdf.position, includeVisualOffset: true, fromPdfPosition: true)
 				.then (data) ->
 					{doc, line} = data
 					ide.editorManager.openDoc(doc, gotoLine: line)
 	]
 
-	App.controller "PdfLogEntryController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
+			event_tracking.sendCountlyOnce "logs-jump-to-location-once"
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?

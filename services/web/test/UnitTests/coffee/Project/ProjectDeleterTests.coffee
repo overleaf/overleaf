@@ -27,13 +27,15 @@ describe 'ProjectDeleter', ->
 			removeProjectFromAllTags: sinon.stub().callsArgWith(2)
 		@ProjectGetter =
 			getProject:sinon.stub()
+		@CollaboratorsHandler =
+			removeUserFromAllProjets: sinon.stub().yields()
 		@deleter = SandboxedModule.require modulePath, requires:
 			"../Editor/EditorController": @editorController
 			'../../models/Project':{Project:@Project}
 			'../DocumentUpdater/DocumentUpdaterHandler': @documentUpdaterHandler
 			"../Tags/TagsHandler":@TagsHandler
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
-			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			"./ProjectGetter": @ProjectGetter
 			'logger-sharelatex':
 				log:->
@@ -72,6 +74,12 @@ describe 'ProjectDeleter', ->
 			user_id = 1234
 			@deleter.deleteUsersProjects user_id, =>
 				@Project.remove.calledWith(owner_ref:user_id).should.equal true
+				done()
+
+		it "should remove all the projects the user is a collaborator of", (done)->
+			user_id = 1234
+			@deleter.deleteUsersProjects user_id, =>
+				@CollaboratorsHandler.removeUserFromAllProjets.calledWith(user_id).should.equal true
 				done()
 
 	describe "deleteProject", ->

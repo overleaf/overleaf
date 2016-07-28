@@ -11,7 +11,19 @@ script(type='text/ng-template', id='supportModalTemplate')
 			label
 				| #{translate("subject")}
 			.form-group
-				input.field.text.medium.span8.form-control(ng-model="form.subject", maxlength='255', tabindex='1', onkeyup='')
+				input.field.text.medium.span8.form-control(
+					ng-model="form.subject",
+					ng-model-options="{ updateOn: 'default blur', debounce: {'default': 350, 'blur': 0} }"
+					maxlength='255',
+					tabindex='1',
+					onkeyup='')
+			.contact-suggestions(ng-show="suggestions.length")
+				p.contact-suggestion-label !{translate("kb_suggestions_enquiry", { kbLink: "<a href='learn/kb' target='_blank'>__kb__</a>", kb: translate("knowledge_base") })} 
+				ul.contact-suggestion-list
+					li(ng-repeat="suggestion in suggestions")
+						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", ng-click="clickSuggestionLink(suggestion.url);" target="_blank")
+							span(ng-bind-html="suggestion.name")
+							i.fa.fa-angle-right
 			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
 				| #{translate("email")}
 			.form-group(ng-show="'#{getUserEmail()}'.length < 1")
@@ -21,7 +33,7 @@ script(type='text/ng-template', id='supportModalTemplate')
 			.form-group
 				input.field.text.medium.span8.form-control(ng-model="form.project_url", tabindex='3', onkeyup='')
 			label.desc
-				| #{translate("suggestion")}
+				| #{translate("contact_message_label")}
 			.form-group
 				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', tabindex='4', onkeyup='')
 			.form-group.text-center
