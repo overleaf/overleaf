@@ -23,10 +23,10 @@ define [], () ->
 				@storeCursorPosition(@editor.getSession())
 				@storeScrollTopPosition(@editor.getSession())
 
-			@$scope.$on "#{@$scope.name}:gotoLine", (editor, value) =>
-				if value?
+			@$scope.$on "#{@$scope.name}:gotoLine", (editor, line, column) =>
+				if line?
 					setTimeout () =>
-						@gotoLine(value)
+						@gotoLine(line, column)
 					, 10 # Hack: Must happen after @gotoStoredPosition
 
 		storeScrollTopPosition: (session) ->
@@ -53,6 +53,6 @@ define [], () ->
 			@editor.getSession().setScrollTop(pos.scrollTop or 0)
 			delete @ignoreCursorPositionChanges
 
-		gotoLine: (line) ->
-			@editor.gotoLine(line)
+		gotoLine: (line, column) ->
+			@editor.gotoLine(line, column)
 			@editor.focus()

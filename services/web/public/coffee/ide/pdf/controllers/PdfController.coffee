@@ -556,7 +556,9 @@ define [
 			return if !entity? or entity.type != "doc"
 			if entry.line?
 				line = entry.line
-			ide.editorManager.openDoc(entity, gotoLine: line)
+			if entry.column?
+				column = entry.column
+			ide.editorManager.openDoc(entity, gotoLine: line, gotoColumn: column)
 	]
 
 	App.controller 'ClearCacheModalController', ["$scope", "$modalInstance", ($scope, $modalInstance) ->
