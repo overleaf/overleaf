@@ -13,7 +13,7 @@ class User
 		@request = request.defaults({
 			jar: @jar
 		})
-	
+
 	login: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
@@ -58,8 +58,15 @@ class User
 			return callback(error) if error?
 			if !body?.project_id?
 				console.error "SOMETHING WENT WRONG CREATING PROJECT", response.statusCode, response.headers["location"], body
-			callback(null, body.project_id)
-	
+			callback(null, body.project_id, body)
+
+	deleteProject: (project_id, callback=(error)) ->
+		@request.delete {
+			url: "/project/#{project_id}"
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback(null)
+
 	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
 		@request.post {
 			url: "/project/#{project_id}/users",
@@ -67,7 +74,7 @@ class User
 		}, (error, response, body) ->
 			return callback(error) if error?
 			callback(null, body.user)
-	
+
 	makePublic: (project_id, level, callback = (error) ->) ->
 		@request.post {
 			url: "/project/#{project_id}/settings/admin",
