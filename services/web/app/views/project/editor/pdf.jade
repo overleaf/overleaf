@@ -36,11 +36,12 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
-				li.dropdown-header #{translate("file_checks")}
-				li
-					a(href, ng-click="recompile({check:true})")
-						i.fa.fa-fw()
-						| &nbsp;#{translate("syntax check")}
+				if user.betaProgram
+					li.dropdown-header #{translate("file_checks")}
+					li
+						a(href, ng-click="recompile({check:true})")
+							i.fa.fa-fw()
+							| &nbsp;#{translate("syntax_check")}
 		a(
 			href
 			ng-click="stop()"
