@@ -3,8 +3,9 @@ define [
 	"ace/ace"
 	"ide/human-readable-logs/HumanReadableLogs"
 	"libs/bib-log-parser"
+	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 
 		# enable per-user containers by default
 		perUserCompile = true
@@ -32,12 +33,17 @@ define [
 					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
 
 		# log hints tracking
+		$scope.logHintsNegFeedbackValues = logHintsFeedback.feedbackOpts
+		
 		$scope.trackLogHintsLearnMore = () ->
 			event_tracking.sendCountly "logs-hints-learn-more"
 
 		trackLogHintsFeedback = (isPositive, hintId) ->
 			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
 			event_tracking.sendCountly (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
+
+		$scope.trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal) ->
+			logHintsFeedback.submitFeedback hintId, feedbackOpt, feedbackOtherVal
 
 		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
 		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
@@ -327,7 +333,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
-			event_tracking.sendCountly "ide-open-logs" if $scope.shouldShowLogs
+			event_tracking.sendCountlyOnce "ide-open-logs-once" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -493,7 +499,7 @@ define [
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
-			event_tracking.sendCountly 'logs-jump-to-location'
+			event_tracking.sendCountlyOnce "logs-jump-to-location-once"
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?

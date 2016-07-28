@@ -56,9 +56,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 				Countly.url = '#{settings.analytics.countly.server}';
 				!{ session.user ? 'Countly.device_id = "' + session.user._id + '";' : '' } 
 
-				Countly.q.push(['track_sessions']);
-				Countly.q.push(['track_pageview']);
-
 				(function() {
 					var cly = document.createElement('script'); cly.type = 'text/javascript';
 					cly.async = true;

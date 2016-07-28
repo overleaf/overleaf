@@ -2,7 +2,7 @@
 	- if (sentrySrc.match(/^([a-z]+:)?\/\//i))
 		script(src="#{sentrySrc}")
 	- else
-		script(src=buildJsPath("libs/#{sentrySrc}"))
+		script(src=buildJsPath("libs/#{sentrySrc}", {fingerprint:false}))
 - if (typeof(sentrySrc) != "undefined")
 	script(type="text/javascript").
 		if (typeof(Raven) != "undefined" && Raven.config) {

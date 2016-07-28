@@ -129,7 +129,7 @@ block content
 
 	- var pdfPath = 'libs/pdfjs-1.3.91/pdf.worker.js'
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
-	- var pdfJsWorkerPath = buildJsPath(pdfPath, {qs:{fingerprint:fingerprintedPath}})
+	- var pdfJsWorkerPath = buildJsPath(pdfPath, {cdn:false,qs:{fingerprint:fingerprintedPath}}) // don't use worker for cdn
 
 
 	script(type='text/javascript').

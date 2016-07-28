@@ -512,6 +512,11 @@ module.exports = ProjectEntityHandler =
 			return callback(e)
 		type = sanitizeTypeOfElement type
 
+		if path.resolve("/", element.name) isnt "/#{element.name}" or element.name.match("/")
+			e = new Error("invalid element name")
+			logger.err project_id:project._id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as name was invalid"
+			return callback(e)
+
 		if !folder_id?
 			folder_id = project.rootFolder[0]._id
 		ProjectEntityHandler._countElements project, (err, count)->

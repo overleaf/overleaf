@@ -32,8 +32,8 @@ module.exports = ReferencesController =
 
 	_handleIndexResponse: (req, res, projectId, shouldBroadcast, data) ->
 		if !data? or !data.keys?
-			return res.send()
-		else if shouldBroadcast
+			return res.json({projectId, keys: []})
+		if shouldBroadcast
 			logger.log {projectId}, "emitting new references keys to connected clients"
 			EditorRealTimeController.emitToRoom projectId, 'references:keys:updated', data.keys
 		return res.json data

@@ -71,13 +71,14 @@ define [
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
-			event_tracking.sendCountly "ide-open-view-#{ newView }" if newView?
+			if newView? and newView != "editor" and newView != "pdf"
+				event_tracking.sendCountlyOnce "ide-open-view-#{ newView }-once" 
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
-			event_tracking.sendCountly "ide-open-chat" if isOpen
+			event_tracking.sendCountlyOnce "ide-open-chat-once" if isOpen
 
 		$scope.$watch "ui.leftMenuShown", (isOpen) ->
-			event_tracking.sendCountly "ide-open-left-menu" if isOpen
+			event_tracking.sendCountlyOnce "ide-open-left-menu-once" if isOpen
 		# End of tracking code.
 
 		window._ide = ide
