@@ -60,6 +60,7 @@ module.exports = CollaboratorsInviteHandler =
 			callback(null, invite)
 
 	acceptInvite: (projectId, inviteId, tokenString, user, callback=(err)->) ->
+		# fetch the target project
 		Project.findOne {_id: projectId}, (err, project) ->
 			if err?
 				logger.err {err, projectId}, "error finding project"
@@ -68,7 +69,7 @@ module.exports = CollaboratorsInviteHandler =
 				err = new Errors.NotFoundError("no project found for invite")
 				logger.log {err, projectId, inviteId}, "no project found"
 				return callback(err)
-			# TODO: check if we need to cast the ids to ObjectId
+			# fetch the invite
 			ProjectInvite.findOne {_id: inviteId, projectId: projectId, token: tokenString}, (err, invite) ->
 				if err?
 					logger.err {err, projectId, inviteId}, "error finding invite"
@@ -78,26 +79,23 @@ module.exports = CollaboratorsInviteHandler =
 					logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
 					return callback(err)
 
-				# do the thing
-				existing_users = (project.collaberator_refs or [])
-				existing_users = existing_users.concat(project.readOnly_refs or [])
-				existing_users = existing_users.map (u) -> u.toString()
-				if existing_users.indexOf(user._id.toString()) > -1
-					return callback null # User already in Project
-
+				# build an update to be applied with $addToSet, user is added to either
+				# `collaberator_refs` or `readOnly_refs`
 				privilegeLevel = invite.privileges
-
 				if privilegeLevel == PrivilegeLevels.READ_AND_WRITE
 					level = {"collaberator_refs": user._id}
-					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user"
+					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user with read-write access"
 				else if privilegeLevel == PrivilegeLevels.READ_ONLY
 					level = {"readOnly_refs": user._id}
-					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user"
+					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user with read-only access"
 				else
 					return callback(new Error("unknown privilegeLevel: #{privilegeLevel}"))
 
 				ContactManager.addContact invite.sendingUserId, user._id
 
+				# Update the project, adding the new member. We don't check if the user is already a member of the project,
+				# because even if they are we still want to have them 'accept' the invite and go through the usual process,
+				# despite the $addToSet operation having no meaningful effect
 				Project.update { _id: project._id }, { $addToSet: level }, (error) ->
 					return callback(error) if error?
 					# Flush to TPDS in background to add files to collaborator's Dropbox
