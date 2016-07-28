@@ -329,8 +329,8 @@ describe "CollaboratorsInviteController", ->
 				it 'should call Project.findOne', ->
 					@Project.findOne.callCount.should.equal 1
 
-				it 'should call getInviteByToken', ->
-					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+				it 'should not call getInviteByToken', ->
+					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
 
 				it 'should not call User.findOne', ->
 					@User.findOne.callCount.should.equal 0

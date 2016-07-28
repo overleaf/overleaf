@@ -55,6 +55,7 @@ module.exports = CollaboratorsInviteController =
 		token = req.params.token
 		currentUser = req.session.user
 		_renderInvalidPage = () ->
+			logger.log {projectId, token}, "invite not valid, rendering not-valid page"
 			res.render "project/invite/not-valid"
 		# get the target project
 		Project.findOne {_id: projectId}, {owner_ref: 1, name: 1, collaberator_refs: 1, readOnly_refs: 1}, (err, project) ->
@@ -64,21 +65,20 @@ module.exports = CollaboratorsInviteController =
 			if !project
 				logger.log {projectId}, "no project found"
 				return _renderInvalidPage()
+			# check if user is already a member of the project, redirect to project if so
+			allMembers = (project.collaberator_refs || []).concat(project.readOnly_refs || []).map((oid) -> oid.toString())
+			if currentUser._id in allMembers
+				logger.log {projectId, userId: currentUser._id}, "user is already a member of this project, redirecting"
+				return res.redirect "/project/#{projectId}"
 			# get the invite
 			CollaboratorsInviteHandler.getInviteByToken projectId, token, (err, invite) ->
 				if err?
 					logger.err {projectId, token}, "error getting invite by token"
 					return next(err)
-				# check if invite is gone
+				# check if invite is gone, or otherwise non-existent
 				if !invite
 					logger.log {projectId, token}, "no invite found for this token"
-					# check if user is already a member of the project, redirect to project if so
-					allMembers = (project.collaberator_refs || []).concat(project.readOnly_refs || []).map((oid) -> oid.toString())
-					if currentUser._id in allMembers
-						logger.log {projectId, userId: currentUser._id}, "user is already a member of this project, redirecting"
-						return res.redirect "/project/#{projectId}"
-					else
-						return _renderInvalidPage()
+					return _renderInvalidPage()
 				# check the user who sent the invite exists
 				User.findOne {_id: invite.sendingUserId}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
 					if err?

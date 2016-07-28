@@ -343,6 +343,41 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite.remove.callCount.should.equal 0
 					done()
 
+		describe 'when user is already a member of project', ->
+
+			beforeEach ->
+				@fakeProject.collaberator_refs = [ObjectId(), @user._id, ObjectId(), ObjectId()]
+				@Project.findOne.callsArgWith(1, null, @fakeProject)
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should have called Project.findOne', (done) ->
+				@call (err) =>
+					@Project.findOne.callCount.should.equal 1
+					@Project.findOne.calledWith({_id: @projectId}).should.equal true
+					done()
+
+			it 'should have called ProjectInvite.findOne', (done) ->
+				@call (err) =>
+					@ProjectInvite.findOne.callCount.should.equal 1
+					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId, token: @token}).should.equal true
+					done()
+
+			it 'should have returned early, not have called Project.update', (done) ->
+				@call (err) =>
+					@Project.update.callCount.should.equal 0
+					done()
+
+			it 'should not have called ProjectInvite.remove', (done) ->
+				@call (err) =>
+					@ProjectInvite.remove.callCount.should.equal 0
+					done()
+
+
 		describe 'when ProjectInvite.findOne does not find an invite', ->
 
 			beforeEach ->

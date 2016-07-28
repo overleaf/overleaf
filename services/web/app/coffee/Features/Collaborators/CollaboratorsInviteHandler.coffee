@@ -79,6 +79,15 @@ module.exports = CollaboratorsInviteHandler =
 					logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
 					return callback(err)
 
+				# check if user is already a member of this project,
+				# return early if so
+				existing_users = (project.collaberator_refs or [])
+				existing_users = existing_users.concat(project.readOnly_refs or [])
+				existing_users = existing_users.map (u) -> u.toString()
+				if existing_users.indexOf(user._id.toString()) > -1
+					logger.log {projectId, userId: user._id}, "user already member of project, returning"
+					return callback null
+
 				# build an update to be applied with $addToSet, user is added to either
 				# `collaberator_refs` or `readOnly_refs`
 				privilegeLevel = invite.privileges
@@ -93,9 +102,7 @@ module.exports = CollaboratorsInviteHandler =
 
 				ContactManager.addContact invite.sendingUserId, user._id
 
-				# Update the project, adding the new member. We don't check if the user is already a member of the project,
-				# because even if they are we still want to have them 'accept' the invite and go through the usual process,
-				# despite the $addToSet operation having no meaningful effect
+				# Update the project, adding the new member.
 				Project.update { _id: project._id }, { $addToSet: level }, (error) ->
 					return callback(error) if error?
 					# Flush to TPDS in background to add files to collaborator's Dropbox
