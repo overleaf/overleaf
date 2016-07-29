@@ -6,7 +6,7 @@ settings = require "settings-sharelatex"
 CollaboratorsEmailHandler = require "../../../app/js/Features/Collaborators/CollaboratorsEmailHandler"
 
 
-createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
+createInvite = (sendingUser, projectId, email, callback=(err, invite)->) ->
 	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
 		sendingUser.request.post {
@@ -16,8 +16,16 @@ createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
 				privileges: 'readAndWrite'
 		}, (err, response, body) ->
 			return callback(err) if err
-			callback(err, body.invite)
+			callback(null, body.invite)
 
+revokeInvite = (sendingUser, projectId, inviteId, callback=(err)->) ->
+	sendingUser.getCsrfToken (err) ->
+		return callback(err) if err
+		sendingUser.request.delete {
+			url: "/project/#{projectId}/invite/#{inviteId}",
+		}, (err, response, body) ->
+			return callback(err) if err
+			callback(null)
 
 # Actions
 tryFollowInviteLink = (user, link, callback=(err, response, body)->) ->
@@ -115,9 +123,14 @@ describe "ProjectInviteTests", ->
 			beforeEach (done) ->
 				@invite = null
 				@link = null
-				createInvite @projectId, @sendingUser, @email, (err, invite) =>
+				createInvite @sendingUser, @projectId, @email, (err, invite) =>
 					@invite = invite
 					@link = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, @invite)
+					done()
+
+			afterEach (done) ->
+				revokeInvite @sendingUser, @projectId, @invite._id, (err) =>
+					throw err if err
 					done()
 
 			it 'should not grant access if the user does not accept the invite', (done) ->
