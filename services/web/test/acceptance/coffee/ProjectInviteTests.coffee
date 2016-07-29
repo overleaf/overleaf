@@ -80,6 +80,26 @@ describe "ProjectInviteTests", ->
 					@link = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, @invite)
 					done()
 
+			it 'should not grant access if the user does not accept the invite', (done) ->
+				Async.series(
+					[
+						# go to the invite page
+						(cb) =>
+							followInviteLink @user, @link, (err, response, body) =>
+								expect(err).to.be.oneOf [null, undefined]
+								expect(response.statusCode).to.equal 200
+								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
+								cb()
+
+						# access the project page
+						(cb) =>
+							@user.openProject @invite.projectId, (err) =>
+								expect(err).to.be.instanceof Error
+								cb()
+
+					], done
+				)
+
 			it 'should allow the user to accept the invite and access the project', (done) ->
 				Async.series(
 					[

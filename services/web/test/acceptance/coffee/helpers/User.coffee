@@ -73,7 +73,10 @@ class User
 		@request.get {
 			url: "/project/#{project_id}"
 		}, (error, response, body) ->
-			return callback(error) if error? or response.statusCode != 200
+			return callback(error) if error?
+			if response.statusCode != 200
+				err = new Error("Non-success response when opening project: #{response.statusCode}")
+				return callback(err)
 			callback(null)
 
 	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
