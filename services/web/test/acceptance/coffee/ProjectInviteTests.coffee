@@ -6,16 +6,31 @@ settings = require "settings-sharelatex"
 CollaboratorsEmailHandler = require "../../../app/js/Features/Collaborators/CollaboratorsEmailHandler"
 
 
-_createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
+createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
 	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
 		sendingUser.request.post {
 			url: "/project/#{projectId}/invite",
 			json:
 				email: email
+				privileges: 'readAndWrite'
 		}, (err, response, body) ->
 			return callback(err) if err
 			callback(err, body.invite)
+
+followInviteLink = (user, link, callback=(err, response, body)->) ->
+	user.request.get {
+		uri: link
+		baseUrl: null
+	}, callback
+
+acceptInvite = (user, invite, callback=(err, response, body)->) ->
+	user.request.post {
+		uri: "/project/#{invite.projectId}/invite/#{invite._id}/accept"
+		json:
+			token: invite.token
+	}, callback
+
 
 describe "ProjectInviteTests", ->
 	before (done) ->
@@ -60,26 +75,35 @@ describe "ProjectInviteTests", ->
 			beforeEach (done) ->
 				@invite = null
 				@link = null
-				_createInvite @projectId, @sendingUser, @email, (err, invite) =>
+				createInvite @projectId, @sendingUser, @email, (err, invite) =>
 					@invite = invite
 					@link = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, @invite)
 					done()
 
-			it 'should render the invite page', (done) ->
+			it 'should allow the user to accept the invite and access the project', (done) ->
 				Async.series(
 					[
+						# go to the invite page
 						(cb) =>
-							@user.request.get {
-								uri: @link
-								baseUrl: null
-							}, (err, response, body) =>
+							followInviteLink @user, @link, (err, response, body) =>
 								expect(err).to.be.oneOf [null, undefined]
 								expect(response.statusCode).to.equal 200
 								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
 								cb()
 
-					], (err, result) =>
-						if err
-							throw err
-						done()
+						# accept the invite
+						(cb) =>
+							acceptInvite @user, @invite, (err, response, body) =>
+								expect(err).to.be.oneOf [null, undefined]
+								expect(response.statusCode).to.equal 302
+								expect(response.headers.location).to.equal "/project/#{@invite.projectId}"
+								cb()
+
+						# access the project page
+						(cb) =>
+							@user.openProject @invite.projectId, (err) =>
+								expect(err).to.be.oneOf [null, undefined]
+								cb()
+
+					], done
 				)

@@ -69,6 +69,13 @@ class User
 			return callback(error) if error?
 			callback(null)
 
+	openProject: (project_id, callback=(error)) ->
+		@request.get {
+			url: "/project/#{project_id}"
+		}, (error, response, body) ->
+			return callback(error) if error? or response.statusCode != 200
+			callback(null)
+
 	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
 		@request.post {
 			url: "/project/#{project_id}/users",
