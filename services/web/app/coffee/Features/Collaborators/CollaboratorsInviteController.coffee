@@ -88,7 +88,7 @@ module.exports = CollaboratorsInviteController =
 						logger.log {projectId}, "no project owner found"
 						return _renderInvalidPage()
 					# finally render the invite
-					res.render "project/invite/show", {invite, project, owner}
+					res.render "project/invite/show", {invite, project, owner, title: "Project Invite"}
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id

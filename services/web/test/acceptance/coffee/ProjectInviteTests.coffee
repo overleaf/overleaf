@@ -6,10 +6,10 @@ settings = require "settings-sharelatex"
 CollaboratorsEmailHandler = require "../../../app/js/Features/Collaborators/CollaboratorsEmailHandler"
 
 
-_createInvite = (projectId, user, email, callback=(err, invite)->) ->
-	user.getCsrfToken (err) ->
+_createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
+	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
-		user.request.post {
+		sendingUser.request.post {
 			url: "/project/#{projectId}/invite",
 			json:
 				email: email
@@ -23,7 +23,7 @@ describe "ProjectInviteTests", ->
 		@sendingUser = new User()
 		@user = new User()
 		@site_admin = new User({email: "admin@example.com"})
-		@email = 'user@example.com'
+		@email = 'smoketestuser@example.com'
 		@projectName = 'sharing test'
 		@projectId = null
 		@fakeProject = null
@@ -55,7 +55,7 @@ describe "ProjectInviteTests", ->
 					throw err
 				done()
 
-		describe 'user is already a member of the project', ->
+		describe 'user is not a member of the project', ->
 
 			beforeEach (done) ->
 				@invite = null
@@ -65,12 +65,18 @@ describe "ProjectInviteTests", ->
 					@link = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, @invite)
 					done()
 
-			it 'should redirect to the project page', (done) ->
+			it 'should render the invite page', (done) ->
 				Async.series(
 					[
 						(cb) =>
-							console.log ">> yes"
-							cb()
+							@user.request.get {
+								uri: @link
+								baseUrl: null
+							}, (err, response, body) =>
+								expect(err).to.be.oneOf [null, undefined]
+								expect(response.statusCode).to.equal 200
+								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
+								cb()
 
 					], (err, result) =>
 						if err

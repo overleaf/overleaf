@@ -28,6 +28,8 @@ class User
 					return callback(error) if error?
 					@id = user?._id?.toString()
 					@_id = user?._id?.toString()
+					@first_name = user?.first_name
+					@referal_id = user?.referal_id
 					callback()
 
 	logout: (callback = (error) ->) ->
