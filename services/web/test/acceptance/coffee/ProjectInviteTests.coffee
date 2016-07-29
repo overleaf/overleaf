@@ -91,7 +91,28 @@ describe "ProjectInviteTests", ->
 								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
 								cb()
 
-						# access the project page
+						# forbid access to the project page
+						(cb) =>
+							@user.openProject @invite.projectId, (err) =>
+								expect(err).to.be.instanceof Error
+								cb()
+
+					], done
+				)
+
+			it 'should render the invalid-invite page if the token is invalid', (done) ->
+				Async.series(
+					[
+						# go to the invite page with an invalid token
+						(cb) =>
+							link = @link.replace(@invite.token, 'not_a_real_token')
+							followInviteLink @user, link, (err, response, body) =>
+								expect(err).to.be.oneOf [null, undefined]
+								expect(response.statusCode).to.equal 200
+								expect(body).to.match new RegExp("<title>Invalid Invite - .*</title>")
+								cb()
+
+						# forbid access to the project page
 						(cb) =>
 							@user.openProject @invite.projectId, (err) =>
 								expect(err).to.be.instanceof Error

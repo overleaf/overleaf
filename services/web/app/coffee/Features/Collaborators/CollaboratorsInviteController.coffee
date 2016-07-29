@@ -56,7 +56,7 @@ module.exports = CollaboratorsInviteController =
 		currentUser = req.session.user
 		_renderInvalidPage = () ->
 			logger.log {projectId, token}, "invite not valid, rendering not-valid page"
-			res.render "project/invite/not-valid"
+			res.render "project/invite/not-valid", {title: "Invalid Invite"}
 		# get the target project
 		Project.findOne {_id: projectId}, {owner_ref: 1, name: 1, collaberator_refs: 1, readOnly_refs: 1}, (err, project) ->
 			if err?
