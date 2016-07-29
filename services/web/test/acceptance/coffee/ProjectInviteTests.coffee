@@ -18,18 +18,58 @@ createInvite = (projectId, sendingUser, email, callback=(err, invite)->) ->
 			return callback(err) if err
 			callback(err, body.invite)
 
-followInviteLink = (user, link, callback=(err, response, body)->) ->
+
+# Actions
+tryFollowInviteLink = (user, link, callback=(err, response, body)->) ->
 	user.request.get {
 		uri: link
 		baseUrl: null
 	}, callback
 
-acceptInvite = (user, invite, callback=(err, response, body)->) ->
+tryAcceptInvite = (user, invite, callback=(err, response, body)->) ->
 	user.request.post {
 		uri: "/project/#{invite.projectId}/invite/#{invite._id}/accept"
 		json:
 			token: invite.token
 	}, callback
+
+
+# Expectations
+expectProjectAccess = (user, projectId, callback=()->) ->
+	# should have access to project
+	user.openProject projectId, (err) =>
+		expect(err).to.be.oneOf [null, undefined]
+		callback()
+
+expectNoProjectAccess = (user, projectId, callback=()->) ->
+	# should not have access to project page
+	user.openProject projectId, (err) =>
+		expect(err).to.be.instanceof Error
+		callback()
+
+expectInvitePage = (user, link, callback=()->) ->
+	# view invite
+	tryFollowInviteLink user, link, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
+		callback()
+
+expectInvalidInvitePage = (user, link, callback=()->) ->
+	# view invalid invite
+	tryFollowInviteLink user, link, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(body).to.match new RegExp("<title>Invalid Invite - .*</title>")
+		callback()
+
+expectAcceptInviteAndRedirect = (user, invite, callback=()->) ->
+	# should accept the invite and redirect to project
+	tryAcceptInvite user, invite, (err, response, body) =>
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 302
+		expect(response.headers.location).to.equal "/project/#{invite.projectId}"
+		callback()
 
 
 describe "ProjectInviteTests", ->
@@ -83,68 +123,32 @@ describe "ProjectInviteTests", ->
 			it 'should not grant access if the user does not accept the invite', (done) ->
 				Async.series(
 					[
-						# go to the invite page
 						(cb) =>
-							followInviteLink @user, @link, (err, response, body) =>
-								expect(err).to.be.oneOf [null, undefined]
-								expect(response.statusCode).to.equal 200
-								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
-								cb()
-
-						# forbid access to the project page
+							expectInvitePage @user, @link, cb
 						(cb) =>
-							@user.openProject @invite.projectId, (err) =>
-								expect(err).to.be.instanceof Error
-								cb()
-
+							expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 				)
 
 			it 'should render the invalid-invite page if the token is invalid', (done) ->
 				Async.series(
 					[
-						# go to the invite page with an invalid token
 						(cb) =>
 							link = @link.replace(@invite.token, 'not_a_real_token')
-							followInviteLink @user, link, (err, response, body) =>
-								expect(err).to.be.oneOf [null, undefined]
-								expect(response.statusCode).to.equal 200
-								expect(body).to.match new RegExp("<title>Invalid Invite - .*</title>")
-								cb()
-
-						# forbid access to the project page
+							expectInvalidInvitePage @user, link, cb
 						(cb) =>
-							@user.openProject @invite.projectId, (err) =>
-								expect(err).to.be.instanceof Error
-								cb()
-
+							expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 				)
 
 			it 'should allow the user to accept the invite and access the project', (done) ->
 				Async.series(
 					[
-						# go to the invite page
 						(cb) =>
-							followInviteLink @user, @link, (err, response, body) =>
-								expect(err).to.be.oneOf [null, undefined]
-								expect(response.statusCode).to.equal 200
-								expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
-								cb()
-
-						# accept the invite
+							expectInvitePage @user, @link, cb
 						(cb) =>
-							acceptInvite @user, @invite, (err, response, body) =>
-								expect(err).to.be.oneOf [null, undefined]
-								expect(response.statusCode).to.equal 302
-								expect(response.headers.location).to.equal "/project/#{@invite.projectId}"
-								cb()
-
-						# access the project page
+							expectAcceptInviteAndRedirect @user, @invite, cb
 						(cb) =>
-							@user.openProject @invite.projectId, (err) =>
-								expect(err).to.be.oneOf [null, undefined]
-								cb()
-
+							expectProjectAccess @user, @invite.projectId, cb
 					], done
 				)
