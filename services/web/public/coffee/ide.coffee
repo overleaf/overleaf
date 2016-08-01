@@ -138,7 +138,7 @@ define [
 			console.error err
 
 		if ide.browserIsSafari
-			ide.safariScrollPatcher = new SafariScrollPatcher(ide, $scope)
+			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
