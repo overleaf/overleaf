@@ -153,7 +153,6 @@ expectRegistrationRedirectToInvite = (user, email, redir, link, callback=(err, r
 		expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
 		callback(null, null)
 
-
 expectInviteRedirectToProject = (user, link, invite, callback=(err,result)->) ->
 	# view invite, redirect straight to project
 	tryFollowInviteLink user, link, (err, response, body) ->
@@ -221,20 +220,16 @@ describe "ProjectInviteTests", ->
 
 				beforeEach (done) ->
 					Async.series [
-						(cb) =>
-							expectInvitePage @user, @link, cb
-						(cb) =>
-							expectAcceptInviteAndRedirect @user, @invite, cb
+						(cb) => expectInvitePage @user, @link, cb
+						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
 					], done
 
 				describe 'when user clicks on the invite a second time', ->
 
 					it 'should just redirect to the project page', (done) ->
 						Async.series [
-							(cb) =>
-								expectProjectAccess @user, @invite.projectId, cb
-							(cb) =>
-								expectInviteRedirectToProject @user, @link, @invite, cb
+							(cb) => expectProjectAccess @user, @invite.projectId, cb
+							(cb) => expectInviteRedirectToProject @user, @link, @invite, cb
 						], done
 
 					describe 'when the user recieves another invite to the same project', ->
@@ -248,10 +243,8 @@ describe "ProjectInviteTests", ->
 										@secondInvite = invite
 										@secondLink = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, invite)
 										cb()
-								(cb) =>
-									expectInviteRedirectToProject @user, @secondLink, @secondInvite, cb
-								(cb) =>
-									revokeInvite @sendingUser, @projectId, @secondInvite._id, cb
+								(cb) => expectInviteRedirectToProject @user, @secondLink, @secondInvite, cb
+								(cb) => revokeInvite @sendingUser, @projectId, @secondInvite._id, cb
 							], done
 
 
@@ -260,10 +253,8 @@ describe "ProjectInviteTests", ->
 				it 'should not grant access if the user does not accept the invite', (done) ->
 					Async.series(
 						[
-							(cb) =>
-								expectInvitePage @user, @link, cb
-							(cb) =>
-								expectNoProjectAccess @user, @invite.projectId, cb
+							(cb) => expectInvitePage @user, @link, cb
+							(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 						], done
 					)
 
@@ -281,12 +272,9 @@ describe "ProjectInviteTests", ->
 				it 'should allow the user to accept the invite and access the project', (done) ->
 					Async.series(
 						[
-							(cb) =>
-								expectInvitePage @user, @link, cb
-							(cb) =>
-								expectAcceptInviteAndRedirect @user, @invite, cb
-							(cb) =>
-								expectProjectAccess @user, @invite.projectId, cb
+							(cb) => expectInvitePage @user, @link, cb
+							(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
+							(cb) => expectProjectAccess @user, @invite.projectId, cb
 						], done
 					)
 
@@ -326,12 +314,10 @@ describe "ProjectInviteTests", ->
 							expectInviteRedirectToRegister @user, @link, (err, redirectUrl) =>
 								@_redir = redirectUrl
 								cb()
-						(cb) =>
-							expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, @link, cb
-						(cb) =>
-							expectInvitePage @user, @link, cb
-						(cb) =>
-							expectAcceptInviteAndRedirect @user, @invite, cb
+						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, @link, cb
+						(cb) => expectInvitePage @user, @link, cb
+						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
+						(cb) => expectProjectAccess @user, @invite.projectId, cb
 					], done
 
 			describe 'registration prompt workflow with non-valid token', ->
