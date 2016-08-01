@@ -368,10 +368,36 @@ describe "ProjectInviteTests", ->
 						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 
-
 				it 'should allow user to accept the invite if the user registers a new account', (done) ->
 					Async.series [
 						(cb) => expectInvitePage @user, @link, cb
 						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
 						(cb) => expectProjectAccess @user, @invite.projectId, cb
+					], done
+
+			describe 'login workflow with non-valid token', ->
+
+				before (done)->
+					@user.logout done
+
+				it 'should redirect to the register page', (done) ->
+					Async.series [
+						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+					], done
+
+				it 'should show the invalid-invite page once the user has logged in', (done) ->
+					badLink = @link.replace(@invite.token, 'not_a_real_token')
+					Async.series [
+						(cb) =>
+							expectInviteRedirectToRegister @user, badLink, (err, redirectUrl, loginUrl) =>
+								@_redir = redirectUrl
+								@_loginLink = loginUrl
+								cb()
+						(cb) =>
+							expectLoginPage @user, @_loginLink, (err, redirectUrl) =>
+								expect(@_redir).to.equal redirectUrl
+								cb()
+						(cb) => expectLoginRedirectToInvite @user, @_redir, badLink, cb
+						(cb) => expectInvalidInvitePage @user, badLink, cb
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
