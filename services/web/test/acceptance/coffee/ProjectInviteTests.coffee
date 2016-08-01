@@ -10,7 +10,7 @@ createInvite = (sendingUser, projectId, email, callback=(err, invite)->) ->
 	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
 		sendingUser.request.post {
-			url: "/project/#{projectId}/invite",
+			uri: "/project/#{projectId}/invite",
 			json:
 				email: email
 				privileges: 'readAndWrite'
@@ -40,7 +40,7 @@ revokeInvite = (sendingUser, projectId, inviteId, callback=(err)->) ->
 	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
 		sendingUser.request.delete {
-			url: "/project/#{projectId}/invite/#{inviteId}",
+			uri: "/project/#{projectId}/invite/#{inviteId}",
 		}, (err, response, body) ->
 			return callback(err) if err
 			callback(null)
@@ -180,6 +180,24 @@ describe "ProjectInviteTests", ->
 							(cb) =>
 								expectInviteRedirectToProject @user, @link, @invite, cb
 						], done
+
+					describe 'when the user recieves another invite to the same project', ->
+
+						it 'should redirect to the project page', (done) ->
+							Async.series [
+								(cb) =>
+									createInvite @sendingUser, @projectId, @email, (err, invite) =>
+										if err
+											throw err
+										@secondInvite = invite
+										@secondLink = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, invite)
+										cb()
+								(cb) =>
+									expectInviteRedirectToProject @user, @secondLink, @secondInvite, cb
+								(cb) =>
+									revokeInvite @sendingUser, @projectId, @secondInvite._id, cb
+							], done
+
 
 			describe 'user is not a member of the project', ->
 
