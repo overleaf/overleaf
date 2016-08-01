@@ -280,7 +280,7 @@ describe "ProjectInviteTests", ->
 					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
 				], done
 
-			describe 'registration prompt workflow', ->
+			describe 'registration prompt workflow with valid token', ->
 
 				it 'should redirect to the register page', (done) ->
 					Async.series [
@@ -299,4 +299,29 @@ describe "ProjectInviteTests", ->
 							expectInvitePage @user, @link, cb
 						(cb) =>
 							expectAcceptInviteAndRedirect @user, @invite, cb
+					], done
+
+			describe 'registration prompt workflow with non-valid token', ->
+
+				before (done)->
+					@user.logout done
+
+				it 'should redirect to the register page', (done) ->
+					Async.series [
+						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+					], done
+
+				it 'should display invalid-invite if the user registers a new account', (done) ->
+					badLink = @link.replace(@invite.token, 'not_a_real_token')
+					Async.series [
+						(cb) =>
+							expectInviteRedirectToRegister @user, badLink, (err, redirectUrl) =>
+								@_redir = redirectUrl
+								cb()
+						(cb) =>
+							expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, badLink, cb
+						(cb) =>
+							expectInvalidInvitePage @user, badLink, cb
+						(cb) =>
+							expectNoProjectAccess @user, @invite.projectId, cb
 					], done
