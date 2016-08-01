@@ -18,6 +18,24 @@ createInvite = (sendingUser, projectId, email, callback=(err, invite)->) ->
 			return callback(err) if err
 			callback(null, body.invite)
 
+createProject = (owner, projectName, callback=(err, projectId, project)->) ->
+	owner.createProject projectName, (err, projectId) ->
+		throw err if err
+		fakeProject = {
+			_id: projectId,
+			name: projectName,
+			owner_ref: owner
+		}
+		callback(err, projectId, fakeProject)
+
+createProjectAndInvite = (owner, projectName, email, callback=(err, project, invite)->) ->
+	createProject owner, projectName, (err, projectId, project) ->
+		return callback(err) if err
+		createInvite owner, projectId, email, (err, invite) ->
+			return callback(err) if err
+			link =  CollaboratorsEmailHandler._buildInviteUrl(project, invite)
+			callback(null, project, invite, link)
+
 revokeInvite = (sendingUser, projectId, inviteId, callback=(err)->) ->
 	sendingUser.getCsrfToken (err) ->
 		return callback(err) if err
@@ -26,6 +44,7 @@ revokeInvite = (sendingUser, projectId, inviteId, callback=(err)->) ->
 		}, (err, response, body) ->
 			return callback(err) if err
 			callback(null)
+
 
 # Actions
 tryFollowInviteLink = (user, link, callback=(err, response, body)->) ->
@@ -71,6 +90,13 @@ expectInvalidInvitePage = (user, link, callback=()->) ->
 		expect(body).to.match new RegExp("<title>Invalid Invite - .*</title>")
 		callback()
 
+expectInviteRedirectToRegister = (user, link, callback=()->) ->
+	tryFollowInviteLink user, link, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 302
+		expect(response.headers.location).to.match new RegExp("^/register\?.*redir=.*$")
+		callback()
+
 expectAcceptInviteAndRedirect = (user, invite, callback=()->) ->
 	# should accept the invite and redirect to project
 	tryAcceptInvite user, invite, (err, response, body) =>
@@ -82,86 +108,113 @@ expectAcceptInviteAndRedirect = (user, invite, callback=()->) ->
 
 describe "ProjectInviteTests", ->
 	before (done) ->
-		@timeout(20000)
 		@sendingUser = new User()
 		@user = new User()
 		@site_admin = new User({email: "admin@example.com"})
 		@email = 'smoketestuser@example.com'
 		@projectName = 'sharing test'
-		@projectId = null
-		@fakeProject = null
 		Async.series [
 			(cb) => @user.login cb
+			(cb) => @user.logout cb
 			(cb) => @sendingUser.login cb
-			(cb) => @sendingUser.createProject(@projectName, (err, projectId) =>
-				throw err if err
-				@projectId = projectId
-				@fakeProject = {
-					_id: projectId,
-					name: @projectName,
-					owner_ref: @sendingUser
-				}
-				cb()
-			)
 		], done
 
-		after (done) ->
-			Async.series [
-				(cb) => @sendingUser.deleteProject(@projectId, cb)
-			], done
-
-	describe "user is logged in", ->
+	describe 'clicking the invite link', ->
 
 		beforeEach (done) ->
-			@user.login (err) =>
-				if err
-					throw err
-				done()
+			@projectId = null
+			@fakeProject = null
+			done()
 
-		describe 'user is not a member of the project', ->
+
+		describe "user is logged in already", ->
 
 			beforeEach (done) ->
-				@invite = null
-				@link = null
-				createInvite @sendingUser, @projectId, @email, (err, invite) =>
-					@invite = invite
-					@link = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, @invite)
-					done()
+				Async.series [
+					(cb) =>
+						createProjectAndInvite @sendingUser, @projectName, @email, (err, project, invite, link) =>
+							@projectId = project._id
+							@fakeProject = project
+							@invite = invite
+							@link = link
+							cb()
+					(cb) =>
+						@user.login (err) =>
+							if err
+								throw err
+							cb()
+				], done
 
 			afterEach (done) ->
-				revokeInvite @sendingUser, @projectId, @invite._id, (err) =>
-					throw err if err
-					done()
+				Async.series [
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
+				], done
 
-			it 'should not grant access if the user does not accept the invite', (done) ->
-				Async.series(
-					[
-						(cb) =>
-							expectInvitePage @user, @link, cb
-						(cb) =>
-							expectNoProjectAccess @user, @invite.projectId, cb
-					], done
-				)
+			# describe 'user is already a member of the project', ->
 
-			it 'should render the invalid-invite page if the token is invalid', (done) ->
-				Async.series(
-					[
-						(cb) =>
-							link = @link.replace(@invite.token, 'not_a_real_token')
-							expectInvalidInvitePage @user, link, cb
-						(cb) =>
-							expectNoProjectAccess @user, @invite.projectId, cb
-					], done
-				)
+			describe 'user is not a member of the project', ->
 
-			it 'should allow the user to accept the invite and access the project', (done) ->
-				Async.series(
-					[
-						(cb) =>
-							expectInvitePage @user, @link, cb
-						(cb) =>
-							expectAcceptInviteAndRedirect @user, @invite, cb
-						(cb) =>
-							expectProjectAccess @user, @invite.projectId, cb
+				it 'should not grant access if the user does not accept the invite', (done) ->
+					Async.series(
+						[
+							(cb) =>
+								expectInvitePage @user, @link, cb
+							(cb) =>
+								expectNoProjectAccess @user, @invite.projectId, cb
+						], done
+					)
+
+				it 'should render the invalid-invite page if the token is invalid', (done) ->
+					Async.series(
+						[
+							(cb) =>
+								link = @link.replace(@invite.token, 'not_a_real_token')
+								expectInvalidInvitePage @user, link, cb
+							(cb) =>
+								expectNoProjectAccess @user, @invite.projectId, cb
+						], done
+					)
+
+				it 'should allow the user to accept the invite and access the project', (done) ->
+					Async.series(
+						[
+							(cb) =>
+								expectInvitePage @user, @link, cb
+							(cb) =>
+								expectAcceptInviteAndRedirect @user, @invite, cb
+							(cb) =>
+								expectProjectAccess @user, @invite.projectId, cb
+						], done
+					)
+
+		describe 'user is not logged in initially', ->
+
+			before (done) ->
+				@user.logout done
+
+			beforeEach (done) ->
+				Async.series [
+					(cb) =>
+						createProjectAndInvite @sendingUser, @projectName, @email, (err, project, invite, link) =>
+							@projectId = project._id
+							@fakeProject = project
+							@invite = invite
+							@link = link
+							cb()
+				], done
+
+			afterEach (done) ->
+				Async.series [
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
+				], done
+
+			describe 'user is not a member of the project', ->
+
+				it 'should redirect to the register page', (done) ->
+					Async.series [
+						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
 					], done
-				)
