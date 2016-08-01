@@ -93,7 +93,7 @@ describe "ProjectInviteTests", ->
 		Async.series [
 			(cb) => @user.login cb
 			(cb) => @sendingUser.login cb
-			(cb) => @sendingUser.createProject(@projectName, (err, projectId, project) =>
+			(cb) => @sendingUser.createProject(@projectName, (err, projectId) =>
 				throw err if err
 				@projectId = projectId
 				@fakeProject = {
