@@ -91,10 +91,19 @@ expectInvalidInvitePage = (user, link, callback=()->) ->
 		callback()
 
 expectInviteRedirectToRegister = (user, link, callback=()->) ->
+	# view invite, redirect to `/register`
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 302
 		expect(response.headers.location).to.match new RegExp("^/register\?.*redir=.*$")
+		callback()
+
+expectInviteRedirectToProject = (user, link, invite, callback=()->) ->
+	# view invite, redirect straight to project
+	tryFollowInviteLink user, link, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 302
+		expect(response.headers.location).to.equal "/project/#{invite.projectId}"
 		callback()
 
 expectAcceptInviteAndRedirect = (user, invite, callback=()->) ->
@@ -152,7 +161,25 @@ describe "ProjectInviteTests", ->
 					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
 				], done
 
-			# describe 'user is already a member of the project', ->
+			describe 'user is already a member of the project', ->
+
+				beforeEach (done) ->
+					Async.series [
+						(cb) =>
+							expectInvitePage @user, @link, cb
+						(cb) =>
+							expectAcceptInviteAndRedirect @user, @invite, cb
+					], done
+
+				describe 'when user clicks on the invite a second time', ->
+
+					it 'should just redirect to the project page', (done) ->
+						Async.series [
+							(cb) =>
+								expectProjectAccess @user, @invite.projectId, cb
+							(cb) =>
+								expectInviteRedirectToProject @user, @link, @invite, cb
+						], done
 
 			describe 'user is not a member of the project', ->
 
