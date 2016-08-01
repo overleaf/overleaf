@@ -222,6 +222,7 @@ describe "ProjectInviteTests", ->
 					Async.series [
 						(cb) => expectInvitePage @user, @link, cb
 						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
+						(cb) => expectProjectAccess @user, @invite.projectId, cb
 					], done
 
 				describe 'when user clicks on the invite a second time', ->
@@ -230,6 +231,7 @@ describe "ProjectInviteTests", ->
 						Async.series [
 							(cb) => expectProjectAccess @user, @invite.projectId, cb
 							(cb) => expectInviteRedirectToProject @user, @link, @invite, cb
+							(cb) => expectProjectAccess @user, @invite.projectId, cb
 						], done
 
 					describe 'when the user recieves another invite to the same project', ->
@@ -244,6 +246,7 @@ describe "ProjectInviteTests", ->
 										@secondLink = CollaboratorsEmailHandler._buildInviteUrl(@fakeProject, invite)
 										cb()
 								(cb) => expectInviteRedirectToProject @user, @secondLink, @secondInvite, cb
+								(cb) => expectProjectAccess @user, @invite.projectId, cb
 								(cb) => revokeInvite @sendingUser, @projectId, @secondInvite._id, cb
 							], done
 
@@ -264,8 +267,8 @@ describe "ProjectInviteTests", ->
 							(cb) =>
 								link = @link.replace(@invite.token, 'not_a_real_token')
 								expectInvalidInvitePage @user, link, cb
-							(cb) =>
-								expectNoProjectAccess @user, @invite.projectId, cb
+							(cb) => expectNoProjectAccess @user, @invite.projectId, cb
+							(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 						], done
 					)
 
@@ -328,6 +331,7 @@ describe "ProjectInviteTests", ->
 				it 'should redirect to the register page', (done) ->
 					Async.series [
 						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 
 				it 'should display invalid-invite if the user registers a new account', (done) ->
@@ -350,6 +354,7 @@ describe "ProjectInviteTests", ->
 				it 'should redirect to the register page', (done) ->
 					Async.series [
 						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 
 				it 'should allow the user to login to view the invite', (done) ->
@@ -383,6 +388,7 @@ describe "ProjectInviteTests", ->
 				it 'should redirect to the register page', (done) ->
 					Async.series [
 						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
 
 				it 'should show the invalid-invite page once the user has logged in', (done) ->
