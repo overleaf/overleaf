@@ -60,21 +60,32 @@ tryAcceptInvite = (user, invite, callback=(err, response, body)->) ->
 			token: invite.token
 	}, callback
 
+tryRegisterUser = (user, email, redir, callback=(err, response, body)->) ->
+	user.getCsrfToken (error) =>
+		return callback(error) if error?
+		user.request.post {
+			url: "/register"
+			json:
+				email: email
+				password: "some_weird_password"
+				redir: redir
+		}, callback
+
 
 # Expectations
-expectProjectAccess = (user, projectId, callback=()->) ->
+expectProjectAccess = (user, projectId, callback=(err,result)->) ->
 	# should have access to project
 	user.openProject projectId, (err) =>
 		expect(err).to.be.oneOf [null, undefined]
 		callback()
 
-expectNoProjectAccess = (user, projectId, callback=()->) ->
+expectNoProjectAccess = (user, projectId, callback=(err,result)->) ->
 	# should not have access to project page
 	user.openProject projectId, (err) =>
 		expect(err).to.be.instanceof Error
 		callback()
 
-expectInvitePage = (user, link, callback=()->) ->
+expectInvitePage = (user, link, callback=(err,result)->) ->
 	# view invite
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
@@ -82,7 +93,7 @@ expectInvitePage = (user, link, callback=()->) ->
 		expect(body).to.match new RegExp("<title>Project Invite - .*</title>")
 		callback()
 
-expectInvalidInvitePage = (user, link, callback=()->) ->
+expectInvalidInvitePage = (user, link, callback=(err,result)->) ->
 	# view invalid invite
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
@@ -90,15 +101,27 @@ expectInvalidInvitePage = (user, link, callback=()->) ->
 		expect(body).to.match new RegExp("<title>Invalid Invite - .*</title>")
 		callback()
 
-expectInviteRedirectToRegister = (user, link, callback=()->) ->
+expectInviteRedirectToRegister = (user, link, callback=(err,result)->) ->
 	# view invite, redirect to `/register`
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 302
 		expect(response.headers.location).to.match new RegExp("^/register\?.*redir=.*$")
-		callback()
+		# follow redirect to register page and extract the redirectUrl from form
+		user.request.get response.headers.location, (err, response, body) ->
+			redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
+			expect(redirectUrl).to.not.be.oneOf [null, undefined]
+			callback(null, redirectUrl)
 
-expectInviteRedirectToProject = (user, link, invite, callback=()->) ->
+expectRegistrationRedirectToInvite = (user, email, redir, link, callback=(err, result)->) ->
+	tryRegisterUser user, email, redir, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
+		callback(null, null)
+
+
+expectInviteRedirectToProject = (user, link, invite, callback=(err,result)->) ->
 	# view invite, redirect straight to project
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
@@ -106,7 +129,7 @@ expectInviteRedirectToProject = (user, link, invite, callback=()->) ->
 		expect(response.headers.location).to.equal "/project/#{invite.projectId}"
 		callback()
 
-expectAcceptInviteAndRedirect = (user, invite, callback=()->) ->
+expectAcceptInviteAndRedirect = (user, invite, callback=(err,result)->) ->
 	# should accept the invite and redirect to project
 	tryAcceptInvite user, invite, (err, response, body) =>
 		expect(err).to.be.oneOf [null, undefined]
@@ -262,4 +285,18 @@ describe "ProjectInviteTests", ->
 				it 'should redirect to the register page', (done) ->
 					Async.series [
 						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+					], done
+
+				it 'should allow user to accept the invite if the user registers a new account', (done) ->
+					Async.series [
+						(cb) =>
+							expectInviteRedirectToRegister @user, @link, (err, redirectUrl) =>
+								@_redir = redirectUrl
+								cb()
+						(cb) =>
+							expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, @link, cb
+						(cb) =>
+							expectInvitePage @user, @link, cb
+						(cb) =>
+							expectAcceptInviteAndRedirect @user, @invite, cb
 					], done
