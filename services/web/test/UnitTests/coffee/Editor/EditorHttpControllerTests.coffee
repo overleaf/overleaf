@@ -17,7 +17,8 @@ describe "EditorHttpController", ->
 			"./EditorController": @EditorController = {}
 			'../../infrastructure/Metrics': @Metrics = {inc: sinon.stub()}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
-			
+			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
+
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@user_id = "mock-user-id"
@@ -102,9 +103,14 @@ describe "EditorHttpController", ->
 				_id: @project_id
 				owner:{_id:"something"}
 				view: true
+			@invites = [
+				{_id: "invite_one", email: "user-one@example.com", privileges: "readOnly", projectId: @project._id}
+				{_id: "invite_two", email: "user-two@example.com", privileges: "readOnly", projectId: @project._id}
+			]
 			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@CollaboratorsHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
+			@CollaboratorsInviteHandler.getAllInvites = sinon.stub().callsArgWith(1, null, @invites)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				
 		describe "when authorized", ->
@@ -131,6 +137,11 @@ describe "EditorHttpController", ->
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
 					.calledWith(@user_id, @project_id)
+					.should.equal true
+
+			it 'should include the invites', ->
+				@CollaboratorsInviteHandler.getAllInvites
+					.calledWith(@project._id)
 					.should.equal true
 
 			it "should return the project model view, privilege level and protocol version", ->

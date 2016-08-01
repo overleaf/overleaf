@@ -14,7 +14,6 @@ define [
 		}
 
 		$modalInstance.opened.then () ->
-			getOutstandingInvites()
 			$timeout () ->
 				$scope.$broadcast "open"
 			, 200
@@ -43,14 +42,6 @@ define [
 
 		getCurrentMemberEmails = () ->
 			$scope.project.members.map (u) -> u.email
-
-		getOutstandingInvites = (callback) ->
-			projectInvites.getInvites().then(
-				(response) ->
-					$scope.state.invites = response?.data?.invites
-				, (response) ->
-					console.error response
-			)
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
@@ -95,7 +86,7 @@ define [
 						.success (data) ->
 							if data.invite
 								invite = data.invite
-								$scope.state.invites.push invite
+								$scope.project.invites.push invite
 							else
 								if data.users?
 									users = data.users
@@ -137,9 +128,9 @@ define [
 				.revokeInvite(invite._id)
 				.success () ->
 					$scope.state.inflight = false
-					index = $scope.state.invites.indexOf(invite)
+					index = $scope.project.invites.indexOf(invite)
 					return if index == -1
-					$scope.state.invites.splice(index, 1)
+					$scope.project.invites.splice(index, 1)
 				.error () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("

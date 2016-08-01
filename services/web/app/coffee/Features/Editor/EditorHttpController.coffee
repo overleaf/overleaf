@@ -9,6 +9,7 @@ AuthorizationManager = require("../Authorization/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+CollaboratorsInviteHandler = require("../Collaborators/CollaboratorsInviteHandler")
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 
 module.exports = EditorHttpController =
@@ -39,13 +40,15 @@ module.exports = EditorHttpController =
 					return callback(error) if error?
 					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
-						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
-							callback null, null, false
-						else
-							callback(null,
-								ProjectEditorHandler.buildProjectModelView(project, members),
-								privilegeLevel
-							)
+						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
+							return callback(error) if error?
+							if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
+								callback null, null, false
+							else
+								callback(null,
+									ProjectEditorHandler.buildProjectModelView(project, members, invites),
+									privilegeLevel
+								)
 
 	restoreDoc: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -135,5 +138,3 @@ module.exports = EditorHttpController =
 		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", (error) ->
 			return next(error) if error?
 			res.sendStatus 204
-
-

@@ -54,7 +54,7 @@ module.exports = CollaboratorsInviteHandler =
 			if err?
 				logger.err {err, projectId}, "error fetching invite"
 				return callback(err)
-			if !invite
+			if !invite?
 				logger.err {err, projectId, token: tokenString}, "no invite found"
 				return callback(null, null)
 			callback(null, invite)

@@ -67,12 +67,16 @@ describe "ProjectEditorHandler", ->
 			},
 			privilegeLevel: "readAndWrite"
 		}]
+		@invites = [
+			{_id: "invite_one", email: "user-one@example.com", privileges: "readOnly", projectId: @project._id}
+			{_id: "invite_two", email: "user-two@example.com", privileges: "readOnly", projectId: @project._id}
+		]
 		@handler = SandboxedModule.require modulePath
 
 	describe "buildProjectModelView", ->
 		describe "with owner and members included", ->
 			beforeEach ->
-				@result = @handler.buildProjectModelView @project, @members
+				@result = @handler.buildProjectModelView @project, @members, @invites
 
 			it "should include the id", ->
 				should.exist @result._id
@@ -143,6 +147,10 @@ describe "ProjectEditorHandler", ->
 				@result.rootFolder[0].folders[0].docs[0]._id.should.equal "doc-id"
 				@result.rootFolder[0].folders[0].docs[0].name.should.equal "main.tex"
 				should.not.exist @result.rootFolder[0].folders[0].docs[0].lines
+
+			it 'should include invites', ->
+				should.exist @result.invites
+				@result.invites.should.deep.equal @invites
 
 		describe "deletedByExternalDataSource", ->
 

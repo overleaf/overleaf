@@ -43,7 +43,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="removeMember(member)"
 					)
 						i.fa.fa-times
-			.row.project-invite(ng-repeat="invite in state.invites")
+			.row.project-invite(ng-repeat="invite in project.invites")
 				.col-xs-8 {{ invite.email }}&nbsp;
 					span.label.label-primary #{translate("pending")}
 				.col-xs-3.text-left

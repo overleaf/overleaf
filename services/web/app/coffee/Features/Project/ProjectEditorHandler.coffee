@@ -1,7 +1,7 @@
 _ = require("underscore")
 
 module.exports = ProjectEditorHandler =
-	buildProjectModelView: (project, members) ->
+	buildProjectModelView: (project, members, invites) ->
 		result =
 			_id        : project._id
 			name       : project.name
@@ -15,7 +15,8 @@ module.exports = ProjectEditorHandler =
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
 			members:     []
-		
+			invites:     invites || []
+
 		owner = null
 		for member in members
 			if member.privilegeLevel == "owner"
