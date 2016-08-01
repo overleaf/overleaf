@@ -69,6 +69,9 @@ define [
 					# editor.
 					e.preventDefault()
 
+			# "loaded" event is emitted from the pdfViewer controller $scope. This means
+			# that the previous PDF DOM element was destroyed and a new one is available,
+			# so we need to grab the elements and set the listeners again.
 			$scope.$on "loaded", () =>
 				@setListeners()
 
