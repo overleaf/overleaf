@@ -212,7 +212,7 @@ describe "ProjectInviteTests", ->
 					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
 				], done
 
-			describe 'user is not a member of the project', ->
+			describe 'registration prompt workflow', ->
 
 				it 'should redirect to the register page', (done) ->
 					Async.series [
