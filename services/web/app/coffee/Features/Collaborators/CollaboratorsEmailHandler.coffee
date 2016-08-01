@@ -9,8 +9,6 @@ module.exports = CollaboratorsEmailHandler =
 		"#{Settings.siteUrl}/project/#{project._id}/invite/token/#{invite.token}?" + [
 			"project_name=#{encodeURIComponent(project.name)}"
 			"user_first_name=#{encodeURIComponent(project.owner_ref.first_name)}"
-			"r=#{project.owner_ref.referal_id}" # Referal
-			"rs=ci" # referral source = collaborator invite
 		].join("&")
 
 	notifyUserOfProjectShare: (project_id, email, callback)->
