@@ -71,6 +71,22 @@ tryRegisterUser = (user, email, redir, callback=(err, response, body)->) ->
 				redir: redir
 		}, callback
 
+tryFollowLoginLink = (user, loginLink, callback=(err, response, body)->) ->
+	user.getCsrfToken (error) =>
+		return callback(error) if error?
+		user.request.get loginLink, callback
+
+tryLoginUser = (user, redir, callback=(err, response, body)->) ->
+	user.getCsrfToken (error) =>
+		return callback(error) if error?
+		user.request.post {
+			url: "/login"
+			json:
+				email: user.email
+				password: user.password
+				redir: redir
+		}, callback
+
 
 # Expectations
 expectProjectAccess = (user, projectId, callback=(err,result)->) ->
@@ -114,6 +130,21 @@ expectInviteRedirectToRegister = (user, link, callback=(err,result)->) ->
 			expect(redirectUrl).to.not.be.oneOf [null, undefined]
 			expect(loginUrl).to.not.be.oneOf [null, undefined]
 			callback(null, redirectUrl, loginUrl)
+
+expectLoginPage = (user, loginLink, callback=(err, result)->) ->
+	tryFollowLoginLink user, loginLink, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(body).to.match new RegExp("<title>Login - .*</title>")
+		redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
+		callback(null, redirectUrl)
+
+expectLoginRedirectToInvite = (user, redir, link, callback=(err, result)->) ->
+	tryLoginUser user, redir, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
+		callback(null, null)
 
 expectRegistrationRedirectToInvite = (user, email, redir, link, callback=(err, result)->) ->
 	tryRegisterUser user, email, redir, (err, response, body) ->
@@ -320,10 +351,41 @@ describe "ProjectInviteTests", ->
 							expectInviteRedirectToRegister @user, badLink, (err, redirectUrl) =>
 								@_redir = redirectUrl
 								cb()
+						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, badLink, cb
+						(cb) => expectInvalidInvitePage @user, badLink, cb
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
+					], done
+
+			describe 'login workflow with valid token', ->
+
+				before (done)->
+					@user.logout done
+
+				it 'should redirect to the register page', (done) ->
+					Async.series [
+						(cb) => expectInviteRedirectToRegister(@user, @link, cb)
+					], done
+
+				it 'should allow the user to login to view the invite', (done) ->
+					Async.series [
 						(cb) =>
-							expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, badLink, cb
+							expectInviteRedirectToRegister @user, @link, (err, redirectUrl, loginUrl) =>
+								@_redir = redirectUrl
+								@_loginLink = loginUrl
+								cb()
 						(cb) =>
-							expectInvalidInvitePage @user, badLink, cb
-						(cb) =>
-							expectNoProjectAccess @user, @invite.projectId, cb
+							expectLoginPage @user, @_loginLink, (err, redirectUrl) =>
+								expect(@_redir).to.equal redirectUrl
+								cb()
+						(cb) => expectLoginRedirectToInvite @user, @_redir, @link, cb
+						(cb) => expectInvitePage @user, @link, cb
+						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
+					], done
+
+
+				it 'should allow user to accept the invite if the user registers a new account', (done) ->
+					Async.series [
+						(cb) => expectInvitePage @user, @link, cb
+						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
+						(cb) => expectProjectAccess @user, @invite.projectId, cb
 					], done
