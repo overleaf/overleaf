@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/SafariScrollPatcher"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -40,6 +41,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	SafariScrollPatcher
 ) ->
 
 	App.controller "IdeController", ($scope, $timeout, ide, localStorage, event_tracking) ->
@@ -134,6 +136,9 @@ define [
 			)
 		catch err
 			console.error err
+
+		if ide.browserIsSafari
+			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
