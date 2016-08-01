@@ -110,8 +110,10 @@ expectInviteRedirectToRegister = (user, link, callback=(err,result)->) ->
 		# follow redirect to register page and extract the redirectUrl from form
 		user.request.get response.headers.location, (err, response, body) ->
 			redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
+			loginUrl = body.match(/href="([^"]*)">\s*Login here/m)?[1]
 			expect(redirectUrl).to.not.be.oneOf [null, undefined]
-			callback(null, redirectUrl)
+			expect(loginUrl).to.not.be.oneOf [null, undefined]
+			callback(null, redirectUrl, loginUrl)
 
 expectRegistrationRedirectToInvite = (user, email, redir, link, callback=(err, result)->) ->
 	tryRegisterUser user, email, redir, (err, response, body) ->
