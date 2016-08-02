@@ -4,7 +4,7 @@ ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 EditorRealTimeController = require "../Editor/EditorRealTimeController"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
-EmailHelpers = require "../Helpers/EmailHelpers"
+EmailHelper = require "../Helpers/EmailHelper"
 
 
 module.exports = CollaboratorsController =
@@ -18,7 +18,7 @@ module.exports = CollaboratorsController =
 			else
 				{email, privileges} = req.body
 
-				email = EmailHelpers.parseEmail(email)
+				email = EmailHelper.parseEmail(email)
 				if !email? or email == ""
 					return res.status(400).send("invalid email address")
 

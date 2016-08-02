@@ -4,7 +4,7 @@ UserGetter = require "../User/UserGetter"
 Project = require("../../models/Project").Project
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
-EmailHelpers = require "../Helpers/EmailHelpers"
+EmailHelper = require "../Helpers/EmailHelper"
 
 
 module.exports = CollaboratorsInviteController =
@@ -29,7 +29,7 @@ module.exports = CollaboratorsInviteController =
 				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
 				return res.json {invite: null}
 			{email, privileges} = req.body
-			email = EmailHelpers.parseEmail(email)
+			email = EmailHelper.parseEmail(email)
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)

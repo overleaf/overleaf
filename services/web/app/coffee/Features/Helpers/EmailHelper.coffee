@@ -1,7 +1,7 @@
 mimelib = require("mimelib")
 
 
-module.exports = EmailHelpers =
+module.exports = EmailHelper =
 
 	parseEmail: (email) ->
 			email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()

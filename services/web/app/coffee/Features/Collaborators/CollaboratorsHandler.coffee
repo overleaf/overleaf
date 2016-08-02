@@ -7,7 +7,7 @@ CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 Errors = require "../Errors/Errors"
-EmailHelpers = require "../Helpers/EmailHelpers"
+EmailHelper = require "../Helpers/EmailHelper"
 
 
 module.exports = CollaboratorsHandler =
@@ -102,7 +102,7 @@ module.exports = CollaboratorsHandler =
 			async.series jobs, callback
 
 	addEmailToProject: (project_id, adding_user_id, unparsed_email, privilegeLevel, callback = (error, user) ->) ->
-		email = EmailHelpers.parseEmail(unparsed_email)
+		email = EmailHelper.parseEmail(unparsed_email)
 		if !email? or email == ""
 			return callback(new Error("no valid email provided: '#{unparsed_email}'"))
 		UserCreator.getUserOrCreateHoldingAccount email, (error, user) ->
