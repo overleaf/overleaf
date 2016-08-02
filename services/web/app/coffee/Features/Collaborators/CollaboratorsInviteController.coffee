@@ -2,7 +2,6 @@ ProjectGetter = require "../Project/ProjectGetter"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
 Project = require("../../models/Project").Project
-User = require("../../models/User").User
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 mimelib = require("mimelib")
 logger = require('logger-sharelatex')
@@ -80,7 +79,7 @@ module.exports = CollaboratorsInviteController =
 					logger.log {projectId, token}, "no invite found for this token"
 					return _renderInvalidPage()
 				# check the user who sent the invite exists
-				User.findOne {_id: invite.sendingUserId}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
+				UserGetter.getUser {_id: invite.sendingUserId}, {email: 1, first_name: 1, last_name: 1}, (err, owner) ->
 					if err?
 						logger.err {err, projectId}, "error getting project owner"
 						return next(err)

@@ -11,9 +11,6 @@ ObjectId = require("mongojs").ObjectId
 
 describe "CollaboratorsInviteController", ->
 	beforeEach ->
-		@User = class User
-			constructor: (options={}) -> this
-			@findOne: sinon.stub()
 		@Project = class Project
 			constructor: () ->
 				this
@@ -24,9 +21,8 @@ describe "CollaboratorsInviteController", ->
 			"../Editor/EditorRealTimeController": @EditorRealTimeController = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
 			'../Project/ProjectEditorHandler' : @ProjectEditorHandler = {}
-			'../User/UserGetter': @UserGetter = {}
+			'../User/UserGetter': @UserGetter = {getUser: sinon.stub()}
 			'../../models/Project': {Project: @Project}
-			'../../models/User': {User; @User}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 		@res = new MockResponse()
 		@req = new MockRequest()
@@ -195,7 +191,7 @@ describe "CollaboratorsInviteController", ->
 				last_name: "Doe"
 				email: "john@example.com"
 			@Project.findOne.callsArgWith(2, null, @fakeProject)
-			@User.findOne.callsArgWith(2, null, @owner)
+			@UserGetter.getUser.callsArgWith(2, null, @owner)
 			@CollaboratorsInviteHandler.getInviteByToken = sinon.stub().callsArgWith(2, null, @invite)
 			@callback = sinon.stub()
 			@next = sinon.stub()
@@ -220,9 +216,9 @@ describe "CollaboratorsInviteController", ->
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
-			it 'should call User.findOne', ->
-				@User.findOne.callCount.should.equal 1
-				@User.findOne.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+			it 'should call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 1
+				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
 
 		describe 'when Project.findOne produces an error', ->
 
@@ -241,8 +237,8 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
 
-			it 'should not call User.findOne', ->
-				@User.findOne.callCount.should.equal 0
+			it 'should not call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 0
 
 		describe 'when Project.findOne does not find a project', ->
 
@@ -264,8 +260,8 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
 
-			it 'should not call User.findOne', ->
-				@User.findOne.callCount.should.equal 0
+			it 'should not call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 0
 
 		describe 'when the getInviteByToken produces an error', ->
 
@@ -284,8 +280,8 @@ describe "CollaboratorsInviteController", ->
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
-			it 'should not call User.findOne', ->
-				@User.findOne.callCount.should.equal 0
+			it 'should not call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 0
 
 		describe 'when the getInviteByToken does not produce an invite', ->
 
@@ -308,8 +304,8 @@ describe "CollaboratorsInviteController", ->
 				it 'should call getInviteByToken', ->
 					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
-				it 'should not call User.findOne', ->
-					@User.findOne.callCount.should.equal 0
+				it 'should not call User.getUser', ->
+					@UserGetter.getUser.callCount.should.equal 0
 
 			describe 'when the user is already a member of the project', ->
 
@@ -332,13 +328,13 @@ describe "CollaboratorsInviteController", ->
 				it 'should not call getInviteByToken', ->
 					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
 
-				it 'should not call User.findOne', ->
-					@User.findOne.callCount.should.equal 0
+				it 'should not call User.getUser', ->
+					@UserGetter.getUser.callCount.should.equal 0
 
-		describe 'when User.findOne produces an error', ->
+		describe 'when User.getUser produces an error', ->
 
 			beforeEach ->
-				@User.findOne.callsArgWith(2, new Error('woops'))
+				@UserGetter.getUser.callsArgWith(2, new Error('woops'))
 				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
 			it 'should produce an error', ->
@@ -352,13 +348,13 @@ describe "CollaboratorsInviteController", ->
 				@Project.findOne.callCount.should.equal 1
 				@Project.findOne.calledWith({_id: @project_id}).should.equal true
 
-			it 'should call User.findOne', ->
-				@User.findOne.callCount.should.equal 1
+			it 'should call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 1
 
-		describe 'when User.findOne does not find a user', ->
+		describe 'when User.getUser does not find a user', ->
 
 			beforeEach ->
-				@User.findOne.callsArgWith(2, null, null)
+				@UserGetter.getUser.callsArgWith(2, null, null)
 				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
 			it 'should render the not-valid view template', ->
@@ -372,8 +368,8 @@ describe "CollaboratorsInviteController", ->
 				@Project.findOne.callCount.should.equal 1
 				@Project.findOne.calledWith({_id: @project_id}).should.equal true
 
-			it 'should call User.findOne', ->
-				@User.findOne.callCount.should.equal 1
+			it 'should call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 1
 
 	describe "revokeInvite", ->
 
