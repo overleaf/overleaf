@@ -41,7 +41,16 @@ module.exports = CompileManager =
 					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
 				else
 					callback()
-			
+
+			# set up environment variables for chktex
+			env = {}
+			if request.check?
+				env['CHKTEX_OPTIONS'] =  '-nall -e9 -e10 -w15 -w16 -w27'
+				if request.check is 'error'
+					env['CHKTEX_EXIT_ON_ERROR'] =  1
+				if request.check is 'validate'
+					env['CHKTEX_VALIDATE'] =  1
+
 			injectDraftModeIfRequired (error) ->
 				return callback(error) if error?
 				timer = new Metrics.Timer("run-compile")
@@ -57,9 +66,14 @@ module.exports = CompileManager =
 					compiler:  request.compiler
 					timeout:   request.timeout
 					image:     request.imageName
+					environment: env
 				}, (error, output, stats, timings) ->
+					if request.check is "validate"
+						result = if error?.code then "fail" else "pass"
+						error = new Error("validation")
+						error.validate = result
 					# compile was killed by user
-					if error?.terminated
+					if error?.terminated or error?.validate
 						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
 							return callback(err) if err?
 							callback(error, outputFiles) # return output files so user can check logs

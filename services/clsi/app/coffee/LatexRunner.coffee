@@ -8,11 +8,11 @@ ProcessTable = {}  # table of currently running jobs (pids or docker container n
 
 module.exports = LatexRunner =
 	runLatex: (project_id, options, callback = (error) ->) ->
-		{directory, mainFile, compiler, timeout, image} = options
+		{directory, mainFile, compiler, timeout, image, environment} = options
 		compiler ||= "pdflatex"
 		timeout  ||= 60000 # milliseconds
 
-		logger.log directory: directory, compiler: compiler, timeout: timeout, mainFile: mainFile, "starting compile"
+		logger.log directory: directory, compiler: compiler, timeout: timeout, mainFile: mainFile, environment: environment, "starting compile"
 
 		# We want to run latexmk on the tex file which we will automatically
 		# generate from the Rtex/Rmd/md file.
@@ -34,7 +34,7 @@ module.exports = LatexRunner =
 
 		id = "#{project_id}" # record running project under this id
 
-		ProcessTable[id] = CommandRunner.run project_id, command, directory, image, timeout, (error, output) ->
+		ProcessTable[id] = CommandRunner.run project_id, command, directory, image, timeout, environment, (error, output) ->
 			delete ProcessTable[id]
 			return callback(error) if error?
 			runs = output?.stderr?.match(/^Run number \d+ of .*latex/mg)?.length or 0
