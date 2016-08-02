@@ -20,6 +20,7 @@ describe "CollaboratorsInviteHandler", ->
 			@findOne: sinon.stub()
 			@find: sinon.stub()
 			@remove: sinon.stub()
+			@count: sinon.stub()
 		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex': @settings = {}
@@ -47,6 +48,34 @@ describe "CollaboratorsInviteHandler", ->
 			projectId:      @projectId
 			privileges:     @privileges
 			createdAt:      new Date()
+
+	describe 'getInviteCount', ->
+
+		beforeEach ->
+			@ProjectInvite.count.callsArgWith(1, null, 2)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler.getInviteCount @projectId, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err, invites) =>
+				expect(err).to.not.be.instanceof Error
+				expect(err).to.be.oneOf [null, undefined]
+				done()
+
+		it 'should produce the count of documents', (done) ->
+			@call (err, count) =>
+				expect(count).to.equal 2
+				done()
+
+		describe 'when model.count produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.count.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, count) =>
+					expect(err).to.be.instanceof Error
+					done()
 
 	describe 'getAllInvites', ->
 
