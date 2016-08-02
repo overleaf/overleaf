@@ -3,8 +3,9 @@ LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
 Project = require("../../models/Project").Project
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
-mimelib = require("mimelib")
 logger = require('logger-sharelatex')
+EmailHelpers = require "../Helpers/EmailHelpers"
+
 
 module.exports = CollaboratorsInviteController =
 
@@ -28,7 +29,7 @@ module.exports = CollaboratorsInviteController =
 				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
 				return res.json {invite: null}
 			{email, privileges} = req.body
-			email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()
+			email = EmailHelpers.parseEmail(email)
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)

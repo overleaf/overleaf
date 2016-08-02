@@ -1,5 +1,4 @@
 ProjectInvite = require("../../models/ProjectInvite").ProjectInvite
-mimelib = require("mimelib")
 logger = require('logger-sharelatex')
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 CollaboratorsHandler = require "./CollaboratorsHandler"

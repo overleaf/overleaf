@@ -4,7 +4,8 @@ ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 EditorRealTimeController = require "../Editor/EditorRealTimeController"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
-mimelib = require("mimelib")
+EmailHelpers = require "../Helpers/EmailHelpers"
+
 
 module.exports = CollaboratorsController =
 	addUserToProject: (req, res, next) ->
@@ -16,11 +17,11 @@ module.exports = CollaboratorsController =
 				return res.json { user: false }
 			else
 				{email, privileges} = req.body
-				
-				email = mimelib.parseAddresses(email or "")[0]?.address?.toLowerCase()
+
+				email = EmailHelpers.parseEmail(email)
 				if !email? or email == ""
 					return res.status(400).send("invalid email address")
-					
+
 				adding_user_id = req.session?.user?._id
 				CollaboratorsHandler.addEmailToProject project_id, adding_user_id, email, privileges, (error, user_id) =>
 					return next(error) if error?
@@ -36,7 +37,7 @@ module.exports = CollaboratorsController =
 		CollaboratorsController._removeUserIdFromProject project_id, user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204
-	
+
 	removeSelfFromProject: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
 		user_id    = req.session?.user?._id
@@ -49,4 +50,3 @@ module.exports = CollaboratorsController =
 			return callback(error) if error?
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			callback()
-
