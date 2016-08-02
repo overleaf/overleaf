@@ -17,6 +17,14 @@ module.exports = CollaboratorsInviteHandler =
 				return callback(err)
 			callback(null, invites)
 
+	getInviteCount: (projectId, callback=(err, count)->) ->
+		logger.log {projectId}, "counting invites for project"
+		ProjectInvite.count {projectId: projectId}, (err, count) ->
+			if err?
+				logger.err {err, projectId}, "error getting invites from mongo"
+				return callback(err)
+			callback(null, count)
+
 	inviteToProject: (projectId, sendingUserId, email, privileges, callback=(err,invite)->) ->
 		logger.log {projectId, sendingUserId, email, privileges}, "adding invite"
 		Crypto.randomBytes 24, (err, buffer) ->
