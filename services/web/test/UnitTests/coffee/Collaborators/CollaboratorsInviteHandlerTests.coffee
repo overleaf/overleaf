@@ -20,20 +20,13 @@ describe "CollaboratorsInviteHandler", ->
 			@findOne: sinon.stub()
 			@find: sinon.stub()
 			@remove: sinon.stub()
-		@Project = class Project
-			constructor: () ->
-				this
-			@findOne: sinon.stub()
-			@update: sinon.stub()
 		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex': @settings = {}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 			'./CollaboratorsEmailHandler': @CollaboratorsEmailHandler = {}
-			'../Contacts/ContactManager': @ContactManager = {}
-			'../../models/Project': {Project: @Project}
+			"./CollaboratorsHandler": @CollaboratorsHandler = {addUserIdToProject: sinon.stub()}
 			'../../models/ProjectInvite': {ProjectInvite: @ProjectInvite}
-			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			'crypto': @Crypto
 
 		@projectId = ObjectId()
@@ -249,14 +242,15 @@ describe "CollaboratorsInviteHandler", ->
 				_id: @projectId
 				collaberator_refs: []
 				readOnly_refs: []
-			@Project.findOne.callsArgWith(1, null, @fakeProject)
-			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
-			@ContactManager.addContact = sinon.stub()
-			@Project.update.callsArgWith(2, null)
-			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArgWith(1, null)
+			@CollaboratorsHandler.addUserIdToProject.callsArgWith(4, null)
+			@_getInviteByToken = sinon.stub(@CollaboratorsInviteHandler, 'getInviteByToken')
+			@_getInviteByToken.callsArgWith(2, null, @fakeInvite)
 			@ProjectInvite.remove.callsArgWith(1, null)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.acceptInvite @projectId, @inviteId, @token, @user, callback
+
+		afterEach ->
+			@_getInviteByToken.restore()
 
 		describe 'when all goes well', ->
 
@@ -268,34 +262,16 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.oneOf [null, undefined]
 					done()
 
-			it 'should have called Project.findOne', (done) ->
+			it 'should have called getInviteByToken', (done) ->
 				@call (err) =>
-					@Project.findOne.callCount.should.equal 1
-					@Project.findOne.calledWith({_id: @projectId}).should.equal true
+					@_getInviteByToken.callCount.should.equal 1
+					@_getInviteByToken.calledWith(@projectId, @token).should.equal true
 					done()
 
-			it 'should have called ProjectInvite.findOne', (done) ->
+			it 'should have called CollaboratorsHandler.addUserIdToProject', (done) ->
 				@call (err) =>
-					@ProjectInvite.findOne.callCount.should.equal 1
-					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId, token: @token}).should.equal true
-					done()
-
-			it 'should have called ContactManager.addContact', (done) ->
-				@call (err) =>
-					@ContactManager.addContact.callCount.should.equal 1
-					@ContactManager.addContact.calledWith(@sendingUserId, @userId).should.equal true
-					done()
-
-			it 'should have called Project.update, adding the user to collaberator_refs', (done) ->
-				@call (err) =>
-					@Project.update.callCount.should.equal 1
-					@Project.update.calledWith({_id: @projectId}, {$addToSet: {"collaberator_refs": @userId}}).should.equal true
-					done()
-
-			it 'should have called ProjectEntityHandler.flushProjectToThirdPartyDataStore', (done) ->
-				@call (err) =>
-					@ProjectEntityHandler.flushProjectToThirdPartyDataStore.callCount.should.equal 1
-					@ProjectEntityHandler.flushProjectToThirdPartyDataStore.calledWith(@projectId).should.equal true
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 1
+					@CollaboratorsHandler.addUserIdToProject.calledWith(@projectId, @sendingUserId, @userId, @fakeInvite.privileges).should.equal true
 					done()
 
 			it 'should have called ProjectInvite.remove', (done) ->
@@ -308,7 +284,7 @@ describe "CollaboratorsInviteHandler", ->
 
 			beforeEach ->
 				@fakeInvite.privileges = 'readOnly'
-				@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
+				@_getInviteByToken.callsArgWith(2, null, @fakeInvite)
 
 			it 'should not produce an error', (done) ->
 				@call (err) =>
@@ -316,72 +292,16 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.oneOf [null, undefined]
 					done()
 
-			it 'should have called Project.update, adding the user to readOnly_refs', (done) ->
+			it 'should have called CollaboratorsHandler.addUserIdToProject', (done) ->
 				@call (err) =>
-					@Project.update.callCount.should.equal 1
-					@Project.update.calledWith({_id: @projectId}, {$addToSet: {"readOnly_refs": @userId}}).should.equal true
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 1
+					@CollaboratorsHandler.addUserIdToProject.calledWith(@projectId, @sendingUserId, @userId, @fakeInvite.privileges).should.equal true
 					done()
 
-		describe 'when the invite is for an unknown access level', ->
+		describe 'when getInviteByToken does not find an invite', ->
 
 			beforeEach ->
-				@fakeInvite.privileges = 'some_crazy_permission'
-				@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
-
-			it 'should produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.instanceof Error
-					done()
-
-			it 'should not have called Project.update', (done) ->
-				@call (err) =>
-					@Project.update.callCount.should.equal 0
-					done()
-
-			it 'should not have called ProjectInvite.remove', (done) ->
-				@call (err) =>
-					@ProjectInvite.remove.callCount.should.equal 0
-					done()
-
-		describe 'when user is already a member of project', ->
-
-			beforeEach ->
-				@fakeProject.collaberator_refs = [ObjectId(), @user._id, ObjectId(), ObjectId()]
-				@Project.findOne.callsArgWith(1, null, @fakeProject)
-
-			it 'should not produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.not.be.instanceof Error
-					expect(err).to.be.oneOf [null, undefined]
-					done()
-
-			it 'should have called Project.findOne', (done) ->
-				@call (err) =>
-					@Project.findOne.callCount.should.equal 1
-					@Project.findOne.calledWith({_id: @projectId}).should.equal true
-					done()
-
-			it 'should have called ProjectInvite.findOne', (done) ->
-				@call (err) =>
-					@ProjectInvite.findOne.callCount.should.equal 1
-					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId, token: @token}).should.equal true
-					done()
-
-			it 'should have returned early, not have called Project.update', (done) ->
-				@call (err) =>
-					@Project.update.callCount.should.equal 0
-					done()
-
-			it 'should not have called ProjectInvite.remove', (done) ->
-				@call (err) =>
-					@ProjectInvite.remove.callCount.should.equal 0
-					done()
-
-
-		describe 'when ProjectInvite.findOne does not find an invite', ->
-
-			beforeEach ->
-				@ProjectInvite.findOne.callsArgWith(1, null, null)
+				@_getInviteByToken.callsArgWith(2, null, null)
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
@@ -389,9 +309,15 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err.name).to.equal "NotFoundError"
 					done()
 
-			it 'should not have called Project.update', (done) ->
+			it 'should have called getInviteByToken', (done) ->
 				@call (err) =>
-					@Project.update.callCount.should.equal 0
+					@_getInviteByToken.callCount.should.equal 1
+					@_getInviteByToken.calledWith(@projectId, @token).should.equal true
+					done()
+
+			it 'should not have called CollaboratorsHandler.addUserIdToProject', (done) ->
+				@call (err) =>
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 0
 					done()
 
 			it 'should not have called ProjectInvite.remove', (done) ->
@@ -399,19 +325,25 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite.remove.callCount.should.equal 0
 					done()
 
-		describe 'when Project.findOne produces an error', ->
+		describe 'when getInviteByToken produces an error', ->
 
 			beforeEach ->
-				@Project.findOne.callsArgWith(1, new Error('woops'))
+				@_getInviteByToken.callsArgWith(2, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
 					expect(err).to.be.instanceof Error
 					done()
 
-			it 'should not have called Project.update', (done) ->
+			it 'should have called getInviteByToken', (done) ->
 				@call (err) =>
-					@Project.update.callCount.should.equal 0
+					@_getInviteByToken.callCount.should.equal 1
+					@_getInviteByToken.calledWith(@projectId, @token).should.equal true
+					done()
+
+			it 'should not have called CollaboratorsHandler.addUserIdToProject', (done) ->
+				@call (err) =>
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 0
 					done()
 
 			it 'should not have called ProjectInvite.remove', (done) ->
@@ -419,39 +351,26 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite.remove.callCount.should.equal 0
 					done()
 
-		describe 'when ProjectInvite.findOne produces an error', ->
+		describe 'when addUserIdToProject produces an error', ->
 
 			beforeEach ->
-				@ProjectInvite.findOne.callsArgWith(1, new Error('woops'))
+				@CollaboratorsHandler.addUserIdToProject.callsArgWith(4, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
 					expect(err).to.be.instanceof Error
 					done()
 
-			it 'should not have called Project.update', (done) ->
+			it 'should have called getInviteByToken', (done) ->
 				@call (err) =>
-					@Project.update.callCount.should.equal 0
+					@_getInviteByToken.callCount.should.equal 1
+					@_getInviteByToken.calledWith(@projectId, @token).should.equal true
 					done()
 
-			it 'should not have called ProjectInvite.remove', (done) ->
+			it 'should have called CollaboratorsHandler.addUserIdToProject', (done) ->
 				@call (err) =>
-					@ProjectInvite.remove.callCount.should.equal 0
-					done()
-
-		describe 'when Project.update produces an error', ->
-
-			beforeEach ->
-				@Project.update.callsArgWith(2, new Error('woops'))
-
-			it 'should produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.instanceof Error
-					done()
-
-			it 'should have called Project.update', (done) ->
-				@call (err) =>
-					@Project.update.callCount.should.equal 1
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 1
+					@CollaboratorsHandler.addUserIdToProject.calledWith(@projectId, @sendingUserId, @userId, @fakeInvite.privileges).should.equal true
 					done()
 
 			it 'should not have called ProjectInvite.remove', (done) ->
@@ -469,9 +388,16 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
-			it 'should have called Project.update', (done) ->
+			it 'should have called getInviteByToken', (done) ->
 				@call (err) =>
-					@Project.update.callCount.should.equal 1
+					@_getInviteByToken.callCount.should.equal 1
+					@_getInviteByToken.calledWith(@projectId, @token).should.equal true
+					done()
+
+			it 'should have called CollaboratorsHandler.addUserIdToProject', (done) ->
+				@call (err) =>
+					@CollaboratorsHandler.addUserIdToProject.callCount.should.equal 1
+					@CollaboratorsHandler.addUserIdToProject.calledWith(@projectId, @sendingUserId, @userId, @fakeInvite.privileges).should.equal true
 					done()
 
 			it 'should have called ProjectInvite.remove', (done) ->

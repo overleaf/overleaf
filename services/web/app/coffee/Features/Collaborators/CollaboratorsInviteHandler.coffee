@@ -1,9 +1,8 @@
-Project = require("../../models/Project").Project
 ProjectInvite = require("../../models/ProjectInvite").ProjectInvite
 mimelib = require("mimelib")
 logger = require('logger-sharelatex')
-ContactManager = require "../Contacts/ContactManager"
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
+CollaboratorsHandler = require "./CollaboratorsHandler"
 Async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 Errors = require "../Errors/Errors"
@@ -60,59 +59,24 @@ module.exports = CollaboratorsInviteHandler =
 			callback(null, invite)
 
 	acceptInvite: (projectId, inviteId, tokenString, user, callback=(err)->) ->
-		# fetch the target project
-		Project.findOne {_id: projectId}, (err, project) ->
+		logger.log {projectId, inviteId, userId: user._id}, "accepting invite"
+		CollaboratorsInviteHandler.getInviteByToken projectId, tokenString, (err, invite) ->
 			if err?
-				logger.err {err, projectId}, "error finding project"
+				logger.err {err, projectId, inviteId}, "error finding invite"
 				return callback(err)
-			if !project
-				err = new Errors.NotFoundError("no project found for invite")
-				logger.log {err, projectId, inviteId}, "no project found"
+			if !invite
+				err = new Errors.NotFoundError("no matching invite found")
+				logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
 				return callback(err)
-			# fetch the invite
-			ProjectInvite.findOne {_id: inviteId, projectId: projectId, token: tokenString}, (err, invite) ->
+			inviteId = invite._id
+			CollaboratorsHandler.addUserIdToProject projectId, invite.sendingUserId, user._id, invite.privileges, (err) ->
 				if err?
-					logger.err {err, projectId, inviteId}, "error finding invite"
+					logger.err {err, projectId, inviteId, userId: user._id}, "error adding user to project"
 					return callback(err)
-				if !invite
-					err = new Errors.NotFoundError("no matching invite found")
-					logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
-					return callback(err)
-
-				# check if user is already a member of this project,
-				# return early if so
-				existing_users = (project.collaberator_refs or [])
-				existing_users = existing_users.concat(project.readOnly_refs or [])
-				existing_users = existing_users.map (u) -> u.toString()
-				if existing_users.indexOf(user._id.toString()) > -1
-					logger.log {projectId, userId: user._id}, "user already member of project, returning"
-					return callback null
-
-				# build an update to be applied with $addToSet, user is added to either
-				# `collaberator_refs` or `readOnly_refs`
-				privilegeLevel = invite.privileges
-				if privilegeLevel == PrivilegeLevels.READ_AND_WRITE
-					level = {"collaberator_refs": user._id}
-					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user with read-write access"
-				else if privilegeLevel == PrivilegeLevels.READ_ONLY
-					level = {"readOnly_refs": user._id}
-					logger.log {privileges: privilegeLevel, user_id: user._id, projectId}, "adding user with read-only access"
-				else
-					return callback(new Error("unknown privilegeLevel: #{privilegeLevel}"))
-
-				ContactManager.addContact invite.sendingUserId, user._id
-
-				# Update the project, adding the new member.
-				Project.update { _id: project._id }, { $addToSet: level }, (error) ->
-					return callback(error) if error?
-					# Flush to TPDS in background to add files to collaborator's Dropbox
-					ProjectEntityHandler = require("../Project/ProjectEntityHandler")
-					ProjectEntityHandler.flushProjectToThirdPartyDataStore project._id, (error) ->
-						if error?
-							logger.error {err: error, project_id: project._id, user_id}, "error flushing to TPDS after adding collaborator"
-					# Remove invite
-					ProjectInvite.remove {_id: inviteId}, (err) ->
-						if err?
-							logger.err {err, projectId, inviteId}, "error removing invite"
-							return callback(err)
-						callback()
+				# Remove invite
+				logger.log {projectId, inviteId}, "removing invite"
+				ProjectInvite.remove {_id: inviteId}, (err) ->
+					if err?
+						logger.err {err, projectId, inviteId}, "error removing invite"
+						return callback(err)
+					callback()
