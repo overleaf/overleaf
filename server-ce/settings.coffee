@@ -565,6 +565,8 @@ if process.env["SHARELATEX_TEMPLATES_USER_ID"]
 	settings.templates =
 		mountPointUrl: "/templates"
 		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
+		
+	settings.templateLinks: parse(process.env["SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS"])
 
 
 # /Learn
