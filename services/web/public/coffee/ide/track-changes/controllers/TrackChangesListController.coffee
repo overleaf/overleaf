@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "TrackChangesPremiumPopup", ($scope, ide, sixpack, event_tracking)->
+	App.controller "TrackChangesPremiumPopup", ($scope, ide, sixpack)->
 		$scope.$watch "ui.view", ->
 			if $scope.ui.view == "track-changes"
 				if $scope.project?.features?.versioning
@@ -78,7 +78,7 @@ define [
 			$scope.recalculateSelectedUpdates()
 	]
 
-	App.controller "TrackChangesListItemController", ["$scope", ($scope) ->
+	App.controller "TrackChangesListItemController", ["$scope", "event_tracking", ($scope, event_tracking) ->
 		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
 			if selectedFrom
 				for update in $scope.trackChanges.updates
