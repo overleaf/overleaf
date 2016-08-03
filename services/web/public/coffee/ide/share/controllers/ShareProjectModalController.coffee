@@ -136,7 +136,15 @@ define [
 					$scope.state.error = "Sorry, something went wrong :("
 
 		$scope.resendInvite = (invite) ->
-			console.log ">> resend"
+			$scope.state.error = null
+			$scope.state.inflight = true
+			projectInvites
+				.resendInvite(invite._id)
+				.success () ->
+					$scope.state.inflight = false
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = "Sorry, something went wrong resending the invite :("
 
 		$scope.openMakePublicModal = () ->
 			$modal.open {

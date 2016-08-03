@@ -209,6 +209,67 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
+	describe 'resendInvite', ->
+
+		beforeEach ->
+			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
+			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub()
+			@call = (callback) =>
+				@CollaboratorsInviteHandler.resendInvite @projectId, @inviteId, callback
+
+		describe 'when all goes well', ->
+
+			beforeEach ->
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should call ProjectInvite.findOne', (done) ->
+				@call (err, invite) =>
+					@ProjectInvite.findOne.callCount.should.equal 1
+					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId}).should.equal true
+					done()
+
+			it 'should have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+				@call (err, invite) =>
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 1
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.calledWith(@projectId, @email).should.equal true
+					done()
+
+		describe 'when findOne produces an error', ->
+
+			beforeEach ->
+				@ProjectInvite.findOne.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, invite) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+				@call (err, invite) =>
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 0
+					done()
+
+		describe 'when findOne does not find an invite', ->
+
+			beforeEach ->
+				@ProjectInvite.findOne.callsArgWith(1, null, null)
+
+			it 'should not produce an error', (done) ->
+				@call (err, invite) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should not have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+				@call (err, invite) =>
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 0
+					done()
+
 	describe 'getInviteByToken', ->
 
 		beforeEach ->

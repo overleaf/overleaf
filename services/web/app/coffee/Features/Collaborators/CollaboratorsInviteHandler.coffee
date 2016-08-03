@@ -54,6 +54,18 @@ module.exports = CollaboratorsInviteHandler =
 				return callback(err)
 			callback(null)
 
+	resendInvite: (projectId, inviteId, callback=(err)->) ->
+		logger.log {projectId, inviteId}, "resending invite email"
+		ProjectInvite.findOne {_id: inviteId, projectId: projectId}, (err, invite) ->
+			if err?
+				logger.err {err, projectId, inviteId}, "error finding invite"
+				return callback(err)
+			if !invite?
+				logger.err {err, projectId, inviteId}, "no invite found, nothing to resend"
+				return callback(null)
+			CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, invite.email, invite
+			callback(null)
+
 	getInviteByToken: (projectId, tokenString, callback=(err,invite)->) ->
 		logger.log {projectId, tokenString}, "fetching invite by token"
 		ProjectInvite.findOne {projectId: projectId, token: tokenString}, (err, invite) ->

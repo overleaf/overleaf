@@ -50,6 +50,16 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.sendStatus(201)
 
+	resendInvite: (req, res, next) ->
+		projectId = req.params.Project_id
+		inviteId = req.params.invite_id
+		logger.log {projectId, inviteId}, "resending invite"
+		CollaboratorsInviteHandler.resendInvite projectId, inviteId, (err) ->
+			if err?
+				logger.err {projectId, inviteId}, "error revoking invite"
+				return next(err)
+			res.sendStatus(201)
+
 	viewInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		token = req.params.token

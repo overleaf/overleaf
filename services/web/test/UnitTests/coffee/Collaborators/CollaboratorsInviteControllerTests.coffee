@@ -429,6 +429,50 @@ describe "CollaboratorsInviteController", ->
 			it 'should call ProjectGetter.getProject', ->
 				@ProjectGetter.getProject.callCount.should.equal 1
 
+	describe "resendInvite", ->
+
+		beforeEach ->
+			@req.params =
+				Project_id: @project_id
+				invite_id: @invite_id = "thuseoautoh"
+			@req.session =
+				user: _id: @current_user_id = "current-user-id"
+			@res.render = sinon.stub()
+			@res.sendStatus = sinon.stub()
+			@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(2, null)
+			@callback = sinon.stub()
+			@next = sinon.stub()
+
+		describe 'when resendInvite does not produce an error', ->
+
+			beforeEach ->
+				@CollaboratorsInviteController.resendInvite @req, @res, @next
+
+			it 'should produce a 201 response', ->
+				@res.sendStatus.callCount.should.equal 1
+				@res.sendStatus.calledWith(201).should.equal true
+
+			it 'should have called resendInvite', ->
+				@CollaboratorsInviteHandler.resendInvite.callCount.should.equal 1
+
+		describe 'when resendInvite produces an error', ->
+
+			beforeEach ->
+				@err = new Error('woops')
+				@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(2, @err)
+				@CollaboratorsInviteController.resendInvite @req, @res, @next
+
+			it 'should not produce a 201 response', ->
+				@res.sendStatus.callCount.should.equal 0
+
+			it 'should call next with the error', ->
+				@next.callCount.should.equal 1
+				@next.calledWith(@err).should.equal true
+
+			it 'should have called resendInvite', ->
+				@CollaboratorsInviteHandler.resendInvite.callCount.should.equal 1
+
+
 	describe "revokeInvite", ->
 
 		beforeEach ->

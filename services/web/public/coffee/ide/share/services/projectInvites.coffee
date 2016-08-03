@@ -19,6 +19,11 @@ define [
 						"X-Csrf-Token": window.csrfToken
 				})
 
+			resendInvite: (inviteId, privileges) ->
+				$http.post("/project/#{ide.project_id}/invite/#{inviteId}/resend", {
+					_csrf: window.csrfToken
+				})
+
 			getInvites: () ->
 				$http.get("/project/#{ide.project_id}/invite", {
 					json: true

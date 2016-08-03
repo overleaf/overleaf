@@ -29,6 +29,12 @@ module.exports =
 			CollaboratorsInviteController.revokeInvite
 		)
 
+		webRouter.post(
+			'/project/:Project_id/invite/:invite_id/resend',
+			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			CollaboratorsInviteController.resendInvite
+		)
+
 		webRouter.get(
 			'/project/:Project_id/invite/token/:token',
 			AuthenticationController.requireLogin(),
