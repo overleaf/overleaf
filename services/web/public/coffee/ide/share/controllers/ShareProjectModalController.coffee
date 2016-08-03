@@ -43,6 +43,9 @@ define [
 		getCurrentMemberEmails = () ->
 			$scope.project.members.map (u) -> u.email
 
+		getCurrentInviteEmails = () ->
+			$scope.project.invites.map (u) -> u.email
+
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
 			return $scope.autocompleteContacts.filter (contact) ->
@@ -63,6 +66,7 @@ define [
 				$scope.state.inflight = true
 
 				currentMemberEmails = getCurrentMemberEmails()
+				currentInviteEmails = getCurrentInviteEmails()
 				do addNextMember = () ->
 					if members.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
@@ -75,7 +79,9 @@ define [
 						return addNextMember()
 
 					# NOTE: groups aren't really a thing in ShareLaTeX, partially inherited from DJ
-					if member.type == "user"
+					if member.display in currentInviteEmails and inviteId = _.find($scope.project.invites, (invite) -> invite.email == member.display)?._id
+						request = projectInvites.resendInvite(inviteId)
+					else if member.type == "user"
 						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
 					else if member.type == "group"
 						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)

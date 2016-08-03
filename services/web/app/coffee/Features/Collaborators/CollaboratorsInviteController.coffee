@@ -56,7 +56,7 @@ module.exports = CollaboratorsInviteController =
 		logger.log {projectId, inviteId}, "resending invite"
 		CollaboratorsInviteHandler.resendInvite projectId, inviteId, (err) ->
 			if err?
-				logger.err {projectId, inviteId}, "error revoking invite"
+				logger.err {projectId, inviteId}, "error resending invite"
 				return next(err)
 			res.sendStatus(201)
 
