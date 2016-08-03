@@ -1,13 +1,21 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "TrackChangesDiffController", ($scope, $modal, ide) ->
+	App.controller "TrackChangesDiffController", ($scope, $modal, ide, event_tracking) ->
 		$scope.restoreDeletedDoc = () ->
-			ide.trackChangesManager.restoreDeletedDoc(
-				$scope.trackChanges.diff.doc
-			)
+			event_tracking.sendCountly "track-changes-restore-deleted"
+			$scope.trackChanges.diff.restoreInProgress = true
+			ide.trackChangesManager
+				.restoreDeletedDoc(
+					$scope.trackChanges.diff.doc
+				)
+				.success (response) ->
+					$scope.trackChanges.diff.restoredDocNewId = response.doc_id
+					$scope.trackChanges.diff.restoreInProgress = false
+					$scope.trackChanges.diff.restoreDeletedSuccess = true
 
 		$scope.openRestoreDiffModal = () ->
+			event_tracking.sendCountly "track-changes-restore-modal"
 			$modal.open {
 				templateUrl: "trackChangesRestoreDiffModalTemplate"
 				controller: "TrackChangesRestoreDiffModalController"
@@ -15,13 +23,17 @@ define [
 					diff: () -> $scope.trackChanges.diff
 			}
 
-	App.controller "TrackChangesRestoreDiffModalController", ($scope, $modalInstance, diff, ide) ->
+		$scope.backToEditorAfterRestore = () ->
+			ide.editorManager.openDoc({ id: $scope.trackChanges.diff.restoredDocNewId })
+
+	App.controller "TrackChangesRestoreDiffModalController", ($scope, $modalInstance, diff, ide, event_tracking) ->
 		$scope.state =
 			inflight: false
 
 		$scope.diff = diff
 
 		$scope.restore = () ->
+			event_tracking.sendCountly "track-changes-restored"
 			$scope.state.inflight = true
 			ide.trackChangesManager
 				.restoreDiff(diff)
