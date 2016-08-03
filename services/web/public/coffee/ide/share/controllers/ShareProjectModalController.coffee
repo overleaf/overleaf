@@ -135,6 +135,9 @@ define [
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 
+		$scope.resendInvite = (invite) ->
+			console.log ">> resend"
+
 		$scope.openMakePublicModal = () ->
 			$modal.open {
 				templateUrl: "makePublicModalTemplate"

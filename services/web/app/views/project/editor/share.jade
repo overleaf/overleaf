@@ -45,7 +45,9 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						i.fa.fa-times
 			.row.project-invite(ng-repeat="invite in project.invites")
 				.col-xs-8 {{ invite.email }}&nbsp;
-					span.label.label-primary #{translate("pending")}
+					div.small
+						| #{translate("invite_not_accepted")}.&nbsp;
+						a(href="#", ng-click="resendInvite(invite)") #{translate("resend")}
 				.col-xs-3.text-left
 					// todo: get invite privileges
 					span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
