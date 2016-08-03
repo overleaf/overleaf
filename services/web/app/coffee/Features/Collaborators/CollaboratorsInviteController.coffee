@@ -1,7 +1,7 @@
 ProjectGetter = require "../Project/ProjectGetter"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
-Project = require("../../models/Project").Project
+CollaboratorsHandler = require('./CollaboratorsHandler')
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
@@ -57,17 +57,12 @@ module.exports = CollaboratorsInviteController =
 		_renderInvalidPage = () ->
 			logger.log {projectId, token}, "invite not valid, rendering not-valid page"
 			res.render "project/invite/not-valid", {title: "Invalid Invite"}
-		# get the target project
-		Project.findOne {_id: projectId}, {owner_ref: 1, name: 1, collaberator_refs: 1, readOnly_refs: 1}, (err, project) ->
+		# check if the user is already a member of the project
+		CollaboratorsHandler.isUserMemberOfProject currentUser._id, projectId, (err, isMember, _privilegeLevel) ->
 			if err?
-				logger.err {err, projectId}, "error getting project"
+				logger.err {err, projectId}, "error checking if user is member of project"
 				return next(err)
-			if !project
-				logger.log {projectId}, "no project found"
-				return _renderInvalidPage()
-			# check if user is already a member of the project, redirect to project if so
-			allMembers = (project.collaberator_refs || []).concat(project.readOnly_refs || []).map((oid) -> oid.toString())
-			if currentUser._id in allMembers
+			if isMember
 				logger.log {projectId, userId: currentUser._id}, "user is already a member of this project, redirecting"
 				return res.redirect "/project/#{projectId}"
 			# get the invite
@@ -87,8 +82,16 @@ module.exports = CollaboratorsInviteController =
 					if !owner
 						logger.log {projectId}, "no project owner found"
 						return _renderInvalidPage()
-					# finally render the invite
-					res.render "project/invite/show", {invite, project, owner, title: "Project Invite"}
+					# fetch the project name
+					ProjectGetter.getProject projectId, {}, (err, project) ->
+						if err?
+							logger.err {err, projectId}, "error getting project"
+							return next(err)
+						if !project
+							logger.log {projectId}, "no project found"
+							return _renderInvalidPage()
+						# finally render the invite
+						res.render "project/invite/show", {invite, project, owner, title: "Project Invite"}
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id

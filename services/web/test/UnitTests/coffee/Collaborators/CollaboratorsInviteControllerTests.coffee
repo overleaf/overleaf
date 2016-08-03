@@ -17,12 +17,10 @@ describe "CollaboratorsInviteController", ->
 			@findOne: sinon.stub()
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
-			"./CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
-			"../Editor/EditorRealTimeController": @EditorRealTimeController = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
-			'../Project/ProjectEditorHandler' : @ProjectEditorHandler = {}
 			'../User/UserGetter': @UserGetter = {getUser: sinon.stub()}
-			'../../models/Project': {Project: @Project}
+			"./CollaboratorsHandler": @CollaboratorsHandler = {}
+			"./CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 		@res = new MockResponse()
 		@req = new MockRequest()
@@ -163,9 +161,10 @@ describe "CollaboratorsInviteController", ->
 	describe "viewInvite", ->
 
 		beforeEach ->
+			@token = "some-opaque-token"
 			@req.params =
 				Project_id: @project_id
-				token: "some-opaque-token"
+				token: @token
 			@req.session =
 				user: _id: @current_user_id = "current-user-id"
 			@res.render = sinon.stub()
@@ -173,7 +172,7 @@ describe "CollaboratorsInviteController", ->
 			@res.sendStatus = sinon.stub()
 			@invite = {
 				_id: ObjectId(),
-				token: "htnseuthaouse",
+				token: @token,
 				sendingUserId: ObjectId(),
 				projectId: @project_id,
 				targetEmail: 'user@example.com'
@@ -190,16 +189,18 @@ describe "CollaboratorsInviteController", ->
 				first_name: "John"
 				last_name: "Doe"
 				email: "john@example.com"
-			@Project.findOne.callsArgWith(2, null, @fakeProject)
-			@UserGetter.getUser.callsArgWith(2, null, @owner)
+
+			@CollaboratorsHandler.isUserMemberOfProject = sinon.stub().callsArgWith(2, null, false, null)
 			@CollaboratorsInviteHandler.getInviteByToken = sinon.stub().callsArgWith(2, null, @invite)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @fakeProject)
+			@UserGetter.getUser.callsArgWith(2, null, @owner)
+
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
 		describe 'when the token is valid', ->
 
 			beforeEach ->
-				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, @invite)
 				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
 			it 'should render the view template', ->
@@ -209,30 +210,61 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call next', ->
 				@next.callCount.should.equal 0
 
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
-				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+				@CollaboratorsInviteHandler.getInviteByToken.calledWith(@fakeProject._id, @invite.token).should.equal true
 
 			it 'should call User.getUser', ->
 				@UserGetter.getUser.callCount.should.equal 1
 				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
 
-		describe 'when Project.findOne produces an error', ->
+			it 'should call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 1
+				@ProjectGetter.getProject.calledWith(@project_id).should.equal true
+
+		describe 'when user is already a member of the project', ->
 
 			beforeEach ->
-				@Project.findOne.callsArgWith(2, new Error('woops'))
+				@CollaboratorsHandler.isUserMemberOfProject = sinon.stub().callsArgWith(2, null, true, null)
 				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
-			it 'should produce an error', ->
+			it 'should redirect to the project page', ->
+				@res.redirect.callCount.should.equal 1
+				@res.redirect.calledWith("/project/#{@project_id}").should.equal true
+
+			it 'should not call next with an error', ->
+				@next.callCount.should.equal 0
+
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
+
+			it 'should not call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
+
+			it 'should not call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 0
+
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
+
+		describe 'when isUserMemberOfProject produces an error', ->
+
+			beforeEach ->
+				@CollaboratorsHandler.isUserMemberOfProject = sinon.stub().callsArgWith(2, new Error('woops'))
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should call next with an error', ->
 				@next.callCount.should.equal 1
 				expect(@next.firstCall.args[0]).to.be.instanceof Error
 
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
-				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
 			it 'should not call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
@@ -240,28 +272,8 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call User.getUser', ->
 				@UserGetter.getUser.callCount.should.equal 0
 
-		describe 'when Project.findOne does not find a project', ->
-
-			beforeEach ->
-				@Project.findOne.callsArgWith(2, null, null)
-				@CollaboratorsInviteController.viewInvite @req, @res, @next
-
-			it 'should render the not-valid view template', ->
-				@res.render.callCount.should.equal 1
-				@res.render.calledWith('project/invite/not-valid').should.equal true
-
-			it 'should not call next', ->
-				@next.callCount.should.equal 0
-
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
-				@Project.findOne.calledWith({_id: @project_id}).should.equal true
-
-			it 'should not call getInviteByToken', ->
-				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
-
-			it 'should not call User.getUser', ->
-				@UserGetter.getUser.callCount.should.equal 0
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
 
 		describe 'when the getInviteByToken produces an error', ->
 
@@ -274,62 +286,46 @@ describe "CollaboratorsInviteController", ->
 				@next.callCount.should.equal 1
 				@next.calledWith(@err).should.equal true
 
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
 			it 'should not call User.getUser', ->
 				@UserGetter.getUser.callCount.should.equal 0
 
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
+
 		describe 'when the getInviteByToken does not produce an invite', ->
 
-			describe 'when the user is not already a member of this project', ->
+			beforeEach ->
+				@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
 
-				beforeEach ->
-					@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
-					@CollaboratorsInviteController.viewInvite @req, @res, @next
+			it 'should render the not-valid view template', ->
+				@res.render.callCount.should.equal 1
+				@res.render.calledWith('project/invite/not-valid').should.equal true
 
-				it 'should render the not-valid view template', ->
-					@res.render.callCount.should.equal 1
-					@res.render.calledWith('project/invite/not-valid').should.equal true
+			it 'should not call next', ->
+				@next.callCount.should.equal 0
 
-				it 'should not call next', ->
-					@next.callCount.should.equal 0
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
-				it 'should call Project.findOne', ->
-					@Project.findOne.callCount.should.equal 1
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
 
-				it 'should call getInviteByToken', ->
-					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+			it 'should not call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 0
 
-				it 'should not call User.getUser', ->
-					@UserGetter.getUser.callCount.should.equal 0
-
-			describe 'when the user is already a member of the project', ->
-
-				beforeEach ->
-					@fakeProject.collaberator_refs = [ObjectId(), @current_user_id, ObjectId()]
-					@Project.findOne.callsArgWith(2, null, @fakeProject)
-					@CollaboratorsInviteHandler.getInviteByToken.callsArgWith(2, null, null)
-					@CollaboratorsInviteController.viewInvite @req, @res, @next
-
-				it 'should redirect to the project page', ->
-					@res.redirect.callCount.should.equal 1
-					@res.redirect.calledWith("/project/#{@project_id}").should.equal true
-
-				it 'should not call next', ->
-					@next.callCount.should.equal 0
-
-				it 'should call Project.findOne', ->
-					@Project.findOne.callCount.should.equal 1
-
-				it 'should not call getInviteByToken', ->
-					@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 0
-
-				it 'should not call User.getUser', ->
-					@UserGetter.getUser.callCount.should.equal 0
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
 
 		describe 'when User.getUser produces an error', ->
 
@@ -341,15 +337,19 @@ describe "CollaboratorsInviteController", ->
 				@next.callCount.should.equal 1
 				expect(@next.firstCall.args[0]).to.be.instanceof Error
 
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
+
 			it 'should call getInviteByToken', ->
 				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
-				@Project.findOne.calledWith({_id: @project_id}).should.equal true
-
 			it 'should call User.getUser', ->
 				@UserGetter.getUser.callCount.should.equal 1
+				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
 
 		describe 'when User.getUser does not find a user', ->
 
@@ -364,12 +364,70 @@ describe "CollaboratorsInviteController", ->
 			it 'should not call next', ->
 				@next.callCount.should.equal 0
 
-			it 'should call Project.findOne', ->
-				@Project.findOne.callCount.should.equal 1
-				@Project.findOne.calledWith({_id: @project_id}).should.equal true
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
 
 			it 'should call User.getUser', ->
 				@UserGetter.getUser.callCount.should.equal 1
+				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+
+			it 'should not call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 0
+
+		describe 'when getProject produces an error', ->
+
+			beforeEach ->
+				@ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should produce an error', ->
+				@next.callCount.should.equal 1
+				expect(@next.firstCall.args[0]).to.be.instanceof Error
+
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should call User.getUser', ->
+				@UserGetter.getUser.callCount.should.equal 1
+				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+
+			it 'should call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 1
+
+		describe 'when Project.getUser does not find a user', ->
+
+			beforeEach ->
+				@ProjectGetter.getProject.callsArgWith(2, null, null)
+				@CollaboratorsInviteController.viewInvite @req, @res, @next
+
+			it 'should render the not-valid view template', ->
+				@res.render.callCount.should.equal 1
+				@res.render.calledWith('project/invite/not-valid').should.equal true
+
+			it 'should not call next', ->
+				@next.callCount.should.equal 0
+
+			it 'should call CollaboratorsHandler.isUserMemberOfProject', ->
+				@CollaboratorsHandler.isUserMemberOfProject.callCount.should.equal 1
+				@CollaboratorsHandler.isUserMemberOfProject.calledWith(@current_user_id, @project_id).should.equal true
+
+			it 'should call getInviteByToken', ->
+				@CollaboratorsInviteHandler.getInviteByToken.callCount.should.equal 1
+
+			it 'should call getUser', ->
+				@UserGetter.getUser.callCount.should.equal 1
+				@UserGetter.getUser.calledWith({_id: @fakeProject.owner_ref}).should.equal true
+
+			it 'should call ProjectGetter.getProject', ->
+				@ProjectGetter.getProject.callCount.should.equal 1
 
 	describe "revokeInvite", ->
 
