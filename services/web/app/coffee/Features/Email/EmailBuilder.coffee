@@ -7,7 +7,7 @@ settings = require("settings-sharelatex")
 
 templates = {}
 
-templates.registered =	
+templates.registered =
 	subject:  _.template "Activate your #{settings.appName} Account"
 	layout: PersonalEmailLayout
 	type: "notification"
@@ -19,7 +19,7 @@ templates.registered =
 <p>If you have any questions or problems, please contact <a href="mailto:#{settings.adminEmail}">#{settings.adminEmail}</a>.</p>
 """
 
-templates.canceledSubscription = 
+templates.canceledSubscription =
 	subject:  _.template "ShareLaTeX thoughts"
 	layout: PersonalEmailLayout
 	type:"lifecycle"
@@ -36,7 +36,7 @@ ShareLaTeX Co-founder
 </p>
 '''
 
-templates.passwordResetRequested =	
+templates.passwordResetRequested =
 	subject:  _.template "Password Reset - #{settings.appName}"
 	layout: NotificationEmailLayout
 	type:"notification"
@@ -66,7 +66,7 @@ If you didn't request a password reset, let us know.
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
-templates.projectSharedWithYou = 
+templates.projectSharedWithYou =
 	subject: _.template "<%= owner.email %> wants to share <%= project.name %> with you"
 	layout: NotificationEmailLayout
 	type:"notification"
@@ -88,7 +88,7 @@ templates.projectSharedWithYou =
 """
 
 templates.projectInvite =
-	subject: _.template "<%= owner.email %> wants to share <%= project.name %> with you"
+	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
 	layout: NotificationEmailLayout
 	type:"notification"
 	compiledTemplate: _.template """
@@ -98,7 +98,7 @@ templates.projectInvite =
 		<div style="padding-right:10px;padding-left:10px">
 			<a href="<%= inviteUrl %>" style="text-decoration:none" target="_blank">
 				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
-					View Invite
+					View Project
 				</span>
 			</a>
 		</div>
@@ -108,7 +108,7 @@ templates.projectInvite =
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
-templates.completeJoinGroupAccount = 
+templates.completeJoinGroupAccount =
 	subject: _.template "Verify Email to join <%= group_name %> group"
 	layout: NotificationEmailLayout
 	type:"notification"
@@ -143,4 +143,3 @@ module.exports =
 			html: template.layout(opts)
 			type:template.type
 		}
-

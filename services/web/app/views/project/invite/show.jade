@@ -8,7 +8,8 @@ block content
 					.card.project-invite-accept
 						.page-header.text-centered
 							h1  #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
-								em #{project.name}
+								em
+									span.project-name #{project.name} 
 						.row.text-center
 							.col-md-12
 								p
@@ -25,6 +26,6 @@ block content
 									input(name='token', type='hidden', value="#{invite.token}")
 									.form-group.text-center
 										button.btn.btn-lg.btn-primary(type="submit")
-											| #{translate("accept_invite")}
+											| #{translate("join_project")}
 									.form-group.text-center
 							
