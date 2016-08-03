@@ -156,13 +156,13 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 		.diff-deleted.text-centered(
 			ng-show="trackChanges.diff.deleted && trackChanges.diff.restoreDeletedSuccess"
 		)
-			p.text-serif Your file ({{ trackChanges.diff.doc.name }}) has been recovered.
-			p.text-serif You can go back to the editor and work on it again.
+			p.text-serif  #{translate("file_restored", {filename:"{{ trackChanges.diff.doc.name }} "})}
+			p.text-serif  #{translate("file_restored_back_to_editor")}
 			p
 				a.btn.btn-default(
 					href,
 					ng-click="backToEditorAfterRestore()",
-				) Back to editor
+				) #{translate("file_restored_back_to_editor_btn")}
 
 		.loading-panel(ng-show="trackChanges.diff.loading")
 			i.fa.fa-spin.fa-refresh
