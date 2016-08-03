@@ -81,6 +81,9 @@ define [
 
 		$scope.$watch "ui.leftMenuShown", (isOpen) ->
 			event_tracking.sendCountlyOnce "ide-open-left-menu-once" if isOpen
+
+		$scope.trackHover = (feature) ->
+			event_tracking.sendCountlyOnce "ide-hover-#{feature}-once"
 		# End of tracking code.
 
 		window._ide = ide

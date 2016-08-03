@@ -8,6 +8,7 @@ define [
 			)
 
 		$scope.openRestoreDiffModal = () ->
+			console.log("track-changes-restore-modal")
 			$modal.open {
 				templateUrl: "trackChangesRestoreDiffModalTemplate"
 				controller: "TrackChangesRestoreDiffModalController"
@@ -22,6 +23,7 @@ define [
 		$scope.diff = diff
 
 		$scope.restore = () ->
+			console.log("track-changes-restored")
 			$scope.state.inflight = true
 			ide.trackChangesManager
 				.restoreDiff(diff)

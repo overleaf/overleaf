@@ -92,6 +92,7 @@ define [
 				$scope.recalculateSelectedUpdates()
 
 		$scope.select = () ->
+			console.log("track-changes-view")
 			$scope.update.selectedTo = true
 			$scope.update.selectedFrom = true
 
