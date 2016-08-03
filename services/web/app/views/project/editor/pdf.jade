@@ -42,6 +42,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						a(href, ng-click="recompile({check:true})")
 							i.fa.fa-fw()
 							| &nbsp;#{translate("run_syntax_check")}
+							span.beta-feature-badge
 		a(
 			href
 			ng-click="stop()"
