@@ -1,14 +1,15 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "TrackChangesDiffController", ($scope, $modal, ide) ->
+	App.controller "TrackChangesDiffController", ($scope, $modal, ide, event_tracking) ->
 		$scope.restoreDeletedDoc = () ->
+			event_tracking.sendCountly "track-changes-restore-deleted"
 			ide.trackChangesManager.restoreDeletedDoc(
 				$scope.trackChanges.diff.doc
 			)
 
 		$scope.openRestoreDiffModal = () ->
-			console.log("track-changes-restore-modal")
+			event_tracking.sendCountly "track-changes-restore-modal"
 			$modal.open {
 				templateUrl: "trackChangesRestoreDiffModalTemplate"
 				controller: "TrackChangesRestoreDiffModalController"
@@ -16,14 +17,14 @@ define [
 					diff: () -> $scope.trackChanges.diff
 			}
 
-	App.controller "TrackChangesRestoreDiffModalController", ($scope, $modalInstance, diff, ide) ->
+	App.controller "TrackChangesRestoreDiffModalController", ($scope, $modalInstance, diff, ide, event_tracking) ->
 		$scope.state =
 			inflight: false
 
 		$scope.diff = diff
 
 		$scope.restore = () ->
-			console.log("track-changes-restored")
+			event_tracking.sendCountly "track-changes-restored"
 			$scope.state.inflight = true
 			ide.trackChangesManager
 				.restoreDiff(diff)

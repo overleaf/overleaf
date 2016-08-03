@@ -119,7 +119,6 @@ define [
 				diff.deleted = true
 
 		restoreDeletedDoc: (doc) ->
-			console.log("track-changes-restore-deleted")
 			url = "/project/#{@$scope.project_id}/doc/#{doc.id}/restore"
 			@ide.$http.post(url, name: doc.name, _csrf: window.csrfToken)
 
