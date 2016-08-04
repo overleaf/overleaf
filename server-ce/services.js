@@ -40,4 +40,8 @@ module.exports =
 	name: "spelling",
 	repo: "https://github.com/sharelatex/spelling-sharelatex.git",
 	version: "master"
+}, {
+	name: "contacts",
+	repo: "https://github.com/sharelatex/contacts-sharelatex.git",
+	version: "master"
 }]
