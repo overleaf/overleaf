@@ -8,6 +8,7 @@ async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 Errors = require "../Errors/Errors"
 EmailHelper = require "../Helpers/EmailHelper"
+ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 
 
 module.exports = CollaboratorsHandler =
@@ -144,3 +145,12 @@ module.exports = CollaboratorsHandler =
 					if error?
 						logger.error {err: error, project_id, user_id}, "error flushing to TPDS after adding collaborator"
 				callback()
+
+	getAllMembers: (projectId, callback=(err, members)->) ->
+		logger.log {projectId}, "fetching all members"
+		CollaboratorsHandler.getMembersWithPrivilegeLevels projectId, (error, rawMembers) ->
+			if error?
+				logger.err {projectId, error}, "error getting members for project"
+				return callback(error)
+			{owner, members} = ProjectEditorHandler.buildOwnerAndMembersViews(rawMembers)
+			callback(null, members)

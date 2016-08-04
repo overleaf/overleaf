@@ -11,6 +11,13 @@ module.exports =
 		webRouter.post   '/project/:Project_id/users', AuthorizationMiddlewear.ensureUserCanAdminProject, CollaboratorsController.addUserToProject
 		webRouter.delete '/project/:Project_id/users/:user_id', AuthorizationMiddlewear.ensureUserCanAdminProject, CollaboratorsController.removeUserFromProject
 
+		webRouter.get(
+			'/project/:Project_id/members',
+			AuthenticationController.requireLogin(),
+			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			CollaboratorsController.getAllMembers
+		)
+
 		# invites
 		webRouter.post(
 			'/project/:Project_id/invite',
@@ -26,7 +33,7 @@ module.exports =
 		)
 
 		webRouter.get(
-			'/project/:Project_id/invite',
+			'/project/:Project_id/invites',
 			AuthenticationController.requireLogin(),
 			AuthorizationMiddlewear.ensureUserCanAdminProject,
 			CollaboratorsInviteController.getAllInvites

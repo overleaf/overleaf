@@ -1,4 +1,5 @@
 chai = require('chai')
+expect = chai.expect
 should = chai.should()
 
 modulePath = "../../../../app/js/Features/Project/ProjectEditorHandler"
@@ -105,7 +106,7 @@ describe "ProjectEditorHandler", ->
 			it "should include the deletedDocs", ->
 				should.exist @result.deletedDocs
 				@result.deletedDocs.should.equal @project.deletedDocs
-				
+
 			it "should gather readOnly_refs and collaberators_refs into a list of members", ->
 				findMember = (id) =>
 					for member in @result.members
@@ -176,10 +177,46 @@ describe "ProjectEditorHandler", ->
 					compileGroup:"priority"
 					compileTimeout: 96
 				@result = @handler.buildProjectModelView @project, @members
-			
+
 			it "should copy the owner features to the project", ->
 				@result.features.versioning.should.equal @owner.features.versioning
 				@result.features.collaborators.should.equal @owner.features.collaborators
 				@result.features.compileGroup.should.equal @owner.features.compileGroup
 				@result.features.compileTimeout.should.equal @owner.features.compileTimeout
 
+	describe 'buildOwnerAndMembersViews', ->
+		beforeEach ->
+			@owner.features =
+				versioning: true
+				collaborators: 3
+				compileGroup:"priority"
+				compileTimeout: 22
+			@result = @handler.buildOwnerAndMembersViews @members
+
+		it 'should produce an object with owner, ownerFeatures and members keys', ->
+			expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members']
+
+		it 'should separate the owner from the members', ->
+			@result.members.length.should.equal(@members.length-1)
+			expect(@result.owner._id).to.equal @owner._id
+			expect(@result.owner.email).to.equal @owner.email
+			expect(@result.members.filter((m) => m._id == @owner._id).length).to.equal 0
+
+		it 'should extract the ownerFeatures from the owner object', ->
+			expect(@result.ownerFeatures).to.deep.equal @owner.features
+
+		describe 'when there is no owner', ->
+			beforeEach ->
+				# remove the owner from members list
+				@membersWithoutOwner = @members.filter((m) => m.user._id != @owner._id)
+				@result = @handler.buildOwnerAndMembersViews @membersWithoutOwner
+
+			it 'should produce an object with owner, ownerFeatures and members keys', ->
+				expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members']
+
+			it 'should not separate out an owner', ->
+				@result.members.length.should.equal @membersWithoutOwner.length
+				expect(@result.owner).to.equal null
+
+			it 'should not extract the ownerFeatures from the owner object', ->
+				expect(@result.ownerFeatures).to.equal null

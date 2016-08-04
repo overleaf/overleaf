@@ -17,5 +17,13 @@ define [
 					privileges: privileges
 					_csrf: window.csrfToken
 				})
+
+			getMembers: () ->
+				$http.get("/project/#{ide.project_id}/members", {
+					json: true
+					headers:
+						"X-Csrf-Token": window.csrfToken
+				})
+
 		}
 	]

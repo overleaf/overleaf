@@ -25,7 +25,7 @@ define [
 				})
 
 			getInvites: () ->
-				$http.get("/project/#{ide.project_id}/invite", {
+				$http.get("/project/#{ide.project_id}/invites", {
 					json: true
 					headers:
 						"X-Csrf-Token": window.csrfToken

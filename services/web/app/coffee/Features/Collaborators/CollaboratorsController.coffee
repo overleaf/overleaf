@@ -5,6 +5,7 @@ EditorRealTimeController = require "../Editor/EditorRealTimeController"
 LimitationsManager = require "../Subscription/LimitationsManager"
 UserGetter = require "../User/UserGetter"
 EmailHelper = require "../Helpers/EmailHelper"
+logger = require 'logger-sharelatex'
 
 
 module.exports = CollaboratorsController =
@@ -50,3 +51,12 @@ module.exports = CollaboratorsController =
 			return callback(error) if error?
 			EditorRealTimeController.emitToRoom(project_id, 'userRemovedFromProject', user_id)
 			callback()
+
+	getAllMembers: (req, res, next) ->
+		projectId = req.params.Project_id
+		logger.log {projectId}, "getting all active members for project"
+		CollaboratorsHandler.getAllMembers projectId, (err, members) ->
+			if err?
+				logger.err {projectId}, "error getting members for project"
+				return next(err)
+			res.json({members: members})
