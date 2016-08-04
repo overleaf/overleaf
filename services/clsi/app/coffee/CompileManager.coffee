@@ -188,8 +188,9 @@ module.exports = CompileManager =
 	_runSynctex: (args, callback = (error, stdout) ->) ->
 		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
 		seconds = 1000
-		synctex = Settings.clsi?.synctex?.command?(__dirname, child_process) || child_process
-		synctex.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
+		if Settings.clsi?.synctexCommandWrapper?
+			[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
+		child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
 			if error?
 				logger.err err:error, args:args, "error running synctex"
 				return callback(error)
