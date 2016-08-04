@@ -155,270 +155,146 @@ settings =
 	# dictionaries you have installed. These should be set for the `code` for
 	# each language.
 	languages: [{
-		"code":"en",
-		"name":"English (American)"
+		"code":"en", "name":"English (American)"
 		},{
-		"code":"en_GB",
-		"name":"English (British)"
+		"code":"en_GB", "name":"English (British)"
 		},{
-		"code":"af",
-		"name":"Africaans"
+		"code":"af", "name":"Africaans"
 		},{
-		"code":"am",
-		"name":"Amharic"
+		"code":"am", "name":"Amharic"
 		},{
-		"code":"ar",
-		"name":"Arabic"
+		"code":"ar", "name":"Arabic"
 		},{
-		"code":"hy",
-		"name":"Armenian"
+		"code":"hy", "name":"Armenian"
 		},{
-		"code":"gl",
-		"name":"Galician"
+		"code":"gl", "name":"Galician"
 		},{
-		"code":"eu",
-		"name":"Basque"
+		"code":"eu", "name":"Basque"
 		},{
-		"code":"bn",
-		"name":"Bengali"
+		"code":"bn", "name":"Bengali"
 		},{
-		"code":"br",
-		"name":"Breton"
+		"code":"br", "name":"Breton"
 		},{
-		"code":"bg",
-		"name":"Bulgarian"
+		"code":"bg", "name":"Bulgarian"
 		},{
-		"code":"ca",
-		"name":"Catalan"
+		"code":"ca", "name":"Catalan"
 		},{
-		"code":"hr",
-		"name":"Croatian"
+		"code":"hr", "name":"Croatian"
 		},{
-		"code":"cs",
-		"name":"Czech"
+		"code":"cs", "name":"Czech"
 		},{
-		"code":"da",
-		"name":"Danish"
+		"code":"da", "name":"Danish"
 		},{
-		"code":"nl",
-		"name":"Dutch"
+		"code":"nl", "name":"Dutch"
 		},{
-		"code":"eo",
-		"name":"Esperanto"
+		"code":"eo", "name":"Esperanto"
 		},{
-		"code":"et",
-		"name":"Estonian"
+		"code":"et", "name":"Estonian"
 		},{
-		"code":"fo",
-		"name":"Faroese"
+		"code":"fo", "name":"Faroese"
 		},{
-		"code":"fr",
-		"name":"French"
+		"code":"fr", "name":"French"
 		},{
-		"code":"de",
-		"name":"German"
+		"code":"de", "name":"German"
 		},{
-		"code":"el",
-		"name":"Greek"
+		"code":"el", "name":"Greek"
 		},{
-		"code":"gu",
-		"name":"Gujarati"
+		"code":"gu", "name":"Gujarati"
 		},{
-		"code":"he",
-		"name":"Hebrew"
+		"code":"he", "name":"Hebrew"
 		},{
-		"code":"hi",
-		"name":"Hindi"
+		"code":"hi", "name":"Hindi"
 		},{
-		"code":"hu",
-		"name":"Hungarian"
+		"code":"hu", "name":"Hungarian"
 		},{
-		"code":"is",
-		"name":"Icelandic"
+		"code":"is", "name":"Icelandic"
 		},{
-		"code":"id",
-		"name":"Indonesian"
+		"code":"id", "name":"Indonesian"
 		},{
-		"code":"ga",
-		"name":"Irish"
+		"code":"ga", "name":"Irish"
 		},{
-		"code":"it",
-		"name":"Italian"
+		"code":"it", "name":"Italian"
 		},{
-		"code":"kn",
-		"name":"Kannada"
+		"code":"kn", "name":"Kannada"
 		},{
-		"code":"kk",
-		"name":"Kazakh"
+		"code":"kk", "name":"Kazakh"
 		},{
-		"code":"ku",
-		"name":"Kurdish"
+		"code":"ku", "name":"Kurdish"
 		},{
-		"code":"lv",
-		"name":"Latvian"
+		"code":"lv", "name":"Latvian"
 		},{
-		"code":"lt",
-		"name":"Lithuanian"
+		"code":"lt", "name":"Lithuanian"
 		},{
-		"code":"ml",
-		"name":"Malayalam"
+		"code":"ml", "name":"Malayalam"
 		},{
-		"code":"mr",
-		"name":"Marathi"
+		"code":"mr", "name":"Marathi"
 		},{
-		"code":"nr",
-		"name":"Ndebele"
+		"code":"nr", "name":"Ndebele"
 		},{
-		"code":"ns",
-		"name":"Northern Sotho"
+		"code":"ns", "name":"Northern Sotho"
 		},{
-		"code":"no",
-		"name":"Norwegian"
+		"code":"no", "name":"Norwegian"
 		},{
-		"code":"or",
-		"name":"Oriya"
+		"code":"or", "name":"Oriya"
 		},{
-		"code":"fa",
-		"name":"Persian"
+		"code":"fa", "name":"Persian"
 		},{
-		"code":"pl",
-		"name":"Polish"
+		"code":"pl", "name":"Polish"
 		},{
-		"code":"pt_BR",
-		"name":"Portuguese (Brazilian)"
+		"code":"pt_BR", "name":"Portuguese (Brazilian)"
 		},{
-		"code":"pt_PT",
-		"name":"Portuguese (European)"
+		"code":"pt_PT", "name":"Portuguese (European)"
 		},{
-		"code":"pa",
-		"name":"Punjabi"
+		"code":"pa", "name":"Punjabi"
 		},{
-		"code":"ro",
-		"name":"Romanian"
+		"code":"ro", "name":"Romanian"
 		},{
-		"code":"ru",
-		"name":"Russian"
+		"code":"ru", "name":"Russian"
 		},{
-		"code":"sk",
-		"name":"Slovak"
+		"code":"sk", "name":"Slovak"
 		},{
-		"code":"sl",
-		"name":"Slovenian"
+		"code":"sl", "name":"Slovenian"
 		},{
-		"code":"st",
-		"name":"Southern Sotho"
+		"code":"st", "name":"Southern Sotho"
 		},{
-		"code":"es",
-		"name":"Spanish"
+		"code":"es", "name":"Spanish"
 		},{
-		"code":"ss",
-		"name":"Swazi"
+		"code":"ss", "name":"Swazi"
 		},{
-		"code":"sv",
-		"name":"Swedish"
+		"code":"sv", "name":"Swedish"
 		},{
-		"code":"tl",
-		"name":"Tagalog"
+		"code":"tl", "name":"Tagalog"
 		},{
-		"code":"ta",
-		"name":"Tamil"
+		"code":"ta", "name":"Tamil"
 		},{
-		"code":"te",
-		"name":"Telugu"
+		"code":"te", "name":"Telugu"
 		},{
-		"code":"ts",
-		"name":"Tsonga"
+		"code":"ts", "name":"Tsonga"
 		},{
-		"code":"tn",
-		"name":"Tswana"
+		"code":"tn", "name":"Tswana"
 		},{
-		"code":"uk",
-		"name":"Ukrainian"
+		"code":"uk", "name":"Ukrainian"
 		},{
-		"code":"hsb",
-		"name":"Upper Sorbian"
+		"code":"hsb", "name":"Upper Sorbian"
 		},{
-		"code":"uz",
-		"name":"Uzbek"
+		"code":"uz", "name":"Uzbek"
 		},{
-		"code":"cy",
-		"name":"Welsh"
+		"code":"cy", "name":"Welsh"
 		},{
-		"code":"xh",
-		"name":"Xhosa"
+		"code":"xh", "name":"Xhosa"
 		},{
-		"code":"zu",
-		"name":"Zulu"
+		"code":"zu", "name":"Zulu"
 		}
 	]
-	
-	# Service locations
-	# -----------------
 
-	# ShareLaTeX is comprised of many small services, which each expose
-	# an HTTP API running on a different port. Generally you
-	# can leave these as they are unless you have some other services
-	# running which conflict, or want to run the web process on port 80.
-	# internal:
-	# 	web:
-	# 		port: webPort = 3000
-	# 		host: "localhost"
-	# 	documentupdater:
-	# 		port: docUpdaterPort = 3003
-	# 		host: "localhost"
-	# 	filestore:
-	# 		port: filestorePort = 3009
-	# 		host: "localhost"
-	# 	chat:
-	# 		port: chatPort = 3010
-	# 		host: "localhost"
-	# 	tags:
-	# 		port: tagsPort = 3012
-	# 		host: "localhost"
-	# 	clsi:
-	# 		port: clsiPort = 3013
-	# 		host: "localhost"
-	# 	trackchanges:
-	# 		port: trackchangesPort = 3015
-	# 		host: "localhost"
-	# 	docstore:
-	# 		port: docstorePort = 3016
-	# 		host: "localhost"
-	# 	spelling:
-	# 		port: spellingPort = 3005
-	# 		host: "localhost"
-	# 	templates:
-	# 		port: templatesPort = 3007
-	# 		host: "localhost"
-
-	# If you change the above config, or run some services on remote servers,
-	# you need to tell the other services where to find them:
 	apis:
 		web:
 			url: "http://localhost:3000"
 			user: httpAuthUser
 			pass: httpAuthPass
-	references:undefined
+	references:{}
 	notifications:undefined
 
-	# 	documentupdater:
-	# 		url : "http://localhost:#{docUpdaterPort}"
-	# 	clsi:
-	# 		url: "http://localhost:#{clsiPort}"
-	# 	filestore:
-	# 		url: "http://localhost:#{filestorePort}"
-	# 	trackchanges:
-	# 		url: "http://localhost:#{trackchangesPort}"
-	# 	docstore:
-	# 		url: "http://localhost:#{docstorePort}"
-	# 	tags:
-	# 		url: "http://localhost:#{tagsPort}"
-	# 	spelling:
-	# 		url: "http://localhost:#{spellingPort}"
-	# 	chat:
-	# 		url: "http://localhost:#{chatPort}"
-	#	templates:
-	#		url: "http://localhost:#{templatesPort}"
 
 
 #### OPTIONAL CONFIGERABLE SETTINGS
@@ -440,7 +316,10 @@ if process.env["SHARELATEX_HEADER_IMAGE_URL"]?
 	settings.nav.custom_logo = process.env["SHARELATEX_HEADER_IMAGE_URL"]
 	
 if process.env["SHARELATEX_HEADER"]?
-	settings.nav.header = process.env["SHARELATEX_HEADER"]
+	settings.nav.header = process.env["SHARELATEX_HEADER_NAV_LINKS"]
+
+# if process.env["SHARELATEX_PROXY_LEARN"]?
+# 	settings.nav.header.push({text: "help", class: "subdued", dropdown: [{text: "documentation", url: "/learn"}] })
 
 
 # Sending Email
@@ -500,7 +379,9 @@ if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELA
 # ShareLaTeX Server Pro
 #######################
 
-
+if parse(process.env["SHARELATEX_IS_SERVER_PRO"]) == true
+	settings.apis.references =
+		 url: "http://localhost:3040"
 
 
 # LDAP - SERVER PRO ONLY
@@ -565,6 +446,8 @@ if process.env["SHARELATEX_TEMPLATES_USER_ID"]
 	settings.templates =
 		mountPointUrl: "/templates"
 		user_id: process.env["SHARELATEX_TEMPLATES_USER_ID"]
+		
+	settings.templateLinks = parse(process.env["SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS"])
 
 
 # /Learn
@@ -573,6 +456,12 @@ if process.env["SHARELATEX_PROXY_LEARN"]?
 	settings.proxyLearn = parse(process.env["SHARELATEX_PROXY_LEARN"])
 
 
+# /References
+# -----------
+if process.env["SHARELATEX_ELASTICSEARCH_URL"]?
+	settings.references.elasticsearch =
+			host: process.env["SHARELATEX_ELASTICSEARCH_URL"]
+	
 
 # With lots of incoming and outgoing HTTP connections to different services,
 # sometimes long running, it is a good idea to increase the default number
@@ -583,3 +472,4 @@ https = require('https')
 https.globalAgent.maxSockets = 300
 
 module.exports = settings
+
