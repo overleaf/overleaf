@@ -19,6 +19,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	grunt.loadNpmTasks "grunt-shell"
+	require('load-grunt-config')(grunt)
 
 
 	execute = {}
