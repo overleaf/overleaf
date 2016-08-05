@@ -122,6 +122,7 @@ module.exports = (grunt) ->
 
 	Helpers =
 		installService: (service, callback = (error) ->) ->
+			console.log "Installing #{service.name}"
 			Helpers.cloneGitRepo service, (error) ->
 				return callback(error) if error?
 				Helpers.installNpmModules service, (error) ->
@@ -130,6 +131,7 @@ module.exports = (grunt) ->
 						return callback(error) if error?
 						Helpers.runGruntInstall service, (error) ->
 							return callback(error) if error?
+							console.log "Finished installing #{service.name}"
 							callback()
 
 
