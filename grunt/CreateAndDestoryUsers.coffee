@@ -1,7 +1,7 @@
 
 module.exports = (grunt) ->
 
-	grunt.registerTask 'create-admin-user', "Create a user with the given email address and make them an admin. Update in place if the user already exists. Usage: grunt create-admin-user --email joe@example.com", () ->
+	grunt.registerTask 'user:create-admin', "Create a user with the given email address and make them an admin. Update in place if the user already exists. Usage: grunt create-admin-user --email joe@example.com", () ->
 		done = @async()
 		email = grunt.option("email")
 		if !email?
@@ -35,7 +35,7 @@ module.exports = (grunt) ->
 					"""
 					done()
 
-	grunt.registerTask 'delete-user', "deletes a user and all their data, Usage: grunt delete-user --email joe@example.com", () ->
+	grunt.registerTask 'user:delete', "deletes a user and all their data, Usage: grunt delete-user --email joe@example.com", () ->
 		done = @async()
 		email = grunt.option("email")
 		if !email?
