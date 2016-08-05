@@ -17,7 +17,7 @@ describe 'Notifications Tests', ->
 		@insertStub = sinon.stub()
 		@countStub = sinon.stub()
 		@updateStub = sinon.stub()
-
+		@findStub.cock = "helllo"
 		@mongojs = =>
 			notifications:
 				update: self.mongojsUpdate
@@ -36,20 +36,20 @@ describe 'Notifications Tests', ->
 		@stubbedNotificationArray = [@stubbedNotification]
 
 	describe 'getUserNotifications', ->
-		it "should find all notifications and return it", (done)->
+		it "should find all notifications and return i", (done)->
 			@findStub.callsArgWith(1, null, @stubbedNotificationArray)
 			@notifications.getUserNotifications user_id, (err, notifications)=>
 				notifications.should.equal @stubbedNotificationArray
-				@findStub.calledWith({"user_id" : ObjectId(user_id), "templateKey": {"$exists":true}}).should.equal true
+				assert.deepEqual(@findStub.args[0][0], {"user_id" :ObjectId(user_id), "templateKey": {"$exists":true}})
 				done()
 
 	describe 'addNotification', ->
-		it 'should insert the notification into the collection', (done)->
+		it 'should insert the notification into the collectionssss', (done)->
 			@insertStub.callsArgWith(1, null)
 			@countStub.callsArgWith(1, null, 0)
 
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				@insertStub.calledWith(@stubbedNotification).should.equal true
+				assert.deepEqual(@insertStub.args[0][0], @stubbedNotification)
 				done()
 
 		it 'should fail insert of existing notification key', (done)->
@@ -70,7 +70,8 @@ describe 'Notifications Tests', ->
 					_id:ObjectId(notification_id)
 				updateOperation = 
 					"$unset": {templateKey:true, messageOpts:true}
-				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				assert.deepEqual(@updateStub.args[0][0], searchOps)
+				assert.deepEqual(@updateStub.args[0][1], updateOperation)
 				done()
 
 	describe 'removeNotificationKey', ->
@@ -83,5 +84,6 @@ describe 'Notifications Tests', ->
 					key: notification_key
 				updateOperation = 
 					"$unset": {templateKey:true}
-				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				assert.deepEqual(@updateStub.args[0][0], searchOps)
+				assert.deepEqual(@updateStub.args[0][1], updateOperation)
 				done()
