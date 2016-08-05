@@ -106,8 +106,8 @@ module.exports = settings =
 			url: ""
 		# references:
 		# 	url: "http://localhost:3040"
-		# notifications:
-		# 	url: "http://localhost:3042" 
+		notifications:
+			url: "http://localhost:3042" 
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
