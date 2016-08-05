@@ -7,6 +7,7 @@
     "east": "0.5.1",
     "east-mongo": "^0.1.2",
     "grunt-shell": "^1.1.1",
+    "load-grunt-config": "^0.19.2",
     "lodash": "^3.0.0",
     "mongojs": "^0.18.1",
     "rimraf": "~2.2.6",

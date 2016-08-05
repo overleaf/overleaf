@@ -44,4 +44,8 @@ module.exports =
 	name: "contacts",
 	repo: "https://github.com/sharelatex/contacts-sharelatex.git",
 	version: "master"
+}, {
+	name: "notifications",
+	repo: "https://github.com/sharelatex/notifications-sharelatex.git",
+	version: "master"
 }]
