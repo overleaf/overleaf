@@ -78,17 +78,9 @@ module.exports = (grunt) ->
 			grunt.registerTask "install:#{service.name}", "Download and set up the #{service.name} service", () ->
 				done = @async()
 				Helpers.installService(service, done)
-			grunt.registerTask "update:#{service.name}", "Checkout and update the #{service.name} service", () ->
-				done = @async()
-				Helpers.updateService(service, done)
-			grunt.registerTask "run:#{service.name}", "Run the ShareLaTeX #{service.name} service", ["bunyan", "execute:#{service.name}"]
-			grunt.registerTask "release:#{service.name}", "Create a new release version of #{service.name} (specify with --release option)", () ->
-				done = @async()
-				Helpers.createNewRelease(service, grunt.option("release"), done)
 
 
-	grunt.registerTask 'install:dirs', "Copy the example config into the real config", () ->
-		Helpers.createDataDirs @async()
+
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		["check:make"].concat(
 			("install:#{service.name}" for service in SERVICES)
@@ -119,10 +111,9 @@ module.exports = (grunt) ->
 		Helpers.checkAspell @async()
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
+
 	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs", "check:aspell"]
 
-	grunt.registerTask "build:upstart_scripts", "Create upstart scripts for each service", () ->
-		Helpers.buildUpstartScripts()
 
 
 	grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
@@ -140,16 +131,6 @@ module.exports = (grunt) ->
 							return callback(error) if error?
 							callback()
 
-		updateService: (service, callback = (error) ->) ->
-			Helpers.updateGitRepo service, (error) ->
-				return callback(error) if error?
-				Helpers.installNpmModules service, (error) ->
-					return callback(error) if error?
-					Helpers.rebuildNpmModules service, (error) ->
-						return callback(error) if error?
-						Helpers.runGruntInstall service, (error) ->
-							return callback(error) if error?
-							callback()
 
 		cloneGitRepo: (service, callback = (error) ->) ->
 			repo_src = service.repo
@@ -172,31 +153,6 @@ module.exports = (grunt) ->
 			proc.on "close", () ->
 				callback()
 
-		updateGitRepo: (service, callback = (error) ->) ->
-			dir = service.name
-			proc = spawn "git", ["checkout", service.version], cwd: dir, stdio: "inherit"
-			proc.on "close", () ->
-				proc = spawn "git", ["pull"], cwd: dir, stdio: "inherit"
-				proc.on "close", () ->
-					callback()
-
-		createNewRelease: (service, version, callback = (error) ->) ->
-			dir = service.name
-			proc = spawn "sed", [
-				"-i", "",
-				"s/\"version\".*$/\"version\": \"#{version}\",/g",
-				"package.json"
-			], cwd: dir, stdio: "inherit"
-			proc.on "close", () ->
-				proc = spawn "git", ["commit", "-a", "-m", "Release version #{version}"], cwd: dir, stdio: "inherit"
-				proc.on "close", () ->
-					proc = spawn "git", ["tag", "v#{version}"], cwd: dir, stdio: "inherit"
-					proc.on "close", () ->
-						proc = spawn "git", ["push"], cwd: dir, stdio: "inherit"
-						proc.on "close", () ->
-							proc = spawn "git", ["push", "--tags"], cwd: dir, stdio: "inherit"
-							proc.on "close", () ->
-								callback()
 
 		installNpmModules: (service, callback = (error) ->) ->
 			dir = service.name
@@ -211,24 +167,6 @@ module.exports = (grunt) ->
 			proc = spawn "npm", ["rebuild"], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
-
-		createDataDirs: (callback = (error) ->) ->
-			DIRS = [
-				"tmp/dumpFolder"
-				"tmp/uploads"
-				"data/user_files"
-				"data/compiles"
-				"data/cache"
-			]
-			jobs = []
-			for dir in DIRS
-				do (dir) ->
-					jobs.push (callback) ->
-						path = Path.join(__dirname, dir)
-						grunt.log.writeln "Ensuring '#{path}' exists"
-						exec "mkdir -p #{path}", callback
-			async.series jobs, callback
-
 
 		runGruntInstall: (service, callback = (error) ->) ->
 			dir = service.name
@@ -406,7 +344,3 @@ module.exports = (grunt) ->
 					grunt.log.write "OK."
 					return callback()
 
-		buildUpstartScripts: () ->
-			template = fs.readFileSync("package/upstart/sharelatex-template.conf").toString()
-			for service in SERVICES
-				fs.writeFileSync "package/upstart/sharelatex-#{service.name}.conf", template.replace(/__SERVICE__/g, service.name)
