@@ -6,6 +6,7 @@ CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 
 module.exports = CollaboratorsInviteController =
@@ -19,10 +20,27 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.json({invites: invites})
 
+	_trySendInviteNotification: (projectId, sendingUser, invite, callback=(err)->) ->
+		email = invite.email
+		UserGetter.getUser {email: email}, {_id: 1}, (err, existingUser) ->
+			if err?
+				logger.err {projectId, email}, "error checking if user exists"
+				return next(err)
+			if existingUser
+				ProjectGetter.getProject projectId, (err, project) ->
+					if err?
+						logger.err {projectId, email}, "error getting project"
+						return next(err)
+					if !project
+						logger.log {projectId}, "no project found while sending notification, returning"
+						return callback()
+					NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
-		sendingUserId = req.session?.user?._id
+		sendingUser = req.session.user
+		sendingUserId = sendingUser._id
 		logger.log {projectId, email, sendingUserId}, "inviting to project"
 		LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
 			return next(error) if error?
@@ -40,6 +58,8 @@ module.exports = CollaboratorsInviteController =
 					return next(err)
 				logger.log {projectId, email, sendingUserId}, "invite created"
 				EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true}
+				# async check if email is for an existing user, send a notification
+				CollaboratorsInviteController._trySendInviteNotification(projectId, sendingUser, invite, ()->)
 				return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->

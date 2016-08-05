@@ -7,6 +7,7 @@ PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 Errors = require "../Errors/Errors"
 Crypto = require 'crypto'
 
+
 module.exports = CollaboratorsInviteHandler =
 
 	getAllInvites: (projectId, callback=(err, invites)->) ->
