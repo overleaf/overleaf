@@ -23,6 +23,8 @@ define [
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
+		window._m = projectMembers
+
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
 			$http.get "/user/contacts"

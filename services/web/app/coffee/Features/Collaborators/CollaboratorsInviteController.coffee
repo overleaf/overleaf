@@ -5,6 +5,7 @@ CollaboratorsHandler = require('./CollaboratorsHandler')
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
+EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
 
 module.exports = CollaboratorsInviteController =
@@ -38,6 +39,7 @@ module.exports = CollaboratorsInviteController =
 					logger.err {projectId, email, sendingUserId}, "error creating project invite"
 					return next(err)
 				logger.log {projectId, email, sendingUserId}, "invite created"
+				EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true}
 				return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
@@ -48,6 +50,7 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, inviteId}, "error revoking invite"
 				return next(err)
+			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true}
 			res.sendStatus(201)
 
 	resendInvite: (req, res, next) ->
@@ -113,4 +116,5 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
+			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
 			res.redirect "/project/#{projectId}"

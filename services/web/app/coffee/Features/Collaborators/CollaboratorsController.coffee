@@ -37,6 +37,7 @@ module.exports = CollaboratorsController =
 		user_id    = req.params.user_id
 		CollaboratorsController._removeUserIdFromProject project_id, user_id, (error) ->
 			return next(error) if error?
+			EditorRealTimeController.emitToRoom project_id, 'project:membership:changed', {members: true}
 			res.sendStatus 204
 
 	removeSelfFromProject: (req, res, next = (error) ->) ->

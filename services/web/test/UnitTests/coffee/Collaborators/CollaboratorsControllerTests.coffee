@@ -128,6 +128,9 @@ describe "CollaboratorsController", ->
 		it "should send the back a success response", ->
 			@res.sendStatus.calledWith(204).should.equal true
 
+		it 'should have called emitToRoom', ->
+			@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
+
 	describe "removeSelfFromProject", ->
 		beforeEach ->
 			@req.session =

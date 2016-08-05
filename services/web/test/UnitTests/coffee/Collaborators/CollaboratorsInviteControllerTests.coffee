@@ -22,6 +22,7 @@ describe "CollaboratorsInviteController", ->
 			"./CollaboratorsHandler": @CollaboratorsHandler = {}
 			"./CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
+			"../Editor/EditorRealTimeController": @EditorRealTimeController = {emitToRoom: sinon.stub()}
 		@res = new MockResponse()
 		@req = new MockRequest()
 
@@ -111,6 +112,10 @@ describe "CollaboratorsInviteController", ->
 			it 'should have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
 				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user_id,@targetEmail,@privileges).should.equal true
+
+			it 'should have called emitToRoom', ->
+				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
 
 		describe 'when the user is not allowed to add more collaborators', ->
 
@@ -499,6 +504,10 @@ describe "CollaboratorsInviteController", ->
 			it 'should have called revokeInvite', ->
 				@CollaboratorsInviteHandler.revokeInvite.callCount.should.equal 1
 
+			it 'should have called emitToRoom', ->
+				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
+
 		describe 'when revokeInvite produces an error', ->
 
 			beforeEach ->
@@ -543,6 +552,10 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called acceptInvite', ->
 				@CollaboratorsInviteHandler.acceptInvite.callCount.should.equal 1
+
+			it 'should have called emitToRoom', ->
+				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
+				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
 
 		describe 'when revokeInvite produces an error', ->
 
