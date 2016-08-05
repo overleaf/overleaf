@@ -45,7 +45,7 @@ RUN rm /etc/nginx/sites-enabled/default
 ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
-COPY {baseDir}/init_scripts/  /etc/my_init.d/
+COPY ${baseDir}/init_scripts/  /etc/my_init.d/
 
 
 # Install ShareLaTeX
