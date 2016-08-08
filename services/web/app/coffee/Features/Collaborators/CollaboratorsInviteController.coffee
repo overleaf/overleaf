@@ -25,16 +25,18 @@ module.exports = CollaboratorsInviteController =
 		UserGetter.getUser {email: email}, {_id: 1}, (err, existingUser) ->
 			if err?
 				logger.err {projectId, email}, "error checking if user exists"
-				return next(err)
-			if existingUser
-				ProjectGetter.getProject projectId, (err, project) ->
-					if err?
-						logger.err {projectId, email}, "error getting project"
-						return next(err)
-					if !project
-						logger.log {projectId}, "no project found while sending notification, returning"
-						return callback()
-					NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
+				return callback(err)
+			if !existingUser
+				logger.log {projectId, email}, "no existing user found, returning"
+				return callback(null)
+			ProjectGetter.getProject projectId, (err, project) ->
+				if err?
+					logger.err {projectId, email}, "error getting project"
+					return callback(err)
+				if !project
+					logger.log {projectId}, "no project found while sending notification, returning"
+					return callback(null)
+				NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
 
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
