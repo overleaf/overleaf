@@ -38,6 +38,9 @@ module.exports = CollaboratorsInviteController =
 					return callback(null)
 				NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
 
+	_tryCancelInviteNotification: (inviteId, currentUser, callback=()->) ->
+			NotificationsBuilder.projectInvite({_id: inviteId}, null, null, currentUser).read(callback)
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
@@ -139,4 +142,5 @@ module.exports = CollaboratorsInviteController =
 				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
+			CollaboratorsInviteController._tryCancelInviteNotification inviteId, currentUser, () ->
 			res.redirect "/project/#{projectId}"
