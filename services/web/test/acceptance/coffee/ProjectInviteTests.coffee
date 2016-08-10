@@ -249,6 +249,33 @@ describe "ProjectInviteTests", ->
 					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
 				], done
 
+			it 'should allow the project owner to many invites at once', (done) ->
+				@inviteOne = null
+				@inviteTwo = null
+				Async.series [
+					(cb) => expectProjectAccess @sendingUser, @projectId, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+					# create first invite
+					(cb) => createInvite @sendingUser, @projectId, @email, (err, invite) =>
+						return cb(err) if err
+						@inviteOne = invite
+						cb()
+					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb
+					# and a second
+					(cb) => createInvite @sendingUser, @projectId, @email, (err, invite) =>
+						return cb(err) if err
+						@inviteTwo = invite
+						cb()
+					# should have two
+					(cb) => expectInviteListCount @sendingUser, @projectId, 2, cb
+					# revoke first
+					(cb) => revokeInvite @sendingUser, @projectId, @inviteOne._id, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb
+					# revoke second
+					(cb) => revokeInvite @sendingUser, @projectId, @inviteTwo._id, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+				], done
+
 	describe 'clicking the invite link', ->
 
 		beforeEach (done) ->
