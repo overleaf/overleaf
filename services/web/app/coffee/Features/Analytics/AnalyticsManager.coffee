@@ -21,13 +21,11 @@ else
 	Event = sequelize.define("Event", {
 		user_id: Sequelize.STRING,
 		event: Sequelize.STRING,
-		metadata: Sequelize.STRING
+		metadata: Sequelize.JSON
 	})
 
 	module.exports =
 		recordEvent: (user_id, event, metadata = {}, callback = (error) ->) ->
-			if typeof(metadata) != "string"
-				metadata = JSON.stringify(metadata)
 			if user_id? and typeof(user_id) != "string"
 				user_id = user_id.toString()
 			if user_id == Settings.smokeTest?.userId
