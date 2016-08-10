@@ -2,14 +2,14 @@ define [
 	"base"
 	"modules/localStorage"
 ], (App) ->
-	CACHE_KEY = "countlyEvents"
+	CACHE_KEY = "mbEvents"
+
 	send = (category, action, attributes = {})->
 		ga('send', 'event', category, action)
 		event_name = "#{action}-#{category}"
 		Intercom?("trackEvent", event_name, attributes)
 		
-
-	App.factory "event_tracking", (localStorage) ->
+	App.factory "event_tracking", ($http, localStorage) ->
 		_getEventCache = () -> 
 			eventCache = localStorage CACHE_KEY
 
@@ -34,30 +34,23 @@ define [
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
 
-			sendCountly: (key, segmentation) ->
-				eventData = { key }
-				eventData.segmentation = segmentation if segmentation?				
-				Countly?.q.push([ "add_event", eventData ])
-
-			sendCountlySampled: (key, segmentation) ->
-				@sendCountly key, segmentation if Math.random() < .01 
-
-			sendCountlyOnce: (key, segmentation) ->
-				if ! _eventInCache(key)
-					_addEventToCache(key)
-					@sendCountly key, segmentation
-			
-			send: (category, action, attributes = {})->
-				event_name = "#{action}-#{category}"
-				$.ajax {
-					url: "/event/#{event_name}",
+			sendMB: (key, segmentation = {}) ->
+				$http {
+					url: "/event/#{key}",
 					method: "POST",
-					data: attributes,
-					dataType: "json",
+					data: segmentation
 					headers: {
 						"X-CSRF-Token": window.csrfToken
 					}
 				}
+
+			sendMBSampled: (key, segmentation) ->
+				@sendMB key, segmentation if Math.random() < .01 
+
+			sendMBOnce: (key, segmentation) ->
+				if ! _eventInCache(key)
+					_addEventToCache(key)
+					@sendMB key, segmentation
 		}
 
 	# App.directive "countlyTrack", () ->
