@@ -92,7 +92,7 @@ define [
 				$scope.recalculateSelectedUpdates()
 
 		$scope.select = () ->
-			event_tracking.sendCountly "track-changes-view-change"
+			event_tracking.sendMB "track-changes-view-change"
 			$scope.update.selectedTo = true
 			$scope.update.selectedFrom = true
 

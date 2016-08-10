@@ -24,7 +24,7 @@ define [
 					url :"/learn/kb/#{page_underscored}"
 					name : hit._highlightResult.pageName.value
 
-			event_tracking.sendCountly "contact-form-suggestions-shown" if results.hits.length
+			event_tracking.sendMB "contact-form-suggestions-shown" if results.hits.length
 
 			$scope.$applyAsync () -> 
 				$scope.suggestions = suggestions
@@ -60,7 +60,7 @@ define [
 				$scope.suggestions = [];
 
 		$scope.clickSuggestionLink = (url) ->
-			event_tracking.sendCountly "contact-form-suggestions-clicked", { url }
+			event_tracking.sendMB "contact-form-suggestions-clicked", { url }
 
 		$scope.close = () ->
 			$modalInstance.close()

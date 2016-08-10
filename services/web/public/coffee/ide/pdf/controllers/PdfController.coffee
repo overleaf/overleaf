@@ -36,11 +36,11 @@ define [
 		$scope.logHintsNegFeedbackValues = logHintsFeedback.feedbackOpts
 		
 		$scope.trackLogHintsLearnMore = () ->
-			event_tracking.sendCountly "logs-hints-learn-more"
+			event_tracking.sendMB "logs-hints-learn-more"
 
 		trackLogHintsFeedback = (isPositive, hintId) ->
 			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
-			event_tracking.sendCountly (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
+			event_tracking.sendMB (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
 
 		$scope.trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal) ->
 			logHintsFeedback.submitFeedback hintId, feedbackOpt, feedbackOtherVal
@@ -338,7 +338,7 @@ define [
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 
-			event_tracking.sendCountlySampled "editor-recompile-sampled", options
+			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
 
@@ -387,7 +387,7 @@ define [
 
 		$scope.toggleLogs = () ->
 			$scope.shouldShowLogs = !$scope.shouldShowLogs
-			event_tracking.sendCountlyOnce "ide-open-logs-once" if $scope.shouldShowLogs
+			event_tracking.sendMBOnce "ide-open-logs-once" if $scope.shouldShowLogs
 
 		$scope.showPdf = () ->
 			$scope.pdf.view = "pdf"
@@ -395,7 +395,7 @@ define [
 
 		$scope.toggleRawLog = () ->
 			$scope.pdf.showRawLog = !$scope.pdf.showRawLog
-			event_tracking.sendCountly "logs-view-raw" if $scope.pdf.showRawLog
+			event_tracking.sendMB "logs-view-raw" if $scope.pdf.showRawLog
 
 		$scope.openClearCacheModal = () ->
 			modalInstance = $modal.open(
@@ -430,7 +430,7 @@ define [
 		$scope.startFreeTrial = (source) ->
 			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
 
-			event_tracking.sendCountly "subscription-start-trial", { source }
+			event_tracking.sendMB "subscription-start-trial", { source }
 
 			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
 			$scope.startedFreeTrial = true
@@ -553,7 +553,7 @@ define [
 
 	App.controller "PdfLogEntryController", ["$scope", "ide", "event_tracking", ($scope, ide, event_tracking) ->
 		$scope.openInEditor = (entry) ->
-			event_tracking.sendCountlyOnce "logs-jump-to-location-once"
+			event_tracking.sendMBOnce "logs-jump-to-location-once"
 			entity = ide.fileTreeManager.findEntityByPath(entry.file)
 			return if !entity? or entity.type != "doc"
 			if entry.line?
