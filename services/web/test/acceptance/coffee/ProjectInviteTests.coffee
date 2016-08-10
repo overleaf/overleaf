@@ -87,6 +87,14 @@ tryLoginUser = (user, redir, callback=(err, response, body)->) ->
 				redir: redir
 		}, callback
 
+tryGetInviteList = (user, projectId, callback=(err, response, body)->) ->
+	user.getCsrfToken (error) =>
+		return callback(error) if error?
+		user.request.get {
+			url: "/project/#{projectId}/invites"
+			json: true
+		}, callback
+
 
 # Expectations
 expectProjectAccess = (user, projectId, callback=(err,result)->) ->
@@ -169,6 +177,14 @@ expectAcceptInviteAndRedirect = (user, invite, callback=(err,result)->) ->
 		expect(response.headers.location).to.equal "/project/#{invite.projectId}"
 		callback()
 
+expectInviteListCount = (user, projectId, count, callback=(err)->) ->
+	tryGetInviteList user, projectId, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(body).to.have.all.keys ['invites']
+		expect(body.invites.length).to.equal count
+		callback()
+
 
 describe "ProjectInviteTests", ->
 	before (done) ->
@@ -182,6 +198,56 @@ describe "ProjectInviteTests", ->
 			(cb) => @user.logout cb
 			(cb) => @sendingUser.login cb
 		], done
+
+	describe 'creating invites', ->
+
+		beforeEach (done) ->
+			@projectName = "wat"
+			@projectId = null
+			@fakeProject = null
+			done()
+
+		afterEach ->
+
+		describe 'creating two invites', ->
+
+			beforeEach (done) ->
+				Async.series [
+					(cb) =>
+						createProject @sendingUser, @projectName, (err, projectId, project) =>
+							@projectId = projectId
+							@fakeProject = project
+							cb()
+				], done
+
+			afterEach (done) ->
+				Async.series [
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+					(cb) => @sendingUser.deleteProject(@projectId, cb)
+				], done
+
+			it 'should allow the project owner to create and remove invites', (done) ->
+				@invite = null
+				Async.series [
+					(cb) => expectProjectAccess @sendingUser, @projectId, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+					# create invite, check invite list count
+					(cb) => createInvite @sendingUser, @projectId, @email, (err, invite) =>
+						return cb(err) if err
+						@invite = invite
+						cb()
+					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb
+					(cb) => revokeInvite @sendingUser, @projectId, @invite._id, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+					# and a second time
+					(cb) => createInvite @sendingUser, @projectId, @email, (err, invite) =>
+						return cb(err) if err
+						@invite = invite
+						cb()
+					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb
+					(cb) => revokeInvite @sendingUser, @projectId, @invite._id, cb
+					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+				], done
 
 	describe 'clicking the invite link', ->
 
