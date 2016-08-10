@@ -86,10 +86,14 @@ define [
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
+				check: if options.check then "validate" else null
 				_csrf: window.csrfToken
 			}, {params: params}
 
 		parseCompileResponse = (response) ->		
+
+			# keep last url
+			last_pdf_url = $scope.pdf.url
 
 			# Reset everything
 			$scope.pdf.error      = false
@@ -120,11 +124,23 @@ define [
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
-				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+				fetchLogs(fileByPath)
 			else if response.status == "terminated"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.compileTerminated = true
-				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+				fetchLogs(fileByPath)
+			else if response.status in ["validation-fail", "validation-pass"]
+				$scope.pdf.view = 'pdf'
+				$scope.pdf.compileExited = true
+				$scope.pdf.url = last_pdf_url
+				$scope.shouldShowLogs = true
+				fetchLogs(fileByPath, { validation: true })
+			else if response.status == "exited"
+				$scope.pdf.view = 'pdf'
+				$scope.pdf.compileExited = true
+				$scope.pdf.url = last_pdf_url
+				$scope.shouldShowLogs = true
+				fetchLogs(fileByPath)
 			else if response.status == "autocompile-backoff"
 				$scope.pdf.view = 'uncompiled'
 			else if response.status == "project-too-large"
@@ -134,7 +150,7 @@ define [
 				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
 				$scope.shouldShowLogs = true
-				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+				fetchLogs(fileByPath)
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.view = 'errors'
 				$scope.pdf.clsiMaintenance = true
@@ -165,7 +181,7 @@ define [
 				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
-				fetchLogs(fileByPath['output.log'], fileByPath['output.blg'])
+				fetchLogs(fileByPath)
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
@@ -186,7 +202,13 @@ define [
 					}
 
 
-		fetchLogs = (logFile, blgFile) ->
+		fetchLogs = (fileByPath, options) ->
+
+			if options?.validation
+				chktexFile = fileByPath['output.chktex']
+			else
+				logFile = fileByPath['output.log']
+				blgFile = fileByPath['output.blg']
 
 			getFile = (name, file) ->
 				opts =
@@ -213,6 +235,8 @@ define [
 
 			accumulateResults = (newEntries) ->
 				for key in ['all', 'errors', 'warnings']
+					if newEntries.type?
+						entry.type = newEntries.type for entry in newEntries[key]
 					logEntries[key] = logEntries[key].concat newEntries[key]
 
 			# use the parsers for each file type
@@ -222,10 +246,24 @@ define [
 				all = [].concat errors, warnings, typesetting
 				accumulateResults {all, errors, warnings}
 
+			processChkTex = (log) ->
+				errors = []
+				warnings = []
+				for line in log.split("\n")
+					if m = line.match /^(\S+):(\d+):(\d+): (Error|Warning): (.*)/
+						result = { file:m[1], line:m[2], column:m[3], level:m[4].toLowerCase(), message: "#{m[4]}: #{m[5]}"}
+						if result.level is 'error'
+							errors.push result
+						else
+							warnings.push result
+				all = [].concat errors, warnings
+				logHints = HumanReadableLogs.parse {type: "Validation", all, errors, warnings}
+				accumulateResults logHints
+
 			processBiber = (log) ->
 				{errors, warnings} = BibLogParser.parse(log, {})
 				all = [].concat errors, warnings
-				accumulateResults {all, errors, warnings}
+				accumulateResults {type: "BibTeX", all, errors, warnings}
 
 			# output the results
 			handleError = () ->
@@ -248,19 +286,35 @@ define [
 							}
 
 			# retrieve the logfile and process it
-			response = getFile('output.log', logFile)
-				.success processLog
-				.error handleError
+			if logFile?
+				response = getFile('output.log', logFile)
+					.then	(response) -> processLog(response.data)
 
-			if blgFile?	# retrieve the blg file if present
-				response.success () ->
-					getFile('output.blg', blgFile)
-						# ignore errors in biber file
-						.success processBiber
-						# display the combined result
-						.then annotateFiles
-			else # otherwise just display the result
-				response.success annotateFiles
+				if blgFile?	# retrieve the blg file if present
+					response = response.then () ->
+						getFile('output.blg', blgFile)
+							.then(
+								(response) -> processBiber(response.data),
+								() ->	true # ignore errors in biber file
+							)
+
+			if response?
+				response.catch handleError
+			else
+				handleError()
+
+			if chktexFile?
+				getChkTex = () ->
+					getFile('output.chktex', chktexFile)
+						.then	(response) -> processChkTex(response.data)
+				# always retrieve the chktex file if present
+				if response?
+					response = response.then getChkTex, getChkTex
+				else
+					response = getChkTex()
+
+			# display the combined result
+			response.finally annotateFiles
 
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
@@ -504,7 +558,9 @@ define [
 			return if !entity? or entity.type != "doc"
 			if entry.line?
 				line = entry.line
-			ide.editorManager.openDoc(entity, gotoLine: line)
+			if entry.column?
+				column = entry.column
+			ide.editorManager.openDoc(entity, gotoLine: line, gotoColumn: column)
 	]
 
 	App.controller 'ClearCacheModalController', ["$scope", "$modalInstance", ($scope, $modalInstance) ->
