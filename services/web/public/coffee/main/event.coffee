@@ -3,6 +3,11 @@ define [
 	"modules/localStorage"
 ], (App) ->
 	CACHE_KEY = "countlyEvents"
+	send = (category, action, attributes = {})->
+		ga('send', 'event', category, action)
+		event_name = "#{action}-#{category}"
+		Intercom?("trackEvent", event_name, attributes)
+		
 
 	App.factory "event_tracking", (localStorage) ->
 		_getEventCache = () -> 
@@ -41,6 +46,18 @@ define [
 				if ! _eventInCache(key)
 					_addEventToCache(key)
 					@sendCountly key, segmentation
+			
+			send: (category, action, attributes = {})->
+				event_name = "#{action}-#{category}"
+				$.ajax {
+					url: "/event/#{event_name}",
+					method: "POST",
+					data: attributes,
+					dataType: "json",
+					headers: {
+						"X-CSRF-Token": window.csrfToken
+					}
+				}
 		}
 
 	# App.directive "countlyTrack", () ->
