@@ -21,7 +21,7 @@ else
 	Event = sequelize.define("Event", {
 		user_id: Sequelize.STRING,
 		event: Sequelize.STRING,
-		segmentation: Sequelize.JSON
+		segmentation: Sequelize.JSONB
 	})
 
 	module.exports =
