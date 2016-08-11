@@ -231,7 +231,7 @@ module.exports = CompileManager =
 		timeout = 10 * 1000
 		compileName = getCompileName(project_id, user_id)
 
-		CommandRunner.run compileName, command, directory, image, timeout, (error) ->
+		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
 			return callback(error) if error?
 			try
 				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
