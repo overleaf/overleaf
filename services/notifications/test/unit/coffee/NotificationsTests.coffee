@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+expect = chai.should
 should = chai.should()
 modulePath = "../../../app/js/Notifications.js"
 SandboxedModule = require('sandboxed-module')
@@ -44,12 +45,27 @@ describe 'Notifications Tests', ->
 				done()
 
 	describe 'addNotification', ->
+		beforeEach ->
+			@stubbedNotification = {
+				user_id: ObjectId(user_id),
+				key:"notification-key",
+				messageOpts:"some info",
+				templateKey:"template-key"
+			}
+			@expectedDocument = {
+				user_id: @stubbedNotification.user_id,
+				key:"notification-key",
+				messageOpts:"some info",
+				templateKey:"template-key",
+				expires: false
+			}
+
 		it 'should insert the notification into the collection', (done)->
 			@insertStub.callsArgWith(1, null)
 			@countStub.callsArgWith(1, null, 0)
 
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				@insertStub.calledWith(@stubbedNotification).should.equal true
+				@insertStub.calledWith(@expectedDocument).should.equal true
 				done()
 
 		it 'should fail insert of existing notification key', (done)->
@@ -57,8 +73,36 @@ describe 'Notifications Tests', ->
 			@countStub.callsArgWith(1, null, 1)
 
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				@insertStub.calledWith(@stubbedNotification).should.equal false
+				@insertStub.calledWith(@expectedDocument).should.equal false
 				done()
+
+		describe 'when the notification is set to expire', () ->
+			beforeEach ->
+				@stubbedNotification = {
+					user_id: ObjectId(user_id),
+					key:"notification-key",
+					messageOpts:"some info",
+					templateKey:"template-key",
+					expires: true
+				}
+				@expectedDocument = {
+					user_id: @stubbedNotification.user_id,
+					key:"notification-key",
+					messageOpts:"some info",
+					templateKey:"template-key",
+					expires: true,
+					expiresFrom: new Date()
+				}
+
+			it 'should add an `expiresFrom` Date field to the inserted notification', (done)->
+				@insertStub.callsArgWith(1, null)
+				@countStub.callsArgWith(1, null, 0)
+
+				@notifications.addNotification user_id, @stubbedNotification, (err)=>
+					@insertStub.callCount.should.equal 1
+					Object.keys(@insertStub.lastCall.args[0]).should.deep.equal Object.keys(@expectedDocument)
+					@insertStub.firstCall.args[0].expiresFrom.should.be.instanceof Date
+					done()
 
 	describe 'removeNotificationId', ->
 		it 'should mark the notification id as read', (done)->

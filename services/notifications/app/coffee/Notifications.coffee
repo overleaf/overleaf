@@ -27,6 +27,10 @@ module.exports =
 					key: notification.key
 					messageOpts: notification.messageOpts
 					templateKey: notification.templateKey
+					expires: notification.expires || false
+				# ttl index on `expiresFrom` field
+				if doc.expires
+					doc.expiresFrom = new Date()
 				db.notifications.insert(doc, callback)
 
 	removeNotificationId: (user_id, notification_id, callback)->
