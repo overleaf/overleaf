@@ -46,8 +46,11 @@ define [
 
 			done = () =>
 				if options.gotoLine?
-					@$scope.$broadcast "editor:gotoLine", options.gotoLine, options.gotoColumn
-			
+					# allow Ace to display document before moving, delay until next tick
+					setTimeout () =>
+						@$scope.$broadcast "editor:gotoLine", options.gotoLine, options.gotoColumn
+					,0
+
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>
 					done()
