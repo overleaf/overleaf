@@ -130,11 +130,6 @@ module.exports = CollaboratorsHandler =
 			else
 				return callback(new Error("unknown privilegeLevel: #{privilegeLevel}"))
 
-			# Do these in the background
-			UserGetter.getUser user_id, {email: 1}, (error, user) ->
-				if error?
-					logger.error {err: error, project_id, user_id}, "error getting user while adding to project"
-				CollaboratorsEmailHandler.notifyUserOfProjectShare project_id, user.email
 			ContactManager.addContact adding_user_id, user_id
 
 			Project.update { _id: project_id }, { $addToSet: level }, (error) ->

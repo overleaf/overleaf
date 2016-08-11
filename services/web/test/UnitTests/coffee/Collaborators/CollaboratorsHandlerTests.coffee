@@ -180,8 +180,6 @@ describe "CollaboratorsHandler", ->
 			@Project.findOne = sinon.stub().callsArgWith(2, null, @project = {})
 			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArg(1)
 			@CollaboratorHandler.addEmailToProject = sinon.stub().callsArgWith(4, null, @user_id)
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { _id: @user_id, email: @email })
-			@CollaboratorsEmailHandler.notifyUserOfProjectShare = sinon.stub()
 			@ContactManager.addContact = sinon.stub()
 
 		describe "as readOnly", ->
