@@ -22,7 +22,7 @@ module.exports =
 				logger.log number:number, user_id:user_id, key:notification.key, "alredy has notification key for user"
 				callback number
 			else
-				doc = 
+				doc =
 					user_id: ObjectId(user_id)
 					key: notification.key
 					messageOpts: notification.messageOpts
@@ -30,17 +30,24 @@ module.exports =
 				db.notifications.insert(doc, callback)
 
 	removeNotificationId: (user_id, notification_id, callback)->
-		searchOps = 
+		searchOps =
 			user_id:ObjectId(user_id)
 			_id:ObjectId(notification_id)
-		updateOperation = 
+		updateOperation =
 			"$unset": {templateKey:true, messageOpts: true}
 		db.notifications.update searchOps, updateOperation, callback
 
 	removeNotificationKey: (user_id, notification_key, callback)->
-		searchOps = 
+		searchOps =
 			user_id:ObjectId(user_id)
 			key: notification_key
-		updateOperation = 
+		updateOperation =
+			"$unset": {templateKey:true}
+		db.notifications.update searchOps, updateOperation, callback
+
+	removeNotificationByKeyOnly: (notification_key, callback)->
+		searchOps =
+			key: notification_key
+		updateOperation =
 			"$unset": {templateKey:true}
 		db.notifications.update searchOps, updateOperation, callback

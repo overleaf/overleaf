@@ -65,10 +65,10 @@ describe 'Notifications Tests', ->
 			@updateStub.callsArgWith(2, null)
 
 			@notifications.removeNotificationId user_id, notification_id, (err)=>
-				searchOps = 
+				searchOps =
 					user_id:ObjectId(user_id)
 					_id:ObjectId(notification_id)
-				updateOperation = 
+				updateOperation =
 					"$unset": {templateKey:true, messageOpts:true}
 				@updateStub.calledWith(searchOps, updateOperation).should.equal true
 				done()
@@ -78,10 +78,22 @@ describe 'Notifications Tests', ->
 			@updateStub.callsArgWith(2, null)
 
 			@notifications.removeNotificationKey user_id, notification_key, (err)=>
-				searchOps = 
+				searchOps =
 					user_id:ObjectId(user_id)
 					key: notification_key
-				updateOperation = 
+				updateOperation =
+					"$unset": {templateKey:true}
+				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				done()
+
+	describe 'removeNotificationByKeyOnly', ->
+		it 'should mark the notification key as read', (done)->
+			@updateStub.callsArgWith(2, null)
+
+			@notifications.removeNotificationByKeyOnly notification_key, (err)=>
+				searchOps =
+					key: notification_key
+				updateOperation =
 					"$unset": {templateKey:true}
 				@updateStub.calledWith(searchOps, updateOperation).should.equal true
 				done()

@@ -30,3 +30,10 @@ module.exports =
 		metrics.inc "removeNotificationKey"
 		Notifications.removeNotificationKey req.params.user_id, req.body.key, (err, notifications)->
 			res.send()
+
+	removeNotificationByKeyOnly: (req, res)->
+		notification_key = req.params.key
+		logger.log {notification_key}, "mark notification as read by key only"
+		metrics.inc "removeNotificationKey"
+		Notifications.removeNotificationByKeyOnly notification_key, (err, notifications)->
+			res.send()
