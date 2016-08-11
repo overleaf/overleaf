@@ -200,11 +200,6 @@ describe "CollaboratorsHandler", ->
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should send an email to the shared-with user", ->
-				@CollaboratorsEmailHandler.notifyUserOfProjectShare
-					.calledWith(@project_id, @email)
-					.should.equal true
-
 			it "should add the user as a contact for the adding user", ->
 				@ContactManager.addContact
 					.calledWith(@adding_user_id, @user_id)
