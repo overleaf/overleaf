@@ -233,12 +233,11 @@ module.exports = CompileManager =
 
 		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
 			return callback(error) if error?
-			try
-				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
-			catch err
-				logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
-				return callback(err)
-			callback null, CompileManager._parseWordcountFromOutput(stdout)
+			fs.readFile directory + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
+				if err?
+					logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
+					return callback(err)
+				callback null, CompileManager._parseWordcountFromOutput(stdout)
 
 	_parseWordcountFromOutput: (output) ->
 		results = {
