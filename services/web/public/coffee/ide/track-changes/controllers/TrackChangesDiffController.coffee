@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	App.controller "TrackChangesDiffController", ($scope, $modal, ide, event_tracking) ->
 		$scope.restoreDeletedDoc = () ->
-			event_tracking.sendCountly "track-changes-restore-deleted"
+			event_tracking.sendMB "track-changes-restore-deleted"
 			$scope.trackChanges.diff.restoreInProgress = true
 			ide.trackChangesManager
 				.restoreDeletedDoc(
@@ -15,7 +15,7 @@ define [
 					$scope.trackChanges.diff.restoreDeletedSuccess = true
 
 		$scope.openRestoreDiffModal = () ->
-			event_tracking.sendCountly "track-changes-restore-modal"
+			event_tracking.sendMB "track-changes-restore-modal"
 			$modal.open {
 				templateUrl: "trackChangesRestoreDiffModalTemplate"
 				controller: "TrackChangesRestoreDiffModalController"
@@ -33,7 +33,7 @@ define [
 		$scope.diff = diff
 
 		$scope.restore = () ->
-			event_tracking.sendCountly "track-changes-restored"
+			event_tracking.sendMB "track-changes-restored"
 			$scope.state.inflight = true
 			ide.trackChangesManager
 				.restoreDiff(diff)

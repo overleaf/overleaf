@@ -51,7 +51,7 @@ define [
 			.done()
 
 		pricing.on "change", =>
-			event_tracking.sendCountly "subscription-form", { plan : pricing.items.plan.code }
+			event_tracking.sendMB "subscription-form", { plan : pricing.items.plan.code }
 
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
@@ -125,7 +125,7 @@ define [
 							state:       $scope.data.state
 							postal_code: $scope.data.postal_code
 				
-				event_tracking.sendCountly "subscription-form-submitted", { 
+				event_tracking.sendMB "subscription-form-submitted", { 
 					currencyCode	: postData.subscriptionDetails.currencyCode,
 					plan_code		: postData.subscriptionDetails.plan_code,
 					coupon_code		: postData.subscriptionDetails.coupon_code,
@@ -135,7 +135,7 @@ define [
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
 						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->
-							event_tracking.sendCountly "subscription-submission-success"
+							event_tracking.sendMB "subscription-submission-success"
 							window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false

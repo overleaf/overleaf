@@ -38,6 +38,7 @@ ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
+AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -68,7 +69,8 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
-
+		AnalyticsRouter.apply(webRouter, apiRouter)
+		
 		Modules.applyRouter(webRouter, apiRouter)
 
 
