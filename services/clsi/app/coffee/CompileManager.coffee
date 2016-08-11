@@ -226,7 +226,7 @@ module.exports = CompileManager =
 	wordcount: (project_id, user_id, file_name, image, callback = (error, pdfPositions) ->) ->
 		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
-		command = [ "texcount", '-inc', file_path, "-out=" + file_path + ".wc"]
+		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
 		directory = getCompileDir(project_id, user_id)
 		timeout = 10 * 1000
 		compileName = getCompileName(project_id, user_id)
@@ -237,7 +237,9 @@ module.exports = CompileManager =
 				if err?
 					logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
 					return callback(err)
-				callback null, CompileManager._parseWordcountFromOutput(stdout)
+				results = CompileManager._parseWordcountFromOutput(stdout)
+				logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
+				callback null, results
 
 	_parseWordcountFromOutput: (output) ->
 		results = {
@@ -249,6 +251,8 @@ module.exports = CompileManager =
 			elements: 0
 			mathInline: 0
 			mathDisplay: 0
+			errors: 0
+			messages: ""
 		}
 		for line in output.split("\n")
 			[data, info] = line.split(":")
@@ -268,4 +272,8 @@ module.exports = CompileManager =
 				results['mathInline'] = parseInt(info, 10)
 			if data.indexOf("Number of math displayed") > -1
 				results['mathDisplay'] = parseInt(info, 10)
+			if data is "(errors"  # errors reported as (errors:123)
+				results['errors'] = parseInt(info, 10)
+			if line.indexOf("!!! ") > -1  # errors logged as !!! message !!!
+				results['messages'] += line + "\n"
 		return results
