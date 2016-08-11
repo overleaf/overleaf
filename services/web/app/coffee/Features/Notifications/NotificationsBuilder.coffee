@@ -3,6 +3,8 @@ NotificationsHandler = require("./NotificationsHandler")
 
 module.exports =
 
+	# Note: notification keys should be url-safe
+
 	groupPlan: (user, licence)->
 		key : "join-sub-#{licence.subscription_id}"
 		create: (callback = ->)->
@@ -26,4 +28,4 @@ module.exports =
 			logger.log {user_id: user._id, project_id: project._id, invite_id: invite._id, key: @key}, "creating project invite notification for user"
 			NotificationsHandler.createNotification user._id, @key, "notification_project_invite", messageOpts, callback
 		read:  (callback=()->) ->
-			NotificationsHandler.markAsReadWithKey user._id, @key, callback
+			NotificationsHandler.markAsReadByKeyOnly @key, callback

@@ -69,3 +69,16 @@ describe 'NotificationsHandler', ->
 				expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts}
 				assert.deepEqual(args.json, expectedJson)
 				done()
+
+	describe "markAsReadByKeyOnly", ->
+		beforeEach ->
+			@key = "some key here"
+
+		it 'should send a delete request when a delete has been received to mark a notification', (done)->
+			@handler.markAsReadByKeyOnly @key, =>
+				opts =
+					uri: "#{notificationUrl}/notification/key/#{@key}"
+					timeout:1000
+					method: "DELETE"
+				@request.calledWith(opts).should.equal true
+				done()

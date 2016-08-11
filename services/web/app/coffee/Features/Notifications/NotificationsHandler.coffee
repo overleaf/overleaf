@@ -61,3 +61,13 @@ module.exports =
 			timeout:oneSecond
 		logger.log user_id:user_id, notification_id:notification_id, "sending mark notification as read to notifications api"
 		makeRequest opts, callback
+
+	# removes notification by key, without regard for user_id,
+	# should not be exposed to user via ui/router
+	markAsReadByKeyOnly: (key, callback)->
+		opts =
+			uri: "#{settings.apis.notifications?.url}/notification/key/#{key}"
+			method: "DELETE"
+			timeout: oneSecond
+		logger.log {key:key}, "sending mark notification as read with key-only to notifications api"
+		makeRequest opts, callback
