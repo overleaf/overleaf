@@ -29,6 +29,8 @@ module.exports =
 					templateKey: notification.templateKey
 					expires: notification.expires || false
 				# ttl index on `expiresFrom` field
+				# in Mongo, TTL indexes only work on date fields,
+				# and ignore the document when that field is missing
 				if doc.expires
 					doc.expiresFrom = new Date()
 				db.notifications.insert(doc, callback)
