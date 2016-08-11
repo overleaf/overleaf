@@ -2,8 +2,8 @@
 
 include /etc/firejail/disable-common.inc
 include /etc/firejail/disable-devel.inc
-include /etc/firejail/disable-mgmt.inc
-include /etc/firejail/disable-secret.inc
+# include /etc/firejail/disable-mgmt.inc ## removed in firejail 0.9.40
+# include /etc/firejail/disable-secret.inc ## removed in firejail 0.9.40
 
 read-only /bin
 blacklist /boot
