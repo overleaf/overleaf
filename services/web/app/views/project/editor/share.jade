@@ -95,6 +95,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							button.btn.btn-info(
 								type="submit"
 								ng-mousedown="addMembers()"
+								ng-keyup="$event.keyCode == 13 ? addMembers() : null"
 							) #{translate("share")}
 				div(ng-hide="canAddCollaborators")
 					p.text-center #{translate("need_to_upgrade_for_more_collabs")}. Also:
