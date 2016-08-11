@@ -19,6 +19,7 @@ describe "AuthenticationController", ->
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
+			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"settings-sharelatex": {}
 			"../User/UserSessionsManager": @UserSessionsManager =
@@ -98,6 +99,11 @@ describe "AuthenticationController", ->
 			it "should log the successful login", ->
 				@logger.log
 					.calledWith(email: @email.toLowerCase(), user_id: @user._id.toString(), "successful log in")
+					.should.equal true
+
+			it "should track the login event", ->
+				@AnalyticsManager.recordEvent
+					.calledWith(@user._id, "user-logged-in")
 					.should.equal true
 
 
