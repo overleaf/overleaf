@@ -8,6 +8,7 @@ logger = require("logger-sharelatex")
 crypto = require("crypto")
 EmailHandler = require("../Email/EmailHandler")
 OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
+Analytics = require "../Analytics/AnalyticsManager"
 settings = require "settings-sharelatex"
 
 module.exports = UserRegistrationHandler =
@@ -62,6 +63,7 @@ module.exports = UserRegistrationHandler =
 						cb() #this can be slow, just fire it off
 				], (err)->
 					logger.log user: user, "registered"
+					Analytics.recordEvent user._id, "user-registered"
 					callback(err, user)
 	
 	registerNewUserAndSendActivationEmail: (email, callback = (error, user, setNewPasswordUrl) ->) ->
