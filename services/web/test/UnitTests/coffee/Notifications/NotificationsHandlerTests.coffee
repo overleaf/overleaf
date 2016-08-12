@@ -77,7 +77,7 @@ describe 'NotificationsHandler', ->
 		it 'should send a delete request when a delete has been received to mark a notification', (done)->
 			@handler.markAsReadByKeyOnly @key, =>
 				opts =
-					uri: "#{notificationUrl}/notification/key/#{@key}"
+					uri: "#{notificationUrl}/key/#{@key}"
 					timeout:1000
 					method: "DELETE"
 				@request.calledWith(opts).should.equal true

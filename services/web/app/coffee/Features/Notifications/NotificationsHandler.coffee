@@ -10,10 +10,10 @@ makeRequest = (opts, callback)->
 	else
 		request(opts, callback)
 
-module.exports = 
+module.exports =
 
 	getUserNotifications: (user_id, callback)->
-		opts = 
+		opts =
 			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			json: true
 			timeout: oneSecond
@@ -30,7 +30,7 @@ module.exports =
 				callback(null, unreadNotifications)
 
 	createNotification: (user_id, key, templateKey, messageOpts, callback)->
-		opts = 
+		opts =
 			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			timeout: oneSecond
 			method:"POST"
@@ -43,7 +43,7 @@ module.exports =
 		makeRequest opts, callback
 
 	markAsReadWithKey: (user_id, key, callback)->
-		opts = 
+		opts =
 			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			method: "DELETE"
 			timeout: oneSecond
@@ -52,7 +52,7 @@ module.exports =
 			}
 		logger.log user_id:user_id, key:key, "sending mark notification as read with key to notifications api"
 		makeRequest opts, callback
-	
+
 
 	markAsRead: (user_id, notification_id, callback)->
 		opts =
@@ -66,7 +66,7 @@ module.exports =
 	# should not be exposed to user via ui/router
 	markAsReadByKeyOnly: (key, callback)->
 		opts =
-			uri: "#{settings.apis.notifications?.url}/notification/key/#{key}"
+			uri: "#{settings.apis.notifications?.url}/key/#{key}"
 			method: "DELETE"
 			timeout: oneSecond
 		logger.log {key:key}, "sending mark notification as read with key-only to notifications api"
