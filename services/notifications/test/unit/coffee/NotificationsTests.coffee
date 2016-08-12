@@ -56,7 +56,6 @@ describe 'Notifications Tests', ->
 				key:"notification-key",
 				messageOpts:"some info",
 				templateKey:"template-key",
-				expires: false
 			}
 
 		it 'should insert the notification into the collection', (done)->
