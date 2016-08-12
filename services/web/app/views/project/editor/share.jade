@@ -47,7 +47,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-8 {{ invite.email }}&nbsp;
 					div.small
 						| #{translate("invite_not_accepted")}.&nbsp;
-						a(href="#", ng-click="resendInvite(invite)") #{translate("resend")}
+						a(href="#", ng-click="resendInvite(invite, $event)") #{translate("resend")}
 				.col-xs-3.text-left
 					// todo: get invite privileges
 					span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
