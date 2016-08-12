@@ -55,7 +55,7 @@ describe 'Notifications Tests', ->
 				user_id: @stubbedNotification.user_id,
 				key:"notification-key",
 				messageOpts:"some info",
-				templateKey:"template-key",
+				templateKey:"template-key"
 			}
 
 		it 'should insert the notification into the collection', (done)->
@@ -81,25 +81,23 @@ describe 'Notifications Tests', ->
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
-					expires: true
+					expires: '2922-02-13T09:32:56.289Z'
 				}
 				@expectedDocument = {
 					user_id: @stubbedNotification.user_id,
 					key:"notification-key",
 					messageOpts:"some info",
 					templateKey:"template-key",
-					expires: true,
-					expiresFrom: new Date()
+					expires: new Date(@stubbedNotification.expires),
 				}
 
-			it 'should add an `expiresFrom` Date field to the inserted notification', (done)->
+			it 'should add an `expires` Date field to the document', (done)->
 				@insertStub.callsArgWith(1, null)
 				@countStub.callsArgWith(1, null, 0)
 
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					@insertStub.callCount.should.equal 1
-					Object.keys(@insertStub.lastCall.args[0]).should.deep.equal Object.keys(@expectedDocument)
-					@insertStub.firstCall.args[0].expiresFrom.should.be.instanceof Date
+					@insertStub.calledWith(@expectedDocument).should.equal true
 					done()
 
 	describe 'removeNotificationId', ->
