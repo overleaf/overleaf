@@ -26,14 +26,14 @@ module.exports = CollaboratorsInviteController =
 			if err?
 				logger.err {projectId, email}, "error checking if user exists"
 				return callback(err)
-			if !existingUser
+			if !existingUser?
 				logger.log {projectId, email}, "no existing user found, returning"
 				return callback(null)
-			ProjectGetter.getProject projectId, (err, project) ->
+			ProjectGetter.getProject projectId, {_id: 1, name: 1}, (err, project) ->
 				if err?
 					logger.err {projectId, email}, "error getting project"
 					return callback(err)
-				if !project
+				if !project?
 					logger.log {projectId}, "no project found while sending notification, returning"
 					return callback(null)
 				NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
@@ -109,7 +109,7 @@ module.exports = CollaboratorsInviteController =
 					logger.err {projectId, token}, "error getting invite by token"
 					return next(err)
 				# check if invite is gone, or otherwise non-existent
-				if !invite
+				if !invite?
 					logger.log {projectId, token}, "no invite found for this token"
 					return _renderInvalidPage()
 				# check the user who sent the invite exists
@@ -117,7 +117,7 @@ module.exports = CollaboratorsInviteController =
 					if err?
 						logger.err {err, projectId}, "error getting project owner"
 						return next(err)
-					if !owner
+					if !owner?
 						logger.log {projectId}, "no project owner found"
 						return _renderInvalidPage()
 					# fetch the project name
@@ -125,7 +125,7 @@ module.exports = CollaboratorsInviteController =
 						if err?
 							logger.err {err, projectId}, "error getting project"
 							return next(err)
-						if !project
+						if !project?
 							logger.log {projectId}, "no project found"
 							return _renderInvalidPage()
 						# finally render the invite

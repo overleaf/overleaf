@@ -73,7 +73,7 @@ describe "CollaboratorsInviteController", ->
 			@fakeProject =
 				_id: @project_id
 				name: "some project"
-			@ProjectGetter.getProject = sinon.stub().callsArgWith(1, null, @fakeProject)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @fakeProject)
 			@notification = {create: sinon.stub().callsArgWith(0, null)}
 			@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
 			@call = (callback) =>
@@ -109,7 +109,7 @@ describe "CollaboratorsInviteController", ->
 			describe 'when getProject produces an error', ->
 
 				beforeEach ->
-					@ProjectGetter.getProject.callsArgWith(1, new Error('woops'))
+					@ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
 
 				it 'should produce an error', (done) ->
 					@call (err) =>
