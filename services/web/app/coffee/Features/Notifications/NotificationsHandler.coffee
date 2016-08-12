@@ -29,16 +29,19 @@ module.exports =
 					unreadNotifications = []
 				callback(null, unreadNotifications)
 
-	createNotification: (user_id, key, templateKey, messageOpts, callback)->
+	createNotification: (user_id, key, templateKey, messageOpts, expiryDateTime, callback)->
+		payload = {
+				key:key
+				messageOpts:messageOpts
+				templateKey:templateKey
+		}
+		if expiryDateTime?
+			payload.expires = expiryDateTime
 		opts =
 			uri: "#{settings.apis.notifications?.url}/user/#{user_id}"
 			timeout: oneSecond
 			method:"POST"
-			json: {
-				key:key
-				messageOpts:messageOpts
-				templateKey:templateKey
-			}
+			json: payload
 		logger.log opts:opts, "creating notification for user"
 		makeRequest opts, callback
 

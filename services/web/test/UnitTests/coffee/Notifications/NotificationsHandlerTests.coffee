@@ -60,15 +60,32 @@ describe 'NotificationsHandler', ->
 			@key = "some key here"
 			@messageOpts = {value:12344}
 			@templateKey = "renderThisHtml"
+			@expiry = null
 
 		it "should post the message over", (done)->
-			@handler.createNotification user_id, @key, @templateKey, @messageOpts, =>
+			@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
 				args = @request.args[0][0]
 				args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
 				args.timeout.should.equal 1000
 				expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts}
 				assert.deepEqual(args.json, expectedJson)
 				done()
+
+		describe 'when expiry date is supplied', ->
+			beforeEach ->
+				@key = "some key here"
+				@messageOpts = {value:12344}
+				@templateKey = "renderThisHtml"
+				@expiry = new Date()
+
+			it 'should post the message over with expiry field', (done) ->
+				@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
+					args = @request.args[0][0]
+					args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
+					args.timeout.should.equal 1000
+					expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts, expires: @expiry}
+					assert.deepEqual(args.json, expectedJson)
+					done()
 
 	describe "markAsReadByKeyOnly", ->
 		beforeEach ->

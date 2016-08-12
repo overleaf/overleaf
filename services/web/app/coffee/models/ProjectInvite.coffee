@@ -6,7 +6,13 @@ Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
 
-THIRTY_DAYS_IN_SECONDS = 60 * 60 * 24 * 30
+EXPIRY_IN_SECONDS = 60 * 60 * 24 * 30
+
+ExpiryDate = () ->
+	timestamp = new Date()
+	timestamp.setSeconds(timestamp.getSeconds() + EXPIRY_IN_SECONDS)
+	return timestamp
+
 
 
 ProjectInviteSchema = new Schema(
@@ -16,7 +22,8 @@ ProjectInviteSchema = new Schema(
 		sendingUserId:  ObjectId
 		projectId:      ObjectId
 		privileges:     String
-		createdAt:      {type: Date, default: Date.now, index: {expireAfterSeconds: THIRTY_DAYS_IN_SECONDS}}
+		createdAt:      {type: Date, default: Date.now}
+		expires:        {type: Date, default: ExpiryDate, index: {expireAfterSeconds: 10}}
 	},
 	{
 		collection: 'projectInvites'
@@ -29,7 +36,7 @@ conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: Settings.
 
 ProjectInvite = conn.model('ProjectInvite', ProjectInviteSchema)
 
-
 mongoose.model 'ProjectInvite', ProjectInviteSchema
 exports.ProjectInvite = ProjectInvite
 exports.ProjectInviteSchema = ProjectInviteSchema
+exports.EXPIRY_IN_SECONDS = EXPIRY_IN_SECONDS
