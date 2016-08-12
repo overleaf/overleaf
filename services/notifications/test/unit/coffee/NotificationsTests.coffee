@@ -18,7 +18,6 @@ describe 'Notifications Tests', ->
 		@insertStub = sinon.stub()
 		@countStub = sinon.stub()
 		@updateStub = sinon.stub()
-
 		@mongojs = =>
 			notifications:
 				update: self.mongojsUpdate
@@ -37,11 +36,11 @@ describe 'Notifications Tests', ->
 		@stubbedNotificationArray = [@stubbedNotification]
 
 	describe 'getUserNotifications', ->
-		it "should find all notifications and return it", (done)->
+		it "should find all notifications and return i", (done)->
 			@findStub.callsArgWith(1, null, @stubbedNotificationArray)
 			@notifications.getUserNotifications user_id, (err, notifications)=>
 				notifications.should.equal @stubbedNotificationArray
-				@findStub.calledWith({"user_id" : ObjectId(user_id), "templateKey": {"$exists":true}}).should.equal true
+				assert.deepEqual(@findStub.args[0][0], {"user_id" :ObjectId(user_id), "templateKey": {"$exists":true}})
 				done()
 
 	describe 'addNotification', ->
@@ -114,7 +113,8 @@ describe 'Notifications Tests', ->
 					_id:ObjectId(notification_id)
 				updateOperation =
 					"$unset": {templateKey:true, messageOpts:true}
-				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				assert.deepEqual(@updateStub.args[0][0], searchOps)
+				assert.deepEqual(@updateStub.args[0][1], updateOperation)
 				done()
 
 	describe 'removeNotificationKey', ->
@@ -139,5 +139,6 @@ describe 'Notifications Tests', ->
 					key: notification_key
 				updateOperation =
 					"$unset": {templateKey:true}
-				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				assert.deepEqual(@updateStub.args[0][0], searchOps)
+				assert.deepEqual(@updateStub.args[0][1], updateOperation)
 				done()
