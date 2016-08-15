@@ -28,7 +28,10 @@ describe 'Notifications Tests', ->
 		@mongojs.ObjectId = ObjectId
 
 		@notifications = SandboxedModule.require modulePath, requires:
-			'logger-sharelatex': log:->
+			'logger-sharelatex': {
+				log:()->
+				error:()->
+			}
 			'settings-sharelatex': {}
 			'mongojs':@mongojs
 
@@ -98,6 +101,33 @@ describe 'Notifications Tests', ->
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					@insertStub.callCount.should.equal 1
 					@insertStub.calledWith(@expectedDocument).should.equal true
+					done()
+
+		describe 'when the notification has a nonsensical expires field', () ->
+			beforeEach ->
+				@stubbedNotification = {
+					user_id: ObjectId(user_id),
+					key:"notification-key",
+					messageOpts:"some info",
+					templateKey:"template-key",
+					expires: 'WAT'
+				}
+				@expectedDocument = {
+					user_id: @stubbedNotification.user_id,
+					key:"notification-key",
+					messageOpts:"some info",
+					templateKey:"template-key",
+					expires: new Date(@stubbedNotification.expires),
+				}
+
+			it 'should produce an error', (done)->
+				@insertStub.callsArgWith(1, null)
+				@countStub.callsArgWith(1, null, 0)
+
+				@notifications.addNotification user_id, @stubbedNotification, (err)=>
+					(err instanceof Error).should.equal true
+					@insertStub.callCount.should.equal 0
+					@insertStub.calledWith(@expectedDocument).should.equal false
 					done()
 
 	describe 'removeNotificationId', ->

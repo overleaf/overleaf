@@ -32,7 +32,12 @@ module.exports =
 				# in Mongo, TTL indexes only work on date fields, and ignore the document when that field is missing
 				# see `README.md` for instruction on creating TTL index
 				if notification.expires?
-					doc.expires =  new Date(notification.expires)
+					try
+						doc.expires =  new Date(notification.expires)
+						_testValue = doc.expires.toISOString()
+					catch err
+						logger.error {user_id, expires: notification.expires}, "error converting `expires` field to Date"
+						return callback(err)
 				db.notifications.insert(doc, callback)
 
 	removeNotificationId: (user_id, notification_id, callback)->
