@@ -195,11 +195,16 @@ define [
 				qs.clsiserverid = response.clsiServerId
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
+					isOutputFile = file.path.match(/^output\./)
 					$scope.pdf.outputFiles.push {
 						# Turn 'output.blg' into 'blg file'.
-						name: if file.path.match(/^output\./) then "#{file.path.replace(/^output\./, "")} file" else file.path
+						name: if isOutputFile then "#{file.path.replace(/^output\./, "")} file" else file.path
 						url: "/project/#{project_id}/output/#{file.path}" + createQueryString qs
+						main: if isOutputFile then true else false
 					}
+
+			# sort the output files into order, main files first, then others
+			$scope.pdf.outputFiles.sort (a,b) -> (b.main - a.main) || a.name.localeCompare(b.name)
 
 
 		fetchLogs = (fileByPath, options) ->
