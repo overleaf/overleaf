@@ -43,10 +43,10 @@ define [
 							contact.display = contact.name
 
 		getCurrentMemberEmails = () ->
-			$scope.project.members.map (u) -> u.email
+			($scope.project.members || []).map (u) -> u.email
 
 		getCurrentInviteEmails = () ->
-			$scope.project.invites.map (u) -> u.email
+			($scope.project.invites || []).map (u) -> u.email
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
