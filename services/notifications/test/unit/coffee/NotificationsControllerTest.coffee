@@ -24,7 +24,7 @@ describe 'Notifications Controller', ->
 	describe "getUserNotifications", ->
 		it 'should ask the notifications for the users notifications', (done)->
 			@notifications.getUserNotifications = sinon.stub().callsArgWith(1, null, @stubbedNotification)
-			req = 
+			req =
 				params:
 					user_id: user_id
 			@controller.getUserNotifications req, json:(result)=>
@@ -35,7 +35,7 @@ describe 'Notifications Controller', ->
 	describe "addNotification", ->
 		it "should tell the notifications to add the notification for the user", (done)->
 			@notifications.addNotification = sinon.stub().callsArgWith(2)
-			req = 
+			req =
 				params:
 					user_id: user_id
 				body: @stubbedNotification
@@ -46,7 +46,7 @@ describe 'Notifications Controller', ->
 	describe "removeNotificationId", ->
 		it "should tell the notifications to mark the notification Id as read", (done)->
 			@notifications.removeNotificationId = sinon.stub().callsArgWith(2)
-			req = 
+			req =
 				params:
 					user_id: user_id
 					notification_id: notification_id
@@ -57,10 +57,20 @@ describe 'Notifications Controller', ->
 	describe "removeNotificationKey", ->
 		it "should tell the notifications to mark the notification Key as read", (done)->
 			@notifications.removeNotificationKey = sinon.stub().callsArgWith(2)
-			req = 
+			req =
 				params:
 					user_id: user_id
 				body: {key: notification_key}
 			@controller.removeNotificationKey req, send:(result)=>
 				@notifications.removeNotificationKey.calledWith(user_id, notification_key).should.equal true
+				done()
+
+	describe "removeNotificationByKeyOnly", ->
+		it "should tell the notifications to mark the notification Key as read", (done)->
+			@notifications.removeNotificationByKeyOnly = sinon.stub().callsArgWith(1)
+			req =
+				params:
+					key: notification_key
+			@controller.removeNotificationByKeyOnly req, send:(result)=>
+				@notifications.removeNotificationByKeyOnly.calledWith(notification_key).should.equal true
 				done()
