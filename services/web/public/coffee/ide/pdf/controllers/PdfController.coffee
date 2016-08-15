@@ -86,7 +86,7 @@ define [
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
-				check: if options.check then "validate" else null
+				check: if options.check then "validate" else "silent"
 				_csrf: window.csrfToken
 			}, {params: params}
 
