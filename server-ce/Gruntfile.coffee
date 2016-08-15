@@ -70,7 +70,7 @@ module.exports = (grunt) ->
 						"Misc": [
 							"help"
 						]
-						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install", "install:dirs"])
+						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
 						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
 
@@ -85,7 +85,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		["check:make"].concat(
 			("install:#{service.name}" for service in SERVICES)
-		).concat([ "install:dirs"])
+		)
 
 	grunt.registerTask 'install', 'install:all'
 
