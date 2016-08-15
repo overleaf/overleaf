@@ -67,6 +67,9 @@ define [
 				$scope.state.error = null
 				$scope.state.inflight = true
 
+				if !$scope.project.invites?
+					$scope.project.invites = []
+
 				currentMemberEmails = getCurrentMemberEmails()
 				currentInviteEmails = getCurrentInviteEmails()
 				do addNextMember = () ->
