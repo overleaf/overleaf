@@ -15,7 +15,10 @@ module.exports = ProjectEditorHandler =
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
 			members:     []
-			invites:     invites || []
+			invites:     invites
+
+		if !result.invites?
+			result.invites = []
 
 		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
 		result.owner = owner
