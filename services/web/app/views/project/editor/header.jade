@@ -91,12 +91,14 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			ng-if="permissions.admin",
 			tooltip="#{translate('share')}",
 			tooltip-placement="bottom",
+			ng-mouseenter="trackHover('share')"
 			ng-click="openShareProjectModal()",
 			ng-controller="ShareController"
 		)
 			i.fa.fa-fw.fa-group
 		a.btn.btn-full-height(
 			href,
+			ng-mouseenter="trackHover('track-changes')"
 			ng-click="toggleTrackChanges()",
 			ng-class="{ active: (ui.view == 'track-changes') }"
 			tooltip="#{translate('recent_changes')}",
@@ -108,6 +110,7 @@ header.toolbar.toolbar-header(ng-cloak, ng-hide="state.loading")
 			tooltip="#{translate('chat')}",
 			tooltip-placement="bottom",
 			ng-class="{ active: ui.chatOpen }",
+			ng-mouseenter="trackHover('chat')"
 			ng-click="toggleChat()",
 			ng-controller="ChatButtonController",
 			ng-show="!anonymous"

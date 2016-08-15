@@ -25,7 +25,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				dropdown-toggle
 			)
 				span.caret
-			ul.dropdown-menu.dropdown-menu-right
+			ul.dropdown-menu.dropdown-menu-left
 				li.dropdown-header #{translate("compile_mode")}
 				li
 					a(href, ng-click="draft = false")
@@ -36,6 +36,13 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
+				if user.betaProgram
+					li.dropdown-header #{translate("file_checks")}
+					li
+						a(href, ng-click="recompile({check:true})")
+							i.fa.fa-fw()
+							| &nbsp;#{translate("run_syntax_check")}
+							span.beta-feature-badge
 		a(
 			href
 			ng-click="stop()"
@@ -115,7 +122,8 @@ div.full-size.pdf(ng-controller="PdfController")
 					| &nbsp;
 					span(ng-show="entry.file") {{ entry.file }}
 					span(ng-show="entry.line") , line {{ entry.line }}
-				p.entry-message(ng-show="entry.message") {{ entry.message }}
+				p.entry-message(ng-show="entry.message")
+					| {{ entry.type }} {{ entry.message }}
 				.card.card-hint(
 					ng-if="entry.humanReadableHint"
 					stop-propagation="click"
@@ -126,7 +134,7 @@ div.full-size.pdf(ng-controller="PdfController")
 						ng-show="entry.humanReadableHint",
 						ng-bind-html="wikiEnabled ? entry.humanReadableHint : stripHTMLFromString(entry.humanReadableHint)")
 					.card-hint-actions.clearfix
-						.card-hint-ext-link(ng-if="wikiEnabled")
+						.card-hint-ext-link(ng-if="wikiEnabled && entry.extraInfoURL")
 							a(
 								ng-href="{{ entry.extraInfoURL }}",
 								ng-click="trackLogHintsLearnMore()"

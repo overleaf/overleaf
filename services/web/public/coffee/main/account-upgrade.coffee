@@ -6,7 +6,7 @@ define [
 		$scope.buttonClass = "btn-primary"
 
 		$scope.startFreeTrial = (source, couponCode) ->
-			event_tracking.sendCountly "subscription-start-trial", { source }
+			event_tracking.sendMB "subscription-start-trial", { source }
 
 			w = window.open()
 			sixpack.convert "track-changes-discount", ->

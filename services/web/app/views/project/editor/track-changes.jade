@@ -143,15 +143,27 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 				navigate-highlights="true"
 			)
 		.diff-deleted.text-centered(
-			ng-show="trackChanges.diff.deleted"
+			ng-show="trackChanges.diff.deleted && !trackChanges.diff.restoreDeletedSuccess"
 		)
 			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ trackChanges.diff.doc.name }} "})}
-
 			p
 				a.btn.btn-primary.btn-lg(
 					href,
-					ng-click="restoreDeletedDoc()"
+					ng-click="restoreDeletedDoc()",
+					ng-disabled="trackChanges.diff.restoreInProgress"
 				) #{translate("restore")}
+
+		.diff-deleted.text-centered(
+			ng-show="trackChanges.diff.deleted && trackChanges.diff.restoreDeletedSuccess"
+		)
+			p.text-serif  #{translate("file_restored", {filename:"{{ trackChanges.diff.doc.name }} "})}
+			p.text-serif  #{translate("file_restored_back_to_editor")}
+			p
+				a.btn.btn-default(
+					href,
+					ng-click="backToEditorAfterRestore()",
+				) #{translate("file_restored_back_to_editor_btn")}
+
 		.loading-panel(ng-show="trackChanges.diff.loading")
 			i.fa.fa-spin.fa-refresh
 			| &nbsp;&nbsp;#{translate("loading")}...

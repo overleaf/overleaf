@@ -10,6 +10,7 @@ Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
 UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
+Analytics = require "../Analytics/AnalyticsManager"
 
 module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
@@ -37,6 +38,7 @@ module.exports = AuthenticationController =
 						return next(error) if error?
 						req.session.justLoggedIn = true
 						logger.log email: email, user_id: user._id.toString(), "successful log in"
+						Analytics.recordEvent user._id, "user-logged-in"
 						res.json redir: redir
 				else
 					AuthenticationController._recordFailedLogin()

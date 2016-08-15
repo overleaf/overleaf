@@ -4,7 +4,7 @@ define [
 	App.controller "ShareController", ["$scope", "$modal", "ide", "projectInvites", "projectMembers", "event_tracking",
 	($scope, $modal, ide, projectInvites, projectMembers, event_tracking) ->
 			$scope.openShareProjectModal = () ->
-				event_tracking.sendCountlyOnce "ide-open-share-modal-once"
+				event_tracking.sendMBOnce "ide-open-share-modal-once"
 
 				$modal.open(
 					templateUrl: "shareProjectModalTemplate"

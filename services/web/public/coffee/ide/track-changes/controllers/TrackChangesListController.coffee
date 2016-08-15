@@ -78,7 +78,7 @@ define [
 			$scope.recalculateSelectedUpdates()
 	]
 
-	App.controller "TrackChangesListItemController", ["$scope", ($scope) ->
+	App.controller "TrackChangesListItemController", ["$scope", "event_tracking", ($scope, event_tracking) ->
 		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
 			if selectedFrom
 				for update in $scope.trackChanges.updates
@@ -92,6 +92,7 @@ define [
 				$scope.recalculateSelectedUpdates()
 
 		$scope.select = () ->
+			event_tracking.sendMB "track-changes-view-change"
 			$scope.update.selectedTo = true
 			$scope.update.selectedFrom = true
 

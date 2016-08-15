@@ -30,5 +30,5 @@ module.exports =
 		multi.get buildKey(token)
 		multi.del buildKey(token)
 		multi.exec (err, results)->
-			callback err, results[0]
+			callback err, results?[0]
 

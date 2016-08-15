@@ -27,8 +27,8 @@ module.exports = ProjectUploadController =
 	
 	uploadFile: (req, res, next) ->
 		timer = new metrics.Timer("file-upload")
-		name = req.files.qqfile.originalname
-		path = req.files.qqfile.path
+		name = req.files.qqfile?.originalname
+		path = req.files.qqfile?.path
 		project_id   = req.params.Project_id
 		folder_id    = req.query.folder_id
 		if !name? or name.length == 0 or name.length > 150

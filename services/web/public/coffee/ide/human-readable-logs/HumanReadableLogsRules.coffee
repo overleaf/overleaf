@@ -88,4 +88,19 @@ define -> [
 		humanReadableHint: """
 			You have used a font command which is only available in math mode. To use this command, you must be in maths mode (E.g. $ \u2026 $ or \\begin{math} \u2026 \\end{math}). If you want to use it outside of math mode, use the text version instead: \\textrm, \\textit, etc.
 		"""
+	,
+		ruleId: "hint_mismatched_environment"
+		regexToMatch: /Error: `([^']{2,})' expected, found `([^']{2,})'.*/
+		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
+		humanReadableHint: """
+			You have used \\begin{...} without a corresponding \\end{...}.
+		"""
+	,
+		ruleId: "hint_mismatched_brackets"
+		regexToMatch: /Error: `([^a-zA-Z0-9])' expected, found `([^a-zA-Z0-9])'.*/
+		newMessage: "Error: brackets do not match, found '$2' instead of '$1'"
+		humanReadableHint: """
+			You have used an open bracket without a corresponding close bracket.
+		"""
+
 ]

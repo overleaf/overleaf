@@ -46,7 +46,7 @@ define [
 
 			done = () =>
 				if options.gotoLine?
-					@$scope.$broadcast "editor:gotoLine", options.gotoLine
+					@$scope.$broadcast "editor:gotoLine", options.gotoLine, options.gotoColumn
 			
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>

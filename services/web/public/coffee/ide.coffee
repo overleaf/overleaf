@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/SafariScrollPatcher"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -40,6 +41,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	SafariScrollPatcher
 ) ->
 
 	App.controller "IdeController", ($scope, $timeout, ide, localStorage, event_tracking) ->
@@ -72,13 +74,16 @@ define [
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendCountlyOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
-			event_tracking.sendCountlyOnce "ide-open-chat-once" if isOpen
+			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
 
 		$scope.$watch "ui.leftMenuShown", (isOpen) ->
-			event_tracking.sendCountlyOnce "ide-open-left-menu-once" if isOpen
+			event_tracking.sendMBOnce "ide-open-left-menu-once" if isOpen
+
+		$scope.trackHover = (feature) ->
+			event_tracking.sendMBOnce "ide-hover-#{feature}-once"
 		# End of tracking code.
 
 		window._ide = ide
@@ -134,6 +139,9 @@ define [
 			)
 		catch err
 			console.error err
+
+		if ide.browserIsSafari
+			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]

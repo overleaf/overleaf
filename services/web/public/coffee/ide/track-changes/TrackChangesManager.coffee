@@ -117,6 +117,9 @@ define [
 						diff.error = true
 			else
 				diff.deleted = true
+				diff.restoreInProgress = false
+				diff.restoreDeletedSuccess = false
+				diff.restoredDocNewId = null
 
 		restoreDeletedDoc: (doc) ->
 			url = "/project/#{@$scope.project_id}/doc/#{doc.id}/restore"
