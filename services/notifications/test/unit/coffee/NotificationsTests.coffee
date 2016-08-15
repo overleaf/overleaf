@@ -66,7 +66,7 @@ describe 'Notifications Tests', ->
 			@countStub.callsArgWith(1, null, 0)
 
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
-				@insertStub.calledWith(@expectedDocument).should.equal true
+				assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
 				done()
 
 		it 'should fail insert of existing notification key', (done)->
@@ -100,7 +100,7 @@ describe 'Notifications Tests', ->
 
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					@insertStub.callCount.should.equal 1
-					@insertStub.calledWith(@expectedDocument).should.equal true
+					assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
 					done()
 
 		describe 'when the notification has a nonsensical expires field', () ->
@@ -149,12 +149,15 @@ describe 'Notifications Tests', ->
 			@updateStub.callsArgWith(2, null)
 
 			@notifications.removeNotificationKey user_id, notification_key, (err)=>
-				searchOps =
+				searchOps = {
 					user_id:ObjectId(user_id)
 					key: notification_key
-				updateOperation =
+				}
+				updateOperation = {
 					"$unset": {templateKey:true}
-				@updateStub.calledWith(searchOps, updateOperation).should.equal true
+				}
+				assert.deepEqual(@updateStub.args[0][0], searchOps)
+				assert.deepEqual(@updateStub.args[0][1], updateOperation)
 				done()
 
 	describe 'removeNotificationByKeyOnly', ->
