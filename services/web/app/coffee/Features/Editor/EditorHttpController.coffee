@@ -46,7 +46,7 @@ module.exports = EditorHttpController =
 							return callback null, null, false
 						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
 							return callback(error) if error?
-							logger.log {project_id, user_id, privilegeLevel}, "returning project model view"
+							logger.log {project_id, user_id, memberCount: members.length, inviteCount: invites.length, privilegeLevel}, "returning project model view"
 							callback(null,
 								ProjectEditorHandler.buildProjectModelView(project, members, invites),
 								privilegeLevel
