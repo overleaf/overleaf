@@ -40,15 +40,14 @@ module.exports = EditorHttpController =
 					return callback(error) if error?
 					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
+						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
+							return callback null, null, false
 						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
 							return callback(error) if error?
-							if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
-								callback null, null, false
-							else
-								callback(null,
-									ProjectEditorHandler.buildProjectModelView(project, members, invites),
-									privilegeLevel
-								)
+							callback(null,
+								ProjectEditorHandler.buildProjectModelView(project, members, invites),
+								privilegeLevel
+							)
 
 	restoreDoc: (req, res, next) ->
 		project_id = req.params.Project_id
