@@ -11,11 +11,12 @@ Crypto = require 'crypto'
 module.exports = CollaboratorsInviteHandler =
 
 	getAllInvites: (projectId, callback=(err, invites)->) ->
-		logger.log {projectId}, "fetching invites from mongo"
+		logger.log {projectId}, "fetching invites for project"
 		ProjectInvite.find {projectId: projectId}, (err, invites) ->
 			if err?
 				logger.err {err, projectId}, "error getting invites from mongo"
 				return callback(err)
+			logger.log {projectId, count: invites.length}, "found invites for project"
 			callback(null, invites)
 
 	getInviteCount: (projectId, callback=(err, count)->) ->
