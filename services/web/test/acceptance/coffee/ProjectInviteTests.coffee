@@ -95,6 +95,19 @@ tryGetInviteList = (user, projectId, callback=(err, response, body)->) ->
 			json: true
 		}, callback
 
+tryJoinProject = (user, projectId, callback=(err, response, body)->) ->
+	user.getCsrfToken (error) =>
+		return callback(error) if error?
+		user.request.post {
+			url: "/project/#{projectId}/join"
+			qs: {user_id: user._id}
+			auth:
+				user: settings.apis.web.user
+				pass: settings.apis.web.pass
+				sendImmediately: true
+			json: true
+			jar: false
+		}, callback
 
 # Expectations
 expectProjectAccess = (user, projectId, callback=(err,result)->) ->
@@ -185,6 +198,15 @@ expectInviteListCount = (user, projectId, count, callback=(err)->) ->
 		expect(body.invites.length).to.equal count
 		callback()
 
+expectInvitesInJoinProjectCount = (user, projectId, count, callback=(err,result)->) ->
+	tryJoinProject user, projectId, (err, response, body) ->
+		expect(err).to.be.oneOf [null, undefined]
+		expect(response.statusCode).to.equal 200
+		expect(body.project).to.contain.keys ['invites']
+		expect(body.project.invites.length).to.equal count
+		callback()
+
+
 
 describe "ProjectInviteTests", ->
 	before (done) ->
@@ -245,8 +267,12 @@ describe "ProjectInviteTests", ->
 						@invite = invite
 						cb()
 					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb
+					# check the joinProject view
+					(cb) => expectInvitesInJoinProjectCount @sendingUser, @projectId, 1, cb
+					# revoke invite
 					(cb) => revokeInvite @sendingUser, @projectId, @invite._id, cb
 					(cb) => expectInviteListCount @sendingUser, @projectId, 0, cb
+					(cb) => expectInvitesInJoinProjectCount @sendingUser, @projectId, 0, cb
 				], done
 
 			it 'should allow the project owner to many invites at once', (done) ->
@@ -268,6 +294,7 @@ describe "ProjectInviteTests", ->
 						cb()
 					# should have two
 					(cb) => expectInviteListCount @sendingUser, @projectId, 2, cb
+					(cb) => expectInvitesInJoinProjectCount @sendingUser, @projectId, 2, cb
 					# revoke first
 					(cb) => revokeInvite @sendingUser, @projectId, @inviteOne._id, cb
 					(cb) => expectInviteListCount @sendingUser, @projectId, 1, cb

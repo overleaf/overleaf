@@ -31,6 +31,7 @@ module.exports = EditorHttpController =
 				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
 
 	_buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
+		logger.log {project_id, user_id}, "building the joinProject view"
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			return callback(new Error("not found")) if !project?
@@ -41,9 +42,11 @@ module.exports = EditorHttpController =
 					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
 						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
+							logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"
 							return callback null, null, false
 						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
 							return callback(error) if error?
+							logger.log {project_id, user_id, privilegeLevel}, "returning project model view"
 							callback(null,
 								ProjectEditorHandler.buildProjectModelView(project, members, invites),
 								privilegeLevel
