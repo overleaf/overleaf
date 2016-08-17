@@ -13,14 +13,25 @@ module.exports =
 		db.notifications.find query, (err, notifications)->
 			callback err, notifications
 
-	addNotification: (user_id, notification, callback)->
+
+	_checkExistingNotifcationAndOverride : (user_id, notification, callback)->
+		self = @
 		query =
 			user_id: ObjectId(user_id)
 			key: notification.key
 		db.notifications.count query, (err, number)->
-			if number > 0
+			if number > 0 and !notification.override
 				logger.log number:number, user_id:user_id, key:notification.key, "alredy has notification key for user"
-				callback number
+				return callback(number)
+			else if number > 0 and notification.override
+				self.removeNotificationKey user_id, notification.key, callback
+			else
+				callback()
+
+	addNotification: (user_id, notification, callback)->
+		@_checkExistingNotifcationAndOverride user_id, notification, (err)->
+			if err?
+				callback err
 			else
 				doc =
 					user_id: ObjectId(user_id)
