@@ -55,4 +55,5 @@ define [], () ->
 
 		gotoLine: (line, column) ->
 			@editor.gotoLine(line, column)
+			@editor.scrollToLine(line,true,true) # centre and animate
 			@editor.focus()
