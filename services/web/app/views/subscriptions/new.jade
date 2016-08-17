@@ -176,7 +176,54 @@ block content
 												div.pull-right
 													strong {{price.currency.symbol}}{{price.next.total}}
 								.col-md-12(sixpack-when="simple")
-									span Lorem ipsum!
+									form(ng-show="planName")
+										.row
+											.col-md-12
+												.form-group
+													.row
+														.col-md-6
+															label.radio-inline
+																input.paymentTypeOption(type="radio", value="credit_card", ng-model="paymentMethod")
+																i.fa.fa-cc-mastercard.fa-3x
+																span &nbsp;
+																i.fa.fa-cc-visa.fa-3x
+														.col-md-6
+															label.radio-inline
+																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
+																i.fa.fa-cc-paypal.fa-3x
+										//- TODO Validation messages
+										.form-group
+											label(for="card-name") Name on card
+											input#card-name.form-control(type="text")
+										.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
+											label(for="card-no") Card number
+											input#card-no.form-control(type="credit card", ng-model='data.number', ng-blur="validateCardNumber()")
+										.row
+											.col-xs-6
+												label Valid thru {{ data.mmYY }}
+												input.form-control(
+													type="text"
+													ng-model="data.mmYY"
+													cc-format-expiry
+												)
+											.col-xs-6
+												.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
+													label Security code
+													input.form-control(type="cvc", ng-model='data.cvv', ng-blur="validateCvv()")
+													.form-control-feedback
+														a.form-helper(
+															href
+															tooltip-template="'cvv-tooltip-tpl.html'"
+															tooltip-trigger="mouseenter"
+															tooltip-append-to-body="true"
+														) ?
+										.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
+											label(for="country") Country
+											select#country.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
+												mixin countries_options()
+										.row
+											.col-xs-12
+												button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
 
 				span(sixpack-switch="payment-left-menu-bottom")
 
@@ -271,6 +318,13 @@ block content
 
 	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
+
+	script(
+		type="text/ng-template"
+		id="cvv-tooltip-tpl.html"
+	)
+		p For #[strong Visa, MasterCard and Discover], the #[strong 3 digits] on the #[strong back] of your card.
+		p For #[strong American Express], the #[strong 4 digits] on the #[strong front] of your card.
 
 mixin countries_options()
 	option(value='', disabled, selected) #{translate("country")}

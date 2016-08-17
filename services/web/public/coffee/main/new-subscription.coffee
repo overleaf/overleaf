@@ -1,5 +1,6 @@
 define [
-	"base"
+	"base",
+	"directives/creditCards"
 ], (App)->
 
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking)->
@@ -13,6 +14,7 @@ define [
 
 
 		$scope.paymentMethod = "credit_card"
+
 
 		$scope.data =
 			number: ""
@@ -28,6 +30,7 @@ define [
 			city:""
 			country:window.countryCode
 			coupon: window.couponCode
+			mmYY: ""
 
  
 		$scope.validation =
