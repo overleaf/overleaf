@@ -9,10 +9,9 @@ span(ng-controller="NotificationsController").userNotifications
 			.row(ng-hide="unreadNotification.hide")
 				.col-xs-12
 					.alert.alert-info
-						.row
-							.col-xs-11
-								span(ng-bind-html="unreadNotification.html")
-							.col-xs-1
+						div.notification_inner
+							span(ng-bind-html="unreadNotification.html").notification_body
+							span().notification_close
 								button(ng-click="dismiss(unreadNotification)").close.pull-right
 									span(aria-hidden="true") &times;
 									span.sr-only #{translate("close")}
