@@ -18,6 +18,7 @@ describe 'Notifications Tests', ->
 		@insertStub = sinon.stub()
 		@countStub = sinon.stub()
 		@updateStub = sinon.stub()
+		@removeStub = sinon.stub()
 		@mongojs = =>
 			notifications:
 				update: self.mongojsUpdate
@@ -25,6 +26,7 @@ describe 'Notifications Tests', ->
 				insert: @insertStub
 				count: @countStub
 				update: @updateStub
+				remove: @removeStub
 		@mongojs.ObjectId = ObjectId
 
 		@notifications = SandboxedModule.require modulePath, requires:
@@ -60,6 +62,8 @@ describe 'Notifications Tests', ->
 				messageOpts:"some info",
 				templateKey:"template-key"
 			}
+			@notifications.deleteNotificationByKeyOnly = sinon.stub()
+			@notifications.deleteNotificationByKeyOnly.callsArgWith(1, null)
 
 		it 'should insert the notification into the collection', (done)->
 			@insertStub.callsArgWith(1, null)
@@ -72,20 +76,19 @@ describe 'Notifications Tests', ->
 		it 'should fail insert of existing notification key', (done)->
 			@insertStub.callsArgWith(1, null)
 			@countStub.callsArgWith(1, null, 1)
-			@notifications.removeNotificationKey = sinon.stub()
 			@notifications.addNotification user_id, @stubbedNotification, (err)=>
 				@insertStub.calledWith(@expectedDocument).should.equal false
 				done()
 
 		describe "when key already exists but forceCreate is passed", (done)->
 
-			it "should delete the old key and insert the new one", ->
+			it "should delete the old key and insert the new one", (done) ->
 				@insertStub.callsArgWith(1, null)
 				@countStub.callsArgWith(1, null, 1)
 				@stubbedNotification.forceCreate = true
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
-					@notifications.removeNotificationKey.calledWith(user_id, @stubbedNotification.key).should.equal true
+					@notifications.deleteNotificationByKeyOnly.calledWith(@stubbedNotification.key).should.equal true
 					done()
 
 		describe 'when the notification is set to expire', () ->
@@ -182,4 +185,17 @@ describe 'Notifications Tests', ->
 					"$unset": {templateKey:true}
 				assert.deepEqual(@updateStub.args[0][0], searchOps)
 				assert.deepEqual(@updateStub.args[0][1], updateOperation)
+				done()
+
+	describe 'deleteNotificationByKeyOnly', ->
+		it 'should completely remove the notification', (done)->
+			@removeStub.callsArgWith(2, null)
+
+			@notifications.deleteNotificationByKeyOnly notification_key, (err)=>
+				searchOps =
+					key: notification_key
+				opts =
+					justOne: true
+				assert.deepEqual(@removeStub.args[0][0], searchOps)
+				assert.deepEqual(@removeStub.args[0][1], opts)
 				done()

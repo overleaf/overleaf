@@ -24,7 +24,7 @@ module.exports =
 				logger.log number:number, user_id:user_id, key:notification.key, "alredy has notification key for user"
 				return callback(number)
 			else if number > 0 and notification.forceCreate
-				self.removeNotificationKey user_id, notification.key, callback
+				self.deleteNotificationByKeyOnly notification.key, callback
 			else
 				callback()
 
@@ -73,3 +73,9 @@ module.exports =
 		updateOperation =
 			"$unset": {templateKey:true}
 		db.notifications.update searchOps, updateOperation, callback
+
+	# hard delete of doc, rather than removing the templateKey
+	deleteNotificationByKeyOnly: (notification_key, callback)->
+		searchOps =
+			key: notification_key
+		db.notifications.remove searchOps, {justOne: true}, callback
