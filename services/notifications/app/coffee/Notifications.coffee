@@ -20,10 +20,10 @@ module.exports =
 			user_id: ObjectId(user_id)
 			key: notification.key
 		db.notifications.count query, (err, number)->
-			if number > 0 and !notification.override
+			if number > 0 and !notification.forceCreate
 				logger.log number:number, user_id:user_id, key:notification.key, "alredy has notification key for user"
 				return callback(number)
-			else if number > 0 and notification.override
+			else if number > 0 and notification.forceCreate
 				self.removeNotificationKey user_id, notification.key, callback
 			else
 				callback()

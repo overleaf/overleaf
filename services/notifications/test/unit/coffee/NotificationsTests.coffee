@@ -77,12 +77,12 @@ describe 'Notifications Tests', ->
 				@insertStub.calledWith(@expectedDocument).should.equal false
 				done()
 
-		describe "when key already exists but override is passed", (done)->
+		describe "when key already exists but forceCreate is passed", (done)->
 
 			it "should delete the old key and insert the new one", ->
 				@insertStub.callsArgWith(1, null)
 				@countStub.callsArgWith(1, null, 1)
-				@stubbedNotification.override = true
+				@stubbedNotification.forceCreate = true
 				@notifications.addNotification user_id, @stubbedNotification, (err)=>
 					assert.deepEqual(@insertStub.lastCall.args[0], @expectedDocument)
 					@notifications.removeNotificationKey.calledWith(user_id, @stubbedNotification.key).should.equal true
