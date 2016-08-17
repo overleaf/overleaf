@@ -51,131 +51,132 @@ block content
 									div(ng-if="normalPrice")
 										span.small Normally {{price.currency.symbol}}{{normalPrice}}
 						.row
-							.col-md-12
-								form(ng-show="planName")
-									
-
-									.row
-										.col-md-12
-											.form-group
-												.row
-													.col-md-6
-														label.radio-inline
-															input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod")
-															i.fa.fa-cc-mastercard.fa-3x
-															span &nbsp;
-															i.fa.fa-cc-visa.fa-3x
-													.col-md-6
-														label.radio-inline
-															input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
-															i.fa.fa-cc-paypal.fa-3x
-
-
-
-									.alert.alert-warning.small(ng-show="genericError")
-										strong {{genericError}}
-
-									span(ng-hide="paymentMethod == 'paypal'")
+							div(sixpack-switch="subscription-form")
+								.col-md-12(sixpack-default)
+									form(ng-show="planName")
 										.row
 											.col-md-12
 												.form-group
-													div.alert.alert-warning.small(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
-													div.alert.alert-warning.small(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
+													.row
+														.col-md-6
+															label.radio-inline
+																input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod")
+																i.fa.fa-cc-mastercard.fa-3x
+																span &nbsp;
+																i.fa.fa-cc-visa.fa-3x
+														.col-md-6
+															label.radio-inline
+																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
+																i.fa.fa-cc-paypal.fa-3x
+
+
+
+										.alert.alert-warning.small(ng-show="genericError")
+											strong {{genericError}}
+
+										span(ng-hide="paymentMethod == 'paypal'")
+											.row
+												.col-md-12
+													.form-group
+														div.alert.alert-warning.small(ng-hide="validation.correctCvv") #{translate("invalid")} CVV
+														div.alert.alert-warning.small(ng-hide="validation.correctCardNumber") #{translate("invalid")} #{translate("credit_card_number")}
+											.row
+												.col-md-6
+													.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
+														input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
+												.col-md-3
+													.form-group(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
+														input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
+											.row
+												.col-md-12
+													div.alert.alert-warning.small(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
+											.row
+												.col-md-3
+													.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.month ? 'has-error' : ''")
+														select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
+															option(value="", disabled, selected) Month
+															option(value="01") 01
+															option(value="02") 02
+															option(value="03") 03
+															option(value="04") 04
+															option(value="05") 05
+															option(value="06") 06
+															option(value="07") 07
+															option(value="08") 08
+															option(value="09") 09
+															option(value="10") 10
+															option(value="11") 11
+															option(value="12") 12
+												.col-md-4
+													.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
+														select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
+															option(value="", disabled, selected) Year
+															option(value="2016") 2016
+															option(value="2017") 2017
+															option(value="2018") 2018
+															option(value="2019") 2019
+															option(value="2020") 2020
+															option(value="2021") 2021
+															option(value="2022") 2022
+															option(value="2023") 2023
+															option(value="2024") 2024
+															option(value="2025") 2025
+															option(value="2026") 2026
 										.row
 											.col-md-6
-												.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
-													input.form-control(ng-model='data.number', ng-blur="validateCardNumber()", placeholder="#{translate('credit_card_number')}")
-											.col-md-3
-												.form-group(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
-													input.form-control(ng-model='data.cvv', ng-blur="validateCvv()", placeholder="CVV")
+												.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255', , onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
+											.col-md-6
+												.form-group(ng-class="validation.errorFields.last_name ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
+										hr
 										.row
 											.col-md-12
-												div.alert.alert-warning.small(ng-hide="validation.correctExpiry") #{translate("invalid")} #{translate("expiry")}
+												.form-group(ng-class="validation.errorFields.address1 ? 'has-error' : ''")
+													label #{translate("billing_address")}
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
+												.form-group(ng-class="validation.errorFields.address2 ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
+												.form-group(ng-class="validation.errorFields.state ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.state", placeholder="#{translate('state')}")
 										.row
-											.col-md-3
-												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.month ? 'has-error' : ''")
-													select.form-control(data-recurly='month', ng-change="validateExpiry()", ng-model='data.month')
-														option(value="", disabled, selected) Month
-														option(value="01") 01
-														option(value="02") 02
-														option(value="03") 03
-														option(value="04") 04
-														option(value="05") 05
-														option(value="06") 06
-														option(value="07") 07
-														option(value="08") 08
-														option(value="09") 09
-														option(value="10") 10
-														option(value="11") 11
-														option(value="12") 12
-											.col-md-4
-												.form-group(ng-class="validation.correctExpiry == false || validation.errorFields.year ? 'has-error' : ''")
-													select.form-control(data-recurly='year', ng-change="validateExpiry()", ng-model='data.year')
-														option(value="", disabled, selected) Year
-														option(value="2016") 2016
-														option(value="2017") 2017
-														option(value="2018") 2018
-														option(value="2019") 2019
-														option(value="2020") 2020
-														option(value="2021") 2021
-														option(value="2022") 2022
-														option(value="2023") 2023
-														option(value="2024") 2024
-														option(value="2025") 2025
-														option(value="2026") 2026
-									.row
-										.col-md-6
-											.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255', , onkeyup='', data-recurly="first_name", ng-model="data.first_name", required, placeholder="#{translate('first_name')}")
-										.col-md-6
-											.form-group(ng-class="validation.errorFields.last_name ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="last_name", ng-model="data.last_name", required, placeholder="#{translate('last_name')}")
-									hr
-									.row
-										.col-md-12
-											.form-group(ng-class="validation.errorFields.address1 ? 'has-error' : ''")
-												label #{translate("billing_address")}
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address1", placeholder="#{translate('address')}")
-											.form-group(ng-class="validation.errorFields.address2 ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.address2", placeholder="#{translate('address')}")
-											.form-group(ng-class="validation.errorFields.state ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', ng-model="data.state", placeholder="#{translate('state')}")
-									.row
-										.col-md-7
-											.form-group(ng-class="validation.errorFields.city ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
-										.col-md-5(ng-class="validation.errorFields.postal_code ? 'has-error' : ''")
-												input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
-									.row
-										.col-md-7
-											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
-												select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
-													mixin countries_options()
-									.row
-										.col-md-8
-											if (showCouponField)
+											.col-md-7
+												.form-group(ng-class="validation.errorFields.city ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="city", ng-model="data.city", placeholder="#{translate('city')}")
+											.col-md-5(ng-class="validation.errorFields.postal_code ? 'has-error' : ''")
+													input.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="postal_code", ng-model="data.postal_code", placeholder="#{translate('zip_post_code')}")
+										.row
+											.col-md-7
+												.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
+													select.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
+														mixin countries_options()
+										.row
+											.col-md-8
+												if (showCouponField)
+													.form-group
+														input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
+										.row
+											.col-md-8
+												if (showVatField)
+													.form-group
+														input.form-control(type='text', ng-blur="applyVatNumber()", ng-model="data.vat_number", placeholder="#{translate('vat_number')}")
+										.row
+											.col-xs-7
 												.form-group
-													input.form-control(type='text', ng-blur="applyCoupon()", ng-model="data.coupon", placeholder="#{translate('coupon')}")
-									.row
-										.col-md-8
-											if (showVatField)
-												.form-group
-													input.form-control(type='text', ng-blur="applyVatNumber()", ng-model="data.vat_number", placeholder="#{translate('vat_number')}")
-									.row
-										.col-xs-7
-											.form-group
-												button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
-									
-										.col-xs-3.pricingBreakdown
-											div(ng-if="price.next.subtotal != price.next.total") Subtotal
-											div(ng-if="price.next.tax!='0.00'") Tax
-											div
-												strong Total
-										.col-xs-2
-											div(ng-if="price.next.subtotal != price.next.total").pull-right {{price.currency.symbol}}{{price.next.subtotal}}
-											div(ng-if="price.next.tax!='0.00'").pull-right {{price.currency.symbol}}{{price.next.tax}}
-											div.pull-right
-												strong {{price.currency.symbol}}{{price.next.total}}
+													button.btn.btn-success(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
+										
+											.col-xs-3.pricingBreakdown
+												div(ng-if="price.next.subtotal != price.next.total") Subtotal
+												div(ng-if="price.next.tax!='0.00'") Tax
+												div
+													strong Total
+											.col-xs-2
+												div(ng-if="price.next.subtotal != price.next.total").pull-right {{price.currency.symbol}}{{price.next.subtotal}}
+												div(ng-if="price.next.tax!='0.00'").pull-right {{price.currency.symbol}}{{price.next.tax}}
+												div.pull-right
+													strong {{price.currency.symbol}}{{price.next.total}}
+								.col-md-12(sixpack-when="simple")
+									span Lorem ipsum!
 
 				span(sixpack-switch="payment-left-menu-bottom")
 
