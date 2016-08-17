@@ -24,14 +24,20 @@ describe "CollaboratorsInviteHandler", ->
 		@Crypto = Crypto
 		@CollaboratorsInviteHandler = SandboxedModule.require modulePath, requires:
 			'settings-sharelatex': @settings = {}
+			'../../models/ProjectInvite': {ProjectInvite: @ProjectInvite}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 			'./CollaboratorsEmailHandler': @CollaboratorsEmailHandler = {}
 			"./CollaboratorsHandler": @CollaboratorsHandler = {addUserIdToProject: sinon.stub()}
-			'../../models/ProjectInvite': {ProjectInvite: @ProjectInvite}
+			'../User/UserGetter': @UserGetter = {getUser: sinon.stub()}
+			"../Project/ProjectGetter": @ProjectGetter = {}
+			"../Notifications/NotificationsBuilder": @NotificationsBuilder = {}
 			'crypto': @Crypto
 
 		@projectId = ObjectId()
 		@sendingUserId = ObjectId()
+		@sendingUser =
+			_id: @sendingUserId
+			name: "Bob"
 		@email = "user@example.com"
 		@userId = ObjectId()
 		@user =
@@ -125,9 +131,9 @@ describe "CollaboratorsInviteHandler", ->
 		beforeEach ->
 			@ProjectInvite::save = sinon.spy (cb) -> cb(null, this)
 			@randomBytesSpy = sinon.spy(@Crypto, 'randomBytes')
-			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub()
+			@CollaboratorsInviteHandler._sendMessages = sinon.stub().callsArgWith(3, null)
 			@call = (callback) =>
-				@CollaboratorsInviteHandler.inviteToProject @projectId, @sendingUserId, @email, @privileges, callback
+				@CollaboratorsInviteHandler.inviteToProject @projectId, @sendingUser, @email, @privileges, callback
 
 		afterEach ->
 			@randomBytesSpy.restore()
@@ -160,10 +166,10 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite::save.callCount.should.equal 1
 					done()
 
-			it 'should have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+			it 'should have called _sendMessages', (done) ->
 				@call (err, invite) =>
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 1
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.calledWith(@projectId, @email).should.equal true
+					@CollaboratorsInviteHandler._sendMessages.callCount.should.equal 1
+					@CollaboratorsInviteHandler._sendMessages.calledWith(@projectId, @sendingUser).should.equal true
 					done()
 
 		describe 'when saving model produces an error', ->
@@ -176,10 +182,64 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
+	describe '_sendMessages', ->
+
+		beforeEach ->
+			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(3, null)
+			@CollaboratorsInviteHandler._trySendInviteNotification = sinon.stub().callsArgWith(3, null)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler._sendMessages @projectId, @sendingUser, @fakeInvite, callback
+
+		describe 'when all goes well', ->
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.instanceof Error
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should call CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+				@call (err) =>
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 1
+					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.calledWith(@projectId, @fakeInvite.email, @fakeInvite).should.equal true
+					done()
+
+			it 'should call _trySendInviteNotification', (done) ->
+				@call (err) =>
+					@CollaboratorsInviteHandler._trySendInviteNotification.callCount.should.equal 1
+					@CollaboratorsInviteHandler._trySendInviteNotification.calledWith(@projectId, @sendingUser, @fakeInvite).should.equal true
+					done()
+
+		describe 'when CollaboratorsEmailHandler.notifyUserOfProjectInvite produces an error', ->
+
+			beforeEach ->
+				@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(3, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, invite) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not call _trySendInviteNotification', (done) ->
+				@call (err) =>
+					@CollaboratorsInviteHandler._trySendInviteNotification.callCount.should.equal 0
+					done()
+
+		describe 'when _trySendInviteNotification produces an error', ->
+
+			beforeEach ->
+				@CollaboratorsInviteHandler._trySendInviteNotification = sinon.stub().callsArgWith(3, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, invite) =>
+					expect(err).to.be.instanceof Error
+					done()
+
 	describe 'revokeInvite', ->
 
 		beforeEach ->
 			@ProjectInvite.remove.callsArgWith(1, null)
+			@CollaboratorsInviteHandler._tryCancelInviteNotification = sinon.stub().callsArgWith(1, null)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.revokeInvite @projectId, @inviteId, callback
 
@@ -199,6 +259,12 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite.remove.calledWith({projectId: @projectId, _id: @inviteId}).should.equal true
 					done()
 
+			it 'should call _tryCancelInviteNotification', (done) ->
+				@call (err) =>
+					@CollaboratorsInviteHandler._tryCancelInviteNotification.callCount.should.equal 1
+					@CollaboratorsInviteHandler._tryCancelInviteNotification.calledWith(@inviteId).should.equal true
+					done()
+
 		describe 'when remove produces an error', ->
 
 			beforeEach ->
@@ -213,9 +279,9 @@ describe "CollaboratorsInviteHandler", ->
 
 		beforeEach ->
 			@ProjectInvite.findOne.callsArgWith(1, null, @fakeInvite)
-			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub()
+			@CollaboratorsInviteHandler._sendMessages = sinon.stub().callsArgWith(3, null)
 			@call = (callback) =>
-				@CollaboratorsInviteHandler.resendInvite @projectId, @inviteId, callback
+				@CollaboratorsInviteHandler.resendInvite @projectId, @sendingUser, @inviteId, callback
 
 		describe 'when all goes well', ->
 
@@ -233,10 +299,10 @@ describe "CollaboratorsInviteHandler", ->
 					@ProjectInvite.findOne.calledWith({_id: @inviteId, projectId: @projectId}).should.equal true
 					done()
 
-			it 'should have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+			it 'should have called _sendMessages', (done) ->
 				@call (err, invite) =>
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 1
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.calledWith(@projectId, @email).should.equal true
+					@CollaboratorsInviteHandler._sendMessages.callCount.should.equal 1
+					@CollaboratorsInviteHandler._sendMessages.calledWith(@projectId, @sendingUser, @fakeInvite).should.equal true
 					done()
 
 		describe 'when findOne produces an error', ->
@@ -249,9 +315,9 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
-			it 'should not have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+			it 'should not have called _sendMessages', (done) ->
 				@call (err, invite) =>
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 0
+					@CollaboratorsInviteHandler._sendMessages.callCount.should.equal 0
 					done()
 
 		describe 'when findOne does not find an invite', ->
@@ -265,9 +331,9 @@ describe "CollaboratorsInviteHandler", ->
 					expect(err).to.be.oneOf [null, undefined]
 					done()
 
-			it 'should not have called CollaboratorsEmailHandler.notifyUserOfProjectInvite', (done) ->
+			it 'should not have called _sendMessages', (done) ->
 				@call (err, invite) =>
-					@CollaboratorsEmailHandler.notifyUserOfProjectInvite.callCount.should.equal 0
+					@CollaboratorsInviteHandler._sendMessages.callCount.should.equal 0
 					done()
 
 	describe 'getInviteByToken', ->
@@ -335,6 +401,7 @@ describe "CollaboratorsInviteHandler", ->
 			@CollaboratorsHandler.addUserIdToProject.callsArgWith(4, null)
 			@_getInviteByToken = sinon.stub(@CollaboratorsInviteHandler, 'getInviteByToken')
 			@_getInviteByToken.callsArgWith(2, null, @fakeInvite)
+			@CollaboratorsInviteHandler._tryCancelInviteNotification = sinon.stub().callsArgWith(1, null)
 			@ProjectInvite.remove.callsArgWith(1, null)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler.acceptInvite @projectId, @inviteId, @token, @user, callback
@@ -493,4 +560,164 @@ describe "CollaboratorsInviteHandler", ->
 			it 'should have called ProjectInvite.remove', (done) ->
 				@call (err) =>
 					@ProjectInvite.remove.callCount.should.equal 1
+					done()
+
+	describe '_tryCancelInviteNotification', ->
+		beforeEach ->
+			@inviteId = ObjectId()
+			@currentUser = {_id: ObjectId()}
+			@notification = {read: sinon.stub().callsArgWith(0, null)}
+			@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler._tryCancelInviteNotification @inviteId, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.be.oneOf [null, undefined]
+				done()
+
+		it 'should call notification.read', (done) ->
+			@call (err) =>
+				@notification.read.callCount.should.equal 1
+				done()
+
+		describe 'when notification.read produces an error', ->
+			beforeEach ->
+				@notification = {read: sinon.stub().callsArgWith(0, new Error('woops'))}
+				@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+	describe "_trySendInviteNotification", ->
+
+		beforeEach ->
+			@invite =
+				_id: ObjectId(),
+				token: "some_token",
+				sendingUserId: ObjectId(),
+				projectId: @project_id,
+				targetEmail: 'user@example.com'
+				createdAt: new Date(),
+			@sendingUser =
+				_id: ObjectId()
+				first_name: "jim"
+			@existingUser = {_id: ObjectId()}
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @existingUser)
+			@fakeProject =
+				_id: @project_id
+				name: "some project"
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @fakeProject)
+			@notification = {create: sinon.stub().callsArgWith(0, null)}
+			@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
+			@call = (callback) =>
+				@CollaboratorsInviteHandler._trySendInviteNotification @project_id, @sendingUser, @invite, callback
+
+		describe 'when the user exists', ->
+
+			beforeEach ->
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should call getUser', (done) ->
+				@call (err) =>
+					@UserGetter.getUser.callCount.should.equal 1
+					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					done()
+
+			it 'should call getProject', (done) ->
+				@call (err) =>
+					@ProjectGetter.getProject.callCount.should.equal 1
+					@ProjectGetter.getProject.calledWith(@project_id).should.equal true
+					done()
+
+			it 'should call NotificationsBuilder.projectInvite.create', (done) ->
+				@call (err) =>
+					@NotificationsBuilder.projectInvite.callCount.should.equal 1
+					@notification.create.callCount.should.equal 1
+					done()
+
+			describe 'when getProject produces an error', ->
+
+				beforeEach ->
+					@ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
+
+				it 'should produce an error', (done) ->
+					@call (err) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+				it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
+					@call (err) =>
+						@NotificationsBuilder.projectInvite.callCount.should.equal 0
+						@notification.create.callCount.should.equal 0
+						done()
+
+			describe 'when projectInvite.create produces an error', ->
+
+				beforeEach ->
+					@notification.create.callsArgWith(0, new Error('woops'))
+
+				it 'should produce an error', (done) ->
+					@call (err) =>
+						expect(err).to.be.instanceof Error
+						done()
+
+		describe 'when the user does not exist', ->
+
+			beforeEach ->
+				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.oneOf [null, undefined]
+					done()
+
+			it 'should call getUser', (done) ->
+				@call (err) =>
+					@UserGetter.getUser.callCount.should.equal 1
+					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					done()
+
+			it 'should not call getProject', (done) ->
+				@call (err) =>
+					@ProjectGetter.getProject.callCount.should.equal 0
+					done()
+
+			it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
+				@call (err) =>
+					@NotificationsBuilder.projectInvite.callCount.should.equal 0
+					@notification.create.callCount.should.equal 0
+					done()
+
+		describe 'when the getUser produces an error', ->
+
+			beforeEach ->
+				@UserGetter.getUser = sinon.stub().callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should call getUser', (done) ->
+				@call (err) =>
+					@UserGetter.getUser.callCount.should.equal 1
+					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					done()
+
+			it 'should not call getProject', (done) ->
+				@call (err) =>
+					@ProjectGetter.getProject.callCount.should.equal 0
+					done()
+
+			it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
+				@call (err) =>
+					@NotificationsBuilder.projectInvite.callCount.should.equal 0
+					@notification.create.callCount.should.equal 0
 					done()

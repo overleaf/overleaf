@@ -61,9 +61,10 @@ describe 'NotificationsHandler', ->
 			@messageOpts = {value:12344}
 			@templateKey = "renderThisHtml"
 			@expiry = null
+			@forceCreate = false
 
 		it "should post the message over", (done)->
-			@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
+			@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, @forceCreate, =>
 				args = @request.args[0][0]
 				args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
 				args.timeout.should.equal 1000
@@ -77,13 +78,31 @@ describe 'NotificationsHandler', ->
 				@messageOpts = {value:12344}
 				@templateKey = "renderThisHtml"
 				@expiry = new Date()
+				@forceCreate = false
 
 			it 'should post the message over with expiry field', (done) ->
-				@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
+				@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, @forceCreate, =>
 					args = @request.args[0][0]
 					args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
 					args.timeout.should.equal 1000
 					expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts, expires: @expiry}
+					assert.deepEqual(args.json, expectedJson)
+					done()
+
+		describe 'when forceCreate is true', ->
+			beforeEach ->
+				@key = "some key here"
+				@messageOpts = {value:12344}
+				@templateKey = "renderThisHtml"
+				@expiry = null
+				@forceCreate = true
+
+			it 'should add a forceCreate=true flag to the payload', (done) ->
+				@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, @forceCreate, =>
+					args = @request.args[0][0]
+					args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
+					args.timeout.should.equal 1000
+					expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts, forceCreate: @forceCreate}
 					assert.deepEqual(args.json, expectedJson)
 					done()
 

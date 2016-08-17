@@ -20,27 +20,6 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.json({invites: invites})
 
-	_trySendInviteNotification: (projectId, sendingUser, invite, callback=(err)->) ->
-		email = invite.email
-		UserGetter.getUser {email: email}, {_id: 1}, (err, existingUser) ->
-			if err?
-				logger.err {projectId, email}, "error checking if user exists"
-				return callback(err)
-			if !existingUser?
-				logger.log {projectId, email}, "no existing user found, returning"
-				return callback(null)
-			ProjectGetter.getProject projectId, {_id: 1, name: 1}, (err, project) ->
-				if err?
-					logger.err {projectId, email}, "error getting project"
-					return callback(err)
-				if !project?
-					logger.log {projectId}, "no project found while sending notification, returning"
-					return callback(null)
-				NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
-
-	_tryCancelInviteNotification: (inviteId, currentUser, callback=()->) ->
-			NotificationsBuilder.projectInvite({_id: inviteId}, null, null, currentUser).read(callback)
-
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
@@ -57,14 +36,12 @@ module.exports = CollaboratorsInviteController =
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)
-			CollaboratorsInviteHandler.inviteToProject projectId, sendingUserId, email, privileges, (err, invite) ->
+			CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
 				if err?
 					logger.err {projectId, email, sendingUserId}, "error creating project invite"
 					return next(err)
 				logger.log {projectId, email, sendingUserId}, "invite created"
-				EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true}
-				# async check if email is for an existing user, send a notification
-				CollaboratorsInviteController._trySendInviteNotification(projectId, sendingUser, invite, ()->)
+				EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
 				return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
@@ -81,8 +58,9 @@ module.exports = CollaboratorsInviteController =
 	resendInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		inviteId = req.params.invite_id
+		sendingUser = req.session.user
 		logger.log {projectId, inviteId}, "resending invite"
-		CollaboratorsInviteHandler.resendInvite projectId, inviteId, (err) ->
+		CollaboratorsInviteHandler.resendInvite projectId, sendingUser, inviteId, (err) ->
 			if err?
 				logger.err {projectId, inviteId}, "error resending invite"
 				return next(err)
@@ -142,5 +120,4 @@ module.exports = CollaboratorsInviteController =
 				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
-			CollaboratorsInviteController._tryCancelInviteNotification inviteId, currentUser, () ->
 			res.redirect "/project/#{projectId}"

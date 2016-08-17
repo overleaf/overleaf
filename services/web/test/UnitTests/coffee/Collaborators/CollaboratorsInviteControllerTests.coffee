@@ -26,166 +26,6 @@ describe "CollaboratorsInviteController", ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
-	describe '_tryCancelInviteNotification', ->
-		beforeEach ->
-			@inviteId = ObjectId()
-			@currentUser = {_id: ObjectId()}
-			@notification = {read: sinon.stub().callsArgWith(0, null)}
-			@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
-			@call = (callback) =>
-				@CollaboratorsInviteController._tryCancelInviteNotification @inviteId, @currentUser, callback
-
-		it 'should not produce an error', (done) ->
-			@call (err) =>
-				expect(err).to.be.oneOf [null, undefined]
-				done()
-
-		it 'should call notification.read', (done) ->
-			@call (err) =>
-				@notification.read.callCount.should.equal 1
-				done()
-
-		describe 'when notification.read produces an error', ->
-			beforeEach ->
-				@notification = {read: sinon.stub().callsArgWith(0, new Error('woops'))}
-				@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
-
-			it 'should produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.instanceof Error
-					done()
-
-	describe "_trySendInviteNotification", ->
-
-		beforeEach ->
-			@invite =
-				_id: ObjectId(),
-				token: "some_token",
-				sendingUserId: ObjectId(),
-				projectId: @project_id,
-				targetEmail: 'user@example.com'
-				createdAt: new Date(),
-			@sendingUser =
-				_id: ObjectId()
-				first_name: "jim"
-			@existingUser = {_id: ObjectId()}
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @existingUser)
-			@fakeProject =
-				_id: @project_id
-				name: "some project"
-			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @fakeProject)
-			@notification = {create: sinon.stub().callsArgWith(0, null)}
-			@NotificationsBuilder.projectInvite = sinon.stub().returns(@notification)
-			@call = (callback) =>
-				@CollaboratorsInviteController._trySendInviteNotification @project_id, @sendingUser, @invite, callback
-
-		describe 'when the user exists', ->
-
-			beforeEach ->
-
-			it 'should not produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.oneOf [null, undefined]
-					done()
-
-			it 'should call getUser', (done) ->
-				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
-					done()
-
-			it 'should call getProject', (done) ->
-				@call (err) =>
-					@ProjectGetter.getProject.callCount.should.equal 1
-					@ProjectGetter.getProject.calledWith(@project_id).should.equal true
-					done()
-
-			it 'should call NotificationsBuilder.projectInvite.create', (done) ->
-				@call (err) =>
-					@NotificationsBuilder.projectInvite.callCount.should.equal 1
-					@notification.create.callCount.should.equal 1
-					done()
-
-			describe 'when getProject produces an error', ->
-
-				beforeEach ->
-					@ProjectGetter.getProject.callsArgWith(2, new Error('woops'))
-
-				it 'should produce an error', (done) ->
-					@call (err) =>
-						expect(err).to.be.instanceof Error
-						done()
-
-				it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
-					@call (err) =>
-						@NotificationsBuilder.projectInvite.callCount.should.equal 0
-						@notification.create.callCount.should.equal 0
-						done()
-
-			describe 'when projectInvite.create produces an error', ->
-
-				beforeEach ->
-					@notification.create.callsArgWith(0, new Error('woops'))
-
-				it 'should produce an error', (done) ->
-					@call (err) =>
-						expect(err).to.be.instanceof Error
-						done()
-
-		describe 'when the user does not exist', ->
-
-			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-
-			it 'should not produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.oneOf [null, undefined]
-					done()
-
-			it 'should call getUser', (done) ->
-				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
-					done()
-
-			it 'should not call getProject', (done) ->
-				@call (err) =>
-					@ProjectGetter.getProject.callCount.should.equal 0
-					done()
-
-			it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
-				@call (err) =>
-					@NotificationsBuilder.projectInvite.callCount.should.equal 0
-					@notification.create.callCount.should.equal 0
-					done()
-
-		describe 'when the getUser produces an error', ->
-
-			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, new Error('woops'))
-
-			it 'should produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.be.instanceof Error
-					done()
-
-			it 'should call getUser', (done) ->
-				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
-					done()
-
-			it 'should not call getProject', (done) ->
-				@call (err) =>
-					@ProjectGetter.getProject.callCount.should.equal 0
-					done()
-
-			it 'should not call NotificationsBuilder.projectInvite.create', (done) ->
-				@call (err) =>
-					@NotificationsBuilder.projectInvite.callCount.should.equal 0
-					@notification.create.callCount.should.equal 0
-					done()
-
 	describe 'getAllInvites', ->
 
 		beforeEach ->
@@ -231,8 +71,10 @@ describe "CollaboratorsInviteController", ->
 			@targetEmail = "user@example.com"
 			@req.params =
 				Project_id: @project_id
+			@current_user =
+				_id: @current_user_id = "current-user-id"
 			@req.session =
-				user: _id: @current_user_id = "current-user-id"
+				user: @current_user
 			@req.body =
 				email: @targetEmail
 				privileges: @privileges = "readAndWrite"
@@ -248,7 +90,6 @@ describe "CollaboratorsInviteController", ->
 			}
 			@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 			@CollaboratorsInviteHandler.inviteToProject = sinon.stub().callsArgWith(4, null, @invite)
-			@CollaboratorsInviteController._trySendInviteNotification = sinon.stub()
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -268,14 +109,11 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
-				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user_id,@targetEmail,@privileges).should.equal true
+				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user,@targetEmail,@privileges).should.equal true
 
 			it 'should have called emitToRoom', ->
 				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
-
-			it 'should call _trySendInviteNotification', ->
-				@CollaboratorsInviteController._trySendInviteNotification.callCount.should.equal 1
 
 		describe 'when the user is not allowed to add more collaborators', ->
 
@@ -321,7 +159,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
-				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user_id,@targetEmail,@privileges).should.equal true
+				@CollaboratorsInviteHandler.inviteToProject.calledWith(@project_id,@current_user,@targetEmail,@privileges).should.equal true
 
 	describe "viewInvite", ->
 
@@ -604,7 +442,7 @@ describe "CollaboratorsInviteController", ->
 				user: _id: @current_user_id = "current-user-id"
 			@res.render = sinon.stub()
 			@res.sendStatus = sinon.stub()
-			@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(2, null)
+			@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(3, null)
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -624,7 +462,7 @@ describe "CollaboratorsInviteController", ->
 
 			beforeEach ->
 				@err = new Error('woops')
-				@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(2, @err)
+				@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(3, @err)
 				@CollaboratorsInviteController.resendInvite @req, @res, @next
 
 			it 'should not produce a 201 response', ->
@@ -637,15 +475,16 @@ describe "CollaboratorsInviteController", ->
 			it 'should have called resendInvite', ->
 				@CollaboratorsInviteHandler.resendInvite.callCount.should.equal 1
 
-
 	describe "revokeInvite", ->
 
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
 				invite_id: @invite_id = "thuseoautoh"
+			@current_user =
+				_id: @current_user_id = "current-user-id"
 			@req.session =
-				user: _id: @current_user_id = "current-user-id"
+				user: @current_user
 			@res.render = sinon.stub()
 			@res.sendStatus = sinon.stub()
 			@CollaboratorsInviteHandler.revokeInvite = sinon.stub().callsArgWith(2, null)
@@ -698,7 +537,6 @@ describe "CollaboratorsInviteController", ->
 			@res.render = sinon.stub()
 			@res.redirect = sinon.stub()
 			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, null)
-			@CollaboratorsInviteController._tryCancelInviteNotification = sinon.stub()
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -717,9 +555,6 @@ describe "CollaboratorsInviteController", ->
 			it 'should have called emitToRoom', ->
 				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'project:membership:changed').should.equal true
-
-			it 'should call _tryCancelInviteNotification', ->
-				@CollaboratorsInviteController._tryCancelInviteNotification.callCount.should.equal 1
 
 		describe 'when revokeInvite produces an error', ->
 

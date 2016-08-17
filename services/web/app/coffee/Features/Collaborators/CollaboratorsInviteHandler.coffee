@@ -2,10 +2,13 @@ ProjectInvite = require("../../models/ProjectInvite").ProjectInvite
 logger = require('logger-sharelatex')
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 CollaboratorsHandler = require "./CollaboratorsHandler"
+UserGetter = require "../User/UserGetter"
+ProjectGetter = require "../Project/ProjectGetter"
 Async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 Errors = require "../Errors/Errors"
 Crypto = require 'crypto'
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 
 module.exports = CollaboratorsInviteHandler =
@@ -27,26 +30,57 @@ module.exports = CollaboratorsInviteHandler =
 				return callback(err)
 			callback(null, count)
 
-	inviteToProject: (projectId, sendingUserId, email, privileges, callback=(err,invite)->) ->
-		logger.log {projectId, sendingUserId, email, privileges}, "adding invite"
+	_trySendInviteNotification: (projectId, sendingUser, invite, callback=(err)->) ->
+		email = invite.email
+		UserGetter.getUser {email: email}, {_id: 1}, (err, existingUser) ->
+			if err?
+				logger.err {projectId, email}, "error checking if user exists"
+				return callback(err)
+			if !existingUser?
+				logger.log {projectId, email}, "no existing user found, returning"
+				return callback(null)
+			ProjectGetter.getProject projectId, {_id: 1, name: 1}, (err, project) ->
+				if err?
+					logger.err {projectId, email}, "error getting project"
+					return callback(err)
+				if !project?
+					logger.log {projectId}, "no project found while sending notification, returning"
+					return callback(null)
+				NotificationsBuilder.projectInvite(invite, project, sendingUser, existingUser).create(callback)
+
+	_tryCancelInviteNotification: (inviteId, callback=()->) ->
+			NotificationsBuilder.projectInvite({_id: inviteId}, null, null, null).read(callback)
+
+	_sendMessages: (projectId, sendingUser, invite, callback=(err)->) ->
+		logger.log {projectId, inviteId: invite._id}, "sending notification and email for invite"
+		CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, invite.email, invite, (err)->
+			return callback(err) if err?
+			CollaboratorsInviteHandler._trySendInviteNotification projectId, sendingUser, invite, (err)->
+				return callback(err) if err?
+				callback()
+
+	inviteToProject: (projectId, sendingUser, email, privileges, callback=(err,invite)->) ->
+		logger.log {projectId, sendingUserId: sendingUser._id, email, privileges}, "adding invite"
 		Crypto.randomBytes 24, (err, buffer) ->
 			if err?
-				logger.err {err, projectId, sendingUserId, email}, "error generating random token"
+				logger.err {err, projectId, sendingUserId: sendingUser._id, email}, "error generating random token"
 				return callback(err)
 			token = buffer.toString('hex')
 			invite = new ProjectInvite {
 				email: email
 				token: token
-				sendingUserId: sendingUserId
+				sendingUserId: sendingUser._id
 				projectId: projectId
 				privileges: privileges
 			}
 			invite.save (err, invite) ->
 				if err?
-					logger.err {err, projectId, sendingUserId, email}, "error saving token"
+					logger.err {err, projectId, sendingUserId: sendingUser._id, email}, "error saving token"
 					return callback(err)
-				CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, email, invite
-				callback(null, invite)
+				CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
+					if err?
+						logger.err {projectId, email}, "error sending messages for invite"
+					callback(err, invite)
 
 	revokeInvite: (projectId, inviteId, callback=(err)->) ->
 		logger.log {projectId, inviteId}, "removing invite"
@@ -54,9 +88,10 @@ module.exports = CollaboratorsInviteHandler =
 			if err?
 				logger.err {err, projectId, inviteId}, "error removing invite"
 				return callback(err)
+			CollaboratorsInviteHandler._tryCancelInviteNotification(inviteId, ()->)
 			callback(null)
 
-	resendInvite: (projectId, inviteId, callback=(err)->) ->
+	resendInvite: (projectId, sendingUser, inviteId, callback=(err)->) ->
 		logger.log {projectId, inviteId}, "resending invite email"
 		ProjectInvite.findOne {_id: inviteId, projectId: projectId}, (err, invite) ->
 			if err?
@@ -65,8 +100,11 @@ module.exports = CollaboratorsInviteHandler =
 			if !invite?
 				logger.err {err, projectId, inviteId}, "no invite found, nothing to resend"
 				return callback(null)
-			CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, invite.email, invite
-			callback(null)
+			CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
+				if err?
+					logger.err {projectid, inviteId}, "error resending invite messages"
+					return callback(err)
+				callback(null)
 
 	getInviteByToken: (projectId, tokenString, callback=(err,invite)->) ->
 		logger.log {projectId, tokenString}, "fetching invite by token"
@@ -100,4 +138,5 @@ module.exports = CollaboratorsInviteHandler =
 					if err?
 						logger.err {err, projectId, inviteId}, "error removing invite"
 						return callback(err)
+					CollaboratorsInviteHandler._tryCancelInviteNotification inviteId, ()->
 					callback()
