@@ -229,7 +229,7 @@ module.exports = (grunt) ->
 						error = new Error("Unknown latexmk version")
 					else
 						version = m[1]
-						if semver.gte(version + ".0", "4.39.0")
+						if semver.gte(version.replace(/[a-z]$/, "") + ".0", "4.39.0")
 							grunt.log.writeln "OK."
 							grunt.log.writeln "Running latexmk version #{version}"
 						else
