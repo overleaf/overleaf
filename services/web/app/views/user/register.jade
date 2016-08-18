@@ -6,9 +6,13 @@ block content
 			.row
 				.registration_message
 					if sharedProjectData.user_first_name !== undefined
-						h1  #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:sharedProjectData.project_name})}
-						div #{translate("join_sl_to_view_project")}.
-							a(href="/login")  #{translate("login_here")}
+						h1  #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:""})}
+							em #{sharedProjectData.project_name}
+						div
+							| #{translate("join_sl_to_view_project")}.
+						div
+							| #{translate("if_you_are_registered")},
+							a(href="/login?redir=#{getReqQueryParam('redir')}")  #{translate("login_here")}
 					else if newTemplateData.templateName !== undefined
 						h1 #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
 

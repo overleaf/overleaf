@@ -1,0 +1,18 @@
+extends ../../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card.project-invite-invalid
+						.page-header.text-centered
+							h1  #{translate("invite_not_valid")}
+						.row.text-center
+							.col-md-12
+								p
+									| #{translate("invite_not_valid_description")}.
+						.row.text-center.actions
+							.col-md-12
+								a.btn.btn-info(href="/project") #{translate("back_to_your_projects")}
+							
