@@ -99,6 +99,30 @@ define [
 				groups = $.grep(groups, (n) -> n) # Filter empty groups
 				groups.join(' ')
 
+		formatExpiry = (expiry) ->
+			parts = expiry.match(/^\D*(\d{1,2})(\D+)?(\d{1,4})?/)
+			return '' unless parts
+
+			mon = parts[1] || ''
+			sep = parts[2] || ''
+			year = parts[3] || ''
+
+			if year.length > 0
+				sep = ' / '
+
+			else if sep is ' /'
+				mon = mon.substring(0, 1)
+				sep = ''
+
+			else if mon.length == 2 or sep.length > 0
+				sep = ' / '
+
+			else if mon.length == 1 and mon not in ['0', '1']
+				mon = "0#{mon}"
+				sep = ' / '
+
+			return mon + sep + year
+
 		parseExpiry = (value = "") ->
 			[month, year] = value.split(/[\s\/]+/, 2)
 
@@ -119,6 +143,7 @@ define [
 			fromNumber: cardFromNumber
 			fromType: cardFromType
 			cardType: cardType 
+			formatExpiry: formatExpiry
 			formatCardNumber: formatCardNumber  
 			defaultFormat: defaultFormat
 			defaultInputFormat: defaultInputFormat
@@ -136,6 +161,45 @@ define [
 				return true if document.selection.createRange().text
 
 			false
+
+		safeVal = (value, $target) ->
+			try
+				cursor = $target.prop('selectionStart')
+			catch error
+				cursor = null
+			
+			last = $target.val()
+			$target.val(value)
+
+			if cursor != null && $target.is(":focus")
+				cursor = value.length if cursor is last.length
+
+				# This hack looks for scenarios where we are changing an input's value such
+				# that "X| " is replaced with " |X" (where "|" is the cursor). In those
+				# scenarios, we want " X|".
+				#
+				# For example:
+				# 1. Input field has value "4444| "
+				# 2. User types "1"
+				# 3. Input field has value "44441| "
+				# 4. Reformatter changes it to "4444 |1"
+				# 5. By incrementing the cursor, we make it "4444 1|"
+				#
+				# This is awful, and ideally doesn't go here, but given the current design
+				# of the system there does not appear to be a better solution.
+				#
+				# Note that we can't just detect when the cursor-1 is " ", because that
+				# would incorrectly increment the cursor when backspacing, e.g. pressing
+				# backspace in this scenario: "4444 1|234 5".
+				if last != value
+					prevPair = last[cursor-1..cursor]
+					currPair = value[cursor-1..cursor]
+					digit = value[cursor]
+					cursor = cursor + 1 if /\d/.test(digit) and
+						prevPair == "#{digit} " and currPair == " #{digit}"
+
+				$target.prop('selectionStart', cursor)
+				$target.prop('selectionEnd', cursor)
 
 		# Replace Full-Width Chars
 		replaceFullWidthChars = (str = '') ->
@@ -160,6 +224,7 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = value.replace(/\D/g, '')
+				safeVal(value, $target)
 
 		# Format Card Number
 		reFormatCardNumber = (e) ->
@@ -168,6 +233,7 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = ccUtils.formatCardNumber(value)
+				safeVal(value, $target)
 
 		formatCardNumber = (e) ->
 			# Only format if input is a number
@@ -249,7 +315,9 @@ define [
 			setTimeout ->
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
-				value   = $.payment.formatExpiry(value)
+				value   = ccUtils.formatExpiry(value)
+				safeVal(value, $target)
+
 
 		formatExpiry = (e) ->
 			# Only format if input is a number
@@ -328,6 +396,7 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = value.replace(/\D/g, '')[0...4]
+				safeVal(value, $target)
 
 		# Restrictions
 		restrictNumeric = (e) ->
@@ -429,11 +498,15 @@ define [
 		restrict: "A"
 		require: "ngModel"
 		link: (scope, el, attrs, ngModel) ->
+			el.on "keypress", 	ccFormat.restrictNumeric
 			el.on "keypress", 	ccFormat.restrictExpiry
 			el.on "keypress", 	ccFormat.formatExpiry
 			el.on "keypress", 	ccFormat.formatForwardSlash
 			el.on "keypress", 	ccFormat.formatForwardExpiry
 			el.on "keydown", 	ccFormat.formatBackExpiry
+			el.on "change", 	ccFormat.reFormatExpiry
+			el.on "input", 		ccFormat.reFormatExpiry
+			el.on "paste", 		ccFormat.reFormatExpiry
 
 			ngModel.$parsers.push ccFormat.parseExpiry
 			ngModel.$formatters.push ccFormat.parseExpiry
@@ -442,6 +515,7 @@ define [
 		restrict: "A"
 		require: "ngModel"
 		link: (scope, el, attrs, ngModel) ->
+			el.on "keypress", 	ccFormat.restrictNumeric
 			el.on "keypress", 	ccFormat.restrictCardNumber
 			el.on "keypress", 	ccFormat.formatCardNumber
 			el.on "keydown", 	ccFormat.formatBackCardNumber
