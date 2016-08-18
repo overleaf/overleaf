@@ -90,6 +90,8 @@ define [
 			month = parseInt(month, 10)
 			year  = parseInt(year, 10)
 
+			return unless !isNaN(month) and !isNaN(year)
+
 			month: month, year: year
 
 		return {
@@ -271,8 +273,14 @@ define [
 
 		parseExpiry = (value) ->
 			if value?
-				dateAsObj = ccUtils.parseExpiry(value);
+				dateAsObj = ccUtils.parseExpiry(value)
+				
+				console.log dateAsObj
+				
+				return unless dateAsObj?
+
 				expiry = new Date dateAsObj.year, dateAsObj.month - 1
+
 				return $filter('date')(expiry, 'MM/yyyy')
 
 		# Format CVC
