@@ -102,5 +102,22 @@ define -> [
 		humanReadableHint: """
 			You have used an open bracket without a corresponding close bracket.
 		"""
-
+	,	ruleId: "hint_mismatched_environment2"
+		regexToMatch: /Error: `\\end\{([^\}]+)\})' expected but found `\\end\{([^\}]+)\}'.*/
+		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
+		humanReadableHint: """
+			You have used \\begin{...} without a corresponding \\end{...}.
+		"""
+	,	ruleId: "hint_mismatched_environment3"
+		regexToMatch: /Error: No matching \\end found for `\\begin\{([^\}]+)\}'.*/
+		newMessage: "Error: No matching \\end found for \\begin{$1}"
+		humanReadableHint: """
+			You have used \\begin{...} without a corresponding \\end{...}.
+		"""
+	,	ruleId: "hint_mismatched_environment3"
+		regexToMatch: /Error:  Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/
+		newMessage: "Error: Found \\end{$1} without a corresponding \\begin{$1}"
+		humanReadableHint: """
+			You have used \\begin{...} without a corresponding \\end{...}.
+		"""
 ]
