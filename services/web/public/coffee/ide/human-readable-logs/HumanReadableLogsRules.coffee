@@ -90,6 +90,7 @@ define -> [
 		"""
 	,
 		ruleId: "hint_mismatched_environment"
+		types: ['environment']
 		regexToMatch: /Error: `([^']{2,})' expected, found `([^']{2,})'.*/
 		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
 		humanReadableHint: """
@@ -97,27 +98,35 @@ define -> [
 		"""
 	,
 		ruleId: "hint_mismatched_brackets"
+		types: ['environment']
 		regexToMatch: /Error: `([^a-zA-Z0-9])' expected, found `([^a-zA-Z0-9])'.*/
 		newMessage: "Error: brackets do not match, found '$2' instead of '$1'"
 		humanReadableHint: """
 			You have used an open bracket without a corresponding close bracket.
 		"""
-	,	ruleId: "hint_mismatched_environment2"
-		regexToMatch: /Error: `\\end\{([^\}]+)\})' expected but found `\\end\{([^\}]+)\}'.*/
-		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
+	,
+		ruleId: "hint_mismatched_environment2"
+		types: ['environment']
+		regexToMatch: /Error: `\\end\{([^\}]+)\}' expected but found `\\end\{([^\}]+)\}'.*/
+		newMessage: "Error: environments do not match: \\begin{$1} ... \\end{$2}"
 		humanReadableHint: """
-			You have used \\begin{...} without a corresponding \\end{...}.
+			You have used \\begin{} without a corresponding \\end{}.
 		"""
-	,	ruleId: "hint_mismatched_environment3"
-		regexToMatch: /Error: No matching \\end found for `\\begin\{([^\}]+)\}'.*/
-		newMessage: "Error: No matching \\end found for \\begin{$1}"
+	,
+		ruleId: "hint_mismatched_environment3"
+		types: ['environment']
+		regexToMatch: /Warning: No matching \\end found for `\\begin\{([^\}]+)\}'.*/
+		newMessage: "Warning: No matching \\end found for \\begin{$1}"
 		humanReadableHint: """
-			You have used \\begin{...} without a corresponding \\end{...}.
+			You have used \\begin{} without a corresponding \\end{}.
 		"""
-	,	ruleId: "hint_mismatched_environment3"
-		regexToMatch: /Error:  Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/
-		newMessage: "Error: Found \\end{$1} without a corresponding \\begin{$1}"
+	,
+		ruleId: "hint_mismatched_environment4"
+		types: ['environment']
+		cascadesFrom: ['environment']
+		regexToMatch: /Error: Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/
+		newMessage: "Error: found \\end{$1} without a corresponding \\begin{$1}"
 		humanReadableHint: """
-			You have used \\begin{...} without a corresponding \\end{...}.
+			You have used \\begin{} without a corresponding \\end{}.
 		"""
 ]
