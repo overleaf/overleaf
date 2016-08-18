@@ -258,6 +258,7 @@ module.exports = ProjectEntityHandler =
 					if !foundFolder?
 						logger.log path:path, project_id:project._id, folderName:folderName, "making folder from mkdirp"
 						@addFolder project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
+							return callback(err) if err?
 							newFolder.parentFolder_id = parentFolder_id
 							previousFolders.push newFolder
 							callback null, previousFolders
@@ -268,6 +269,7 @@ module.exports = ProjectEntityHandler =
 
 
 			async.reduce folders, [], procesFolder, (err, folders)->
+				return callback(err) if err?
 				lastFolder = folders[folders.length-1]
 				folders = _.select folders, (folder)->
 					!folder.filterOut
