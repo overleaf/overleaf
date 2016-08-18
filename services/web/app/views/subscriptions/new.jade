@@ -176,54 +176,73 @@ block content
 												div.pull-right
 													strong {{price.currency.symbol}}{{price.next.total}}
 								.col-md-12(sixpack-when="simple")
-									form(ng-show="planName")
-										.row
-											.col-md-12
-												.form-group
-													.row
-														.col-md-6
-															label.radio-inline
-																input.paymentTypeOption(type="radio", value="credit_card", ng-model="paymentMethod")
-																i.fa.fa-cc-mastercard.fa-3x
-																span &nbsp;
-																i.fa.fa-cc-visa.fa-3x
-														.col-md-6
-															label.radio-inline
-																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
-																i.fa.fa-cc-paypal.fa-3x
+									form(ng-if="planName")
+										div.payment-method-toggle
+											a.payment-method-toggle-switch(
+												href
+												ng-click="paymentMethod = 'credit_card'"
+												ng-class="paymentMethod === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
+											)
+												i.fa.fa-cc-mastercard.fa-2x
+												span &nbsp;
+												i.fa.fa-cc-visa.fa-2x
+												span &nbsp;
+												i.fa.fa-cc-amex.fa-2x
+											a.payment-method-toggle-switch(
+												href
+												ng-click="paymentMethod = 'paypal'"
+												ng-class="paymentMethod === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
+											)
+												i.fa.fa-cc-paypal.fa-2x
 										//- TODO Validation messages
-										.form-group
-											label(for="card-name") Name on card
-											input#card-name.form-control(type="text")
-										.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
-											label(for="card-no") Card number
-											input#card-no.form-control(type="credit card", ng-model='data.number', ng-blur="validateCardNumber()")
-										.row
-											.col-xs-6
-												label Valid thru {{ data.mmYY }}
-												input.form-control(
+										div(ng-if="paymentMethod === 'credit_card'")
+											.form-group
+												label(for="card-name") Name on card
+												input#card-name.form-control(type="text")
+											.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
+												label(for="card-no") Card number
+												input#card-no.form-control(
 													type="text"
-													ng-model="data.mmYY"
-													cc-format-expiry
-												)
-											.col-xs-6
-												.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
-													label Security code
-													input.form-control(type="cvc", ng-model='data.cvv', ng-blur="validateCvv()")
-													.form-control-feedback
-														a.form-helper(
-															href
-															tooltip-template="'cvv-tooltip-tpl.html'"
-															tooltip-trigger="mouseenter"
-															tooltip-append-to-body="true"
-														) ?
-										.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
-											label(for="country") Country
-											select#country.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
-												mixin countries_options()
-										.row
-											.col-xs-12
-												button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") #{translate("upgrade_now")} 
+													ng-model="data.number"
+													ng-blur="validateCardNumber()"
+													cc-format-card-number)
+											.row
+												.col-xs-6
+													label Expiry date
+													input.form-control(
+														type="text"
+														ng-model="data.mmYY"
+														placeholder="MM // YY"
+														cc-format-expiry
+													)
+												.col-xs-6
+													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
+														label Security code
+														input.form-control(
+															type="text"
+															ng-model="data.cvv"
+															ng-blur="validateCvv()"
+															cc-format-sec-code)
+														.form-control-feedback
+															a.form-helper(
+																href
+																tabindex="-1"
+																tooltip-template="'cvv-tooltip-tpl.html'"
+																tooltip-trigger="mouseenter"
+																tooltip-append-to-body="true"
+															) ?
+											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
+												label(for="country") Country
+												select#country.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
+													mixin countries_options()
+											.row.payment-form-submit
+												.col-xs-12
+													button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") Upgrade now, pay after 7 days
+										div(ng-if="paymentMethod === 'paypal'")
+											p Click the button below to login with PayPal and upgrade.
+											.row.payment-form-submit
+												.col-xs-12
+													button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") Continue
 
 				span(sixpack-switch="payment-left-menu-bottom")
 
@@ -279,32 +298,33 @@ block content
 							.paymentPageFeatures
 								.page-header
 									h2 #{translate("features")}
-								h3 
-									i.fa.fa-check &nbsp;
-									| #{translate("unlimited_projects")}
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy #{translate("unlimited_projects")}
 							
-								h3
-									i.fa.fa-check &nbsp;
-									if plan.features.collaborators == -1
-										- var collaboratorCount = 'Unlimited'
-									else
-										- var collaboratorCount = plan.features.collaborators
-									| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy
+										if plan.features.collaborators == -1
+											- var collaboratorCount = 'Unlimited'
+										else
+											- var collaboratorCount = plan.features.collaborators
+										| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
 								
-								h3
-									i.fa.fa-check &nbsp;
-									|  #{translate("full_doc_history")}
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy #{translate("full_doc_history")}
 								
-								h3 
-									i.fa.fa-check &nbsp;
-									| #{translate("sync_to_dropbox")}
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy #{translate("sync_to_dropbox")}
 
-								h3
-									i.fa.fa-check &nbsp;
-									| #{translate("sync_to_github")}
-								h3
-									i.fa.fa-check &nbsp;
-									| #{translate("Compile Larger Projects")}								
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy #{translate("sync_to_github")}
+								h3.feature
+									.features-check: i.fa.fa-check
+									.features-copy #{translate("compile_larger_projects")}
 								hr
 									
 								h2.text-center 30 Day Guarantee
