@@ -137,7 +137,6 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = value.replace(/\D/g, '')
-				safeVal(value, $target)
 
 		# Format Card Number
 		reFormatCardNumber = (e) ->
@@ -146,7 +145,6 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = $.payment.formatCardNumber(value)
-				#safeVal(value, $target)
 
 		formatCardNumber = (e) ->
 			# Only format if input is a number
@@ -155,7 +153,7 @@ define [
 
 			$target = $(e.currentTarget)
 			value   = $target.val()
-			card    = ccUtils.cardFromNumber(value + digit)
+			card    = ccUtils.fromNumber(value + digit)
 			length  = (value.replace(/\D/g, '') + digit).length
 
 			upperLength = 16
@@ -202,6 +200,26 @@ define [
 				e.preventDefault()
 				setTimeout -> $target.val(value.replace(/\d$/, ''))
 
+		getFormattedCardNumber = (num) ->
+			num = num.replace(/\D/g, '')
+			card = ccUtils.fromNumber(num)
+			return num unless card
+
+			upperLength = card.length[card.length.length - 1]
+			num = num[0...upperLength]
+
+			if card.format.global
+				num.match(card.format)?.join(' ')
+			else
+				groups = card.format.exec(num)
+				return unless groups?
+				groups.shift()
+				groups = $.grep(groups, (n) -> n) # Filter empty groups
+				groups.join(' ')
+
+		parseCardNumber = (value) ->
+    		if value? then value.replace(/\s/g, '') else value
+
 		# Format Expiry
 		reFormatExpiry = (e) ->
 			$target = $(e.currentTarget)
@@ -209,7 +227,6 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = $.payment.formatExpiry(value)
-				safeVal(value, $target)
 
 		formatExpiry = (e) ->
 			# Only format if input is a number
@@ -275,8 +292,6 @@ define [
 			if value?
 				dateAsObj = ccUtils.parseExpiry(value)
 				
-				console.log dateAsObj
-				
 				return unless dateAsObj?
 
 				expiry = new Date dateAsObj.year, dateAsObj.month - 1
@@ -290,7 +305,6 @@ define [
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
 				value   = value.replace(/\D/g, '')[0...4]
-				safeVal(value, $target)
 
 		# Restrictions
 		restrictNumeric = (e) ->
@@ -320,7 +334,7 @@ define [
 
 			# Restrict number of digits
 			value = ($target.val() + digit).replace(/\D/g, '')
-			card  = cardFromNumber(value)
+			card  = ccUtils.fromNumber(value)
 
 			if card
 				value.length <= card.length[card.length.length - 1]
@@ -372,6 +386,8 @@ define [
 			reFormatCardNumber
 			formatCardNumber
 			formatBackCardNumber
+			getFormattedCardNumber
+			parseCardNumber
 			reFormatExpiry
 			formatExpiry
 			formatForwardExpiry
@@ -386,18 +402,41 @@ define [
 			setCardType
 		}
 		
-	App.directive 'ccFormatExpiry', (ccFormat) ->
-		restrict: 'A'
-		require: 'ngModel'
+	App.directive "ccFormatExpiry", (ccFormat) ->
+		restrict: "A"
+		require: "ngModel"
 		link: (scope, el, attrs, ngModel) ->
-			el.on 'keypress', 	ccFormat.restrictExpiry
-			el.on 'keypress', 	ccFormat.formatExpiry
-			el.on 'keypress', 	ccFormat.formatForwardSlash
-			el.on 'keypress', 	ccFormat.formatForwardExpiry
-			el.on 'keydown', 	ccFormat.formatBackExpiry
+			el.on "keypress", 	ccFormat.restrictExpiry
+			el.on "keypress", 	ccFormat.formatExpiry
+			el.on "keypress", 	ccFormat.formatForwardSlash
+			el.on "keypress", 	ccFormat.formatForwardExpiry
+			el.on "keydown", 	ccFormat.formatBackExpiry
 
 			ngModel.$parsers.push ccFormat.parseExpiry
 			ngModel.$formatters.push ccFormat.parseExpiry
+
+	App.directive "ccFormatCardNumber", (ccFormat) ->
+		restrict: "A"
+		require: "ngModel"
+		link: (scope, el, attrs, ngModel) ->
+			el.on "keypress", 	ccFormat.restrictCardNumber
+			el.on "keypress", 	ccFormat.formatCardNumber
+			el.on "keydown", 	ccFormat.formatBackCardNumber
+			el.on "paste", 		ccFormat.reFormatCardNumber
+
+			ngModel.$parsers.push ccFormat.parseCardNumber
+			ngModel.$formatters.push ccFormat.getFormattedCardNumber
+
+	App.directive "ccFormatSecCode", (ccFormat) ->
+		restrict: "A"
+		require: "ngModel"
+		link: (scope, el, attrs, ngModel) ->
+			el.on "keypress", 	ccFormat.restrictNumeric
+			el.on "keypress", 	ccFormat.restrictCVC
+			el.on "paste", 		ccFormat.reFormatCVC
+			el.on "change", 	ccFormat.reFormatCVC
+			el.on "input", 		ccFormat.reFormatCVC
+
 
 
 	
