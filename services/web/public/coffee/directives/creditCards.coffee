@@ -78,6 +78,27 @@ define [
 		cardFromType = (type) ->
 			return card for card in cards when card.type is type
 
+		cardType = (num) ->
+			return null unless num
+			cardFromNumber(num)?.type or null
+
+		formatCardNumber = (num) ->
+			num = num.replace(/\D/g, '')
+			card = cardFromNumber(num)
+			return num unless card
+
+			upperLength = card.length[card.length.length - 1]
+			num = num[0...upperLength]
+
+			if card.format.global
+				num.match(card.format)?.join(' ')
+			else
+				groups = card.format.exec(num)
+				return unless groups?
+				groups.shift()
+				groups = $.grep(groups, (n) -> n) # Filter empty groups
+				groups.join(' ')
+
 		parseExpiry = (value = "") ->
 			[month, year] = value.split(/[\s\/]+/, 2)
 
@@ -97,6 +118,8 @@ define [
 		return {
 			fromNumber: cardFromNumber
 			fromType: cardFromType
+			cardType: cardType 
+			formatCardNumber: formatCardNumber  
 			defaultFormat: defaultFormat
 			defaultInputFormat: defaultInputFormat
 			parseExpiry: parseExpiry
@@ -144,7 +167,7 @@ define [
 			setTimeout ->
 				value   = $target.val()
 				value   = replaceFullWidthChars(value)
-				value   = $.payment.formatCardNumber(value)
+				value   = ccUtils.formatCardNumber(value)
 
 		formatCardNumber = (e) ->
 			# Only format if input is a number
@@ -367,7 +390,7 @@ define [
 		setCardType = (e) ->
 			$target  = $(e.currentTarget)
 			val      = $target.val()
-			cardType = $.payment.cardType(val) or 'unknown'
+			cardType = ccUtils.cardType(val) or 'unknown'
 
 			unless $target.hasClass(cardType)
 				allTypes = (card.type for card in cards)

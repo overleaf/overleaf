@@ -175,6 +175,7 @@ block content
 												div(ng-if="price.next.tax!='0.00'").pull-right {{price.currency.symbol}}{{price.next.tax}}
 												div.pull-right
 													strong {{price.currency.symbol}}{{price.next.total}}
+								
 								.col-md-12(sixpack-when="simple")
 									form(ng-if="planName")
 										div.payment-method-toggle
@@ -196,10 +197,18 @@ block content
 												i.fa.fa-cc-paypal.fa-2x
 										//- TODO Validation messages
 										div(ng-if="paymentMethod === 'credit_card'")
+											ol 
+												li validation.correctCardNumber : {{ validation.correctCardNumber }}
+												li validation.correctExpiry : {{ validation.correctExpiry }}
+												li validation.correctCvv : {{ validation.correctCvv }}
+												li data.month : {{ data.month }}
+												li data.year : {{ data.year }}
+												li data.mmYY : {{ data.mmYY }}
+
 											.form-group
 												label(for="card-name") Name on card
 												input#card-name.form-control(type="text")
-											.form-group(ng-class="validation.number == false || validation.errorFields.number ? 'has-error' : ''")
+											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number ? 'has-error' : ''")
 												label(for="card-no") Card number
 												input#card-no.form-control(
 													type="text"
@@ -208,13 +217,15 @@ block content
 													cc-format-card-number)
 											.row
 												.col-xs-6
-													label Expiry date
-													input.form-control(
-														type="text"
-														ng-model="data.mmYY"
-														placeholder="MM // YY"
-														cc-format-expiry
-													)
+													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry ? 'has-error' : ''")
+														label Expiry date
+														input.form-control(
+															type="text"
+															ng-model="data.mmYY"
+															placeholder="MM / YY"
+															ng-blur="validateExpiry()"
+															cc-format-expiry
+														)
 												.col-xs-6
 													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
 														label Security code

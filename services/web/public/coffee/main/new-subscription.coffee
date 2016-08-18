@@ -3,7 +3,7 @@ define [
 	"directives/creditCards"
 ], (App)->
 
-	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking)->
+	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 	
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
@@ -32,11 +32,16 @@ define [
 			coupon: window.couponCode
 			mmYY: ""
 
- 
+		$scope.$watch 'data.mmYY', (newVal) ->
+			parsedDateObj = ccUtils.parseExpiry newVal
+			if parsedDateObj?
+				$scope.data.month = parsedDateObj.month
+				$scope.data.year = parsedDateObj.year
+
 		$scope.validation =
 			correctCardNumber : true
 			correctExpiry: true
-			correctCvv:true
+			correctCvv: true
 
 		$scope.processing = false
 
