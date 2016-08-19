@@ -171,8 +171,8 @@ module.exports = SubscriptionController =
 			return next(error) if error?
 			planCode = req.body.plan_code
 			if !planCode?
-				err = new Error('plan_code not defined')
-				logger.err {user_id: user._id, err}, "error updating subscription"
+				err = new Error('plan_code is not defined')
+				logger.err {user_id: user._id, err, planCode}, "[Subscription] error in updateSubscription form"
 				return next(err)
 			logger.log planCode: planCode, user_id:user._id, "updating subscription"
 			SubscriptionHandler.updateSubscription user, planCode, null, (err)->
