@@ -65,6 +65,7 @@ define [
 			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial?.length
 			$scope.monthlyBilling = pricing.items.plan.period.length == 1
+
 			if pricing.items?.coupon?.discount?.type == "percent"
 				basePrice = parseInt(pricing.price.base.plan.unit)
 				$scope.normalPrice = basePrice
@@ -100,6 +101,7 @@ define [
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		$scope.updateCountry = ->
+			console.log 'update country'
 			pricing.address({country:$scope.data.country}).done()
 
 		$scope.changePaymentMethod = (paymentMethod)->
@@ -139,6 +141,8 @@ define [
 					coupon_code		: postData.subscriptionDetails.coupon_code,
 					isPaypal		: postData.subscriptionDetails.isPaypal
 				}
+
+				sixpack.convert "subscription-form"
 
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->

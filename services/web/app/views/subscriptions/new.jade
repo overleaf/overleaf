@@ -69,8 +69,6 @@ block content
 																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
 																i.fa.fa-cc-paypal.fa-3x
 
-
-
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
@@ -195,16 +193,18 @@ block content
 												ng-class="paymentMethod === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
 											)
 												i.fa.fa-cc-paypal.fa-2x
-										//- TODO Validation messages
-										div(ng-if="paymentMethod === 'credit_card'")
-											ol 
-												li validation.correctCardNumber : {{ validation.correctCardNumber }}
-												li validation.correctExpiry : {{ validation.correctExpiry }}
-												li validation.correctCvv : {{ validation.correctCvv }}
-												li data.month : {{ data.month }}
-												li data.year : {{ data.year }}
-												li data.mmYY : {{ data.mmYY }}
+										
+										.alert.alert-warning.small(ng-show="genericError")
+											strong {{genericError}}
 
+										div(ng-if="paymentMethod === 'credit_card'")
+											//- ol 
+											//- 	li validation.correctCardNumber : {{ validation.correctCardNumber }}
+											//- 	li validation.correctExpiry : {{ validation.correctExpiry }}
+											//- 	li validation.correctCvv : {{ validation.correctCvv }}
+											//- 	li data.month : {{ data.month }}
+											//- 	li data.year : {{ data.year }}
+											//- 	li data.mmYY : {{ data.mmYY }}
 											.form-group
 												label(for="card-name") Name on card
 												input#card-name.form-control(type="text")
@@ -244,16 +244,50 @@ block content
 															) ?
 											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
 												label(for="country") Country
-												select#country.form-control(data-recurly="country", ng-model="data.country", ng-change="updateCountry()", required)
+												select#country.form-control(
+													data-recurly="country"
+													ng-model="data.country"
+													ng-change="updateCountry()"
+													required
+												)
 													mixin countries_options()
-											.row.payment-form-submit
-												.col-xs-12
-													button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") Upgrade now, pay after 7 days
-										div(ng-if="paymentMethod === 'paypal'")
-											p Click the button below to login with PayPal and upgrade.
-											.row.payment-form-submit
-												.col-xs-12
-													button.btn.btn-success.btn-block(ng-click="submit()", ng-disabled="processing", sixpack-convert="payment-left-menu-bottom") Continue
+										
+										div
+											if (showVatField)
+												.form-group
+													label(for="vat-no") #{translate('vat_number')}
+													input#vat-no.form-control(
+														type='text'
+														ng-blur="applyVatNumber()"
+														ng-model="data.vat_number"
+													)
+											if (showCouponField)
+												.form-group
+													label(for="coupon-code") #{translate('coupon_code')}
+													input#coupon-code.form-control(
+														type='text'
+														ng-blur="applyCoupon()"
+														ng-model="data.coupon"
+													)
+											
+											//- PRicing stuff
+													
+											p(ng-if="paymentMethod === 'paypal'") To upgrade, click on the button below and log on to PayPal using your email and password.
+											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
+												hr.thin
+												span Total: 
+												strong {{price.currency.symbol}}{{price.next.total}} 
+												span ({{price.currency.symbol}}{{price.next.subtotal}} + {{price.currency.symbol}}{{price.next.tax}} tax) 
+												span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
+												span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
+												hr.thin
+
+											div.payment-submit
+												button.btn.btn-success.btn-block(
+													ng-click="submit()"
+													ng-disabled="processing"
+													sixpack-convert="payment-left-menu-bottom"
+												) {{ paymentMethod === 'credit_card' ? 'Upgrade now, pay after 7 days' : 'Continue' }}
 
 				span(sixpack-switch="payment-left-menu-bottom")
 
