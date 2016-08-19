@@ -114,9 +114,9 @@ module.exports = settings =
 		showSocialButtons: false
 		showComments: false
 
-	# cdn:
-	# 	web:
-	# 		host:"http://cdn.sharelatex.dev:3000"
+	cdn:
+		web:
+			host:"http://nowhere.sharelatex.dev"
 	#		darkHost:"http://cdn.sharelatex.dev:3000"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
