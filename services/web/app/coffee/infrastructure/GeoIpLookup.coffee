@@ -2,6 +2,7 @@ request = require("request")
 settings = require("settings-sharelatex")
 _ = require("underscore")
 logger = require("logger-sharelatex")
+URL = require("url")
 
 currencyMappings = {
 	"GB":"GBP"
@@ -31,7 +32,7 @@ module.exports = GeoIpLookup =
 			return callback(e)
 		ip = ip.trim().split(" ")[0]
 		opts = 
-			url: "#{settings.apis.geoIpLookup.url}/#{ip}"
+			url: URL.resolve(settings.apis.geoIpLookup.url,ip)
 			timeout: 1000
 			json:true
 		logger.log ip:ip, opts:opts, "getting geo ip details"
