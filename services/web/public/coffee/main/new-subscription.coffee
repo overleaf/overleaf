@@ -12,9 +12,9 @@ define [
 		$scope.switchToStudent = ()->
 			window.location = "/user/subscription/new?planCode=student_free_trial_7_days&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
 
+		event_tracking.sendMB "subscription-form", { plan : window.plan_code }
 
 		$scope.paymentMethod = "credit_card"
-
 
 		$scope.data =
 			number: ""
@@ -59,8 +59,6 @@ define [
 			.done()
 
 		pricing.on "change", =>
-			event_tracking.sendMB "subscription-form", { plan : pricing.items.plan.code }
-
 			$scope.planName = pricing.items.plan.name
 			$scope.price = pricing.price
 			$scope.trialLength = pricing.items.plan.trial?.length
