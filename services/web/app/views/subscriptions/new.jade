@@ -287,96 +287,48 @@ block content
 													sixpack-convert="payment-left-menu-bottom"
 												) {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 
-				span(sixpack-switch="payment-left-menu-bottom")
 
-					.col-md-3.col-md-pull-4(sixpack-default)
-						if showStudentPlan == 'true'
-							a.btn-primary.btn.plansPageStudentLink(
-								href,
-								ng-click="switchToStudent()"
-							) #{translate("half_price_student")} 
+				.col-md-3.col-md-pull-4
+					if showStudentPlan == 'true'
+						a.btn-primary.btn.plansPageStudentLink(
+							href,
+							ng-click="switchToStudent()"
+						) #{translate("half_price_student")} 
 
-						.card.card-first
-							.paymentPageFeatures
-								h3 #{translate("unlimited_projects")}
-								p #{translate("create_unlimited_projects")}
+					.card.card-first
+						.paymentPageFeatures
+							h3 #{translate("unlimited_projects")}
+							p #{translate("create_unlimited_projects")}
+						
+							h3
+								if plan.features.collaborators == -1
+									- var collaboratorCount = 'Unlimited'
+								else
+									- var collaboratorCount = plan.features.collaborators
+								| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
 							
-								h3
-									if plan.features.collaborators == -1
-										- var collaboratorCount = 'Unlimited'
-									else
-										- var collaboratorCount = plan.features.collaborators
-									| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
-								p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
-								
-								h3 #{translate("full_doc_history")}
-								p #{translate("see_what_has_been")} 
-									span.added #{translate("added")} 
-									| #{translate("and")} 
-									span.removed #{translate("removed")}. 
-									| #{translate("restore_to_any_older_version")}.
-								
-								h3 #{translate("sync_to_dropbox")}
-								p
-									| #{translate("acces_work_from_anywhere")}. 
-									| #{translate("work_offline_and_sync_with_dropbox")}.
-									
-								hr
-									
-								p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
-								hr
-								span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
-								a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
-									img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
-									div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
-										a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
-					.col-md-3.col-md-pull-4(sixpack-when="bolder")
-						if showStudentPlan == 'true'
-							a.btn-primary.btn.plansPageStudentLink(
-								href,
-								ng-click="switchToStudent()"
-							) #{translate("half_price_student")} 
-
-						.card.card-first
-							.paymentPageFeatures
-								.page-header
-									h2 #{translate("features")}
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy #{translate("unlimited_projects")}
+							h3 #{translate("full_doc_history")}
+							p #{translate("see_what_has_been")} 
+								span.added #{translate("added")} 
+								| #{translate("and")} 
+								span.removed #{translate("removed")}. 
+								| #{translate("restore_to_any_older_version")}.
 							
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy
-										if plan.features.collaborators == -1
-											- var collaboratorCount = 'Unlimited'
-										else
-											- var collaboratorCount = plan.features.collaborators
-										| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+							h3 #{translate("sync_to_dropbox")}
+							p
+								| #{translate("acces_work_from_anywhere")}. 
+								| #{translate("work_offline_and_sync_with_dropbox")}.
 								
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy #{translate("full_doc_history")}
+							hr
 								
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy #{translate("sync_to_dropbox")}
-
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy #{translate("sync_to_github")}
-								h3.feature
-									.features-check: i.fa.fa-check
-									.features-copy #{translate("compile_larger_projects")}
-								hr
-									
-								h2.text-center 30 Day Guarantee
-								hr
-								span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
-								a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
-									img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
-									div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
-										a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
+							p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
+							hr
+							span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+							a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
+								img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
+								div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
+									a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
 
 
 	script(type="text/javascript").
