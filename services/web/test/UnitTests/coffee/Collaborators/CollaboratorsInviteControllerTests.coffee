@@ -11,6 +11,7 @@ ObjectId = require("mongojs").ObjectId
 
 describe "CollaboratorsInviteController", ->
 	beforeEach ->
+		@AnalyticsManger = recordEvent: sinon.stub()
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
@@ -20,6 +21,7 @@ describe "CollaboratorsInviteController", ->
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
 			"../Editor/EditorRealTimeController": @EditorRealTimeController = {emitToRoom: sinon.stub()}
 			"../Notifications/NotificationsBuilder": @NotificationsBuilder = {}
+			"../Analytics/AnalyticsManager": @AnalyticsManger
 		@res = new MockResponse()
 		@req = new MockRequest()
 

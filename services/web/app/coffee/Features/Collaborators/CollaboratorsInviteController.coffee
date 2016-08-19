@@ -7,7 +7,7 @@ logger = require('logger-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
-
+AnalyticsManger = require("../Analytics/AnalyticsManager")
 
 module.exports = CollaboratorsInviteController =
 
@@ -120,4 +120,5 @@ module.exports = CollaboratorsInviteController =
 				logger.err {projectId, inviteId}, "error accepting invite by token"
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
+			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {inviteId:inviteId, projectId:projectId})
 			res.redirect "/project/#{projectId}"
