@@ -206,10 +206,10 @@ block content
 											//- 	li data.year : {{ data.year }}
 											//- 	li data.mmYY : {{ data.mmYY }}
 											.form-group
-												label(for="card-name") Name on card
+												label(for="card-name") #{translate("name_on_card")}
 												input#card-name.form-control(type="text")
 											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number ? 'has-error' : ''")
-												label(for="card-no") Card number
+												label(for="card-no") #{translate("credit_card_number")}
 												input#card-no.form-control(
 													type="text"
 													ng-model="data.number"
@@ -218,7 +218,7 @@ block content
 											.row
 												.col-xs-6
 													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry ? 'has-error' : ''")
-														label Expiry date
+														label #{translate("expiry")}
 														input.form-control(
 															type="text"
 															ng-model="data.mmYY"
@@ -228,7 +228,7 @@ block content
 														)
 												.col-xs-6
 													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
-														label Security code
+														label #{translate("security_code")}
 														input.form-control(
 															type="text"
 															ng-model="data.cvv"
@@ -243,7 +243,7 @@ block content
 																tooltip-append-to-body="true"
 															) ?
 											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
-												label(for="country") Country
+												label(for="country") #{translate('country')}
 												select#country.form-control(
 													data-recurly="country"
 													ng-model="data.country"
@@ -270,16 +270,14 @@ block content
 														ng-model="data.coupon"
 													)
 											
-											//- PRicing stuff
-													
-											p(ng-if="paymentMethod === 'paypal'") To upgrade, click on the button below and log on to PayPal using your email and password.
+											p(ng-if="paymentMethod === 'paypal'") #{translate("paypal_upgrade")}
 											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
 												hr.thin
 												span Total: 
 												strong {{price.currency.symbol}}{{price.next.total}} 
 												span ({{price.currency.symbol}}{{price.next.subtotal}} + {{price.currency.symbol}}{{price.next.tax}} tax) 
-												span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
-												span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
+												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
+												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
 												hr.thin
 
 											div.payment-submit
@@ -287,7 +285,7 @@ block content
 													ng-click="submit()"
 													ng-disabled="processing"
 													sixpack-convert="payment-left-menu-bottom"
-												) {{ paymentMethod === 'credit_card' ? 'Upgrade now, pay after 7 days' : 'Continue' }}
+												) {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 
 				span(sixpack-switch="payment-left-menu-bottom")
 
