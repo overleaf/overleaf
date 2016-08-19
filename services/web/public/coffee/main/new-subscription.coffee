@@ -101,7 +101,6 @@ define [
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		$scope.updateCountry = ->
-			console.log 'update country'
 			pricing.address({country:$scope.data.country}).done()
 
 		$scope.changePaymentMethod = (paymentMethod)->

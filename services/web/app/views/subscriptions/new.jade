@@ -53,7 +53,7 @@ block content
 						.row
 							div(sixpack-switch="subscription-form")
 								.col-md-12(sixpack-default)
-									form(ng-show="planName")
+									form(ng-show="planName",novalidate)
 										.row
 											.col-md-12
 												.form-group
@@ -175,7 +175,7 @@ block content
 													strong {{price.currency.symbol}}{{price.next.total}}
 								
 								.col-md-12(sixpack-when="simple")
-									form(ng-if="planName")
+									form(ng-if="planName",novalidate)
 										div.payment-method-toggle
 											a.payment-method-toggle-switch(
 												href
@@ -198,16 +198,16 @@ block content
 											strong {{genericError}}
 
 										div(ng-if="paymentMethod === 'credit_card'")
-											//- ol 
-											//- 	li validation.correctCardNumber : {{ validation.correctCardNumber }}
-											//- 	li validation.correctExpiry : {{ validation.correctExpiry }}
-											//- 	li validation.correctCvv : {{ validation.correctCvv }}
-											//- 	li data.month : {{ data.month }}
-											//- 	li data.year : {{ data.year }}
-											//- 	li data.mmYY : {{ data.mmYY }}
-											.form-group
-												label(for="card-name") #{translate("name_on_card")}
-												input#card-name.form-control(type="text")
+											.row
+												.col-xs-6
+													.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
+														label(for="first-name") #{translate('first_name')}
+														input#first-name.form-control(type='text', value='', maxlength='255', , onkeyup='', data-recurly="first_name", ng-model="data.first_name", required)
+												.col-xs-6
+													.form-group(for="last-name",ng-class="validation.errorFields.last_name ? 'has-error' : ''")
+														label(for="last-name") #{translate('last_name')}
+														input#last-name.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="last_name", ng-model="data.last_name", required)
+
 											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number ? 'has-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
 												input#card-no.form-control(
