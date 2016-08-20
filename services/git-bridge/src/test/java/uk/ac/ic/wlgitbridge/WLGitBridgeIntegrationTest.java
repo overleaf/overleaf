@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,8 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by Winston on 11/01/15.
@@ -336,8 +336,6 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_FIRST =
-      "To http://127.0.0.1:33867/testproj.git\n" +
-      " ! [rejected]        master -> master (non-fast-forward)\n" +
       "error: failed to push some refs to 'http://127.0.0.1:33867/testproj.git'\n" +
       "hint: Updates were rejected because the tip of your current branch is behind\n" +
       "hint: its remote counterpart. Integrate the remote changes (e.g.\n" +
@@ -367,8 +365,6 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final String EXPECTED_OUT_PUSH_OUT_OF_DATE_SECOND =
-      "To http://127.0.0.1:33868/testproj.git\n" +
-      " ! [rejected]        master -> master (non-fast-forward)\n" +
       "error: failed to push some refs to 'http://127.0.0.1:33868/testproj.git'\n" +
       "hint: Updates were rejected because the tip of your current branch is behind\n" +
       "hint: its remote counterpart. Integrate the remote changes (e.g.\n" +
@@ -398,7 +394,6 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final List<String> EXPECTED_OUT_PUSH_INVALID_FILES = Arrays.asList(
-        "remote: error: invalid files",
         "remote: hint: You have 4 invalid files in your Overleaf project:",
         "remote: hint: file1.invalid (error)",
         "remote: hint: file2.exe (invalid file extension)",
@@ -433,7 +428,6 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final List<String> EXPECTED_OUT_PUSH_INVALID_PROJECT = Arrays.asList(
-        "remote: error: invalid project",
         "remote: hint: project: no main file",
         "remote: hint: The project would have no (editable) main .tex file.",
         "To http://127.0.0.1:33870/testproj.git",
@@ -465,7 +459,6 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final List<String> EXPECTED_OUT_PUSH_UNEXPECTED_ERROR = Arrays.asList(
-        "remote: error: Overleaf error",
         "remote: hint: There was an internal error with the Overleaf server.",
         "remote: hint: Please contact Overleaf.",
         "To http://127.0.0.1:33871/testproj.git",
@@ -499,6 +492,7 @@ public class WLGitBridgeIntegrationTest {
 
     private static final List<String> EXPECTED_OUT_PUSH_INVALID_EXE_FILE = Arrays.asList(
         "remote: error: invalid files",
+        "remote:",
         "remote: hint: You have 1 invalid files in your Overleaf project:",
         "remote: hint: file1.exe (invalid file extension)",
         "To http://127.0.0.1:33872/testproj.git",
@@ -595,8 +589,14 @@ public class WLGitBridgeIntegrationTest {
 
     private File cloneRepository(String repositoryName, int port, File dir) throws IOException, InterruptedException {
         String repo = "git clone http://127.0.0.1:" + port + "/" + repositoryName + ".git";
-        assertEquals(0, runtime.exec(repo, null, dir).waitFor());
-
+        Process gitProcess = runtime.exec(repo, null, dir);
+        int exitCode = gitProcess.waitFor();
+        if (exitCode != 0) {
+            System.err.println("git clone failed. Dumping stderr and stdout.");
+            System.err.println(IOUtils.toString(gitProcess.getErrorStream()));
+            System.err.println(IOUtils.toString(gitProcess.getInputStream()));
+            fail("git clone failed");
+        }
         File repositoryDir = new File(dir, repositoryName);
 
         assertEquals(0, runtime.exec("git config user.name TEST", null, repositoryDir).waitFor());

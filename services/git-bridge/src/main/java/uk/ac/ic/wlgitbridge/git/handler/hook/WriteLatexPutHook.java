@@ -19,6 +19,7 @@ import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Created by Winston on 03/11/14.
@@ -57,9 +58,17 @@ public class WriteLatexPutHook implements PreReceiveHook {
     private void handleSnapshotPostException(ReceivePack receivePack, ReceiveCommand receiveCommand, SnapshotPostException e) {
         String message = e.getMessage();
         receivePack.sendError(message);
-        for (String line : e.getDescriptionLines()) {
-            receivePack.sendMessage("hint: " + line);
+        StringBuilder msg = new StringBuilder();
+        for (Iterator<String> it = e.getDescriptionLines().iterator(); it.hasNext();) {
+            String line = it.next();
+            msg.append("hint: ");
+            msg.append(line);
+            if (it.hasNext()) {
+                msg.append('\n');
+            }
         }
+        receivePack.sendMessage("");
+        receivePack.sendMessage(msg.toString());
         receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
     }
 
