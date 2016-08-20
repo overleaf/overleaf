@@ -2,15 +2,27 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
+import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
+import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
+import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotAPI;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
+import uk.ac.ic.wlgitbridge.bridge.swap.SwapJob;
+import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobImpl;
+import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
-import uk.ac.ic.wlgitbridge.data.ProjectLock;
-import uk.ac.ic.wlgitbridge.data.ShutdownHook;
+import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
+import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
-import uk.ac.ic.wlgitbridge.data.model.DataStore;
+import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import uk.ac.ic.wlgitbridge.data.model.Snapshot;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushRequest;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
@@ -18,29 +30,91 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
+import java.util.*;
 
 /**
  * Created by Winston on 16/11/14.
  */
 public class Bridge {
 
-    private final DataStore dataStore;
-    private final PostbackManager postbackManager;
-    private final ProjectLock mainProjectLock;
+    private final ProjectLock lock;
 
-    public Bridge(String rootGitDirectoryPath) {
-        dataStore = new DataStore(rootGitDirectoryPath);
-        postbackManager = new PostbackManager();
-        mainProjectLock = new ProjectLock();
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook(mainProjectLock));
+    private final RepoStore repoStore;
+    private final DBStore dbStore;
+    private final SwapStore swapStore;
+
+    private final SnapshotAPI snapshotAPI;
+    private final ResourceCache resourceCache;
+
+    private final SwapJob swapJob;
+
+    private final PostbackManager postbackManager;
+
+    public static Bridge make(
+            RepoStore repoStore,
+            DBStore dbStore,
+            SwapStore swapStore
+    ) {
+        ProjectLock lock = new ProjectLockImpl((int threads) ->
+                Log.info("Waiting for " + threads + " projects...")
+        );
+        return new Bridge(
+                lock,
+                repoStore,
+                dbStore,
+                swapStore,
+                new NetSnapshotAPI(),
+                new UrlResourceCache(dbStore),
+                new SwapJobImpl(
+                        lock,
+                        repoStore,
+                        dbStore,
+                        swapStore
+                )
+        );
     }
 
+    Bridge(
+            ProjectLock lock,
+            RepoStore repoStore,
+            DBStore dbStore,
+            SwapStore swapStore,
+            SnapshotAPI snapshotAPI,
+            ResourceCache resourceCache,
+            SwapJob swapJob
+    ) {
+        this.lock = lock;
+        this.repoStore = repoStore;
+        this.dbStore = dbStore;
+        this.swapStore = swapStore;
+        this.snapshotAPI = snapshotAPI;
+        this.resourceCache = resourceCache;
+        this.swapJob = swapJob;
+        postbackManager = new PostbackManager();
+        Runtime.getRuntime().addShutdownHook(new Thread(this::doShutdown));
+        repoStore.purgeNonexistentProjects(dbStore.getProjectNames());
+    }
+
+    void doShutdown() {
+        Log.info("Shutdown received.");
+        Log.info("Stopping SwapJob");
+        swapJob.stop();
+        Log.info("Waiting for projects");
+        lock.lockAll();
+        Log.info("Bye");
+    }
+
+    public void startSwapJob(int intervalMillis) {
+        swapJob.start(intervalMillis);
+    }
+
+    /* TODO: Remove these when WLBridged is moved into RepoStore */
     public void lockForProject(String projectName) {
-        mainProjectLock.lockForProject(projectName);
+        lock.lockForProject(projectName);
     }
 
     public void unlockForProject(String projectName) {
-        mainProjectLock.unlockForProject(projectName);
+        lock.unlockForProject(projectName);
     }
 
     public boolean repositoryExists(Credential oauth2, String projectName)
@@ -64,7 +138,7 @@ public class Bridge {
     ) throws IOException,
              GitUserException {
         Log.info("[{}] Fetching", repo.getProjectName());
-        dataStore.updateProjectWithName(oauth2, repo);
+        updateProjectWithName(oauth2, repo);
     }
 
     public void
@@ -74,7 +148,7 @@ public class Bridge {
                                           RawDirectory oldDirectoryContents,
                                           String hostname)
             throws SnapshotPostException, IOException, ForbiddenException {
-        mainProjectLock.lockForProject(projectName);
+        lock.lockForProject(projectName);
         CandidateSnapshot candidate = null;
         try {
             Log.info("[{}] Pushing", projectName);
@@ -85,7 +159,7 @@ public class Bridge {
                     postbackKey
             );
             candidate =
-                    dataStore.createCandidateSnapshot(
+                    createCandidateSnapshot(
                             projectName,
                             directoryContents,
                             oldDirectoryContents
@@ -115,7 +189,7 @@ public class Bridge {
                         projectName,
                         versionID
                 );
-                dataStore.approveSnapshot(versionID, candidate);
+                approveSnapshot(versionID, candidate);
                 Log.info(
                         "[{}] Approved version ID: {}",
                         projectName,
@@ -152,7 +226,7 @@ public class Bridge {
                         projectName
                 );
             }
-            mainProjectLock.unlockForProject(projectName);
+            lock.unlockForProject(projectName);
         }
     }
 
@@ -189,5 +263,101 @@ public class Bridge {
                 postbackKey
         );
     }
+
+    /* PRIVATE */
+
+    private void updateProjectWithName(
+            Credential oauth2,
+            ProjectRepo repo
+    ) throws IOException, GitUserException {
+        String projectName = repo.getProjectName();
+        Deque<Snapshot> snapshots =
+                snapshotAPI.getSnapshotsForProjectAfterVersion(
+                        oauth2,
+                        projectName,
+                        dbStore.getLatestVersionForProject(projectName)
+                );
+
+        makeCommitsFromSnapshots(repo, snapshots);
+
+        if (!snapshots.isEmpty()) {
+            dbStore.setLatestVersionForProject(
+                    projectName,
+                    snapshots.getLast().getVersionID()
+            );
+        }
+    }
+
+    private void makeCommitsFromSnapshots(ProjectRepo repo,
+                                          Collection<Snapshot> snapshots)
+            throws IOException, GitUserException {
+        String name = repo.getProjectName();
+        for (Snapshot snapshot : snapshots) {
+            Map<String, RawFile> fileTable = repo.getFiles();
+            List<RawFile> files = new LinkedList<>();
+            files.addAll(snapshot.getSrcs());
+            Map<String, byte[]> fetchedUrls = new HashMap<>();
+            for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
+                files.add(
+                        resourceCache.get(
+                                name,
+                                snapshotAttachment.getUrl(),
+                                snapshotAttachment.getPath(),
+                                fileTable,
+                                fetchedUrls
+                        )
+                );
+            }
+            Log.info(
+                    "[{}] Committing version ID: {}",
+                    name,
+                    snapshot.getVersionID()
+            );
+            Collection<String> missingFiles = repo.commitAndGetMissing(
+                    new GitDirectoryContents(
+                            files,
+                            repoStore.getRootDirectory(),
+                            name,
+                            snapshot
+                    )
+            );
+            dbStore.deleteFilesForProject(
+                    name,
+                    missingFiles.toArray(new String[missingFiles.size()])
+            );
+        }
+    }
+
+    private CandidateSnapshot createCandidateSnapshot(
+            String projectName,
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) throws IOException {
+        CandidateSnapshot candidateSnapshot = new CandidateSnapshot(
+                projectName,
+                dbStore.getLatestVersionForProject(projectName),
+                directoryContents,
+                oldDirectoryContents
+        );
+        candidateSnapshot.writeServletFiles(repoStore.getRootDirectory());
+        return candidateSnapshot;
+    }
+
+    private void approveSnapshot(
+            int versionID,
+            CandidateSnapshot candidateSnapshot
+    ) {
+        List<String> deleted = candidateSnapshot.getDeleted();
+        dbStore.setLatestVersionForProject(
+                candidateSnapshot.getProjectName(),
+                versionID
+        );
+        dbStore.deleteFilesForProject(
+                candidateSnapshot.getProjectName(),
+                deleted.toArray(new String[deleted.size()])
+        );
+    }
+
+
 
 }

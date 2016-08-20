@@ -40,7 +40,12 @@ public class WLBridgedProject {
         }
     }
 
-    private void updateRepositoryFromSnapshots(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, GitUserException {
+    private void updateRepositoryFromSnapshots(
+            Credential oauth2,
+            Repository repository
+    ) throws RepositoryNotFoundException,
+             ServiceMayNotContinueException,
+             GitUserException {
         try {
             bridgeAPI.getWritableRepositories(
                     oauth2,
