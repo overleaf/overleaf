@@ -4,7 +4,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InvalidPostbackKeyException;
 
 import javax.servlet.ServletException;
@@ -22,10 +22,10 @@ import java.util.regex.Pattern;
 public class FileHandler extends ResourceHandler {
     private static final Logger LOG = LoggerFactory.getLogger(FileHandler.class);
 
-    private final BridgeAPI writeLatexDataSource;
+    private final Bridge writeLatexDataSource;
     private final Pattern DOC_KEY_PATTERN = Pattern.compile("^/(\\w+)/.+$");
 
-    public FileHandler(BridgeAPI writeLatexDataSource) {
+    public FileHandler(Bridge writeLatexDataSource) {
         this.writeLatexDataSource = writeLatexDataSource;
     }
 

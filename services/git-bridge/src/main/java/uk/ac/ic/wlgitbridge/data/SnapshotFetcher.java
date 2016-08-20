@@ -1,16 +1,16 @@
 package uk.ac.ic.wlgitbridge.data;
 
 import com.google.api.client.auth.oauth2.Credential;
+import uk.ac.ic.wlgitbridge.data.model.Snapshot;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
-import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.GetForVersionRequest;
+import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotData;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.GetSavedVersRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.SnapshotInfo;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.data.model.Snapshot;
 
 import java.util.*;
 
@@ -19,14 +19,14 @@ import java.util.*;
  */
 public class SnapshotFetcher {
 
-    public LinkedList<Snapshot> getSnapshotsForProjectAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, SnapshotPostException, ForbiddenException {
+    public LinkedList<Snapshot> getSnapshotsForProjectAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, GitUserException {
         List<SnapshotInfo> snapshotInfos = getSnapshotInfosAfterVersion(oauth2, projectName, version);
         List<SnapshotData> snapshotDatas = getMatchingSnapshotData(oauth2, projectName, snapshotInfos);
         LinkedList<Snapshot> snapshots = combine(snapshotInfos, snapshotDatas);
         return snapshots;
     }
 
-    private List<SnapshotInfo> getSnapshotInfosAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, SnapshotPostException, ForbiddenException {
+    private List<SnapshotInfo> getSnapshotInfosAfterVersion(Credential oauth2, String projectName, int version) throws FailedConnectionException, GitUserException {
         SortedSet<SnapshotInfo> versions = new TreeSet<SnapshotInfo>();
         GetDocRequest getDoc = new GetDocRequest(oauth2, projectName);
         GetSavedVersRequest getSavedVers = new GetSavedVersRequest(oauth2, projectName);

@@ -11,8 +11,8 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,7 +32,7 @@ public class ResourceFetcherTest {
     private MockServerClient mockServerClient;
 
     @Test
-    public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException, SnapshotPostException {
+    public void fetchesFilesThatAreMissingFromUrlStoreCache() throws IOException, GitUserException {
         final String testProjectName = "123abc";
         final String testUrl = "http://localhost:" + mockServerRule.getPort() + "/123abc";
         final String oldTestPath = "testPath";

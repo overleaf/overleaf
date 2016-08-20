@@ -6,7 +6,7 @@ import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
 import uk.ac.ic.wlgitbridge.util.Util;
@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 /* */
 public class WLReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
-    public WLReceivePackFactory(BridgeAPI bridgeAPI) {
+    public WLReceivePackFactory(Bridge bridgeAPI) {
         this.bridgeAPI = bridgeAPI;
     }
 

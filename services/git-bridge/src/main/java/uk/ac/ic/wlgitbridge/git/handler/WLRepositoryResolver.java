@@ -8,6 +8,7 @@ import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
@@ -51,6 +52,8 @@ public class WLRepositoryResolver implements RepositoryResolver<HttpServletReque
             throw new ServiceMayNotContinueException(e);
         } catch (ForbiddenException e) {
             throw new ServiceNotAuthorizedException();
+        } catch (GitUserException e) {
+            throw new ServiceMayNotContinueException(e.getMessage(), e);
         }
     }
 

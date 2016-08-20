@@ -8,7 +8,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -31,7 +31,7 @@ import java.util.EnumSet;
  */
 public class GitBridgeServer {
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
     private final Server jettyServer;
 
@@ -43,7 +43,7 @@ public class GitBridgeServer {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
-        bridgeAPI = new BridgeAPI(rootGitDirectoryPath);
+        bridgeAPI = new Bridge(rootGitDirectoryPath);
         jettyServer = new Server(port);
         configureJettyServer(config);
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());

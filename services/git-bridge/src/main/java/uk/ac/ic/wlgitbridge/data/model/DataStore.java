@@ -1,10 +1,7 @@
 package uk.ac.ic.wlgitbridge.data.model;
 
 import com.google.api.client.auth.oauth2.Credential;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Repository;
+import uk.ac.ic.wlgitbridge.bridge.ProjectRepo;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.SnapshotFetcher;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
@@ -12,8 +9,7 @@ import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
 import uk.ac.ic.wlgitbridge.data.model.db.SqlitePersistentStore;
-import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
-import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -47,39 +43,37 @@ public class DataStore {
         resourceFetcher = new ResourceFetcher(persistentStore);
     }
 
-    public void updateProjectWithName(Credential oauth2,
-                                      String name,
-                                      Repository repository)
-            throws IOException,
-                   SnapshotPostException,
-                   GitAPIException,
-                   ForbiddenException {
+    public void updateProjectWithName(
+            Credential oauth2,
+            ProjectRepo repo
+    ) throws IOException, GitUserException {
+        String projectName = repo.getProjectName();
         LinkedList<Snapshot> snapshots =
                 snapshotFetcher.getSnapshotsForProjectAfterVersion(
                         oauth2,
-                        name,
-                        persistentStore.getLatestVersionForProject(name)
+                        projectName,
+                        persistentStore.getLatestVersionForProject(projectName)
                 );
 
-        makeCommitsFromSnapshots(name, repository, snapshots);
+        makeCommitsFromSnapshots(repo, snapshots);
 
         if (!snapshots.isEmpty()) {
             persistentStore.setLatestVersionForProject(
-                    name,
+                    projectName,
                     snapshots.getLast().getVersionID()
             );
         }
     }
 
-    private void makeCommitsFromSnapshots(String name,
-                                          Repository repository,
+    private void makeCommitsFromSnapshots(ProjectRepo repo,
                                           List<Snapshot> snapshots)
-            throws IOException, GitAPIException, SnapshotPostException {
+            throws IOException, GitUserException {
+        String name = repo.getProjectName();
         for (Snapshot snapshot : snapshots) {
-            Map<String, RawFile> fileTable = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable();
-            List<RawFile> files = new LinkedList<RawFile>();
+            Map<String, RawFile> fileTable = repo.getFiles();
+            List<RawFile> files = new LinkedList<>();
             files.addAll(snapshot.getSrcs());
-            Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
+            Map<String, byte[]> fetchedUrls = new HashMap<>();
             for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
                 files.add(
                         resourceFetcher.get(
@@ -96,61 +90,27 @@ public class DataStore {
                     name,
                     snapshot.getVersionID()
             );
-            commit(name,
+            Collection<String> missingFiles = repo.commitAndGetMissing(
                     new GitDirectoryContents(
                             files,
                             rootGitDirectory,
                             name,
-                            snapshot),
-                    repository);
+                            snapshot
+                    )
+            );
+            persistentStore.deleteFilesForProject(
+                    name,
+                    missingFiles.toArray(new String[missingFiles.size()])
+            );
         }
     }
 
-    private void commit(String name,
-                        GitDirectoryContents contents,
-                        Repository repository) throws IOException,
-                                                      GitAPIException {
-        Log.info("[{}] Writing commit", name);
-        contents.write();
-        Git git = new Git(repository);
-        Log.info("[{}] Getting missing files", name);
-        Set<String> missingFiles = git.status().call().getMissing();
-        for (String missing : missingFiles) {
-            Log.info("[{}] Git rm {}", name, missing);
-            git.rm().setCached(true).addFilepattern(missing).call();
-        }
-        Log.info("[{}] Calling Git add", name);
-        git.add().addFilepattern(".").call();
-        Log.info("[{}] Calling Git commit", name);
-        git.commit(
-        ).setAuthor(
-                new PersonIdent(
-                        contents.getUserName(),
-                        contents.getUserEmail(),
-                        contents.getWhen(),
-                        TimeZone.getDefault()
-                )
-        ).setMessage(
-                contents.getCommitMessage()
-        ).call();
-        persistentStore.deleteFilesForProject(
-                name,
-                missingFiles.toArray(new String[missingFiles.size()])
-        );
-        Log.info(
-                "[{}] Deleting files in directory: {}",
-                name,
-                contents.getDirectory().getAbsolutePath()
-        );
-        Util.deleteInDirectoryApartFrom(contents.getDirectory(), ".git");
-    }
-
-    public CandidateSnapshot
-    createCandidateSnapshot(String projectName,
-                            RawDirectory directoryContents,
-                            RawDirectory oldDirectoryContents)
-            throws SnapshotPostException,
-                   IOException {
+    public CandidateSnapshot createCandidateSnapshot(
+            String projectName,
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) throws SnapshotPostException,
+             IOException {
         CandidateSnapshot candidateSnapshot = new CandidateSnapshot(
                 projectName,
                 persistentStore.getLatestVersionForProject(projectName),

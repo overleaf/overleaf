@@ -1,16 +1,14 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
 import com.google.api.client.auth.oauth2.Credential;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLock;
 import uk.ac.ic.wlgitbridge.data.ShutdownHook;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.model.DataStore;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
-import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
@@ -24,13 +22,13 @@ import java.io.IOException;
 /**
  * Created by Winston on 16/11/14.
  */
-public class BridgeAPI {
+public class Bridge {
 
     private final DataStore dataStore;
     private final PostbackManager postbackManager;
     private final ProjectLock mainProjectLock;
 
-    public BridgeAPI(String rootGitDirectoryPath) {
+    public Bridge(String rootGitDirectoryPath) {
         dataStore = new DataStore(rootGitDirectoryPath);
         postbackManager = new PostbackManager();
         mainProjectLock = new ProjectLock();
@@ -46,7 +44,7 @@ public class BridgeAPI {
     }
 
     public boolean repositoryExists(Credential oauth2, String projectName)
-            throws ServiceMayNotContinueException, ForbiddenException {
+            throws ServiceMayNotContinueException, GitUserException {
         lockForProject(projectName);
         GetDocRequest getDocRequest = new GetDocRequest(oauth2, projectName);
         getDocRequest.request();
@@ -54,25 +52,19 @@ public class BridgeAPI {
             getDocRequest.getResult().getVersionID();
         } catch (InvalidProjectException e) {
             return false;
-        } catch (FailedConnectionException e) {
-            throw e;
-        } catch (SnapshotPostException e) {
-            throw new ServiceMayNotContinueException(e.getMessage());
         } finally {
             unlockForProject(projectName);
         }
         return true;
     }
 
-    public void getWritableRepositories(Credential oauth2,
-                                        String projectName,
-                                        Repository repository)
-            throws IOException,
-                   SnapshotPostException,
-                   GitAPIException,
-                   ForbiddenException {
-        Log.info("[{}] Fetching", projectName);
-        dataStore.updateProjectWithName(oauth2, projectName, repository);
+    public void getWritableRepositories(
+            Credential oauth2,
+            ProjectRepo repo
+    ) throws IOException,
+             GitUserException {
+        Log.info("[{}] Fetching", repo.getProjectName());
+        dataStore.updateProjectWithName(oauth2, repo);
     }
 
     public void

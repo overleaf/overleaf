@@ -3,14 +3,11 @@ package uk.ac.ic.wlgitbridge.data.model;
 import com.ning.http.client.AsyncCompletionHandler;
 import com.ning.http.client.HttpResponseBodyPart;
 import com.ning.http.client.Response;
-import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.data.model.db.PersistentStore;
-import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -29,7 +26,7 @@ public class ResourceFetcher {
         this.persistentStore = persistentStore;
     }
 
-    public RawFile get(String projectName, String url, String newPath, Map<String, RawFile> fileTable, Map<String, byte[]> fetchedUrls) throws IOException, SnapshotPostException {
+    public RawFile get(String projectName, String url, String newPath, Map<String, RawFile> fileTable, Map<String, byte[]> fetchedUrls) throws IOException {
         String path = persistentStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {

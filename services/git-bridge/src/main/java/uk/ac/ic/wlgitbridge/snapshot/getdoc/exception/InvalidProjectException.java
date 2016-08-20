@@ -2,8 +2,7 @@ package uk.ac.ic.wlgitbridge.snapshot.getdoc.exception;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
+import uk.ac.ic.wlgitbridge.git.exception.SnapshotAPIException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -11,13 +10,9 @@ import java.util.List;
 /**
  * Created by Winston on 08/11/14.
  */
-public class InvalidProjectException extends SnapshotPostException {
+public class InvalidProjectException extends SnapshotAPIException {
 
     private List<String> errors;
-
-    public InvalidProjectException(JsonObject json) {
-        super(json);
-    }
 
     public InvalidProjectException() {
         super();
@@ -37,7 +32,8 @@ public class InvalidProjectException extends SnapshotPostException {
     @Override
     public void fromJSON(JsonElement json) {
         errors = new LinkedList<String>();
-        JsonArray errors = json.getAsJsonObject().get("errors").getAsJsonArray();
+        JsonArray errors =
+                json.getAsJsonObject().get("errors").getAsJsonArray();
         for (JsonElement error : errors) {
             this.errors.add(error.getAsString());
         }

@@ -1,14 +1,12 @@
 package uk.ac.ic.wlgitbridge.snapshot.push.exception;
 
 import com.google.gson.JsonElement;
-import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
-
-import java.util.List;
+import uk.ac.ic.wlgitbridge.git.exception.SnapshotAPIException;
 
 /**
  * Created by Winston on 16/11/14.
  */
-public abstract class SnapshotPostException extends Exception implements JSONSource {
+public abstract class SnapshotPostException extends SnapshotAPIException {
 
     public SnapshotPostException() {
 
@@ -17,8 +15,5 @@ public abstract class SnapshotPostException extends Exception implements JSONSou
     public SnapshotPostException(JsonElement jsonElement) {
         fromJSON(jsonElement);
     }
-
-    public abstract String getMessage();
-    public abstract List<String> getDescriptionLines();
 
 }

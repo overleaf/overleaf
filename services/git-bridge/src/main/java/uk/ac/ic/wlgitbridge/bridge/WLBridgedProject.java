@@ -1,13 +1,11 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
 import com.google.api.client.auth.oauth2.Credential;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
-import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 
@@ -18,15 +16,15 @@ public class WLBridgedProject {
 
     private final Repository repository;
     private final String name;
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
-    public WLBridgedProject(Repository repository, String name, BridgeAPI bridgeAPI) {
+    public WLBridgedProject(Repository repository, String name, Bridge bridgeAPI) {
         this.repository = repository;
         this.name = name;
         this.bridgeAPI = bridgeAPI;
     }
 
-    public void buildRepository(Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+    public void buildRepository(Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, GitUserException {
         bridgeAPI.lockForProject(name);
         try {
             if (repository.getObjectDatabase().exists()) {
@@ -42,21 +40,20 @@ public class WLBridgedProject {
         }
     }
 
-    private void updateRepositoryFromSnapshots(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+    private void updateRepositoryFromSnapshots(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, GitUserException {
         try {
-            bridgeAPI.getWritableRepositories(oauth2, name, repository);
+            bridgeAPI.getWritableRepositories(
+                    oauth2,
+                    new GitProjectRepo(repository, name)
+            );
         } catch (InvalidProjectException e) {
             throw new RepositoryNotFoundException(name);
-        } catch (SnapshotPostException e) {
-            throw new ServiceMayNotContinueException(e.getDescriptionLines().get(0), e);
-        } catch (GitAPIException e) {
-            throw new ServiceMayNotContinueException(e);
         } catch (IOException e) {
             throw new ServiceMayNotContinueException(e);
         }
     }
 
-    private void buildRepositoryFromScratch(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+    private void buildRepositoryFromScratch(Credential oauth2, Repository repository) throws RepositoryNotFoundException, ServiceMayNotContinueException, GitUserException {
         if (!bridgeAPI.repositoryExists(oauth2, name)) {
             throw new RepositoryNotFoundException(name);
         }
