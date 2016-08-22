@@ -32,12 +32,6 @@ define [
 			coupon: window.couponCode
 			mmYY: ""
 
-		$scope.$watch 'data.mmYY', (newVal) ->
-			parsedDateObj = ccUtils.parseExpiry newVal
-			if parsedDateObj?
-				$scope.data.month = parsedDateObj.month
-				$scope.data.year = parsedDateObj.year
-
 		$scope.validation =
 			correctCardNumber : true
 			correctExpiry: true
@@ -81,10 +75,15 @@ define [
 		$scope.applyVatNumber = ->
 			pricing.tax({tax_code: 'digital', vat_number: $scope.data.vat_number}).done()
 
-
 		$scope.changeCurrency = (newCurrency)->
 			$scope.currencyCode = newCurrency
 			pricing.currency(newCurrency).done()
+
+		$scope.updateExpiry = () ->
+			parsedDateObj = ccUtils.parseExpiry $scope.data.mmYY
+			if parsedDateObj?
+				$scope.data.month = parsedDateObj.month
+				$scope.data.year = parsedDateObj.year
 
 		$scope.validateCardNumber = validateCardNumber = ->
 			if $scope.data.number?.length != 0
@@ -98,14 +97,26 @@ define [
 			if $scope.data.cvv?.length != 0
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
+		$scope.inputHasError = inputHasError = (formItem) ->
+			if !formItem?
+				return false
+
+			return (formItem.$touched && formItem.$invalid)
+
+		$scope.isFormValid = isFormValid = (form) ->
+			return $scope.paymentMethod == 'paypal' or 
+					(form.$valid and 
+					$scope.validation.correctCardNumber and
+					$scope.validation.correctExpiry and
+					$scope.validation.correctCvv)
+
 		$scope.updateCountry = ->
 			pricing.address({country:$scope.data.country}).done()
 
-		$scope.changePaymentMethod = (paymentMethod)->
-			if paymentMethod == "paypal"
-				$scope.usePaypal = true
-			else
-				$scope.usePaypal = false
+		$scope.setPaymentMethod = setPaymentMethod = (method) ->
+			$scope.paymentMethod = method;
+			$scope.validation.errorFields = {}
+			$scope.genericError = ""
 
 		completeSubscription = (err, recurly_token_id) ->
 			$scope.validation.errorFields = {}

@@ -21,6 +21,15 @@
 	margin-bottom: -10px;
 }
 
+.input-feedback-message {
+	display: none;
+	font-size: 0.8em;
+	
+	.has-error & {
+		display: inline-block;
+	}
+}
+
 .payment-submit {
 	padding-top: (@line-height-computed / 2);
 }

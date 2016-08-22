@@ -175,11 +175,15 @@ block content
 													strong {{price.currency.symbol}}{{price.next.total}}
 								
 								.col-md-12(sixpack-when="simple")
-									form(ng-if="planName",novalidate)
+									form(
+										ng-if="planName"
+										name="simpleCCForm"
+										novalidate
+									)
 										div.payment-method-toggle
 											a.payment-method-toggle-switch(
 												href
-												ng-click="paymentMethod = 'credit_card'"
+												ng-click="setPaymentMethod('credit_card');"
 												ng-class="paymentMethod === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
 											)
 												i.fa.fa-cc-mastercard.fa-2x
@@ -189,7 +193,7 @@ block content
 												i.fa.fa-cc-amex.fa-2x
 											a.payment-method-toggle-switch(
 												href
-												ng-click="paymentMethod = 'paypal'"
+												ng-click="setPaymentMethod('paypal');"
 												ng-class="paymentMethod === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
 											)
 												i.fa.fa-cc-paypal.fa-2x
@@ -200,40 +204,68 @@ block content
 										div(ng-if="paymentMethod === 'credit_card'")
 											.row
 												.col-xs-6
-													.form-group(ng-class="validation.errorFields.first_name ? 'has-error' : ''")
+													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
 														label(for="first-name") #{translate('first_name')}
-														input#first-name.form-control(type='text', value='', maxlength='255', , onkeyup='', data-recurly="first_name", ng-model="data.first_name", required)
+														input#first-name.form-control(
+															type="text"
+															maxlength='255'
+															data-recurly="first_name"
+															name="firstName"
+															ng-model="data.first_name"
+															required
+														)
+														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
 												.col-xs-6
-													.form-group(for="last-name",ng-class="validation.errorFields.last_name ? 'has-error' : ''")
+													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-error' : ''")
 														label(for="last-name") #{translate('last_name')}
-														input#last-name.form-control(type='text', value='', maxlength='255',  onkeyup='', data-recurly="last_name", ng-model="data.last_name", required)
+														input#last-name.form-control(
+															type="text"
+															maxlength='255'
+															data-recurly="last_name"
+															name="lastName"
+															ng-model="data.last_name"
+															required
+														)
+														span.input-feedback-message {{ simpleCCForm.lastName.$error.required ? 'This field is required' : '' }}
 
-											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number ? 'has-error' : ''")
+											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number || inputHasError(simpleCCForm.ccNumber) ? 'has-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
 												input#card-no.form-control(
 													type="text"
 													ng-model="data.number"
-													ng-blur="validateCardNumber()"
-													cc-format-card-number)
+													name="ccNumber"
+													required
+													ng-change="validateCardNumber()"
+													cc-format-card-number
+												)
+												span.input-feedback-message {{ simpleCCForm.ccNumber.$error.required ? 'This field is required' : 'Please re-check the card number' }}
+
 											.row
 												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry ? 'has-error' : ''")
+													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
 														label #{translate("expiry")}
 														input.form-control(
 															type="text"
 															ng-model="data.mmYY"
+															name="expiry"
+															required
 															placeholder="MM / YY"
-															ng-blur="validateExpiry()"
+															ng-change="updateExpiry(); validateExpiry()"
 															cc-format-expiry
 														)
+														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
+
 												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv ? 'has-error' : ''")
+													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv || inputHasError(simpleCCForm.cvv) ? 'has-error' : ''")
 														label #{translate("security_code")}
 														input.form-control(
 															type="text"
 															ng-model="data.cvv"
-															ng-blur="validateCvv()"
-															cc-format-sec-code)
+															ng-change="validateCvv()"
+															name="cvv"
+															required
+															cc-format-sec-code
+														)
 														.form-control-feedback
 															a.form-helper(
 																href
@@ -242,22 +274,26 @@ block content
 																tooltip-trigger="mouseenter"
 																tooltip-append-to-body="true"
 															) ?
-											.form-group(ng-class="validation.errorFields.country ? 'has-error' : ''")
+														span.input-feedback-message {{ simpleCCForm.cvv.$error.required ? 'This field is required' : 'Please re-check the security code' }}
+
+											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
 												label(for="country") #{translate('country')}
 												select#country.form-control(
 													data-recurly="country"
 													ng-model="data.country"
+													name="country"
 													ng-change="updateCountry()"
 													required
 												)
 													mixin countries_options()
+												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 										
 										div
 											if (showVatField)
 												.form-group
 													label(for="vat-no") #{translate('vat_number')}
 													input#vat-no.form-control(
-														type='text'
+														type="text"
 														ng-blur="applyVatNumber()"
 														ng-model="data.vat_number"
 													)
@@ -265,7 +301,7 @@ block content
 												.form-group
 													label(for="coupon-code") #{translate('coupon_code')}
 													input#coupon-code.form-control(
-														type='text'
+														type="text"
 														ng-blur="applyCoupon()"
 														ng-model="data.coupon"
 													)
@@ -283,7 +319,7 @@ block content
 											div.payment-submit
 												button.btn.btn-success.btn-block(
 													ng-click="submit()"
-													ng-disabled="processing"
+													ng-disabled="processing || !isFormValid(simpleCCForm);"
 													sixpack-convert="payment-left-menu-bottom"
 												) {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 
