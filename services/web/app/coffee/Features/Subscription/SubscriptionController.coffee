@@ -167,12 +167,13 @@ module.exports = SubscriptionController =
 				res.redirect "/user/subscription"
 
 	updateSubscription: (req, res, next)->
+		_origin = req?.query?.origin || null
 		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return next(error) if error?
 			planCode = req.body.plan_code
 			if !planCode?
 				err = new Error('plan_code is not defined')
-				logger.err {user_id: user._id, err, planCode}, "[Subscription] error in updateSubscription form"
+				logger.err {user_id: user._id, err, planCode, origin: _origin, body: req.body}, "[Subscription] error in updateSubscription form"
 				return next(err)
 			logger.log planCode: planCode, user_id:user._id, "updating subscription"
 			SubscriptionHandler.updateSubscription user, planCode, null, (err)->
