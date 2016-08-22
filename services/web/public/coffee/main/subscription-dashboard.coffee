@@ -62,8 +62,7 @@ define [
 
 			$scope.inflight = true
 
-
-			$http.post(SUBSCRIPTION_URL, body)
+			$http.post("#{SUBSCRIPTION_URL}?origin=confirmChangePlan", body)
 				.success ->
 					location.reload()
 				.error ->
@@ -124,7 +123,7 @@ define [
 				plan_code: 'student'
 				_csrf : window.csrfToken
 			$scope.inflight = true
-			$http.post(SUBSCRIPTION_URL, body)
+			$http.post("#{SUBSCRIPTION_URL}?origin=downgradeToStudent", body)
 				.success ->
 					location.reload()
 				.error ->
