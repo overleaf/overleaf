@@ -47,6 +47,7 @@
 			}
 			.message-wrapper {
 				margin-left: 50px + @line-height-computed/2;
+
 				.name {
 					font-size: 12px;
 					color: @gray-light;
@@ -54,12 +55,17 @@
 					min-height: 16px;
 				}
 				.message {
-					padding: @line-height-computed / 2;
 					border-left: 3px solid transparent;
-					position: relative;
 					font-size: 14px;
 					box-shadow: -1px 2px 3px #ddd;
 					border-raduis: @border-radius-base;
+					position: relative;
+					
+					.message-content {
+						padding: @line-height-computed / 2;
+						overflow-x: scroll;
+					}
+
 					.arrow {
 						right: 100%;
 						top: @line-height-computed / 4;
