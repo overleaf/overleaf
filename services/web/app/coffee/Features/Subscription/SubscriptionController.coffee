@@ -97,7 +97,7 @@ module.exports = SubscriptionController =
 							groupSubscriptions: groupSubscriptions
 							subscriptionTabActive: true
 							user:user
-
+							saved_billing_details: req.query.saved_billing_details?
 
 	userCustomSubscriptionPage: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
@@ -131,9 +131,12 @@ module.exports = SubscriptionController =
 								currency: "USD"
 								subdomain: Settings.apis.recurly.subdomain
 							signature  : signature
-							successURL : "#{Settings.siteUrl}/user/subscription/update"
+							successURL : "#{Settings.siteUrl}/user/subscription/billing-details/update"
 							user       :
 								id : user._id
+	
+	updateBillingDetails: (req, res, next) ->
+		res.redirect "/user/subscription?saved_billing_details=true"
 
 	createSubscription: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->

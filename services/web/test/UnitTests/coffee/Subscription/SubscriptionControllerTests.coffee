@@ -109,7 +109,7 @@ describe "SubscriptionController sanboxed", ->
 
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
+				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/billing-details/update"
 				@res.renderedVariables.user.id.should.equal @user._id
 
 		describe "with a user without subscription", ->
