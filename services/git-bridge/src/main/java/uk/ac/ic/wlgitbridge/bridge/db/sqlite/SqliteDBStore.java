@@ -2,10 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 
 import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetLatestVersionForProjectSQLQuery;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetOldestProjectName;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetPathForURLInProjectSQLQuery;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetProjectNamesSQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.AddURLIndexSQLUpdate;
@@ -32,6 +29,11 @@ public class SqliteDBStore implements DBStore {
         } catch (Throwable t) {
             throw new DBInitException(t);
         }
+    }
+
+    @Override
+    public int getNumProjects() {
+        return query(new GetNumProjects());
     }
 
     @Override

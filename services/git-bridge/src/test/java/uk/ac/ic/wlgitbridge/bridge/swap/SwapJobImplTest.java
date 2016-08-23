@@ -31,6 +31,7 @@ public class SwapJobImplTest {
         dbStore = mock(DBStore.class);
         swapStore = mock(SwapStore.class);
         swapJob = new SwapJobImpl(
+                SwapJobConfig.DEFAULT,
                 lock,
                 repoStore,
                 dbStore,

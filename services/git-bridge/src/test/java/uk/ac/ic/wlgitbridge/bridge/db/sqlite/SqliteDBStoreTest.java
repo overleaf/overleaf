@@ -27,6 +27,17 @@ public class SqliteDBStoreTest {
     }
 
     @Test
+    public void testGetNumProjects() {
+        assertEquals(0, dbStore.getNumProjects());
+        dbStore.setLatestVersionForProject("asdf", 1);
+        assertEquals(1, dbStore.getNumProjects());
+        dbStore.setLatestVersionForProject("asdf1", 2);
+        assertEquals(2, dbStore.getNumProjects());
+        dbStore.setLatestVersionForProject("asdf1", 3);
+        assertEquals(2, dbStore.getNumProjects());
+    }
+
+    @Test
     public void swapTableStartsOutEmpty() {
         assertNull(dbStore.getOldestUnswappedProject());
     }

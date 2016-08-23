@@ -9,8 +9,8 @@ public class CreateProjectsTableSQLUpdate implements SQLUpdate {
 
     private static final String CREATE_PROJECTS_TABLE =
             "CREATE TABLE IF NOT EXISTS `projects` (\n" +
-            "  `name` varchar(10) NOT NULL DEFAULT '',\n" +
-            "  `version_id` int(11) NOT NULL DEFAULT 0,\n" +
+            "  `name` VARCHAR NOT NULL DEFAULT '',\n" +
+            "  `version_id` INT NOT NULL DEFAULT 0,\n" +
             "  PRIMARY KEY (`name`)\n" +
             ")";
     @Override

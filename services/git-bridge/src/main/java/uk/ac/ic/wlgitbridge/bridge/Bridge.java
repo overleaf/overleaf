@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotAPI;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
 import uk.ac.ic.wlgitbridge.bridge.swap.SwapJob;
+import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobConfig;
 import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
@@ -43,18 +44,19 @@ public class Bridge {
     private final RepoStore repoStore;
     private final DBStore dbStore;
     private final SwapStore swapStore;
+    private final SwapJob swapJob;
 
     private final SnapshotAPI snapshotAPI;
     private final ResourceCache resourceCache;
 
-    private final SwapJob swapJob;
 
     private final PostbackManager postbackManager;
 
     public static Bridge make(
             RepoStore repoStore,
             DBStore dbStore,
-            SwapStore swapStore
+            SwapStore swapStore,
+            SwapJobConfig swapJobConfig
     ) {
         ProjectLock lock = new ProjectLockImpl((int threads) ->
                 Log.info("Waiting for " + threads + " projects...")
@@ -64,14 +66,15 @@ public class Bridge {
                 repoStore,
                 dbStore,
                 swapStore,
-                new NetSnapshotAPI(),
-                new UrlResourceCache(dbStore),
                 new SwapJobImpl(
+                        swapJobConfig,
                         lock,
                         repoStore,
                         dbStore,
                         swapStore
-                )
+                ),
+                new NetSnapshotAPI(),
+                new UrlResourceCache(dbStore)
         );
     }
 
@@ -80,9 +83,9 @@ public class Bridge {
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore,
+            SwapJob swapJob,
             SnapshotAPI snapshotAPI,
-            ResourceCache resourceCache,
-            SwapJob swapJob
+            ResourceCache resourceCache
     ) {
         this.lock = lock;
         this.repoStore = repoStore;

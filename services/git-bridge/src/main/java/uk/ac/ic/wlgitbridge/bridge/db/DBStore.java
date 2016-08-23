@@ -8,6 +8,8 @@ import java.util.List;
  */
 public interface DBStore {
 
+    int getNumProjects();
+
     List<String> getProjectNames();
 
     void setLatestVersionForProject(String project, int versionID);

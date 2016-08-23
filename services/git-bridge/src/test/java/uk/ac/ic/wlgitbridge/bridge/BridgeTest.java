@@ -44,9 +44,9 @@ public class BridgeTest {
                 repoStore,
                 dbStore,
                 swapStore,
+                swapJob,
                 snapshotAPI,
-                resourceCache,
-                swapJob
+                resourceCache
         );
     }
 

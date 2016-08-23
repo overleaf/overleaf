@@ -14,6 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SwapJobImpl implements SwapJob {
 
+    private final int minProjects;
+    private final long lowGiB;
+    private final long highGiB;
+
     private final ProjectLock lock;
     private final RepoStore repoStore;
     private final SwapStore swapStore;
@@ -24,12 +28,15 @@ public class SwapJobImpl implements SwapJob {
     final AtomicInteger swaps;
 
     public SwapJobImpl(
+            SwapJobConfig cfg,
             ProjectLock lock,
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore
     ) {
-
+        minProjects = cfg.getMinProjects();
+        lowGiB = cfg.getLowGiB();
+        highGiB = cfg.getHighGiB();
         this.lock = lock;
         this.repoStore = repoStore;
         this.swapStore = swapStore;
@@ -54,7 +61,13 @@ public class SwapJobImpl implements SwapJob {
 
     private void doSwap() {
         Log.info("Running {}th swap", swaps.getAndIncrement());
+        while (repoStore.totalSize() > lowGiB) {
+            doEvict();
+        }
+    }
 
+    private void doEvict() {
+        dbStore.getOldestUnswappedProject();
     }
 
 }
