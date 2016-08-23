@@ -29,13 +29,15 @@ module.exports = RecurlyWrapper =
 			RecurlyWrapper.apiRequest({
 				url:    "accounts/#{user._id}"
 				method: "GET"
+				expect404: true
 			}, (error, response, responseBody) ->
 				if error
-					if response.statusCode == 404  # actually not an error in this case, just no existing account
-						cache.userExists = false
-						return next(null, cache)
 					logger.error {error, user_id: user._id, recurly_token_id}, "error response from recurly while checking account"
 					return next(error)
+				if response.statusCode == 404  # actually not an error in this case, just no existing account
+					logger.log {user_id: user._id, recurly_token_id}, "user does not currently exist in recurly, proceed"
+					cache.userExists = false
+					return next(null, cache)
 				logger.log {user_id: user._id, recurly_token_id}, "user appears to exist in recurly"
 				RecurlyWrapper._parseAccountXml responseBody, (err, account) ->
 					if err
@@ -236,10 +238,14 @@ module.exports = RecurlyWrapper =
 			"Authorization" : "Basic " + new Buffer(Settings.apis.recurly.apiKey).toString("base64")
 			"Accept"        : "application/xml"
 			"Content-Type"  : "application/xml; charset=utf-8"
+		expect404 = options.expect404
+		delete options.expect404
 		request options, (error, response, body) ->
-			unless error? or response.statusCode == 200 or response.statusCode == 201 or response.statusCode == 204
+			unless error? or response.statusCode == 200 or response.statusCode == 201 or response.statusCode == 204 or (response.statusCode == 404 and expect404)
 				logger.err err:error, body:body, options:options, statusCode:response?.statusCode, "error returned from recurly"
 				error = "Recurly API returned with status code: #{response.statusCode}"
+			if response.statusCode == 404 and expect404
+				logger.log {url: options.url, method: options.method}, "got 404 response from recurly, expected as valid response"
 			callback(error, response, body)
 
 	sign : (parameters, callback) ->
