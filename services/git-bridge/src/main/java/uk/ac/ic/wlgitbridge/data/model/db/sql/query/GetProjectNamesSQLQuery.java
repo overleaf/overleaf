@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.data.model.db.sql.query;
 
-import uk.ac.ic.wlgitbridge.data.model.db.sql.SQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLQuery;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.data.model.db.sql.update.create;
 
-import uk.ac.ic.wlgitbridge.data.model.db.sql.SQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

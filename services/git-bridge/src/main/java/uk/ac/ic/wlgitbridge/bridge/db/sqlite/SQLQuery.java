@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db.sql;
+package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
