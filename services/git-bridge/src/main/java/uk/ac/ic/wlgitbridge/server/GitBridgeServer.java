@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import java.io.File;
 import java.io.InputStream;
 import java.net.BindException;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 /**
@@ -50,7 +51,11 @@ public class GitBridgeServer {
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
         RepoStore repoStore = new FSRepoStore(rootGitDirectoryPath);
-        DBStore dbStore = new SqliteDBStore(repoStore.getRootDirectory());
+        DBStore dbStore = new SqliteDBStore(
+                Paths.get(
+                        repoStore.getRootDirectory().getAbsolutePath()
+                ).resolve(".wlgb").resolve("wlgb.db").toFile()
+        );
         SwapStore swapStore = new SwapStore() {
             @Override
             public void upload(String projectName, InputStream uploadStream, long contentLength) {

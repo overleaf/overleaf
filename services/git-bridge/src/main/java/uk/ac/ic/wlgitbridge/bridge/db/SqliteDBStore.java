@@ -16,9 +16,9 @@ public class SqliteDBStore implements DBStore {
 
     private final SQLiteWLDatabase database;
 
-    public SqliteDBStore(File rootDirectory) {
+    public SqliteDBStore(File dbFile) {
         try {
-            database = new SQLiteWLDatabase(rootDirectory);
+            database = new SQLiteWLDatabase(dbFile);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
@@ -87,12 +87,20 @@ public class SqliteDBStore implements DBStore {
 
     @Override
     public String getOldestUnswappedProject() {
-        throw new UnsupportedOperationException();
+        try {
+            return database.getOldestUnswappedProject();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void setLastAccessedTime(String projectName, Timestamp time) {
-        throw new UnsupportedOperationException();
+        try {
+            database.setLastAccessedTime(projectName, time);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
