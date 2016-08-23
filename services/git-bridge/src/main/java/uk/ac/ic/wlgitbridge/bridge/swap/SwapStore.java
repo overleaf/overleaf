@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.swap;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -7,7 +8,11 @@ import java.io.InputStream;
  */
 public interface SwapStore {
 
-    void upload(String projectName, InputStream uploadStream, long contentLength);
+    void upload(
+            String projectName,
+            InputStream uploadStream,
+            long contentLength
+    ) throws IOException;
 
     InputStream openDownloadStream(String projectName);
 

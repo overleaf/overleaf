@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.bridge.swap;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.time.Duration;
 import java.util.Timer;
@@ -52,7 +53,8 @@ public class SwapJobImpl implements SwapJob {
     }
 
     private void doSwap() {
-        swaps.incrementAndGet();
+        Log.info("Running {}th swap", swaps.getAndIncrement());
+
     }
 
 }
