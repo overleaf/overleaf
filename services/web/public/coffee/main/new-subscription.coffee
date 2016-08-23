@@ -86,14 +86,17 @@ define [
 				$scope.data.year = parsedDateObj.year
 
 		$scope.validateCardNumber = validateCardNumber = ->
+			$scope.validation.errorFields = {}
 			if $scope.data.number?.length != 0
 				$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
 
 		$scope.validateExpiry = validateExpiry = ->
+			$scope.validation.errorFields = {}
 			if $scope.data.month?.length != 0 and $scope.data.year?.length != 0
 				$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
 
 		$scope.validateCvv = validateCvv = ->
+			$scope.validation.errorFields = {}
 			if $scope.data.cvv?.length != 0
 				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
