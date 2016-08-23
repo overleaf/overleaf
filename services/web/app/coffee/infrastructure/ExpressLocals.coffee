@@ -64,8 +64,7 @@ module.exports = (app, webRouter, apiRouter)->
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked
 
 		if cdnBlocked and !req.session.cdnBlocked?
-			ip = req.ip || req.socket?.socket?.remoteAddress || req.socket?.remoteAddress
-			logger.log user_id:req?.session?.user?._id, ip:ip, "cdnBlocked for user, not using it"
+			logger.log user_id:req?.session?.user?._id, ip:req?.ip, "cdnBlocked for user, not using it and turning it off for future requets"
 			req.session.cdnBlocked = true
 
 		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
