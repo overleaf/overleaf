@@ -155,6 +155,7 @@ define -> [
 	,
 		ruleId: "hint_mismatched_environment2"
 		types: ['environment']
+		cascadesFrom: ['environment']
 		regexToMatch: /Error: `\\end\{([^\}]+)\}' expected but found `\\end\{([^\}]+)\}'.*/
 		newMessage: "Error: environments do not match: \\begin{$1} ... \\end{$2}"
 		humanReadableHint: """
@@ -163,6 +164,7 @@ define -> [
 	,
 		ruleId: "hint_mismatched_environment3"
 		types: ['environment']
+		cascadesFrom: ['environment']
 		regexToMatch: /Warning: No matching \\end found for `\\begin\{([^\}]+)\}'.*/
 		newMessage: "Warning: No matching \\end found for \\begin{$1}"
 		humanReadableHint: """
