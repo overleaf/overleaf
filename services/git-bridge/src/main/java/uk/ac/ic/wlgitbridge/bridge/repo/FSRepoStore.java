@@ -60,7 +60,7 @@ public class FSRepoStore implements RepoStore {
     @Override
     public InputStream bzip2Project(String projectName) throws IOException {
         Preconditions.checkArgument(Project.isValidProjectName(projectName));
-        return Tar.tar(getDotGitForProject(projectName));
+        return Tar.bz2.zip(getDotGitForProject(projectName));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class FSRepoStore implements RepoStore {
     ) throws IOException {
         Preconditions.checkArgument(Project.isValidProjectName(projectName));
         Preconditions.checkState(getDirForProject(projectName).mkdirs());
-        Tar.untar(dataStream, getDirForProject(projectName));
+        Tar.bz2.unzip(dataStream, getDirForProject(projectName));
     }
 
     private File getDirForProject(String projectName) {

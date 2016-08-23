@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class TarTest {
 
     private File testDir;
+    private File tmpDir;
 
     @Before
     public void setup() throws IOException {
@@ -29,17 +30,23 @@ public class TarTest {
                 "src/test/resources/uk/ac/ic/wlgitbridge/util/TarTest/testdir"
         );
         FileUtils.copyDirectory(resdir.toFile(), testDir);
+        tmpDir = tmpFolder.newFolder();
     }
 
     @Test
     public void tarAndUntarProducesTheSameResult() throws IOException {
         InputStream tar = Tar.tar(testDir);
-        TemporaryFolder tmpF = new TemporaryFolder();
-        tmpF.create();
-        File parentDir = tmpF.newFolder();
-        Tar.untar(tar, parentDir);
-        File untarred = new File(parentDir, "testdir");
+        Tar.untar(tar, tmpDir);
+        File untarred = new File(tmpDir, "testdir");
         assertTrue(Files.contentsAreEqual(testDir, untarred));
+    }
+
+    @Test
+    public void tarbz2AndUntarbz2ProducesTheSameResult() throws IOException {
+        InputStream tarbz2 = Tar.bz2.zip(testDir);
+        Tar.bz2.unzip(tarbz2, tmpDir);
+        File unzipped = new File(tmpDir, "testdir");
+        assertTrue(Files.contentsAreEqual(testDir, unzipped));
     }
 
 }
