@@ -24,29 +24,13 @@ public class SqliteDBStore implements DBStore {
 
     private final Connection connection;
 
-    public SqliteDBStore(
-            File dbFile
-    ) {
-        File parentDir = dbFile.getParentFile();
-        if (!parentDir.exists() && !parentDir.mkdirs()) {
-            throw new DBInitException(
-                    parentDir.getAbsolutePath() + " directory didn't exist, " +
-                            "and unable to create. Check your permissions."
-            );
-        }
+    public SqliteDBStore(File dbFile) {
         try {
-            Class.forName("org.sqlite.JDBC");
-        } catch (ClassNotFoundException e) {
-            throw new DBInitException(e);
+            connection = openConnectionTo(dbFile);
+            createTables();
+        } catch (Throwable t) {
+            throw new DBInitException(t);
         }
-        try {
-            connection = DriverManager.getConnection(
-                    "jdbc:sqlite:" + dbFile.getAbsolutePath()
-            );
-        } catch (SQLException e) {
-            throw new DBInitException("Unable to connect to DB", e);
-        }
-        createTables();
     }
 
     @Override
@@ -105,6 +89,28 @@ public class SqliteDBStore implements DBStore {
             Timestamp time
     ) {
         throw new UnsupportedOperationException();
+    }
+
+    private Connection openConnectionTo(File dbFile) {
+        File parentDir = dbFile.getParentFile();
+        if (!parentDir.exists() && !parentDir.mkdirs()) {
+            throw new DBInitException(
+                    parentDir.getAbsolutePath() + " directory didn't exist, " +
+                            "and unable to create. Check your permissions."
+            );
+        }
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new DBInitException(e);
+        }
+        try {
+            return DriverManager.getConnection(
+                    "jdbc:sqlite:" + dbFile.getAbsolutePath()
+            );
+        } catch (SQLException e) {
+            throw new DBInitException("Unable to connect to DB", e);
+        }
     }
 
     private void createTables() {
