@@ -30,6 +30,7 @@ describe "LimitationsManager", ->
 			'./SubscriptionLocator':@SubscriptionLocator
 			'settings-sharelatex' : @Settings = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
+			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			'logger-sharelatex':log:->
 
 	describe "allowedNumberOfCollaboratorsInProject", ->
@@ -56,6 +57,7 @@ describe "LimitationsManager", ->
 	describe "canAddXCollaborators", ->
 		beforeEach ->
 			@CollaboratorsHandler.getCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+			@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
 			sinon.stub @LimitationsManager,
 					   "allowedNumberOfCollaboratorsInProject",
 					   (project_id, callback) => callback(null, @allowed_number)
@@ -65,6 +67,17 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 1
 				@allowed_number = 2
+				@invite_count = 0
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
+
+			it "should return true", ->
+				@callback.calledWith(null, true).should.equal true
+
+		describe "when the project has fewer collaborators and invites than allowed", ->
+			beforeEach ->
+				@current_number = 1
+				@allowed_number = 4
+				@invite_count = 1
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return true", ->
@@ -74,6 +87,7 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 1
 				@allowed_number = 2
+				@invite_count = 0
 				@LimitationsManager.canAddXCollaborators(@project_id, 2, @callback)
 
 			it "should return false", ->
@@ -83,6 +97,7 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 3
 				@allowed_number = 2
+				@invite_count = 0
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return false", ->
@@ -92,11 +107,31 @@ describe "LimitationsManager", ->
 			beforeEach ->
 				@current_number = 100
 				@allowed_number = -1
+				@invite_count = 0
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return true", ->
 				@callback.calledWith(null, true).should.equal true
 
+		describe 'when the project has more invites than allowed', ->
+			beforeEach ->
+				@current_number = 0
+				@allowed_number = 2
+				@invite_count = 2
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
+
+			it "should return false", ->
+				@callback.calledWith(null, false).should.equal true
+
+		describe 'when the project has more invites and collaborators than allowed', ->
+			beforeEach ->
+				@current_number = 1
+				@allowed_number = 2
+				@invite_count = 1
+				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
+
+			it "should return false", ->
+				@callback.calledWith(null, false).should.equal true
 
 	describe "userHasSubscription", ->
 		beforeEach ->
@@ -193,7 +228,7 @@ describe "LimitationsManager", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal false
 				done()
-				
+
 	describe "hasGroupMembersLimitReached", ->
 
 		beforeEach ->
@@ -214,7 +249,7 @@ describe "LimitationsManager", ->
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal false
 				done()
-				
+
 		it "should return true if the limit has been exceded", (done)->
 			@subscription.membersLimit = 0
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)

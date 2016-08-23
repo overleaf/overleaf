@@ -9,6 +9,7 @@ AuthorizationManager = require("../Authorization/AuthorizationManager")
 ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 Metrics = require('../../infrastructure/Metrics')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+CollaboratorsInviteHandler = require("../Collaborators/CollaboratorsInviteHandler")
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 
 module.exports = EditorHttpController =
@@ -30,6 +31,7 @@ module.exports = EditorHttpController =
 				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
 
 	_buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
+		logger.log {project_id, user_id}, "building the joinProject view"
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			return callback(new Error("not found")) if !project?
@@ -40,10 +42,13 @@ module.exports = EditorHttpController =
 					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
 						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
-							callback null, null, false
-						else
+							logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"
+							return callback null, null, false
+						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
+							return callback(error) if error?
+							logger.log {project_id, user_id, memberCount: members.length, inviteCount: invites.length, privilegeLevel}, "returning project model view"
 							callback(null,
-								ProjectEditorHandler.buildProjectModelView(project, members),
+								ProjectEditorHandler.buildProjectModelView(project, members, invites),
 								privilegeLevel
 							)
 
@@ -135,5 +140,3 @@ module.exports = EditorHttpController =
 		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", (error) ->
 			return next(error) if error?
 			res.sendStatus 204
-
-

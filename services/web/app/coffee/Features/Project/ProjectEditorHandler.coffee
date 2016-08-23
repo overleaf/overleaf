@@ -1,7 +1,7 @@
 _ = require("underscore")
 
 module.exports = ProjectEditorHandler =
-	buildProjectModelView: (project, members) ->
+	buildProjectModelView: (project, members, invites) ->
 		result =
 			_id        : project._id
 			name       : project.name
@@ -15,17 +15,16 @@ module.exports = ProjectEditorHandler =
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
 			members:     []
-		
-		owner = null
-		for member in members
-			if member.privilegeLevel == "owner"
-				owner = member.user
-			else
-				result.members.push @buildUserModelView member.user, member.privilegeLevel
-		if owner?
-			result.owner = @buildUserModelView owner, "owner"
+			invites:     invites
 
-		result.features = _.defaults(owner?.features or {}, {
+		if !result.invites?
+			result.invites = []
+
+		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
+		result.owner = owner
+		result.members = members
+
+		result.features = _.defaults(ownerFeatures or {}, {
 			collaborators: -1 # Infinite
 			versioning: false
 			dropbox:false
@@ -36,6 +35,18 @@ module.exports = ProjectEditorHandler =
 		})
 
 		return result
+
+	buildOwnerAndMembersViews: (members) ->
+		owner = null
+		ownerFeatures = null
+		filteredMembers = []
+		for member in members
+			if member.privilegeLevel == "owner"
+				ownerFeatures = member.user.features
+				owner = @buildUserModelView member.user, "owner"
+			else
+				filteredMembers.push @buildUserModelView member.user, member.privilegeLevel
+		{owner: owner, ownerFeatures: ownerFeatures, members: filteredMembers}
 
 	buildUserModelView: (user, privileges) ->
 		_id        : user._id

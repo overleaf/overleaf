@@ -13,7 +13,7 @@ class User
 		@request = request.defaults({
 			jar: @jar
 		})
-	
+
 	login: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
@@ -28,6 +28,8 @@ class User
 					return callback(error) if error?
 					@id = user?._id?.toString()
 					@_id = user?._id?.toString()
+					@first_name = user?.first_name
+					@referal_id = user?.referal_id
 					callback()
 
 	logout: (callback = (error) ->) ->
@@ -59,7 +61,24 @@ class User
 			if !body?.project_id?
 				console.error "SOMETHING WENT WRONG CREATING PROJECT", response.statusCode, response.headers["location"], body
 			callback(null, body.project_id)
-	
+
+	deleteProject: (project_id, callback=(error)) ->
+		@request.delete {
+			url: "/project/#{project_id}"
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback(null)
+
+	openProject: (project_id, callback=(error)) ->
+		@request.get {
+			url: "/project/#{project_id}"
+		}, (error, response, body) ->
+			return callback(error) if error?
+			if response.statusCode != 200
+				err = new Error("Non-success response when opening project: #{response.statusCode}")
+				return callback(err)
+			callback(null)
+
 	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
 		@request.post {
 			url: "/project/#{project_id}/users",
@@ -67,7 +86,7 @@ class User
 		}, (error, response, body) ->
 			return callback(error) if error?
 			callback(null, body.user)
-	
+
 	makePublic: (project_id, level, callback = (error) ->) ->
 		@request.post {
 			url: "/project/#{project_id}/settings/admin",
