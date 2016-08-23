@@ -26,6 +26,8 @@ describe "ShareJsUpdateManager", ->
 			@model =
 				applyOp: sinon.stub().callsArg(2)
 				getSnapshot: sinon.stub()
+				db:
+					appliedOps: {}
 			@ShareJsUpdateManager.getNewShareJsModel = sinon.stub().returns(@model)
 			@ShareJsUpdateManager._listenForOps = sinon.stub()
 			@ShareJsUpdateManager.removeDocFromCache = sinon.stub().callsArg(1)
@@ -38,8 +40,9 @@ describe "ShareJsUpdateManager", ->
 		describe "successfully", ->
 			beforeEach (done) ->
 				@model.getSnapshot.callsArgWith(1, null, {snapshot: @updatedDocLines.join("\n"), v: @version})
-				@ShareJsUpdateManager.applyUpdates @project_id, @doc_id, @updates, (err, docLines, version) =>
-					@callback(err, docLines, version)
+				@model.db.appliedOps["#{@project_id}:#{@doc_id}"] = @appliedOps = ["mock-ops"]
+				@ShareJsUpdateManager.applyUpdates @project_id, @doc_id, @updates, (err, docLines, version, appliedOps) =>
+					@callback(err, docLines, version, appliedOps)
 					done()
 
 			it "should create a new ShareJs model", ->
@@ -61,8 +64,8 @@ describe "ShareJsUpdateManager", ->
 					.calledWith("#{@project_id}:#{@doc_id}")
 					.should.equal true
 
-			it "should return the updated doc lines", ->
-				@callback.calledWith(null, @updatedDocLines, @version).should.equal true
+			it "should return the updated doc lines, version and ops", ->
+				@callback.calledWith(null, @updatedDocLines, @version, @appliedOps).should.equal true
 
 		describe "when applyOp fails", ->
 			beforeEach (done) ->

@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+expect = chai.expect
 should = chai.should()
 modulePath = "../../../../app/js/ShareJsDB.js"
 SandboxedModule = require('sandboxed-module')
@@ -18,33 +19,20 @@ describe "ShareJsDB.writeOps", ->
 			"./DocOpsManager": @DocOpsManager = {}
 			"./DocumentManager": {}
 			"logger-sharelatex": @logger = {error: sinon.stub()}
+		@db = new @ShareJsDB()
 
 	describe "writing an op", ->
 		beforeEach ->
 			@version = 42
 			@opData.v = @version
-			@DocOpsManager.pushDocOp = sinon.stub().callsArgWith(3, null, @version+1)
-			@ShareJsDB.writeOp @doc_key, @opData, @callback
+			@db.writeOp @doc_key, @opData, @callback
 
-		it "should write the op to redis", ->
-			@DocOpsManager.pushDocOp
-				.calledWith(@project_id, @doc_id, @opData)
-				.should.equal true
+		it "should write into appliedOps", ->
+			expect(@db.appliedOps[@doc_key]).to.deep.equal [@opData]
 
 		it "should call the callback without an error", ->
 			@callback.called.should.equal true
 			(@callback.args[0][0]?).should.equal false
-
-	describe "writing an op at the wrong version", ->
-		beforeEach ->
-			@version = 42
-			@mismatch = 5
-			@opData.v = @version
-			@DocOpsManager.pushDocOp = sinon.stub().callsArgWith(3, null, @version + @mismatch)
-			@ShareJsDB.writeOp @doc_key, @opData, @callback
-
-		it "should call the callback with an error", ->
-			@callback.calledWith(new Error()).should.equal true
 
 
 	

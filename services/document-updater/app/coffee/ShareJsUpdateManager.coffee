@@ -15,7 +15,11 @@ ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
 
 module.exports = ShareJsUpdateManager =
-	getNewShareJsModel: () -> new ShareJsModel(ShareJsDB, maxDocLength: Settings.max_doc_length)
+	getNewShareJsModel: () ->
+		db = new ShareJsDB()
+		model = new ShareJsModel(db, maxDocLength: Settings.max_doc_length)
+		model.db = db
+		return model
 
 	applyUpdates: (project_id, doc_id, updates, callback = (error, updatedDocLines) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, updates: updates, "applying sharejs updates"
@@ -51,7 +55,7 @@ module.exports = ShareJsUpdateManager =
 					@_sendError(project_id, doc_id, error)
 					return callback(error)
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
-				callback(null, docLines, data.v)
+				callback(null, docLines, data.v, model.db.appliedOps[doc_key] or [])
 
 	_listenForOps: (model) ->
 		model.on "applyOp", (doc_key, opData) ->

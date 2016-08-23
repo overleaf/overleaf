@@ -141,6 +141,13 @@ describe "Applying updates to a doc", ->
 					rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
 						result.should.equal 1
 						done()
+			
+			it "should store the doc ops in the correct order", (done) ->
+				rclient.lrange "DocOps:#{@doc_id}", 0, -1, (error, updates) =>
+					updates = (JSON.parse(u) for u in updates)
+					for appliedUpdate, i in @updates
+						appliedUpdate.op.should.deep.equal updates[i].op
+					done()
 
 		describe "when older ops come in after the delete", ->
 			before (done) ->
@@ -208,7 +215,14 @@ describe "Applying updates to a doc", ->
 			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
 			db.docOps.insert doc_id: ObjectId(@doc_id), version: 0, (error) =>
 				throw error if error?
-				DocUpdaterClient.sendUpdates @project_id, @doc_id, updates, (error) =>
+				
+				# Send updates in chunks to causes multiple flushes
+				actions = []
+				for i in [0..9]
+					do (i) =>
+						actions.push (cb) =>
+							DocUpdaterClient.sendUpdates @project_id, @doc_id, updates.slice(i*10, (i+1)*10), cb
+				async.series actions, (error) =>
 					throw error if error?
 					setTimeout done, 2000
 

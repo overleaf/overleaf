@@ -14,10 +14,12 @@ describe "UpdateManager", ->
 			"./RedisManager" : @RedisManager = {}
 			"./WebRedisManager" : @WebRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
+			"./TrackChangesManager" : @TrackChangesManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
+			"settings-sharelatex": Settings = {}
 
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
@@ -152,8 +154,10 @@ describe "UpdateManager", ->
 			@updates = [{op: [{p: 42, i: "foo"}]}]
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
-			@ShareJsUpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version)
-			@RedisManager.setDocument = sinon.stub().callsArg(3)
+			@appliedOps = ["mock-applied-ops"]
+			@ShareJsUpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version, @appliedOps)
+			@RedisManager.updateDocument = sinon.stub().callsArg(4)
+			@TrackChangesManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
 		
 		describe "normally", ->
 			beforeEach ->
@@ -165,8 +169,13 @@ describe "UpdateManager", ->
 					.should.equal true
 
 			it "should save the document", ->
-				@RedisManager.setDocument
-					.calledWith(@doc_id, @updatedDocLines, @version)
+				@RedisManager.updateDocument
+					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps)
+					.should.equal true
+			
+			it "should push the applied ops into the track changes queue", ->
+				@TrackChangesManager.pushUncompressedHistoryOps
+					.calledWith(@project_id, @doc_id, @appliedOps)
 					.should.equal true
 
 			it "should call the callback", ->

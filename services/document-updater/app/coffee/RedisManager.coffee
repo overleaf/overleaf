@@ -66,12 +66,6 @@ module.exports = RedisManager =
 			version = parseInt(version, 10)
 			callback null, version
 
-	setDocument : (doc_id, docLines, version, callback = (error) ->)->
-		multi = rclient.multi()
-		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
-		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.exec (error, replys) -> callback(error)
-
 	getPreviousDocOps: (doc_id, start, end, callback = (error, jsonOps) ->) ->
 		rclient.llen keys.docOps(doc_id: doc_id), (error, length) ->
 			return callback(error) if error?
@@ -104,18 +98,23 @@ module.exports = RedisManager =
 
 	DOC_OPS_TTL: 60 * minutes
 	DOC_OPS_MAX_LENGTH: 100
-	pushDocOp: (doc_id, op, callback = (error, new_version) ->) ->
-		jsonOp = JSON.stringify op
-		multi = rclient.multi()
-		multi.rpush  keys.docOps(doc_id: doc_id), jsonOp
-		multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
-		multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
-		multi.incr   keys.docVersion(doc_id: doc_id)
-		multi.exec (error, replys) ->
-			[_, __, ___, version] = replys
+	updateDocument : (doc_id, docLines, newVersion, appliedOps = [], callback = (error) ->)->
+		RedisManager.getDocVersion doc_id, (error, currentVersion) ->
 			return callback(error) if error?
-			version = parseInt(version, 10)
-			callback null, version
+			if currentVersion + appliedOps.length != newVersion
+				error = new Error("Version mismatch. '#{doc_id}' is corrupted.")
+				logger.error {err: error, doc_id, currentVersion, newVersion, opsLength: appliedOps.length}, "version mismatch"
+				return callback(error)
+			jsonOps = appliedOps.map (op) -> JSON.stringify op
+			multi = rclient.multi()
+			multi.set    keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+			multi.set    keys.docVersion(doc_id:doc_id), newVersion
+			multi.rpush  keys.docOps(doc_id: doc_id), jsonOps... # TODO: Really double check that these are going onto the array in the correct order
+			multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
+			multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
+			multi.exec (error, replys) ->
+					return callback(error) if error?
+					return callback()
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback

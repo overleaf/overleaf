@@ -140,40 +140,70 @@ describe "RedisManager", ->
 			it "should log out the problem", ->
 				@logger.warn.called.should.equal true
 
-	describe "pushDocOp", ->
+	describe "updateDocument", ->
 		beforeEach ->
+			@rclient.set = sinon.stub()
 			@rclient.rpush = sinon.stub()
 			@rclient.expire = sinon.stub()
-			@rclient.incr = sinon.stub()
 			@rclient.ltrim = sinon.stub()
-			@op = { op: [{ i: "foo", p: 4 }] }
+			@RedisManager.getDocVersion = sinon.stub()
+			
+			@lines = ["one", "two", "three"]
+			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 8 }] }]
 			@version = 42
-			_ = null
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [_, _, _, @version])
-			@RedisManager.pushDocOp @doc_id, @op, @callback
 
-		it "should push the doc op into the doc ops list", ->
-			@rclient.rpush
-				.calledWith("DocOps:#{@doc_id}", JSON.stringify(@op))
-				.should.equal true
+			@rclient.exec = sinon.stub().callsArg(0)
 
-		it "should renew the expiry ttl on the doc ops array", ->
-			@rclient.expire
-				.calledWith("DocOps:#{@doc_id}", @RedisManager.DOC_OPS_TTL)
-				.should.equal true
+		describe "with a consistent version", ->
+			beforeEach ->
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
+				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @callback
+		
+			it "should get the current doc version to check for consistency", ->
+				@RedisManager.getDocVersion
+					.calledWith(@doc_id)
+					.should.equal true
+		
+			it "should set the doclines", ->
+				@rclient.set
+					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+					.should.equal true
+				
+			it "should set the version", ->
+				@rclient.set
+					.calledWith("DocVersion:#{@doc_id}", @version)
+					.should.equal true
 
-		it "should truncate the list to 100 members", ->
-			@rclient.ltrim
-				.calledWith("DocOps:#{@doc_id}", -@RedisManager.DOC_OPS_MAX_LENGTH, -1)
-				.should.equal true
+			it "should push the doc op into the doc ops list", ->
+				@rclient.rpush
+					.calledWith("DocOps:#{@doc_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
+					.should.equal true
 
-		it "should increment the version number", ->
-			@rclient.incr
-				.calledWith("DocVersion:#{@doc_id}")
-				.should.equal true
+			it "should renew the expiry ttl on the doc ops array", ->
+				@rclient.expire
+					.calledWith("DocOps:#{@doc_id}", @RedisManager.DOC_OPS_TTL)
+					.should.equal true
 
-		it "should call the callback with the version number", ->
-			@callback.calledWith(null, parseInt(@version, 10)).should.equal true
+			it "should truncate the list to 100 members", ->
+				@rclient.ltrim
+					.calledWith("DocOps:#{@doc_id}", -@RedisManager.DOC_OPS_MAX_LENGTH, -1)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+		
+		describe "with an inconsistent version", ->
+			beforeEach ->
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length - 1)
+				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @callback
+			
+			it "should not call multi.exec", ->
+				@rclient.exec.called.should.equal false
+				
+			it "should call the callback with an error", ->
+				@callback
+					.calledWith(new Error("Version mismatch. '#{@doc_id}' is corrupted."))
+					.should.equal true
 
 	describe "putDocInMemory", ->
 		beforeEach (done) ->

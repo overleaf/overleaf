@@ -14,14 +14,14 @@ describe "ShareJsDB.getOps", ->
 		@redis_ops = (JSON.stringify(op) for op in @ops)
 		@ShareJsDB = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
-			"./DocOpsManager": @DocOpsManager = {}
 			"./DocumentManager":{}
 			"logger-sharelatex": {}
+		@db = new @ShareJsDB()
 
 	describe "with start == end", ->
 		beforeEach ->
 			@start = @end = 42
-			@ShareJsDB.getOps @doc_key, @start, @end, @callback
+			@db.getOps @doc_key, @start, @end, @callback
 
 		it "should return an empty array", ->
 			@callback.calledWith(null, []).should.equal true
@@ -30,12 +30,12 @@ describe "ShareJsDB.getOps", ->
 		beforeEach ->
 			@start = 35
 			@end = 42
-			@DocOpsManager.getPreviousDocOps = sinon.stub().callsArgWith(4, null, @ops)
-			@ShareJsDB.getOps @doc_key, @start, @end, @callback
+			@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
+			@db.getOps @doc_key, @start, @end, @callback
 
 		it "should get the range from redis", ->
-			@DocOpsManager.getPreviousDocOps
-				.calledWith(@project_id, @doc_id, @start, @end-1)
+			@RedisManager.getPreviousDocOps
+				.calledWith(@doc_id, @start, @end-1)
 				.should.equal true
 
 		it "should return the ops", ->
@@ -45,11 +45,11 @@ describe "ShareJsDB.getOps", ->
 		beforeEach ->
 			@start = 35
 			@end = null
-			@DocOpsManager.getPreviousDocOps = sinon.stub().callsArgWith(4, null, @ops)
-			@ShareJsDB.getOps @doc_key, @start, @end, @callback
+			@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
+			@db.getOps @doc_key, @start, @end, @callback
 		
 		it "should get until the end of the list", ->
-			@DocOpsManager.getPreviousDocOps
-				.calledWith(@project_id, @doc_id, @start, -1)
+			@RedisManager.getPreviousDocOps
+				.calledWith(@doc_id, @start, -1)
 				.should.equal true
 

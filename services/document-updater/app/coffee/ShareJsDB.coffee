@@ -2,11 +2,16 @@ Keys = require('./UpdateKeys')
 Settings = require('settings-sharelatex')
 DocumentManager = require "./DocumentManager"
 RedisManager = require "./RedisManager"
-DocOpsManager = require "./DocOpsManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
 
-module.exports = ShareJsDB =
+module.exports = class ShareJsDB
+	constructor: () ->
+		@appliedOps = {}
+		# ShareJS calls this detacted from the instance, so we need
+		# bind it to keep our context that can access @appliedOps
+		@writeOp = @_writeOp.bind(@)
+	
 	getOps: (doc_key, start, end, callback) ->
 		if start == end
 			return callback null, []
@@ -18,21 +23,12 @@ module.exports = ShareJsDB =
 			end = -1
 
 		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-		DocOpsManager.getPreviousDocOps project_id, doc_id, start, end, (error, ops) ->
-			return callback error if error?
-			callback null, ops
+		RedisManager.getPreviousDocOps doc_id, start, end, callback
 	
-	writeOp: (doc_key, opData, callback) ->
-		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-		DocOpsManager.pushDocOp project_id, doc_id, opData, (error, version) ->
-			return callback error if error?
-
-			if version == opData.v + 1
-				callback()
-			else
-				error = new Error("Version mismatch. '#{doc_id}' is corrupted.")
-				logger.error err: error, doc_id: doc_id, project_id: project_id, opVersion: opData.v, expectedVersion: version, "doc is corrupt"
-				callback error
+	_writeOp: (doc_key, opData, callback) ->
+		@appliedOps[doc_key] ?= []
+		@appliedOps[doc_key].push opData
+		callback()
 
 	getSnapshot: (doc_key, callback) ->
 		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)

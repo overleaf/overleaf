@@ -17,6 +17,7 @@ describe "ShareJsDB.getSnapshot", ->
 			"./RedisManager": {}
 			"./DocOpsManager": {}
 			"logger-sharelatex": {}
+		@db = new @ShareJsDB()
 
 		@version = 42
 
@@ -27,7 +28,7 @@ describe "ShareJsDB.getSnapshot", ->
 		describe "successfully", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version)
-				@ShareJsDB.getSnapshot @doc_key, @callback
+				@db.getSnapshot @doc_key, @callback
 
 			it "should get the doc", ->
 				@DocumentManager.getDoc
@@ -46,7 +47,7 @@ describe "ShareJsDB.getSnapshot", ->
 		describe "when the doclines do not exist", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
-				@ShareJsDB.getSnapshot @doc_key, @callback
+				@db.getSnapshot @doc_key, @callback
 
 			it "should return the callback with a NotFoundError", ->
 				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
@@ -54,7 +55,7 @@ describe "ShareJsDB.getSnapshot", ->
 		describe "when getDoc returns an error", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, @error = new Error("oops"), null, null)
-				@ShareJsDB.getSnapshot @doc_key, @callback
+				@db.getSnapshot @doc_key, @callback
 
 			it "should return the callback with an error", ->
 				@callback.calledWith(@error).should.equal true
@@ -66,7 +67,7 @@ describe "ShareJsDB.getSnapshot", ->
 		describe "successfully", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version)
-				@ShareJsDB.getSnapshot @doc_key, @callback
+				@db.getSnapshot @doc_key, @callback
 
 			it "should get the doc", ->
 				@DocumentManager.getDoc

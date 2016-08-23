@@ -2,6 +2,7 @@ LockManager = require "./LockManager"
 RedisManager = require "./RedisManager"
 WebRedisManager = require "./WebRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
+TrackChangesManager = require "./TrackChangesManager"
 Settings = require('settings-sharelatex')
 async = require("async")
 logger = require('logger-sharelatex')
@@ -43,10 +44,13 @@ module.exports = UpdateManager =
 	applyUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
 		for update in updates or []
 			UpdateManager._sanitizeUpdate update
-		ShareJsUpdateManager.applyUpdates project_id, doc_id, updates, (error, updatedDocLines, version) ->
+		ShareJsUpdateManager.applyUpdates project_id, doc_id, updates, (error, updatedDocLines, version, appliedOps) ->
 			return callback(error) if error?
 			logger.log doc_id: doc_id, version: version, "updating doc via sharejs"
-			RedisManager.setDocument doc_id, updatedDocLines, version, callback
+			# TODO: Do these in parallel? Worry about consistency here?
+			RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, (error) ->
+				return callback(error) if error?
+				TrackChangesManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		LockManager.getLock doc_id, (error, lockValue) ->

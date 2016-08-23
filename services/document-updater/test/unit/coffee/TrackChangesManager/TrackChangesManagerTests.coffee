@@ -40,19 +40,19 @@ describe "TrackChangesManager", ->
 			it "should return the callback with an error", ->
 				@callback.calledWith(new Error("track changes api return non-success code: 500")).should.equal true
 
-	describe "pushUncompressedHistoryOp", ->
+	describe "pushUncompressedHistoryOps", ->
 		beforeEach ->
-			@op = "mock-op"
+			@ops = ["mock-ops"]
 			@TrackChangesManager.flushDocChanges = sinon.stub().callsArg(2)
 
 		describe "pushing the op", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOp = sinon.stub().callsArgWith(3, null, 1)
-				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
+				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
+				@TrackChangesManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
-			it "should push the op into redis", ->
-				@WebRedisManager.pushUncompressedHistoryOp
-					.calledWith(@project_id, @doc_id, @op)
+			it "should push the ops into redis", ->
+				@WebRedisManager.pushUncompressedHistoryOps
+					.calledWith(@project_id, @doc_id, @ops)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -61,11 +61,23 @@ describe "TrackChangesManager", ->
 			it "should not try to flush the op", ->
 				@TrackChangesManager.flushDocChanges.called.should.equal false
 
-		describe "when there are a multiple of FLUSH_EVERY_N_OPS ops", ->
+		describe "when we hit a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOp =
+				@WebRedisManager.pushUncompressedHistoryOps =
 					sinon.stub().callsArgWith(3, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
-				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
+				@TrackChangesManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
+
+			it "should tell the track changes api to flush", ->
+				@TrackChangesManager.flushDocChanges
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+		describe "when we go over a multiple of FLUSH_EVERY_N_OPS ops", ->
+			beforeEach ->
+				@ops = ["op1", "op2", "op3"]
+				@WebRedisManager.pushUncompressedHistoryOps =
+					sinon.stub().callsArgWith(3, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS + 1)
+				@TrackChangesManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
 			it "should tell the track changes api to flush", ->
 				@TrackChangesManager.flushDocChanges
@@ -74,10 +86,10 @@ describe "TrackChangesManager", ->
 
 		describe "when TrackChangesManager errors", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOp =
+				@WebRedisManager.pushUncompressedHistoryOps =
 					sinon.stub().callsArgWith(3, null, 2 * @TrackChangesManager.FLUSH_EVERY_N_OPS)
 				@TrackChangesManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
-				@TrackChangesManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, @callback
+				@TrackChangesManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
 			it "should log out the error", ->
 				@logger.error

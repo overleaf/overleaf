@@ -1,6 +1,7 @@
 settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
+async = require "async"
 WebRedisManager = require "./WebRedisManager"
 
 module.exports = TrackChangesManager =
@@ -21,10 +22,17 @@ module.exports = TrackChangesManager =
 				return callback(error)
 
 	FLUSH_EVERY_N_OPS: 50
-	pushUncompressedHistoryOp: (project_id, doc_id, op, callback = (error) ->) ->
-		WebRedisManager.pushUncompressedHistoryOp project_id, doc_id, op, (error, length) ->
+	pushUncompressedHistoryOps: (project_id, doc_id, ops, callback = (error) ->) ->
+		WebRedisManager.pushUncompressedHistoryOps project_id, doc_id, ops, (error, length) ->
 			return callback(error) if error?
-			if length > 0 and length % TrackChangesManager.FLUSH_EVERY_N_OPS == 0
+			# We want to flush every 50 ops, i.e. 50, 100, 150, etc
+			# Find out which 'block' (i.e. 0-49, 50-99) we were in before and after pushing these
+			# ops. If we've changed, then we've gone over a multiple of 50 and should flush.
+			# (Most of the time, we will only hit 50 and then flushing will put us back to 0)
+			previousLength = length - ops.length
+			prevBlock = Math.floor(previousLength / TrackChangesManager.FLUSH_EVERY_N_OPS)
+			newBlock  = Math.floor(length / TrackChangesManager.FLUSH_EVERY_N_OPS)
+			if newBlock != prevBlock
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log length: length, doc_id: doc_id, project_id: project_id, "flushing track changes api"

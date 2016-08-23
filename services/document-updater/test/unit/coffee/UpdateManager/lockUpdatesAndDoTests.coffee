@@ -11,7 +11,12 @@ describe 'UpdateManager - lockUpdatesAndDo', ->
 			"./RedisManager" : @RedisManager = {}
 			"./WebRedisManager" : @WebRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
+			"./TrackChangesManager" : @TrackChangesManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
+			"./Metrics": @Metrics =
+				Timer: class Timer
+					done: sinon.stub()
+			"settings-sharelatex": Settings = {}
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@method = sinon.stub().callsArgWith(3, null, @response_arg1)

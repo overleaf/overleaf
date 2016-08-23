@@ -70,18 +70,18 @@ describe "WebRedisManager", ->
 		it "should return the length", ->
 			@callback.calledWith(null, @length).should.equal true
 
-	describe "pushUncompressedHistoryOp", ->
+	describe "pushUncompressedHistoryOps", ->
 		beforeEach (done) ->
-			@op = { op: [{ i: "foo", p: 4 }] }
+			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 56 }] }]
 			@rclient.rpush = sinon.stub().yields(null, @length = 42)
 			@rclient.sadd = sinon.stub().yields()
-			@WebRedisManager.pushUncompressedHistoryOp @project_id, @doc_id, @op, (args...) =>
+			@WebRedisManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, (args...) =>
 				@callback(args...)
 				done()
 		
-		it "should push the doc op into the doc ops list", ->
+		it "should push the doc op into the doc ops list as JSON", ->
 			@rclient.rpush
-				.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@op))
+				.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
 				.should.equal true
 
 		it "should add the doc_id to the set of which records the project docs", ->

@@ -1,6 +1,5 @@
 RedisManager = require "./RedisManager"
 PersistenceManager = require "./PersistenceManager"
-DocOpsManager = require "./DocOpsManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
@@ -37,7 +36,7 @@ module.exports = DocumentManager =
 			if fromVersion == -1
 				callback null, lines, version, []
 			else
-				DocOpsManager.getPreviousDocOps project_id, doc_id, fromVersion, version, (error, ops) ->
+				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
 					callback null, lines, version, ops
 
