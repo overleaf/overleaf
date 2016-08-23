@@ -234,8 +234,9 @@ block content
 													type="text"
 													ng-model="data.number"
 													name="ccNumber"
+													ng-focus="validation.correctCardNumber = true; validation.errorFields.number = false;"
+													ng-blur="validateCardNumber();"
 													required
-													ng-change="validateCardNumber()"
 													cc-format-card-number
 												)
 												span.input-feedback-message {{ simpleCCForm.ccNumber.$error.required ? 'This field is required' : 'Please re-check the card number' }}
@@ -248,9 +249,10 @@ block content
 															type="text"
 															ng-model="data.mmYY"
 															name="expiry"
-															required
 															placeholder="MM / YY"
-															ng-change="updateExpiry(); validateExpiry()"
+															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
+															ng-blur="updateExpiry(); validateExpiry()"
+															required
 															cc-format-expiry
 														)
 														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
@@ -261,7 +263,8 @@ block content
 														input.form-control(
 															type="text"
 															ng-model="data.cvv"
-															ng-change="validateCvv()"
+															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
+															ng-blur="validateCvv()"
 															name="cvv"
 															required
 															cc-format-sec-code
