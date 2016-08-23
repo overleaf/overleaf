@@ -2,9 +2,6 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create;
 
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 /**
  * Created by Winston on 20/11/14.
  */
@@ -19,11 +16,6 @@ public class CreateProjectsTableSQLUpdate implements SQLUpdate {
     @Override
     public String getSQL() {
         return CREATE_PROJECTS_TABLE;
-    }
-
-    @Override
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException {
-
     }
 
 }

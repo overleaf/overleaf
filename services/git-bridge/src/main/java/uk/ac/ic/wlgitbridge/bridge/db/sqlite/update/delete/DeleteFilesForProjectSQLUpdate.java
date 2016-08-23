@@ -11,7 +11,8 @@ import java.sql.SQLException;
 public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
 
     private static final String DELETE_URL_INDEXES_FOR_PROJECT_NAME =
-            "DELETE FROM `url_index_store` WHERE `project_name` = ? AND path IN (";
+            "DELETE FROM `url_index_store` " +
+                    "WHERE `project_name` = ? AND path IN (";
 
     private final String projectName;
     private final String[] paths;
@@ -23,7 +24,9 @@ public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
 
     @Override
     public String getSQL() {
-        StringBuilder sb = new StringBuilder(DELETE_URL_INDEXES_FOR_PROJECT_NAME);
+        StringBuilder sb = new StringBuilder(
+                DELETE_URL_INDEXES_FOR_PROJECT_NAME
+        );
         for (int i = 0; i < paths.length; i++) {
             sb.append("?");
             if (i < paths.length - 1) {
@@ -35,7 +38,9 @@ public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
     }
 
     @Override
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException {
+    public void addParametersToStatement(
+            PreparedStatement statement
+    ) throws SQLException {
         statement.setString(1, projectName);
         for (int i = 0; i < paths.length; i++) {
             statement.setString(i + 2, paths[i]);

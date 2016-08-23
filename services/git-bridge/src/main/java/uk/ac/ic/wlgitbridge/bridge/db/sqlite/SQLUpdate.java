@@ -8,7 +8,11 @@ import java.sql.SQLException;
  */
 public interface SQLUpdate {
 
-    public String getSQL();
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException;
+    String getSQL();
+    default void addParametersToStatement(
+            PreparedStatement statement
+    ) throws SQLException {
+
+    }
 
 }

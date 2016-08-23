@@ -3,14 +3,14 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetLatestVersionForProjectSQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetOldestProjectName;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetPathForURLInProjectSQLQuery;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetProjectNamesSQLQuery;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateIndexURLIndexStore;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateProjectsTableSQLUpdate;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateURLIndexStoreSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.AddURLIndexSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectLastAccessedTime;
 
 import java.io.File;
 import java.sql.*;
@@ -80,15 +80,15 @@ public class SqliteDBStore implements DBStore {
 
     @Override
     public String getOldestUnswappedProject() {
-        throw new UnsupportedOperationException();
+        return query(new GetOldestProjectName());
     }
 
     @Override
     public void setLastAccessedTime(
             String projectName,
-            Timestamp time
+            Timestamp lastAccessed
     ) {
-        throw new UnsupportedOperationException();
+        update(new SetProjectLastAccessedTime(projectName, lastAccessed));
     }
 
     private Connection openConnectionTo(File dbFile) {
@@ -117,7 +117,9 @@ public class SqliteDBStore implements DBStore {
         Stream.of(
                 new CreateProjectsTableSQLUpdate(),
                 new CreateURLIndexStoreSQLUpdate(),
-                new CreateIndexURLIndexStore()
+                new CreateIndexURLIndexStore(),
+                new CreateSwapTable(),
+                new CreateSwapTableIndex()
         ).forEach(this::update);
     }
 
