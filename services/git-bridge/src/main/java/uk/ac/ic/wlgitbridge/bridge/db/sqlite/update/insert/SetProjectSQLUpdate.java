@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db.sql.update.insert;
+package uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert;
 
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 

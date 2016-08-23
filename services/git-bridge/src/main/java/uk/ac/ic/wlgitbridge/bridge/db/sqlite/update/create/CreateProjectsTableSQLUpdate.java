@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db.sql.update.create;
+package uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create;
 
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 

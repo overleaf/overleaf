@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db.sql.update.delete;
+package uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete;
 
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 

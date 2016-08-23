@@ -2,15 +2,15 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 
 import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.query.GetLatestVersionForProjectSQLQuery;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.query.GetPathForURLInProjectSQLQuery;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.query.GetProjectNamesSQLQuery;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.create.CreateIndexURLIndexStore;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.create.CreateProjectsTableSQLUpdate;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.create.CreateURLIndexStoreSQLUpdate;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.delete.DeleteFilesForProjectSQLUpdate;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.insert.AddURLIndexSQLUpdate;
-import uk.ac.ic.wlgitbridge.data.model.db.sql.update.insert.SetProjectSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetLatestVersionForProjectSQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetPathForURLInProjectSQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetProjectNamesSQLQuery;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateIndexURLIndexStore;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateProjectsTableSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateURLIndexStoreSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.AddURLIndexSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectSQLUpdate;
 
 import java.io.File;
 import java.sql.*;

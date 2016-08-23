@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db.sql.query;
+package uk.ac.ic.wlgitbridge.bridge.db.sqlite.query;
 
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLQuery;
 
