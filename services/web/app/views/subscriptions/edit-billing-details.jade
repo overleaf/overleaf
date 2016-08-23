@@ -19,7 +19,7 @@ block content
 		Recurly.config(!{recurlyConfig})
 		Recurly.buildBillingInfoUpdateForm({
 			target      : "#billingDetailsForm",
-			successURL  : "#{successURL}?_csrf=#{csrfToken}",
+			successURL  : "#{successURL}?_csrf=#{csrfToken}&origin=editBillingDetails",
 			signature   : "!{signature}",
 			accountCode : "#{user.id}"
 		});

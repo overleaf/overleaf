@@ -22,6 +22,7 @@ module.exports = SubscriptionController =
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
 		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+			return next(err) if err?
 			res.render viewName,
 				title: "plans_and_pricing"
 				plans: plans
@@ -71,12 +72,13 @@ module.exports = SubscriptionController =
 		AuthenticationController.getLoggedInUser req, (error, user) =>
 			return next(error) if error?
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+				return next(err) if err?
 				groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
 				if subscription?.customAccount
 					logger.log user: user, "redirecting to custom account page"
 					res.redirect "/user/subscription/custom_account"
 				else if groupLicenceInviteUrl? and !hasSubOrIsGroupMember
-					logger.log user:user, "redirecting to group subscription invite page"		
+					logger.log user:user, "redirecting to group subscription invite page"
 					res.redirect groupLicenceInviteUrl
 				else if !hasSubOrIsGroupMember
 					logger.log user: user, "redirecting to plans"
@@ -95,11 +97,13 @@ module.exports = SubscriptionController =
 							groupSubscriptions: groupSubscriptions
 							subscriptionTabActive: true
 							user:user
-
+							saved_billing_details: req.query.saved_billing_details?
 
 	userCustomSubscriptionPage: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
+			return next(error) if error?
 			LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+				return next(err) if err?
 				if !subscription?
 					err = new Error("subscription null for custom account, user:#{user?._id}")
 					logger.warn err:err, "subscription is null for custom accounts page"
@@ -113,6 +117,7 @@ module.exports = SubscriptionController =
 		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return next(error) if error?
 			LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+				return next(err) if err?
 				if !hasSubscription
 					res.redirect "/user/subscription"
 				else
@@ -126,9 +131,12 @@ module.exports = SubscriptionController =
 								currency: "USD"
 								subdomain: Settings.apis.recurly.subdomain
 							signature  : signature
-							successURL : "#{Settings.siteUrl}/user/subscription/update"
+							successURL : "#{Settings.siteUrl}/user/subscription/billing-details/update"
 							user       :
 								id : user._id
+	
+	updateBillingDetails: (req, res, next) ->
+		res.redirect "/user/subscription?saved_billing_details=true"
 
 	createSubscription: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
@@ -142,54 +150,67 @@ module.exports = SubscriptionController =
 					return res.sendStatus 500
 				res.sendStatus 201
 
-	successful_subscription: (req, res)->
+	successful_subscription: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) =>
+			return next(error) if error?
 			SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription) ->
+				return next(error) if error?
 				res.render "subscriptions/successful_subscription",
 					title: "thank_you"
 					subscription:subscription
 
 	cancelSubscription: (req, res, next) ->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
-			logger.log user_id:user._id, "canceling subscription"
 			return next(error) if error?
+			logger.log user_id:user._id, "canceling subscription"
 			SubscriptionHandler.cancelSubscription user, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong canceling subscription"
+					return next(err)
 				res.redirect "/user/subscription"
- 
-	updateSubscription: (req, res)->
+
+	updateSubscription: (req, res, next)->
+		_origin = req?.query?.origin || null
 		AuthenticationController.getLoggedInUser req, (error, user) ->
 			return next(error) if error?
 			planCode = req.body.plan_code
+			if !planCode?
+				err = new Error('plan_code is not defined')
+				logger.err {user_id: user._id, err, planCode, origin: _origin, body: req.body}, "[Subscription] error in updateSubscription form"
+				return next(err)
 			logger.log planCode: planCode, user_id:user._id, "updating subscription"
 			SubscriptionHandler.updateSubscription user, planCode, null, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong updating subscription"
+					return next(err)
 				res.redirect "/user/subscription"
 
-	reactivateSubscription: (req, res)->
+	reactivateSubscription: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
-			logger.log user_id:user._id, "reactivating subscription"
 			return next(error) if error?
+			logger.log user_id:user._id, "reactivating subscription"
 			SubscriptionHandler.reactivateSubscription user, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "something went wrong reactivating subscription"
+					return next(err)
 				res.redirect "/user/subscription"
 
-	recurlyCallback: (req, res)->
+	recurlyCallback: (req, res, next)->
 		logger.log data: req.body, "received recurly callback"
 		# we only care if a subscription has exipired
 		if req.body? and req.body["expired_subscription_notification"]?
 			recurlySubscription = req.body["expired_subscription_notification"].subscription
-			SubscriptionHandler.recurlyCallback recurlySubscription, ->
+			SubscriptionHandler.recurlyCallback recurlySubscription, (err)->
+				return next(err) if err?
 				res.sendStatus 200
 		else
 			res.sendStatus 200
 
-	renderUpgradeToAnnualPlanPage: (req, res)->
+	renderUpgradeToAnnualPlanPage: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
+			return next(error) if error?
 			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				return next(err) if err?
 				planCode = subscription?.planCode.toLowerCase()
 				if planCode?.indexOf("annual") != -1
 					planName = "annual"
@@ -204,8 +225,9 @@ module.exports = SubscriptionController =
 					title: "Upgrade to annual"
 					planName: planName
 
-	processUpgradeToAnnualPlan: (req, res)->
+	processUpgradeToAnnualPlan: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
+			return next(error) if error?
 			{planName} = req.body
 			coupon_code = Settings.coupon_codes.upgradeToAnnualPromo[planName]
 			annualPlanName = "#{planName}-annual"
@@ -213,13 +235,14 @@ module.exports = SubscriptionController =
 			SubscriptionHandler.updateSubscription user, annualPlanName, coupon_code, (err)->
 				if err?
 					logger.err err:err, user_id:user._id, "error updating subscription"
-					res.sendStatus 500
-				else
-					res.sendStatus 200
+					return next(err)
+				res.sendStatus 200
 
-	extendTrial: (req, res)->
+	extendTrial: (req, res, next)->
 		AuthenticationController.getLoggedInUser req, (error, user) ->
+			return next(error) if error?
 			LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+				return next(err) if err?
 				SubscriptionHandler.extendTrial subscription, 14, (err)->
 					if err?
 						res.send 500

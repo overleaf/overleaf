@@ -90,6 +90,7 @@ define -> [
 		"""
 	,
 		ruleId: "hint_mismatched_environment"
+		types: ['environment']
 		regexToMatch: /Error: `([^']{2,})' expected, found `([^']{2,})'.*/
 		newMessage: "Error: environment does not match \\begin{$1} ... \\end{$2}"
 		humanReadableHint: """
@@ -97,10 +98,85 @@ define -> [
 		"""
 	,
 		ruleId: "hint_mismatched_brackets"
+		types: ['environment']
 		regexToMatch: /Error: `([^a-zA-Z0-9])' expected, found `([^a-zA-Z0-9])'.*/
 		newMessage: "Error: brackets do not match, found '$2' instead of '$1'"
 		humanReadableHint: """
 			You have used an open bracket without a corresponding close bracket.
 		"""
-
+	,
+		regexToMatch: /LaTeX Error: Can be used only in preamble/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_Can_be_used_only_in_preamble"
+		humanReadableHint: """
+			You have used a command in the main body of your document which should be used in the preamble. Make sure that \\documentclass[\u2026]{\u2026} and all \\usepackage{\u2026} commands are written before \\begin{document}.
+		"""
+	,
+		regexToMatch: /Missing \\right inserted/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Missing_%5Cright_insertede"
+		humanReadableHint: """
+			You have started an expression with a \\left command, but have not included a corresponding \\right command. Make sure that your \\left and \\right commands balance everywhere, or else try using \\Biggl and \\Biggr commands instead as shown <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors/Missing_%5Cright_inserted\">here</a>.
+		"""
+	,
+		regexToMatch: /Double superscript/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Double_superscript"
+		humanReadableHint: """
+			You have written a double superscript incorrectly as a^b^c, or else you have written a prime with a superscript. Remember to include { and } when using multiple superscripts. Try a^{b^c} instead.
+		"""
+	,
+		regexToMatch: /Double subscript/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Double_subscript"
+		humanReadableHint: """
+			You have written a double subscript incorrectly as a_b_c. Remember to include { and } when using multiple subscripts. Try a_{b_c} instead.
+		"""
+	,
+		regexToMatch: /No \\author given/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/No_%5Cauthor_given"
+		humanReadableHint: """
+			You have used the \\maketitle command, but have not specified any \\author. To fix this, include an author in your preamble using the \\author{\u2026} command.
+		"""
+	,
+		regexToMatch: /LaTeX Error: Environment .+ undefined/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors%2FLaTeX%20Error%3A%20Environment%20XXX%20undefined"
+		humanReadableHint: """
+			You have created an environment (using \\begin{\u2026} and \\end{\u2026} commands) which is not recognized. Make sure you have included the required package for that environment in your preamble, and that the environment is spelled correctly.
+		"""
+	,
+		regexToMatch: /LaTeX Error: Something's wrong--perhaps a missing \\item/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_Something%27s_wrong--perhaps_a_missing_%5Citem"
+		humanReadableHint: """
+			There are no entries found in a list you have created. Make sure you label list entries using the \\item command, and that you have not used a list inside a table.
+		"""
+	,
+		regexToMatch: /Misplaced \\noalign/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Misplaced_%5Cnoalign"
+		humanReadableHint: """
+			You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\ before it.
+		"""
+	,
+		ruleId: "hint_mismatched_environment2"
+		types: ['environment']
+		cascadesFrom: ['environment']
+		regexToMatch: /Error: `\\end\{([^\}]+)\}' expected but found `\\end\{([^\}]+)\}'.*/
+		newMessage: "Error: environments do not match: \\begin{$1} ... \\end{$2}"
+		humanReadableHint: """
+			You have used \\begin{} without a corresponding \\end{}.
+		"""
+	,
+		ruleId: "hint_mismatched_environment3"
+		types: ['environment']
+		cascadesFrom: ['environment']
+		regexToMatch: /Warning: No matching \\end found for `\\begin\{([^\}]+)\}'.*/
+		newMessage: "Warning: No matching \\end found for \\begin{$1}"
+		humanReadableHint: """
+			You have used \\begin{} without a corresponding \\end{}.
+		"""
+	,
+		ruleId: "hint_mismatched_environment4"
+		types: ['environment']
+		cascadesFrom: ['environment']
+		regexToMatch: /Error: Found `\\end\{([^\}]+)\}' without corresponding \\begin.*/
+		newMessage: "Error: found \\end{$1} without a corresponding \\begin{$1}"
+		humanReadableHint: """
+			You have used \\begin{} without a corresponding \\end{}.
+		"""
 ]

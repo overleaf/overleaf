@@ -728,7 +728,7 @@ describe "RecurlyWrapper", ->
 			describe 'when the account does not exist', ->
 
 				beforeEach ->
-					@apiRequest.callsArgWith(1, new Error('not found'), {statusCode: 404}, '')
+					@apiRequest.callsArgWith(1, null, {statusCode: 404}, '')
 
 				it 'should not produce an error', (done) ->
 					@call (err, result) =>

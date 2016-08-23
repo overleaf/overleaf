@@ -40,6 +40,11 @@ block content
 		.container(ng-controller="UserSubscriptionController")
 			.row
 				.col-md-8.col-md-offset-2
+					if saved_billing_details
+						.alert.alert-success
+							i.fa.fa-check
+							| &nbsp;
+							| #{translate("your_billing_details_were_saved")}
 					.card(ng-if="view == 'overview'")
 						.page-header
 							h1 #{translate("your_subscription")}
