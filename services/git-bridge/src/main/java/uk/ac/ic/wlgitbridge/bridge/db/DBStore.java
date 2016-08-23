@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.db;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -18,5 +19,14 @@ public interface DBStore {
     void deleteFilesForProject(String project, String... files);
 
     String getPathForURLInProject(String projectName, String url);
+
+    String getOldestUnswappedProject();
+
+    /**
+     * Sets the last accessed time for the given project name.
+     * @param projectName the project's name
+     * @param time the time, or null if the project is to be swapped
+     */
+    void setLastAccessedTime(String projectName, Timestamp time);
 
 }

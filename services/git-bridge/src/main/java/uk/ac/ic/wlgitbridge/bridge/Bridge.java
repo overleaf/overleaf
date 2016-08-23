@@ -30,6 +30,7 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -104,8 +105,8 @@ public class Bridge {
         Log.info("Bye");
     }
 
-    public void startSwapJob(int intervalMillis) {
-        swapJob.start(intervalMillis);
+    public void startSwapJob(Duration interval) {
+        swapJob.start(interval);
     }
 
     /* TODO: Remove these when WLBridged is moved into RepoStore */

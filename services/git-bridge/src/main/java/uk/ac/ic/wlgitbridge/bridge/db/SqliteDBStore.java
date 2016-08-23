@@ -5,6 +5,7 @@ import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -82,6 +83,16 @@ public class SqliteDBStore implements DBStore {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getOldestUnswappedProject() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setLastAccessedTime(String projectName, Timestamp time) {
+        throw new UnsupportedOperationException();
     }
 
 }

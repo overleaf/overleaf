@@ -24,6 +24,7 @@ import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import java.io.File;
+import java.io.InputStream;
 import java.net.BindException;
 import java.util.EnumSet;
 
@@ -50,7 +51,22 @@ public class GitBridgeServer {
         this.rootGitDirectoryPath = config.getRootGitDirectory();
         RepoStore repoStore = new FSRepoStore(rootGitDirectoryPath);
         DBStore dbStore = new SqliteDBStore(repoStore.getRootDirectory());
-        SwapStore swapStore = new SwapStore() {};
+        SwapStore swapStore = new SwapStore() {
+            @Override
+            public void upload(String projectName, InputStream uploadStream, long contentLength) {
+
+            }
+
+            @Override
+            public InputStream openDownloadStream(String projectName) {
+                return null;
+            }
+
+            @Override
+            public void remove(String projectName) {
+
+            }
+        };
         bridgeAPI = Bridge.make(
                 repoStore,
                 dbStore,

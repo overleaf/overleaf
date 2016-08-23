@@ -1,11 +1,19 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
-import uk.ac.ic.wlgitbridge.util.Util;
+import com.google.api.client.repackaged.com.google.common.base.Preconditions;
+import org.apache.commons.io.FileUtils;
+import uk.ac.ic.wlgitbridge.util.Project;
+import uk.ac.ic.wlgitbridge.util.Tar;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static uk.ac.ic.wlgitbridge.util.Util.deleteInDirectoryApartFrom;
 
 /**
  * Created by winston on 20/08/2016.
@@ -30,6 +38,7 @@ public class FSRepoStore implements RepoStore {
         return rootDirectory;
     }
 
+    /* TODO: Perhaps we should just delete bad directories on the fly. */
     @Override
     public void purgeNonexistentProjects(
             Collection<String> existingProjectNames
@@ -37,15 +46,63 @@ public class FSRepoStore implements RepoStore {
         List<String> excludedFromDeletion =
                 new ArrayList<>(existingProjectNames);
         excludedFromDeletion.add(".wlgb");
-        Util.deleteInDirectoryApartFrom(
+        deleteInDirectoryApartFrom(
                 rootDirectory,
                 excludedFromDeletion.toArray(new String[] {})
         );
     }
 
+    @Override
+    public long totalSize() {
+        return FileUtils.sizeOfDirectory(rootDirectory);
+    }
+
+    @Override
+    public InputStream bzip2Project(String projectName) throws IOException {
+        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        return Tar.tar(getDotGitForProject(projectName));
+    }
+
+    @Override
+    public void remove(String projectName) throws IOException {
+        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        FileUtils.deleteDirectory(new File(rootDirectory, projectName));
+    }
+
+    @Override
+    public void unbzip2Project(
+            String projectName,
+            InputStream dataStream
+    ) throws IOException {
+        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        Preconditions.checkState(getDirForProject(projectName).mkdirs());
+        Tar.untar(dataStream, getDirForProject(projectName));
+    }
+
+    private File getDirForProject(String projectName) {
+        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        return Paths.get(
+                rootDirectory.getAbsolutePath()
+        ).resolve(
+                projectName
+        ).toFile();
+    }
+
+    private File getDotGitForProject(String projectName) {
+        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        return Paths.get(
+                rootDirectory.getAbsolutePath()
+        ).resolve(
+                projectName
+        ).resolve(
+                ".git"
+        ).toFile();
+    }
+
     private File initRootGitDirectory(String rootGitDirectoryPath) {
         File rootGitDirectory = new File(rootGitDirectoryPath);
         rootGitDirectory.mkdirs();
+        Preconditions.checkArgument(rootGitDirectory.isDirectory());
         return rootGitDirectory;
     }
 

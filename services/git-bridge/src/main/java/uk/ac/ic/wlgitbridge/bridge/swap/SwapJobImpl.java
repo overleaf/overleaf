@@ -3,9 +3,10 @@ package uk.ac.ic.wlgitbridge.bridge.swap;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
-import uk.ac.ic.wlgitbridge.util.Util;
 
+import java.time.Duration;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by winston on 20/08/2016.
@@ -19,10 +20,13 @@ public class SwapJobImpl implements SwapJob {
 
     private final Timer timer;
 
+    final AtomicInteger swaps;
+
     public SwapJobImpl(
             ProjectLock lock,
             RepoStore repoStore,
-            DBStore dbStore, SwapStore swapStore
+            DBStore dbStore,
+            SwapStore swapStore
     ) {
 
         this.lock = lock;
@@ -30,14 +34,15 @@ public class SwapJobImpl implements SwapJob {
         this.swapStore = swapStore;
         this.dbStore = dbStore;
         timer = new Timer();
+        swaps = new AtomicInteger(0);
     }
 
     @Override
-    public void start(int intervalMillis) {
+    public void start(Duration interval) {
         timer.scheduleAtFixedRate(
-                Util.makeTimerTask(this::doSwap),
+                uk.ac.ic.wlgitbridge.util.Timer.makeTimerTask(this::doSwap),
                 0,
-                intervalMillis
+                interval.toMillis()
         );
     }
 
@@ -47,7 +52,7 @@ public class SwapJobImpl implements SwapJob {
     }
 
     private void doSwap() {
-        throw new UnsupportedOperationException();
+        swaps.incrementAndGet();
     }
 
 }
