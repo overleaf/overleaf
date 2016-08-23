@@ -279,6 +279,8 @@ block content
 															) ?
 														span.input-feedback-message {{ simpleCCForm.cvv.$error.required ? 'This field is required' : 'Please re-check the security code' }}
 
+										
+										div
 											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
 												label(for="country") #{translate('country')}
 												select#country.form-control(
@@ -290,8 +292,7 @@ block content
 												)
 													mixin countries_options()
 												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
-										
-										div
+
 											if (showVatField)
 												.form-group
 													label(for="vat-no") #{translate('vat_number')}
@@ -310,6 +311,7 @@ block content
 													)
 											
 											p(ng-if="paymentMethod === 'paypal'") #{translate("paypal_upgrade")}
+											
 											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
 												hr.thin
 												span Total: 
@@ -326,7 +328,7 @@ block content
 													sixpack-convert="payment-left-menu-bottom"
 												) 
 													span(ng-show="processing") 
-														i.fa.fa-refresh.fa-spin
+														i.fa.fa-spinner.fa-spin
 														| &nbsp;
 													| {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 

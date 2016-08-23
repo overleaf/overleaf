@@ -107,13 +107,16 @@ define [
 			return (formItem.$touched && formItem.$invalid)
 
 		$scope.isFormValid = isFormValid = (form) ->
-			return $scope.paymentMethod == 'paypal' or 
-					(form.$valid and 
-					$scope.validation.correctCardNumber and
-					$scope.validation.correctExpiry and
-					$scope.validation.correctCvv)
+			if $scope.paymentMethod == 'paypal' 
+				return $scope.data.country != ""
+			else 
+				return (form.$valid and 
+						$scope.validation.correctCardNumber and
+						$scope.validation.correctExpiry and
+						$scope.validation.correctCvv)
 
 		$scope.updateCountry = ->
+			console.log $scope.data.country
 			pricing.address({country:$scope.data.country}).done()
 
 		$scope.setPaymentMethod = setPaymentMethod = (method) ->
