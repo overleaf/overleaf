@@ -321,7 +321,11 @@ block content
 													ng-click="submit()"
 													ng-disabled="processing || !isFormValid(simpleCCForm);"
 													sixpack-convert="payment-left-menu-bottom"
-												) {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
+												) 
+													span(ng-show="processing") 
+														i.fa.fa-refresh.fa-spin
+														| &nbsp;
+													| {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 
 
 				.col-md-3.col-md-pull-4
