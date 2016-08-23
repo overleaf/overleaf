@@ -9,6 +9,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.GetProjectNamesSQLQuery;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.AddURLIndexSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectLastAccessedTimeIfMissing;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectLastAccessedTime;
 
@@ -89,6 +90,19 @@ public class SqliteDBStore implements DBStore {
             Timestamp lastAccessed
     ) {
         update(new SetProjectLastAccessedTime(projectName, lastAccessed));
+    }
+
+    @Override
+    public void setProjectLastAccessedTimeIfMissing(
+            String projectName,
+            Timestamp lastAccessed
+    ) {
+        update(
+                new SetProjectLastAccessedTimeIfMissing(
+                        projectName,
+                        lastAccessed
+                )
+        );
     }
 
     private Connection openConnectionTo(File dbFile) {
