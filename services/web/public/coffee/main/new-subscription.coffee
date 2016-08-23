@@ -121,6 +121,7 @@ define [
 		completeSubscription = (err, recurly_token_id) ->
 			$scope.validation.errorFields = {}
 			if err?
+				event_tracking.sendMB "subscription-error", err
 				# We may or may not be in a digest loop here depending on
 				# whether recurly could do validation locally, so do it async
 				$scope.$evalAsync () ->
