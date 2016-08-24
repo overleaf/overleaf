@@ -132,4 +132,19 @@ public class SqliteDBStoreTest {
         assertEquals("older", dbStore.getOldestUnswappedProject());
     }
 
+    @Test
+    public void testGetNumUnswappedProjects() {
+        dbStore.setLatestVersionForProject("asdf", 1);
+        dbStore.setLastAccessedTime(
+                "asdf",
+                Timestamp.valueOf(LocalDateTime.now())
+        );
+        assertEquals(1, dbStore.getNumUnswappedProjects());
+        dbStore.setLastAccessedTime(
+                "asdf",
+                null
+        );
+        assertEquals(0, dbStore.getNumUnswappedProjects());
+    }
+
 }

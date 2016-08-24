@@ -87,6 +87,11 @@ public class SqliteDBStore implements DBStore {
     }
 
     @Override
+    public int getNumUnswappedProjects() {
+        return query(new GetNumUnswappedProjects());
+    }
+
+    @Override
     public void setLastAccessedTime(
             String projectName,
             Timestamp lastAccessed

@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.bridge.swap;
+package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
 import org.junit.Before;
 

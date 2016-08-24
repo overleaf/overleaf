@@ -7,10 +7,8 @@ import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJob;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
-
-import java.time.Duration;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
+import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -52,9 +50,9 @@ public class BridgeTest {
 
     @Test
     public void shutdownStopsSwapJob() {
-        bridge.startSwapJob(Duration.ofSeconds(1));
+        bridge.startSwapJob();
         bridge.doShutdown();
-        verify(swapJob).start(Duration.ofSeconds(1));
+        verify(swapJob).start();
         verify(swapJob).stop();
     }
 

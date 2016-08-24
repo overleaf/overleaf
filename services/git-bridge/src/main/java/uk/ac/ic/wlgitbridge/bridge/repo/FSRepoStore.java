@@ -58,9 +58,12 @@ public class FSRepoStore implements RepoStore {
     }
 
     @Override
-    public InputStream bzip2Project(String projectName) throws IOException {
+    public InputStream bzip2Project(
+            String projectName,
+            long[] sizePtr
+    ) throws IOException {
         Preconditions.checkArgument(Project.isValidProjectName(projectName));
-        return Tar.bz2.zip(getDotGitForProject(projectName));
+        return Tar.bz2.zip(getDotGitForProject(projectName), sizePtr);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.bridge.swap;
+package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -16,7 +16,15 @@ public class S3SwapStore implements SwapStore {
 
     private final String bucketName;
 
-    public S3SwapStore(
+    public S3SwapStore(SwapStoreConfig cfg) {
+        this(
+                cfg.getAwsAccessKey(),
+                cfg.getAwsSecret(),
+                cfg.getS3BucketName()
+        );
+    }
+
+    S3SwapStore(
             String accessKey,
             String secret,
             String bucketName

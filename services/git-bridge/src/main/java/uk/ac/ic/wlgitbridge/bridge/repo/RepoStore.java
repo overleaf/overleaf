@@ -25,7 +25,16 @@ public interface RepoStore {
      * IOException if the project doesn't exist. The returned stream is a copy
      * of the original .git directory, which must be deleted using remove().
      */
-    InputStream bzip2Project(String projectName) throws IOException;
+    InputStream bzip2Project(
+            String projectName,
+            long[] sizePtr
+    ) throws IOException;
+
+    default InputStream bzip2Project(
+            String projectName
+    ) throws IOException {
+        return bzip2Project(projectName, null);
+    }
 
     void remove(String projectName) throws IOException;
 
@@ -36,6 +45,9 @@ public interface RepoStore {
      * @param projectName the name of the project, e.g. abc123
      * @param dataStream the data stream containing the bzipped contents.
      */
-    void unbzip2Project(String projectName, InputStream dataStream) throws IOException;
+    void unbzip2Project(
+            String projectName,
+            InputStream dataStream
+    ) throws IOException;
 
 }

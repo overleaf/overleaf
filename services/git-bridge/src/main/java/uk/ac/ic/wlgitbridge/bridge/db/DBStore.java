@@ -24,6 +24,8 @@ public interface DBStore {
 
     String getOldestUnswappedProject();
 
+    int getNumUnswappedProjects();
+
     /**
      * Sets the last accessed time for the given project name.
      * @param projectName the project's name

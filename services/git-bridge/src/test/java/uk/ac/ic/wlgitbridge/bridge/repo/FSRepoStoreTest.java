@@ -21,6 +21,20 @@ import static org.junit.Assert.assertEquals;
  */
 public class FSRepoStoreTest {
 
+    public static File makeTempRepoDir(
+            TemporaryFolder tmpFolder,
+            String name
+    ) throws IOException {
+        File tmp = tmpFolder.newFolder(name);
+        Path rootdir = Paths.get(
+                "src/test/resources/uk/ac/ic/wlgitbridge/"
+                        + "bridge/repo/FSRepoStoreTest/rootdir"
+        );
+        FileUtils.copyDirectory(rootdir.toFile(), tmp);
+        Files.renameAll(tmp, "DOTgit", ".git");
+        return tmp;
+    }
+
     private FSRepoStore repoStore;
     private File original;
 
@@ -28,13 +42,7 @@ public class FSRepoStoreTest {
     public void setup() throws IOException {
         TemporaryFolder tmpFolder = new TemporaryFolder();
         tmpFolder.create();
-        File tmp = tmpFolder.newFolder("repostore");
-        Path rootdir = Paths.get(
-                "src/test/resources/uk/ac/ic/wlgitbridge/"
-                        + "bridge/repo/FSRepoStoreTest/rootdir"
-        );
-        FileUtils.copyDirectory(rootdir.toFile(), tmp);
-        Files.renameAll(tmp, "DOTgit", ".git");
+        File tmp = makeTempRepoDir(tmpFolder, "rootdir");
         original = tmpFolder.newFolder("original");
         FileUtils.copyDirectory(tmp, original);
         repoStore = new FSRepoStore(tmp.getAbsolutePath());

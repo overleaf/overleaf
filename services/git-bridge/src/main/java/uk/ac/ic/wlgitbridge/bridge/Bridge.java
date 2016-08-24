@@ -9,10 +9,9 @@ import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotAPI;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJob;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobConfig;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobImpl;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
+import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
@@ -31,7 +30,6 @@ import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.*;
 
 /**
@@ -56,7 +54,7 @@ public class Bridge {
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore,
-            SwapJobConfig swapJobConfig
+            Optional<SwapJobConfig> swapJobConfig
     ) {
         ProjectLock lock = new ProjectLockImpl((int threads) ->
                 Log.info("Waiting for " + threads + " projects...")
@@ -66,7 +64,7 @@ public class Bridge {
                 repoStore,
                 dbStore,
                 swapStore,
-                new SwapJobImpl(
+                SwapJob.fromConfig(
                         swapJobConfig,
                         lock,
                         repoStore,
@@ -108,8 +106,8 @@ public class Bridge {
         Log.info("Bye");
     }
 
-    public void startSwapJob(Duration interval) {
-        swapJob.start(interval);
+    public void startSwapJob() {
+        swapJob.start();
     }
 
     /* TODO: Remove these when WLBridged is moved into RepoStore */

@@ -1,9 +1,10 @@
-package uk.ac.ic.wlgitbridge.bridge.swap;
+package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.ac.ic.wlgitbridge.bridge.swap.store.InMemorySwapStore;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -51,7 +52,8 @@ public class InMemorySwapStoreTest {
     }
 
     @Test
-    public void uploadingForTheSameProjectOverwritesTheFile() throws IOException {
+    public void uploadingForTheSameProjectOverwritesTheFile(
+    ) throws IOException {
         byte[] proj1Contents = "helloproj1".getBytes();
         byte[] proj1NewContents = "goodbyeproj1".getBytes();
         swapStore.upload(

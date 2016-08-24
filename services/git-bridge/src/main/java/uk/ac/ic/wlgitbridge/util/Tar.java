@@ -24,9 +24,19 @@ public class Tar {
         public static InputStream zip(
                 File fileOrDir
         ) throws IOException {
+            return zip(fileOrDir, null);
+        }
+
+        public static InputStream zip(
+                File fileOrDir,
+                long[] sizePtr
+        ) throws IOException {
             ByteArrayOutputStream target = new ByteArrayOutputStream();
             try (OutputStream bzip2 = new BZip2CompressorOutputStream(target)) {
                 tarTo(fileOrDir, bzip2);
+            }
+            if (sizePtr != null) {
+                sizePtr[0] = target.size();
             }
             return target.toInputStream();
         }
@@ -60,7 +70,6 @@ public class Tar {
                     Paths.get(fileOrDir.getParentFile().getAbsolutePath()),
                     fileOrDir
             );
-            tout.close();
         }
     }
 
