@@ -116,7 +116,7 @@ module.exports = settings =
 
 	# cdn:
 	# 	web:
-	# 		host:"http://cdn.sharelatex.dev:3000"
+	# 		host:"http://nowhere.sharelatex.dev"
 	#		darkHost:"http://cdn.sharelatex.dev:3000"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
