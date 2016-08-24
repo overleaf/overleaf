@@ -14,7 +14,8 @@ define [
 
 		event_tracking.sendMB "subscription-form", { plan : window.plan_code }
 
-		$scope.paymentMethod = "credit_card"
+		$scope.paymentMethod =
+			value: "credit_card"
 
 		$scope.data =
 			number: ""
@@ -107,7 +108,7 @@ define [
 			return (formItem.$touched && formItem.$invalid)
 
 		$scope.isFormValid = isFormValid = (form) ->
-			if $scope.paymentMethod == 'paypal' 
+			if $scope.paymentMethod.value == 'paypal' 
 				return $scope.data.country != ""
 			else 
 				return (form.$valid and 
@@ -116,11 +117,10 @@ define [
 						$scope.validation.correctCvv)
 
 		$scope.updateCountry = ->
-			console.log $scope.data.country
 			pricing.address({country:$scope.data.country}).done()
 
 		$scope.setPaymentMethod = setPaymentMethod = (method) ->
-			$scope.paymentMethod = method;
+			$scope.paymentMethod.value = method;
 			$scope.validation.errorFields = {}
 			$scope.genericError = ""
 
@@ -142,7 +142,7 @@ define [
 						currencyCode:pricing.items.currency
 						plan_code:pricing.items.plan.code
 						coupon_code:pricing.items?.coupon?.code || ""
-						isPaypal: $scope.paymentMethod == 'paypal'
+						isPaypal: $scope.paymentMethod.value == 'paypal'
 						address:
 							address1:    $scope.data.address1
 							address2:    $scope.data.address2
@@ -170,7 +170,7 @@ define [
 
 		$scope.submit = ->
 			$scope.processing = true
-			if $scope.paymentMethod == 'paypal'
+			if $scope.paymentMethod.value == 'paypal'
 				opts = { description: $scope.planName }
 				recurly.paypal opts, completeSubscription
 			else

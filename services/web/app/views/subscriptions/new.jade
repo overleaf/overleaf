@@ -60,19 +60,19 @@ block content
 													.row
 														.col-md-6
 															label.radio-inline
-																input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod")
+																input.paymentTypeOption(type="radio",value="credit_card", ng-model="paymentMethod.value")
 																i.fa.fa-cc-mastercard.fa-3x
 																span &nbsp;
 																i.fa.fa-cc-visa.fa-3x
 														.col-md-6
 															label.radio-inline
-																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod")
+																input.paymentTypeOption(type="radio", value="paypal", ng-model="paymentMethod.value")
 																i.fa.fa-cc-paypal.fa-3x
 
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
-										span(ng-hide="paymentMethod == 'paypal'")
+										span(ng-hide="paymentMethod.value == 'paypal'")
 											.row
 												.col-md-12
 													.form-group
@@ -184,7 +184,7 @@ block content
 											a.payment-method-toggle-switch(
 												href
 												ng-click="setPaymentMethod('credit_card');"
-												ng-class="paymentMethod === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
+												ng-class="paymentMethod.value === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
 											)
 												i.fa.fa-cc-mastercard.fa-2x
 												span &nbsp;
@@ -194,14 +194,14 @@ block content
 											a.payment-method-toggle-switch(
 												href
 												ng-click="setPaymentMethod('paypal');"
-												ng-class="paymentMethod === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
+												ng-class="paymentMethod.value === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
 											)
 												i.fa.fa-cc-paypal.fa-2x
 										
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
-										div(ng-if="paymentMethod === 'credit_card'")
+										div(ng-if="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
 													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
@@ -310,7 +310,7 @@ block content
 														ng-model="data.coupon"
 													)
 											
-											p(ng-if="paymentMethod === 'paypal'") #{translate("paypal_upgrade")}
+											p(ng-if="paymentMethod.value === 'paypal'") #{translate("paypal_upgrade")}
 											
 											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
 												hr.thin
@@ -330,7 +330,7 @@ block content
 													span(ng-show="processing") 
 														i.fa.fa-spinner.fa-spin
 														| &nbsp;
-													| {{ paymentMethod === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
+													| {{ paymentMethod.value === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
 
 
 				.col-md-3.col-md-pull-4
