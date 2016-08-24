@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -145,6 +146,31 @@ public class SqliteDBStoreTest {
                 null
         );
         assertEquals(0, dbStore.getNumUnswappedProjects());
+    }
+
+    @Test
+    public void projectStateIsNotPresentIfNotInDBAtAll() {
+        assertEquals(
+                ProjectState.NOT_PRESENT,
+                dbStore.getProjectState("asdf")
+        );
+    }
+
+    @Test
+    public void projectStateIsPresentIfProjectHasLastAccessed() {
+        dbStore.setLatestVersionForProject("asdf", 1);
+        dbStore.setLastAccessedTime(
+                "asdf",
+                Timestamp.valueOf(LocalDateTime.now())
+        );
+        assertEquals(ProjectState.PRESENT, dbStore.getProjectState("asdf"));
+    }
+
+    @Test
+    public void projectStateIsSwappedIfLastAccessedIsNull() {
+        dbStore.setLatestVersionForProject("asdf", 1);
+        dbStore.setLastAccessedTime("asdf", null);
+        assertEquals(ProjectState.SWAPPED, dbStore.getProjectState("asdf"));
     }
 
 }

@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 
 import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
+import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.*;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
@@ -89,6 +90,11 @@ public class SqliteDBStore implements DBStore {
     @Override
     public int getNumUnswappedProjects() {
         return query(new GetNumUnswappedProjects());
+    }
+
+    @Override
+    public ProjectState getProjectState(String projectName) {
+        return query(new GetProjectState(projectName));
     }
 
     @Override

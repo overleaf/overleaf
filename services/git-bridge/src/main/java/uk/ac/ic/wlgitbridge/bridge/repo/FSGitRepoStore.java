@@ -18,12 +18,12 @@ import static uk.ac.ic.wlgitbridge.util.Util.deleteInDirectoryApartFrom;
 /**
  * Created by winston on 20/08/2016.
  */
-public class FSRepoStore implements RepoStore {
+public class FSGitRepoStore implements RepoStore {
 
     private final String repoStorePath;
     private final File rootDirectory;
 
-    public FSRepoStore(String repoStorePath) {
+    public FSGitRepoStore(String repoStorePath) {
         this.repoStorePath = repoStorePath;
         rootDirectory = initRootGitDirectory(repoStorePath);
     }

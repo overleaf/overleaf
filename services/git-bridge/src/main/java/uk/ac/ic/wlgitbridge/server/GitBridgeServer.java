@@ -11,7 +11,7 @@ import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
-import uk.ac.ic.wlgitbridge.bridge.repo.FSRepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
@@ -51,7 +51,7 @@ public class GitBridgeServer {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
-        RepoStore repoStore = new FSRepoStore(rootGitDirectoryPath);
+        RepoStore repoStore = new FSGitRepoStore(rootGitDirectoryPath);
         DBStore dbStore = new SqliteDBStore(
                 Paths.get(
                         repoStore.getRootDirectory().getAbsolutePath()
@@ -143,8 +143,7 @@ public class GitBridgeServer {
                 new ServletHolder(
                         new WLGitServlet(
                                 servletContextHandler,
-                                bridgeAPI,
-                                rootGitDirectoryPath
+                                bridgeAPI
                         )
                 ),
                 "/*"

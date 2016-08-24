@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by winston on 23/08/2016.
  */
-public class FSRepoStoreTest {
+public class FSGitRepoStoreTest {
 
     public static File makeTempRepoDir(
             TemporaryFolder tmpFolder,
@@ -28,14 +28,14 @@ public class FSRepoStoreTest {
         File tmp = tmpFolder.newFolder(name);
         Path rootdir = Paths.get(
                 "src/test/resources/uk/ac/ic/wlgitbridge/"
-                        + "bridge/repo/FSRepoStoreTest/rootdir"
+                        + "bridge/repo/FSGitRepoStoreTest/rootdir"
         );
         FileUtils.copyDirectory(rootdir.toFile(), tmp);
         Files.renameAll(tmp, "DOTgit", ".git");
         return tmp;
     }
 
-    private FSRepoStore repoStore;
+    private FSGitRepoStore repoStore;
     private File original;
 
     @Before
@@ -45,7 +45,7 @@ public class FSRepoStoreTest {
         File tmp = makeTempRepoDir(tmpFolder, "rootdir");
         original = tmpFolder.newFolder("original");
         FileUtils.copyDirectory(tmp, original);
-        repoStore = new FSRepoStore(tmp.getAbsolutePath());
+        repoStore = new FSGitRepoStore(tmp.getAbsolutePath());
     }
 
     @Test

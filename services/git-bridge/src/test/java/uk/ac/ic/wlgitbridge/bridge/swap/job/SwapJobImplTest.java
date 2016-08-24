@@ -6,8 +6,8 @@ import org.junit.rules.TemporaryFolder;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
-import uk.ac.ic.wlgitbridge.bridge.repo.FSRepoStore;
-import uk.ac.ic.wlgitbridge.bridge.repo.FSRepoStoreTest;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStoreTest;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.InMemorySwapStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
@@ -39,8 +39,8 @@ public class SwapJobImplTest {
         TemporaryFolder tmpFolder = new TemporaryFolder();
         tmpFolder.create();
         lock = new ProjectLockImpl();
-        repoStore = new FSRepoStore(
-                FSRepoStoreTest.makeTempRepoDir(
+        repoStore = new FSGitRepoStore(
+                FSGitRepoStoreTest.makeTempRepoDir(
                         tmpFolder,
                         "repostore"
                 ).getAbsolutePath()

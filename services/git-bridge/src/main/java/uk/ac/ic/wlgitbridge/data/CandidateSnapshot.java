@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 /**
  * Created by Winston on 16/11/14.
  */
-public class CandidateSnapshot {
+public class CandidateSnapshot implements AutoCloseable {
 
     private final String projectName;
     private final int currentVersion;
@@ -25,14 +25,22 @@ public class CandidateSnapshot {
     private final List<String> deleted;
     private File attsDirectory;
 
-    public CandidateSnapshot(String projectName, int currentVersion, RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
+    public CandidateSnapshot(
+            String projectName,
+            int currentVersion,
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) {
         this.projectName = projectName;
         this.currentVersion = currentVersion;
         files = diff(directoryContents, oldDirectoryContents);
         deleted = deleted(directoryContents, oldDirectoryContents);
     }
 
-    private List<ServletFile> diff(RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
+    private List<ServletFile> diff(
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) {
         List<ServletFile> files = new LinkedList<ServletFile>();
         Map<String, RawFile> fileTable = directoryContents.getFileTable();
         Map<String, RawFile> oldFileTable = oldDirectoryContents.getFileTable();
@@ -43,10 +51,16 @@ public class CandidateSnapshot {
         return files;
     }
 
-    private List<String> deleted(RawDirectory directoryContents, RawDirectory oldDirectoryContents) {
+    private List<String> deleted(
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) {
         List<String> deleted = new LinkedList<String>();
         Map<String, RawFile> fileTable = directoryContents.getFileTable();
-        for (Entry<String, RawFile> entry : oldDirectoryContents.getFileTable().entrySet()) {
+        for (
+                Entry<String, RawFile> entry :
+                oldDirectoryContents.getFileTable().entrySet()
+        ) {
             String path = entry.getKey();
             RawFile newFile = fileTable.get(path);
             if (newFile == null) {
@@ -57,7 +71,10 @@ public class CandidateSnapshot {
     }
 
     public void writeServletFiles(File rootGitDirectory) throws IOException {
-        attsDirectory = new File(rootGitDirectory, ".wlgb/atts/" + projectName);
+        attsDirectory = new File(
+                rootGitDirectory,
+                ".wlgb/atts/" + projectName
+        );
         for (ServletFile file : files) {
             if (file.isChanged()) {
                 file.writeToDisk(attsDirectory);
@@ -90,11 +107,18 @@ public class CandidateSnapshot {
         return filesArray;
     }
 
-    private JsonObject getFileAsJson(ServletFile file, String projectURL, String postbackKey) {
+    private JsonObject getFileAsJson(
+            ServletFile file,
+            String projectURL,
+            String postbackKey
+    ) {
         JsonObject jsonFile = new JsonObject();
         jsonFile.addProperty("name", file.getPath());
         if (file.isChanged()) {
-            jsonFile.addProperty("url", projectURL + "/" + file.getPath() + "?key=" + postbackKey);
+            jsonFile.addProperty(
+                    "url",
+                    projectURL + "/" + file.getPath() + "?key=" + postbackKey
+            );
         }
         return jsonFile;
     }
@@ -117,6 +141,11 @@ public class CandidateSnapshot {
         sb.append(", deleted: ");
         sb.append(deleted);
         return sb.toString();
+    }
+
+    @Override
+    public void close() throws IOException {
+        deleteServletFiles();
     }
 
 }

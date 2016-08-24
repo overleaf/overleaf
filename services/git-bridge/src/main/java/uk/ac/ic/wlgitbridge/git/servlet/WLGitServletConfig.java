@@ -15,8 +15,8 @@ public class WLGitServletConfig implements ServletConfig {
 
     private ServletContext servletContext;
 
-    public WLGitServletConfig(ServletContextHandler servletContextHandler) {
-        servletContext = servletContextHandler.getServletContext();
+    public WLGitServletConfig(ServletContextHandler ctxHandler) {
+        servletContext = ctxHandler.getServletContext();
     }
 
     @Override

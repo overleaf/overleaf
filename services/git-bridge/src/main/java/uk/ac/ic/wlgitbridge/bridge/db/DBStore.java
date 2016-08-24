@@ -26,6 +26,8 @@ public interface DBStore {
 
     int getNumUnswappedProjects();
 
+    ProjectState getProjectState(String projectName);
+
     /**
      * Sets the last accessed time for the given project name.
      * @param projectName the project's name
