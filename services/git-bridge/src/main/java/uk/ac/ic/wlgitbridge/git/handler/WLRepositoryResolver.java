@@ -62,14 +62,20 @@ public class WLRepositoryResolver
             /* Such as FailedConnectionException */
             throw e;
         } catch (RuntimeException e) {
-            Log.warn("Runtime exception when trying to open repo", e);
+            Log.warn(
+                    "Runtime exception when trying to open repo: " + projName,
+                    e
+            );
             throw new ServiceMayNotContinueException(e);
         } catch (ForbiddenException e) {
             throw new ServiceNotAuthorizedException();
         } catch (GitUserException e) {
             throw new ServiceMayNotContinueException(e.getMessage(), e);
         } catch (IOException e) {
-            Log.warn("IOException when trying to open repo", e);
+            Log.warn(
+                    "IOException when trying to open repo: " + projName,
+                    e
+            );
             throw new ServiceMayNotContinueException("Internal server error.");
         }
     }

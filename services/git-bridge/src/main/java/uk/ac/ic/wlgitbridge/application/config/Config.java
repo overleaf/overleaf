@@ -29,7 +29,9 @@ public class Config implements JSONSource {
                 config.apiBaseURL,
                 config.postbackURL,
                 config.serviceName,
-                Oauth2.asSanitised(config.oauth2)
+                Oauth2.asSanitised(config.oauth2),
+                SwapStoreConfig.sanitisedCopy(config.swapStore),
+                config.swapJob
         );
     }
 
@@ -56,14 +58,18 @@ public class Config implements JSONSource {
         fromJSON(new Gson().fromJson(reader, JsonElement.class));
     }
 
-    public Config(int port,
-                  String rootGitDirectory,
-                  String username,
-                  String password,
-                  String apiBaseURL,
-                  String postbackURL,
-                  String serviceName,
-                  Oauth2 oauth2) {
+    public Config(
+            int port,
+            String rootGitDirectory,
+            String username,
+            String password,
+            String apiBaseURL,
+            String postbackURL,
+            String serviceName,
+            Oauth2 oauth2,
+            SwapStoreConfig swapStore,
+            SwapJobConfig swapJob
+    ) {
         this.port = port;
         this.rootGitDirectory = rootGitDirectory;
         this.username = username;
@@ -72,6 +78,8 @@ public class Config implements JSONSource {
         this.postbackURL = postbackURL;
         this.serviceName = serviceName;
         this.oauth2 = oauth2;
+        this.swapStore = swapStore;
+        this.swapJob = swapJob;
     }
 
     @Override

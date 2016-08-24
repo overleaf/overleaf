@@ -60,4 +60,17 @@ public class SwapStoreConfig {
         return s3BucketName;
     }
 
+    public SwapStoreConfig sanitisedCopy() {
+        return new SwapStoreConfig(
+                type,
+                awsAccessKey == null ? null : "<awsAccessKey>",
+                awsSecret == null ? null : "<awsSecret>",
+                s3BucketName
+        );
+    }
+
+    public static SwapStoreConfig sanitisedCopy(SwapStoreConfig swapStore) {
+        return swapStore == null ? null : swapStore.sanitisedCopy();
+    }
+    
 }

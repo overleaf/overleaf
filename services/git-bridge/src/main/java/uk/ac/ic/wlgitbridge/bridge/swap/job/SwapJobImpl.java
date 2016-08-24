@@ -153,6 +153,7 @@ public class SwapJobImpl implements SwapJob {
                     projName,
                     swapStore.openDownloadStream(projName)
             );
+            swapStore.remove(projName);
             dbStore.setLastAccessedTime(
                     projName,
                     Timestamp.valueOf(LocalDateTime.now())

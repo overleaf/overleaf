@@ -16,6 +16,7 @@ import uk.ac.ic.wlgitbridge.snapshot.servermock.util.FileUtil;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -629,8 +630,18 @@ public class WLGitBridgeIntegrationTest {
         int exitCode = gitProcess.waitFor();
         if (exitCode != 0) {
             System.err.println("git clone failed. Dumping stderr and stdout.");
-            System.err.println(IOUtils.toString(gitProcess.getErrorStream()));
-            System.err.println(IOUtils.toString(gitProcess.getInputStream()));
+            System.err.println(
+                    IOUtils.toString(
+                            gitProcess.getErrorStream(),
+                            StandardCharsets.UTF_8
+                    )
+            );
+            System.err.println(
+                    IOUtils.toString(
+                            gitProcess.getInputStream(),
+                            StandardCharsets.UTF_8
+                    )
+            );
             fail("git clone failed");
         }
         File repositoryDir = new File(dir, repositoryName);
@@ -680,7 +691,10 @@ public class WLGitBridgeIntegrationTest {
         if (swapCfg != null) {
             cfgStr += ",\n" +
                     "    \"swapStore\": {\n" +
-                    "        \"type\": \"memory\"\n" +
+                    "        \"type\": \"memory\",\n" +
+                    "        \"awsAccessKey\": null,\n" +
+                    "        \"awsSecret\": null,\n" +
+                    "        \"s3BucketName\": \"com.overleaf.testbucket\"\n" +
                     "    },\n" +
                     "    \"swapJob\": {\n" +
                     "        \"minProjects\": " +
