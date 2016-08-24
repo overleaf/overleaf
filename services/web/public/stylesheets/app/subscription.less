@@ -1,0 +1,74 @@
+.form-helper {
+	display: inline-block;
+	width: 1.3em;
+	height: 1.3em;
+	line-height: 1.3;
+	vertical-align: initial;
+	background-color: @gray;
+	color: #FFF;
+	font-weight: bolder;
+	border-radius: 50%;
+
+	&:hover,
+	&:focus {
+		color: #FFF;
+		text-decoration: none;
+	}
+}
+
+.price-breakdown {
+	text-align: center;
+	margin-bottom: -10px;
+}
+
+.input-feedback-message {
+	display: none;
+	font-size: 0.8em;
+	
+	.has-error & {
+		display: inline-block;
+	}
+}
+
+.payment-submit {
+	padding-top: (@line-height-computed / 2);
+}
+
+.payment-method-toggle {
+	margin-bottom: (@line-height-computed / 2);
+
+	&-switch {
+		display: inline-block;
+		width: 50%;
+		text-align: center;
+		border: solid 1px @gray-lighter;
+		border-radius: @border-radius-large 0 0 @border-radius-large;
+		padding: (@line-height-computed / 2);
+		color: @gray;
+
+		&:hover,
+		&:focus {
+			color: @gray;
+			text-decoration: none;
+		}
+
+		&:hover {
+			color: @gray-dark;
+		}
+
+		& + & {
+			border-left-width: 0;
+			border-radius: 0 @border-radius-large @border-radius-large 0; 
+		}
+
+		&-selected {
+			color: @link-color;
+			box-shadow: inset 0 -2px 0 0;
+
+			&:hover,
+			&:focus {
+				color: @link-color;
+			}
+		}
+	}
+}
