@@ -68,11 +68,16 @@ module.exports = CompileManager =
 					image:     request.imageName
 					environment: env
 				}, (error, output, stats, timings) ->
+					# request was for validation only
 					if request.check is "validate"
 						result = if error?.code then "fail" else "pass"
 						error = new Error("validation")
 						error.validate = result
-					# compile was killed by user
+					# request was for compile, and failed on validation
+					if request.check is "error" and error?.message is 'exited'
+						error = new Error("compilation")
+						error.validate = "fail"
+					# compile was killed by user, was a validation, or a compile which failed validation
 					if error?.terminated or error?.validate
 						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
 							return callback(err) if err?
