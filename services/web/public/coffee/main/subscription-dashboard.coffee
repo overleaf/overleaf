@@ -18,7 +18,6 @@ define [
 
 	App.controller "ChangePlanFormController", ($scope, $modal, MultiCurrencyPricing)->
 		setupReturly()
-		console.log("init")
 		taxRate = window.taxRate
 
 		$scope.changePlan = ->
