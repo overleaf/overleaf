@@ -118,6 +118,7 @@ define [
 			$scope.pdf.renderingError = false
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.compileTerminated = false
+			$scope.pdf.compileExited = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -144,7 +145,6 @@ define [
 				fetchLogs(fileByPath)
 			else if response.status in ["validation-fail", "validation-pass"]
 				$scope.pdf.view = 'pdf'
-				$scope.pdf.compileExited = true
 				$scope.pdf.url = last_pdf_url
 				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath, { validation: true })
