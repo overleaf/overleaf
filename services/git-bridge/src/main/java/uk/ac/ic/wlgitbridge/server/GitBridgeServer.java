@@ -82,6 +82,7 @@ public class GitBridgeServer {
      */
     public void start() {
         try {
+            bridge.checkDB();
             jettyServer.start();
             bridge.startSwapJob();
             Log.info(Util.getServiceName() + "-Git Bridge server started");

@@ -31,6 +31,7 @@ import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -112,6 +113,33 @@ public class Bridge {
 
     public void startSwapJob() {
         swapJob.start();
+    }
+
+    public void checkDB() {
+        Log.info("Checking DB");
+        File rootDir = repoStore.getRootDirectory();
+        for (File f : rootDir.listFiles()) {
+            if (f.getName().equals(".wlgb")) {
+                continue;
+            }
+            String projName = f.getName();
+            try (LockGuard __ = lock.lockGuard(projName)) {
+                File dotGit = new File(f, ".git");
+                if (!dotGit.exists()) {
+                    Log.warn("Project: {} has no .git", projName);
+                    continue;
+                }
+                ProjectState state = dbStore.getProjectState(projName);
+                if (state != ProjectState.NOT_PRESENT) {
+                    continue;
+                }
+                Log.warn("Project: {} not in swap_store, adding", projName);
+                dbStore.setLastAccessedTime(
+                        projName,
+                        new Timestamp(dotGit.lastModified())
+                );
+            }
+        }
     }
 
     public boolean projectExists(

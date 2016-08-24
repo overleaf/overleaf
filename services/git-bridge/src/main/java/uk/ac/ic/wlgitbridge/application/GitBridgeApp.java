@@ -22,7 +22,7 @@ public class GitBridgeApp implements Runnable {
 
     public static final int EXIT_CODE_FAILED = 1;
     private static final String USAGE_MESSAGE =
-            "usage: writelatex-git-bridge config_file";
+            "usage: writelatex-git-bridge [config_file]";
 
     private String configFilePath;
     Config config;
