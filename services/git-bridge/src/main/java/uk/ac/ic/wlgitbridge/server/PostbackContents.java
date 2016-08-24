@@ -17,7 +17,7 @@ public class PostbackContents implements JSONSource {
 
     private static final String CODE_SUCCESS = "upToDate";
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
     private final String projectName;
     private final String postbackKey;
 
@@ -26,8 +26,8 @@ public class PostbackContents implements JSONSource {
     private int versionID;
     private SnapshotPostException exception;
 
-    public PostbackContents(Bridge bridgeAPI, String projectName, String postbackKey, String contents) {
-        this.bridgeAPI = bridgeAPI;
+    public PostbackContents(Bridge bridge, String projectName, String postbackKey, String contents) {
+        this.bridge = bridge;
         this.projectName = projectName;
         this.postbackKey = postbackKey;
         snapshotPostExceptionBuilder = new SnapshotPostExceptionBuilder();
@@ -43,9 +43,9 @@ public class PostbackContents implements JSONSource {
 
     public void processPostback() throws UnexpectedPostbackException {
         if (exception == null) {
-            bridgeAPI.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
+            bridge.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
         } else {
-            bridgeAPI.postbackReceivedWithException(projectName, postbackKey, exception);
+            bridge.postbackReceivedWithException(projectName, postbackKey, exception);
         }
     }
 

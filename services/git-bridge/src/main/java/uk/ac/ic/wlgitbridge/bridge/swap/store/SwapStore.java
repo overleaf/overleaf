@@ -17,6 +17,7 @@ public interface SwapStore {
 
                 {
                     put("noop", NoopSwapStore::new);
+                    put("memory", InMemorySwapStore::new);
                     put("s3", S3SwapStore::new);
                 }
 

@@ -26,12 +26,12 @@ import java.util.Iterator;
  */
 public class WriteLatexPutHook implements PreReceiveHook {
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
     private final String hostname;
     private final Credential oauth2;
 
-    public WriteLatexPutHook(Bridge bridgeAPI, String hostname, Credential oauth2) {
-        this.bridgeAPI = bridgeAPI;
+    public WriteLatexPutHook(Bridge bridge, String hostname, Credential oauth2) {
+        this.bridge = bridge;
         this.hostname = hostname;
         this.oauth2 = oauth2;
     }
@@ -75,7 +75,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
     private void handleReceiveCommand(Credential oauth2, Repository repository, ReceiveCommand receiveCommand) throws IOException, GitUserException {
         checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
-        bridgeAPI.putDirectoryContentsToProjectWithName(
+        bridge.putDirectoryContentsToProjectWithName(
                 oauth2,
                 repository.getWorkTree().getName(),
                 getPushedDirectoryContents(repository,

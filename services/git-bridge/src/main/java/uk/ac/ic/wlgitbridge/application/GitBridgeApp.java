@@ -25,7 +25,7 @@ public class GitBridgeApp implements Runnable {
             "usage: writelatex-git-bridge config_file";
 
     private String configFilePath;
-    private Config config;
+    Config config;
     private GitBridgeServer server;
 
     /**

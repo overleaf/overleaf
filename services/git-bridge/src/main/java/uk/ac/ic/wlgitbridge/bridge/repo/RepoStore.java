@@ -10,6 +10,9 @@ import java.util.Collection;
  */
 public interface RepoStore {
 
+    /* Still need to get rid of these two methods.
+       Main dependency: GitRepoStore needs a Repository which needs a directory.
+       Instead, use a visitor or something. */
     String getRepoStorePath();
 
     File getRootDirectory();
@@ -20,7 +23,7 @@ public interface RepoStore {
 
     long totalSize();
 
-    /*
+    /**
      * Tars and bzip2s the .git directory of the given project. Throws an
      * IOException if the project doesn't exist. The returned stream is a copy
      * of the original .git directory, which must be deleted using remove().

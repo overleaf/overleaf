@@ -1,13 +1,14 @@
-package uk.ac.ic.wlgitbridge;
+package uk.ac.ic.wlgitbridge.application;
 
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.Response;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import uk.ac.ic.wlgitbridge.application.GitBridgeApp;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.server.MockSnapshotServer;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIState;
 import uk.ac.ic.wlgitbridge.snapshot.servermock.state.SnapshotAPIStateBuilder;
@@ -101,6 +102,9 @@ public class WLGitBridgeIntegrationTest {
         }});
         put("canServePushedFiles", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canServePushedFiles/state/state.json")).build());
+        }});
+        put("wlgbCanSwapProjects", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/wlgbCanSwapProjects/state/state.json")).build());
         }});
     }};
 
@@ -587,6 +591,38 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
     }
 
+    @Test
+    public void wlgbCanSwapProjects(
+    ) throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(
+                3874,
+                getResource("/wlgbCanSwapProjects").toFile()
+        );
+        server.start();
+        server.setState(states.get("wlgbCanSwapProjects").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33874, 3874, new SwapJobConfig(1, 0, 0, 250))
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        File rootGitDir = new File(wlgb.config.getRootGitDirectory());
+        File testProj1ServerDir = new File(rootGitDir, "testproj1");
+        File testProj2ServerDir = new File(rootGitDir, "testproj2");
+        File testProj1Dir = cloneRepository("testproj1", 33874, dir);
+        assertTrue(testProj1ServerDir.exists());
+        assertFalse(testProj2ServerDir.exists());
+        cloneRepository("testproj2", 33874, dir);
+        while (testProj1ServerDir.exists());
+        assertFalse(testProj1ServerDir.exists());
+        assertTrue(testProj2ServerDir.exists());
+        FileUtils.deleteDirectory(testProj1Dir);
+        cloneRepository("testproj1", 33874, dir);
+        while (testProj2ServerDir.exists());
+        assertTrue(testProj1ServerDir.exists());
+        assertFalse(testProj2ServerDir.exists());
+        wlgb.stop();
+    }
+
     private File cloneRepository(String repositoryName, int port, File dir) throws IOException, InterruptedException {
         String repo = "git clone http://127.0.0.1:" + port + "/" + repositoryName + ".git";
         Process gitProcess = runtime.exec(repo, null, dir);
@@ -606,30 +642,72 @@ public class WLGitBridgeIntegrationTest {
         return repositoryDir;
     }
 
-    private String makeConfigFile(int port, int apiPort) throws IOException {
+    private String makeConfigFile(
+            int port,
+            int apiPort
+    ) throws IOException {
+        return makeConfigFile(port, apiPort, null);
+    }
+
+    private String makeConfigFile(
+            int port,
+            int apiPort,
+            SwapJobConfig swapCfg
+    ) throws IOException {
         File wlgb = folder.newFolder();
         File config = folder.newFile();
         PrintWriter writer = new PrintWriter(config);
-        writer.println("{\n" +
-            "\t\"port\": " + port + ",\n" +
-            "\t\"rootGitDirectory\": \"" + wlgb.getAbsolutePath() + "\",\n" +
-            "\t\"apiBaseUrl\": \"http://127.0.0.1:" + apiPort + "/api/v0\",\n" +
-            "\t\"username\": \"\",\n" +
-            "\t\"password\": \"\",\n" +
-            "\t\"postbackBaseUrl\": \"http://127.0.0.1:" + port + "\",\n" +
-            "\t\"serviceName\": \"Overleaf\"\n," +
-            "    \"oauth2\": {\n" +
-            "        \"oauth2ClientID\": \"clientID\",\n" +
-            "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n" +
-            "        \"oauth2Server\": \"https://www.overleaf.com\"\n" +
-            "    }\n" +
-            "}\n");
+        String cfgStr =
+                "{\n" +
+                "    \"port\": " + port + ",\n" +
+                "    \"rootGitDirectory\": \"" +
+                        wlgb.getAbsolutePath() +
+                        "\",\n" +
+                "    \"apiBaseUrl\": \"http://127.0.0.1:" +
+                        apiPort +
+                        "/api/v0\",\n" +
+                "    \"username\": \"\",\n" +
+                "    \"password\": \"\",\n" +
+                "    \"postbackBaseUrl\": \"http://127.0.0.1:" +
+                        port +
+                        "\",\n" +
+                "    \"serviceName\": \"Overleaf\",\n" +
+                "    \"oauth2\": {\n" +
+                "        \"oauth2ClientID\": \"clientID\",\n" +
+                "        \"oauth2ClientSecret\": \"oauth2 client secret\",\n" +
+                "        \"oauth2Server\": \"https://www.overleaf.com\"\n" +
+                "    }";
+        if (swapCfg != null) {
+            cfgStr += ",\n" +
+                    "    \"swapStore\": {\n" +
+                    "        \"type\": \"memory\"\n" +
+                    "    },\n" +
+                    "    \"swapJob\": {\n" +
+                    "        \"minProjects\": " +
+                    swapCfg.getMinProjects() +
+                    ",\n" +
+                    "        \"lowGiB\": " +
+                    swapCfg.getLowGiB() +
+                    ",\n" +
+                    "        \"highGiB\": " +
+                    swapCfg.getHighGiB() +
+                    ",\n" +
+                    "        \"intervalMillis\": " +
+                    swapCfg.getIntervalMillis() +
+                    "\n" +
+                    "    }\n";
+        }
+        cfgStr += "}\n";
+        writer.print(cfgStr);
         writer.close();
         return config.getAbsolutePath();
     }
 
     private Path getResource(String path) {
-        return Paths.get("src/test/resources/uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path);
+        return Paths.get(
+                "src/test/resources/" +
+                "uk/ac/ic/wlgitbridge/WLGitBridgeIntegrationTest" + path
+        );
     }
 
     private InputStream getResourceAsStream(String path) {

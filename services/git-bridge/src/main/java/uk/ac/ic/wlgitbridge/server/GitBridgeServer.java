@@ -37,7 +37,7 @@ import java.util.EnumSet;
  */
 public class GitBridgeServer {
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
 
     private final Server jettyServer;
 
@@ -58,7 +58,7 @@ public class GitBridgeServer {
                 ).resolve(".wlgb").resolve("wlgb.db").toFile()
         );
         SwapStore swapStore = SwapStore.fromConfig(config.getSwapStore());
-        bridgeAPI = Bridge.make(
+        bridge = Bridge.make(
                 repoStore,
                 dbStore,
                 swapStore,
@@ -83,6 +83,7 @@ public class GitBridgeServer {
     public void start() {
         try {
             jettyServer.start();
+            bridge.startSwapJob();
             Log.info(Util.getServiceName() + "-Git Bridge server started");
             Log.info("Listening on port: " + port);
             Log.info("Bridged to: " + apiBaseURL);
@@ -118,7 +119,7 @@ public class GitBridgeServer {
 
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initResourceHandler());
-        handlers.addHandler(new PostbackHandler(bridgeAPI));
+        handlers.addHandler(new PostbackHandler(bridge));
         handlers.addHandler(new DefaultHandler());
 
         api.setHandler(handlers);
@@ -143,7 +144,7 @@ public class GitBridgeServer {
                 new ServletHolder(
                         new WLGitServlet(
                                 servletContextHandler,
-                                bridgeAPI
+                                bridge
                         )
                 ),
                 "/*"
@@ -152,7 +153,7 @@ public class GitBridgeServer {
     }
 
     private Handler initResourceHandler() {
-        ResourceHandler resourceHandler = new FileHandler(bridgeAPI);
+        ResourceHandler resourceHandler = new FileHandler(bridge);
         resourceHandler.setResourceBase(
                 new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath()
         );

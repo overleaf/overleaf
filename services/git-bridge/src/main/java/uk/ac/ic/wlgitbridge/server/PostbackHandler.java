@@ -19,10 +19,10 @@ import java.io.IOException;
  */
 public class PostbackHandler extends AbstractHandler {
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
 
-    public PostbackHandler(Bridge bridgeAPI) {
-        this.bridgeAPI = bridgeAPI;
+    public PostbackHandler(Bridge bridge) {
+        this.bridge = bridge;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class PostbackHandler extends AbstractHandler {
                 String projectName = parts[1];
                 String postbackKey = parts[2];
                 Log.info(baseRequest.getMethod() + " <- " + baseRequest.getHttpURI());
-                PostbackContents postbackContents = new PostbackContents(bridgeAPI, projectName, postbackKey, contents);
+                PostbackContents postbackContents = new PostbackContents(bridge, projectName, postbackKey, contents);
                 JsonObject body = new JsonObject();
 
                 try {

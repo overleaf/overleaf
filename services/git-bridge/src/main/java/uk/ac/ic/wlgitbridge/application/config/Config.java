@@ -98,6 +98,14 @@ public class Config implements JSONSource {
             postbackURL += "/";
         }
         oauth2 = new Gson().fromJson(configObject.get("oauth2"), Oauth2.class);
+        swapStore = new Gson().fromJson(
+                configObject.get("swapStore"),
+                SwapStoreConfig.class
+        );
+        swapJob = new Gson().fromJson(
+                configObject.get("swapJob"),
+                SwapJobConfig.class
+        );
     }
 
     public String getSanitisedString() {

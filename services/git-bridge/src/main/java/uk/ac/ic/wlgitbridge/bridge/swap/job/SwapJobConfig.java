@@ -5,9 +5,6 @@ package uk.ac.ic.wlgitbridge.bridge.swap.job;
  */
 public class SwapJobConfig {
 
-    public static final SwapJobConfig DEFAULT =
-            new SwapJobConfig(1, 1, 2, 3600000);
-
     private final int minProjects;
     private final int lowGiB;
     private final int highGiB;

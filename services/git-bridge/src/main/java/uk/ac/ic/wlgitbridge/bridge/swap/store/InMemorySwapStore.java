@@ -19,6 +19,10 @@ public class InMemorySwapStore implements SwapStore {
         store = new HashMap<>();
     }
 
+    public InMemorySwapStore(SwapStoreConfig __) {
+        this();
+    }
+
     @Override
     public void upload(
             String projectName,
