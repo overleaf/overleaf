@@ -36,6 +36,15 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
+				li.dropdown-header #{translate("compile_time_checks")}
+				li
+					a(href, ng-click="stop_on_validation_error = true")
+						i.fa.fa-fw(ng-class="{'fa-check': stop_on_validation_error}")
+						| &nbsp;#{translate("stop_on_validation_error")}
+				li
+					a(href, ng-click="stop_on_validation_error = false")
+						i.fa.fa-fw(ng-class="{'fa-check': !stop_on_validation_error}")
+						| &nbsp;#{translate("ignore_validation_errors")}
 				li.dropdown-header #{translate("file_checks")}
 				li
 					a(href, ng-click="recompile({check:true})")
@@ -204,6 +213,13 @@ div.full-size.pdf(ng-controller="PdfController")
 
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
+				p.force-recompile(ng-if="$first && !check && stop_on_validation_error")
+					a.btn.btn-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({force:true})"
+					)
+						span() #{translate("force_recompile")}
 		p
 			.files-dropdown-container
 				a.btn.btn-default.btn-sm(

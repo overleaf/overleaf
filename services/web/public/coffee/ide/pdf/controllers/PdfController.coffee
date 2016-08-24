@@ -73,6 +73,12 @@ define [
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
+		# abort compile if syntax checks fail
+		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}") or ide.$scope?.user?.betaProgram
+		$scope.$watch "stop_on_validation_error", (new_value, old_value) ->
+			if new_value? and old_value != new_value
+				localStorage("stop_on_validation_error:#{$scope.project_id}", new_value)
+
 		$scope.draft = localStorage("draft:#{$scope.project_id}") or false
 		$scope.$watch "draft", (new_value, old_value) ->
 			if new_value? and old_value != new_value
@@ -83,10 +89,17 @@ define [
 			params = {}
 			if options.isAutoCompile
 				params["auto_compile"]=true
+			# keep track of whether this is a compile or check
+			$scope.check = if options.check then true else false
+			# send appropriate check type to clsi
+			checkType = switch
+				when $scope.check then "validate" # validate only
+				when $scope.stop_on_validation_error then "error" # try to compile
+				else "silent" # ignore errors
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
-				check: if options.check then "validate" else "silent"
+				check: checkType
 				_csrf: window.csrfToken
 			}, {params: params}
 
@@ -346,6 +359,11 @@ define [
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
+
+			if options?.force
+				# for forced compile, turn off validation check
+				$scope.stop_on_validation_error = false
+				$scope.shouldShowLogs = false # hide the logs while compiling
 
 			ide.$scope.$broadcast("flush-changes")
 
