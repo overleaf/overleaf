@@ -27,8 +27,8 @@ module.exports = CommandRunner =
 				err = new Error("terminated")
 				err.terminated = true
 				return callback(err)
-			else if code
-				err = new Error("exit")
+			else if code is 1 # exit status from chktex
+				err = new Error("exited")
 				err.code = code
 				return callback(err)
 			else
