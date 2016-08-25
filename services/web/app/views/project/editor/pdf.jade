@@ -114,19 +114,19 @@ div.full-size.pdf(ng-controller="PdfController")
 			span #{translate("generic_failed_compile_message")}.
 
 		.alert.alert-danger(ng-show="pdf.failedCheck")
-			div
+			.card
 				strong #{translate("failed_compile_check")}.
-			div(ng-show="!check")
-				a(
-					href,
-					ng-disabled="pdf.compiling",
-					ng-click="recompile({try:true})"
-				) #{translate("failed_compile_check_try")}
-				a(
-					href,
-					ng-disabled="pdf.compiling",
-					ng-click="recompile({force:true})"
-				) #{translate("failed_compile_check_ignore")}
+				div(ng-show="!check")
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({try:true})"
+					) #{translate("failed_compile_check_try")}&nbsp;(
+					a.text-info(
+						href,
+						ng-disabled="pdf.compiling",
+						ng-click="recompile({force:true})"
+					) #{translate("failed_compile_check_ignore")})
 
 		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
 			.alert(
