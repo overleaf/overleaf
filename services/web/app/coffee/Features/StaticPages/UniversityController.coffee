@@ -8,7 +8,7 @@ sanitize = require('sanitizer')
 Settings = require("settings-sharelatex")
 contentful = require('contentful')
 marked = require("marked")
-
+sixpack = require("../../infrastructure/Sixpack")
 
 
 
@@ -36,8 +36,13 @@ module.exports = UniversityController =
 
 
 	getIndexPage: (req, res)->
-		req.url = "/university/index.html"
-		UniversityController.getPage req, res
+		client = sixpack.client(req?.session?.user?._id?.toString() || req.ip)
+		client.participate 'instapage-pages', ['default', 'instapage'], (err, response)->
+			if response?.alternative?.name == "instapage"
+				return res.redirect("/i/university")
+			else
+				req.url = "/university/index.html"
+				UniversityController.getPage req, res
 
 	_directProxy: (originUrl, res)->
 		upstream = request.get(originUrl)
