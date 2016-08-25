@@ -280,7 +280,7 @@ define [
 						else
 							warnings.push result
 				all = [].concat errors, warnings
-				logHints = HumanReadableLogs.parse {type: "Validation", all, errors, warnings}
+				logHints = HumanReadableLogs.parse {type: "Syntax", all, errors, warnings}
 				accumulateResults logHints
 
 			processBiber = (log) ->
