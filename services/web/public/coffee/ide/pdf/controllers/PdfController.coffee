@@ -89,11 +89,14 @@ define [
 			params = {}
 			if options.isAutoCompile
 				params["auto_compile"]=true
+			# if the previous run was a check, clear the error logs
+			$scope.pdf.logEntries = [] if $scope.check
 			# keep track of whether this is a compile or check
 			$scope.check = if options.check then true else false
 			# send appropriate check type to clsi
 			checkType = switch
 				when $scope.check then "validate" # validate only
+				when options.try then "silent" # allow use to try compile once
 				when $scope.stop_on_validation_error then "error" # try to compile
 				else "silent" # ignore errors
 			return $http.post url, {
@@ -119,6 +122,7 @@ define [
 			$scope.pdf.projectTooLarge = false
 			$scope.pdf.compileTerminated = false
 			$scope.pdf.compileExited = false
+			$scope.pdf.failedCheck = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -147,6 +151,7 @@ define [
 				$scope.pdf.view = 'pdf'
 				$scope.pdf.url = last_pdf_url
 				$scope.shouldShowLogs = true
+				$scope.pdf.failedCheck = true if response.status is "validation-fail"
 				fetchLogs(fileByPath, { validation: true })
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
@@ -363,6 +368,9 @@ define [
 			if options?.force
 				# for forced compile, turn off validation check
 				$scope.stop_on_validation_error = false
+				$scope.shouldShowLogs = false # hide the logs while compiling
+
+			if options?.try
 				$scope.shouldShowLogs = false # hide the logs while compiling
 
 			ide.$scope.$broadcast("flush-changes")
