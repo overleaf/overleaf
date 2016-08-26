@@ -93,6 +93,7 @@ define [
 			$scope.pdf.logEntries = [] if $scope.check
 			# keep track of whether this is a compile or check
 			$scope.check = if options.check then true else false
+			event_tracking.sendMB "syntax-check-request" if options.check
 			# send appropriate check type to clsi
 			checkType = switch
 				when $scope.check then "validate" # validate only
@@ -152,6 +153,7 @@ define [
 				$scope.pdf.url = last_pdf_url
 				$scope.shouldShowLogs = true
 				$scope.pdf.failedCheck = true if response.status is "validation-fail"
+				event_tracking.sendMB "syntax-check-#{response.status}"
 				fetchLogs(fileByPath, { validation: true })
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
@@ -281,6 +283,7 @@ define [
 							warnings.push result
 				all = [].concat errors, warnings
 				logHints = HumanReadableLogs.parse {type: "Syntax", all, errors, warnings}
+				event_tracking.sendMB "syntax-check-return-count", {errors:errors.length, warnings:warnings.length}
 				accumulateResults logHints
 
 			processBiber = (log) ->
@@ -366,12 +369,14 @@ define [
 			$scope.pdf.compiling = true
 
 			if options?.force
-				# for forced compile, turn off validation check
+				# for forced compile, turn off validation check and ignore errors
 				$scope.stop_on_validation_error = false
 				$scope.shouldShowLogs = false # hide the logs while compiling
+				event_tracking.sendMB "syntax-check-turn-off-checking"
 
 			if options?.try
 				$scope.shouldShowLogs = false # hide the logs while compiling
+				event_tracking.sendMB "syntax-check-try-compile-anyway"
 
 			ide.$scope.$broadcast("flush-changes")
 
