@@ -160,19 +160,15 @@
 
 					.row
 						.col-md-offset-4.col-md-4
-							.dropdown(dropdown)
+							.dropdown.minimal-create-proj-dropdown(dropdown)
 								a.btn.btn-success.dropdown-toggle(
 									href="#",
 									data-toggle="dropdown",
 									dropdown-toggle
 								)
 									| Create First Project
-								style.
-									.dropdown{text-align:center;}
-									.button, .dropdown-menu{margin:2px auto}
-									.dropdown-menu{width:200px; left:50%; margin-left:-100px;}
 
-								ul.dropdown-menu(role="menu", style="text-align:center;")
+								ul.dropdown-menu.minimal-create-proj-dropdown-menu(role="menu", style="text-align:center;")
 									li
 										a(
 											href,
