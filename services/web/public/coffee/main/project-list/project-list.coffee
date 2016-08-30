@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, sixpack) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.notifications = window.data.notifications
@@ -12,14 +12,10 @@ define [
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
 
-		if $scope.projects.length > 0
-			$scope.first_sign_up = "default"
-		else
-			sixpack.participate 'first_sign_up', ['default', 'minimial'], (chosenVariation, rawResponse)->
-				$scope.first_sign_up = chosenVariation
-				$timeout () ->
-					recalculateProjectListHeight()
-				, 10
+		if $scope.projects.length == 0
+			$timeout () ->
+				recalculateProjectListHeight()
+			, 10
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top
