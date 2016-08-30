@@ -36,11 +36,19 @@ div.full-size.pdf(ng-controller="PdfController")
 						i.fa.fa-fw(ng-class="{'fa-check': draft}")
 						| &nbsp;#{translate("fast")}&nbsp;
 						span.subdued [draft]
-				li.dropdown-header #{translate("file_checks")}
+				li.dropdown-header #{translate("compile_time_checks")}
+				li
+					a(href, ng-click="stop_on_validation_error = true")
+						i.fa.fa-fw(ng-class="{'fa-check': stop_on_validation_error}")
+						| &nbsp;#{translate("stop_on_validation_error")}
+				li
+					a(href, ng-click="stop_on_validation_error = false")
+						i.fa.fa-fw(ng-class="{'fa-check': !stop_on_validation_error}")
+						| &nbsp;#{translate("ignore_validation_errors")}
 				li
 					a(href, ng-click="recompile({check:true})")
 						i.fa.fa-fw()
-						| &nbsp;#{translate("run_syntax_check")}
+						| &nbsp;#{translate("run_syntax_check_now")}
 		a(
 			href
 			ng-click="stop()"
@@ -104,6 +112,23 @@ div.full-size.pdf(ng-controller="PdfController")
 		.alert.alert-danger(ng-show="pdf.failure")
 			strong #{translate("compile_error")}. 
 			span #{translate("generic_failed_compile_message")}.
+
+		.alert.alert-danger(ng-show="pdf.failedCheck")
+			strong #{translate("failed_compile_check")}.
+			p
+			p.text-center(ng-show="!check")
+				a.text-info(
+					href,
+					ng-disabled="pdf.compiling",
+					ng-click="recompile({try:true})"
+				) #{translate("failed_compile_check_try")}
+				| &#32;#{translate("failed_compile_option_or")}&#32;
+				a.text-info(
+					href,
+					ng-disabled="pdf.compiling",
+					ng-click="recompile({force:true})"
+				) #{translate("failed_compile_check_ignore")}
+				| .
 
 		div(ng-repeat="entry in pdf.logEntries.all", ng-controller="PdfLogEntryController")
 			.alert(
