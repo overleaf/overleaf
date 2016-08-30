@@ -14,7 +14,11 @@ module.exports =
 			logger.log user_id:user_id, "got users subscription"
 			callback(err, subscription)
 
-	getMemberSubscriptions: (user_id, callback) ->
+	getMemberSubscriptions: (user_or_id, callback) ->
+		if user_or_id? and user_or_id._id?
+			user_id = user_or_id._id
+		else if user_or_id?
+			user_id = user_or_id
 		logger.log user_id: user_id, "getting users group subscriptions"
 		Subscription.find(member_ids: user_id).populate("admin_id").exec callback
 
