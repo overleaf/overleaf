@@ -23,7 +23,7 @@ block content
 		.container
 				
 			.row(ng-cloak)
-				span(ng-show="first_sign_up == 'default' || projects.length > 0")
+				span(ng-if="projects.length > 0")
 					aside.col-md-2.col-xs-3
 						include ./list/side-bar
 
@@ -31,8 +31,8 @@ block content
 						include ./list/notifications
 						include ./list/project-list
 				
-				span(ng-if="first_sign_up == 'minimial' && projects.length == 0")
+				span(ng-if="projects.length === 0")
 					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
-						include ./list/project-list-minimal
+						include ./list/empty-project-list
 
 		include ./list/modals
