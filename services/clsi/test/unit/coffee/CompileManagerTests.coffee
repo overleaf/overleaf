@@ -47,6 +47,7 @@ describe "CompileManager", ->
 				compiler: @compiler = "pdflatex"
 				timeout: @timeout = 42000
 				imageName: @image = "example.com/image"
+			@env = {}
 			@Settings.compileDir = "compiles"
 			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArg(3)
@@ -72,6 +73,7 @@ describe "CompileManager", ->
 						compiler:  @compiler
 						timeout:   @timeout
 						image:     @image
+						environment: @env
 					})
 					.should.equal true
 
@@ -200,8 +202,8 @@ describe "CompileManager", ->
 
 	describe "wordcount", ->
 		beforeEach ->
-			@CommandRunner.run = sinon.stub().callsArg(5)
-			@fs.readFileSync = sinon.stub().returns @stdout = "Encoding: ascii\nWords in text: 2"
+			@CommandRunner.run = sinon.stub().callsArg(6)
+			@fs.readFile = sinon.stub().callsArgWith(2, null, @stdout = "Encoding: ascii\nWords in text: 2")
 			@callback  = sinon.stub()
 
 			@project_id = "project-id-123"
@@ -215,10 +217,10 @@ describe "CompileManager", ->
 		it "should run the texcount command", ->
 			@directory = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@file_path = "$COMPILE_DIR/#{@file_name}"
-			@command =[ "texcount", "-inc", @file_path, "-out=" + @file_path + ".wc"]
+			@command =[ "texcount", "-nocol", "-inc", @file_path, "-out=" + @file_path + ".wc"]
 			
 			@CommandRunner.run
-				.calledWith("#{@project_id}-#{@user_id}", @command, @directory, @image, @timeout)
+				.calledWith("#{@project_id}-#{@user_id}", @command, @directory, @image, @timeout, {})
 				.should.equal true
 
 		it "should call the callback with the parsed output", ->
@@ -232,5 +234,7 @@ describe "CompileManager", ->
 					elements: 0
 					mathInline: 0
 					mathDisplay: 0
+					errors: 0
+					messages: ""
 				})
 				.should.equal true

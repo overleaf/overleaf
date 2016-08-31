@@ -28,7 +28,7 @@ module.exports = CompileManager =
 		compileDir = getCompileDir(request.project_id, request.user_id)
 
 		timer = new Metrics.Timer("write-to-disk")
-		logger.log project_id: request.project_id, user_id: request.user_id, "starting compile"
+		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
 		ResourceWriter.syncResourcesToDisk request.project_id, request.resources, compileDir, (error) ->
 			if error?
 				logger.err err:error, project_id: request.project_id, user_id: request.user_id, "error writing resources to disk"
@@ -41,7 +41,16 @@ module.exports = CompileManager =
 					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
 				else
 					callback()
-			
+
+			# set up environment variables for chktex
+			env = {}
+			if request.check?
+				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16'
+				if request.check is 'error'
+					env['CHKTEX_EXIT_ON_ERROR'] =  1
+				if request.check is 'validate'
+					env['CHKTEX_VALIDATE'] =  1
+
 			injectDraftModeIfRequired (error) ->
 				return callback(error) if error?
 				timer = new Metrics.Timer("run-compile")
@@ -57,7 +66,24 @@ module.exports = CompileManager =
 					compiler:  request.compiler
 					timeout:   request.timeout
 					image:     request.imageName
+					environment: env
 				}, (error, output, stats, timings) ->
+					# request was for validation only
+					if request.check is "validate"
+						result = if error?.code then "fail" else "pass"
+						error = new Error("validation")
+						error.validate = result
+					# request was for compile, and failed on validation
+					if request.check is "error" and error?.message is 'exited'
+						error = new Error("compilation")
+						error.validate = "fail"
+					# compile was killed by user, was a validation, or a compile which failed validation
+					if error?.terminated or error?.validate
+						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
+							return callback(err) if err?
+							callback(error, outputFiles) # return output files so user can check logs
+						return
+					# compile completed normally
 					return callback(error) if error?
 					Metrics.inc("compiles-succeeded")
 					for metric_key, metric_value of stats or {}
@@ -78,6 +104,10 @@ module.exports = CompileManager =
 						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 							callback null, newOutputFiles
 	
+	stopCompile: (project_id, user_id, callback = (error) ->) ->
+		compileName = getCompileName(project_id, user_id)
+		LatexRunner.killLatex compileName, callback
+
 	clearProject: (project_id, user_id, _callback = (error) ->) ->
 		callback = (error) ->
 			_callback(error)
@@ -163,6 +193,8 @@ module.exports = CompileManager =
 	_runSynctex: (args, callback = (error, stdout) ->) ->
 		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
 		seconds = 1000
+		if Settings.clsi?.synctexCommandWrapper?
+			[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
 		child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
 			if error?
 				logger.err err:error, args:args, "error running synctex"
@@ -199,19 +231,20 @@ module.exports = CompileManager =
 	wordcount: (project_id, user_id, file_name, image, callback = (error, pdfPositions) ->) ->
 		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
-		command = [ "texcount", '-inc', file_path, "-out=" + file_path + ".wc"]
+		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
 		directory = getCompileDir(project_id, user_id)
 		timeout = 10 * 1000
 		compileName = getCompileName(project_id, user_id)
 
-		CommandRunner.run compileName, command, directory, image, timeout, (error) ->
+		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
 			return callback(error) if error?
-			try
-				stdout = fs.readFileSync(directory + "/" + file_name + ".wc", "utf-8")
-			catch err
-				logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
-				return callback(err)
-			callback null, CompileManager._parseWordcountFromOutput(stdout)
+			fs.readFile directory + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
+				if err?
+					logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
+					return callback(err)
+				results = CompileManager._parseWordcountFromOutput(stdout)
+				logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
+				callback null, results
 
 	_parseWordcountFromOutput: (output) ->
 		results = {
@@ -223,6 +256,8 @@ module.exports = CompileManager =
 			elements: 0
 			mathInline: 0
 			mathDisplay: 0
+			errors: 0
+			messages: ""
 		}
 		for line in output.split("\n")
 			[data, info] = line.split(":")
@@ -242,4 +277,8 @@ module.exports = CompileManager =
 				results['mathInline'] = parseInt(info, 10)
 			if data.indexOf("Number of math displayed") > -1
 				results['mathDisplay'] = parseInt(info, 10)
+			if data is "(errors"  # errors reported as (errors:123)
+				results['errors'] = parseInt(info, 10)
+			if line.indexOf("!!! ") > -1  # errors logged as !!! message !!!
+				results['messages'] += line + "\n"
 		return results

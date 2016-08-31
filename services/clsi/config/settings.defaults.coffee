@@ -28,6 +28,9 @@ module.exports =
 	# 		modem:
 	# 			socketPath: false
 	# 		user: "tex"
+	# 		latexmkCommandPrefix: []
+	# 		# latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
+	# 		# latexmkCommandPrefix: ["/usr/local/bin/gtime", "-v"]  # on Mac OSX, installed with `brew install gnu-time`
 
 	internal:
 		clsi:
@@ -41,5 +44,5 @@ module.exports =
 			url: "http://localhost:3013"
 			
 	smokeTest: false
-	project_cache_length_ms: 60 * 60 * 24
+	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1

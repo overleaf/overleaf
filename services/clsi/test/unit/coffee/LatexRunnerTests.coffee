@@ -22,10 +22,11 @@ describe "LatexRunner", ->
 		@image     = "example.com/image"
 		@callback  = sinon.stub()
 		@project_id = "project-id-123"
+		@env       = {'foo': '123'}
 
 	describe "runLatex", ->
 		beforeEach ->
-			@CommandRunner.run = sinon.stub().callsArg(5)
+			@CommandRunner.run = sinon.stub().callsArg(6)
 
 		describe "normally", ->
 			beforeEach ->
@@ -35,11 +36,12 @@ describe "LatexRunner", ->
 					compiler:  @compiler
 					timeout:   @timeout = 42000
 					image:     @image
+					environment: @env
 					@callback
 
 			it "should run the latex command", ->
 				@CommandRunner.run
-					.calledWith(@project_id, sinon.match.any, @directory, @image, @timeout)
+					.calledWith(@project_id, sinon.match.any, @directory, @image, @timeout, @env)
 					.should.equal true
 
 		describe "with an .Rtex main file", ->
