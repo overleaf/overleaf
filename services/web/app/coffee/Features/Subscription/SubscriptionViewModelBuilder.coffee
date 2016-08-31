@@ -16,6 +16,9 @@ module.exports =
 				if subscription?
 					return callback(error) if error?
 					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+					if !plan?
+						err = new Error('No plan found for planCode "#{subscription.planCode}"')
+						return callback(err)
 					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
 						tax = recurlySubscription?.tax_in_cents || 0
 						callback null, {
