@@ -151,9 +151,9 @@ module.exports = CompileController =
 		{page, h, v} = req.query
 		if not page?.match(/^\d+$/)
 			return next(new Error("invalid page parameter"))
-		if not h?.match(/^\d+\.\d+$/)
+		if not h?.match(/^-?\d+\.\d+$/)
 			return next(new Error("invalid h parameter"))
-		if not v?.match(/^\d+\.\d+$/)
+		if not v?.match(/^-?\d+\.\d+$/)
 			return next(new Error("invalid v parameter"))
 		# whether this request is going to a per-user container
 		CompileController._compileAsUser req, (error, user_id) ->
