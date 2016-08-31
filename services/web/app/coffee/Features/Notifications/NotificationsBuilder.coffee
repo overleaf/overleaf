@@ -11,7 +11,7 @@ module.exports =
 			messageOpts =
 				groupName: licence.name
 				subscription_id: licence.subscription_id
-			logger.log user_id:user._id, key:key, "creating notification key for user"
+			logger.log user_id:user._id, key: @key, "creating notification key for user"
 			NotificationsHandler.createNotification user._id, @key, "notification_group_invite", messageOpts, null, callback
 
 		read: (callback = ->)->
