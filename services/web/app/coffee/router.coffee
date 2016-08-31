@@ -22,6 +22,7 @@ UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
+ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
@@ -251,9 +252,11 @@ module.exports = class Router
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
 				res.status statusCode
 				res.send message
+				ClsiCookieManager.clearServerId project_id # force every compile to a new server
 			# set a timeout
 			handler = setTimeout (() ->
 				sendRes 500, "Compiler timed out"
@@ -262,7 +265,7 @@ module.exports = class Router
 			# use a valid user id for testing
 			test_user_id = "123456789012345678901234"
 			# run the compile
-			CompileManager.compile req.params.Project_id, test_user_id, {}, (error, status) ->
+			CompileManager.compile project_id, test_user_id, {}, (error, status) ->
 				clearTimeout handler if handler?
 				if error?
 					sendRes 500, "Compiler returned error #{error.message}"
