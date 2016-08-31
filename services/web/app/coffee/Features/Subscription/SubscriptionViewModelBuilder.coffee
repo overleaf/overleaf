@@ -4,6 +4,7 @@ PlansLocator = require("./PlansLocator")
 SubscriptionFormatters = require("./SubscriptionFormatters")
 LimitationsManager = require("./LimitationsManager")
 SubscriptionLocator = require("./SubscriptionLocator")
+logger = require('logger-sharelatex')
 _ = require("underscore")
 
 module.exports =
@@ -17,7 +18,8 @@ module.exports =
 					return callback(error) if error?
 					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
 					if !plan?
-						err = new Error('No plan found for planCode "#{subscription.planCode}"')
+						err = new Error("No plan found for planCode '#{subscription.planCode}'")
+						logger.error {user_id: user._id, err}, "error getting subscription plan for user"
 						return callback(err)
 					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
 						tax = recurlySubscription?.tax_in_cents || 0
