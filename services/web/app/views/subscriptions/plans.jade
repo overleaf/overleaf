@@ -139,7 +139,10 @@ block content
 											li &nbsp;
 											li
 												br
-												a.btn.btn-info(href="/register") #{translate("sign_up_now")}
+												a.btn.btn-info(
+													href="/register"
+													style=(getLoggedInUserId() === undefined ? "" : "visibility: hidden")
+												) #{translate("sign_up_now")}
 								
 								.col-md-4
 									.card.card-highlighted
