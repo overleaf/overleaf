@@ -18,14 +18,15 @@ describe "DocManager", ->
 				err:->
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
+		@another_project_id = ObjectId().toString()
 		@callback = sinon.stub()
 		@stubbedError = new Error("blew up")
 
 	describe "getDoc", ->
 		beforeEach ->
 			@project = { name: "mock-project" }
-			@doc = { _id: @doc_id, lines: ["mock-lines"] }
-			@docCollectionDoc = { _id: @doc_id, lines: ["mock-lines"] }
+			@doc = { _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }
+			@docCollectionDoc = { _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }
 
 		describe "when the doc is in the doc collection not projects collection", ->
 
@@ -33,24 +34,24 @@ describe "DocManager", ->
 				@MongoManager.findDoc = sinon.stub()
 
 			it "should get the doc from the doc collection when it is present there", (done)->
-				@MongoManager.findDoc.callsArgWith(1, null, @docCollectionDoc)
+				@MongoManager.findDoc.callsArgWith(2, null, @docCollectionDoc)
 				@DocManager.getDoc @project_id, @doc_id, (err, doc)=>
 					doc.should.equal @docCollectionDoc
 					done()
 
 			it "should return the error from find doc", (done)->
-				@MongoManager.findDoc.callsArgWith(1, @stubbedError)
+				@MongoManager.findDoc.callsArgWith(2, @stubbedError)
 				@DocManager.getDoc @project_id, @doc_id, (err, doc)=>
 					err.should.equal @stubbedError
 					done()
 
 		describe "when the doc is deleted", ->
 			beforeEach -> 
-				@doc = { _id: @doc_id, lines: ["mock-lines"] }
-				@s3doc = { _id: @doc_id, inS3: true }
+				@doc = { _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }
+				@s3doc = { _id: @doc_id, project_id: @project_id, inS3: true }
 				@MongoManager.findDoc = sinon.stub()
-				@MongoManager.findDoc.callsArgWith(1, null, @s3doc)
-				@MongoManager.findDoc.callsArgWith(1, null, @doc)
+				@MongoManager.findDoc.callsArgWith(2, null, @s3doc)
+				@MongoManager.findDoc.callsArgWith(2, null, @doc)
 				spy = sinon.spy @DocManager.getDoc
 				@DocArchiveManager.unarchiveDoc = sinon.stub().callsArgWith(2)
 				@DocManager.getDoc @project_id, @doc_id, @callback
@@ -63,13 +64,13 @@ describe "DocManager", ->
 
 		describe "when the doc is in s3", ->
 			beforeEach -> 
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, @doc)
 
 				@DocManager.getDoc @project_id, @doc_id, @callback
 
 		describe "when the doc does not exist anywhere", ->
 			beforeEach -> 
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, null)
 				@DocManager.getDoc @project_id, @doc_id, @callback
 
 			it "should return a NotFoundError", ->
@@ -80,7 +81,7 @@ describe "DocManager", ->
 	describe "getAllDocs", ->
 		describe "when the project exists", ->
 			beforeEach -> 
-				@docs = [{ _id: @doc_id, lines: ["mock-lines"] }]
+				@docs = [{ _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }]
 				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@DocManager.getAllDocs @project_id, @callback
@@ -150,19 +151,19 @@ describe "DocManager", ->
 		beforeEach ->
 			@oldDocLines = ["old", "doc", "lines"]
 			@newDocLines = ["new", "doc", "lines"]
-			@doc = { _id: @doc_id, lines: @oldDocLines, rev: @rev = 5 }
+			@doc = { _id: @doc_id, project_id: @project_id, lines: @oldDocLines, rev: @rev = 5 }
 
 			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
 			@MongoManager.findDoc = sinon.stub()
 
 		describe "when the doc lines have changed", ->
 			beforeEach ->
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 
 			it "should get the existing doc", ->
 				@MongoManager.findDoc
-					.calledWith(@doc_id)
+					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
 			it "should upsert the document to the doc collection", ->
@@ -189,7 +190,7 @@ describe "DocManager", ->
 
 			beforeEach ->
 				@error =  new Error("doc could not be found")
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, @error, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, @error, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 			
 			it "should not upsert the document to the doc collection", ->
@@ -200,7 +201,7 @@ describe "DocManager", ->
 
 		describe "when the doc lines have not changed", ->
 			beforeEach ->
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines.slice(), @callback
 
 			it "should not update the doc", ->
@@ -214,7 +215,7 @@ describe "DocManager", ->
 			beforeEach ->
 
 				@doc.lines = []
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, @doc)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @doc.lines, @callback
 
 			it "should upsert the document to the doc collection", ->
@@ -225,7 +226,7 @@ describe "DocManager", ->
 
 		describe "when the doc does not exist", ->
 			beforeEach ->
-				@MongoManager.findDoc = sinon.stub().callsArgWith(1, null, null, null)
+				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @callback
 			
 			it "should upsert the document to the doc collection", ->

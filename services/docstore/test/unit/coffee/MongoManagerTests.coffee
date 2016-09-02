@@ -18,14 +18,15 @@ describe "MongoManager", ->
 
 	describe "findDoc", ->
 		beforeEach ->
-			@doc = { name: "mock-doc" }
+			@doc = { name: "mock-doc"}
 			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc])
-			@MongoManager.findDoc @doc_id, @callback
+			@MongoManager.findDoc @project_id, @doc_id, @callback
 
 		it "should find the doc", ->
 			@db.docs.find
 				.calledWith({
 					_id: ObjectId(@doc_id)
+					project_id: ObjectId(@project_id)
 				}, {})
 				.should.equal true
 

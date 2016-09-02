@@ -2,8 +2,8 @@
 
 module.exports = MongoManager =
 
-	findDoc: (doc_id, callback = (error, doc) ->) ->
-		db.docs.find _id: ObjectId(doc_id.toString()), {}, (error, docs = []) ->
+	findDoc: (project_id, doc_id, callback = (error, doc) ->) ->
+		db.docs.find {_id: ObjectId(doc_id.toString()), project_id: ObjectId(project_id.toString())}, {}, (error, docs = []) ->
 			callback error, docs[0]
 
 	getProjectsDocs: (project_id, callback)->

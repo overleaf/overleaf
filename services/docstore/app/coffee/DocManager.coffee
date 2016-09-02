@@ -7,7 +7,7 @@ DocArchive = require "./DocArchiveManager"
 module.exports = DocManager =
 
 	getDoc: (project_id, doc_id, callback = (error, doc) ->) ->
-		MongoManager.findDoc doc_id, (err, doc)->
+		MongoManager.findDoc project_id, doc_id, (err, doc)->
 			if err?
 				return callback(err)
 			else if !doc?
