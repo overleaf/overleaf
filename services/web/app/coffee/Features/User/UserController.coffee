@@ -84,6 +84,7 @@ module.exports = UserController =
 		logger.log user: req?.session?.user, "logging out"
 		sessionId = req.sessionID
 		user = req?.session?.user
+		req.logout?()  # passport logout
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'

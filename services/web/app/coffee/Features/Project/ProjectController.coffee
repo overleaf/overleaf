@@ -45,10 +45,10 @@ module.exports = ProjectController =
 		async.series jobs, (error) ->
 			return next(error) if error?
 			res.sendStatus(204)
-			
+
 	updateProjectAdminSettings: (req, res, next) ->
 		project_id = req.params.Project_id
-		
+
 		jobs = []
 		if req.body.publicAccessLevel?
 			jobs.push (callback) ->
@@ -149,7 +149,7 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
-				notifications = require("underscore").map results.notifications, (notification)-> 
+				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]

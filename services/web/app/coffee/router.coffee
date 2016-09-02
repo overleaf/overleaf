@@ -43,6 +43,7 @@ AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
+passport = require('passport')
 
 module.exports = class Router
 	constructor: (webRouter, apiRouter)->
@@ -53,7 +54,10 @@ module.exports = class Router
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
-		webRouter.post '/login', AuthenticationController.login
+		# webRouter.post '/login', AuthenticationController.login
+		webRouter.post '/login', passport.authenticate('local'), AuthenticationController.login, (req, res) ->
+			console.log ">> login done", req._redir
+			res.json {redir: req._redir}
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
@@ -71,7 +75,7 @@ module.exports = class Router
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
 		AnalyticsRouter.apply(webRouter, apiRouter)
-		
+
 		Modules.applyRouter(webRouter, apiRouter)
 
 
@@ -182,7 +186,7 @@ module.exports = class Router
 		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
 
 		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
-		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead	
+		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails

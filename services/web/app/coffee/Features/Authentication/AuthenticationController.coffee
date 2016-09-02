@@ -16,6 +16,54 @@ module.exports = AuthenticationController =
 	login: (req, res, next = (error) ->) ->
 		AuthenticationController.doLogin req.body, req, res, next
 
+	serializeUser: (user, callback) ->
+		console.log ">> serialize", user._id
+		lightUser =
+			_id: user._id
+			first_name: user.first_name
+			last_name: user.last_name
+			isAdmin: user.isAdmin
+			email: user.email
+			referal_id: user.referal_id
+			session_created: (new Date()).toISOString()
+			ip_address: user._login_req_ip
+		callback(null, lightUser)
+
+	deserializeUser: (user, cb) ->
+		console.log ">> de-serialize", user._id
+		cb(null, user)
+
+	doPassportLogin: (req, username, password, done) ->
+		email = username.toLowerCase()
+		redir = Url.parse(req?.body?.redir or "/project").path
+		console.log ">> doing passport login", username, password, redir
+		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+			return done(err) if err?
+			if !isAllowed
+				logger.log email:email, "too many login requests"
+				return done(null, null, {message: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
+			AuthenticationManager.authenticate email: email, password, (error, user) ->
+				return done(error) if error?
+				if user?
+					# async actions
+					UserHandler.setupLoginData(user, ()->)
+					LoginRateLimiter.recordSuccessfulLogin(email)
+					AuthenticationController._recordSuccessfulLogin(user._id)
+					Analytics.recordEvent(user._id, "user-logged-in")
+					UserSessionsManager.trackSession(user, req.sessionID, () ->)
+					req.session.justLoggedIn = true
+					logger.log email: email, user_id: user._id.toString(), "successful log in"
+					# capture the request ip for use when creating the session
+					user._login_req_ip = req.ip
+					req._redir = redir
+					console.log ">> done, returning user"
+					return done(null, user)
+				else
+					AuthenticationController._recordFailedLogin()
+					logger.log email: email, "failed log in"
+					return done(null, false, {message: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
+
+
 	doLogin: (options, req, res, next) ->
 		email = options.email?.toLowerCase()
 		password = options.password
