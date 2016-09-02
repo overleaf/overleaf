@@ -2,11 +2,6 @@ MongoManager = require "./MongoManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
 _ = require "underscore"
-async = require "async"
-settings = require("settings-sharelatex")
-request = require("request")
-crypto = require("crypto")
-thirtySeconds = 30 * 1000
 DocArchive = require "./DocArchiveManager"
 
 module.exports = DocManager =
