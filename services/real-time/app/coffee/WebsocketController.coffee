@@ -113,7 +113,7 @@ module.exports = WebsocketController =
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				if error?
 					logger.warn {client_id: client.id, project_id, user_id}, "silently ignoring unauthorized updateClientPosition. Client likely hasn't called joinProject yet."
-					callback()
+					return callback()
 				cursorData.id      = client.id
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
