@@ -16,6 +16,18 @@ app = express()
 
 app.use Metrics.http.monitor(logger)
 
+app.param 'project_id', (req, res, next, project_id) ->
+	if project_id?.match /^[0-9a-f]{24}$/
+		next()
+	else
+		next new Error("invalid project id")
+
+app.param 'doc_id', (req, res, next, doc_id) ->
+	if doc_id?.match /^[0-9a-f]{24}$/
+		next()
+	else
+		next new Error("invalid doc id")
+
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
