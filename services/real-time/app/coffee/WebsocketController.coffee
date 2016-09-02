@@ -91,6 +91,7 @@ module.exports = WebsocketController =
 							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
 							return callback(err)
 						escapedLines.push line
+					AuthorizationManager.addAccessToDoc client, doc_id
 					client.join(doc_id)
 					callback null, escapedLines, version, ops
 					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
@@ -99,8 +100,9 @@ module.exports = WebsocketController =
 		metrics.inc "editor.leave-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
-		client.leave doc_id
-		callback()
+			client.leave doc_id
+			AuthorizationManager.removeAccessToDoc client, doc_id # may not be needed, could block updates?
+			callback()
 		
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
 		metrics.inc "editor.update-client-position", 0.1
@@ -110,7 +112,7 @@ module.exports = WebsocketController =
 			return callback(error) if error?
 			logger.log {user_id, project_id, client_id: client.id, cursorData: cursorData}, "updating client position"
 					
-			AuthorizationManager.assertClientCanViewProject client, (error) ->
+			AuthorizationManager.assertClientCanViewProjectAndDoc client, cursorData.doc_id, (error) ->
 				if error?
 					logger.warn {client_id: client.id, project_id, user_id}, "silently ignoring unauthorized updateClientPosition. Client likely hasn't called joinProject yet."
 					return callback()
@@ -133,7 +135,7 @@ module.exports = WebsocketController =
 					cursorData.name = "Anonymous"
 					callback()
 				WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
-		
+
 	getConnectedUsers: (client, callback = (error, users) ->) ->
 		metrics.inc "editor.get-connected-users"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
@@ -157,7 +159,7 @@ module.exports = WebsocketController =
 			return callback(new Error("no project_id found on client")) if !project_id?
 			# Omit this logging for now since it's likely too noisey
 			#logger.log {user_id, project_id, doc_id, client_id: client.id, update: update}, "applying update"
-			AuthorizationManager.assertClientCanEditProject client, (error) ->
+			AuthorizationManager.assertClientCanEditProjectAndDoc client, doc_id, (error) ->
 				cbc_1++
 				if error?
 					logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"

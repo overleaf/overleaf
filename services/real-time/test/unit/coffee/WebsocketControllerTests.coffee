@@ -172,7 +172,7 @@ describe 'WebsocketController', ->
 			@ops = ["mock", "ops"]
 			
 			@client.params.project_id = @project_id
-			
+			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ops)
 			
@@ -189,6 +189,11 @@ describe 'WebsocketController', ->
 			it "should get the document from the DocumentUpdaterManager", ->
 				@DocumentUpdaterManager.getDocument
 					.calledWith(@project_id, @doc_id, @fromVersion)
+					.should.equal true
+
+			it "should add permissions for the client to access the doc", ->
+				@AuthorizationManager.addAccessToDoc
+					.calledWith(@client, @doc_id)
 					.should.equal true
 					
 			it "should join the client to room for the doc_id", ->
@@ -287,7 +292,7 @@ describe 'WebsocketController', ->
 		beforeEach ->
 			@WebsocketLoadBalancer.emitToRoom = sinon.stub()
 			@ConnectedUsersManager.updateUserPosition = sinon.stub().callsArgWith(4)
-			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
+			@AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub().callsArgWith(2, null)
 			@update = {
 				doc_id: @doc_id = "doc-id-123"
 				row: @row = 42
@@ -362,7 +367,7 @@ describe 'WebsocketController', ->
 			@update = {op: {p: 12, t: "foo"}}
 			@client.params.user_id = @user_id
 			@client.params.project_id = @project_id
-			@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArg(1)
+			@AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub().callsArg(2)
 			@DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
 
 		describe "succesfully", ->
@@ -410,7 +415,7 @@ describe 'WebsocketController', ->
 		describe "when not authorized", ->
 			beforeEach ->
 				@client.disconnect = sinon.stub()
-				@AuthorizationManager.assertClientCanEditProject = sinon.stub().callsArgWith(1, @error = new Error("not authorized"))
+				@AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub().callsArgWith(2, @error = new Error("not authorized"))
 				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			# This happens in a setTimeout to allow the client a chance to receive the error first.
@@ -423,4 +428,3 @@ describe 'WebsocketController', ->
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
-			
