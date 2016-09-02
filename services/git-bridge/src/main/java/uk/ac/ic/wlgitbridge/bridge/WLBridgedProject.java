@@ -48,7 +48,7 @@ public class WLBridgedProject {
         } catch (InvalidProjectException e) {
             throw new RepositoryNotFoundException(name);
         } catch (SnapshotPostException e) {
-            throw new RepositoryNotFoundException(name);
+            throw new ServiceMayNotContinueException(e.getDescriptionLines().get(0), e);
         } catch (GitAPIException e) {
             throw new ServiceMayNotContinueException(e);
         } catch (IOException e) {

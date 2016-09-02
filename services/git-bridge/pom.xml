@@ -16,8 +16,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <compilerArgument></compilerArgument>
                 </configuration>
             </plugin>
@@ -81,12 +81,12 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>3.6.0.201412230720-r</version>
+            <version>4.4.1.201607150455-r</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit.http.server</artifactId>
-            <version>3.6.0.201412230720-r</version>
+            <version>4.4.1.201607150455-r</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
