@@ -24,12 +24,12 @@ describe "DocumentUpdater.getDoc", ->
 
 	describe "when the doc exists in Redis", ->
 		beforeEach ->
-			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, @lines, @version)
+			@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version)
 			@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 		it "should get the doc from Redis", ->
 			@RedisManager.getDoc
-				.calledWith(@doc_id)
+				.calledWith(@project_id, @doc_id)
 				.should.equal true
 		
 		it "should call the callback with the doc info", ->
@@ -40,14 +40,14 @@ describe "DocumentUpdater.getDoc", ->
 
 	describe "when the doc does not exist in Redis", ->
 		beforeEach ->
-			@RedisManager.getDoc = sinon.stub().callsArgWith(1, null, null, null)
+			@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
 			@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version)
 			@RedisManager.putDocInMemory = sinon.stub().callsArg(4)
 			@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 		it "should try to get the doc from Redis", ->
 			@RedisManager.getDoc
-				.calledWith(@doc_id)
+				.calledWith(@project_id, @doc_id)
 				.should.equal true
 
 		it "should get the doc from the PersistenceManager", ->

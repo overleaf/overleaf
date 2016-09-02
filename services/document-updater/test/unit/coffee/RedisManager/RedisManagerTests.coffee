@@ -38,8 +38,8 @@ describe "RedisManager", ->
 			@jsonlines = JSON.stringify @lines
 			@version = 42
 			@rclient.get = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version])
-			@RedisManager.getDoc @doc_id, @callback
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @project_id])
+			@RedisManager.getDoc @project_id, @doc_id, @callback
 		
 		it "should get the lines from redis", ->
 			@rclient.get
@@ -54,6 +54,21 @@ describe "RedisManager", ->
 		it 'should return the document', ->
 			@callback
 				.calledWith(null, @lines, @version)
+				.should.equal true
+
+	describe "getDoc with an invalid project id", ->
+		beforeEach ->
+			@lines = ["one", "two", "three"]
+			@jsonlines = JSON.stringify @lines
+			@version = 42
+			@another_project_id = "project-id-456"
+			@rclient.get = sinon.stub()
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @another_project_id])
+			@RedisManager.getDoc @project_id, @doc_id, @callback
+
+		it 'should return an error', ->
+			@callback
+				.calledWith(new Errors.NotFoundError("not found"))
 				.should.equal true
 
 	describe "getPreviousDocOpsTests", ->
