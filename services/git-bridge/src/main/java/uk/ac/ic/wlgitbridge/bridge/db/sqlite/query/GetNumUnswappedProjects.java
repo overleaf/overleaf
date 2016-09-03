@@ -12,7 +12,7 @@ public class GetNumUnswappedProjects implements SQLQuery<Integer> {
 
     private static final String GET_NUM_UNSWAPPED_PROJECTS =
             "SELECT COUNT(*)\n" +
-            "    FROM `swap_table`\n" +
+            "    FROM `projects`\n" +
             "    WHERE `last_accessed` IS NOT NULL";
 
     @Override

@@ -35,21 +35,4 @@ public interface DBStore {
      */
     void setLastAccessedTime(String projectName, Timestamp time);
 
-    /**
-     * Sets the last accessed time for the given project name,
-     * ONLY if it is not already in the database.
-     *
-     * This is useful if the server crashed while uploading to S3, because
-     * the files will still be on disk.
-     *
-     * It's also useful for the initial upgrade, where none of the projects
-     * are in the DB.
-     * @param projectName
-     * @param lastAccessed
-     */
-    void setProjectLastAccessedTimeIfMissing(
-            String projectName,
-            Timestamp lastAccessed
-    );
-
 }

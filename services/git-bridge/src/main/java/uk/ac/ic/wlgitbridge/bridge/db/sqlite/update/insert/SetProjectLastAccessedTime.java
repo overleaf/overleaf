@@ -12,13 +12,9 @@ import java.sql.Timestamp;
 public class SetProjectLastAccessedTime implements SQLUpdate {
 
     private static final String SET_PROJECT_LAST_ACCESSED_TIME =
-            "INSERT OR REPLACE INTO `swap_table`(\n" +
-            "        `project_name`,\n" +
-            "        `last_accessed`\n" +
-            ") VALUES (\n" +
-            "        ?,\n" +
-            "        ?\n" +
-            ")";
+            "UPDATE `projects`\n" +
+            "SET `last_accessed` = ?\n" +
+            "WHERE `name` = ?";
 
     private final String projectName;
     private final Timestamp lastAccessed;
@@ -40,8 +36,8 @@ public class SetProjectLastAccessedTime implements SQLUpdate {
     public void addParametersToStatement(
             PreparedStatement statement
     ) throws SQLException {
-        statement.setString(1, projectName);
-        statement.setTimestamp(2, lastAccessed);
+        statement.setTimestamp(1, lastAccessed);
+        statement.setString(2, projectName);
     }
 
 }

@@ -108,32 +108,6 @@ public class SqliteDBStoreTest {
     }
 
     @Test
-    public void ifMissingDoesNotSetIfProjectIsNotMissing() {
-        dbStore.setLatestVersionForProject("older", 1);
-        dbStore.setProjectLastAccessedTimeIfMissing(
-                "older",
-                Timestamp.valueOf(
-                        LocalDateTime.now().minus(2, ChronoUnit.SECONDS)
-                )
-        );
-        dbStore.setLatestVersionForProject("asdf", 2);
-        dbStore.setProjectLastAccessedTimeIfMissing(
-                "asdf",
-                Timestamp.valueOf(
-                        LocalDateTime.now().minus(1, ChronoUnit.SECONDS)
-                )
-        );
-        assertEquals("older", dbStore.getOldestUnswappedProject());
-        dbStore.setProjectLastAccessedTimeIfMissing(
-                "older",
-                Timestamp.valueOf(
-                        LocalDateTime.now()
-                )
-        );
-        assertEquals("older", dbStore.getOldestUnswappedProject());
-    }
-
-    @Test
     public void testGetNumUnswappedProjects() {
         dbStore.setLatestVersionForProject("asdf", 1);
         dbStore.setLastAccessedTime(

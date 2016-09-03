@@ -14,8 +14,8 @@ public class GetProjectState implements SQLQuery<ProjectState> {
 
     private static final String GET_PROJECT_STATE =
             "SELECT `last_accessed`\n" +
-            "    FROM `swap_table`\n" +
-            "    WHERE `project_name` = ?";
+            "    FROM `projects`\n" +
+            "    WHERE `name` = ?";
 
     private final String projectName;
 

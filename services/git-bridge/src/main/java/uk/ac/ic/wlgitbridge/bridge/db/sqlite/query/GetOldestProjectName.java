@@ -11,8 +11,8 @@ import java.sql.SQLException;
 public class GetOldestProjectName implements SQLQuery<String> {
 
     private static final String GET_OLDEST_PROJECT_NAME =
-            "SELECT `project_name`, MIN(`last_accessed`)\n" +
-            "    FROM `swap_table`";
+            "SELECT `name`, MIN(`last_accessed`)\n" +
+            "    FROM `projects`";
 
     @Override
     public String getSQL() {
@@ -22,7 +22,7 @@ public class GetOldestProjectName implements SQLQuery<String> {
     @Override
     public String processResultSet(ResultSet resultSet) throws SQLException {
         while (resultSet.next()) {
-            return resultSet.getString("project_name");
+            return resultSet.getString("name");
         }
         return null;
     }

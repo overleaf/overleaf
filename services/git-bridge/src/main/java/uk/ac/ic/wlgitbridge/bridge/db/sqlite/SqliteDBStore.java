@@ -4,12 +4,15 @@ import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.query.*;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.*;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.alter.ProjectsAddLastAccessed;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateIndexURLIndexStore;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateProjectsIndexLastAccessed;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateProjectsTableSQLUpdate;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.create.CreateURLIndexStoreSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete.DeleteFilesForProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.AddURLIndexSQLUpdate;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectLastAccessedTimeIfMissing;
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectSQLUpdate;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectLastAccessedTime;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.insert.SetProjectSQLUpdate;
 
 import java.io.File;
 import java.sql.*;
@@ -105,19 +108,6 @@ public class SqliteDBStore implements DBStore {
         update(new SetProjectLastAccessedTime(projectName, lastAccessed));
     }
 
-    @Override
-    public void setProjectLastAccessedTimeIfMissing(
-            String projectName,
-            Timestamp lastAccessed
-    ) {
-        update(
-                new SetProjectLastAccessedTimeIfMissing(
-                        projectName,
-                        lastAccessed
-                )
-        );
-    }
-
     private Connection openConnectionTo(File dbFile) {
         File parentDir = dbFile.getParentFile();
         if (!parentDir.exists() && !parentDir.mkdirs()) {
@@ -141,12 +131,17 @@ public class SqliteDBStore implements DBStore {
     }
 
     private void createTables() {
+        try {
+            doUpdate(new ProjectsAddLastAccessed());
+        } catch (SQLException ignore) {
+            /* We need to eat exceptions from here */
+        }
         Stream.of(
                 new CreateProjectsTableSQLUpdate(),
+                new CreateProjectsIndexLastAccessed(),
                 new CreateURLIndexStoreSQLUpdate(),
                 new CreateIndexURLIndexStore(),
-                new CreateSwapTable(),
-                new CreateSwapTableIndex()
+                new CreateProjectsIndexLastAccessed()
         ).forEach(this::update);
     }
 
@@ -175,7 +170,11 @@ public class SqliteDBStore implements DBStore {
         } catch (SQLException e) {
             throw e;
         } finally {
-            statement.close();
+            try {
+                statement.close();
+            } catch (Throwable t) {
+                throw new SQLException(t);
+            }
         }
     }
 

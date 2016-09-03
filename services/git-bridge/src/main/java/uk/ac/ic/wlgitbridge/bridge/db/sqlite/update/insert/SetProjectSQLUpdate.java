@@ -11,8 +11,8 @@ import java.sql.SQLException;
 public class SetProjectSQLUpdate implements SQLUpdate {
 
     private static final String SET_PROJECT =
-            "INSERT OR REPLACE INTO `projects`(`name`, `version_id`) " +
-                    "VALUES (?, ?);\n";
+            "INSERT OR REPLACE INTO `projects`(`name`, `version_id`, `last_accessed`) " +
+            "VALUES (?, ?, DATETIME('now'));\n";
 
     private final String projectName;
     private final int versionID;

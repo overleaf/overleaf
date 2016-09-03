@@ -9,10 +9,12 @@ public class CreateProjectsTableSQLUpdate implements SQLUpdate {
 
     private static final String CREATE_PROJECTS_TABLE =
             "CREATE TABLE IF NOT EXISTS `projects` (\n" +
-            "  `name` VARCHAR NOT NULL DEFAULT '',\n" +
-            "  `version_id` INT NOT NULL DEFAULT 0,\n" +
-            "  PRIMARY KEY (`name`)\n" +
+            "    `name` VARCHAR NOT NULL DEFAULT '',\n" +
+            "    `version_id` INT NOT NULL DEFAULT 0,\n" +
+            "    `last_accessed` DATETIME NULL DEFAULT 0,\n" +
+            "    PRIMARY KEY (`name`)\n" +
             ")";
+
     @Override
     public String getSQL() {
         return CREATE_PROJECTS_TABLE;
