@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.db.sqlite;
 
+import com.google.common.base.Preconditions;
 import uk.ac.ic.wlgitbridge.bridge.db.DBInitException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
@@ -143,6 +144,9 @@ public class SqliteDBStore implements DBStore {
                 new CreateIndexURLIndexStore(),
                 new CreateProjectsIndexLastAccessed()
         ).forEach(this::update);
+        /* In the case of needing to change the schema, we need to check that
+           ProjectsAddLastAccessed didn't just fail */
+        Preconditions.checkState(query(new LastAccessedColumnExists()));
     }
 
     private void update(SQLUpdate update) {
