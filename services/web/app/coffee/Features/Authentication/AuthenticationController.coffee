@@ -13,6 +13,7 @@ UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
 
 module.exports = AuthenticationController =
+
 	login: (req, res, next = (error) ->) ->
 		AuthenticationController.doLogin req.body, req, res, next
 
@@ -34,6 +35,7 @@ module.exports = AuthenticationController =
 		cb(null, user)
 
 	doPassportLogin: (req, username, password, done) ->
+		console.log(">>", username)
 		email = username.toLowerCase()
 		redir = Url.parse(req?.body?.redir or "/project").path
 		console.log ">> doing passport login", username, password, redir
@@ -65,6 +67,7 @@ module.exports = AuthenticationController =
 
 
 	doLogin: (options, req, res, next) ->
+		dienow
 		email = options.email?.toLowerCase()
 		password = options.password
 		redir = Url.parse(options.redir or "/project").path
@@ -111,6 +114,7 @@ module.exports = AuthenticationController =
 
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
+			console.log ">>>>", req.currentUser()
 			if !req.session.user?
 				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
@@ -176,6 +180,7 @@ module.exports = AuthenticationController =
 		callback()
 
 	establishUserSession: (req, user, callback = (error) ->) ->
+		dienow
 		lightUser =
 			_id: user._id
 			first_name: user.first_name

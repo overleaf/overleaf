@@ -55,7 +55,7 @@ module.exports = class Router
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
 		# webRouter.post '/login', AuthenticationController.login
-		webRouter.post '/login', passport.authenticate('local'), AuthenticationController.login, (req, res) ->
+		webRouter.post '/login', passport.authenticate('local'), (req, res) ->
 			console.log ">> login done", req._redir
 			res.json {redir: req._redir}
 		webRouter.get  '/logout', UserController.logout

@@ -106,6 +106,14 @@ passport.use(new LocalStrategy(
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
 
+# standard access to the current user
+currentUserMiddleware = (req, res, next) ->
+	req.currentUser = () ->
+		req.user
+	next()
+
+webRouter.use(currentUserMiddleware)
+apiRouter.use(currentUserMiddleware)
 
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
