@@ -1,14 +1,18 @@
 ChatHandler = require("./ChatHandler")
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 logger = require("logger-sharelatex")
+AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports =
 
 
-	sendMessage: (req, res)->
+	sendMessage: (req, res, next)->
 		project_id = req.params.Project_id
-		user_id = req.session.user._id
 		messageContent = req.body.content
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		if !user_id?
+			err = new Error('no logged-in user')
+			return next(err)
 		ChatHandler.sendMessage project_id, user_id, messageContent, (err, builtMessge)->
 			if err?
 				logger.err err:err, project_id:project_id, user_id:user_id, messageContent:messageContent, "problem sending message to chat api"

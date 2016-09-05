@@ -13,7 +13,7 @@ module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
 		plans = SubscriptionViewModelBuilder.buildViewModel()
-		if !req.session.user?
+		if AuthenticationController.isUserLoggedIn(req)?
 			baseUrl = "/register?redir="
 		else
 			baseUrl = ""
@@ -134,7 +134,7 @@ module.exports = SubscriptionController =
 							successURL : "#{Settings.siteUrl}/user/subscription/billing-details/update"
 							user       :
 								id : user._id
-	
+
 	updateBillingDetails: (req, res, next) ->
 		res.redirect "/user/subscription?saved_billing_details=true"
 

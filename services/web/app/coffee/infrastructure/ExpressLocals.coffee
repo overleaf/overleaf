@@ -5,6 +5,7 @@ Settings = require('settings-sharelatex')
 SubscriptionFormatters = require('../Features/Subscription/SubscriptionFormatters')
 querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
+AuthenticationController = require("../Features/Authentication/AuthenticationController")
 _ = require("underscore")
 Modules = require "./Modules"
 Url = require "url"
@@ -59,7 +60,7 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.session = req.session
 		next()
 
-	webRouter.use (req, res, next)-> 
+	webRouter.use (req, res, next)->
 
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked
 
@@ -77,7 +78,7 @@ module.exports = (app, webRouter, apiRouter)->
 			staticFilesBase = Settings.cdn?.web?.darkHost
 		else
 			staticFilesBase = ""
-		
+
 		res.locals.jsPath = jsPath
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 
@@ -86,7 +87,7 @@ module.exports = (app, webRouter, apiRouter)->
 			path = Path.join(jsPath, jsFile)
 
 			doFingerPrint = opts.fingerprint != false
-			
+
 			if !opts.qs?
 				opts.qs = {}
 
@@ -95,7 +96,7 @@ module.exports = (app, webRouter, apiRouter)->
 
 			if opts.cdn != false
 				path = Url.resolve(staticFilesBase, path)
-				
+
 			qs = querystring.stringify(opts.qs)
 
 			if qs? and qs.length > 0
@@ -115,7 +116,7 @@ module.exports = (app, webRouter, apiRouter)->
 
 
 
-	webRouter.use (req, res, next)-> 
+	webRouter.use (req, res, next)->
 		res.locals.settings = Settings
 		next()
 
@@ -143,7 +144,7 @@ module.exports = (app, webRouter, apiRouter)->
 			return formatedPrivileges[privilegeLevel] || "Private"
 		next()
 
-	webRouter.use (req, res, next)-> 
+	webRouter.use (req, res, next)->
 		res.locals.buildReferalUrl = (referal_medium) ->
 			url = Settings.siteUrl
 			if req.session? and req.session.user? and req.session.user.referal_id?
@@ -167,7 +168,7 @@ module.exports = (app, webRouter, apiRouter)->
 			return ""
 
 		res.locals.getLoggedInUserId = ->
-			return req.session.user?._id
+			return AuthenticationController.getLoggedInUserId(req)
 		next()
 
 	webRouter.use (req, res, next) ->
@@ -179,11 +180,11 @@ module.exports = (app, webRouter, apiRouter)->
 			return req.query?[field]
 		next()
 
-	webRouter.use (req, res, next)-> 
+	webRouter.use (req, res, next)->
 		res.locals.fingerprint = getFingerprint
 		next()
 
-	webRouter.use (req, res, next)-> 
+	webRouter.use (req, res, next)->
 		res.locals.formatPrice = SubscriptionFormatters.formatPrice
 		next()
 
@@ -193,11 +194,11 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
-		if req.session.user?
+		if req.user?
 			res.locals.user =
-				email: req.session.user.email
-				first_name: req.session.user.first_name
-				last_name: req.session.user.last_name
+				email: req.user.email
+				first_name: req.user.first_name
+				last_name: req.user.last_name
 			if req.session.justRegistered
 				res.locals.justRegistered = true
 				delete req.session.justRegistered
@@ -223,7 +224,7 @@ module.exports = (app, webRouter, apiRouter)->
 			res.locals.nav[key] = _.clone(Settings.nav[key])
 		res.locals.templates = Settings.templateLinks
 		next()
-		
+
 	webRouter.use (req, res, next) ->
 		SystemMessageManager.getMessages (error, messages = []) ->
 			res.locals.systemMessages = messages
@@ -246,5 +247,3 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.moduleIncludes = Modules.moduleIncludes
 		res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable
 		next()
-
-

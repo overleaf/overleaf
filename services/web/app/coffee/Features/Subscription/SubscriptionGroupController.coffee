@@ -3,27 +3,28 @@ logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
 ErrorsController = require("../Errors/ErrorController")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
+AuthenticationController = require('../Authentication/AuthenticationController')
 _ = require("underscore")
 async = require("async")
 
 module.exports =
 
 	addUserToGroup: (req, res)->
-		adminUserId = req.session.user._id
+		adminUserId = AuthenticationController.getLoggedInUserId(req)
 		newEmail = req.body?.email?.toLowerCase()?.trim()
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
 		SubscriptionGroupHandler.addUserToGroup adminUserId, newEmail, (err, user)->
 			if err?
 				logger.err err:err, newEmail:newEmail, adminUserId:adminUserId, "error adding user from group"
 				return res.sendStatus 500
-			result = 
+			result =
 				user:user
 			if err and err.limitReached
 				result.limitReached = true
 			res.json(result)
 
 	removeUserFromGroup: (req, res)->
-		adminUserId = req.session.user._id
+		adminUserId = AuthenticationController.getLoggedInUserId(req)
 		userToRemove_id = req.params.user_id
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
 		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
@@ -31,10 +32,10 @@ module.exports =
 				logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
 				return res.sendStatus 500
 			res.send()
-			
+
 	removeSelfFromGroup: (req, res)->
 		adminUserId = req.query.admin_user_id
-		userToRemove_id = req.session.user._id
+		userToRemove_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription after self request"
 		SubscriptionGroupHandler.removeUserFromGroup adminUserId, userToRemove_id, (err)->
 			if err?
@@ -43,7 +44,7 @@ module.exports =
 			res.send()
 
 	renderSubscriptionGroupAdminPage: (req, res)->
-		user_id = req.session.user._id
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
 			if !subscription.groupPlan
 				return res.redirect("/")
@@ -55,11 +56,11 @@ module.exports =
 
 	renderGroupInvitePage: (req, res)->
 		group_subscription_id = req.params.subscription_id
-		user_id = req.session.user._id
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(group_subscription_id)
 		if !licence?
 			return ErrorsController.notFound(req, res)
-		jobs = 
+		jobs =
 			partOfGroup: (cb)->
 				SubscriptionGroupHandler.isUserPartOfGroup user_id, licence.group_subscription_id, cb
 			subscription: (cb)->
@@ -77,15 +78,18 @@ module.exports =
 
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id
-		user_id = req.session.user._id
-		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
-		if !licence?
-			return ErrorsController.notFound(req, res)
-		SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, req.session.user.email, (err)->
+		AuthenticationController.getLoggedInUser req, (err, currentUser) ->
 			if err?
-				res.sendStatus 500
-			else
-				res.sendStatus 200
+				logger.err {subscription_id}, "error getting current user"
+				return res.sendStatus 500
+			licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
+			if !licence?
+				return ErrorsController.notFound(req, res)
+			SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, currentUser.email, (err)->
+				if err?
+					res.sendStatus 500
+				else
+					res.sendStatus 200
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
@@ -109,10 +113,10 @@ module.exports =
 			return ErrorsController.notFound(req, res)
 		res.render "subscriptions/group/successful_join",
 			title: "Sucessfully joined group"
-			licenceName:licence.name	
+			licenceName:licence.name
 
 	exportGroupCsv: (req, res)->
-		user_id = req.session.user._id
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user_id: user_id, "exporting group csv"
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
 			if !subscription.groupPlan

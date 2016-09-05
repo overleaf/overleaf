@@ -4,6 +4,7 @@ ErrorController = require("../Errors/ErrorController")
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
 fs = require('fs')
+AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports =
 
@@ -22,14 +23,14 @@ module.exports =
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
-	
+
 	activateAccountPage: (req, res) ->
 		# An 'activation' is actually just a password reset on an account that
 		# was set with a random password originally.
 		logger.log query:req.query, "activiate account page called"
 		if !req.query?.user_id? or !req.query?.token?
 			return ErrorController.notFound(req, res)
-			
+
 		UserGetter.getUser req.query.user_id, {email: 1, loginCount: 1}, (error, user) ->
 			return next(error) if error?
 			if !user
@@ -53,8 +54,9 @@ module.exports =
 			email: req.query.email
 
 	settingsPage : (req, res, next)->
-		logger.log user: req.session.user, "loading settings page"
-		UserLocator.findById req.session.user._id, (err, user)->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log user: user_id, "loading settings page"
+		UserLocator.findById user_id, (err, user)->
 			return next(err) if err?
 			res.render 'user/settings',
 				title:'account_settings'

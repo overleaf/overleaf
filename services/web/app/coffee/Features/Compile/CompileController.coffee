@@ -16,53 +16,53 @@ module.exports = CompileController =
 		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
 		isAutoCompile = !!req.query?.auto_compile
-		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
+		user_id = AuthenticationController.getLoggedInUserId req
+		options = {
+			isAutoCompile: isAutoCompile
+		}
+		if req.body?.rootDoc_id?
+			options.rootDoc_id = req.body.rootDoc_id
+		else if req.body?.settingsOverride?.rootDoc_id? # Can be removed after deploy
+			options.rootDoc_id = req.body.settingsOverride.rootDoc_id
+		if req.body?.compiler
+			options.compiler = req.body.compiler
+		if req.body?.draft
+			options.draft = req.body.draft
+		if req.body?.check in ['validate', 'error', 'silent']
+			options.check = req.body.check
+		logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
+		CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits, validationProblems) ->
 			return next(error) if error?
-			options = {
-				isAutoCompile: isAutoCompile
+			res.contentType("application/json")
+			res.status(200).send JSON.stringify {
+				status: status
+				outputFiles: outputFiles
+				compileGroup: limits?.compileGroup
+				clsiServerId:clsiServerId
+				validationProblems:validationProblems
 			}
-			if req.body?.rootDoc_id?
-				options.rootDoc_id = req.body.rootDoc_id
-			else if req.body?.settingsOverride?.rootDoc_id? # Can be removed after deploy
-				options.rootDoc_id = req.body.settingsOverride.rootDoc_id
-			if req.body?.compiler
-				options.compiler = req.body.compiler
-			if req.body?.draft
-				options.draft = req.body.draft
-			if req.body?.check in ['validate', 'error', 'silent']
-				options.check = req.body.check
-			logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
-			CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits, validationProblems) ->
-				return next(error) if error?
-				res.contentType("application/json")
-				res.status(200).send JSON.stringify {
-					status: status
-					outputFiles: outputFiles
-					compileGroup: limits?.compileGroup
-					clsiServerId:clsiServerId
-					validationProblems:validationProblems
-				}
 
 	stopCompile: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		AuthenticationController.getLoggedInUserId req, (error, user_id) ->
+		user_id = AuthenticationController.getLoggedInUserId req
+		logger.log {project_id:project_id, user_id:user_id}, "stop compile request"
+		CompileManager.stopCompile project_id, user_id, (error) ->
 			return next(error) if error?
-			logger.log {project_id:project_id, user_id:user_id}, "stop compile request"
-			CompileManager.stopCompile project_id, user_id, (error) ->
-				return next(error) if error?
-				res.status(200).send()
+			res.status(200).send()
 
 	_compileAsUser: (req, callback) ->
 		# callback with user_id if per-user, undefined otherwise
 		if not Settings.disablePerUserCompiles
-			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
+			user_id = AuthenticationController.getLoggedInUserId req
+			return callback(null, user_id)
 		else
 			callback() # do a per-project compile, not per-user
 
 	_downloadAsUser: (req, callback) ->
 		# callback with user_id if per-user, undefined otherwise
 		if not Settings.disablePerUserCompiles
-			AuthenticationController.getLoggedInUserId req, callback # -> (error, user_id)
+			user_id = AuthenticationController.getLoggedInUserId req
+			return callback(null, user_id)
 		else
 			callback() # do a per-project compile, not per-user
 
