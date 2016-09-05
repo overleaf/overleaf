@@ -147,12 +147,12 @@ module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
 		res.locals.buildReferalUrl = (referal_medium) ->
 			url = Settings.siteUrl
-			if req.session? and req.session.user? and req.session.user.referal_id?
-				url+="?r=#{req.session.user.referal_id}&rm=#{referal_medium}&rs=b" # Referal source = bonus
+			if req.user? and req.referal_id?
+				url+="?r=#{req.user.referal_id}&rm=#{referal_medium}&rs=b" # Referal source = bonus
 			return url
 		res.locals.getReferalId = ->
-			if req.session? and req.session.user? and req.session.user.referal_id
-				return req.session.user.referal_id
+			if req.user? and req.referal_id?
+				return req.user.referal_id
 		res.locals.getReferalTagLine = ->
 			tagLines = [
 				"Roar!"

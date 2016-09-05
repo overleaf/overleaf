@@ -119,7 +119,7 @@ apiRouter.use(currentUserMiddleware)
 webRouter.use (req, res, next) ->
 	req.session.touch()
 	if req?.session?.user?
-		UserSessionsManager.touch(req.session.user, (err)->)
+		UserSessionsManager.touch(req.user, (err)->)
 	next()
 
 webRouter.use ReferalConnect.use
