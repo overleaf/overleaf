@@ -101,7 +101,10 @@ module.exports = WebsocketController =
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			logger.log {user_id, project_id, doc_id, client_id: client.id}, "client leaving doc"
 			client.leave doc_id
-			AuthorizationManager.removeAccessToDoc client, doc_id # may not be needed, could block updates?
+			# we could remove permission when user leaves a doc, but because
+			# the connection is per-project, we continue to allow access
+			# after the initial joinDoc since we know they are already authorised.
+			## AuthorizationManager.removeAccessToDoc client, doc_id
 			callback()
 		
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
