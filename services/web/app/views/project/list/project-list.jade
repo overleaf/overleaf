@@ -8,7 +8,7 @@
 				input.form-control.col-md-7.col-xs-12(
 					placeholder="#{translate('search_projects')}…",
 					autofocus='autofocus',
-					ng-model="searchText",
+					ng-model="searchText.value",
 					focus-on='search:clear',
 					ng-keyup="searchProjects()"
 				)
@@ -16,7 +16,7 @@
 				i.fa.fa-times.form-control-feedback(
 					ng-click="clearSearchText()",
 					style="cursor: pointer;",
-					ng-show="searchText.length > 0"
+					ng-show="searchText.value.length > 0"
 				)
 			//- i.fa.fa-remove
 
