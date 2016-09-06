@@ -1,4 +1,4 @@
-AnalyticsManager = equire "./AnalyticsManager"
+AnalyticsManager = require "./AnalyticsManager"
 
 module.exports = AnalyticsController =
 	recordEvent: (req, res, next) ->
