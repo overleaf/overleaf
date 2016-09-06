@@ -19,7 +19,7 @@ define [
 			, 200
 
 		INFINITE_COLLABORATORS = -1
-		$scope.$watch "project.members.length", (noOfMembers) ->
+		$scope.$watch "(project.members.length + project.invites.length)", (noOfMembers) ->
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
