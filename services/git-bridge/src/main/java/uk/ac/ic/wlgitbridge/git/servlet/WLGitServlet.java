@@ -7,7 +7,7 @@ import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.WLRepositoryResolver;
 import uk.ac.ic.wlgitbridge.git.handler.WLUploadPackFactory;
 import uk.ac.ic.wlgitbridge.data.SnapshotRepositoryBuilder;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 
 import javax.servlet.ServletException;
 
@@ -16,7 +16,7 @@ import javax.servlet.ServletException;
  */
 public class WLGitServlet extends GitServlet {
 
-    public WLGitServlet(ServletContextHandler servletContextHandler, BridgeAPI bridgeAPI, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
+    public WLGitServlet(ServletContextHandler servletContextHandler, Bridge bridgeAPI, String rootGitDirectoryPath) throws ServletException, InvalidRootDirectoryPathException {
         setRepositoryResolver(new WLRepositoryResolver(rootGitDirectoryPath, new SnapshotRepositoryBuilder(bridgeAPI)));
         setReceivePackFactory(new WLReceivePackFactory(bridgeAPI));
         setUploadPackFactory(new WLUploadPackFactory());

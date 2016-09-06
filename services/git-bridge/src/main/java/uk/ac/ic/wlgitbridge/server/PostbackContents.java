@@ -3,7 +3,7 @@ package uk.ac.ic.wlgitbridge.server;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
@@ -17,7 +17,7 @@ public class PostbackContents implements JSONSource {
 
     private static final String CODE_SUCCESS = "upToDate";
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
     private final String projectName;
     private final String postbackKey;
 
@@ -26,7 +26,7 @@ public class PostbackContents implements JSONSource {
     private int versionID;
     private SnapshotPostException exception;
 
-    public PostbackContents(BridgeAPI bridgeAPI, String projectName, String postbackKey, String contents) {
+    public PostbackContents(Bridge bridgeAPI, String projectName, String postbackKey, String contents) {
         this.bridgeAPI = bridgeAPI;
         this.projectName = projectName;
         this.postbackKey = postbackKey;

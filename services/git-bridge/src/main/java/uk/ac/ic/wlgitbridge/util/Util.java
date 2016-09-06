@@ -19,6 +19,15 @@ public class Util {
     private static String POSTBACK_URL;
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
+    public static TimerTask makeTimerTask(Runnable lamb) {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                lamb.run();
+            }
+        };
+    }
+
     public static String entries(int entries) {
         if (entries == 1) {
             return "entry";

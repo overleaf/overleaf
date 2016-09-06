@@ -5,9 +5,9 @@ import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.WLBridgedProject;
-import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.util.Log;
 
@@ -19,13 +19,13 @@ import java.io.IOException;
  */
 public class SnapshotRepositoryBuilder {
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
-    public SnapshotRepositoryBuilder(BridgeAPI bridgeAPI) {
+    public SnapshotRepositoryBuilder(Bridge bridgeAPI) {
         this.bridgeAPI = bridgeAPI;
     }
 
-    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory, Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, ForbiddenException {
+    public Repository getRepositoryWithNameAtRootDirectory(String name, File rootDirectory, Credential oauth2) throws RepositoryNotFoundException, ServiceMayNotContinueException, GitUserException {
         if (!bridgeAPI.repositoryExists(oauth2, name)) {
             throw new RepositoryNotFoundException(name);
         }

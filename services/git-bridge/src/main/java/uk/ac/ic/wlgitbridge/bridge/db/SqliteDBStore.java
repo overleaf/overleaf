@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.data.model.db;
+package uk.ac.ic.wlgitbridge.bridge.db;
 
 import uk.ac.ic.wlgitbridge.data.model.db.sql.SQLiteWLDatabase;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -9,15 +9,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by Winston on 19/11/14.
+ * Created by winston on 20/08/2016.
  */
-public class SqlitePersistentStore implements PersistentStore {
+public class SqliteDBStore implements DBStore {
 
     private final SQLiteWLDatabase database;
 
-    public SqlitePersistentStore(File rootGitDirectory) {
+    public SqliteDBStore(File rootDirectory) {
         try {
-            database = new SQLiteWLDatabase(rootGitDirectory);
+            database = new SQLiteWLDatabase(rootDirectory);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {

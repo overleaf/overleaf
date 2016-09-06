@@ -2,14 +2,14 @@ package uk.ac.ic.wlgitbridge.snapshot.getdoc;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
+import uk.ac.ic.wlgitbridge.git.exception.SnapshotAPIException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.WLUser;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
-import uk.ac.ic.wlgitbridge.snapshot.base.Request;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.ProtectedProjectException;
 
 /**
  * Created by Winston on 06/11/14.
@@ -21,7 +21,7 @@ public class GetDocResult extends Result {
     private String createdAt;
     private WLUser user;
 
-    private SnapshotPostException exception;
+    private SnapshotAPIException exception;
     private ForbiddenException forbidden;
 
     public GetDocResult(Request request, JsonElement json) throws FailedConnectionException {
@@ -94,7 +94,7 @@ public class GetDocResult extends Result {
         }
     }
 
-    public int getVersionID() throws SnapshotPostException {
+    public int getVersionID() throws GitUserException {
         if (exception != null) {
             throw exception;
         }

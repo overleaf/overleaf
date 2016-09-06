@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.UnexpectedPostbackException;
 import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
@@ -19,9 +19,9 @@ import java.io.IOException;
  */
 public class PostbackHandler extends AbstractHandler {
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
-    public PostbackHandler(BridgeAPI bridgeAPI) {
+    public PostbackHandler(Bridge bridgeAPI) {
         this.bridgeAPI = bridgeAPI;
     }
 

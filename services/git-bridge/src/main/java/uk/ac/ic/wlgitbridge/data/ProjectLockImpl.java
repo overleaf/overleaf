@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.data;
 
+import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -9,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * Created by Winston on 20/11/14.
  */
-public class ProjectLock {
+public class ProjectLockImpl implements ProjectLock {
 
     private final Map<String, Lock> projectLocks;
     private final ReentrantReadWriteLock rwlock;
@@ -18,12 +20,17 @@ public class ProjectLock {
     private LockAllWaiter waiter;
     private boolean waiting;
 
-    public ProjectLock() {
+    public ProjectLockImpl() {
         projectLocks = new HashMap<String, Lock>();
         rwlock = new ReentrantReadWriteLock();
         rlock = rwlock.readLock();
         wlock = rwlock.writeLock();
         waiting = false;
+    }
+
+    public ProjectLockImpl(LockAllWaiter waiter) {
+        this();
+        setWaiter(waiter);
     }
 
     public void lockForProject(String projectName) {

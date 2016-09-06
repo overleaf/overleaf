@@ -8,8 +8,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
-import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class RepositoryObjectTreeWalker {
         this(repository, repository.resolve("HEAD~" + fromHead));
     }
 
-    public RawDirectory getDirectoryContents() throws IOException, SnapshotPostException {
+    public RawDirectory getDirectoryContents() throws IOException, GitUserException {
         return new RawDirectory(walkGitObjectTree());
     }
 
@@ -51,7 +51,7 @@ public class RepositoryObjectTreeWalker {
         return treeWalk;
     }
 
-    private Map<String, RawFile> walkGitObjectTree() throws IOException, SnapshotPostException {
+    private Map<String, RawFile> walkGitObjectTree() throws IOException, GitUserException {
         Map<String, RawFile> fileContentsTable = new HashMap<String, RawFile>();
         if (treeWalk == null) {
             return fileContentsTable;

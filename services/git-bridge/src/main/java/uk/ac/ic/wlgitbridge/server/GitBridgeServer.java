@@ -8,7 +8,12 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
-import uk.ac.ic.wlgitbridge.bridge.BridgeAPI;
+import uk.ac.ic.wlgitbridge.bridge.Bridge;
+import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
+import uk.ac.ic.wlgitbridge.bridge.db.SqliteDBStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSRepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -31,7 +36,7 @@ import java.util.EnumSet;
  */
 public class GitBridgeServer {
 
-    private final BridgeAPI bridgeAPI;
+    private final Bridge bridgeAPI;
 
     private final Server jettyServer;
 
@@ -43,7 +48,14 @@ public class GitBridgeServer {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
-        bridgeAPI = new BridgeAPI(rootGitDirectoryPath);
+        RepoStore repoStore = new FSRepoStore(rootGitDirectoryPath);
+        DBStore dbStore = new SqliteDBStore(repoStore.getRootDirectory());
+        SwapStore swapStore = new SwapStore() {};
+        bridgeAPI = Bridge.make(
+                repoStore,
+                dbStore,
+                swapStore
+        );
         jettyServer = new Server(port);
         configureJettyServer(config);
         SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
