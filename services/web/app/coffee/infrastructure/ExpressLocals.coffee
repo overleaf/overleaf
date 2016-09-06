@@ -169,6 +169,10 @@ module.exports = (app, webRouter, apiRouter)->
 
 		res.locals.getLoggedInUserId = ->
 			return AuthenticationController.getLoggedInUserId(req)
+		res.locals.isUserLoggedIn = ->
+			return AuthenticationController.isUserLoggedIn(req)
+		res.locals.getSessionUser = ->
+			return AuthenticationController.getSessionUser(req)
 		next()
 
 	webRouter.use (req, res, next) ->

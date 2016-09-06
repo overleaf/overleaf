@@ -71,12 +71,19 @@ module.exports = AuthenticationController =
 
 	# TODO: perhaps should produce an error if the current user is not present
 	getLoggedInUserId: (req) ->
+		user = AuthenticationController.getSessionUser(req)
+		if user?
+			return user._id
+		else
+			return null
+
+	getSessionUser: (req) ->
 		# old sessions
 		if req?.session?.user?._id?
-			return req.session.user._id.toString()
+			return req.session.user
 		# new passport sessions
 		else if req?.session?.passport?.user?._id?
-			return req.session.passport.user._id.toString()
+			return req.session.passport.user
 		# neither
 		else
 			return null

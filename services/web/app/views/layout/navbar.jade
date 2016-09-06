@@ -13,7 +13,7 @@ nav.navbar.navbar-default
 		.navbar-collapse.collapse(collapse="navCollapsed")
 
 			ul.nav.navbar-nav.navbar-right
-				if (session && session.user && session.user.isAdmin)
+				if (getSessionUser() && getSessionUser().isAdmin)
 					li.dropdown(class="subdued", dropdown)
 						a.dropdown-toggle(href, dropdown-toggle)
 							| Admin
@@ -25,7 +25,7 @@ nav.navbar.navbar-default
 								a(href="/admin/user") Manage Users
 
 				each item in nav.header
-					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
+					if ((item.only_when_logged_in && getSessionUser()) || (item.only_when_logged_out && (!getSessionUser())) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown
 							li.dropdown(class=item.class, dropdown)
 								a.dropdown-toggle(href, dropdown-toggle)
