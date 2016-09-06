@@ -18,7 +18,6 @@ module.exports = AuthenticationController =
 	# 	AuthenticationController.doLogin req.body, req, res, next
 
 	serializeUser: (user, callback) ->
-		console.log ">> serialize", user._id
 		lightUser =
 			_id: user._id
 			first_name: user.first_name
@@ -31,14 +30,11 @@ module.exports = AuthenticationController =
 		callback(null, lightUser)
 
 	deserializeUser: (user, cb) ->
-		console.log ">> de-serialize", user._id
 		cb(null, user)
 
 	doPassportLogin: (req, username, password, done) ->
-		console.log(">>", username)
 		email = username.toLowerCase()
 		redir = Url.parse(req?.body?.redir or "/project").path
-		console.log ">> doing passport login", username, password, redir
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 			return done(err) if err?
 			if !isAllowed
@@ -58,7 +54,6 @@ module.exports = AuthenticationController =
 					# capture the request ip for use when creating the session
 					user._login_req_ip = req.ip
 					req._redir = redir
-					console.log ">> done, returning user"
 					return done(null, user)
 				else
 					AuthenticationController._recordFailedLogin()

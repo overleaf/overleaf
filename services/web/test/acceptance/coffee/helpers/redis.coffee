@@ -8,14 +8,8 @@ rclient = redis.createClient(Settings.redis.web)
 module.exports =
 
 	getUserSessions: (user, callback=(err, sessionsSet)->) ->
-		console.log ">> user, get sessions", user._id
-		setTimeout(
-			()->
-				rclient.smembers "UserSessions:#{user._id}", (err, result) ->
-					console.log ">>", result
-					return callback(err, result)
-			, 1000
-		)
+		rclient.smembers "UserSessions:#{user._id}", (err, result) ->
+			return callback(err, result)
 
 	clearUserSessions: (user, callback=(err)->) ->
 		sessionSetKey = "UserSessions:#{user._id}"
