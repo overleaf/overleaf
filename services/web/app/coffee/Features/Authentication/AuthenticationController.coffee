@@ -83,21 +83,18 @@ module.exports = AuthenticationController =
 
 	# TODO: perhaps should produce an error if the current user is not present
 	getLoggedInUser: (req, callback = (error, user) ->) ->
-		if req.session?.user?._id?
-			query = req.session.user._id
-		else
-			return callback null, null
-
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		if !user_id?
+			return callback(null, null)
 		# omit sensitive information
-		UserGetter.getUser query, {hashedPassword: false, refProviders: false}, callback
+		UserGetter.getUser user_id, {hashedPassword: false, refProviders: false}, callback
 
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
-			console.log ">>>>", req.currentUser()
-			if !AuthenticationController.isUserLoggedIn()?
+			if !AuthenticationController.isUserLoggedIn(req)
 				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
-				return next()
+				next()
 
 		return doRequest
 
