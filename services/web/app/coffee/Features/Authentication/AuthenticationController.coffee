@@ -62,24 +62,21 @@ module.exports = AuthenticationController =
 
 	isUserLoggedIn: (req) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		return user_id?
+		return user_id != null
 
 	# TODO: perhaps should produce an error if the current user is not present
 	getLoggedInUserId: (req) ->
 		user = AuthenticationController.getSessionUser(req)
-		if user?
+		if user
 			return user._id
 		else
 			return null
 
 	getSessionUser: (req) ->
-		# old sessions
-		if req?.session?.user?._id?
+		if req?.session?.user?
 			return req.session.user
-		# new passport sessions
-		else if req?.session?.passport?.user?._id?
+		else if req?.session?.passport?.user
 			return req.session.passport.user
-		# neither
 		else
 			return null
 
@@ -110,7 +107,7 @@ module.exports = AuthenticationController =
 
 		if req.headers['authorization']?
 			return AuthenticationController.httpAuth(req, res, next)
-		else if AuthenticationController.isUserLoggedIn()?
+		else if AuthenticationController.isUserLoggedIn(req)
 			return next()
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
