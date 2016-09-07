@@ -6,13 +6,13 @@ Metrics = require "./Metrics"
 TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = DocumentManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, alreadyLoaded) ->) ->
 		timer = new Metrics.Timer("docManager.getDoc")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc doc_id, (error, lines, version, alreadyLoaded) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc not in redis so getting from persistence API"
@@ -89,12 +89,11 @@ module.exports = DocumentManager =
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
-
-		RedisManager.getDoc doc_id, (error, lines, version) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc is not loaded so not flushing"
-				callback null
+				callback null  # TODO: return a flag to bail out, as we go on to remove doc from memory?
 			else
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
 				PersistenceManager.setDoc project_id, doc_id, lines, version, (error) ->

@@ -45,11 +45,12 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			rclient.srem keys.docsInProject(project_id:project_id), doc_id, callback
 
-	getDoc : (doc_id, callback = (error, lines, version) ->)->
+	getDoc : (project_id, doc_id, callback = (error, lines, version, project_id) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
 		multi.get keys.docVersion(doc_id:doc_id)
+		multi.get keys.projectKey(doc_id:doc_id)
 		multi.exec (error, result)->
 			timer.done()
 			return callback(error) if error?
@@ -58,7 +59,12 @@ module.exports = RedisManager =
 			catch e
 				return callback(e)
 			version = parseInt(result[1] or 0, 10)
-			callback null, docLines, version
+			doc_project_id = result[2]
+			# check doc is in requested project
+			if doc_project_id? and doc_project_id isnt project_id
+				logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc not in project"
+				return callback(new Errors.NotFoundError("document not found"))
+			callback null, docLines, version, project_id
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
