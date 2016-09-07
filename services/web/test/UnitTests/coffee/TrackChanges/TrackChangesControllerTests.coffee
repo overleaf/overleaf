@@ -6,18 +6,20 @@ SandboxedModule = require('sandboxed-module')
 
 describe "TrackChangesController", ->
 	beforeEach ->
+		@user_id = "user-id-123"
+		@AuthenticationController =
+			getLoggedInUserId: sinon.stub().returns(@user_id)
 		@TrackChangesController = SandboxedModule.require modulePath, requires:
 			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
-			"../Authentication/AuthenticationController": @AuthenticationController = {}
+			"../Authentication/AuthenticationController": @AuthenticationController
 
 	describe "proxyToTrackChangesApi", ->
 		beforeEach ->
 			@req = { url: "/mock/url", method: "POST" }
 			@res = "mock-res"
 			@next = sinon.stub()
-			@user_id = "user-id-123"
 			@settings.apis =
 				trackchanges:
 					url: "http://trackchanges.example.com"
@@ -26,7 +28,6 @@ describe "TrackChangesController", ->
 				pipe: sinon.stub()
 				on: (event, handler) -> @events[event] = handler
 			@request.returns @proxy
-			@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id)
 			@TrackChangesController.proxyToTrackChangesApi @req, @res, @next
 
 		describe "successfully", ->
@@ -56,4 +57,3 @@ describe "TrackChangesController", ->
 
 			it "should pass the error up the call chain", ->
 				@next.calledWith(@error).should.equal true
-

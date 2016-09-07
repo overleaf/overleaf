@@ -13,7 +13,7 @@ module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
 		plans = SubscriptionViewModelBuilder.buildViewModel()
-		if AuthenticationController.isUserLoggedIn(req)?
+		if AuthenticationController.isUserLoggedIn(req)
 			baseUrl = "/register?redir="
 		else
 			baseUrl = ""

@@ -100,7 +100,7 @@ module.exports = AuthorizationMiddlewear =
 		res.redirect "/restricted"
 
 	restricted : (req, res, next)->
-		if AuthenticationController.isUserLoggedIn()?
+		if AuthenticationController.isUserLoggedIn(req)
 			res.render 'user/restricted',
 				title:'restricted'
 		else

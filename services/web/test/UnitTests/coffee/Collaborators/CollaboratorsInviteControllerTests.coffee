@@ -11,7 +11,11 @@ ObjectId = require("mongojs").ObjectId
 
 describe "CollaboratorsInviteController", ->
 	beforeEach ->
+		@user =
+			_id: 'id'
 		@AnalyticsManger = recordEvent: sinon.stub()
+		@AuthenticationController =
+			getSessionUser: (req) => req.session.user
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager = {}
@@ -22,6 +26,7 @@ describe "CollaboratorsInviteController", ->
 			"../Editor/EditorRealTimeController": @EditorRealTimeController = {emitToRoom: sinon.stub()}
 			"../Notifications/NotificationsBuilder": @NotificationsBuilder = {}
 			"../Analytics/AnalyticsManager": @AnalyticsManger
+			'../Authentication/AuthenticationController': @AuthenticationController
 		@res = new MockResponse()
 		@req = new MockRequest()
 

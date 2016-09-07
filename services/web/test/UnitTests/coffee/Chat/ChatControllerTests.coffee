@@ -10,19 +10,24 @@ describe "ChatController", ->
 
 	beforeEach ->
 
+		@user_id = 'ier_'
 		@settings = {}
-		@ChatHandler = 
+		@ChatHandler =
 			sendMessage:sinon.stub()
 			getMessages:sinon.stub()
 
 		@EditorRealTimeController =
 			emitToRoom:sinon.stub().callsArgWith(3)
+
+		@AuthenticationController =
+			getLoggedInUserId: sinon.stub().returns(@user_id)
 		@ChatController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 			"./ChatHandler":@ChatHandler
 			"../Editor/EditorRealTimeController":@EditorRealTimeController
-		@query = 
+			'../Authentication/AuthenticationController': @AuthenticationController
+		@query =
 			before:"some time"
 
 		@req =
@@ -74,4 +79,3 @@ describe "ChatController", ->
 				sentMessages.should.deep.equal messages
 				done()
 			@ChatController.getMessages @req, @res
-

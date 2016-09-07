@@ -11,7 +11,7 @@ homepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/externa
 
 module.exports = HomeController =
 	index : (req,res)->
-		if AuthenticationController.isUserLoggedIn(req)?
+		if AuthenticationController.isUserLoggedIn(req)
 			if req.query.scribtex_path?
 				res.redirect "/project?scribtex_path=#{req.query.scribtex_path}"
 			else

@@ -16,8 +16,17 @@ describe "UserController", ->
 
 		@user =
 			_id:@user_id
-			save:sinon.stub().callsArgWith(0)
+			save: sinon.stub().callsArgWith(0)
 			ace:{}
+
+		@req =
+			user: {}
+			session:
+				destroy:->
+				user :
+					_id : @user_id
+					email:"old@something.com"
+			body:{}
 
 		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
@@ -31,6 +40,8 @@ describe "UserController", ->
 			registerNewUser: sinon.stub()
 		@AuthenticationController =
 			establishUserSession: sinon.stub().callsArg(2)
+			getLoggedInUserId: sinon.stub().returns(@user._id)
+			getSessionUser: sinon.stub().returns(@req.session.user)
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
@@ -67,13 +78,6 @@ describe "UserController", ->
 				err:->
 			"../../infrastructure/Metrics": inc:->
 
-		@req =
-			session:
-				destroy:->
-				user :
-					_id : @user_id
-					email:"old@something.com"
-			body:{}
 		@res =
 			send: sinon.stub()
 			json: sinon.stub()
@@ -172,7 +176,7 @@ describe "UserController", ->
 				cb(null, @user)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
-				@req.session.user.email.should.equal @newEmail
+				@req.user.email.should.equal @newEmail
 				done()
 			@UserController.updateUserSettings @req, @res
 

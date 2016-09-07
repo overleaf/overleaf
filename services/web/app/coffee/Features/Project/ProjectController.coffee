@@ -89,7 +89,7 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
 		logger.log project_id:project_id, projectName:projectName, "cloning project"
-		if !AuthenticationController.isUserLoggedIn()?
+		if !AuthenticationController.isUserLoggedIn()
 			return res.send redir:"/register"
 		currentUser = AuthenticationController.getSessionUser(req)
 		projectDuplicator.duplicate currentUser, project_id, projectName, (err, project)->
@@ -186,7 +186,7 @@ module.exports = ProjectController =
 		if !Settings.editorIsOpen
 			return res.render("general/closed", {title:"updating_site"})
 
-		if AuthenticationController.isUserLoggedIn(req)?
+		if AuthenticationController.isUserLoggedIn(req)
 			user_id = AuthenticationController.getLoggedInUserId(req)
 			anonymous = false
 		else

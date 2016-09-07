@@ -11,7 +11,7 @@ describe "UserPagesController", ->
 	beforeEach ->
 
 		@settings = {}
-		@user = 
+		@user =
 			_id: @user_id = "kwjewkl"
 			features:{}
 			email: "joe@example.com"
@@ -25,6 +25,8 @@ describe "UserPagesController", ->
 			getUserRegistrationStatus : sinon.stub().callsArgWith(1, null, @dropboxStatus)
 		@ErrorController =
 			notFound: sinon.stub()
+		@AuthenticationController =
+			getLoggedInUserId: sinon.stub().returns(@user._id)
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
@@ -32,7 +34,8 @@ describe "UserPagesController", ->
 			"./UserGetter": @UserGetter
 			"../Errors/ErrorController": @ErrorController
 			'../Dropbox/DropboxHandler': @DropboxHandler
-		@req = 
+			'../Authentication/AuthenticationController': @AuthenticationController
+		@req =
 			query:{}
 			session:
 					user:@user
@@ -111,24 +114,24 @@ describe "UserPagesController", ->
 				opts.user.should.equal @user
 				done()
 			@UserPagesController.settingsPage @req, @res
-	
+
 	describe "activateAccountPage", ->
 		beforeEach ->
 			@req.query.user_id = @user_id
 			@req.query.token = @token = "mock-token-123"
-		
+
 		it "should 404 without a user_id", (done) ->
 			delete @req.query.user_id
 			@ErrorController.notFound = () ->
 				done()
 			@UserPagesController.activateAccountPage @req, @res
-		
+
 		it "should 404 without a token", (done) ->
 			delete @req.query.token
 			@ErrorController.notFound = () ->
 				done()
 			@UserPagesController.activateAccountPage @req, @res
-		
+
 		it "should 404 without a valid user_id", (done) ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
 			@ErrorController.notFound = () ->
@@ -142,7 +145,7 @@ describe "UserPagesController", ->
 				url.should.equal "/login?email=#{encodeURIComponent(@user.email)}"
 				done()
 			@UserPagesController.activateAccountPage @req, @res
-			
+
 		it "render the activation page if the user has not logged in before", (done) ->
 			@user.loginCount = 0
 			@res.render = (page, opts) =>
