@@ -85,13 +85,13 @@ module.exports = UserController =
 		metrics.inc "user.logout"
 		logger.log user: req?.session?.user, "logging out"
 		sessionId = req.sessionID
-		AuthenticationController.getLoggedInUser req, (err, user) ->
-			req.logout?()  # passport logout
-			req.session.destroy (err)->
-				if err
-					logger.err err: err, 'error destorying session'
-				UserSessionsManager.untrackSession(user, sessionId)
-				res.redirect '/login'
+		user = AuthenticationController.getSessionUser(req)
+		req.logout?()  # passport logout
+		req.session.destroy (err)->
+			if err
+				logger.err err: err, 'error destorying session'
+			UserSessionsManager.untrackSession(user, sessionId)
+			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
 		email = req.body.email

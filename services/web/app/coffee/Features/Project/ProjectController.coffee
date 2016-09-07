@@ -91,13 +91,12 @@ module.exports = ProjectController =
 		logger.log project_id:project_id, projectName:projectName, "cloning project"
 		if !AuthenticationController.isUserLoggedIn()?
 			return res.send redir:"/register"
-		AuthenticationController.getLoggedInUser req, (err, currentUser) ->
-			return next(err) if err?
-			projectDuplicator.duplicate currentUser, project_id, projectName, (err, project)->
-				if err?
-					logger.error err:err, project_id: project_id, user_id: currentUser._id, "error cloning project"
-					return next(err)
-				res.send(project_id:project._id)
+		currentUser = AuthenticationController.getSessionUser(req)
+		projectDuplicator.duplicate currentUser, project_id, projectName, (err, project)->
+			if err?
+				logger.error err:err, project_id: project_id, user_id: currentUser._id, "error cloning project"
+				return next(err)
+			res.send(project_id:project._id)
 
 
 	newProject: (req, res)->
@@ -135,52 +134,51 @@ module.exports = ProjectController =
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		AuthenticationController.getLoggedInUser req, (err, currentUser) ->
-			return next(err) if err?
-			async.parallel {
-				tags: (cb)->
-					TagsHandler.getAllTags user_id, cb
-				notifications: (cb)->
-					NotificationsHandler.getUserNotifications user_id, cb
-				projects: (cb)->
-					ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
-				hasSubscription: (cb)->
-					LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
-				user: (cb) ->
-					User.findById user_id, "featureSwitches", cb
-				}, (err, results)->
-					if err?
-						logger.err err:err, "error getting data for project list page"
-						return next(err)
-					logger.log results:results, user_id:user_id, "rendering project list"
-					tags = results.tags[0]
-					notifications = require("underscore").map results.notifications, (notification)->
-						notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
-						return notification
-					projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
-					user = results.user
-					ProjectController._injectProjectOwners projects, (error, projects) ->
-						return next(error) if error?
+		currentUser = AuthenticationController.getSessionUser(req)
+		async.parallel {
+			tags: (cb)->
+				TagsHandler.getAllTags user_id, cb
+			notifications: (cb)->
+				NotificationsHandler.getUserNotifications user_id, cb
+			projects: (cb)->
+				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+			hasSubscription: (cb)->
+				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
+			user: (cb) ->
+				User.findById user_id, "featureSwitches", cb
+			}, (err, results)->
+				if err?
+					logger.err err:err, "error getting data for project list page"
+					return next(err)
+				logger.log results:results, user_id:user_id, "rendering project list"
+				tags = results.tags[0]
+				notifications = require("underscore").map results.notifications, (notification)->
+					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
+					return notification
+				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+				user = results.user
+				ProjectController._injectProjectOwners projects, (error, projects) ->
+					return next(error) if error?
 
-						viewModel = {
-							title:'your_projects'
-							priority_title: true
-							projects: projects
-							tags: tags
-							notifications: notifications or []
-							user: user
-							hasSubscription: results.hasSubscription[0]
-						}
+					viewModel = {
+						title:'your_projects'
+						priority_title: true
+						projects: projects
+						tags: tags
+						notifications: notifications or []
+						user: user
+						hasSubscription: results.hasSubscription[0]
+					}
 
-						if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
-							viewModel.showUserDetailsArea = true
-							viewModel.algolia_api_key = Settings.algolia.read_only_api_key
-							viewModel.algolia_app_id = Settings.algolia.app_id
-						else
-							viewModel.showUserDetailsArea = false
+					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
+						viewModel.showUserDetailsArea = true
+						viewModel.algolia_api_key = Settings.algolia.read_only_api_key
+						viewModel.algolia_app_id = Settings.algolia.app_id
+					else
+						viewModel.showUserDetailsArea = false
 
-						res.render 'project/list', viewModel
-						timer.done()
+					res.render 'project/list', viewModel
+					timer.done()
 
 
 	loadEditor: (req, res, next)->

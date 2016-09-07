@@ -78,18 +78,18 @@ module.exports =
 
 	beginJoinGroup: (req, res)->
 		subscription_id = req.params.subscription_id
-		AuthenticationController.getLoggedInUser req, (err, currentUser) ->
+		currentUser = AuthenticationController.getSessionUser(req)
+		if !currentUser?
+			logger.err {subscription_id}, "error getting current user"
+			return res.sendStatus 500
+		licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
+		if !licence?
+			return ErrorsController.notFound(req, res)
+		SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, currentUser.email, (err)->
 			if err?
-				logger.err {subscription_id}, "error getting current user"
-				return res.sendStatus 500
-			licence = SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)
-			if !licence?
-				return ErrorsController.notFound(req, res)
-			SubscriptionGroupHandler.sendVerificationEmail subscription_id, licence.name, currentUser.email, (err)->
-				if err?
-					res.sendStatus 500
-				else
-					res.sendStatus 200
+				res.sendStatus 500
+			else
+				res.sendStatus 200
 
 	completeJoin: (req, res)->
 		subscription_id = req.params.subscription_id
