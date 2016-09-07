@@ -82,7 +82,6 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.jsPath = jsPath
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 
-
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
@@ -102,7 +101,6 @@ module.exports = (app, webRouter, apiRouter)->
 			if qs? and qs.length > 0
 				path = path + "?" + qs
 			return path
-
 
 		res.locals.buildCssPath = (cssFile)->
 			path = Path.join("/stylesheets/", cssFile)
