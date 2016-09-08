@@ -111,5 +111,5 @@ describe "WebRedisManager", ->
 					.called
 					.should.equal false
 
-			it "should call the callback with the length", ->
-				@callback.calledWith(null, 0).should.equal true
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("cannot push no ops")).should.equal true

@@ -100,4 +100,13 @@ describe "TrackChangesManager", ->
 						"error flushing doc to track changes api"
 					)
 					.should.equal true
+		
+		describe "with no ops", ->
+			beforeEach ->
+				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
+				@TrackChangesManager.pushUncompressedHistoryOps @project_id, @doc_id, [], @callback
+			
+			it "should not call WebRedisManager.pushUncompressedHistoryOps", ->
+				@WebRedisManager.pushUncompressedHistoryOps.called.should.equal false
+			
 

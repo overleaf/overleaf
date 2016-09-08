@@ -22,7 +22,9 @@ module.exports = TrackChangesManager =
 				return callback(error)
 
 	FLUSH_EVERY_N_OPS: 50
-	pushUncompressedHistoryOps: (project_id, doc_id, ops, callback = (error) ->) ->
+	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], callback = (error) ->) ->
+		if ops.length == 0
+			return callback()
 		WebRedisManager.pushUncompressedHistoryOps project_id, doc_id, ops, (error, length) ->
 			return callback(error) if error?
 			# We want to flush every 50 ops, i.e. 50, 100, 150, etc

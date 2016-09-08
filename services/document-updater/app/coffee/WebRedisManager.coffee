@@ -24,7 +24,7 @@ module.exports = WebRedisManager =
 
 	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], callback = (error, length) ->) ->
 		if ops.length == 0
-			return callback(null, 0)
+			return callback(new Error("cannot push no ops")) # This should never be called with no ops, but protect against a redis error if we sent an empty array to rpush
 		jsonOps = ops.map (op) -> JSON.stringify op
 		async.parallel [
 			(cb) -> rclient.rpush "UncompressedHistoryOps:#{doc_id}", jsonOps..., cb
