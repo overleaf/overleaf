@@ -23,6 +23,8 @@ module.exports = WebRedisManager =
 		rclient.llen "PendingUpdates:#{doc_id}", callback
 
 	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], callback = (error, length) ->) ->
+		if ops.length == 0
+			return callback(null, 0)
 		jsonOps = ops.map (op) -> JSON.stringify op
 		async.parallel [
 			(cb) -> rclient.rpush "UncompressedHistoryOps:#{doc_id}", jsonOps..., cb

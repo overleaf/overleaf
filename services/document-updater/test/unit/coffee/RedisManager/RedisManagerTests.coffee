@@ -219,6 +219,21 @@ describe "RedisManager", ->
 				@callback
 					.calledWith(new Error("Version mismatch. '#{@doc_id}' is corrupted."))
 					.should.equal true
+		
+		describe "with no updates", ->
+			beforeEach ->
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version)
+				@RedisManager.updateDocument @doc_id, @lines, @version, [], @callback
+			
+			it "should not do an rpush", ->
+				@rclient.rpush
+					.called
+					.should.equal false
+		
+			it "should still set the doclines", ->
+				@rclient.set
+					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+					.should.equal true
 
 	describe "putDocInMemory", ->
 		beforeEach (done) ->

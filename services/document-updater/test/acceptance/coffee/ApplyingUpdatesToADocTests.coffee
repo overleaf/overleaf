@@ -1,6 +1,7 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+expect = chai.expect
 async = require "async"
 rclient = require("redis").createClient()
 {db, ObjectId} = require "../../../app/js/mongojs"
@@ -251,3 +252,55 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @result
 				done()
+	
+	describe "when the sending duplicate ops", ->
+		before (done) ->
+			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
+			db.docOps.insert {
+				doc_id: ObjectId(@doc_id)
+				version: @version
+			}, (error) =>
+				throw error if error?
+				# One user delete 'one', the next turns it into 'once'. The second becomes a NOP.
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, {
+					doc: @doc_id
+					op: [{
+						i: "one and a half\n"
+						p: 4
+					}]
+					v: @version
+					meta:
+						source: "ikHceq3yfAdQYzBo4-xZ"
+				}, (error) =>
+					throw error if error?
+					setTimeout () =>
+						DocUpdaterClient.sendUpdate @project_id, @doc_id, {
+							doc: @doc_id
+							op: [{
+								i: "one and a half\n"
+								p: 4
+							}]
+							v: @version
+							dupIfSource: ["ikHceq3yfAdQYzBo4-xZ"]
+							meta:
+								source: "ikHceq3yfAdQYzBo4-xZ"
+						}, (error) =>
+							throw error if error?
+							setTimeout done, 200
+					, 200
+			
+			DocUpdaterClient.subscribeToAppliedOps @messageCallback = sinon.stub()
+
+		it "should update the doc", (done) ->
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
+				doc.lines.should.deep.equal @result
+				done()
+		
+		it "should return a message about duplicate ops", ->
+			@messageCallback.calledTwice.should.equal true
+			@messageCallback.args[0][0].should.equal "applied-ops"
+			expect(JSON.parse(@messageCallback.args[0][1]).op.dup).to.be.undefined
+			@messageCallback.args[1][0].should.equal "applied-ops"
+			expect(JSON.parse(@messageCallback.args[1][1]).op.dup).to.equal true
+

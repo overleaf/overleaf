@@ -115,7 +115,8 @@ module.exports = RedisManager =
 			multi = rclient.multi()
 			multi.set    keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 			multi.set    keys.docVersion(doc_id:doc_id), newVersion
-			multi.rpush  keys.docOps(doc_id: doc_id), jsonOps... # TODO: Really double check that these are going onto the array in the correct order
+			if jsonOps.length > 0
+				multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
 			multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
 			multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
 			multi.exec (error, replys) ->
