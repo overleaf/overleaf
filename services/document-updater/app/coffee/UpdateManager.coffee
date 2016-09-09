@@ -39,7 +39,7 @@ module.exports = UpdateManager =
 			return callback(error) if error?
 			if updates.length == 0
 				return callback()
-			async.mapSeries updates,
+			async.eachSeries updates,
 				(update, cb) -> UpdateManager.applyUpdate project_id, doc_id, update, cb
 				callback
 
