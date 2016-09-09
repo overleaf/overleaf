@@ -68,7 +68,7 @@ module.exports = DocumentManager =
 						type: "external"
 						source: source
 						user_id: user_id
-				UpdateManager.applyUpdates project_id, doc_id, [update], (error) ->
+				UpdateManager.applyUpdate project_id, doc_id, update, (error) ->
 					return callback(error) if error?
 					# If the document was loaded already, then someone has it open
 					# in a project, and the usual flushing mechanism will happen.

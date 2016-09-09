@@ -121,16 +121,17 @@ describe "UpdateManager", ->
 				@updatedDocLines = ["updated", "lines"]
 				@version = 34
 				@WebRedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
-				@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version)
+				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version)
 				@UpdateManager.fetchAndApplyUpdates @project_id, @doc_id, @callback
 
 			it "should get the pending updates", ->
 				@WebRedisManager.getPendingUpdatesForDoc.calledWith(@doc_id).should.equal true
 
 			it "should apply the updates", ->
-				@UpdateManager.applyUpdates
-					.calledWith(@project_id, @doc_id, @updates)
-					.should.equal true
+				for update in @updates
+					@UpdateManager.applyUpdate
+						.calledWith(@project_id, @doc_id, update)
+						.should.equal true
 		
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -139,33 +140,33 @@ describe "UpdateManager", ->
 			beforeEach ->
 				@updates = []
 				@WebRedisManager.getPendingUpdatesForDoc = sinon.stub().callsArgWith(1, null, @updates)
-				@UpdateManager.applyUpdates = sinon.stub()
+				@UpdateManager.applyUpdate = sinon.stub()
 				@RedisManager.setDocument = sinon.stub()
 				@UpdateManager.fetchAndApplyUpdates @project_id, @doc_id, @callback
 
-			it "should not call applyUpdates", ->
-				@UpdateManager.applyUpdates.called.should.equal false
+			it "should not call applyUpdate", ->
+				@UpdateManager.applyUpdate.called.should.equal false
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
 				
-	describe "applyUpdates", ->
+	describe "applyUpdate", ->
 		beforeEach ->
-			@updates = [{op: [{p: 42, i: "foo"}]}]
+			@update = {op: [{p: 42, i: "foo"}]}
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
 			@appliedOps = ["mock-applied-ops"]
-			@ShareJsUpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version, @appliedOps)
+			@ShareJsUpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().callsArg(4)
 			@TrackChangesManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
 		
 		describe "normally", ->
 			beforeEach ->
-				@UpdateManager.applyUpdates @project_id, @doc_id, @updates, @callback
+				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
 			
 			it "should apply the updates via ShareJS", ->
-				@ShareJsUpdateManager.applyUpdates
-					.calledWith(@project_id, @doc_id, @updates)
+				@ShareJsUpdateManager.applyUpdate
+					.calledWith(@project_id, @doc_id, @update)
 					.should.equal true
 
 			it "should save the document", ->
@@ -183,14 +184,14 @@ describe "UpdateManager", ->
 
 		describe "with UTF-16 surrogate pairs in the update", ->
 			beforeEach ->
-				@updates = [{op: [{p: 42, i: "\uD835\uDC00"}]}]
-				@UpdateManager.applyUpdates @project_id, @doc_id, @updates, @callback
+				@update = {op: [{p: 42, i: "\uD835\uDC00"}]}
+				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
 
 			it "should apply the update but with surrogate pairs removed", ->
-				@ShareJsUpdateManager.applyUpdates
-					.calledWith(@project_id, @doc_id, @updates)
+				@ShareJsUpdateManager.applyUpdate
+					.calledWith(@project_id, @doc_id, @update)
 					.should.equal true
 				
 				# \uFFFD is 'replacement character'
-				@updates[0].op[0].i.should.equal "\uFFFD\uFFFD"
+				@update.op[0].i.should.equal "\uFFFD\uFFFD"
 

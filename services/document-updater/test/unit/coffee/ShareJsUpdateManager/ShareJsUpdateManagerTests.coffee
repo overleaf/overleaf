@@ -20,7 +20,7 @@ describe "ShareJsUpdateManager", ->
 			globals:
 				clearTimeout: @clearTimeout = sinon.stub()
 
-	describe "applyUpdates", ->
+	describe "applyUpdate", ->
 		beforeEach ->
 			@version = 34
 			@model =
@@ -31,17 +31,14 @@ describe "ShareJsUpdateManager", ->
 			@ShareJsUpdateManager.getNewShareJsModel = sinon.stub().returns(@model)
 			@ShareJsUpdateManager._listenForOps = sinon.stub()
 			@ShareJsUpdateManager.removeDocFromCache = sinon.stub().callsArg(1)
-			@updates = [
-				{p: 4, t: "foo"}
-				{p: 6, t: "bar"}
-			]
+			@update = {p: 4, t: "foo"}
 			@updatedDocLines = ["one", "two"]
 
 		describe "successfully", ->
 			beforeEach (done) ->
 				@model.getSnapshot.callsArgWith(1, null, {snapshot: @updatedDocLines.join("\n"), v: @version})
 				@model.db.appliedOps["#{@project_id}:#{@doc_id}"] = @appliedOps = ["mock-ops"]
-				@ShareJsUpdateManager.applyUpdates @project_id, @doc_id, @updates, (err, docLines, version, appliedOps) =>
+				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, (err, docLines, version, appliedOps) =>
 					@callback(err, docLines, version, appliedOps)
 					done()
 
@@ -54,10 +51,10 @@ describe "ShareJsUpdateManager", ->
 					.calledWith(@model)
 					.should.equal true
 
-			it "should send each update to ShareJs", ->
-				for update in @updates
-					@model.applyOp
-						.calledWith("#{@project_id}:#{@doc_id}", update).should.equal true
+			it "should send the update to ShareJs", ->
+				@model.applyOp
+					.calledWith("#{@project_id}:#{@doc_id}", @update)
+					.should.equal true
 
 			it "should get the updated doc lines", ->
 				@model.getSnapshot
@@ -72,7 +69,7 @@ describe "ShareJsUpdateManager", ->
 				@error = new Error("Something went wrong")
 				@ShareJsUpdateManager._sendError = sinon.stub()
 				@model.applyOp = sinon.stub().callsArgWith(2, @error)
-				@ShareJsUpdateManager.applyUpdates @project_id, @doc_id, @updates, (err, docLines, version) =>
+				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, (err, docLines, version) =>
 					@callback(err, docLines, version)
 					done()
 
@@ -89,7 +86,7 @@ describe "ShareJsUpdateManager", ->
 				@error = new Error("Something went wrong")
 				@ShareJsUpdateManager._sendError = sinon.stub()
 				@model.getSnapshot.callsArgWith(1, @error)
-				@ShareJsUpdateManager.applyUpdates @project_id, @doc_id, @updates, (err, docLines, version) =>
+				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, (err, docLines, version) =>
 					@callback(err, docLines, version)
 					done()
 

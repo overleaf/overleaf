@@ -39,15 +39,15 @@ module.exports = UpdateManager =
 			return callback(error) if error?
 			if updates.length == 0
 				return callback()
-			UpdateManager.applyUpdates project_id, doc_id, updates, callback
+			async.mapSeries updates,
+				(update, cb) -> UpdateManager.applyUpdate project_id, doc_id, update, cb
+				callback
 
-	applyUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
-		for update in updates or []
-			UpdateManager._sanitizeUpdate update
-		ShareJsUpdateManager.applyUpdates project_id, doc_id, updates, (error, updatedDocLines, version, appliedOps) ->
+	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
+		UpdateManager._sanitizeUpdate update
+		ShareJsUpdateManager.applyUpdate project_id, doc_id, update, (error, updatedDocLines, version, appliedOps) ->
 			return callback(error) if error?
-			logger.log doc_id: doc_id, version: version, "updating doc via sharejs"
-			# TODO: Do these in parallel? Worry about consistency here?
+			logger.log doc_id: doc_id, version: version, "updating doc in redis"
 			RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, (error) ->
 				return callback(error) if error?
 				TrackChangesManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback

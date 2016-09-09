@@ -32,7 +32,7 @@ describe "DocumentManager.setDoc", ->
 			@afterLines = ["after", "lines"]
 			@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, true)
 			@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
-			@UpdateManager.applyUpdates = sinon.stub().callsArgWith(3, null)
+			@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
 			@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
 			@DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(2)
 
@@ -51,11 +51,11 @@ describe "DocumentManager.setDoc", ->
 					.should.equal true
 
 			it "should apply the diff as a ShareJS op", ->
-				@UpdateManager.applyUpdates
+				@UpdateManager.applyUpdate
 					.calledWith(
 						@project_id,
 						@doc_id,
-						[
+						{
 							doc: @doc_id,
 							v: @version,
 							op: @ops,
@@ -64,7 +64,7 @@ describe "DocumentManager.setDoc", ->
 								source: @source
 								user_id: @user_id
 							}
-						]
+						}
 					)
 					.should.equal true
 

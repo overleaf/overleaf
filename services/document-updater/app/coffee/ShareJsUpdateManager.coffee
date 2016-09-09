@@ -21,8 +21,8 @@ module.exports = ShareJsUpdateManager =
 		model.db = db
 		return model
 
-	applyUpdates: (project_id, doc_id, updates, callback = (error, updatedDocLines) ->) ->
-		logger.log project_id: project_id, doc_id: doc_id, updates: updates, "applying sharejs updates"
+	applyUpdate: (project_id, doc_id, update, callback = (error, updatedDocLines) ->) ->
+		logger.log project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
 		jobs = []
 
 		# We could use a global model for all docs, but we're hitting issues with the
@@ -33,26 +33,19 @@ module.exports = ShareJsUpdateManager =
 		model = @getNewShareJsModel()
 		@_listenForOps(model)
 		doc_key = Keys.combineProjectIdAndDocId(project_id, doc_id)
-		for update in updates
-			do (update) =>
-				jobs.push (callback) =>
-					model.applyOp doc_key, update, (error) ->
-						if error == "Op already submitted"
-							logger.warn {project_id, doc_id, update}, "op has already been submitted"
-							update.dup = true
-							ShareJsUpdateManager._sendOp(project_id, doc_id, update)
-							callback()
-						else
-							callback(error)
-
-		async.series jobs, (error) =>
-			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied updates"
+		model.applyOp doc_key, update, (error) ->
 			if error?
-				@_sendError(project_id, doc_id, error)
-				return callback(error)
+				if error == "Op already submitted"
+					logger.warn {project_id, doc_id, update}, "op has already been submitted"
+					update.dup = true
+					ShareJsUpdateManager._sendOp(project_id, doc_id, update)
+				else
+					ShareJsUpdateManager._sendError(project_id, doc_id, error)
+					return callback(error)
+			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"
 			model.getSnapshot doc_key, (error, data) =>
 				if error?
-					@_sendError(project_id, doc_id, error)
+					ShareJsUpdateManager._sendError(project_id, doc_id, error)
 					return callback(error)
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
 				callback(null, docLines, data.v, model.db.appliedOps[doc_key] or [])

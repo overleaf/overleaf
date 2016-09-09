@@ -8,9 +8,10 @@ MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
 describe "Getting a document", ->
-	beforeEach ->
+	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
+		setTimeout done, 200 # Give MockWebApi a chance to start
 
 	describe "when the document is not loaded", ->
 		before (done) ->
