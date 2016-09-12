@@ -10,10 +10,10 @@ import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.jetty.NullLogger;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
-import uk.ac.ic.wlgitbridge.bridge.db.SqliteDBStore;
-import uk.ac.ic.wlgitbridge.bridge.repo.FSRepoStore;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
+import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -25,6 +25,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.net.BindException;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 /**
@@ -36,7 +37,7 @@ import java.util.EnumSet;
  */
 public class GitBridgeServer {
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
 
     private final Server jettyServer;
 
@@ -44,21 +45,31 @@ public class GitBridgeServer {
     private String rootGitDirectoryPath;
     private String apiBaseURL;
 
-    public GitBridgeServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
+    public GitBridgeServer(
+            Config config
+    ) throws ServletException, InvalidRootDirectoryPathException {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
-        RepoStore repoStore = new FSRepoStore(rootGitDirectoryPath);
-        DBStore dbStore = new SqliteDBStore(repoStore.getRootDirectory());
-        SwapStore swapStore = new SwapStore() {};
-        bridgeAPI = Bridge.make(
+        RepoStore repoStore = new FSGitRepoStore(rootGitDirectoryPath);
+        DBStore dbStore = new SqliteDBStore(
+                Paths.get(
+                        repoStore.getRootDirectory().getAbsolutePath()
+                ).resolve(".wlgb").resolve("wlgb.db").toFile()
+        );
+        SwapStore swapStore = SwapStore.fromConfig(config.getSwapStore());
+        bridge = Bridge.make(
                 repoStore,
                 dbStore,
-                swapStore
+                swapStore,
+                config.getSwapJob()
         );
         jettyServer = new Server(port);
         configureJettyServer(config);
-        SnapshotAPIRequest.setBasicAuth(config.getUsername(), config.getPassword());
+        SnapshotAPIRequest.setBasicAuth(
+                config.getUsername(),
+                config.getPassword()
+        );
         apiBaseURL = config.getAPIBaseURL();
         SnapshotAPIRequest.setBaseURL(apiBaseURL);
         Util.setServiceName(config.getServiceName());
@@ -71,7 +82,9 @@ public class GitBridgeServer {
      */
     public void start() {
         try {
+            bridge.checkDB();
             jettyServer.start();
+            bridge.startSwapJob();
             Log.info(Util.getServiceName() + "-Git Bridge server started");
             Log.info("Listening on port: " + port);
             Log.info("Bridged to: " + apiBaseURL);
@@ -92,7 +105,9 @@ public class GitBridgeServer {
         }
     }
 
-    private void configureJettyServer(Config config) throws ServletException, InvalidRootDirectoryPathException {
+    private void configureJettyServer(
+            Config config
+    ) throws ServletException, InvalidRootDirectoryPathException {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
         handlers.addHandler(initGitHandler(config));
@@ -105,31 +120,44 @@ public class GitBridgeServer {
 
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initResourceHandler());
-        handlers.addHandler(new PostbackHandler(bridgeAPI));
+        handlers.addHandler(new PostbackHandler(bridge));
         handlers.addHandler(new DefaultHandler());
 
         api.setHandler(handlers);
         return api;
     }
 
-    private Handler initGitHandler(Config config) throws ServletException, InvalidRootDirectoryPathException {
-        final ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+    private Handler initGitHandler(
+            Config config
+    ) throws ServletException, InvalidRootDirectoryPathException {
+        final ServletContextHandler servletContextHandler =
+                new ServletContextHandler(ServletContextHandler.SESSIONS);
         if (config.isUsingOauth2()) {
             Filter filter = new Oauth2Filter(config.getOauth2());
-            servletContextHandler.addFilter(new FilterHolder(filter), "/*", EnumSet.of(DispatcherType.REQUEST));
+            servletContextHandler.addFilter(
+                    new FilterHolder(filter),
+                    "/*",
+                    EnumSet.of(DispatcherType.REQUEST)
+            );
         }
         servletContextHandler.setContextPath("/");
         servletContextHandler.addServlet(
                 new ServletHolder(
-                        new WLGitServlet(servletContextHandler, bridgeAPI, rootGitDirectoryPath)),
+                        new WLGitServlet(
+                                servletContextHandler,
+                                bridge
+                        )
+                ),
                 "/*"
         );
         return servletContextHandler;
     }
 
     private Handler initResourceHandler() {
-        ResourceHandler resourceHandler = new FileHandler(bridgeAPI);
-        resourceHandler.setResourceBase(new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath());
+        ResourceHandler resourceHandler = new FileHandler(bridge);
+        resourceHandler.setResourceBase(
+                new File(rootGitDirectoryPath, ".wlgb/atts").getAbsolutePath()
+        );
         return resourceHandler;
     }
 }

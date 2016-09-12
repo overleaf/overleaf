@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
@@ -14,6 +15,14 @@ import java.util.Map;
 public interface ProjectRepo {
 
     String getProjectName();
+
+    void initRepo(
+            RepoStore repoStore
+    ) throws IOException;
+
+    void useExistingRepository(
+            RepoStore repoStore
+    ) throws IOException;
 
     Map<String, RawFile> getFiles() throws IOException, GitUserException;
 

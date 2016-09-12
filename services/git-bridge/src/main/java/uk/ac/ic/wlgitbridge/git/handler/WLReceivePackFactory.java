@@ -19,10 +19,10 @@ import javax.servlet.http.HttpServletRequest;
 /* */
 public class WLReceivePackFactory implements ReceivePackFactory<HttpServletRequest> {
 
-    private final Bridge bridgeAPI;
+    private final Bridge bridge;
 
-    public WLReceivePackFactory(Bridge bridgeAPI) {
-        this.bridgeAPI = bridgeAPI;
+    public WLReceivePackFactory(Bridge bridge) {
+        this.bridge = bridge;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class WLReceivePackFactory implements ReceivePackFactory<HttpServletReque
         if (hostname == null) {
             hostname = httpServletRequest.getLocalName();
         }
-        receivePack.setPreReceiveHook(new WriteLatexPutHook(bridgeAPI, hostname, oauth2));
+        receivePack.setPreReceiveHook(new WriteLatexPutHook(bridge, hostname, oauth2));
         return receivePack;
     }
 

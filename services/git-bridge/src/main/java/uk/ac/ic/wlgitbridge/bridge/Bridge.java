@@ -3,15 +3,17 @@ package uk.ac.ic.wlgitbridge.bridge;
 import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
+import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
+import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotAPI;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJob;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapJobImpl;
-import uk.ac.ic.wlgitbridge.bridge.swap.SwapStore;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
+import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
+import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
@@ -29,7 +31,10 @@ import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
+import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -42,18 +47,19 @@ public class Bridge {
     private final RepoStore repoStore;
     private final DBStore dbStore;
     private final SwapStore swapStore;
+    private final SwapJob swapJob;
 
     private final SnapshotAPI snapshotAPI;
     private final ResourceCache resourceCache;
 
-    private final SwapJob swapJob;
 
     private final PostbackManager postbackManager;
 
     public static Bridge make(
             RepoStore repoStore,
             DBStore dbStore,
-            SwapStore swapStore
+            SwapStore swapStore,
+            Optional<SwapJobConfig> swapJobConfig
     ) {
         ProjectLock lock = new ProjectLockImpl((int threads) ->
                 Log.info("Waiting for " + threads + " projects...")
@@ -63,14 +69,15 @@ public class Bridge {
                 repoStore,
                 dbStore,
                 swapStore,
-                new NetSnapshotAPI(),
-                new UrlResourceCache(dbStore),
-                new SwapJobImpl(
+                SwapJob.fromConfig(
+                        swapJobConfig,
                         lock,
                         repoStore,
                         dbStore,
                         swapStore
-                )
+                ),
+                new NetSnapshotAPI(),
+                new UrlResourceCache(dbStore)
         );
     }
 
@@ -79,9 +86,9 @@ public class Bridge {
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore,
+            SwapJob swapJob,
             SnapshotAPI snapshotAPI,
-            ResourceCache resourceCache,
-            SwapJob swapJob
+            ResourceCache resourceCache
     ) {
         this.lock = lock;
         this.repoStore = repoStore;
@@ -104,66 +111,140 @@ public class Bridge {
         Log.info("Bye");
     }
 
-    public void startSwapJob(int intervalMillis) {
-        swapJob.start(intervalMillis);
+    public void startSwapJob() {
+        swapJob.start();
     }
 
-    /* TODO: Remove these when WLBridged is moved into RepoStore */
-    public void lockForProject(String projectName) {
-        lock.lockForProject(projectName);
+    public void checkDB() {
+        Log.info("Checking DB");
+        File rootDir = repoStore.getRootDirectory();
+        for (File f : rootDir.listFiles()) {
+            if (f.getName().equals(".wlgb")) {
+                continue;
+            }
+            String projName = f.getName();
+            try (LockGuard __ = lock.lockGuard(projName)) {
+                File dotGit = new File(f, ".git");
+                if (!dotGit.exists()) {
+                    Log.warn("Project: {} has no .git", projName);
+                    continue;
+                }
+                ProjectState state = dbStore.getProjectState(projName);
+                if (state != ProjectState.NOT_PRESENT) {
+                    continue;
+                }
+                Log.warn("Project: {} not in swap_store, adding", projName);
+                dbStore.setLastAccessedTime(
+                        projName,
+                        new Timestamp(dotGit.lastModified())
+                );
+            }
+        }
     }
 
-    public void unlockForProject(String projectName) {
-        lock.unlockForProject(projectName);
-    }
-
-    public boolean repositoryExists(Credential oauth2, String projectName)
-            throws ServiceMayNotContinueException, GitUserException {
-        lockForProject(projectName);
-        GetDocRequest getDocRequest = new GetDocRequest(oauth2, projectName);
-        getDocRequest.request();
-        try {
+    public boolean projectExists(
+            Credential oauth2,
+            String projectName
+    ) throws ServiceMayNotContinueException,
+             GitUserException {
+        try (LockGuard __ = lock.lockGuard(projectName)) {
+            GetDocRequest getDocRequest = new GetDocRequest(
+                    oauth2,
+                    projectName
+            );
+            getDocRequest.request();
             getDocRequest.getResult().getVersionID();
+            return true;
         } catch (InvalidProjectException e) {
             return false;
-        } finally {
-            unlockForProject(projectName);
         }
-        return true;
     }
 
-    public void getWritableRepositories(
+    public void updateRepository(
             Credential oauth2,
             ProjectRepo repo
-    ) throws IOException,
-             GitUserException {
-        Log.info("[{}] Fetching", repo.getProjectName());
-        updateProjectWithName(oauth2, repo);
+    ) throws IOException, GitUserException {
+        String projectName = repo.getProjectName();
+        try (LockGuard __ = lock.lockGuard(projectName)) {
+            Log.info("[{}] Updating", projectName);
+            updateRepositoryCritical(oauth2, repo);
+        }
     }
 
-    public void
-    putDirectoryContentsToProjectWithName(Credential oauth2,
-                                          String projectName,
-                                          RawDirectory directoryContents,
-                                          RawDirectory oldDirectoryContents,
-                                          String hostname)
-            throws SnapshotPostException, IOException, ForbiddenException {
-        lock.lockForProject(projectName);
-        CandidateSnapshot candidate = null;
-        try {
-            Log.info("[{}] Pushing", projectName);
-            String postbackKey = postbackManager.makeKeyForProject(projectName);
-            Log.info(
-                    "[{}] Created postback key: {}",
+    private void updateRepositoryCritical(
+            Credential oauth2,
+            ProjectRepo repo
+    ) throws IOException, GitUserException {
+        String projectName = repo.getProjectName();
+        ProjectState state = dbStore.getProjectState(projectName);
+        switch (state) {
+        case NOT_PRESENT:
+            repo.initRepo(repoStore);
+            break;
+        case SWAPPED:
+            swapJob.restore(projectName);
+            /* Fallthrough */
+        default:
+            repo.useExistingRepository(repoStore);
+        }
+        updateProject(oauth2, repo);
+        dbStore.setLastAccessedTime(
+                projectName,
+                Timestamp.valueOf(LocalDateTime.now())
+        );
+    }
+
+    public void putDirectoryContentsToProjectWithName(
+            Credential oauth2,
+            String projectName,
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents,
+            String hostname
+    ) throws SnapshotPostException, IOException, ForbiddenException {
+        try (LockGuard __ = lock.lockGuard(projectName)) {
+            pushToProjectCritical(
+                    oauth2,
                     projectName,
-                    postbackKey
+                    directoryContents,
+                    oldDirectoryContents
             );
-            candidate =
-                    createCandidateSnapshot(
-                            projectName,
-                            directoryContents,
-                            oldDirectoryContents
-                    );
+        } catch (SevereSnapshotPostException e) {
+            Log.warn("[" + projectName + "] Failed to put to Overleaf", e);
+            throw e;
+        } catch (SnapshotPostException e) {
+            /* Stack trace should be printed further up */
+            Log.warn(
+                    "[{}] Exception when waiting for postback: {}",
+                    projectName,
+                    e.getClass().getSimpleName()
+            );
+            throw e;
+        } catch (IOException e) {
+            Log.warn("[{}] IOException on put", projectName);
+            throw e;
+        }
+    }
+
+    private void pushToProjectCritical(
+            Credential oauth2,
+            String projectName,
+            RawDirectory directoryContents,
+            RawDirectory oldDirectoryContents
+    ) throws IOException, ForbiddenException, SnapshotPostException {
+        Log.info("[{}] Pushing", projectName);
+        String postbackKey = postbackManager.makeKeyForProject(projectName);
+        Log.info(
+                "[{}] Created postback key: {}",
+                projectName,
+                postbackKey
+        );
+        try (
+                CandidateSnapshot candidate = createCandidateSnapshot(
+                                projectName,
+                                directoryContents,
+                                oldDirectoryContents
+                );
+        ) {
             Log.info(
                     "[{}] Candindate snapshot created: {}",
                     projectName,
@@ -195,6 +276,10 @@ public class Bridge {
                         projectName,
                         versionID
                 );
+                dbStore.setLastAccessedTime(
+                        projectName,
+                        Timestamp.valueOf(LocalDateTime.now())
+                );
             } else {
                 Log.warn(
                         "[{}] Went out of date while waiting for push",
@@ -202,31 +287,6 @@ public class Bridge {
                 );
                 throw new OutOfDateException();
             }
-        } catch (SevereSnapshotPostException e) {
-            Log.warn("[" + projectName + "] Failed to put to Overleaf", e);
-            throw e;
-        } catch (SnapshotPostException e) {
-            /* Stack trace should be printed further up */
-            Log.warn(
-                    "[{}] Exception when waiting for postback: {}",
-                    projectName,
-                    e.getClass().getSimpleName()
-            );
-            throw e;
-        } catch (IOException e) {
-            Log.warn("[{}] IOException on put", projectName);
-            throw e;
-        } finally {
-            if (candidate != null) {
-                candidate.deleteServletFiles();
-            } else {
-                Log.error(
-                        "[{}] Candidate snapshot was null: " +
-                                "this should never happen.",
-                        projectName
-                );
-            }
-            lock.unlockForProject(projectName);
         }
     }
 
@@ -266,7 +326,7 @@ public class Bridge {
 
     /* PRIVATE */
 
-    private void updateProjectWithName(
+    private void updateProject(
             Credential oauth2,
             ProjectRepo repo
     ) throws IOException, GitUserException {

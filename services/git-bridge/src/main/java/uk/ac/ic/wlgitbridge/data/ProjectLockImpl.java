@@ -33,11 +33,13 @@ public class ProjectLockImpl implements ProjectLock {
         setWaiter(waiter);
     }
 
+    @Override
     public void lockForProject(String projectName) {
         getLockForProjectName(projectName).lock();
         rlock.lock();
     }
 
+    @Override
     public void unlockForProject(String projectName) {
         getLockForProjectName(projectName).unlock();
         rlock.unlock();
