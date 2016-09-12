@@ -70,7 +70,7 @@ public class SqliteDBStoreTest {
     }
 
     @Test
-    public void noOldestProjectIfAllEvicated() {
+    public void noOldestProjectIfAllEvicted() {
         dbStore.setLatestVersionForProject("older", 3);
         dbStore.setLastAccessedTime("older", null);
         assertNull(dbStore.getOldestUnswappedProject());
