@@ -142,7 +142,6 @@ public class SqliteDBStore implements DBStore {
                 new CreateProjectsIndexLastAccessed(),
                 new CreateURLIndexStoreSQLUpdate(),
                 new CreateIndexURLIndexStore(),
-                new CreateProjectsIndexLastAccessed()
         ).forEach(this::update);
         /* In the case of needing to change the schema, we need to check that
            ProjectsAddLastAccessed didn't just fail */
