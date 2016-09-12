@@ -44,7 +44,9 @@ module.exports = CompileManager =
 
 			# set up environment variables for chktex
 			env = {}
-			if request.check?
+			# only run chktex on LaTeX files (not knitr .Rtex files or any others)
+			isLaTeXFile = request.rootResourcePath?.match(/\.tex$/i)
+			if request.check? and isLaTeXFile
 				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16'
 				if request.check is 'error'
 					env['CHKTEX_EXIT_ON_ERROR'] =  1

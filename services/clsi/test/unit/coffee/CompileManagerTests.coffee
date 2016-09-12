@@ -98,6 +98,41 @@ describe "CompileManager", ->
 					.calledWith(@compileDir + "/" + @rootResourcePath)
 					.should.equal true
 
+		describe "with a check option", ->
+			beforeEach ->
+				@request.check = "error"
+				@CompileManager.doCompile @request, @callback
+
+			it "should run chktex", ->
+				@LatexRunner.runLatex
+					.calledWith("#{@project_id}-#{@user_id}", {
+						directory: @compileDir
+						mainFile:  @rootResourcePath
+						compiler:  @compiler
+						timeout:   @timeout
+						image:     @image
+						environment: {'CHKTEX_OPTIONS': '-nall -e9 -e10 -w15 -w16', 'CHKTEX_EXIT_ON_ERROR':1}
+					})
+					.should.equal true
+
+		describe "with a knitr file and check options", ->
+			beforeEach ->
+				@request.rootResourcePath = "main.Rtex"
+				@request.check = "error"
+				@CompileManager.doCompile @request, @callback
+
+			it "should not run chktex", ->
+				@LatexRunner.runLatex
+					.calledWith("#{@project_id}-#{@user_id}", {
+						directory: @compileDir
+						mainFile:  "main.Rtex"
+						compiler:  @compiler
+						timeout:   @timeout
+						image:     @image
+						environment: @env
+					})
+					.should.equal true
+
 	describe "clearProject", ->
 		describe "succesfully", ->
 			beforeEach ->
