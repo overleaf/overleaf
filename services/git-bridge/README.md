@@ -3,8 +3,22 @@ writelatex-git-bridge
 
 Required
 --------
-  * `maven` (for building)
+  * `maven` (for building, running tests and packaging)
   * `jdk-8` (for compiling and running)
+
+Commands
+--------
+
+To be run from the base directory:
+
+**Build jar**:
+`mvn package`
+
+**Run tests**:
+`mvn test`
+
+**Clean**:
+`mvn clean`
 
 Installation
 ------------
