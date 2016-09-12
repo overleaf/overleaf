@@ -80,10 +80,9 @@ public class SwapJobImpl implements SwapJob {
 
     @Override
     public void start() {
-        timer.scheduleAtFixedRate(
+        timer.schedule(
                 uk.ac.ic.wlgitbridge.util.Timer.makeTimerTask(this::doSwap),
-                0,
-                interval.toMillis()
+                0
         );
     }
 
@@ -93,6 +92,18 @@ public class SwapJobImpl implements SwapJob {
     }
 
     private void doSwap() {
+        try {
+            doSwap_();
+        } catch (Throwable t) {
+            Log.warn("Exception thrown during swap job", t);
+        }
+        timer.schedule(
+                uk.ac.ic.wlgitbridge.util.Timer.makeTimerTask(this::doSwap),
+                interval.toMillis()
+        );
+    }
+
+    private void doSwap_() {
         Log.info("Running swap number {}", swaps.get() + 1);
         long totalSize = repoStore.totalSize();
         Log.info("Size is {}/{} (high)", totalSize, highWatermarkBytes);
