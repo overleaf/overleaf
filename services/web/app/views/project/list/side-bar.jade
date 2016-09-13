@@ -155,6 +155,6 @@
 							| #{translate("or_unlock_features_bonus")} 
 							a(href="/user/bonus") #{translate("sharing_sl")} .
 script.
-	window.userHasNoSubscription = #{settings.enableSubscriptions && !hasSubscription}
+	window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}
 
 
