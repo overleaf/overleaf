@@ -197,6 +197,10 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 			)
 		div(ng-if="!status.loading")
 			.container-fluid
+				.row(ng-show='data.messages.length > 0')
+					.col-xs-12
+						.alert.alert-danger
+							p {{data.messages}}
 				.row
 					.col-xs-4
 						.pull-right #{translate("total_words")} :
