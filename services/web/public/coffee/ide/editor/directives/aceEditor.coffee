@@ -9,7 +9,11 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 ], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
-	
+
+	# set the path for ace workers if using a CDN (from editor.jade)
+	if window.aceWorkerPath?
+		ace.config.set('workerPath', "#{window.aceWorkerPath}");
+
 	# Ace loads its script itself, so we need to hook in to be able to clear
 	# the cache.
 	if !ace.config._moduleUrl?
