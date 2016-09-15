@@ -11,6 +11,7 @@ basicAuth = require('basic-auth-connect')
 UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
+passport = require 'passport'
 
 module.exports = AuthenticationController =
 
@@ -32,6 +33,22 @@ module.exports = AuthenticationController =
 	deserializeUser: (user, cb) ->
 		cb(null, user)
 
+	passportLogin: (req, res, next) ->
+		# This function is middleware which wraps the passport.authenticate middleware,
+		# so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
+		# and send a `{redir: ""}` response on success
+		passport.authenticate('local', (err, user, info) ->
+			# `user` is either a user object or false
+			if err?
+				return next(err)
+			if user
+				req.login user, (err) ->
+					res.json {redir: req._redir}
+			else
+				res.json message: info
+		)(req, res, next)
+
+
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
 		redir = Url.parse(req?.body?.redir or "/project").path
@@ -39,7 +56,7 @@ module.exports = AuthenticationController =
 			return done(err) if err?
 			if !isAllowed
 				logger.log email:email, "too many login requests"
-				return done(null, null, {message: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
+				return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
 				return done(error) if error?
 				if user?
@@ -58,7 +75,7 @@ module.exports = AuthenticationController =
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
-					return done(null, false, {message: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
+					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
 
 	isUserLoggedIn: (req) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
@@ -152,60 +169,3 @@ module.exports = AuthenticationController =
 	_recordFailedLogin: (callback = (error) ->) ->
 		Metrics.inc "user.login.failed"
 		callback()
-
-	# establishUserSession: (req, user, callback = (error) ->) ->
-	# 	dienow
-	# 	lightUser =
-	# 		_id: user._id
-	# 		first_name: user.first_name
-	# 		last_name: user.last_name
-	# 		isAdmin: user.isAdmin
-	# 		email: user.email
-	# 		referal_id: user.referal_id
-	# 		session_created: (new Date()).toISOString()
-	# 		ip_address: req.ip
-	# 	# Regenerate the session to get a new sessionID (cookie value) to
-	# 	# protect against session fixation attacks
-	# 	oldSession = req.session
-	# 	req.session.destroy()
-	# 	req.sessionStore.generate(req)
-	# 	for key, value of oldSession
-	# 		req.session[key] = value
-
-	# 	req.session.user = lightUser
-
-	# 	UserSessionsManager.trackSession(user, req.sessionID, () ->)
-	# 	callback()
-
-
-	# doLogin: (options, req, res, next) ->
-	# 	dienow
-	# 	email = options.email?.toLowerCase()
-	# 	password = options.password
-	# 	redir = Url.parse(options.redir or "/project").path
-	# 	LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
-	# 		if !isAllowed
-	# 			logger.log email:email, "too many login requests"
-	# 			res.statusCode = 429
-	# 			return res.send
-	# 				message:
-	# 					text: req.i18n.translate("to_many_login_requests_2_mins"),
-	# 					type: 'error'
-	# 		AuthenticationManager.authenticate email: email, password, (error, user) ->
-	# 			return next(error) if error?
-	# 			if user?
-	# 				UserHandler.setupLoginData user, ->
-	# 				LoginRateLimiter.recordSuccessfulLogin email
-	# 				AuthenticationController._recordSuccessfulLogin user._id
-	# 				AuthenticationController.establishUserSession req, user, (error) ->
-	# 					return next(error) if error?
-	# 					req.session.justLoggedIn = true
-	# 					logger.log email: email, user_id: user._id.toString(), "successful log in"
-	# 					Analytics.recordEvent user._id, "user-logged-in"
-	# 					res.json redir: redir
-	# 			else
-	# 				AuthenticationController._recordFailedLogin()
-	# 				logger.log email: email, "failed log in"
-	# 				res.json message:
-	# 					text: req.i18n.translate("email_or_password_wrong_try_again"),
-	# 					type: 'error'

@@ -43,7 +43,6 @@ AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
-passport = require('passport')
 
 module.exports = class Router
 	constructor: (webRouter, apiRouter)->
@@ -54,10 +53,8 @@ module.exports = class Router
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
-		# webRouter.post '/login', AuthenticationController.login
-		webRouter.post '/login', passport.authenticate('local'), (req, res) ->
-			console.log ">> login done", req._redir
-			res.json {redir: req._redir}
+		webRouter.post '/login', AuthenticationController.passportLogin
+
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 

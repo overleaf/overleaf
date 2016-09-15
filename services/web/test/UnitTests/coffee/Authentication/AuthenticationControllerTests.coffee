@@ -22,6 +22,8 @@ describe "AuthenticationController", ->
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"settings-sharelatex": {}
+			"passport": @passport =
+				authenticate: sinon.stub().returns(sinon.stub())
 			"../User/UserSessionsManager": @UserSessionsManager =
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
@@ -41,6 +43,62 @@ describe "AuthenticationController", ->
 
 	afterEach ->
 		tk.reset()
+
+	describe 'passportLogin', ->
+
+		beforeEach ->
+			@info = null
+			@req.login = sinon.stub().callsArgWith(1, null)
+			@res.json = sinon.stub()
+			@passport.authenticate.callsArgWith(1, null, @user, @info)
+
+		it 'should call passport.authenticate', () ->
+			@AuthenticationController.passportLogin @req, @res, @next
+			@passport.authenticate.callCount.should.equal 1
+
+		describe 'when authenticate produces an error', ->
+
+			beforeEach ->
+				@err = new Error('woops')
+				@passport.authenticate.callsArgWith(1, @err)
+
+			it 'should return next with an error', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@next.calledWith(@err).should.equal true
+
+		describe 'when authenticate produces a user', ->
+
+			beforeEach ->
+				@req._redir = 'some_redirect'
+				@passport.authenticate.callsArgWith(1, null, @user, @info)
+
+			afterEach ->
+				delete @req._redir
+
+			it 'should call req.login', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@req.login.callCount.should.equal 1
+				@req.login.calledWith(@user).should.equal true
+
+			it 'should send a json response with redirect', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({redir: @req._redir}).should.equal true
+
+		describe 'when authenticate does not produce a user', ->
+
+			beforeEach ->
+				@info = {text: 'a', type: 'b'}
+				@passport.authenticate.callsArgWith(1, null, false, @info)
+
+			it 'should not call req.login', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@req.login.callCount.should.equal 0
+
+			it 'should send a json response with redirect', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({message: @info}).should.equal true
 
 	describe 'getSessionUser', ->
 
@@ -132,7 +190,7 @@ describe "AuthenticationController", ->
 				@cb.callCount.should.equal 1
 				@cb.calledWith(null, false)
 				# @res.body.should.exist
-				expect(@cb.lastCall.args[2]).to.contain.all.keys ['message']
+				expect(@cb.lastCall.args[2]).to.contain.all.keys ['text', 'type']
 					# message:
 					# 	text: 'Your email or password were incorrect. Please try again',
 					# 	type: 'error'
