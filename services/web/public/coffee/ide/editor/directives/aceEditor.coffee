@@ -178,7 +178,6 @@ define [
 						editor.setValue(text, -1)
 						session = editor.getSession()
 						session.setUseWrapMode(true)
-						session.setMode("ace/mode/latex")
 
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()
@@ -203,7 +202,10 @@ define [
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
-					editor.setSession(new EditSession(lines))
+					session = editor.getSession()
+					if session?
+						session.destroy()
+					editor.setSession(new EditSession(lines, "ace/mode/latex"))
 					resetSession()
 					session = editor.getSession()
 
