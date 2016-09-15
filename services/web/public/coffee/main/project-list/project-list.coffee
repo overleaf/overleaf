@@ -11,6 +11,8 @@ define [
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
+		$scope.searchText = 
+			value : ""
 
 		if $scope.projects.length == 0
 			$timeout () ->
@@ -69,7 +71,7 @@ define [
 			$scope.updateVisibleProjects()
 
 		$scope.clearSearchText = () ->
-			$scope.searchText = ""
+			$scope.searchText.value = ""
 			$scope.filter = "all"
 			$scope.$emit "search:clear"
 			$scope.updateVisibleProjects()
@@ -96,8 +98,8 @@ define [
 			for project in $scope.projects
 				visible = true
 				# Only show if it matches any search text
-				if $scope.searchText? and $scope.searchText != ""
-					if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
+				if $scope.searchText.value? and $scope.searchText.value != ""
+					if !project.name.toLowerCase().match($scope.searchText.value.toLowerCase())
 						visible = false
 				# Only show if it matches the selected tag
 				if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids

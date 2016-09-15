@@ -122,7 +122,9 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.translate = (key, vars = {}) ->
 			vars.appName = Settings.appName
 			req.i18n.translate(key, vars)
-		res.locals.currentUrl = req.originalUrl
+		# Don't include the query string parameters, otherwise Google
+		# treats ?nocdn=true as the canonical version
+		res.locals.currentUrl = Url.parse(req.originalUrl).pathname
 		next()
 
 	webRouter.use (req, res, next)->

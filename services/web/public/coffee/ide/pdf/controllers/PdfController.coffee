@@ -74,7 +74,8 @@ define [
 			$scope.pdf.renderingError = true
 
 		# abort compile if syntax checks fail
-		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}") or ide.$scope?.user?.betaProgram
+		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}")
+		$scope.stop_on_validation_error ?= true # turn on for all users by default
 		$scope.$watch "stop_on_validation_error", (new_value, old_value) ->
 			if new_value? and old_value != new_value
 				localStorage("stop_on_validation_error:#{$scope.project_id}", new_value)

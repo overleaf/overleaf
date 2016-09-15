@@ -97,12 +97,16 @@ module.exports = AuthorizationMiddlewear =
 		return callback(null, user_id)
 
 	redirectToRestricted: (req, res, next) ->
-		res.redirect "/restricted"
+		res.redirect "/restricted?from=#{encodeURIComponent(req.url)}"
 
 	restricted : (req, res, next)->
 		if AuthenticationController.isUserLoggedIn(req)
 			res.render 'user/restricted',
 				title:'restricted'
 		else
-			logger.log "user not logged in and trying to access #{req.url}, being redirected to login"
-			res.redirect '/register'
+			from = req.query.from
+			logger.log {from: from}, "redirecting to login"
+			redirect_to = "/login"
+			if from?
+				redirect_to += "?redir=#{encodeURIComponent(from)}"
+			res.redirect redirect_to

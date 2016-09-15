@@ -155,7 +155,7 @@ module.exports = settings =
 		collaborators: -1
 		dropbox: true
 		versioning: true
-		compileTimeout: 60
+		compileTimeout: 180
 		compileGroup: "standard"
 		references: true
 		templates: true
