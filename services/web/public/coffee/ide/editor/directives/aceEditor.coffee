@@ -11,8 +11,10 @@ define [
 	EditSession = ace.require('ace/edit_session').EditSession
 
 	# set the path for ace workers if using a CDN (from editor.jade)
-	if window.aceWorkerPath?
-		ace.config.set('workerPath', "#{window.aceWorkerPath}");
+	if window.aceWorkerPath != ""
+		ace.config.set('workerPath', "#{window.aceWorkerPath}")
+	else
+		ace.config.setDefaultValue("session", "useWorker", false)
 
 	# Ace loads its script itself, so we need to hook in to be able to clear
 	# the cache.
