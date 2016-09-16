@@ -345,6 +345,47 @@ describe "UpdateCompressor", ->
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
+		
+		describe "delete - insert", ->
+			it "should do a diff of the content", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, d: "one two three four five six seven eight" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3, i: "one 2 three four five six seven eight" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 7, d: "two" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}, {
+					op: { p: 7, i: "2" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+
+			it "should do a diff of the content", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, d: "one two three four five six seven eight" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3, i: "one 2 three four five six seven eight" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 7, d: "two" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}, {
+					op: { p: 7, i: "2" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
 
 		describe "noop - insert", ->
 			it "should leave them untouched", ->

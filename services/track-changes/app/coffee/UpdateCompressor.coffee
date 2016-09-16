@@ -1,6 +1,9 @@
 strInject = (s1, pos, s2) -> s1[...pos] + s2 + s1[pos..]
 strRemove = (s1, pos, length) -> s1[...pos] + s1[(pos + length)..]
 
+diff_match_patch = require("../lib/diff_match_patch").diff_match_patch
+dmp = new diff_match_patch()
+
 module.exports = UpdateCompressor =
 	NOOP: "noop"
 
@@ -155,6 +158,47 @@ module.exports = UpdateCompressor =
 				# This will only happen if the delete extends outside the insert
 				return [firstUpdate, secondUpdate]
 
+		# A delete then an insert at the same place, likely a copy-paste of a chunk of content
+		else if firstOp.d? and secondOp.i? and firstOp.p == secondOp.p
+			offset = firstOp.p
+			diff_ops = @diffAsShareJsOps(firstOp.d, secondOp.i)
+			return diff_ops.map (op) ->
+				op.p += offset
+				return {
+					meta:
+						start_ts: firstUpdate.meta.start_ts
+						end_ts:   secondUpdate.meta.end_ts
+						user_id:  firstUpdate.meta.user_id
+					op: op
+					v: secondUpdate.v
+				}
+
 		else
 			return [firstUpdate, secondUpdate]
 
+	ADDED: 1
+	REMOVED: -1
+	UNCHANGED: 0
+	diffAsShareJsOps: (before, after, callback = (error, ops) ->) ->
+		diffs = dmp.diff_main(before, after)
+		dmp.diff_cleanupSemantic(diffs)
+
+		ops = []
+		position = 0
+		for diff in diffs
+			type = diff[0]
+			content = diff[1]
+			if type == @ADDED
+				ops.push
+					i: content
+					p: position
+				position += content.length
+			else if type == @REMOVED
+				ops.push
+					d: content
+					p: position
+			else if type == @UNCHANGED
+				position += content.length
+			else
+				throw "Unknown type"
+		return ops
