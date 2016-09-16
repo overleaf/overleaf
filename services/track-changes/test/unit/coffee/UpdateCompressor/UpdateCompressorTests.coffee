@@ -7,7 +7,8 @@ SandboxedModule = require('sandboxed-module')
 
 describe "UpdateCompressor", ->
 	beforeEach ->
-		@UpdateCompressor = SandboxedModule.require modulePath
+		@UpdateCompressor = SandboxedModule.require modulePath, requires:
+			"../lib/diff_match_patch": require("../../../../app/lib/diff_match_patch")
 		@user_id = "user-id-1"
 		@other_user_id = "user-id-2"
 		@bigstring = ("a" for [0 .. 2*1024*1024]).join("")
@@ -366,23 +367,19 @@ describe "UpdateCompressor", ->
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
-
-			it "should do a diff of the content", ->
+			
+			it "should return a no-op if the delete and insert are the same", ->
 				expect(@UpdateCompressor.compressUpdates [{
 					op: { p: 3, d: "one two three four five six seven eight" }
 					meta: ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 3, i: "one 2 three four five six seven eight" }
+					op: { p: 3, i: "one two three four five six seven eight" }
 					meta: ts: @ts2, user_id: @user_id
 					v: 43
 				}])
 				.to.deep.equal [{
-					op: { p: 7, d: "two" }
-					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
-					v: 43
-				}, {
-					op: { p: 7, i: "2" }
+					op: { p: 3, i: "" }
 					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]

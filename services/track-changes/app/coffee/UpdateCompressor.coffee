@@ -162,16 +162,28 @@ module.exports = UpdateCompressor =
 		else if firstOp.d? and secondOp.i? and firstOp.p == secondOp.p
 			offset = firstOp.p
 			diff_ops = @diffAsShareJsOps(firstOp.d, secondOp.i)
-			return diff_ops.map (op) ->
-				op.p += offset
-				return {
+			if diff_ops.length == 0
+				return [{ # Noop
 					meta:
 						start_ts: firstUpdate.meta.start_ts
 						end_ts:   secondUpdate.meta.end_ts
 						user_id:  firstUpdate.meta.user_id
-					op: op
+					op:
+						p: firstOp.p
+						i: ""
 					v: secondUpdate.v
-				}
+				}]
+			else
+				return diff_ops.map (op) ->
+					op.p += offset
+					return {
+						meta:
+							start_ts: firstUpdate.meta.start_ts
+							end_ts:   secondUpdate.meta.end_ts
+							user_id:  firstUpdate.meta.user_id
+						op: op
+						v: secondUpdate.v
+					}
 
 		else
 			return [firstUpdate, secondUpdate]
