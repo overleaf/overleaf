@@ -60,18 +60,19 @@ public class FSGitRepoStoreTest {
     public void totalSizeShouldChangeWhenFilesAreCreatedAndDeleted()
             throws IOException {
         long old = repoStore.totalSize();
-        repoStore.remove("proj1");
-        long new_ = repoStore.totalSize();
-        assertTrue(new_ < old);
+        File temp = new File(repoStore.getRootDirectory(), "__temp.txt");
         try (
                 OutputStream out = new FileOutputStream(
-                        new File(repoStore.getRootDirectory(), "__temp.txt")
+                        temp
                 )
         ) {
-            out.write(new byte[1 * 1024 * 1024]);
+            out.write(new byte[16 * 1024 * 1024]);
         }
+        long new_ = repoStore.totalSize();
+        assertTrue(new_ > old);
+        assertTrue(temp.delete());
         long new__ = repoStore.totalSize();
-        assertTrue(new__ > new_);
+        assertTrue(new__ < new_);
     }
 
     @Test
