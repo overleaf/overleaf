@@ -137,32 +137,20 @@ describe 'UpdateMerger :', ->
 
 		beforeEach ->
 			@path = "folder/doc1"
+			@type = "mock-type"
 			@editorController.deleteEntity = ->
 			@entity_id = "entity_id_here"
 			@entity = _id:@entity_id
-			@projectLocator.findElementByPath = (project_id, path, cb)=> cb(null, @entity, @path)
+			@projectLocator.findElementByPath = (project_id, path, cb)=> cb(null, @entity, @type)
 
 		it 'should get the element id', ->
 			@projectLocator.findElementByPath = sinon.spy()
 			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 
-		it 'should delete the entity in the editor controller with type doc when entity has docLines array', (done)->
+		it 'should delete the entity in the editor controller with the correct type', (done)->
 			@entity.lines = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "doc", @source).callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, @source, ->
-				mock.verify()
-				done()
-
-		it 'should delete the entity in the editor controller with type folder when entity has folders array', (done)->
-			@entity.folders = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "folder", @source).callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, @source, ->
-				mock.verify()
-				done()
-
-		it 'should delete the entity in the editor controller with type file when entity has no interesting properties', (done)->
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, "file", @source).callsArg(4)
+			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, @type, @source).callsArg(4)
 			@updateMerger.deleteUpdate @project_id, @path, @source, ->
 				mock.verify()
 				done()
