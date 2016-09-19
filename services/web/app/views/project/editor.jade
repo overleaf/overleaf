@@ -102,13 +102,13 @@ block content
 			"paths" : {
 				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
 				"moment": "libs/moment-2.7.0",
-				"libs/pdf": "libs/pdfjs-1.3.91/pdf"
+				"libs/pdf": "libs/pdfjs-1.3.91p1/pdf",
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
 				"libs/pdf": {
-					deps: ["libs/pdfjs-1.3.91/compatibility"]
+					deps: ["libs/pdfjs-1.3.91p1/compatibility"]
 				},
 				"ace/ext-searchbox": {
 					deps: ["ace/ace"]
@@ -127,7 +127,7 @@ block content
 
 	- locals.suppressDefaultJs = true
 
-	- var pdfPath = 'libs/pdfjs-1.3.91/pdf.worker.js'
+	- var pdfPath = 'libs/pdfjs-1.3.91p1/pdf.worker.js'
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
 	- var pdfJsWorkerPath = buildJsPath(pdfPath, {cdn:false,qs:{fingerprint:fingerprintedPath}}) // don't use worker for cdn
 
