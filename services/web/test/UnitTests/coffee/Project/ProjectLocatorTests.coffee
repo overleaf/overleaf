@@ -181,61 +181,71 @@ describe 'ProjectLocator', ->
 
 		it 'should take a doc path and return the element for a root level document', (done)->
 			path = "#{doc1.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal doc1
+				expect(type).to.equal "doc"
 				done()
 
 		it 'should take a doc path and return the element for a root level document with a starting slash', (done)->
 			path = "/#{doc1.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal doc1
+				expect(type).to.equal "doc"
 				done()
 				
 		it 'should take a doc path and return the element for a nested document', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}/#{subSubDoc.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal subSubDoc
+				expect(type).to.equal "doc"
 				done()
 
 		it 'should take a file path and return the element for a root level document', (done)->
 			path = "#{file1.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal file1
+				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested document', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}/#{subSubFile.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal subSubFile
+				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested document case insenstive', (done)->
 			path = "#{subFolder.name.toUpperCase()}/#{secondSubFolder.name.toUpperCase()}/#{subSubFile.name.toUpperCase()}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal subSubFile
+				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested folder', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}"
-			@locator.findElementByPath project._id, path, (err, element)->
+			@locator.findElementByPath project._id, path, (err, element, type)->
 				element.should.deep.equal secondSubFolder
+				expect(type).to.equal "folder"
 				done()
 
 		it 'should take a file path and return the root folder', (done)->
-			@locator.findElementByPath project._id, "/", (err, element)->
+			@locator.findElementByPath project._id, "/", (err, element, type)->
 				element.should.deep.equal rootFolder
+				expect(type).to.equal "folder"
 				done()
 
 		it 'should return an error if the file can not be found inside know folder', (done)->
-			@locator.findElementByPath project._id, "#{subFolder.name}/#{secondSubFolder.name}/exist.txt", (err, element)->
+			@locator.findElementByPath project._id, "#{subFolder.name}/#{secondSubFolder.name}/exist.txt", (err, element, type)->
 				err.should.not.equal undefined
 				assert.equal element, undefined
+				expect(type).to.be.undefined
 				done()
 
 		it 'should return an error if the file can not be found inside unknown folder', (done)->
-			@locator.findElementByPath project._id, "this/does/not/exist.txt", (err, element)->
+			@locator.findElementByPath project._id, "this/does/not/exist.txt", (err, element, type)->
 				err.should.not.equal undefined
 				assert.equal element, undefined
+				expect(type).to.be.undefined
 				done()
 
 
