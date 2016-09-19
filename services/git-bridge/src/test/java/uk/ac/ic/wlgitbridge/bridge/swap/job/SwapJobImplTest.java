@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.swap.job;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -43,7 +44,8 @@ public class SwapJobImplTest {
                 FSGitRepoStoreTest.makeTempRepoDir(
                         tmpFolder,
                         "repostore"
-                ).getAbsolutePath()
+                ).getAbsolutePath(),
+                FileUtils::sizeOfDirectory
         );
         dbStore = new SqliteDBStore(tmpFolder.newFile());
         dbStore.setLatestVersionForProject("proj1", 0);
