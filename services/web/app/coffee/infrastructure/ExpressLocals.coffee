@@ -28,9 +28,9 @@ for path in [
 	"#{jsPath}main.js",
 	"#{jsPath}libs.js",
 	"#{jsPath}ace/ace.js",
-	"#{jsPath}libs/pdfjs-1.3.91/pdf.js",
-	"#{jsPath}libs/pdfjs-1.3.91/pdf.worker.js",
-	"#{jsPath}libs/pdfjs-1.3.91/compatibility.js",
+	"#{jsPath}libs/pdfjs-1.3.91p1/pdf.js",
+	"#{jsPath}libs/pdfjs-1.3.91p1/pdf.worker.js",
+	"#{jsPath}libs/pdfjs-1.3.91p1/compatibility.js",
 	"/stylesheets/style.css"
 ]
 	filePath = Path.join __dirname, "../../../", "public#{path}"
