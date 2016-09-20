@@ -38,10 +38,9 @@ module.exports = AuthenticationController =
 		# so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
 		# and send a `{redir: ""}` response on success
 		passport.authenticate('local', (err, user, info) ->
-			# `user` is either a user object or false
 			if err?
 				return next(err)
-			if user
+			if user # `user` is either a user object or false
 				req.login user, (err) ->
 					res.json {redir: req._redir}
 			else
