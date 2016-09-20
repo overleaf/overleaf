@@ -8,6 +8,7 @@ knox = require "knox"
 crypto = require "crypto"
 async = require "async"
 settings = require("settings-sharelatex")
+_ = require("underscore")
 
 
 SERVICES = require("./config/services")
@@ -101,7 +102,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'default', 'run'
 
 	grunt.registerTask "check:redis", "Check that redis is installed and running", () ->
-		Helpers.checkRedis @async()
+		Helpers.checkRedisConnect @async()
 	grunt.registerTask "check:latexmk", "Check that latexmk is installed", () ->
 		Helpers.checkLatexmk @async()
 	grunt.registerTask "check:s3", "Check that Amazon S3 credentials are configured", () ->
@@ -112,6 +113,9 @@ module.exports = (grunt) ->
 		Helpers.checkAspell @async()
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
+
+	grunt.registerTask "check:mongo", "Check that make is installed", () ->
+		Helpers.checkMongoConnect @async()
 
 	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs", "check:aspell"]
 
@@ -347,3 +351,46 @@ module.exports = (grunt) ->
 					grunt.log.write "OK."
 					return callback()
 
+
+		checkMongoConnect: (callback = (error) ->) ->
+			grunt.log.write "Checking can connect to mongo"
+			mongojs = require("mongojs")
+			db = mongojs.connect(settings.mongo.url, ["tags"])
+			db.runCommand { ping: 1 }, (err, res) ->
+				if !err and res.ok
+					grunt.log.write "OK."
+				return callback()
+			db.on 'error', (err)->
+				err = "Can not connect to mongodb"
+				grunt.log.error "FAIL."
+				grunt.log.errorlns """
+				
+				ShareLaTeX can not talk to the mongdb instance
+
+				Check the mongodb instance is running and accessible on env var SHARELATEX_MONGO_URL
+
+				"""
+				return callback(err)
+
+		checkRedisConnect: (callback = (error) ->) ->
+			grunt.log.write "Checking can connect to redis\n"
+			rclient = require("redis").createClient(settings.redis.web)
+
+			rclient.ping (err, res) ->
+				if !err?
+					grunt.log.write "OK."
+				else
+					throw new Error("hllll")
+				return callback()
+			errorHandler = _.once (err)->
+				err = "Can not connect to redis"
+				grunt.log.error "FAIL."
+				grunt.log.errorlns """
+				
+				ShareLaTeX can not talk to the redis instance
+
+				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_URL
+
+				"""
+				return callback(err)
+			rclient.on 'error', errorHandler
