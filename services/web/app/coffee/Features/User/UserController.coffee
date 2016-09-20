@@ -30,7 +30,7 @@ module.exports = UserController =
 
 	updateUserSettings : (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		logger.log user: user_id, "updating account settings"
+		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
 				logger.err err:err, user_id:user_id, "problem updaing user settings"
