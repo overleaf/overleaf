@@ -256,24 +256,6 @@ describe "AuthenticationController", ->
 			result = @AuthenticationController.getLoggedInUserId @req
 			expect(result).to.equal null
 
-	describe "getLoggedInUser", ->
-		beforeEach ->
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
-
-		describe "with an established session", ->
-			beforeEach ->
-				@req.session =
-					user: @user
-				@AuthenticationController.getLoggedInUser(@req, @callback)
-
-			it "should look up the user in the database", ->
-				@UserGetter.getUser
-					.calledWith(@user._id)
-					.should.equal true
-
-			it "should return the user", ->
-				@callback.calledWith(null, @user).should.equal true
-
 	describe "requireLogin", ->
 		beforeEach ->
 			@user =

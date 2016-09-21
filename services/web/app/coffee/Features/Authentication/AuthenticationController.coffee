@@ -15,9 +15,6 @@ passport = require 'passport'
 
 module.exports = AuthenticationController =
 
-	# login: (req, res, next = (error) ->) ->
-	# 	AuthenticationController.doLogin req.body, req, res, next
-
 	serializeUser: (user, callback) ->
 		lightUser =
 			_id: user._id
@@ -46,7 +43,6 @@ module.exports = AuthenticationController =
 			else
 				res.json message: info
 		)(req, res, next)
-
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
@@ -96,14 +92,6 @@ module.exports = AuthenticationController =
 		else
 			return null
 
-	# TODO: perhaps should produce an error if the current user is not present
-	getLoggedInUser: (req, callback = (error, user) ->) ->
-		user_id = AuthenticationController.getLoggedInUserId(req)
-		if !user_id?
-			return callback(null, null)
-		# omit sensitive information
-		UserGetter.getUser user_id, {hashedPassword: false, refProviders: false}, callback
-
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
 			if !AuthenticationController.isUserLoggedIn(req)
@@ -140,7 +128,6 @@ module.exports = AuthenticationController =
 			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
 			AuthenticationController._redirectToLoginPage(req, res)
-
 
 	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
