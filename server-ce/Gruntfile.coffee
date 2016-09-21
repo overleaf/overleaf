@@ -73,7 +73,7 @@ module.exports = (grunt) ->
 						]
 						"Install tasks": ("install:#{service.name}" for service in SERVICES).concat(["install:all", "install"])
 						"Update tasks": ("update:#{service.name}" for service in SERVICES).concat(["update:all", "update"])
-						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make"]
+						"Checks": ["check", "check:redis", "check:latexmk", "check:s3", "check:make", "check:mongo"]
 
 	for service in SERVICES
 		do (service) ->
@@ -84,7 +84,7 @@ module.exports = (grunt) ->
 
 
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
-		["check:make"].concat(
+		[].concat(
 			("install:#{service.name}" for service in SERVICES)
 		)
 
@@ -104,12 +104,13 @@ module.exports = (grunt) ->
 	grunt.registerTask "check:redis", "Check that redis is installed and running", () ->
 		Helpers.checkRedisConnect @async()
 
-	grunt.registerTask "check:mongo", "Check that make is installed", () ->
+	grunt.registerTask "check:mongo", "Check that mongo is installed", () ->
 		Helpers.checkMongoConnect @async()
 
-	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:latexmk", "check:s3", "check:fs", "check:aspell"]
+	grunt.registerTask "check", "Check that you have the required dependencies installed", ["check:redis", "check:mongo", "check:make"]
 
-
+	grunt.registerTask "check:make", "Check that make is installed", () ->
+		Helpers.checkMake @async()
 
 	grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
 
@@ -171,7 +172,25 @@ module.exports = (grunt) ->
 			proc.on "close", () ->
 				callback()
 
+		checkMake: (callback = (error) ->) ->
+			grunt.log.write "Checking make is installed... "
+			exec "make --version", (error, stdout, stderr) ->
+				if error? and error.message.match("not found")
+					grunt.log.error "FAIL."
+					grunt.log.errorlns """
+					Either make is not installed or is not in your path.
 
+					On Ubuntu you can install make with:
+
+					    sudo apt-get install build-essential
+
+					"""
+					return callback(error)
+				else if error?
+					return callback(error)
+				else
+					grunt.log.write "OK."
+					return callback()
 		checkMongoConnect: (callback = (error) ->) ->
 			grunt.log.write "Checking can connect to mongo"
 			mongojs = require("mongojs")
