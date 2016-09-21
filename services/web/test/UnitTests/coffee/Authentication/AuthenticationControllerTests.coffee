@@ -20,7 +20,7 @@ describe "AuthenticationController", ->
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub() }
 			"settings-sharelatex": {}
 			"passport": @passport =
 				authenticate: sinon.stub().returns(sinon.stub())
@@ -50,6 +50,10 @@ describe "AuthenticationController", ->
 			@info = null
 			@req.login = sinon.stub().callsArgWith(1, null)
 			@res.json = sinon.stub()
+			@req.session = @session = {test: 'test'}
+			@req.session.destroy = sinon.stub()
+			@req.session.save = sinon.stub().callsArgWith(0, null)
+			@req.sessionStore = {generate: sinon.stub()}
 			@passport.authenticate.callsArgWith(1, null, @user, @info)
 
 		it 'should call passport.authenticate', () ->
@@ -84,6 +88,18 @@ describe "AuthenticationController", ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@res.json.callCount.should.equal 1
 				@res.json.calledWith({redir: @req._redir}).should.equal true
+
+			describe 'when session.save produces an error', () ->
+				beforeEach ->
+					@req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
+
+				it 'should return next with an error', () ->
+					@AuthenticationController.passportLogin @req, @res, @next
+					@next.calledWith(@err).should.equal true
+
+				it 'should not return json', () ->
+					@AuthenticationController.passportLogin @req, @res, @next
+					@res.json.callCount.should.equal 0
 
 		describe 'when authenticate does not produce a user', ->
 

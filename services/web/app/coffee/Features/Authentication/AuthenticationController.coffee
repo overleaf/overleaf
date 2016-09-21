@@ -39,7 +39,19 @@ module.exports = AuthenticationController =
 				return next(err)
 			if user # `user` is either a user object or false
 				req.login user, (err) ->
-					res.json {redir: req._redir}
+					# Regenerate the session to get a new sessionID (cookie value) to
+					# protect against session fixation attacks
+					oldSession = req.session
+					req.session.destroy()
+					req.sessionStore.generate(req)
+					for key, value of oldSession
+						req.session[key] = value
+					req.session.save (err) ->
+						if err?
+							logger.err {user_id: user._id}, "error saving regenerated session after login"
+							return next(err)
+						UserSessionsManager.trackSession(user, req.sessionID, () ->)
+						res.json {redir: req._redir}
 			else
 				res.json message: info
 		)(req, res, next)
@@ -60,9 +72,8 @@ module.exports = AuthenticationController =
 					LoginRateLimiter.recordSuccessfulLogin(email)
 					AuthenticationController._recordSuccessfulLogin(user._id)
 					Analytics.recordEvent(user._id, "user-logged-in")
-					UserSessionsManager.trackSession(user, req.sessionID, () ->)
-					req.session.justLoggedIn = true
 					logger.log email: email, user_id: user._id.toString(), "successful log in"
+					req.session.justLoggedIn = true
 					# capture the request ip for use when creating the session
 					user._login_req_ip = req.ip
 					req._redir = redir
