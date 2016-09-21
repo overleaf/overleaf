@@ -206,11 +206,21 @@ describe "RequestParser", ->
 
 	describe "with a root resource path that needs escaping", ->
 		beforeEach ->
-			@validRequest.compile.rootResourcePath = "`rm -rf foo`.tex"
+			@badPath = "`rm -rf foo`.tex"
+			@goodPath = "rm -rf foo.tex"
+			@validRequest.compile.rootResourcePath = @badPath
+			@validRequest.compile.resources.push {
+				path: @badPath
+				date: "12:00 01/02/03"
+				content: "Hello world"
+			}
 			@RequestParser.parse @validRequest, @callback
 			@data = @callback.args[0][1]
 			
 		it "should return the escaped resource", ->
-			@data.rootResourcePath.should.equal "rm -rf foo.tex"
+			@data.rootResourcePath.should.equal @goodPath
+			
+		it "should also escape the resource path", ->
+			@data.resources[0].path.should.equal @goodPath
 		
 

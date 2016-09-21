@@ -42,7 +42,13 @@ module.exports = RequestParser =
 				compile.rootResourcePath
 				default: "main.tex"
 				type: "string"
-			response.rootResourcePath = RequestParser._sanitizePath(rootResourcePath)
+			originalRootResourcePath = rootResourcePath
+			sanitizedRootResourcePath = RequestParser._sanitizePath(rootResourcePath)
+			response.rootResourcePath = sanitizedRootResourcePath
+			
+			for resource in response.resources
+				if resource.path == originalRootResourcePath
+					resource.path = sanitizedRootResourcePath
 		catch error
 			return callback error
 
