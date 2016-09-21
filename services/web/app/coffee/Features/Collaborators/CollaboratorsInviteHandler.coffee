@@ -77,10 +77,12 @@ module.exports = CollaboratorsInviteHandler =
 				if err?
 					logger.err {err, projectId, sendingUserId: sendingUser._id, email}, "error saving token"
 					return callback(err)
+				# Send email and notification in background
 				CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
 					if err?
 						logger.err {projectId, email}, "error sending messages for invite"
-					callback(err, invite)
+				callback(null, invite)
+				
 
 	revokeInvite: (projectId, inviteId, callback=(err)->) ->
 		logger.log {projectId, inviteId}, "removing invite"
