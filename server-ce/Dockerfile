@@ -13,6 +13,10 @@ RUN wget https://s3.amazonaws.com/sharelatex-random-files/qpdf-6.0.0.tar.gz && t
 WORKDIR /opt/qpdf-6.0.0
 RUN ./configure && make && make install && ldconfig
 
+# Install ShareLaTeX settings file
+ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
+ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
+
 # Install TexLive
 RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
 	mkdir /install-tl-unx; \
@@ -45,7 +49,7 @@ RUN rm /etc/nginx/sites-enabled/default
 ADD ${baseDir}/nginx/nginx.conf /etc/nginx/nginx.conf
 ADD ${baseDir}/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
 
-COPY {baseDir}/init_scripts/  /etc/my_init.d/
+COPY ${baseDir}/init_scripts/  /etc/my_init.d/
 
 
 # Install ShareLaTeX
@@ -69,9 +73,6 @@ RUN cd /var/www/sharelatex/web; \
 RUN cd /var/www/sharelatex/clsi; \
 	grunt compile:bin
 
-# Install ShareLaTeX settings file
-ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
-ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
 
 
 EXPOSE 80
