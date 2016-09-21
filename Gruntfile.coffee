@@ -209,6 +209,7 @@ module.exports = (grunt) ->
 				Check the mongodb instance is running and accessible on env var SHARELATEX_MONGO_URL
 
 				"""
+				throw new Error("Can not connect to Mongodb")
 				return callback(err)
 
 		checkRedisConnect: (callback = (error) ->) ->
@@ -219,7 +220,7 @@ module.exports = (grunt) ->
 				if !err?
 					grunt.log.write "OK."
 				else
-					throw new Error("hllll")
+					throw new Error("Can not connect to redis")
 				return callback()
 			errorHandler = _.once (err)->
 				err = "Can not connect to redis"
@@ -231,5 +232,6 @@ module.exports = (grunt) ->
 				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_URL
 
 				"""
+				throw new Error("Can not connect to redis")
 				return callback(err)
 			rclient.on 'error', errorHandler
