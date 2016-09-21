@@ -26,9 +26,23 @@ define [
 		$scope.startRenaming = () ->
 			$scope.entity.renaming = true
 
+		invalidModalShowing = false
 		$scope.finishRenaming = () ->
-			delete $scope.entity.renaming
 			name = $scope.inputs.name
+			
+			if !name.match(/^[^\*\/]*$/)
+				# Showing the modal blurs the rename box which calls us again
+				# so track this with the invalidModalShowing flag
+				return if invalidModalShowing
+				invalidModalShowing = true
+				modal = $modal.open(
+					templateUrl: "invalidFileNameModalTemplate"
+				)
+				modal.result.then () ->
+					invalidModalShowing = false
+				return
+				
+			delete $scope.entity.renaming
 			if !name? or name.length == 0
 				$scope.inputs.name = $scope.entity.name
 				return
