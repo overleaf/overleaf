@@ -101,16 +101,15 @@ module.exports = ProjectLocator =
 		getEntity = (folder, entityName, cb)->
 			if !entityName?
 				return cb null, folder, "folder"
-
-			for file in folder.fileRefs
+			for file in folder.fileRefs or []
 				if file?.name.toLowerCase() == entityName.toLowerCase()
 					result = file
 					type = "file"
-			for doc in folder.docs
+			for doc in folder.docs or []
 				if doc?.name.toLowerCase() == entityName.toLowerCase()
 					result = doc
 					type = "doc"
-			for childFolder in folder.folders
+			for childFolder in folder.folders or []
 				if childFolder?.name.toLowerCase() == entityName.toLowerCase()
 					result = childFolder
 					type = "folder"
