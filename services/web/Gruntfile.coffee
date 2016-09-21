@@ -380,8 +380,8 @@ module.exports = (grunt) ->
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 
-	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
-	grunt.registerTask 'runq', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'exec']
+	grunt.registerTask 'run:watch', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
+	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'exec']
 
 	grunt.registerTask 'default', 'run'
 
