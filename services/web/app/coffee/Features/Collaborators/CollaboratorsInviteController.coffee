@@ -121,4 +121,7 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
 			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {inviteId:inviteId, projectId:projectId})
-			res.redirect "/project/#{projectId}"
+			if req.xhr
+				res.sendStatus 204 #  Done async via project page notification
+			else
+				res.redirect "/project/#{projectId}"
