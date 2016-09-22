@@ -1,6 +1,5 @@
 fs = require "fs"
 PackageVersions = require "./app/coffee/infrastructure/PackageVersions"
-pdfjs = PackageVersions.lib('pdfjs')
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -159,12 +158,12 @@ module.exports = (grunt) ->
 					inlineText: false
 					preserveLicenseComments: false
 					paths:
-						"moment": "libs/moment-2.9.0"
+						"moment": "libs/#{PackageVersions.lib('moment')}"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
-						"libs/pdf": "libs/#{pdfjs}/pdf"
+						"libs/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
 					shim:
 						"libs/pdf":
-							deps: ["libs/#{pdfjs}/compatibility"]
+							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
 
 					skipDirOptimize: true
 					modules: [

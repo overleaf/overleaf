@@ -101,7 +101,7 @@ block content
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
-				"moment": "libs/moment-2.7.0",
+				"moment": "libs/#{lib('moment')}",
 				"libs/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"ace": "#{lib('ace')}"
 			},
