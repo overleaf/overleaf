@@ -109,8 +109,8 @@ passport.deserializeUser(AuthenticationController.deserializeUser)
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
-	if req?.session?.user?
-		UserSessionsManager.touch(req.user, (err)->)
+	if AuthenticationController.isUserLoggedIn(req)
+		UserSessionsManager.touch(AuthenticationController.getSessionUser(req), (err)->)
 	next()
 
 webRouter.use ReferalConnect.use
