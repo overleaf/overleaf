@@ -108,6 +108,7 @@ module.exports = AuthenticationController =
 			if !AuthenticationController.isUserLoggedIn(req)
 				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
+				req.user = AuthenticationController.getSessionUser(req)
 				next()
 
 		return doRequest
