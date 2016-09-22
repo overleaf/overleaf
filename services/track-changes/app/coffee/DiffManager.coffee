@@ -49,6 +49,8 @@ module.exports = DiffManager =
 			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version - 1
 				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
+			
+			logger.log {docVersion: version, lastUpdateVersion: lastUpdate?.v, updateCount: updates.length}, "rewinding updates"
 
 			tryUpdates = updates.slice().reverse()
 
