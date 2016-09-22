@@ -24,7 +24,7 @@ define [
 		$scope.accept = () ->
 			$scope.notification.inflight = true
 			$http({
-				url: "/project/#{$scope.notification.messageOpts.projectId}/invite/#{$scope.notification.messageOpts.token}/accept"
+				url: "/project/#{$scope.notification.messageOpts.projectId}/invite/token/#{$scope.notification.messageOpts.token}/accept"
 				method: "POST"
 				headers:
 					"X-Csrf-Token": window.csrfToken

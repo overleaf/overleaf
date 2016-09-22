@@ -111,16 +111,15 @@ module.exports = CollaboratorsInviteController =
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id
-		inviteId = req.params.invite_id
-		{token} = req.body
+		token = req.params.token
 		currentUser = req.session.user
-		logger.log {projectId, inviteId, userId: currentUser._id}, "accepting invite"
-		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, token, currentUser, (err) ->
+		logger.log {projectId, userId: currentUser._id, token}, "got request to accept invite"
+		CollaboratorsInviteHandler.acceptInvite projectId, token, currentUser, (err) ->
 			if err?
-				logger.err {projectId, inviteId}, "error accepting invite by token"
+				logger.err {projectId, token}, "error accepting invite by token"
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
-			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {inviteId:inviteId, projectId:projectId})
+			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {projectId:projectId, userId:currentUser._id})
 			if req.xhr
 				res.sendStatus 204 #  Done async via project page notification
 			else

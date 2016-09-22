@@ -119,15 +119,15 @@ module.exports = CollaboratorsInviteHandler =
 				return callback(null, null)
 			callback(null, invite)
 
-	acceptInvite: (projectId, inviteId, tokenString, user, callback=(err)->) ->
-		logger.log {projectId, inviteId, userId: user._id}, "accepting invite"
+	acceptInvite: (projectId, tokenString, user, callback=(err)->) ->
+		logger.log {projectId, userId: user._id, tokenString}, "accepting invite"
 		CollaboratorsInviteHandler.getInviteByToken projectId, tokenString, (err, invite) ->
 			if err?
-				logger.err {err, projectId, inviteId}, "error finding invite"
+				logger.err {err, projectId, tokenString}, "error finding invite"
 				return callback(err)
 			if !invite
 				err = new Errors.NotFoundError("no matching invite found")
-				logger.log {err, projectId, inviteId, tokenString}, "no matching invite found"
+				logger.log {err, projectId, tokenString}, "no matching invite found"
 				return callback(err)
 			inviteId = invite._id
 			CollaboratorsHandler.addUserIdToProject projectId, invite.sendingUserId, user._id, invite.privileges, (err) ->

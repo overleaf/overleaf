@@ -531,14 +531,12 @@ describe "CollaboratorsInviteController", ->
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
-				invite_id: @invite_id = "thuseoautoh"
+				token: @token = "mock-token"
 			@req.session =
 				user: _id: @current_user_id = "current-user-id"
-			@req.body =
-				token: "thsueothaueotauahsuet"
 			@res.render = sinon.stub()
 			@res.redirect = sinon.stub()
-			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, null)
+			@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(3, null)
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -552,7 +550,9 @@ describe "CollaboratorsInviteController", ->
 				@res.redirect.calledWith("/project/#{@project_id}").should.equal true
 
 			it 'should have called acceptInvite', ->
-				@CollaboratorsInviteHandler.acceptInvite.callCount.should.equal 1
+				@CollaboratorsInviteHandler.acceptInvite
+					.calledWith(@project_id, @token)
+					.should.equal true
 
 			it 'should have called emitToRoom', ->
 				@EditorRealTimeController.emitToRoom.callCount.should.equal 1
@@ -562,7 +562,7 @@ describe "CollaboratorsInviteController", ->
 
 			beforeEach ->
 				@err = new Error('woops')
-				@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(4, @err)
+				@CollaboratorsInviteHandler.acceptInvite = sinon.stub().callsArgWith(3, @err)
 				@CollaboratorsInviteController.acceptInvite @req, @res, @next
 
 			it 'should not redirect to project page', ->
