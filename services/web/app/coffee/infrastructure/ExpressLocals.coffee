@@ -147,12 +147,14 @@ module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
 		res.locals.buildReferalUrl = (referal_medium) ->
 			url = Settings.siteUrl
-			if req.user? and req.referal_id?
-				url+="?r=#{req.user.referal_id}&rm=#{referal_medium}&rs=b" # Referal source = bonus
+			currentUser = AuthenticationController.getSessionUser(req)
+			if currentUser? and currentUser?.referal_id?
+				url+="?r=#{currentUser.referal_id}&rm=#{referal_medium}&rs=b" # Referal source = bonus
 			return url
 		res.locals.getReferalId = ->
-			if req.user? and req.referal_id?
-				return req.user.referal_id
+			currentUser = AuthenticationController.getSessionUser(req)
+			if currentUser? and currentUser?.referal_id?
+				return currentUser.referal_id
 		res.locals.getReferalTagLine = ->
 			tagLines = [
 				"Roar!"
@@ -198,11 +200,12 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
-		if req.user?
+		currentUser = AuthenticationController.getSessionUser(req)
+		if currentUser?
 			res.locals.user =
-				email: req.user.email
-				first_name: req.user.first_name
-				last_name: req.user.last_name
+				email: currentUser.email
+				first_name: currentUser.first_name
+				last_name: currentUser.last_name
 			if req.session.justRegistered
 				res.locals.justRegistered = true
 				delete req.session.justRegistered
