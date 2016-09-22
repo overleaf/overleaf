@@ -14,9 +14,9 @@ module.exports = SubscriptionController =
 	plansPage: (req, res, next) ->
 		plans = SubscriptionViewModelBuilder.buildViewModel()
 		if AuthenticationController.isUserLoggedIn(req)
-			baseUrl = "/register?redir="
-		else
 			baseUrl = ""
+		else
+			baseUrl = "/register?redir="
 		viewName = "subscriptions/plans"
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
