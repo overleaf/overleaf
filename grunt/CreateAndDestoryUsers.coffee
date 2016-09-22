@@ -1,11 +1,11 @@
 
 module.exports = (grunt) ->
 
-	grunt.registerTask 'user:create-admin', "Create a user with the given email address and make them an admin. Update in place if the user already exists. Usage: grunt create-admin-user --email joe@example.com", () ->
+	grunt.registerTask 'user:create-admin', "Create a user with the given email address and make them an admin. Update in place if the user already exists. Usage: grunt user:create-admin --email joe@example.com", () ->
 		done = @async()
 		email = grunt.option("email")
 		if !email?
-			console.error "Usage: grunt create-admin-user --email joe@example.com"
+			console.error "Usage: grunt user:create-admin --email joe@example.com"
 			process.exit(1)
 
 		settings = require "settings-sharelatex"
@@ -35,11 +35,11 @@ module.exports = (grunt) ->
 					"""
 					done()
 
-	grunt.registerTask 'user:delete', "deletes a user and all their data, Usage: grunt delete-user --email joe@example.com", () ->
+	grunt.registerTask 'user:delete', "deletes a user and all their data, Usage: grunt user:delete --email joe@example.com", () ->
 		done = @async()
 		email = grunt.option("email")
 		if !email?
-			console.error "Usage: grunt delete-user --email joe@example.com"
+			console.error "Usage: grunt user:delete --email joe@example.com"
 			process.exit(1)
 		settings = require "settings-sharelatex"
 		UserGetter = require "../web/app/js/Features/User/UserGetter"
