@@ -49,7 +49,7 @@ services:
             ## Server Pro ##
             ################
 
-            # SANDBOXED_COMPILES: "true"
+            # SANDBOXED_COMPILES:true
 
             # SHARELATEX_LDAP_HOST: 'ldap://ldap.forumsys.com' 
             # SHARELATEX_LDAP_DN: 'uid=:userKey,dc=example,dc=com' 
