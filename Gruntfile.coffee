@@ -203,11 +203,13 @@ module.exports = (grunt) ->
 				err = "Can not connect to mongodb"
 				grunt.log.error "FAIL."
 				grunt.log.errorlns """
-				
+				!!!!!!!!!!!!!! MONGO ERROR !!!!!!!!!!!!!!
+
 				ShareLaTeX can not talk to the mongdb instance
 
 				Check the mongodb instance is running and accessible on env var SHARELATEX_MONGO_URL
-
+				
+				!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				"""
 				throw new Error("Can not connect to Mongodb")
 				return callback(err)
@@ -226,11 +228,13 @@ module.exports = (grunt) ->
 				err = "Can not connect to redis"
 				grunt.log.error "FAIL."
 				grunt.log.errorlns """
-				
+				!!!!!!!!!!!!!! REDIS ERROR !!!!!!!!!!!!!!
+
 				ShareLaTeX can not talk to the redis instance
 
 				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_URL
 
+				!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				"""
 				throw new Error("Can not connect to redis")
 				return callback(err)
