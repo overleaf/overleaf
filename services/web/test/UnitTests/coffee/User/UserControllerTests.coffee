@@ -42,6 +42,7 @@ describe "UserController", ->
 			establishUserSession: sinon.stub().callsArg(2)
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 			getSessionUser: sinon.stub().returns(@req.session.user)
+			setInSessionUser: sinon.stub()
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
@@ -176,7 +177,9 @@ describe "UserController", ->
 				cb(null, @user)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
-				@req.user.email.should.equal @newEmail
+				@AuthenticationController.setInSessionUser.calledWith(
+					@req, {email: @newEmail, first_name: undefined, last_name: undefined}
+				).should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
 

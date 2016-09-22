@@ -59,6 +59,7 @@ module.exports = UserController =
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email
+					AuthenticationController.setInSessionUser(req, {first_name: user.first_name, last_name: user.last_name})
 					return res.sendStatus 200
 				else if newEmail.indexOf("@") == -1
 					return res.sendStatus(400)
@@ -75,7 +76,7 @@ module.exports = UserController =
 							if err?
 								logger.err err:err, user_id:user_id, "error getting user for email update"
 								return res.send 500
-							req.user.email = user.email
+							AuthenticationController.setInSessionUser(req, {email: user.email, first_name: user.first_name, last_name: user.last_name})
 							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
 								if err?
 									logger.err err:err, "error populateGroupLicenceInvite"

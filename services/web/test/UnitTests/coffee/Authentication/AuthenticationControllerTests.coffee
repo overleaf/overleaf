@@ -44,6 +44,29 @@ describe "AuthenticationController", ->
 	afterEach ->
 		tk.reset()
 
+	describe 'setInSessionUser', () ->
+
+		beforeEach ->
+			@user = {
+				_id: 'id'
+				first_name: 'a'
+				last_name:  'b'
+				email:      'c'
+			}
+			@req.session.passport = {user: @user}
+			@req.session.user = @user
+
+		it 'should update the right properties', () ->
+			@AuthenticationController.setInSessionUser(@req, {first_name: 'new_first_name', email: 'new_email'})
+			expectedUser = {
+				_id: 'id'
+				first_name: 'new_first_name'
+				last_name:  'b'
+				email:      'new_email'
+			}
+			expect(@req.session.passport.user).to.deep.equal(expectedUser)
+			expect(@req.session.user).to.deep.equal(expectedUser)
+
 	describe 'passportLogin', ->
 
 		beforeEach ->
@@ -346,6 +369,7 @@ describe "AuthenticationController", ->
 
 		describe "with no login credentials", ->
 			beforeEach ->
+				@req.session = {}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 
 			it "should redirect to the /login page", ->

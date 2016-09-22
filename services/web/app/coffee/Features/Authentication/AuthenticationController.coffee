@@ -85,6 +85,13 @@ module.exports = AuthenticationController =
 					logger.log email: email, "failed log in"
 					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
 
+	setInSessionUser: (req, props) ->
+		for key, value of props
+			if req?.session?.passport?.user?
+				req.session.passport.user[key] = value
+			if req?.session?.user?
+				req.session.user[key] = value
+
 	isUserLoggedIn: (req) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		return user_id != null
