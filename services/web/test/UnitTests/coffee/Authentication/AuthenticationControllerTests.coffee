@@ -50,7 +50,7 @@ describe "AuthenticationController", ->
 			@info = null
 			@req.login = sinon.stub().callsArgWith(1, null)
 			@res.json = sinon.stub()
-			@req.session = @session = {test: 'test'}
+			@req.session = @session = {passport: {user: @user}}
 			@req.session.destroy = sinon.stub()
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
