@@ -63,9 +63,10 @@ module.exports = (app, webRouter, apiRouter)->
 	webRouter.use (req, res, next)->
 
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked
+		user_id = AuthenticationController.getLoggedInUserId(req)
 
 		if cdnBlocked and !req.session.cdnBlocked?
-			logger.log user_id:req?.session?.user?._id, ip:req?.ip, "cdnBlocked for user, not using it and turning it off for future requets"
+			logger.log user_id:user_id, ip:req?.ip, "cdnBlocked for user, not using it and turning it off for future requets"
 			req.session.cdnBlocked = true
 
 		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
@@ -132,9 +133,10 @@ module.exports = (app, webRouter, apiRouter)->
 			Settings.siteUrl.substring(Settings.siteUrl.indexOf("//")+2)
 		next()
 
-	webRouter.use (req, res, next)->
+	webRouter.use (req, res, next) ->
 		res.locals.getUserEmail = ->
-			email = req?.session?.user?.email or ""
+			user = AuthenticationController.getSessionUser(req)
+			email = user?.email or ""
 			return email
 		next()
 

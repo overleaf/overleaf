@@ -83,9 +83,9 @@ module.exports = UserController =
 
 	logout : (req, res)->
 		metrics.inc "user.logout"
-		logger.log user: req?.session?.user, "logging out"
-		sessionId = req.sessionID
 		user = AuthenticationController.getSessionUser(req)
+		logger.log user: user, "logging out"
+		sessionId = req.sessionID
 		req.logout?()  # passport logout
 		req.session.destroy (err)->
 			if err

@@ -9,15 +9,16 @@ Settings = require("settings-sharelatex")
 contentful = require('contentful')
 marked = require("marked")
 sixpack = require("../../infrastructure/Sixpack")
+AuthenticationController = require '../Authentication/AuthenticationController'
 
 
 
-module.exports = UniversityController = 
+module.exports = UniversityController =
 
 	getPage: (req, res, next)->
 		url = req.url?.toLowerCase()
 		universityUrl = "#{settings.apis.university.url}#{url}"
-		if StaticPageHelpers.shouldProxy(url) 
+		if StaticPageHelpers.shouldProxy(url)
 			return UniversityController._directProxy universityUrl, res
 
 		logger.log url:url, "proxying request to university api"
@@ -36,7 +37,8 @@ module.exports = UniversityController =
 
 
 	getIndexPage: (req, res)->
-		client = sixpack.client(req?.session?.user?._id?.toString() || req.ip)
+		user = AuthenticationController.getSessionUser(req)
+		client = sixpack.client(user?._id?.toString() || req.ip)
 		client.participate 'instapage-pages', ['default', 'instapage'], (err, response)->
 			if response?.alternative?.name == "instapage"
 				return res.redirect("/i/university")
@@ -70,6 +72,3 @@ module.exports = UniversityController =
 				viewData = entry.items[0].fields
 				viewData.html = marked(viewData.content)
 				res.render "university/case_study", viewData:viewData
-
-
-

@@ -92,11 +92,12 @@ module.exports =
 				res.sendStatus 200
 
 	completeJoin: (req, res)->
+		currentUser = AuthenticationController.getSessionUser(req)
 		subscription_id = req.params.subscription_id
 		if !SubscriptionDomainHandler.findDomainLicenceBySubscriptionId(subscription_id)?
 			return ErrorsController.notFound(req, res)
-		email = req?.session?.user?.email
-		logger.log subscription_id:subscription_id, user_id:req?.session?.user?._id, email:email, "starting the completion of joining group"
+		email = currentUser?.email
+		logger.log subscription_id:subscription_id, user_id:currentUser?._id, email:email, "starting the completion of joining group"
 		SubscriptionGroupHandler.processGroupVerification email, subscription_id, req.query?.token, (err)->
 			if err? and err == "token_not_found"
 				return res.redirect "/user/subscription/#{subscription_id}/group/invited?expired=true"
