@@ -46,7 +46,7 @@ module.exports = ResourceWriter =
 				do (file) ->
 					path = file.path
 					should_delete = true
-					if path.match(/^output\./) or path.match(/\.aux$/)
+					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
 						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log"
 						should_delete = true
