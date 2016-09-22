@@ -30,7 +30,7 @@ define [
 		$scope.finishRenaming = () ->
 			name = $scope.inputs.name
 			
-			if !name.match(/^[^\*\/]*$/)
+			if !name.match(new RegExp(ide.validFileRegex))
 				# Showing the modal blurs the rename box which calls us again
 				# so track this with the invalidModalShowing flag
 				return if invalidModalShowing
