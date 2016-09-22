@@ -66,7 +66,7 @@ module.exports =
 		)
 
 		webRouter.post(
-			'/project/:Project_id/invite/:invite_id/accept',
+			'/project/:Project_id/invite/token/:token/accept',
 			AuthenticationController.requireLogin(),
 			CollaboratorsInviteController.acceptInvite
 		)

@@ -4,14 +4,31 @@ span(ng-controller="NotificationsController").userNotifications
 		ng-cloak
 	)
 		li.notification_entry(
-			ng-repeat="unreadNotification in notifications",
+			ng-repeat="notification in notifications",
 		)
-			.row(ng-hide="unreadNotification.hide")
+			.row(ng-hide="notification.hide")
 				.col-xs-12
-					.alert.alert-info
+					.alert.alert-info(ng-if="notification.templateKey == 'notification_project_invite'", ng-controller="ProjectInviteNotificationController")
 						div.notification_inner
-							span(ng-bind-html="unreadNotification.html").notification_body
+							.notification_body(ng-show="!notification.accepted")
+								| !{translate("notification_project_invite_message")}
+								a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
+									span(ng-show="!notification.inflight") #{translate("join_project")}
+									span(ng-show="notification.inflight")
+										i.fa.fa-fw.fa-spinner.fa-spin
+										| &nbsp;
+										| #{translate("joining")}...
+							.notification_body(ng-show="notification.accepted")
+								| !{translate("notification_project_invite_accepted_message")}
+								a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
 							span().notification_close
-								button(ng-click="dismiss(unreadNotification)").close.pull-right
+								button(ng-click="dismiss(notification)").close.pull-right
+									span(aria-hidden="true") &times;
+									span.sr-only #{translate("close")}
+					.alert.alert-info(ng-if="notification.templateKey != 'notification_project_invite'")
+						div.notification_inner
+							span(ng-bind-html="notification.html").notification_body
+							span().notification_close
+								button(ng-click="dismiss(notification)").close.pull-right
 									span(aria-hidden="true") &times;
 									span.sr-only #{translate("close")}

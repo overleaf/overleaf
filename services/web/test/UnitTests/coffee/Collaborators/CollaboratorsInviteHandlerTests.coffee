@@ -404,7 +404,7 @@ describe "CollaboratorsInviteHandler", ->
 			@CollaboratorsInviteHandler._tryCancelInviteNotification = sinon.stub().callsArgWith(1, null)
 			@ProjectInvite.remove.callsArgWith(1, null)
 			@call = (callback) =>
-				@CollaboratorsInviteHandler.acceptInvite @projectId, @inviteId, @token, @user, callback
+				@CollaboratorsInviteHandler.acceptInvite @projectId, @token, @user, callback
 
 		afterEach ->
 			@_getInviteByToken.restore()
