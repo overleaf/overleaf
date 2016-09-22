@@ -46,6 +46,8 @@ module.exports = AuthenticationController =
 					req.sessionStore.generate(req)
 					for key, value of oldSession
 						req.session[key] = value
+					# copy to the old `session.user` location, for backward-comptability
+					req.session.user = req.session.passport.user
 					req.session.save (err) ->
 						if err?
 							logger.err {user_id: user._id}, "error saving regenerated session after login"
