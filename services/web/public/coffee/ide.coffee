@@ -87,6 +87,8 @@ define [
 		# End of tracking code.
 
 		window._ide = ide
+		
+		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
 
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope

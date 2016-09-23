@@ -79,19 +79,20 @@ define [
 						return
 
 					member = members.shift()
-					if !member.type? and member.display in currentMemberEmails
+					if member.type == "user"
+						email = member.email
+					else # Not an auto-complete object, so email == display
+						email = member.display
+					email = email.toLowerCase()
+
+					if email in currentMemberEmails
 						# Skip this existing member
 						return addNextMember()
 
-					# NOTE: groups aren't really a thing in ShareLaTeX, partially inherited from DJ
-					if member.display in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == member.display)?._id
+					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
 						request = projectInvites.resendInvite(inviteId)
-					else if member.type == "user"
-						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
-					else if member.type == "group"
-						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
-					else # Not an auto-complete object, so email == display
-						request = projectInvites.sendInvite(member.display, $scope.inputs.privileges)
+					else
+						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
 
 					request
 						.success (data) ->
