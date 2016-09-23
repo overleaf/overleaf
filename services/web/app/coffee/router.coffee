@@ -11,7 +11,6 @@ SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
 UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
-ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 NotificationsController = require("./Features/Notifications/NotificationsController")
@@ -77,7 +76,7 @@ module.exports = class Router
 
 
 		if Settings.enableSubscriptions
-			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
+			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
 
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage
