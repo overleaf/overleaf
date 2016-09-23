@@ -89,7 +89,7 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
 		logger.log project_id:project_id, projectName:projectName, "cloning project"
-		if !AuthenticationController.isUserLoggedIn()
+		if !AuthenticationController.isUserLoggedIn(req)
 			return res.send redir:"/register"
 		currentUser = AuthenticationController.getSessionUser(req)
 		projectDuplicator.duplicate currentUser, project_id, projectName, (err, project)->
