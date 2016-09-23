@@ -79,7 +79,7 @@ block content
 														required,
 														complex-password
 													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.currentPassword.$dirty", ng-bind-html="complexPasswordErrorMessage") 
+													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
 												.form-group
 													label(for='newPassword2') #{translate("confirm_new_password")}
 													input.form-control(
@@ -88,9 +88,11 @@ block content
 														placeholder='*********',
 														ng-model="newPassword2",
 														equals="passwordField"
-													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-														| #{translate("doesnt_match")}
+													) 
+													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
+														| #{translate("doesnt_match")} 
+													span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+														| #{translate("Invalid Password")} 
 												.actions
 													button.btn.btn-primary(
 														type='submit',
