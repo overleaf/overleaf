@@ -12,7 +12,9 @@ define [
 			INDICATOR_DELAY2: 250  # time until the indicator starts animating
 
 			constructor: (@url, @options) ->
-				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
+				if navigator.userAgent?.indexOf("Edge/") >= 0
+					# Microsoft Edge does not work well with font-face (Sept 2016)
+					PDFJS.disableFontFace = true
 				if @options.disableAutoFetch
 					PDFJS.disableAutoFetch = true # prevent loading whole file
 				# PDFJS.disableStream
