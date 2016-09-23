@@ -55,7 +55,7 @@ tryFollowInviteLink = (user, link, callback=(err, response, body)->) ->
 
 tryAcceptInvite = (user, invite, callback=(err, response, body)->) ->
 	user.request.post {
-		uri: "/project/#{invite.projectId}/invite/#{invite._id}/accept"
+		uri: "/project/#{invite.projectId}/invite/token/#{invite.token}/accept"
 		json:
 			token: invite.token
 	}, callback
