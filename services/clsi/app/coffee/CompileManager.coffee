@@ -48,6 +48,7 @@ module.exports = CompileManager =
 			isLaTeXFile = request.rootResourcePath?.match(/\.tex$/i)
 			if request.check? and isLaTeXFile
 				env['CHKTEX_OPTIONS'] = '-nall -e9 -e10 -w15 -w16'
+				env['CHKTEX_ULIMIT_OPTIONS'] = '-t 5 -v 16000'
 				if request.check is 'error'
 					env['CHKTEX_EXIT_ON_ERROR'] =  1
 				if request.check is 'validate'
