@@ -3,7 +3,7 @@ extends ../../layout
 block scripts
 	script(type='text/javascript').
 		window.group_subscription_id = '#{group_subscription_id}'
-		window.has_personal_subscription = '#{has_personal_subscription}'
+		window.has_personal_subscription = #{has_personal_subscription}
 
 block content
 	.content.content-alt
