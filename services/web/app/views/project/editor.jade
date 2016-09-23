@@ -109,18 +109,18 @@ block content
 			"waitSeconds": 0,
 			"shim": {
 				"libs/pdf": {
-					deps: ["libs/#{lib('pdfjs')}/compatibility"]
+					"deps": ["libs/#{lib('pdfjs')}/compatibility"]
 				},
 				"ace/ext-searchbox": {
-					deps: ["ace/ace"]
+					"deps": ["ace/ace"]
 				},
 				"ace/ext-language_tools": {
-					deps: ["ace/ace"]
+					"deps": ["ace/ace"]
 				}
 			},
-			config:{
-				moment:{
-					noGlobal: true
+			"config":{
+				"moment":{
+					"noGlobal": true
 				}
 			}
 		};
