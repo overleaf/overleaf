@@ -315,8 +315,12 @@ script(type='text/ng-template', id='newDocModalTemplate')
 				required,
 				ng-model="inputs.name",
 				on-enter="create()",
-				select-name-on="open"
+				select-name-on="open",
+				ng-pattern="validFileRegex",
+				name="name"
 			)
+			.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.pattern")
+				| #{translate('files_cannot_include_invalid_characters')}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
@@ -341,8 +345,12 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 				required,
 				ng-model="inputs.name",
 				on-enter="create()",
-				select-name-on="open"
+				select-name-on="open",
+				ng-pattern="validFileRegex",
+				name="name"
 			)
+			.text-danger.row-spaced-small(ng-show="newFolderForm.name.$error.pattern")
+				| #{translate('files_cannot_include_invalid_characters')}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
@@ -414,3 +422,13 @@ script(type='text/ng-template', id='deleteEntityModalTemplate')
 		)
 			span(ng-hide="state.inflight") #{translate("delete")}
 			span(ng-show="state.inflight") #{translate("deleting")}...
+
+script(type='text/ng-template', id='invalidFileNameModalTemplate')
+	.modal-header
+		h3 #{translate('invalid_file_name')}
+	.modal-body
+		p #{translate('files_cannot_include_invalid_characters')}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="$close()"
+		) #{translate('ok')}
