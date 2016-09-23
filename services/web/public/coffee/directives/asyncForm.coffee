@@ -112,8 +112,6 @@ define [
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
 			ngModelCtrl.$parsers.unshift (modelValue) ->
-				
-			
 				isValid = passField.validatePass()
 				email = asyncFormCtrl.getEmail() || window.usersEmail
 				if !isValid
@@ -123,8 +121,5 @@ define [
 					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
 						isValid = false
 						scope.complexPasswordErrorMessage = "Password can not contain email address"
-				if opts.length.max? and modelValue.length == opts.length.max
-					isValid = false
-					scope.complexPasswordErrorMessage = "Maxium password length #{opts.length.max} reached"
 				ngModelCtrl.$setValidity('complexPassword', isValid)
 				return modelValue
