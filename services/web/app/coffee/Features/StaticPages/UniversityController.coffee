@@ -37,8 +37,8 @@ module.exports = UniversityController =
 
 
 	getIndexPage: (req, res)->
-		user = AuthenticationController.getSessionUser(req)
-		client = sixpack.client(user?._id?.toString() || req.ip)
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		client = sixpack.client(user_id.toString() || req.ip)
 		client.participate 'instapage-pages', ['default', 'instapage'], (err, response)->
 			if response?.alternative?.name == "instapage"
 				return res.redirect("/i/university")
