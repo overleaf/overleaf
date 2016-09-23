@@ -94,7 +94,7 @@ module.exports = AuthenticationController =
 
 	isUserLoggedIn: (req) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		return user_id != null
+		return (user_id not in [null, undefined, false])
 
 	# TODO: perhaps should produce an error if the current user is not present
 	getLoggedInUserId: (req) ->

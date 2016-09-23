@@ -44,6 +44,24 @@ describe "AuthenticationController", ->
 	afterEach ->
 		tk.reset()
 
+	describe 'isUserLoggedIn', () ->
+
+		beforeEach ->
+			@stub = sinon.stub(@AuthenticationController, 'getLoggedInUserId')
+
+		afterEach ->
+			@stub.restore()
+
+		it 'should do the right thing in all cases', () ->
+			@AuthenticationController.getLoggedInUserId.returns('some_id')
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal true
+			@AuthenticationController.getLoggedInUserId.returns(null)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+			@AuthenticationController.getLoggedInUserId.returns(false)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+			@AuthenticationController.getLoggedInUserId.returns(undefined)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+
 	describe 'setInSessionUser', () ->
 
 		beforeEach ->
@@ -361,7 +379,7 @@ describe "AuthenticationController", ->
 		describe "with a user session", ->
 			beforeEach ->
 				@req.session =
-					user: {"mock": "user"}
+					user: {"mock": "user", "_id": "some_id"}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 
 			it "should call next() directly", ->
