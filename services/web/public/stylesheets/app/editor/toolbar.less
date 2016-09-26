@@ -130,6 +130,29 @@
 	}
 }
 
+.toolbar.toolbar-with-labels {
+	height: 50px;
+
+	.btn-full-height {
+		padding: 0 10px;
+	}
+
+	& ~ #ide-body {
+		top: 50px;
+	}
+
+	.project-name .name {
+		padding: 12px;
+	}
+}
+
+.toolbar-label {
+	margin: 0;
+	font-size: 0.6em;
+	font-weight: normal;
+	min-width: 35px;
+}
+
 .editor-dark {
 	.toolbar-alt {
 		background-color: darken(@editor-dark-background-color, 0%);
