@@ -176,6 +176,8 @@ module.exports = (grunt) ->
 							name: "libs"
 						},{
 							name: "ace/mode-latex"
+						},{
+							name: "ace/worker-latex"
 						}
 
 					]
