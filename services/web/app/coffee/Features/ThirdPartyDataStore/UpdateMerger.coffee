@@ -51,12 +51,13 @@ module.exports =
 					return callback(err)
 				logger.log docLines:docLines, doc_id:doc_id, project_id:project_id, "processing doc update from tpds"
 				if doc_id?
-					editorController.setDoc project_id, doc_id, user_id, docLines, source, (err)->
-						callback()
+					editorController.setDoc project_id, doc_id, user_id, docLines, source, callback
 				else
 					setupNewEntity project_id, path, (err, folder, fileName)->
-						editorController.addDoc project_id, folder._id, fileName, docLines, source, (err)->
-							callback()
+						if err?
+							logger.err err:err, project_id:project_id, doc_id:doc_id, path:path, "error processing file"
+							return callback(err)
+						editorController.addDoc project_id, folder._id, fileName, docLines, source, callback
 
 		processFile: (project_id, file_id, fsPath, path, source, callback)->
 			finish = (err)->
@@ -64,10 +65,13 @@ module.exports =
 				callback(err)
 			logger.log project_id:project_id, file_id:file_id, path:path, "processing file update from tpds"
 			setupNewEntity project_id, path, (err, folder, fileName) =>
-				if file_id?
+				if err?
+					logger.err err:err, project_id:project_id, file_id:file_id, path:path, "error processing file"
+					return callback(err)
+				else if file_id?
 					editorController.replaceFile project_id, file_id, fsPath, source, finish
 				else
-					editorController.addFile project_id, folder._id, fileName, fsPath, source, finish
+					editorController.addFile project_id, folder?._id, fileName, fsPath, source, finish
 
 		writeStreamToDisk: (project_id, file_id, stream, callback = (err, fsPath)->)->
 			if !file_id?
