@@ -134,17 +134,17 @@ div(sixpack-switch="editor-header")
 		ng-hide="state.loading"
 		sixpack-when="labels"
 	)
-		a.btn.btn-full-height(
-			href,
-			ng-click="ui.leftMenuShown = true"
-		)
-			i.fa.fa-fw.fa-bars
-			p.toolbar-label Menu
-		a(
-			href="/project"
-		)
-			i.fa.fa-fw.fa-level-up
-			p.toolbar-label Back
+		.toolbar-left
+			a.btn.btn-full-height(
+				href,
+				ng-click="ui.leftMenuShown = true"
+			)
+				i.fa.fa-fw.fa-bars
+				p.toolbar-label Menu
+			a(
+				href="/project"
+			)
+				i.fa.fa-fw.fa-level-up
 
 		span(ng-controller="PdfViewToggleController")
 			a(
@@ -234,7 +234,7 @@ div(sixpack-switch="editor-header")
 				ng-class="{ active: (ui.view == 'track-changes') }"
 			)
 				i.fa.fa-fw.fa-history
-				p.toolbar-label Changes
+				p.toolbar-label History
 			a.btn.btn-full-height(
 				href,
 				ng-class="{ active: ui.chatOpen }",

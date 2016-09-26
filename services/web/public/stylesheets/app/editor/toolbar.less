@@ -17,7 +17,9 @@
 		outline: none;
 	}
 
-	> a:not(.btn), .toolbar-right > a:not(.btn) {
+	> a:not(.btn),
+	.toolbar-left > a:not(.btn),
+	.toolbar-right > a:not(.btn) {
 		display: inline-block;
 		color: @gray-light;
 		padding: 4px 10px 5px;
@@ -62,6 +64,11 @@
 			top: 4px;
 			right: 4px;
 		}
+	}
+
+	.toolbar-left {
+		float: left;
+		text-align: center;
 	}
 
 	.toolbar-right {
@@ -131,26 +138,14 @@
 }
 
 .toolbar.toolbar-with-labels {
-	height: 50px;
-
-	.btn-full-height {
-		padding: 0 10px;
-	}
-
-	& ~ #ide-body {
-		top: 50px;
-	}
-
-	.project-name .name {
-		padding: 12px;
-	}
 }
 
 .toolbar-label {
-	margin: 0;
-	font-size: 0.6em;
+	display: inline-block;
+	margin: 0 4px;
+	font-size: 12px;
 	font-weight: normal;
-	min-width: 35px;
+	vertical-align: middle;
 }
 
 .editor-dark {
