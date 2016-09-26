@@ -10,7 +10,8 @@ div(sixpack-switch="editor-header")
 			ng-click="ui.leftMenuShown = true"
 			tooltip='#{translate("menu")}',
 			tooltip-placement="bottom",
-			tooltip-append-to-body="true"
+			tooltip-append-to-body="true",
+			sixpack-convert="editor-header"
 		)
 			i.fa.fa-fw.fa-bars
 		a(
@@ -100,7 +101,8 @@ div(sixpack-switch="editor-header")
 				tooltip-placement="bottom",
 				ng-mouseenter="trackHover('share')"
 				ng-click="openShareProjectModal()",
-				ng-controller="ShareController"
+				ng-controller="ShareController",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-group
 			a.btn.btn-full-height(
@@ -109,7 +111,8 @@ div(sixpack-switch="editor-header")
 				ng-click="toggleTrackChanges()",
 				ng-class="{ active: (ui.view == 'track-changes') }"
 				tooltip="#{translate('recent_changes')}",
-				tooltip-placement="bottom"
+				tooltip-placement="bottom",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-history
 			a.btn.btn-full-height(
@@ -120,7 +123,8 @@ div(sixpack-switch="editor-header")
 				ng-mouseenter="trackHover('chat')"
 				ng-click="toggleChat()",
 				ng-controller="ChatButtonController",
-				ng-show="!anonymous"
+				ng-show="!anonymous",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-comment(
 					ng-class="{ 'bounce': unreadMessages > 0 }"
@@ -137,10 +141,11 @@ div(sixpack-switch="editor-header")
 		.toolbar-left
 			a.btn.btn-full-height(
 				href,
-				ng-click="ui.leftMenuShown = true"
+				ng-click="ui.leftMenuShown = true",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-bars
-				p.toolbar-label Menu
+				p.toolbar-label #{translate("menu")}
 			a(
 				href="/project"
 			)
@@ -223,25 +228,28 @@ div(sixpack-switch="editor-header")
 				ng-if="permissions.admin",
 				ng-mouseenter="trackHover('share')"
 				ng-click="openShareProjectModal()",
-				ng-controller="ShareController"
+				ng-controller="ShareController",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-group
-				p.toolbar-label Share
+				p.toolbar-label #{translate("share")}
 			a.btn.btn-full-height(
 				href,
 				ng-mouseenter="trackHover('track-changes')"
 				ng-click="toggleTrackChanges()",
-				ng-class="{ active: (ui.view == 'track-changes') }"
+				ng-class="{ active: (ui.view == 'track-changes') }",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-history
-				p.toolbar-label History
+				p.toolbar-label #{translate("history")}
 			a.btn.btn-full-height(
 				href,
 				ng-class="{ active: ui.chatOpen }",
 				ng-mouseenter="trackHover('chat')"
 				ng-click="toggleChat()",
 				ng-controller="ChatButtonController",
-				ng-show="!anonymous"
+				ng-show="!anonymous",
+				sixpack-convert="editor-header"
 			)
 				i.fa.fa-fw.fa-comment(
 					ng-class="{ 'bounce': unreadMessages > 0 }"
@@ -249,4 +257,4 @@ div(sixpack-switch="editor-header")
 				span.label.label-info(
 					ng-show="unreadMessages > 0"
 				) {{ unreadMessages }}
-				p.toolbar-label Chat
+				p.toolbar-label #{translate("chat")}
