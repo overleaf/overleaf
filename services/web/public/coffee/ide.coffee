@@ -71,6 +71,13 @@ define [
 
 		$scope.chat = {}
 
+
+		# Only run the header AB test for newly registered users.
+		_abTestStartDate = new Date(Date.UTC(2016, 8, 22))
+		_userSignUpDate = new Date(window.user.signUpDate)
+		
+		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
+
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
