@@ -76,7 +76,7 @@ define [
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
 		_userSignUpDate = new Date(window.user.signUpDate)
 		
-		$scope.shouldABTestHeaderLabels = _userSignUpDate < _abTestStartDate
+		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
 		$scope.headerLabelsABVariant = ""
 
 		if ($scope.shouldABTestHeaderLabels)
@@ -88,7 +88,6 @@ define [
 				headerItem: headerItem,
 				variant: $scope.headerLabelsABVariant
 			}
-
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
