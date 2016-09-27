@@ -5,11 +5,12 @@ logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
-		# retrieve the document before retreiving the updates,
-		# because updates are written to mongo after the document
-		DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
+		# Whichever order these are in, there is potential for updates to come in between
+		# them so that they do not return the same 'latest' versions.
+		# TODO: If these don't return consistent content, try again.
+		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
 			return callback(error) if error?
-			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
+			DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 				return callback(error) if error?
 				callback(null, content, version, updates)
 	
@@ -49,6 +50,8 @@ module.exports = DiffManager =
 			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version - 1
 				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
+			
+			logger.log {docVersion: version, lastUpdateVersion: lastUpdate?.v, updateCount: updates.length}, "rewinding updates"
 
 			tryUpdates = updates.slice().reverse()
 
