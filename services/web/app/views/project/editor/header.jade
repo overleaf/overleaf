@@ -136,7 +136,7 @@ div(ng-if="shouldABTestHeaderLabels")
 		)
 			a.btn.btn-full-height(
 				href,
-				ng-click="ui.leftMenuShown = true"
+				ng-click="ui.leftMenuShown = true; trackABTestConversion('menu');"
 				tooltip='#{translate("menu")}',
 				tooltip-placement="bottom",
 				tooltip-append-to-body="true",
@@ -229,7 +229,7 @@ div(ng-if="shouldABTestHeaderLabels")
 					tooltip="#{translate('share')}",
 					tooltip-placement="bottom",
 					ng-mouseenter="trackHover('share')"
-					ng-click="openShareProjectModal()",
+					ng-click="openShareProjectModal(); trackABTestConversion('share');",
 					ng-controller="ShareController",
 					sixpack-convert="editor-header"
 				)
@@ -237,7 +237,7 @@ div(ng-if="shouldABTestHeaderLabels")
 				a.btn.btn-full-height(
 					href,
 					ng-mouseenter="trackHover('track-changes')"
-					ng-click="toggleTrackChanges()",
+					ng-click="toggleTrackChanges(); trackABTestConversion('history');",
 					ng-class="{ active: (ui.view == 'track-changes') }"
 					tooltip="#{translate('recent_changes')}",
 					tooltip-placement="bottom",
@@ -250,7 +250,7 @@ div(ng-if="shouldABTestHeaderLabels")
 					tooltip-placement="bottom",
 					ng-class="{ active: ui.chatOpen }",
 					ng-mouseenter="trackHover('chat')"
-					ng-click="toggleChat()",
+					ng-click="toggleChat(); trackABTestConversion('chat');",
 					ng-controller="ChatButtonController",
 					ng-show="!anonymous",
 					sixpack-convert="editor-header"
@@ -270,7 +270,7 @@ div(ng-if="shouldABTestHeaderLabels")
 			.toolbar-left
 				a.btn.btn-full-height(
 					href,
-					ng-click="ui.leftMenuShown = true",
+					ng-click="ui.leftMenuShown = true; trackABTestConversion('menu');",
 					sixpack-convert="editor-header"
 				)
 					i.fa.fa-fw.fa-bars
@@ -355,7 +355,7 @@ div(ng-if="shouldABTestHeaderLabels")
 				a.btn.btn-full-height(
 					href,
 					ng-if="permissions.admin",
-					ng-mouseenter="trackHover('share')"
+					ng-mouseenter="trackHover('share'); trackABTestConversion('share');"
 					ng-click="openShareProjectModal()",
 					ng-controller="ShareController",
 					sixpack-convert="editor-header"
@@ -365,7 +365,7 @@ div(ng-if="shouldABTestHeaderLabels")
 				a.btn.btn-full-height(
 					href,
 					ng-mouseenter="trackHover('track-changes')"
-					ng-click="toggleTrackChanges()",
+					ng-click="toggleTrackChanges(); trackABTestConversion('history');",
 					ng-class="{ active: (ui.view == 'track-changes') }",
 					sixpack-convert="editor-header"
 				)
@@ -375,7 +375,7 @@ div(ng-if="shouldABTestHeaderLabels")
 					href,
 					ng-class="{ active: ui.chatOpen }",
 					ng-mouseenter="trackHover('chat')"
-					ng-click="toggleChat()",
+					ng-click="toggleChat(); trackABTestConversion('chat');",
 					ng-controller="ChatButtonController",
 					ng-show="!anonymous",
 					sixpack-convert="editor-header"
