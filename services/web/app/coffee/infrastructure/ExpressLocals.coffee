@@ -53,15 +53,7 @@ for paths in pathList
 		logger.log "#{filePath}: #{hash}"
 		fingerprints[filePath] = hash
 
-
-
-
-
-
-
-
 getFingerprint = (path) ->
-	console.log path, fingerprints[path], "!!!!!!!!!!!"
 	if fingerprints[path]?
 		return fingerprints[path]
 	else
