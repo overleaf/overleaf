@@ -7,6 +7,7 @@ querystring = require('querystring')
 SystemMessageManager = require("../Features/SystemMessages/SystemMessageManager")
 AuthenticationController = require("../Features/Authentication/AuthenticationController")
 _ = require("underscore")
+async = require("async")
 Modules = require "./Modules"
 Url = require "url"
 
@@ -21,27 +22,36 @@ jsPath =
 		"/js/"
 
 
-logger.log "Generating file fingerprints..."
-for path in [
-	"#{jsPath}libs/require.js",
-	"#{jsPath}ide.js",
-	"#{jsPath}main.js",
-	"#{jsPath}libs.js",
-	"#{jsPath}ace/ace.js",
-	"#{jsPath}libs/pdfjs-1.3.91p1/pdf.js",
-	"#{jsPath}libs/pdfjs-1.3.91p1/pdf.worker.js",
-	"#{jsPath}libs/pdfjs-1.3.91p1/compatibility.js",
-	"/stylesheets/style.css"
-]
-	filePath = Path.join __dirname, "../../../", "public#{path}"
+getFileContent = (filePath)->
+	filePath = Path.join __dirname, "../../../", "public#{filePath}"
 	exists = fs.existsSync filePath
 	if exists
 		content = fs.readFileSync filePath
-		hash = crypto.createHash("md5").update(content).digest("hex")
-		logger.log "#{filePath}: #{hash}"
-		fingerprints[path] = hash
+		return content
 	else
 		logger.log filePath:filePath, "file does not exist for fingerprints"
+		return ""
+
+logger.log "Generating file fingerprints..."
+pathList = [
+	["#{jsPath}libs/require.js"]
+	["#{jsPath}ide.js"]
+	["#{jsPath}main.js"]
+	["#{jsPath}libs.js"]
+	["#{jsPath}ace/ace.js","#{jsPath}ace/mode-latex.js", "#{jsPath}ace/snippets/latex.js"]
+	["#{jsPath}libs/pdfjs-1.3.91p1/pdf.js"]
+	["#{jsPath}libs/pdfjs-1.3.91p1/pdf.worker.js"]
+	["#{jsPath}libs/pdfjs-1.3.91p1/compatibility.js"]
+	["/stylesheets/style.css"]
+]
+
+for paths in pathList
+	contentList = _.map(paths, getFileContent)
+	content = contentList.join("")
+	hash = crypto.createHash("md5").update(content).digest("hex")
+	_.each paths, (filePath)-> 
+		logger.log "#{filePath}: #{hash}"
+		fingerprints[filePath] = hash
 
 getFingerprint = (path) ->
 	if fingerprints[path]?
