@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import static uk.ac.ic.wlgitbridge.util.Util.deleteInDirectoryApartFrom;
 
@@ -22,10 +23,16 @@ public class FSGitRepoStore implements RepoStore {
 
     private final String repoStorePath;
     private final File rootDirectory;
+    private final Function<File, Long> fsSizer;
 
     public FSGitRepoStore(String repoStorePath) {
+        this(repoStorePath, d -> d.getTotalSpace() - d.getFreeSpace());
+    }
+
+    public FSGitRepoStore(String repoStorePath, Function<File, Long> fsSizer) {
         this.repoStorePath = repoStorePath;
         rootDirectory = initRootGitDirectory(repoStorePath);
+        this.fsSizer = fsSizer;
     }
 
     @Override
@@ -54,7 +61,7 @@ public class FSGitRepoStore implements RepoStore {
 
     @Override
     public long totalSize() {
-        return FileUtils.sizeOfDirectory(rootDirectory);
+        return fsSizer.apply(rootDirectory);
     }
 
     @Override

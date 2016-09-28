@@ -1,20 +1,17 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.ac.ic.wlgitbridge.util.Files;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Created by winston on 23/08/2016.
@@ -52,16 +49,30 @@ public class FSGitRepoStoreTest {
     public void testPurgeNonexistentProjects() {
         File toDelete = new File(repoStore.getRootDirectory(), "idontexist");
         File wlgb = new File(repoStore.getRootDirectory(), ".wlgb");
-        Assert.assertTrue(toDelete.exists());
-        Assert.assertTrue(wlgb.exists());
+        assertTrue(toDelete.exists());
+        assertTrue(wlgb.exists());
         repoStore.purgeNonexistentProjects(Arrays.asList("proj1", "proj2"));
-        Assert.assertFalse(toDelete.exists());
-        Assert.assertTrue(wlgb.exists());
+        assertFalse(toDelete.exists());
+        assertTrue(wlgb.exists());
     }
 
     @Test
-    public void testTotalSize() {
-        assertEquals(31860, repoStore.totalSize());
+    public void totalSizeShouldChangeWhenFilesAreCreatedAndDeleted()
+            throws IOException {
+        long old = repoStore.totalSize();
+        File temp = new File(repoStore.getRootDirectory(), "__temp.txt");
+        try (
+                OutputStream out = new FileOutputStream(
+                        temp
+                )
+        ) {
+            out.write(new byte[16 * 1024 * 1024]);
+        }
+        long new_ = repoStore.totalSize();
+        assertTrue(new_ > old);
+        assertTrue(temp.delete());
+        long new__ = repoStore.totalSize();
+        assertTrue(new__ < new_);
     }
 
     @Test
@@ -69,10 +80,10 @@ public class FSGitRepoStoreTest {
         long beforeSize = repoStore.totalSize();
         InputStream zipped = repoStore.bzip2Project("proj1");
         repoStore.remove("proj1");
-        Assert.assertTrue(beforeSize > repoStore.totalSize());
+        assertTrue(beforeSize > repoStore.totalSize());
         repoStore.unbzip2Project("proj1", zipped);
-        Assert.assertEquals(beforeSize, repoStore.totalSize());
-        Assert.assertTrue(
+        assertEquals(beforeSize, repoStore.totalSize());
+        assertTrue(
                 Files.contentsAreEqual(
                         original,
                         repoStore.getRootDirectory()
