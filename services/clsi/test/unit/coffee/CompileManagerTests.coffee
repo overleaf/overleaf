@@ -111,7 +111,7 @@ describe "CompileManager", ->
 						compiler:  @compiler
 						timeout:   @timeout
 						image:     @image
-						environment: {'CHKTEX_OPTIONS': '-nall -e9 -e10 -w15 -w16', 'CHKTEX_EXIT_ON_ERROR':1, 'CHKTEX_ULIMIT_OPTIONS': '-t 5 -v 16000'}
+						environment: {'CHKTEX_OPTIONS': '-nall -e9 -e10 -w15 -w16', 'CHKTEX_EXIT_ON_ERROR':1, 'CHKTEX_ULIMIT_OPTIONS': '-t 5 -v 64000'}
 					})
 					.should.equal true
 
