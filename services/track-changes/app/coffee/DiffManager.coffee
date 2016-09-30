@@ -43,7 +43,7 @@ module.exports = DiffManager =
 		callback = (error, args...) ->
 			if error?
 				if error.retry and retries > 0
-					logger.warn {error, project_id, doc_id, version}, "retrying getDocumentBeforeVersion"
+					logger.warn {error, project_id, doc_id, version, retries}, "retrying getDocumentBeforeVersion"
 					retry()
 				else
 					_callback(error)
