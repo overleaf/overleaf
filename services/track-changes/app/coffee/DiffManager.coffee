@@ -5,12 +5,11 @@ logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
 	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
-		# Whichever order these are in, there is potential for updates to come in between
-		# them so that they do not return the same 'latest' versions.
-		# TODO: If these don't return consistent content, try again.
-		UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
+		# Get updates last, since then they must be ahead and it
+		# might be possible to rewind to the same version as the doc.
+		DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 			return callback(error) if error?
-			DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
+			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
 				return callback(error) if error?
 				callback(null, content, version, updates)
 	
@@ -34,7 +33,28 @@ module.exports = DiffManager =
 			
 			callback(null, diff)
 
-	getDocumentBeforeVersion: (project_id, doc_id, version, callback = (error, document, rewoundUpdates) ->) ->
+	getDocumentBeforeVersion: (project_id, doc_id, version, _callback = (error, document, rewoundUpdates) ->) ->
+		# Whichever order we get the latest document and the latest updates,
+		# there is potential for updates to be applied between them so that
+		# they do not return the same 'latest' versions.
+		# If this happens, we just retry and hopefully get them at the compatible
+		# versions.
+		retries = 3
+		callback = (error, args...) ->
+			if error?
+				if error.retry and retries > 0
+					logger.warn {error, project_id, doc_id, version, retries}, "retrying getDocumentBeforeVersion"
+					retry()
+				else
+					_callback(error)
+			else
+				_callback(null, args...)
+
+		do retry = () ->
+			retries--
+			DiffManager._tryGetDocumentBeforeVersion(project_id, doc_id, version, callback)
+
+	_tryGetDocumentBeforeVersion: (project_id, doc_id, version, callback = (error, document, rewoundUpdates) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, version: version, "getting document before version"
 		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, null, (error, content, version, updates) ->
 			return callback(error) if error?
@@ -49,7 +69,9 @@ module.exports = DiffManager =
 
 			lastUpdate = updates[0]
 			if lastUpdate? and lastUpdate.v != version - 1
-				return callback new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
+				error = new Error("latest update version, #{lastUpdate.v}, does not match doc version, #{version}")
+				error.retry = true
+				return callback error
 			
 			logger.log {docVersion: version, lastUpdateVersion: lastUpdate?.v, updateCount: updates.length}, "rewinding updates"
 
