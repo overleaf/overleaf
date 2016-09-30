@@ -91,6 +91,76 @@ describe "DiffManager", ->
 
 	describe "getDocumentBeforeVersion", ->
 		beforeEach ->
+			@DiffManager._tryGetDocumentBeforeVersion = sinon.stub()
+			@document = "mock-documents"
+			@rewound_updates = "mock-rewound-updates"
+
+		describe "succesfully", ->
+			beforeEach ->
+				@DiffManager._tryGetDocumentBeforeVersion.yields(null, @document, @rewound_updates)
+				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @version, @callback
+			
+			it "should call _tryGetDocumentBeforeVersion", ->
+				@DiffManager._tryGetDocumentBeforeVersion
+					.calledWith(@project_id, @doc_id, @version)
+					.should.equal true
+			
+			it "should call the callback with the response", ->
+				@callback.calledWith(null, @document, @rewound_updates).should.equal true
+		
+		describe "with a retry needed", ->
+			beforeEach ->
+				retried = false
+				@DiffManager._tryGetDocumentBeforeVersion = (project_id, doc_id, version, callback) =>
+					if !retried
+						retried = true
+						error = new Error()
+						error.retry = true
+						callback error
+					else
+						callback(null, @document, @rewound_updates)
+				sinon.spy @DiffManager, "_tryGetDocumentBeforeVersion"
+				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @version, @callback
+			
+			it "should call _tryGetDocumentBeforeVersion twice", ->
+				@DiffManager._tryGetDocumentBeforeVersion
+					.calledTwice
+					.should.equal true
+			
+			it "should call the callback with the response", ->
+				@callback.calledWith(null, @document, @rewound_updates).should.equal true
+		
+		describe "with a non-retriable error", ->
+			beforeEach ->
+				@error = new Error("oops")
+				@DiffManager._tryGetDocumentBeforeVersion.yields(@error)
+				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @version, @callback
+			
+			it "should call _tryGetDocumentBeforeVersion once", ->
+				@DiffManager._tryGetDocumentBeforeVersion
+					.calledOnce
+					.should.equal true
+			
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+		
+		describe "when retry limit is matched", ->
+			beforeEach ->
+				@error = new Error("oops")
+				@error.retry = true
+				@DiffManager._tryGetDocumentBeforeVersion.yields(@error)
+				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @version, @callback
+			
+			it "should call _tryGetDocumentBeforeVersion three times (max retries)", ->
+				@DiffManager._tryGetDocumentBeforeVersion
+					.calledThrice
+					.should.equal true
+			
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+
+	describe "_tryGetDocumentBeforeVersion", ->
+		beforeEach ->
 			@content = "hello world"
 			# Op versions are the version they were applied to, so doc is always one version
 			# ahead.s
@@ -113,7 +183,7 @@ describe "DiffManager", ->
 					updates.reverse()
 					return @rewound_content
 				@rewindUpdatesWithArgs = @DiffGenerator.rewindUpdates.withArgs(@content, @updates.slice().reverse())
-				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
+				@DiffManager._tryGetDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 
 			it "should get the latest doc and version with all recent updates", ->
 				@DiffManager.getLatestDocAndUpdates
@@ -131,12 +201,14 @@ describe "DiffManager", ->
 				@version = 50
 				@updates = [ { op: "mock-1", v: 40 }, { op: "mock-1", v: 39 } ]
 				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
-				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
+				@DiffManager._tryGetDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 
-			it "should call the callback with an error", ->
+			it "should call the callback with an error with retry = true set", ->
 				@callback
 					.calledWith(new Error("latest update version, 40, does not match doc version, 42"))
 					.should.equal true
+				error = @callback.args[0][0]
+				expect(error.retry).to.equal true
 
 		describe "when the updates are inconsistent", ->
 			beforeEach ->
