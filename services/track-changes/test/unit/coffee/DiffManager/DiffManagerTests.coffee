@@ -204,9 +204,7 @@ describe "DiffManager", ->
 				@DiffManager._tryGetDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 
 			it "should call the callback with an error with retry = true set", ->
-				@callback
-					.calledWith(new Error("latest update version, 40, does not match doc version, 42"))
-					.should.equal true
+				@callback.calledOnce.should.equal true
 				error = @callback.args[0][0]
 				expect(error.retry).to.equal true
 
