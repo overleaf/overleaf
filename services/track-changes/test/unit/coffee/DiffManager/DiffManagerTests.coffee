@@ -8,7 +8,7 @@ SandboxedModule = require('sandboxed-module')
 describe "DiffManager", ->
 	beforeEach ->
 		@DiffManager = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"./UpdatesManager": @UpdatesManager = {}
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
 			"./DiffGenerator": @DiffGenerator = {}
