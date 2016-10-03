@@ -3,7 +3,7 @@ EmailBuilder = require "./EmailBuilder"
 EmailSender = require "./EmailSender"
 
 if !settings.email?
-	settings.email = 
+	settings.email =
 		lifecycleEnabled:false
 
 
@@ -14,6 +14,7 @@ module.exports =
 		if email.type == "lifecycle" and !settings.email.lifecycle
 			return callback()
 		opts.html = email.html
+		opts.text = email.text
 		opts.subject = email.subject
 		EmailSender.sendEmail opts, (err)->
 			callback(err)

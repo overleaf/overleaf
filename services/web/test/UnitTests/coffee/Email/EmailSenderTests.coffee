@@ -31,7 +31,7 @@ describe "EmailSender", ->
 				warn:->
 				err:->
 			"../../infrastructure/Metrics": inc:->
-				
+
 
 
 		@opts =
@@ -83,3 +83,19 @@ describe "EmailSender", ->
 				args = @sesClient.sendMail.args[0][0]
 				args.replyTo.should.equal @opts.replyTo
 				done()
+
+		describe 'with plain-text email content', () ->
+
+			beforeEach ->
+				@opts.text = "hello there"
+
+			it "should set the text property on the email to send", (done)->
+				@sesClient.sendMail.callsArgWith(1)
+
+				@sender.sendEmail @opts, =>
+					args = @sesClient.sendMail.args[0][0]
+					args.html.should.equal @opts.html
+					args.text.should.equal @opts.text
+					args.to.should.equal @opts.to
+					args.subject.should.equal @opts.subject
+					done()
