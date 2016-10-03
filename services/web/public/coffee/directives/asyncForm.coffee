@@ -125,6 +125,6 @@ define [
 						scope.complexPasswordErrorMessage = "Password can not contain email address"
 				if opts.length.max? and modelValue.length == opts.length.max
 					isValid = false
-					scope.complexPasswordErrorMessage = "Maxium password length #{opts.length.max} reached"
+					scope.complexPasswordErrorMessage = "Maximum password length #{opts.length.max} reached"
 				ngModelCtrl.$setValidity('complexPassword', isValid)
 				return modelValue
