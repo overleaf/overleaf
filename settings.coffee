@@ -432,6 +432,7 @@ if process.env["SANDBOXED_COMPILES"] == "true"
 		docker:
 			image: process.env["TEX_LIVE_DOCKER_IMAGE"]
 			env:
+				HOME: "/tmp"
 				PATH: process.env["COMPILER_PATH"] or "/usr/local/texlive/2015/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 			user: "www-data"
 
