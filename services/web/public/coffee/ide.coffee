@@ -84,7 +84,7 @@ define [
 				$scope.headerLabelsABVariant = chosenVariation
 
 		$scope.trackABTestConversion = (headerItem) ->
-			event_tracking.sendMB "header-label-ab-conversion", {
+			event_tracking.sendMB "header-ab-conversion", {
 				headerItem: headerItem,
 				variant: $scope.headerLabelsABVariant
 			}
