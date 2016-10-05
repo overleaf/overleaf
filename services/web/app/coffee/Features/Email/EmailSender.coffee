@@ -49,6 +49,7 @@ module.exports =
 			from: defaultFromAddress
 			subject: options.subject
 			html: options.html
+			text: options.text
 			replyTo: options.replyTo || Settings.email.replyToAddress
 			socketTimeout: 30 * 1000
 		client.sendMail options, (err, res)->

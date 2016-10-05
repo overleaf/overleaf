@@ -82,7 +82,7 @@ module.exports = CollaboratorsInviteHandler =
 					if err?
 						logger.err {projectId, email}, "error sending messages for invite"
 				callback(null, invite)
-				
+
 
 	revokeInvite: (projectId, inviteId, callback=(err)->) ->
 		logger.log {projectId, inviteId}, "removing invite"
@@ -104,7 +104,7 @@ module.exports = CollaboratorsInviteHandler =
 				return callback(null)
 			CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
 				if err?
-					logger.err {projectid, inviteId}, "error resending invite messages"
+					logger.err {projectId, inviteId}, "error resending invite messages"
 					return callback(err)
 				callback(null)
 

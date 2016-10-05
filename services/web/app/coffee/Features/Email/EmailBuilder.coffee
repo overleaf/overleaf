@@ -91,6 +91,15 @@ templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
 	layout: NotificationEmailLayout
 	type:"notification"
+	plainTextTemplate: _.template """
+Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
+
+Follow this link to view the project: <%= inviteUrl %>
+
+Thank you
+
+#{settings.appName} - <%= siteUrl %>
+"""
 	compiledTemplate: _.template """
 <p>Hi, <%= owner.email %> wants to share <a href="<%= project.url %>">'<%= project.name %>'</a> with you</p>
 <center>
@@ -137,5 +146,6 @@ module.exports =
 		return {
 			subject : template.subject(opts)
 			html: template.layout(opts)
+			text: template?.plainTextTemplate?(opts)
 			type:template.type
 		}
