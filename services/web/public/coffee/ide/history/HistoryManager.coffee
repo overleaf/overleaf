@@ -1,30 +1,30 @@
 define [
-	"ide/track-changes/controllers/TrackChangesListController"
-	"ide/track-changes/controllers/TrackChangesDiffController"
-	"ide/track-changes/directives/infiniteScroll"
+	"ide/history/controllers/HistoryListController"
+	"ide/history/controllers/HistoryDiffController"
+	"ide/history/directives/infiniteScroll"
 ], () ->
-	class TrackChangesManager
+	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
 
-			@$scope.toggleTrackChanges = () =>
-				if @$scope.ui.view == "track-changes"
+			@$scope.toggleHistory = () =>
+				if @$scope.ui.view == "history"
 					@hide()
 				else
 					@show()
 
-			@$scope.$watch "trackChanges.selection.updates", (updates) =>
+			@$scope.$watch "history.selection.updates", (updates) =>
 				if updates? and updates.length > 0
 					@_selectDocFromUpdates()
 					@reloadDiff()
 
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view == "track-changes") and (entity.type == "doc")
-					@$scope.trackChanges.selection.doc = entity
+				if (@$scope.ui.view == "history") and (entity.type == "doc")
+					@$scope.history.selection.doc = entity
 					@reloadDiff()
 
 		show: () ->
-			@$scope.ui.view = "track-changes"
+			@$scope.ui.view = "history"
 			@reset()
 
 		hide: () ->
@@ -33,7 +33,7 @@ define [
 			@$scope.$emit "entity:selected", @ide.fileTreeManager.findSelectedEntity()
 
 		reset: () ->
-			@$scope.trackChanges = {
+			@$scope.history = {
 				updates: []
 				nextBeforeTimestamp: null
 				atEnd: false
@@ -51,36 +51,36 @@ define [
 			}
 
 		autoSelectRecentUpdates: () ->
-			return if @$scope.trackChanges.updates.length == 0
+			return if @$scope.history.updates.length == 0
 
-			@$scope.trackChanges.updates[0].selectedTo = true
+			@$scope.history.updates[0].selectedTo = true
 
 			indexOfLastUpdateNotByMe = 0
-			for update, i in @$scope.trackChanges.updates
+			for update, i in @$scope.history.updates
 				if @_updateContainsUserId(update, @$scope.user.id)
 					break
 				indexOfLastUpdateNotByMe = i
 
-			@$scope.trackChanges.updates[indexOfLastUpdateNotByMe].selectedFrom = true
+			@$scope.history.updates[indexOfLastUpdateNotByMe].selectedFrom = true
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
 			url = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
-			if @$scope.trackChanges.nextBeforeTimestamp?
-				url += "&before=#{@$scope.trackChanges.nextBeforeTimestamp}"
-			@$scope.trackChanges.loading = true
+			if @$scope.history.nextBeforeTimestamp?
+				url += "&before=#{@$scope.history.nextBeforeTimestamp}"
+			@$scope.history.loading = true
 			@ide.$http
 				.get(url)
 				.success (data) =>
 					@_loadUpdates(data.updates)
-					@$scope.trackChanges.nextBeforeTimestamp = data.nextBeforeTimestamp
+					@$scope.history.nextBeforeTimestamp = data.nextBeforeTimestamp
 					if !data.nextBeforeTimestamp?
-						@$scope.trackChanges.atEnd = true
-					@$scope.trackChanges.loading = false
+						@$scope.history.atEnd = true
+					@$scope.history.loading = false
 
 		reloadDiff: () ->
-			diff = @$scope.trackChanges.diff
-			{updates, doc} = @$scope.trackChanges.selection
+			diff = @$scope.history.diff
+			{updates, doc} = @$scope.history.selection
 			{fromV, toV, start_ts, end_ts}   = @_calculateRangeFromSelection()
 
 			return if !doc?
@@ -90,7 +90,7 @@ define [
 				diff.fromV == fromV and
 				diff.toV   == toV
 
-			@$scope.trackChanges.diff = diff = {
+			@$scope.history.diff = diff = {
 				fromV:    fromV
 				toV:      toV
 				start_ts: start_ts
@@ -183,7 +183,7 @@ define [
 			return {text, highlights}
 
 		_loadUpdates: (updates = []) ->
-			previousUpdate = @$scope.trackChanges.updates[@$scope.trackChanges.updates.length - 1]
+			previousUpdate = @$scope.history.updates[@$scope.history.updates.length - 1]
 
 			for update in updates
 				for doc_id, doc of update.docs or {}
@@ -202,19 +202,19 @@ define [
 
 				previousUpdate = update
 
-			firstLoad = @$scope.trackChanges.updates.length == 0
+			firstLoad = @$scope.history.updates.length == 0
 
-			@$scope.trackChanges.updates =
-				@$scope.trackChanges.updates.concat(updates)
+			@$scope.history.updates =
+				@$scope.history.updates.concat(updates)
 
 			@autoSelectRecentUpdates() if firstLoad
 
 		_calculateRangeFromSelection: () ->
 			fromV = toV = start_ts = end_ts = null
 
-			selected_doc_id = @$scope.trackChanges.selection.doc?.id
+			selected_doc_id = @$scope.history.selection.doc?.id
 
-			for update in @$scope.trackChanges.selection.updates or []
+			for update in @$scope.history.selection.updates or []
 				for doc_id, doc of update.docs
 					if doc_id == selected_doc_id
 						if fromV? and toV?
@@ -236,11 +236,11 @@ define [
 		# then prefer this one if present.
 		_selectDocFromUpdates: () ->
 			affected_docs = {}
-			for update in @$scope.trackChanges.selection.updates
+			for update in @$scope.history.selection.updates
 				for doc_id, doc of update.docs
 					affected_docs[doc_id] = doc.entity
 
-			selected_doc = @$scope.trackChanges.selection.doc
+			selected_doc = @$scope.history.selection.doc
 			if selected_doc? and affected_docs[selected_doc.id]?
 				# Selected doc is already open
 			else
@@ -248,7 +248,7 @@ define [
 					selected_doc = doc
 					break
 
-			@$scope.trackChanges.selection.doc = selected_doc
+			@$scope.history.selection.doc = selected_doc
 			@ide.fileTreeManager.selectEntity(selected_doc)
 
 		_updateContainsUserId: (update, user_id) ->

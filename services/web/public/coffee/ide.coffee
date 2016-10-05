@@ -4,7 +4,7 @@ define [
 	"ide/connection/ConnectionManager"
 	"ide/editor/EditorManager"
 	"ide/online-users/OnlineUsersManager"
-	"ide/track-changes/TrackChangesManager"
+	"ide/history/HistoryManager"
 	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
@@ -36,7 +36,7 @@ define [
 	ConnectionManager
 	EditorManager
 	OnlineUsersManager
-	TrackChangesManager
+	HistoryManager
 	PermissionsManager
 	PdfManager
 	BinaryFilesManager
@@ -116,7 +116,7 @@ define [
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
-		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
+		ide.historyManager = new HistoryManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
