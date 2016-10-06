@@ -3,6 +3,7 @@ redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
+crypto = require('crypto')
 
 rclient = redis.createClient(Settings.redis.web)
 
@@ -54,6 +55,31 @@ module.exports = UserSessionsManager =
 					return callback(err)
 				UserSessionsManager._checkSessions(user, () ->)
 				callback()
+
+	getAllUserSessions: (user_id, callback=(err, sessionKeys)->) ->
+		sessionSetKey = UserSessionsManager._sessionSetKey({_id: user_id})
+		rclient.smembers sessionSetKey, (err, sessionKeys) ->
+			if err?
+				logger.err {user_id}, "error getting all session keys for user from redis"
+				return callback(err)
+			rclient.mget sessionKeys, (err, sessions) ->
+				if err?
+					logger.err {user_id}, "error getting all sessions for user from redis"
+					return callback(err)
+
+				hashedSessionKeys = sessionKeys.map (key) ->
+					crypto.createHash('md5').update(key).digest('hex')
+				expiries = sessions.map (s) ->
+					if s == null
+						return null
+					s = JSON.parse(s)
+					s?.user?.session_created or s?.passport?.user?.session_created
+				pairs = _.zip(hashedSessionKeys, expiries)
+				result = []
+				for pair in pairs
+					result.push {id: pair[0], expires: pair[1]}
+				console.log ">> result:", result
+				return callback(null, result)
 
 	revokeAllUserSessions: (user, retain, callback=(err)->) ->
 		if !retain

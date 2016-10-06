@@ -1,5 +1,6 @@
 UserLocator = require("./UserLocator")
 UserGetter = require("./UserGetter")
+UserSessionsManager = require("./UserSessionsManager")
 ErrorController = require("../Errors/ErrorController")
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
@@ -63,3 +64,11 @@ module.exports =
 				user: user,
 				languages: Settings.languages,
 				accountSettingsTabActive: true
+
+	sessionsPage: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log user: user_id, "loading settings page"
+		UserSessionsManager.getAllUserSessions user_id, (err, sessions) ->
+			res.render 'user/sessions',
+				title: "sessions"
+				sessions: sessions

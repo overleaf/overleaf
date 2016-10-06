@@ -1,0 +1,14 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+					.card
+						.page-header
+							h1  #{translate("your_sessions")}
+						.sessions-list
+							each session in sessions
+								div.session
+									| #{session.id} - #{session.expires}
