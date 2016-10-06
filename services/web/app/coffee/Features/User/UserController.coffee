@@ -56,6 +56,8 @@ module.exports = UserController =
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			if req.body.pdfViewer?
 				user.ace.pdfViewer = req.body.pdfViewer
+			if req.body.syntaxValidation?
+				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email
