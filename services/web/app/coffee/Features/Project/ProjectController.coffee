@@ -262,6 +262,7 @@ module.exports = ProjectController =
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
+						syntaxValidation: user.ace.syntaxValidation
 					}
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
@@ -323,6 +324,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 		autoComplete: true
 		spellCheckLanguage: ""
 		pdfViewer: ""
+		syntaxValidation: true
 	subscription:
 		freeTrial:
 			allowed: true
