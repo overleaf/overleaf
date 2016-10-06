@@ -1414,67 +1414,412 @@ var Mirror = require("../worker/mirror").Mirror;
 
 var LatexWorker = exports.LatexWorker = function(sender) {
     Mirror.call(this, sender);
-    this.setTimeout(500);
+    this.setTimeout(250);
 };
 
 oop.inherits(LatexWorker, Mirror);
 
 var Parse = function (text) {
-    var lines = text.split('\n');
-    var state = [], errors = [];
-    var i;
-    var regex = /^\s*\\(begin|end)\{(\w+\*?)\}/; // keep the regex outside the loop for performance
-    for (i = 0; i < lines.length; i++) {
-	var line = lines[i];
-	var result;
-	var error = null;
-	regex.lastIndex = 0;
-	if ((result = regex.exec(line))) {
-	    var type = result[1];
-	    var env = result[2];
-	    if (type == "begin") {
-		state.push({"env":env, "row": i});
-	    } else if (type == "end") {
-		var last_open = state.pop();
-		if (last_open &&  last_open.env == env) {
-		} else if (last_open && last_open.env != env) {
-		    error = {"type":"info", "text": "end " + env + "with begin " + last_open.env, "start_row": last_open.row, "end_row":i };
-		} else if (!last_open) {
-		    error = {"type":"info", "text": "end without begin " + type, "start_row": 0, "end_row": i};
+    var errors = [];
+    var Comments = [];
+    var Tokens = [];
+    var Environments = [];
+    var pos = -1;
+    var SPECIAL = /[\\\{\}\$\&\#\^\_\~\%]/g;
+    var CS = /[^a-zA-Z]/g;
+    var idx = 0;
+    var lineNumber = 0;
+    var linePosition = [];
+    linePosition[0] = 0;
+
+    var TokenError = function (token, message) {
+	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+	var start_col = start - linePosition[line];
+	var end_col = end - linePosition[line] + 1;
+	errors.push({row: line,
+		     column: start_col,
+		     start_row:line,
+		     start_col: start_col,
+		     end_row:line,
+		     end_col: end_col,
+		     type:"error",
+		     text:message,
+		     suppressIfEditing:true});
+    };
+
+    var TokenErrorFromTo = function (fromToken, toToken, message) {
+	var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3];
+	var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3];
+	if (!toEnd) { toEnd = toStart + 1;};
+	var start_col = fromStart - linePosition[fromLine];
+	var end_col = toEnd - linePosition[toLine] + 1;
+
+	errors.push({row: line,
+		     column: start_col,
+		     start_row: fromLine,
+		     start_col: start_col,
+		     end_row: toLine,
+		     end_col: end_col,
+		     type:"error",
+		     text:message,
+		     suppressIfEditing:true});
+    };
+
+
+    var EnvErrorFromTo = function (fromEnv, toEnv, message, options) {
+	if(!options) { options = {} ; };
+	var fromToken = fromEnv.token, toToken = toEnv.closeToken || toEnv.token;
+	var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3], fromSeq = fromToken[4];
+	if (!toToken) {toToken = fromToken;};
+	var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3], toSeq = toToken[4];
+	if (!toEnd) { toEnd = toStart + 1;};
+	var start_col = fromStart - linePosition[fromLine];
+	var end_col = toEnd - linePosition[toLine] + 1;
+	errors.push({row:toLine,
+		     column:end_col,
+		     start_row:fromLine,
+		     start_col: start_col,
+		     end_row:toLine,
+		     end_col: end_col,
+		     type:"error",
+		     text:message,
+		     suppressIfEditing:options.suppressIfEditing});
+    };
+
+    var EnvErrorTo = function (toEnv, message) {
+	var token = toEnv.closeToken || toEnv.token;
+	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+	if (!end) { end = start + 1; };
+	var end_col = end - linePosition[line] + 1;
+	var err = {row: line,
+		   column: end_col,
+		   start_row:0,
+		   start_col: 0,
+		   end_row: line,
+		   end_col: end_col,
+		   type:"error",
+		   text:message};
+	errors.push(err);
+    };
+
+    var EnvErrorFrom = function (env, message) {
+	var token = env.token;
+	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+	var start_col = start - linePosition[line];
+	var end_col = Infinity;
+	errors.push({row: line,
+		     column: start_col,
+		     start_row:line,
+		     start_col: start_col,
+		     end_row: lineNumber,
+		     end_col: end_col,
+		     type:"error",
+		     text:message});
+    };
+
+    var checkingDisabled = false;
+
+    while (true) {
+	var result = SPECIAL.exec(text);
+	if (result == null) {
+	    if (idx < text.length) {
+		Tokens.push([lineNumber, "Text", idx, text.length]);
+	    }
+	    break;
+	}
+	if (result && result.index <= pos) {
+	    break;
+	};
+	pos = result.index;
+	var newIdx = SPECIAL.lastIndex;
+	if (pos > idx) {
+	    Tokens.push([lineNumber, "Text", idx, pos]);
+	}
+	for (var i = idx; i < pos; i++) {
+	    if (text[i] === "\n") {
+		lineNumber++;
+		linePosition[lineNumber] = i+1;
+	    }
+	}
+	idx = newIdx;
+	var code = result[0];
+	if (code === "%") {
+	    var newLinePos = text.indexOf("\n", idx);
+	    if (newLinePos === -1) {
+		newLinePos = text.length;
+	    };
+	    var commentString = text.substring(idx, newLinePos);
+	    if (commentString.indexOf("%novalidate") === 0) {
+		return [];
+	    } else if(!checkingDisabled && commentString.indexOf("%begin novalidate") === 0) {
+		checkingDisabled = true;
+	    } else if (checkingDisabled && commentString.indexOf("%end novalidate") === 0) {
+		checkingDisabled = false;
+	    };
+	    idx = SPECIAL.lastIndex = newLinePos + 1;
+	    Comments.push([lineNumber, idx, newLinePos]);
+	    lineNumber++;
+	    linePosition[lineNumber] = idx;
+	} else if (checkingDisabled) {
+	    continue;
+	} else if (code === '\\') {
+	    CS.lastIndex = idx;
+	    var controlSequence = CS.exec(text);
+	    var nextSpecialPos = controlSequence === null ? idx : controlSequence.index;
+	    if (nextSpecialPos === idx) {
+		Tokens.push([lineNumber, code, pos, idx + 1, text[idx]]);
+		idx = SPECIAL.lastIndex = idx + 1;
+		char = text[nextSpecialPos];
+		if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
+	    } else {
+		Tokens.push([lineNumber, code, pos, nextSpecialPos, text.slice(idx, nextSpecialPos)]);
+		var char;
+		while ((char = text[nextSpecialPos]) === ' ' || char === '\t' || char  === '\r' || char === '\n') {
+		    nextSpecialPos++;
+		    if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
 		}
+		idx = SPECIAL.lastIndex = nextSpecialPos;
+	    }
+	} else if (code === "{") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "}") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "$") {
+	    if (text[idx] === "$") {
+		idx = SPECIAL.lastIndex = idx + 1;
+		Tokens.push([lineNumber, "$$", pos]);
+	    } else {
+		Tokens.push([lineNumber, code, pos]);
+	    }
+	} else if (code === "&") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "#") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "^") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "_") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else if (code === "~") {
+	    Tokens.push([lineNumber, code, pos]);
+	} else {
+	    throw "unrecognised character " + code;
+	}
+    }
+
+    var read1arg = function (k) {
+	var open = Tokens[k+1];
+	var env = Tokens[k+2];
+	var close = Tokens[k+3];
+	var envName;
+
+	if(open && open[1] === "\\") {
+	    envName = open[4];
+	    return k + 1;
+	} else if(open && open[1] === "{" && env && env[1] === "\\" && close && close[1] === "}") {
+	    envName = env[4];
+	    return k + 3;
+	} else {
+	    return null;
+	}
+    };
+
+    var read1name = function (k) {
+	var open = Tokens[k+1];
+	var env = Tokens[k+2];
+	var close = Tokens[k+3];
+
+	if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
+	    var envName = text.substring(env[2], env[3]);
+	    return k + 3;
+	} else {
+	    return null;
+	}
+    };
+
+
+
+    var readOptionalParams = function(k) {
+	var params = Tokens[k+1];
+
+	if(params && params[1] === "Text") {
+	    var paramNum = text.substring(params[2], params[3]);
+	    if (paramNum.match(/^\[\d+\]$/)) {
+		return k + 1;
 	    };
 	};
-	if (error) {
-	    errors.push(error);
-	};
+	return null;
     };
-    if (state.length > 0) {
-	for (i = 0; i < state.length; i++) {
-	    var unclosed = state[i];
-	    error = {"type":"info", "text": "begin without end " + unclosed.type, "start_row": unclosed.row, "end_row": lines.length-1};
-	    errors.push(error);
-	};
+
+    var readDefinition = function(k) {
+	k = k + 1;
+	var count = 0;
+	var nextToken = Tokens[k];
+	while (nextToken && nextToken[1] === "Text") {
+	    var start = nextToken[2], end = nextToken[3];
+	    for (i = start; i < end; i++) {
+		var char = text[i];
+		if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { continue; }
+		return null;
+	    }
+	    k++;
+	    nextToken = Tokens[k];
+	}
+	if (nextToken && nextToken[1] === "{") {
+	    count++;
+	    while (count>0) {
+		k++;
+		nextToken = Tokens[k];
+		if(!nextToken) { break; };
+		if (nextToken[1] === "}") { count--; }
+		if (nextToken[1] === "{") { count++; }
+	    }
+	    return k;
+	}
+	return null;
     };
-    if (errors.length) {
-	return [errors[0]];
-    }; 
+
+    for (var _j = 0, _len = Tokens.length; _j < _len; _j++) {
+	var token = Tokens[_j];
+	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+	if (type === "\\") {
+	    if (seq === "begin" || seq === "end") {
+		var open = Tokens[_j+1];
+		var env = Tokens[_j+2];
+		var close = Tokens[_j+3];
+		if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
+		    var envName = text.substring(env[2], env[3]);
+		    Environments.push({command: seq, name: envName, token: token, closeToken: close});
+		    _j = _j + 3; // advance past these tokens
+		} else {
+		    var endToken = null;
+		    if (open && open[1] === "{") {
+			endToken = open;
+
+			if (env && env[1] === "Text") {
+			    endToken = env.slice();
+			    start = endToken[2]; end = endToken[3];
+			    for (i = start; i < end; i++) {
+				char = text[i];
+				if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { break; }
+			    }
+			    endToken[3] = i;
+			};
+		    };
+
+		    if (endToken) {
+			TokenErrorFromTo(token, endToken, "invalid environment command" + text.substring(token[2], endToken[3] || endToken[2]));
+		    } else {
+			TokenError(token, "invalid environment command");
+		    };
+		}
+	    } else if (seq === "newcommand" || seq === "renewcommand" || seq === "def" || seq === "DeclareRobustCommand") {
+
+		var newPos = read1arg(_j);
+		if (newPos === null) { continue; } else {_j = newPos;};
+
+		newPos = readOptionalParams(_j);
+		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
+
+		newPos = readDefinition(_j);
+		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
+
+	    } else if (seq === "newenvironment") {
+
+		newPos = read1name(_j);
+		if (newPos === null) { continue; } else {_j = newPos;};
+
+		newPos = readOptionalParams(_j);
+		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
+
+		newPos = readDefinition(_j);
+		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
+
+		newPos = readDefinition(_j);
+		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
+	    }
+	} else if (type === "{") {
+	    Environments.push({command:"{", token:token});
+	} else if (type === "}") {
+	    Environments.push({command:"}", token:token});
+	};
+
+	if ((start != null) && (end != null) && (seq != null)) {
+	} else if ((start != null) && (end != null)) {
+	} else if (start != null) {
+	} else {
+	}
+    }
+    var state = [];
+    for (i = 0; i < Environments.length; i++) {
+	var thisEnv = Environments[i];
+	if(thisEnv.command === "begin" || thisEnv.command === "{") {
+	    state.push(thisEnv);
+	} else if (thisEnv.command === "end" || thisEnv.command === "}") {
+	    var lastEnv = state.pop();
+	    if (!lastEnv) {
+		if (thisEnv.command === "}") {
+		    EnvErrorTo(thisEnv, "unexpected end group }");
+		} else if (thisEnv.command === "end") {
+		    EnvErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
+		}
+	    } else if (lastEnv.command === "{" && thisEnv.command === "}") {
+		continue; // closed group correctly
+	    } else if (lastEnv.name === thisEnv.name) {
+		continue; // closed environment correctly
+	    } else if (thisEnv.command === "}") {
+		EnvErrorFromTo(lastEnv, thisEnv, "unexpected end group } after \\begin{" + lastEnv.name +"}");
+		state.push(lastEnv);
+	    } else if (lastEnv.command === "{" && thisEnv.command === "end") {
+		EnvErrorFromTo(lastEnv, thisEnv, "unexpected \\end{" + thisEnv.name + "} inside group {", {suppressIfEditing:true});
+		i--;
+	    } else if (lastEnv.command === "begin" && thisEnv.command === "end") {
+		EnvErrorFromTo(lastEnv, thisEnv, "unexpected \\end{" + thisEnv.name + "} after \\begin{" + lastEnv.name + "}");
+		for (var j = i + 1; j < Environments.length; j++) {
+		    var futureEnv = Environments[j];
+		    if (futureEnv.command === "end" && futureEnv.name === lastEnv.name) {
+			state.push(lastEnv);
+			continue;
+		    }
+		}
+		lastEnv = state.pop();
+		if(lastEnv) {
+		    if (thisEnv.name === lastEnv.name) {
+			continue;
+		    } else {
+			state.push(lastEnv);
+		    }
+		}
+
+	    }
+	}
+    }
+    while (state.length > 0) {
+	thisEnv = state.pop();
+	if (thisEnv.command === "{") {
+	    EnvErrorFrom(thisEnv, "unclosed group {");
+	} else if (thisEnv.command === "begin") {
+	    EnvErrorFrom(thisEnv, "unclosed environment \\begin{" + thisEnv.name + "}");
+	};
+    }
     return errors;
 };
 
-    
 (function() {
+    var disabled = false;
 
     this.onUpdate = function() {
-        var value = this.doc.getValue();
-        var errors = [];
+	if (disabled) { return ; };
 
+	var value = this.doc.getValue();
+	var errors = [];
 	try {
-            if (value)
-                errors = Parse(value);
-        } catch (e) {
-	    console.log("latex worker error",e);
-        }
-        this.sender.emit("lint", errors);
+	    if (value)
+		errors = Parse(value);
+	} catch (e) {
+	    disabled = true;
+	    errors = [];
+	}
+	this.sender.emit("lint", errors);
     };
 
 }).call(LatexWorker.prototype);
