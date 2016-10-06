@@ -156,7 +156,7 @@ define -> [
 		regexToMatch: /LaTeX Error: There's no line here to end/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_There%27s_no_line_here_to_end"
 		humanReadableHint: """
-			You have used a \\\ or \\newline command where LaTeX was not expecting one. Make sure that you only use line breaks after blocks of text, and be careful using linebreaks inside lists and other environments.
+			You have used a \\\\ or \\newline command where LaTeX was not expecting one. Make sure that you only use line breaks after blocks of text, and be careful using linebreaks inside lists and other environments.
 		"""
 	,
 		regexToMatch: /LaTeX Error: \\verb ended by end of line/
@@ -168,7 +168,7 @@ define -> [
 		regexToMatch: /Illegal unit of measure (pt inserted)/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors%2FIllegal%20unit%20of%20measure%20(pt%20inserted)"
 		humanReadableHint: """
-			You have written a length, but have not specified the appropriate units (pt, mm, cm etc.). If you have not written a length, check that you have not witten a linebreak \\\ followed by square brackets [\u2026] anywhere.
+			You have written a length, but have not specified the appropriate units (pt, mm, cm etc.). If you have not written a length, check that you have not witten a linebreak \\\\ followed by square brackets [\u2026] anywhere.
 		"""
 	,
 		regexToMatch: /Extra \\right/
