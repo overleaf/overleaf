@@ -1,8 +1,9 @@
 define [
+	"moment"
 	"ide/track-changes/controllers/TrackChangesListController"
 	"ide/track-changes/controllers/TrackChangesDiffController"
 	"ide/track-changes/directives/infiniteScroll"
-], () ->
+], (moment) ->
 	class TrackChangesManager
 		constructor: (@ide, @$scope) ->
 			@reset()

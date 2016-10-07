@@ -1,6 +1,6 @@
 define [
 	"base"
-	"libs/moment-2.9.0"
+	"moment"
 ], (App, moment) ->
 	moment.locale "en", calendar:
 		lastDay : '[Yesterday]'
