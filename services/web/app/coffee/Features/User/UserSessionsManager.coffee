@@ -56,29 +56,33 @@ module.exports = UserSessionsManager =
 				UserSessionsManager._checkSessions(user, () ->)
 				callback()
 
-	getAllUserSessions: (user_id, callback=(err, sessionKeys)->) ->
-		sessionSetKey = UserSessionsManager._sessionSetKey({_id: user_id})
+	getAllUserSessions: (user, exclude, callback=(err, sessionKeys)->) ->
+		exclude = _.map(exclude, UserSessionsManager._sessionKey)
+		sessionSetKey = UserSessionsManager._sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err?
-				logger.err {user_id}, "error getting all session keys for user from redis"
+				logger.err user_id: user._id, "error getting all session keys for user from redis"
 				return callback(err)
+			sessionKeys = _.filter sessionKeys, (k) -> !(_.contains(exclude, k))
+			if sessionKeys.length == 0
+				logger.log {user_id: user._id}, "no other sessions found, returning"
+				return callback(null, [])
 			rclient.mget sessionKeys, (err, sessions) ->
 				if err?
-					logger.err {user_id}, "error getting all sessions for user from redis"
+					logger.err {user_id: user._id}, "error getting all sessions for user from redis"
 					return callback(err)
 
-				hashedSessionKeys = sessionKeys.map (key) ->
-					crypto.createHash('md5').update(key).digest('hex')
-				expiries = sessions.map (s) ->
-					if s == null
-						return null
-					s = JSON.parse(s)
-					s?.user?.session_created or s?.passport?.user?.session_created
-				pairs = _.zip(hashedSessionKeys, expiries)
 				result = []
-				for pair in pairs
-					result.push {id: pair[0], expires: pair[1]}
-				console.log ">> result:", result
+				for session in sessions
+					if session is null
+						continue
+					session = JSON.parse(session)
+					session_user = session?.user or session?.passport?.user
+					result.push {
+						ip_address: session_user.ip_address,
+						session_created: session_user.session_created
+					}
+
 				return callback(null, result)
 
 	revokeAllUserSessions: (user, retain, callback=(err)->) ->

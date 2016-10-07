@@ -66,9 +66,12 @@ module.exports =
 				accountSettingsTabActive: true
 
 	sessionsPage: (req, res, next) ->
-		user_id = AuthenticationController.getLoggedInUserId(req)
-		logger.log user: user_id, "loading settings page"
-		UserSessionsManager.getAllUserSessions user_id, (err, sessions) ->
+		user = AuthenticationController.getSessionUser(req)
+		logger.log user_id: user._id, "loading sessions page"
+		UserSessionsManager.getAllUserSessions user, [req.sessionID], (err, sessions) ->
+			if err?
+				logger.err {user_id: user._id}, "error getting all user sessions"
+				return next(err)
 			res.render 'user/sessions',
 				title: "sessions"
 				sessions: sessions

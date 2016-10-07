@@ -20,6 +20,8 @@ describe "UserPagesController", ->
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith(2, null, @user)
+		@UserSessionsManager =
+			getAllUserSessions: sinon.stub()
 		@dropboxStatus = {}
 		@DropboxHandler =
 			getUserRegistrationStatus : sinon.stub().callsArgWith(1, null, @dropboxStatus)
@@ -27,11 +29,15 @@ describe "UserPagesController", ->
 			notFound: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user._id)
+			getSessionUser: sinon.stub().returns(@user)
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
-			"logger-sharelatex": log:->
+			"logger-sharelatex":
+				log:->
+				err:->
 			"./UserLocator": @UserLocator
 			"./UserGetter": @UserGetter
+			"./UserSessionsManager": @UserSessionsManager
 			"../Errors/ErrorController": @ErrorController
 			'../Dropbox/DropboxHandler': @DropboxHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
@@ -100,6 +106,34 @@ describe "UserPagesController", ->
 				done()
 			@UserPagesController.loginPage @req, @res
 
+	describe 'sessionsPage', ->
+
+		beforeEach ->
+			@UserSessionsManager.getAllUserSessions.callsArgWith(2, null, [])
+
+		it 'should render user/sessions', (done) ->
+			@res.render = (page)->
+				page.should.equal "user/sessions"
+				done()
+			@UserPagesController.sessionsPage @req, @res
+
+		it 'should have called getAllUserSessions', (done) ->
+			@res.render = (page) =>
+				@UserSessionsManager.getAllUserSessions.callCount.should.equal 1
+				done()
+			@UserPagesController.sessionsPage @req, @res
+
+		describe 'when getAllUserSessions produces an error', ->
+
+			beforeEach ->
+				@UserSessionsManager.getAllUserSessions.callsArgWith(2, new Error('woops'))
+
+			it 'should call next with an error', (done) ->
+				@next = (err) =>
+					assert(err != null)
+					assert(err instanceof Error)
+					done()
+				@UserPagesController.sessionsPage @req, @res, @next
 
 	describe "settingsPage", ->
 

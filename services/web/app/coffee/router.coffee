@@ -88,7 +88,8 @@ module.exports = class Router
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
-		webRouter.get '/user/sessions', AuthenticationController.requireLogin(), UserPagesController.sessionsPage
+		webRouter.get  '/user/sessions', AuthenticationController.requireLogin(), UserPagesController.sessionsPage
+		webRouter.post '/user/sessions/clear', AuthenticationController.requireLogin(), UserController.clearSessions
 
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		webRouter.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser

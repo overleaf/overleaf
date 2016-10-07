@@ -81,6 +81,7 @@ describe "UserController", ->
 
 		@res =
 			send: sinon.stub()
+			sendStatus: sinon.stub()
 			json: sinon.stub()
 		@next = sinon.stub()
 	describe "deleteUser", ->
@@ -223,6 +224,29 @@ describe "UserController", ->
 					setNewPasswordUrl: @url
 				})
 				.should.equal true
+
+	describe 'clearSessions', ->
+
+		it 'should call revokeAllUserSessions', (done) ->
+			@UserController.clearSessions @req, @res
+			@UserSessionsManager.revokeAllUserSessions.callCount.should.equal 1
+			done()
+
+		it 'send a 201 response', (done) ->
+			@res.sendStatus = (status) =>
+				status.should.equal 201
+				done()
+			@UserController.clearSessions @req, @res
+
+		describe 'when revokeAllUserSessions produces an error', ->
+
+			it 'should call next with an error', (done) ->
+				@UserSessionsManager.revokeAllUserSessions.callsArgWith(2, new Error('woops'))
+				next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.clearSessions @req, @res, next
 
 	describe "changePassword", ->
 
