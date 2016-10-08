@@ -6,6 +6,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
+import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;

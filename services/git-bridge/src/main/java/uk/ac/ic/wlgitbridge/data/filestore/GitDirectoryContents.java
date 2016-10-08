@@ -20,13 +20,38 @@ public class GitDirectoryContents {
     private final String commitMessage;
     private final Date when;
 
-    public GitDirectoryContents(List<RawFile> files, File rootGitDirectory, String projectName, Snapshot snapshot) {
+    public GitDirectoryContents(
+            List<RawFile> files,
+            File rootGitDirectory,
+            String projectName,
+            String userName,
+            String userEmail,
+            String commitMessage,
+            Date when
+    ) {
         this.files = files;
-        gitDirectory = new File(rootGitDirectory, projectName);
-        userName = snapshot.getUserName();
-        userEmail = snapshot.getUserEmail();
-        commitMessage = snapshot.getComment();
-        when = snapshot.getCreatedAt();
+        this.gitDirectory = new File(rootGitDirectory, projectName);
+        this.userName = userName;
+        this.userEmail = userEmail;
+        this.commitMessage = commitMessage;
+        this.when = when;
+    }
+
+    public GitDirectoryContents(
+            List<RawFile> files,
+            File rootGitDirectory,
+            String projectName,
+            Snapshot snapshot
+    ) {
+        this(
+                files,
+                rootGitDirectory,
+                projectName,
+                snapshot.getUserName(),
+                snapshot.getUserEmail(),
+                snapshot.getComment(),
+                snapshot.getCreatedAt()
+        );
     }
 
     public void write() throws IOException {

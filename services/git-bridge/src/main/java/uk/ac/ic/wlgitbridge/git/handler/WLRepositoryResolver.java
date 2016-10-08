@@ -8,7 +8,7 @@ import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
-import uk.ac.ic.wlgitbridge.bridge.GitProjectRepo;
+import uk.ac.ic.wlgitbridge.bridge.repo.GitProjectRepo;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;

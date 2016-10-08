@@ -32,7 +32,8 @@ public abstract class RawFile {
             return false;
         }
         RawFile that = (RawFile) obj;
-        return getPath().equals(that.getPath()) && Arrays.equals(getContents(), that.getContents());
+        return getPath().equals(that.getPath())
+                && Arrays.equals(getContents(), that.getContents());
     }
 
 }

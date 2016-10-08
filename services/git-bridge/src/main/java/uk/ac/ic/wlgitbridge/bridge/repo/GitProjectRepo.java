@@ -1,12 +1,12 @@
-package uk.ac.ic.wlgitbridge.bridge;
+package uk.ac.ic.wlgitbridge.bridge.repo;
 
 import com.google.common.base.Preconditions;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
@@ -80,8 +80,21 @@ public class GitProjectRepo implements ProjectRepo {
         }
     }
 
+    public void resetHard() throws IOException {
+        Git git = new Git(getJGitRepository());
+        try {
+            git.reset().setMode(ResetCommand.ResetType.HARD).call();
+        } catch (GitAPIException e) {
+            throw new IOException(e);
+        }
+    }
+
     public Repository getJGitRepository() {
         return repository.get();
+    }
+
+    public File getDirectory() {
+        return getJGitRepository().getWorkTree();
     }
 
     private void initRepositoryField(RepoStore repoStore) throws IOException {
@@ -103,10 +116,11 @@ public class GitProjectRepo implements ProjectRepo {
             GitDirectoryContents contents
     ) throws IOException, GitAPIException {
         Preconditions.checkState(repository.isPresent());
+        Repository repo = getJGitRepository();
         String name = getProjectName();
         Log.info("[{}] Writing commit", name);
         contents.write();
-        Git git = new Git(repository.get());
+        Git git = new Git(getJGitRepository());
         Log.info("[{}] Getting missing files", name);
         Set<String> missingFiles = git.status().call().getMissing();
         for (String missing : missingFiles) {
@@ -114,7 +128,10 @@ public class GitProjectRepo implements ProjectRepo {
             git.rm().setCached(true).addFilepattern(missing).call();
         }
         Log.info("[{}] Calling Git add", name);
-        git.add().addFilepattern(".").call();
+        git.add(
+        ).setWorkingTreeIterator(
+                new NoGitignoreIterator(repo)
+        ).addFilepattern(".").call();
         Log.info("[{}] Calling Git commit", name);
         git.commit(
         ).setAuthor(

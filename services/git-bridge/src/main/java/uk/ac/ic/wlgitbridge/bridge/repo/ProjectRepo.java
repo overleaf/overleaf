@@ -1,4 +1,4 @@
-package uk.ac.ic.wlgitbridge.bridge;
+package uk.ac.ic.wlgitbridge.bridge.repo;
 
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
