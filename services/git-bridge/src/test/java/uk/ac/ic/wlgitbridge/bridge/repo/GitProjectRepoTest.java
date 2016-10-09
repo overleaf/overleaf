@@ -41,6 +41,7 @@ public class GitProjectRepoTest {
     private File rootdir;
     FSGitRepoStore repoStore;
     GitProjectRepo repo;
+    GitProjectRepo badGitignore;
 
     @Before
     public void setup() throws IOException {
@@ -50,6 +51,8 @@ public class GitProjectRepoTest {
         repoStore = new FSGitRepoStore(rootdir.getAbsolutePath());
         repo = new GitProjectRepo("repo");
         repo.useExistingRepository(repoStore);
+        badGitignore = new GitProjectRepo("badgitignore");
+        badGitignore.useExistingRepository(repoStore);
     }
 
     private GitDirectoryContents makeDirContents(
@@ -119,6 +122,23 @@ public class GitProjectRepoTest {
                 )),
                 new HashSet<String>(Arrays.asList(repo.getDirectory().list()))
         );
+    }
+
+    @Test
+    public void badGitignoreShouldNotThrow() throws IOException {
+        GitDirectoryContents contents = makeDirContents(
+                ".gitignore",
+                "*.ignored\n",
+                "file1.ignored",
+                "",
+                "file1.txt",
+                "",
+                "file2.txt",
+                "",
+                "added.ignored",
+                ""
+        );
+        badGitignore.commitAndGetMissing(contents);
     }
 
 }
