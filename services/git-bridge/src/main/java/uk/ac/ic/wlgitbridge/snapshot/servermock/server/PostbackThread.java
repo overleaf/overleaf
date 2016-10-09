@@ -19,7 +19,10 @@ public class PostbackThread extends Thread {
 
     public PostbackThread(Reader reader, String postback) {
         if (postback != null) {
-            url = new Gson().fromJson(reader, JsonObject.class).get("postbackUrl").getAsString();
+            url = new Gson().fromJson(
+                    reader,
+                    JsonObject.class
+            ).get("postbackUrl").getAsString();
             this.postback = postback;
         }
     }
@@ -27,7 +30,9 @@ public class PostbackThread extends Thread {
     @Override
     public void run() {
         try {
-            new AsyncHttpClient().preparePost(url).setBody(postback).execute().get().getResponseBody();
+            new AsyncHttpClient().preparePost(
+                    url
+            ).setBody(postback).execute().get().getResponseBody();
         } catch (IOException e) {
             Log.warn(
                     "IOException on postback, url: " +

@@ -9,6 +9,7 @@ import org.eclipse.jgit.transport.ReceivePack;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
+import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
@@ -24,42 +25,80 @@ import java.util.Iterator;
 /**
  * Created by Winston on 03/11/14.
  */
+/**
+ * Created by {@link WLReceivePackFactory} to update the {@link Bridge} for a
+ * user's Git push request, or fail with an error. The hook is able to approve
+ * or reject a request.
+ */
 public class WriteLatexPutHook implements PreReceiveHook {
 
     private final Bridge bridge;
     private final String hostname;
     private final Credential oauth2;
 
-    public WriteLatexPutHook(Bridge bridge, String hostname, Credential oauth2) {
+    /**
+     * The constructor to use, which provides the hook with the {@link Bridge},
+     * the hostname (used to construct a URL to give to Overleaf to postback),
+     * and the oauth2 (used to authenticate with the Snapshot API).
+     * @param bridge the {@link Bridge}
+     * @param hostname the hostname used for postback from the Snapshot API
+     * @param oauth2 used to authenticate with the snapshot API, or null
+     */
+    public WriteLatexPutHook(
+            Bridge bridge,
+            String hostname,
+            Credential oauth2
+    ) {
         this.bridge = bridge;
         this.hostname = hostname;
         this.oauth2 = oauth2;
     }
 
     @Override
-    public void onPreReceive(ReceivePack receivePack, Collection<ReceiveCommand> receiveCommands) {
+    public void onPreReceive(
+            ReceivePack receivePack,
+            Collection<ReceiveCommand> receiveCommands
+    ) {
         for (ReceiveCommand receiveCommand : receiveCommands) {
             try {
-                handleReceiveCommand(oauth2, receivePack.getRepository(), receiveCommand);
+                handleReceiveCommand(
+                        oauth2,
+                        receivePack.getRepository(),
+                        receiveCommand
+                );
             } catch (IOException e) {
                 receivePack.sendError(e.getMessage());
-                receiveCommand.setResult(Result.REJECTED_OTHER_REASON, e.getMessage());
+                receiveCommand.setResult(
+                        Result.REJECTED_OTHER_REASON,
+                        e.getMessage()
+                );
             } catch (OutOfDateException e) {
                 receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
             } catch (SnapshotPostException e) {
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
                 Log.warn("Throwable on pre receive: ", t);
-                handleSnapshotPostException(receivePack, receiveCommand, new InternalErrorException());
+                handleSnapshotPostException(
+                        receivePack,
+                        receiveCommand,
+                        new InternalErrorException()
+                );
             }
         }
     }
 
-    private void handleSnapshotPostException(ReceivePack receivePack, ReceiveCommand receiveCommand, SnapshotPostException e) {
+    private void handleSnapshotPostException(
+            ReceivePack receivePack,
+            ReceiveCommand receiveCommand,
+            SnapshotPostException e
+    ) {
         String message = e.getMessage();
         receivePack.sendError(message);
         StringBuilder msg = new StringBuilder();
-        for (Iterator<String> it = e.getDescriptionLines().iterator(); it.hasNext();) {
+        for (
+                Iterator<String> it = e.getDescriptionLines().iterator();
+                it.hasNext();
+        ) {
             String line = it.next();
             msg.append("hint: ");
             msg.append(line);
@@ -72,10 +111,14 @@ public class WriteLatexPutHook implements PreReceiveHook {
         receiveCommand.setResult(Result.REJECTED_OTHER_REASON, message);
     }
 
-    private void handleReceiveCommand(Credential oauth2, Repository repository, ReceiveCommand receiveCommand) throws IOException, GitUserException {
+    private void handleReceiveCommand(
+            Credential oauth2,
+            Repository repository,
+            ReceiveCommand receiveCommand
+    ) throws IOException, GitUserException {
         checkBranch(receiveCommand);
         checkForcedPush(receiveCommand);
-        bridge.putDirectoryContentsToProjectWithName(
+        bridge.push(
                 oauth2,
                 repository.getWorkTree().getName(),
                 getPushedDirectoryContents(repository,
@@ -85,26 +128,41 @@ public class WriteLatexPutHook implements PreReceiveHook {
         );
     }
 
-    private void checkBranch(ReceiveCommand receiveCommand) throws WrongBranchException {
+    private void checkBranch(
+            ReceiveCommand receiveCommand
+    ) throws WrongBranchException {
         if (!receiveCommand.getRefName().equals("refs/heads/master")) {
             throw new WrongBranchException();
         }
     }
 
-    private void checkForcedPush(ReceiveCommand receiveCommand) throws ForcedPushException {
-        if (receiveCommand.getType() == ReceiveCommand.Type.UPDATE_NONFASTFORWARD) {
+    private void checkForcedPush(
+            ReceiveCommand receiveCommand
+    ) throws ForcedPushException {
+        if (
+                receiveCommand.getType()
+                        == ReceiveCommand.Type.UPDATE_NONFASTFORWARD
+        ) {
             throw new ForcedPushException();
         }
     }
 
-    private RawDirectory getPushedDirectoryContents(Repository repository, ReceiveCommand receiveCommand) throws IOException, GitUserException {
-        return new RepositoryObjectTreeWalker(repository,
-                                              receiveCommand.getNewId())
-               .getDirectoryContents();
+    private RawDirectory getPushedDirectoryContents(
+            Repository repository,
+            ReceiveCommand receiveCommand
+    ) throws IOException, GitUserException {
+        return new RepositoryObjectTreeWalker(
+                repository,
+                receiveCommand.getNewId()
+        ).getDirectoryContents();
     }
 
-    private RawDirectory getOldDirectoryContents(Repository repository) throws IOException, GitUserException {
-        return new RepositoryObjectTreeWalker(repository).getDirectoryContents();
+    private RawDirectory getOldDirectoryContents(
+            Repository repository
+    ) throws IOException, GitUserException {
+        return new RepositoryObjectTreeWalker(
+                repository
+        ).getDirectoryContents();
     }
 
 }

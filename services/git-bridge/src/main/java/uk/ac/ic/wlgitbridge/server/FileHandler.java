@@ -20,20 +20,23 @@ import java.util.regex.Pattern;
  * Requests must include the postback key.
  */
 public class FileHandler extends ResourceHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(FileHandler.class);
+    private static final Logger LOG
+            = LoggerFactory.getLogger(FileHandler.class);
 
-    private final Bridge writeLatexDataSource;
+    private final Bridge bridge;
     private final Pattern DOC_KEY_PATTERN = Pattern.compile("^/(\\w+)/.+$");
 
-    public FileHandler(Bridge writeLatexDataSource) {
-        this.writeLatexDataSource = writeLatexDataSource;
+    public FileHandler(Bridge bridge) {
+        this.bridge = bridge;
     }
 
     @Override
-    public void handle(String target,
-                       Request baseRequest,
-                       HttpServletRequest request,
-                       HttpServletResponse response) throws IOException, ServletException {
+    public void handle(
+            String target,
+            Request baseRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException, ServletException {
         if (!"GET".equals(baseRequest.getMethod())) return;
         LOG.info("GET <- {}", baseRequest.getRequestURI());
 
@@ -45,12 +48,17 @@ public class FileHandler extends ResourceHandler {
         if (apiKey == null) return;
 
         try {
-            writeLatexDataSource.checkPostbackKey(docKey, apiKey);
+            bridge.checkPostbackKey(docKey, apiKey);
         } catch (InvalidPostbackKeyException e) {
-            LOG.warn("INVALID POST BACK KEY: docKey={} apiKey={}", docKey, apiKey);
+            LOG.warn(
+                    "INVALID POST BACK KEY: docKey={} apiKey={}",
+                    docKey,
+                    apiKey
+            );
             return;
         }
 
         super.handle(target, baseRequest, request, response);
     }
+
 }

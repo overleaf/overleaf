@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,12 +20,15 @@ public class SnapshotData implements JSONSource {
     private List<SnapshotAttachment> atts;
 
     public SnapshotData(JsonElement json) {
-        srcs = new LinkedList<SnapshotFile>();
-        atts = new LinkedList<SnapshotAttachment>();
+        srcs = new ArrayList<>();
+        atts = new ArrayList<>();
         fromJSON(json);
     }
 
-    public SnapshotData(List<SnapshotFile> srcs, List<SnapshotAttachment> atts) {
+    public SnapshotData(
+            List<SnapshotFile> srcs,
+            List<SnapshotAttachment> atts
+    ) {
         this.srcs = srcs;
         this.atts = atts;
     }
@@ -47,8 +50,12 @@ public class SnapshotData implements JSONSource {
 
     @Override
     public void fromJSON(JsonElement json) {
-        populateSrcs(json.getAsJsonObject().get(JSON_KEY_SRCS).getAsJsonArray());
-        populateAtts(json.getAsJsonObject().get(JSON_KEY_ATTS).getAsJsonArray());
+        populateSrcs(
+                json.getAsJsonObject().get(JSON_KEY_SRCS).getAsJsonArray()
+        );
+        populateAtts(
+                json.getAsJsonObject().get(JSON_KEY_ATTS).getAsJsonArray()
+        );
     }
 
     private void populateSrcs(JsonArray jsonArray) {
@@ -70,4 +77,5 @@ public class SnapshotData implements JSONSource {
     public List<SnapshotAttachment> getAtts() {
         return atts;
     }
+
 }

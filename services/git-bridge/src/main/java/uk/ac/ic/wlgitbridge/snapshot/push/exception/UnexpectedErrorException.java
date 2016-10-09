@@ -13,7 +13,8 @@ import java.util.List;
 public class UnexpectedErrorException extends SevereSnapshotPostException {
 
     private static final String[] DESCRIPTION_LINES = {
-            "There was an internal error with the " + Util.getServiceName() + " server.",
+            "There was an internal error with the "
+                    + Util.getServiceName() + " server.",
             "Please contact " + Util.getServiceName() + "."
     };
 
@@ -32,8 +33,6 @@ public class UnexpectedErrorException extends SevereSnapshotPostException {
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
-
-    }
+    public void fromJSON(JsonElement json) {}
 
 }

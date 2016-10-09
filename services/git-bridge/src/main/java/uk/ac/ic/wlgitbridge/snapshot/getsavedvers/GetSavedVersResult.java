@@ -4,11 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
+import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +18,10 @@ public class GetSavedVersResult extends Result {
 
     private List<SnapshotInfo> savedVers;
 
-    public GetSavedVersResult(Request request, JsonElement json) throws FailedConnectionException {
+    public GetSavedVersResult(
+            Request request,
+            JsonElement json
+    ) throws FailedConnectionException {
         super(request, json);
     }
 
@@ -46,9 +49,14 @@ public class GetSavedVersResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
-        savedVers = new LinkedList<SnapshotInfo>();
+        savedVers = new ArrayList<>();
         for (JsonElement elem : json.getAsJsonArray()) {
-            savedVers.add(new Gson().fromJson(elem.getAsJsonObject(), SnapshotInfo.class));
+            savedVers.add(
+                    new Gson().fromJson(
+                            elem.getAsJsonObject(),
+                            SnapshotInfo.class
+                    )
+            );
         }
     }
 

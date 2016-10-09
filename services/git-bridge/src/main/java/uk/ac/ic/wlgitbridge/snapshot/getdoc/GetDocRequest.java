@@ -27,7 +27,9 @@ public class GetDocRequest extends SnapshotAPIRequest<GetDocResult> {
     }
 
     @Override
-    protected GetDocResult parseResponse(JsonElement json) throws FailedConnectionException {
+    protected GetDocResult parseResponse(
+            JsonElement json
+    ) throws FailedConnectionException {
         return new GetDocResult(this, json);
     }
 

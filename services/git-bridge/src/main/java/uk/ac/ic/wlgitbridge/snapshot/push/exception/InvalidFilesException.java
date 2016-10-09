@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.util.Util;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,16 +31,24 @@ public class InvalidFilesException extends SnapshotPostException {
 
     @Override
     public void fromJSON(JsonElement json) {
-        descriptionLines = new LinkedList<String>();
-        JsonArray errors = json.getAsJsonObject().get("errors").getAsJsonArray();
-        descriptionLines.add("You have " + errors.size() + " invalid files in your " + Util.getServiceName() + " project:");
+        descriptionLines = new ArrayList<>();
+        JsonArray errors =
+                json.getAsJsonObject().get("errors").getAsJsonArray();
+        descriptionLines.add(
+                "You have "
+                        + errors.size()
+                        + " invalid files in your "
+                        + Util.getServiceName()
+                        + " project:"
+        );
         for (JsonElement error : errors) {
             descriptionLines.add(describeError(error.getAsJsonObject()));
         }
     }
 
     private String describeError(JsonObject jsonObject) {
-        return jsonObject.get("file").getAsString() + " (" + describeFile(jsonObject) + ")";
+        return jsonObject.get("file").getAsString()
+                + " (" + describeFile(jsonObject) + ")";
     }
 
     private String describeFile(JsonObject file) {

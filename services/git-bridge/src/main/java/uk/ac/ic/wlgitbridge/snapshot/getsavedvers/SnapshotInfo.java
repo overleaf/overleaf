@@ -12,11 +12,28 @@ public class SnapshotInfo implements Comparable<SnapshotInfo> {
     private WLUser user;
     private String createdAt;
 
-    public SnapshotInfo(int versionID, String createdAt, String name, String email) {
-        this(versionID, "Update on " + Util.getServiceName() + ".", email, name, createdAt);
+    public SnapshotInfo(
+            int versionID,
+            String createdAt,
+            String name,
+            String email
+    ) {
+        this(
+                versionID,
+                "Update on " + Util.getServiceName() + ".",
+                email,
+                name,
+                createdAt
+        );
     }
 
-    public SnapshotInfo(int versionID, String comment, String email, String name, String createdAt) {
+    public SnapshotInfo(
+            int versionID,
+            String comment,
+            String email,
+            String name,
+            String createdAt
+    ) {
         versionId = versionID;
         this.comment = comment;
         user = new WLUser(name, email);
@@ -52,4 +69,5 @@ public class SnapshotInfo implements Comparable<SnapshotInfo> {
     public int compareTo(SnapshotInfo o) {
         return Integer.compare(versionId, o.versionId);
     }
+
 }

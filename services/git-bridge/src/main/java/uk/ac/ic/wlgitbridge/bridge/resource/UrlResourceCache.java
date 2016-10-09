@@ -27,7 +27,13 @@ public class UrlResourceCache implements ResourceCache {
     }
 
     @Override
-    public RawFile get(String projectName, String url, String newPath, Map<String, RawFile> fileTable, Map<String, byte[]> fetchedUrls) throws IOException {
+    public RawFile get(
+            String projectName,
+            String url,
+            String newPath,
+            Map<String, RawFile> fileTable,
+            Map<String, byte[]> fetchedUrls
+    ) throws IOException {
         String path = dbStore.getPathForURLInProject(projectName, url);
         byte[] contents;
         if (path == null) {
@@ -42,8 +48,11 @@ public class UrlResourceCache implements ResourceCache {
                 RawFile rawFile = fileTable.get(path);
                 if (rawFile == null) {
                     Log.warn(
-                            "File " + path + " was not in the current commit, or the git tree, yet path was not null. " +
-                                    "File url is: " + url
+                            "File " + path
+                                    + " was not in the current commit, "
+                                    + "or the git tree, yet path was not null. "
+                                    + "File url is: "
+                                    + url
                     );
                     contents = fetch(projectName, url, path);
                 } else {
@@ -54,25 +63,42 @@ public class UrlResourceCache implements ResourceCache {
         return new RepositoryFile(newPath, contents);
     }
 
-    private byte[] fetch(String projectName, final String url, String path) throws FailedConnectionException {
+    private byte[] fetch(
+            String projectName,
+            final String url,
+            String path
+    ) throws FailedConnectionException {
         byte[] contents;
         Log.info("GET -> " + url);
         try {
-            contents = Request.httpClient.prepareGet(url).execute(new AsyncCompletionHandler<byte[]>() {
+            contents = Request.httpClient.prepareGet(url).execute(
+                    new AsyncCompletionHandler<byte[]>() {
 
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
                 @Override
-                public STATE onBodyPartReceived(HttpResponseBodyPart bodyPart) throws Exception {
+                public STATE onBodyPartReceived(
+                        HttpResponseBodyPart bodyPart
+                ) throws Exception {
                     bytes.write(bodyPart.getBodyPartBytes());
                     return STATE.CONTINUE;
                 }
 
                 @Override
-                public byte[] onCompleted(Response response) throws Exception {
+                public byte[] onCompleted(
+                        Response response
+                ) throws Exception {
                     byte[] data = bytes.toByteArray();
                     bytes.close();
-                    Log.info(response.getStatusCode() + " " + response.getStatusText() + " (" + data.length + "B) -> " + url);
+                    Log.info(
+                            response.getStatusCode()
+                                    + " "
+                                    + response.getStatusText()
+                                    + " ("
+                                    + data.length
+                                    + "B) -> "
+                                    + url
+                    );
                     return data;
                 }
 

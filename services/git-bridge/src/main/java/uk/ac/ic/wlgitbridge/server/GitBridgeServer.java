@@ -14,7 +14,6 @@ import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
-import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -47,7 +46,7 @@ public class GitBridgeServer {
 
     public GitBridgeServer(
             Config config
-    ) throws ServletException, InvalidRootDirectoryPathException {
+    ) throws ServletException {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
@@ -107,7 +106,7 @@ public class GitBridgeServer {
 
     private void configureJettyServer(
             Config config
-    ) throws ServletException, InvalidRootDirectoryPathException {
+    ) throws ServletException {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
         handlers.addHandler(initGitHandler(config));
@@ -129,7 +128,7 @@ public class GitBridgeServer {
 
     private Handler initGitHandler(
             Config config
-    ) throws ServletException, InvalidRootDirectoryPathException {
+    ) throws ServletException {
         final ServletContextHandler servletContextHandler =
                 new ServletContextHandler(ServletContextHandler.SESSIONS);
         if (config.isUsingOauth2()) {
@@ -160,4 +159,5 @@ public class GitBridgeServer {
         );
         return resourceHandler;
     }
+
 }

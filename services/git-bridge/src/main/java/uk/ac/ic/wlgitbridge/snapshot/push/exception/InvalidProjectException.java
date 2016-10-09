@@ -30,7 +30,8 @@ public class InvalidProjectException extends SnapshotPostException {
     @Override
     public void fromJSON(JsonElement json) {
         descriptionLines = new LinkedList<String>();
-        JsonArray errors = json.getAsJsonObject().get("errors").getAsJsonArray();
+        JsonArray errors =
+                json.getAsJsonObject().get("errors").getAsJsonArray();
         for (JsonElement error : errors) {
             descriptionLines.add(error.getAsString());
         }

@@ -23,7 +23,9 @@ public class SnapshotPostbackRequestInvalidFiles extends SnapshotPostbackRequest
     public SnapshotPostbackRequestInvalidFiles(JsonArray errors) {
         this(new ArrayList<InvalidFileError>());
         for (JsonElement error : errors) {
-            this.errors.add(InvalidFileError.buildFromJsonError(error.getAsJsonObject()));
+            this.errors.add(InvalidFileError.buildFromJsonError(
+                    error.getAsJsonObject()
+            ));
         }
     }
 

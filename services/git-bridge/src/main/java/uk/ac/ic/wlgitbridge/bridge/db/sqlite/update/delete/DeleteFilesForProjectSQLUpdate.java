@@ -17,7 +17,10 @@ public class DeleteFilesForProjectSQLUpdate implements SQLUpdate {
     private final String projectName;
     private final String[] paths;
 
-    public DeleteFilesForProjectSQLUpdate(String projectName, String... paths) {
+    public DeleteFilesForProjectSQLUpdate(
+            String projectName,
+            String... paths
+    ) {
         this.projectName = projectName;
         this.paths = paths;
     }

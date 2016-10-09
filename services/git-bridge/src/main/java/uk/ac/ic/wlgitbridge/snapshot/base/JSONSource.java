@@ -7,6 +7,6 @@ import com.google.gson.JsonElement;
  */
 public interface JSONSource {
 
-    public abstract void fromJSON(JsonElement json);
+    void fromJSON(JsonElement json);
 
 }

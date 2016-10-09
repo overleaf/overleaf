@@ -21,8 +21,16 @@ public class FileUtil {
 
     public static boolean currentCommitsAreEqual(Path dir1, Path dir2) {
         try {
-            RevCommit commit1 = new Git(new FileRepositoryBuilder().setWorkTree(dir1.toFile().getAbsoluteFile()).build()).log().call().iterator().next();
-            RevCommit commit2 = new Git(new FileRepositoryBuilder().setWorkTree(dir2.toFile().getAbsoluteFile()).build()).log().call().iterator().next();
+            RevCommit commit1 = new Git(
+                    new FileRepositoryBuilder().setWorkTree(
+                            dir1.toFile().getAbsoluteFile()
+                    ).build()
+            ).log().call().iterator().next();
+            RevCommit commit2 = new Git(
+                    new FileRepositoryBuilder().setWorkTree(
+                            dir2.toFile().getAbsoluteFile()
+                    ).build()
+            ).log().call().iterator().next();
             return commit1.equals(commit2);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -34,22 +42,42 @@ public class FileUtil {
     }
 
     public static boolean gitDirectoriesAreEqual(Path dir1, Path dir2) {
-        Set<String> dir1Contents = getAllRecursivelyInDirectoryApartFrom(dir1, dir1.resolve(".git"));
-        Set<String> dir2Contents = getAllRecursivelyInDirectoryApartFrom(dir2, dir2.resolve(".git"));
+        Set<String> dir1Contents = getAllRecursivelyInDirectoryApartFrom(
+                dir1,
+                dir1.resolve(".git")
+        );
+        Set<String> dir2Contents = getAllRecursivelyInDirectoryApartFrom(
+                dir2,
+                dir2.resolve(".git")
+        );
         boolean filesEqual = dir1Contents.equals(dir2Contents);
         if (!filesEqual) {
-            System.out.println("Not equal: (" + dir1Contents + ", " + dir2Contents + ")");
+            System.out.println(
+                    "Not equal: ("
+                            + dir1Contents
+                            + ", "
+                            + dir2Contents
+                            + ")"
+            );
             System.out.println(dir1 + ": " + dir1Contents);
             System.out.println(dir2 + ": " + dir2Contents);
         }
         return filesEqual && directoryContentsEqual(dir1Contents, dir1, dir2);
     }
 
-    static boolean directoryContentsEqual(Set<String> dirContents, Path dir1, Path dir2) {
+    static boolean directoryContentsEqual(
+            Set<String> dirContents,
+            Path dir1,
+            Path dir2
+    ) {
         for (String file : dirContents) {
             Path path1 = dir1.resolve(file);
             Path path2 = dir2.resolve(file);
-            if (!path1.toFile().isDirectory() && !path2.toFile().isDirectory() && !fileContentsEqual(path1, path2)) {
+            if (
+                    !path1.toFile().isDirectory()
+                            && !path2.toFile().isDirectory()
+                            && !fileContentsEqual(path1, path2)
+            ) {
                 return false;
             }
         }
@@ -62,7 +90,9 @@ public class FileUtil {
             byte[] secondContents = Files.readAllBytes(second);
             boolean equals = Arrays.equals(firstContents, secondContents);
             if (!equals) {
-                System.out.println("Not equal: (" + first + ", " + second + ")");
+                System.out.println(
+                        "Not equal: (" + first + ", " + second + ")"
+                );
                 System.out.println(first + ": " + new String(firstContents));
                 System.out.println(second + ": " + new String(secondContents));
             }
@@ -72,22 +102,37 @@ public class FileUtil {
         }
     }
 
-    public static Set<String> getAllRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+    public static Set<String> getAllRecursivelyInDirectoryApartFrom(
+            Path dir,
+            Path excluded
+    ) {
         return getAllRecursivelyInDirectoryApartFrom(dir, excluded, true);
     }
 
-    public static Set<String> getOnlyFilesRecursivelyInDirectoryApartFrom(Path dir, Path excluded) {
+    public static Set<String> getOnlyFilesRecursivelyInDirectoryApartFrom(
+            Path dir,
+            Path excluded
+    ) {
         return getAllRecursivelyInDirectoryApartFrom(dir, excluded, false);
     }
 
-    private static Set<String> getAllRecursivelyInDirectoryApartFrom(Path dir, Path excluded, boolean directories) {
+    private static Set<String> getAllRecursivelyInDirectoryApartFrom(
+            Path dir,
+            Path excluded,
+            boolean directories
+    ) {
         if (!dir.toFile().isDirectory()) {
             throw new IllegalArgumentException("need a directory");
         }
         return getAllFilesRecursively(dir, dir, excluded, directories);
     }
 
-    static Set<String> getAllFilesRecursively(Path baseDir, Path dir, Path excluded, boolean directories) {
+    static Set<String> getAllFilesRecursively(
+            Path baseDir,
+            Path dir,
+            Path excluded,
+            boolean directories
+    ) {
         Set<String> files = new HashSet<String>();
         for (File file : dir.toFile().listFiles()) {
             if (!file.equals(excluded.toFile())) {
@@ -96,7 +141,12 @@ public class FileUtil {
                     files.add(baseDir.relativize(file.toPath()).toString());
                 }
                 if (isDirectory) {
-                    files.addAll(getAllFilesRecursively(baseDir, file.toPath(), excluded, directories));
+                    files.addAll(getAllFilesRecursively(
+                            baseDir,
+                            file.toPath(),
+                            excluded,
+                            directories
+                    ));
                 }
             }
         }

@@ -5,6 +5,6 @@ package uk.ac.ic.wlgitbridge.data;
  */
 public interface LockAllWaiter {
 
-    public void threadsRemaining(int threads);
+    void threadsRemaining(int threads);
 
 }

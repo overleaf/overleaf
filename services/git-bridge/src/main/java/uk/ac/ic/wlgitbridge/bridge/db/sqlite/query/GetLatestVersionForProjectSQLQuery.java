@@ -35,7 +35,9 @@ public class GetLatestVersionForProjectSQLQuery implements SQLQuery<Integer> {
     }
 
     @Override
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException {
+    public void addParametersToStatement(
+            PreparedStatement statement
+    ) throws SQLException {
         statement.setString(1, projectName);
     }
 }

@@ -17,7 +17,11 @@ public class PushRequest extends SnapshotAPIRequest<PushResult> {
     private final CandidateSnapshot candidateSnapshot;
     private final String postbackKey;
 
-    public PushRequest(Credential oauth2, CandidateSnapshot candidateSnapshot, String postbackKey) {
+    public PushRequest(
+            Credential oauth2,
+            CandidateSnapshot candidateSnapshot,
+            String postbackKey
+    ) {
         super(candidateSnapshot.getProjectName(), API_CALL, oauth2);
         this.candidateSnapshot = candidateSnapshot;
         this.postbackKey = postbackKey;
@@ -34,7 +38,9 @@ public class PushRequest extends SnapshotAPIRequest<PushResult> {
     }
 
     @Override
-    protected PushResult parseResponse(JsonElement json) throws FailedConnectionException {
+    protected PushResult parseResponse(
+            JsonElement json
+    ) throws FailedConnectionException {
         return new PushResult(this, json);
     }
 

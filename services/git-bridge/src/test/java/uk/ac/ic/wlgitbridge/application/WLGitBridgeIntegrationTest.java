@@ -323,11 +323,11 @@ public class WLGitBridgeIntegrationTest {
     public void canPushFilesSuccessfully() throws IOException, GitAPIException, InterruptedException {
         MockSnapshotServer server = new MockSnapshotServer(3866, getResource("/canPushFilesSuccessfully").toFile());
         server.start();
-        server.setState(states.get("canPushFilesSuccessfully").get("state"));
         GitBridgeApp wlgb = new GitBridgeApp(new String[] {
             makeConfigFile(33866, 3866)
         });
         wlgb.run();
+        server.setState(states.get("canPushFilesSuccessfully").get("state"));
         File dir = folder.newFolder();
         File testprojDir = cloneRepository("testproj", 33866, dir);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPushFilesSuccessfully/state/testproj"), testprojDir.toPath()));

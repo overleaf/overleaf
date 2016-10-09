@@ -13,9 +13,12 @@ import java.util.List;
 public class ForcedPushException extends SnapshotPostException {
 
     private static final String[] DESCRIPTION_LINES = {
-            "You can't git push --force to a " + Util.getServiceName() + " project.",
+            "You can't git push --force to a "
+                    + Util.getServiceName()
+                    + " project.",
             "Try to put your changes on top of the current head.",
-            "If everything else fails, delete and reclone your repository, make your changes, then push again."
+            "If everything else fails, delete and reclone your repository, "
+                    + "make your changes, then push again."
     };
 
     @Override
@@ -29,8 +32,6 @@ public class ForcedPushException extends SnapshotPostException {
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
-
-    }
+    public void fromJSON(JsonElement json) {}
 
 }

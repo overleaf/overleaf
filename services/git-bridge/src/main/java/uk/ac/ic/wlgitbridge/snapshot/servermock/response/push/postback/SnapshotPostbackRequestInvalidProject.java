@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * Created by Winston on 10/01/15.
  */
-public class SnapshotPostbackRequestInvalidProject extends SnapshotPostbackRequest {
+public class SnapshotPostbackRequestInvalidProject
+        extends SnapshotPostbackRequest {
 
     private final List<String> errors;
 

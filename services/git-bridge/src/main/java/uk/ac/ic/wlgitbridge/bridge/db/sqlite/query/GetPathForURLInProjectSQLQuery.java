@@ -12,7 +12,10 @@ import java.sql.SQLException;
 public class GetPathForURLInProjectSQLQuery implements SQLQuery<String> {
 
     private static final String GET_URL_INDEXES_FOR_PROJECT_NAME =
-            "SELECT `path` FROM `url_index_store` WHERE `project_name` = ? AND `url` = ?";
+            "SELECT `path` "
+                    + "FROM `url_index_store` "
+                    + "WHERE `project_name` = ? "
+                    + "AND `url` = ?";
 
     private final String projectName;
     private final String url;
@@ -37,7 +40,9 @@ public class GetPathForURLInProjectSQLQuery implements SQLQuery<String> {
     }
 
     @Override
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException {
+    public void addParametersToStatement(
+            PreparedStatement statement
+    ) throws SQLException {
         statement.setString(1, projectName);
         statement.setString(2, url);
     }

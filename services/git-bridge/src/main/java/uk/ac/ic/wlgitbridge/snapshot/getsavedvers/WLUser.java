@@ -20,7 +20,9 @@ public class WLUser {
             this.email = email;
         } else {
             this.name = "Anonymous";
-            this.email = "anonymous@" + Util.getServiceName().toLowerCase() + ".com";
+            this.email = "anonymous@"
+                    + Util.getServiceName().toLowerCase()
+                    + ".com";
         }
     }
 

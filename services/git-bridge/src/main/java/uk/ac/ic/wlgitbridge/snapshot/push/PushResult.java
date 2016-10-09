@@ -14,7 +14,10 @@ public class PushResult extends Result {
 
     private boolean success;
 
-    public PushResult(Request request, JsonElement json) throws FailedConnectionException {
+    public PushResult(
+            Request request,
+            JsonElement json
+    ) throws FailedConnectionException {
         super(request, json);
     }
 
