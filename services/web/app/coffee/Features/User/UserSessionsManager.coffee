@@ -85,10 +85,10 @@ module.exports = UserSessionsManager =
 				return callback(null, result)
 
 	revokeAllUserSessions: (user, retain, callback=(err)->) ->
-		if !retain
+		if !retain?
 			retain = []
 		retain = retain.map((i) -> UserSessionsManager._sessionKey(i))
-		if !user
+		if !user?
 			logger.log {}, "no user to revoke sessions for, returning"
 			return callback(null)
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
