@@ -55,11 +55,40 @@ module.exports = UserSessionsManager =
 				UserSessionsManager._checkSessions(user, () ->)
 				callback()
 
+	getAllUserSessions: (user, exclude, callback=(err, sessionKeys)->) ->
+		exclude = _.map(exclude, UserSessionsManager._sessionKey)
+		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		rclient.smembers sessionSetKey, (err, sessionKeys) ->
+			if err?
+				logger.err user_id: user._id, "error getting all session keys for user from redis"
+				return callback(err)
+			sessionKeys = _.filter sessionKeys, (k) -> !(_.contains(exclude, k))
+			if sessionKeys.length == 0
+				logger.log {user_id: user._id}, "no other sessions found, returning"
+				return callback(null, [])
+			rclient.mget sessionKeys, (err, sessions) ->
+				if err?
+					logger.err {user_id: user._id}, "error getting all sessions for user from redis"
+					return callback(err)
+
+				result = []
+				for session in sessions
+					if session is null
+						continue
+					session = JSON.parse(session)
+					session_user = session?.user or session?.passport?.user
+					result.push {
+						ip_address: session_user.ip_address,
+						session_created: session_user.session_created
+					}
+
+				return callback(null, result)
+
 	revokeAllUserSessions: (user, retain, callback=(err)->) ->
-		if !retain
+		if !retain?
 			retain = []
 		retain = retain.map((i) -> UserSessionsManager._sessionKey(i))
-		if !user
+		if !user?
 			logger.log {}, "no user to revoke sessions for, returning"
 			return callback(null)
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
