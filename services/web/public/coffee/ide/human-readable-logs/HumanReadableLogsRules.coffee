@@ -20,7 +20,7 @@ define -> [
 		regexToMatch: /Missing [{$] inserted./
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Missing_$_inserted"
 		humanReadableHint: """
-			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors/Missing_$_inserted \">here</a>.If you intended to use mathematics mode, then use $ \u2026 $ for 'inline math mode', $$ \u2026 $$ for 'display math mode' or alternatively \begin{math} \u2026 \end{math}.
+			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors/Missing_$_inserted \">here</a>.If you intended to use mathematics mode, then use $ \u2026 $ for 'inline math mode', $$ \u2026 $$ for 'display math mode' or alternatively \\begin{math} \u2026 \\end{math}.
 		"""
 	,
 		regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/
