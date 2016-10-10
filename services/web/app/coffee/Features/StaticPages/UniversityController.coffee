@@ -9,7 +9,7 @@ module.exports = UniversityController =
 
 	getPage: (req, res, next)->
 		url = req.url?.toLowerCase().replace(".html","")
-		return res.redirect("/i/#{url}")
+		return res.redirect("/i#{url}")
 
 	getIndexPage: (req, res)->
 		return res.redirect("/i/university")
