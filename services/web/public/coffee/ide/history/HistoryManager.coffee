@@ -1,8 +1,9 @@
 define [
+	"moment"
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/directives/infiniteScroll"
-], () ->
+], (moment) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()

@@ -34,6 +34,31 @@ describe "EmailBuilder", ->
 			@email.html.indexOf(@opts.owner.email).should.not.equal -1
 			@email.subject.indexOf(@opts.owner.email).should.not.equal -1
 
+		it 'should not have text component', ->
+			expect(@email.html?).to.equal true
+			expect(@email.text?).to.equal false
+
+		it "should not have undefined in it", ->
+			@email.html.indexOf("undefined").should.equal -1
+			@email.subject.indexOf("undefined").should.equal -1
+
+	describe "projectInvite", ->
+		beforeEach ->
+			@opts =
+				to:"bob@bob.com"
+				first_name:"bob"
+				owner:
+					email:"sally@hally.com"
+				inviteUrl: "http://example.com/invite"
+				project:
+					url:"http://www.project.com"
+					name:"standard project"
+			@email = @EmailBuilder.buildEmail("projectInvite", @opts)
+
+		it 'should have html and text properties', ->
+			expect(@email.html?).to.equal true
+			expect(@email.text?).to.equal true
+
 		it "should not have undefined in it", ->
 			@email.html.indexOf("undefined").should.equal -1
 			@email.subject.indexOf("undefined").should.equal -1

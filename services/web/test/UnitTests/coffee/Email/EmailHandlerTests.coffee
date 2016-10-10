@@ -10,9 +10,9 @@ describe "EmailHandler", ->
 
 	beforeEach ->
 
-		@settings = 
+		@settings =
 			email:{}
-		@EmailBuilder = 
+		@EmailBuilder =
 			buildEmail:sinon.stub()
 		@EmailSender =
 			sendEmail:sinon.stub()
@@ -74,3 +74,19 @@ describe "EmailHandler", ->
 			@EmailHandler.sendEmail "welcome", opts, =>
 				@EmailSender.sendEmail.called.should.equal true
 				done()
+
+		describe 'with plain-text email content', () ->
+
+			beforeEach ->
+				@text = "hello there"
+
+			it 'should pass along the text field', (done) ->
+				@EmailBuilder.buildEmail.returns({html: @html, text: @text})
+				@EmailSender.sendEmail.callsArgWith(1)
+				opts =
+					to: "bob@bob.com"
+				@EmailHandler.sendEmail "welcome", opts, =>
+					args = @EmailSender.sendEmail.args[0][0]
+					args.html.should.equal @html
+					args.text.should.equal @text
+					done()

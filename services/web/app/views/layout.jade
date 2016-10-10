@@ -126,7 +126,12 @@ html(itemscope, itemtype='http://schema.org/Product')
 				window.requirejs = {
 					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"paths" : {
-						"moment": "libs/moment-2.7.0"
+						"moment": "libs/#{lib('moment')}"
+					},
+					"config":{
+						"moment":{
+							"noGlobal": true
+						}
 					}
 				};
 			script(

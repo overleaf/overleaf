@@ -56,6 +56,8 @@ module.exports = UserController =
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			if req.body.pdfViewer?
 				user.ace.pdfViewer = req.body.pdfViewer
+			if req.body.syntaxValidation?
+				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email
@@ -105,6 +107,14 @@ module.exports = UserController =
 				email: user.email
 				setNewPasswordUrl: setNewPasswordUrl
 			}
+
+	clearSessions: (req, res, next = (error) ->) ->
+		metrics.inc "user.clear-sessions"
+		user = AuthenticationController.getSessionUser(req)
+		logger.log {user_id: user._id}, "clearing sessions for user"
+		UserSessionsManager.revokeAllUserSessions user, [req.sessionID], (err) ->
+			return next(err) if err?
+			res.sendStatus 201
 
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"

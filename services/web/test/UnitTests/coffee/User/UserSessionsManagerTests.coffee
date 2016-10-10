@@ -21,6 +21,7 @@ describe 'UserSessionsManager', ->
 			sadd:     sinon.stub()
 			srem:     sinon.stub()
 			smembers: sinon.stub()
+			mget:     sinon.stub()
 			expire:   sinon.stub()
 		@rclient.multi.returns(@rclient)
 		@rclient.get.returns(@rclient)
@@ -403,6 +404,97 @@ describe 'UserSessionsManager', ->
 				@call (err) =>
 					@rclient.expire.callCount.should.equal 0
 					done()
+
+	describe 'getAllUserSessions', ->
+
+		beforeEach ->
+			@sessionKeys = ['sess:one', 'sess:two', 'sess:three']
+			@sessions = [
+				'{"user": {"ip_address": "a", "session_created": "b"}}',
+				'{"passport": {"user": {"ip_address": "c", "session_created": "d"}}}'
+			]
+			@exclude = ['two']
+			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
+			@rclient.mget.callsArgWith(1, null, @sessions)
+			@call = (callback) =>
+				@UserSessionsManager.getAllUserSessions @user, @exclude, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err, sessions) =>
+				expect(err).to.equal null
+				done()
+
+		it 'should get sessions', (done) ->
+			@call (err, sessions) =>
+				expect(sessions).to.deep.equal [
+					{ ip_address: 'a', session_created: 'b' },
+					{ ip_address: 'c', session_created: 'd' }
+				]
+				done()
+
+		it 'should have called rclient.smembers', (done) ->
+			@call (err, sessions) =>
+				@rclient.smembers.callCount.should.equal 1
+				done()
+
+		it 'should have called rclient.mget', (done) ->
+			@call (err, sessions) =>
+				@rclient.mget.callCount.should.equal 1
+				done()
+
+		describe 'when there are no other sessions', ->
+
+			beforeEach ->
+				@sessionKeys = ['sess:two']
+				@rclient.smembers.callsArgWith(1, null, @sessionKeys)
+
+			it 'should not produce an error', (done) ->
+				@call (err, sessions) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should produce an empty list of sessions', (done) ->
+				@call (err, sessions) =>
+					expect(sessions).to.deep.equal []
+					done()
+
+			it 'should have called rclient.smembers', (done) ->
+				@call (err, sessions) =>
+					@rclient.smembers.callCount.should.equal 1
+					done()
+
+			it 'should not have called rclient.mget', (done) ->
+				@call (err, sessions) =>
+					@rclient.mget.callCount.should.equal 0
+					done()
+
+		describe 'when smembers produces an error', ->
+
+			beforeEach ->
+				@rclient.smembers.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, sessions) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not have called rclient.mget', (done) ->
+				@call (err, sessions) =>
+					@rclient.mget.callCount.should.equal 0
+					done()
+
+		describe 'when mget produces an error', ->
+
+			beforeEach ->
+				@rclient.mget.callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, sessions) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
 
 	describe '_checkSessions', ->
 

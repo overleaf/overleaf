@@ -28,6 +28,10 @@ define [
 			if pdfViewer != oldPdfViewer
 				settings.saveSettings({pdfViewer: pdfViewer})
 
+		$scope.$watch "settings.syntaxValidation", (syntaxValidation, oldSyntaxValidation) =>
+			if syntaxValidation != oldSyntaxValidation
+				settings.saveProjectSettings({syntaxValidation: syntaxValidation})
+
 		$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
 			return if @ignoreUpdates
 			if oldLanguage? and language != oldLanguage
