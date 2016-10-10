@@ -108,6 +108,14 @@ module.exports = UserController =
 				setNewPasswordUrl: setNewPasswordUrl
 			}
 
+	clearSessions: (req, res, next = (error) ->) ->
+		metrics.inc "user.clear-sessions"
+		user = AuthenticationController.getSessionUser(req)
+		logger.log {user_id: user._id}, "clearing sessions for user"
+		UserSessionsManager.revokeAllUserSessions user, [req.sessionID], (err) ->
+			return next(err) if err?
+			res.sendStatus 201
+
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"
 		oldPass = req.body.currentPassword
