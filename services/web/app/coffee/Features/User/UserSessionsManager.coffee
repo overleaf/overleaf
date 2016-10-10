@@ -3,7 +3,6 @@ redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
-crypto = require('crypto')
 
 rclient = redis.createClient(Settings.redis.web)
 
