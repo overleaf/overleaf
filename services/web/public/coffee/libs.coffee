@@ -1,5 +1,5 @@
 define [
-	"libs/moment-2.9.0"
+	"moment"
 	"libs/angular-autocomplete/angular-autocomplete"
 	"libs/ui-bootstrap"
 	"libs/ng-context-menu-0.1.4"

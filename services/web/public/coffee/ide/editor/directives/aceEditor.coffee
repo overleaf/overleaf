@@ -43,6 +43,7 @@ define [
 				annotations: "="
 				navigateHighlights: "=",
 				onCtrlEnter: "="
+				syntaxValidation: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -187,6 +188,11 @@ define [
 
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
+
+				scope.$watch "syntaxValidation", (value) ->
+					console.log "change syntaxValidation to ", value
+					session = editor.getSession()
+					session.setOption("useWorker", value);
 
 				editor.setOption("scrollPastEnd", true)
 

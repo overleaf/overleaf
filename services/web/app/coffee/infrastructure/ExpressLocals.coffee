@@ -10,10 +10,9 @@ _ = require("underscore")
 async = require("async")
 Modules = require "./Modules"
 Url = require "url"
-
+PackageVersions = require "./PackageVersions"
 fingerprints = {}
 Path = require 'path'
-
 
 jsPath =
 	if Settings.useMinifiedJs
@@ -21,6 +20,8 @@ jsPath =
 	else
 		"/js/"
 
+ace = PackageVersions.lib('ace')
+pdfjs = PackageVersions.lib('pdfjs')
 
 getFileContent = (filePath)->
 	filePath = Path.join __dirname, "../../../", "public#{filePath}"
@@ -38,10 +39,10 @@ pathList = [
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]
 	["#{jsPath}libs.js"]
-	["#{jsPath}ace/ace.js","#{jsPath}ace/mode-latex.js", "#{jsPath}ace/snippets/latex.js"]
-	["#{jsPath}libs/pdfjs-1.3.91p1/pdf.js"]
-	["#{jsPath}libs/pdfjs-1.3.91p1/pdf.worker.js"]
-	["#{jsPath}libs/pdfjs-1.3.91p1/compatibility.js"]
+	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js", "#{jsPath}#{ace}/snippets/latex.js"]
+	["#{jsPath}libs/#{pdfjs}/pdf.js"]
+	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
+	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
 	["/stylesheets/style.css"]
 ]
 
@@ -92,6 +93,7 @@ module.exports = (app, webRouter, apiRouter)->
 
 		res.locals.jsPath = jsPath
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
+		res.locals.lib = PackageVersions.lib
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)

@@ -19,6 +19,7 @@ ProjectUpdateHandler = require("./ProjectUpdateHandler")
 ProjectGetter = require("./ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
+PackageVersions = require("../../infrastructure/PackageVersions")
 
 module.exports = ProjectController =
 
@@ -262,6 +263,7 @@ module.exports = ProjectController =
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
+						syntaxValidation: user.ace.syntaxValidation
 					}
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
@@ -323,6 +325,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 		autoComplete: true
 		spellCheckLanguage: ""
 		pdfViewer: ""
+		syntaxValidation: true
 	subscription:
 		freeTrial:
 			allowed: true
@@ -331,7 +334,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 
 THEME_LIST = []
 do generateThemeList = () ->
-	files = fs.readdirSync __dirname + '/../../../../public/js/ace'
+	files = fs.readdirSync __dirname + '/../../../../public/js/' + PackageVersions.lib('ace')
 	for file in files
 		if file.slice(-2) == "js" and file.match(/^theme-/)
 			cleanName = file.slice(0,-3).slice(6)
