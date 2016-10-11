@@ -157,13 +157,11 @@ define [
 					isPaypal		: postData.subscriptionDetails.isPaypal
 				}
 
-				sixpack.convert "subscription-form"
 
 				$http.post("/user/subscription/create", postData)
 					.success (data, status, headers)->
-						sixpack.convert "in-editor-free-trial-plan", pricing.items.plan.code, (err)->
-							event_tracking.sendMB "subscription-submission-success"
-							window.location.href = "/user/subscription/thank-you"
+						event_tracking.sendMB "subscription-submission-success"
+						window.location.href = "/user/subscription/thank-you"
 					.error (data, status, headers)->
 						$scope.processing = false
 						$scope.genericError = "Something went wrong processing the request"
