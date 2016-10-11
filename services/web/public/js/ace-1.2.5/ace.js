@@ -34,6 +34,14 @@
  * @param payload a function to call with (require, exports, module) params
  */
 
+// WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
+// https://github.com/ajaxorg/ace/issues/3045
+var isChrome53PlusMatched = navigator.userAgent.match(/Chrome\/(.*?)(.|\s+|$)/);
+var isChrome53Plus = false;
+if (isChrome53PlusMatched) {
+  isChrome53Plus = isChrome53PlusMatched[1] >= 53;
+}
+
 (function() {
 
 var ACE_NAMESPACE = "ace";
@@ -2283,6 +2291,9 @@ var TextInput = function(parentNode, host) {
         if (e.type == "compositionend" && c.range) {
             host.selection.setRange(c.range);
         }
+        // WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
+        // https://github.com/ajaxorg/ace/issues/3045
+        if (isChrome53Plus) onInput();
     };
     
     
