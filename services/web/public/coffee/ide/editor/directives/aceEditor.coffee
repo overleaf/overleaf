@@ -190,7 +190,6 @@ define [
 					editor.setReadOnly !!value
 
 				scope.$watch "syntaxValidation", (value) ->
-					console.log "change syntaxValidation to ", value
 					session = editor.getSession()
 					session.setOption("useWorker", value);
 
