@@ -1,10 +1,9 @@
 extends ../layout
 
-block content
-	- locals.suppressDefaultJs = true
-	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
+block scripts
 	script(src=buildJsPath('libs/recurly.min.js', {fingerprint:false}))
 
+block content
 	.content.content-alt
 		.container
 			.row
