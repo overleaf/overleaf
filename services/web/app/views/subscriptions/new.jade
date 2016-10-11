@@ -1,6 +1,6 @@
 extends ../layout
-block scripts
 
+block scripts
 	script(src="https://js.recurly.com/v3/recurly.js")
 
 	script(type='text/javascript').
@@ -11,10 +11,6 @@ block scripts
 		window.couponCode = "#{couponCode}"
 
 block content
-	- locals.suppressDefaultJs = true
-	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
-
-
 	.content.content-alt
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
