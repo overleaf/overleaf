@@ -109,6 +109,19 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
 
+		script(type='text/javascript').
+			// minimal requirejs configuration (can be extended/overridden)
+			window.requirejs = {
+				"paths" : {
+					"moment": "libs/#{lib('moment')}"
+				},
+				"config":{
+					"moment":{
+						"noGlobal": true
+					}
+				}
+			};
+
 		block content
 		div(ng-controller="AbTestController")
 		- if(typeof(suppressFooter) == "undefined")
@@ -120,20 +133,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 			span(ng-controller="ScribtexPopupController")
 			include scribtex-modal
 
-
-		- if(typeof(suppressFooter) == "undefined")
+		- if(typeof(suppressDefaultJs) == "undefined")
 			script(type='text/javascript').
-				window.requirejs = {
-					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
-					"paths" : {
-						"moment": "libs/#{lib('moment')}"
-					},
-					"config":{
-						"moment":{
-							"noGlobal": true
-						}
-					}
-				};
+				// extend requirejs config
+				window.requirejs.urlArgs = "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}"
 			script(
 				data-main=buildJsPath('main.js', {fingerprint:false}),
 				baseurl=fullJsPath,
