@@ -235,7 +235,9 @@ module.exports = UpdatesManager =
 			# a new summarized update next timge, hence we monitor the previous update.
 			if previousUpdateWasBigDelete
 				shouldConcat = false
-			else if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+			else if earliestUpdate and earliestUpdate.meta.end_ts - update.meta.start_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				# We're going backwards in time through the updates, so only combine if this update starts less than 5 minutes before
+				# the end of current summarized block, so no block spans more than 5 minutes.
 				shouldConcat = true
 
 			isBigDelete = false
