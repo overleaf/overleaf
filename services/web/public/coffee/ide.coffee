@@ -64,6 +64,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			reviewPanelOpen: false
 		}
 		$scope.user = window.user
 		$scope.settings = window.userSettings
@@ -71,6 +72,9 @@ define [
 
 		$scope.chat = {}
 
+		ide.toggleReviewPanel = () ->
+			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+			$scope.$digest()
 
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
