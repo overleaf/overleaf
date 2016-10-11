@@ -1,7 +1,7 @@
 extends ../layout
 
 block content
-	- locals.supressDefaultJs = true
+	- locals.suppressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
 	script(src=buildJsPath('libs/recurly.min.js', {fingerprint:false}))
 

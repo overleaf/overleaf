@@ -11,7 +11,7 @@ block scripts
 		window.couponCode = "#{couponCode}"
 
 block content
-	- locals.supressDefaultJs = true
+	- locals.suppressDefaultJs = true
 	script(data-main=jsPath+'main.js', src=jsPath+'libs/require.js', baseurl=jsPath)
 
 

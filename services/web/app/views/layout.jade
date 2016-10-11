@@ -133,8 +133,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			span(ng-controller="ScribtexPopupController")
 			include scribtex-modal
 
-
-		- if(typeof(suppressFooter) == "undefined")
+		- if(typeof(suppressDefaultJs) == "undefined")
 			script(type='text/javascript').
 				// extend requirejs config
 				window.requirejs.urlArgs = "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}"
