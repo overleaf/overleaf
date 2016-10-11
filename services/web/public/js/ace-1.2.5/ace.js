@@ -35,6 +35,7 @@
  */
 
 (function() {
+
 var ACE_NAMESPACE = "ace";
 
 var global = (function() { return this; })();
@@ -1918,11 +1919,6 @@ var lang = require("../lib/lang");
 var BROKEN_SETDATA = useragent.isChrome < 18;
 var USE_IE_MIME_TYPE =  useragent.isIE;
 
-// WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
-// https://github.com/ajaxorg/ace/issues/3045
-var chromeVersion = navigator.userAgent.match(/Chrome\/(\d*)/)[1];
-var isChrome53Plus = (chromeVersion >= 53);
-
 var TextInput = function(parentNode, host) {
     var text = dom.createElement("textarea");
     text.className = "ace_text-input";
@@ -2289,7 +2285,7 @@ var TextInput = function(parentNode, host) {
         }
         // WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
         // https://github.com/ajaxorg/ace/issues/3045
-        if (isChrome53Plus) onInput();
+        if (useragent.isChrome >= 53) onInput();
     };
     
     
