@@ -3,7 +3,6 @@ extends ../layout
 block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
-	- var suppressDefaultJs = true
 	- var suppressSystemMessages = true
 
 block content
@@ -66,7 +65,7 @@ block content
 					.ui-layout-center
 						include ./editor/editor
 						include ./editor/binary-file
-						include ./editor/track-changes
+						include ./editor/history
 						include ./editor/publish-template
 
 			.ui-layout-east
@@ -86,8 +85,8 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(src='/socket.io/socket.io.js')
-
+block requirejs
+	script(type="text/javascript" src='/socket.io/socket.io.js')
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
@@ -126,8 +125,6 @@ block content
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 
-	- locals.suppressDefaultJs = true
-
 	- var pdfPath = "libs/" + lib('pdfjs') + "/pdf.worker.js"
 	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
 	- var pdfJsWorkerPath = buildJsPath(pdfPath, {cdn:false,qs:{fingerprint:fingerprintedPath}}) // don't use worker for cdn
@@ -144,5 +141,4 @@ block content
 		src=buildJsPath('libs/require.js')
 	)
 
-		
-
+	
