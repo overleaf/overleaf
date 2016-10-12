@@ -70,13 +70,13 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 				ng-repeat="entity in rootFolder.children | orderBy:[orderByFoldersFirst, 'name']"
 			)
 
-			li(ng-show="deletedDocs.length > 0 && ui.view == 'track-changes'")
+			li(ng-show="deletedDocs.length > 0 && ui.view == 'history'")
 				h3 #{translate("deleted_files")}
 			li(
 				ng-class="{ 'selected': entity.selected }",
 				ng-repeat="entity in deletedDocs | orderBy:'name'",
 				ng-controller="FileTreeEntityController",
-				ng-show="ui.view == 'track-changes'"
+				ng-show="ui.view == 'history'"
 			)
 				.entity
 					.entity-name(

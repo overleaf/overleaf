@@ -1,5 +1,5 @@
 @import "./editor/file-tree.less";
-@import "./editor/track-changes.less";
+@import "./editor/history.less";
 @import "./editor/toolbar.less";
 @import "./editor/left-menu.less";
 @import "./editor/pdf.less";
@@ -145,6 +145,17 @@
 		background-image: url(/img/spellcheck-underline.png);
 		background-repeat: repeat-x;
 		background-position: bottom left;
+	}
+	.track-changes-added-marker {
+		border-radius: 0;
+		position: absolute;
+		background-color: hsl(100, 70%, 70%);
+	}
+	.track-changes-deleted-marker {
+		border-radius: 0;
+		position: absolute;
+		border-left: 2px dotted red;
+		margin-left: -1px;
 	}
 	.remote-cursor {
 		position: absolute;

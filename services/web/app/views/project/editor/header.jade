@@ -102,8 +102,8 @@ div(ng-if="!shouldABTestHeaderLabels")
 				i.fa.fa-fw.fa-group
 			a.btn.btn-full-height(
 				href,
-				ng-click="toggleTrackChanges()",
-				ng-class="{ active: (ui.view == 'track-changes') }"
+				ng-click="toggleHistory()",
+				ng-class="{ active: (ui.view == 'history') }"
 				tooltip="#{translate('recent_changes')}",
 				tooltip-placement="bottom",
 			)
@@ -232,8 +232,8 @@ div(ng-if="shouldABTestHeaderLabels")
 					i.fa.fa-fw.fa-group
 				a.btn.btn-full-height(
 					href,
-					ng-click="toggleTrackChanges(); trackABTestConversion('history');",
-					ng-class="{ active: (ui.view == 'track-changes') }"
+					ng-click="toggleHistory(); trackABTestConversion('history');",
+					ng-class="{ active: (ui.view == 'history') }"
 					tooltip="#{translate('recent_changes')}",
 					tooltip-placement="bottom",
 					sixpack-convert="editor-header"
@@ -357,8 +357,8 @@ div(ng-if="shouldABTestHeaderLabels")
 					p.toolbar-label #{translate("share")}
 				a.btn.btn-full-height(
 					href,
-					ng-click="toggleTrackChanges(); trackABTestConversion('history');",
-					ng-class="{ active: (ui.view == 'track-changes') }",
+					ng-click="toggleHistory(); trackABTestConversion('history');",
+					ng-class="{ active: (ui.view == 'history') }",
 					sixpack-convert="editor-header"
 				)
 					i.fa.fa-fw.fa-history

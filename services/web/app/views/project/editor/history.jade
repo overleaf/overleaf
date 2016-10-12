@@ -1,5 +1,5 @@
-div#trackChanges(ng-show="ui.view == 'track-changes'")
-	span(ng-controller="TrackChangesPremiumPopup")
+div#history(ng-show="ui.view == 'history'")
+	span(ng-controller="HistoryPremiumPopup")
 		.upgrade-prompt(ng-show="!project.features.versioning")
 			.message(ng-show="project.owner._id == user.id")
 				p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
@@ -33,29 +33,29 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					a.btn.btn-success(
 						href
 						ng-class="buttonClass"
-						ng-click="startFreeTrial('track-changes')"
+						ng-click="startFreeTrial('history')"
 					) #{translate("start_free_trial")}
 
 
 			.message(ng-show="project.owner._id != user.id")
 				p #{translate("ask_proj_owner_to_upgrade_for_history")}
 				p
-					a.small(href, ng-click="toggleTrackChanges()") #{translate("cancel")}
+					a.small(href, ng-click="toggleHistory()") #{translate("cancel")}
 
 	aside.change-list(
-		ng-controller="TrackChangesListController"
+		ng-controller="HistoryListController"
 		infinite-scroll="loadMore()"
-		infinite-scroll-disabled="trackChanges.loading || trackChanges.atEnd"
-		infinite-scroll-initialize="ui.view == 'track-changes'"
+		infinite-scroll-disabled="history.loading || history.atEnd"
+		infinite-scroll-initialize="ui.view == 'history'"
 	)
 		.infinite-scroll-inner
 			ul.list-unstyled(
 				ng-class="{\
-					'hover-state': trackChanges.hoveringOverListSelectors\
+					'hover-state': history.hoveringOverListSelectors\
 				}"
 			)
 				li.change(
-					ng-repeat="update in trackChanges.updates"
+					ng-repeat="update in history.updates"
 					ng-class="{\
 						'first-in-day': update.meta.first_in_day,\
 						'selected': update.inSelection,\
@@ -65,7 +65,7 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 						'hover-selected-to': update.hoverSelectedTo,\
 						'hover-selected-from': update.hoverSelectedFrom,\
 					}"
-					ng-controller="TrackChangesListItemController"
+					ng-controller="HistoryListItemController"
 				)
 
 					div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
@@ -108,55 +108,55 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 								.color-square(style="background-color: hsl(100, 100%, 50%)")
 								span #{translate("anonymous")}
 
-			.loading(ng-show="trackChanges.loading")
+			.loading(ng-show="history.loading")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp; #{translate("loading")}...
 
-	.diff-panel.full-size(ng-controller="TrackChangesDiffController")
+	.diff-panel.full-size(ng-controller="HistoryDiffController")
 		.diff(
-			ng-show="!!trackChanges.diff && !trackChanges.diff.loading && !trackChanges.diff.deleted && !trackChanges.diff.error"
+			ng-show="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error"
 		)
 			.toolbar.toolbar-alt
 				span.name
-					| <strong>{{trackChanges.diff.highlights.length}} </strong>
+					| <strong>{{history.diff.highlights.length}} </strong>
 					ng-pluralize(
-						count="trackChanges.diff.highlights.length",
+						count="history.diff.highlights.length",
 						when="{\
 							'one': 'change',\
 							'other': 'changes'\
 						}"
 					)
-					|  in <strong>{{trackChanges.diff.doc.name}}</strong>
+					|  in <strong>{{history.diff.doc.name}}</strong>
 				.toolbar-right
 					a.btn.btn-danger.btn-sm(
 						href,
 						ng-click="openRestoreDiffModal()"
 					) #{translate("restore_to_before_these_changes")}
 			.diff-editor.hide-ace-cursor(
-				ace-editor="track-changes",
+				ace-editor="history",
 				theme="settings.theme",
 				font-size="settings.fontSize",
-				text="trackChanges.diff.text",
-				highlights="trackChanges.diff.highlights",
+				text="history.diff.text",
+				highlights="history.diff.highlights",
 				read-only="true",
 				resize-on="layout:main:resize",
 				navigate-highlights="true"
 			)
 		.diff-deleted.text-centered(
-			ng-show="trackChanges.diff.deleted && !trackChanges.diff.restoreDeletedSuccess"
+			ng-show="history.diff.deleted && !history.diff.restoreDeletedSuccess"
 		)
-			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ trackChanges.diff.doc.name }} "})}
+			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ history.diff.doc.name }} "})}
 			p
 				a.btn.btn-primary.btn-lg(
 					href,
 					ng-click="restoreDeletedDoc()",
-					ng-disabled="trackChanges.diff.restoreInProgress"
+					ng-disabled="history.diff.restoreInProgress"
 				) #{translate("restore")}
 
 		.diff-deleted.text-centered(
-			ng-show="trackChanges.diff.deleted && trackChanges.diff.restoreDeletedSuccess"
+			ng-show="history.diff.deleted && history.diff.restoreDeletedSuccess"
 		)
-			p.text-serif  #{translate("file_restored", {filename:"{{ trackChanges.diff.doc.name }} "})}
+			p.text-serif  #{translate("file_restored", {filename:"{{ history.diff.doc.name }} "})}
 			p.text-serif  #{translate("file_restored_back_to_editor")}
 			p
 				a.btn.btn-default(
@@ -164,13 +164,13 @@ div#trackChanges(ng-show="ui.view == 'track-changes'")
 					ng-click="backToEditorAfterRestore()",
 				) #{translate("file_restored_back_to_editor_btn")}
 
-		.loading-panel(ng-show="trackChanges.diff.loading")
+		.loading-panel(ng-show="history.diff.loading")
 			i.fa.fa-spin.fa-refresh
 			| &nbsp;&nbsp;#{translate("loading")}...
-		.error-panel(ng-show="trackChanges.diff.error")
+		.error-panel(ng-show="history.diff.error")
 			.alert.alert-danger #{translate("generic_something_went_wrong")}
 
-script(type="text/ng-template", id="trackChangesRestoreDiffModalTemplate")
+script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 	.modal-header
 		button.close(
 			type="button"

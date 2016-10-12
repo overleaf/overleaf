@@ -7,7 +7,8 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 
 	# set the path for ace workers if using a CDN (from editor.jade)
@@ -69,6 +70,9 @@ define [
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+				trackChangesManager   = new TrackChangesManager(scope, editor, element)
+				if window.location.search.match /tcon=true/ # track changes on
+					trackChangesManager.enabled = true
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -222,7 +226,9 @@ define [
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
 
+					editor.initing = true
 					sharejs_doc.attachToAce(editor)
+					editor.initing = false
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
