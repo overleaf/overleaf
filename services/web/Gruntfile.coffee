@@ -161,6 +161,7 @@ module.exports = (grunt) ->
 						"moment": "libs/#{PackageVersions.lib('moment')}"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
 						"libs/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
+						"ace": "#{PackageVersions.lib('ace')}"
 					shim:
 						"libs/pdf":
 							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
