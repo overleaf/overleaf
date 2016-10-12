@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/settings/index"
 	"ide/share/index"
@@ -41,6 +42,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 

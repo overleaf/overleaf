@@ -8,46 +8,44 @@ div.full-size(
 	initial-size-east="'50%'"
 	minimum-restore-size-east="300"
 )
-	.ui-layout-center
-		#review-panel-wrapper.full-size(
-			layout="review"
-			spacing-open="12"
-			spacing-closed="0"
-			init-closed-east="true"
-			open-east="ui.reviewPanelOpen"
-		)
-			.ui-layout-center
-				.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
-					span(ng-show="editor.open_doc_id")
-						i.fa.fa-spin.fa-refresh
-						| &nbsp;&nbsp;#{translate("loading")}...
-					span(ng-show="!editor.open_doc_id")
-						i.fa.fa-arrow-left
-						| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
+	.ui-layout-center(ng-controller="ReviewPanelController")
+		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
+			span(ng-show="editor.open_doc_id")
+				i.fa.fa-spin.fa-refresh
+				| &nbsp;&nbsp;#{translate("loading")}...
+			span(ng-show="!editor.open_doc_id")
+				i.fa.fa-arrow-left
+				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-				#editor(
-					ace-editor="editor",
-					ng-show="!!editor.sharejs_doc && !editor.opening"
-					theme="settings.theme",
-					keybindings="settings.mode",
-					font-size="settings.fontSize",
-					auto-complete="settings.autoComplete",
-					spell-check="true",
-					spell-check-language="project.spellCheckLanguage",
-					highlights="onlineUserCursorHighlights[editor.open_doc_id]"
-					show-print-margin="false",
-					sharejs-doc="editor.sharejs_doc",
-					last-updated="editor.last_updated",
-					cursor-position="editor.cursorPosition",
-					goto-line="editor.gotoLine",
-					resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize",
-					annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
-					read-only="!permissions.write",
-					on-ctrl-enter="recompileViaKey"
-					syntax-validation="settings.syntaxValidation"
-				)
-			.ui-layout-east
-				strong Hello world
+		#editor.has-review-panel(
+			ace-editor="editor",
+			ng-show="!!editor.sharejs_doc && !editor.opening"
+			theme="settings.theme",
+			keybindings="settings.mode",
+			font-size="settings.fontSize",
+			auto-complete="settings.autoComplete",
+			spell-check="true",
+			spell-check-language="project.spellCheckLanguage",
+			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
+			show-print-margin="false",
+			sharejs-doc="editor.sharejs_doc",
+			last-updated="editor.last_updated",
+			cursor-position="editor.cursorPosition",
+			goto-line="editor.gotoLine",
+			resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize",
+			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
+			read-only="!permissions.write",
+			on-ctrl-enter="recompileViaKey",
+			syntax-validation="settings.syntaxValidation",
+			review-panel="reviewPanel",
+			on-scroll="onScroll",
+			scroll-events="scrollEvents"
+		)
+		#review-panel
+			.review-panel-scroller
+				.review-entry-list
+					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': entry.screenPos.y}")
+						{{ entry.content }}
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

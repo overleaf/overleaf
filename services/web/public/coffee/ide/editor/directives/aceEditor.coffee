@@ -42,9 +42,12 @@ define [
 				text: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "=",
+				navigateHighlights: "="
 				onCtrlEnter: "="
 				syntaxValidation: "="
+				reviewPanel: "="
+				onScroll: "="
+				scrollEvents: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -210,6 +213,15 @@ define [
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
+				
+				onScroll = (scrollTop) ->
+					return if !scope.onScroll?
+					height = editor.renderer.layerConfig.maxHeight
+					scope.onScroll(scrollTop, height)
+					
+				if scope.scrollEvents?
+					scope.scrollEvents.on "scroll", (position) ->
+						editor.getSession().setScrollTop(position)
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
@@ -222,6 +234,8 @@ define [
 
 					doc = session.getDocument()
 					doc.on "change", onChange
+					
+					session.on "changeScrollTop", onScroll
 
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
@@ -240,6 +254,8 @@ define [
 					sharejs_doc.off "remoteop.recordForUndo"
 
 					session = editor.getSession()
+					session.off "changeScrollTop"
+					
 					doc = session.getDocument()
 					doc.off "change", onChange
 

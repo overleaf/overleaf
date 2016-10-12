@@ -9,6 +9,7 @@ define [
 			@changesTracker = new ChangesTracker()
 			@changeIdToMarkerIdMap = {}
 			@enabled = false
+			console.log "Track Changes", @$scope.reviewPanel
 
 			@changesTracker.on "insert:added", (change) =>
 				@_onInsertAdded(change)
@@ -27,12 +28,18 @@ define [
 					setTimeout () =>
 						@checkMapping()
 					, 100
+			
+			# onScroll = () =>
+			# 	@recalculateReviewEntriesScreenPositions()
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
+				# e.oldSession?.off "changeScrollTop", onScroll
+				# e.session.on "changeScrollTop", onScroll
 			@editor.getSession().getDocument().on "change", onChange
-		
+			# @editor.getSession().on "changeScrollTop", onScroll
+
 		checkMapping: () ->
 			session = @editor.getSession()
 
@@ -65,9 +72,28 @@ define [
 		
 		applyChange: (delta) ->
 			op = @_aceChangeToShareJs(delta)
-			console.log "Applying change", delta, op
 			@changesTracker.applyOp(op)
 		
+		updateReviewEntriesScope: () ->
+			# TODO: Update in place so Angular doesn't have to redo EVERYTHING
+			@$scope.reviewPanel.entries = {}
+			for change in @changesTracker.changes
+				@$scope.reviewPanel.entries[change.id] = {
+					content: change.op.i or change.op.d
+					offset: change.op.p
+				}
+			@recalculateReviewEntriesScreenPositions()
+		
+		recalculateReviewEntriesScreenPositions: () ->
+			session = @editor.getSession()
+			renderer = @editor.renderer
+			for entry_id, entry of @$scope.reviewPanel.entries
+				doc_position = @_shareJsOffsetToAcePosition(entry.offset)
+				screen_position = session.documentToScreenPosition(doc_position.row, doc_position.column)
+				y = screen_position.row * renderer.lineHeight
+				entry.screenPos = { y }
+			@$scope.$apply()
+				
 		_onInsertAdded: (change) ->
 			start = @_shareJsOffsetToAcePosition(change.op.p)
 			end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
@@ -76,6 +102,7 @@ define [
 			ace_range = new Range(start.row, start.column, end.row, end.column)
 			marker_id = session.addMarker(ace_range, "track-changes-added-marker", "text")
 			@changeIdToMarkerIdMap[change.id] = marker_id
+			@updateReviewEntriesScope()
 		
 		_onDeleteAdded: (change) ->
 			position = @_shareJsOffsetToAcePosition(change.op.p)
@@ -97,16 +124,19 @@ define [
 
 			marker_id = session.addMarker(ace_range, "track-changes-deleted-marker", "text")
 			@changeIdToMarkerIdMap[change.id] = marker_id
+			@updateReviewEntriesScope()
 		
 		_onInsertRemoved: (change) ->
 			marker_id = @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker marker_id
+			@updateReviewEntriesScope()
 		
 		_onDeleteRemoved: (change) ->
 			marker_id = @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker marker_id
+			@updateReviewEntriesScope()
 		
 		_aceChangeToShareJs: (delta) ->
 			start = delta.start
@@ -138,6 +168,8 @@ define [
 		_onChangesMoved: (changes) ->
 			session = @editor.getSession()
 			markers = session.getMarkers()
+			# TODO: PERFORMANCE: Only run through the Ace lines once, and calculate all
+			# change positions as we go.
 			for change in changes
 				start = @_shareJsOffsetToAcePosition(change.op.p)
 				if change.op.i?
@@ -146,9 +178,9 @@ define [
 					end = start
 				marker_id = @changeIdToMarkerIdMap[change.id]
 				marker = markers[marker_id]
-				console.log "moving marker", {marker, start, end, change}
 				marker.range.start = start
 				marker.range.end = end
+			@updateReviewEntriesScope()
 	
 	class ChangesTracker extends EventEmitter
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
