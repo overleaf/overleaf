@@ -52,6 +52,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			window.csrfToken = "#{csrfToken}";
 			
 		block scripts
+
 		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
 		script(type="text/javascript").
 			var noCdnKey = "nocdn=true"
@@ -109,40 +110,35 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
 
-		script(type='text/javascript').
-			// minimal requirejs configuration (can be extended/overridden)
-			window.requirejs = {
-				"paths" : {
-					"moment": "libs/#{lib('moment')}"
-				},
-				"config":{
-					"moment":{
-						"noGlobal": true
-					}
-				}
-			};
-
 		block content
+
 		div(ng-controller="AbTestController")
 		- if(typeof(suppressFooter) == "undefined")
 			include layout/footer
-
-
 
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			span(ng-controller="ScribtexPopupController")
 			include scribtex-modal
 
-		- if(typeof(suppressDefaultJs) == "undefined")
+		block requirejs
 			script(type='text/javascript').
-				// extend requirejs config
-				window.requirejs.urlArgs = "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}"
+				// minimal requirejs configuration (can be extended/overridden)
+				window.requirejs = {
+					"paths" : {
+						"moment": "libs/#{lib('moment')}"
+					},
+					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
+					"config":{
+						"moment":{
+							"noGlobal": true
+						}
+					}
+				};
 			script(
 				data-main=buildJsPath('main.js', {fingerprint:false}),
 				baseurl=fullJsPath,
 				src=buildJsPath('libs/require.js')
 			)
-
 
 		include contact-us-modal
 		include sentry
