@@ -348,7 +348,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 			secure: parse(process.env["SHARELATEX_EMAIL_SMTP_SECURE"])
 			ignoreTLS: parse(process.env["SHARELATEX_EMAIL_SMTP_IGNORE_TLS"])
 
-
+		textEncoding:  process.env["SHARELATEX_EMAIL_TEXT_ENCODING"]
 		templates:
 			customFooter: process.env["SHARELATEX_CUSTOM_EMAIL_FOOTER"]
 
