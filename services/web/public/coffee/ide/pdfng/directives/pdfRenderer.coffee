@@ -6,6 +6,22 @@ define [
 
 	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', 'pdfSpinner', ($q, $timeout, pdfAnnotations, pdfTextLayer, pdfSpinner) ->
 
+		# Have a single worker used by all rendering, to avoid reloading
+		RenderThread = { worker: null, count: 0}
+
+		getRenderThread = () ->
+			if RenderThread.count > 16 # recycle the worker periodically to avoid leaks
+				RenderThread.readyToDestroy = true
+				RenderThread = { worker: null, count: 0 }
+			RenderThread.worker ||= new PDFJS.PDFWorker('pdfjsworker')
+			RenderThread.count++
+			return RenderThread
+
+		resetWorker = (thread) ->
+			thread.worker.destroy() if thread.readyToDestroy
+
+		# The PDF page renderer
+
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
 			PAGE_LOAD_TIMEOUT: 60*1000
@@ -22,7 +38,8 @@ define [
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
-				@pdfjs = PDFJS.getDocument {url: @url, rangeChunkSize: 2*65536}
+				@thread = getRenderThread()
+				@pdfjs = PDFJS.getDocument {url: @url, rangeChunkSize: 2*65536, worker: @thread.worker}
 				@pdfjs.onProgress = @options.progressCallback
 				@document = $q.when(@pdfjs)
 				@navigateFn = @options.navigateFn
@@ -327,8 +344,9 @@ define [
 			destroy: () ->
 				@shuttingDown = true
 				@resetState()
-				@pdfjs.then (document) ->
+				@pdfjs.then (document) =>
 					document.cleanup()
 					document.destroy()
+					resetWorker(@thread)
 
 		]
