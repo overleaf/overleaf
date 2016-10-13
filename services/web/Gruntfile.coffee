@@ -160,10 +160,10 @@ module.exports = (grunt) ->
 					paths:
 						"moment": "libs/#{PackageVersions.lib('moment')}"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
-						"libs/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
+						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
 						"ace": "#{PackageVersions.lib('ace')}"
 					shim:
-						"libs/pdf":
+						"pdfjs-dist/build/pdf":
 							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
 
 					skipDirOptimize: true
@@ -173,7 +173,7 @@ module.exports = (grunt) ->
 							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs", "libs/pdf"]
+							exclude: ["libs", "pdfjs-dist/build/pdf"]
 						}, {
 							name: "libs"
 						},{

@@ -87,6 +87,10 @@ block content
 
 block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
+
+	//- don't use cdn for worker
+	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
+
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script(type='text/javascript').
@@ -101,13 +105,14 @@ block requirejs
 			"paths" : {
 				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
 				"moment": "libs/#{lib('moment')}",
-				"libs/pdf": "libs/#{lib('pdfjs')}/pdf",
+				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
+				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
 				"ace": "#{lib('ace')}"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
-				"libs/pdf": {
+				"pdfjs-dist/build/pdf": {
 					"deps": ["libs/#{lib('pdfjs')}/compatibility"]
 				},
 				"ace/ext-searchbox": {
@@ -125,13 +130,9 @@ block requirejs
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 
-	- var pdfPath = "libs/" + lib('pdfjs') + "/pdf.worker.js"
-	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
-	- var pdfJsWorkerPath = buildJsPath(pdfPath, {cdn:false,qs:{fingerprint:fingerprintedPath}}) // don't use worker for cdn
 	- var aceWorkerPath = user.betaProgram ? buildJsPath(lib('ace'), {cdn:false,fingerprint:false}) : "" // don't use worker for cdn
 
 	script(type='text/javascript').
-		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
 		window.aceWorkerPath = "#{aceWorkerPath}";
 
 	script(
