@@ -2,7 +2,7 @@ define [
 	"base",
 	"utils/EventEmitter"
 ], (App, EventEmitter) ->
-	App.controller "ReviewPanelController", ($scope, $element) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide) ->
 		$scope.reviewPanel =
 			entries: {}
 			
@@ -31,9 +31,17 @@ define [
 			else
 				ignoreNextAceEvent = true
 				$scope.scrollEvents.emit "scroll", e.target.scrollTop
-
-		scroller.on "scroll", scrollAce
-		$scope.onScroll = scrollPanel # Passed into the editor directive for it to call
+				
+		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
+			return if !reviewPanelOpen?
+			setTimeout () ->
+				$scope.$broadcast "reviewPanel:toggle"
+			if reviewPanelOpen
+				scroller.on "scroll", scrollAce
+				$scope.onScroll = scrollPanel # Passed into the editor directive for it to call
+			else
+				scroller.off "scroll"
+				$scope.onScroll = null
 
 		# If we listen for scroll events in the review panel natively, then with a Mac trackpad
 		# the scroll is very smooth (natively done I'd guess), but we don't get polled regularly

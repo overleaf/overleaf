@@ -1,11 +1,14 @@
+@review-panel-width: 230px;
+
 #review-panel {
 	position: absolute;
-	width: 160px;
+	width: @review-panel-width;
 	top: 0px;
 	bottom: 0px;
 	right: 0px;
 	background-color: #eee;
 	overflow: hidden;
+	display: none;
 }
 
 .review-panel-scroller {
@@ -19,7 +22,7 @@
 
 .review-entry-list {
 	position: relative;
-	width: 160px;
+	width: @review-panel-width;;
 }
 
 .review-entry {
@@ -33,14 +36,19 @@
 	word-wrap: break-word;
 }
 
-#editor.has-review-panel {
-	right: 160px;
-	left: 0px;
-	width: auto;
-	.ace-editor-body {
-		overflow: visible;
-		.ace_scrollbar-v {
-			right: -160px;
+.has-review-panel {
+	#editor {
+		right: @review-panel-width;;
+		left: 0px;
+		width: auto;
+		.ace-editor-body {
+			overflow: visible;
+			.ace_scrollbar-v {
+				right: -@review-panel-width;;
+			}
 		}
+	}
+	#review-panel {
+		display: block;
 	}
 }
