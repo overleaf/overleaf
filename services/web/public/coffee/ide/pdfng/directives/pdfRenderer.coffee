@@ -1,6 +1,7 @@
 define [
 	"base"
-], (App) ->
+	"pdfjs-dist/build/pdf"
+], (App, PDFJS) ->
 	# App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
 	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', 'pdfSpinner', ($q, $timeout, pdfAnnotations, pdfTextLayer, pdfSpinner) ->
