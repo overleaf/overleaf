@@ -130,7 +130,7 @@ block requirejs
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 
-	- var aceWorkerPath = user.betaProgram ? buildJsPath(lib('ace'), {cdn:false,fingerprint:false}) : "" // don't use worker for cdn
+	- var aceWorkerPath = user.betaProgram ? buildJsPath(lib('ace'), {cdn:false,fingerprint:false}) : "" // don't use cdn for worker
 
 	script(type='text/javascript').
 		window.aceWorkerPath = "#{aceWorkerPath}";
