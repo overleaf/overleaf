@@ -9,7 +9,6 @@ define [
 			@changesTracker = new ChangesTracker()
 			@changeIdToMarkerIdMap = {}
 			@enabled = false
-			console.log "Track Changes", @$scope.reviewPanel
 
 			@changesTracker.on "insert:added", (change) =>
 				@_onInsertAdded(change)
@@ -28,17 +27,14 @@ define [
 					setTimeout () =>
 						@checkMapping()
 					, 100
-			
-			# onScroll = () =>
-			# 	@recalculateReviewEntriesScreenPositions()
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
-				# e.oldSession?.off "changeScrollTop", onScroll
-				# e.session.on "changeScrollTop", onScroll
 			@editor.getSession().getDocument().on "change", onChange
-			# @editor.getSession().on "changeScrollTop", onScroll
+			
+			@editor.renderer.on "resize", () =>
+				@recalculateReviewEntriesScreenPositions()
 
 		checkMapping: () ->
 			session = @editor.getSession()
