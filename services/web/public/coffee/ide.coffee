@@ -66,6 +66,18 @@ define [
 			pdfLayout: 'sideBySide'
 		}
 		$scope.user = window.user
+
+
+		$scope.startTrialPlanCode = 'collaborator_free_trial_7_days'
+		$scope.shouldABTestPlans = false
+		$scope._plansVariant = 'default'
+		if $scope.user.signUpDate >= '2011-10-18'
+			$scope.shouldABTestPlans = true
+			sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
+				$scope._plansVariant = chosenVariation
+				if chosenVariation in ['heron', 'ibis']
+					$scope.startTrialPlanCode = "collaborator_#{chosenVariation}"
+
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
@@ -75,7 +87,7 @@ define [
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
 		_userSignUpDate = new Date(window.user.signUpDate)
-		
+
 		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
 		$scope.headerLabelsABVariant = ""
 
@@ -92,7 +104,7 @@ define [
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once"
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
 			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
@@ -105,7 +117,7 @@ define [
 		# End of tracking code.
 
 		window._ide = ide
-		
+
 		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
 
 		ide.project_id = $scope.project_id = window.project_id

@@ -5,12 +5,171 @@ define [
 
 
 	App.factory "MultiCurrencyPricing", () ->
-		
+
 		currencyCode = window.recomendedCurrency
 
 		return {
 			currencyCode:currencyCode
-			plans: 
+
+			heron:
+				USD:
+					student:
+						monthly: "$6"
+						annual: "$60"
+					collaborator:
+						monthly: "$12"
+						annual: "$144"
+				EUR:
+					student:
+						monthly: "€5"
+						annual: "€50"
+					collaborator:
+						monthly: "€10"
+						annual: "€120"
+				GBP:
+					student:
+						monthly: "£5"
+						annual: "£50"
+					collaborator:
+						monthly: "£10"
+						annual: "£120"
+				SEK:
+					student:
+						monthly: "45 kr"
+						annual: "450 kr"
+					collaborator:
+						monthly: "90 kr"
+						annual: "1080 kr"
+				CAD:
+					student:
+						monthly: "$7"
+						annual: "$70"
+					collaborator:
+						monthly: "$14"
+						annual: "$168"
+				NOK:
+					student:
+						monthly: "45 kr"
+						annual: "450 kr"
+					collaborator:
+						monthly: "90 kr"
+						annual: "1080 kr"
+				DKK:
+					student:
+						monthly: "40 kr"
+						annual: "400 kr"
+					collaborator:
+						monthly: "80 kr"
+						annual: "960 kr"
+				AUD:
+					student:
+						monthly: "$8"
+						annual: "$80"
+					collaborator:
+						monthly: "$16"
+						annual: "$192"
+				NZD:
+					student:
+						monthly: "$8"
+						annual: "$80"
+					collaborator:
+						monthly: "$16"
+						annual: "$192"
+				CHF:
+					student:
+						monthly: "Fr 6"
+						annual: "Fr 60"
+					collaborator:
+						monthly: "Fr 12"
+						annual: "Fr 144"
+				SGD:
+					student:
+						monthly: "$8"
+						annual: "$80"
+					collaborator:
+						monthly: "$16"
+						annual: "$192"
+
+			ibis:
+				USD:
+					student:
+						monthly: "$10"
+						annual: "$100"
+					collaborator:
+						monthly: "$18"
+						annual: "$216"
+				EUR:
+					student:
+						monthly: "€9"
+						annual: "€90"
+					collaborator:
+						monthly: "€16"
+						annual: "€192"
+				GBP:
+					student:
+						monthly: "£7"
+						annual: "£70"
+					collaborator:
+						monthly: "£13"
+						annual: "£156"
+				SEK:
+					student:
+						monthly: "75 kr"
+						annual: "750 kr"
+					collaborator:
+						monthly: "140 kr"
+						annual: "1680 kr"
+				CAD:
+					student:
+						monthly: "$12"
+						annual: "$120"
+					collaborator:
+						monthly: "$22"
+						annual: "$264"
+				NOK:
+					student:
+						monthly: "75 kr"
+						annual: "750 kr"
+					collaborator:
+						monthly: "140 kr"
+						annual: "1680 kr"
+				DKK:
+					student:
+						monthly: "68 kr"
+						annual: "680 kr"
+					collaborator:
+						monthly: "122 kr"
+						annual: "1464 kr"
+				AUD:
+					student:
+						monthly: "$13"
+						annual: "$130"
+					collaborator:
+						monthly: "$24"
+						annual: "$288"
+				NZD:
+					student:
+						monthly: "$14"
+						annual: "$140"
+					collaborator:
+						monthly: "$25"
+						annual: "$300"
+				CHF:
+					student:
+						monthly: "Fr 10"
+						annual: "Fr 100"
+					collaborator:
+						monthly: "Fr 18"
+						annual: "Fr 216"
+				SGD:
+					student:
+						monthly: "$14"
+						annual: "$140"
+					collaborator:
+						monthly: "$25"
+						annual: "$300"
+
+			plans:
 				USD:
 					symbol: "$"
 					student:
@@ -23,7 +182,7 @@ define [
 						monthly: "$30"
 						annual: "$360"
 
-				EUR: 
+				EUR:
 					symbol: "€"
 					student:
 						monthly: "€7"
@@ -34,7 +193,7 @@ define [
 					professional:
 						monthly: "€28"
 						annual: "€336"
-						
+
 				GBP:
 					symbol: "£"
 					student:
@@ -117,7 +276,7 @@ define [
 					professional:
 						monthly: "$35"
 						annual: "$420"
-						
+
 				CHF:
 					symbol: "Fr"
 					student:
@@ -141,22 +300,34 @@ define [
 					professional:
 						monthly: "$40"
 						annual: "$480"
+
 		}
-	
 
 
+	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack) ->
 
-	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http) ->
+		$scope.plansVariant = 'default'
+		$scope.shouldABTestPlans = window.shouldABTestPlans
+
+		if $scope.shouldABTestPlans
+			sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
+				$scope.plansVariant = chosenVariation
+				if chosenVariation in ['heron', 'ibis']
+					# overwrite student plans with alternative
+					for currency, _v of $scope.plans
+						$scope.plans[currency]['student'] = MultiCurrencyPricing[chosenVariation][currency]['student']
+						$scope.plans[currency]['collaborator'] = MultiCurrencyPricing[chosenVariation][currency]['collaborator']
 
 		$scope.plans = MultiCurrencyPricing.plans
+
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
 		$scope.trial_len = 7
+
 		$scope.planQueryString = '_free_trial_7_days'
 
 		$scope.ui =
 			view: "monthly"
-
 
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency
@@ -164,13 +335,16 @@ define [
 		$scope.signUpNowClicked = (plan, annual)->
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
-			
-			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
+
+			event_tracking.send   'subscription-funnel', 'sign_up_now_button', plan
+			# TODO: double check this is correct
+			if $scope.shouldABTestPlans and plan in ['student', 'collaborator']
+				sixpack.convert 'plans-1610', () ->
 
 		$scope.switchToMonthly = ->
 			$scope.ui.view = "monthly"
 			event_tracking.send 'subscription-funnel', 'plans-page', 'monthly-prices'
-		
+
 		$scope.switchToStudent = ->
 			$scope.ui.view = "student"
 			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
@@ -178,7 +352,7 @@ define [
 		$scope.switchToAnnual = ->
 			$scope.ui.view = "annual"
 			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
-			
+
 		$scope.openGroupPlanModal = () ->
 			$modal.open {
 				templateUrl: "groupPlanModalTemplate"

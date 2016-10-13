@@ -8,6 +8,7 @@ Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
+UserGetter = require "../User/UserGetter"
 
 module.exports = SubscriptionController =
 
@@ -21,14 +22,27 @@ module.exports = SubscriptionController =
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
+		currentUser = null
 		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
 			return next(err) if err?
-			res.render viewName,
-				title: "plans_and_pricing"
-				plans: plans
-				baseUrl: baseUrl
-				gaExperiments: Settings.gaExperiments.plansPage
-				recomendedCurrency:recomendedCurrency
+			render = () ->
+				res.render viewName,
+					title: "plans_and_pricing"
+					plans: plans
+					baseUrl: baseUrl
+					gaExperiments: Settings.gaExperiments.plansPage
+					recomendedCurrency:recomendedCurrency
+					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2011-10-18')))
+			user_id = AuthenticationController.getLoggedInUserId(req)
+			if user_id?
+				console.log '>> user is logged in'
+				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->
+					return next(err) if err?
+					currentUser = user
+					render()
+			else
+				console.log '>> not logged in'
+				render()
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->
