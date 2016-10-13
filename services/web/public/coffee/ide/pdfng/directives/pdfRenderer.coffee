@@ -245,6 +245,12 @@ define [
 					return
 
 				canvas = $('<canvas class="pdf-canvas pdfng-rendering"></canvas>')
+				# In Windows+IE we must have the canvas in the DOM during
+				# rendering to see the fonts defined in the DOM. If we try to
+				# render 'offscreen' then all the text will be sans-serif.
+				# Previously we rendered offscreen and added in the canvas
+				# when rendering was complete.
+				element.canvas.replaceWith(canvas)
 
 				viewport = page.getViewport (scale)
 
@@ -298,7 +304,6 @@ define [
 
 				result.then () ->
 					# page render success
-					element.canvas.replaceWith(canvas)
 					canvas.removeClass('pdfng-rendering')
 					page.getTextContent().then (textContent) ->
 						textLayer.setTextContent textContent
