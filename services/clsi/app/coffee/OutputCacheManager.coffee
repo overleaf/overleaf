@@ -85,7 +85,7 @@ module.exports = OutputCacheManager =
 						# clean up the directory we just created
 						fse.remove cacheDir, (err) ->
 							if err?
-								logger.error err: err, dir: dir, "error removing cache dir after failure"
+								logger.error err: err, dir: cacheDir, "error removing cache dir after failure"
 					else
 						# pass back the list of new files in the cache
 						callback(err, results)
