@@ -27,6 +27,7 @@ define [
 			PAGE_LOAD_TIMEOUT: 60*1000
 			INDICATOR_DELAY1: 100  # time to delay before showing the indicator
 			INDICATOR_DELAY2: 250  # time until the indicator starts animating
+			TEXTLAYER_TIMEOUT: 100
 
 			constructor: (@url, @options) ->
 				if window.location?.search?.indexOf("disable-font-face=true") >= 0
@@ -307,6 +308,7 @@ define [
 				textLayer = new pdfTextLayer({
 					textLayerDiv: element.text[0]
 					viewport: viewport
+					renderer: PDFJS.renderTextLayer
 				})
 
 				annotationsLayer = new pdfAnnotations({
@@ -321,11 +323,14 @@ define [
 					transform: [pixelRatio, 0, 0, pixelRatio, 0, 0]
 				}
 
+				textLayerTimeout = @TEXTLAYER_TIMEOUT
+
 				result.then () ->
 					# page render success
 					canvas.removeClass('pdfng-rendering')
-					page.getTextContent().then (textContent) ->
+					page.getTextContent({normalizeWhitespace: true}).then (textContent) ->
 						textLayer.setTextContent textContent
+						textLayer.render(textLayerTimeout)
 					, (error) ->
 						self.errorCallback?(error)
 					page.getAnnotations().then (annotations) ->
