@@ -52,7 +52,7 @@ module.exports =
 			text: options.text
 			replyTo: options.replyTo || Settings.email.replyToAddress
 			socketTimeout: 30 * 1000
-		if settings.email.textEncoding?
+		if Settings.email.textEncoding?
 			opts.textEncoding = textEncoding
 		client.sendMail options, (err, res)->
 			if err?
