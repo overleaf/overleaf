@@ -101,7 +101,7 @@ Thank you
 #{settings.appName} - <%= siteUrl %>
 """
 	compiledTemplate: _.template """
-<p>Hi, <%= owner.email %> wants to share <a href="<%= project.url %>">'<%= project.name %>'</a> with you</p>
+<p>Hi, <%= owner.email %> wants to share <a href="<%= inviteUrl %>">'<%= project.name %>'</a> with you</p>
 <center>
 			<a style="text-decoration: none; width: 200px; background-color: #a93629; border: 1px solid #e24b3b; border-radius: 3px; padding: 15px; margin: 24px; display: block;" href="<%= inviteUrl %>" style="text-decoration:none" target="_blank">
 				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
