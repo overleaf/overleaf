@@ -6,9 +6,6 @@ define [
 	pdfViewer
 
 ) ->
-	if PDFJS?
-		PDFJS.workerSrc = window.pdfJsWorkerPath
-
 	App.directive "pdfng", ["$timeout", "localStorage", ($timeout, localStorage) ->
 		return {
 			scope: {

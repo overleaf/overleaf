@@ -166,6 +166,8 @@ module.exports = settings =
 		price: 0
 		features: defaultFeatures
 	}]
+	
+	enableSubscriptions:false
 
 	# i18n
 	# ------
