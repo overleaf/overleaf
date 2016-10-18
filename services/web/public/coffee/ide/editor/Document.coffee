@@ -265,10 +265,10 @@ define [
 				@ide.pushEvent "externalUpdate",
 					doc_id: @doc_id
 				@trigger "externalUpdate", update
-			@doc.on "remoteop", () => 
+			@doc.on "remoteop", (args...) => 
 				@ide.pushEvent "remoteop",
 					doc_id: @doc_id
-				@trigger "remoteop"
+				@trigger "remoteop", args...
 			@doc.on "op:sent", (op) =>
 				@ide.pushEvent "op:sent",
 					doc_id: @doc_id

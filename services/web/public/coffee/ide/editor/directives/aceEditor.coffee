@@ -235,8 +235,9 @@ define [
 					doc = session.getDocument()
 					doc.on "change", onChange
 
-					sharejs_doc.on "remoteop.recordForUndo", () =>
+					sharejs_doc.on "remoteop.recordRemote", (op, oldSnapshot, msg) ->
 						undoManager.nextUpdateIsRemote = true
+						trackChangesManager.nextUpdateMetaData = msg?.meta
 
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
@@ -255,7 +256,7 @@ define [
 
 				detachFromAce = (sharejs_doc) ->
 					sharejs_doc.detachFromAce()
-					sharejs_doc.off "remoteop.recordForUndo"
+					sharejs_doc.off "remoteop.recordRemote"
 
 					session = editor.getSession()
 					session.off "changeScrollTop"

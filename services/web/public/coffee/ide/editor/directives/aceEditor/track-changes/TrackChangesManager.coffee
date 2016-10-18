@@ -23,10 +23,24 @@ define [
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
-					@applyChange(e)
+					# This change is trigger by a sharejs 'change' event, which is before the
+					# sharejs 'remoteop' event. So wait until the next event loop when the 'remoteop'
+					# will have fired, before we decide if it was a remote op.
 					setTimeout () =>
-						@checkMapping()
-					, 100
+						if @nextUpdateMetaData?
+							# The remote op may have contained multiple atomic ops, each of which is an Ace
+							# 'change' event (i.e. bulk commenting out of lines is a single remote op
+							# but gives us one event for each % inserted). These all come in a single event loop
+							# though, so wait until the next one before clearing the metadata.
+							setTimeout () =>
+								@nextUpdateMetaData = null
+
+						@applyChange(e)
+						
+						# TODO: Just for debugging, remove before going live.
+						setTimeout () =>
+							@checkMapping()
+						, 100
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession?.getDocument().off "change", onChange
@@ -176,6 +190,7 @@ define [
 				marker = markers[marker_id]
 				marker.range.start = start
 				marker.range.end = end
+			@editor.renderer.updateBackMarkers()
 			@updateReviewEntriesScope()
 	
 	class ChangesTracker extends EventEmitter
