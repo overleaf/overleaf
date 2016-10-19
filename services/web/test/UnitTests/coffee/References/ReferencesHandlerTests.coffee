@@ -322,6 +322,11 @@ describe 'ReferencesHandler', ->
 			result = @handler._findBibDocIds(@fakeProject)
 			expect(result).to.deep.equal @expectedIds
 
+		it 'should not error with a non array of folders from dirty data', ->
+			@fakeProject.rootFolder[0].folders[0].folders = {}
+			result = @handler._findBibDocIds(@fakeProject)
+			expect(result).to.deep.equal @expectedIds
+
 	describe '_findBibFileIds', ->
 
 		beforeEach ->

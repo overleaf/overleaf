@@ -21,7 +21,8 @@ define [
 		$scope.deleteAccount = () ->
 			modalInstance = $modal.open(
 				templateUrl: "deleteAccountModalTemplate"
-				controller: "DeleteAccountModalController"
+				controller: "DeleteAccountModalController",
+				scope: $scope
 			)
 	]
 
@@ -39,7 +40,7 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = $scope.state.deleteText == "DELETE"
+				$scope.state.isValid = $scope.state.deleteText == $scope.email
 
 			$scope.delete = () ->
 				$scope.state.inflight = true

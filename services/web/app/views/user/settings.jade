@@ -79,7 +79,7 @@ block content
 														required,
 														complex-password
 													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.currentPassword.$dirty", ng-bind-html="complexPasswordErrorMessage") 
+													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
 												.form-group
 													label(for='newPassword2') #{translate("confirm_new_password")}
 													input.form-control(
@@ -88,9 +88,11 @@ block content
 														placeholder='*********',
 														ng-model="newPassword2",
 														equals="passwordField"
-													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-														| #{translate("doesnt_match")}
+													) 
+													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
+														| #{translate("doesnt_match")} 
+													span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+														| #{translate("Invalid Password")} 
 												.actions
 													button.btn.btn-primary(
 														type='submit',
@@ -99,16 +101,25 @@ block content
 
 							| !{moduleIncludes("userSettings", locals)}
 
+							hr
+
+							h3
+								| #{translate("sharelatex_beta_program")}
+
 							if (user.betaProgram)
-								hr
-
-								h3
-									| #{translate("sharelatex_beta_program")}
-
 								p.small
 									| #{translate("beta_program_already_participating")}
-								div
-									a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
+
+							div
+								a(id="beta-program-participate-link" href="/beta/participate") #{translate("manage_beta_program_membership")}
+
+							hr
+	
+							h3
+								| #{translate("sessions")}
+
+							div
+								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
 
 							hr
 
@@ -140,7 +151,7 @@ block content
 		.modal-header
 			h3 #{translate("delete_account")}
 		.modal-body
-			p !{translate("delete_account_warning_message")}
+			p !{translate("delete_account_warning_message_2")}
 			form(novalidate, name="deleteAccountForm")
 				input.form-control(
 					type="text",

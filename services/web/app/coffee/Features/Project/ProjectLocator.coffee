@@ -81,7 +81,7 @@ module.exports = ProjectLocator =
 				else
 					getRootDoc project
 
-	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity)->)->
+	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity, type)->)->
 
 		getParentFolder = (haystackFolder, foldersList, level, cb)->
 			if foldersList.length == 0
@@ -100,12 +100,22 @@ module.exports = ProjectLocator =
 
 		getEntity = (folder, entityName, cb)->
 			if !entityName?
-				return cb null, folder
-			enteties = _.union folder.fileRefs, folder.docs, folder.folders
-			result = _.find enteties, (entity)->
-				entity?.name.toLowerCase() == entityName.toLowerCase()
+				return cb null, folder, "folder"
+			for file in folder.fileRefs or []
+				if file?.name.toLowerCase() == entityName.toLowerCase()
+					result = file
+					type = "file"
+			for doc in folder.docs or []
+				if doc?.name.toLowerCase() == entityName.toLowerCase()
+					result = doc
+					type = "doc"
+			for childFolder in folder.folders or []
+				if childFolder?.name.toLowerCase() == entityName.toLowerCase()
+					result = childFolder
+					type = "folder"
+
 			if result?
-				cb null, result
+				cb null, result, type
 			else
 				cb("not found project_or_id: #{project_or_id} search path: #{needlePath}, entity #{entityName} could not be found")
 
@@ -117,7 +127,7 @@ module.exports = ProjectLocator =
 			if !project?
 				return callback("project could not be found for finding a element #{project_or_id}")
 			if needlePath == '' || needlePath == '/'
-				return callback(null, project.rootFolder[0])
+				return callback(null, project.rootFolder[0], "folder")
 
 			if needlePath.indexOf('/') == 0
 				needlePath = needlePath.substring(1)

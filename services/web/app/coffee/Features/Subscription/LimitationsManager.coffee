@@ -4,6 +4,7 @@ User = require("../../models/User").User
 SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
 
 module.exports =
 
@@ -20,10 +21,12 @@ module.exports =
 			return callback(error) if error?
 			CollaboratorsHandler.getCollaboratorCount project_id, (error, current_number) =>
 				return callback(error) if error?
-				if current_number + x_collaborators <= allowed_number or allowed_number < 0
-					callback null, true
-				else
-					callback null, false
+				CollaboratorsInvitesHandler.getInviteCount project_id, (error, invite_count) =>
+					return callback(error) if error?
+					if current_number + invite_count + x_collaborators <= allowed_number or allowed_number < 0
+						callback null, true
+					else
+						callback null, false
 
 	userHasSubscriptionOrIsGroupMember: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
 		@userHasSubscription user, (err, hasSubscription, subscription)=>
@@ -41,7 +44,7 @@ module.exports =
 			hasValidSubscription = subscription? and (subscription.recurlySubscription_id? or subscription?.customAccount == true)
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
-			
+
 	userIsMemberOfGroupSubscription: (user, callback = (error, isMember, subscriptions) ->) ->
 		logger.log user_id: user._id, "checking is user is member of subscription groups"
 		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
@@ -65,4 +68,3 @@ getOwnerOfProject = (project_id, callback)->
 		return callback(error) if error?
 		User.findById project.owner_ref, (error, owner) ->
 			callback(error, owner)
-

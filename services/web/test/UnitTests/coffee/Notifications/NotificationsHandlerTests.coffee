@@ -60,12 +60,44 @@ describe 'NotificationsHandler', ->
 			@key = "some key here"
 			@messageOpts = {value:12344}
 			@templateKey = "renderThisHtml"
+			@expiry = null
 
 		it "should post the message over", (done)->
-			@handler.createNotification user_id, @key, @templateKey, @messageOpts, =>
+			@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
 				args = @request.args[0][0]
 				args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
 				args.timeout.should.equal 1000
-				expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts}
+				expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts,  forceCreate:true}
 				assert.deepEqual(args.json, expectedJson)
+				done()
+
+		describe 'when expiry date is supplied', ->
+			beforeEach ->
+				@key = "some key here"
+				@messageOpts = {value:12344}
+				@templateKey = "renderThisHtml"
+				@expiry = new Date()
+
+			it 'should post the message over with expiry field', (done) ->
+				@handler.createNotification user_id, @key, @templateKey, @messageOpts, @expiry, =>
+					args = @request.args[0][0]
+					args.uri.should.equal "#{notificationUrl}/user/#{user_id}"
+					args.timeout.should.equal 1000
+					expectedJson = {key:@key, templateKey:@templateKey, messageOpts:@messageOpts, expires: @expiry, forceCreate:true}
+					assert.deepEqual(args.json, expectedJson)
+					done()
+
+	
+
+	describe "markAsReadByKeyOnly", ->
+		beforeEach ->
+			@key = "some key here"
+
+		it 'should send a delete request when a delete has been received to mark a notification', (done)->
+			@handler.markAsReadByKeyOnly @key, =>
+				opts =
+					uri: "#{notificationUrl}/key/#{@key}"
+					timeout:1000
+					method: "DELETE"
+				@request.calledWith(opts).should.equal true
 				done()

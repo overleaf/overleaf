@@ -4,7 +4,7 @@ settings = require("settings-sharelatex")
 ProjectGetter = require "../Project/ProjectGetter"
 UserGetter = require "../User/UserGetter"
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-U = require('underscore')
+_ = require('underscore')
 Async = require('async')
 
 oneMinInMs = 60 * 1000
@@ -22,24 +22,24 @@ module.exports = ReferencesHandler =
 	_findBibFileIds: (project) ->
 		ids = []
 		_process = (folder) ->
-			(folder.fileRefs or []).forEach (file) ->
+			_.each (folder.fileRefs or []), (file) ->
 				if file?.name?.match(/^.*\.bib$/)
 					ids.push(file._id)
-			(folder.folders or []).forEach (folder) ->
+			_.each (folder.folders or []), (folder) ->
 				_process(folder)
-		(project.rootFolder or []).forEach (rootFolder) ->
+		_.each (project.rootFolder or []), (rootFolder) ->
 			_process(rootFolder)
 		return ids
 
 	_findBibDocIds: (project) ->
 		ids = []
 		_process = (folder) ->
-			(folder.docs or []).forEach (doc) ->
+			_.each (folder.docs or []), (doc) ->
 				if doc?.name?.match(/^.*\.bib$/)
 					ids.push(doc._id)
-			(folder.folders or []).forEach (folder) ->
+			_.each (folder.folders or []), (folder) ->
 				_process(folder)
-		(project.rootFolder or []).forEach (rootFolder) ->
+		_.each (project.rootFolder or []), (rootFolder) ->
 			_process(rootFolder)
 		return ids
 

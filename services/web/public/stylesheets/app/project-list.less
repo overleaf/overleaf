@@ -32,10 +32,24 @@
 	ul {
 		margin-bottom:0px;
 	}
-	.alert {
-		.box-shadow(2px 4px 6px rgba(0, 0, 0, 0.25));
+	.notification_entry {
+		.alert {
+			.box-shadow(2px 4px 6px rgba(0, 0, 0, 0.25));
+			.notification_inner {
+				display: table-row;
+				.notification_body {
+					display: table-cell;
+					width: 99%;
+					padding-right: 15px;
+					vertical-align: middle;
+				}
+				.notification_close {
+					display: table-cell;
+					vertical-align: middle;
+				}
+			}
+		}
 	}
-
 }
 
 ul.folders-menu {
@@ -263,5 +277,15 @@ ul.project-list {
 	}
 	.autocomplete .highlight {
 		font-weight: 700;
+	}
+}
+
+.minimal-create-proj-dropdown {
+	text-align:center;
+
+	&-menu {
+		width:200px;
+		left:50%;
+		margin-left:-100px;
 	}
 }

@@ -2,6 +2,7 @@ define [
 	"main/project-list/index"
 	"main/user-details"
 	"main/account-settings"
+	"main/clear-sessions"
 	"main/account-upgrade"
 	"main/plans"
 	"main/group-members"
@@ -26,11 +27,9 @@ define [
 	"directives/onEnter"
 	"directives/selectAll"
 	"directives/maxHeight"
+	"directives/creditCards"
 	"services/queued-http"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.bootstrap(document.body, ["SharelatexApp"])
-
-	
-

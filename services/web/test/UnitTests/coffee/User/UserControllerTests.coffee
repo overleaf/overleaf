@@ -16,8 +16,17 @@ describe "UserController", ->
 
 		@user =
 			_id:@user_id
-			save:sinon.stub().callsArgWith(0)
+			save: sinon.stub().callsArgWith(0)
 			ace:{}
+
+		@req =
+			user: {}
+			session:
+				destroy:->
+				user :
+					_id : @user_id
+					email:"old@something.com"
+			body:{}
 
 		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
@@ -31,6 +40,9 @@ describe "UserController", ->
 			registerNewUser: sinon.stub()
 		@AuthenticationController =
 			establishUserSession: sinon.stub().callsArg(2)
+			getLoggedInUserId: sinon.stub().returns(@user._id)
+			getSessionUser: sinon.stub().returns(@req.session.user)
+			setInSessionUser: sinon.stub()
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
@@ -67,15 +79,9 @@ describe "UserController", ->
 				err:->
 			"../../infrastructure/Metrics": inc:->
 
-		@req =
-			session:
-				destroy:->
-				user :
-					_id : @user_id
-					email:"old@something.com"
-			body:{}
 		@res =
 			send: sinon.stub()
+			sendStatus: sinon.stub()
 			json: sinon.stub()
 		@next = sinon.stub()
 	describe "deleteUser", ->
@@ -172,7 +178,9 @@ describe "UserController", ->
 				cb(null, @user)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
-				@req.session.user.email.should.equal @newEmail
+				@AuthenticationController.setInSessionUser.calledWith(
+					@req, {email: @newEmail, first_name: undefined, last_name: undefined}
+				).should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
 
@@ -216,6 +224,29 @@ describe "UserController", ->
 					setNewPasswordUrl: @url
 				})
 				.should.equal true
+
+	describe 'clearSessions', ->
+
+		it 'should call revokeAllUserSessions', (done) ->
+			@UserController.clearSessions @req, @res
+			@UserSessionsManager.revokeAllUserSessions.callCount.should.equal 1
+			done()
+
+		it 'send a 201 response', (done) ->
+			@res.sendStatus = (status) =>
+				status.should.equal 201
+				done()
+			@UserController.clearSessions @req, @res
+
+		describe 'when revokeAllUserSessions produces an error', ->
+
+			it 'should call next with an error', (done) ->
+				@UserSessionsManager.revokeAllUserSessions.callsArgWith(2, new Error('woops'))
+				next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.clearSessions @req, @res, next
 
 	describe "changePassword", ->
 

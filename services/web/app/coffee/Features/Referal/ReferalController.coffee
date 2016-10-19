@@ -1,9 +1,11 @@
 logger = require('logger-sharelatex')
 ReferalHandler = require('./ReferalHandler')
+AuthenticationController = require('../Authentication/AuthenticationController')
 
-module.exports = 
+module.exports =
 	bonus: (req, res)->
-		ReferalHandler.getReferedUserIds req.session.user._id, (err, refered_users)->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		ReferalHandler.getReferedUserIds user_id, (err, refered_users)->
 			res.render "referal/bonus",
 				title: "bonus_please_recommend_us"
 				refered_users: refered_users

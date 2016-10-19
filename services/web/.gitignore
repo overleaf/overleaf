@@ -47,23 +47,21 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
-public/js/history/versiondetail.js
-!public/js/libs/
-public/js/*
-!public/js/ace/*
-!public/js/libs/
+public/js/*.js
 public/js/libs/sharejs.js
-public/js/editor.js
-public/js/home.js
-public/js/forms.js
-public/js/gui.js
-public/js/admin.js
-public/js/history/*
+public/js/analytics/
+public/js/directives/
+public/js/filters/
+public/js/ide/
+public/js/main/
+public/js/modules/
+public/js/services/
+public/js/utils/
+
 public/stylesheets/style.css
 public/brand/plans.css
 public/minjs/
 
-public/js/main.js
 Gemfile.lock
 
 *.swp

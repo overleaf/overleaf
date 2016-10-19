@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, $modal, $http) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -10,6 +10,7 @@ define [
 			error: null
 			inflight: false
 			startedFreeTrial: false
+			invites: []
 		}
 
 		$modalInstance.opened.then () ->
@@ -18,9 +19,11 @@ define [
 			, 200
 
 		INFINITE_COLLABORATORS = -1
-		$scope.$watch "project.members.length", (noOfMembers) ->
+		$scope.$watch "(project.members.length + project.invites.length)", (noOfMembers) ->
 			allowedNoOfMembers = $scope.project.features.collaborators
 			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
+
+		window._m = projectMembers
 
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
@@ -38,9 +41,12 @@ define [
 						else
 							# Must be a group
 							contact.display = contact.name
-		
+
 		getCurrentMemberEmails = () ->
-			$scope.project.members.map (u) -> u.email
+			($scope.project.members || []).map (u) -> u.email
+
+		getCurrentInviteEmails = () ->
+			($scope.project.invites || []).map (u) -> u.email
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
@@ -60,36 +66,48 @@ define [
 				$scope.inputs.contacts = []
 				$scope.state.error = null
 				$scope.state.inflight = true
-				
+
+				if !$scope.project.invites?
+					$scope.project.invites = []
+
 				currentMemberEmails = getCurrentMemberEmails()
+				currentInviteEmails = getCurrentInviteEmails()
 				do addNextMember = () ->
 					if members.length == 0 or !$scope.canAddCollaborators
 						$scope.state.inflight = false
 						$scope.$apply()
 						return
-					
+
 					member = members.shift()
-					if !member.type? and member.display in currentMemberEmails
+					if member.type == "user"
+						email = member.email
+					else # Not an auto-complete object, so email == display
+						email = member.display
+					email = email.toLowerCase()
+
+					if email in currentMemberEmails
 						# Skip this existing member
 						return addNextMember()
-					
-					if member.type == "user"
-						request = projectMembers.addMember(member.email, $scope.inputs.privileges)
-					else if member.type == "group"
-						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
-					else # Not an auto-complete object, so email == display
-						request = projectMembers.addMember(member.display, $scope.inputs.privileges)
-					
+
+					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
+						request = projectInvites.resendInvite(inviteId)
+					else
+						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
+
 					request
 						.success (data) ->
-							if data.users?
-								users = data.users
-							else if data.user?
-								users = [data.user]
+							if data.invite
+								invite = data.invite
+								$scope.project.invites.push invite
 							else
-								users = []
-								
-							$scope.project.members.push users...
+								if data.users?
+									users = data.users
+								else if data.user?
+									users = [data.user]
+								else
+									users = []
+								$scope.project.members.push users...
+
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
 								# with new collaborator information.
@@ -98,8 +116,7 @@ define [
 						.error () ->
 							$scope.state.inflight = false
 							$scope.state.error = true
-			
-			
+
 			$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
@@ -115,6 +132,33 @@ define [
 				.error () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
+
+		$scope.revokeInvite = (invite) ->
+			$scope.state.error = null
+			$scope.state.inflight = true
+			projectInvites
+				.revokeInvite(invite._id)
+				.success () ->
+					$scope.state.inflight = false
+					index = $scope.project.invites.indexOf(invite)
+					return if index == -1
+					$scope.project.invites.splice(index, 1)
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = "Sorry, something went wrong :("
+
+		$scope.resendInvite = (invite, event) ->
+			$scope.state.error = null
+			$scope.state.inflight = true
+			projectInvites
+				.resendInvite(invite._id)
+				.success () ->
+					$scope.state.inflight = false
+					event.target.blur()
+				.error () ->
+					$scope.state.inflight = false
+					$scope.state.error = "Sorry, something went wrong resending the invite :("
+					event.target.blur()
 
 		$scope.openMakePublicModal = () ->
 			$modal.open {

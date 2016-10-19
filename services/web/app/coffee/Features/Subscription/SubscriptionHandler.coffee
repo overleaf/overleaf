@@ -7,6 +7,8 @@ SubscriptionUpdater = require("./SubscriptionUpdater")
 LimitationsManager = require('./LimitationsManager')
 EmailHandler = require("../Email/EmailHandler")
 Events = require "../../infrastructure/Events"
+Analytics = require("../Analytics/AnalyticsManager")
+
 
 module.exports =
 
@@ -52,6 +54,7 @@ module.exports =
 					setTimeout (-> EmailHandler.sendEmail "canceledSubscription", emailOpts
 					), ONE_HOUR_IN_MS
 					Events.emit "cancelSubscription", user._id
+					Analytics.recordEvent user._id, "subscription-canceled"
 					callback()
 			else
 				callback()

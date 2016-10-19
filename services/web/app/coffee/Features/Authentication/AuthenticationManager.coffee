@@ -29,6 +29,9 @@ module.exports = AuthenticationManager =
 				callback null, null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->
+		if Settings.passwordStrengthOptions?.length?.max? and Settings.passwordStrengthOptions?.length?.max < password.length
+			return callback("password is too long")
+
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
 			bcrypt.hash password, salt, (error, hash) ->

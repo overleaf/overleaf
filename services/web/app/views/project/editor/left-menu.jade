@@ -105,6 +105,15 @@ aside#left-menu.full-size(
 					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
 				)
 
+			if (user.betaProgram)
+				.form-controls
+					label(for="syntaxValidation") #{translate("syntax_validation")}
+					select(
+						name="syntaxValidation"
+						ng-model="settings.syntaxValidation"
+						ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
+					)
+
 			.form-controls
 				label(for="theme") #{translate("theme")}
 				select(
@@ -197,6 +206,10 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 			)
 		div(ng-if="!status.loading")
 			.container-fluid
+				.row(ng-show='data.messages.length > 0')
+					.col-xs-12
+						.alert.alert-danger
+							p(style="white-space: pre-wrap") {{data.messages}}
 				.row
 					.col-xs-4
 						.pull-right #{translate("total_words")} :

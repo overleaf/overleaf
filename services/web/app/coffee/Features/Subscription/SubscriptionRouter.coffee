@@ -16,6 +16,7 @@ module.exports =
 		
 		webRouter.get  '/user/subscription/new',        AuthenticationController.requireLogin(), SubscriptionController.paymentPage 
 		webRouter.get  '/user/subscription/billing-details/edit', AuthenticationController.requireLogin(), SubscriptionController.editBillingDetailsPage
+		webRouter.post '/user/subscription/billing-details/update', AuthenticationController.requireLogin(), SubscriptionController.updateBillingDetails
 
 		webRouter.get  '/user/subscription/thank-you', AuthenticationController.requireLogin(), SubscriptionController.successful_subscription
 

@@ -21,6 +21,9 @@ cookieParser = require('cookie-parser')
 
 sessionStore = new RedisStore(client:rclient)
 
+passport = require('passport')
+LocalStrategy = require('passport-local').Strategy
+
 Mongoose = require("./Mongoose")
 
 oneDayInMilliseconds = 86400000
@@ -32,6 +35,7 @@ Modules = require "./Modules"
 
 ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
+AuthenticationController = require "../Features/Authentication/AuthenticationController"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -87,11 +91,26 @@ webRouter.use csrfProtection
 webRouter.use translations.expressMiddlewear
 webRouter.use translations.setLangBasedOnDomainMiddlewear
 
+# passport
+webRouter.use passport.initialize()
+webRouter.use passport.session()
+
+passport.use(new LocalStrategy(
+	{
+		passReqToCallback: true,
+		usernameField: 'email',
+		passwordField: 'password'
+	},
+	AuthenticationController.doPassportLogin
+))
+passport.serializeUser(AuthenticationController.serializeUser)
+passport.deserializeUser(AuthenticationController.deserializeUser)
+
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
-	if req?.session?.user?
-		UserSessionsManager.touch(req.session.user, (err)->)
+	if AuthenticationController.isUserLoggedIn(req)
+		UserSessionsManager.touch(AuthenticationController.getSessionUser(req), (err)->)
 	next()
 
 webRouter.use ReferalConnect.use

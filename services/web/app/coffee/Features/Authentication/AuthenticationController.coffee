@@ -10,62 +10,115 @@ Settings = require "settings-sharelatex"
 basicAuth = require('basic-auth-connect')
 UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
+Analytics = require "../Analytics/AnalyticsManager"
+passport = require 'passport'
 
 module.exports = AuthenticationController =
-	login: (req, res, next = (error) ->) ->
-		AuthenticationController.doLogin req.body, req, res, next
 
-	doLogin: (options, req, res, next) ->
-		email = options.email?.toLowerCase()
-		password = options.password
-		redir = Url.parse(options.redir or "/project").path
+	serializeUser: (user, callback) ->
+		lightUser =
+			_id: user._id
+			first_name: user.first_name
+			last_name: user.last_name
+			isAdmin: user.isAdmin
+			email: user.email
+			referal_id: user.referal_id
+			session_created: (new Date()).toISOString()
+			ip_address: user._login_req_ip
+		callback(null, lightUser)
+
+	deserializeUser: (user, cb) ->
+		cb(null, user)
+
+	passportLogin: (req, res, next) ->
+		# This function is middleware which wraps the passport.authenticate middleware,
+		# so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
+		# and send a `{redir: ""}` response on success
+		passport.authenticate('local', (err, user, info) ->
+			if err?
+				return next(err)
+			if user # `user` is either a user object or false
+				req.login user, (err) ->
+					# Regenerate the session to get a new sessionID (cookie value) to
+					# protect against session fixation attacks
+					oldSession = req.session
+					req.session.destroy()
+					req.sessionStore.generate(req)
+					for key, value of oldSession
+						req.session[key] = value
+					# copy to the old `session.user` location, for backward-comptability
+					req.session.user = req.session.passport.user
+					req.session.save (err) ->
+						if err?
+							logger.err {user_id: user._id}, "error saving regenerated session after login"
+							return next(err)
+						UserSessionsManager.trackSession(user, req.sessionID, () ->)
+						res.json {redir: req._redir}
+			else
+				res.json message: info
+		)(req, res, next)
+
+	doPassportLogin: (req, username, password, done) ->
+		email = username.toLowerCase()
+		redir = Url.parse(req?.body?.redir or "/project").path
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+			return done(err) if err?
 			if !isAllowed
 				logger.log email:email, "too many login requests"
-				res.statusCode = 429
-				return res.send
-					message:
-						text: req.i18n.translate("to_many_login_requests_2_mins"),
-						type: 'error'
+				return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
 			AuthenticationManager.authenticate email: email, password, (error, user) ->
-				return next(error) if error?
+				return done(error) if error?
 				if user?
-					UserHandler.setupLoginData user, ->
-					LoginRateLimiter.recordSuccessfulLogin email
-					AuthenticationController._recordSuccessfulLogin user._id
-					AuthenticationController.establishUserSession req, user, (error) ->
-						return next(error) if error?
-						req.session.justLoggedIn = true
-						logger.log email: email, user_id: user._id.toString(), "successful log in"
-						res.json redir: redir
+					# async actions
+					UserHandler.setupLoginData(user, ()->)
+					LoginRateLimiter.recordSuccessfulLogin(email)
+					AuthenticationController._recordSuccessfulLogin(user._id)
+					Analytics.recordEvent(user._id, "user-logged-in")
+					logger.log email: email, user_id: user._id.toString(), "successful log in"
+					req.session.justLoggedIn = true
+					# capture the request ip for use when creating the session
+					user._login_req_ip = req.ip
+					req._redir = redir
+					return done(null, user)
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
-					res.json message:
-						text: req.i18n.translate("email_or_password_wrong_try_again"),
-						type: 'error'
+					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
 
-	getLoggedInUserId: (req, callback = (error, user_id) ->) ->
-		if req?.session?.user?._id?
-			callback null, req.session.user._id.toString()
+	setInSessionUser: (req, props) ->
+		for key, value of props
+			if req?.session?.passport?.user?
+				req.session.passport.user[key] = value
+			if req?.session?.user?
+				req.session.user[key] = value
+
+	isUserLoggedIn: (req) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		return (user_id not in [null, undefined, false])
+
+	# TODO: perhaps should produce an error if the current user is not present
+	getLoggedInUserId: (req) ->
+		user = AuthenticationController.getSessionUser(req)
+		if user
+			return user._id
 		else
-			callback null, null
+			return null
 
-	getLoggedInUser: (req, callback = (error, user) ->) ->
-		if req.session?.user?._id?
-			query = req.session.user._id
+	getSessionUser: (req) ->
+		if req?.session?.user?
+			return req.session.user
+		else if req?.session?.passport?.user
+			return req.session.passport.user
 		else
-			return callback null, null
-
-		UserGetter.getUser query, callback
+			return null
 
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
-			if !req.session.user?
+			if !AuthenticationController.isUserLoggedIn(req)
 				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
-				req.user = req.session.user
-				return next()
+				req.user = AuthenticationController.getSessionUser(req)
+				next()
 
 		return doRequest
 
@@ -79,7 +132,7 @@ module.exports = AuthenticationController =
 
 		if req.headers['authorization']?
 			return AuthenticationController.httpAuth(req, res, next)
-		else if req.session.user?
+		else if AuthenticationController.isUserLoggedIn(req)
 			return next()
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
@@ -96,7 +149,6 @@ module.exports = AuthenticationController =
 			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
 			AuthenticationController._redirectToLoginPage(req, res)
-
 
 	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
@@ -123,27 +175,4 @@ module.exports = AuthenticationController =
 
 	_recordFailedLogin: (callback = (error) ->) ->
 		Metrics.inc "user.login.failed"
-		callback()
-
-	establishUserSession: (req, user, callback = (error) ->) ->
-		lightUser =
-			_id: user._id
-			first_name: user.first_name
-			last_name: user.last_name
-			isAdmin: user.isAdmin
-			email: user.email
-			referal_id: user.referal_id
-			session_created: (new Date()).toISOString()
-			ip_address: req.ip
-		# Regenerate the session to get a new sessionID (cookie value) to
-		# protect against session fixation attacks
-		oldSession = req.session
-		req.session.destroy()
-		req.sessionStore.generate(req)
-		for key, value of oldSession
-			req.session[key] = value
-
-		req.session.user = lightUser
-
-		UserSessionsManager.trackSession(user, req.sessionID, () ->)
 		callback()

@@ -3,7 +3,6 @@ extends ../layout
 block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
-	- var suppressDefaultJs = true
 	- var suppressSystemMessages = true
 
 block content
@@ -66,7 +65,7 @@ block content
 					.ui-layout-center
 						include ./editor/editor
 						include ./editor/binary-file
-						include ./editor/track-changes
+						include ./editor/history
 						include ./editor/publish-template
 
 			.ui-layout-east
@@ -86,7 +85,11 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(src='/socket.io/socket.io.js')
+block requirejs
+	script(type="text/javascript" src='/socket.io/socket.io.js')
+
+	//- don't use cdn for worker
+	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
@@ -100,47 +103,43 @@ block content
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {qs:{config:'TeX-AMS_HTML', fingerprint:false}})}",
-				"moment": "libs/moment-2.7.0",
-				"libs/pdf": "libs/pdfjs-1.3.91/pdf"
+				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
+				"moment": "libs/#{lib('moment')}",
+				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
+				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
+				"ace": "#{lib('ace')}"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
-				"libs/pdf": {
-					deps: ["libs/pdfjs-1.3.91/compatibility"]
+				"pdfjs-dist/build/pdf": {
+					"deps": ["libs/#{lib('pdfjs')}/compatibility"]
 				},
 				"ace/ext-searchbox": {
-					deps: ["ace/ace"]
+					"deps": ["ace/ace"]
 				},
 				"ace/ext-language_tools": {
-					deps: ["ace/ace"]
+					"deps": ["ace/ace"]
 				}
 			},
-			config:{
-				moment:{
-					noGlobal: true
+			"config":{
+				"moment":{
+					"noGlobal": true
 				}
 			}
 		};
-		window.aceFingerprint = "#{fingerprint(jsPath + 'ace/ace.js')}"
+		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 
-	- locals.suppressDefaultJs = true
-
-	- var pdfPath = 'libs/pdfjs-1.3.91/pdf.worker.js'
-	- var fingerprintedPath = fingerprint(jsPath+pdfPath)
-	- var pdfJsWorkerPath = buildJsPath(pdfPath, {cdn:false,qs:{fingerprint:fingerprintedPath}}) // don't use worker for cdn
-
+	- var aceWorkerPath = user.betaProgram ? buildJsPath(lib('ace'), {cdn:false,fingerprint:false}) : "" // don't use cdn for worker
 
 	script(type='text/javascript').
-		window.pdfJsWorkerPath = "#{pdfJsWorkerPath}";
+		window.aceWorkerPath = "#{aceWorkerPath}";
 
 	script(
 		data-main=buildJsPath("ide.js", {fingerprint:false}),
 		baseurl=fullJsPath,
-		data-ace-base=buildJsPath('ace', {fingerprint:false}),
+		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
 		src=buildJsPath('libs/require.js')
 	)
 
-		
-
+	

@@ -19,8 +19,11 @@ describe "AuthenticationController", ->
 			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub() }
 			"settings-sharelatex": {}
+			"passport": @passport =
+				authenticate: sinon.stub().returns(sinon.stub())
 			"../User/UserSessionsManager": @UserSessionsManager =
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
@@ -38,35 +41,165 @@ describe "AuthenticationController", ->
 		@callback = @next = sinon.stub()
 		tk.freeze(Date.now())
 
-
 	afterEach ->
 		tk.reset()
 
-	describe "login", ->
+	describe 'isUserLoggedIn', () ->
+
+		beforeEach ->
+			@stub = sinon.stub(@AuthenticationController, 'getLoggedInUserId')
+
+		afterEach ->
+			@stub.restore()
+
+		it 'should do the right thing in all cases', () ->
+			@AuthenticationController.getLoggedInUserId.returns('some_id')
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal true
+			@AuthenticationController.getLoggedInUserId.returns(null)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+			@AuthenticationController.getLoggedInUserId.returns(false)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+			@AuthenticationController.getLoggedInUserId.returns(undefined)
+			expect(@AuthenticationController.isUserLoggedIn(@req)).to.equal false
+
+	describe 'setInSessionUser', () ->
+
+		beforeEach ->
+			@user = {
+				_id: 'id'
+				first_name: 'a'
+				last_name:  'b'
+				email:      'c'
+			}
+			@req.session.passport = {user: @user}
+			@req.session.user = @user
+
+		it 'should update the right properties', () ->
+			@AuthenticationController.setInSessionUser(@req, {first_name: 'new_first_name', email: 'new_email'})
+			expectedUser = {
+				_id: 'id'
+				first_name: 'new_first_name'
+				last_name:  'b'
+				email:      'new_email'
+			}
+			expect(@req.session.passport.user).to.deep.equal(expectedUser)
+			expect(@req.session.user).to.deep.equal(expectedUser)
+
+	describe 'passportLogin', ->
+
+		beforeEach ->
+			@info = null
+			@req.login = sinon.stub().callsArgWith(1, null)
+			@res.json = sinon.stub()
+			@req.session = @session = {passport: {user: @user}}
+			@req.session.destroy = sinon.stub()
+			@req.session.save = sinon.stub().callsArgWith(0, null)
+			@req.sessionStore = {generate: sinon.stub()}
+			@passport.authenticate.callsArgWith(1, null, @user, @info)
+
+		it 'should call passport.authenticate', () ->
+			@AuthenticationController.passportLogin @req, @res, @next
+			@passport.authenticate.callCount.should.equal 1
+
+		describe 'when authenticate produces an error', ->
+
+			beforeEach ->
+				@err = new Error('woops')
+				@passport.authenticate.callsArgWith(1, @err)
+
+			it 'should return next with an error', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@next.calledWith(@err).should.equal true
+
+		describe 'when authenticate produces a user', ->
+
+			beforeEach ->
+				@req._redir = 'some_redirect'
+				@passport.authenticate.callsArgWith(1, null, @user, @info)
+
+			afterEach ->
+				delete @req._redir
+
+			it 'should call req.login', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@req.login.callCount.should.equal 1
+				@req.login.calledWith(@user).should.equal true
+
+			it 'should send a json response with redirect', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({redir: @req._redir}).should.equal true
+
+			describe 'when session.save produces an error', () ->
+				beforeEach ->
+					@req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
+
+				it 'should return next with an error', () ->
+					@AuthenticationController.passportLogin @req, @res, @next
+					@next.calledWith(@err).should.equal true
+
+				it 'should not return json', () ->
+					@AuthenticationController.passportLogin @req, @res, @next
+					@res.json.callCount.should.equal 0
+
+		describe 'when authenticate does not produce a user', ->
+
+			beforeEach ->
+				@info = {text: 'a', type: 'b'}
+				@passport.authenticate.callsArgWith(1, null, false, @info)
+
+			it 'should not call req.login', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@req.login.callCount.should.equal 0
+
+			it 'should send a json response with redirect', () ->
+				@AuthenticationController.passportLogin @req, @res, @next
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({message: @info}).should.equal true
+
+	describe 'getSessionUser', ->
+
+		it 'should get the user object from session', ->
+			@req.session =
+				passport:
+					user: {_id: 'one'}
+			user = @AuthenticationController.getSessionUser(@req)
+			expect(user).to.deep.equal {_id: 'one'}
+
+		it 'should work with legacy sessions', ->
+			@req.session =
+				user: {_id: 'one'}
+			user = @AuthenticationController.getSessionUser(@req)
+			expect(user).to.deep.equal {_id: 'one'}
+
+	describe "doPassportLogin", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
-			@AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
+			# @AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
 			@req.body =
 				email: @email
 				password: @password
 				redir: @redir = "/path/to/redir/to"
+			@cb = sinon.stub()
 
 		describe "when the users rate limit", ->
 
-			it "should block the request if the limit has been exceeded", (done)->
+			beforeEach ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, false)
-				@res =
-					send: (code)=>
-						@res.statusCode.should.equal 429
-						done()
-				@AuthenticationController.login(@req, @res)
+
+			it "should block the request if the limit has been exceeded", (done)->
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
+				@cb.callCount.should.equal 1
+				@cb.calledWith(null, null).should.equal true
+				done()
 
 		describe 'when the user is authenticated', ->
 			beforeEach ->
+				@cb = sinon.stub()
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
-				@AuthenticationController.login(@req, @res)
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
 			it "should attempt to authorise the user", ->
 				@AuthenticationManager.authenticate
@@ -77,15 +210,13 @@ describe "AuthenticationController", ->
 				@UserHandler.setupLoginData.calledWith(@user).should.equal true
 
 			it "should establish the user's session", ->
-				@AuthenticationController.establishUserSession
-					.calledWith(@req, @user)
-					.should.equal true
+				@cb.calledWith(null, @user).should.equal true
 
 			it "should set res.session.justLoggedIn", ->
 				@req.session.justLoggedIn.should.equal true
 
 			it "should redirect the user to the specified location", ->
-				expect(@res.body).to.deep.equal redir: @redir
+				expect(@req._redir).to.deep.equal @redir
 
 			it "should record the successful login", ->
 				@AuthenticationController._recordSuccessfulLogin
@@ -100,22 +231,26 @@ describe "AuthenticationController", ->
 					.calledWith(email: @email.toLowerCase(), user_id: @user._id.toString(), "successful log in")
 					.should.equal true
 
+			it "should track the login event", ->
+				@AnalyticsManager.recordEvent
+					.calledWith(@user._id, "user-logged-in")
+					.should.equal true
 
 		describe 'when the user is not authenticated', ->
 			beforeEach ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, null)
-				@AuthenticationController.login(@req, @res)
+				@cb = sinon.stub()
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
-			it "should return an error", ->
+			it "should not establish the login", ->
+				@cb.callCount.should.equal 1
+				@cb.calledWith(null, false)
 				# @res.body.should.exist
-				expect(@res.body.message).to.exist
+				expect(@cb.lastCall.args[2]).to.contain.all.keys ['text', 'type']
 					# message:
 					# 	text: 'Your email or password were incorrect. Please try again',
 					# 	type: 'error'
-
-			it "should not establish a session", ->
-				@AuthenticationController.establishUserSession.called.should.equal false
 
 			it "should not setup the user data in the background", ->
 				@UserHandler.setupLoginData.called.should.equal false
@@ -133,10 +268,11 @@ describe "AuthenticationController", ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@req.body.redir = "http://www.facebook.com/test"
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
-				@AuthenticationController.login(@req, @res)
+				@cb = sinon.stub()
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
 			it "should only redirect to the local path", ->
-				expect(@res.body).to.deep.equal redir: "/test"
+				expect(@req._redir).to.equal "/test"
 
 	describe "getLoggedInUserId", ->
 
@@ -144,48 +280,38 @@ describe "AuthenticationController", ->
 			@req =
 				session :{}
 
-		it "should return the user id from the session", (done)->
+		it "should return the user id from the session", ()->
 			@user_id = "2134"
 			@req.session.user =
 				_id:@user_id
-			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(user_id).to.equal @user_id
-				done()
+			result = @AuthenticationController.getLoggedInUserId @req
+			expect(result).to.equal @user_id
 
-		it "should return null if there is no user on the session", (done)->
-			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(user_id).to.be.null
-				done()
+		it 'should return user for passport session', () ->
+			@user_id = "2134"
+			@req.session = {
+				passport: {
+					user: {
+						_id:@user_id
+					}
+				}
+		 	}
+			result = @AuthenticationController.getLoggedInUserId @req
+			expect(result).to.equal @user_id
 
-		it "should return null if there is no session", (done)->
+		it "should return null if there is no user on the session", ()->
+			result = @AuthenticationController.getLoggedInUserId @req
+			expect(result).to.equal null
+
+		it "should return null if there is no session", ()->
 			@req = {}
-			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(user_id).to.be.null
-				done()
+			result = @AuthenticationController.getLoggedInUserId @req
+			expect(result).to.equal null
 
-		it "should return null if there is no req", (done)->
+		it "should return null if there is no req", ()->
 			@req = {}
-			@AuthenticationController.getLoggedInUserId @req, (err, user_id)=>
-				expect(user_id).to.be.null
-				done()
-
-	describe "getLoggedInUser", ->
-		beforeEach ->
-			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
-
-		describe "with an established session", ->
-			beforeEach ->
-				@req.session =
-					user: @user
-				@AuthenticationController.getLoggedInUser(@req, @callback)
-
-			it "should look up the user in the database", ->
-				@UserGetter.getUser
-					.calledWith(@user._id)
-					.should.equal true
-
-			it "should return the user", ->
-				@callback.calledWith(null, @user).should.equal true
+			result = @AuthenticationController.getLoggedInUserId @req
+			expect(result).to.equal null
 
 	describe "requireLogin", ->
 		beforeEach ->
@@ -202,9 +328,6 @@ describe "AuthenticationController", ->
 						email: "user@sharelatex.com"
 					}
 				@middleware(@req, @res, @next)
-
-			it "should set the user property on the request", ->
-				@req.user.should.deep.equal @user
 
 			it "should call the next method in the chain", ->
 				@next.called.should.equal true
@@ -256,7 +379,7 @@ describe "AuthenticationController", ->
 		describe "with a user session", ->
 			beforeEach ->
 				@req.session =
-					user: {"mock": "user"}
+					user: {"mock": "user", "_id": "some_id"}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 
 			it "should call next() directly", ->
@@ -264,6 +387,7 @@ describe "AuthenticationController", ->
 
 		describe "with no login credentials", ->
 			beforeEach ->
+				@req.session = {}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 
 			it "should redirect to the /login page", ->
@@ -360,34 +484,4 @@ describe "AuthenticationController", ->
 				.should.equal true
 
 		it "should call the callback", ->
-			@callback.called.should.equal true
-
-	describe "establishUserSession", ->
-		beforeEach ->
-			@req.session =
-				save: sinon.stub().callsArg(0)
-				destroy : sinon.stub()
-			@req.sessionStore =
-				generate: sinon.stub()
-			@req.ip = "1.2.3.4"
-			@AuthenticationController.establishUserSession @req, @user, @callback
-
-		it "should set the session user to a basic version of the user", ->
-			@req.session.user._id.should.equal @user._id
-			@req.session.user.email.should.equal @user.email
-			@req.session.user.first_name.should.equal @user.first_name
-			@req.session.user.last_name.should.equal @user.last_name
-			@req.session.user.referal_id.should.equal @user.referal_id
-			@req.session.user.isAdmin.should.equal @user.isAdmin
-			@req.session.user.ip_address.should.equal @req.ip
-			expect(typeof @req.session.user.ip_address).to.equal 'string'
-			expect(typeof @req.session.user.session_created).to.equal 'string'
-
-		it "should destroy the session", ->
-			@req.session.destroy.called.should.equal true
-
-		it "should regenerate the session to protect against session fixation", ->
-			@req.sessionStore.generate.calledWith(@req).should.equal true
-
-		it "should return the callback", ->
 			@callback.called.should.equal true

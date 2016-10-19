@@ -1,24 +1,46 @@
 define [
 	"base"
-], (App) ->
+	"pdfjs-dist/build/pdf"
+], (App, PDFJS) ->
 	# App = angular.module 'PDFRenderer', ['pdfAnnotations', 'pdfTextLayer']
 
 	App.factory 'PDFRenderer', ['$q', '$timeout', 'pdfAnnotations', 'pdfTextLayer', 'pdfSpinner', ($q, $timeout, pdfAnnotations, pdfTextLayer, pdfSpinner) ->
+
+		# Have a single worker used by all rendering, to avoid reloading
+		RenderThread = { worker: null, count: 0}
+
+		getRenderThread = () ->
+			if RenderThread.count > 16 # recycle the worker periodically to avoid leaks
+				RenderThread.readyToDestroy = true
+				RenderThread = { worker: null, count: 0 }
+			RenderThread.worker ||= new PDFJS.PDFWorker('pdfjsworker')
+			RenderThread.count++
+			return RenderThread
+
+		resetWorker = (thread) ->
+			thread.worker.destroy() if thread.readyToDestroy
+
+		# The PDF page renderer
 
 		class PDFRenderer
 			JOB_QUEUE_INTERVAL: 25
 			PAGE_LOAD_TIMEOUT: 60*1000
 			INDICATOR_DELAY1: 100  # time to delay before showing the indicator
 			INDICATOR_DELAY2: 250  # time until the indicator starts animating
+			TEXTLAYER_TIMEOUT: 100
 
 			constructor: (@url, @options) ->
-				# PDFJS.disableFontFace = true  # avoids repaints, uses worker more
+				if window.location?.search?.indexOf("disable-font-face=true") >= 0
+					window.PDFJS.disableFontFace = true
+				else
+					window.PDFJS.disableFontFace = false
 				if @options.disableAutoFetch
-					PDFJS.disableAutoFetch = true # prevent loading whole file
+					window.PDFJS.disableAutoFetch = true # prevent loading whole file
 				# PDFJS.disableStream
 				# PDFJS.disableRange
 				@scale = @options.scale || 1
-				@pdfjs = PDFJS.getDocument {url: @url, rangeChunkSize: 2*65536}
+				@thread = getRenderThread()
+				@pdfjs = PDFJS.getDocument {url: @url, rangeChunkSize: 2*65536, worker: @thread.worker}
 				@pdfjs.onProgress = @options.progressCallback
 				@document = $q.when(@pdfjs)
 				@navigateFn = @options.navigateFn
@@ -243,6 +265,12 @@ define [
 					return
 
 				canvas = $('<canvas class="pdf-canvas pdfng-rendering"></canvas>')
+				# In Windows+IE we must have the canvas in the DOM during
+				# rendering to see the fonts defined in the DOM. If we try to
+				# render 'offscreen' then all the text will be sans-serif.
+				# Previously we rendered offscreen and added in the canvas
+				# when rendering was complete.
+				element.canvas.replaceWith(canvas)
 
 				viewport = page.getViewport (scale)
 
@@ -280,6 +308,7 @@ define [
 				textLayer = new pdfTextLayer({
 					textLayerDiv: element.text[0]
 					viewport: viewport
+					renderer: PDFJS.renderTextLayer
 				})
 
 				annotationsLayer = new pdfAnnotations({
@@ -294,12 +323,14 @@ define [
 					transform: [pixelRatio, 0, 0, pixelRatio, 0, 0]
 				}
 
+				textLayerTimeout = @TEXTLAYER_TIMEOUT
+
 				result.then () ->
 					# page render success
-					element.canvas.replaceWith(canvas)
 					canvas.removeClass('pdfng-rendering')
-					page.getTextContent().then (textContent) ->
+					page.getTextContent({normalizeWhitespace: true}).then (textContent) ->
 						textLayer.setTextContent textContent
+						textLayer.render(textLayerTimeout)
 					, (error) ->
 						self.errorCallback?(error)
 					page.getAnnotations().then (annotations) ->
@@ -318,8 +349,9 @@ define [
 			destroy: () ->
 				@shuttingDown = true
 				@resetState()
-				@pdfjs.then (document) ->
+				@pdfjs.then (document) =>
 					document.cleanup()
 					document.destroy()
+					resetWorker(@thread)
 
 		]

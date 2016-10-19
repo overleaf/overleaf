@@ -18,6 +18,8 @@ InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
 ProjectGetter = require("./ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
+AuthenticationController = require("../Authentication/AuthenticationController")
+PackageVersions = require("../../infrastructure/PackageVersions")
 
 module.exports = ProjectController =
 
@@ -45,10 +47,10 @@ module.exports = ProjectController =
 		async.series jobs, (error) ->
 			return next(error) if error?
 			res.sendStatus(204)
-			
+
 	updateProjectAdminSettings: (req, res, next) ->
 		project_id = req.params.Project_id
-		
+
 		jobs = []
 		if req.body.publicAccessLevel?
 			jobs.push (callback) ->
@@ -88,32 +90,33 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
 		logger.log project_id:project_id, projectName:projectName, "cloning project"
-		if !req.session.user?
+		if !AuthenticationController.isUserLoggedIn(req)
 			return res.send redir:"/register"
-		projectDuplicator.duplicate req.session.user, project_id, projectName, (err, project)->
+		currentUser = AuthenticationController.getSessionUser(req)
+		projectDuplicator.duplicate currentUser, project_id, projectName, (err, project)->
 			if err?
-				logger.error err:err, project_id: project_id, user_id: req.session.user._id, "error cloning project"
+				logger.error err:err, project_id: project_id, user_id: currentUser._id, "error cloning project"
 				return next(err)
 			res.send(project_id:project._id)
 
 
 	newProject: (req, res)->
-		user = req.session.user
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		projectName = req.body.projectName?.trim()
 		template = req.body.template
-		logger.log user: user, projectType: template, name: projectName, "creating project"
+		logger.log user: user_id, projectType: template, name: projectName, "creating project"
 		async.waterfall [
 			(cb)->
 				if template == 'example'
-					projectCreationHandler.createExampleProject user._id, projectName, cb
+					projectCreationHandler.createExampleProject user_id, projectName, cb
 				else
-					projectCreationHandler.createBasicProject user._id, projectName, cb
+					projectCreationHandler.createBasicProject user_id, projectName, cb
 		], (err, project)->
 			if err?
-				logger.error err: err, project: project, user: user, name: projectName, templateType: template, "error creating project"
+				logger.error err: err, project: project, user: user_id, name: projectName, templateType: template, "error creating project"
 				res.sendStatus 500
 			else
-				logger.log project: project, user: user, name: projectName, templateType: template, "created project"
+				logger.log project: project, user: user_id, name: projectName, templateType: template, "created project"
 				res.send {project_id:project._id}
 
 
@@ -131,7 +134,8 @@ module.exports = ProjectController =
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
-		user_id = req.session.user._id
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		currentUser = AuthenticationController.getSessionUser(req)
 		async.parallel {
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
@@ -140,7 +144,7 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
 			hasSubscription: (cb)->
-				LimitationsManager.userHasSubscriptionOrIsGroupMember req.session.user, cb
+				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
 				User.findById user_id, "featureSwitches", cb
 			}, (err, results)->
@@ -149,7 +153,7 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
-				notifications = require("underscore").map results.notifications, (notification)-> 
+				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
 				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
@@ -183,8 +187,8 @@ module.exports = ProjectController =
 		if !Settings.editorIsOpen
 			return res.render("general/closed", {title:"updating_site"})
 
-		if req.session.user?
-			user_id = req.session.user._id
+		if AuthenticationController.isUserLoggedIn(req)
+			user_id = AuthenticationController.getLoggedInUserId(req)
 			anonymous = false
 		else
 			anonymous = true
@@ -259,6 +263,7 @@ module.exports = ProjectController =
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						pdfViewer : user.ace.pdfViewer
+						syntaxValidation: user.ace.syntaxValidation
 					}
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
@@ -320,6 +325,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 		autoComplete: true
 		spellCheckLanguage: ""
 		pdfViewer: ""
+		syntaxValidation: true
 	subscription:
 		freeTrial:
 			allowed: true
@@ -328,7 +334,7 @@ defaultSettingsForAnonymousUser = (user_id)->
 
 THEME_LIST = []
 do generateThemeList = () ->
-	files = fs.readdirSync __dirname + '/../../../../public/js/ace'
+	files = fs.readdirSync __dirname + '/../../../../public/js/' + PackageVersions.lib('ace')
 	for file in files
 		if file.slice(-2) == "js" and file.match(/^theme-/)
 			cleanName = file.slice(0,-3).slice(6)

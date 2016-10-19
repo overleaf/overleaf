@@ -147,6 +147,7 @@ module.exports = ClsiManager =
 								timeout: options.timeout
 								imageName: project.imageName
 								draft: !!options.draft
+								check: options.check
 							rootResourcePath: rootResourcePath
 							resources: resources
 					}

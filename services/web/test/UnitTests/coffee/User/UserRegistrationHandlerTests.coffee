@@ -33,6 +33,7 @@ describe "UserRegistrationHandler", ->
 			"crypto": @crypto = {}
 			"../Email/EmailHandler": @EmailHandler
 			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
+			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
 			"settings-sharelatex": @settings = {siteUrl: "http://sl.example.com"}
 
 		@passingRequest = {email:"something@email.com", password:"123"}
@@ -130,6 +131,13 @@ describe "UserRegistrationHandler", ->
 			it "should add the user to the news letter manager", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
 					@NewsLetterManager.subscribe.calledWith(@user).should.equal true
+					done()
+
+			it "should track the registration event", (done)->
+				@handler.registerNewUser @passingRequest, (err)=>
+					@AnalyticsManager.recordEvent
+						.calledWith(@user._id, "user-registered")
+						.should.equal true
 					done()
 
 

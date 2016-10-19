@@ -133,7 +133,7 @@ expect_no_admin_access = (user, project_id, options, callback) ->
 
 describe "Authorization", ->
 	before (done) ->
-		@timeout(10000)
+		@timeout(90000)
 		@owner = new User()
 		@other1 = new User()
 		@other2 = new User()

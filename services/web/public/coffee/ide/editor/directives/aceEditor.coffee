@@ -7,9 +7,16 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager) ->
+	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
+], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
-	
+
+	# set the path for ace workers if using a CDN (from editor.jade)
+	if window.aceWorkerPath != ""
+		ace.config.set('workerPath', "#{window.aceWorkerPath}")
+	else
+		ace.config.setDefaultValue("session", "useWorker", false)
+
 	# Ace loads its script itself, so we need to hook in to be able to clear
 	# the cache.
 	if !ace.config._moduleUrl?
@@ -37,6 +44,7 @@ define [
 				annotations: "="
 				navigateHighlights: "=",
 				onCtrlEnter: "="
+				syntaxValidation: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -62,6 +70,9 @@ define [
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+				trackChangesManager   = new TrackChangesManager(scope, editor, element)
+				if window.location.search.match /tcon=true/ # track changes on
+					trackChangesManager.enabled = true
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -174,7 +185,6 @@ define [
 						editor.setValue(text, -1)
 						session = editor.getSession()
 						session.setUseWrapMode(true)
-						session.setMode("ace/mode/latex")
 
 				scope.$watch "annotations", (annotations) ->
 					session = editor.getSession()
@@ -182,6 +192,10 @@ define [
 
 				scope.$watch "readOnly", (value) ->
 					editor.setReadOnly !!value
+
+				scope.$watch "syntaxValidation", (value) ->
+					session = editor.getSession()
+					session.setOption("useWorker", value);
 
 				editor.setOption("scrollPastEnd", true)
 
@@ -199,7 +213,10 @@ define [
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
-					editor.setSession(new EditSession(lines))
+					session = editor.getSession()
+					if session?
+						session.destroy()
+					editor.setSession(new EditSession(lines, "ace/mode/latex"))
 					resetSession()
 					session = editor.getSession()
 
@@ -209,7 +226,9 @@ define [
 					sharejs_doc.on "remoteop.recordForUndo", () =>
 						undoManager.nextUpdateIsRemote = true
 
+					editor.initing = true
 					sharejs_doc.attachToAce(editor)
+					editor.initing = false
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations

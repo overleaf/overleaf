@@ -20,12 +20,15 @@ mockSubscriptions =
 describe "SubscriptionController sanboxed", ->
 
 	beforeEach ->
-		@user = {email:"tom@yahoo.com"}
+		@user = {email:"tom@yahoo.com", _id: 'one'}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
 
 		@AuthenticationController =
 			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
-		@SubscriptionHandler = 
+			getLoggedInUserId: sinon.stub().returns(@user._id)
+			getSessionUser: sinon.stub().returns(@user)
+			isUserLoggedIn: sinon.stub().returns(true)
+		@SubscriptionHandler =
 			createSubscription: sinon.stub().callsArgWith(3)
 			updateSubscription: sinon.stub().callsArgWith(3)
 			reactivateSubscription: sinon.stub().callsArgWith(1)
@@ -36,19 +39,19 @@ describe "SubscriptionController sanboxed", ->
 		@PlansLocator =
 			findLocalPlanInSettings: sinon.stub()
 
-		@LimitationsManager = 
+		@LimitationsManager =
 			userHasSubscriptionOrIsGroupMember: sinon.stub()
 			userHasSubscription : sinon.stub()
 
-		@RecurlyWrapper = 
+		@RecurlyWrapper =
 			sign: sinon.stub().callsArgWith(1, null, "somthing")
 
-		@SubscriptionViewModelBuilder = 
+		@SubscriptionViewModelBuilder =
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
 			buildViewModel: sinon.stub()
-		@settings = 
+		@settings =
 			coupon_codes:
-				upgradeToAnnualPromo: 
+				upgradeToAnnualPromo:
 					student:"STUDENTCODEHERE"
 					collaborator:"COLLABORATORCODEHERE"
 			apis:
@@ -58,8 +61,8 @@ describe "SubscriptionController sanboxed", ->
 			gaExperiments:{}
 		@GeoIpLookup =
 			getCurrencyCode:sinon.stub()
-		@SubscriptionDomainHandler = 
-			getDomainLicencePage:sinon.stub()	
+		@SubscriptionDomainHandler =
+			getDomainLicencePage:sinon.stub()
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'./SubscriptionHandler': @SubscriptionHandler
@@ -68,7 +71,7 @@ describe "SubscriptionController sanboxed", ->
 			"./LimitationsManager": @LimitationsManager
 			"../../infrastructure/GeoIpLookup":@GeoIpLookup
 			'./RecurlyWrapper': @RecurlyWrapper
-			"logger-sharelatex": 
+			"logger-sharelatex":
 				log:->
 				warn:->
 			"settings-sharelatex": @settings
@@ -78,7 +81,7 @@ describe "SubscriptionController sanboxed", ->
 		@res = new MockResponse()
 		@req = new MockRequest()
 		@req.body = {}
-		@req.query = 
+		@req.query =
 			planCode:"123123"
 
 		@stubbedCurrencyCode = "GBP"
@@ -109,7 +112,7 @@ describe "SubscriptionController sanboxed", ->
 
 			it "should set the correct variables for the template", ->
 				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/update"
+				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/billing-details/update"
 				@res.renderedVariables.user.id.should.equal @user._id
 
 		describe "with a user without subscription", ->
@@ -175,7 +178,7 @@ describe "SubscriptionController sanboxed", ->
 				@res.render = (page, opts)=>
 					opts.currency.should.equal "EUR"
 					done()
-				@SubscriptionController.paymentPage @req, @res	
+				@SubscriptionController.paymentPage @req, @res
 
 
 			it "should use the geo ip currency if non is provided", (done)->
@@ -183,8 +186,8 @@ describe "SubscriptionController sanboxed", ->
 				@res.render = (page, opts)=>
 					opts.currency.should.equal @stubbedCurrencyCode
 					done()
-				@SubscriptionController.paymentPage @req, @res	
-		
+				@SubscriptionController.paymentPage @req, @res
+
 	describe "successful_subscription", ->
 		beforeEach (done) ->
 			@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, {})
@@ -226,7 +229,7 @@ describe "SubscriptionController sanboxed", ->
 
 				it "should render the dashboard", ->
 					@res.renderedTemplate.should.equal "subscriptions/dashboard"
-				
+
 		describe "with a user with a paid subscription", ->
 			beforeEach (done) ->
 				@res.callback = done
@@ -238,7 +241,7 @@ describe "SubscriptionController sanboxed", ->
 				@res.rendered.should.equal true
 				@res.renderedTemplate.should.equal "subscriptions/dashboard"
 				done()
-			
+
 			it "should set the correct subscription details", ->
 				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
 
@@ -251,7 +254,7 @@ describe "SubscriptionController sanboxed", ->
 
 			it "should render the dashboard", ->
 				@res.renderedTemplate.should.equal "subscriptions/dashboard"
-			
+
 			it "should set the correct subscription details", ->
 				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
 
@@ -431,7 +434,7 @@ describe "SubscriptionController sanboxed", ->
 	describe "processUpgradeToAnnualPlan", ->
 
 		beforeEach ->
-			
+
 		it "should tell the subscription handler to update the subscription with the annual plan and apply a coupon code", (done)->
 			@req.body =
 				planName:"student"
@@ -452,6 +455,3 @@ describe "SubscriptionController sanboxed", ->
 				done()
 
 			@SubscriptionController.processUpgradeToAnnualPlan @req, @res
-
-
-

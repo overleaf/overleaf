@@ -34,6 +34,9 @@ describe "BetaProgramController", ->
 				err: sinon.stub()
 				error: sinon.stub()
 			}
+			'../Authentication/AuthenticationController': @AuthenticationController = {
+				getLoggedInUserId: sinon.stub().returns(@user._id)
+			}
 		@res =
 			send: sinon.stub()
 			redirect: sinon.stub()

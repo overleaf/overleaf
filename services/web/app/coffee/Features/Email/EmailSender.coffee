@@ -49,8 +49,11 @@ module.exports =
 			from: defaultFromAddress
 			subject: options.subject
 			html: options.html
+			text: options.text
 			replyTo: options.replyTo || Settings.email.replyToAddress
 			socketTimeout: 30 * 1000
+		if Settings.email.textEncoding?
+			opts.textEncoding = textEncoding
 		client.sendMail options, (err, res)->
 			if err?
 				logger.err err:err, "error sending message"

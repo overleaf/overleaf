@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, sixpack) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.notifications = window.data.notifications
@@ -11,15 +11,13 @@ define [
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
 		$scope.reverse = true
+		$scope.searchText = 
+			value : ""
 
-		if $scope.projects.length > 0
-			$scope.first_sign_up = "default"
-		else
-			sixpack.participate 'first_sign_up', ['default', 'minimial'], (chosenVariation, rawResponse)->
-				$scope.first_sign_up = chosenVariation
-				$timeout () ->
-					recalculateProjectListHeight()
-				, 10
+		if $scope.projects.length == 0
+			$timeout () ->
+				recalculateProjectListHeight()
+			, 10
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top
@@ -73,7 +71,7 @@ define [
 			$scope.updateVisibleProjects()
 
 		$scope.clearSearchText = () ->
-			$scope.searchText = ""
+			$scope.searchText.value = ""
 			$scope.filter = "all"
 			$scope.$emit "search:clear"
 			$scope.updateVisibleProjects()
@@ -100,8 +98,8 @@ define [
 			for project in $scope.projects
 				visible = true
 				# Only show if it matches any search text
-				if $scope.searchText? and $scope.searchText != ""
-					if !project.name.toLowerCase().match($scope.searchText.toLowerCase())
+				if $scope.searchText.value? and $scope.searchText.value != ""
+					if !project.name.toLowerCase().match($scope.searchText.value.toLowerCase())
 						visible = false
 				# Only show if it matches the selected tag
 				if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids

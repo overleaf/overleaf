@@ -11,7 +11,6 @@ SubscriptionRouter = require './Features/Subscription/SubscriptionRouter'
 UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('./infrastructure/Metrics')
 ReferalController = require('./Features/Referal/ReferalController')
-ReferalMiddleware = require('./Features/Referal/ReferalMiddleware')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 NotificationsController = require("./Features/Notifications/NotificationsController")
@@ -22,6 +21,7 @@ UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
+ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
@@ -38,6 +38,7 @@ ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
+AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -51,7 +52,8 @@ module.exports = class Router
 		webRouter.get  '/login', UserPagesController.loginPage
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
-		webRouter.post '/login', AuthenticationController.login
+		webRouter.post '/login', AuthenticationController.passportLogin
+
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
@@ -68,12 +70,13 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, apiRouter)
 		RealTimeProxyRouter.apply(webRouter, apiRouter)
 		ContactRouter.apply(webRouter, apiRouter)
+		AnalyticsRouter.apply(webRouter, apiRouter)
 
 		Modules.applyRouter(webRouter, apiRouter)
 
 
 		if Settings.enableSubscriptions
-			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalMiddleware.getUserReferalId, ReferalController.bonus
+			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
 
 		webRouter.get '/blog', BlogController.getIndexPage
 		webRouter.get '/blog/*', BlogController.getPage
@@ -84,6 +87,9 @@ module.exports = class Router
 		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
+
+		webRouter.get  '/user/sessions', AuthenticationController.requireLogin(), UserPagesController.sessionsPage
+		webRouter.post '/user/sessions/clear', AuthenticationController.requireLogin(), UserController.clearSessions
 
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
 		webRouter.delete '/user', AuthenticationController.requireLogin(), UserController.deleteUser
@@ -179,7 +185,7 @@ module.exports = class Router
 		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
 
 		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
-		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead	
+		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
@@ -249,14 +255,27 @@ module.exports = class Router
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
-				res.writeHead statusCode
-				res.end message
-			CompileManager.compile req.params.Project_id, "test-compile", {}, () ->
-				sendRes 200, "Compiler returned in less than 10 seconds"
-			setTimeout (() ->
+				res.status statusCode
+				res.send message
+				ClsiCookieManager.clearServerId project_id # force every compile to a new server
+			# set a timeout
+			handler = setTimeout (() ->
 				sendRes 500, "Compiler timed out"
+				handler = null
 			), 10000
+			# use a valid user id for testing
+			test_user_id = "123456789012345678901234"
+			# run the compile
+			CompileManager.compile project_id, test_user_id, {}, (error, status) ->
+				clearTimeout handler if handler?
+				if error?
+					sendRes 500, "Compiler returned error #{error.message}"
+				else if status is "success"
+					sendRes 200, "Compiler returned in less than 10 seconds"
+				else
+					sendRes 500, "Compiler returned failure #{status}"
 
 		apiRouter.get "/ip", (req, res, next) ->
 			res.send({

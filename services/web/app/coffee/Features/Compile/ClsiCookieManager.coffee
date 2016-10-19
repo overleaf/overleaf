@@ -48,6 +48,10 @@ module.exports = ClsiCookieManager =
 		multi.exec (err)->
 			callback(err, serverId)
 
+	clearServerId: (project_id, callback = (err)->)->
+		if !clsiCookiesEnabled
+			return callback()
+		rclient.del buildKey(project_id), callback
 
 	getCookieJar: (project_id, callback = (err, jar)->)->
 		if !clsiCookiesEnabled

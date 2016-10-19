@@ -106,8 +106,8 @@ module.exports = settings =
 			url: ""
 		# references:
 		# 	url: "http://localhost:3040"
-		# notifications:
-		# 	url: "http://localhost:3042" 
+		notifications:
+			url: "http://localhost:3042" 
 			
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -116,7 +116,7 @@ module.exports = settings =
 
 	# cdn:
 	# 	web:
-	# 		host:"http://cdn.sharelatex.dev:3000"
+	# 		host:"http://nowhere.sharelatex.dev"
 	#		darkHost:"http://cdn.sharelatex.dev:3000"
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
@@ -155,7 +155,7 @@ module.exports = settings =
 		collaborators: -1
 		dropbox: true
 		versioning: true
-		compileTimeout: 60
+		compileTimeout: 180
 		compileGroup: "standard"
 		references: true
 		templates: true
@@ -166,6 +166,8 @@ module.exports = settings =
 		price: 0
 		features: defaultFeatures
 	}]
+	
+	enableSubscriptions:false
 
 	# i18n
 	# ------
@@ -193,8 +195,8 @@ module.exports = settings =
 	# passwordStrengthOptions:
 	# 	pattern: "aA$3"
 	# 	length:
-	# 		min: 8
-	# 		max: 50
+	# 		min: 1
+	# 		max: 10
 
 	# Email support
 	# -------------

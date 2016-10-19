@@ -12,12 +12,15 @@ describe "ProjectController", ->
 
 		@project_id = "123213jlkj9kdlsaj"
 
-		@settings = 
+		@user =
+			_id:"!£123213kjljkl"
+			first_name: "bjkdsjfk"
+		@settings =
 			apis:
 				chat:
 					url:"chat.com"
 			siteUrl: "mysite.com"
-		@ProjectDeleter = 
+		@ProjectDeleter =
 			archiveProject: sinon.stub().callsArg(1)
 			deleteProject: sinon.stub().callsArg(1)
 			restoreProject: sinon.stub().callsArg(1)
@@ -29,7 +32,7 @@ describe "ProjectController", ->
 			createBasicProject: sinon.stub().callsArgWith(2, null, {_id:@project_id})
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
-		@LimitationsManager = 
+		@LimitationsManager =
 			userHasSubscriptionOrIsGroupMember: sinon.stub()
 		@TagsHandler =
 			getAllTags: sinon.stub()
@@ -39,7 +42,7 @@ describe "ProjectController", ->
 			findById: sinon.stub()
 		@AuthorizationManager =
 			getPrivilegeLevelForProject:sinon.stub()
-		@EditorController = 
+		@EditorController =
 			renameProject:sinon.stub()
 		@InactiveProjectManager =
 			reactivateProjectIfRequired:sinon.stub()
@@ -50,12 +53,17 @@ describe "ProjectController", ->
 		@ProjectGetter =
 			findAllUsersProjects: sinon.stub()
 			getProject: sinon.stub()
+		@AuthenticationController =
+			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
+			getLoggedInUserId: sinon.stub().returns(@user._id)
+			getSessionUser: sinon.stub().returns(@user)
+			isUserLoggedIn: sinon.stub().returns(true)
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
-			"logger-sharelatex": 
+			"logger-sharelatex":
 				log:->
 				err:->
-			"../../infrastructure/Metrics": 
+			"../../infrastructure/Metrics":
 				Timer:->
 					done:->
 				inc:->
@@ -73,21 +81,19 @@ describe "ProjectController", ->
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
 			"./ProjectGetter": @ProjectGetter
+			'../Authentication/AuthenticationController': @AuthenticationController
 
-		@user = 
-			_id:"!£123213kjljkl"
-			first_name: "bjkdsjfk"
 		@projectName = "£12321jkj9ujkljds"
-		@req = 
-			params: 
+		@req =
+			params:
 				Project_id: @project_id
 			session:
 				user: @user
 			body:
-				projectName: @projectName 
+				projectName: @projectName
 			i18n:
 				translate:->
-		@res = 
+		@res =
 			locals:
 				jsPath:"js path here"
 
@@ -139,7 +145,7 @@ describe "ProjectController", ->
 				code.should.equal 204
 				done()
 			@ProjectController.updateProjectSettings @req, @res
-	
+
 	describe "updateProjectAdminSettings", ->
 		it "should update the public access level", (done) ->
 			@EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
@@ -178,7 +184,7 @@ describe "ProjectController", ->
 			@ProjectController.restoreProject @req, @res
 
 	describe "cloneProject", ->
-		it "should call the project duplicator", (done)->	
+		it "should call the project duplicator", (done)->
 			@res.send = (json)=>
 				@ProjectDuplicator.duplicate.calledWith(@user, @project_id, @projectName).should.equal true
 				json.project_id.should.equal @project_id
@@ -214,7 +220,7 @@ describe "ProjectController", ->
 			@readOnly = [{lastUpdated:3, _id:3, owner_ref: "user-1"}]
 
 			@users =
-				'user-1': 
+				'user-1':
 					first_name: 'James'
 				'user-2':
 					first_name: 'Henry'
@@ -289,10 +295,10 @@ describe "ProjectController", ->
 	describe "loadEditor", ->
 		beforeEach ->
 			@settings.editorIsOpen = true
-			@project = 
+			@project =
 				name:"my proj"
 				_id:"213123kjlkj"
-			@user = 
+			@user =
 				_id:"123kj21k3lj"
 				ace:
 					fontSize:"massive"
@@ -351,4 +357,3 @@ describe "ProjectController", ->
 				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
 				done()
 			@ProjectController.loadEditor @req, @res
-

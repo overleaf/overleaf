@@ -27,6 +27,7 @@ describe "UserInfoController", ->
 			"./UserDeleter": @UserDeleter
 			"logger-sharelatex": log:->
 			"sanitizer":@sanitizer
+			'../Authentication/AuthenticationController': @AuthenticationController = {getLoggedInUserId: sinon.stub()}
 
 		@req = new MockRequest()
 		@res = new MockResponse()
@@ -40,6 +41,7 @@ describe "UserInfoController", ->
 			@req.session.user = @user
 			@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@user._id)
 			@UserInfoController.getLoggedInUsersPersonalInfo(@req, @res, @next)
 
 		it "should call sendFormattedPersonalInfo", ->

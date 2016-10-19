@@ -4,11 +4,12 @@ define [
 	"ide/connection/ConnectionManager"
 	"ide/editor/EditorManager"
 	"ide/online-users/OnlineUsersManager"
-	"ide/track-changes/TrackChangesManager"
+	"ide/history/HistoryManager"
 	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/SafariScrollPatcher"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -35,14 +36,15 @@ define [
 	ConnectionManager
 	EditorManager
 	OnlineUsersManager
-	TrackChangesManager
+	HistoryManager
 	PermissionsManager
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, event_tracking) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -69,19 +71,42 @@ define [
 
 		$scope.chat = {}
 
+
+		# Only run the header AB test for newly registered users.
+		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
+		_userSignUpDate = new Date(window.user.signUpDate)
+		
+		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
+		$scope.headerLabelsABVariant = ""
+
+		if ($scope.shouldABTestHeaderLabels)
+			sixpack.participate "editor-header", [ "default", "labels"], (chosenVariation) ->
+				$scope.headerLabelsABVariant = chosenVariation
+
+		$scope.trackABTestConversion = (headerItem) ->
+			event_tracking.sendMB "header-ab-conversion", {
+				headerItem: headerItem,
+				variant: $scope.headerLabelsABVariant
+			}
+
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendCountlyOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
-			event_tracking.sendCountlyOnce "ide-open-chat-once" if isOpen
+			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
 
 		$scope.$watch "ui.leftMenuShown", (isOpen) ->
-			event_tracking.sendCountlyOnce "ide-open-left-menu-once" if isOpen
+			event_tracking.sendMBOnce "ide-open-left-menu-once" if isOpen
+
+		$scope.trackHover = (feature) ->
+			event_tracking.sendMBOnce "ide-hover-#{feature}-once"
 		# End of tracking code.
 
 		window._ide = ide
+		
+		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
 
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
@@ -91,7 +116,7 @@ define [
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
-		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
+		ide.historyManager = new HistoryManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
@@ -134,6 +159,9 @@ define [
 			)
 		catch err
 			console.error err
+
+		if ide.browserIsSafari
+			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]

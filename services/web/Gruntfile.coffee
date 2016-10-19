@@ -1,4 +1,5 @@
 fs = require "fs"
+PackageVersions = require "./app/coffee/infrastructure/PackageVersions"
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -157,12 +158,13 @@ module.exports = (grunt) ->
 					inlineText: false
 					preserveLicenseComments: false
 					paths:
-						"moment": "libs/moment-2.9.0"
+						"moment": "libs/#{PackageVersions.lib('moment')}"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
-						"libs/pdf": "libs/pdfjs-1.3.91/pdf"
+						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
+						"ace": "#{PackageVersions.lib('ace')}"
 					shim:
-						"libs/pdf":
-							deps: ["libs/pdfjs-1.3.91/compatibility"]
+						"pdfjs-dist/build/pdf":
+							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
 
 					skipDirOptimize: true
 					modules: [
@@ -171,11 +173,13 @@ module.exports = (grunt) ->
 							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs", "libs/pdf"]
+							exclude: ["libs", "pdfjs-dist/build/pdf"]
 						}, {
 							name: "libs"
 						},{
 							name: "ace/mode-latex"
+						},{
+							name: "ace/worker-latex"
 						}
 
 					]
@@ -199,7 +203,7 @@ module.exports = (grunt) ->
 			acceptance:
 				src: ["test/acceptance/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
-					timeout: 10000
+					timeout: 40000
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
 
@@ -380,63 +384,10 @@ module.exports = (grunt) ->
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 
-	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
+	grunt.registerTask 'run:watch', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
+	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'exec']
 
 	grunt.registerTask 'default', 'run'
 
 	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
 
-
-	grunt.registerTask 'create-admin-user', "Create a user with the given email address and make them an admin. Update in place if the user already exists", () ->
-		done = @async()
-		email = grunt.option("email")
-		if !email?
-			console.error "Usage: grunt create-admin-user --email joe@example.com"
-			process.exit(1)
-
-		settings = require "settings-sharelatex"
-		UserRegistrationHandler = require "./app/js/Features/User/UserRegistrationHandler"
-		OneTimeTokenHandler = require "./app/js/Features/Security/OneTimeTokenHandler"
-		UserRegistrationHandler.registerNewUser {
-			email: email
-			password: require("crypto").randomBytes(32).toString("hex")
-		}, (error, user) ->
-			if error? and error?.message != "EmailAlreadyRegistered"
-				throw error
-			user.isAdmin = true
-			user.save (error) ->
-				throw error if error?
-				ONE_WEEK = 7 * 24 * 60 * 60 # seconds
-				OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
-					return next(err) if err?
-					
-					console.log ""
-					console.log """
-						Successfully created #{email} as an admin user.
-						
-						Please visit the following URL to set a password for #{email} and log in:
-						
-							#{settings.siteUrl}/user/password/set?passwordResetToken=#{token}
-						
-					"""
-					done()
-
-	grunt.registerTask 'delete-user', "deletes a user and all their data", () ->
-		done = @async()
-		email = grunt.option("email")
-		if !email?
-			console.error "Usage: grunt delete-user --email joe@example.com"
-			process.exit(1)
-		settings = require "settings-sharelatex"
-		UserGetter = require "./app/js/Features/User/UserGetter"
-		UserDeleter = require "./app/js/Features/User/UserDeleter"
-		UserGetter.getUser email:email, (error, user) ->
-			if error?
-				throw error
-			if !user?
-				console.log("user #{email} not in database, potentially already deleted")
-				return done()
-			UserDeleter.deleteUser user._id, (err)->
-				if err?
-					throw err
-				done()

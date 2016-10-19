@@ -27,12 +27,12 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					) #{translate("make_private")}
 			.row.project-member
 				.col-xs-8 {{ project.owner.email }}
-				.text-right(
+				.text-left(
 					ng-class="{'col-xs-3': project.members.length > 0, 'col-xs-4': project.members.length == 0}"
 				) #{translate("owner")}
 			.row.project-member(ng-repeat="member in project.members")
 				.col-xs-8 {{ member.email }}
-				.col-xs-3.text-right
+				.col-xs-3.text-left
 					span(ng-show="member.privileges == 'readAndWrite'") #{translate("can_edit")}
 					span(ng-show="member.privileges == 'readOnly'") #{translate("read_only")}
 				.col-xs-1
@@ -41,6 +41,23 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						tooltip="#{translate('remove_collaborator')}"
 						tooltip-placement="bottom"
 						ng-click="removeMember(member)"
+					)
+						i.fa.fa-times
+			.row.project-invite(ng-repeat="invite in project.invites")
+				.col-xs-8 {{ invite.email }}&nbsp;
+					div.small
+						| #{translate("invite_not_accepted")}.&nbsp;
+						a(href="#", ng-click="resendInvite(invite, $event)") #{translate("resend")}
+				.col-xs-3.text-left
+					// todo: get invite privileges
+					span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
+					span(ng-show="invite.privileges == 'readOnly'") #{translate("read_only")}
+				.col-xs-1
+					a(
+						href
+						tooltip="#{translate('revoke_invite')}"
+						tooltip-placement="bottom"
+						ng-click="revokeInvite(invite)"
 					)
 						i.fa.fa-times
 			.row.invite-controls
@@ -78,6 +95,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 							button.btn.btn-info(
 								type="submit"
 								ng-mousedown="addMembers()"
+								ng-keyup="$event.keyCode == 13 ? addMembers() : null"
 							) #{translate("share")}
 				div(ng-hide="canAddCollaborators")
 					p.text-center #{translate("need_to_upgrade_for_more_collabs")}. Also:
@@ -123,7 +141,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
 			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
-		button.btn.btn-primary(
+		button.btn.btn-default(
 			ng-click="done()"
 		) #{translate("close")}
 

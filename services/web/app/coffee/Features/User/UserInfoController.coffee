@@ -3,12 +3,14 @@ logger = require("logger-sharelatex")
 UserDeleter = require("./UserDeleter")
 UserUpdater = require("./UserUpdater")
 sanitize = require('sanitizer')
+AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports = UserController =
 	getLoggedInUsersPersonalInfo: (req, res, next = (error) ->) ->
-		logger.log user: req.user, "reciving request for getting logged in users personal info"
-		return next(new Error("User is not logged in")) if !req.user?
-		UserGetter.getUser req.user._id, {
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log user_id: user_id, "reciving request for getting logged in users personal info"
+		return next(new Error("User is not logged in")) if !user_id?
+		UserGetter.getUser user_id, {
 			first_name: true, last_name: true,
 			role:true, institution:true,
 			email: true, signUpDate: true
@@ -38,6 +40,3 @@ module.exports = UserController =
 			role: user.role
 			institution: user.institution
 		}
-		
-
-	
