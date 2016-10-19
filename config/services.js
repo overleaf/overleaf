@@ -3,7 +3,7 @@ module.exports =
 [{
 	name: "web",
 	repo: "https://github.com/sharelatex/web-sharelatex.git",
-	version: "master"
+	version: "ha-docker"
 }, {
 	name: "real-time",
 	repo: "https://github.com/sharelatex/real-time-sharelatex.git",
