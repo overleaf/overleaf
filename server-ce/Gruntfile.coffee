@@ -1,3 +1,4 @@
+coffee = require("coffee-script")
 fs = require "fs"
 spawn = require("child_process").spawn
 exec = require("child_process").exec
@@ -20,7 +21,6 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-concurrent'
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	grunt.loadNpmTasks "grunt-shell"
-	require('load-grunt-config')(grunt)
 
 
 	execute = {}
@@ -240,3 +240,7 @@ module.exports = (grunt) ->
 				throw new Error("Can not connect to redis")
 				return callback(err)
 			rclient.on 'error', errorHandler
+
+
+	require('load-grunt-config')(grunt)
+
