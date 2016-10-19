@@ -147,6 +147,7 @@ module.exports = (grunt) ->
 
 		checkoutVersion: (service, callback = (error) ->) ->
 			dir = service.name
+			grunt.log.write "checking out #{service.name} #{service.version}"
 			proc = spawn "git", ["checkout", service.version], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
