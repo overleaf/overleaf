@@ -103,7 +103,7 @@ define [
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
 			renderer = @editor.renderer
-			for entry_id, entry of @$scope.reviewPanel.entries
+			for entry_id, entry of (@$scope.reviewPanel?.entries or {})
 				doc_position = @_shareJsOffsetToAcePosition(entry.offset)
 				screen_position = session.documentToScreenPosition(doc_position.row, doc_position.column)
 				y = screen_position.row * renderer.lineHeight

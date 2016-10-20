@@ -48,6 +48,7 @@ define [
 				reviewPanel: "="
 				onScroll: "="
 				scrollEvents: "="
+				trackChangesEnabled: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -74,7 +75,7 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				if window.location.search.match /tcon=true/ # track changes on
+				if scope.trackChangesEnabled and window.location.search.match /tcon=true/ # track changes on
 					trackChangesManager.enabled = true
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
