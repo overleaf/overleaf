@@ -121,14 +121,13 @@ define [
 			colorScheme = ColorManager.getColorScheme(hue, @element)
 			markerLayer = @editor.renderer.$markerBack
 			klass = "track-changes-added-marker"
-			style = "background-color: #{colorScheme.highlightBackgroundColor}"
+			style = "border-color: #{colorScheme.cursor}"
 			marker_id = session.addMarker ace_range, klass, (html, range, left, top, config) ->
 				if range.isMultiLine()
 					markerLayer.drawTextMarker(html, range, klass, config, style)
 				else
 					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
 			
-			# marker_id = session.addMarker(ace_range, "track-changes-added-marker", "text")
 			@changeIdToMarkerIdMap[change.id] = marker_id
 			@updateReviewEntriesScope()
 		
