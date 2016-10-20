@@ -44,8 +44,8 @@ div.full-size(
 		)
 		#review-panel
 			.review-panel-scroller
-				.review-entry-list
-					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': entry.screenPos.y}")
+				.review-entry-list(review-panel-sorted)
+					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': top}")
 						{{ entry.content }}
 
 	.ui-layout-east
