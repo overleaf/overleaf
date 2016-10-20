@@ -58,6 +58,11 @@ define [
 
 				editor = ace.edit(element.find(".ace-editor-body")[0])
 				editor.$blockScrolling = Infinity
+
+				# disable auto insertion of brackets and quotes
+				editor.setOption('behavioursEnabled', false)
+				editor.setOption('wrapBehavioursEnabled', false)
+
 				window.editors ||= []
 				window.editors.push editor
 
