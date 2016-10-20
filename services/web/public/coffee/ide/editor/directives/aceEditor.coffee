@@ -2,14 +2,16 @@ define [
 	"base"
 	"ace/ace"
 	"ace/ext-searchbox"
+	"ace/ext-modelist"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
-], (App, Ace, SearchBox, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager) ->
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
+	ModeList = ace.require('ace/ext/modelist')
 
 	# set the path for ace workers if using a CDN (from editor.jade)
 	if window.aceWorkerPath != ""
@@ -42,7 +44,8 @@ define [
 				text: "="
 				readOnly: "="
 				annotations: "="
-				navigateHighlights: "=",
+				navigateHighlights: "="
+				fileName: "="
 				onCtrlEnter: "="
 				syntaxValidation: "="
 			}
@@ -221,8 +224,16 @@ define [
 					session = editor.getSession()
 					if session?
 						session.destroy()
-					editor.setSession(new EditSession(lines, "ace/mode/latex"))
-					resetSession()
+
+					# see if we can lookup a suitable mode from ace
+					# but fall back to text by default
+					try
+						mode = ModeList.getModeForPath(scope.fileName).mode
+					catch
+						mode = "ace/mode/text"
+
+					editor.setSession(new EditSession(lines, mode))
+
 					session = editor.getSession()
 
 					doc = session.getDocument()
