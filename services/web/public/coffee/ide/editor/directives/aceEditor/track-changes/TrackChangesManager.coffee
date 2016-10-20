@@ -9,19 +9,25 @@ define [
 		
 		constructor: (@$scope, @editor, @element) ->
 			@changesTracker = new ChangesTracker()
+			@changesTracker.track_changes = true
 			@changeIdToMarkerIdMap = {}
 			@enabled = false
 			window.changesTracker ?= @changesTracker
 
 			@changesTracker.on "insert:added", (change) =>
+				sl_console.log "[insert:added]", change
 				@_onInsertAdded(change)
 			@changesTracker.on "insert:removed", (change) =>
+				sl_console.log "[insert:removed]", change
 				@_onInsertRemoved(change)
 			@changesTracker.on "delete:added", (change) =>
+				sl_console.log "[delete:added]", change
 				@_onDeleteAdded(change)
 			@changesTracker.on "delete:removed", (change) =>
+				sl_console.log "[delete:removed]", change
 				@_onDeleteRemoved(change)
 			@changesTracker.on "changes:moved", (changes) =>
+				sl_console.log "[changes:moved]", changes
 				@_onChangesMoved(changes)
 
 			onChange = (e) =>

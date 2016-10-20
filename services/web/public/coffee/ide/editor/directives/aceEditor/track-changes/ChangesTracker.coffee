@@ -101,7 +101,8 @@ define [
 
 					# If the insert is overlapping another insert, either at the beginning in the middle or touching the end,
 					# then we merge them into one.
-					if is_change_overlapping and
+					if @track_changes and
+							is_change_overlapping and
 							!is_insert_blocked_by_delete and
 							!already_merged and 
 							is_same_user
@@ -115,7 +116,7 @@ define [
 						# If not merged above, then it must be blocked by a delete, and will be after this insert, so we shift it along as well
 						change.op.p += op_length
 						moved_changes.push change
-					else if !is_same_user and change_start < op_start < change_end
+					else if (!is_same_user or !@track_changes) and change_start < op_start < change_end
 						# This user is inserting inside a change by another user, so we need to split the
 						# other user's change into one before and after this one.
 						offset = op_start - change_start
@@ -139,7 +140,7 @@ define [
 						
 				previous_change = change
 
-			if !already_merged
+			if @track_changes and !already_merged
 				@_addOp op, metadata
 			for {op, metadata} in new_changes
 				@_addOp op, metadata
@@ -216,21 +217,27 @@ define [
 							op_modifications.push modification
 				else if change.op.d?
 					change_start = change.op.p
-					if op_end < change_start
-						# Shift ops after us (but not touching) back by our length
+					if op_end < change_start or (!@track_changes and op_end == change_start)
+						# Shift ops after us back by our length.
+						# If we're tracking changes, it must be strictly before, since we'll merge 
+						# below if they are touching. Otherwise, touching is fine.
 						change.op.p -= op_length
 						moved_changes.push change
 					else if op_start <= change_start <= op_end
-						# If we overlap a delete, add it in our content, and delete the existing change
-						offset = change_start - op_start
-						op_modifications.push { i: change.op.d, p: offset }
-						remove_changes.push change
+						if @track_changes
+							# If we overlap a delete, add it in our content, and delete the existing change
+							offset = change_start - op_start
+							op_modifications.push { i: change.op.d, p: offset }
+							remove_changes.push change
+						else
+							change.op.p = op_start
+							moved_changes.push change
 
 			for change in remove_changes
 				@_removeChange change
 			
 			op.d = @_applyOpModifications(op.d, op_modifications)
-			if op.d.length > 0
+			if @track_changes and op.d.length > 0
 				@_addOp op, metadata
 			else
 				# It's possible that we deleted an insert between two other inserts. I.e.
@@ -240,9 +247,10 @@ define [
 				#   |-- user_1 insert --||-- user_1 insert --|
 				# We need to merge these together again
 				results = @_scanAndMergeAdjacentUpdates()
-				moved_changed = moved_changes.concat(results.moved_changes)
+				moved_changes = moved_changes.concat(results.moved_changes)
 				for change in results.remove_changes
 					@_removeChange change
+					moved_changes = moved_changes.filter (c) -> c != change
 			
 			if moved_changes.length > 0
 				@emit "changes:moved", moved_changes

@@ -1,13 +1,11 @@
 define [
 	"base"
 ], (App) ->
-	console.log "Defingint", "reviePanelSorted"
 	App.directive "reviewPanelSorted", () ->
 		return  {
 			link: (scope, element, attrs) ->
 				scope.$watch "reviewPanel.entries", (value) ->
 					return if !value?
-					console.log "reviewPanel.entries updates", entries
 					entries = []
 					for el in element.find(".review-entry")
 						entries.push {
