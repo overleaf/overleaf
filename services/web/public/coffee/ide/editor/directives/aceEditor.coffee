@@ -207,11 +207,6 @@ define [
 
 				editor.setOption("scrollPastEnd", true)
 
-				resetSession = () ->
-					session = editor.getSession()
-					session.setUseWrapMode(true)
-					session.setMode("ace/mode/latex")
-
 				updateCount = 0
 				onChange = () ->
 					updateCount++
@@ -235,6 +230,7 @@ define [
 					editor.setSession(new EditSession(lines, mode))
 
 					session = editor.getSession()
+					session.setUseWrapMode(true)
 
 					doc = session.getDocument()
 					doc.on "change", onChange
