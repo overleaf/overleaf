@@ -1,8 +1,34 @@
-.feat-onboard
+.feat-onboard(
+	ng-controller="FeatureOnboardingController"
+	ng-cloak
+)
 	.feat-onboard-wrapper
 		h1.feat-onboard-title
-			| Introducing
+			| Introducing&nbsp;
 			span.feat-onboard-title-name Code check
-		p.feat-onboard-description
-			span.feat-onboard-description-name Code check
-			| will highlight potential problems in your LaTeX code, allowing you to handle errors earlier and become more productive.
+		div(ng-if="step === 1;")
+			p.feat-onboard-description
+				span.feat-onboard-description-name Code check&nbsp;
+				| will highlight potential problems in your LaTeX code, allowing you to handle errors earlier and become more productive.
+			.row.feat-onboard-adv-wrapper
+				.col-xs-4
+					h2.feat-onboard-adv-title 
+						| Missing&nbsp;
+						span.feat-onboard-adv-title-highlight brackets
+					p Lorem ipsum feature description stuff.
+				.col-xs-4
+					h2.feat-onboard-adv-title 
+						| Missing&nbsp;
+						span.feat-onboard-adv-title-highlight brackets
+					p Lorem ipsum feature description stuff.
+				.col-xs-4
+					h2.feat-onboard-adv-title 
+						| Missing&nbsp;
+						span.feat-onboard-adv-title-highlight brackets
+					p Lorem ipsum feature description stuff.
+			div
+				.btn.btn-primary(ng-click="turnCodeCheckOn();") Yes, turn Code check on
+			div
+				.btn.btn-default(ng-click="turnCodeCheckOn();") No, disable it for now
+		div(ng-if="step === 2;")
+			p Step 2, TODO.

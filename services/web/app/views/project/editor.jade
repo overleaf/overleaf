@@ -15,7 +15,8 @@ block content
 				p.text-center.text-danger(ng-if="state.error").ng-cloak 
 					span(ng-bind-html="state.error")
 
-
+		include ./editor/feature-onboarding
+		
 		.global-alerts(ng-cloak)
 			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
 				strong #{translate("disconnected")}
@@ -72,7 +73,6 @@ block content
 				include ./editor/chat
 				
 	include ./editor/hotkeys
-	include ./editor/feature-onboarding
 
 	script(type="text/ng-template", id="genericMessageModalTemplate")
 		.modal-header
