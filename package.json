@@ -7,6 +7,7 @@
     "grunt-contrib-rename": "0.0.3",
     "grunt-docker-io": "^0.7.0",
     "grunt-github-api": "^0.2.3",
-    "simple-git": "^1.32.1"
+    "simple-git": "^1.32.1",
+    "underscore": "^1.8.3"
   }
 }

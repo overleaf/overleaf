@@ -1,4 +1,5 @@
 Path = require('path')
+_ = require("underscore")
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
@@ -391,6 +392,7 @@ if parse(process.env["SHARELATEX_IS_SERVER_PRO"]) == true
 	
 
 if process.env["SHARELATEX_LDAP_HOST"]
+	settings.externalAuth = true
 	settings.ldap =
 		host: process.env["SHARELATEX_LDAP_HOST"]
 		dn: process.env["SHARELATEX_LDAP_DN"]
@@ -423,6 +425,9 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		settings.ldap.tlsOptions =
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
+
+if settings.externalAuth
+	settings.nav.header = _.filter settings.nav.header, (button)-> button.url != "/register"
 
 # Compiler
 # --------
