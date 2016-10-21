@@ -35,13 +35,11 @@ module.exports = SubscriptionController =
 					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2011-10-18')))
 			user_id = AuthenticationController.getLoggedInUserId(req)
 			if user_id?
-				console.log '>> user is logged in'
 				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->
 					return next(err) if err?
 					currentUser = user
 					render()
 			else
-				console.log '>> not logged in'
 				render()
 
 	#get to show the recurly.js page
