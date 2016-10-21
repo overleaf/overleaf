@@ -2,7 +2,9 @@ define [
 	"base"
 ], (App) ->
 	App.controller "FeatureOnboardingController", ($scope, $modal, event_tracking) ->
-		$scope.innerStep = 1;
+		$scope.isFeatureSettingDefined = window.userSettings.syntaxValidation?;
+
+		$scope.innerStep = 1
 
 		$scope.turnCodeCheckOn = () ->
 			navToInnerStep2()
