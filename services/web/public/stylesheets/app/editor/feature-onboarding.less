@@ -7,7 +7,41 @@
 	background-color: rgba(0, 0, 0, .85);
 	color: #FFF;
 	text-align: center;
-	z-index: 100;
+	z-index: 102;
+	transition: left ease-in-out @left-menu-animation-duration;
+	&::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 0;
+		opacity: 0;
+		transition: opacity ease-in-out @left-menu-animation-duration, width ease-in-out @left-menu-animation-duration;
+	}
+}
+
+.feat-onboard-step2 {
+	left: @left-menu-width;
+	&::before {
+		content: '';
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: @left-menu-width;
+		opacity: 1;
+		background-image: linear-gradient(
+			180deg,
+			rgba(0,0,0,.85),
+			rgba(0,0,0,.85) 160px,
+			transparent 205px,
+			transparent 210px,
+			rgba(0,0,0,.85) 215px,
+			rgba(0,0,0,.85)
+		);
+
+	}
 }
 	.feat-onboard-wrapper {
 		width: 600px;
