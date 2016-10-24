@@ -19,7 +19,8 @@ module.exports =
 				logger.log {client_id: client.id}, "Asking client to reconnect gracefully"
 				client.emit "reconnectGracefully"
 				drainedCount++
-			if drainedCount == N
+			haveDrainedNClients = (drainedCount == N)
+			if haveDrainedNClients
 				break
 		if drainedCount < N
 			logger.log "All clients have been told to reconnectGracefully"
