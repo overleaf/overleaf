@@ -57,7 +57,7 @@ block content
 										ng-click="changeCurreny(currency)"
 									) {{currency}} ({{value['symbol']}})
 
-				div
+				div(ng-show="showPlans")
 					.row(ng-cloak)
 						.col-md-10.col-md-offset-1
 							.row

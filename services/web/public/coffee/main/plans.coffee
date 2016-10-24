@@ -306,6 +306,8 @@ define [
 
 	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack) ->
 
+		$scope.showPlans = false
+
 		$scope.plansVariant = 'default'
 		$scope.shouldABTestPlans = window.shouldABTestPlans
 
@@ -318,6 +320,9 @@ define [
 					for currency, _v of $scope.plans
 						$scope.plans[currency]['student'] = MultiCurrencyPricing[chosenVariation][currency]['student']
 						$scope.plans[currency]['collaborator'] = MultiCurrencyPricing[chosenVariation][currency]['collaborator']
+				$scope.showPlans = true
+		else
+			$scope.showPlans = true
 
 		$scope.plans = MultiCurrencyPricing.plans
 
