@@ -70,6 +70,7 @@ describe 'ProjectLocator', ->
 
 		it 'should give error if element could not be found', (done)->
 			@locator.findElement {project_id:project._id, element_id:"ddsd432nj42", type:"docs"}, (err, foundElement, path, parentFolder)->
+				console.log err
 				err.should.deep.equal new Errors.NotFoundError("entity not found")
 				done()
 
