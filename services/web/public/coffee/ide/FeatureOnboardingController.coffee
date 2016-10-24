@@ -1,16 +1,22 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FeatureOnboardingController", ($scope, $modal, event_tracking) ->
+	App.controller "FeatureOnboardingController", ($scope, settings) ->
 		$scope.isFeatureSettingDefined = window.userSettings.syntaxValidation?;
 
 		$scope.innerStep = 1
 
 		$scope.turnCodeCheckOn = () ->
+			settings.saveProjectSettings({ syntaxValidation: true })
 			navToInnerStep2()
 			
 		$scope.turnCodeCheckOn = () ->
+			settings.saveProjectSettings({ syntaxValidation: false })
 			navToInnerStep2()
+
+		$scope.dismiss = () ->
+			# TODO Toggle logic.
+			$scope.isFeatureSettingDefined = false 
 
 		navToInnerStep2 = () ->
 			$scope.innerStep = 2
