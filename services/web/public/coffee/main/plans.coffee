@@ -312,6 +312,7 @@ define [
 		if $scope.shouldABTestPlans
 			sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
 				$scope.plansVariant = chosenVariation
+				event_tracking.sendMB 'plans-page', {plans_variant: chosenVariation}
 				if chosenVariation in ['heron', 'ibis']
 					# overwrite student plans with alternative
 					for currency, _v of $scope.plans
@@ -333,6 +334,7 @@ define [
 			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
+			event_tracking.sendMB 'plans-page-start-trial', {plan}
 			if $scope.shouldABTestPlans and plan in ['student', 'collaborator']
 				sixpack.convert 'plans-1610', () ->
 			if $scope.ui.view == "annual"
