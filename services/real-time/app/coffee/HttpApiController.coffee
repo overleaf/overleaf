@@ -1,4 +1,5 @@
 WebsocketLoadBalancer = require "./WebsocketLoadBalancer"
+DrainManager = require "./DrainManager"
 logger = require "logger-sharelatex"
 
 module.exports = HttpApiController =
@@ -10,3 +11,11 @@ module.exports = HttpApiController =
 		else
 			WebsocketLoadBalancer.emitToRoom req.params.project_id, req.params.message, req.body
 		res.send 204 # No content
+	
+	startDrain: (req, res, next) ->
+		io = req.app.get("io")
+		rate = req.query.rate or "4"
+		rate = parseInt(rate, 10)
+		logger.log {rate}, "setting client drain rate"
+		DrainManager.startDrain io, rate
+		res.send 204
