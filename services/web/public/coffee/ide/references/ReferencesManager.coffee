@@ -17,8 +17,13 @@ define [
 			# When we join the project:
 			#   index all references files
 			#   and don't broadcast to all clients
+			@inited = false
 			@$scope.$on 'project:joined', (e) =>
-				@indexAllReferences(false)
+				# We only need to grab the references when the editor first loads,
+				# not on every reconnect
+				if !@inited
+					@inited = true
+					@indexAllReferences(false)
 
 			setTimeout(
 				(self) ->
