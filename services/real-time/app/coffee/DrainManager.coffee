@@ -14,7 +14,6 @@ module.exports =
 	reconnectNClients: (io, N) ->
 		drainedCount = 0
 		for client in io.sockets.clients()
-			logger.log {client_id: client.id, already_reconnecting: @RECONNECTED_CLIENTS[client.id]}, "Considering client"
 			if !@RECONNECTED_CLIENTS[client.id]
 				@RECONNECTED_CLIENTS[client.id] = true
 				logger.log {client_id: client.id}, "Asking client to reconnect gracefully"
