@@ -8,6 +8,8 @@ buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 
 destructors = []
 
+require "./uv_threadpool_size"
+
 module.exports =
 	initialize: (_name) ->
 		name = _name
