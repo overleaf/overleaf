@@ -333,13 +333,11 @@ define [
 			$scope.currencyCode = newCurrency
 
 		$scope.signUpNowClicked = (plan, annual)->
-			if $scope.ui.view == "annual"
-				plan = "#{plan}_annual"
-
-			event_tracking.send   'subscription-funnel', 'sign_up_now_button', plan
-			# TODO: double check this is correct
 			if $scope.shouldABTestPlans and plan in ['student', 'collaborator']
 				sixpack.convert 'plans-1610', () ->
+			if $scope.ui.view == "annual"
+				plan = "#{plan}_annual"
+			event_tracking.send   'subscription-funnel', 'sign_up_now_button', plan
 
 		$scope.switchToMonthly = ->
 			$scope.ui.view = "monthly"
