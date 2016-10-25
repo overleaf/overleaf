@@ -143,7 +143,7 @@ module.exports = UserController =
 									type:'success'
 									text:'Your password has been changed'
 			else
-				logger.log user: user, "current password wrong"
+				logger.log user_id: user_id, "current password wrong"
 				res.send
 					message:
 					  type:'error'
