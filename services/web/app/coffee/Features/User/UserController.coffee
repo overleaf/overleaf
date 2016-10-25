@@ -26,8 +26,7 @@ module.exports = UserController =
 	tryDeleteUser: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		password = req.body.password
-		console.log '>> here', user_id, password
-		return res.sendStatus(500)
+		logger.info {user_id}, "trying to delete user account"
 		if !password? or password == ''
 			logger.err {user_id}, 'no password supplied for attempt to delete account'
 			return res.sendStatus(403)
@@ -35,13 +34,15 @@ module.exports = UserController =
 			if err?
 				logger.err {user_id}, 'error authenticating during attempt to delete account'
 				return next(err)
-			if user
-				UserDeleter.deleteUser user_id, (err) ->
-					if err?
-						logger.err {user_id}, "error while deleting user account"
-						return next(err)
-					req.session?.destroy()
-					res.sendStatus(200)
+			if !user
+				logger.err {user_id}, 'auth failde during attempt to delete account'
+				return res.sendStatus(403)
+			UserDeleter.deleteUser user_id, (err) ->
+				if err?
+					logger.err {user_id}, "error while deleting user account"
+					return next(err)
+				req.session?.destroy()
+				res.sendStatus(200)
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)

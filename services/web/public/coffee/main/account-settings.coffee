@@ -32,8 +32,10 @@ define [
 			$scope.state =
 				isValid : false
 				deleteText: ""
+				password: ""
 				inflight: false
 				error: false
+				invalidCredentials: false
 
 			$modalInstance.opened.then () ->
 				$timeout () ->
@@ -41,11 +43,12 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = $scope.state.deleteText == $scope.email
+				$scope.state.isValid = $scope.state.deleteText == $scope.email and $scope.state.password.length > 0
 
 			$scope.delete = () ->
 				$scope.state.inflight = true
 				$scope.state.error = false
+				$scope.state.invalidCredentials = false
 				$http({
 						method: "POST"
 						url: "/user/delete"
@@ -59,11 +62,14 @@ define [
 						$modalInstance.close()
 						$scope.state.inflight = false
 						$scope.state.error = false
+						$scope.state.invalidCredentials = false
 						window.location = "/"
-					.error (err) ->
-						console.log ">> error", err
-						$scope.state.error = true
+					.error (data, status) ->
 						$scope.state.inflight = false
+						if status == 403
+							$scope.state.invalidCredentials = true
+						else
+							$scope.state.error = true
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

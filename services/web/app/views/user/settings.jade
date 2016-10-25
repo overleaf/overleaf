@@ -150,8 +150,8 @@ block content
 	script(type='text/ng-template', id='deleteAccountModalTemplate')
 		.modal-header
 			h3 #{translate("delete_account")}
-		.modal-body
-			p !{translate("delete_account_warning_message_2")}
+		div.modal-body#delete-account-modal
+			p !{translate("delete_account_warning_message_3")}
 			form(novalidate, name="deleteAccountForm")
 				label #{translate('email')}
 				input.form-control(
@@ -166,11 +166,14 @@ block content
 					type="password",
 					placeholder="",
 					ng-model="state.password",
+					ng-keyup="checkValidation()"
 				)
 			div(ng-if="state.error")
-				br
 				div.alert.alert-danger
 					| #{translate('generic_something_went_wrong')}
+			div(ng-if="state.invalidCredentials")
+				div.alert.alert-danger
+					| #{translate('email_or_password_wrong_try_again')}
 		.modal-footer
 			button.btn.btn-default(
 				ng-click="cancel()"
