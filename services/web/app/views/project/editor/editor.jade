@@ -35,7 +35,8 @@ div.full-size(
 			resize-on="layout:main:resize,layout:pdf:resize",
 			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
 			read-only="!permissions.write",
-			on-ctrl-enter="recompileViaKey"
+			file-name="editor.open_doc_name",
+			on-ctrl-enter="recompileViaKey",
 			syntax-validation="settings.syntaxValidation"
 		)
 
