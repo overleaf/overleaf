@@ -340,8 +340,6 @@ define [
 
 		$scope.signUpNowClicked = (plan, annual)->
 			event_tracking.sendMB 'plans-page-start-trial', {plan}
-			if $scope.shouldABTestPlans and plan in ['student', 'collaborator']
-				sixpack.convert 'plans-1610', () ->
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			event_tracking.send   'subscription-funnel', 'sign_up_now_button', plan

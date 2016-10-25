@@ -68,21 +68,14 @@ define [
 		$scope.user = window.user
 
 
-		$scope.startTrialPlanCode = 'collaborator_free_trial_7_days'
 		$scope.shouldABTestPlans = false
-		$scope._plansVariant = 'default'
 		if $scope.user.signUpDate >= '2011-10-18'
 			$scope.shouldABTestPlans = true
-			sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
-				$scope._plansVariant = chosenVariation
-				if chosenVariation in ['heron', 'ibis']
-					$scope.startTrialPlanCode = "collaborator_#{chosenVariation}"
 
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
-
 
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))

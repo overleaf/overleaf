@@ -1,11 +1,17 @@
 define [
 	"base"
 ], (App)->
+
+	App.controller 'SuccessfulSubscriptionController', ($scope, sixpack) ->
+		sixpack.convert 'plans-1610', () ->
+
+
 	SUBSCRIPTION_URL = "/user/subscription/update"
 
 	setupReturly = _.once ->
 		recurly?.configure window.recurlyApiKey
 	PRICES = {}
+
 
 	App.controller "CurrenyDropdownController", ($scope, MultiCurrencyPricing, $q)->
 
