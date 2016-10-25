@@ -204,4 +204,6 @@ define [], () ->
 		_reconnectGracefullyNow: () ->
 			@gracefullyReconnecting = true
 			@reconnectGracefullyStarted = null
+			# Clear cookie so we don't go to the same backend server
+			$.cookie("SERVERID", "", { expires: -1, path: "/" })
 			@reconnectImmediately()
