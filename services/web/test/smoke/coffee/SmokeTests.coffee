@@ -25,8 +25,14 @@ convertCookieFile = (callback) ->
 describe "Opening", ->
 
 	before (done) ->
-		require("../../../app/js/Features/Security/LoginRateLimiter.js").recordSuccessfulLogin Settings.smokeTest.user, ->
+		logger.log "smoke test: setup"
+		require("../../../app/js/Features/Security/LoginRateLimiter.js").recordSuccessfulLogin Settings.smokeTest.user, (err)->
+			if err?
+				logger.err err:err, "smoke test: error recoring successful login"
+				return done(err)
+			logger.log "smoke test: clearing rate limit "
 			require("../../../app/js/infrastructure/RateLimiter.js").clearRateLimit "open-project", "#{Settings.smokeTest.projectId}:#{Settings.smokeTest.userId}", ->
+				logger.log "smoke test: hitting /register"
 				command =  """
 					curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('register')}
 				"""
@@ -37,17 +43,20 @@ describe "Opening", ->
 						logger.err stdout:stdout, "smoke test: does not have csrf token"
 						return done("smoke test: does not have csrf token")
 					csrf = csrfMatches[1]
-
+					logger.log "smoke test: converting cookie file 1"
 					convertCookieFile (err) ->
 						return done(err) if err?
+						logger.log "smoke test: hitting /register with csrf"
 						command = """
 							curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
 						"""
 						child.exec command, (err) ->
 							return done(err) if err?
+							logger.log "smoke test: finishing setup"
 							convertCookieFile done
 
-	after (done)-> 
+	after (done)->
+		logger.log "smoke test: cleaning up"
 		command =  """
 			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('logout')}
 		"""
@@ -57,6 +66,7 @@ describe "Opening", ->
 			fs.unlink cookeFilePath, done
 
 	it "a project", (done) ->
+		logger.log "smoke test: Checking can load a project"
 		@timeout(4000)
 		command =  """
 			curl -H "X-Forwarded-Proto: https" -v #{buildUrl("project/#{Settings.smokeTest.projectId}")}
@@ -74,6 +84,7 @@ describe "Opening", ->
 
 
 	it "the project list", (done) ->
+		logger.log "smoke test: Checking can load project list"
 		@timeout(4000)
 		command =  """
 			curl -H "X-Forwarded-Proto: https" -v #{buildUrl("project")}

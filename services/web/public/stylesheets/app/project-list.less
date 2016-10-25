@@ -200,6 +200,10 @@ ul.structured-list {
 		.select-item + span, .select-all + span {
 			display: inline-block;
 			padding-left: @line-height-computed * 1.5;
+			max-width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			vertical-align: top;
 		}
 	}
 }

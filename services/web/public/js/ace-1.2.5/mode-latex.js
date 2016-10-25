@@ -205,128 +205,137 @@ var LatexFoldMode = require("./folding/latex").FoldMode;
 var Range = require("../range").Range;
 var WorkerClient = require("ace/worker/worker_client").WorkerClient;
 
+var createLatexWorker = function (session) {
+    var doc = session.getDocument();
+    var selection = session.getSelection();
+    var cursorAnchor = selection.lead;
+
+    var savedRange = {};
+    var suppressions = [];
+    var hints = [];
+    var changeHandler = null;
+
+    var worker = new WorkerClient(["ace"], "ace/mode/latex_worker", "LatexWorker");
+    worker.attachToDocument(doc);
+
+    doc.on("change", function () {
+        if(changeHandler) {
+            clearTimeout(changeHandler);
+            changeHandler = null;
+        }
+    });
+
+    selection.on("changeCursor", function () {
+        changeHandler = setTimeout(function () {
+            updateMarkers({cursorMoveOnly:true});
+            suppressions = [];
+            changeHandler = null;
+        }, 100);
+    });
+
+    var updateMarkers = function (options) {
+        if (!options) { options = {};};
+        var cursorMoveOnly = options.cursorMoveOnly;
+        var annotations = [];
+        var newRange = {};
+        var cursor = selection.getCursor();
+        suppressions = [];
+
+        for (var i = 0, len = hints.length; i<len; i++) {
+            var hint = hints[i];
+
+            var suppressedChanges = 0;
+            var hintRange = new Range(hint.start_row, hint.start_col, hint.end_row, hint.end_col);
+
+            var cursorInRange = hintRange.insideStart(cursor.row, cursor.column);
+            var cursorAtStart = hintRange.isStart(cursor.row, cursor.column);
+            var cursorAtEnd = hintRange.isEnd(cursor.row, cursor.column);
+            if (hint.suppressIfEditing && (cursorAtStart || cursorAtEnd)) {
+                suppressions.push(hintRange);
+                if (!hint.suppressed) { suppressedChanges++; };
+                hint.suppressed = true;
+                continue;
+            }
+            var isCascadeError = false;
+            for (var j = 0, suplen = suppressions.length; j < suplen; j++) {
+                var badRange = suppressions[j];
+                if (badRange.intersects(hintRange)) {
+                    isCascadeError = true;
+                    break;
+                }
+            }
+            if(isCascadeError) {
+                if (!hint.suppressed) { suppressedChanges++; };
+                hint.suppressed = true;
+                continue;
+            };
+
+            if (hint.suppressed) { suppressedChanges++; };
+            hint.suppressed = false;
+
+            annotations.push(hint);
+            if (hint.type === "info") {
+                continue;
+            };
+            var key = hintRange.toString() + (cursorInRange ? "+cursor" : "");
+            newRange[key] = {hint: hint, cursorInRange: cursorInRange, range: hintRange};
+        }
+        for (key in newRange) {
+            if (!savedRange[key]) {  // doesn't exist in already displayed errors
+                var new_range = newRange[key].range;
+                cursorInRange = newRange[key].cursorInRange;
+                hint = newRange[key].hint;
+                var errorAtStart = (hint.row === hint.start_row && hint.column === hint.start_col);
+                var a = (cursorInRange && !errorAtStart) ? cursorAnchor : doc.createAnchor(new_range.start);
+                var b = (cursorInRange && errorAtStart) ? cursorAnchor : doc.createAnchor(new_range.end);
+                var range = new Range();
+                range.start = a;
+                range.end = b;
+                var cssClass = "ace_error-marker";
+                if (hint.type === "warning") { cssClass = "ace_highlight-marker"; };
+                range.id = session.addMarker(range, cssClass, "text");
+                savedRange[key] = range;
+            }
+        }
+        for (key in savedRange) {
+            if (!newRange[key]) {  // no longer present in list of errors to display
+                range = savedRange[key];
+                if (range.start !== cursorAnchor) { range.start.detach(); }
+                if (range.end !== cursorAnchor) { range.end.detach(); }
+                session.removeMarker(range.id);
+                delete savedRange[key];
+            }
+        }
+        if (!cursorMoveOnly || suppressedChanges) {
+            session.setAnnotations(annotations);
+        };
+
+    };
+    worker.on("lint", function(results) {
+        hints = results.data;
+        if (hints.length > 100) {
+            hints = hints.slice(0, 100); // limit to 100 errors
+        };
+        updateMarkers();
+    });
+    worker.on("terminate", function() {
+        for (var key in savedRange) {
+            var range = savedRange[key];
+            range.start.detach();
+            range.end.detach();
+            session.removeMarker(range.id);
+            delete savedRange[key];
+        }
+
+    });
+
+    return worker;
+};
 
 var Mode = function() {
     this.HighlightRules = LatexHighlightRules;
     this.foldingRules = new LatexFoldMode();
-    this.createWorker = function(session) {
-	var doc = session.getDocument();
-	var selection = session.getSelection();
-
-	var savedRange = {};
-	var suppressions = [];
-	var hints = [];
-	var changeHandler = null;
-
-	var worker = new WorkerClient(["ace"], "ace/mode/latex_worker", "LatexWorker");
-	worker.attachToDocument(doc);
-
-	doc.on("change", function () {
-	    if(changeHandler) {
-		clearTimeout(changeHandler);
-		changeHandler = null;
-	    }
-	});
-
-	selection.on("changeCursor", function () {
-	    if(suppressions.length > 0) {
-		changeHandler = setTimeout(function () {
-		    updateMarkers();
-		    suppressions = [];
-		    changeHandler = null;
-		}, 100);
-	    }
-	});
-
-	var updateMarkers = function () {
-	    var annotations = [];
-	    var newRange = {};
-	    var cursor = selection.getCursor();
-	    suppressions = [];
-
-	    for (var i = 0; i<hints.length; i++) {
-		var data = hints[i];
-		var start_row = data.start_row;
-		var start_col = data.start_col;
-		var end_row = data.end_row;
-		var end_col = data.end_col;
-		if (data.suppressIfEditing &&
-		    ((cursor.row === start_row && cursor.column == start_col+1)
-		     || (cursor.row === end_row && (cursor.column+1) == end_col))) {
-		    suppressions.push([start_row, start_col, end_row, end_col]);
-		    continue;
-		}
-		var suppress = false;
-		for (var j = 0; j < suppressions.length; j++) {
-		    var e=suppressions[j];
-		    var fromRow=e[0], fromCol=e[1], toRow=e[2], toCol=e[3];
-		    if (start_row == fromRow && start_col >= fromCol && start_row === toRow  && start_col <= toCol) {
-			suppress = true;
-			break;
-		    }
-		}
-		if(suppress) { continue; };
-
-		var key = "(" + start_row + "," + start_col + ")" + ":" + "(" + end_row + "," + end_col + ")";
-		newRange[key] = data;
-		annotations.push(data);
-	    }
-
-	    var newKeys = Object.keys(newRange);
-	    var oldKeys = Object.keys(savedRange);
-	    var changes = 0;
-	    for (i = 0; i < newKeys.length; i++) {
-		key = newKeys[i];
-		if (!savedRange[key]) {
-		    var new_range = newRange[key];
-		    var a = doc.createAnchor(new_range.start_row, new_range.start_col);
-		    var b = doc.createAnchor(new_range.end_row, new_range.end_col);
-		    var range = new Range();
-		    range.start = a;
-		    range.end = b;
-		    range.id = session.addMarker(range, "ace_error-marker", "text");
-		    savedRange[key] = range;
-		    changes++;
-		}
-	    }
-
-	    for (i = 0; i < oldKeys.length; i++) {
-		key = oldKeys[i];
-		if (!newRange[key]) {
-		    range = savedRange[key];
-		    range.start.detach();
-		    range.end.detach();
-		    session.removeMarker(range.id);
-		    delete savedRange[key];
-		    changes++;
-		}
-	    }
-
-	    if (changes>0) {
-		session.setAnnotations(annotations);
-	    };
-	};
-
-	worker.on("lint", function(results) {
-	    hints = results.data;
-	    if (hints.length > 100) {
-		hints = hints.slice(0, 100); // limit to 100 errors
-	    };
-	    updateMarkers();
-	});
-
-	worker.on("terminate", function() {
-	    var oldKeys = Object.keys(savedRange);
-	    for (var i = 0; i < oldKeys.length; i++) {
-		var key = oldKeys[i];
-		var range = savedRange[key];
-		session.removeMarker(range.id);
-		delete savedRange[key];
-	    }
-
-	});
-	return worker;
-    };
+    this.createWorker = createLatexWorker;
 };
 oop.inherits(Mode, TextMode);
 
