@@ -39,7 +39,7 @@ pathList = [
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]
 	["#{jsPath}libs.js"]
-	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js", "#{jsPath}#{ace}/snippets/latex.js"]
+	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js","#{jsPath}#{ace}/worker-latex.js","#{jsPath}#{ace}/snippets/latex.js"]
 	["#{jsPath}libs/#{pdfjs}/pdf.js"]
 	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
 	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
