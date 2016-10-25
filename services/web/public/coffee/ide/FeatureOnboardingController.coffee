@@ -7,11 +7,11 @@ define [
 		$scope.innerStep = 1
 
 		$scope.turnCodeCheckOn = () ->
-			settings.saveProjectSettings({ syntaxValidation: true })
+			settings.saveSettings({ syntaxValidation: true })
 			navToInnerStep2()
 			
 		$scope.turnCodeCheckOn = () ->
-			settings.saveProjectSettings({ syntaxValidation: false })
+			settings.saveSettings({ syntaxValidation: false })
 			navToInnerStep2()
 
 		$scope.dismiss = () ->
