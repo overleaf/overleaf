@@ -6,7 +6,6 @@ define [
 	"ide/pdfng/directives/pdfRenderer"
 	"ide/pdfng/directives/pdfPage"
 	"ide/pdfng/directives/pdfSpinner"
-	"libs/pdf"
 ], (
 	App
 	pdfTextLayer

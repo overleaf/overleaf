@@ -229,7 +229,7 @@ div.full-size.pdf(ng-controller="PdfController")
 
 				p.entry-content(ng-show="entry.content") {{ entry.content.trim() }}
 
-		p
+		div
 			.files-dropdown-container
 				a.btn.btn-default.btn-sm(
 					href,
@@ -344,7 +344,7 @@ div.full-size.pdf(ng-controller="PdfController")
 					strong #{translate("ask_proj_owner_to_upgrade_for_faster_compiles")}
 				p #{translate("free_accounts_have_timeout_upgrade_to_increase")}
 				p Plus:
-				p
+				div
 					ul.list-unstyled
 						li
 							i.fa.fa-check &nbsp;

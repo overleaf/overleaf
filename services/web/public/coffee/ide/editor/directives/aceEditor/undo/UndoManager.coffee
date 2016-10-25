@@ -231,6 +231,12 @@ define [
 
 		_aceDeltaToSimpleDelta: (aceDelta, docLines) ->
 			start = aceDelta.start
+			if !start?
+				error = new Error("aceDelta had no start event.")
+				Raven?.captureException(error, {
+					aceDelta: JSON.stringify(aceDelta)
+				})
+				throw error
 			linesBefore = docLines.slice(0, start.row)
 			position =
 				linesBefore.join("").length + # full lines
