@@ -153,6 +153,7 @@ block content
 		.modal-body
 			p !{translate("delete_account_warning_message_2")}
 			form(novalidate, name="deleteAccountForm")
+				label #{translate('email')}
 				input.form-control(
 					type="text",
 					placeholder="",
@@ -160,6 +161,16 @@ block content
 					focus-on="open",
 					ng-keyup="checkValidation()"
 				)
+				label #{translate('password')}
+				input.form-control(
+					type="password",
+					placeholder="",
+					ng-model="state.password",
+				)
+			div(ng-if="state.error")
+				br
+				div.alert.alert-danger
+					| #{translate('generic_something_went_wrong')}
 		.modal-footer
 			button.btn.btn-default(
 				ng-click="cancel()"

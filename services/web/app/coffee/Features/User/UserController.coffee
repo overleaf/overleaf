@@ -15,12 +15,33 @@ settings = require "settings-sharelatex"
 
 module.exports = UserController =
 
+	# TODO: deprecated, remove
 	deleteUser: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		UserDeleter.deleteUser user_id, (err)->
 			if !err?
 				req.session?.destroy()
 			res.sendStatus(200)
+
+	tryDeleteUser: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		password = req.body.password
+		console.log '>> here', user_id, password
+		return res.sendStatus(500)
+		if !password? or password == ''
+			logger.err {user_id}, 'no password supplied for attempt to delete account'
+			return res.sendStatus(403)
+		AuthenticationManager.authenticate {_id: user_id}, password, (err, user) ->
+			if err?
+				logger.err {user_id}, 'error authenticating during attempt to delete account'
+				return next(err)
+			if user
+				UserDeleter.deleteUser user_id, (err) ->
+					if err?
+						logger.err {user_id}, "error while deleting user account"
+						return next(err)
+					req.session?.destroy()
+					res.sendStatus(200)
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
