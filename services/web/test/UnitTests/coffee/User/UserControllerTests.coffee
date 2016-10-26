@@ -85,16 +85,6 @@ describe "UserController", ->
 			json: sinon.stub()
 		@next = sinon.stub()
 
-	describe "deleteUser", ->
-
-		it "should delete the user", (done)->
-
-			@res.sendStatus = (code)=>
-				@UserDeleter.deleteUser.calledWith(@user_id)
-				code.should.equal 200
-				done()
-			@UserController.deleteUser @req, @res
-
 	describe 'tryDeleteUser', ->
 
 		beforeEach ->
