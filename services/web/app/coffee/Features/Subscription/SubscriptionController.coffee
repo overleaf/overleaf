@@ -32,7 +32,7 @@ module.exports = SubscriptionController =
 					baseUrl: baseUrl
 					gaExperiments: Settings.gaExperiments.plansPage
 					recomendedCurrency:recomendedCurrency
-					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2011-10-18')))
+					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2016-10-26')))
 			user_id = AuthenticationController.getLoggedInUserId(req)
 			if user_id?
 				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->
