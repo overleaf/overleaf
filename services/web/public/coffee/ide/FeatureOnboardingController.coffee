@@ -15,8 +15,7 @@ define [
 			navToInnerStep2()
 
 		$scope.dismiss = () ->
-			# TODO Toggle logic.
-			$scope.isFeatureSettingDefined = false 
+			$scope.isFeatureSettingDefined = true 
 
 		navToInnerStep2 = () ->
 			$scope.innerStep = 2
