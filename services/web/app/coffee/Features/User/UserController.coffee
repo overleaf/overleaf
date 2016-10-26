@@ -26,7 +26,7 @@ module.exports = UserController =
 	tryDeleteUser: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		password = req.body.password
-		logger.info {user_id}, "trying to delete user account"
+		logger.log {user_id}, "trying to delete user account"
 		if !password? or password == ''
 			logger.err {user_id}, 'no password supplied for attempt to delete account'
 			return res.sendStatus(403)
@@ -35,7 +35,7 @@ module.exports = UserController =
 				logger.err {user_id}, 'error authenticating during attempt to delete account'
 				return next(err)
 			if !user
-				logger.err {user_id}, 'auth failde during attempt to delete account'
+				logger.err {user_id}, 'auth failed during attempt to delete account'
 				return res.sendStatus(403)
 			UserDeleter.deleteUser user_id, (err) ->
 				if err?
