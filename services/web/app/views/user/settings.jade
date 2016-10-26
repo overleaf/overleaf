@@ -156,6 +156,7 @@ block content
 				label #{translate('email')}
 				input.form-control(
 					type="text",
+					autocomplete="off",
 					placeholder="",
 					ng-model="state.deleteText",
 					focus-on="open",
@@ -164,6 +165,7 @@ block content
 				label #{translate('password')}
 				input.form-control(
 					type="password",
+					autocomplete="off",
 					placeholder="",
 					ng-model="state.password",
 					ng-keyup="checkValidation()"
