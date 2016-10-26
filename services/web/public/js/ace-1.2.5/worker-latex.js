@@ -1755,7 +1755,7 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
                     };
 
                     if (endToken) {
-                        TokenErrorFromTo(token, endToken, "invalid environment command" + text.substring(token[2], endToken[3] || endToken[2]));
+                        TokenErrorFromTo(token, endToken, "invalid environment command " + text.substring(token[2], endToken[3] || endToken[2]));
                     } else {
                         TokenError(token, "invalid environment command");
                     };
