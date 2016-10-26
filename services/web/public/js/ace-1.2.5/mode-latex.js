@@ -214,18 +214,21 @@ var createLatexWorker = function (session) {
     var suppressions = [];
     var hints = [];
     var changeHandler = null;
+    var docChangePending = false;
+    var firstPass = true;
 
     var worker = new WorkerClient(["ace"], "ace/mode/latex_worker", "LatexWorker");
     worker.attachToDocument(doc);
-
-    doc.on("change", function () {
+    var docChangeHandler = doc.on("change", function () {
+        docChangePending = true;
         if(changeHandler) {
             clearTimeout(changeHandler);
             changeHandler = null;
         }
     });
 
-    selection.on("changeCursor", function () {
+    var cursorHandler = selection.on("changeCursor", function () {
+        if (docChangePending) { return; } ;
         changeHandler = setTimeout(function () {
             updateMarkers({cursorMoveOnly:true});
             suppressions = [];
@@ -307,11 +310,20 @@ var createLatexWorker = function (session) {
             }
         }
         if (!cursorMoveOnly || suppressedChanges) {
-            session.setAnnotations(annotations);
+            if (firstPass) {
+                if (annotations.length > 0) {
+                    var originalAnnotations = session.getAnnotations();
+                    session.setAnnotations(originalAnnotations.concat(annotations));
+                };
+                firstPass = false;
+            } else {
+                session.setAnnotations(annotations);
+            }
         };
 
     };
     worker.on("lint", function(results) {
+        if(docChangePending) { docChangePending = false; };
         hints = results.data;
         if (hints.length > 100) {
             hints = hints.slice(0, 100); // limit to 100 errors
@@ -319,14 +331,22 @@ var createLatexWorker = function (session) {
         updateMarkers();
     });
     worker.on("terminate", function() {
+        if(changeHandler) {
+            clearTimeout(changeHandler);
+            changeHandler = null;
+        }
+        doc.off("change", docChangeHandler);
+        selection.off("changeCursor", cursorHandler);
         for (var key in savedRange) {
             var range = savedRange[key];
-            range.start.detach();
-            range.end.detach();
+            if (range.start !== cursorAnchor) { range.start.detach(); }
+            if (range.end !== cursorAnchor) { range.end.detach(); }
             session.removeMarker(range.id);
-            delete savedRange[key];
         }
-
+        savedRange = {};
+        hints = [];
+        suppressions = [];
+        session.clearAnnotations();
     });
 
     return worker;
