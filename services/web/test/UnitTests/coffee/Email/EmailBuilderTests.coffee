@@ -34,9 +34,9 @@ describe "EmailBuilder", ->
 			@email.html.indexOf(@opts.owner.email).should.not.equal -1
 			@email.subject.indexOf(@opts.owner.email).should.not.equal -1
 
-		it 'should not have text component', ->
+		it 'should have html and text properties', ->
 			expect(@email.html?).to.equal true
-			expect(@email.text?).to.equal false
+			expect(@email.text?).to.equal true
 
 		it "should not have undefined in it", ->
 			@email.html.indexOf("undefined").should.equal -1
