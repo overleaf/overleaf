@@ -2,7 +2,7 @@ div#history(ng-show="ui.view == 'history'")
 	span(ng-controller="HistoryPremiumPopup")
 		.upgrade-prompt(ng-show="!project.features.versioning")
 			
-			div(sixpack-switch="teaser-track-changes")
+			div(sixpack-switch="teaser-history")
 				.message(
 					sixpack-default
 					ng-show="project.owner._id == user.id"
@@ -46,7 +46,7 @@ div#history(ng-show="ui.view == 'history'")
 				)
 					header.message-header
 						h3 History
-						
+
 					.message-body
 						h4.teaser-title See who changed what. Go back to previous versions.
 						img.teaser-img(
