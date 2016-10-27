@@ -38,6 +38,7 @@ div#history(ng-show="ui.view == 'history'")
 							href
 							ng-class="buttonClass"
 							ng-click="startFreeTrial('history')"
+							sixpack-convert="teaser-history"
 						) #{translate("start_free_trial")}
 
 				.message.message-wider(
@@ -77,7 +78,8 @@ div#history(ng-show="ui.view == 'history'")
 								href
 								ng-class="buttonClass"
 								ng-click="startFreeTrial('history')"
-							) #{translate("start_free_trial")}
+								sixpack-convert="teaser-history"
+							) Try it for free
 
 			.message(ng-show="project.owner._id != user.id")
 				p #{translate("ask_proj_owner_to_upgrade_for_history")}
