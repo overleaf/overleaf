@@ -6,9 +6,20 @@ define [
 		$scope.buttonClass = "btn-primary"
 
 		$scope.startFreeTrial = (source, couponCode) ->
-			event_tracking.sendMB "subscription-start-trial", { source }
-
 			w = window.open()
+
+			switch source
+				when "dropbox"
+					sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
+						event_tracking.sendMB "subscription-start-trial", { source, variant }
+
+				when "history"
+					sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
+						event_tracking.sendMB "subscription-start-trial", { source, variant }
+
+				else
+					event_tracking.sendMB "subscription-start-trial", { source }
+
 			sixpack.convert "track-changes-discount", ->
 				sixpack.participate 'in-editor-free-trial-plan', ['student', 'collaborator'], (planName, rawResponse)->
 					ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)

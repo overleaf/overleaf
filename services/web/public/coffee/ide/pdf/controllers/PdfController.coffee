@@ -467,17 +467,7 @@ define [
 		$scope.startFreeTrial = (source) ->
 			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
 
-			switch source
-				when "dropbox"
-					sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
-						event_tracking.sendMB "subscription-start-trial", { source, variant }
-
-				when "history"
-					sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
-						event_tracking.sendMB "subscription-start-trial", { source, variant }
-
-				else
-					event_tracking.sendMB "subscription-start-trial", { source }
+			event_tracking.sendMB "subscription-start-trial", { source }
 
 			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
 			$scope.startedFreeTrial = true
