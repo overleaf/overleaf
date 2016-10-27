@@ -24,8 +24,8 @@ define [
 						monthly: "€5"
 						annual: "€50"
 					collaborator:
-						monthly: "€10"
-						annual: "€120"
+						monthly: "€11"
+						annual: "€132"
 				GBP:
 					student:
 						monthly: "£5"
@@ -59,22 +59,22 @@ define [
 						monthly: "40 kr"
 						annual: "400 kr"
 					collaborator:
-						monthly: "80 kr"
-						annual: "960 kr"
+						monthly: "70 kr"
+						annual: "840 kr"
 				AUD:
 					student:
 						monthly: "$8"
 						annual: "$80"
 					collaborator:
-						monthly: "$16"
-						annual: "$192"
+						monthly: "$15"
+						annual: "$180"
 				NZD:
 					student:
 						monthly: "$8"
 						annual: "$80"
 					collaborator:
-						monthly: "$16"
-						annual: "$192"
+						monthly: "$15"
+						annual: "$180"
 				CHF:
 					student:
 						monthly: "Fr 6"
@@ -103,15 +103,15 @@ define [
 						monthly: "€9"
 						annual: "€90"
 					collaborator:
-						monthly: "€16"
-						annual: "€192"
+						monthly: "€17"
+						annual: "€204"
 				GBP:
 					student:
 						monthly: "£7"
 						annual: "£70"
 					collaborator:
-						monthly: "£13"
-						annual: "£156"
+						monthly: "£14"
+						annual: "£168"
 				SEK:
 					student:
 						monthly: "75 kr"
@@ -138,22 +138,22 @@ define [
 						monthly: "68 kr"
 						annual: "680 kr"
 					collaborator:
-						monthly: "122 kr"
-						annual: "1464 kr"
+						monthly: "110 kr"
+						annual: "1320 kr"
 				AUD:
 					student:
 						monthly: "$13"
 						annual: "$130"
 					collaborator:
-						monthly: "$24"
-						annual: "$288"
+						monthly: "$22"
+						annual: "$264"
 				NZD:
 					student:
 						monthly: "$14"
 						annual: "$140"
 					collaborator:
-						monthly: "$25"
-						annual: "$300"
+						monthly: "$22"
+						annual: "$264"
 				CHF:
 					student:
 						monthly: "Fr 10"
