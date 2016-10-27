@@ -6,25 +6,34 @@ define [
 		$scope.buttonClass = "btn-primary"
 
 		$scope.startFreeTrial = (source, couponCode) ->
+			plan = 'collaborator_free_trial_7_days'
+
 			w = window.open()
+			go = () ->
+				ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
+				url = "/user/subscription/new?planCode=#{plan}&ssp=true"
+				if couponCode?
+					url = "#{url}&cc=#{couponCode}"
+				$scope.startedFreeTrial = true
 
-			switch source
-				when "dropbox"
-					sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
-						event_tracking.sendMB "subscription-start-trial", { source, variant }
+				switch source
+					when "dropbox"
+						sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
+							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
 
-				when "history"
-					sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
-						event_tracking.sendMB "subscription-start-trial", { source, variant }
+					when "history"
+						sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
+							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
 
-				else
-					event_tracking.sendMB "subscription-start-trial", { source }
+					else
+						event_tracking.sendMB "subscription-start-trial", { source, plan }
+				
+				w.location = url
 
-			sixpack.convert "track-changes-discount", ->
-				sixpack.participate 'in-editor-free-trial-plan', ['student', 'collaborator'], (planName, rawResponse)->
-					ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
-					url = "/user/subscription/new?planCode=#{planName}_free_trial_7_days&ssp=#{planName == 'collaborator'}"
-					if couponCode?
-						url = "#{url}&cc=#{couponCode}"
-					$scope.startedFreeTrial = true
-					w.location = url
+			if $scope.shouldABTestPlans
+				sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
+					if chosenVariation in ['heron', 'ibis']
+						plan = "collaborator_#{chosenVariation}"
+					go()
+			else
+				go()

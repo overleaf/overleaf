@@ -15,9 +15,13 @@ define [
 
 	# set the path for ace workers if using a CDN (from editor.jade)
 	if window.aceWorkerPath != ""
+		syntaxValidationEnabled = true
 		ace.config.set('workerPath', "#{window.aceWorkerPath}")
 	else
-		ace.config.setDefaultValue("session", "useWorker", false)
+		syntaxValidationEnabled = false
+
+	# By default, don't use workers - enable them per-session as required
+	ace.config.setDefaultValue("session", "useWorker", false)
 
 	# Ace loads its script itself, so we need to hook in to be able to clear
 	# the cache.
@@ -202,8 +206,12 @@ define [
 					editor.setReadOnly !!value
 
 				scope.$watch "syntaxValidation", (value) ->
-					session = editor.getSession()
-					session.setOption("useWorker", value);
+					# ignore undefined settings here
+					# only instances of ace with an explicit value should set useWorker
+					# the history instance will have syntaxValidation undefined
+					if value? and syntaxValidationEnabled
+						session = editor.getSession()
+						session.setOption("useWorker", value);
 
 				editor.setOption("scrollPastEnd", true)
 
@@ -227,10 +235,16 @@ define [
 					catch
 						mode = "ace/mode/text"
 
-					editor.setSession(new EditSession(lines, mode))
+					# create our new session
+					session = new EditSession(lines, mode)
 
-					session = editor.getSession()
 					session.setUseWrapMode(true)
+					# use syntax validation only when explicitly set
+					if scope.syntaxValidation? and syntaxValidationEnabled
+						session.setOption("useWorker", scope.syntaxValidation);
+
+					# now attach session to editor
+					editor.setSession(session)
 
 					doc = session.getDocument()
 					doc.on "change", onChange
