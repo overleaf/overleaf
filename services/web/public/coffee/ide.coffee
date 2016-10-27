@@ -66,16 +66,21 @@ define [
 			pdfLayout: 'sideBySide'
 		}
 		$scope.user = window.user
+
+
+		$scope.shouldABTestPlans = false
+		if $scope.user.signUpDate >= '2016-10-27'
+			$scope.shouldABTestPlans = true
+
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
 
-
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
 		_userSignUpDate = new Date(window.user.signUpDate)
-		
+
 		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
 		$scope.headerLabelsABVariant = ""
 
@@ -92,7 +97,7 @@ define [
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once"
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
 			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
@@ -105,7 +110,7 @@ define [
 		# End of tracking code.
 
 		window._ide = ide
-		
+
 		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
 
 		ide.project_id = $scope.project_id = window.project_id

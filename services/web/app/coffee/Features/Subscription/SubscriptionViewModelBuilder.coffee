@@ -44,7 +44,7 @@ module.exports =
 		allPlans = {}
 		plans.forEach (plan)->
 			allPlans[plan.planCode] = plan
-			
+
 		result =
 			allPlans: allPlans
 
@@ -54,7 +54,7 @@ module.exports =
 
 		result.studentAccounts = _.filter plans, (plan)->
 			plan.planCode.indexOf("student") != -1
-			
+
 		result.groupMonthlyPlans = _.filter plans, (plan)->
 			plan.groupPlan and !plan.annual
 
@@ -68,4 +68,3 @@ module.exports =
 			!plan.groupPlan and plan.annual and plan.planCode.indexOf("student") == -1
 
 		return result
-
