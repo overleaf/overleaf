@@ -231,9 +231,21 @@ define [
 					# see if we can lookup a suitable mode from ace
 					# but fall back to text by default
 					try
-						mode = ModeList.getModeForPath(scope.fileName).mode
+						if scope.fileName.match(/\.(Rtex|bbl)$/i)
+							# recognise Rtex and bbl as latex
+							mode = "ace/mode/latex"
+						else if scope.fileName.match(/\.(sty|cls|clo)$/)
+							# recognise some common files as tex
+							mode = "ace/mode/tex"
+						else
+							mode = ModeList.getModeForPath(scope.fileName).mode
+							# we prefer plain_text mode over text mode because ace's
+							# text mode is actually for code and has unwanted
+							# indenting (see wrapMethod in ace edit_session.js)
+							if mode is "ace/mode/text"
+								mode = "ace/mode/plain_text"
 					catch
-						mode = "ace/mode/text"
+						mode = "ace/mode/plain_text"
 
 					# create our new session
 					session = new EditSession(lines, mode)
