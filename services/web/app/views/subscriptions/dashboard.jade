@@ -12,8 +12,8 @@ block scripts
 
 mixin printPlan(plan)
 	-if (!plan.hideFromUsers)
-		tr(ng-controller="ChangePlanFormController")
-			td(ng-init="plan=#{JSON.stringify(plan)}")
+		tr(ng-controller="ChangePlanFormController", ng-init="plan=#{JSON.stringify(plan)}", ng-show="shouldShowPlan(plan.planCode)")
+			td
 				strong #{plan.name}
 			td {{refreshPrice(plan.planCode)}}
 				-if (plan.annual)
@@ -46,8 +46,8 @@ block content
 							| &nbsp;
 							| #{translate("your_billing_details_were_saved")}
 					.card(ng-if="view == 'overview'")
-						.page-header
-							h1 #{translate("your_subscription")}
+						.page-header(x-current-plan="#{subscription.planCode}")
+							h1 #{translate("your_subscription")} 
 
 						- if (subscription && user._id+'' == subscription.admin_id+'')
 							case subscription.state
@@ -56,7 +56,8 @@ block content
 									
 								when "active"
 									p !{translate("currently_subscribed_to_plan", {planName:"<strong>" + subscription.name + "</strong>"})} 
-										a(href, ng-click="changePlan = true") !{translate("change_plan")}.
+										span(ng-show="!isNextGenPlan")
+											a(href, ng-click="changePlan = true") !{translate("change_plan")}.
 									p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>" + subscription.price + "</strong>", collectionDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
 									p.pull-right
 									p

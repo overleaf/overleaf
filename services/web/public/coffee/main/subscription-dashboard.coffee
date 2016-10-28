@@ -1,15 +1,21 @@
 define [
 	"base"
 ], (App)->
+
+	App.controller 'SuccessfulSubscriptionController', ($scope, sixpack) ->
+		sixpack.convert 'plans-1610', () ->
+
+
 	SUBSCRIPTION_URL = "/user/subscription/update"
 
 	setupReturly = _.once ->
 		recurly?.configure window.recurlyApiKey
 	PRICES = {}
 
+
 	App.controller "CurrenyDropdownController", ($scope, MultiCurrencyPricing, $q)->
 
-		$scope.plans = MultiCurrencyPricing.plans
+		# $scope.plans = MultiCurrencyPricing.plans
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
 		$scope.changeCurrency = (newCurrency)->
@@ -31,7 +37,7 @@ define [
 			$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
 		$scope.pricing = MultiCurrencyPricing
-		$scope.plans = MultiCurrencyPricing.plans
+		# $scope.plans = MultiCurrencyPricing.plans
 		$scope.currencySymbol = MultiCurrencyPricing.plans[MultiCurrencyPricing.currencyCode].symbol
 
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
@@ -53,9 +59,9 @@ define [
 			price = ""
 
 	App.controller "ConfirmChangePlanController", ($scope, $modalInstance, $http)->
-		
+
 		$scope.confirmChangePlan = ->
-			body = 
+			body =
 				plan_code: $scope.plan.planCode
 				_csrf : window.csrfToken
 
@@ -74,7 +80,7 @@ define [
 		$scope.confirmLeaveGroup = ->
 			$scope.inflight = true
 			$http({
-				url: "/subscription/group/user", 
+				url: "/subscription/group/user",
 				method: "DELETE",
 				params: {admin_user_id: $scope.admin_id, _csrf: window.csrfToken}
 			}).success ->
@@ -87,6 +93,8 @@ define [
 
 
 	App.controller "UserSubscriptionController", ($scope, MultiCurrencyPricing, $http, sixpack, $modal) ->
+		$scope.plans = MultiCurrencyPricing.plans
+
 		freeTrialEndDate = new Date(subscription?.trial_ends_at)
 
 		sevenDaysTime = new Date()
@@ -96,6 +104,16 @@ define [
 		freeTrialExpiresUnderSevenDays = freeTrialEndDate < sevenDaysTime
 
 		$scope.view = 'overview'
+		$scope.getSuffix = (planCode) ->
+			planCode?.match(/(.*?)_(.*)/)?[2] || null
+		$scope.subscriptionSuffix = $scope.getSuffix(window?.subscription?.planCode)
+		if $scope.subscriptionSuffix == 'free_trial_7_days'
+			$scope.subscriptionSuffix = ''
+		$scope.isNextGenPlan = $scope.subscriptionSuffix in ['heron', 'ibis']
+
+		$scope.shouldShowPlan = (planCode) ->
+			$scope.getSuffix(planCode) not in ['heron', 'ibis']
+
 		isMonthlyCollab = subscription?.planCode?.indexOf("collaborator") != -1 and subscription?.planCode?.indexOf("ann") == -1
 		stillInFreeTrial = freeTrialInFuture and freeTrialExpiresUnderSevenDays
 
@@ -118,7 +136,7 @@ define [
 					$scope.studentPrice = $scope.currencySymbol + (totalPriceExTax + taxAmmount)
 
 		$scope.downgradeToStudent = ->
-			body = 
+			body =
 				plan_code: 'student'
 				_csrf : window.csrfToken
 			$scope.inflight = true
@@ -129,7 +147,7 @@ define [
 					console.log "something went wrong changing plan"
 
 		$scope.cancelSubscription = ->
-			body = 
+			body =
 				_csrf : window.csrfToken
 
 			$scope.inflight = true
@@ -158,7 +176,7 @@ define [
 
 
 		$scope.exendTrial = ->
-			body = 
+			body =
 				_csrf : window.csrfToken
 			$scope.inflight = true
 			$http.put("/user/subscription/extend", body)
@@ -166,6 +184,3 @@ define [
 					location.reload()
 				.error ->
 					console.log "something went wrong changing plan"
-
-
-

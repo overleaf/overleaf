@@ -1,41 +1,85 @@
 div#history(ng-show="ui.view == 'history'")
 	span(ng-controller="HistoryPremiumPopup")
-		.upgrade-prompt(ng-show="!project.features.versioning")
-			.message(ng-show="project.owner._id == user.id")
-				p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
-				p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
-				ul.list-unstyled
-					li 
-						i.fa.fa-check &nbsp;
-						| #{translate("unlimited_projects")}
-					
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-					
-					li 
-						i.fa.fa-check &nbsp;
-						| #{translate("full_doc_history")}
-					
-					li 
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_dropbox")}
+		.upgrade-prompt(ng-if="project.features.versioning === false && ui.view === 'history'")
+			
+			div(sixpack-switch="teaser-history")
+				.message(
+					sixpack-default
+					ng-show="project.owner._id == user.id"
+				)
+					p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
+					p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+					ul.list-unstyled
+						li 
+							i.fa.fa-check &nbsp;
+							| #{translate("unlimited_projects")}
+						
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+						
+						li 
+							i.fa.fa-check &nbsp;
+							| #{translate("full_doc_history")}
+						
+						li 
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_dropbox")}
 
-					li 
-						i.fa.fa-check &nbsp;
-						| #{translate("sync_to_github")}
+						li 
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_github")}
 
-					li  
-						i.fa.fa-check &nbsp;
-						|#{translate("compile_larger_projects")}
+						li  
+							i.fa.fa-check &nbsp;
+							|#{translate("compile_larger_projects")}
+					p.text-center(ng-controller="FreeTrialModalController")
+						a.btn.btn-success(
+							href
+							ng-class="buttonClass"
+							ng-click="startFreeTrial('history')"
+							sixpack-convert="teaser-history"
+						) #{translate("start_free_trial")}
 
-				p.text-center(ng-controller="FreeTrialModalController")
-					a.btn.btn-success(
-						href
-						ng-class="buttonClass"
-						ng-click="startFreeTrial('history')"
-					) #{translate("start_free_trial")}
+				.message.message-wider(
+					sixpack-when="focused"
+					ng-show="project.owner._id == user.id"
+				)
+					header.message-header
+						h3 History
 
+					.message-body
+						h4.teaser-title See who changed what. Go back to previous versions.
+						img.teaser-img(
+							src="/img/teasers/history/teaser-history.png"
+							alt="History"
+						)
+						p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+						.row
+							.col-md-8.col-md-offset-2
+								ul.list-unstyled
+									li 
+										i.fa.fa-check &nbsp;
+										| Catch up with your collaborators changes
+									
+									li
+										i.fa.fa-check &nbsp;
+										| See changes over any time period
+									
+									li 
+										i.fa.fa-check &nbsp;
+										| Revert your documents to previous versions
+									
+									li 
+										i.fa.fa-check &nbsp;
+										| Restore deleted files
+						p.text-center(ng-controller="FreeTrialModalController")
+							a.btn.btn-success(
+								href
+								ng-class="buttonClass"
+								ng-click="startFreeTrial('history')"
+								sixpack-convert="teaser-history"
+							) Try it for free
 
 			.message(ng-show="project.owner._id != user.id")
 				p #{translate("ask_proj_owner_to_upgrade_for_history")}
