@@ -15,12 +15,26 @@ settings = require "settings-sharelatex"
 
 module.exports = UserController =
 
-	deleteUser: (req, res)->
+	tryDeleteUser: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		UserDeleter.deleteUser user_id, (err)->
-			if !err?
+		password = req.body.password
+		logger.log {user_id}, "trying to delete user account"
+		if !password? or password == ''
+			logger.err {user_id}, 'no password supplied for attempt to delete account'
+			return res.sendStatus(403)
+		AuthenticationManager.authenticate {_id: user_id}, password, (err, user) ->
+			if err?
+				logger.err {user_id}, 'error authenticating during attempt to delete account'
+				return next(err)
+			if !user
+				logger.err {user_id}, 'auth failed during attempt to delete account'
+				return res.sendStatus(403)
+			UserDeleter.deleteUser user_id, (err) ->
+				if err?
+					logger.err {user_id}, "error while deleting user account"
+					return next(err)
 				req.session?.destroy()
-			res.sendStatus(200)
+				res.sendStatus(200)
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
