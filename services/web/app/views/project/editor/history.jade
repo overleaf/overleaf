@@ -1,6 +1,6 @@
 div#history(ng-show="ui.view == 'history'")
 	span(ng-controller="HistoryPremiumPopup")
-		.upgrade-prompt(ng-if="project.features.versioning === false")
+		.upgrade-prompt(ng-if="project.features.versioning === false && ui.view === 'history'")
 			
 			div(sixpack-switch="teaser-history")
 				.message(
