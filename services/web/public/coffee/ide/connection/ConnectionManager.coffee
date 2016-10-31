@@ -207,7 +207,9 @@ define [], () ->
 			delete @$scope.connection.reconnection_countdown
 			return if @connected
 			@$scope.connection.reconnecting = true
-			@ide.socket.socket.reconnect()
+			# use socket.io connect() here to make a single attempt, the
+			# reconnect() method makes multiple attempts
+			@ide.socket.socket.connect()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 
 		disconnectIfInactive: ()->
