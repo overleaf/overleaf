@@ -36,16 +36,19 @@ define [], () ->
 				inactive_disconnect: false
 
 			@$scope.tryReconnectNow = () =>
-				@tryReconnect()
+				# user manually requested reconnection via "Try now" button
+				@tryReconnectWithRateLimit({force:true})
 
 			@$scope.$on 'cursor:editor:update', () =>
 				@lastUserAction = new Date()  # time of last edit
 				if !@connected
-					@tryReconnect()
+					# user is editing, try to reconnect
+					@tryReconnectWithRateLimit()
 
 			document.querySelector('body').addEventListener 'click', (e) =>
 				if !@connected and e.target.id != 'try-reconnect-now-button'
-					@tryReconnect()
+					# user is editing, try to reconnect
+					@tryReconnectWithRateLimit()
 
 			@ide.socket = io.connect null,
 				reconnect: false
@@ -210,7 +213,24 @@ define [], () ->
 			# use socket.io connect() here to make a single attempt, the
 			# reconnect() method makes multiple attempts
 			@ide.socket.socket.connect()
+			# record the time of the last attempt to connect
+			@lastConnectionAttempt = new Date()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
+
+		MIN_RETRY_INTERVAL: 1000 # ms
+		BACKGROUND_RETRY_INTERVAL : 30 * 1000 # ms
+
+		tryReconnectWithRateLimit: (options) ->
+			# bail out if the reconnect is already in progress
+			return if @$scope.connection?.reconnecting
+			# bail out if we are going to reconnect soon anyway
+			reconnectingSoon = @$scope.connection?.reconnection_countdown? and @$scope.connection.reconnection_countdown <= 5
+			clickedTryNow = options?.force  # user requested reconnection
+			return if reconnectingSoon and not clickedTryNow
+			# bail out if we tried reconnecting recently
+			allowedInterval = if clickedTryNow then @MIN_RETRY_INTERVAL else @BACKGROUND_RETRY_INTERVAL
+			return if @lastConnectionAttempt? and new Date() - @lastConnectionAttempt < allowedInterval
+			@tryReconnect()
 
 		disconnectIfInactive: ()->
 			@userIsInactive = (new Date() - @lastUserAction) > @disconnectAfterMs
