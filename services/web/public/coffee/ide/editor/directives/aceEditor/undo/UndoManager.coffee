@@ -233,11 +233,16 @@ define [
 			start = aceDelta.start
 			if !start?
 				error = new Error("aceDelta had no start event.")
-				inspectedAceDelta = {}
-				for key, value of aceDelta
-					inspectedAceDelta[key] = typeof value
+				JSONstringifyWithCycles = (o) ->
+					seen = []
+					return JSON.stringify o, (k,v) ->
+						if (typeof v == 'object')
+							if ( !seen.indexOf(v) )
+								return '__cycle__'
+							seen.push(v);
+						return v
 				Raven?.captureException(error, {
-					aceDelta: JSON.stringify(inspectedAceDelta)
+					aceDelta: JSONstringifyWithCycles(aceDelta)
 				})
 				throw error
 			linesBefore = docLines.slice(0, start.row)
