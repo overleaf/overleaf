@@ -237,7 +237,7 @@ define [
 					seen = []
 					return JSON.stringify o, (k,v) ->
 						if (typeof v == 'object')
-							if ( !seen.indexOf(v) )
+							if ( seen.indexOf(v) >= 0 )
 								return '__cycle__'
 							seen.push(v);
 						return v
