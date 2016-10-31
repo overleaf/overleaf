@@ -28,8 +28,8 @@ define [], () ->
 			@connected = false
 			@userIsInactive = false
 			@gracefullyReconnecting = false
-			
-			@$scope.connection = 
+
+			@$scope.connection =
 				reconnecting: false
 				# If we need to force everyone to reload the editor
 				forced_disconnect: false
@@ -262,7 +262,7 @@ define [], () ->
 				setTimeout () =>
 					@reconnectGracefully()
 				, @RECONNECT_GRACEFULLY_RETRY_INTERVAL
-		
+
 		_reconnectGracefullyNow: () ->
 			@gracefullyReconnecting = true
 			@reconnectGracefullyStarted = null
