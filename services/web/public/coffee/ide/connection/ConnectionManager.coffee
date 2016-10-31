@@ -169,9 +169,11 @@ define [], () ->
 			@tryReconnect()
 
 		disconnect: () ->
+			sl_console.log "[socket.io] disconnecting client"
 			@ide.socket.disconnect()
 
 		startAutoReconnectCountdown: () ->
+			sl_console.log "[ConnectionManager] starting autoreconnect countdown"
 			twoMinutes = 2 * 60 * 1000
 			if @lastUserAction? and new Date() - @lastUserAction > twoMinutes
 				# between 1 minute and 3 minutes
@@ -212,6 +214,7 @@ define [], () ->
 				@timeoutId = setTimeout (=> @decreaseCountdown()), 1000
 
 		tryReconnect: () ->
+			sl_console.log "[ConnectionManager] tryReconnect"
 			@cancelReconnect()
 			delete @$scope.connection.reconnection_countdown
 			return if @connected
