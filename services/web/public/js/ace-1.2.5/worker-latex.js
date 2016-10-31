@@ -1419,407 +1419,634 @@ var LatexWorker = exports.LatexWorker = function(sender) {
 
 oop.inherits(LatexWorker, Mirror);
 
-var Parse = function (text) {
-    var errors = [];
-    var Comments = [];
+var Tokenise = function (text) {
     var Tokens = [];
-    var Environments = [];
+    var Comments = [];
     var pos = -1;
-    var SPECIAL = /[\\\{\}\$\&\#\^\_\~\%]/g;
-    var CS = /[^a-zA-Z]/g;
+    var SPECIAL = /[\\\{\}\$\&\#\^\_\~\%]/g;  // match TeX special characters
+    var NEXTCS = /[^a-zA-Z]/g;  // match characters which aren't part of a TeX control sequence
     var idx = 0;
-    var lineNumber = 0;
-    var linePosition = [];
+
+    var lineNumber = 0;   // current line number when parsing tokens (zero-based)
+    var linePosition = [];  // mapping from line number to absolute offset of line in text[]
     linePosition[0] = 0;
 
-    var TokenError = function (token, message) {
-	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
-	var start_col = start - linePosition[line];
-	var end_col = end - linePosition[line] + 1;
-	errors.push({row: line,
-		     column: start_col,
-		     start_row:line,
-		     start_col: start_col,
-		     end_row:line,
-		     end_col: end_col,
-		     type:"error",
-		     text:message,
-		     suppressIfEditing:true});
-    };
-
-    var TokenErrorFromTo = function (fromToken, toToken, message) {
-	var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3];
-	var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3];
-	if (!toEnd) { toEnd = toStart + 1;};
-	var start_col = fromStart - linePosition[fromLine];
-	var end_col = toEnd - linePosition[toLine] + 1;
-
-	errors.push({row: line,
-		     column: start_col,
-		     start_row: fromLine,
-		     start_col: start_col,
-		     end_row: toLine,
-		     end_col: end_col,
-		     type:"error",
-		     text:message,
-		     suppressIfEditing:true});
-    };
-
-
-    var EnvErrorFromTo = function (fromEnv, toEnv, message, options) {
-	if(!options) { options = {} ; };
-	var fromToken = fromEnv.token, toToken = toEnv.closeToken || toEnv.token;
-	var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3], fromSeq = fromToken[4];
-	if (!toToken) {toToken = fromToken;};
-	var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3], toSeq = toToken[4];
-	if (!toEnd) { toEnd = toStart + 1;};
-	var start_col = fromStart - linePosition[fromLine];
-	var end_col = toEnd - linePosition[toLine] + 1;
-	errors.push({row:toLine,
-		     column:end_col,
-		     start_row:fromLine,
-		     start_col: start_col,
-		     end_row:toLine,
-		     end_col: end_col,
-		     type:"error",
-		     text:message,
-		     suppressIfEditing:options.suppressIfEditing});
-    };
-
-    var EnvErrorTo = function (toEnv, message) {
-	var token = toEnv.closeToken || toEnv.token;
-	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
-	if (!end) { end = start + 1; };
-	var end_col = end - linePosition[line] + 1;
-	var err = {row: line,
-		   column: end_col,
-		   start_row:0,
-		   start_col: 0,
-		   end_row: line,
-		   end_col: end_col,
-		   type:"error",
-		   text:message};
-	errors.push(err);
-    };
-
-    var EnvErrorFrom = function (env, message) {
-	var token = env.token;
-	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
-	var start_col = start - linePosition[line];
-	var end_col = Infinity;
-	errors.push({row: line,
-		     column: start_col,
-		     start_row:line,
-		     start_col: start_col,
-		     end_row: lineNumber,
-		     end_col: end_col,
-		     type:"error",
-		     text:message});
-    };
-
     var checkingDisabled = false;
+    var count = 0;  // number of tokens parses
+    var MAX_TOKENS = 100000;
 
     while (true) {
-	var result = SPECIAL.exec(text);
-	if (result == null) {
-	    if (idx < text.length) {
-		Tokens.push([lineNumber, "Text", idx, text.length]);
-	    }
-	    break;
-	}
-	if (result && result.index <= pos) {
-	    break;
-	};
-	pos = result.index;
-	var newIdx = SPECIAL.lastIndex;
-	if (pos > idx) {
-	    Tokens.push([lineNumber, "Text", idx, pos]);
-	}
-	for (var i = idx; i < pos; i++) {
-	    if (text[i] === "\n") {
-		lineNumber++;
-		linePosition[lineNumber] = i+1;
-	    }
-	}
-	idx = newIdx;
-	var code = result[0];
-	if (code === "%") {
-	    var newLinePos = text.indexOf("\n", idx);
-	    if (newLinePos === -1) {
-		newLinePos = text.length;
-	    };
-	    var commentString = text.substring(idx, newLinePos);
-	    if (commentString.indexOf("%novalidate") === 0) {
-		return [];
-	    } else if(!checkingDisabled && commentString.indexOf("%begin novalidate") === 0) {
-		checkingDisabled = true;
-	    } else if (checkingDisabled && commentString.indexOf("%end novalidate") === 0) {
-		checkingDisabled = false;
-	    };
-	    idx = SPECIAL.lastIndex = newLinePos + 1;
-	    Comments.push([lineNumber, idx, newLinePos]);
-	    lineNumber++;
-	    linePosition[lineNumber] = idx;
-	} else if (checkingDisabled) {
-	    continue;
-	} else if (code === '\\') {
-	    CS.lastIndex = idx;
-	    var controlSequence = CS.exec(text);
-	    var nextSpecialPos = controlSequence === null ? idx : controlSequence.index;
-	    if (nextSpecialPos === idx) {
-		Tokens.push([lineNumber, code, pos, idx + 1, text[idx]]);
-		idx = SPECIAL.lastIndex = idx + 1;
-		char = text[nextSpecialPos];
-		if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
-	    } else {
-		Tokens.push([lineNumber, code, pos, nextSpecialPos, text.slice(idx, nextSpecialPos)]);
-		var char;
-		while ((char = text[nextSpecialPos]) === ' ' || char === '\t' || char  === '\r' || char === '\n') {
-		    nextSpecialPos++;
-		    if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
-		}
-		idx = SPECIAL.lastIndex = nextSpecialPos;
-	    }
-	} else if (code === "{") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "}") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "$") {
-	    if (text[idx] === "$") {
-		idx = SPECIAL.lastIndex = idx + 1;
-		Tokens.push([lineNumber, "$$", pos]);
-	    } else {
-		Tokens.push([lineNumber, code, pos]);
-	    }
-	} else if (code === "&") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "#") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "^") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "_") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else if (code === "~") {
-	    Tokens.push([lineNumber, code, pos]);
-	} else {
-	    throw "unrecognised character " + code;
-	}
+        count++;
+        if (count > MAX_TOKENS) {
+            throw new Error("exceed max token count of " + MAX_TOKENS);
+            break;
+        };
+        var result = SPECIAL.exec(text);
+        if (result == null) {
+            if (idx < text.length) {
+                Tokens.push([lineNumber, "Text", idx, text.length]);
+            }
+            break;
+        }
+        if (result && result.index <= pos) {
+            throw new Error("infinite loop in parsing");
+            break;
+        };
+        pos = result.index;
+        if (pos > idx) {
+            Tokens.push([lineNumber, "Text", idx, pos]);
+        }
+        for (var i = idx; i < pos; i++) {
+            if (text[i] === "\n") {
+                lineNumber++;
+                linePosition[lineNumber] = i+1;
+            }
+        }
+
+        var newIdx = SPECIAL.lastIndex;
+        idx = newIdx;
+        var code = result[0];
+        if (code === "%") { // comment character
+            var newLinePos = text.indexOf("\n", idx);
+            if (newLinePos === -1) {
+                newLinePos = text.length;
+            };
+            var commentString = text.substring(idx, newLinePos);
+            if (commentString.indexOf("%novalidate") === 0) {
+                return [];
+            } else if(!checkingDisabled && commentString.indexOf("%begin novalidate") === 0) {
+                checkingDisabled = true;
+            } else if (checkingDisabled && commentString.indexOf("%end novalidate") === 0) {
+                checkingDisabled = false;
+            };
+            idx = SPECIAL.lastIndex = newLinePos + 1;
+            Comments.push([lineNumber, idx, newLinePos]);
+            lineNumber++;
+            linePosition[lineNumber] = idx;
+        } else if (checkingDisabled) {
+            continue;
+        } else if (code === '\\') { // escape character
+            NEXTCS.lastIndex = idx;
+            var controlSequence = NEXTCS.exec(text);
+            var nextSpecialPos = controlSequence === null ? idx : controlSequence.index;
+            if (nextSpecialPos === idx) {
+                Tokens.push([lineNumber, code, pos, idx + 1, text[idx]]);
+                idx = SPECIAL.lastIndex = idx + 1;
+                char = text[nextSpecialPos];
+                if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
+            } else {
+                Tokens.push([lineNumber, code, pos, nextSpecialPos, text.slice(idx, nextSpecialPos)]);
+                var char;
+                while ((char = text[nextSpecialPos]) === ' ' || char === '\t' || char  === '\r' || char === '\n') {
+                    nextSpecialPos++;
+                    if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
+                }
+                idx = SPECIAL.lastIndex = nextSpecialPos;
+            }
+        } else if (code === "{") {  // open group
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "}") {  // close group
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "$") {  // math mode
+            if (text[idx] === "$") {
+                idx = SPECIAL.lastIndex = idx + 1;
+                Tokens.push([lineNumber, "$$", pos]);
+            } else {
+                Tokens.push([lineNumber, code, pos]);
+            }
+        } else if (code === "&") {  // tabalign
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "#") {  // macro parameter
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "^") {  // superscript
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "_") {  // subscript
+            Tokens.push([lineNumber, code, pos]);
+        } else if (code === "~") {  // active character (space)
+            Tokens.push([lineNumber, code, pos]);
+        } else {
+            throw "unrecognised character " + code;
+        }
     }
 
-    var read1arg = function (k) {
-	var open = Tokens[k+1];
-	var env = Tokens[k+2];
-	var close = Tokens[k+3];
-	var envName;
+    return {tokens: Tokens, comments: Comments, linePosition: linePosition, lineNumber: lineNumber, text: text};
+};
 
-	if(open && open[1] === "\\") {
-	    envName = open[4];
-	    return k + 1;
-	} else if(open && open[1] === "{" && env && env[1] === "\\" && close && close[1] === "}") {
-	    envName = env[4];
-	    return k + 3;
-	} else {
-	    return null;
-	}
+var read1arg = function (TokeniseResult, k, options) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+    if (options && options.allowStar) {
+        var optional = Tokens[k+1];
+        if (optional && optional[1] === "Text") {
+            var optionalstr = text.substring(optional[2], optional[3]);
+            if (optionalstr === "*") { k++;}
+        };
     };
 
-    var read1name = function (k) {
-	var open = Tokens[k+1];
-	var env = Tokens[k+2];
-	var close = Tokens[k+3];
+    var open = Tokens[k+1];
+    var env = Tokens[k+2];
+    var close = Tokens[k+3];
+    var envName;
 
-	if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
-	    var envName = text.substring(env[2], env[3]);
-	    return k + 3;
-	} else {
-	    return null;
-	}
-    };
-
-
-
-    var readOptionalParams = function(k) {
-	var params = Tokens[k+1];
-
-	if(params && params[1] === "Text") {
-	    var paramNum = text.substring(params[2], params[3]);
-	    if (paramNum.match(/^\[\d+\]$/)) {
-		return k + 1;
-	    };
-	};
-	return null;
-    };
-
-    var readDefinition = function(k) {
-	k = k + 1;
-	var count = 0;
-	var nextToken = Tokens[k];
-	while (nextToken && nextToken[1] === "Text") {
-	    var start = nextToken[2], end = nextToken[3];
-	    for (i = start; i < end; i++) {
-		var char = text[i];
-		if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { continue; }
-		return null;
-	    }
-	    k++;
-	    nextToken = Tokens[k];
-	}
-	if (nextToken && nextToken[1] === "{") {
-	    count++;
-	    while (count>0) {
-		k++;
-		nextToken = Tokens[k];
-		if(!nextToken) { break; };
-		if (nextToken[1] === "}") { count--; }
-		if (nextToken[1] === "{") { count++; }
-	    }
-	    return k;
-	}
-	return null;
-    };
-
-    for (var _j = 0, _len = Tokens.length; _j < _len; _j++) {
-	var token = Tokens[_j];
-	var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
-	if (type === "\\") {
-	    if (seq === "begin" || seq === "end") {
-		var open = Tokens[_j+1];
-		var env = Tokens[_j+2];
-		var close = Tokens[_j+3];
-		if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
-		    var envName = text.substring(env[2], env[3]);
-		    Environments.push({command: seq, name: envName, token: token, closeToken: close});
-		    _j = _j + 3; // advance past these tokens
-		} else {
-		    var endToken = null;
-		    if (open && open[1] === "{") {
-			endToken = open;
-
-			if (env && env[1] === "Text") {
-			    endToken = env.slice();
-			    start = endToken[2]; end = endToken[3];
-			    for (i = start; i < end; i++) {
-				char = text[i];
-				if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { break; }
-			    }
-			    endToken[3] = i;
-			};
-		    };
-
-		    if (endToken) {
-			TokenErrorFromTo(token, endToken, "invalid environment command" + text.substring(token[2], endToken[3] || endToken[2]));
-		    } else {
-			TokenError(token, "invalid environment command");
-		    };
-		}
-	    } else if (seq === "newcommand" || seq === "renewcommand" || seq === "def" || seq === "DeclareRobustCommand") {
-
-		var newPos = read1arg(_j);
-		if (newPos === null) { continue; } else {_j = newPos;};
-
-		newPos = readOptionalParams(_j);
-		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
-
-		newPos = readDefinition(_j);
-		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
-
-	    } else if (seq === "newenvironment") {
-
-		newPos = read1name(_j);
-		if (newPos === null) { continue; } else {_j = newPos;};
-
-		newPos = readOptionalParams(_j);
-		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
-
-		newPos = readDefinition(_j);
-		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
-
-		newPos = readDefinition(_j);
-		if (newPos === null) { /* do nothing */ } else {_j = newPos;};
-	    }
-	} else if (type === "{") {
-	    Environments.push({command:"{", token:token});
-	} else if (type === "}") {
-	    Environments.push({command:"}", token:token});
-	};
-
-	if ((start != null) && (end != null) && (seq != null)) {
-	} else if ((start != null) && (end != null)) {
-	} else if (start != null) {
-	} else {
-	}
+    if(open && open[1] === "\\") {
+        envName = open[4]; // array element 4 is command sequence
+        return k + 1;
+    } else if(open && open[1] === "{" && env && env[1] === "\\" && close && close[1] === "}") {
+        envName = env[4]; // NOTE: if we were actually using this, keep track of * above
+        return k + 3; // array element 4 is command sequence
+    } else {
+        return null;
     }
+};
+
+
+var read1name = function (TokeniseResult, k) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var open = Tokens[k+1];
+    var env = Tokens[k+2];
+    var close = Tokens[k+3];
+
+    if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
+        var envName = text.substring(env[2], env[3]);
+        return k + 3;
+    } else if (open && open[1] === "{" && env && env[1] === "Text") {
+        envName = "";
+        for (var j = k + 2, tok; (tok = Tokens[j]); j++) {
+            if (tok[1] === "Text") {
+                var str = text.substring(tok[2], tok[3]);
+                if (!str.match(/^\S*$/)) { break; }
+                envName = envName + str;
+            } else if (tok[1] === "_") {
+                envName = envName + "_";
+            } else {
+                break;
+            }
+        }
+        if (tok && tok[1] === "}") {
+            return  j; // advance past these tokens
+        } else {
+            return null;
+        }
+    } else {
+        return null;
+    }
+};
+
+var readOptionalParams = function(TokeniseResult, k) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var params = Tokens[k+1];
+
+    if(params && params[1] === "Text") {
+        var paramNum = text.substring(params[2], params[3]);
+        if (paramNum.match(/^\[\d+\](\[[^\]]*\])*\s*$/)) {
+            return k + 1; // got it
+        };
+    };
+    return null;
+};
+
+var readDefinition = function(TokeniseResult, k) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    k = k + 1;
+    var count = 0;
+    var nextToken = Tokens[k];
+    while (nextToken && nextToken[1] === "Text") {
+        var start = nextToken[2], end = nextToken[3];
+        for (var i = start; i < end; i++) {
+            var char = text[i];
+            if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { continue; }
+            return null; // bail out, should begin with a {
+        }
+        k++;
+        nextToken = Tokens[k];
+    }
+    if (nextToken && nextToken[1] === "{") {
+        count++;
+        while (count>0) {
+            k++;
+            nextToken = Tokens[k];
+            if(!nextToken) { break; };
+            if (nextToken[1] === "}") { count--; }
+            if (nextToken[1] === "{") { count++; }
+        }
+        return k;
+    }
+
+    return null;
+};
+
+var readVerb = function(TokeniseResult, k) {
+
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var verbToken = Tokens[k];
+    var verbStr = text.substring(verbToken[2], verbToken[3]);
+    var pos = verbToken[3];
+    if (text[pos] === "*") { pos++; } // \verb* form of command
+    var delimiter = text[pos];
+    pos++;
+
+    var nextToken = Tokens[k+1];
+    for (var i = pos, end = text.length; i < end; i++) {
+        var char = text[i];
+        if (nextToken && i >= nextToken[2]) { k++; nextToken = Tokens[k+1];};
+        if (char === delimiter) { return k; };
+        if (char  === '\r' || char === '\n') { return null; }
+    };
+
+    return null;
+};
+
+var readUrl = function(TokeniseResult, k) {
+
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var urlToken = Tokens[k];
+    var urlStr = text.substring(urlToken[2], urlToken[3]);
+    var pos = urlToken[3];
+    var openDelimiter = text[pos];
+    var closeDelimiter =  (openDelimiter === "{") ? "}" : openDelimiter;
+    var nextToken = Tokens[k+1];
+    if (nextToken && pos === nextToken[2]) {
+        k++;
+        nextToken = Tokens[k+1];
+    };
+    pos++;
+
+    var count = 1;
+    for (var i = pos, end = text.length; count > 0 && i < end; i++) {
+        var char = text[i];
+        if (nextToken && i >= nextToken[2]) { k++; nextToken = Tokens[k+1];};
+        if (char === closeDelimiter) {
+            count--;
+        } else if (char === openDelimiter) {
+            count++;
+        };
+        if (count === 0) { return k; };
+        if (char  === '\r' || char === '\n') { return null; }
+    };
+
+    return null;
+};
+
+
+var InterpretTokens = function (TokeniseResult, ErrorReporter) {
+    var Tokens = TokeniseResult.tokens;
+    var linePosition = TokeniseResult.linePosition;
+    var lineNumber = TokeniseResult.lineNumber;
+    var text = TokeniseResult.text;
+
+    var TokenErrorFromTo = ErrorReporter.TokenErrorFromTo;
+    var TokenError = ErrorReporter.TokenError;
+    var Environments = [];
+
+    for (var i = 0, len = Tokens.length; i < len; i++) {
+        var token = Tokens[i];
+        var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+        if (type === "\\") {
+            if (seq === "begin" || seq === "end") {
+                var open = Tokens[i+1];
+                var env = Tokens[i+2];
+                var close = Tokens[i+3];
+                if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
+                    var envName = text.substring(env[2], env[3]);
+                    Environments.push({command: seq, name: envName, token: token, closeToken: close});
+                    i = i + 3; // advance past these tokens
+                } else {
+                    if (open && open[1] === "{" && env && env[1] === "Text") {
+                        envName = "";
+                        for (var j = i + 2, tok; (tok = Tokens[j]); j++) {
+                            if (tok[1] === "Text") {
+                                var str = text.substring(tok[2], tok[3]);
+                                if (!str.match(/^\S*$/)) { break; }
+                                envName = envName + str;
+                            } else if (tok[1] === "_") {
+                                envName = envName + "_";
+                            } else {
+                                break;
+                            }
+                        }
+                        if (tok && tok[1] === "}") {
+                            Environments.push({command: seq, name: envName, token: token, closeToken: close});
+                            i = j; // advance past these tokens
+                            continue;
+                        }
+                    }
+                    var endToken = null;
+                    if (open && open[1] === "{") {
+                        endToken = open; // we've got a {
+                        if (env && env[1] === "Text") {
+                            endToken = env.slice(); // we've got some text following the {
+                            start = endToken[2]; end = endToken[3];
+                            for (j = start; j < end; j++) {
+                                var char = text[j];
+                                if (char === ' ' || char === '\t' || char  === '\r' || char === '\n') { break; }
+                            }
+                            endToken[3] = j; // the end of partial token is as far as we got looking ahead
+                        };
+                    };
+
+                    if (endToken) {
+                        TokenErrorFromTo(token, endToken, "invalid environment command " + text.substring(token[2], endToken[3] || endToken[2]));
+                    } else {
+                        TokenError(token, "invalid environment command");
+                    };
+                    }
+            } else if (seq === "newcommand" || seq === "renewcommand" || seq === "def" || seq === "DeclareRobustCommand") {
+                var newPos = read1arg(TokeniseResult, i, {allowStar: (seq != "def")});
+                if (newPos === null) { continue; } else {i = newPos;};
+                newPos = readOptionalParams(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+
+            } else if (seq === "newcolumntype") {
+                newPos = read1name(TokeniseResult, i);
+                if (newPos === null) { continue; } else {i = newPos;};
+                newPos = readOptionalParams(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+
+            } else if (seq === "newenvironment" || seq === "renewenvironment") {
+                newPos = read1name(TokeniseResult, i);
+                if (newPos === null) { continue; } else {i = newPos;};
+                newPos = readOptionalParams(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+            } else if (seq === "verb") {
+                newPos = readVerb(TokeniseResult, i);
+                if (newPos === null) { TokenError(token, "invalid verbatim command"); } else {i = newPos;};
+            } else if (seq === "url") {
+                newPos = readUrl(TokeniseResult, i);
+                if (newPos === null) { TokenError(token, "invalid url command"); } else {i = newPos;};
+            }
+        } else if (type === "{") {
+            Environments.push({command:"{", token:token});
+        } else if (type === "}") {
+            Environments.push({command:"}", token:token});
+        };
+    };
+    return Environments;
+};
+
+
+var CheckEnvironments = function (Environments, ErrorReporter) {
+    var ErrorTo = ErrorReporter.EnvErrorTo;
+    var ErrorFromTo = ErrorReporter.EnvErrorFromTo;
+    var ErrorFrom = ErrorReporter.EnvErrorFrom;
+
     var state = [];
-    for (i = 0; i < Environments.length; i++) {
-	var thisEnv = Environments[i];
-	if(thisEnv.command === "begin" || thisEnv.command === "{") {
-	    state.push(thisEnv);
-	} else if (thisEnv.command === "end" || thisEnv.command === "}") {
-	    var lastEnv = state.pop();
-	    if (!lastEnv) {
-		if (thisEnv.command === "}") {
-		    EnvErrorTo(thisEnv, "unexpected end group }");
-		} else if (thisEnv.command === "end") {
-		    EnvErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
-		}
-	    } else if (lastEnv.command === "{" && thisEnv.command === "}") {
-		continue; // closed group correctly
-	    } else if (lastEnv.name === thisEnv.name) {
-		continue; // closed environment correctly
-	    } else if (thisEnv.command === "}") {
-		EnvErrorFromTo(lastEnv, thisEnv, "unexpected end group } after \\begin{" + lastEnv.name +"}");
-		state.push(lastEnv);
-	    } else if (lastEnv.command === "{" && thisEnv.command === "end") {
-		EnvErrorFromTo(lastEnv, thisEnv, "unexpected \\end{" + thisEnv.name + "} inside group {", {suppressIfEditing:true});
-		i--;
-	    } else if (lastEnv.command === "begin" && thisEnv.command === "end") {
-		EnvErrorFromTo(lastEnv, thisEnv, "unexpected \\end{" + thisEnv.name + "} after \\begin{" + lastEnv.name + "}");
-		for (var j = i + 1; j < Environments.length; j++) {
-		    var futureEnv = Environments[j];
-		    if (futureEnv.command === "end" && futureEnv.name === lastEnv.name) {
-			state.push(lastEnv);
-			continue;
-		    }
-		}
-		lastEnv = state.pop();
-		if(lastEnv) {
-		    if (thisEnv.name === lastEnv.name) {
-			continue;
-		    } else {
-			state.push(lastEnv);
-		    }
-		}
+    var documentClosed = null;
+    var inVerbatim = false;
+    var verbatimRanges = [];
+    for (var i = 0, len = Environments.length; i < len; i++) {
+        var name = Environments[i].name ;
+        if (name && name.match(/^(verbatim|boxedverbatim|lstlisting)$/)) {
+            Environments[i].verbatim = true;
+        }
+    }
+    for (i = 0, len = Environments.length; i < len; i++) {
+        var thisEnv = Environments[i];
+        if(thisEnv.command === "begin" || thisEnv.command === "{") {
+            if (inVerbatim) { continue; } // ignore anything in verbatim environments
+            if (thisEnv.verbatim) {inVerbatim = true;};
+            state.push(thisEnv);
+        } else if (thisEnv.command === "end" || thisEnv.command === "}") {
+            var lastEnv = state.pop();
 
-	    }
-	}
+            if (inVerbatim) {
+                if (lastEnv && lastEnv.name === thisEnv.name) {
+                    inVerbatim = false;
+                    verbatimRanges.push({start: lastEnv.token[2], end: thisEnv.token[2]});
+                    continue;
+                } else {
+                    if(lastEnv) { state.push(lastEnv); } ;
+                    continue;  // ignore all other commands
+                }
+            };
+
+            if (lastEnv && lastEnv.command === "{" && thisEnv.command === "}") {
+                continue;
+            } else if (lastEnv && lastEnv.name === thisEnv.name) {
+                if (thisEnv.name === "document" && !documentClosed) {
+                    documentClosed = thisEnv;
+                };
+                continue;
+            } else if (!lastEnv) {
+                if (thisEnv.command === "}") {
+                    if (documentClosed) {
+                        ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected end group }",{errorAtStart: true, type: "info"});
+                    } else {
+                        ErrorTo(thisEnv, "unexpected end group }");
+                    };
+                } else if (thisEnv.command === "end") {
+                    if (documentClosed) {
+                        ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
+                    } else {
+                        ErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
+                    }
+                }
+            } else if (lastEnv.command === "begin" && thisEnv.command === "}") {
+                ErrorFromTo(lastEnv, thisEnv, "unexpected end group } after \\begin{" + lastEnv.name +"}");
+                state.push(lastEnv);
+            } else if (lastEnv.command === "{" && thisEnv.command === "end") {
+                ErrorFromTo(lastEnv, thisEnv,
+                            "unclosed group { found at \\end{" + thisEnv.name + "}",
+                            {suppressIfEditing:true, errorAtStart: true, type:"warning"});
+                i--;
+            } else if (lastEnv.command === "begin" && thisEnv.command === "end") {
+                ErrorFromTo(lastEnv, thisEnv,
+                            "unclosed \\begin{" + lastEnv.name + "} found at \\end{" + thisEnv.name + "} " ,
+                            {errorAtStart: true});
+                for (var j = i + 1; j < len; j++) {
+                    var futureEnv = Environments[j];
+                    if (futureEnv.command === "end" && futureEnv.name === lastEnv.name) {
+                        state.push(lastEnv);
+                        continue;
+                    }
+                }
+                lastEnv = state.pop();
+                if(lastEnv) {
+                    if (thisEnv.name === lastEnv.name) {
+                        continue;
+                    } else {
+                        state.push(lastEnv);
+                    }
+                }
+
+            }
+        }
     }
     while (state.length > 0) {
-	thisEnv = state.pop();
-	if (thisEnv.command === "{") {
-	    EnvErrorFrom(thisEnv, "unclosed group {");
-	} else if (thisEnv.command === "begin") {
-	    EnvErrorFrom(thisEnv, "unclosed environment \\begin{" + thisEnv.name + "}");
-	};
+        thisEnv = state.pop();
+        if (thisEnv.command === "{") {
+            ErrorFrom(thisEnv, "unclosed group {", {type:"warning"});
+        } else if (thisEnv.command === "begin") {
+            ErrorFrom(thisEnv, "unclosed environment \\begin{" + thisEnv.name + "}");
+        };
     }
-    return errors;
+    var vlen = verbatimRanges.length;
+    len = ErrorReporter.tokenErrors.length;
+    if (vlen >0 && len > 0) {
+        for (i = 0; i < len; i++) {
+            var tokenError = ErrorReporter.tokenErrors[i];
+            var startPos = tokenError.startPos;
+            var endPos = tokenError.endPos;
+            for (j = 0; j < vlen; j++) {
+                if (startPos > verbatimRanges[j].start && startPos < verbatimRanges[j].end) {
+                    tokenError.ignore = true;
+                    break;
+                }
+            }
+        }
+    }
+
+};
+var ErrorReporter = function (TokeniseResult) {
+    var text = TokeniseResult.text;
+    var linePosition = TokeniseResult.linePosition;
+    var lineNumber = TokeniseResult.lineNumber;
+
+    var errors = [], tokenErrors = [];
+    this.errors = errors;
+    this.tokenErrors = tokenErrors;
+
+    this.getErrors = function () {
+        var returnedErrors = [];
+        for (var i = 0, len = tokenErrors.length; i < len; i++) {
+            if (!tokenErrors[i].ignore) { returnedErrors.push(tokenErrors[i]); }
+        }
+        return returnedErrors.concat(errors);
+    };
+
+    this.TokenError = function (token, message) {
+        var line = token[0], type = token[1], start = token[2], end = token[3];
+        var start_col = start - linePosition[line];
+        var end_col = end - linePosition[line];
+        tokenErrors.push({row: line,
+                          column: start_col,
+                          start_row:line,
+                          start_col: start_col,
+                          end_row:line,
+                          end_col: end_col,
+                          type:"error",
+                          text:message,
+                          startPos: start,
+                          endPos: end,
+                          suppressIfEditing:true});
+    };
+
+    this.TokenErrorFromTo = function (fromToken, toToken, message) {
+        var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3];
+        var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3];
+        if (!toEnd) { toEnd = toStart + 1;};
+        var start_col = fromStart - linePosition[fromLine];
+        var end_col = toEnd - linePosition[toLine];
+
+        tokenErrors.push({row: fromLine,
+                          column: start_col,
+                          start_row: fromLine,
+                          start_col: start_col,
+                          end_row: toLine,
+                          end_col: end_col,
+                          type:"error",
+                          text:message,
+                          startPos: fromStart,
+                          endPos: toEnd,
+                          suppressIfEditing:true});
+    };
+
+
+    this.EnvErrorFromTo = function (fromEnv, toEnv, message, options) {
+        if(!options) { options = {} ; };
+        var fromToken = fromEnv.token, toToken = toEnv.closeToken || toEnv.token;
+        var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3];
+        if (!toToken) {toToken = fromToken;};
+        var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3];
+        if (!toEnd) { toEnd = toStart + 1;};
+        var start_col = fromStart - linePosition[fromLine];
+        var end_col = toEnd - linePosition[toLine];
+        errors.push({row: options.errorAtStart ? fromLine : toLine,
+                     column: options.errorAtStart ? start_col: end_col,
+                     start_row:fromLine,
+                     start_col: start_col,
+                     end_row:toLine,
+                     end_col: end_col,
+                     type: options.type ? options.type : "error",
+                     text:message,
+                     suppressIfEditing:options.suppressIfEditing});
+    };
+
+    this.EnvErrorTo = function (toEnv, message, options) {
+        if(!options) { options = {} ; };
+        var token = toEnv.closeToken || toEnv.token;
+        var line = token[0], type = token[1], start = token[2], end = token[3];
+        if (!end) { end = start + 1; };
+        var end_col = end - linePosition[line];
+        var err = {row: line,
+                   column: end_col,
+                   start_row:0,
+                   start_col: 0,
+                   end_row: line,
+                   end_col: end_col,
+                   type: options.type ? options.type : "error",
+                   text:message};
+        errors.push(err);
+    };
+
+    this.EnvErrorFrom = function (env, message, options) {
+        if(!options) { options = {} ; };
+        var token = env.token;
+        var line = token[0], type = token[1], start = token[2], end = token[3];
+        var start_col = start - linePosition[line];
+        var end_col = Infinity;
+        errors.push({row: line,
+                     column: start_col,
+                     start_row:line,
+                     start_col: start_col,
+                     end_row: lineNumber,
+                     end_col: end_col,
+                     type: options.type ? options.type : "error",
+                     text:message});
+    };
+};
+
+var Parse = function (text) {
+    var TokeniseResult = Tokenise(text);
+    var Reporter = new ErrorReporter(TokeniseResult);
+    var Environments = InterpretTokens(TokeniseResult, Reporter);
+    CheckEnvironments(Environments, Reporter);
+    return Reporter.getErrors();
 };
 
 (function() {
     var disabled = false;
 
     this.onUpdate = function() {
-	if (disabled) { return ; };
+        if (disabled) { return ; };
 
-	var value = this.doc.getValue();
-	var errors = [];
-	try {
-	    if (value)
-		errors = Parse(value);
-	} catch (e) {
-	    disabled = true;
-	    errors = [];
-	}
-	this.sender.emit("lint", errors);
+        var value = this.doc.getValue();
+        var errors = [];
+        try {
+            if (value)
+                errors = Parse(value);
+        } catch (e) {
+            disabled = true;
+            errors = [];
+        }
+        this.sender.emit("lint", errors);
     };
 
 }).call(LatexWorker.prototype);

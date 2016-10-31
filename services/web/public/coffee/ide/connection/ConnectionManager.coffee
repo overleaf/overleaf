@@ -27,6 +27,7 @@ define [], () ->
 
 			@connected = false
 			@userIsInactive = false
+			@gracefullyReconnecting = false
 			
 			@$scope.connection = 
 				reconnecting: false
@@ -54,6 +55,7 @@ define [], () ->
 			@ide.socket.on "connect", () =>
 				sl_console.log "[socket.io connect] Connected"
 				@connected = true
+				@gracefullyReconnecting = false
 				@ide.pushEvent("connected")
 
 				@$scope.$apply () =>
@@ -81,7 +83,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
 
-				if !$scope.connection.forced_disconnect and !@userIsInactive
+				if !$scope.connection.forced_disconnect and !@userIsInactive and !@gracefullyReconnecting
 					@startAutoReconnectCountdown()
 
 			@ide.socket.on 'forceDisconnect', (message) =>
@@ -97,7 +99,11 @@ define [], () ->
 				setTimeout () ->
 					location.reload()
 				, 10 * 1000
-				
+			
+			@ide.socket.on "reconnectGracefully", () =>
+				sl_console.log "Reconnect gracefully"
+				@reconnectGracefully()
+
 		joinProject: () ->
 			sl_console.log "[joinProject] joining..."
 			@ide.socket.emit 'joinProject', {
@@ -180,3 +186,24 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.connection.inactive_disconnect = true
 
+		RECONNECT_GRACEFULLY_RETRY_INTERVAL: 5000 # ms
+		MAX_RECONNECT_GRACEFULLY_INTERVAL: 60 * 5 * 1000 # 5 minutes
+		reconnectGracefully: () ->
+			@reconnectGracefullyStarted ?= new Date()
+			userIsInactive = (new Date() - @lastUserAction) > @RECONNECT_GRACEFULLY_RETRY_INTERVAL
+			maxIntervalReached = (new Date() - @reconnectGracefullyStarted) > @MAX_RECONNECT_GRACEFULLY_INTERVAL
+			if userIsInactive or maxIntervalReached
+				sl_console.log "[reconnectGracefully] User didn't do anything for last 5 seconds, reconnecting"
+				@_reconnectGracefullyNow()
+			else
+				sl_console.log "[reconnectGracefully] User is working, will try again in 5 seconds"
+				setTimeout () =>
+					@reconnectGracefully()
+				, @RECONNECT_GRACEFULLY_RETRY_INTERVAL
+		
+		_reconnectGracefullyNow: () ->
+			@gracefullyReconnecting = true
+			@reconnectGracefullyStarted = null
+			# Clear cookie so we don't go to the same backend server
+			$.cookie("SERVERID", "", { expires: -1, path: "/" })
+			@reconnectImmediately()

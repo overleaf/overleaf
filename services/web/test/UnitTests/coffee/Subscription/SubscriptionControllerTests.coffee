@@ -20,7 +20,7 @@ mockSubscriptions =
 describe "SubscriptionController sanboxed", ->
 
 	beforeEach ->
-		@user = {email:"tom@yahoo.com", _id: 'one'}
+		@user = {email:"tom@yahoo.com", _id: 'one', signUpDate: new Date('2000-10-01')}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
 
 		@AuthenticationController =
@@ -63,6 +63,8 @@ describe "SubscriptionController sanboxed", ->
 			getCurrencyCode:sinon.stub()
 		@SubscriptionDomainHandler =
 			getDomainLicencePage:sinon.stub()
+		@UserGetter =
+			getUser: sinon.stub().callsArgWith(2, null, @user)
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'./SubscriptionHandler': @SubscriptionHandler
@@ -76,6 +78,7 @@ describe "SubscriptionController sanboxed", ->
 				warn:->
 			"settings-sharelatex": @settings
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
+			"../User/UserGetter": @UserGetter
 
 
 		@res = new MockResponse()
@@ -92,11 +95,30 @@ describe "SubscriptionController sanboxed", ->
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
 			@res.callback = done
 			@SubscriptionController.plansPage(@req, @res)
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 
 		it "should set the recommended currency from the geoiplookup", (done)->
 			@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
 			@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
 			done()
+
+		it 'should fetch the current user', (done) ->
+			@UserGetter.getUser.callCount.should.equal 1
+			done()
+
+		it 'should decide not to AB test the plans', (done) ->
+			@res.renderedVariables.shouldABTestPlans.should.equal false
+			done()
+
+		describe 'when user is not logged in', (done) ->
+
+			beforeEach ->
+				@AuthenticationController.getLoggedInUserId.returns(null)
+
+			it 'should not fetch the current user', (done) ->
+				@UserGetter.getUser.callCount.should.equal 0
+				done()
+
 
 	describe "editBillingDetailsPage", ->
 		describe "with a user with a subscription", ->

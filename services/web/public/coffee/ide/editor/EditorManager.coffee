@@ -8,11 +8,12 @@ define [
 			@$scope.editor = {
 				sharejs_doc: null
 				open_doc_id: null
+				open_doc_name: null
 				opening: true
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view != "track-changes" and entity.type == "doc")
+				if (@$scope.ui.view != "history" and entity.type == "doc")
 					@openDoc(entity)
 
 			@$scope.$on "entity:deleted", (event, entity) =>
@@ -59,6 +60,7 @@ define [
 				return
 
 			@$scope.editor.open_doc_id = doc.id
+			@$scope.editor.open_doc_name = doc.name
 
 			@ide.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)

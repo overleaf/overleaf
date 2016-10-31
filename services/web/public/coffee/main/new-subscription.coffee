@@ -5,12 +5,15 @@ define [
 
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
-	
+
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
 
 		$scope.switchToStudent = ()->
-			window.location = "/user/subscription/new?planCode=student_free_trial_7_days&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
+			currentPlanCode = window.plan_code
+			planCode = currentPlanCode.replace('collaborator', 'student')
+			event_tracking.sendMB 'subscription-form-switch-to-student', { plan: window.plan_code }
+			window.location = "/user/subscription/new?planCode=#{planCode}&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
 
 		event_tracking.sendMB "subscription-form", { plan : window.plan_code }
 
