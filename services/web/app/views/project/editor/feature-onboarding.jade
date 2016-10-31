@@ -1,7 +1,7 @@
 .feat-onboard(
 	ng-controller="FeatureOnboardingController"
 	ng-class="('feat-onboard-step' + innerStep)"
-	ng-if="!state.loading && !isFeatureSettingDefined"
+	ng-if="!state.loading && ui.showCodeCheckerOnboarding"
 	ng-cloak
 )
 	.feat-onboard-wrapper
@@ -29,11 +29,11 @@
 						span.feat-onboard-adv-title-highlight brackets
 					p Lorem ipsum feature description stuff.
 			.feat-onboard-btn-wrapper
-				.btn.btn-primary(ng-click="turnCodeCheckOn();") Yes, turn Code check on
+				button.btn.btn-primary(ng-click="turnCodeCheckOn();") Yes, turn Code check on
 			.feat-onboard-btn-wrapper
-				.btn.btn-default(ng-click="turnCodeCheckOn();") No, disable it for now
+				button.btn.btn-default(ng-click="turnCodeCheckOn();") No, disable it for now
 		div(ng-if="innerStep === 2;")
-			p 
+			p.feat-onboard-description
 				| Remember: you can always turn&nbsp;
 				span.feat-onboard-description-name Code check&nbsp;
 				em on&nbsp;
@@ -41,4 +41,4 @@
 				em off&nbsp;
 				|, in the settings menu.
 			.feat-onboard-btn-wrapper
-				.btn.btn-primary(ng-click="dismiss();") OK, got it
+				button.btn.btn-primary(ng-click="dismiss();") OK, got it

@@ -2,20 +2,21 @@ define [
 	"base"
 ], (App) ->
 	App.controller "FeatureOnboardingController", ($scope, settings) ->
-		$scope.isFeatureSettingDefined = window.userSettings.syntaxValidation?;
-
 		$scope.innerStep = 1
 
 		$scope.turnCodeCheckOn = () ->
 			settings.saveSettings({ syntaxValidation: true })
+			scope.settings.syntaxValidation = true
 			navToInnerStep2()
 			
 		$scope.turnCodeCheckOn = () ->
 			settings.saveSettings({ syntaxValidation: false })
+			scope.settings.syntaxValidation = false
 			navToInnerStep2()
 
 		$scope.dismiss = () ->
-			$scope.isFeatureSettingDefined = true 
+			$scope.ui.leftMenuShown = false
+			$scope.ui.showCodeCheckerOnboarding = false
 
 		navToInnerStep2 = () ->
 			$scope.innerStep = 2

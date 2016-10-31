@@ -65,6 +65,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			showCodeCheckerOnboarding: true
 		}
 		$scope.user = window.user
 
