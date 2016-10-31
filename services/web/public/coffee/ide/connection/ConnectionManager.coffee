@@ -192,10 +192,16 @@ define [], () ->
 			, 200)
 
 		cancelReconnect: () ->
-			clearTimeout @timeoutId if @timeoutId?
-					
+			# clear timeout and set to null so we know there is no countdown running
+			if @timeoutId?
+				sl_console.log "[ConnectionManager] cancelling existing reconnect timer"
+				clearTimeout @timeoutId
+				@timeoutId = null
+
 		decreaseCountdown: () ->
+			@timeoutId = null
 			return if !@$scope.connection.reconnection_countdown?
+			sl_console.log "[ConnectionManager] decreasing countdown", @$scope.connection.reconnection_countdown
 			@$scope.$apply () =>
 				@$scope.connection.reconnection_countdown--
 
