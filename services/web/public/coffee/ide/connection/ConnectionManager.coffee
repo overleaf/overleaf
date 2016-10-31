@@ -39,7 +39,7 @@ define [], () ->
 				@tryReconnect()
 
 			@$scope.$on 'cursor:editor:update', () =>
-				@lastUserAction = new Date()
+				@lastUserAction = new Date()  # time of last edit
 				if !@connected
 					@tryReconnect()
 
@@ -170,7 +170,7 @@ define [], () ->
 
 		startAutoReconnectCountdown: () ->
 			twoMinutes = 2 * 60 * 1000
-			if @lastUpdated? and new Date() - @lastUpdated > twoMinutes
+			if @lastUserAction? and new Date() - @lastUserAction > twoMinutes
 				# between 1 minute and 3 minutes
 				countdown = 60 + Math.floor(Math.random() * 120)
 			else
