@@ -7,11 +7,15 @@
 	right: 0;
 	bottom: 0;
 	left: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	background-color: rgba(0, 0, 0, .85);
 	color: #FFF;
 	text-align: center;
 	z-index: 102;
 	transition: left ease-in-out @left-menu-animation-duration;
+	overflow: auto;
 	&::before {
 		content: '';
 		position: fixed;
@@ -46,16 +50,12 @@
 	}
 }
 	.feat-onboard-wrapper {
-		position: fixed;
-		top: 130px;
-		left: 50%;
 		width: @feat-onboard-wrapper-width;
-		margin-left: -@feat-onboard-wrapper-width / 2;
 		text-shadow: 0 0 70px rgba(255, 255, 255, 0.5);
 	}
 		.feat-onboard-title {
 			color: @brand-primary;
-			margin-bottom: 50px;
+			margin-bottom: 40px;
 
 		}
 			.feat-onboard-title-name {
@@ -65,7 +65,7 @@
 
 		.feat-onboard-description {
 			max-width: @feat-onboard-max-text-width;
-			margin: 0 auto 40px;
+			margin: 0 auto 30px;
 			padding: 0 80px;
 		}
 			.feat-onboard-description-name {
@@ -78,7 +78,7 @@
 
 	.feat-onboard-adv-wrapper {
 		text-align: left;
-		margin-bottom: 40px;
+		margin-bottom: 30px;
 	}
 		.feat-onboard-adv-title {
 			color: #FFF;
