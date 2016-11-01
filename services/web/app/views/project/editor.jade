@@ -89,7 +89,8 @@ block content
 block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
 
-	//- don't use cdn for worker
+	//- don't use cdn for workers
+	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false,fingerprint:false})
 	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
@@ -133,10 +134,6 @@ block requirejs
 			}
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
-
-	- var aceWorkerPath = user.betaProgram ? buildJsPath(lib('ace'), {cdn:false,fingerprint:false}) : "" // don't use cdn for worker
-
-	script(type='text/javascript').
 		window.aceWorkerPath = "#{aceWorkerPath}";
 
 	script(
