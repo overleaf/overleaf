@@ -52,8 +52,19 @@ define [], () ->
 				'connect timeout': 30 * 1000
 				"force new connection": true
 
+			# The "connect" event is the first event we get back. It only
+			# indicates that the websocket is connected, we still need to
+			# pass authentication to join a project.
+
 			@ide.socket.on "connect", () =>
 				sl_console.log "[socket.io connect] Connected"
+
+			# The next event we should get is an authentication response
+			# from the server, either "connectionAccepted" or
+			# "connectionRejected".
+
+			@ide.socket.on 'connectionAccepted', (message) =>
+				sl_console.log "[socket.io connectionAccepted] allowed to connect"
 				@connected = true
 				@gracefullyReconnecting = false
 				@ide.pushEvent("connected")
@@ -64,16 +75,26 @@ define [], () ->
 					if @$scope.state.loading
 						@$scope.state.load_progress = 70
 
+				# we have passed authentication so we can now join the project
 				setTimeout(() =>
 					@joinProject()
 				, 100)
+
+			@ide.socket.on 'connectionRejected', (err) =>
+				sl_console.log "[socket.io connectionRejected] session not valid or other connection error"
+				# we have failed authentication, usually due to an invalid session cookie
+				return @reportConnectionError(err)
+
+			# Alternatively the attempt to connect can fail completely, so
+			# we never get into the "connect" state.
 
 			@ide.socket.on "connect_failed", () =>
 				@connected = false
 				$scope.$apply () =>
 					@$scope.state.error = "Unable to connect, please view the <u><a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a></u> to fix the issue."
 
-
+			# We can get a "disconnect" event at any point after the
+			# "connect" event.
 
 			@ide.socket.on 'disconnect', () =>
 				sl_console.log "[socket.io disconnect] Disconnected"
@@ -85,6 +106,8 @@ define [], () ->
 
 				if !$scope.connection.forced_disconnect and !@userIsInactive and !@gracefullyReconnecting
 					@startAutoReconnectCountdown()
+
+			# Site administrators can send the forceDisconnect event to all users
 
 			@ide.socket.on 'forceDisconnect', (message) =>
 				@$scope.$apply () =>
@@ -99,25 +122,33 @@ define [], () ->
 				setTimeout () ->
 					location.reload()
 				, 10 * 1000
-			
+
 			@ide.socket.on "reconnectGracefully", () =>
 				sl_console.log "Reconnect gracefully"
 				@reconnectGracefully()
 
+		# Error reporting, which can reload the page if appropriate
+
+		reportConnectionError: (err) ->
+			sl_console.log "[socket.io] reporting connection error"
+			if err?.message == "not authorized" or err?.message == "invalid session"
+				window.location = "/login?redir=#{encodeURI(window.location.pathname)}"
+			else
+				@ide.socket.disconnect()
+				@ide.showGenericMessageModal("Something went wrong connecting", """
+					Something went wrong connecting to your project. Please refresh is this continues to happen.
+				""")
+
 		joinProject: () ->
 			sl_console.log "[joinProject] joining..."
+			# Note: if the "joinProject" message doesn't reach the server
+			# (e.g. if we are in a disconnected state at this point) the
+			# callback will never be executed
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
 			}, (err, project, permissionsLevel, protocolVersion) =>
 				if err?
-					if err.message == "not authorized"
-						window.location = "/login?redir=#{encodeURI(window.location.pathname)}"
-					else
-						@ide.socket.disconnect()
-						@ide.showGenericMessageModal("Something went wrong connecting", """
-							Something went wrong connecting to your project. Please refresh is this continues to happen.
-						""")
-					return
+					return @reportConnectionError(err)
 
 				if @$scope.protocolVersion? and @$scope.protocolVersion != protocolVersion
 					location.reload(true)
