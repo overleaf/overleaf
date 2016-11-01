@@ -1,4 +1,5 @@
-@feat-onboard-wrapper-width: 700px;
+@feat-onboard-wrapper-width: 820px;
+@feat-onboard-max-text-width: 750px;
 
 .feat-onboard {
 	position: fixed;
@@ -61,13 +62,19 @@
 				color: #FFF;
 				font-weight: bold;
 			}
+
 		.feat-onboard-description {
-			margin-bottom: 40px;
+			max-width: @feat-onboard-max-text-width;
+			margin: 0 auto 40px;
 			padding: 0 80px;
 		}
 			.feat-onboard-description-name {
 				font-weight: bold;
 			}
+
+	.feat-onboard-video {
+		box-shadow: 0 0 70px rgba(255, 255, 255, 0.3);
+	}
 
 	.feat-onboard-adv-wrapper {
 		text-align: left;
@@ -75,6 +82,7 @@
 	}
 		.feat-onboard-adv-title {
 			color: #FFF;
+			font-size: 23px;
 		}
 			.feat-onboard-adv-title-highlight {
 				font-weight: bold;

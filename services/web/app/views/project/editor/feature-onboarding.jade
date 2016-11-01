@@ -12,26 +12,36 @@
 			p.feat-onboard-description
 				span.feat-onboard-description-name Code check&nbsp;
 				| will highlight potential problems in your LaTeX code, allowing you to handle errors earlier and become more productive.
+			.row
+				video.feat-onboard-video(autoplay, loop)
+					source(src="/img/teasers/code-checker/code-checker.mp4", type="video/mp4")
+					img(src="/img/teasers/code-checker/code-checker.gif")
 			.row.feat-onboard-adv-wrapper
 				.col-xs-4
 					h2.feat-onboard-adv-title 
 						| Missing&nbsp;
 						span.feat-onboard-adv-title-highlight brackets
-					p Lorem ipsum feature description stuff.
+					p Forgot to place a closing bracket? We'll warn you.
 				.col-xs-4
 					h2.feat-onboard-adv-title 
-						| Missing&nbsp;
-						span.feat-onboard-adv-title-highlight brackets
-					p Lorem ipsum feature description stuff.
+						| Unclosed&nbsp;
+						span.feat-onboard-adv-title-highlight environments
+					p 
+						| Know when you are missing an&nbsp;
+						code \end{...}
+						| &nbsp;command.
 				.col-xs-4
 					h2.feat-onboard-adv-title 
-						| Missing&nbsp;
-						span.feat-onboard-adv-title-highlight brackets
-					p Lorem ipsum feature description stuff.
+						| Incorrect&nbsp;
+						span.feat-onboard-adv-title-highlight nesting
+					p 
+						| Order matters. Get notified when you use an&nbsp;
+						code \end{...}
+						| &nbsp; too soon.
 			.feat-onboard-btn-wrapper
 				button.btn.btn-primary(ng-click="turnCodeCheckOn();") Yes, turn Code check on
 			.feat-onboard-btn-wrapper
-				button.btn.btn-default(ng-click="turnCodeCheckOn();") No, disable it for now
+				button.btn.btn-default(ng-click="turnCodeCheckOff();") No, disable it for now
 		div(ng-if="innerStep === 2;")
 			p.feat-onboard-description
 				| Remember: you can always turn&nbsp;
