@@ -6,12 +6,12 @@ define [
 
 		$scope.turnCodeCheckOn = () ->
 			settings.saveSettings({ syntaxValidation: true })
-			scope.settings.syntaxValidation = true
+			$scope.settings.syntaxValidation = true
 			navToInnerStep2()
 			
-		$scope.turnCodeCheckOn = () ->
+		$scope.turnCodeCheckOff = () ->
 			settings.saveSettings({ syntaxValidation: false })
-			scope.settings.syntaxValidation = false
+			$scope.settings.syntaxValidation = false
 			navToInnerStep2()
 
 		$scope.dismiss = () ->
