@@ -18,37 +18,17 @@
 	z-index: 102;
 	transition: background-position ease-in-out @left-menu-animation-duration;
 	overflow: auto;
-	&::before {
-		content: '';
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		width: 0;
-		opacity: 0;
-		transition: opacity ease-in-out @left-menu-animation-duration, width ease-in-out @left-menu-animation-duration;
-	}
 }
 
 .feat-onboard-step2 {
 	background-position-x: @left-menu-width;
-	&::before {
-		content: '';
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		width: @left-menu-width;
-		opacity: 1;
-		background-image: linear-gradient(
-			180deg,
-			rgba(0,0,0,.85),
-			rgba(0,0,0,.85) 530px,
-			transparent 555px,
-			transparent 585px,
-			rgba(0,0,0,.85) 610px,
-			rgba(0,0,0,.85)
-		);
+
+	~ #left-menu {
+		pointer-events: none;
+
+		.code-check-setting {
+			box-shadow: 0 0 300px #000;
+		}
 	}
 }
 	.feat-onboard-wrapper {

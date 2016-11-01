@@ -105,7 +105,7 @@ aside#left-menu.full-size(
 					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
 				)
 
-			.form-controls
+			.form-controls.code-check-setting
 				label(for="syntaxValidation") #{translate("syntax_validation")}
 				select(
 					name="syntaxValidation"
