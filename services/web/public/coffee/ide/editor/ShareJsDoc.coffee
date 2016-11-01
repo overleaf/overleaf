@@ -46,6 +46,7 @@ define [
 			@_doc.on "change", () =>
 				@trigger "change"
 			@_doc.on "acknowledge", () =>
+				@lastAcked = new Date() # note time of last ack from server
 				@trigger "acknowledge"
 			@_doc.on "remoteop", () =>
 				# As soon as we're working with a collaborator, start sending
@@ -101,12 +102,26 @@ define [
 			@connection.id = @socket.socket.sessionid
 			@_doc.autoOpen = false
 			@_doc._connectionStateChanged(state)
+			@lastAcked = null # reset the last ack time when connection changes
 
 		hasBufferedOps: () ->
 			@_doc.inflightOp? or @_doc.pendingOp?
 
 		getInflightOp: () -> @_doc.inflightOp
 		getPendingOp: () -> @_doc.pendingOp
+		getRecentAck: () ->
+			# check if we have received an ack recently (within the flush delay)
+			@lastAcked? and new Date() - @lastAcked < @_doc._flushDelay
+		getOpSize: (op) ->
+			# compute size of an op from its components
+			# (total number of characters inserted and deleted)
+			size = 0
+			for component in op or []
+				if component?.i?
+					size += component.i.length
+				if component?.d?
+					size += component.d.length
+			return size
 
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
