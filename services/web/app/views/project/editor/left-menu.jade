@@ -105,14 +105,13 @@ aside#left-menu.full-size(
 					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
 				)
 
-			if (user.betaProgram)
-				.form-controls
-					label(for="syntaxValidation") #{translate("syntax_validation")}
-					select(
-						name="syntaxValidation"
-						ng-model="settings.syntaxValidation"
-						ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
-					)
+			.form-controls
+				label(for="syntaxValidation") #{translate("syntax_validation")}
+				select(
+					name="syntaxValidation"
+					ng-model="settings.syntaxValidation"
+					ng-options="o.v as o.n for o in [{ n: 'On', v: true }, { n: 'Off', v: false }]"
+				)
 
 			.form-controls
 				label(for="theme") #{translate("theme")}
