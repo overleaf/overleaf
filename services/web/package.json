@@ -47,6 +47,7 @@
     "nodemailer-ses-transport": "^1.3.0",
     "optimist": "0.6.1",
     "passport": "^0.3.2",
+    "passport-ldapauth": "^0.6.0",
     "passport-local": "^1.0.0",
     "pg": "^6.0.3",
     "pg-hstore": "^2.3.2",

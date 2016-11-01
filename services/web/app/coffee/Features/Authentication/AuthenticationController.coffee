@@ -30,6 +30,24 @@ module.exports = AuthenticationController =
 	deserializeUser: (user, cb) ->
 		cb(null, user)
 
+	afterLoginSessionSetup: (req, user, callback=(err)->) ->
+		req.login user, (err) ->
+			# Regenerate the session to get a new sessionID (cookie value) to
+			# protect against session fixation attacks
+			oldSession = req.session
+			req.session.destroy()
+			req.sessionStore.generate(req)
+			for key, value of oldSession
+				req.session[key] = value
+			# copy to the old `session.user` location, for backward-comptability
+			req.session.user = req.session.passport.user
+			req.session.save (err) ->
+				if err?
+					logger.err {user_id: user._id}, "error saving regenerated session after login"
+					return callback(err)
+				UserSessionsManager.trackSession(user, req.sessionID, () ->)
+				callback(null)
+
 	passportLogin: (req, res, next) ->
 		# This function is middleware which wraps the passport.authenticate middleware,
 		# so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
@@ -38,22 +56,10 @@ module.exports = AuthenticationController =
 			if err?
 				return next(err)
 			if user # `user` is either a user object or false
-				req.login user, (err) ->
-					# Regenerate the session to get a new sessionID (cookie value) to
-					# protect against session fixation attacks
-					oldSession = req.session
-					req.session.destroy()
-					req.sessionStore.generate(req)
-					for key, value of oldSession
-						req.session[key] = value
-					# copy to the old `session.user` location, for backward-comptability
-					req.session.user = req.session.passport.user
-					req.session.save (err) ->
-						if err?
-							logger.err {user_id: user._id}, "error saving regenerated session after login"
-							return next(err)
-						UserSessionsManager.trackSession(user, req.sessionID, () ->)
-						res.json {redir: req._redir}
+				AuthenticationController.afterLoginSessionSetup req, user, (err) ->
+					if err?
+						return next(err)
+					res.json {redir: req._redir}
 			else
 				res.json message: info
 		)(req, res, next)

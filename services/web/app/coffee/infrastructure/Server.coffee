@@ -106,6 +106,10 @@ passport.use(new LocalStrategy(
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
 
+Modules.hooks.fire 'passportSetup', passport, (err) ->
+	if err?
+		logger.err {err}, "error setting up passport in modules"
+
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
