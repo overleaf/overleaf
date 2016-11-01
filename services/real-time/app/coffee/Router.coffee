@@ -39,10 +39,21 @@ module.exports = Router =
 		app.post "/drain", httpAuth, HttpApiController.startDrain
 
 		session.on 'connection', (error, client, session) ->
+			if client? and error?.message?.match(/could not look up session by key/)
+				logger.err err: error, client: client?, session: session?, "invalid session"
+				# tell the client to reauthenticate if it has an invalid session key
+				client.emit("connectionRejected", {message: "invalid session"})
+				client.disconnect()
+				return
+
 			if error?
-				logger.err err: error, "error when client connected"
+				logger.err err: error, client: client?, session: session?, "error when client connected"
+				client?.emit("connectionRejected", {message: "error"})
 				client?.disconnect()
 				return
+
+			# send positive confirmation that the client has a valid connection
+			client.emit("connectionAccepted")
 
 			metrics.inc('socket-io.connection')
 
