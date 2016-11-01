@@ -65,7 +65,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			showCodeCheckerOnboarding: window.userSettings.syntaxValidation?
+			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
 
