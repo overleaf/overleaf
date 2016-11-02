@@ -85,6 +85,11 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
+	script(type="text/ng-template", id="lockEditorModalTemplate")
+		.modal-header
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+
 block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
 
