@@ -100,7 +100,7 @@ define [], () ->
 			@ide.socket.on "connect_failed", () =>
 				@connected = false
 				$scope.$apply () =>
-					@$scope.state.error = "Unable to connect, please view the <u><a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a></u> to fix the issue."
+					@$scope.state.error = "Unable to connect, please view the <u><a href='https://www.sharelatex.com/learn/Kb/Connection_problems'>connection problems guide</a></u> to fix the issue."
 
 			# We can get a "disconnect" event at any point after the
 			# "connect" event.
