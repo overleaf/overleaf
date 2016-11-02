@@ -338,6 +338,21 @@ define [
 		$scope.changeCurreny = (newCurrency)->
 			$scope.currencyCode = newCurrency
 
+		# because ternary logic in angular bindings is hard
+		$scope.getCollaboratorPlanCode = () ->
+			view = $scope.ui.view
+			variant = $scope.plansVariant
+			if view == "annual"
+				if variant == "default"
+					return "collaborator-annual"
+				else
+					return "collaborator-annual_#{variant}"
+			else
+				if variant == "default"
+					return "collaborator#{$scope.planQueryString}"
+				else
+					return "collaborator_#{variant}"
+
 		$scope.signUpNowClicked = (plan, annual)->
 			event_tracking.sendMB 'plans-page-start-trial', {plan}
 			if $scope.ui.view == "annual"

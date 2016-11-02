@@ -100,8 +100,7 @@ block content
 												li
 													br
 													a.btn.btn-info(
-
-														ng-href="#{baseUrl}/user/subscription/new?planCode=collaborator{{ (ui.view == 'annual' ? '-annual' : '') + (plansVariant == 'default' ? planQueryString : '_'+plansVariant)}}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
+														ng-href="#{baseUrl}/user/subscription/new?planCode={{ getCollaboratorPlanCode() }}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 													)
 														span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 														span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
