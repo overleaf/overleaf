@@ -153,9 +153,7 @@ define [
 			$scope.inflight = true
 			$http.post("/user/subscription/cancel", body)
 				.success ->
-					sixpack.convert 'cancelation-options-view', ->
-						sixpack.convert 'upgrade-success-message', ->
-							location.reload()
+					location.reload()
 				.error ->
 					console.log "something went wrong changing plan"
 
@@ -169,9 +167,7 @@ define [
 			)
 
 		$scope.switchToCancelationView = ->
-			sixpack.participate 'cancelation-options-view', ['basic', 'downgrade-options'], (view, rawResponse)->
-				$scope.view = "cancelation"
-				$scope.sixpackOpt = view
+			$scope.view = "cancelation"
 
 
 
