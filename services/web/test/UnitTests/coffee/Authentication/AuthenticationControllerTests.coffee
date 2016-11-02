@@ -157,6 +157,56 @@ describe "AuthenticationController", ->
 				@res.json.callCount.should.equal 1
 				@res.json.calledWith({message: @info}).should.equal true
 
+	describe 'afterLoginSessionSetup', ->
+
+		beforeEach ->
+			@req.login = sinon.stub().callsArgWith(1, null)
+			@req.session = @session = {passport: {user: @user}}
+			@req.session =
+				passport: {user: {_id: "one"}}
+			@req.session.destroy = sinon.stub()
+			@req.session.save = sinon.stub().callsArgWith(0, null)
+			@req.sessionStore = {generate: sinon.stub()}
+			@UserSessionsManager.trackSession = sinon.stub()
+			@call = (callback) =>
+				@AuthenticationController.afterLoginSessionSetup @req, @user, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.equal null
+				done()
+
+		it 'should call req.login', (done) ->
+			@call (err) =>
+				@req.login.callCount.should.equal 1
+				done()
+
+		it 'should call req.session.save', (done) ->
+			@call (err) =>
+				@req.session.save.callCount.should.equal 1
+				done()
+
+		it 'should call UserSessionsManager.trackSession', (done) ->
+			@call (err) =>
+				@UserSessionsManager.trackSession.callCount.should.equal 1
+				done()
+
+		describe 'when req.session.save produces an error', ->
+
+			beforeEach ->
+				@req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.oneOf [null, undefined]
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not call UserSessionsManager.trackSession', (done) ->
+				@call (err) =>
+					@UserSessionsManager.trackSession.callCount.should.equal 0
+					done()
+
 	describe 'getSessionUser', ->
 
 		it 'should get the user object from session', ->
