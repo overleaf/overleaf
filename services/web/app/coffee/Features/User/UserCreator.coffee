@@ -17,6 +17,7 @@ module.exports =
 		user = new User()
 		user.email = opts.email
 		user.holdingAccount = opts.holdingAccount
+		user.ace.syntaxValidation = true
 
 		username = opts.email.match(/^[^@]*/)
 		if opts.first_name? and opts.first_name.length != 0

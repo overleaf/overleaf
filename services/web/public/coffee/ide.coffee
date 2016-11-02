@@ -10,6 +10,7 @@ define [
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
 	"ide/SafariScrollPatcher"
+	"ide/FeatureOnboardingController"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -64,6 +65,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
 
