@@ -233,7 +233,7 @@ module.exports = (grunt) ->
 
 				ShareLaTeX can not talk to the redis instance
 
-				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_URL
+				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_HOST
 
 				!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				"""
