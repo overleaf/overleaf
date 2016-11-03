@@ -416,7 +416,7 @@ if process.env["SHARELATEX_LDAP_HOST"]
 
 		if typeof(ca)  == 'string'
 			ca_paths = [ca]
-		else if typeof(ca) == 'object' && ca.length?
+		else if typeof(ca) == 'object' && ca?.length?
 			ca_paths = ca
 		else
 			console.error "problem parsing SHARELATEX_LDAP_TLS_OPTS_CA_PATH"
