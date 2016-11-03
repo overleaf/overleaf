@@ -52,6 +52,10 @@ define [
 				fileName: "="
 				onCtrlEnter: "="
 				syntaxValidation: "="
+				reviewPanel: "="
+				onScroll: "="
+				scrollEvents: "="
+				trackChangesEnabled: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -83,7 +87,7 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				if window.location.search.match /tcon=true/ # track changes on
+				if scope.trackChangesEnabled and window.location.search.match /tcon=true/ # track changes on
 					trackChangesManager.enabled = true
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
@@ -221,6 +225,15 @@ define [
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
+				
+				onScroll = (scrollTop) ->
+					return if !scope.onScroll?
+					height = editor.renderer.layerConfig.maxHeight
+					scope.onScroll(scrollTop, height)
+					
+				if scope.scrollEvents?
+					scope.scrollEvents.on "scroll", (position) ->
+						editor.getSession().setScrollTop(position)
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
@@ -261,23 +274,32 @@ define [
 					doc = session.getDocument()
 					doc.on "change", onChange
 
-					sharejs_doc.on "remoteop.recordForUndo", () =>
+					sharejs_doc.on "remoteop.recordRemote", (op, oldSnapshot, msg) ->
 						undoManager.nextUpdateIsRemote = true
+						trackChangesManager.nextUpdateMetaData = msg?.meta
 
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
+					
+					session.on "changeScrollTop", onScroll
+					setTimeout () ->
+						# Let any listeners init themselves
+						onScroll(editor.renderer.getScrollTop())
 
 					editor.focus()
 
 				detachFromAce = (sharejs_doc) ->
 					sharejs_doc.detachFromAce()
-					sharejs_doc.off "remoteop.recordForUndo"
+					sharejs_doc.off "remoteop.recordRemote"
 
 					session = editor.getSession()
+					session.off "changeScrollTop"
+					
 					doc = session.getDocument()
 					doc.off "change", onChange
 

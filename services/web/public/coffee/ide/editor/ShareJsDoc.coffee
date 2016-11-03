@@ -47,11 +47,11 @@ define [
 				@trigger "change"
 			@_doc.on "acknowledge", () =>
 				@trigger "acknowledge"
-			@_doc.on "remoteop", () =>
+			@_doc.on "remoteop", (args...) =>
 				# As soon as we're working with a collaborator, start sending
 				# ops as quickly as possible for low latency.
 				@_doc.setFlushDelay(0)
-				@trigger "remoteop"
+				@trigger "remoteop", args...
 			@_doc.on "error", (e) =>
 				@_handleError(e)
 

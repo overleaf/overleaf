@@ -11,6 +11,7 @@
 @import "./editor/publish-template.less";
 @import "./editor/online-users.less";
 @import "./editor/hotkeys.less";
+@import "./editor/review-panel.less";
 @import "./editor/feature-onboarding.less";
 
 .full-size {
@@ -32,13 +33,6 @@
 		padding: (@line-height-computed / 4);
 		font-size: 14px;
 		margin-bottom: (@line-height-computed / 4);
-	}
-}
-
-#chat-wrapper {
-	.full-size;
-	> .ui-layout-resizer > .ui-layout-toggler {
-		display: none !important;
 	}
 }
 
@@ -150,7 +144,8 @@
 	.track-changes-added-marker {
 		border-radius: 0;
 		position: absolute;
-		background-color: hsl(100, 70%, 70%);
+		border-bottom: 1px dashed green;
+		background-color: hsl(100, 70%, 85%);
 	}
 	.track-changes-deleted-marker {
 		border-radius: 0;

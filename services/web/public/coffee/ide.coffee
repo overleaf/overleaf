@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController"
 	"ide/settings/index"
@@ -42,6 +43,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
@@ -65,6 +67,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			reviewPanelOpen: false
 			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
@@ -78,6 +81,10 @@ define [
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
+
+		ide.toggleReviewPanel = () ->
+			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+			$scope.$digest()
 
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
