@@ -232,7 +232,6 @@ define [
 		_aceDeltaToSimpleDelta: (aceDelta, docLines) ->
 			start = aceDelta.start
 			if !start?
-				error = new Error("aceDelta had no start event.")
 				JSONstringifyWithCycles = (o) ->
 					seen = []
 					return JSON.stringify o, (k,v) ->
@@ -241,9 +240,7 @@ define [
 								return '__cycle__'
 							seen.push(v);
 						return v
-				Raven?.captureException(error, {
-					aceDelta: JSONstringifyWithCycles(aceDelta)
-				})
+				error = new Error("aceDelta had no start event: #{JSONstringifyWithCycles(aceDelta)}")
 				throw error
 			linesBefore = docLines.slice(0, start.row)
 			position =
