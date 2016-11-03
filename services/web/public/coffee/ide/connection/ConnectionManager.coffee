@@ -226,8 +226,8 @@ define [], () ->
 			@lastConnectionAttempt = new Date()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 
-		MIN_RETRY_INTERVAL: 1000 # ms
-		BACKGROUND_RETRY_INTERVAL : 30 * 1000 # ms
+		MIN_RETRY_INTERVAL: 1000 # ms, rate limit on reconnects for user clicking "try now"
+		BACKGROUND_RETRY_INTERVAL : 5 * 1000 # ms, rate limit on reconnects for other user activity (e.g. cursor moves)
 
 		tryReconnectWithRateLimit: (options) ->
 			# bail out if the reconnect is already in progress
