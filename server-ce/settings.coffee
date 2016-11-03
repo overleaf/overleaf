@@ -1,5 +1,4 @@
 Path = require('path')
-_ = require("underscore")
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
@@ -427,8 +426,13 @@ if process.env["SHARELATEX_LDAP_HOST"]
 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
 
 if settings.externalAuth
-	settings.nav.header = _.filter settings.nav.header, (button)-> button.url != "/register"
+	results = []
+	for button in settings.nav.header
+		if button.url != "/register"
+			results.push(button)
+	settings.nav.header = results
 
+	
 # Compiler
 # --------
 if process.env["SANDBOXED_COMPILES"] == "true"
