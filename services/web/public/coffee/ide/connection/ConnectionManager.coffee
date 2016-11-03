@@ -20,6 +20,12 @@ define [], () ->
 				@disconnectIfInactive()
 			, ONEHOUR)
 
+			# trigger a reconnect immediately if network comes back online
+			window.addEventListener 'online', =>
+				sl_console.log "[online] browser notified online"
+				if !@connected
+					@tryReconnectWithRateLimit({force:true})
+
 			@userIsLeavingPage = false
 			window.addEventListener 'beforeunload', =>
 				@userIsLeavingPage = true
