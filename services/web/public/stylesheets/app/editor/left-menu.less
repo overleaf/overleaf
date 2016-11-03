@@ -1,6 +1,6 @@
 #left-menu {
 	position: absolute;
-	width: 260px;
+	width: @left-menu-width;
 	padding: (@line-height-computed / 2);
 	top: 0;
 	bottom: 0;
@@ -8,8 +8,8 @@
 	z-index: 100;
 	overflow-y: auto;
 	overflow-x: hidden;
-	-webkit-transition: left ease-in-out 0.35s;
-	transition: left ease-in-out 0.35s;
+	-webkit-transition: left ease-in-out @left-menu-animation-duration;
+	transition: left ease-in-out @left-menu-animation-duration;
 	font-size: 14px;
 
 	left: -280px;

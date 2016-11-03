@@ -11,6 +11,7 @@ define [
 	"ide/references/ReferencesManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
+	"ide/FeatureOnboardingController"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -67,6 +68,7 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			reviewPanelOpen: false
+			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
 

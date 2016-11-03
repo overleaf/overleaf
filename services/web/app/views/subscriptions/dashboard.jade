@@ -113,39 +113,28 @@ block content
 							div
 								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
 
-
-
 					.card(ng-if="view == 'cancelation'")
 						.page-header
 							h1 #{translate("Cancel Subscription")}
 
-						span(ng-if="sixpackOpt == 'downgrade-options'")
+						div(ng-show="showExtendFreeTrial", style="text-align: center")
+							p !{translate("have_more_days_to_try", {days:14})}
+							button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it")}
+							p
+								| &nbsp;
+							p
+								a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
 
-							div(ng-show="showExtendFreeTrial", style="text-align: center")
-								p !{translate("have_more_days_to_try", {days:14})}
-								button(type="submit", ng-click="exendTrial()", ng-disabled='inflight').btn.btn-success #{translate("ill_take_it")}
+						div(ng-show="showDowngradeToStudent", style="text-align: center")
+							span(ng-controller="ChangePlanFormController")
+								p !{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
+								button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please")}
 								p
 									| &nbsp;
 								p
-									a(href, ng-click="cancelSubscription()", ng-disabled='inflight') #{translate("no_thanks_cancel_now")}
+									a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
 
-
-							div(ng-show="showDowngradeToStudent", style="text-align: center")
-								span(ng-controller="ChangePlanFormController")
-									p !{translate("interested_in_cheaper_plan",{price:'{{studentPrice}}'})}
-									button(type="submit", ng-click="downgradeToStudent()", ng-disabled='inflight').btn.btn-success #{translate("yes_please")}
-									p
-										| &nbsp;
-									p
-										a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
-
-							div(ng-show="showBasicCancel")
-								p #{translate("sure_you_want_to_cancel")}
-								a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
-								| &nbsp;
-								a(ng-click="cancelSubscription()", ng-disabled='inflight').btn.btn-primary #{translate("cancel_my_account")}
-
-						span(ng-if="sixpackOpt == 'basic'")
+						div(ng-show="showBasicCancel")
 							p #{translate("sure_you_want_to_cancel")}
 							a(href="/project").btn.btn-info #{translate("i_want_to_stay")}
 							| &nbsp;
