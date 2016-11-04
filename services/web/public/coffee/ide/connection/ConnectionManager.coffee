@@ -20,6 +20,12 @@ define [], () ->
 				@disconnectIfInactive()
 			, ONEHOUR)
 
+			# trigger a reconnect immediately if network comes back online
+			window.addEventListener 'online', =>
+				sl_console.log "[online] browser notified online"
+				if !@connected
+					@tryReconnectWithRateLimit({force:true})
+
 			@userIsLeavingPage = false
 			window.addEventListener 'beforeunload', =>
 				@userIsLeavingPage = true
@@ -94,7 +100,7 @@ define [], () ->
 			@ide.socket.on "connect_failed", () =>
 				@connected = false
 				$scope.$apply () =>
-					@$scope.state.error = "Unable to connect, please view the <u><a href='http://sharelatex.tenderapp.com/help/kb/latex-editor/editor-connection-problems'>connection problems guide</a></u> to fix the issue."
+					@$scope.state.error = "Unable to connect, please view the <u><a href='/learn/Kb/Connection_problems'>connection problems guide</a></u> to fix the issue."
 
 			# We can get a "disconnect" event at any point after the
 			# "connect" event.
@@ -226,8 +232,8 @@ define [], () ->
 			@lastConnectionAttempt = new Date()
 			setTimeout (=> @startAutoReconnectCountdown() if !@connected), 2000
 
-		MIN_RETRY_INTERVAL: 1000 # ms
-		BACKGROUND_RETRY_INTERVAL : 30 * 1000 # ms
+		MIN_RETRY_INTERVAL: 1000 # ms, rate limit on reconnects for user clicking "try now"
+		BACKGROUND_RETRY_INTERVAL : 5 * 1000 # ms, rate limit on reconnects for other user activity (e.g. cursor moves)
 
 		tryReconnectWithRateLimit: (options) ->
 			# bail out if the reconnect is already in progress

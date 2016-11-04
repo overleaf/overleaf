@@ -109,7 +109,7 @@ define [
 					@ide.reportError(error, meta)
 					@ide.showGenericMessageModal(
 						"Out of sync"
-						"Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='http://sharelatex.tenderapp.com/help/kb/browsers/editor-out-of-sync-problems'>Please see this help guide for more information</a>"
+						"Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>"
 					)
 				@openDoc(doc, forceReopen: true)
 
