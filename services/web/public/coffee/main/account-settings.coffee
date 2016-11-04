@@ -57,6 +57,7 @@ define [
 							"Content-Type": 'application/json'
 						data:
 							password: $scope.state.password
+						disableAutoLoginRedirect: true # we want to handle errors ourselves
 					})
 					.success () ->
 						$modalInstance.close()

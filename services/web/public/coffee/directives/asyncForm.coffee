@@ -24,8 +24,10 @@ define [
 
 					scope[attrs.name].inflight = true
 
+					# for asyncForm prevent automatic redirect to /login if
+					# authentication fails, we will handle it ourselves
 					$http
-						.post(element.attr('action'), formData)
+						.post(element.attr('action'), formData, {disableAutoLoginRedirect: true})
 						.success (data, status, headers, config) ->
 							scope[attrs.name].inflight = false
 							response.success = true
