@@ -64,7 +64,7 @@ class Doc
       server_ = @type.transform server, client, 'right'
       return [client_, server_]
   
-  _otApply: (docOp, isRemote) ->
+  _otApply: (docOp, isRemote, msg) ->
     oldSnapshot = @snapshot
     @snapshot = @type.apply(@snapshot, docOp)
 
@@ -72,7 +72,7 @@ class Doc
     # The reason is that the OT type APIs might need to access the snapshots to
     # determine information about the received op.
     @emit 'change', docOp, oldSnapshot
-    @emit 'remoteop', docOp, oldSnapshot if isRemote
+    @emit 'remoteop', docOp, oldSnapshot, msg if isRemote
   
   _connectionStateChanged: (state, data) ->
     switch state
@@ -185,7 +185,7 @@ class Doc
           # functionality, because its really a local op. Basically, the problem is that
           # if the client's op is rejected by the server, the editor window should update
           # to reflect the undo.
-          @_otApply undo, true
+          @_otApply undo, true, msg
         else
           @emit 'error', "Op apply failed (#{error}) and the op could not be reverted"
 
@@ -234,7 +234,7 @@ class Doc
         
       @version++
       # Finally, apply the op to @snapshot and trigger any event listeners
-      @_otApply docOp, true
+      @_otApply docOp, true, msg
 
     else if msg.meta
       {path, value} = msg.meta

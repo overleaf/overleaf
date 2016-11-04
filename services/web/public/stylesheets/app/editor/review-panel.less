@@ -1,0 +1,55 @@
+@review-panel-width: 230px;
+
+#review-panel {
+	position: absolute;
+	width: @review-panel-width;
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	background-color: #eee;
+	overflow: hidden;
+	display: none;
+}
+
+.review-panel-scroller {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	// TODO: Use a more cross-browser method of hiding the scroll bar
+	right: -30px; // Hide scroll bar
+	overflow-y: scroll;
+}
+
+.review-entry-list {
+	position: relative;
+	width: @review-panel-width;;
+}
+
+.review-entry {
+	position: absolute;
+	font-size: 12px;
+	padding: 2px 6px;
+	border: 1px solid #999;
+	margin: 0 6px;
+	background-color: white;
+	max-width: 148px;
+	word-wrap: break-word;
+}
+
+.has-review-panel {
+	#editor {
+		right: @review-panel-width;;
+		left: 0px;
+		width: auto;
+		.ace-editor-body {
+			overflow: visible;
+			.ace_scrollbar-v {
+				right: -@review-panel-width;;
+			}
+		}
+	}
+	#review-panel {
+		display: block;
+	}
+}

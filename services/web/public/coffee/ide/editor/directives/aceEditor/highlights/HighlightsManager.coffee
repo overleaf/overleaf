@@ -1,6 +1,7 @@
 define [
 	"ace/ace"
-], () ->
+	"ide/colors/ColorManager"
+], (_, ColorManager) ->
 	Range = ace.require("ace/range").Range
 
 	class HighlightsManager
@@ -64,7 +65,7 @@ define [
 
 			for annotation in @$scope.highlights or []
 				do (annotation) =>
-					colorScheme = @_getColorScheme(annotation.hue)
+					colorScheme = ColorManager.getColorScheme(annotation.hue, @element)
 					if annotation.cursor?
 						@labels.push {
 							text: annotation.label
@@ -262,29 +263,3 @@ define [
 				else
 					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
 			, foreground
-
-		_getColorScheme: (hue) ->
-			if @_isDarkTheme()
-				return {
-					cursor: "hsl(#{hue}, 70%, 50%)"
-					labelBackgroundColor: "hsl(#{hue}, 70%, 50%)"
-					highlightBackgroundColor: "hsl(#{hue}, 100%, 28%);"
-					strikeThroughBackgroundColor: "hsl(#{hue}, 100%, 20%);"
-					strikeThroughForegroundColor: "hsl(#{hue}, 100%, 60%);"
-				}
-			else
-				return {
-					cursor: "hsl(#{hue}, 70%, 50%)"
-					labelBackgroundColor: "hsl(#{hue}, 70%, 50%)"
-					highlightBackgroundColor: "hsl(#{hue}, 70%, 85%);"
-					strikeThroughBackgroundColor: "hsl(#{hue}, 70%, 95%);"
-					strikeThroughForegroundColor: "hsl(#{hue}, 70%, 40%);"
-				}
-
-		_isDarkTheme: () ->
-			rgb = @element.find(".ace_editor").css("background-color");
-			[m, r, g, b] = rgb.match(/rgb\(([0-9]+), ([0-9]+), ([0-9]+)\)/)
-			r = parseInt(r, 10)
-			g = parseInt(g, 10)
-			b = parseInt(b, 10)
-			return r + g + b < 3 * 128

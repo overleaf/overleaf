@@ -1,7 +1,8 @@
 define [
+	"ide/colors/ColorManager"
 	"libs/md5"
 	"ide/online-users/controllers/OnlineUsersController"
-], () ->
+], (ColorManager) ->
 	class OnlineUsersManager
 
 		cursorUpdateInterval:500
@@ -46,7 +47,7 @@ define [
 					@refreshOnlineUsers()
 					
 			@$scope.getHueForUserId = (user_id) =>
-				@getHueForUserId(user_id)
+				ColorManager.getHueForUserId(user_id)
 
 		refreshOnlineUsers: () ->
 			@$scope.onlineUsersArray = []
@@ -74,7 +75,7 @@ define [
 					cursor:
 						row: client.row
 						column: client.column
-					hue: @getHueForUserId(client.user_id)
+					hue: ColorManager.getHueForUserId(client.user_id)
 				}
 
 			if @$scope.onlineUsersArray.length > 0
@@ -100,20 +101,4 @@ define [
 
 					delete @cursorUpdateTimeout
 				, @cursorUpdateInterval
-
-		OWN_HUE: 200 # We will always appear as this color to ourselves
-		ANONYMOUS_HUE: 100
-		getHueForUserId: (user_id) ->
-			if !user_id? or user_id == "anonymous-user"
-				return @ANONYMOUS_HUE
-
-			if window.user.id == user_id
-				return @OWN_HUE
-
-			hash = CryptoJS.MD5(user_id)
-			hue = parseInt(hash.toString().slice(0,8), 16) % 320
-			# Avoid 20 degrees either side of the personal hue
-			if hue > @OWNER_HUE - 20
-				hue = hue + 40
-			return hue
 
