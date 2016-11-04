@@ -425,14 +425,14 @@ if process.env["SHARELATEX_LDAP_HOST"]
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
 
-if settings.externalAuth
+if settings.externalAuth and settings?.nav?.header?
 	results = []
 	for button in settings.nav.header
 		if button.url != "/register"
 			results.push(button)
 	settings.nav.header = results
 
-	
+
 # Compiler
 # --------
 if process.env["SANDBOXED_COMPILES"] == "true"
