@@ -259,6 +259,16 @@
 	margin-bottom:0px;
 }
 
+// vertically centre the "connection down" modal so it does not hide
+// the reconnecting indicator
+
+.modal.lock-editor-modal {
+	display: flex !important;
+	.modal-dialog {
+		margin: auto;
+	}
+}
+
 .sl_references_search_hint-varDefault {
 	position: absolute;
 	bottom: -22px;
