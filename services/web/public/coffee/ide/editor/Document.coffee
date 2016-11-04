@@ -149,8 +149,7 @@ define [
 		clearChaosMonkey: () ->
 			clearTimeout @_cm
 
-		MAX_PENDING_OP_SIZE: 30 # pending ops bigger than this are always
-														# considered unsaved
+		MAX_PENDING_OP_SIZE: 30 # pending ops bigger than this are always considered unsaved
 
 		pollSavedStatus: () ->
 			# returns false if doc has ops waiting to be acknowledged or
