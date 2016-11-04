@@ -46,7 +46,7 @@ define [
 			@_doc.on "change", () =>
 				@trigger "change"
 			@_doc.on "acknowledge", () =>
-				@lastAcked = new Date() # note time of last ack from server
+				@lastAcked = new Date() # note time of last ack from server for an op we sent
 				@trigger "acknowledge"
 			@_doc.on "remoteop", () =>
 				# As soon as we're working with a collaborator, start sending
