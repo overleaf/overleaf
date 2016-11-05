@@ -162,7 +162,7 @@ define -> [
 		regexToMatch: /LaTeX Error: \\verb ended by end of line/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_%5Cverb_ended_by_end_of_line"
 		humanReadableHint: """
-			You have used a \\verb command incorrectly. Try replacling the \\verb command with \begin{verbatim}\u2026\end{verbatim}.
+			You have used a \\verb command incorrectly. Try replacling the \\verb command with \\begin{verbatim}\u2026\\end{verbatim}.
 		"""
 	,
 		regexToMatch: /Illegal unit of measure (pt inserted)/
